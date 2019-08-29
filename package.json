@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@antv/g2": "^3.5.8-beta.3",
     "mocha": "^6.2.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
@@ -10,7 +11,8 @@
     "rollup": "^1.20.3"
   },
   "scripts": {
-    "start": "npm run build && react-scripts start",
+    "copy": "cp ./test/dataset/titanic.json ./src/build/titanic.json",
+    "start": "npm run build && npm run copy && react-scripts start",
     "build": "rollup -c",
     "test": "npm run build && mocha",
     "eject": "react-scripts eject"

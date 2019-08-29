@@ -25,7 +25,7 @@ showme helps you group the fields with too many members(both category and contin
 │    6    │      'Count'      │ 2.822952399757021  │ 4.392317422778761 │
 └─────────┴───────────────────┴────────────────────┴───────────────────┘
 ```
-Then, the showme will match each field with a proper visual element based on the impurity *(Tan, et al, Introduction to Data Mining, 2011)* of the field and the sensation of aestheics *(Fechner, 1860, Elemente der Psychophysik)* .
+Then, the showme will match each field with a proper visual element based on the impurity *(Tan, et al, 2011, Introduction to Data Mining)* of the field and the sensation of aestheics *(Wilkinson, 2005, The Grammar of Graphics)* .
 ```js
 {
   position: [ 'Count', 'Age(group)' ],
@@ -50,7 +50,7 @@ If you just want to use the algorithm instead of the ui component, you can use t
 + dimensions: `string[]` collections of keys which are independent variables.
 + measures: `string[]` collections of keys which are dependent variables.
 
-return a chart specification schema:
+return a chart specification schema, example:
 ```js
 {
   position: [ 'Count', 'Age(group)' ],

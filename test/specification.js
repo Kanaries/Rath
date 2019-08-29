@@ -16,12 +16,12 @@ const dimensions = ['Age', 'Survived', 'Parch', 'Sex', 'Embarked', 'Pclass'];
 
 describe('specification test', function () {
   it('specification result', function () {
-    const result = specification(dataSource, dimensions, measures);
-    console.log(result);
-    assert.equal(Object.keys(result).length > 0, true);
+    const { schema, aggData } = specification(dataSource, dimensions, measures);
+    console.log(schema);
+    assert.equal(Object.keys(schema).length > 0, true);
     for (let [element, size] of visualElements) {
-      if (typeof result[element] !== 'undefined') {
-        assert.equal(result[element].length <= size, true);
+      if (typeof schema[element] !== 'undefined') {
+        assert.equal(schema[element].length <= size, true);
       }
     }
   })
