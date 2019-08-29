@@ -16,3 +16,11 @@ Most of the test are based on kaggle open dataset, like titanic. Dataset could b
 | fare | Passenger fare |  |
 | cabin | Cabin number |  |
 | embarked | Port of Embarkation | C = Cherbourg, Q = Queenstown, S = Southampton |
+
+data config:
+```json
+{
+  "Measures": ["Count"],
+  "Dimensions": ["Age","Survived","SibSp","Parch","Fare","Name","Sex","Ticket","Cabin","Embarked","PassengerId","Pclass"]
+}
+```

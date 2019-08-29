@@ -7,35 +7,61 @@ A implementation of tableau showme feature. Not completely follow the tableau's 
 
 ## Introduction
 
-`fieldsAnalysis` help you group the field with too many members(both category and continous) except those obey uniform distribution and then rank the new fields by their impurity measure (entropy as default).
+showme helps you group the fields with too many members(both category and continous) except those obey uniform distribution and then ranks the new fields by their impurity measure (entropy as default).
 
 ```bash
-0 - dimension
-1 - entropy
-2 - largest entropy log(category)
-┌─────────┬───────────────────┬─────────────────────┬───────────────────┐
-│ (index) │         0         │          1          │         2         │
-├─────────┼───────────────────┼─────────────────────┼───────────────────┤
-│    0    │  'Ticket(group)'  │ 0.31438663168300657 │ 2.584962500721156 │
-│    1    │   'Fare(group)'   │ 0.47805966268354355 │ 2.321928094887362 │
-│    2    │  'SibSp(group)'   │ 0.5668299600894294  │ 2.321928094887362 │
-│    3    │  'Cabin(group)'   │ 0.8964522768552765  │ 2.584962500721156 │
-│    4    │       'Sex'       │ 0.9362046432498521  │         1         │
-│    5    │ 'Survived(group)' │ 0.9607079018756469  │         1         │
-│    6    │    'Embarked'     │  1.117393450740606  │         2         │
-│    7    │  'Parch(group)'   │ 1.1239601233166567  │ 2.584962500721156 │
-│    8    │     'Pclass'      │ 1.4393214704441286  │ 1.584962500721156 │
-│    9    │   'Age(group)'    │ 2.1763926737318022  │ 2.584962500721156 │
-│   10    │      'Name'       │  9.79928162152199   │ 9.799281621521923 │
-│   11    │   'PassengerId'   │  9.79928162152199   │ 9.799281621521923 │
-└─────────┴───────────────────┴─────────────────────┴───────────────────┘
+0 - fields
+1 - entropy / impurity
+2 - largest entropy log(category) / max(impurity)
+┌─────────┬───────────────────┬────────────────────┬───────────────────┐
+│ (index) │         0         │         1          │         2         │
+├─────────┼───────────────────┼────────────────────┼───────────────────┤
+│    0    │       'Sex'       │ 0.9983320412729848 │         1         │
+│    1    │ 'Survived(group)' │ 0.9999333063390999 │         1         │
+│    2    │    'Embarked'     │ 1.4040564841946588 │         2         │
+│    3    │     'Pclass'      │ 1.554059251795564  │ 1.584962500721156 │
+│    4    │  'Parch(group)'   │ 1.799076550749284  │ 2.584962500721156 │
+│    5    │   'Age(group)'    │ 2.3911297628989137 │ 2.584962500721156 │
+│    6    │      'Count'      │ 2.822952399757021  │ 4.392317422778761 │
+└─────────┴───────────────────┴────────────────────┴───────────────────┘
 ```
-
+Then, the showme will match each field with a proper visual element based on the impurity *(Tan, et al, Introduction to Data Mining, 2011)* of the field and the sensation of aestheics *(Fechner, 1860, Elemente der Psychophysik)* .
+```js
+{
+  position: [ 'Count', 'Age(group)' ],
+  'adjust&color': [ 'Parch(group)' ],
+  facets: [ 'Pclass', 'Embarked' ],
+  size: [ 'Survived(group)' ],
+  opacity: [ 'Sex' ],
+  geomType: [ 'interval' ]
+}
+```
 ## Usage
+you can choose:
++ Use algorithm library only.
++ Use UI components based on charts library (vega-lite/g2)
 
 If you just want to use the algorithm instead of the ui component, you can use the source code in `/lib`. Currently run `npm run build` will use rollup to pack all the code in the lib instead of the ui part in `src`.
 
 ### API
+
+#### specification(dataSource, dimensions, measures): schema
++ dataSource: `Array<{ [key: string]: string | number | null }>` json style format dataset.
++ dimensions: `string[]` collections of keys which are independent variables.
++ measures: `string[]` collections of keys which are dependent variables.
+
+return a chart specification schema:
+```js
+{
+  position: [ 'Count', 'Age(group)' ],
+  'adjust&color': [ 'Parch(group)' ],
+  facets: [ 'Pclass', 'Embarked' ],
+  size: [ 'Survived(group)' ],
+  opacity: [ 'Sex' ],
+  geomType: [ 'interval' ]
+}
+```
+You can use this schema to generate visual chart with any visualization library you prefer.
 
 #### fieldsAnalysis(rawData, dimensions, measures): dimScores
 + rawData: `Array<{ [key: string]: string | number | null }>` json style format dataset.
@@ -68,7 +94,7 @@ return dimension score list: `Array<[dimension, impurity, maxImpurity]>`
 + dataSource: `Array<{ [key: string]: string | number | null }>` json style format dataset.
 + field: `string`
 
-### aggregate({ dataSource, fields, bys, method = 'sum' }): aggregated dataSource
+#### aggregate({ dataSource, fields, bys, method = 'sum' }): aggregated dataSource
 + dataSource: `Array<{ [key: string]: string | number | null }>` json style format dataset.
 + field: `string[]`. usually known as dimensions.
 + bys: `string[]`. usually known as measures.
@@ -112,7 +138,7 @@ memberCount(dataSource, 'Sex')
 [ [ 'male', 577 ], [ 'female', 314 ] ]
 ```
 
-#### groupContinousField({ dataSource, field, newField = `${field}(group)`, groupNumber })
+#### groupContinousField({ dataSource, field, newField, groupNumber })
 + dataSource: `Array<{ [key: string]: string | number | null }>` json style format dataset.
 + field: `string`
 + newField: `string`
@@ -152,7 +178,7 @@ example of field 'Age':
 ]
 ```
 
-#### groupCategoryField({ dataSource, field, newField = `${field}(group)`, groupNumber })
+#### groupCategoryField({ dataSource, field, newField, groupNumber })
 + dataSource: `Array<{ [key: string]: string | number | null }>` json style format dataset.
 + field: `string`
 + newField: `string`
@@ -179,6 +205,10 @@ example of field 'Parch':
 frequencyList => probabilityList
 ```
 
+#### isUniformDistribution(dataSource, field): boolean
++ dataSource: `Array<{ [key: string]: string | number | null }>` json style format dataset.
++ field: `string`
+
 ### Impurity Measures
 
 + entropy(probabilityList: number[]): number
@@ -200,18 +230,19 @@ interface iView {
   measures: Array<Field>;
   dataSource: Array<Row>;
 }
+// {dimensions, measures} is a subset of fields in dataSource.
 
 interface oView {
 	facets?: Array<Field>;
   rows: Array<Field>;
   columns: Array<Field>;
-  x: Field | null;
-  y: Field | null;
-  geom: GeomType;
-  color: Field | null;
-  opacity: Field | null;
-  size: Field | null;
-  shape: Field | null;
+  x: [Field | null];
+  y: [Field | null];
+  geom: GeomType[];
+  color: [Field | null];
+  opacity: [Field | null];
+  size: [Field | null];
+  shape: [Field | null];
   coordinate?: string;
 }
 

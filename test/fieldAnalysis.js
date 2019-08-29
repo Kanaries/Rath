@@ -9,16 +9,16 @@ const dataset = JSON.parse(fs.readFileSync(datasetPath).toString());
 const {
   dataSource,
   config: {
-    Dimensions: dimensions,
     Measures: measures
   }
 } = dataset;
+const dimensions = ['Age', 'Survived', 'Parch', 'Sex', 'Embarked', 'Pclass'];
 
 describe('test with titanic dataset', function () {
   it('[print result]', function () {
-    const result = fieldsAnalysis(dataSource, dimensions, measures);
+    const { dimScores: result } = fieldsAnalysis(dataSource, dimensions, measures);
     console.table(result)
-    assert.equal(result.length, dimensions.length);
+    assert.equal(result.length, dimensions.length + measures.length);
   })
 })
 
