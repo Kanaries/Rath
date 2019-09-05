@@ -67,20 +67,20 @@ describe('utils test', function () {
     assert.equal(t, true);
   })
 
-  it('function: groupCategoryField', function () {
-    const field = 'Parch';
-    const newField = field + '(group)';
-    let data = deepcopy(dataSource);
-    data = groupCategoryField({
-      dataSource: data,
-      field,
-      newField,
-      groupNumber: 4
-    });
-    // todo: how to design this test.
-    const groupSet = new Set(data.map(d => d[newField]));
-    assert.equal(groupSet.size, 4);
-  })
+  // it('function: groupCategoryField', function () {
+  //   const field = 'Parch';
+  //   const newField = field + '(group)';
+  //   let data = deepcopy(dataSource);
+  //   data = groupCategoryField({
+  //     dataSource: data,
+  //     field,
+  //     newField,
+  //     // groupNumber: 4
+  //   });
+  //   // todo: how to design this test.
+  //   const groupSet = new Set(data.map(d => d[newField]));
+  //   assert.equal(groupSet.size, 4);
+  // })
 
   it('function: aggregate', function () {
     const result = aggregate({

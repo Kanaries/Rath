@@ -30,7 +30,7 @@ describe('Impurity Measure test', function () {
         const probabilityList = normalize(frequencyList);
 
         let ans = entropy(probabilityList);
-
+        assert.notEqual(ans, NaN);
         assert.equal(Math.log2(size) >= ans, true);
       })
   })

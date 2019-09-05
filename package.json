@@ -11,10 +11,11 @@
     "rollup": "^1.20.3"
   },
   "scripts": {
-    "copy": "cp ./test/dataset/titanic.json ./src/build/titanic.json",
+    "copy": "cp -r ./test/dataset ./server/dataset",
+    "server": "npm run copy && node ./server/index.js",
     "start": "npm run build && npm run copy && react-scripts start",
     "build": "rollup -c",
-    "test": "npm run build && mocha",
+    "test": "npm run build && mocha --no-timeouts",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

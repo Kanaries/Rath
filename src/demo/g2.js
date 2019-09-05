@@ -1,7 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import G2 from '@antv/g2';
 function Demo(props) {
   const { dataSource, schema } = props;
+  const container = useRef(null);
+  const [chart, setChart] = useState(null);
   console.log(dataSource, schema)
   const {
     position,
@@ -12,18 +14,31 @@ function Demo(props) {
     'adjust&color': color,
     facets = []
   } = schema;
+
   useEffect(() => {
-    const chart = new G2.Chart({
-      container: 'g2-demo',
-      forceFit: true,
-      padding: [100, 300, 100, 300],
-      height: window.innerHeight
-    });
+    setChart(() => {
+      return new G2.Chart({
+        container: container.current,
+        // forceFit: true,
+        padding: [10, 30, 10, 30],
+        height: 400,
+        width: 600
+      })
+    })
+  }, []);
+
+  useEffect(() => {
+    if (chart === null) return;
     const scale = {};
-    Object.keys(dataSource[0]).forEach(key => {
+    position.forEach(key => {
       scale[key] = { sync: true };
     })
     chart.source(dataSource, scale);
+    ['opacity', 'shape', 'size', 'adjust&color'].filter(aestheic => typeof schema[aestheic] !== 'undefined').forEach(aestheic => {
+      chart.legend(schema[aestheic][0], {
+        title: schema[aestheic][0]
+      })
+    });
     chart.facet('rect', {
       fields: facets,
       eachView (view) {
@@ -44,7 +59,7 @@ function Demo(props) {
     });
     chart.render();
   });
-  return <div id="g2-demo"></div>
+  return <div ref={container}></div>
 }
 
 export default Demo;
