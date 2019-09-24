@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import Demo from './demo/g2';
 // import { specification } from './build/bundle.js';
 // import dataset from './build/airbnb.json';
 import './App.css';
 
-const { getInsightViews, specification, dropNull } = require('./build/bundle.js');
+const { getInsightViews, specification, dropNull, fieldsAnalysis } = require('./build/bundle.js');
 
 function App() {
   const [page, setPage] = useState(0);
@@ -15,48 +16,83 @@ function App() {
       Measures: []
     }
   })
+  const [cleanData, setCleanData] = useState([]);
+  const [dataView, setDataView] = useState({
+    schema: {
+      position: [],
+      color: [],
+      opacity: [],
+      geomType: ['interval']
+    },
+    aggData: []
+  });
+  const [result, setResult] = useState([]);
   useEffect(() => {
     fetch('http://localhost:8000/api/airbnb')
       .then(res => res.json())
       .then(res => {
         if (res.success) {
-          setDataset(res.data)
+          setDataset(res.data);
         }
       })
   }, [])
-  const {
-    dataSource,
-    config: {
-      Dimensions: dimensions,
-      Measures: measures
-    }
-  } = dataset;
-  const cleanData = dropNull(dataSource, dimensions, measures);
-  let result = getInsightViews(cleanData, dimensions, measures);
+  useEffect(() => {
+    const {
+      dataSource,
+      config: {
+        Dimensions: dimensions,
+        Measures: measures
+      }
+    } = dataset;
+    const cleanData = dropNull(dataSource, dimensions, measures);
+    const { dimScores, aggData } = fieldsAnalysis(cleanData, dimensions, measures)
+    setCleanData(aggData);
+    setResult(getInsightViews(aggData, dimScores.map(dim => dim[0]), measures))
+  }, [dataset])
     // console.log(result)
   let charts = [];
   for (let report of result) {
     const dimList = report.detail[0];
     for (let meaList of report.groups) {
-      const { schema, aggData } = specification(cleanData, dimList, meaList);
-      charts.push({ schema, aggData })
+      // const { schema, aggData } = specification(cleanData, dimList, meaList);
+      // charts.push({ schema, aggData })
+      charts.push({
+        dimList,
+        meaList
+      })
     }
   }
   return (
     <div>
       <p>page no. {page} of {charts.length}</p>
       <div>
-        <div onClick={() => { setPage((page - 1 + charts.length) % charts.length)}}
+        <div onClick={() => {
+          let newPage = (page - 1 + charts.length) % charts.length;
+          let {schema, aggData} = specification(cleanData, charts[newPage].dimList, charts[newPage].meaList);
+          setPage(newPage);
+          setDataView({
+            schema,
+            aggData
+          })
+        }}
           className="button">Last</div>
-        <div onClick={() => { setPage((page + 1) % charts.length)}}
+        <div onClick={() => {
+          let newPage = (page + 1) % charts.length;
+          let {schema, aggData} = specification(cleanData, charts[newPage].dimList, charts[newPage].meaList);
+          setDataView({
+            schema,
+            aggData
+          })
+          setPage(newPage)
+        }}
           className="button">Next</div>
+          <div>
+            <ReactMarkdown source={`\`\`\`json\n${JSON.stringify(dataView.schema)}\n\`\`\``} />
+          </div>
       </div>
       {
         charts.length === 0 ? '' : <div>
-          <p>
-            {JSON.stringify(charts[page].schema)}
-          </p>
-          <Demo dataSource={charts[page].aggData} schema={charts[page].schema} />
+          <Demo dimensions={charts[page].dimList} measures={charts[page].meaList} dataSource={dataView.aggData} schema={dataView.schema} />
         </div>
       }
     </div>

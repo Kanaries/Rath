@@ -26,6 +26,15 @@ app.get('/api/airbnb', function (req, res) {
   })
 })
 
+app.get('/api/titanic', function (req, res) {
+  const filePath = path.resolve(__dirname, './dataset/titanic.json');
+  const data = JSON.parse(fs.readFileSync(filePath).toString())
+  res.json({
+    success: true,
+    data
+  })
+})
+
 var server = app.listen(8000, function () {
 
   var host = server.address().address
