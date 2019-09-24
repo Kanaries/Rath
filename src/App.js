@@ -28,7 +28,7 @@ function App() {
   });
   const [result, setResult] = useState([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/airbnb')
+    fetch('http://localhost:8000/api/titanic')
       .then(res => res.json())
       .then(res => {
         if (res.success) {
@@ -45,9 +45,10 @@ function App() {
       }
     } = dataset;
     const cleanData = dropNull(dataSource, dimensions, measures);
-    const { dimScores, aggData } = fieldsAnalysis(cleanData, dimensions, measures)
+    const { dimScores, aggData, mapData, newDimensions } = fieldsAnalysis(cleanData, dimensions, measures)
+    console.log(aggData, dimensions ,newDimensions)
     setCleanData(aggData);
-    setResult(getInsightViews(aggData, dimScores.map(dim => dim[0]), measures))
+    setResult(getInsightViews(aggData, newDimensions, measures))
   }, [dataset])
     // console.log(result)
   let charts = [];
@@ -84,6 +85,12 @@ function App() {
             aggData
           })
           setPage(newPage)
+          console.log('======')
+          console.log(charts[newPage])
+          console.log({
+            schema,
+            aggData
+          })
         }}
           className="button">Next</div>
           <div>
