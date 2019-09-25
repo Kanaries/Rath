@@ -131,15 +131,15 @@ function App() {
             {
               !loading ? undefined : <ProgressIndicator label="Finding insights" description="calculating" />
             }
-            <p>page no. {page + 1} of {charts.length}</p>
+            <p>Page No. {page + 1} of {charts.length}</p>
             <Stack horizontal tokens={{ childrenGap: 20}}>
-              <DefaultButton text="Last" iconProps={{iconName: 'ChevronLeft'}} onClick={() => { gotoPage((page - 1 + charts.length) % charts.length) }} allowDisabledFocus />
-              <DefaultButton text="Next" iconProps={{iconName: 'ChevronRight'}} onClick={() => { gotoPage((page + 1) % charts.length) }} allowDisabledFocus />
+              <DefaultButton text="Last" onClick={() => { gotoPage((page - 1 + charts.length) % charts.length) }} allowDisabledFocus />
+              <DefaultButton text="Next" onClick={() => { gotoPage((page + 1) % charts.length) }} allowDisabledFocus />
               <PrimaryButton text="intrested" />
             </Stack>
             <div className="ms-Grid" dir="ltr">
               <div className="ms-Grid-row">
-              <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3">
+              <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3" style={{overflow: 'auto'}}>
                 <h3>Specification</h3>
                 <pre>
                   {JSON.stringify(dataView.schema, null, 2)}
