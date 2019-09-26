@@ -43,11 +43,11 @@ app.get('/api/data/titanic', function (req, res) {
 app.post('/api/service/fieldsAnalysis', function (req, res) {
   console.log('[fieldsAnalysis]')
   const { dataSource, dimensions, measures } = req.body;
-  const { dimScores, aggData, mapData, newDimensions } = fieldsAnalysis(dataSource, dimensions, measures);
+  const { dimScores, aggData, mapData } = fieldsAnalysis(dataSource, dimensions, measures);
   res.json({
     success: true,
     data: {
-      dimScores, aggData, mapData, newDimensions
+      dimScores, aggData, mapData
     }
   })
 })

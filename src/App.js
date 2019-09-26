@@ -5,7 +5,7 @@ import DataTable from './components/table';
 import BaseChart from './demo/vegaBase';
 import './App.css';
 
-const { specification, dropNull } = require('./build/bundle.js');
+const { specificationWithFieldsAnalysisResult, dropNull } = require('./build/bundle.js');
 
 function App() {
   const [page, setPage] = useState(0);
@@ -19,6 +19,7 @@ function App() {
     }
   })
   const [cleanData, setCleanData] = useState([]);
+  const [dimScores, setDimScores] = useState([]);
   const [dataView, setDataView] = useState({
     schema: {
       position: [],
@@ -26,7 +27,10 @@ function App() {
       opacity: [],
       geomType: ['interval']
     },
-    aggData: []
+    fieldFeatures: [],
+    aggData: [],
+    dimensions: [],
+    measures: []
   });
   const [result, setResult] = useState([]);
   async function fetchDataSource () {
@@ -50,8 +54,10 @@ function App() {
     });
     const result = await res.json();
     if (result.success) {
-      const { dimScores, aggData, mapData, newDimensions } = result.data;
+      const { dimScores, aggData } = result.data;
+      const newDimensions = dimScores.map(dim => dim[0]).filter(dim => !measures.includes(dim));
       setCleanData(aggData);
+      setDimScores(dimScores);
       await getInsightViewsService(aggData, newDimensions, measures);
     }
   }
@@ -92,12 +98,7 @@ function App() {
 
   useEffect(() => {
     if (charts.length > 0) {
-      setPage(0)
-      let {schema, aggData} = specification(cleanData, charts[page].dimList, charts[page].meaList);
-      setDataView({
-        schema,
-        aggData
-      })
+      gotoPage(28)
     }
   }, [cleanData, result]);
 
@@ -114,11 +115,17 @@ function App() {
   }
   const gotoPage = (pageNo) => {
     // let pageNo = (page - 1 + charts.length) % charts.length;
-    let {schema, aggData} = specification(cleanData, charts[pageNo].dimList, charts[pageNo].meaList);
+    let fieldsOfView = charts[pageNo].dimList.concat(charts[pageNo].meaList)
+    let scoreOfDimensionSubset = dimScores.filter(dim => fieldsOfView.includes(dim[0]));
+    console.log(scoreOfDimensionSubset)
+    let {schema, aggData} = specificationWithFieldsAnalysisResult(scoreOfDimensionSubset, cleanData, charts[pageNo].meaList);
     setPage(pageNo);
     setDataView({
       schema,
-      aggData
+      aggData,
+      fieldFeatures: scoreOfDimensionSubset.map(item => item[3]),
+      dimensions: charts[pageNo].dimList,
+      measures: charts[pageNo].meaList
     })
   }
   // ChevronRight
@@ -146,7 +153,12 @@ function App() {
                 </pre>
               </div>
               <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg9" style={{overflow: 'auto'}}>
-                  <BaseChart dataSource={dataView.aggData} schema={dataView.schema} />
+                  <BaseChart
+                    dimensions={dataView.dimensions}
+                    measures={dataView.measures}
+                    dataSource={dataView.aggData}
+                    schema={dataView.schema}
+                    fieldFeatures={dataView.fieldFeatures} />
               </div>
               </div>
             </div>
