@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, FrontIcon } from 'office-ui-fabric-react';
+import { DefaultButton, IconButton, PrimaryButton, Stack, ProgressIndicator, Checkbox, Panel, PanelType, ComboBox, Label } from 'office-ui-fabric-react';
 import DataTable from './components/table';
-
+import PreferencePanel from './components/preference';
 import BaseChart from './demo/vegaBase';
 import './App.css';
 
@@ -17,6 +17,12 @@ function App() {
       Dimensions: [],
       Measures: []
     }
+  })
+  const [showConfigPanel, setShowConfigPanel] = useState(false);
+  const [visualConfig, setVisualConfig] = useState({
+    aggregator: 'sum',
+    defaultAggregated: true,
+    defaultStack: true
   })
   const [cleanData, setCleanData] = useState([]);
   const [dimScores, setDimScores] = useState([]);
@@ -117,7 +123,6 @@ function App() {
     // let pageNo = (page - 1 + charts.length) % charts.length;
     let fieldsOfView = charts[pageNo].dimList.concat(charts[pageNo].meaList)
     let scoreOfDimensionSubset = dimScores.filter(dim => fieldsOfView.includes(dim[0]));
-    console.log(scoreOfDimensionSubset)
     let {schema, aggData} = specificationWithFieldsAnalysisResult(scoreOfDimensionSubset, cleanData, charts[pageNo].meaList);
     setPage(pageNo);
     setDataView({
@@ -129,43 +134,54 @@ function App() {
     })
   }
   // ChevronRight
+
   return (
     <div>
       <div className="header-bar" ></div>
+      <PreferencePanel show={showConfigPanel}
+        config={visualConfig}
+        onUpdateConfig={(config) => {
+          setVisualConfig(config)
+          setShowConfigPanel(false);
+        }}
+        onClose={() => { setShowConfigPanel(false) }} />
       <div className="content-container">
         {
           !showInsightBoard ? undefined : <div className="card">
             {
-              !loading ? undefined : <ProgressIndicator label="Finding insights" description="calculating" />
+              !loading ? undefined : <ProgressIndicator description="calculating" />
             }
-            <p>Page No. {page + 1} of {charts.length}</p>
-            <Stack horizontal tokens={{ childrenGap: 20}}>
-              <DefaultButton text="Last" onClick={() => { gotoPage((page - 1 + charts.length) % charts.length) }} allowDisabledFocus />
-              <DefaultButton text="Next" onClick={() => { gotoPage((page + 1) % charts.length) }} allowDisabledFocus />
-              <PrimaryButton text="intrested" />
-            </Stack>
+            <h2 style={{marginBottom: 0}}>Visual Insights <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="preference" onClick={() => {setShowConfigPanel(true)}} /></h2>
+            <p className="state-description">Page No. {page + 1} of {charts.length}</p>
             <div className="ms-Grid" dir="ltr">
               <div className="ms-Grid-row">
               <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3" style={{overflow: 'auto'}}>
+                <Stack horizontal tokens={{ childrenGap: 20 }}>
+                  <DefaultButton text="Last" onClick={() => { gotoPage((page - 1 + charts.length) % charts.length) }} allowDisabledFocus />
+                  <DefaultButton text="Next" onClick={() => { gotoPage((page + 1) % charts.length) }} allowDisabledFocus />
+                </Stack>
                 <h3>Specification</h3>
                 <pre>
                   {JSON.stringify(dataView.schema, null, 2)}
                 </pre>
               </div>
               <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg9" style={{overflow: 'auto'}}>
-                  <BaseChart
-                    dimensions={dataView.dimensions}
-                    measures={dataView.measures}
-                    dataSource={dataView.aggData}
-                    schema={dataView.schema}
-                    fieldFeatures={dataView.fieldFeatures} />
+                <BaseChart
+                  aggregator={visualConfig.aggregator}
+                  defaultAggregated={visualConfig.defaultAggregated}
+                  defaultStack={visualConfig.defaultStack}
+                  dimensions={dataView.dimensions}
+                  measures={dataView.measures}
+                  dataSource={dataView.aggData}
+                  schema={dataView.schema}
+                  fieldFeatures={dataView.fieldFeatures} />
               </div>
               </div>
             </div>
           </div>
         }
         <div className="card">
-          <PrimaryButton text="Extract Insights" onClick={() => {
+          <DefaultButton iconProps={{iconName: 'Financial'}} text="Extract Insights" onClick={() => {
               setShowInsightBoard(true);
               extractInsights(dataset);
             }} />

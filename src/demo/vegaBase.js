@@ -9,8 +9,10 @@ const geomTypeMap = {
 }
 
 const BaseChart = (props) => {
-  const [operator, setOperator] = useState('sum');
   const {
+    defaultAggregated,
+    defaultStack,
+    aggregator,
     dataSource = [],
     dimensions = [],
     measures = [],
@@ -27,7 +29,7 @@ const BaseChart = (props) => {
     },
     fieldFeatures = []
   } = props;
-  console.log(props)
+
   const container = useRef();
   function getFieldType (field) {
     let targetField = fieldFeatures.find(f => f.name === field);
@@ -35,20 +37,21 @@ const BaseChart = (props) => {
   }
   const aggregatedMeasures = measures.map(mea => {
     return {
-      op: operator,
+      op: aggregator,
       field: mea,
-      as: `${mea}_${operator}`
+      as: `${mea}_${aggregator}`
     }
   })
-  let table = aggregate({ dataSource, dimensions, measures, operator, asFields: aggregatedMeasures.map(mea => mea.as)});
+  let table = defaultAggregated ? aggregate({ dataSource, dimensions, measures, operator: aggregator, asFields: aggregatedMeasures.map(mea => mea.as)}) : dataSource;
   function adjustField (field) {
-    if (measures.includes(field)) {
+    if (defaultAggregated && measures.includes(field)) {
       return aggregatedMeasures.find(mea => {
         return mea.field === field;
       }).as;
     }
     return field;
   }
+  // todo for slider
   // function getDomain (field) {
   //   let fieldType = fieldFeatures.find(f => f.name === field).type;
   //   let values = table.map(row => row[field]);
@@ -86,7 +89,13 @@ const BaseChart = (props) => {
           field: adjustField(fieldMap[channel]),
           type: getFieldType(fieldMap[channel])
         }
+        if (['x', 'y'].includes(channel) && getFieldType(fieldMap[channel]) === 'quantitative' && !defaultStack) {
+          basicSpec.encoding[channel].stack = null;
+        }
       }
+    }
+    if (!defaultStack && opacity.length === 0) {
+      basicSpec.encoding.opacity = { value: 0.7 }
     }
     if (page.length === 0) {
       spec = {
@@ -96,11 +105,11 @@ const BaseChart = (props) => {
     } else if (page.length > 0) {
       basicSpec.transform = [
         {filter: {selection: 'brush'}},
-        {
+        defaultAggregated ? {
           aggregate: aggregatedMeasures,
           groupby: dimensions.filter(dim => dim !== page[0])
-        }
-      ];
+        } : null
+      ].filter(Boolean);
       let sliderSpec = {
         width: 600,
         mark: 'tick',

@@ -24,9 +24,15 @@
   background-color: #fff;
   min-height: 60px;
 }
-h3 {
+h2, h3 {
   color: #323130;
-  font-weight: 560;
+  font-weight: 500;
+}
+.state-description{
+  margin-top: 0px;
+  font-weight: 360;
+  font-size: 12px;
+  color: #8a8886;
 }
 .card{
   background-color: #fff;

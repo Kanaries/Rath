@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@antv/g2": "^3.5.8-beta.3",
+    "@uifabric/icons": "^7.3.0",
     "cube-core": "^2.13.0",
     "mocha": "^6.2.0",
     "office-ui-fabric-core": "^10.1.0",

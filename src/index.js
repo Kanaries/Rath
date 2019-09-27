@@ -2,8 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import { initializeIcons } from '@uifabric/icons';
 import * as serviceWorker from './serviceWorker';
-
+initializeIcons();
 ReactDOM.render(<App />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
