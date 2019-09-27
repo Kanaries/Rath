@@ -98,7 +98,7 @@ function App() {
 
   useEffect(() => {
     if (charts.length > 0) {
-      gotoPage(28)
+      gotoPage(0)
     }
   }, [cleanData, result]);
 

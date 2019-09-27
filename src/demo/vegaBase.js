@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Slider } from 'office-ui-fabric-react';
+import aggregate from 'cube-core';
 import embed from 'vega-embed';
 const geomTypeMap = {
   interval: 'bar',
@@ -7,6 +8,7 @@ const geomTypeMap = {
   point: 'point',
   density: 'rect'
 }
+
 const BaseChart = (props) => {
   const [operator, setOperator] = useState('sum');
   const [pageMembers, setPageMembers] = useState([]);
@@ -42,6 +44,7 @@ const BaseChart = (props) => {
       as: `${mea}_${operator}`
     }
   })
+  let table = aggregate({ dataSource, dimensions, measures, operator, asFields: aggregatedMeasures.map(mea => mea.as)});
   function adjustField (field) {
     if (measures.includes(field)) {
       return aggregatedMeasures.find(mea => {
@@ -50,41 +53,76 @@ const BaseChart = (props) => {
     }
     return field;
   }
-  function getDomain (field) {
-    let fieldType = fieldFeatures.find(f => f.name === field).type;
-    let values = dataSource.map(row => row[field]);
-    if (fieldType === 'quantitative') {
-      let min = Math.min(0, ...values)
-      let max = Math.max(...values)
-      return [min, max]
+  // function getDomain (field) {
+  //   let fieldType = fieldFeatures.find(f => f.name === field).type;
+  //   let values = table.map(row => row[field]);
+  //   if (fieldType === 'quantitative') {
+  //     let min = Math.min(0, ...values)
+  //     let max = Math.max(...values)
+  //     return [min, max]
+  //   }
+  //   return [...new Set(values)];
+  // }
+  function getSpecification () {
+    const fieldMap = {
+      x: position[0],
+      y: position[1],
+      color: color[0],
+      size: size[0],
+      opacity: opacity[0],
+      row: facets[0],
+      column: facets[1]
     }
-    return [...new Set(values)];
+    let spec = {
+      width: 600,
+      data: {
+        values: table
+      }
+    }
+    let basicSpec = {
+      width: 600,
+      mark: geomTypeMap[geomType[0]] ? geomTypeMap[geomType[0]] : geomType[0],
+      encoding: {}
+    };
+    for (let channel in fieldMap) {
+      if (fieldMap[channel]) {
+        basicSpec.encoding[channel] = {
+          field: adjustField(fieldMap[channel]),
+          type: getFieldType(fieldMap[channel])
+        }
+      }
+    }
+    if (page.length === 0) {
+      spec = {
+        ...spec,
+        ...basicSpec
+      }
+    } else if (page.length > 0) {
+      basicSpec.transform = [
+        {filter: {selection: 'brush'}},
+        {
+          aggregate: aggregatedMeasures,
+          groupby: dimensions.filter(dim => dim !== page[0])
+        }
+      ];
+      let sliderSpec = {
+        width: 600,
+        // height: 150,
+        mark: 'tick',
+        selection: { brush: { encodings: ['x'], type: 'interval'}},
+        encoding: {
+          x: { field: page[0], type: getFieldType(page[0]) }
+        }
+        // selection: {}
+      }
+      spec.vconcat = [basicSpec, sliderSpec];
+    }
+    return spec;
   }
   useEffect(() => {
     if (container.current) {
       if (position.length > 0 && geomType.length > 0) {
-        let spec = {
-          width: 600,
-          data: {
-            values: page.length > 0 ? dataSource.filter(row => row[page] === pageMembers[pageNo]) : dataSource
-          },
-          transform: aggregatedMeasures.length > 0 ? [
-            {
-              aggregate: aggregatedMeasures,
-              groupby: dimensions
-            }
-          ] : undefined,
-          mark: geomTypeMap[geomType[0]] ? geomTypeMap[geomType[0]] : geomType[0],
-          encoding: {
-            x: { field: adjustField(position[0]), type: getFieldType(position[0]), /*scale: {domain: getDomain(position[0])}*/},
-            y: { field: adjustField(position[1]), type: getFieldType(position[1]), /*scale: {domain: getDomain(position[1])}*/},
-            color: color[0] ? { field: adjustField(color[0]), type: getFieldType(color[0]), /*scale: {domain: getDomain(color[0])}*/} : undefined,
-            size: size[0] ? { field: adjustField(size[0]), type: getFieldType(size[0]), /*scale: {domain: getDomain(size[0])}*/} : undefined,
-            opacity: opacity[0] ? { field: adjustField(opacity[0]), type: getFieldType(opacity[0]), /*scale: {domain: getDomain(opacity[0])}*/} : undefined,
-            row: facets[0] ? { field: adjustField(facets[0]), type: getFieldType(facets[0])} : undefined,
-            column: facets[1] ? { field: adjustField(facets[1]), type: getFieldType(facets[1])} : undefined,
-          }
-        };
+        let spec = getSpecification()
         console.log(spec)
         embed(container.current, spec);
       }
@@ -97,21 +135,7 @@ const BaseChart = (props) => {
       setPageNo(0);
     }
   }, [page, dataSource])
-  return <div>
-      {
-        page.length > 0 ? <Slider
-          label="Basic example"
-          min={0}
-          max={Math.max(0, pageMembers.length - 1)}
-          step={1}
-          defaultValue={0}
-          showValue={true}
-          onChange={(value) => setPageNo(value)}
-        /> : undefined
-      }
-      <div ref={container}></div>
-      
-  </div>
+  return <div ref={container}></div>
   
 }
 
