@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Slider } from 'office-ui-fabric-react';
 import aggregate from 'cube-core';
 import embed from 'vega-embed';
 const geomTypeMap = {
@@ -11,15 +10,12 @@ const geomTypeMap = {
 
 const BaseChart = (props) => {
   const [operator, setOperator] = useState('sum');
-  const [pageMembers, setPageMembers] = useState([]);
-  const [pageNo, setPageNo] = useState(0);
   const {
     dataSource = [],
     dimensions = [],
     measures = [],
     schema: {
       position = [],
-      // color = [],
       color = [],
       opacity = [],
       size = [],
@@ -107,13 +103,11 @@ const BaseChart = (props) => {
       ];
       let sliderSpec = {
         width: 600,
-        // height: 150,
         mark: 'tick',
         selection: { brush: { encodings: ['x'], type: 'interval'}},
         encoding: {
           x: { field: page[0], type: getFieldType(page[0]) }
         }
-        // selection: {}
       }
       spec.vconcat = [basicSpec, sliderSpec];
     }
@@ -128,13 +122,6 @@ const BaseChart = (props) => {
       }
     }
   })
-  useEffect(() => {
-    if (page.length > 0) {
-      let pageMemberSet = new Set(dataSource.map(row => row[page]));
-      setPageMembers([...pageMemberSet].sort());
-      setPageNo(0);
-    }
-  }, [page, dataSource])
   return <div ref={container}></div>
   
 }
