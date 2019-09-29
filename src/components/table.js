@@ -2,28 +2,17 @@ import React from 'react';
 import { DetailsList, SelectionMode } from 'office-ui-fabric-react';
 
 export default function DataTable(props) {
-  const { dataSource = [], dimensions = [], measures = [] } = props;
-  let columns = [];
-  columns = dimensions.map(field => {
+  const { dataSource = [], fields = [] } = props;
+  let columns = fields.map(field => {
     return {
-      key: field,
-      name: field,
-      fieldName: field,
+      key: field.name,
+      name: field.name,
+      fieldName: field.name,
       minWidth: 70,
-        maxWidth: 90,
-      data: 'string'
+      maxHeight: 90
     }
-  })
-  columns.concat(measures.map(field => {
-    return {
-      key: field,
-      name: field,
-      fieldName: field,
-      minWidth: 70,
-        maxWidth: 90,
-      data: 'number'
-    }
-  }))
+  });
+  console.log(dataSource)
   return <div style={{maxHeight: 400, overflow: 'auto'}}>
     <DetailsList items={dataSource} columns={columns} selectionMode={SelectionMode.none} />
   </div>

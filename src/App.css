@@ -52,3 +52,34 @@ h2, h3 {
     transform: scaleY(1);
   }
 }
+
+.vi-callout{
+  min-Width: 300px;
+}
+.vi-callout-header{
+  padding: 18px 24px 12px;
+}
+.vi-callout-title{
+  margin: 0;
+  font-size: 21px;
+  font-weight: 100;
+  color: #323130;
+  font-weight: 300;
+}
+.vi-callout-inner{
+  height: 100%;
+  padding: 0px 24px 20px;
+}
+.vi-callout-subText{
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #323130;
+  font-weight: 300;
+}
+.vi-callout-action{
+  position: relative;
+  margin-top: 20px;
+  width: 100%;
+  white-space: nowrap;
+}

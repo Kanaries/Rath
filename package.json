@@ -9,6 +9,7 @@
     "mocha": "^6.2.0",
     "office-ui-fabric-core": "^10.1.0",
     "office-ui-fabric-react": "^7.38.0",
+    "papaparse": "^5.1.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-scripts": "3.1.1",

@@ -5,6 +5,13 @@
 
 A implementation of tableau showme feature. Not completely follow the tableau's rules.
 
+## Demo
+```
+npm start
+
+npm run server
+```
+
 ## Introduction
 
 showme helps you group the fields with too many members(both category and continous) except those obey uniform distribution and then ranks the new fields by their impurity measure (entropy as default).
