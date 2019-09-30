@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "outDir": "../src/build",
+    // "lib": ["es2019"],
+    "target": "esnext",
+    "moduleResolution": "node",
+    "declaration": true,
+    "downlevelIteration": true,
+    "module":"esnext"
+    // "skipLibCheck": true
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}

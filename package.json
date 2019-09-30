@@ -24,12 +24,13 @@
     "vega-lite": "^4.0.0-beta.2"
   },
   "scripts": {
-    "copy": "cp -r ./test/dataset/. ./server/dataset && cp -r ./lib/build/. ./src/build",
-    "server": "npm run copy && node ./server/index.js",
-    "start": "npm run build && npm run copy && react-scripts start",
-    "build": "npm run core",
-    "core": "tsc -p ./lib/tsconfig.json",
-    "test": "npm run build && mocha --no-timeouts",
+    "copy": "cp -r ./test/dataset/. ./server/dataset",
+    "server": "npm run buildback && npm run copy && node ./server/index.js",
+    "start": "npm run buildfront && react-scripts start",
+    "build": "npm run buildfront && npm run buildback",
+    "buildback": "tsc -p ./lib/tsconfig.cjs.json",
+    "buildfront": "tsc -p ./lib/tsconfig.esm.json",
+    "test": "npm run buildback && mocha --no-timeouts",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
