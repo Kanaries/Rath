@@ -1,48 +1,56 @@
+import { DataSource } from './commonTypes'
 const JOIN_SYMBOL = '_';
 const MAGIC_NUMBER = 5;
-function deepcopy(data) {
+
+function deepcopy(data: any): any {
   return JSON.parse(JSON.stringify(data))
 }
 
-function isFieldCategory(dataSource, field) {
+function isFieldCategory(dataSource: DataSource, fieldName: string): boolean {
   return dataSource.every(record => {
-    return typeof record[field] === 'string'
-      || typeof record[field] === 'undefined'
-      || record[field] === null;
+    return typeof record[fieldName] === 'string'
+      || typeof record[fieldName] === 'undefined'
+      || record[fieldName] === null;
   });
 }
 
-function isFieldContinous(dataSource, field) {
+function isFieldContinous(dataSource: DataSource, fieldName: string): boolean {
   return dataSource.every(record => {
-    return typeof record[field] === 'number'
-      || typeof record[field] === 'undefined'
-      || record[field] === null;
+    return typeof record[fieldName] === 'number'
+      || typeof record[fieldName] === 'undefined'
+      || record[fieldName] === null;
   });
 }
 
-function isFieldNumeric(dataSource, field) {
+function isFieldNumeric(dataSource: DataSource, fieldName: string): boolean {
   return dataSource.every(record => {
-    return !isNaN(record[field])
-    || typeof record[field] === 'undefined'
-    || record[field] === null;
+    return !isNaN(record[fieldName])
+    || typeof record[fieldName] === 'undefined'
+    || record[fieldName] === null;
   })
 }
 
-function isFieldTime(dataSource, field) {
+function isFieldTime(dataSource: DataSource, fieldName: string): boolean {
   return dataSource.every(record => {
-    return (!isNaN(Date.parse(record[field]))
-    && typeof record[field] === 'string'
-    && /[0-9]{0,4}-[0-9]{0,2}(-[0-9]{0,2})?/.test(record[field]))
-    || typeof record[field] === 'undefined'
-    || record[field] === null;
+    return (!isNaN(Date.parse(record[fieldName]))
+    && typeof record[fieldName] === 'string'
+    && /[0-9]{0,4}-[0-9]{0,2}(-[0-9]{0,2})?/.test(record[fieldName]))
+    || typeof record[fieldName] === 'undefined'
+    || record[fieldName] === null;
   })
 }
 
-function aggregate({ dataSource, fields, bys, method = 'sum' }) {
-  let tmp = [];
+interface AggregateProps {
+  dataSource: DataSource;
+  fields: string[];
+  bys: string[];
+  method?: string;
+}
+function aggregate({ dataSource, fields, bys, method = 'sum' }: AggregateProps): DataSource {
+  let tmp: DataSource = [];
 
   for (let by of bys) {
-    let map = new Map();
+    let map: Map<string, number> = new Map();
     for (let record of dataSource) {
       let key = JSON.stringify(fields.map(field => record[field]));
       if (!map.has(key)) {
@@ -65,7 +73,7 @@ function aggregate({ dataSource, fields, bys, method = 'sum' }) {
     }
   }
 
-  let ans = new Map();
+  let ans: Map<string, any> = new Map();
   for (let record of tmp) {
     if (!ans.has(record.index)) {
       ans.set(record.index, {})
@@ -75,8 +83,8 @@ function aggregate({ dataSource, fields, bys, method = 'sum' }) {
   return [...ans.values()];
 }
 
-function memberCount(dataSource, field) {
-  const counter = new Map();
+function memberCount(dataSource: DataSource, field: string): [string, number][] {
+  const counter: Map<string, number> = new Map();
 
   for (let row of dataSource) {
     let member = row[field];
@@ -104,15 +112,20 @@ function memberCount(dataSource, field) {
 
 //   return [...counter.entries()];
 // }
-
-function groupContinousField({ dataSource, field, newField = `${field}(con-group)`, groupNumber }) {
+interface GroupFieldProps {
+  dataSource: DataSource;
+  field: string;
+  newField: string;
+  groupNumber: number;
+}
+function groupContinousField({ dataSource, field, newField = `${field}(con-group)`, groupNumber }: GroupFieldProps): DataSource {
   // const members = memberCount(dataSource, field);
   // todo: outlier detection
   const values = dataSource.map(item => item[field])
   const max = Math.max(...values); // Number.EPSILON * ;
   const min = Math.min(...values);
   const segWidth = (max - min) / groupNumber;
-  let ranges = [];
+  let ranges: [number, number][] = [];
 
   for (let i = 0; i < groupNumber; i++) {
     let left = min + i * segWidth;
@@ -134,7 +147,7 @@ function groupContinousField({ dataSource, field, newField = `${field}(con-group
   return dataSource;
 }
 
-function groupCategoryField({ dataSource, field, newField = `${field}(cat-group)`, groupNumber }) {
+function groupCategoryField({ dataSource, field, newField = `${field}(cat-group)`, groupNumber }: GroupFieldProps): DataSource {
   // auto category should obey Power law distrubution.
   let members = memberCount(dataSource, field);
   members.sort((a, b) => b[1] - a[1]);
@@ -161,12 +174,12 @@ function groupCategoryField({ dataSource, field, newField = `${field}(cat-group)
       }
     });
   }
-  let set = new Set()
-  // let sum = 0;
+
+  let set: Set<string> = new Set()
   for (let i = groupNumber - 1; i < members.length; i++) {
-    // sum += members[i][1];
     set.add(members[i][0]);
   }
+
   for (let record of dataSource) {
     if (set.has(record[field])) {
       record[newField] = 'others';
@@ -176,17 +189,6 @@ function groupCategoryField({ dataSource, field, newField = `${field}(cat-group)
   }
   return dataSource;
 }
-
-// def combine(self, n: int, k: int) -> List[List[int]]:
-// res = []
-// def backtrack(i, k, tmp):
-//     if k == 0:
-//         res.append(tmp)
-//         return 
-//     for j in range(i, n + 1):
-//         backtrack(j+1, k-1, tmp + [j])
-// backtrack(1, k, [])
-// return res
 
 export {
   deepcopy,
@@ -200,3 +202,4 @@ export {
   isFieldNumeric,
   JOIN_SYMBOL
 }
+

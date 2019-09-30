@@ -1,6 +1,6 @@
 const assert = require('assert');
 const fs = require('fs');
-const { specification, visualElements } = require('../lib/build/bundle');
+const { specification } = require('../lib/build/bundle');
 const path = require('path');
 
 const datasetPath = path.resolve(__dirname, './dataset/titanic.json');
@@ -11,7 +11,14 @@ const {
     Measures: measures
   }
 } = dataset;
-
+const visualElements = [['position', 2],
+['adjust&color', 1],
+['facets', 2],
+['size', 1],
+['shape', 1],
+['opacity', 1],
+['high-facets', Infinity]
+]
 const dimensions = ['Age', 'Survived', 'Parch', 'Sex', 'Embarked', 'Pclass'];
 
 describe('specification test', function () {

@@ -1,6 +1,7 @@
-function turnAdjMatrix2List(matrix) {
+type AdjList = [[number, number], number][];
+function turnAdjMatrix2List(matrix: number[][]): AdjList {
   // only for the special matrix here(corelational matrix)
-  let edges = [];
+  let edges: AdjList = [];
   for (let i = 0; i < matrix.length; i++) {
     for (let j = i + 1; j < matrix[i].length; j++) {
       edges.push([[i, j], Math.abs(matrix[i][j])]);
@@ -12,19 +13,23 @@ function turnAdjMatrix2List(matrix) {
   return edges
 }
 
-function find (parents, n) {
+function find (parents: number[], n: number): number {
   return parents[n] === n ? n : find(parents, parents[n]);
 }
 
 
-function union (parents, n1, n2) {
+function union (parents: number[], n1: number, n2: number): void {
   let p1 = find(parents, n1);
   let p2 = find(parents, n2);
   parents[p1] = p2;
 }
 
 // maxiumn spanning tree
-function kruskal({ matrix, groupMaxSize = 4 }) {
+interface KruskalClusterProps {
+  matrix: number[][];
+  groupMaxSize: number
+}
+function kruskal({ matrix, groupMaxSize }: KruskalClusterProps): Map<number, number[]> {
   const edges = turnAdjMatrix2List(matrix);
   const parents = matrix.map((m, i) => i);
 
@@ -35,7 +40,7 @@ function kruskal({ matrix, groupMaxSize = 4 }) {
       break;
     }
   }
-  let groups = new Map();
+  let groups: Map<number, number[]> = new Map();
   for (let i = 0; i < parents.length; i++) {
     if (!groups.has(parents[i])) {
       groups.set(parents[i], []);
@@ -45,9 +50,15 @@ function kruskal({ matrix, groupMaxSize = 4 }) {
   return groups;
 }
 
-function cluster ({ matrix, measures ,method = 'kruskal', groupNumber }) {
-  const groups = kruskal({ matrix });
-  let ans = [];
+interface ClusterProps {
+  matrix: number[][];
+  measures: string[];
+  method?: string;
+  groupMaxSize?: number;
+}
+function cluster ({ matrix, measures ,method = 'kruskal', groupMaxSize = 4 }: ClusterProps): string[][] {
+  const groups = kruskal({ matrix, groupMaxSize });
+  let ans: string[][] = [];
   for (let meas of groups.values()) {
     ans.push(meas.map(meaIndex => measures[meaIndex]))
   }

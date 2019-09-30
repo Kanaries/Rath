@@ -1,3 +1,5 @@
+import { DataSource, Field, FieldImpurity } from './commonTypes'
+
 import {
   deepcopy,
   memberCount,
@@ -14,20 +16,19 @@ import { isUniformDistribution } from './distribution';
 import {
   normalize,
   entropy,
-  gini
 } from './impurityMeasure';
 
 const MAGIC_NUMBER = 5;
 
-function fieldsAnalysis(rawData, dimensions, measures) {
+function fieldsAnalysis(rawData: DataSource, dimensions: string[], measures: string[]) {
   // 1. process fields
   // 2. aggregate
   // 3. calculate field entropy
   // 4. give the high entropy fields with high delta I aesthics 
 
-  let dataSource = deepcopy(rawData);
+  let dataSource: DataSource = deepcopy(rawData);
   let aggDims = new Set(dimensions);
-  let fieldFeatureList = []
+  let fieldFeatureList: Field[] = []
   // find all the field with too much members, group them. reduce the entropy of a field.
   for (let dim of dimensions) {
     if (isFieldTime(dataSource, dim)) {
@@ -36,7 +37,7 @@ function fieldsAnalysis(rawData, dimensions, measures) {
         type: 'temporal'
       })
     } else if (isFieldContinous(dataSource, dim)) {
-      if (memberCount(dataSource, dim) > MAGIC_NUMBER * MAGIC_NUMBER) {
+      if (memberCount(dataSource, dim).length > MAGIC_NUMBER * MAGIC_NUMBER) {
         let newField = `${dim}(con-group)`;
         dataSource = groupContinousField({
           dataSource,
@@ -44,7 +45,7 @@ function fieldsAnalysis(rawData, dimensions, measures) {
           newField,
           groupNumber: MAGIC_NUMBER
         });
-        aggDims.delete(dim)
+        aggDims.delete(dim);
         aggDims.add(newField);
         fieldFeatureList.push({
           name: newField,
@@ -99,15 +100,12 @@ function fieldsAnalysis(rawData, dimensions, measures) {
     })
   }
   
-  let dimScores = [];
+  let dimScores: FieldImpurity[] = [];
   for (let dim of aggDims) {
     const members = memberCount(aggData, dim);
-    // console.log(`=========[${dim} members]========`)
-    // console.log(members)
     const frequencyList = members.map(m => m[1]);
     const probabilityList = normalize(frequencyList);
     const fieldEntropy = entropy(probabilityList);
-    // console.log(`[${dim} filed entropy] = ${fieldEntropy}`)
     dimScores.push([dim, fieldEntropy, Math.log2(members.length), fieldFeatureList.find(item => item.name === dim)]);
   }
 

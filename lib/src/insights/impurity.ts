@@ -1,10 +1,11 @@
 import { aggregate } from '../utils';
 import { entropy, normalize } from '../impurityMeasure';
+import { DataSource } from '../commonTypes';
 // insights like outlier and trend both request high impurity of dimension.
 const maxVisualChannel = 8;
-function getCombination(elements, start = 1, end = elements.length) {
-  let ans = [];
-  const combine = (step, set, size) => {
+function getCombination(elements: string[], start: number = 1, end: number = elements.length): string[][] {
+  let ans: string[][] = [];
+  const combine = (step: number, set: string[], size: number) => {
     if (set.length === size) {
       ans.push([...set]);
       return;
@@ -21,12 +22,12 @@ function getCombination(elements, start = 1, end = elements.length) {
   return ans
 }
 
-function linearMapPositive (arr) {
+function linearMapPositive (arr: number[]): number[] {
   let min = Math.min(...arr);
   return arr.map(a => a + min + 1);
 }
 
-function sum(arr) {
+function sum(arr: number[]): number {
   let sum = 0;
   for (let i = 0, len = arr.length; i < len; i++) {
     // if (typeof dataSource[i][field])
@@ -35,7 +36,7 @@ function sum(arr) {
   return sum;
 }
 
-function correlation(dataSource, fieldX, fieldY) {
+function correlation(dataSource: DataSource, fieldX: string, fieldY: string): number {
   let r = 0;
   let xBar = sum(dataSource.map(r => r[fieldX]));
   let yBar = sum(dataSource.map(r => r[fieldY]));
@@ -43,9 +44,9 @@ function correlation(dataSource, fieldX, fieldY) {
   Math.sqrt(sum(dataSource.map(r => Math.pow(r[fieldX] - xBar, 2))) * sum(dataSource.map(r => Math.pow(r[fieldY] - yBar, 2))));
   return r;
 }
-
-function analysisDimensions(dataSource, dimensions, measures) {
-  let impurityList = [];
+type FieldsFeature = [string[], any, number[][]];
+function analysisDimensions(dataSource: DataSource, dimensions: string[], measures: string[]): FieldsFeature[] {
+  let impurityList: FieldsFeature[] = [];
   let dimSet = getCombination(dimensions)
   for (let dset of dimSet) {
     let impurity = {};

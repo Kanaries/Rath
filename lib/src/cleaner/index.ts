@@ -1,5 +1,6 @@
-import { deepcopy, isFieldNumeric, isFieldTime, memberCount } from '../utils';
-function dropNull(dataSource, dimensions, measures) {
+import { isFieldNumeric, isFieldTime, memberCount } from '../utils';
+import { DataSource } from '../commonTypes';
+function dropNull(dataSource: DataSource, dimensions: string[], measures: string[]): DataSource {
   let data = [];
   for (let record of dataSource) {
     let keep = true;

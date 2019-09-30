@@ -9,7 +9,7 @@ import {
 } from './utils'
 
 import fieldsAnalysis from './fieldAnalysis';
-import specification, { specificationWithFieldsAnalysisResult, visualElements } from './specification';
+import specification, { specificationWithFieldsAnalysisResult } from './specification';
 
 import {
   isUniformDistribution
@@ -39,7 +39,6 @@ export {
   gini,
   specification,
   specificationWithFieldsAnalysisResult,
-  visualElements,
   analysisDimensions,
   dropNull,
   getInsightViews,

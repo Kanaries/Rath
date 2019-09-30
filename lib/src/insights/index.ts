@@ -3,14 +3,15 @@ import { TopKSingleField, TopKPercentField, Depth, VisualLimit } from './config'
 import { entropy, normalize } from '../impurityMeasure';
 import { memberCount } from '../utils'
 import cluster from './cluster';
+import { DataSource } from '../commonTypes';
 
-function getInsightViews(dataSource, originDimensions, measures) {
+function getInsightViews(dataSource: DataSource, originDimensions: string[], measures: string[]) {
   // 1. impurity of measures based on some dimensons (single variable or depth)
   // 2. correlation matrix of measures
   // cluster of measure group
   // rank dimension
   // choose one dimension
-  let dimScores = [];
+  let dimScores: [string, number, number][] = [];
   for (let dim of originDimensions) {
     const members = memberCount(dataSource, dim);
     const frequencyList = members.map(m => m[1]);
