@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PrimaryButton, Stack, Checkbox, Panel, PanelType, ComboBox, Label } from 'office-ui-fabric-react';
-
-const checkboxStyles = (props) => {
+import { Aggregator } from '../global';
+const checkboxStyles = () => {
   return {
     root: {
       marginTop: '10px'
@@ -10,13 +10,24 @@ const checkboxStyles = (props) => {
 }
 
 // todo: import aggregators list from cube-core
-const aggregationList = [
+const aggregationList: Array<{ key: Aggregator; text: string }> = [
   { key: 'sum', text: 'Sum' },
   { key: 'count', text: 'Count' },
   { key: 'mean', text: 'Mean' }
 ]
+export interface PreferencePanelConfig {
+  aggregator: Aggregator;
+  defaultAggregated: boolean;
+  defaultStack: boolean
+}
+export interface PreferencePanelProps {
+  show: boolean;
+  onUpdateConfig: (props: PreferencePanelConfig) => void;
+  onClose: () => void;
+  config: PreferencePanelConfig
+}
 
-export default function PreferencePanel (props) {
+const PreferencePanel: React.FC<PreferencePanelProps> = (props) => {
   const {
     show = false,
     onUpdateConfig,
@@ -24,7 +35,7 @@ export default function PreferencePanel (props) {
     config
   } = props;
   
-  const [aggregator, setAggregator] = useState('sum');
+  const [aggregator, setAggregator] = useState<Aggregator>('sum');
   const [defaultAggregated, setDefaultAggregated] = useState(true);
   const [defaultStack, setDefaultStack] = useState(true);
   
@@ -57,10 +68,12 @@ export default function PreferencePanel (props) {
         allowFreeform={true}
         autoComplete="on"
         options={aggregationList}
-        onChange={(e, option) => {setAggregator(option.key)}}
+        onChange={(e, option) => {option && setAggregator(option.key as Aggregator)}}
       />
-      <Checkbox styles={checkboxStyles} label="measurement aggregation" checked={defaultAggregated} onChange={(e, isChecked) => {setDefaultAggregated(isChecked)}} />
-      <Checkbox styles={checkboxStyles} label="measurement stack" checked={defaultStack} onChange={(e, isChecked) => {setDefaultStack(isChecked)}} />
+      <Checkbox styles={checkboxStyles} label="measurement aggregation" checked={defaultAggregated} onChange={(e, isChecked) => {setDefaultAggregated(isChecked || false)}} />
+      <Checkbox styles={checkboxStyles} label="measurement stack" checked={defaultStack} onChange={(e, isChecked) => {setDefaultStack(isChecked || false)}} />
     </Stack>
   </Panel>
 }
+
+export default PreferencePanel;

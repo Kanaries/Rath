@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { isUniformDistribution } = require('../lib/build/bundle');
+const { isUniformDistribution } = require('../lib/build/index');
 
 const RANDOM_TEST_GROUP = 10;
 

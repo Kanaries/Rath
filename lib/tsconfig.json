@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
     "outDir": "./build",
-    "lib": ["es2019"],
+    // "lib": ["es2019"],
     "target": "es5",
     "moduleResolution": "node",
     "declaration": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "module":"commonjs"
+    // "skipLibCheck": true
   },
   "include": [
     "./src/**/*"

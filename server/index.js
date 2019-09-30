@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs')
 const path = require('path');
 const bodyParser = require('body-parser');
-const { fieldsAnalysis, getInsightViews } = require('../lib/build/bundle');
+const { fieldsAnalysis, getInsightViews } = require('../lib/build/index');
 
 const app = express();
 app.use(bodyParser.json({limit: '300mb'}));

@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { PrimaryButton, Panel, PanelType, Toggle } from 'office-ui-fabric-react';
 
+import { BIField, BIFieldType } from '../global';
 
-export default function FieldPanel (props) {
+interface FieldPanelProps {
+  show: boolean;
+  onClose: () => void;
+  onUpdateConfig: (fields: BIField[]) => void;
+  fields: BIField[];
+}
+const FieldPanel: React.FC<FieldPanelProps> = (props) => {
   const {
     show = false,
     // fields = [],
     onUpdateConfig,
     onClose
   } = props;
-  const [fields, setFields] = useState([])
+  const [fields, setFields] = useState<BIField[]>([])
   useEffect(() => {
     setFields(props.fields)
   }, [props.fields])
   
-  function updateFieldType(field, type) {
+  function updateFieldType(field: BIField, type: BIFieldType) {
     setFields(fields => {
       return fields.map(f => {
         if (field.name === f.name) {
@@ -50,3 +57,5 @@ export default function FieldPanel (props) {
     </div>
   </Panel>
 }
+
+export default FieldPanel;

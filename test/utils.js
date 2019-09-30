@@ -9,7 +9,7 @@ const {
   aggregate,
   isFieldCategory,
   isFieldContinous
-} = require('../lib/build/bundle');
+} = require('../lib/build/index');
 
 const dataPath = path.resolve(__dirname, './dataset/titanic.json');
 const data = JSON.parse(fs.readFileSync(dataPath).toString())

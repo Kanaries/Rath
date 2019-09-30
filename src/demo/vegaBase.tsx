@@ -1,14 +1,36 @@
 import React, { useEffect, useState, useRef } from 'react';
 import aggregate from 'cube-core';
 import embed from 'vega-embed';
-const geomTypeMap = {
+import { DataSource, Field, FieldType } from '../build/commonTypes'
+const geomTypeMap: {[key: string]: any} = {
   interval: 'bar',
   line: 'line',
   point: 'point',
   density: 'rect'
 }
+export interface Specification {
+  position?: string[];
+  color?: string[];
+  opacity?: string[];
+  size?: string[];
+  shape?: string[];
+  geomType?: string[];
+  facets?: string[];
+  page?: string[];
+  filter?: string[]
+}
+interface BaseChartProps {
+  defaultAggregated: boolean;
+  defaultStack: boolean;
+  aggregator: 'sum' | 'mean' | 'count';
+  dataSource: DataSource;
+  dimensions: string[];
+  measures: string[];
+  fieldFeatures: Field[];
+  schema: Specification;
+}
 
-const BaseChart = (props) => {
+const BaseChart: React.FC<BaseChartProps> = (props) => {
   const {
     defaultAggregated,
     defaultStack,
@@ -30,11 +52,13 @@ const BaseChart = (props) => {
     fieldFeatures = []
   } = props;
 
-  const container = useRef();
-  function getFieldType (field) {
+  const container = useRef<HTMLDivElement>(null);
+
+  function getFieldType (field: string): FieldType {
     let targetField = fieldFeatures.find(f => f.name === field);
     return targetField ? targetField.type : 'nominal';
   }
+
   const aggregatedMeasures = measures.map(mea => {
     return {
       op: aggregator,
@@ -43,13 +67,14 @@ const BaseChart = (props) => {
     }
   })
   let table = defaultAggregated ? aggregate({ dataSource, dimensions, measures, operator: aggregator, asFields: aggregatedMeasures.map(mea => mea.as)}) : dataSource;
-  function adjustField (field) {
-    if (defaultAggregated && measures.includes(field)) {
-      return aggregatedMeasures.find(mea => {
-        return mea.field === field;
-      }).as;
+  function adjustField (fieldName: string): string {
+    if (defaultAggregated && measures.includes(fieldName)) {
+      let aggField = aggregatedMeasures.find(mea => {
+        return mea.field === fieldName;
+      });
+      return aggField ? aggField.as : fieldName;
     }
-    return field;
+    return fieldName;
   }
   // todo for slider
   // function getDomain (field) {
@@ -63,7 +88,7 @@ const BaseChart = (props) => {
   //   return [...new Set(values)];
   // }
   function getSpecification () {
-    const fieldMap = {
+    const fieldMap: any = {
       x: position[0],
       y: position[1],
       color: color[0],
@@ -72,15 +97,15 @@ const BaseChart = (props) => {
       row: facets[0],
       column: facets[1]
     }
-    let spec = {
+    let spec: any = {
       width: 600,
       data: {
         values: table
       }
     }
-    let basicSpec = {
+    let basicSpec: any = {
       width: 600,
-      mark: geomTypeMap[geomType[0]] ? geomTypeMap[geomType[0]] : geomType[0],
+      mark: (geomType[0] && geomTypeMap[geomType[0]]) ? geomTypeMap[geomType[0]] : geomType[0],
       encoding: {}
     };
     for (let channel in fieldMap) {
@@ -123,7 +148,7 @@ const BaseChart = (props) => {
     return spec;
   }
   useEffect(() => {
-    if (container.current) {
+    if (container.current !== null) {
       if (position.length > 0 && geomType.length > 0) {
         let spec = getSpecification()
         console.log(spec)

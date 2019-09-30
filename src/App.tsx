@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DefaultButton, IconButton, Callout, Stack, ProgressIndicator, Pivot, PivotItem, CommandBar, Toggle, setFocusVisibility } from 'office-ui-fabric-react';
 import DataTable from './components/table';
-import PreferencePanel from './components/preference';
+import PreferencePanel, { PreferencePanelConfig } from './components/preference';
 import FieldPanel from './components/fieldConfig';
 import BaseChart from './demo/vegaBase';
 import Papa from 'papaparse';
 import './App.css';
+import { fieldsAnalysisService, getInsightViewsService, View } from './service';
+import { specificationWithFieldsAnalysisResult, dropNull } from './build/index';
+import { DataSource, Record, BIField, Field } from './global';
+import { Specification } from './demo/vegaBase';
 
-const { specificationWithFieldsAnalysisResult, dropNull } = require('./build/bundle.js');
 const pivotList = [
   {
     title: 'DataSource',
@@ -18,97 +21,64 @@ const pivotList = [
     itemKey: 'pivot-' + 2
   }
 ]
+interface DataView {
+  schema: Specification,
+  aggData: DataSource,
+  fieldFeatures: Field[],
+  dimensions: string[],
+  measures: string[]
+}
 function App() {
   const [page, setPage] = useState(0);
   const [showInsightBoard, setShowInsightBoard] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [tableData, setTableData] = useState([]);
-  const [dataSource, setDataSource] = useState([])
+  const [tableData, setTableData] = useState<DataSource>([]);
+  const [dataSource, setDataSource] = useState<DataSource>([])
 
   const [showConfigPanel, setShowConfigPanel] = useState(false);
   const [showFieldConfig, setShowFieldConfig] = useState(false);
   const [showDataConfig, setShowDataConfig] = useState(false);
-  const [visualConfig, setVisualConfig] = useState({
+  const [visualConfig, setVisualConfig] = useState<PreferencePanelConfig>({
     aggregator: 'sum',
     defaultAggregated: true,
     defaultStack: true
   })
-  const [cleanData, setCleanData] = useState([]);
-  const [dimScores, setDimScores] = useState([]);
-  const [dataView, setDataView] = useState({
+  const [cleanData, setCleanData] = useState<DataSource>([]);
+  const [dimScores, setDimScores] = useState<Array<[string, number, number, Field]>>([]);
+  const [dataView, setDataView] = useState<DataView>({
     schema: {
       position: [],
       color: [],
       opacity: [],
-      geomType: ['interval']
+      geomType: []
     },
     fieldFeatures: [],
     aggData: [],
     dimensions: [],
     measures: []
   });
-  const [fields, setFields] = useState([]);
-  const [result, setResult] = useState([]);
+  const [fields, setFields] = useState<BIField[]>([]);
+  const [result, setResult] = useState<View[]>([]);
   const [currentPivotKey, setCurrenyPivotKey] = useState(pivotList[0].itemKey);
-  const dataSetting = useRef();
-  const fileEle = useRef();
-  // async function fetchDataSource () {
-  //   const res = await fetch('//localhost:8000/api/data/airbnb');
-  //   const result = await res.json();
-  //   if (result.success) {
-  //     setDataset(result.data);
-  //   }
-  // }
-  async function fieldsAnalysisService (cleanData, dimensions, measures) {
-    const res = await fetch('//localhost:8000/api/service/fieldsAnalysis', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        dataSource: cleanData,
-        dimensions,
-        measures
-      })
-    });
-    const result = await res.json();
-    if (result.success) {
-      const { dimScores, aggData } = result.data;
-      const newDimensions = dimScores.map(dim => dim[0]).filter(dim => !measures.includes(dim));
-      setCleanData(aggData);
-      setDimScores(dimScores);
-      await getInsightViewsService(aggData, newDimensions, measures);
-    }
-  }
-  async function getInsightViewsService (aggData, newDimensions, measures) {
-    const res = await fetch('//localhost:8000/api/service/getInsightViews', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        dataSource: aggData,
-        dimensions: newDimensions,
-        measures
-      })
-    });
-    const result = await res.json();
-    if (result.success) {
-      const views = result.data;
-      setResult(views);
-    }
-  }
-  async function extractInsights (dataSource, fields) {
+  const dataSetting = useRef<HTMLDivElement>(null);
+  const fileEle = useRef<HTMLInputElement>(null);
+
+  async function extractInsights (dataSource: DataSource, fields: BIField[]) {
     const dimensions = fields.filter(field => field.type === 'dimension').map(field => field.name)
     const measures = fields.filter(field => field.type === 'measure').map(field => field.name)
     const cleanData = dropNull(dataSource, dimensions, measures);
     setLoading(true);
-    await fieldsAnalysisService(cleanData, dimensions, measures);
+    try {
+      const { dimScores, aggData, newDimensions } = await fieldsAnalysisService(cleanData, dimensions, measures);
+      setCleanData(aggData);
+      setDimScores(dimScores);
+      const views = await getInsightViewsService(aggData, newDimensions, measures);
+      setResult(views)
+    } catch (error) {
+      console.error(error);
+    }
     setLoading(false);
-  } 
-  // useEffect(() => {
-  //   fetchDataSource();
-  // }, [])
+  }
 
   useEffect(() => {
     if (charts.length > 0) {
@@ -116,8 +86,7 @@ function App() {
     }
   }, [cleanData, result]);
 
-
-  let charts = [];
+  let charts: Array<{ dimList: string[]; meaList: string[] }> = [];
   for (let report of result) {
     const dimList = report.detail[0];
     for (let meaList of report.groups) {
@@ -127,7 +96,7 @@ function App() {
       })
     }
   }
-  const gotoPage = (pageNo) => {
+  const gotoPage = (pageNo: number) => {
     // let pageNo = (page - 1 + charts.length) % charts.length;
     let fieldsOfView = charts[pageNo].dimList.concat(charts[pageNo].meaList)
     let scoreOfDimensionSubset = dimScores.filter(dim => fieldsOfView.includes(dim[0]));
@@ -154,58 +123,65 @@ function App() {
       }
     }
   ]
-  function readFile (file) {
+  function readFile (file: File): Promise<any> {
     return new Promise((resolve, reject) => {
       let reader = new FileReader()
       reader.readAsText(file)
       reader.onload = (ev) => {
-        resolve(ev.target.result)
+        if (ev.target) {
+          resolve(ev.target.result)
+        } else {
+          reject(ev)
+        }
       }
       reader.onerror = reject
     })
   }
   const fileUploadHanlder = () => {
-    const file = fileEle.current.files[0];
-    console.log(file.type)
-    if (file.type === 'text/csv') {
-      Papa.parse(file, {
-        complete (results, file) {
-          let data = results.data;
-          let tmpFields = data[0].map((fieldName, index) => {
-            return {
-              name: fieldName,
-              type: data.slice(1).every(row => {
-                return !isNaN(row[index]) || row[index] === undefined;
-              }) ? 'measure' : 'dimension'
-            }
-          });
-          setFields(tmpFields);
-          setTableData(data.slice(1).map(row => {
-            let record = {};
-            tmpFields.forEach((field, index) => {
-              record[field.name] = row[index]
-            })
-            return record
-          }))
-        }
-      })
-    } else if (file.type === 'application/json') {
-        readFile(file).then(result => {
-          let data = JSON.parse(result);
-          let tmpFields = Object.keys(data[0]).map(fieldName => {
-            return {
-              name: fieldName,
-              type: data.every(row => {
-                return !isNaN(row[fieldName]) || row[fieldName] === undefined;
-              }) ? 'measure' : 'dimension'
-            }
-          });
-          setFields(tmpFields);
-          setTableData(data);
+    if (fileEle.current !== null && fileEle.current.files !== null) {
+      const file = fileEle.current.files[0];
+      console.log(file.type)
+      if (file.type === 'text/csv') {
+        Papa.parse(file, {
+          complete (results, file) {
+            let data: any[][] = results.data;
+            let tmpFields: BIField[] = data[0].map((fieldName, index) => {
+              return {
+                name: fieldName,
+                type: data.slice(1).every(row => {
+                  return !isNaN(row[index]) || row[index] === undefined;
+                }) ? 'measure' : 'dimension'
+              }
+            });
+            setFields(tmpFields);
+            setTableData(data.slice(1).map(row => {
+              let record: Record = {};
+              tmpFields.forEach((field, index) => {
+                record[field.name] = row[index]
+              })
+              return record
+            }))
+          }
         })
+      } else if (file.type === 'application/json') {
+          readFile(file).then(result => {
+            let data: DataSource = JSON.parse(result);
+            let tmpFields: BIField[] = Object.keys(data[0]).map(fieldName => {
+              return {
+                name: fieldName,
+                type: data.every(row => {
+                  return !isNaN(row[fieldName]) || row[fieldName] === undefined;
+                }) ? 'measure' : 'dimension'
+              }
+            });
+            setFields(tmpFields);
+            setTableData(data);
+          })
+      }
     }
+    
   }
-  function transNumber(num) {
+  function transNumber(num: any): number | null {
     if (isNaN(num)) {
       return null
     }
@@ -213,8 +189,8 @@ function App() {
   }
   useEffect(() => {
     console.log(tableData, fields)
-    let ds = tableData.map(row => {
-      let record = {}
+    let ds: DataSource = tableData.map(row => {
+      let record: Record = {}
       fields.forEach(field => {
         record[field.name] = field.type === 'dimension' ? row[field.name] : transNumber(row[field.name])
       })
@@ -226,7 +202,7 @@ function App() {
   return (
     <div>
       <div className="header-bar" >
-        <Pivot selectedKey={currentPivotKey} onLinkClick={(item) => { setCurrenyPivotKey(item.props.itemKey) }} headersOnly={true}>
+        <Pivot selectedKey={currentPivotKey} onLinkClick={(item) => { item && item.props.itemKey && setCurrenyPivotKey(item.props.itemKey) }} headersOnly={true}>
           {
             pivotList.map(pivot => <PivotItem key={pivot.itemKey} headerText={pivot.title} itemKey={pivot.itemKey} />)
           }

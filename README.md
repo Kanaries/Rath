@@ -1,9 +1,9 @@
-# Show Me
+# Visual Insights
 
 ![](https://www.travis-ci.org/ObservedObserver/showme.svg?branch=master)
 ![](https://img.shields.io/github/license/ObservedObserver/showme)
 
-A implementation of tableau showme feature. Not completely follow the tableau's rules.
+Automatic insights extraction and visualization specification in data analysis.
 
 ## Demo
 ```

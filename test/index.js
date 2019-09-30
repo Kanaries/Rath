@@ -2,7 +2,7 @@ const fs = require('fs');
 const assert = require('assert');
 const path  = require('path');
 
-const { specification, dropNull, getInsightViews } = require('../lib/build/bundle');
+const { specification, dropNull, getInsightViews } = require('../lib/build/index');
 
 const datasetPath = path.resolve(__dirname, './dataset/airbnb.json');
 const dataset = JSON.parse(fs.readFileSync(datasetPath).toString());
