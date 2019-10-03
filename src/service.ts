@@ -38,9 +38,6 @@ export async function fieldsAnalysisService (cleanData: DataSource, dimensions: 
       aggData,
       newDimensions
     }
-    // setCleanData(aggData);
-    // setDimScores(dimScores);
-    // await getInsightViewsService(aggData, newDimensions, measures);
   } else {
     throw new Error('fieldsAnalysisService failed' + result.message);
   }
@@ -67,16 +64,7 @@ export async function getInsightViewsService (aggData: DataSource, newDimensions
   if (result.success === true) {
     const views = result.data;
     return views;
-    // setResult(views);
   } else {
     throw new Error('getInsightView service fail' + result.message);
   }
 }
-// export async function getInsightsService (dataSource: DataSource, fields: BIField[]) {
-//   const dimensions = fields.filter(field => field.type === 'dimension').map(field => field.name)
-//   const measures = fields.filter(field => field.type === 'measure').map(field => field.name)
-//   // const cleanData = dropNull(dataSource, dimensions, measures);
-//   // setLoading(true);
-//   await fieldsAnalysisService(cleanData, dimensions, measures);
-//   // setLoading(false);
-// } 

@@ -10,6 +10,7 @@ import { fieldsAnalysisService, getInsightViewsService, View } from './service';
 import { specificationWithFieldsAnalysisResult, dropNull } from './build/index';
 import { DataSource, Record, BIField, Field } from './global';
 import { Specification } from './demo/vegaBase';
+import NoteBook from './pages/notebook/index';
 
 const pivotList = [
   {
@@ -17,8 +18,12 @@ const pivotList = [
     itemKey: 'pivot-' + 1
   },
   {
-    title: 'Explore',
+    title: 'NoteBook',
     itemKey: 'pivot-' + 2
+  },
+  {
+    title: 'Explore',
+    itemKey: 'pivot-' + 3
   }
 ]
 interface DataView {
@@ -209,7 +214,7 @@ function App() {
         </Pivot>
       </div>
       {
-        currentPivotKey === 'pivot-2' && <div className="content-container">
+        currentPivotKey === 'pivot-3' && <div className="content-container">
           <PreferencePanel show={showConfigPanel}
             config={visualConfig}
             onUpdateConfig={(config) => {
@@ -303,6 +308,13 @@ function App() {
             <DataTable
               fields={fields}
               dataSource={dataSource} />
+          </div>
+        </div>
+      }
+      {
+        currentPivotKey === 'pivot-2' && <div className="content-container">
+          <div className="card">
+            <NoteBook dimScores={dimScores} />
           </div>
         </div>
       }
