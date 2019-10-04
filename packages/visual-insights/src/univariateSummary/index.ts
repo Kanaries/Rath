@@ -55,7 +55,7 @@ export interface FieldSummary {
 }
 export function getAllFieldsDistribution(dataSource: DataSource, fields: string[]): FieldSummary[] {
   let fieldsDistribution: FieldSummary[] = [];
-  for (let field in fields) {
+  for (let field of fields) {
     fieldsDistribution.push({
       fieldName: field,
       distribution: getFieldDistribution(dataSource, field)

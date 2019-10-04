@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { DetailsList, SelectionMode, IColumn, Icon, IDetailsRowProps, IDetailsRowStyles, DetailsRow, IRenderFunction } from 'office-ui-fabric-react';
 import chroma, { Color } from 'chroma-js';
 import { FieldSummary } from '../../service';
+import DistributionChart from './distributionChart';
+import { FieldType } from '../../global';
 
 // todo: distribution info
 interface Impurity {
@@ -48,7 +50,7 @@ const columns: IColumn[] = [
     key: 'distribution',
     name: 'distribution',
     fieldName: 'distribution',
-    minWidth: 200
+    minWidth: 300
   }
 ];
 function getIconNameByFieldType (type: string): string {
@@ -71,7 +73,12 @@ function getValueColor (value: number, range: [number, number]): string {
 }
 const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
   const { fields, originSummary, groupedSummary } = props;
-
+  const entropyRange = useMemo<[number, number]>(() => {
+    const originEntropy = originSummary.map(s => s.entropy);
+    const groupedEntropy = groupedSummary.map(s => s.entropy);
+    const entropyList = originEntropy.concat(groupedEntropy);
+    return [Math.min(...entropyList), Math.max(...entropyList)];
+  }, [originSummary, groupedSummary])
   const renderItemColumn = (item: {[key: string]: any}, index?: number, column?: IColumn) => {
     if (column !== undefined) {
       const fieldContent = item[column.fieldName!];
@@ -81,7 +88,7 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
             <Icon iconName={getIconNameByFieldType(fieldContent)} /> {fieldContent}
           </span>
         case 'distribution':
-          return <span>{JSON.stringify(fieldContent)}</span>
+          return <DistributionChart x="memberName" y="count" fieldType={item.type as FieldType} dataSource={fieldContent} />
         // case 'entropy':
         // case 'max_entropy':
         //   return <div style={{ backgroundColor: getValueColor(fieldContent, impurityRange[column.name])}}>{fieldContent}</div>
@@ -90,13 +97,13 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
       }
     }
   }
-  // const onRenderRow: IRenderFunction<any> = (props) => {
-  //   const customStyles: Partial<IDetailsRowStyles> = {};
-  //   customStyles.root = { backgroundColor: getValueColor(props.item['entropy'], impurityRange['entropy']), color: '#fff' }
-  //   return <DetailsRow {...props} styles={customStyles} />;
-  // };
+  const onRenderRow: IRenderFunction<any> = (props) => {
+    const customStyles: Partial<IDetailsRowStyles> = {};
+    customStyles.root = { backgroundColor: getValueColor(props.item['entropy'], entropyRange), color: '#fff' }
+    return <DetailsRow {...props} styles={customStyles} />;
+  };
   return <div>
-    <DetailsList compact={true} columns={columns} items={originSummary} selectionMode={SelectionMode.none} onRenderItemColumn={renderItemColumn} />
+    <DetailsList compact={true} columns={columns} items={originSummary} selectionMode={SelectionMode.none} onRenderRow={onRenderRow} onRenderItemColumn={renderItemColumn} />
   </div>
 }
 
