@@ -1,6 +1,6 @@
 const assert = require('assert');
-const { normalize, gini, entropy } = require('../lib/build/index');
-
+const { ImpurityMeasure } = require('../lib/build/index');
+const { normalize, gini, entropy } = ImpurityMeasure;
 describe('Impurity Measure test', function () {
   describe('function: normalize', function () {
     it('sum_{p} = 1', function () {

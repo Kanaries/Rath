@@ -7,7 +7,7 @@ import BaseChart from './demo/vegaBase';
 import Papa from 'papaparse';
 import './App.css';
 import { fieldsAnalysisService, getInsightViewsService, View } from './service';
-import { specificationWithFieldsAnalysisResult, dropNull } from './build/index';
+import { specificationWithFieldsAnalysisResult, Cleaner } from 'visual-insights';
 import { DataSource, Record, BIField, Field } from './global';
 import { Specification } from './demo/vegaBase';
 import NoteBook from './pages/notebook/index';
@@ -71,7 +71,7 @@ function App() {
   async function extractInsights (dataSource: DataSource, fields: BIField[]) {
     const dimensions = fields.filter(field => field.type === 'dimension').map(field => field.name)
     const measures = fields.filter(field => field.type === 'measure').map(field => field.name)
-    const cleanData = dropNull(dataSource, dimensions, measures);
+    const cleanData = Cleaner.dropNull(dataSource, dimensions, measures);
     setLoading(true);
     try {
       const { dimScores, aggData, newDimensions } = await fieldsAnalysisService(cleanData, dimensions, measures);

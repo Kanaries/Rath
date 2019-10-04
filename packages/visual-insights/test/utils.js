@@ -1,6 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const { Utils } = require('../lib/build/index');
 const {
   deepcopy,
   memberCount,
@@ -9,8 +10,7 @@ const {
   aggregate,
   isFieldCategory,
   isFieldContinous
-} = require('../lib/build/index');
-
+} = Utils;
 const dataPath = path.resolve(__dirname, './dataset/titanic.json');
 const data = JSON.parse(fs.readFileSync(dataPath).toString())
 const { dataSource, config: {Dimensions: dimensions, Measures: measures}} = data;

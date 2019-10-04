@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "outDir": "../src/build",
+    "outDir": "./build/cjs",
     // "lib": ["es2019"],
-    "target": "esnext",
+    "target": "es6",
     "moduleResolution": "node",
     "declaration": true,
     "downlevelIteration": true,
-    "module":"esnext"
+    "module":"commonjs"
     // "skipLibCheck": true
   },
   "include": [

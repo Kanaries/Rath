@@ -89,9 +89,9 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
     }
     return ans;
   }, [impurityList, items])
-  const renderItemColumn = (item: any, index: number | undefined, column: IColumn | undefined) => {
+  const renderItemColumn = (item: {[key: string]: any}, index?: number, column?: IColumn) => {
     if (column !== undefined) {
-      const fieldContent = item[column.fieldName as keyof any];
+      const fieldContent = item[column.fieldName!];
       switch (column.key) {
         case 'type':
           return <span>

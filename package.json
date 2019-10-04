@@ -1,53 +1,24 @@
 {
-  "name": "showme",
-  "version": "0.1.0",
+  "name": "visual-insights",
   "private": true,
-  "dependencies": {
-    "@antv/g2": "^3.5.8-beta.3",
-    "@types/chroma-js": "^1.4.3",
-    "@types/jest": "^24.0.18",
-    "@types/node": "^12.7.8",
-    "@types/papaparse": "^5.0.1",
-    "@types/react": "^16.9.3",
-    "@types/react-dom": "^16.9.1",
-    "@uifabric/icons": "^7.3.0",
-    "chroma-js": "^2.0.6",
-    "cube-core": "^2.13.0",
-    "mocha": "^6.2.0",
-    "office-ui-fabric-core": "^10.1.0",
-    "office-ui-fabric-react": "^7.38.0",
-    "papaparse": "^5.1.0",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
-    "react-scripts": "3.1.1",
-    "typescript": "^3.6.3",
-    "vega": "^5.6.0",
-    "vega-embed": "^5.1.3",
-    "vega-lite": "^4.0.0-beta.2"
-  },
+  "version": "1.0.0",
+  "description": "![](https://www.travis-ci.org/ObservedObserver/showme.svg?branch=master) ![](https://img.shields.io/github/license/ObservedObserver/showme)",
+  "main": "index.js",
   "scripts": {
-    "copy": "cp -r ./test/dataset/. ./server/dataset",
-    "server": "npm run buildback && npm run copy && node ./server/index.js",
-    "start": "npm run buildfront && react-scripts start",
-    "build": "npm run buildfront && npm run buildback",
-    "buildback": "tsc -p ./lib/tsconfig.cjs.json",
-    "buildfront": "tsc -p ./lib/tsconfig.esm.json",
-    "test": "npm run buildback && mocha --no-timeouts",
-    "eject": "react-scripts eject"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "eslintConfig": {
-    "extends": "react-app"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ObservedObserver/showme.git"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ObservedObserver/showme/issues"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "homepage": "https://github.com/ObservedObserver/showme#readme"
 }

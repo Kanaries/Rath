@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { isUniformDistribution } = require('../lib/build/index');
+const { Distribution } = require('../lib/build/index');
 
 const RANDOM_TEST_GROUP = 10;
 
@@ -25,6 +25,7 @@ function mock (field = 'mock_test', isUniform = true) {
 describe('distribution test', function () {
   describe('[uniform distribution]', function () {
     it('function: isUniformDistribution', function () {
+      const { isUniformDistribution } = Distribution;
       for (let i = 0; i < RANDOM_TEST_GROUP; i++) {
         const positiveData = mock('positive_test', true);
         const negativeData = mock('negative_test', false);

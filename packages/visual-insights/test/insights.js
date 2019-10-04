@@ -2,7 +2,7 @@ const fs = require('fs');
 const assert = require('assert');
 const path  = require('path');
 
-const { analysisDimensions, dropNull, getInsightViews, getCombination } = require('../lib/build/index');
+const { analysisDimensions, Cleaner, getInsightViews, getCombination } = require('../lib/build/index');
 
 const datasetPath = path.resolve(__dirname, './dataset/airbnb.json');
 const dataset = JSON.parse(fs.readFileSync(datasetPath).toString());
@@ -13,7 +13,7 @@ const {
     Measures: measures
   }
 } = dataset;
-let cleanData = dropNull(dataSource, dimensions, measures);
+let cleanData = Cleaner.dropNull(dataSource, dimensions, measures);
 
 describe('insights test', function () {
   // it('print(analysisDimensions)', function () {
