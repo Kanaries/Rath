@@ -1,5 +1,7 @@
 import { DataSource, Field, FieldImpurity, FieldType, Record } from '../commonTypes';
-import { isFieldTime, isFieldContinous, memberCount, isFieldCategory } from '../utils';
+import { isFieldTime, isFieldContinous, memberCount, isFieldCategory, deepcopy, groupContinousField, groupCategoryField } from '../utils';
+import { normalize, entropy } from '../impurityMeasure';
+import { isUniformDistribution } from '../distribution';
 
 const MIN_QUAN_MEMBER_SIZE = 25;
 
@@ -51,7 +53,7 @@ export interface FieldSummary {
   distribution: FieldDistribution;
   fieldName: string;
 }
-export function getAllFieldsDistribution(dataSource, DataSource, fields: string[]): FieldSummary[] {
+export function getAllFieldsDistribution(dataSource: DataSource, fields: string[]): FieldSummary[] {
   let fieldsDistribution: FieldSummary[] = [];
   for (let field in fields) {
     fieldsDistribution.push({
@@ -60,4 +62,74 @@ export function getAllFieldsDistribution(dataSource, DataSource, fields: string[
     })
   }
   return fieldsDistribution;
+}
+
+export interface FieldEntropy {
+  fieldName: string;
+  entropy: number;
+  /**
+   * potentional max entropy of this field, log(count(members))
+   */
+  maxEntropy: number;
+}
+export function getFieldEntropy(dataSource: DataSource, field: string): FieldEntropy {
+  const members = memberCount(dataSource, field);
+  const frequencyList = members.map(m => m[1]);
+  const probabilityList = normalize(frequencyList);
+  const fieldEntropy = entropy(probabilityList);
+  const maxEntropy = Math.log2(members.length)
+  return {
+    fieldName: field,
+    entropy: fieldEntropy,
+    maxEntropy
+  }
+}
+
+export function getAllFieldsEntropy(dataSource: DataSource, fields: string[]): FieldEntropy[] {
+  let fieldEntropyList: FieldEntropy[] = [];
+  for (let field of fields) {
+    fieldEntropyList.push(getFieldEntropy(dataSource, field))
+  }
+  return fieldEntropyList
+}
+
+interface GroupResult {
+  groupedData: DataSource,
+  newFields: Field[]
+}
+export function groupFields(dataSource: DataSource, fields: Field[]): GroupResult {
+  let groupedData: DataSource = deepcopy(dataSource);
+  let newFields: Field[] = [];
+  for (let field of fields) {
+    let newFieldName = `${field.name}(group)`;
+    if (field.type === 'quantitative') {
+      groupedData = groupContinousField({
+        dataSource: groupedData,
+        field: field.name,
+        newField: newFieldName,
+        groupNumber: 8
+      })
+      newFields.push({
+        name: newFieldName,
+        type: field.type
+      })
+    } else if (field.type === 'ordinal' || field.type === 'temporal') {
+      if (!isUniformDistribution(dataSource, field.name)) {
+        groupedData = groupCategoryField({
+          dataSource: groupedData,
+          field: field.name,
+          newField: newFieldName,
+          groupNumber: 8
+        })
+        newFields.push({
+          name: newFieldName,
+          type: field.type
+        })
+      }
+    }
+  }
+  return {
+    groupedData,
+    newFields: fields.concat(newFields)
+  }
 }

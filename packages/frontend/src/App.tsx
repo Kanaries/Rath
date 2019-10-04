@@ -6,7 +6,12 @@ import FieldPanel from './components/fieldConfig';
 import BaseChart from './demo/vegaBase';
 import Papa from 'papaparse';
 import './App.css';
-import { fieldsAnalysisService, getInsightViewsService, View } from './service';
+import {
+  fieldsAnalysisService,
+  getInsightViewsService, View,
+  getFieldsSummaryService, FieldSummary,
+  getGroupFieldsService
+} from './service';
 import { specificationWithFieldsAnalysisResult, Cleaner } from 'visual-insights';
 import { DataSource, Record, BIField, Field } from './global';
 import { Specification } from './demo/vegaBase';
@@ -63,6 +68,11 @@ function App() {
     measures: []
   });
   const [fields, setFields] = useState<BIField[]>([]);
+  const [fieldSummaryList, setFieldSummaryList] = useState<FieldSummary[]>([]);
+  const [summaryData, setSummaryData] = useState<{
+    originSummary: FieldSummary[],
+    groupedSummary: FieldSummary[]
+  }>({ groupedSummary: [], originSummary: []});
   const [result, setResult] = useState<View[]>([]);
   const [currentPivotKey, setCurrenyPivotKey] = useState(pivotList[0].itemKey);
   const dataSetting = useRef<HTMLDivElement>(null);
@@ -83,6 +93,30 @@ function App() {
       console.error(error);
     }
     setLoading(false);
+  }
+
+  async function univariateSummary (dataSource: DataSource, fields: BIField[]) {
+    try {
+      const originSummary = await getFieldsSummaryService(dataSource, fields.map(f => f.name));
+      let fieldWithTypeList: Field[] = originSummary ? originSummary.map(f => {
+        return {
+          name: f.fieldName,
+          type: f.type
+        }
+      }) : [];
+      if (originSummary) {
+
+      }
+      const groupedResult = await getGroupFieldsService(dataSource, fieldWithTypeList);
+      const { groupedData, newFields } = groupedResult ? groupedResult : { groupedData: dataSource, newFields: fieldWithTypeList };
+      const groupedSummary = await getFieldsSummaryService(dataSource, newFields.map(f => f.name));
+      setSummaryData({
+        originSummary: originSummary || [],
+        groupedSummary: groupedSummary || []
+      })
+    } catch (error) {
+      
+    }
   }
 
   useEffect(() => {
@@ -270,6 +304,7 @@ function App() {
             <Stack horizontal>
               <DefaultButton disabled={dataSource.length === 0} iconProps={{iconName: 'Financial'}} text="Extract Insights" onClick={() => {
                 setCurrenyPivotKey('pivot-2');
+                univariateSummary(dataSource, fields);
                 setShowInsightBoard(true);
                 extractInsights(dataSource, fields);
               }} />
@@ -314,7 +349,7 @@ function App() {
       {
         currentPivotKey === 'pivot-2' && <div className="content-container">
           <div className="card">
-            <NoteBook dimScores={dimScores} />
+            <NoteBook dimScores={dimScores} summaryData={summaryData} />
           </div>
         </div>
       }

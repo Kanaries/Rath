@@ -1,4 +1,4 @@
-import { DataSource, BIField, Field } from './global';
+import { DataSource, BIField, Field, FieldType } from './global';
 interface SuccessResult<T> {
   success: true;
   data: T;
@@ -66,5 +66,62 @@ export async function getInsightViewsService (aggData: DataSource, newDimensions
     return views;
   } else {
     throw new Error('getInsightView service fail' + result.message);
+  }
+}
+export interface FieldSummary {
+  fieldName: string;
+  entropy: number;
+  maxEntropy: number;
+  distribution: Array<{ memberName: string; count: number }>
+  type: FieldType
+}
+export async function getFieldsSummaryService (dataSource: DataSource, fields: string[]): Promise<FieldSummary[] | undefined> {
+  try {
+    const res = await fetch('//localhost:8000/api/service/fieldsSummary', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        dataSource,
+        fields
+      })
+    })
+    const result: Result<FieldSummary[]> = await res.json();
+    if (result.success === true) {
+      const fieldSummaryList = result.data;
+      return fieldSummaryList
+    } else {
+      throw new Error('[fields summary failed]' + result.message)
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+interface GroupFieldsResponse {
+  groupedData: DataSource;
+  newFields: Field[]
+}
+export async function getGroupFieldsService (dataSource: DataSource, fields: Field[]): Promise<GroupFieldsResponse | undefined> {
+  try {
+    const res = await fetch('//localhost:8000/api/service/groupFields', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        dataSource,
+        fields
+      })
+    })
+    const result: Result<GroupFieldsResponse> = await res.json();
+    if (result.success === true) {
+      const { groupedData, newFields } = result.data;
+      return { groupedData, newFields }
+    } else {
+      throw new Error('[group fields failed]' + result.message)
+    }
+  } catch (error) {
+    console.error(error)
   }
 }
