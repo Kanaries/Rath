@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { Distribution } = require('../lib/build/index');
+const { Distribution } = require('../build/cjs/index');
 
 const RANDOM_TEST_GROUP = 10;
 

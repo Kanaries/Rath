@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { ImpurityMeasure } = require('../lib/build/index');
+const { ImpurityMeasure } = require('../build/cjs/index');
 const { normalize, gini, entropy } = ImpurityMeasure;
 describe('Impurity Measure test', function () {
   describe('function: normalize', function () {

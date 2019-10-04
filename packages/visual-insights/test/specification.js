@@ -1,6 +1,6 @@
 const assert = require('assert');
 const fs = require('fs');
-const { specification } = require('../lib/build/index');
+const { specification } = require('../build/cjs/index');
 const path = require('path');
 
 const datasetPath = path.resolve(__dirname, './dataset/titanic.json');

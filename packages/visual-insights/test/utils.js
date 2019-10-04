@@ -1,7 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { Utils } = require('../lib/build/index');
+const { Utils } = require('../build/cjs/index');
 const {
   deepcopy,
   memberCount,

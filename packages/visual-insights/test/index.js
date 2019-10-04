@@ -2,7 +2,7 @@ const fs = require('fs');
 const assert = require('assert');
 const path  = require('path');
 
-const { specification, Cleaner, getInsightViews } = require('../lib/build/index');
+const { specification, Cleaner, getInsightViews } = require('../build/cjs/index');
 
 const datasetPath = path.resolve(__dirname, './dataset/titanic.json');
 const dataset = JSON.parse(fs.readFileSync(datasetPath).toString());
