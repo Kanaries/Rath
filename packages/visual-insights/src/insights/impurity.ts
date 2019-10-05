@@ -1,6 +1,7 @@
-import { aggregate } from '../utils';
+// import { aggregate } from '../utils';
+import aggregate from 'cube-core';
 import { entropy, normalize } from '../impurityMeasure';
-import { DataSource } from '../commonTypes';
+import { DataSource, OperatorType } from '../commonTypes';
 // insights like outlier and trend both request high impurity of dimension.
 const maxVisualChannel = 8;
 function getCombination(elements: string[], start: number = 1, end: number = elements.length): string[][] {
@@ -45,15 +46,17 @@ function correlation(dataSource: DataSource, fieldX: string, fieldY: string): nu
   return r;
 }
 type FieldsFeature = [string[], any, number[][]];
-function analysisDimensions(dataSource: DataSource, dimensions: string[], measures: string[]): FieldsFeature[] {
+function analysisDimensions(dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType | undefined = 'sum'): FieldsFeature[] {
   let impurityList: FieldsFeature[] = [];
   let dimSet = getCombination(dimensions)
   for (let dset of dimSet) {
     let impurity = {};
     let aggData = aggregate({
       dataSource,
-      fields: dset,
-      bys: measures
+      dimensions: dset,
+      measures,
+      asFields: measures,
+      operator: operator || 'sum'//: operator as 
     });
     // let fList = aggData.map(r => r)
     for (let mea of measures) {

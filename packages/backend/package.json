@@ -16,6 +16,6 @@
     "express": "^4.17.1",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.3",
-    "visual-insights": "^1.0.0"
+    "visual-insights": "^0.1.0"
   }
 }

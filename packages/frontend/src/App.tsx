@@ -10,10 +10,12 @@ import {
   fieldsAnalysisService,
   getInsightViewsService, View,
   getFieldsSummaryService, FieldSummary,
-  getGroupFieldsService
+  getGroupFieldsService,
+  combineFieldsService,
+  Subspace
 } from './service';
 import { specificationWithFieldsAnalysisResult, Cleaner } from 'visual-insights';
-import { DataSource, Record, BIField, Field } from './global';
+import { DataSource, Record, BIField, Field, OperatorType } from './global';
 import { Specification } from './demo/vegaBase';
 import NoteBook from './pages/notebook/index';
 
@@ -73,6 +75,7 @@ function App() {
     originSummary: FieldSummary[],
     groupedSummary: FieldSummary[]
   }>({ groupedSummary: [], originSummary: []});
+  const [subspaceList, SetSubspaceList] = useState<Subspace[]>([])
   const [result, setResult] = useState<View[]>([]);
   const [currentPivotKey, setCurrenyPivotKey] = useState(pivotList[0].itemKey);
   const dataSetting = useRef<HTMLDivElement>(null);
@@ -104,18 +107,43 @@ function App() {
           type: f.type
         }
       }) : [];
-      if (originSummary) {
-
-      }
       const groupedResult = await getGroupFieldsService(dataSource, fieldWithTypeList);
       const { groupedData, newFields } = groupedResult ? groupedResult : { groupedData: dataSource, newFields: fieldWithTypeList };
+      let newDimensions: string[] = [];
+      const newBIFields: BIField[] = newFields.map(field => {
+        let target = fields.find(f => f.name + '(group)' === field.name)
+        target && newDimensions.push(field.name)
+        return {
+          name: field.name,
+          type: target ? target.type : 'dimension'
+        }
+      })
       const groupedSummary = await getFieldsSummaryService(groupedData, newFields);
       setSummaryData({
         originSummary: originSummary || [],
         groupedSummary: groupedSummary || []
       })
+      setFields(newBIFields);
+      // tmp solutions
+      let orderedDimensions = groupedSummary ? newDimensions.map(d => {
+        let target = groupedSummary.find(g => g.fieldName === d)
+        return {
+          name: d,
+          entropy: target ? target.entropy : Infinity
+        }
+      }) : [];
+      orderedDimensions.sort((a, b) => a.entropy - b.entropy);
+      const measures = fields.filter(field => field.type === 'measure').map(field => field.name)
+      await SubspaceSeach(groupedData, orderedDimensions.map(d => d.name).slice(0, Math.round(orderedDimensions.length * 0.8)), measures, 'sum');
     } catch (error) {
       
+    }
+  }
+
+  async function SubspaceSeach (dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType) {
+    const subspaceList = await combineFieldsService(dataSource, dimensions, measures, operator);
+    if (subspaceList) {
+      SetSubspaceList(subspaceList);
     }
   }
 
@@ -304,9 +332,12 @@ function App() {
             <Stack horizontal>
               <DefaultButton disabled={dataSource.length === 0} iconProps={{iconName: 'Financial'}} text="Extract Insights" onClick={() => {
                 setCurrenyPivotKey('pivot-2');
-                univariateSummary(dataSource, fields);
+                const dimensions = fields.filter(field => field.type === 'dimension').map(field => field.name)
+                const measures = fields.filter(field => field.type === 'measure').map(field => field.name)
+                const cleanData = Cleaner.dropNull(dataSource, dimensions, measures);
+                univariateSummary(cleanData, fields);
                 setShowInsightBoard(true);
-                extractInsights(dataSource, fields);
+                // extractInsights(dataSource, fields);
               }} />
               <div ref={dataSetting}>
                 <IconButton iconProps={{iconName: 'ExcelDocument'}} ariaLabel="upload data" onClick={() => {setShowDataConfig(true)}} />
@@ -349,7 +380,7 @@ function App() {
       {
         currentPivotKey === 'pivot-2' && <div className="content-container">
           <div className="card">
-            <NoteBook dimScores={dimScores} summaryData={summaryData} />
+            <NoteBook dimScores={dimScores} summaryData={summaryData} subspaceList={subspaceList} />
           </div>
         </div>
       }

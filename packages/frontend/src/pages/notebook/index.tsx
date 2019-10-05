@@ -1,17 +1,19 @@
 import React, { useMemo } from 'react';
 import { DataSource, BIField, Field } from '../../global';
 import FieldAnalysisBoard, { FieldDescription } from './fieldAnalysis';
-import { FieldSummary } from '../../service';
+import Subspaces from './subspaces';
+import { FieldSummary, Subspace } from '../../service';
 
 interface NoteBookProps {
   dimScores: [string, number, number, Field][],
   summaryData: {
     originSummary: FieldSummary[],
     groupedSummary: FieldSummary[]
-  }
+  },
+  subspaceList: Subspace[]
 }
 const NoteBook: React.FC<NoteBookProps> = (props) => {
-  const { dimScores, summaryData } = props;
+  const { dimScores, summaryData, subspaceList } = props;
   const { originSummary, groupedSummary } = summaryData;
   const fieldsDesc = useMemo<FieldDescription[]>(() => {
     return dimScores.map(dim => {
@@ -30,6 +32,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
   }, [dimScores])
   return <div>
     <FieldAnalysisBoard fields={fieldsDesc} originSummary={originSummary} groupedSummary={groupedSummary} />
+    <Subspaces subspaceList={subspaceList} />
   </div>
 }
 

@@ -2,6 +2,7 @@ import getInsightViews from './controllers/getInsightViews';
 import fieldsAnalysis from './controllers/fieldsAnalysis';
 import fieldsSummary from './controllers/fieldsSummary';
 import groupFields from './controllers/groupFields';
+import combineFields from './controllers/combineFields';
 import { RequestHandler } from 'express';
 
 interface Route {
@@ -30,6 +31,11 @@ const router: Route[] = [
     url: '/api/service/groupFields',
     method: 'post',
     controller: groupFields
+  },
+  {
+    url: '/api/service/combineFields',
+    method: 'post',
+    controller: combineFields
   }
 ]
 

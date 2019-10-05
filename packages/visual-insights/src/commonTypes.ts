@@ -30,3 +30,5 @@ export interface View {
   schema: Specification;
   aggData: DataSource;
 }
+
+export type OperatorType = 'sum' | 'mean' | 'count';

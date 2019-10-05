@@ -1,4 +1,4 @@
-import { DataSource, BIField, Field, FieldType } from './global';
+import { DataSource, BIField, Field, FieldType, OperatorType } from './global';
 interface SuccessResult<T> {
   success: true;
   data: T;
@@ -120,6 +120,37 @@ export async function getGroupFieldsService (dataSource: DataSource, fields: Fie
       return { groupedData, newFields }
     } else {
       throw new Error('[group fields failed]' + result.message)
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export interface Subspace {
+  dimensions: string[];
+  measures: Array<{name: string; value: number}>;
+  correlationMatrix: number[][];
+}
+export async function combineFieldsService (dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType): Promise<Subspace[] | undefined> {
+  try {
+    const res = await fetch('//localhost:8000/api/service/combineFields', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        dataSource,
+        dimensions,
+        measures,
+        operator
+      })
+    })
+    const result: Result<Subspace[]> = await res.json();
+    if (result.success === true) {
+      const subspaceList = result.data;
+      return subspaceList
+    } else {
+      throw new Error('[combine fields failed]' + result.message)
     }
   } catch (error) {
     console.error(error)
