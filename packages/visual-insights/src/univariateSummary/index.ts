@@ -43,7 +43,7 @@ export interface Member extends Record {
 export type FieldDistribution = Member[];
 export function getFieldDistribution(dataSource: DataSource, field: string): FieldDistribution {
   let members = memberCount(dataSource, field);
-  members.sort((a, b) => a[1] - b[1]);
+  // members.sort((a, b) => a[1] - b[1]);
   return members.map(m => {
     return { memberName: m[0], count: m[1] }
   })
@@ -102,7 +102,7 @@ export function groupFields(dataSource: DataSource, fields: Field[]): GroupResul
   let newFields: Field[] = [];
   for (let field of fields) {
     let newFieldName = `${field.name}(group)`;
-    if (field.type === 'quantitative') {
+    if (field.type === 'quantitative' && memberCount(dataSource, field.name).length > MIN_QUAN_MEMBER_SIZE * 2) {
       groupedData = groupContinousField({
         dataSource: groupedData,
         field: field.name,
@@ -111,9 +111,9 @@ export function groupFields(dataSource: DataSource, fields: Field[]): GroupResul
       })
       newFields.push({
         name: newFieldName,
-        type: field.type
+        type: 'ordinal'
       })
-    } else if (field.type === 'ordinal' || field.type === 'temporal') {
+    } else if ((field.type === 'ordinal' || field.type === 'temporal') && memberCount(dataSource, field.name).length > MIN_QUAN_MEMBER_SIZE) {
       if (!isUniformDistribution(dataSource, field.name)) {
         groupedData = groupCategoryField({
           dataSource: groupedData,

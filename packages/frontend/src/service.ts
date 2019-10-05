@@ -75,7 +75,7 @@ export interface FieldSummary {
   distribution: Array<{ memberName: string; count: number }>
   type: FieldType
 }
-export async function getFieldsSummaryService (dataSource: DataSource, fields: string[]): Promise<FieldSummary[] | undefined> {
+export async function getFieldsSummaryService (dataSource: DataSource, fields: string[] | Field[]): Promise<FieldSummary[] | undefined> {
   try {
     const res = await fetch('//localhost:8000/api/service/fieldsSummary', {
       method: 'POST',

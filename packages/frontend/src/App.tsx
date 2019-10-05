@@ -109,7 +109,7 @@ function App() {
       }
       const groupedResult = await getGroupFieldsService(dataSource, fieldWithTypeList);
       const { groupedData, newFields } = groupedResult ? groupedResult : { groupedData: dataSource, newFields: fieldWithTypeList };
-      const groupedSummary = await getFieldsSummaryService(dataSource, newFields.map(f => f.name));
+      const groupedSummary = await getFieldsSummaryService(groupedData, newFields);
       setSummaryData({
         originSummary: originSummary || [],
         groupedSummary: groupedSummary || []

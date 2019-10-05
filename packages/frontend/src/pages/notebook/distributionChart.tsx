@@ -11,27 +11,52 @@ export interface DistributionChartProps {
 const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const chart = useRef<HTMLDivElement>(null);
   const { x, y, dataSource, fieldType } = props;
-  useEffect(() => {
-    if (chart.current) {
-      embed(chart.current, {
-        background: '#fff',
-        data: {
-          values: dataSource
-        },
-        height: 120,
-        width: 240,
-        mark: ['quantitative', 'temporal'].includes(fieldType) ? 'line' : 'bar',
-        encoding: {
-          x: { field: x,
-            axis: null,
-            type: fieldType, sort: fieldType === 'nominal' ? '-y' : undefined },
-          y: { field: y, type: 'quantitative', aggregate: 'sum' }
+    useEffect(() => {
+      if (chart.current) {
+        let values: typeof dataSource = [];
+        let hasIndex = false;
+        if (fieldType === 'ordinal' && dataSource.some(member => {
+          return /(\[|\()-?([0-9.]+|Infinity),\s*([0-9.]+|Infinity)(\]|\))/.test(member.memberName)
+        })) {
+          values = dataSource.map(member => {
+            hasIndex = true;
+            let result = /(\[|\()(?<left>-?([0-9.]+|Infinity)),\s*([0-9.]+|Infinity)(\]|\))/.exec(member.memberName);
+            
+            return {
+              ...member,
+              index: result === null ? member.name : Number(result.groups!.left)
+            }
+          })
+        } else {
+          values = dataSource
         }
-      }, {
-        actions: false
-      })
-    }
-  }, [x, y, dataSource])
+        let sortBy: string | undefined | any = undefined;
+        if (fieldType === 'nominal') {
+          sortBy = '-y'
+        } else if (fieldType === 'ordinal' && hasIndex) {
+          sortBy = { field: 'index' }
+        }
+        embed(chart.current, {
+          background: '#fff',
+          data: {
+            values
+          },
+          height: 120,
+          width: 200,
+          mark: ['quantitative', 'temporal'].includes(fieldType) ? 'line' : 'bar',
+          encoding: {
+            x: {
+              field: x,
+              axis: dataSource.length > 16 ? null : undefined,
+              type: fieldType, sort: sortBy
+            },
+            y: { field: y, type: 'quantitative', aggregate: 'sum' }
+          }
+        }, {
+          actions: false
+        })
+      }
+    }, [x, y, dataSource])
   return <div ref={chart}></div>
 }
 
