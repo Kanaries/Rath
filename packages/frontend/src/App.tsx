@@ -100,7 +100,11 @@ function App() {
 
   async function univariateSummary (dataSource: DataSource, fields: BIField[]) {
     try {
+      /**
+       * get summary of the orignal dataset(fields without grouped)
+       */
       const originSummary = await getFieldsSummaryService(dataSource, fields.map(f => f.name));
+      // todo only group dimension.
       let fieldWithTypeList: Field[] = originSummary ? originSummary.map(f => {
         return {
           name: f.fieldName,
@@ -109,15 +113,21 @@ function App() {
       }) : [];
       const groupedResult = await getGroupFieldsService(dataSource, fieldWithTypeList);
       const { groupedData, newFields } = groupedResult ? groupedResult : { groupedData: dataSource, newFields: fieldWithTypeList };
-      let newDimensions: string[] = [];
-      const newBIFields: BIField[] = newFields.map(field => {
-        let target = fields.find(f => f.name + '(group)' === field.name)
-        target && newDimensions.push(field.name)
+      /**
+       * `newBIFields` shares the same length (size) with fields.
+       * It repalces some of the fields with high entropy with a grouped new field.
+       */
+      const newBIFields: BIField[] = fields.map(field => {
+        let groupedField = newFields.find(f => f.name === field.name + '(group)')
         return {
-          name: field.name,
-          type: target ? target.type : 'dimension'
+          name: groupedField ? groupedField.name : field.name,
+          type: field.type
         }
       })
+      const newDimensions: string[] = newBIFields.filter(f => f.type === 'dimension').map(f => f.name);
+      /**
+       * groupedSummary only contains newFields generated during `groupFieldsService`.
+       */
       const groupedSummary = await getFieldsSummaryService(groupedData, newFields);
       setSummaryData({
         originSummary: originSummary || [],

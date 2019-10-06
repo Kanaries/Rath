@@ -94,8 +94,9 @@ export function getAllFieldsEntropy(dataSource: DataSource, fields: string[]): F
 }
 
 interface GroupResult {
-  groupedData: DataSource,
-  newFields: Field[]
+  groupedData: DataSource;
+  newFields: Field[];
+  fields: Field[]
 }
 export function groupFields(dataSource: DataSource, fields: Field[]): GroupResult {
   let groupedData: DataSource = deepcopy(dataSource);
@@ -130,6 +131,7 @@ export function groupFields(dataSource: DataSource, fields: Field[]): GroupResul
   }
   return {
     groupedData,
-    newFields: fields.concat(newFields)
+    fields,
+    newFields
   }
 }

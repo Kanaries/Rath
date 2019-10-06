@@ -2,7 +2,7 @@ import { analysisDimensions, getCombination } from './impurity';
 import { TopKSingleField, TopKPercentField, Depth, VisualLimit } from './config';
 import { entropy, normalize } from '../impurityMeasure';
 import { memberCount } from '../utils'
-import cluster from './cluster';
+import cluster, { kruskalMST } from './cluster';
 import { DataSource } from '../commonTypes';
 
 function getInsightViews(dataSource: DataSource, originDimensions: string[], measures: string[]) {
@@ -52,4 +52,4 @@ function getInsightViews(dataSource: DataSource, originDimensions: string[], mea
 }
 
 export default getInsightViews;
-export { analysisDimensions, getCombination }
+export { analysisDimensions, getCombination, cluster as clusterMeasures, kruskalMST }

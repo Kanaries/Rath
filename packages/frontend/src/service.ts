@@ -98,9 +98,11 @@ export async function getFieldsSummaryService (dataSource: DataSource, fields: s
     console.error(error)
   }
 }
+
 interface GroupFieldsResponse {
   groupedData: DataSource;
-  newFields: Field[]
+  newFields: Field[];
+  fields: Field[];
 }
 export async function getGroupFieldsService (dataSource: DataSource, fields: Field[]): Promise<GroupFieldsResponse | undefined> {
   try {
@@ -116,8 +118,8 @@ export async function getGroupFieldsService (dataSource: DataSource, fields: Fie
     })
     const result: Result<GroupFieldsResponse> = await res.json();
     if (result.success === true) {
-      const { groupedData, newFields } = result.data;
-      return { groupedData, newFields }
+      const { groupedData, newFields, fields } = result.data;
+      return { groupedData, newFields, fields }
     } else {
       throw new Error('[group fields failed]' + result.message)
     }
