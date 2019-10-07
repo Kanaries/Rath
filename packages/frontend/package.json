@@ -13,6 +13,7 @@
     "@uifabric/icons": "^7.3.0",
     "chroma-js": "^2.0.6",
     "cube-core": "^2.13.0",
+    "immer": "^4.0.1",
     "mocha": "^6.2.0",
     "office-ui-fabric-core": "^10.1.0",
     "office-ui-fabric-react": "^7.38.0",
@@ -32,7 +33,6 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  
   "browserslist": {
     "production": [
       ">0.2%",

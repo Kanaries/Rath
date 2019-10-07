@@ -158,10 +158,7 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
     return <DetailsRow {...props} styles={customStyles} />;
   };
 
-  return <div>
-    <h2 style={{fontWeight: 400, marginBottom: 0}}>Univariate Summary</h2>
-    <DetailsList compact={true} columns={columns} items={originSummary} selectionMode={SelectionMode.none} onRenderRow={onRenderRow} onRenderItemColumn={renderItemColumn} />
-  </div>
+  return <DetailsList compact={true} columns={columns} items={originSummary} selectionMode={SelectionMode.none} onRenderRow={onRenderRow} onRenderItemColumn={renderItemColumn} />
 }
 
 export default FieldAnalsis;

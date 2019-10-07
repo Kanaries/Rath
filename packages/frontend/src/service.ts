@@ -68,6 +68,9 @@ export async function getInsightViewsService (aggData: DataSource, newDimensions
     throw new Error('getInsightView service fail' + result.message);
   }
 }
+/**
+ * statistic description for a field
+ */
 export interface FieldSummary {
   fieldName: string;
   entropy: number;

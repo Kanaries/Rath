@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useGlobalState, GlobalStateProvider } from './state';
 import { DefaultButton, IconButton, Callout, Stack, ProgressIndicator, Pivot, PivotItem, CommandBar, Toggle, setFocusVisibility } from 'office-ui-fabric-react';
 import DataTable from './components/table';
 import PreferencePanel, { PreferencePanelConfig } from './components/preference';
 import FieldPanel from './components/fieldConfig';
 import BaseChart from './demo/vegaBase';
-import Papa from 'papaparse';
+import { FileLoader, useComposeState } from './utils/index';
 import './App.css';
 import {
   fieldsAnalysisService,
@@ -40,16 +41,33 @@ interface DataView {
   dimensions: string[],
   measures: string[]
 }
-function App() {
-  const [page, setPage] = useState(0);
-  const [showInsightBoard, setShowInsightBoard] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [tableData, setTableData] = useState<DataSource>([]);
-  const [dataSource, setDataSource] = useState<DataSource>([])
 
-  const [showConfigPanel, setShowConfigPanel] = useState(false);
-  const [showFieldConfig, setShowFieldConfig] = useState(false);
-  const [showDataConfig, setShowDataConfig] = useState(false);
+interface PageStatus {
+  show: {
+    insightBoard: boolean;
+    configPanel: boolean;
+    fieldConfig: boolean;
+    dataConfig: boolean;
+  },
+  current: {
+    pivotKey: string;
+  }
+}
+function App() {
+  const [state, updateState] = useGlobalState();
+  const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
+    show: {
+      insightBoard: false,
+      fieldConfig: false,
+      configPanel: false,
+      dataConfig: false
+    },
+    current: {
+      pivotKey: pivotList[0].itemKey
+    }
+  })
+  const [loading, setLoading] = useState(false);
+
   const [visualConfig, setVisualConfig] = useState<PreferencePanelConfig>({
     aggregator: 'sum',
     defaultAggregated: true,
@@ -69,17 +87,25 @@ function App() {
     dimensions: [],
     measures: []
   });
-  const [fields, setFields] = useState<BIField[]>([]);
-  const [fieldSummaryList, setFieldSummaryList] = useState<FieldSummary[]>([]);
   const [summaryData, setSummaryData] = useState<{
     originSummary: FieldSummary[],
     groupedSummary: FieldSummary[]
   }>({ groupedSummary: [], originSummary: []});
   const [subspaceList, SetSubspaceList] = useState<Subspace[]>([])
   const [result, setResult] = useState<View[]>([]);
-  const [currentPivotKey, setCurrenyPivotKey] = useState(pivotList[0].itemKey);
+
   const dataSetting = useRef<HTMLDivElement>(null);
   const fileEle = useRef<HTMLInputElement>(null);
+
+  const dataSource = useMemo<DataSource>(() => {
+    return state.rawData.map(row => {
+      let record: Record = {}
+      state.fields.forEach(field => {
+        record[field.name] = field.type === 'dimension' ? row[field.name] : transNumber(row[field.name])
+      })
+      return record
+    })
+  }, [state.fields, state.rawData])
 
   async function extractInsights (dataSource: DataSource, fields: BIField[]) {
     const dimensions = fields.filter(field => field.type === 'dimension').map(field => field.name)
@@ -133,7 +159,7 @@ function App() {
         originSummary: originSummary || [],
         groupedSummary: groupedSummary || []
       })
-      setFields(newBIFields);
+      // setFields(newBIFields);
       // tmp solutions
       let orderedDimensions = groupedSummary ? newDimensions.map(d => {
         let target = groupedSummary.find(g => g.fieldName === d)
@@ -163,22 +189,26 @@ function App() {
     }
   }, [cleanData, result]);
 
-  let charts: Array<{ dimList: string[]; meaList: string[] }> = [];
-  for (let report of result) {
-    const dimList = report.detail[0];
-    for (let meaList of report.groups) {
-      charts.push({
-        dimList,
-        meaList
-      })
+  const charts = useMemo<Array<{ dimList: string[]; meaList: string[] }> >(() => {
+    let ans = [];
+    for (let report of result) {
+      const dimList = report.detail[0];
+      for (let meaList of report.groups) {
+        ans.push({
+          dimList,
+          meaList
+        })
+      }
     }
-  }
+    return ans;
+  }, [result])
+  
   const gotoPage = (pageNo: number) => {
     // let pageNo = (page - 1 + charts.length) % charts.length;
     let fieldsOfView = charts[pageNo].dimList.concat(charts[pageNo].meaList)
     let scoreOfDimensionSubset = dimScores.filter(dim => fieldsOfView.includes(dim[0]));
     let {schema, aggData} = specificationWithFieldsAnalysisResult(scoreOfDimensionSubset, cleanData, charts[pageNo].meaList);
-    setPage(pageNo);
+    updateState(draft => draft.currentPage = pageNo)
     setDataView({
       schema,
       aggData,
@@ -200,63 +230,34 @@ function App() {
       }
     }
   ]
-  function readFile (file: File): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let reader = new FileReader()
-      reader.readAsText(file)
-      reader.onload = (ev) => {
-        if (ev.target) {
-          resolve(ev.target.result)
-        } else {
-          reject(ev)
-        }
-      }
-      reader.onerror = reject
-    })
-  }
-  const fileUploadHanlder = () => {
+
+  async function fileUploadHanlder () {
     if (fileEle.current !== null && fileEle.current.files !== null) {
       const file = fileEle.current.files[0];
-      console.log(file.type)
+      /**
+       * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
+       */
+      let tmpFields: BIField[] = [];
+      let rawData: DataSource = [];
+
       if (file.type === 'text/csv') {
-        Papa.parse(file, {
-          complete (results, file) {
-            let data: any[][] = results.data;
-            let tmpFields: BIField[] = data[0].map((fieldName, index) => {
-              return {
-                name: fieldName,
-                type: data.slice(1).every(row => {
-                  return !isNaN(row[index]) || row[index] === undefined;
-                }) ? 'measure' : 'dimension'
-              }
-            });
-            setFields(tmpFields);
-            setTableData(data.slice(1).map(row => {
-              let record: Record = {};
-              tmpFields.forEach((field, index) => {
-                record[field.name] = row[index]
-              })
-              return record
-            }))
-          }
-        })
+        rawData = await FileLoader.csvLoader(file);
       } else if (file.type === 'application/json') {
-          readFile(file).then(result => {
-            let data: DataSource = JSON.parse(result);
-            let tmpFields: BIField[] = Object.keys(data[0]).map(fieldName => {
-              return {
-                name: fieldName,
-                type: data.every(row => {
-                  return !isNaN(row[fieldName]) || row[fieldName] === undefined;
-                }) ? 'measure' : 'dimension'
-              }
-            });
-            setFields(tmpFields);
-            setTableData(data);
-          })
+        rawData = await FileLoader.jsonLoader(file);
       }
+      tmpFields = Object.keys(rawData[0]).map(fieldName => {
+        return {
+          name: fieldName,
+          type: rawData.every(row => {
+            return !isNaN(row[fieldName]) || row[fieldName] === undefined;
+          }) ? 'measure' : 'dimension'
+        }
+      });
+      updateState(draft => {
+        draft.fields = tmpFields;
+        draft.rawData = rawData;
+      })
     }
-    
   }
   function transNumber(num: any): number | null {
     if (isNaN(num)) {
@@ -264,49 +265,38 @@ function App() {
     }
     return Number(num)
   }
-  useEffect(() => {
-    console.log(tableData, fields)
-    let ds: DataSource = tableData.map(row => {
-      let record: Record = {}
-      fields.forEach(field => {
-        record[field.name] = field.type === 'dimension' ? row[field.name] : transNumber(row[field.name])
-      })
-      return record
-    })
-    setDataSource(ds);
-  }, [fields, tableData])
   
   return (
     <div>
       <div className="header-bar" >
-        <Pivot selectedKey={currentPivotKey} onLinkClick={(item) => { item && item.props.itemKey && setCurrenyPivotKey(item.props.itemKey) }} headersOnly={true}>
+        <Pivot selectedKey={pageStatus.current.pivotKey} onLinkClick={(item) => { item && item.props.itemKey && setPageStatus(draft => draft.current.pivotKey = item.props.itemKey!) }} headersOnly={true}>
           {
             pivotList.map(pivot => <PivotItem key={pivot.itemKey} headerText={pivot.title} itemKey={pivot.itemKey} />)
           }
         </Pivot>
       </div>
       {
-        currentPivotKey === 'pivot-3' && <div className="content-container">
-          <PreferencePanel show={showConfigPanel}
+        pageStatus.current.pivotKey === 'pivot-3' && <div className="content-container">
+          <PreferencePanel show={pageStatus.show.configPanel}
             config={visualConfig}
             onUpdateConfig={(config) => {
               setVisualConfig(config)
-              setShowConfigPanel(false);
+              setPageStatus(draft => draft.show.configPanel = false)
             }}
-            onClose={() => { setShowConfigPanel(false) }} />
+            onClose={() => { setPageStatus(draft => draft.show.configPanel = false) }} />
           {
-            !showInsightBoard ? undefined : <div className="card">
+            !pageStatus.show.insightBoard ? undefined : <div className="card">
               {
                 !loading ? undefined : <ProgressIndicator description="calculating" />
               }
-              <h2 style={{marginBottom: 0}}>Visual Insights <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="preference" onClick={() => {setShowConfigPanel(true)}} /></h2>
-              <p className="state-description">Page No. {page + 1} of {charts.length}</p>
+              <h2 style={{marginBottom: 0}}>Visual Insights <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="preference" onClick={() => { setPageStatus(draft => draft.show.configPanel = false) }} /></h2>
+              <p className="state-description">Page No. {state.currentPage + 1} of {charts.length}</p>
               <div className="ms-Grid" dir="ltr">
                 <div className="ms-Grid-row">
                 <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3" style={{overflow: 'auto'}}>
                   <Stack horizontal tokens={{ childrenGap: 20 }}>
-                    <DefaultButton text="Last" onClick={() => { gotoPage((page - 1 + charts.length) % charts.length) }} allowDisabledFocus />
-                    <DefaultButton text="Next" onClick={() => { gotoPage((page + 1) % charts.length) }} allowDisabledFocus />
+                    <DefaultButton text="Last" onClick={() => { gotoPage((state.currentPage - 1 + charts.length) % charts.length) }} allowDisabledFocus />
+                    <DefaultButton text="Next" onClick={() => { gotoPage((state.currentPage + 1) % charts.length) }} allowDisabledFocus />
                   </Stack>
                   <h3>Specification</h3>
                   <pre>
@@ -331,35 +321,37 @@ function App() {
         </div>
       }
       {
-        currentPivotKey === 'pivot-1' && <div className="content-container">
-          <FieldPanel fields={fields}
-          show={showFieldConfig} onUpdateConfig={(fields) => {
-              setFields(fields);
+        pageStatus.current.pivotKey === 'pivot-1' && <div className="content-container">
+          <FieldPanel fields={state.fields}
+          show={pageStatus.show.fieldConfig} onUpdateConfig={(fields) => {
+              updateState(draft => { draft.fields = fields })
             }}
-            onClose={() => {setShowFieldConfig(false)}}
+            onClose={() => { setPageStatus(draft => { draft.show.fieldConfig = false }) }}
           />
           <div className="card">
             <Stack horizontal>
               <DefaultButton disabled={dataSource.length === 0} iconProps={{iconName: 'Financial'}} text="Extract Insights" onClick={() => {
-                setCurrenyPivotKey('pivot-2');
-                const dimensions = fields.filter(field => field.type === 'dimension').map(field => field.name)
-                const measures = fields.filter(field => field.type === 'measure').map(field => field.name)
+                const dimensions = state.fields.filter(field => field.type === 'dimension').map(field => field.name)
+                const measures = state.fields.filter(field => field.type === 'measure').map(field => field.name)
                 const cleanData = Cleaner.dropNull(dataSource, dimensions, measures);
-                univariateSummary(cleanData, fields);
-                setShowInsightBoard(true);
+                univariateSummary(cleanData, state.fields);
+                setPageStatus(draft => {
+                  draft.current.pivotKey = 'pivot-2';
+                  draft.show.insightBoard = true
+                })
                 // extractInsights(dataSource, fields);
               }} />
               <div ref={dataSetting}>
-                <IconButton iconProps={{iconName: 'ExcelDocument'}} ariaLabel="upload data" onClick={() => {setShowDataConfig(true)}} />
+                <IconButton iconProps={{iconName: 'ExcelDocument'}} ariaLabel="upload data" onClick={() => { setPageStatus(draft => { draft.show.dataConfig = true }) }} />
                 <Callout
                   style={{ maxWidth: 300}}
                   className="vi-callout-callout"
                   role="alertdialog"
                   gapSpace={0}
                   target={dataSetting.current}
-                  onDismiss={() => {setShowDataConfig(false)}}
+                  onDismiss={() => { setPageStatus(draft => { draft.show.dataConfig = false }) }}
                   setInitialFocus={true}
-                  hidden={!showDataConfig}
+                  hidden={!pageStatus.show.dataConfig}
                 >
                   <div className="vi-callout-header">
                   <p className="vi-callout-title">
@@ -379,16 +371,16 @@ function App() {
                 </div>
               </Callout>
               </div>
-              <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="field setting" onClick={ () => {setShowFieldConfig(true)} } />
+              <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="field setting" onClick={() => { setPageStatus(draft => { draft.show.fieldConfig = true })}} />
             </Stack>
             <DataTable
-              fields={fields}
+              fields={state.fields}
               dataSource={dataSource} />
           </div>
         </div>
       }
       {
-        currentPivotKey === 'pivot-2' && <div className="content-container">
+        pageStatus.current.pivotKey === 'pivot-2' && <div className="content-container">
           <div className="card">
             <NoteBook dimScores={dimScores} summaryData={summaryData} subspaceList={subspaceList} />
           </div>
@@ -399,4 +391,8 @@ function App() {
   );
 }
 
-export default App;
+export default function () {
+  return <GlobalStateProvider>
+    <App />
+  </GlobalStateProvider>
+};

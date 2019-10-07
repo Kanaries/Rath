@@ -4,6 +4,9 @@ import FieldAnalysisBoard, { FieldDescription } from './fieldAnalysis';
 import Subspaces from './subspaces';
 import { FieldSummary, Subspace } from '../../service';
 import ClusterBoard from './cluster';
+import { clusterMeasures, kruskalMST } from 'visual-insights';
+import { useGlobalState } from '../../state';
+import './index.css';
 
 interface NoteBookProps {
   dimScores: [string, number, number, Field][],
@@ -40,14 +43,31 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     })
   }, [dimScores])
   return <div>
-    <FieldAnalysisBoard fields={fieldsDesc} originSummary={originSummary} groupedSummary={groupedSummary} />
-    <Subspaces subspaceList={subspaceList} onSpaceChange={(measures, matrix) => {
-      setClusterState({
-        measures,
-        matrix
-      })
-    }} />
-    <ClusterBoard adjMatrix={clusterState.matrix} measures={clusterState.measures} />
+    <h3 className="notebook header">Univariate Summary</h3>
+    <div className="notebook content container">
+      <FieldAnalysisBoard fields={fieldsDesc} originSummary={originSummary} groupedSummary={groupedSummary} />
+    </div>
+    
+    <h3 className="notebook header">Subspace Searching</h3>
+    <div className="notebook content center container">
+      <Subspaces subspaceList={subspaceList} onSpaceChange={(measures, matrix) => {
+        setClusterState({
+          measures,
+          matrix
+        })
+      }} />
+    </div>
+
+    <h3 className="notebook header">Measurement Clustering</h3>
+    <div className="notebook content center container">
+      <ClusterBoard adjMatrix={clusterState.matrix} measures={clusterState.measures} />
+    </div>
+
+    <h3 className="notebook header">Visualization</h3>
+    <div className="notebook content center container">
+
+    </div>
+    
   </div>
 }
 
