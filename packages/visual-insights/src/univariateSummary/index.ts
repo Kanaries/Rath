@@ -114,7 +114,7 @@ export function groupFields(dataSource: DataSource, fields: Field[]): GroupResul
         name: newFieldName,
         type: 'ordinal'
       })
-    } else if ((field.type === 'ordinal' || field.type === 'temporal') && memberCount(dataSource, field.name).length > MIN_QUAN_MEMBER_SIZE) {
+    } else if ((field.type === 'ordinal' || field.type === 'nominal') && memberCount(dataSource, field.name).length > MIN_QUAN_MEMBER_SIZE) {
       if (!isUniformDistribution(dataSource, field.name)) {
         groupedData = groupCategoryField({
           dataSource: groupedData,

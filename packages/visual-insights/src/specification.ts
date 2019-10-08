@@ -5,6 +5,7 @@ import {
   // isFieldContinous,
   memberCount
 } from './utils';
+import { FieldSummary } from './univariateSummary';
 interface VisualElements {
   position: number;
   color: number;
@@ -51,14 +52,16 @@ function findBestField (type: FieldType, fieldRankList: LabelField[]): LabelFiel
   return false;
 }
 
-
-function aestheticMapping (dimScores: FieldImpurity[]) {
+/**
+ * 
+ * @param dimFields ranked dimension by entropy. desc
+ */
+function aestheticMapping (dimFields: Field[]) {
   let spec: Specification = {};
   let visualElements = getVisualElements();
-  let fieldRankList = dimScores.map(field => {
+  let fieldRankList = dimFields.map(field => {
     return {
-      name: field[0],
-      type: field[3].type,
+      ...field,
       choosen: false
     }
   });
@@ -91,15 +94,17 @@ function aestheticMapping (dimScores: FieldImpurity[]) {
   return spec
 }
 
-function specificationWithFieldsAnalysisResult (dimScores: FieldImpurity[], aggData: DataSource, measures: string[]): View {
-  let viewDimensions = dimScores.map(dim => dim[0]).filter(dim => !measures.includes(dim));
-
-  let spec = aestheticMapping(dimScores);
+// todo:
+// don't use dimScores: FieldImpurity.
+// it's a structure with redundency design.
+function specification (dimScores: FieldImpurity[], aggData: DataSource, dimensions: string[], measures: string[]): View {
+  let rankedFields: Field[] = dimScores.sort((a, b) => b[1] - a[1]).map(dim => dim[3])
+  let spec = aestheticMapping(rankedFields);
   // todo: design a better rule for choosing geom type.
   if (spec.position.length === 2) {
-    if ((viewDimensions.includes(spec.position[0]) && measures.includes(spec.position[1])) ||
-      (viewDimensions.includes(spec.position[1]) && measures.includes(spec.position[0]))) {
-      const dimIndex = viewDimensions.includes(spec.position[0]) ? 0 : 1;
+    if ((dimensions.includes(spec.position[0]) && measures.includes(spec.position[1])) ||
+      (dimensions.includes(spec.position[1]) && measures.includes(spec.position[0]))) {
+      const dimIndex = dimensions.includes(spec.position[0]) ? 0 : 1;
       const dim = spec.position[dimIndex];
       const mea = spec.position[(dimIndex + 1) % 2];
       spec.position = [dim, mea];
@@ -121,12 +126,5 @@ function specificationWithFieldsAnalysisResult (dimScores: FieldImpurity[], aggD
   }
   return { schema: spec, aggData };
 }
-function specification (dataSource: DataSource, dimensions: string[], measures: string[]): View {
-  const { dimScores, aggData } = fieldsAnalysis(dataSource, dimensions, measures);
-  return  specificationWithFieldsAnalysisResult(dimScores, aggData, measures);
-
-}
 
 export default specification;
-
-export { specificationWithFieldsAnalysisResult }

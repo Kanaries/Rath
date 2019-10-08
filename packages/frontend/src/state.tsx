@@ -17,7 +17,10 @@ export interface GlobalState {
    * This is defined by user's purpose or domain knowledge.
    */
   fields: BIField[];
-
+  /**
+   * dataSource been cleaned and grouped which is readly for exploration.
+   */
+  cookedDataSource: DataSource;
 }
 
 interface GlobalComputed {
@@ -47,6 +50,7 @@ const initState: GlobalState = {
   currentPage: 0,
   fields: [],
   rawData: [],
+  cookedDataSource: []
 };
 
 const GloalStateContext = createContext<[GlobalState, (updater:StateUpdater<GlobalState>) => void]>(null!)

@@ -67,6 +67,7 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
     }
   })
   let table = defaultAggregated ? aggregate({ dataSource, dimensions, measures, operator: aggregator, asFields: aggregatedMeasures.map(mea => mea.as)}) : dataSource;
+  console.log(dimensions, measures, table)
   function adjustField (fieldName: string): string {
     if (defaultAggregated && measures.includes(fieldName)) {
       let aggField = aggregatedMeasures.find(mea => {

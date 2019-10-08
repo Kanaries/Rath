@@ -132,6 +132,7 @@ export async function getGroupFieldsService (dataSource: DataSource, fields: Fie
 }
 
 export interface Subspace {
+  score: number;
   dimensions: string[];
   measures: Array<{name: string; value: number}>;
   correlationMatrix: number[][];

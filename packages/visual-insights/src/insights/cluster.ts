@@ -68,16 +68,20 @@ function kruskal({ matrix, groupMaxSize }: KruskalClusterProps): Map<number, num
   return groups;
 }
 
-function kruskalMST(matrix: number[][]) {
+function kruskalMST(matrix: number[][], maxGroupNumber: number = 4) {
   const edges = turnAdjMatrix2List(matrix);
   edges.sort((a, b) => b[1] - a[1]);
 
-  const edgesInMST: AdjList = []
+  const edgesInMST: [[number, number], number, boolean][] = []
   const parents = matrix.map((m, i) => i);
+  let groups = [...parents];
+  let inCutEdge = false;
   for (let edge of edges) {
     if (find(parents, edge[0][0]) !== find(parents, edge[0][1])) {
       union(parents, edge[0][0], edge[0][1]);
-      edgesInMST.push(edge);
+      // fuck typescript
+      // edgesInMST.push([...edge, inCutEdge]);
+      edgesInMST.push([edge[0], edge[1], inCutEdge]);
     }
     for (let i = 0; i < parents.length; i++) {
       parents[i] = find(parents, i)
@@ -85,12 +89,16 @@ function kruskalMST(matrix: number[][]) {
     let set = new Set(parents);
     // TODO:
     // + use kruskalMST instead of kruskal.
-    // + add param: maxGroupSize
-    if (set.size <= 4){
+    if (set.size <= maxGroupNumber) {
+      inCutEdge = true;
+    } else {
+      groups = [...parents]
+    }
+    if (set.size === 1) {
       break;
     }
   }
-  return { edgesInMST, groups: parents }
+  return { edgesInMST, groups }
 }
 
 interface ClusterProps {

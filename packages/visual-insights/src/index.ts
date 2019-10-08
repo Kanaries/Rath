@@ -1,7 +1,7 @@
 import * as Utils from './utils'
 
 import fieldsAnalysis from './fieldAnalysis';
-import specification, { specificationWithFieldsAnalysisResult } from './specification';
+import specification from './specification';
 
 import * as Distribution from './distribution';
 
@@ -19,7 +19,6 @@ export {
   Distribution,
   ImpurityMeasure,
   specification,
-  specificationWithFieldsAnalysisResult,
   analysisDimensions,
   Cleaner,
   getInsightViews,

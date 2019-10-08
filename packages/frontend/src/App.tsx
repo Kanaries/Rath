@@ -15,7 +15,7 @@ import {
   combineFieldsService,
   Subspace
 } from './service';
-import { specificationWithFieldsAnalysisResult, Cleaner } from 'visual-insights';
+import { Cleaner } from 'visual-insights';
 import { DataSource, Record, BIField, Field, OperatorType } from './global';
 import { Specification } from './demo/vegaBase';
 import NoteBook from './pages/notebook/index';
@@ -125,23 +125,32 @@ function App() {
   }
 
   async function univariateSummary (dataSource: DataSource, fields: BIField[]) {
+    const dimensions = fields.filter(field => field.type === 'dimension').map(field => field.name)
+    const measures = fields.filter(field => field.type === 'measure').map(field => field.name)
     try {
       /**
        * get summary of the orignal dataset(fields without grouped)
        */
       const originSummary = await getFieldsSummaryService(dataSource, fields.map(f => f.name));
       // todo only group dimension.
-      let fieldWithTypeList: Field[] = originSummary ? originSummary.map(f => {
-        return {
-          name: f.fieldName,
-          type: f.type
-        }
-      }) : [];
+      let fieldWithTypeList: Field[] = originSummary ? originSummary
+        .filter(f => dimensions.includes(f.fieldName))
+        .map(f => {
+          return {
+            name: f.fieldName,
+            type: f.type
+          }
+        }) : [];
+      /**
+       * bug:
+       * should not group measures!!!
+       */
       const groupedResult = await getGroupFieldsService(dataSource, fieldWithTypeList);
       const { groupedData, newFields } = groupedResult ? groupedResult : { groupedData: dataSource, newFields: fieldWithTypeList };
       /**
        * `newBIFields` shares the same length (size) with fields.
        * It repalces some of the fields with high entropy with a grouped new field.
+       * newBIFields does not contain field before grouped.
        */
       const newBIFields: BIField[] = fields.map(field => {
         let groupedField = newFields.find(f => f.name === field.name + '(group)')
@@ -155,21 +164,25 @@ function App() {
        * groupedSummary only contains newFields generated during `groupFieldsService`.
        */
       const groupedSummary = await getFieldsSummaryService(groupedData, newFields);
+      updateState(draft => { draft.cookedDataSource = groupedData })
       setSummaryData({
         originSummary: originSummary || [],
         groupedSummary: groupedSummary || []
       })
       // setFields(newBIFields);
       // tmp solutions
-      let orderedDimensions = groupedSummary ? newDimensions.map(d => {
-        let target = groupedSummary.find(g => g.fieldName === d)
+      let orderedDimensions = []// groupedSummary ? 
+      let summary = (groupedSummary || []).concat(originSummary || []);
+      orderedDimensions = newDimensions.map(d => {
+        let target = summary.find(g => g.fieldName === d)
         return {
           name: d,
           entropy: target ? target.entropy : Infinity
         }
-      }) : [];
+      })
+      
       orderedDimensions.sort((a, b) => a.entropy - b.entropy);
-      const measures = fields.filter(field => field.type === 'measure').map(field => field.name)
+      console.log(orderedDimensions)
       await SubspaceSeach(groupedData, orderedDimensions.map(d => d.name).slice(0, Math.round(orderedDimensions.length * 0.8)), measures, 'sum');
     } catch (error) {
       
@@ -202,20 +215,24 @@ function App() {
     }
     return ans;
   }, [result])
-  
+
   const gotoPage = (pageNo: number) => {
     // let pageNo = (page - 1 + charts.length) % charts.length;
     let fieldsOfView = charts[pageNo].dimList.concat(charts[pageNo].meaList)
     let scoreOfDimensionSubset = dimScores.filter(dim => fieldsOfView.includes(dim[0]));
-    let {schema, aggData} = specificationWithFieldsAnalysisResult(scoreOfDimensionSubset, cleanData, charts[pageNo].meaList);
-    updateState(draft => draft.currentPage = pageNo)
-    setDataView({
-      schema,
-      aggData,
-      fieldFeatures: scoreOfDimensionSubset.map(item => item[3]),
-      dimensions: charts[pageNo].dimList,
-      measures: charts[pageNo].meaList
-    })
+    // todo:
+    // specification api is not easy to use.
+    // + should not accpet score, it should only accept a order, which allow use to use it more in a more flexible way.
+    // + accept a dimensions: Field[], measures: Field[] and cleanData(cookedData)
+    // let {schema, aggData} = specificationWithFieldsAnalysisResult(scoreOfDimensionSubset, cleanData, charts[pageNo].meaList);
+    // updateState(draft => draft.currentPage = pageNo)
+    // setDataView({
+    //   schema,
+    //   aggData,
+    //   fieldFeatures: scoreOfDimensionSubset.map(item => item[3]),
+    //   dimensions: charts[pageNo].dimList,
+    //   measures: charts[pageNo].meaList
+    // })
   }
   // ChevronRight
   const commandBarList = [
@@ -269,7 +286,7 @@ function App() {
   return (
     <div>
       <div className="header-bar" >
-        <Pivot selectedKey={pageStatus.current.pivotKey} onLinkClick={(item) => { item && item.props.itemKey && setPageStatus(draft => draft.current.pivotKey = item.props.itemKey!) }} headersOnly={true}>
+        <Pivot selectedKey={pageStatus.current.pivotKey} onLinkClick={(item) => { item && item.props.itemKey && setPageStatus(draft => { draft.current.pivotKey = item.props.itemKey! }) }} headersOnly={true}>
           {
             pivotList.map(pivot => <PivotItem key={pivot.itemKey} headerText={pivot.title} itemKey={pivot.itemKey} />)
           }
@@ -382,7 +399,7 @@ function App() {
       {
         pageStatus.current.pivotKey === 'pivot-2' && <div className="content-container">
           <div className="card">
-            <NoteBook dimScores={dimScores} summaryData={summaryData} subspaceList={subspaceList} />
+            <NoteBook summaryData={summaryData} subspaceList={subspaceList} dataSource={state.cookedDataSource} />
           </div>
         </div>
       }

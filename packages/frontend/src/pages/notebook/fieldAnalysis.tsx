@@ -8,17 +8,8 @@ import { FieldType, Record } from '../../global';
 import './fieldAnalysis.css';
 
 // todo: distribution info
-interface Impurity {
-  name: string;
-  value: number
-}
-export interface FieldDescription {
-  name: string;
-  type: string;
-  impurity: Impurity[]
-}
+
 interface FieldAnalsisProps {
-  fields: FieldDescription[];
   originSummary: FieldSummary[];
   groupedSummary: FieldSummary[];
 }
@@ -81,19 +72,27 @@ function getIconNameByFieldType (type: string): string {
   }
 }
 
-function getValueColor (value: number, range: [number, number]): string {
-  return chroma.scale('YlGnBu').domain([range[1], range[0]])(value).hex()
+function getValueColor (value: number, range: [number, number]): [number, number, number] {
+  return chroma.scale('YlGnBu').domain([range[1], range[0]])(value).rgb();
+}
+
+/**
+ * 
+ * @param color rgb array
+ * algorithm provided by https://stackoverflow.com/questions/1855884/determine-font-color-based-on-background-color
+ */
+function contrastColor(color: [number, number, number]): [number, number, number] {
+  let luminance = (0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]) / 255;
+  return luminance > 0.5 ? [0, 0, 0] : [255, 255, 255]
 }
 const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
 
-  const { fields, originSummary, groupedSummary } = props;
+  const { originSummary, groupedSummary } = props;
 
   const entropyRange = useMemo<[number, number]>(() => {
-    const originEntropy = originSummary.map(s => s.entropy);
-    const groupedEntropy = groupedSummary.map(s => s.entropy);
-    const entropyList = originEntropy.concat(groupedEntropy);
-    return [Math.min(...entropyList), Math.max(...entropyList)];
-  }, [originSummary, groupedSummary])
+    const originEntropy = originSummary.map(s => s.maxEntropy);
+    return [0, Math.max(...originEntropy)];
+  }, [originSummary])
 
   const onRenderCompactCard = (item: Record) => {
     return (
@@ -139,11 +138,23 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
         expandedCardHeight: target ? 320 : 40
       }
       const fieldContent = item[column.fieldName!];
+      let bgColor: [number, number, number] = [255, 255, 255];
       switch (column.key) {
         case 'type':
-          return <span>
+          return <div>
             <Icon iconName={getIconNameByFieldType(fieldContent)} /> {fieldContent}
-          </span>
+          </div>
+        case 'entropy':
+        case 'maxEntropy':
+          bgColor = getValueColor(item[column.key], entropyRange);
+          let fontColor = contrastColor(bgColor)
+          let bgColorStr = `rgb(${bgColor.join(',')})`
+          let fontColorStr = `rgb(${contrastColor(bgColor).join(',')})`
+          return (
+            <HoverCard expandedCardOpenDelay={800} expandingCardProps={expandingCardProps} instantOpenOnClick={true}>
+              <div style={{ boxShadow: `${bgColorStr} 0px 0px 0px 10px`, backgroundColor: bgColorStr, color: fontColorStr }}>{fieldContent}</div>
+            </HoverCard>
+          )
         default:
           return <HoverCard expandedCardOpenDelay={800} expandingCardProps={expandingCardProps} instantOpenOnClick={true}>
           <div>{fieldContent}</div>
@@ -152,13 +163,13 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
     }
   }
 
-  const onRenderRow: IRenderFunction<any> = (props) => {
-    const customStyles: Partial<IDetailsRowStyles> = {};
-    customStyles.root = { backgroundColor: getValueColor(props.item['entropy'], entropyRange), color: '#fff' }
-    return <DetailsRow {...props} styles={customStyles} />;
-  };
+  // const onRenderRow: IRenderFunction<any> = (props) => {
+  //   const customStyles: Partial<IDetailsRowStyles> = {};
+  //   customStyles.root = { backgroundColor: getValueColor(props.item['entropy'], entropyRange), color: '#fff' }
+  //   return <DetailsRow {...props} styles={customStyles} />;
+  // };
 
-  return <DetailsList compact={true} columns={columns} items={originSummary} selectionMode={SelectionMode.none} onRenderRow={onRenderRow} onRenderItemColumn={renderItemColumn} />
+  return <DetailsList compact={true} columns={columns} items={originSummary} selectionMode={SelectionMode.none} onRenderItemColumn={renderItemColumn} />
 }
 
 export default FieldAnalsis;

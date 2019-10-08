@@ -8,13 +8,15 @@ import embed from 'vega-embed';
  */
 interface ClusterBoardProps {
   adjMatrix: number[][];
-  measures: string[]
+  measures: string[];
+  onFocusGroup: (measuresInView: string[]) => void;
 }
 
 interface VegaEdge {
   source: number | string;
   target: number | string;
   value: number;
+  inCutEdge: boolean;
 }
 interface VegaNode {
   name: string;
@@ -27,7 +29,7 @@ interface TreeData {
   edges: VegaEdge[]
 }
 const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
-  const { adjMatrix, measures } = props;
+  const { adjMatrix, measures, onFocusGroup } = props;
   const chart = useRef<HTMLDivElement>(null);
   // const groups = useMemo<string[][]>(() => {
   //   return clusterMeasures({
@@ -35,14 +37,18 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
   //     measures,
   //   })
   // }, [adjMatrix, measures]);
-
-  const treeData = useMemo<TreeData>(() => {
+  const clusterResult = useMemo(() => {
     let { edgesInMST, groups } = kruskalMST(adjMatrix);
+    return { edgesInMST, groups }
+  }, [adjMatrix])
+  const treeData = useMemo<TreeData>(() => {
+    let { edgesInMST, groups } = clusterResult;
     const edges: VegaEdge[] = edgesInMST.map(edge => {
       return {
         source: edge[0][0],
         target: edge[0][1],
-        value: 1 / edge[1]
+        value: 1 / edge[1],
+        inCutEdge: edge[2]
       }
     });
     const nodes: VegaNode[] = [];
@@ -54,14 +60,13 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
         group: groups[i]
       })
     }
-    console.log(measures, nodes, edgesInMST)
     return {
       nodes,
       edges
     }
   }, [adjMatrix, measures])
   useEffect(() => {
-    if (chart.current) {
+    if (chart.current && measures.length > 0) {
       embed(chart.current, {
         "$schema": "https://vega.github.io/schema/vega/v5.json",
         "width": 700,
@@ -77,15 +82,15 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             "name": "fix", "value": false,
             "on": [
               {
-                "events": "symbol:mouseout[!event.buttons], window:mouseup",
+                "events": "text:mouseout[!event.buttons], window:mouseup",
                 "update": "false"
               },
               {
-                "events": "symbol:mouseover",
+                "events": "text:mouseover",
                 "update": "fix || true"
               },
               {
-                "events": "[symbol:mousedown, window:mouseup] > window:mousemove!",
+                "events": "[text:mousedown, window:mouseup] > window:mousemove!",
                 "update": "xy()",
                 "force": true
               }
@@ -96,7 +101,7 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             "name": "node", "value": null,
             "on": [
               {
-                "events": "symbol:mouseover",
+                "events": "text:mouseover",
                 "update": "fix === true ? item() : node"
               }
             ]
@@ -113,15 +118,11 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
         "data": [
           {
             "name": "node-data",
-            // "url": "data/miserables.json",
             values: treeData.nodes,
-            // "format": {"type": "json", "property": "nodes"}
           },
           {
             "name": "link-data",
             values: treeData.edges
-            // "url": "data/miserables.json",
-            // "format": {"type": "json", "property": "links"}
           }
         ],
       
@@ -137,7 +138,7 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
         "marks": [
           {
             "name": "nodes",
-            "type": "symbol",
+            "type": "text",
             "zindex": 1,
       
             "from": {"data": "node-data"},
@@ -156,7 +157,9 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             "encode": {
               "enter": {
                 "fill": {"scale": "color", "field": "group"},
-                "stroke": {"value": "white"}
+                "text": {"field": "name"},
+                "fontSize": {"value": 14},
+                "fontWeight": {"value": 600}
               },
               "update": {
                 "cursor": {"value": "pointer"}
@@ -184,9 +187,11 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             "interactive": false,
             "encode": {
               "update": {
-                "stroke": {"value": "#ccc"},
-                "strokeWidth": {"value": 0.5}
-              }
+                "stroke": {
+                  signal: "datum.inCutEdge == true ? '#f5f5f5' : '#d9d9d9' "
+                },
+                "strokeWidth": {"value": 0.8}
+              },
             },
             "transform": [
               {
@@ -199,9 +204,21 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             ]
           }
         ]
+      }).then(res => {
+        res.view.addEventListener('click', function (e, item) {
+          if (item) {
+            let record = item.datum;
+            let group = record.group;
+            let measuresInView = measures.filter((mea, index) => {
+              return clusterResult.groups[index] === group
+            });
+            onFocusGroup(measuresInView);
+            console.log(record)
+          }
+        })
       })
     }
-  }, [treeData])
+  }, [treeData, measures])
   return <div ref={chart}>
   </div>
 }
