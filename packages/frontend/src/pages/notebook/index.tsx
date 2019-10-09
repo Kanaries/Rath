@@ -5,6 +5,7 @@ import Subspaces from './subspaces';
 import { FieldSummary, Subspace } from '../../service';
 import ClusterBoard from './cluster';
 import { clusterMeasures, kruskalMST, specification } from 'visual-insights';
+import { DefaultButton, ProgressIndicator } from 'office-ui-fabric-react';
 import { useGlobalState } from '../../state';
 import VegaBase from '../../demo/vegaBase';
 import './index.css';
@@ -13,9 +14,9 @@ interface NoteBookProps {
   dataSource: DataSource;
   // dimScores: [string, number, number, Field][],
   summaryData: {
-    originSummary: FieldSummary[],
+    originSummary: FieldSummary[];
     groupedSummary: FieldSummary[]
-  },
+  };
   subspaceList: Subspace[]
 }
 const NoteBook: React.FC<NoteBookProps> = (props) => {
@@ -35,12 +36,6 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
 
   const [measuresInView, setMeasuresInView] = useState<string[]>([]);
 
-  // const dimensions = useMemo<string[]>(() => {
-  //   return state.fields.filter(f => f.type === 'dimension').map(f => f.name)
-  // }, [state.fields])
-  // const measures = useMemo<string[]>(() => {
-  //   return state.fields.filter(f => f.type === 'measure').map(f => f.name)
-  // }, [state.fields])
 
   // todo:
   // should be updated after designing new specification api
@@ -57,6 +52,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     // maybe use try catch in future
     try {
       /**
+       * fieldScores is the scores info for the dims and meas in current view.
        * dimensions should get the grouped new field.
        * measures shall never use the grouped field.
        */
@@ -71,27 +67,18 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
         position: []
       }
     }
-    // if (dimensions.length > 0 && measures.length > 0 && dataSource.length > 0 && dimScores.length > 0) {
-    //   const fieldScores = dimScores.filter(field => {
-    //     return dimensions.includes(field[0]) || measures.includes(field[0])
-    //   })
-    //   const { schema } = specification(fieldScores, dataSource, dimensions, measures)
-    //   return schema;
-    // } else {
-    //   return {
-    //     position: []
-    //   }
-    // }
     
   }, [dimScores, clusterState, dataSource, measuresInView])
 
   return <div>
     <h3 className="notebook header">Univariate Summary</h3>
+    <ProgressIndicator description="analyzing" />
     <div className="notebook content container">
       <FieldAnalysisBoard originSummary={originSummary} groupedSummary={groupedSummary} />
     </div>
 
     <h3 className="notebook header">Subspace Searching</h3>
+    <ProgressIndicator description="analyzing" />
     <div className="notebook content center container">
       <Subspaces subspaceList={subspaceList} onSpaceChange={(dimensions, measures, matrix) => {
         setClusterState({
@@ -103,16 +90,18 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     </div>
 
     <h3 className="notebook header">Measurement Clustering</h3>
+    <ProgressIndicator description="analyzing" />
     <div className="notebook content center container">
       <ClusterBoard adjMatrix={clusterState.matrix} measures={clusterState.measures} onFocusGroup={(measInView) => {setMeasuresInView(measInView); console.log('view in measures', measInView)}} />
     </div>
 
     <h3 className="notebook header">Visualization</h3>
-    <div className="notebook content center container">
-      <VegaBase defaultAggregated={true} defaultStack={true} aggregator={'sum'}
+    <ProgressIndicator description="analyzing" />
+    <div className="notebook content center container" style={{overflowX: 'auto'}}>
+      <VegaBase defaultAggregated={false} defaultStack={true} aggregator={'sum'}
         schema={spec}
         fieldFeatures={dimScores.map(dim => dim[3])}
-        dataSource={state.cookedDataSource}
+        dataSource={JSON.parse(JSON.stringify(state.cookedDataSource))}
         dimensions={clusterState.dimensions} measures={measuresInView} />
     </div>
 

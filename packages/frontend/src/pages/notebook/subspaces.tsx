@@ -53,7 +53,7 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
           score: space.score,
           dimensions,
           measureName: name,
-          measureValue: (Math.pow(value, 4) - Math.pow(range[0], 4)) / (Math.pow(range[1], 4) - Math.pow(range[0], 4) ),
+          measureValue: value,
         };
         ans.push(record)
       }
@@ -132,7 +132,7 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
         encoding: {
           x: { field: 'x', type: 'nominal' },
           y: { field: 'y', type: 'nominal' },
-          color: { field: 'correlation', type: 'quantitative', aggregate: 'mean' , scale: { scheme: 'yelloworangered' } }
+          color: { field: 'correlation', type: 'quantitative', aggregate: 'mean' , scale: { scheme: 'redyellowgreen', domain: [-1, 1] } }
         }
       })
     }

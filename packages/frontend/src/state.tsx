@@ -1,6 +1,7 @@
 import produce, { Draft } from 'immer';
 import React, { useState, useMemo, createContext, useContext } from 'react';
 import { DataSource, BIField } from './global';
+import { Subspace } from './service';
 export interface GlobalState {
   /**
    * `currentPage` is the current page number of visualization in explore board.
@@ -21,6 +22,10 @@ export interface GlobalState {
    * dataSource been cleaned and grouped which is readly for exploration.
    */
   cookedDataSource: DataSource;
+  /**
+   * subspaceList is ordered list by it score.
+   */
+  // subspaceList: Subspace[]
 }
 
 interface GlobalComputed {

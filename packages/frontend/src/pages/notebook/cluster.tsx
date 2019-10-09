@@ -38,7 +38,12 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
   //   })
   // }, [adjMatrix, measures]);
   const clusterResult = useMemo(() => {
-    let { edgesInMST, groups } = kruskalMST(adjMatrix);
+    /**
+     * todo: 
+     * maxGroupNumber = the measures length / max visual channel for measure.
+     */
+    let maxGroupNumber = measures.length / 4
+    let { edgesInMST, groups } = kruskalMST(adjMatrix, maxGroupNumber);
     return { edgesInMST, groups }
   }, [adjMatrix])
   const treeData = useMemo<TreeData>(() => {
@@ -131,7 +136,7 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             "name": "color",
             "type": "ordinal",
             "domain": {"data": "node-data", "field": "group"},
-            "range": {"scheme": "tableau10"}
+            "range": {"scheme": "tableau20"}
           }
         ],
       
@@ -213,7 +218,6 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
               return clusterResult.groups[index] === group
             });
             onFocusGroup(measuresInView);
-            console.log(record)
           }
         })
       })

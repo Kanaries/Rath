@@ -1,5 +1,6 @@
-import { isFieldNumeric, isFieldTime, memberCount } from '../utils';
+import { deepcopy, isFieldNumeric, isFieldTime, memberCount } from '../utils';
 import { DataSource } from '../commonTypes';
+
 function dropNull(dataSource: DataSource, dimensions: string[], measures: string[]): DataSource {
   let data = [];
   for (let record of dataSource) {
@@ -35,4 +36,84 @@ function dropNull(dataSource: DataSource, dimensions: string[], measures: string
   return data;
 }
 
-export { dropNull }
+function isNullValue(value: any): boolean {
+  return ['', null, undefined].includes(value)
+}
+
+/**
+ * use mode of one field to replace its null value
+ * @param dataSource 
+ * @param fieldNames name list of fields you want to clean with useMode function.
+ * problem: some field may regard the null value as the most common value... sad : (.
+ * I am dead.
+ */
+function useMode(dataSource: DataSource, fieldNames: string[]): DataSource {
+  /**
+   * map to count each member's times of apperance in fields.
+   */
+  const countMap: Map<string, Map<string, number>> = new Map();
+  /**
+   * map to get the mode member of each field.
+   */
+  const modeMap: Map<string, any> = new Map();
+
+  for (let fieldName of fieldNames) {
+    countMap.set(fieldName, new Map());
+    modeMap.set(fieldName, 0);
+  }
+  for (let record of dataSource) {
+    for (let fieldName of fieldNames) {
+      let counter: Map<string, number> = countMap.get(fieldName);
+      if (!isNullValue(record[fieldName])) {
+        if (!counter.has(record[fieldName])) {
+          counter.set(record[fieldName], 0)
+        }
+        counter.set(record[fieldName], counter.get(record[fieldName]) + 1)
+      }
+      
+    }
+  }
+  for (let key of countMap.keys()) {
+    let counter: Map<string, number> = countMap.get(key);
+    let members = [...counter.entries()];
+    let max = 0;
+    let maxPos = 0;
+    for (let i = 0; i < members.length; i++) {
+      let member = members[i];
+      if (member[1] > max) {
+        max = member[1];
+        maxPos = i;
+      }
+    }
+    modeMap.set(key, members[maxPos][0])
+  }
+  const newDataSource = deepcopy(dataSource);
+  for (let record of newDataSource) {
+    for (let fieldName of fieldNames) {
+      if (isNullValue(record[fieldName])) {
+        record[fieldName] = modeMap.get(fieldName);
+      }
+    }
+  }
+  return newDataSource;
+}
+
+function simpleClean (dataSource: DataSource, dimensions: string[], measures: string[]): DataSource {
+  const newDataSource = deepcopy(dataSource);
+  for (let record of dataSource) {
+    for (let dim of dimensions) {
+      if (isNullValue(record[dim])) {
+        record[dim] = 'null'
+      }
+    }
+    for (let mea of measures) {
+      if (isNullValue(record[mea])) {
+        record[mea] = 0;
+      }
+    }
+  }
+  return newDataSource
+} 
+
+
+export { simpleClean, dropNull, useMode }

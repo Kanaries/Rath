@@ -18,6 +18,7 @@ import {
 import { Cleaner } from 'visual-insights';
 import { DataSource, Record, BIField, Field, OperatorType } from './global';
 import { Specification } from './demo/vegaBase';
+import Gallery from './pages/gallery/index';
 import NoteBook from './pages/notebook/index';
 
 const pivotList = [
@@ -293,49 +294,7 @@ function App() {
         </Pivot>
       </div>
       {
-        pageStatus.current.pivotKey === 'pivot-3' && <div className="content-container">
-          <PreferencePanel show={pageStatus.show.configPanel}
-            config={visualConfig}
-            onUpdateConfig={(config) => {
-              setVisualConfig(config)
-              setPageStatus(draft => draft.show.configPanel = false)
-            }}
-            onClose={() => { setPageStatus(draft => draft.show.configPanel = false) }} />
-          {
-            !pageStatus.show.insightBoard ? undefined : <div className="card">
-              {
-                !loading ? undefined : <ProgressIndicator description="calculating" />
-              }
-              <h2 style={{marginBottom: 0}}>Visual Insights <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="preference" onClick={() => { setPageStatus(draft => draft.show.configPanel = false) }} /></h2>
-              <p className="state-description">Page No. {state.currentPage + 1} of {charts.length}</p>
-              <div className="ms-Grid" dir="ltr">
-                <div className="ms-Grid-row">
-                <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3" style={{overflow: 'auto'}}>
-                  <Stack horizontal tokens={{ childrenGap: 20 }}>
-                    <DefaultButton text="Last" onClick={() => { gotoPage((state.currentPage - 1 + charts.length) % charts.length) }} allowDisabledFocus />
-                    <DefaultButton text="Next" onClick={() => { gotoPage((state.currentPage + 1) % charts.length) }} allowDisabledFocus />
-                  </Stack>
-                  <h3>Specification</h3>
-                  <pre>
-                    {JSON.stringify(dataView.schema, null, 2)}
-                  </pre>
-                </div>
-                <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg9" style={{overflow: 'auto'}}>
-                  <BaseChart
-                    aggregator={visualConfig.aggregator}
-                    defaultAggregated={visualConfig.defaultAggregated}
-                    defaultStack={visualConfig.defaultStack}
-                    dimensions={dataView.dimensions}
-                    measures={dataView.measures}
-                    dataSource={dataView.aggData}
-                    schema={dataView.schema}
-                    fieldFeatures={dataView.fieldFeatures} />
-                </div>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
+        pageStatus.current.pivotKey === 'pivot-3' && <Gallery subspaceList={subspaceList} dataSource={state.cookedDataSource} summaryData={summaryData}  />
       }
       {
         pageStatus.current.pivotKey === 'pivot-1' && <div className="content-container">
@@ -350,7 +309,12 @@ function App() {
               <DefaultButton disabled={dataSource.length === 0} iconProps={{iconName: 'Financial'}} text="Extract Insights" onClick={() => {
                 const dimensions = state.fields.filter(field => field.type === 'dimension').map(field => field.name)
                 const measures = state.fields.filter(field => field.type === 'measure').map(field => field.name)
-                const cleanData = Cleaner.dropNull(dataSource, dimensions, measures);
+                // hint: dropNull works really bad when we test titanic dataset.
+                // const cleanData = Cleaner.dropNull(dataSource, dimensions, measures);
+                // useMode fails when there are more null values than normal values;
+                // const cleanData = Cleaner.useMode(dataSource, dimensions.concat(measures));
+                const cleanData = Cleaner.simpleClean(dataSource, dimensions, measures);
+
                 univariateSummary(cleanData, state.fields);
                 setPageStatus(draft => {
                   draft.current.pivotKey = 'pivot-2';

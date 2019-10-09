@@ -162,3 +162,38 @@ export async function combineFieldsService (dataSource: DataSource, dimensions: 
     console.error(error)
   }
 }
+
+export interface ViewCombinedSpace {
+  dimensions: string[];
+  measures: string[];
+  matrix: number[][];
+}
+
+export interface ViewSpace {
+  dimensions: string[];
+  measures: string[]
+}
+
+export async function clusterMeasures (combinedSpaces: ViewCombinedSpace[]): Promise<ViewSpace[]> {
+  let viewSpaces: ViewSpace[] = [];
+  try {
+    const res = await fetch('//localhost:8000/api/service/clusterMeasures', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        spaces: combinedSpaces
+      })
+    });
+    const result: Result<ViewSpace[]> = await res.json();
+    if (result.success === true) {
+      viewSpaces = result.data;
+    } else {
+      throw new Error('[cluster measures]' + result.message)
+    }
+  } catch (error) {
+    console.error(error)
+  }
+  return viewSpaces;
+}
