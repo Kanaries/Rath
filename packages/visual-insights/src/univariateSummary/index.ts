@@ -4,16 +4,24 @@ import { normalize, entropy } from '../impurityMeasure';
 import { isUniformDistribution } from '../distribution';
 
 const MIN_QUAN_MEMBER_SIZE = 25;
-
+/**
+ * 
+ * @param dataSource 
+ * @param field 
+ * todo: should accept BIField type and calculate the semantic type basic on it.
+ */
 export function getFieldType(dataSource: DataSource, field: string): FieldType {
   if (isFieldTime(dataSource, field)) {
     return 'temporal'
   } else if (isFieldContinous(dataSource, field)) {
-    if (memberCount(dataSource, field).length > MIN_QUAN_MEMBER_SIZE) {
-      return 'quantitative'
-    } else {
-      return 'ordinal';
-    }
+    // Todo:
+    // here is only a tmp solution. we still hope to divided ordinal type and quantitative type.
+    // if (memberCount(dataSource, field).length > MIN_QUAN_MEMBER_SIZE) {
+    //   return 'quantitative'
+    // } else {
+    //   return 'ordinal';
+    // }
+    return 'quantitative'
   } else if (isFieldCategory(dataSource, field)) {
     // isFieldCategory is a safety checking here, for sometimes dirty data value can be object.
     return 'nominal'
