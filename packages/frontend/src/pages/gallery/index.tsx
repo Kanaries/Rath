@@ -122,22 +122,22 @@ const Gallery: React.FC<GalleryProps> = (props) => {
       }
     }
   }, [viewSpaces, currentPage]);
-  
+  console.log(pageStatus, pageStatus.show)
   return (
     <div className="content-container">
       <PreferencePanel show={pageStatus.show.configPanel}
         config={visualConfig}
         onUpdateConfig={(config) => {
           setVisualConfig(config)
-          setPageStatus(draft => draft.show.configPanel = false)
+          setPageStatus(draft => { draft.show.configPanel = false })
         }}
-        onClose={() => { setPageStatus(draft => draft.show.configPanel = false) }} />
+        onClose={() => { setPageStatus(draft => { draft.show.configPanel = false }) }} />
       {
           <div className="card">
           {
             !loading ? undefined : <ProgressIndicator description="calculating" />
           }
-          <h2 style={{marginBottom: 0}}>Visual Insights <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="preference" onClick={() => { setPageStatus(draft => draft.show.configPanel = false) }} /></h2>
+          <h2 style={{marginBottom: 0}}>Visual Insights <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="preference" onClick={() => { setPageStatus(draft => { draft.show.configPanel = true }) }} /></h2>
           <p className="state-description">Page No. {currentPage + 1} of {viewSpaces.length}</p>
           <div className="ms-Grid" dir="ltr">
             <div className="ms-Grid-row">

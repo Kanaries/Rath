@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import aggregate from 'cube-core';
 import embed from 'vega-embed';
-import { DataSource, Field, FieldType } from '../build/commonTypes'
+import { DataSource, Field, FieldType } from '../global'
 const geomTypeMap: {[key: string]: any} = {
   interval: 'bar',
   line: 'line',
