@@ -1,6 +1,6 @@
 # Visual-Insights
 
-![](https://www.travis-ci.org/ObservedObserver/showme.svg?branch=master)
+![](https://travis-ci.org/ObservedObserver/visual-insights.svg?branch=master)
 ![](https://img.shields.io/npm/v/visual-insights?color=blue)
 
 ### API
