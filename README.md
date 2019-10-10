@@ -58,7 +58,7 @@ In this step, visual insights search the combination of fields, and calculate th
 ### Correlation
 After one subspace is specified, it will analyze the correlation of measures in the space.
 
-![](https://cdn.nlark.com/yuque/0/2019/svg/171008/1570614439983-cf6d757a-928d-4f42-b46c-f1de3a76f4b1.svg)
+![](https://cdn.nlark.com/yuque/0/2019/svg/171008/1570614552078-2a6635c3-b81f-4381-b82d-e81b3d30826a.svg)
 
 ### Clustering
 It helps you to cluster all the measures based on their correlation. It puts all the variables who are strongly related together to make a specific view (with specified dimenions).
