@@ -54,7 +54,8 @@ function findBestField (type: FieldType, fieldRankList: LabelField[]): LabelFiel
 
 /**
  * 
- * @param dimFields ranked dimension by entropy. desc
+ * @param dimFields ranked dimension by entropy. asc
+ * todo: not clear enough implementation for using asc and desc
  */
 function aestheticMapping (dimFields: Field[]) {
   let spec: Specification = {};
@@ -98,7 +99,7 @@ function aestheticMapping (dimFields: Field[]) {
 // don't use dimScores: FieldImpurity.
 // it's a structure with redundency design.
 function specification (dimScores: FieldImpurity[], aggData: DataSource, dimensions: string[], measures: string[]): View {
-  let rankedFields: Field[] = dimScores.sort((a, b) => b[1] - a[1]).map(dim => dim[3])
+  let rankedFields: Field[] = dimScores.sort((a, b) => a[1] - b[1]).map(dim => dim[3])
   let spec = aestheticMapping(rankedFields);
   // todo: design a better rule for choosing geom type.
   if (spec.position.length === 2) {

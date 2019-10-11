@@ -2,10 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { DataSource, BIField, Field } from '../../global';
 import FieldAnalysisBoard from './fieldAnalysis';
 import Subspaces from './subspaces';
-import { FieldSummary, Subspace } from '../../service';
+import { FieldSummary, Subspace, combineFieldsService } from '../../service';
 import ClusterBoard from './cluster';
 import { clusterMeasures, kruskalMST, specification } from 'visual-insights';
-import { DefaultButton, ProgressIndicator } from 'office-ui-fabric-react';
+import { DefaultButton, ProgressIndicator, Toggle, Slider } from 'office-ui-fabric-react';
 import { useGlobalState } from '../../state';
 import VegaBase from '../../demo/vegaBase';
 import './index.css';
@@ -23,6 +23,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
   const { summaryData, subspaceList, dataSource } = props;
   const [state, updateState] = useGlobalState();
   const { originSummary, groupedSummary } = summaryData;
+  const [isAggregated, setIsAggregated] = useState(false);
   interface ClusterState {
     measures: string[];
     dimensions: string[];
@@ -67,20 +68,43 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
         position: []
       }
     }
-    
+
   }, [dimScores, clusterState, dataSource, measuresInView])
 
   return <div>
     <h3 className="notebook header">Univariate Summary</h3>
-    <ProgressIndicator description="analyzing" />
+    {state.loading.univariateSummary && <ProgressIndicator description="analyzing" />}
     <div className="notebook content container">
       <FieldAnalysisBoard originSummary={originSummary} groupedSummary={groupedSummary} />
     </div>
 
     <h3 className="notebook header">Subspace Searching</h3>
-    <ProgressIndicator description="analyzing" />
+    {state.loading.subspaceSearching && <ProgressIndicator description="analyzing" />}
+    {!state.loading.subspaceSearching && <Slider value={state.topK.dimensionSize * 100} label="top k percent dimension used" max={100} valueFormat={(value: number) => `${value}%`} showValue={true}
+      onChange={(value: number) => {
+        updateState(draft => {
+          draft.topK.dimensionSize = value / 100;
+        })
+        const selectedDimensions = state.cookedDimensions.slice(0, Math.round(state.cookedDimensions.length * value / 100));
+        combineFieldsService(dataSource, selectedDimensions, state.cookedMeasures, 'sum')
+          .then(subspaces => {
+            if (subspaces) {
+              updateState(draft => {
+                draft.subspaceList = subspaces
+              })
+            }
+          })
+      }}/>}
+      {
+        !state.loading.subspaceSearching && <Slider value={state.topK.subspacePercentSize * 100} label="top k percent subspace used" max={100} valueFormat={(value: number) => `${value}%`} showValue={true}
+        onChange={(value: number) => {
+          updateState(draft => {
+            draft.topK.subspacePercentSize = value / 100;
+          })
+        }}/>
+      }
     <div className="notebook content center container">
-      <Subspaces subspaceList={subspaceList} onSpaceChange={(dimensions, measures, matrix) => {
+      <Subspaces subspaceList={subspaceList.slice(0, Math.round(subspaceList.length * state.topK.subspacePercentSize))} onSpaceChange={(dimensions, measures, matrix) => {
         setClusterState({
           dimensions,
           measures,
@@ -90,18 +114,17 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     </div>
 
     <h3 className="notebook header">Measurement Clustering</h3>
-    <ProgressIndicator description="analyzing" />
     <div className="notebook content center container">
-      <ClusterBoard adjMatrix={clusterState.matrix} measures={clusterState.measures} onFocusGroup={(measInView) => {setMeasuresInView(measInView); console.log('view in measures', measInView)}} />
+      <ClusterBoard adjMatrix={clusterState.matrix} measures={clusterState.measures} onFocusGroup={(measInView) => { setMeasuresInView(measInView); console.log('view in measures', measInView) }} />
     </div>
 
     <h3 className="notebook header">Visualization</h3>
-    <ProgressIndicator description="analyzing" />
-    <div className="notebook content center container" style={{overflowX: 'auto'}}>
-      <VegaBase defaultAggregated={false} defaultStack={true} aggregator={'sum'}
+    <Toggle checked={isAggregated} label="aggregate measures" defaultChecked onText="On" offText="Off" onChange={(e, checked: boolean | undefined) => {setIsAggregated(!!checked)}} />
+    <div className="notebook content center container">
+      <VegaBase defaultAggregated={isAggregated} defaultStack={true} aggregator={'sum'}
         schema={spec}
         fieldFeatures={dimScores.map(dim => dim[3])}
-        dataSource={JSON.parse(JSON.stringify(state.cookedDataSource))}
+        dataSource={JSON.parse(JSON.stringify(dataSource))}
         dimensions={clusterState.dimensions} measures={measuresInView} />
     </div>
 

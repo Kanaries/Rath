@@ -8,6 +8,7 @@
 .notebook.content.container{
   margin-top: 16px;
   margin-bottom: 18px;
+  overflow-x: auto;
 }
 .notebook.content.center.container{
   text-align: center;

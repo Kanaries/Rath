@@ -22,10 +22,31 @@ export interface GlobalState {
    * dataSource been cleaned and grouped which is readly for exploration.
    */
   cookedDataSource: DataSource;
+  cookedDimensions: string[];
+  cookedMeasures: string[];
   /**
    * subspaceList is ordered list by it score.
    */
   // subspaceList: Subspace[]
+  /**
+   * loading status for some service
+   * todo: 
+   * manage the loading status in pages intead of globally.
+   */
+  loading: {
+    univariateSummary: boolean;
+    subspaceSearching: boolean;
+  };
+  
+  topK: {
+    /**
+     * top k percent subspace it will fetch.
+     */
+    subspacePercentSize: number;
+    dimensionSize: number;
+  }
+
+  subspaceList: Subspace[];
 }
 
 interface GlobalComputed {
@@ -55,7 +76,18 @@ const initState: GlobalState = {
   currentPage: 0,
   fields: [],
   rawData: [],
-  cookedDataSource: []
+  cookedDataSource: [],
+  cookedDimensions: [],
+  cookedMeasures: [],
+  loading: {
+    univariateSummary: false,
+    subspaceSearching: false
+  },
+  topK: {
+    subspacePercentSize: 0.7,
+    dimensionSize: 0.8
+  },
+  subspaceList: []
 };
 
 const GloalStateContext = createContext<[GlobalState, (updater:StateUpdater<GlobalState>) => void]>(null!)
@@ -64,8 +96,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const [state, setState] = useState<GlobalState>(initState)
 
   const updateState = (stateUpdater: StateUpdater<GlobalState>) => {
-    const nextState = produce<GlobalState>(state, draftState => stateUpdater(draftState))
-    setState(nextState)
+    setState(state => {
+      const nextState = produce<GlobalState>(state, draftState => stateUpdater(draftState))
+      return nextState;
+    })
   }
 
   return (

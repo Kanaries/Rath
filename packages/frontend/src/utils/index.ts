@@ -1,6 +1,8 @@
 import * as FileLoader from './fileParser';
-import useComposeState from './useComposeState'
+import useComposeState from './useComposeState';
+import deepcopy from './deepcopy';
 export {
   FileLoader,
-  useComposeState
+  useComposeState,
+  deepcopy
 }

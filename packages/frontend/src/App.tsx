@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useGlobalState, GlobalStateProvider } from './state';
-import { DefaultButton, IconButton, Callout, Stack, ProgressIndicator, Pivot, PivotItem, CommandBar, Toggle, setFocusVisibility } from 'office-ui-fabric-react';
+import { ComboBox, DefaultButton, IconButton, Callout, Stack, ProgressIndicator, Pivot, PivotItem, CommandBar, Toggle, setFocusVisibility } from 'office-ui-fabric-react';
 import DataTable from './components/table';
 import PreferencePanel, { PreferencePanelConfig } from './components/preference';
 import FieldPanel from './components/fieldConfig';
 import BaseChart from './demo/vegaBase';
-import { FileLoader, useComposeState } from './utils/index';
+import { FileLoader, useComposeState, deepcopy } from './utils/index';
 import './App.css';
 import {
   fieldsAnalysisService,
@@ -20,7 +20,6 @@ import { DataSource, Record, BIField, Field, OperatorType } from './global';
 import { Specification } from './demo/vegaBase';
 import Gallery from './pages/gallery/index';
 import NoteBook from './pages/notebook/index';
-
 const pivotList = [
   {
     title: 'DataSource',
@@ -35,13 +34,6 @@ const pivotList = [
     itemKey: 'pivot-' + 3
   }
 ]
-interface DataView {
-  schema: Specification,
-  aggData: DataSource,
-  fieldFeatures: Field[],
-  dimensions: string[],
-  measures: string[]
-}
 
 interface PageStatus {
   show: {
@@ -54,6 +46,34 @@ interface PageStatus {
     pivotKey: string;
   }
 }
+// todo
+// cleanMethodList has redundency.
+// clean method type, cleanData(switch), cleanMethodList should be maintained in one structure.
+type CleanMethod = 'dropNull' | 'useMode' | 'simpleClean';
+
+function cleanData (dataSource: DataSource, dimensions: string[], measures: string[], method: CleanMethod): DataSource {
+  // hint: dropNull works really bad when we test titanic dataset.
+  // useMode fails when there are more null values than normal values;
+  switch (method) {
+    case 'dropNull':
+      return Cleaner.dropNull(dataSource, dimensions, measures);
+    case 'useMode':
+      // todo: bad props design
+      return Cleaner.useMode(dataSource, dimensions.concat(measures));  
+    case 'simpleClean':
+    default:
+      return Cleaner.simpleClean(dataSource, dimensions, measures);
+  }
+}
+
+const cleanMethodList: Array<{ key: CleanMethod; text: string }> = [
+  { key: 'dropNull', text: 'drop null records' },
+  { key: 'useMode', text: 'replace null with mode' },
+  { key: 'simpleClean', text: 'simple cleaning' }
+]
+
+
+
 function App() {
   const [state, updateState] = useGlobalState();
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
@@ -67,33 +87,12 @@ function App() {
       pivotKey: pivotList[0].itemKey
     }
   })
-  const [loading, setLoading] = useState(false);
 
-  const [visualConfig, setVisualConfig] = useState<PreferencePanelConfig>({
-    aggregator: 'sum',
-    defaultAggregated: true,
-    defaultStack: true
-  })
-  const [cleanData, setCleanData] = useState<DataSource>([]);
-  const [dimScores, setDimScores] = useState<Array<[string, number, number, Field]>>([]);
-  const [dataView, setDataView] = useState<DataView>({
-    schema: {
-      position: [],
-      color: [],
-      opacity: [],
-      geomType: []
-    },
-    fieldFeatures: [],
-    aggData: [],
-    dimensions: [],
-    measures: []
-  });
   const [summaryData, setSummaryData] = useState<{
     originSummary: FieldSummary[],
     groupedSummary: FieldSummary[]
   }>({ groupedSummary: [], originSummary: []});
-  const [subspaceList, SetSubspaceList] = useState<Subspace[]>([])
-  const [result, setResult] = useState<View[]>([]);
+  const [cleanMethod, setCleanMethod] = useState<CleanMethod>('dropNull');
 
   const dataSetting = useRef<HTMLDivElement>(null);
   const fileEle = useRef<HTMLInputElement>(null);
@@ -108,26 +107,11 @@ function App() {
     })
   }, [state.fields, state.rawData])
 
-  async function extractInsights (dataSource: DataSource, fields: BIField[]) {
-    const dimensions = fields.filter(field => field.type === 'dimension').map(field => field.name)
-    const measures = fields.filter(field => field.type === 'measure').map(field => field.name)
-    const cleanData = Cleaner.dropNull(dataSource, dimensions, measures);
-    setLoading(true);
-    try {
-      const { dimScores, aggData, newDimensions } = await fieldsAnalysisService(cleanData, dimensions, measures);
-      setCleanData(aggData);
-      setDimScores(dimScores);
-      const views = await getInsightViewsService(aggData, newDimensions, measures);
-      setResult(views)
-    } catch (error) {
-      console.error(error);
-    }
-    setLoading(false);
-  }
 
   async function univariateSummary (dataSource: DataSource, fields: BIField[]) {
     const dimensions = fields.filter(field => field.type === 'dimension').map(field => field.name)
     const measures = fields.filter(field => field.type === 'measure').map(field => field.name)
+    // updateState(draft => { draft.loading.univariateSummary = true })
     try {
       /**
        * get summary of the orignal dataset(fields without grouped)
@@ -161,10 +145,15 @@ function App() {
         }
       })
       const newDimensions: string[] = newBIFields.filter(f => f.type === 'dimension').map(f => f.name);
+      // updateState(draft => {
+      //   draft.cookedDimensions = newDimensions;
+      //   draft.cookedMeasures = measures;
+      // })
       /**
        * groupedSummary only contains newFields generated during `groupFieldsService`.
        */
       const groupedSummary = await getFieldsSummaryService(groupedData, newFields);
+      // console.error('groupedData', groupedData)
       updateState(draft => { draft.cookedDataSource = groupedData })
       setSummaryData({
         originSummary: originSummary || [],
@@ -172,69 +161,46 @@ function App() {
       })
       // setFields(newBIFields);
       // tmp solutions
-      let orderedDimensions = []// groupedSummary ? 
       let summary = (groupedSummary || []).concat(originSummary || []);
-      orderedDimensions = newDimensions.map(d => {
-        let target = summary.find(g => g.fieldName === d)
-        return {
-          name: d,
-          entropy: target ? target.entropy : Infinity
-        }
-      })
       
-      orderedDimensions.sort((a, b) => a.entropy - b.entropy);
-      console.log(orderedDimensions)
-      await SubspaceSeach(groupedData, orderedDimensions.map(d => d.name).slice(0, Math.round(orderedDimensions.length * 0.8)), measures, 'sum');
+      updateState(draft => { draft.loading.univariateSummary = false })
+      await SubspaceSeach(groupedData, summary, newDimensions, measures, 'sum');
     } catch (error) {
-      
+      updateState(draft => { draft.loading.univariateSummary = false })
     }
   }
 
-  async function SubspaceSeach (dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType) {
-    const subspaceList = await combineFieldsService(dataSource, dimensions, measures, operator);
-    if (subspaceList) {
-      SetSubspaceList(subspaceList);
-    }
-  }
-
-  useEffect(() => {
-    if (charts.length > 0) {
-      gotoPage(0)
-    }
-  }, [cleanData, result]);
-
-  const charts = useMemo<Array<{ dimList: string[]; meaList: string[] }> >(() => {
-    let ans = [];
-    for (let report of result) {
-      const dimList = report.detail[0];
-      for (let meaList of report.groups) {
-        ans.push({
-          dimList,
-          meaList
+  async function SubspaceSeach (dataSource: DataSource, summary: FieldSummary[], dimensions: string[], measures: string[], operator: OperatorType) {
+    updateState(draft => { draft.loading.subspaceSearching = true })
+    let orderedDimensions: Array<{name: string; entropy: number}> = [];
+    orderedDimensions = dimensions.map(d => {
+      let target = summary.find(g => g.fieldName === d)
+      return {
+        name: d,
+        entropy: target ? target.entropy : Infinity
+      }
+    })
+    
+    orderedDimensions.sort((a, b) => a.entropy - b.entropy);
+    updateState(draft => {
+      draft.cookedDimensions = orderedDimensions.map(d => d.name);
+      draft.cookedMeasures = measures;
+    })
+    const selectedDimensions = orderedDimensions.map(d => d.name).slice(0, Math.round(orderedDimensions.length * state.topK.dimensionSize));
+    try {
+      const subspaceList = await combineFieldsService(dataSource, selectedDimensions, measures, operator);
+      if (subspaceList) {
+        updateState(draft => {
+          draft.subspaceList = subspaceList
         })
       }
+      updateState(draft => { draft.loading.subspaceSearching = false })
+    } catch (error) {
+      updateState(draft => { draft.loading.subspaceSearching = false })
     }
-    return ans;
-  }, [result])
-
-  const gotoPage = (pageNo: number) => {
-    // let pageNo = (page - 1 + charts.length) % charts.length;
-    let fieldsOfView = charts[pageNo].dimList.concat(charts[pageNo].meaList)
-    let scoreOfDimensionSubset = dimScores.filter(dim => fieldsOfView.includes(dim[0]));
-    // todo:
-    // specification api is not easy to use.
-    // + should not accpet score, it should only accept a order, which allow use to use it more in a more flexible way.
-    // + accept a dimensions: Field[], measures: Field[] and cleanData(cookedData)
-    // let {schema, aggData} = specificationWithFieldsAnalysisResult(scoreOfDimensionSubset, cleanData, charts[pageNo].meaList);
-    // updateState(draft => draft.currentPage = pageNo)
-    // setDataView({
-    //   schema,
-    //   aggData,
-    //   fieldFeatures: scoreOfDimensionSubset.map(item => item[3]),
-    //   dimensions: charts[pageNo].dimList,
-    //   measures: charts[pageNo].meaList
-    // })
   }
+
+
   // ChevronRight
   const commandBarList = [
     {
@@ -283,7 +249,13 @@ function App() {
     }
     return Number(num)
   }
-  
+  // console.log(cleanMethod)
+  const preparedData = useMemo<DataSource>(() => {
+    const dimensions = state.fields.filter(field => field.type === 'dimension').map(field => field.name)
+    const measures = state.fields.filter(field => field.type === 'measure').map(field => field.name)
+    return cleanData(deepcopy(dataSource), dimensions, measures, cleanMethod);
+  }, [state.fields, dataSource, cleanMethod])
+  // console.log(preparedData, state.cookedDataSource);
   return (
     <div>
       <div className="header-bar" >
@@ -294,7 +266,7 @@ function App() {
         </Pivot>
       </div>
       {
-        pageStatus.current.pivotKey === 'pivot-3' && <Gallery subspaceList={subspaceList} dataSource={state.cookedDataSource} summaryData={summaryData}  />
+        pageStatus.current.pivotKey === 'pivot-3' && <Gallery subspaceList={state.subspaceList} dataSource={state.cookedDataSource} summaryData={summaryData}  />
       }
       {
         pageStatus.current.pivotKey === 'pivot-1' && <div className="content-container">
@@ -307,15 +279,7 @@ function App() {
           <div className="card">
             <Stack horizontal>
               <DefaultButton disabled={dataSource.length === 0} iconProps={{iconName: 'Financial'}} text="Extract Insights" onClick={() => {
-                const dimensions = state.fields.filter(field => field.type === 'dimension').map(field => field.name)
-                const measures = state.fields.filter(field => field.type === 'measure').map(field => field.name)
-                // hint: dropNull works really bad when we test titanic dataset.
-                // const cleanData = Cleaner.dropNull(dataSource, dimensions, measures);
-                // useMode fails when there are more null values than normal values;
-                // const cleanData = Cleaner.useMode(dataSource, dimensions.concat(measures));
-                const cleanData = Cleaner.simpleClean(dataSource, dimensions, measures);
-
-                univariateSummary(cleanData, state.fields);
+                univariateSummary(preparedData, state.fields);
                 setPageStatus(draft => {
                   draft.current.pivotKey = 'pivot-2';
                   draft.show.insightBoard = true
@@ -353,17 +317,30 @@ function App() {
               </Callout>
               </div>
               <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="field setting" onClick={() => { setPageStatus(draft => { draft.show.fieldConfig = true })}} />
+              
             </Stack>
+            <div style={{ margin: '20px 0px'}}>
+              <ComboBox
+                styles={{ root: { maxWidth: '180px'}}}
+                selectedKey={cleanMethod}
+                label="Clean Method"
+                allowFreeform={true}
+                autoComplete="on"
+                options={cleanMethodList}
+                onChange={(e, option) => {option && setCleanMethod(option.key as CleanMethod)}}
+              />
+            </div>
+            <i style={{fontSize: 12, fontWeight: 300, color: '#595959'}}>Number of records {preparedData.length}</i>
             <DataTable
               fields={state.fields}
-              dataSource={dataSource} />
+              dataSource={preparedData} />
           </div>
         </div>
       }
       {
         pageStatus.current.pivotKey === 'pivot-2' && <div className="content-container">
           <div className="card">
-            <NoteBook summaryData={summaryData} subspaceList={subspaceList} dataSource={state.cookedDataSource} />
+            <NoteBook summaryData={summaryData} subspaceList={state.subspaceList} dataSource={state.cookedDataSource} />
           </div>
         </div>
       }
