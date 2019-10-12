@@ -1,5 +1,5 @@
 import express from 'express';
-
+import path from 'path';
 import bodyParser from 'body-parser';
 import router from './router';
 
@@ -20,6 +20,8 @@ app.all('*',function (req, res, next) {
     next();
   }
 });
+
+app.use(express.static(path.resolve(__dirname, '../../frontend/build')))
 
 for (let i = 0; i < router.length; i++) {
   app[router[i].method](router[i].url, router[i].controller)
