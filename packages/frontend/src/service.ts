@@ -1,4 +1,5 @@
 import { DataSource, BIField, Field, FieldType, OperatorType } from './global';
+const server = '//lobay.moe:8000';
 interface SuccessResult<T> {
   success: true;
   data: T;
@@ -18,7 +19,7 @@ export interface FieldAnalysisResult extends FieldAnalysisResponse {
   newDimensions: string[];
 }
 export async function fieldsAnalysisService (cleanData: DataSource, dimensions: string[], measures: string[]): Promise<FieldAnalysisResult> {
-  const res = await fetch('//localhost:8000/api/service/fieldsAnalysis', {
+  const res = await fetch(server + '/api/service/fieldsAnalysis', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -49,7 +50,7 @@ export interface View {
 }
 
 export async function getInsightViewsService (aggData: DataSource, newDimensions: string[], measures: string[]): Promise<View[]> {
-  const res = await fetch('//localhost:8000/api/service/getInsightViews', {
+  const res = await fetch(server + '/api/service/getInsightViews', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -80,7 +81,7 @@ export interface FieldSummary {
 }
 export async function getFieldsSummaryService (dataSource: DataSource, fields: string[] | Field[]): Promise<FieldSummary[] | undefined> {
   try {
-    const res = await fetch('//localhost:8000/api/service/fieldsSummary', {
+    const res = await fetch(server + '/api/service/fieldsSummary', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -109,7 +110,7 @@ interface GroupFieldsResponse {
 }
 export async function getGroupFieldsService (dataSource: DataSource, fields: Field[]): Promise<GroupFieldsResponse | undefined> {
   try {
-    const res = await fetch('//localhost:8000/api/service/groupFields', {
+    const res = await fetch(server + '/api/service/groupFields', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -139,7 +140,7 @@ export interface Subspace {
 }
 export async function combineFieldsService (dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType): Promise<Subspace[] | undefined> {
   try {
-    const res = await fetch('//localhost:8000/api/service/combineFields', {
+    const res = await fetch(server + '/api/service/combineFields', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -177,7 +178,7 @@ export interface ViewSpace {
 export async function clusterMeasures (combinedSpaces: ViewCombinedSpace[]): Promise<ViewSpace[]> {
   let viewSpaces: ViewSpace[] = [];
   try {
-    const res = await fetch('//localhost:8000/api/service/clusterMeasures', {
+    const res = await fetch(server + '/api/service/clusterMeasures', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
