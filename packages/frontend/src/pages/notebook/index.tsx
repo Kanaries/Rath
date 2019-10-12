@@ -73,12 +73,14 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
 
   return <div>
     <h3 className="notebook header">Univariate Summary</h3>
+    <p className="state-description">Hover your mouse over the fields and see the distails and entropy reducing strategy.</p>
     {state.loading.univariateSummary && <ProgressIndicator description="analyzing" />}
     <div className="notebook content container">
       <FieldAnalysisBoard originSummary={originSummary} groupedSummary={groupedSummary} />
     </div>
 
     <h3 className="notebook header">Subspace Searching</h3>
+    <p className="state-description">Try to choose one row(combination of dimensions) of the subspace and see the changes of the processes below.</p>
     {state.loading.subspaceSearching && <ProgressIndicator description="analyzing" />}
     {!state.loading.subspaceSearching && <Slider value={state.topK.dimensionSize * 100} label="top k percent dimension used" max={100} valueFormat={(value: number) => `${value}%`} showValue={true}
       onChange={(value: number) => {
@@ -114,11 +116,15 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     </div>
 
     <h3 className="notebook header">Measurement Clustering</h3>
+    <p className="state-description">Try to choose one group to visualize them.</p>
     <div className="notebook content center container">
       <ClusterBoard adjMatrix={clusterState.matrix} measures={clusterState.measures} onFocusGroup={(measInView) => { setMeasuresInView(measInView); console.log('view in measures', measInView) }} />
     </div>
 
     <h3 className="notebook header">Visualization</h3>
+    <p className="state-description">
+      If there is no result here, try to click one group of measures in <b>Clustering</b> process above.
+    </p>
     <Toggle checked={isAggregated} label="aggregate measures" defaultChecked onText="On" offText="Off" onChange={(e, checked: boolean | undefined) => {setIsAggregated(!!checked)}} />
     <div className="notebook content center container">
       <VegaBase defaultAggregated={isAggregated} defaultStack={true} aggregator={'sum'}

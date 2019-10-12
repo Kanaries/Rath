@@ -139,6 +139,12 @@ const Gallery: React.FC<GalleryProps> = (props) => {
           }
           <h2 style={{marginBottom: 0}}>Visual Insights <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="preference" onClick={() => { setPageStatus(draft => { draft.show.configPanel = true }) }} /></h2>
           <p className="state-description">Page No. {currentPage + 1} of {viewSpaces.length}</p>
+          <p className="state-description">
+            Details of the recommendation process can be seen in <b>NoteBook</b> Board. You can adjust some of the parameters and operators and see how it influence recommendation results.
+          </p>
+          <p className="state-description">
+            Try to use the setting button beside the "visual insight" title to adjust the visualization settings to get a view you prefer better.
+           </p>
           <div className="ms-Grid" dir="ltr">
             <div className="ms-Grid-row">
             <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3" style={{overflow: 'auto'}}>

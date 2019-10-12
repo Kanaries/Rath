@@ -30,6 +30,7 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 
 
 ## Usage
++ try online demo [Here](http://lobay.moe:8000)
 + use the whole application `npm run ui`.
 + or run `yarn workspace frontend start` for front end dev, run `yarn work space backend dev` for backend.
 
@@ -39,12 +40,12 @@ npm i visual-insights --save
 ```
 
 ## How does it work
-The working process are visualized in notebook board in the application.
+The working process are visualized in notebook board in the application. *** Main process of the algorithm is shown in the `notebook` board. ***
 
 ![](https://cdn.nlark.com/yuque/0/2019/png/171008/1570692438037-b2ce208d-bd1d-4b38-be27-9251bbb171d2.png)
 
 ### Univariate summary
-For the first step, visual-insights analyze all the fields in the dataset independently. It gets the fields' distributions and calculate its entropy. Besides, it will define a semantic type (`quantitative`, `ordinal`, `temporal`, `nominal`) for each field.
+For the first step, visual-insights analyze all the fields in the dataset independently. It gets the fields' distributions and calculate its entropy. Besides, it will define a semantic type (`quantitative`, `ordinal`, `temporal`, `nominal`) for each field. More details of the field will be displayed when hover your mouse on the fields.
 
 ![](https://cdn.nlark.com/yuque/0/2019/jpeg/171008/1570614609678-33d5f2c1-e51e-4bcd-8343-271a041f7519.jpeg)
 
@@ -56,12 +57,14 @@ In this step, visual insights search the combination of fields, and calculate th
 ![](https://cdn.nlark.com/yuque/0/2019/svg/171008/1570614537188-bf841fc7-90ba-47fe-a5f1-83304a4f464a.svg)
 
 ### Correlation
-After one subspace is specified, it will analyze the correlation of measures in the space.
+After one subspace is specified (try to click one row of subsapce in notebook), it will analyze the correlation of measures in the space.
 
 ![](https://cdn.nlark.com/yuque/0/2019/svg/171008/1570614552078-2a6635c3-b81f-4381-b82d-e81b3d30826a.svg)
 
 ### Clustering
 It helps you to cluster all the measures based on their correlation. It puts all the variables who are strongly related together to make a specific view (with specified dimenions).
+
+Click one group of measures and visualization will be shown at the bottom of the page.
 
 ![](https://cdn.nlark.com/yuque/0/2019/svg/171008/1570614439983-cf6d757a-928d-4f42-b46c-f1de3a76f4b1.svg)
 

@@ -291,7 +291,7 @@ function App() {
               <DefaultButton disabled={dataSource.length === 0} iconProps={{iconName: 'Financial'}} text="Extract Insights" onClick={() => {
                 univariateSummary(preparedData, state.fields);
                 setPageStatus(draft => {
-                  draft.current.pivotKey = 'pivot-2';
+                  draft.current.pivotKey = 'pivot-3';
                   draft.show.insightBoard = true
                 })
                 // extractInsights(dataSource, fields);
@@ -340,6 +340,9 @@ function App() {
                 onChange={(e, option) => {option && setCleanMethod(option.key as CleanMethod)}}
               />
             </div>
+            <p style={{fontSize: 12, fontWeight: 400, color: '#595959'}}>
+              Remember to adjust the fields' types and cleaning strategy before extracting insights.
+            </p>
             <i style={{fontSize: 12, fontWeight: 300, color: '#595959'}}>Number of records {preparedData.length}</i>
             <DataTable
               fields={state.fields}
