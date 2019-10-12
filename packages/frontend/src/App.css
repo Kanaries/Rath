@@ -24,6 +24,15 @@
   background-color: #fff;
   min-height: 60px;
 }
+.logo{
+  float: right;
+  width: 36px;
+  padding: 1px;
+  cursor: pointer;
+}
+.logo>img{
+  width: 100%;
+}
 h2, h3 {
   color: #323130;
   font-weight: 500;

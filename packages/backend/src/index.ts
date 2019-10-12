@@ -20,8 +20,12 @@ app.all('*',function (req, res, next) {
     next();
   }
 });
+const staticFilePath = path.resolve(__dirname, '../../frontend/build');
+app.use(express.static(staticFilePath))
 
-app.use(express.static(path.resolve(__dirname, '../../frontend/build')))
+app.get('/', function (req, res) {
+  res.sendFile( staticFilePath + '/index.html' );
+})
 
 for (let i = 0; i < router.length; i++) {
   app[router[i].method](router[i].url, router[i].controller)

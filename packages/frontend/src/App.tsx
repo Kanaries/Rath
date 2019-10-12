@@ -7,6 +7,7 @@ import FieldPanel from './components/fieldConfig';
 import BaseChart from './demo/vegaBase';
 import { FileLoader, useComposeState, deepcopy } from './utils/index';
 import './App.css';
+
 import {
   fieldsAnalysisService,
   getInsightViewsService, View,
@@ -259,11 +260,20 @@ function App() {
   return (
     <div>
       <div className="header-bar" >
-        <Pivot selectedKey={pageStatus.current.pivotKey} onLinkClick={(item) => { item && item.props.itemKey && setPageStatus(draft => { draft.current.pivotKey = item.props.itemKey! }) }} headersOnly={true}>
-          {
-            pivotList.map(pivot => <PivotItem key={pivot.itemKey} headerText={pivot.title} itemKey={pivot.itemKey} />)
-          }
-        </Pivot>
+        <div className="ms-Grid-row">
+          <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg1">
+            <a href="https://github.com/ObservedObserver/visual-insights" className="logo">
+              <img src="/logo.png" />
+            </a>
+          </div>
+          <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg11">
+            <Pivot selectedKey={pageStatus.current.pivotKey} onLinkClick={(item) => { item && item.props.itemKey && setPageStatus(draft => { draft.current.pivotKey = item.props.itemKey! }) }} headersOnly={true}>
+              {
+                pivotList.map(pivot => <PivotItem key={pivot.itemKey} headerText={pivot.title} itemKey={pivot.itemKey} />)
+              }
+            </Pivot>
+          </div>
+        </div>
       </div>
       {
         pageStatus.current.pivotKey === 'pivot-3' && <Gallery subspaceList={state.subspaceList} dataSource={state.cookedDataSource} summaryData={summaryData}  />
