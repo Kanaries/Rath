@@ -39,8 +39,8 @@ function sum(arr: number[]): number {
 
 function correlation(dataSource: DataSource, fieldX: string, fieldY: string): number {
   let r = 0;
-  let xBar = sum(dataSource.map(r => r[fieldX]));
-  let yBar = sum(dataSource.map(r => r[fieldY]));
+  let xBar = sum(dataSource.map(r => r[fieldX])) / dataSource.length;
+  let yBar = sum(dataSource.map(r => r[fieldY])) / dataSource.length;
   r = sum(dataSource.map(r => (r[fieldX] - xBar) * (r[fieldY] - yBar))) /
   Math.sqrt(sum(dataSource.map(r => Math.pow(r[fieldX] - xBar, 2))) * sum(dataSource.map(r => Math.pow(r[fieldY] - yBar, 2))));
   return r;
