@@ -1,5 +1,11 @@
 import { DataSource, BIField, Field, FieldType, OperatorType } from './global';
-const server = '//lobay.moe:8000';
+let server = '//lobay.moe:8000';
+
+if (process.env.NODE_ENV === 'development') {
+  console.log('using dev server')
+  server = '//localhost:8000'
+}
+
 interface SuccessResult<T> {
   success: true;
   data: T;
@@ -166,7 +172,7 @@ export async function combineFieldsService (dataSource: DataSource, dimensions: 
 
 export interface ViewCombinedSpace {
   dimensions: string[];
-  measures: string[];
+  measures: Array<{name: string; value: number}>;
   matrix: number[][];
 }
 

@@ -230,6 +230,7 @@ function App() {
       } else if (file.type === 'application/json') {
         rawData = await FileLoader.jsonLoader(file);
       }
+      rawData = Cleaner.dropNullColumn(rawData, Object.keys(rawData[0])).dataSource;
       tmpFields = Object.keys(rawData[0]).map(fieldName => {
         return {
           name: fieldName,

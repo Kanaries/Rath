@@ -16,6 +16,7 @@ interface SubspacesProps {
 }
 const Subspaces: React.FC<SubspacesProps> = (props) => {
   const { subspaceList, onSpaceChange } = props;
+  console.log(subspaceList)
   const [curIndex, setCurIndex] = useState(0);
   const spaceChart = useRef<HTMLDivElement>(null)
   const relationChart = useRef<HTMLDivElement>(null)

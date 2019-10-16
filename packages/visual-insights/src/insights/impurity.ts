@@ -25,7 +25,7 @@ function getCombination(elements: string[], start: number = 1, end: number = ele
 
 function linearMapPositive (arr: number[]): number[] {
   let min = Math.min(...arr);
-  return arr.map(a => a + min + 1);
+  return arr.map(a => a - min + 1);
 }
 
 function sum(arr: number[]): number {

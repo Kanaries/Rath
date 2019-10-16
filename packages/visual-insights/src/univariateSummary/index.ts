@@ -112,16 +112,18 @@ export function groupFields(dataSource: DataSource, fields: Field[]): GroupResul
   for (let field of fields) {
     let newFieldName = `${field.name}(group)`;
     if (field.type === 'quantitative' && memberCount(dataSource, field.name).length > MIN_QUAN_MEMBER_SIZE * 2) {
-      groupedData = groupContinousField({
-        dataSource: groupedData,
-        field: field.name,
-        newField: newFieldName,
-        groupNumber: 8
-      })
-      newFields.push({
-        name: newFieldName,
-        type: 'ordinal'
-      })
+      if (!isUniformDistribution(dataSource, field.name)) {
+        groupedData = groupContinousField({
+          dataSource: groupedData,
+          field: field.name,
+          newField: newFieldName,
+          groupNumber: 8
+        })
+        newFields.push({
+          name: newFieldName,
+          type: 'ordinal'
+        })
+      }
     } else if ((field.type === 'ordinal' || field.type === 'nominal') && memberCount(dataSource, field.name).length > MIN_QUAN_MEMBER_SIZE) {
       if (!isUniformDistribution(dataSource, field.name)) {
         groupedData = groupCategoryField({

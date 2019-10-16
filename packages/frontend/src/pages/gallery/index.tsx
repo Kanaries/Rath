@@ -83,9 +83,9 @@ const Gallery: React.FC<GalleryProps> = (props) => {
   useEffect(() => {
     setLoading(true);
     clusterMeasures(subspaceList.map(space => {
-      return {
+      return {     
         dimensions: space.dimensions,
-        measures: space.measures.map(mea => mea.name),
+        measures: space.measures,
         matrix: space.correlationMatrix
       }
     })).then(viewSpaces => {
@@ -117,12 +117,32 @@ const Gallery: React.FC<GalleryProps> = (props) => {
           dimensions,
           measures
         })
+        // ugly code
+        // todo:
+        // implement this in specification
+        // + check geomType
+        // + check geom number and aggregated geom number
+        if (schema.geomType && schema.geomType.includes('point')) {
+          setVisualConfig(config => {
+            return {
+              ...config,
+              defaultAggregated: false
+            }
+          })
+        } else {
+          setVisualConfig(config => {
+            return {
+              ...config,
+              defaultAggregated: true
+            }
+          })
+        }
       } catch (error) {
         console.log(error)
       }
     }
   }, [viewSpaces, currentPage]);
-  console.log(pageStatus, pageStatus.show)
+
   return (
     <div className="content-container">
       <PreferencePanel show={pageStatus.show.configPanel}

@@ -84,8 +84,8 @@ const initState: GlobalState = {
     subspaceSearching: false
   },
   topK: {
-    subspacePercentSize: 0.7,
-    dimensionSize: 0.8
+    subspacePercentSize: 0.3,
+    dimensionSize: 0.72
   },
   subspaceList: []
 };

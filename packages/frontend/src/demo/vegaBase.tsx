@@ -151,7 +151,7 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
     if (container.current !== null) {
       if (position.length > 0 && geomType.length > 0) {
         let spec = getSpecification()
-        console.log(spec)
+        // console.log(spec)
         embed(container.current, spec);
       }
     }

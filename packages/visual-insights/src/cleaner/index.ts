@@ -1,6 +1,29 @@
 import { deepcopy, isFieldNumeric, isFieldTime, memberCount } from '../utils';
 import { DataSource } from '../commonTypes';
-
+function dropNullColumn (dataSource: DataSource, fields: string[]): { fields: string[]; dataSource: DataSource} {
+  let keepFields = fields.map(() => false);
+  for (let record of dataSource) {
+    for (let i = 0; i < fields.length; i++) {
+      let field = fields[i];
+      if (typeof record[field] !== 'undefined' && record[field] !== '' && record[field] !== null) {
+        keepFields[i] = true;
+      }
+    }
+  }
+  let finalFields = fields.filter((field, index) => {
+    return keepFields[index];
+  });
+  return {
+    fields: finalFields,
+    dataSource: dataSource.map(record => {
+      let ans = {};
+      for (let field of finalFields) {
+        ans[field] = record[field]
+      }
+      return ans
+    })
+  }
+}
 function dropNull(dataSource: DataSource, dimensions: string[], measures: string[]): DataSource {
   let data = [];
   for (let record of dataSource) {
@@ -116,4 +139,4 @@ function simpleClean (dataSource: DataSource, dimensions: string[], measures: st
 } 
 
 
-export { simpleClean, dropNull, useMode }
+export { simpleClean, dropNull, useMode, dropNullColumn }
