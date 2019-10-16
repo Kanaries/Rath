@@ -1,9 +1,9 @@
 import { DataSource, BIField, Field, FieldType, OperatorType } from './global';
 let server = '//lobay.moe:8000';
 
-if (process.env.NODE_ENV === 'development') {
-  console.log('using dev server')
-  server = '//localhost:8000'
+if (process.env.NODE_ENV !== 'production') {
+  console.log('using dev server');
+  server = '//localhost:8000';
 }
 
 interface SuccessResult<T> {
