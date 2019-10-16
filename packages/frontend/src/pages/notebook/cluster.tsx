@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { clusterMeasures, kruskalMST } from 'visual-insights';
+import { useGlobalState } from '../../state';
 import embed from 'vega-embed';
 // cluster should be used for small graph because the number of measure is limited. 
 // Browser may be more likely crashed by other algorithm or data structure or memory used in the whole analysis pipline.
@@ -30,6 +31,7 @@ interface TreeData {
 }
 const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
   const { adjMatrix, measures, onFocusGroup } = props;
+  const [state, updateState] = useGlobalState();
   const chart = useRef<HTMLDivElement>(null);
   // const groups = useMemo<string[][]>(() => {
   //   return clusterMeasures({
@@ -42,10 +44,10 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
      * todo: 
      * maxGroupNumber = the measures length / max visual channel for measure.
      */
-    let maxGroupNumber = measures.length / 4
+    let maxGroupNumber = state.maxGroupNumber
     let { edgesInMST, groups } = kruskalMST(adjMatrix, maxGroupNumber);
     return { edgesInMST, groups }
-  }, [adjMatrix])
+  }, [adjMatrix, state.maxGroupNumber])
   const treeData = useMemo<TreeData>(() => {
     let { edgesInMST, groups } = clusterResult;
     const edges: VegaEdge[] = edgesInMST.map(edge => {
@@ -69,7 +71,7 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
       nodes,
       edges
     }
-  }, [adjMatrix, measures])
+  }, [measures, clusterResult])
   useEffect(() => {
     if (chart.current && measures.length > 0) {
       embed(chart.current, {

@@ -258,6 +258,12 @@ function App() {
     return cleanData(deepcopy(dataSource), dimensions, measures, cleanMethod);
   }, [state.fields, dataSource, cleanMethod])
   // console.log(preparedData, state.cookedDataSource);
+
+  // useEffect(() => {
+  //   updateState(draft => {
+  //     draft.topK.dimensionSize = Math.min(1, 90 / preparedData.length + 0.1)
+  //   })
+  // }, [preparedData])
   return (
     <div>
       <div className="header-bar" >

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { DataSource, BIField, Field } from '../../global';
 import FieldAnalysisBoard from './fieldAnalysis';
 import Subspaces from './subspaces';
@@ -70,7 +70,11 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     }
 
   }, [dimScores, clusterState, dataSource, measuresInView])
-
+  useEffect(() => {
+    updateState(draft => {
+      draft.maxGroupNumber = state.cookedMeasures.length / 4
+    })
+  }, [state.cookedMeasures])
   return <div>
     <h3 className="notebook header">Univariate Summary</h3>
     <p className="state-description">Hover your mouse over the fields and see the distails and entropy reducing strategy.</p>
@@ -117,6 +121,18 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
 
     <h3 className="notebook header">Measurement Clustering</h3>
     <p className="state-description">Try to choose one group to visualize them.</p>
+    <Slider
+      label="Max Group Number"
+      min={1}
+      max={state.cookedMeasures.length || 4}
+      step={1}
+      // defaultValue={clusterState.measures.length / 4}
+      value={state.maxGroupNumber}
+      showValue={true}
+      onChange={(value: number) => { updateState(draft => {
+        draft.maxGroupNumber = value
+      })}}
+    />
     <div className="notebook content center container">
       <ClusterBoard adjMatrix={clusterState.matrix} measures={clusterState.measures} onFocusGroup={(measInView) => { setMeasuresInView(measInView); console.log('view in measures', measInView) }} />
     </div>

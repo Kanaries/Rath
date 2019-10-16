@@ -5,6 +5,7 @@ import { FileLoader, useComposeState } from '../../utils/index';
 import BaseChart, { Specification } from '../../demo/vegaBase';
 import { DataSource, Record, BIField, Field, OperatorType } from '../../global';
 import { specification } from 'visual-insights';
+import VisSummary from '../../plugins/visSummary/index';
 import { useGlobalState } from '../../state';
 import {
   Subspace,
@@ -46,6 +47,7 @@ const Gallery: React.FC<GalleryProps> = (props) => {
   const { originSummary, groupedSummary } = summaryData;
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
+  const [state, updateState] = useGlobalState();
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
@@ -82,8 +84,10 @@ const Gallery: React.FC<GalleryProps> = (props) => {
   
   useEffect(() => {
     setLoading(true);
-    clusterMeasures(subspaceList.map(space => {
-      return {     
+    // todo:
+    // should group number be the same for different subspaces?
+    clusterMeasures(state.maxGroupNumber, subspaceList.map(space => {
+      return {
         dimensions: space.dimensions,
         measures: space.measures,
         matrix: space.correlationMatrix
@@ -92,7 +96,7 @@ const Gallery: React.FC<GalleryProps> = (props) => {
       setViewSpaces(viewSpaces);
       setLoading(false);
     })
-  }, [subspaceList, dataSource]);
+  }, [subspaceList, dataSource, state.maxGroupNumber]);
   
   const dimScores = useMemo<[string, number, number, Field][]>(() => {
     return [...originSummary, ...groupedSummary].map(field => {
@@ -142,7 +146,11 @@ const Gallery: React.FC<GalleryProps> = (props) => {
       }
     }
   }, [viewSpaces, currentPage]);
-
+  const currentSpace = useMemo<Subspace>(() => {
+    return subspaceList.find(subspace => {
+      return subspace.dimensions.join(',') === dataView.dimensions.join(',')
+    })!
+  }, [subspaceList, currentPage, dataView])
   return (
     <div className="content-container">
       <PreferencePanel show={pageStatus.show.configPanel}
@@ -176,6 +184,7 @@ const Gallery: React.FC<GalleryProps> = (props) => {
               <pre>
                 {JSON.stringify(dataView.schema, null, 2)}
               </pre>
+              <VisSummary dimensions={dataView.dimensions} measures={dataView.measures} dimScores={dimScores} space={currentSpace} spaceList={subspaceList} schema={dataView.schema}  />
             </div>
             <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg9" style={{overflow: 'auto'}}>
               <BaseChart

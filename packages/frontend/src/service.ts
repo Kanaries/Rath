@@ -181,7 +181,7 @@ export interface ViewSpace {
   measures: string[]
 }
 
-export async function clusterMeasures (combinedSpaces: ViewCombinedSpace[]): Promise<ViewSpace[]> {
+export async function clusterMeasures (maxGroupNumber: number, combinedSpaces: ViewCombinedSpace[]): Promise<ViewSpace[]> {
   let viewSpaces: ViewSpace[] = [];
   try {
     const res = await fetch(server + '/api/service/clusterMeasures', {
@@ -190,6 +190,7 @@ export async function clusterMeasures (combinedSpaces: ViewCombinedSpace[]): Pro
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        maxGroupNumber,
         spaces: combinedSpaces
       })
     });

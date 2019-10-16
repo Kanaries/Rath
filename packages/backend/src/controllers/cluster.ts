@@ -11,6 +11,7 @@ interface Space {
 }
 interface RequestBody {
   spaces: Space[];
+  maxGroupNumber: number;
 }
 
 function sum (arr: number[]) {
@@ -24,10 +25,10 @@ function sum (arr: number[]) {
 const cluster: RequestHandler = (req, res) => {
   console.log('[cluster measures]')
   try {
-    const { spaces } = req.body as RequestBody;
+    const { spaces, maxGroupNumber } = req.body as RequestBody;
     let result = [];
     for (let space of spaces) {
-      let maxGroupNumber = space.measures.length / 4
+      // let maxGroupNumber = space.measures.length / 4
       const { edgesInMST, groups } = kruskalMST(space.matrix, maxGroupNumber);
       let measureGroups: Map<number, MeasureDetail[]> = new Map();
       for (let i = 0; i < groups.length; i++) {
