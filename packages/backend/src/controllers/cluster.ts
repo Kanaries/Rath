@@ -41,7 +41,7 @@ const cluster: RequestHandler = (req, res) => {
           dimensions: space.dimensions,
           measures: group.map(mea => mea.name),
           // how to get a good score here ？
-          score: sum(group.map(mea => mea.value)) / group.length
+          score: sum(group.map(mea => mea.value))
         })
       }
     }
