@@ -10,7 +10,7 @@ interface CombineFieldsRequest {
 const combineFields: RequestHandler = (req, res) => {
   console.log('[combine fields]')
   try {
-    const { dataSource, dimensions, measures, operator, topKPercent = 0.3 } = req.body as CombineFieldsRequest;
+    const { dataSource, dimensions, measures, operator, topKPercent = 1 } = req.body as CombineFieldsRequest;
     let impurityList = analysisDimensions(dataSource, dimensions, measures, operator).map(dimReport => {
       let sum = 0;
       for (let key in dimReport[1]) {
