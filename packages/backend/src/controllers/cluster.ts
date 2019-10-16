@@ -27,7 +27,8 @@ const cluster: RequestHandler = (req, res) => {
     const { spaces } = req.body as RequestBody;
     let result = [];
     for (let space of spaces) {
-      const { edgesInMST, groups } = kruskalMST(space.matrix);
+      let maxGroupNumber = space.measures.length / 4
+      const { edgesInMST, groups } = kruskalMST(space.matrix, maxGroupNumber);
       let measureGroups: Map<number, MeasureDetail[]> = new Map();
       for (let i = 0; i < groups.length; i++) {
         if (!measureGroups.has(groups[i])) {
