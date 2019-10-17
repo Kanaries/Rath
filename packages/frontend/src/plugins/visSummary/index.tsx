@@ -38,15 +38,16 @@ const StoryTeller: React.FC<StoryTellerProps> = (props) => {
   }, [])
   const bestMeasure = useMemo<string | undefined>(() => {
     if (typeof space === 'undefined') return;
+    const measuresInView = space.measures.filter(mea => measures.includes(mea.name));
     let min = Infinity;
     let minPos = 0;
-    for (let i = 0; i < space.measures.length; i++) {
-      if (space.measures[i].value < min) {
-        min = space.measures[i].value;
+    for (let i = 0; i < measuresInView.length; i++) {
+      if (measuresInView[i].value < min) {
+        min = measuresInView[i].value;
         minPos = i;
       }
     }
-    return space.measures[minPos].name;
+    return measuresInView[minPos].name;
   }, [measures, space])
 
   const countDiffField = useMemo<string | undefined>(() => {
