@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { DataSource, BIField, Field } from '../../global';
+import { DataSource, Field } from '../../global';
 import FieldAnalysisBoard from './fieldAnalysis';
 import Subspaces from './subspaces';
 import { FieldSummary, Subspace, combineFieldsService } from '../../service';
 import ClusterBoard from './cluster';
-import { clusterMeasures, kruskalMST, specification } from 'visual-insights';
-import { DefaultButton, ProgressIndicator, Toggle, Slider } from 'office-ui-fabric-react';
+import { specification } from 'visual-insights';
+import { ProgressIndicator, Toggle, Slider } from 'office-ui-fabric-react';
 import { useGlobalState } from '../../state';
 import VegaBase from '../../demo/vegaBase';
 import './index.css';
@@ -13,16 +13,15 @@ import './index.css';
 interface NoteBookProps {
   dataSource: DataSource;
   // dimScores: [string, number, number, Field][],
-  summaryData: {
-    originSummary: FieldSummary[];
-    groupedSummary: FieldSummary[]
+  summary: {
+    origin: FieldSummary[];
+    grouped: FieldSummary[]
   };
   subspaceList: Subspace[]
 }
 const NoteBook: React.FC<NoteBookProps> = (props) => {
-  const { summaryData, subspaceList, dataSource } = props;
+  const { summary, subspaceList, dataSource } = props;
   const [state, updateState] = useGlobalState();
-  const { originSummary, groupedSummary } = summaryData;
   const [isAggregated, setIsAggregated] = useState(false);
   interface ClusterState {
     measures: string[];
@@ -41,10 +40,10 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
   // todo:
   // should be updated after designing new specification api
   const dimScores = useMemo<[string, number, number, Field][]>(() => {
-    return [...originSummary, ...groupedSummary].map(field => {
+    return [...summary.origin, ...summary.grouped].map(field => {
       return [field.fieldName, field.entropy, field.maxEntropy, { name: field.fieldName, type: field.type }]
     });
-  }, [originSummary, groupedSummary])
+  }, [summary.origin, summary.grouped])
 
   const spec = useMemo(() => {
     const { dimensions, measures } = clusterState;
@@ -80,7 +79,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     <p className="state-description">Hover your mouse over the fields and see the distails and entropy reducing strategy.</p>
     {state.loading.univariateSummary && <ProgressIndicator description="analyzing" />}
     <div className="notebook content container">
-      <FieldAnalysisBoard originSummary={originSummary} groupedSummary={groupedSummary} />
+      <FieldAnalysisBoard originSummary={summary.origin} groupedSummary={summary.grouped} />
     </div>
 
     <h3 className="notebook header">Subspace Searching</h3>

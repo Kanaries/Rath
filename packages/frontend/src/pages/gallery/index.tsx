@@ -1,9 +1,9 @@
-import React, {useEffect, useState, useMemo} from 'react';
-import { DefaultButton, IconButton, Callout, Stack, ProgressIndicator, Pivot, PivotItem, CommandBar, Toggle, setFocusVisibility } from 'office-ui-fabric-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { DefaultButton, IconButton, Stack, ProgressIndicator } from 'office-ui-fabric-react';
 import PreferencePanel, { PreferencePanelConfig } from '../../components/preference';
-import { FileLoader, useComposeState } from '../../utils/index';
+import { useComposeState } from '../../utils/index';
 import BaseChart, { Specification } from '../../demo/vegaBase';
-import { DataSource, Record, BIField, Field, OperatorType } from '../../global';
+import { DataSource, Field } from '../../global';
 import { specification } from 'visual-insights';
 import VisSummary from '../../plugins/visSummary/index';
 import { useGlobalState } from '../../state';
@@ -36,15 +36,14 @@ interface GalleryProps {
    * dataSource here should be cookedData.
    */
   dataSource: DataSource;
-  summaryData: {
-    originSummary: FieldSummary[];
-    groupedSummary: FieldSummary[]
+  summary: {
+    origin: FieldSummary[];
+    grouped: FieldSummary[]
   },
 }
 
 const Gallery: React.FC<GalleryProps> = (props) => {
-  const { dataSource, summaryData, subspaceList } = props;
-  const { originSummary, groupedSummary } = summaryData;
+  const { dataSource, summary, subspaceList } = props;
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [state, updateState] = useGlobalState();
@@ -99,10 +98,10 @@ const Gallery: React.FC<GalleryProps> = (props) => {
   }, [subspaceList, dataSource, state.maxGroupNumber]);
   
   const dimScores = useMemo<[string, number, number, Field][]>(() => {
-    return [...originSummary, ...groupedSummary].map(field => {
+    return [...summary.origin, ...summary.grouped].map(field => {
       return [field.fieldName, field.entropy, field.maxEntropy, { name: field.fieldName, type: field.type }]
     });
-  }, [originSummary, groupedSummary]);
+  }, [summary.origin, summary.grouped]);
 
   useEffect(() => {
     const viewState = viewSpaces[currentPage];

@@ -1,7 +1,8 @@
 import produce, { Draft } from 'immer';
 import React, { useState, useMemo, createContext, useContext } from 'react';
 import { DataSource, BIField } from './global';
-import { Subspace } from './service';
+import { Subspace, FieldSummary } from './service';
+import actions, { Test, Actions } from './actions';
 export interface GlobalState {
   /**
    * `currentPage` is the current page number of visualization in explore board.
@@ -47,6 +48,10 @@ export interface GlobalState {
   }
   maxGroupNumber: number;
   subspaceList: Subspace[];
+  summary: {
+    origin: FieldSummary[];
+    grouped: FieldSummary[];
+  }
 }
 
 interface GlobalComputed {
@@ -88,10 +93,15 @@ const initState: GlobalState = {
     dimensionSize: 0.72
   },
   maxGroupNumber: 4,
-  subspaceList: []
+  subspaceList: [],
+  summary: {
+    origin: [],
+    grouped: []
+  }
 };
-
-const GloalStateContext = createContext<[GlobalState, (updater:StateUpdater<GlobalState>) => void]>(null!)
+type Dispatch<T> = (actionName: string, params: T) => void;
+type valueof<T> = T[keyof T]
+const GloalStateContext = createContext<[GlobalState, (updater:StateUpdater<GlobalState>) => void, <P extends Test>(actionName: P['name'], params: P['params']) => void]>(null!)
 
 export function GlobalStateProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<GlobalState>(initState)
@@ -103,8 +113,20 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     })
   }
 
+  const dispatch: <P extends Test>(actionName: P['name'], params: P['params']) => void = (actionName, params) => {
+    if (typeof actions[actionName] === 'function') {
+
+      // todo: fix the any type
+      
+      actions[actionName](state, updateState, params as any);
+      // actions['subspaceSearch'](state, updateState, params)
+    }
+  }
+
+
+
   return (
-    <GloalStateContext.Provider value={[state, updateState]}>
+    <GloalStateContext.Provider value={[state, updateState, dispatch]}>
       {children}
     </GloalStateContext.Provider>
   )
