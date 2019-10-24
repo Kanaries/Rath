@@ -9,7 +9,7 @@ import { ProgressIndicator, Toggle, Slider } from 'office-ui-fabric-react';
 import { useGlobalState } from '../../state';
 import VegaBase from '../../demo/vegaBase';
 import './index.css';
-
+const maxMeasureInView = 4;
 interface NoteBookProps {
   dataSource: DataSource;
   // dimScores: [string, number, number, Field][],
@@ -71,7 +71,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
   }, [dimScores, clusterState, dataSource, measuresInView])
   useEffect(() => {
     updateState(draft => {
-      draft.maxGroupNumber = state.cookedMeasures.length / 4
+      draft.maxGroupNumber = Math.round(state.cookedMeasures.length / maxMeasureInView)
     })
   }, [state.cookedMeasures])
   return <div>
