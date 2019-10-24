@@ -3,7 +3,9 @@ import {
   getFieldsSummaryService,
   FieldSummary,
   getGroupFieldsService,
-  combineFieldsService
+  combineFieldsService,
+  clusterMeasures,
+  Subspace
 } from "./service";
 import { GlobalState, StateUpdater } from './state';
 
@@ -160,21 +162,31 @@ const subspaceSearch: Action<SubspaceSeachParams> = async (state, updateState, p
 
 const extractInsights: Action<{dataSource: DataSource; fields: BIField[]}> = async (state, updateState, params) => {
   const { dataSource, fields } = params;
-  const univariateResult = await univariateSummary(state, updateState, {
-    dataSource, fields
-  });
-    if (univariateResult) {
-      const {
-        groupedData,
-        summary,
-        newDimensions,
-        measures
-      } = univariateResult;
-      await subspaceSearch(state, updateState, {
-        groupedData, summary, dimensions: newDimensions, measures, operator: "sum"
-      });
-    }
-
+  updateState(draft => {
+    draft.loading.gallery = true
+  })
+  try {
+    const univariateResult = await univariateSummary(state, updateState, {
+      dataSource, fields
+    });
+      if (univariateResult) {
+        const {
+          groupedData,
+          summary,
+          newDimensions,
+          measures
+        } = univariateResult;
+        await subspaceSearch(state, updateState, {
+          groupedData, summary, dimensions: newDimensions, measures, operator: "sum"
+        });
+      }
+  } catch (error) {
+  } finally {
+    updateState(draft => {
+      draft.loading.gallery = false
+      draft.loading.gallery = false
+    })
+  }
 }
 const actions = {
   univariateSummary,

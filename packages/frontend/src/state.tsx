@@ -1,7 +1,7 @@
 import produce, { Draft } from 'immer';
 import React, { useState, useMemo, createContext, useContext } from 'react';
 import { DataSource, BIField } from './global';
-import { Subspace, FieldSummary } from './service';
+import { Subspace, FieldSummary, ViewSpace } from './service';
 import actions, { Test, Actions } from './actions';
 export interface GlobalState {
   /**
@@ -37,6 +37,7 @@ export interface GlobalState {
   loading: {
     univariateSummary: boolean;
     subspaceSearching: boolean;
+    gallery: boolean;
   };
   
   topK: {
@@ -51,7 +52,8 @@ export interface GlobalState {
   summary: {
     origin: FieldSummary[];
     grouped: FieldSummary[];
-  }
+  };
+  viewSpaces: ViewSpace[]
 }
 
 interface GlobalComputed {
@@ -86,7 +88,8 @@ const initState: GlobalState = {
   cookedMeasures: [],
   loading: {
     univariateSummary: false,
-    subspaceSearching: false
+    subspaceSearching: false,
+    gallery: false
   },
   topK: {
     subspacePercentSize: 0.3,
@@ -97,7 +100,8 @@ const initState: GlobalState = {
   summary: {
     origin: [],
     grouped: []
-  }
+  },
+  viewSpaces: []
 };
 type Dispatch<T> = (actionName: string, params: T) => void;
 type valueof<T> = T[keyof T]

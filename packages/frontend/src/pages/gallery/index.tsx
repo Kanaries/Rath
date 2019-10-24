@@ -44,7 +44,6 @@ interface GalleryProps {
 
 const Gallery: React.FC<GalleryProps> = (props) => {
   const { dataSource, summary, subspaceList } = props;
-  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [state, updateState] = useGlobalState();
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
@@ -82,7 +81,9 @@ const Gallery: React.FC<GalleryProps> = (props) => {
   }
   
   useEffect(() => {
-    setLoading(true);
+    updateState(draft => {
+      draft.loading.gallery = true
+    })
     // todo:
     // should group number be the same for different subspaces?
     clusterMeasures(state.maxGroupNumber, subspaceList.map(space => {
@@ -93,7 +94,9 @@ const Gallery: React.FC<GalleryProps> = (props) => {
       }
     })).then(viewSpaces => {
       setViewSpaces(viewSpaces);
-      setLoading(false);
+      updateState(draft => {
+        draft.loading.gallery = false
+      })
     })
   }, [subspaceList, dataSource, state.maxGroupNumber]);
   
@@ -162,7 +165,7 @@ const Gallery: React.FC<GalleryProps> = (props) => {
       {
           <div className="card">
           {
-            !loading ? undefined : <ProgressIndicator description="calculating" />
+            (state.loading.gallery || state.loading.subspaceSearching || state.loading.univariateSummary) && <ProgressIndicator description="calculating" />
           }
           <h2 style={{marginBottom: 0}}>Visual Insights <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="preference" onClick={() => { setPageStatus(draft => { draft.show.configPanel = true }) }} /></h2>
           <p className="state-description">Page No. {currentPage + 1} of {viewSpaces.length}</p>
