@@ -1,8 +1,11 @@
-import produce, { Draft } from 'immer';
+import produce, { Draft, setAutoFreeze } from 'immer';
 import React, { useState, useMemo, createContext, useContext } from 'react';
 import { DataSource, BIField } from './global';
 import { Subspace, FieldSummary, ViewSpace } from './service';
 import actions, { Test, Actions } from './actions';
+
+setAutoFreeze(false)
+
 export interface GlobalState {
   /**
    * `currentPage` is the current page number of visualization in explore board.

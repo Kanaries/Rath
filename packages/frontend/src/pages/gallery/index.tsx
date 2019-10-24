@@ -119,7 +119,7 @@ const Gallery: React.FC<GalleryProps> = (props) => {
         setDataView({
           schema,
           fieldFeatures: fieldScores.map(f => f[3]),
-          aggData: JSON.parse(JSON.stringify(dataSource)),
+          aggData: dataSource,
           dimensions,
           measures
         })

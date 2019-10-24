@@ -145,7 +145,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
       <VegaBase defaultAggregated={isAggregated} defaultStack={true} aggregator={'sum'}
         schema={spec}
         fieldFeatures={dimScores.map(dim => dim[3])}
-        dataSource={JSON.parse(JSON.stringify(dataSource))}
+        dataSource={dataSource}
         dimensions={clusterState.dimensions} measures={measuresInView} />
     </div>
 
