@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { DetailsList, SelectionMode, IColumn, Icon, IDetailsRowProps, IDetailsRowStyles, DetailsRow, IRenderFunction, HoverCard, IExpandingCardProps } from 'office-ui-fabric-react';
+import { DetailsList, SelectionMode, IColumn, Icon, HoverCard, IExpandingCardProps } from 'office-ui-fabric-react';
 import chroma, { Color } from 'chroma-js';
 import { FieldSummary } from '../../service';
 import DistributionChart from './distributionChart';
@@ -33,29 +33,12 @@ const columns: IColumn[] = [
     fieldName: 'entropy',
     minWidth: 120
   },
-  // {
-  //   key: 'entropy(group)',
-  //   name: 'entropy(group)',
-  //   fieldName: 'entropy',
-  //   minWidth: 70
-  // },
   {
     key: 'maxEntropy',
     name: 'maxEntropy',
     fieldName: 'maxEntropy',
     minWidth: 120
-  },
-  // {
-  //   key: 'distribution',
-  //   name: 'distribution',
-  //   fieldName: 'distribution',
-  //   minWidth: 300
-  // },
-  // {
-  //   key: 'groupedDistribution',
-  //   name: 'groupedDistribution',
-  //   minWidth: 300
-  // }
+  }
 ];
 function getIconNameByFieldType (type: string): string {
   switch (type) {

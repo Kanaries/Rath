@@ -1,9 +1,9 @@
-import React, {useEffect, useState, useMemo} from 'react';
-import { DefaultButton, IconButton, Callout, Stack, ProgressIndicator, Pivot, PivotItem, CommandBar, Toggle, setFocusVisibility } from 'office-ui-fabric-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { DefaultButton, IconButton, Stack, ProgressIndicator } from 'office-ui-fabric-react';
 import PreferencePanel, { PreferencePanelConfig } from '../../components/preference';
-import { FileLoader, useComposeState } from '../../utils/index';
+import { useComposeState } from '../../utils/index';
 import BaseChart, { Specification } from '../../demo/vegaBase';
-import { DataSource, Record, BIField, Field, OperatorType } from '../../global';
+import { DataSource, Field } from '../../global';
 import { specification } from 'visual-insights';
 import VisSummary from '../../plugins/visSummary/index';
 import { useGlobalState } from '../../state';
@@ -36,16 +36,14 @@ interface GalleryProps {
    * dataSource here should be cookedData.
    */
   dataSource: DataSource;
-  summaryData: {
-    originSummary: FieldSummary[];
-    groupedSummary: FieldSummary[]
+  summary: {
+    origin: FieldSummary[];
+    grouped: FieldSummary[]
   },
 }
 
 const Gallery: React.FC<GalleryProps> = (props) => {
-  const { dataSource, summaryData, subspaceList } = props;
-  const { originSummary, groupedSummary } = summaryData;
-  const [loading, setLoading] = useState(false);
+  const { dataSource, summary, subspaceList } = props;
   const [currentPage, setCurrentPage] = useState(0);
   const [state, updateState] = useGlobalState();
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
@@ -83,7 +81,9 @@ const Gallery: React.FC<GalleryProps> = (props) => {
   }
   
   useEffect(() => {
-    setLoading(true);
+    updateState(draft => {
+      draft.loading.gallery = true
+    })
     // todo:
     // should group number be the same for different subspaces?
     clusterMeasures(state.maxGroupNumber, subspaceList.map(space => {
@@ -94,15 +94,17 @@ const Gallery: React.FC<GalleryProps> = (props) => {
       }
     })).then(viewSpaces => {
       setViewSpaces(viewSpaces);
-      setLoading(false);
+      updateState(draft => {
+        draft.loading.gallery = false
+      })
     })
   }, [subspaceList, dataSource, state.maxGroupNumber]);
   
   const dimScores = useMemo<[string, number, number, Field][]>(() => {
-    return [...originSummary, ...groupedSummary].map(field => {
+    return [...summary.origin, ...summary.grouped].map(field => {
       return [field.fieldName, field.entropy, field.maxEntropy, { name: field.fieldName, type: field.type }]
     });
-  }, [originSummary, groupedSummary]);
+  }, [summary.origin, summary.grouped]);
 
   useEffect(() => {
     const viewState = viewSpaces[currentPage];
@@ -117,7 +119,7 @@ const Gallery: React.FC<GalleryProps> = (props) => {
         setDataView({
           schema,
           fieldFeatures: fieldScores.map(f => f[3]),
-          aggData: JSON.parse(JSON.stringify(dataSource)),
+          aggData: dataSource,
           dimensions,
           measures
         })
@@ -163,7 +165,7 @@ const Gallery: React.FC<GalleryProps> = (props) => {
       {
           <div className="card">
           {
-            !loading ? undefined : <ProgressIndicator description="calculating" />
+            (state.loading.gallery || state.loading.subspaceSearching || state.loading.univariateSummary) && <ProgressIndicator description="calculating" />
           }
           <h2 style={{marginBottom: 0}}>Visual Insights <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="preference" onClick={() => { setPageStatus(draft => { draft.show.configPanel = true }) }} /></h2>
           <p className="state-description">Page No. {currentPage + 1} of {viewSpaces.length}</p>

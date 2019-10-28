@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import aggregate from 'cube-core';
 import embed from 'vega-embed';
 import { DataSource, Field, FieldType } from '../global'

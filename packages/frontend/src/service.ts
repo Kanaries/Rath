@@ -1,4 +1,4 @@
-import { DataSource, BIField, Field, FieldType, OperatorType } from './global';
+import { DataSource,  Field, FieldType, OperatorType } from './global';
 let server = '//lobay.moe:8000';
 
 if (process.env.NODE_ENV !== 'production') {

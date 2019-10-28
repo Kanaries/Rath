@@ -55,13 +55,12 @@ const StoryTeller: React.FC<StoryTellerProps> = (props) => {
     return ans ? ans[0] : undefined;
   }, [sortedFieldsScores, dimensions])
   const result = `
-  ${ schema && schema.position ? `本图主要研究***${schema.position[0]}***与***${schema.position[1]}***之间的关系` : ''}
-  ${ dimensions.length > 1 ? `+ 将数据按照***${dimensions.join(', ')}***分组，度量(指标)会表现出较强的分布差异性(规律性)` : '' }
-  ${ measures.length > 1 ? `+ ***${measures.join(', ')}***具有较强的相关性` : '' }
-  ${ countDiffField ? `+ 其中数量分布差异最明显的字段为***${countDiffField}***` : '' }
-  ${ mostInfluencedDimension ? `+ 对聚合值造成影响最大的字段为***${mostInfluencedDimension}***` : '' }
-  ${ bestMeasure ? `+ 分布差异最明显的指标为***${bestMeasure}***` : '' }
-  + 其中对数据分布差异性影响最强的维度为...
+  ${ schema && schema.position ? `Current chart mainly focus on the relationship between ***${schema.position[0]}*** and ***${schema.position[1]}***` : ''}
+  ${ dimensions.length > 1 ? `+ DataSource is grouped by ***${dimensions.join(', ')}***, measures(indicators) will propose strong difference of distribution between each other.` : '' }
+  ${ measures.length > 1 ? `+ ***${measures.join(', ')}***are strongly related to each other` : '' }
+  ${ countDiffField ? `+ The distribution of member countings of ***${countDiffField}*** seems to contain more orders and patterns.` : '' }
+  ${ mostInfluencedDimension ? `+ ***${mostInfluencedDimension}*** has great influence on aggregated measure values.` : '' }
+  ${ bestMeasure ? `+ ***${bestMeasure}*** is more likely to have patterns according to its distribution.` : '' }
   \`\`\
   `
   return (
@@ -76,7 +75,7 @@ const StoryTeller: React.FC<StoryTellerProps> = (props) => {
               closeButtonAriaLabel="Close"
               target={'#vis-summary'}
               onDismiss={() => { setIsTeachingBubbleVisible(false) }}
-              headline="图表概述"
+              headline="Chart Description"
             >
               <ReactMarkdown source={result} />
             </TeachingBubble>
