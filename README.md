@@ -1,4 +1,4 @@
-# Visual Insights
+# Rath (Visual Insights)
 
 ![](https://travis-ci.org/ObservedObserver/visual-insights.svg?branch=master)
 ![](https://img.shields.io/github/license/ObservedObserver/showme)
@@ -31,8 +31,29 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 
 ## Usage
 + try online demo [Here](http://lobay.moe:8000)
-+ use the whole application `npm run ui`.
-+ or run `yarn workspace frontend start` for front end dev, run `yarn work space backend dev` for backend.
+
+run local(dev)
+```bash
+# under project root dir
+yarn workspace visual-insights build
+
+yarn workspace frontend start
+
+yarn workspace backend dev
+
+# localhost:3000
+```
+
+production mode
+```bash
+yarn workspace visual-insights build
+
+yarn workspace frontend build
+
+yarn workspace backend dev
+
+# server:8000
+```
 
 only use the algorithm package. (`/packages/visual-insights`) ![](https://img.shields.io/npm/v/visual-insights?color=blue)
 ```bash
