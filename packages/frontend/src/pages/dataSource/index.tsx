@@ -50,8 +50,10 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
       if (file.type === 'text/csv') {
         rawData = await FileLoader.csvLoader(file);
-      } else if (file.type === 'application/json') {
+      } else if (file.type === 'application/json' || file.type === 'application/vnd.ms-excel') {
         rawData = await FileLoader.jsonLoader(file);
+      } else {
+        throw new Error(`unsupported file type=${file.type} `)
       }
       rawData = Cleaner.dropNullColumn(rawData, Object.keys(rawData[0])).dataSource;
       tmpFields = Object.keys(rawData[0]).map(fieldName => {
