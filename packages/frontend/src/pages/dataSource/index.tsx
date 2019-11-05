@@ -48,9 +48,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
       let tmpFields: BIField[] = [];
       let rawData: DataSource = [];
 
-      if (file.type === 'text/csv') {
+      if (file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
         rawData = await FileLoader.csvLoader(file);
-      } else if (file.type === 'application/json' || file.type === 'application/vnd.ms-excel') {
+      } else if (file.type === 'application/json') {
         rawData = await FileLoader.jsonLoader(file);
       } else {
         throw new Error(`unsupported file type=${file.type} `)
