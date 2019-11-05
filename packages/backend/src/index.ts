@@ -20,11 +20,11 @@ app.all('*',function (req, res, next) {
     next();
   }
 });
-const staticFilePath = path.resolve(__dirname, '../../frontend/build');
+const staticFilePath = path.resolve(__dirname, '../static');
 app.use(express.static(staticFilePath))
 
 app.get('/', function (req, res) {
-  res.sendFile( staticFilePath + '/index.html' );
+  res.sendFile( staticFilePath + '/404.html' );
 })
 
 for (let i = 0; i < router.length; i++) {
