@@ -2,8 +2,18 @@ import express from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
 import router from './router';
+import fs from 'fs';
+import http from 'http';
+import https from 'https';
+
+const privateKey  = fs.readFileSync(path.resolve(__dirname, '../safety/server.pem'), 'utf8');
+const certificate = fs.readFileSync(path.resolve(__dirname, '../safety/server.crt'), 'utf8');
+const credentials = {key: privateKey, cert: certificate};
+const httpPort = 8000;
+const httpsPort = 8443;
 
 const app = express();
+
 app.use(bodyParser.json({ limit: '300mb' }));
 app.use(bodyParser.urlencoded({ limit: '300mb', extended: false }));
 
@@ -32,11 +42,12 @@ for (let i = 0; i < router.length; i++) {
 }
 
 
-const server = app.listen(8000, function () {
-  const address = server.address();
-  const host = typeof address === 'string' ? address : address!.address
-  const port = typeof address === 'string' ? address : address!.port
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(credentials, app);
 
-  console.log(`应用实例，访问地址为 http://${host}:${port}`)
-
-})
+httpServer.listen(httpPort, () => {
+  console.log(`server is running on http://0.0.0.0:${httpPort}`)
+});
+httpsServer.listen(httpsPort, () => {
+  console.log(`server is running on https://0.0.0.0:${httpsPort}`)
+});

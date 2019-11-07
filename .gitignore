@@ -25,3 +25,5 @@ yarn-error.log*
 /server/dataset/
 
 .vscode
+
+safety

@@ -1,5 +1,5 @@
 import { DataSource,  Field, FieldType, OperatorType } from './global';
-let server = '//lobay.moe:8000';
+let server = '//lobay.moe:8443';
 
 if (process.env.NODE_ENV !== 'production') {
   console.log('using dev server');
