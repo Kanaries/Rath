@@ -1,18 +1,26 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { DefaultButton, IconButton, Stack, ProgressIndicator } from 'office-ui-fabric-react';
-import PreferencePanel, { PreferencePanelConfig } from '../../components/preference';
-import { useComposeState } from '../../utils/index';
-import BaseChart, { Specification } from '../../demo/vegaBase';
-import { DataSource, Field } from '../../global';
-import { specification } from 'visual-insights';
-import VisSummary from '../../plugins/visSummary/index';
-import { useGlobalState } from '../../state';
+import React, { useEffect, useState, useMemo } from "react";
+import {
+  DefaultButton,
+  IconButton,
+  Stack,
+  ProgressIndicator
+} from "office-ui-fabric-react";
+import PreferencePanel, {
+  PreferencePanelConfig
+} from "../../components/preference";
+import { useComposeState } from "../../utils/index";
+import BaseChart, { Specification } from "../../demo/vegaBase";
+import { DataSource, Field } from "../../global";
+import { specification } from "visual-insights";
+import VisSummary from "../../plugins/visSummary/index";
+import { useGlobalState } from "../../state";
+import Association from "./association/index";
 import {
   Subspace,
   clusterMeasures,
   ViewSpace,
   FieldSummary
-} from '../../service';
+} from "../../service";
 
 interface PageStatus {
   show: {
@@ -20,14 +28,14 @@ interface PageStatus {
     configPanel: boolean;
     fieldConfig: boolean;
     dataConfig: boolean;
-  }
+  };
 }
 interface DataView {
   schema: Specification;
   aggData: DataSource;
   fieldFeatures: Field[];
   dimensions: string[];
-  measures: string[]
+  measures: string[];
 }
 
 interface GalleryProps {
@@ -38,11 +46,11 @@ interface GalleryProps {
   dataSource: DataSource;
   summary: {
     origin: FieldSummary[];
-    grouped: FieldSummary[]
-  },
+    grouped: FieldSummary[];
+  };
 }
 
-const Gallery: React.FC<GalleryProps> = (props) => {
+const Gallery: React.FC<GalleryProps> = props => {
   const { dataSource, summary, subspaceList } = props;
   const [currentPage, setCurrentPage] = useState(0);
   const [state, updateState] = useGlobalState();
@@ -54,11 +62,12 @@ const Gallery: React.FC<GalleryProps> = (props) => {
       dataConfig: false
     }
   });
+  const [showAssociation, setShowAssociation] = useState(false);
   const [visualConfig, setVisualConfig] = useState<PreferencePanelConfig>({
-    aggregator: 'sum',
+    aggregator: "sum",
     defaultAggregated: true,
     defaultStack: true
-  })
+  });
   const [viewSpaces, setViewSpaces] = useState<ViewSpace[]>([]);
 
   const [dataView, setDataView] = useState<DataView>({
@@ -74,35 +83,41 @@ const Gallery: React.FC<GalleryProps> = (props) => {
     measures: []
   });
 
-
-
   const gotoPage = (pageNo: number) => {
     setCurrentPage(pageNo);
-  }
-  
+  };
+
   useEffect(() => {
     updateState(draft => {
-      draft.loading.gallery = true
-    })
+      draft.loading.gallery = true;
+    });
     // todo:
     // should group number be the same for different subspaces?
-    clusterMeasures(state.maxGroupNumber, subspaceList.map(space => {
-      return {
-        dimensions: space.dimensions,
-        measures: space.measures,
-        matrix: space.correlationMatrix
-      }
-    })).then(viewSpaces => {
+    clusterMeasures(
+      state.maxGroupNumber,
+      subspaceList.map(space => {
+        return {
+          dimensions: space.dimensions,
+          measures: space.measures,
+          matrix: space.correlationMatrix
+        };
+      })
+    ).then(viewSpaces => {
       setViewSpaces(viewSpaces);
       updateState(draft => {
-        draft.loading.gallery = false
-      })
-    })
+        draft.loading.gallery = false;
+      });
+    });
   }, [subspaceList, dataSource, state.maxGroupNumber]);
-  
+
   const dimScores = useMemo<[string, number, number, Field][]>(() => {
     return [...summary.origin, ...summary.grouped].map(field => {
-      return [field.fieldName, field.entropy, field.maxEntropy, { name: field.fieldName, type: field.type }]
+      return [
+        field.fieldName,
+        field.entropy,
+        field.maxEntropy,
+        { name: field.fieldName, type: field.type }
+      ];
     });
   }, [summary.origin, summary.grouped]);
 
@@ -113,82 +128,148 @@ const Gallery: React.FC<GalleryProps> = (props) => {
       try {
         // todo: find the strict confition instead of using try catch
         const fieldScores = dimScores.filter(field => {
-          return dimensions.includes(field[0]) || measures.includes(field[0])
-        })
-        const { schema } = specification(fieldScores, dataSource, dimensions, measures)
+          return dimensions.includes(field[0]) || measures.includes(field[0]);
+        });
+        const { schema } = specification(
+          fieldScores,
+          dataSource,
+          dimensions,
+          measures
+        );
         setDataView({
           schema,
           fieldFeatures: fieldScores.map(f => f[3]),
           aggData: dataSource,
           dimensions,
           measures
-        })
+        });
         // ugly code
         // todo:
         // implement this in specification
         // + check geomType
         // + check geom number and aggregated geom number
-        if (schema.geomType && schema.geomType.includes('point')) {
+        if (schema.geomType && schema.geomType.includes("point")) {
           setVisualConfig(config => {
             return {
               ...config,
               defaultAggregated: false
-            }
-          })
+            };
+          });
         } else {
           setVisualConfig(config => {
             return {
               ...config,
               defaultAggregated: true
-            }
-          })
+            };
+          });
         }
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
     }
   }, [viewSpaces, currentPage]);
   const currentSpace = useMemo<Subspace>(() => {
     return subspaceList.find(subspace => {
-      return subspace.dimensions.join(',') === dataView.dimensions.join(',')
-    })!
-  }, [subspaceList, currentPage, dataView])
+      return subspace.dimensions.join(",") === dataView.dimensions.join(",");
+    })!;
+  }, [subspaceList, currentPage, dataView]);
+  useEffect(() => {
+    setShowAssociation(false);
+  }, [currentPage]);
   return (
     <div className="content-container">
-      <PreferencePanel show={pageStatus.show.configPanel}
+      <PreferencePanel
+        show={pageStatus.show.configPanel}
         config={visualConfig}
-        onUpdateConfig={(config) => {
-          setVisualConfig(config)
-          setPageStatus(draft => { draft.show.configPanel = false })
+        onUpdateConfig={config => {
+          setVisualConfig(config);
+          setPageStatus(draft => {
+            draft.show.configPanel = false;
+          });
         }}
-        onClose={() => { setPageStatus(draft => { draft.show.configPanel = false }) }} />
-      {
-          <div className="card">
-          {
-            (state.loading.gallery || state.loading.subspaceSearching || state.loading.univariateSummary) && <ProgressIndicator description="calculating" />
-          }
-          <h2 style={{marginBottom: 0}}>Visual Insights <IconButton iconProps={{iconName: 'Settings'}} ariaLabel="preference" onClick={() => { setPageStatus(draft => { draft.show.configPanel = true }) }} /></h2>
-          <p className="state-description">Page No. {currentPage + 1} of {viewSpaces.length}</p>
-          <p className="state-description">
-            Details of the recommendation process can be seen in <b>NoteBook</b> Board. You can adjust some of the parameters and operators and see how it influence recommendation results.
-          </p>
-          <p className="state-description">
-            Try to use the setting button beside the "visual insight" title to adjust the visualization settings to get a view you prefer better.
-           </p>
-          <div className="ms-Grid" dir="ltr">
-            <div className="ms-Grid-row">
-            <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3" style={{overflow: 'auto'}}>
+        onClose={() => {
+          setPageStatus(draft => {
+            draft.show.configPanel = false;
+          });
+        }}
+      />
+
+      <div className="card">
+        {(state.loading.gallery ||
+          state.loading.subspaceSearching ||
+          state.loading.univariateSummary) && (
+          <ProgressIndicator description="calculating" />
+        )}
+        <h2 style={{ marginBottom: 0 }}>
+          Visual Insights{" "}
+          <IconButton
+            iconProps={{ iconName: "Settings" }}
+            ariaLabel="preference"
+            onClick={() => {
+              setPageStatus(draft => {
+                draft.show.configPanel = true;
+              });
+            }}
+          />
+          <IconButton
+            iconProps={{ iconName: "Lightbulb" }}
+            ariaLabel="digIn"
+            onClick={() => {
+              setShowAssociation(true);
+            }}
+          />
+        </h2>
+        <p className="state-description">
+          Page No. {currentPage + 1} of {viewSpaces.length}
+        </p>
+        <p className="state-description">
+          Details of the recommendation process can be seen in <b>NoteBook</b>{" "}
+          Board. You can adjust some of the parameters and operators and see how
+          it influence recommendation results.
+        </p>
+        <p className="state-description">
+          Try to use the setting button beside the "visual insight" title to
+          adjust the visualization settings to get a view you prefer better.
+        </p>
+        <div className="ms-Grid" dir="ltr">
+          <div className="ms-Grid-row">
+            <div
+              className="ms-Grid-col ms-sm6 ms-md8 ms-lg3"
+              style={{ overflow: "auto" }}
+            >
               <Stack horizontal tokens={{ childrenGap: 20 }}>
-                <DefaultButton text="Last" onClick={() => { gotoPage((currentPage - 1 + viewSpaces.length) % viewSpaces.length) }} allowDisabledFocus />
-                <DefaultButton text="Next" onClick={() => { gotoPage((currentPage + 1) % viewSpaces.length) }} allowDisabledFocus />
+                <DefaultButton
+                  text="Last"
+                  onClick={() => {
+                    gotoPage(
+                      (currentPage - 1 + viewSpaces.length) % viewSpaces.length
+                    );
+                  }}
+                  allowDisabledFocus
+                />
+                <DefaultButton
+                  text="Next"
+                  onClick={() => {
+                    gotoPage((currentPage + 1) % viewSpaces.length);
+                  }}
+                  allowDisabledFocus
+                />
               </Stack>
               <h3>Specification</h3>
-              <pre>
-                {JSON.stringify(dataView.schema, null, 2)}
-              </pre>
-              <VisSummary dimensions={dataView.dimensions} measures={dataView.measures} dimScores={dimScores} space={currentSpace} spaceList={subspaceList} schema={dataView.schema}  />
+              <pre>{JSON.stringify(dataView.schema, null, 2)}</pre>
+              <VisSummary
+                dimensions={dataView.dimensions}
+                measures={dataView.measures}
+                dimScores={dimScores}
+                space={currentSpace}
+                spaceList={subspaceList}
+                schema={dataView.schema}
+              />
             </div>
-            <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg9" style={{overflow: 'auto'}}>
+            <div
+              className="ms-Grid-col ms-sm6 ms-md4 ms-lg9"
+              style={{ overflow: "auto" }}
+            >
               <BaseChart
                 aggregator={visualConfig.aggregator}
                 defaultAggregated={visualConfig.defaultAggregated}
@@ -197,14 +278,29 @@ const Gallery: React.FC<GalleryProps> = (props) => {
                 measures={dataView.measures}
                 dataSource={dataView.aggData}
                 schema={dataView.schema}
-                fieldFeatures={dataView.fieldFeatures} />
-            </div>
+                fieldFeatures={dataView.fieldFeatures}
+              />
             </div>
           </div>
         </div>
-      }
+      </div>
+      {showAssociation && (
+        <div className="card">
+          <h2> Related Views </h2>
+          <Association
+            subspaceList={subspaceList}
+            digDimensionProps={{
+              visualConfig,
+              dataSource,
+              viewSpaces,
+              fieldScores: dimScores,
+              interestedViewSpace: viewSpaces[currentPage]
+            }}
+          />
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
 
 export default Gallery;
