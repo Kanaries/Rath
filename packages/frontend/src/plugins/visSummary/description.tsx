@@ -1,13 +1,12 @@
 import React, { useMemo, useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Subspace, FieldSummary } from '../../service';
-import { DefaultButton, TeachingBubble, DirectionalHint } from 'office-ui-fabric-react';
 
 import './index.css';
 import { Field } from '../../global';
 import { Specification } from '../../demo/vegaBase';
 
-interface StoryTellerProps {
+interface VisDescriptionProps {
   lang?: 'zh' | 'en';
   dimScores: Array<[string, number, number, Field]>;
   space: Subspace;
@@ -17,9 +16,8 @@ interface StoryTellerProps {
   schema: Specification
 }
 
-const StoryTeller: React.FC<StoryTellerProps> = (props) => {
+const VisDescription: React.FC<VisDescriptionProps> = (props) => {
   const { space, dimensions = [], measures = [], dimScores = [], spaceList = [], schema } = props;
-  const [isTeachingBubbleVisible, setIsTeachingBubbleVisible] = useState(false);
 
   const sortedFieldsScores = useMemo<Array<[string, number, number, Field]>>(() => {
     return [...dimScores].sort((a, b) => a[1] - b[1]);
@@ -64,25 +62,8 @@ const StoryTeller: React.FC<StoryTellerProps> = (props) => {
   \`\`\
   `
   return (
-    <div>
-      <DefaultButton id="vis-summary" text="Summary" onClick={() => { setIsTeachingBubbleVisible(true) }} />
-      {isTeachingBubbleVisible ? (
-          <div>
-            <TeachingBubble
-              calloutProps={{ directionalHint: DirectionalHint.bottomCenter }}
-              isWide={true}
-              hasCloseIcon={true}
-              closeButtonAriaLabel="Close"
-              target={'#vis-summary'}
-              onDismiss={() => { setIsTeachingBubbleVisible(false) }}
-              headline="Chart Description"
-            >
-              <ReactMarkdown source={result} />
-            </TeachingBubble>
-          </div>
-        ) : null}
-    </div>
+    <ReactMarkdown source={result} />
   )
 }
 
-export default StoryTeller
+export default VisDescription

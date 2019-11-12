@@ -178,7 +178,8 @@ export interface ViewCombinedSpace {
 
 export interface ViewSpace {
   dimensions: string[];
-  measures: string[]
+  measures: string[];
+  score: number;
 }
 
 export async function clusterMeasures (maxGroupNumber: number, combinedSpaces: ViewCombinedSpace[]): Promise<ViewSpace[]> {
