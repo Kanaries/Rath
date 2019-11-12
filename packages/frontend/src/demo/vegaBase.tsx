@@ -88,6 +88,8 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
   //   return [...new Set(values)];
   // }
   function getSpecification () {
+    console.log( container.current && container.current.offsetWidth)
+    let chartWidth = 600; //container.current ? container.current.offsetWidth * 0.8 : 600;
     const fieldMap: any = {
       x: position[0],
       y: position[1],
@@ -98,13 +100,13 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
       column: facets[1]
     }
     let spec: any = {
-      width: 600,
+      width: chartWidth,
       data: {
         values: table
       }
     }
     let basicSpec: any = {
-      width: 600,
+      width: chartWidth,
       mark: (geomType[0] && geomTypeMap[geomType[0]]) ? geomTypeMap[geomType[0]] : geomType[0],
       encoding: {}
     };
@@ -136,7 +138,7 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
         } : null
       ].filter(Boolean);
       let sliderSpec = {
-        width: 600,
+        width: chartWidth,
         mark: 'tick',
         selection: { brush: { encodings: ['x'], type: 'interval'}},
         encoding: {

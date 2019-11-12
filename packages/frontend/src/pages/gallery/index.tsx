@@ -204,6 +204,7 @@ const Gallery: React.FC<GalleryProps> = props => {
           Visual Insights{" "}
           <IconButton
             iconProps={{ iconName: "Settings" }}
+            title="Preference"
             ariaLabel="preference"
             onClick={() => {
               setPageStatus(draft => {
@@ -213,6 +214,7 @@ const Gallery: React.FC<GalleryProps> = props => {
           />
           <IconButton
             iconProps={{ iconName: "Lightbulb" }}
+            title="Dig In"
             ariaLabel="digIn"
             onClick={() => {
               setShowAssociation(true);

@@ -118,6 +118,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           <div ref={dataSetting}>
             <IconButton
               iconProps={{ iconName: "ExcelDocument" }}
+              title="Upload"
               ariaLabel="upload data"
               onClick={() => {
                 setPageStatus(draft => {
@@ -167,6 +168,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           </div>
           <IconButton
             iconProps={{ iconName: "Settings" }}
+            title="Field Setting"
             ariaLabel="field setting"
             onClick={() => {
               setPageStatus(draft => {

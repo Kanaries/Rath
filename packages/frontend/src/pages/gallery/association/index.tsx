@@ -39,11 +39,11 @@ const Association: React.FC<AssociationProps> = props => {
             >
               <div
                 className="ms-Grid-col ms-sm6 ms-md8 ms-lg9"
-                style={{ overflow: "auto" }}
+                style={{ overflow: 'auto' }}
               >
                 <BaseChart
                   aggregator={visualConfig.aggregator}
-                  defaultAggregated={visualConfig.defaultAggregated}
+                  defaultAggregated={view.schema.geomType && view.schema.geomType.includes("point") ? false : true}
                   defaultStack={visualConfig.defaultStack}
                   dimensions={view.dimensions}
                   measures={view.measures}
