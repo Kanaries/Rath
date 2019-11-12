@@ -24,12 +24,12 @@ const Association: React.FC<AssociationProps> = props => {
   return (
     <div>
       <div className="ms-Grid">
-        {relatedCharts.map(view => {
+        {relatedCharts.map((view, i) => {
           let currentSpace = subspaceList.find(space => {
             return isDimensionEqual(space.dimensions, view.dimensions);
           });
           return (
-            <div
+            <div key={`associate-row-${i}`}
               className="ms-Grid-row"
               style={{
                 border: "solid 1px #bfbfbf",

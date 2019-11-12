@@ -24,6 +24,7 @@ function measuresRelatedScore (measures1: string[], measures2: string[]) {
     score += meaVec1[i] * meaVec2[i];
   }
   score /= (Math.sqrt(measures1.length) * Math.sqrt(measures2.length))
+  // console.log(measures1, measures2, score)
   return score;
 }
 interface RelatedViewSpace extends ViewSpace {
@@ -45,7 +46,7 @@ function useDigDimension(props: DigDimensionProps) {
   const relatedSpaces = useMemo<ViewSpace[]>(() => {
     let ans: ViewSpace[] = []
     for (let space of viewSpaces) {
-      if (space.dimensions.length > interestedViewSpace.dimensions.length) {
+      if (space.dimensions.length > interestedViewSpace.dimensions.length && space.dimensions.length - interestedViewSpace.dimensions.length <= 2) {
         let isSubset = interestedViewSpace.dimensions.every(subDim => {
           return space.dimensions.find(dim => subDim === dim)
         })
@@ -56,15 +57,15 @@ function useDigDimension(props: DigDimensionProps) {
     }
     return ans;
   }, [interestedViewSpace, viewSpaces])
-  
   const rankedRelatedSpaces = useMemo(() => {
     let ans: RelatedViewSpace[] = [];
     for (let space of relatedSpaces) {
       let measureSimilarity = measuresRelatedScore(interestedViewSpace.measures, space.measures);
       if (measureSimilarity > similarityThrehold) {
+        // console.log({ measureSimilarity })
         ans.push({
           ...space,
-          relatedScore: measureSimilarity / space.score
+          relatedScore: space.score / Math.sqrt(measureSimilarity)
         })
       }
     }
@@ -72,7 +73,7 @@ function useDigDimension(props: DigDimensionProps) {
   }, [relatedSpaces]);
 
   const viewList = useMemo(() => {
-    const ans = relatedSpaces.slice(0, topKRelatedSpace).map(space => {
+    const ans = rankedRelatedSpaces.slice(0, topKRelatedSpace).map(space => {
       let spaceFieldScores = fieldScores.filter(field => {
         return space.dimensions.includes(field[0]) || space.measures.includes(field[0])
       })
@@ -82,7 +83,8 @@ function useDigDimension(props: DigDimensionProps) {
       };
     })
     return ans;
-  }, [rankedRelatedSpaces])
+  }, [rankedRelatedSpaces, fieldScores])
+
   return viewList
 }
 
