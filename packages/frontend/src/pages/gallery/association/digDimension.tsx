@@ -5,7 +5,6 @@ import {
 import { Field, DataSource } from '../../../global';
 import { specification } from 'visual-insights';
 import { PreferencePanelConfig } from '../../../components/preference';
-import BaseChart, { Specification } from '../../../demo/vegaBase';
 const similarityThrehold = 0.2;
 const topKRelatedSpace = 5;
 

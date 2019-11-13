@@ -3,6 +3,7 @@ import VisDescription from "../../../plugins/visSummary/description";
 import useDigDimension, { DigDimensionProps } from "./digDimension";
 import BaseChart, { Specification } from "../../../demo/vegaBase";
 import { Subspace } from "../../../service";
+import { IconButton, Stack } from "office-ui-fabric-react";
 
 function isDimensionEqual(dimensions1: string[], dimensions2: string[]) {
   if (dimensions1.length !== dimensions2.length) {
@@ -15,9 +16,10 @@ function isDimensionEqual(dimensions1: string[], dimensions2: string[]) {
 interface AssociationProps {
   digDimensionProps: DigDimensionProps;
   subspaceList: Subspace[];
+  onSelectView: (index: number) => void
 }
 const Association: React.FC<AssociationProps> = props => {
-  const { digDimensionProps, subspaceList } = props;
+  const { digDimensionProps, subspaceList, onSelectView } = props;
   const { dataSource, visualConfig, fieldScores } = digDimensionProps;
   const relatedCharts = useDigDimension(digDimensionProps);
   const fieldFeatures = fieldScores.map(f => f[3]);
@@ -56,6 +58,14 @@ const Association: React.FC<AssociationProps> = props => {
                 className="ms-Grid-col ms-sm6 ms-md4 ms-lg3"
                 style={{ fontSize: 14, color: "#8a8886", overflow: "auto" }}
               >
+                <div>
+                  
+                  <Stack tokens={{ childrenGap: 8 }} horizontal>
+                    <IconButton iconProps={{ iconName: 'Lightbulb' }} title="Interested" onClick={() => {
+                      onSelectView(view.index)
+                    }} />
+                  </Stack>
+                </div>
                 {currentSpace && (
                   <VisDescription
                     dimensions={view.dimensions}

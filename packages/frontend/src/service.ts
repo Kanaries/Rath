@@ -177,6 +177,7 @@ export interface ViewCombinedSpace {
 }
 
 export interface ViewSpace {
+  index: number;
   dimensions: string[];
   measures: string[];
   score: number;
@@ -197,7 +198,12 @@ export async function clusterMeasures (maxGroupNumber: number, combinedSpaces: V
     });
     const result: Result<ViewSpace[]> = await res.json();
     if (result.success === true) {
-      viewSpaces = result.data;
+      viewSpaces = result.data.map((v, i) => {
+        return {
+          ...v,
+          index: i
+        }
+      });
     } else {
       throw new Error('[cluster measures]' + result.message)
     }

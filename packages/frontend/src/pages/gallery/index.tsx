@@ -290,6 +290,12 @@ const Gallery: React.FC<GalleryProps> = props => {
         <div className="card">
           <h2> Related Views </h2>
           <Association
+            onSelectView={(index) => {
+              let pos = viewSpaces.findIndex(v => v.index === index)
+              if (pos > -1) {
+                gotoPage(pos);
+              }
+            }}
             subspaceList={subspaceList}
             digDimensionProps={{
               visualConfig,
