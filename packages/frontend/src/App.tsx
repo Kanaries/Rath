@@ -58,7 +58,7 @@ function App() {
               href="https://github.com/ObservedObserver/visual-insights"
               className="logo"
             >
-              <img src="/logo.png" />
+              <img src="https://chspace.oss-cn-hongkong.aliyuncs.com/logos/logo.png" />
             </a>
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg11">
