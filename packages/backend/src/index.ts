@@ -6,8 +6,8 @@ import fs from 'fs';
 import http from 'http';
 import https from 'https';
 
-const privateKey  = fs.readFileSync(path.resolve(__dirname, '../safety/server.pem'), 'utf8');
-const certificate = fs.readFileSync(path.resolve(__dirname, '../safety/server.crt'), 'utf8');
+const privateKey  = fs.readFileSync(path.resolve(__dirname, '../safety/lobay.moe.key'), 'utf8');
+const certificate = fs.readFileSync(path.resolve(__dirname, '../safety/lobay.moe.cer'), 'utf8');
 const credentials = {key: privateKey, cert: certificate};
 const httpPort = 8000;
 const httpsPort = 8443;
