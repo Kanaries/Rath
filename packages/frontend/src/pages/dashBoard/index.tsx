@@ -16,7 +16,10 @@ const DashBoardPage: React.FC = props => {
           measures: cookedMeasures
         })
       }} />
-      <div style={{ overflowX: 'auto' }}>
+      <p className="state-description">
+        Double click the chart with selection to clear selection(filter).
+      </p>
+      <div style={{ overflowX: 'auto', margin: '1rem', border: '1px solid #e8e8e8' }}>
         <CombinedChart dataSource={cookedDataSource} dashBoard={dashBoardList[0]} dimScores={dimScores} />
       </div>
     </div>

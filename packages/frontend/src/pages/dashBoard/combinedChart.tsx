@@ -67,6 +67,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
         container.current,
         {
           width: 600,
+          // autosize: {type: 'pad'},
           data: { values: dataSource },
           columns: 3,
           concat: chartSpecList.map((spec, index) => {
@@ -88,7 +89,8 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
               mark: markType,
               selection: {
                 [`selection-${index}`]: {
-                  type: "interval"
+                  type: markType === 'bar' ? 'single' : 'interval',
+                  encodings: markType === 'bar' ? ['x'] : undefined
                 }
               },
               encoding: {
@@ -109,6 +111,17 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
                     markType !== "point"
                       ? "sum"
                       : undefined
+                },
+                size: schema.size![0] ? { field: schema.size![0], type: getFieldType(schema.size![0]) } : undefined,
+                opacity: schema.opacity![0] ? { field: schema.opacity![0], type: getFieldType(schema.opacity![0]) } : undefined,
+                shape: schema.shape![0] ? { field: schema.shape![0], type: getFieldType(schema.shape![0]) } : undefined,
+                color: {
+                  field: schema.color![0],
+                  type: schema.color![0] && getFieldType(schema.color![0]),
+                  // condition: {
+                  //   selection: `selection-${index}`,
+                  // },
+                  // value: 'grey'
                 }
               }
             };
@@ -120,7 +133,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       );
     }
   });
-  return <div ref={container}>{JSON.stringify(chartSpecList, null, 2)}</div>;
+  return <div ref={container}></div>;
 };
 
 export default CombinedChart;
