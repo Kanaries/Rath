@@ -23,7 +23,7 @@ function getCombination(elements: string[], start: number = 1, end: number = ele
   return ans
 }
 
-function linearMapPositive (arr: number[]): number[] {
+export function linearMapPositive (arr: number[]): number[] {
   let min = Math.min(...arr);
   return arr.map(a => a - min + 1);
 }
@@ -37,7 +37,7 @@ function sum(arr: number[]): number {
   return sum;
 }
 
-function correlation(dataSource: DataSource, fieldX: string, fieldY: string): number {
+export function correlation(dataSource: DataSource, fieldX: string, fieldY: string): number {
   let r = 0;
   let xBar = sum(dataSource.map(r => r[fieldX])) / dataSource.length;
   let yBar = sum(dataSource.map(r => r[fieldY])) / dataSource.length;
@@ -45,7 +45,7 @@ function correlation(dataSource: DataSource, fieldX: string, fieldY: string): nu
   Math.sqrt(sum(dataSource.map(r => Math.pow(r[fieldX] - xBar, 2))) * sum(dataSource.map(r => Math.pow(r[fieldY] - yBar, 2))));
   return r;
 }
-type FieldsFeature = [string[], any, number[][]];
+export type FieldsFeature = [string[], any, number[][]];
 function analysisDimensions(dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType | undefined = 'sum'): FieldsFeature[] {
   let impurityList: FieldsFeature[] = [];
   let dimSet = getCombination(dimensions)

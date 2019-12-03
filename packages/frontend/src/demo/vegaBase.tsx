@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import aggregate from 'cube-core';
 import embed from 'vega-embed';
 import { DataSource, Field, FieldType } from '../global'
-const geomTypeMap: {[key: string]: any} = {
+export const geomTypeMap: {[key: string]: any} = {
   interval: 'bar',
   line: 'line',
   point: 'point',
@@ -107,7 +107,10 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
     }
     let basicSpec: any = {
       width: chartWidth,
-      mark: (geomType[0] && geomTypeMap[geomType[0]]) ? geomTypeMap[geomType[0]] : geomType[0],
+      mark: {
+        type: (geomType[0] && geomTypeMap[geomType[0]]) ? geomTypeMap[geomType[0]] : geomType[0],
+        tooltip: true
+      },
       encoding: {}
     };
     for (let channel in fieldMap) {

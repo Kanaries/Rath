@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { UnivariateSummary } from 'visual-insights';
 
-const groupFields: RequestHandler = (req, res) => {
+const groupFields: RequestHandler<any> = (req, res) => {
   console.log('[getgroupFields]')
   try {
     const { dataSource, fields } = req.body;

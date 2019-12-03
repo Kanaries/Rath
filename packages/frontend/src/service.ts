@@ -212,3 +212,37 @@ export async function clusterMeasures (maxGroupNumber: number, combinedSpaces: V
   }
   return viewSpaces;
 }
+
+interface ViewInDashBoard {
+  dimensions: string[];
+  measures: string[];
+}
+
+export type DashBoard = ViewInDashBoard[];
+
+export async function generateDashBoard (dataSource: DataSource, dimensions: string[], measures: string[], subspaces: Subspace[]): Promise<DashBoard[]> {
+  let dashBoardList: DashBoard[] = [];
+  try {
+    const res =  await fetch(server + '/api/service/generateDashBoard', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        dataSource,
+        dimensions,
+        measures,
+        subspaces
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      dashBoardList = result.data;
+    } else {
+      throw new Error('[generateDashBoard]' + result.message);
+    }
+  } catch (error) {
+    console.error(error)
+  }
+  return dashBoardList;
+} 

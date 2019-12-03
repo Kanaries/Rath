@@ -5,6 +5,7 @@ import router from './router';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
+import morgan from 'morgan';
 
 const privateKey  = fs.readFileSync(path.resolve(__dirname, '../safety/lobay.moe.key'), 'utf8');
 const certificate = fs.readFileSync(path.resolve(__dirname, '../safety/lobay.moe.cer'), 'utf8');
@@ -14,6 +15,7 @@ const httpsPort = 8443;
 
 const app = express();
 
+app.use(morgan('short'))
 app.use(bodyParser.json({ limit: '300mb' }));
 app.use(bodyParser.urlencoded({ limit: '300mb', extended: false }));
 

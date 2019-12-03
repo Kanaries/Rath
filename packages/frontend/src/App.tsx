@@ -7,6 +7,7 @@ import "./App.css";
 import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
 import DataSourceBoard from "./pages/dataSource/index";
+import DashBoardPage from './pages/dashBoard/index';
 
 const pivotList = [
   {
@@ -20,6 +21,10 @@ const pivotList = [
   {
     title: "Explore",
     itemKey: "pivot-" + 3
+  },
+  {
+    title: "DashBaord",
+    itemKey: "pivot-" + 4
   }
 ];
 
@@ -109,6 +114,9 @@ function App() {
           </div>
         </div>
       )}
+      {
+        pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />
+      }
     </div>
   );
 }

@@ -68,7 +68,7 @@ function kruskal({ matrix, groupMaxSize }: KruskalClusterProps): Map<number, num
   return groups;
 }
 
-function kruskalMST(matrix: number[][], maxGroupNumber: number = 4) {
+export function kruskalMST(matrix: number[][], maxGroupNumber: number = 4) {
   const edges = turnAdjMatrix2List(matrix);
   edges.sort((a, b) => b[1] - a[1]);
 
@@ -117,5 +117,3 @@ function cluster ({ matrix, measures ,method = 'kruskal', groupMaxSize = 4 }: Cl
 }
 
 export default cluster;
-
-export { kruskalMST }

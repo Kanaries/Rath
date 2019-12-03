@@ -12,7 +12,7 @@ const {
     Measures: measures
   }
 } = dataset;
-const dimensions = ['Age', 'Survived', 'Parch', 'Sex', 'Embarked', 'Pclass'];
+const dimensions = ['Age', 'Parch', 'Sex', 'Embarked', 'Pclass'];
 
 describe('test with titanic dataset', function () {
   it('[print result]', function () {
