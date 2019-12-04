@@ -3,22 +3,24 @@ import { DataSource, OperatorType } from "../commonTypes";
 import cluster, { kruskalMST } from "../insights/cluster";
 import aggregate from 'cube-core';
 import { normalize, entropy } from "../impurityMeasure";
+import { crammersV } from './utils';
 
 interface DashBoardSpace {
   dimensions: string[];
   measures: string[];
   entropyMatrix: number[][];
   correlationMatrix: number[][];
+  dimensionCorrelationMatrix: number[][];
 }
 
-export function getEntropyMatrix (dimensions: string[], measures: string[], dataSource: DataSource, operator?: OperatorType | undefined): number[][] {
+export function getEntropyMatrix (dimensionsList: string[][], measures: string[], dataSource: DataSource, operator?: OperatorType | undefined): number[][] {
   let matrix: number[][] = [];
-  for (let i = 0; i < dimensions.length; i++) {
-    let dim = dimensions[i];
+  for (let i = 0; i < dimensionsList.length; i++) {
+    let dimensions = dimensionsList[i];
     matrix.push([])
     const aggData = aggregate({
       dataSource,
-      dimensions: [dim],
+      dimensions,
       measures,
       asFields: measures,
       operator: operator || 'sum'
@@ -42,11 +44,21 @@ export function getDashBoardSubspace (dataSource: DataSource, dimensions: string
       correlationMatrix[j][i] = correlationMatrix[i][j] = r;
     }
   }
+  
   const measureGroups = cluster({
     matrix: correlationMatrix,
     measures,
-    groupMaxSize: 6
+    groupMaxSize: Math.round(measures.length / 6)
   })
+
+  const dimCorrelationMatrix = dimensions.map(d => dimensions.map(d => 0));
+  for (let i = 0; i < dimensions.length; i++) {
+    dimCorrelationMatrix[i][i] = 1;
+    for (let j = i + 1; j < dimensions.length; j++) {
+      dimCorrelationMatrix[i][j] = dimCorrelationMatrix[j][i] = crammersV(dataSource, dimensions[i], dimensions[j])
+    }
+  }
+
   let dimensionsInDashBoardSet = new Set<string>();
   for (let fieldFeature of fieldFeatureList) {
     for (let dim of fieldFeature[0]) {
@@ -58,10 +70,18 @@ export function getDashBoardSubspace (dataSource: DataSource, dimensions: string
   for (let group of measureGroups) {
     let matrix = group.map(g => group.map(p => 0));
     for (let i = 0; i < group.length; i++) {
-      let mea1Index = group.indexOf(group[i])
+      let mea1Index = measures.indexOf(group[i])
       for (let j = 0; j < group.length; j++) {
-        let mea2Index = group.indexOf(group[j])
+        let mea2Index = measures.indexOf(group[j])
         matrix[i][j] = correlationMatrix[mea1Index][mea2Index];
+      }
+    }
+    let dMatrix = dimensionsInDashBoard.map(d => dimensionsInDashBoard.map(d => 0))
+    for (let i = 0; i < dimensionsInDashBoard.length; i++) {
+      let dim1Index = dimensions.indexOf(dimensionsInDashBoard[i])
+      for (let j = 0; j < dimensionsInDashBoard.length; j++) {
+        let dim2Index = dimensions.indexOf(dimensionsInDashBoard[j])
+        dMatrix[i][j] = dimCorrelationMatrix[dim1Index][dim2Index];
       }
     }
     
@@ -69,14 +89,15 @@ export function getDashBoardSubspace (dataSource: DataSource, dimensions: string
       dimensions: dimensionsInDashBoard,
       measures: group,
       correlationMatrix: matrix,
-      entropyMatrix: getEntropyMatrix(dimensionsInDashBoard, group, dataSource)
+      dimensionCorrelationMatrix: dMatrix,
+      entropyMatrix: getEntropyMatrix(dimensionsInDashBoard.map(dim => [dim]), group, dataSource)
     })
   }
   return dashBoardSpaces;
 }
 
 interface VisView {
-  type?: 'correlation' | 'impact';
+  type?: 'target' | 'feature';
   dimensions: string[];
   measures: string[];
 }
@@ -85,8 +106,8 @@ interface VisView {
  * @param dashBoardSpace 
  * 
  */
-export function getDashBoardView (dashBoardSpace: DashBoardSpace): VisView[] {
-  const { dimensions, measures, entropyMatrix } = dashBoardSpace;
+export function getDashBoardView (dashBoardSpace: DashBoardSpace, dataSource: DataSource): VisView[] {
+  const { dimensions, measures, entropyMatrix, dimensionCorrelationMatrix } = dashBoardSpace;
   /**
    * 1. get correlation view
    * 2. get impact view
@@ -98,7 +119,7 @@ export function getDashBoardView (dashBoardSpace: DashBoardSpace): VisView[] {
   const measureGroups = cluster({
     matrix: dashBoardSpace.correlationMatrix,
     measures: measures,
-    groupMaxSize: 3
+    groupMaxSize: Math.round(measures.length / 3)
   });
   for (let group of measureGroups) {
     const meaIndexList = group.map(mea => measures.indexOf(mea))
@@ -111,6 +132,7 @@ export function getDashBoardView (dashBoardSpace: DashBoardSpace): VisView[] {
     });
     const dimInView = dimensions[minIndex(dimScoreList)];
     visViewList.push({
+      type: 'target',
       dimensions: [dimInView],
       measures: group
     })
@@ -119,13 +141,22 @@ export function getDashBoardView (dashBoardSpace: DashBoardSpace): VisView[] {
    * impact views
    * todo: protentional repeat view or very similiar view
    */
-  for (let i = 0; i < dimensions.length; i++) {
-    const meaInView = measures[minIndex(entropyMatrix[i])]
+  const dimensionGroups = cluster({
+    matrix: dimensionCorrelationMatrix,
+    measures: dimensions,
+    groupMaxSize: Math.round(dimensions.length / 2)
+  })
+
+  const dimGroupEntropyMatrix = getEntropyMatrix(dimensionGroups, measures, dataSource);
+  for (let i = 0; i < dimensionGroups.length; i++) {
+    const meaInView = measures[minIndex(dimGroupEntropyMatrix[i])];
     visViewList.push({
-      dimensions: [dimensions[i]],
+      type: 'feature',
+      dimensions: dimensionGroups[i],
       measures: [meaInView]
     })
   }
+
   return visViewList
 }
 

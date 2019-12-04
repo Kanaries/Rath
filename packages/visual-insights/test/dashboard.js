@@ -20,9 +20,9 @@ describe('insights test', function () {
     const fieldFeastureList = analysisDimensions(cleanData, dimensions, measures);
     // assert.equal(fieldFeastureList.length, dimensions.length);
     const dashboardSpace = DashBoard.getDashBoardSubspace(cleanData, dimensions, measures, fieldFeastureList);
-    console.log(dashboardSpace)
+    console.log(JSON.stringify(dashboardSpace, null, 2))
     assert.equal(dashboardSpace.length > 0, true);
-    const sampleViewList = DashBoard.getDashBoardView(dashboardSpace[0]);
+    const sampleViewList = DashBoard.getDashBoardView(dashboardSpace[0], dataSource);
     assert.equal(sampleViewList.length > 0, true);
     console.log(sampleViewList)
   })

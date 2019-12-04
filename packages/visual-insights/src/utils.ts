@@ -190,6 +190,23 @@ function groupCategoryField({ dataSource, field, newField = `${field}(cat-group)
   return dataSource;
 }
 
+/**
+ * Kullback–Leibler divergence
+ * @param p1List 
+ * @param p2List 
+ * 
+ */
+function DKL (p1List: number[], p2List: number[]): number {
+  let sum = 0;
+  const len = Math.max(p1List.length, p2List.length);
+  for (let i = 0; i < len; i++) {
+    let p1 = p1List[i] || 0;
+    let p2 = p2List[i] || 0;
+    sum += p1 * Math.log2(p1 / p2);
+  }
+  return sum;
+}
+
 export {
   deepcopy,
   memberCount,
@@ -200,6 +217,7 @@ export {
   isFieldContinous,
   isFieldTime,
   isFieldNumeric,
-  JOIN_SYMBOL
+  JOIN_SYMBOL,
+  DKL
 }
 

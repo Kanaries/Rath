@@ -38,7 +38,7 @@ const generateDashBoard: RequestHandler<any> = (req, res) => {
     const dashBoardViewList = [] // DashBoard.getDashBoardView(dashBoardSubspaces);
 
     for (let i = 0; i < dashBoardSubspaces.length; i++) {
-      const viewsInDashBoard = DashBoard.getDashBoardView(dashBoardSubspaces[i]);
+      const viewsInDashBoard = DashBoard.getDashBoardView(dashBoardSubspaces[i], dataSource);
       dashBoardViewList.push(viewsInDashBoard);
     }
     res.json({

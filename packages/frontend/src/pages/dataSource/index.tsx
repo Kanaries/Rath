@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useGlobalState } from "../../state";
 import { FileLoader, useComposeState } from '../../utils/index';
-import { ComboBox, DefaultButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider } from 'office-ui-fabric-react';
+import { ComboBox, DefaultButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider, Label } from 'office-ui-fabric-react';
 import DataTable from '../../components/table';
 import FieldPanel from '../../components/fieldConfig';
 import { DataSource,  BIField } from '../../global';
@@ -177,6 +177,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                   </p>
                 </div>
                 <div>
+                <Label id={labelId} required={true}>
+                  Sampling
+                </Label>
                 <ChoiceGroup
                   defaultSelectedKey="B"
                   options={SampleOptions}
