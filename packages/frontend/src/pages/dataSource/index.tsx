@@ -1,13 +1,30 @@
 import React, { useState, useRef } from "react";
 import { useGlobalState } from "../../state";
 import { FileLoader, useComposeState } from '../../utils/index';
-import { ComboBox, DefaultButton, IconButton, Callout, Stack, CommandBar } from 'office-ui-fabric-react';
+import { ComboBox, DefaultButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider } from 'office-ui-fabric-react';
 import DataTable from '../../components/table';
 import FieldPanel from '../../components/fieldConfig';
 import { DataSource,  BIField } from '../../global';
 import {  cleanMethodList, CleanMethod } from './clean';
-import { Cleaner } from 'visual-insights';
+import { Cleaner, Sampling } from 'visual-insights';
 import { useDataSource } from './useDataSource';
+import { useId } from '@uifabric/react-hooks';
+
+enum SampleKey {
+  none = 'none',
+  reservoir = 'reservoir',
+}
+
+const SampleOptions = [
+  {
+    key: SampleKey.none,
+    text: 'none'
+  },
+  {
+    key: SampleKey.reservoir,
+    text: 'reservoir'
+  }
+];
 
 interface PageStatus {
   show: {
@@ -33,11 +50,15 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     }
   })
   const [cleanMethod, setCleanMethod] = useState<CleanMethod>('dropNull');
+  const [sampleMethod, setSampleMethod] = useState<SampleKey>(SampleKey.none)
+  const [sampleSize, setSampleSize] = useState<number>(0.2);
 
   const dataSetting = useRef<HTMLDivElement>(null);
   const fileEle = useRef<HTMLInputElement>(null);
 
   const [dataSource, preparedData] = useDataSource(state.rawData, state.fields, cleanMethod);
+
+  const labelId = useId('labelElement');
 
   async function fileUploadHanlder () {
     if (fileEle.current !== null && fileEle.current.files !== null) {
@@ -55,6 +76,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
       } else {
         throw new Error(`unsupported file type=${file.type} `)
       }
+      if (sampleMethod === SampleKey.reservoir) {
+        rawData = Sampling.reservoirSampling(rawData, Math.round(rawData.length * sampleSize));
+      }
       rawData = Cleaner.dropNullColumn(rawData, Object.keys(rawData[0])).dataSource;
       tmpFields = Object.keys(rawData[0]).map(fieldName => {
         return {
@@ -68,6 +92,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         draft.fields = tmpFields;
         draft.rawData = rawData;
       })
+      setPageStatus(draft => {
+        draft.show.dataConfig = false;
+      });
     }
   }
   // const analysisHandler = startAnalysis(preparedData, state.fields);
@@ -146,8 +173,33 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
               <div className="vi-callout-inner">
                 <div className="vi-callout-content">
                   <p className="vi-callout-subTex">
-                    .csv, .json, .txt are supportted.
+                    .csv, .json are supportted.
                   </p>
+                </div>
+                <div>
+                <ChoiceGroup
+                  defaultSelectedKey="B"
+                  options={SampleOptions}
+                  selectedKey={sampleMethod}
+                  onChange={(ev: any, option: IChoiceGroupOption | undefined) => {
+                    if (option) {
+                      setSampleMethod(option.key as SampleKey)
+                    }
+                  }}
+                  ariaLabelledBy={labelId}
+                />
+                {
+                  sampleMethod !== SampleKey.none && <Slider
+                    label="sample size(percent)"
+                    min={0}
+                    max={1}
+                    step={0.001}
+                    value={sampleSize}
+                    showValue={true}
+                    valueFormat={(value: number) => `${(value * 100).toFixed(1)}%`}
+                    onChange={(val: number) => { setSampleSize(val) }}
+                  />
+                }
                 </div>
                 <div className="vi-callout-actions">
                   <input
