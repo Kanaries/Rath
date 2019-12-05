@@ -215,7 +215,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       {specList.map((spec, index) => (
         <div
           key={`ds-chart-${index}`}
-          style={{ float: "left", padding: "4px", margin: "2px" }}
+          style={{ float: "left", padding: "4px", margin: "2px", height: '380px', overflowY: 'auto' }}
         >
           <div>
             <IconButton
