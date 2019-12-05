@@ -41,6 +41,7 @@ export interface GlobalState {
     univariateSummary: boolean;
     subspaceSearching: boolean;
     gallery: boolean;
+    dashBoard: boolean;
   };
   
   topK: {
@@ -93,7 +94,8 @@ const initState: GlobalState = {
   loading: {
     univariateSummary: false,
     subspaceSearching: false,
-    gallery: false
+    gallery: false,
+    dashBoard: false,
   },
   topK: {
     subspacePercentSize: 0.3,

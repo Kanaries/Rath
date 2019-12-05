@@ -192,6 +192,9 @@ const extractInsights: Action<{dataSource: DataSource; fields: BIField[]}> = asy
 
 const getDashBoard: Action<{dataSource: DataSource, dimensions: string[], measures: string[]}> = async (state, updateState, params) => {
   const { dataSource, dimensions, measures } = params;
+  updateState(draft => {
+    draft.loading.dashBoard = true
+  })
   try {
     const dashBoardList = await generateDashBoard(dataSource, dimensions, measures, state.subspaceList)
     updateState(draft => {
@@ -199,6 +202,10 @@ const getDashBoard: Action<{dataSource: DataSource, dimensions: string[], measur
     })
   } catch (error) {
     console.error(error)
+  } finally {
+    updateState(draft => {
+      draft.loading.dashBoard = false
+    })
   }
 }
 const actions = {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PrimaryButton, DefaultButton, Stack, Separator } from "office-ui-fabric-react";
+import { PrimaryButton, DefaultButton, Stack, Separator, ProgressIndicator } from "office-ui-fabric-react";
 import { useGlobalState } from "../../state";
 import CombinedChart from "./combinedChart";
 
@@ -29,6 +29,7 @@ const DashBoardPage: React.FC = props => {
             });
           }}
         />
+        { state.loading.dashBoard && <ProgressIndicator description="generating dashboard" /> }
         <Separator>current page no: {dashBoardIndex + 1} of {dashBoardList.length}</Separator>
         <Stack horizontal tokens={{ childrenGap: 20 }}>
           <DefaultButton
