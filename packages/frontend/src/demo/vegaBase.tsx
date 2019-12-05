@@ -6,7 +6,8 @@ export const geomTypeMap: {[key: string]: any} = {
   interval: 'bar',
   line: 'line',
   point: 'point',
-  density: 'rect'
+  // density: 'rect'
+  density: 'point'
 }
 export interface Specification {
   position?: string[];

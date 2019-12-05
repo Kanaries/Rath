@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useGlobalState } from "../../state";
 import { FileLoader, useComposeState } from '../../utils/index';
-import { ComboBox, DefaultButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider, Label } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider, Label } from 'office-ui-fabric-react';
 import DataTable from '../../components/table';
 import FieldPanel from '../../components/fieldConfig';
 import { DataSource,  BIField } from '../../global';
@@ -130,7 +130,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
       />
       <div className="card">
         <Stack horizontal>
-          <DefaultButton
+          <PrimaryButton
             disabled={dataSource.length === 0}
             iconProps={{ iconName: "Financial" }}
             text="Extract Insights"

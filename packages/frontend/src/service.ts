@@ -214,6 +214,7 @@ export async function clusterMeasures (maxGroupNumber: number, combinedSpaces: V
 }
 
 interface ViewInDashBoard {
+  type: string;
   dimensions: string[];
   measures: string[];
 }

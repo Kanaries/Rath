@@ -35,7 +35,7 @@ const geomTypes = {
   interval: [0, 20],
   line: [21, Infinity],
   area: [21, Infinity],
-  point: [0, 10000000],
+  point: [0, 1000],
   path: [0, 100],
   density: [1001, Infinity]
 }
