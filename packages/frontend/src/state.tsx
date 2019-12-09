@@ -51,7 +51,7 @@ export interface GlobalState {
     subspacePercentSize: number;
     dimensionSize: number;
   }
-  maxGroupNumber: number;
+  maxGroupSize: number;
   subspaceList: Subspace[];
   summary: {
     origin: FieldSummary[];
@@ -101,7 +101,7 @@ const initState: GlobalState = {
     subspacePercentSize: 0.3,
     dimensionSize: 0.72
   },
-  maxGroupNumber: 4,
+  maxGroupSize: 4,
   subspaceList: [],
   summary: {
     origin: [],
