@@ -49,6 +49,9 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       schema.size = schema.size || [];
       schema.shape = schema.shape || [];
       schema.geomType = schema.geomType || [];
+      console.log({
+        schema, dimensions, measures, fieldScores
+      })
       return {
         dimensions,
         measures,
@@ -93,7 +96,10 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
         // transform: filters.length > 0 && [...filters],
         // width: 300,
         data: { name: "dataSource" },
-        padding: 26,
+        // padding: 26,
+        autosize: {
+          type: "pad"
+        },
         mark: markType,
         selection: {
           sl: {
@@ -111,7 +117,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
                 dimensions,
                 measures,
                 markType
-              ) && "sum"
+              ) ? "sum" : undefined
           },
           y: schema.position![1] && {
             field: schema.position![1],
@@ -122,7 +128,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
                 dimensions,
                 measures,
                 markType
-              ) && "sum"
+              ) ? "sum" : undefined
           },
           size: schema.size![0] && {
             field: schema.size![0],
@@ -146,7 +152,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
   }, [chartSpecList]);
   const dataSourceContainer = useMemo(() => {
     return { dataSource };
-  }, [dataSource]);
+  }, [dataSource, specList, dimScores]);
 
   const signalHandler = useMemo(() => {
     return dashBoard.map((d, index) => {
@@ -170,7 +176,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
         }
       };
     });
-  }, [dashBoard, chartStateList]);
+  }, [dashBoard, chartStateList, dimScores, specList]);
   const vsourceList = useMemo<Array<{ dataSource: DataSource }>>(() => {
     let ans = [];
     const filters = Object.keys(globalFilters).map(fieldName => {
@@ -208,8 +214,8 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       ans.push({ dataSource: ds });
     }
     return ans;
-  }, [dashBoard, globalFilters, dataSource, chartStateList]);
-
+  }, [dashBoard, globalFilters, dataSource, chartStateList, specList, dataSourceContainer]);
+  console.log(vsourceList, specList)
   return (
     <div>
       {specList.map((spec, index) => (
@@ -217,29 +223,30 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
           key={`ds-chart-${index}`}
           style={{ float: "left", padding: "4px", margin: "2px", height: '380px', overflowY: 'auto' }}
         >
-          <div>
-            <IconButton
-              iconProps={{
-                iconName: chartStateList[index] ? "FilterSolid" : "Filter"
-              }}
-              onClick={() => {
-                setChartStateList(list => {
-                  let nextList = [...list];
-                  nextList[index] = !nextList[index];
-                  return nextList;
-                });
-              }}
+          <div style={{ float: 'left', minWidth: '300px', minHeight: '300px' }}>
+            <VegaLite
+              data={vsourceList[index]}
+              spec={spec}
+              actions={true}
+              signalListeners={
+                chartStateList[index] && (signalHandler[index] as any)
+              }
             />
-            { chartStateList[index] && <span style={{ fontSize: 12, fontWeight: 300, lineHeight: '32px' }}>Used as filter</span> }
           </div>
-          <VegaLite
-            data={vsourceList[index]}
-            spec={spec}
-            actions={false}
-            signalListeners={
-              chartStateList[index] && (signalHandler[index] as any)
-            }
-          />
+          <div style={{ float: 'left'}}>
+            <IconButton
+                iconProps={{
+                  iconName: chartStateList[index] ? "FilterSolid" : "Filter"
+                }}
+                onClick={() => {
+                  setChartStateList(list => {
+                    let nextList = [...list];
+                    nextList[index] = !nextList[index];
+                    return nextList;
+                  });
+                }}
+              />
+          </div>
         </div>
       ))}
     </div>
