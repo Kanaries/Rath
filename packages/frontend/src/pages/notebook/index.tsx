@@ -71,7 +71,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
   }, [dimScores, clusterState, dataSource, measuresInView])
   useEffect(() => {
     updateState(draft => {
-      draft.maxGroupSize = Math.round(maxMeasureInView)
+      draft.maxGroupNumber = Math.round(state.cookedMeasures.length / maxMeasureInView)
     })
   }, [state.cookedMeasures])
   return <div>
@@ -121,15 +121,15 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     <h3 className="notebook header">Measurement Clustering</h3>
     <p className="state-description">Try to choose one group to visualize them.</p>
     <Slider
-      label="Max Group Size(max measure number in a view)"
+      label="Max Group Number"
       min={1}
       max={state.cookedMeasures.length || 4}
       step={1}
       // defaultValue={clusterState.measures.length / 4}
-      value={state.maxGroupSize}
+      value={state.maxGroupNumber}
       showValue={true}
       onChange={(value: number) => { updateState(draft => {
-        draft.maxGroupSize = value
+        draft.maxGroupNumber = value
       })}}
     />
     <div className="notebook content center container">

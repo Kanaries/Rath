@@ -134,13 +134,11 @@ function groupContinousField({ dataSource, field, newField = `${field}(con-group
   }
   ranges[0][0] = -Infinity;
   ranges[ranges.length - 1][1] = Infinity;
-  let precision = Math.max(1, Math.log10(Math.abs(min)) - Math.log10(segWidth)) + 1;
-  for (let i = 0; i < dataSource.length; i++) {
-    let record = dataSource[i]
-    let rangeIndex = ranges.findIndex(r => (r[0] <= record[field] && record[field] < r[1]));
-    let range = ranges[rangeIndex];
+
+  for (let record of dataSource) {
+    let range = ranges.find(r => (r[0] <= record[field] && record[field] < r[1]));
     if (typeof range !== 'undefined') {
-      record[newField] = `${rangeIndex + 1}:[${Number(range[0].toPrecision(precision))}, ${Number(range[1].toPrecision(precision))})`;
+      record[newField] = `[${range[0]}, ${range[1]})`;
     } else {
       record[newField] = 'null';
     }

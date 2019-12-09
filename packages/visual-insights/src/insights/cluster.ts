@@ -30,26 +30,6 @@ function union (parents: number[], n1: number, n2: number): void {
   find(parents, n2)
 }
 
-function findWithEffect (parents: number[], sizes: number[], n: number): number {
-  if (parents[n] === n) {
-    return n;
-  }
-  parents[n] = findWithEffect(parents, sizes, parents[n]);
-  sizes[n] = sizes[parents[n]];
-  return parents[n];
-}
-
-function unionWithEffect (parents: number[], sizes: number[], n1: number, n2: number): void {
-  let p1 = findWithEffect(parents, sizes, n1);
-  let p2 = findWithEffect(parents, sizes, n2);
-  let size1 = sizes[p1];
-  let size2 = sizes[p2];
-  parents[p1] = p2;
-  sizes[p1] = sizes[p2] = size1 + size2;
-  findWithEffect(parents, sizes, n1);
-  findWithEffect(parents, sizes, n2);
-}
-
 // maxiumn spanning tree
 interface KruskalClusterProps {
   /**
@@ -88,71 +68,37 @@ function kruskal({ matrix, groupMaxSize }: KruskalClusterProps): Map<number, num
   return groups;
 }
 
-function kruskalWithLimitSize(matrix: number[][], limitSize: number): Map<number, number[]> {
-
-  const edges = turnAdjMatrix2List(matrix);
-  edges.sort((a, b) => b[1] - a[1]);
-  const parents = matrix.map((m, i) => i);
-  const sizes = matrix.map(() => 1);
-  
-  for (let edge of edges) {
-    if (findWithEffect(parents, sizes, edge[0][0]) !== findWithEffect(parents, sizes, edge[0][1])) {
-      if (sizes[edge[0][0]] + sizes[edge[0][1]] > limitSize) {
-        continue;
-      }
-      unionWithEffect(parents, sizes, edge[0][0], edge[0][1]);
-    }
-    for (let i = 0; i < parents.length; i++) {
-      parents[i] = findWithEffect(parents, sizes, i)
-    }
-    let set = new Set(parents);
-    if (set.size === 1) {
-      break;
-    }
-  }
-  let groups: Map<number, number[]> = new Map();
-  for (let i = 0; i < parents.length; i++) {
-    if (!groups.has(parents[i])) {
-      groups.set(parents[i], []);
-    }
-    groups.get(parents[i]).push(i);
-  }
-  return groups;
-}
-
-export function kruskalMST(matrix: number[][], limitSize: number = 4) {
+export function kruskalMST(matrix: number[][], maxGroupNumber: number = 4) {
   const edges = turnAdjMatrix2List(matrix);
   edges.sort((a, b) => b[1] - a[1]);
 
   const edgesInMST: [[number, number], number, boolean][] = []
   const parents = matrix.map((m, i) => i);
-  const cloneParents = matrix.map((m, i) => i);
-  const sizes = matrix.map(() => 1);
+  let groups = [...parents];
   let inCutEdge = false;
   for (let edge of edges) {
-    if (findWithEffect(parents, sizes, edge[0][0]) !== findWithEffect(parents, sizes, edge[0][1])) {
-      if (sizes[edge[0][0]] + sizes[edge[0][1]] > limitSize) {
-        if (find(cloneParents, edge[0][0]) !== find(cloneParents, edge[0][1])) {
-          edgesInMST.push([edge[0], edge[1], true]);
-          union(cloneParents, edge[0][0], edge[0][1])
-        }
-        continue;
-      }
-      unionWithEffect(parents, sizes, edge[0][0], edge[0][1]);
+    if (find(parents, edge[0][0]) !== find(parents, edge[0][1])) {
+      union(parents, edge[0][0], edge[0][1]);
       // fuck typescript
       // edgesInMST.push([...edge, inCutEdge]);
-      edgesInMST.push([edge[0], edge[1], false]);
+      edgesInMST.push([edge[0], edge[1], inCutEdge]);
     }
     for (let i = 0; i < parents.length; i++) {
-      parents[i] = findWithEffect(parents, sizes, i)
-      cloneParents[i] = find(cloneParents, i)
+      parents[i] = find(parents, i)
     }
     let set = new Set(parents);
+    // TODO:
+    // + use kruskalMST instead of kruskal.
+    if (set.size <= maxGroupNumber) {
+      inCutEdge = true;
+    } else {
+      groups = [...parents]
+    }
     if (set.size === 1) {
       break;
     }
   }
-  return { edgesInMST, groups: parents }
+  return { edgesInMST, groups }
 }
 
 interface ClusterProps {
@@ -162,8 +108,7 @@ interface ClusterProps {
   groupMaxSize?: number;
 }
 function cluster ({ matrix, measures ,method = 'kruskal', groupMaxSize = 4 }: ClusterProps): string[][] {
-  // const groups = kruskal({ matrix, groupMaxSize });
-  const groups = kruskalWithLimitSize(matrix, groupMaxSize)
+  const groups = kruskal({ matrix, groupMaxSize });
   let ans: string[][] = [];
   for (let meas of groups.values()) {
     ans.push(meas.map(meaIndex => measures[meaIndex]))

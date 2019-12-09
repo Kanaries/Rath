@@ -4,6 +4,8 @@ import {
   FieldSummary,
   getGroupFieldsService,
   combineFieldsService,
+  clusterMeasures,
+  Subspace,
   generateDashBoard
 } from "./service";
 import { GlobalState, StateUpdater } from './state';

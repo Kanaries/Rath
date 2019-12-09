@@ -44,9 +44,10 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
      * todo: 
      * maxGroupNumber = the measures length / max visual channel for measure.
      */
-    let { edgesInMST, groups } = kruskalMST(adjMatrix, state.maxGroupSize);
+    let maxGroupNumber = state.maxGroupNumber
+    let { edgesInMST, groups } = kruskalMST(adjMatrix, maxGroupNumber);
     return { edgesInMST, groups }
-  }, [adjMatrix, state.maxGroupSize])
+  }, [adjMatrix, state.maxGroupNumber])
   const treeData = useMemo<TreeData>(() => {
     let { edgesInMST, groups } = clusterResult;
     const edges: VegaEdge[] = edgesInMST.map(edge => {
@@ -138,12 +139,6 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             "type": "ordinal",
             "domain": {"data": "node-data", "field": "group"},
             "range": {"scheme": "tableau20"}
-          },
-          {
-            "name": "colorEdge",
-            "type": "quantize",
-            "domain": {"data": "link-data", "field": "value"},
-            "range": {"scheme": "viridis"}
           }
         ],
       
@@ -200,11 +195,9 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             "encode": {
               "update": {
                 "stroke": {
-                  "scale": "colorEdge",
-                  "field": "value"
+                  signal: "datum.inCutEdge == true ? '#f5f5f5' : '#d9d9d9' "
                 },
-                "strokeWidth": {"value": 0.8},
-                "opacity": {"value": 0.5}
+                "strokeWidth": {"value": 0.8}
               },
             },
             "transform": [
