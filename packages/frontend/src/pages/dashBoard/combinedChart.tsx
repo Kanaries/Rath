@@ -8,6 +8,9 @@ import { geomTypeMap } from "../../demo/vegaBase";
 import produce from "immer";
 import { useComposeState } from "../../utils/index";
 import { IconButton } from "office-ui-fabric-react";
+import IndicatorCard from "./indicatorCard";
+
+const IndicatorCardType = "indicator" as const;
 
 interface CombinedChartProps {
   dashBoard: DashBoard;
@@ -19,6 +22,10 @@ interface GlobalFilters {
   [key: string]: any[];
 }
 
+function getFieldScale (dataSource: DataSource, field: XMLDocument, type: 'quantitative' | 'norminal') {
+  return 
+}
+
 const CombinedChart: React.FC<CombinedChartProps> = props => {
   const { dashBoard, dataSource, dimScores } = props;
   const [globalFilters, setGlobalFilters] = useComposeState<GlobalFilters>({});
@@ -27,7 +34,28 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
   useEffect(() => {
     setChartStateList(dashBoard.map(() => false));
   }, [dashBoard]);
-
+  const filedDomains = useMemo(() => {
+    const fieldList = dimScores.map(f => f[0]);
+    let domainDict: {[key: string]: any[]} = {};
+    let dsLen = dataSource.length;
+    let fLen = fieldList.length;
+    for (let i = 0; i < fLen; i++) {
+      if (dimScores[i][3].type !== 'quantitative') {
+        continue;
+        // tmp
+      }
+      let fieldName = fieldList[i];
+      domainDict[fieldName] = [0, 100];
+      let min = Infinity;
+      let max = -Infinity;
+      for (let j = 0; j < dsLen; j++) {
+        min = Math.min(dataSource[j][fieldName], min)
+        max = Math.max(dataSource[j][fieldName], max)
+      }
+      domainDict[fieldName] = [min, max];
+    }
+    return domainDict;
+  }, [dataSource, dimScores])
   const chartSpecList = useMemo(() => {
     if (!dashBoard || !dataSource || !dimScores) {
       return [];
@@ -49,9 +77,6 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       schema.size = schema.size || [];
       schema.shape = schema.shape || [];
       schema.geomType = schema.geomType || [];
-      console.log({
-        schema, dimensions, measures, fieldScores
-      })
       return {
         dimensions,
         measures,
@@ -86,12 +111,22 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
 
   const specList = useMemo<any[]>(() => {
     return chartSpecList.map((spec, index) => {
-      const { dimensions, measures, schema } = spec;
+      const { dimensions, measures, schema, type } = spec;
+      if (type === "target" && measures.length === 1) {
+        return {
+          type: IndicatorCardType,
+          measures: measures,
+          operator: "sum"
+        };
+      }
 
       const markType =
         schema.geomType![0] && geomTypeMap[schema.geomType![0]]
           ? geomTypeMap[schema.geomType![0]]
           : schema.geomType![0];
+      const xType = getFieldType(schema.position![0]);
+      const yType = getFieldType(schema.position![1]);
+      const mustDefineScale = xType === 'quantitative' && yType === 'quantitative';
       return {
         // transform: filters.length > 0 && [...filters],
         // width: 300,
@@ -111,24 +146,28 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
           x: schema.position![0] && {
             field: schema.position![0],
             type: getFieldType(schema.position![0]),
-            aggregate:
-              shouldFieldAggregate(
-                schema.position![0],
-                dimensions,
-                measures,
-                markType
-              ) ? "sum" : undefined
+            aggregate: shouldFieldAggregate(
+              schema.position![0],
+              dimensions,
+              measures,
+              markType
+            )
+              ? "sum"
+              : undefined,
+            scale: mustDefineScale ? { domain: filedDomains[schema.position![0]] } : undefined
           },
           y: schema.position![1] && {
             field: schema.position![1],
             type: getFieldType(schema.position![1]),
-            aggregate:
-              shouldFieldAggregate(
-                schema.position![1],
-                dimensions,
-                measures,
-                markType
-              ) ? "sum" : undefined
+            aggregate: shouldFieldAggregate(
+              schema.position![1],
+              dimensions,
+              measures,
+              markType
+            )
+              ? "sum"
+              : undefined,
+            scale: mustDefineScale ? { domain: filedDomains[schema.position![1]] } : undefined
           },
           size: schema.size![0] && {
             field: schema.size![0],
@@ -149,7 +188,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
         }
       };
     }) as any;
-  }, [chartSpecList]);
+  }, [chartSpecList, filedDomains]);
   const dataSourceContainer = useMemo(() => {
     return { dataSource };
   }, [dataSource, specList, dimScores]);
@@ -160,7 +199,6 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
         sl: (name: any, values: any) => {
           if (chartStateList[index]) {
             setGlobalFilters(draft => {
-              console.log(values);
               if (Object.keys(values).length === 0) {
                 for (let key in draft) {
                   // delete draft[key]
@@ -214,27 +252,48 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       ans.push({ dataSource: ds });
     }
     return ans;
-  }, [dashBoard, globalFilters, dataSource, chartStateList, specList, dataSourceContainer]);
-  console.log(vsourceList, specList)
+  }, [
+    dashBoard,
+    globalFilters,
+    dataSource,
+    chartStateList,
+    specList,
+    dataSourceContainer
+  ]);
   return (
     <div>
-      {specList.map((spec, index) => (
-        <div
-          key={`ds-chart-${index}`}
-          style={{ float: "left", padding: "4px", margin: "2px", height: '380px', overflowY: 'auto' }}
-        >
-          <div style={{ float: 'left', minWidth: '300px', minHeight: '300px' }}>
-            <VegaLite
-              data={vsourceList[index]}
-              spec={spec}
-              actions={true}
-              signalListeners={
-                chartStateList[index] && (signalHandler[index] as any)
-              }
-            />
-          </div>
-          <div style={{ float: 'left'}}>
-            <IconButton
+      {specList.map((spec, index) =>
+        spec.type === IndicatorCardType ? (
+          <IndicatorCard
+            key={`ds-chart-${index}`}
+            dataSource={vsourceList[index].dataSource}
+            measures={spec.measures}
+          />
+        ) : (
+          <div
+            key={`ds-chart-${index}`}
+            style={{
+              float: "left",
+              padding: "4px",
+              margin: "2px",
+              height: "380px",
+              overflowY: "auto"
+            }}
+          >
+            <div
+              style={{ float: "left", minWidth: "300px", minHeight: "300px" }}
+            >
+              <VegaLite
+                data={vsourceList[index]}
+                spec={spec}
+                actions={true}
+                signalListeners={
+                  chartStateList[index] && (signalHandler[index] as any)
+                }
+              />
+            </div>
+            <div style={{ float: "left" }}>
+              <IconButton
                 iconProps={{
                   iconName: chartStateList[index] ? "FilterSolid" : "Filter"
                 }}
@@ -246,9 +305,10 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
                   });
                 }}
               />
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      )}
     </div>
   );
 };

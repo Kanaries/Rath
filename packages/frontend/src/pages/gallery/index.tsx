@@ -94,7 +94,7 @@ const Gallery: React.FC<GalleryProps> = props => {
     // todo:
     // should group number be the same for different subspaces?
     clusterMeasures(
-      state.maxGroupSize,
+      state.maxGroupNumber,
       subspaceList.map(space => {
         return {
           dimensions: space.dimensions,
@@ -108,7 +108,7 @@ const Gallery: React.FC<GalleryProps> = props => {
         draft.loading.gallery = false;
       });
     });
-  }, [subspaceList, dataSource, state.maxGroupSize]);
+  }, [subspaceList, dataSource, state.maxGroupNumber]);
 
   const dimScores = useMemo<[string, number, number, Field][]>(() => {
     return [...summary.origin, ...summary.grouped].map(field => {

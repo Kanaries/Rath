@@ -89,7 +89,6 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
   //   return [...new Set(values)];
   // }
   function getSpecification () {
-    console.log( container.current && container.current.offsetWidth)
     let chartWidth = 600; //container.current ? container.current.offsetWidth * 0.8 : 600;
     const fieldMap: any = {
       x: position[0],

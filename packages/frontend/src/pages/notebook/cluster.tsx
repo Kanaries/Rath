@@ -44,9 +44,9 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
      * todo: 
      * maxGroupNumber = the measures length / max visual channel for measure.
      */
-    let { edgesInMST, groups } = kruskalMST(adjMatrix, state.maxGroupSize);
+    let { edgesInMST, groups } = kruskalMST(adjMatrix, state.maxGroupNumber);
     return { edgesInMST, groups }
-  }, [adjMatrix, state.maxGroupSize])
+  }, [adjMatrix, state.maxGroupNumber])
   const treeData = useMemo<TreeData>(() => {
     let { edgesInMST, groups } = clusterResult;
     const edges: VegaEdge[] = edgesInMST.map(edge => {
