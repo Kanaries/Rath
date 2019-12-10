@@ -35,7 +35,7 @@ const geomTypes = {
   interval: [0, 20],
   line: [21, Infinity],
   area: [21, Infinity],
-  point: [0, 10000000],
+  point: [0, 1000],
   path: [0, 100],
   density: [1001, Infinity]
 }
@@ -68,7 +68,7 @@ function aestheticMapping (dimFields: Field[]) {
   });
   const priority: [FieldType, string[]][] = [
     ['quantitative', ['position', 'size', 'opacity', 'color', 'page', 'filter', 'hightFacets']],
-    ['ordinal', ['position', 'opacity' ,'color', 'facets', 'size', 'page', 'filter', 'highFacets']],
+    ['ordinal', ['position', 'color' ,'opacity', 'facets', 'size', 'page', 'filter', 'highFacets']],
     ['nominal', ['position', 'color', 'facets', 'shape', 'page', 'filter', 'hightFacets']],
     ['temporal', ['position', 'page', 'filter']]
   ];

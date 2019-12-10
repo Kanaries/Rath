@@ -4,8 +4,7 @@ import {
   FieldSummary,
   getGroupFieldsService,
   combineFieldsService,
-  clusterMeasures,
-  Subspace
+  generateDashBoard
 } from "./service";
 import { GlobalState, StateUpdater } from './state';
 
@@ -188,10 +187,30 @@ const extractInsights: Action<{dataSource: DataSource; fields: BIField[]}> = asy
     })
   }
 }
+
+const getDashBoard: Action<{dataSource: DataSource, dimensions: string[], measures: string[]}> = async (state, updateState, params) => {
+  const { dataSource, dimensions, measures } = params;
+  updateState(draft => {
+    draft.loading.dashBoard = true
+  })
+  try {
+    const dashBoardList = await generateDashBoard(dataSource, dimensions, measures, state.subspaceList)
+    updateState(draft => {
+      draft.dashBoardList = dashBoardList;
+    })
+  } catch (error) {
+    console.error(error)
+  } finally {
+    updateState(draft => {
+      draft.loading.dashBoard = false
+    })
+  }
+}
 const actions = {
   univariateSummary,
   subspaceSearch,
-  extractInsights
+  extractInsights,
+  getDashBoard
 }
 export type Actions =  typeof actions
 

@@ -44,8 +44,7 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
      * todo: 
      * maxGroupNumber = the measures length / max visual channel for measure.
      */
-    let maxGroupNumber = state.maxGroupNumber
-    let { edgesInMST, groups } = kruskalMST(adjMatrix, maxGroupNumber);
+    let { edgesInMST, groups } = kruskalMST(adjMatrix, state.maxGroupNumber);
     return { edgesInMST, groups }
   }, [adjMatrix, state.maxGroupNumber])
   const treeData = useMemo<TreeData>(() => {
@@ -139,6 +138,12 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             "type": "ordinal",
             "domain": {"data": "node-data", "field": "group"},
             "range": {"scheme": "tableau20"}
+          },
+          {
+            "name": "colorEdge",
+            "type": "quantize",
+            "domain": {"data": "link-data", "field": "value"},
+            "range": {"scheme": "viridis"}
           }
         ],
       
@@ -195,9 +200,11 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             "encode": {
               "update": {
                 "stroke": {
-                  signal: "datum.inCutEdge == true ? '#f5f5f5' : '#d9d9d9' "
+                  "scale": "colorEdge",
+                  "field": "value"
                 },
-                "strokeWidth": {"value": 0.8}
+                "strokeWidth": {"value": 0.8},
+                "opacity": {"value": 0.5}
               },
             },
             "transform": [

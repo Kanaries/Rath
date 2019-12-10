@@ -12,7 +12,13 @@ import * as Cleaner from './cleaner/index';
 
 import * as UnivariateSummary from './univariateSummary/index'
 
+import * as DashBoard from './dashboard/index';
+
+import * as Sampling from './sampling/index';
+
 export {
+  DashBoard,
+  Sampling,
   Utils,
   UnivariateSummary,
   fieldsAnalysis,

@@ -1,7 +1,7 @@
 import produce, { Draft, setAutoFreeze } from 'immer';
 import React, { useState, useMemo, createContext, useContext } from 'react';
-import { DataSource, BIField } from './global';
-import { Subspace, FieldSummary, ViewSpace } from './service';
+import { DataSource, BIField, Field } from './global';
+import { Subspace, FieldSummary, ViewSpace, DashBoard } from './service';
 import actions, { Test, Actions } from './actions';
 
 setAutoFreeze(false)
@@ -41,6 +41,7 @@ export interface GlobalState {
     univariateSummary: boolean;
     subspaceSearching: boolean;
     gallery: boolean;
+    dashBoard: boolean;
   };
   
   topK: {
@@ -56,17 +57,18 @@ export interface GlobalState {
     origin: FieldSummary[];
     grouped: FieldSummary[];
   };
-  viewSpaces: ViewSpace[]
+  viewSpaces: ViewSpace[];
+  dashBoardList: DashBoard[];
 }
 
-interface GlobalComputed {
+interface Getters {
   /**
    * `dataSource` is computed data based on fields' property(dimension or measure).
    * sometimes, uploaded data contains contains some measure field but they are parsed into string value, which is raw data.
    * dataSource transform these fields into what they should be for future computation.
    * This is usually happened when a csv file is uploaded.
    */
-  dataSource: DataSource;
+  dimScores: [string, number, number, Field][]
 }
 export type StateUpdater<S> = (draftState: Draft<S>) => void
 
@@ -92,7 +94,8 @@ const initState: GlobalState = {
   loading: {
     univariateSummary: false,
     subspaceSearching: false,
-    gallery: false
+    gallery: false,
+    dashBoard: false,
   },
   topK: {
     subspacePercentSize: 0.3,
@@ -104,15 +107,34 @@ const initState: GlobalState = {
     origin: [],
     grouped: []
   },
-  viewSpaces: []
+  viewSpaces: [],
+  dashBoardList: []
 };
 type Dispatch<T> = (actionName: string, params: T) => void;
 type valueof<T> = T[keyof T]
-const GloalStateContext = createContext<[GlobalState, (updater:StateUpdater<GlobalState>) => void, <P extends Test>(actionName: P['name'], params: P['params']) => void]>(null!)
+const GloalStateContext = createContext<[GlobalState, (updater:StateUpdater<GlobalState>) => void, <P extends Test>(actionName: P['name'], params: P['params']) => void, Getters]>(null!)
+function useGetters(state: GlobalState) {
+  const dimScores = useMemo<[string, number, number, Field][]>(() => {
+    return [...state.summary.origin, ...state.summary.grouped].map(field => {
+      return [
+        field.fieldName,
+        field.entropy,
+        field.maxEntropy,
+        { name: field.fieldName, type: field.type }
+      ];
+    });
+  }, [state.summary])
 
+  const getters: Getters = {
+    dimScores
+  }
+
+  return getters;
+}
 export function GlobalStateProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<GlobalState>(initState)
 
+  const getters = useGetters(state);
   const updateState = (stateUpdater: StateUpdater<GlobalState>) => {
     setState(state => {
       const nextState = produce<GlobalState>(state, draftState => stateUpdater(draftState))
@@ -133,7 +155,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
 
   return (
-    <GloalStateContext.Provider value={[state, updateState, dispatch]}>
+    <GloalStateContext.Provider value={[state, updateState, dispatch, getters]}>
       {children}
     </GloalStateContext.Provider>
   )
