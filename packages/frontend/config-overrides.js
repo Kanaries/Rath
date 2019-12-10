@@ -4,9 +4,6 @@ module.exports = function override(config, env) {
     test: /\.worker\.js$/,
     use: { loader: 'worker-loader' }
   })
-  config.output = {
-    ...config.output,
-    globalObject: 'self'
-  }
+  config.output.globalObject = 'self'
   return config;
 };

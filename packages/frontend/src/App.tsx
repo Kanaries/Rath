@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useGlobalState, GlobalStateProvider } from "./state";
 import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
@@ -8,9 +8,6 @@ import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
-// @ts-ignore
-// eslint-disable-next-line
-import testWorker from 'worker-loader!./workers/test.worker';
 
 const pivotList = [
   {
@@ -30,10 +27,6 @@ const pivotList = [
     itemKey: "pivot-" + 4
   }
 ];
-
-const worker = new testWorker();
-console.log(worker)
-worker.postMessage('sdhfbshjd');
 
 interface PageStatus {
   show: {

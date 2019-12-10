@@ -1,4 +1,8 @@
 import { DataSource,  Field, FieldType, OperatorType } from './global';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import dashBoardGeneratorWorker from './workers/dashboard.worker'
 let server = '//lobay.moe:8443';
 
 if (process.env.NODE_ENV !== 'production') {
@@ -16,6 +20,22 @@ interface FailResult<T> {
 }
 
 type Result<T> = SuccessResult<T> | FailResult<T>;
+
+function workerService<T, R> (worker: Worker, data: R): Promise<Result<T>> {
+  return new Promise<Result<T>>((resolve, reject) => {
+    worker.postMessage(data);
+    worker.onmessage = (e: MessageEvent) => {
+      console.log('worker res', e)
+      resolve(e.data)
+    }
+    worker.onerror = (e: ErrorEvent) => {
+      reject({
+        success: false,
+        message: e.error
+      })
+    }
+  })
+}
 
 interface FieldAnalysisResponse {
   dimScores: Array<[string, number, number, Field]>;
@@ -221,29 +241,45 @@ interface ViewInDashBoard {
 
 export type DashBoard = ViewInDashBoard[];
 
-export async function generateDashBoard (dataSource: DataSource, dimensions: string[], measures: string[], subspaces: Subspace[]): Promise<DashBoard[]> {
+export async function generateDashBoard (dataSource: DataSource, dimensions: string[], measures: string[], subspaces: Subspace[], useServer?: boolean): Promise<DashBoard[]> {
   let dashBoardList: DashBoard[] = [];
-  try {
-    const res =  await fetch(server + '/api/service/generateDashBoard', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
+  if (useServer) {
+    try {
+      const res =  await fetch(server + '/api/service/generateDashBoard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          dataSource,
+          dimensions,
+          measures,
+          subspaces
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        dashBoardList = result.data;
+      } else {
+        throw new Error('[generateDashBoard]' + result.message);
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  } else {
+    const worker = new dashBoardGeneratorWorker();
+    const result = await workerService<DashBoard[], any>(worker, {
         dataSource,
         dimensions,
         measures,
         subspaces
-      })
-    });
-    const result = await res.json();
+      });
     if (result.success) {
       dashBoardList = result.data;
     } else {
       throw new Error('[generateDashBoard]' + result.message);
     }
-  } catch (error) {
-    console.error(error)
   }
+  
   return dashBoardList;
 } 
