@@ -21,6 +21,9 @@ Notebook is a board for user to know what happened in the automatic analysis pro
 ### Gallery
 Gallery displays parts of the visualization with interesting findings. There are some settings here to adjust some of the visual elements in the chart.
 
+### Dashboard
+automantic generate dashboard for you. rath will figure out a set of visulization of which contents are connected to each other and can be used to analysis a specific problem. 
+
 ## Examples
 
 + [DataSet: NASA - Kepler](https://www.kaggle.com/nasa/kepler-exoplanet-search-results)
@@ -30,7 +33,9 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 
 
 ## Usage
-+ try online demo [Here](http://lobay.moe:8000)
++ try online demo
+  + github [demo](https://kanaries.github.io/Rath/)
+  + aliyun [demo](https://chspace.oss-cn-hongkong.aliyuncs.com/rath/index.html)
 
 run local(dev)
 ```bash
@@ -57,7 +62,7 @@ yarn workspace backend dev
 
 only use the algorithm package. (`/packages/visual-insights`) ![](https://img.shields.io/npm/v/visual-insights?color=blue)
 ```bash
-npm i visual-insights --save
+npm i visual-insights --save`
 ```
 
 ## How does it work
