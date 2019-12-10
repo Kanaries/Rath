@@ -126,6 +126,8 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
           : schema.geomType![0];
       const xType = getFieldType(schema.position![0]);
       const yType = getFieldType(schema.position![1]);
+      const xAgg = shouldFieldAggregate(schema.position![0], dimensions, measures, markType);
+      const yAgg = shouldFieldAggregate(schema.position![1], dimensions, measures, markType);
       const mustDefineScale = xType === 'quantitative' && yType === 'quantitative';
       return {
         // transform: filters.length > 0 && [...filters],
@@ -146,28 +148,14 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
           x: schema.position![0] && {
             field: schema.position![0],
             type: getFieldType(schema.position![0]),
-            aggregate: shouldFieldAggregate(
-              schema.position![0],
-              dimensions,
-              measures,
-              markType
-            )
-              ? "sum"
-              : undefined,
-            scale: mustDefineScale ? { domain: filedDomains[schema.position![0]] } : undefined
+            aggregate: xAgg && 'sum',
+            scale: mustDefineScale && !xAgg ? { domain: filedDomains[schema.position![0]] } : undefined
           },
           y: schema.position![1] && {
             field: schema.position![1],
             type: getFieldType(schema.position![1]),
-            aggregate: shouldFieldAggregate(
-              schema.position![1],
-              dimensions,
-              measures,
-              markType
-            )
-              ? "sum"
-              : undefined,
-            scale: mustDefineScale ? { domain: filedDomains[schema.position![1]] } : undefined
+            aggregate: yAgg && 'sum',
+            scale: mustDefineScale && !yAgg ? { domain: filedDomains[schema.position![1]] } : undefined
           },
           size: schema.size![0] && {
             field: schema.size![0],

@@ -39,6 +39,10 @@ const generateDashBoard: RequestHandler<any> = (req, res) => {
 
     for (let i = 0; i < dashBoardSubspaces.length; i++) {
       const viewsInDashBoard = DashBoard.getDashBoardView(dashBoardSubspaces[i], dataSource);
+      viewsInDashBoard.sort((a, b) => {
+        if (a.type === 'feature' && b.type === 'target') return 1;
+        return a.measures.length - b.measures.length; 
+      })
       dashBoardViewList.push(viewsInDashBoard);
     }
     res.json({

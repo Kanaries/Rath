@@ -21,14 +21,14 @@ const Card = styled.div`
     color: #8c8c8c;
     margin-top: 0px;
     margin-bottom: 0px;
-    font-size: 24px;
-    line-height: 32px;
+    font-size: 20px;
+    line-height: 28px;
     font-weight: 400;
   }
   .indicator-card.content {
     color: #0078d4;
-    font-size: 68px;
-    line-height: 76px;
+    font-size: 56px;
+    line-height: 64px;
     font-weight: 400;
     margin: 0px;
   }
