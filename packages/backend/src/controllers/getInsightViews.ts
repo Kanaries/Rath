@@ -5,7 +5,7 @@ interface RequestBody {
   dimensions: string[];
   measures: string[];
 }
-const insightViews: RequestHandler<any> = (req, res) => {
+const insightViews: RequestHandler = (req, res) => {
   console.log('[getInsightViews]')
   try {
     const { dataSource, dimensions, measures } = req.body as RequestBody;

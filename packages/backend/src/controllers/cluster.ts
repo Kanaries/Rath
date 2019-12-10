@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { Request, Response, RequestHandler } from 'express';
 import { kruskalMST } from 'visual-insights';
 interface MeasureDetail {
   name: string;
@@ -22,7 +22,7 @@ function sum (arr: number[]) {
   }
   return ans;
 }
-const cluster: RequestHandler<any> = (req, res) => {
+const cluster: RequestHandler = (req, res) => {
   console.log('[cluster measures]')
   try {
     const { spaces, maxGroupNumber } = req.body as RequestBody;

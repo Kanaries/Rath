@@ -30,7 +30,7 @@ function transSubspaces2FieldsFeature(subspaces: Subspace[]): FieldsFeature[] {
   }
   return fieldFeatureList;
 }
-const generateDashBoard: RequestHandler<any> = (req, res) => {
+const generateDashBoard: RequestHandler = (req, res) => {
   const { dataSource, dimensions, measures, subspaces } = req.body as DashBoardRequest;
   try {
     const fieldFeatureList = transSubspaces2FieldsFeature(subspaces);

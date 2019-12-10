@@ -1,7 +1,7 @@
 import { fieldsAnalysis, getInsightViews } from 'visual-insights'
 import { RequestHandler } from 'express';
 
-const fieldProcess: RequestHandler<any> = (req, res) => {
+const fieldProcess: RequestHandler = (req, res) => {
   console.log('[fieldsAnalysis]')
   try {
     const { dataSource, dimensions, measures } = req.body;

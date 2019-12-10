@@ -7,7 +7,7 @@ interface CombineFieldsRequest {
   operator: 'sum' | 'mean' | 'count';
   topKPercent: number
 }
-const combineFields: RequestHandler<any> = (req, res) => {
+const combineFields: RequestHandler = (req, res) => {
   console.log('[combine fields]')
   try {
     const { dataSource, dimensions, measures, operator, topKPercent = 1 } = req.body as CombineFieldsRequest;
