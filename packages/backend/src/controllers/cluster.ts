@@ -22,7 +22,7 @@ function sum (arr: number[]) {
   }
   return ans;
 }
-const cluster: RequestHandler = (req, res) => {
+const cluster: RequestHandler<any> = (req, res) => {
   console.log('[cluster measures]')
   try {
     const { spaces, maxGroupNumber } = req.body as RequestBody;

@@ -4,6 +4,7 @@ import fieldsSummary from './controllers/fieldsSummary';
 import groupFields from './controllers/groupFields';
 import combineFields from './controllers/combineFields';
 import cluster from './controllers/cluster';
+import generateDashBoard from './controllers/dashboard';
 import { RequestHandler } from 'express';
 
 interface Route {
@@ -42,6 +43,11 @@ const router: Route[] = [
     url: '/api/service/clusterMeasures',
     method: 'post',
     controller: cluster
+  },
+  {
+    url: '/api/service/generateDashBoard',
+    method: 'post',
+    controller: generateDashBoard
   }
 ]
 

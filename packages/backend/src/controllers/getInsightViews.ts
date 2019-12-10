@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { getInsightViews } from 'visual-insights';
 
-const insightViews: RequestHandler = (req, res) => {
+const insightViews: RequestHandler<any> = (req, res) => {
   console.log('[getInsightViews]')
   try {
     const { dataSource, dimensions, measures } = req.body;

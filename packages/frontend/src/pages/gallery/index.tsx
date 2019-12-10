@@ -148,7 +148,7 @@ const Gallery: React.FC<GalleryProps> = props => {
         // implement this in specification
         // + check geomType
         // + check geom number and aggregated geom number
-        if (schema.geomType && schema.geomType.includes("point")) {
+        if (schema.geomType && (schema.geomType.includes("point") || schema.geomType.includes("density"))) {
           setVisualConfig(config => {
             return {
               ...config,
