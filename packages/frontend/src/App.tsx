@@ -1,6 +1,6 @@
 import React from "react";
 import { useGlobalState, GlobalStateProvider } from "./state";
-import { Pivot, PivotItem, Toggle } from "office-ui-fabric-react";
+import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
 import "./App.css";
 
@@ -47,7 +47,7 @@ interface PageStatus {
 }
 
 function App() {
-  const [state, updateState] = useGlobalState();
+  const [state, ] = useGlobalState();
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
@@ -69,7 +69,7 @@ function App() {
               href="https://github.com/ObservedObserver/visual-insights"
               className="logo"
             >
-              <img src={ getLogoSrc(state.useServer) } />
+              <img src={ getLogoSrc(state.useServer) } alt="rath" />
             </a>
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg8">

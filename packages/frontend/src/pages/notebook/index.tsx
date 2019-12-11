@@ -22,7 +22,7 @@ interface NoteBookProps {
 const NoteBook: React.FC<NoteBookProps> = (props) => {
   const { summary, subspaceList, dataSource } = props;
   const [state, updateState] = useGlobalState();
-  const [isAggregated, setIsAggregated] = useState(false);
+  const [isAggregated, setIsAggregated] = useState(true);
   interface ClusterState {
     measures: string[];
     dimensions: string[];
@@ -69,6 +69,10 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     }
 
   }, [dimScores, clusterState, dataSource, measuresInView])
+
+  const usedSubspaceList = useMemo<Subspace[]>(() => {
+    return subspaceList.slice(0, Math.round(subspaceList.length * state.topK.subspacePercentSize))
+  }, [subspaceList, state.topK.subspacePercentSize]);
   useEffect(() => {
     updateState(draft => {
       draft.maxGroupNumber = Math.round(state.cookedMeasures.length / maxMeasureInView)
@@ -109,7 +113,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
         }}/>
       }
     <div className="notebook content center container">
-      <Subspaces subspaceList={subspaceList.slice(0, Math.round(subspaceList.length * state.topK.subspacePercentSize))} onSpaceChange={(dimensions, measures, matrix) => {
+      <Subspaces subspaceList={usedSubspaceList} onSpaceChange={(dimensions, measures, matrix) => {
         setClusterState({
           dimensions,
           measures,

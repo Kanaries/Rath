@@ -23,6 +23,14 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
   //     }
   //   })
   // }, [subspaceList]);
+  useEffect(() => {
+    let index = subspaceList.length - 1;
+    if (index > -1) {
+      let targetSpace = subspaceList[index];
+      onSpaceChange(targetSpace.dimensions, targetSpace.measures.map(m => m.name), targetSpace.correlationMatrix);
+      setCurIndex(index);
+    }
+  }, [subspaceList])
   const range = useMemo<[number, number]>(() => {
     let max = 0;
     let min = Infinity;

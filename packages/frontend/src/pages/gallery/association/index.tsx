@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
+import React from "react";
 import VisDescription from "../../../plugins/visSummary/description";
 import useDigDimension, { DigDimensionProps } from "./digDimension";
-import BaseChart, { Specification } from "../../../demo/vegaBase";
+import BaseChart from "../../../demo/vegaBase";
 import { Subspace } from "../../../service";
 import { IconButton, Stack } from "office-ui-fabric-react";
 

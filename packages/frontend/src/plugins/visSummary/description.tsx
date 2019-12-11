@@ -1,6 +1,6 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Subspace, FieldSummary } from '../../service';
+import { Subspace } from '../../service';
 
 import './index.css';
 import { Field } from '../../global';

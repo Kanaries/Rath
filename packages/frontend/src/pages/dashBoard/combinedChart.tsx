@@ -2,16 +2,20 @@ import React, { useMemo, useEffect, useState } from "react";
 import { DashBoard } from "../../service";
 import { DataSource, Field, FieldType } from "../../global";
 import { specification } from "visual-insights";
-import embed, { VisualizationSpec } from "vega-embed";
 import { VegaLite } from "react-vega";
-import { geomTypeMap } from "../../demo/vegaBase";
-import produce from "immer";
+// import { geomTypeMap } from "../../demo/vegaBase";
 import { useComposeState } from "../../utils/index";
 import { IconButton } from "office-ui-fabric-react";
 import IndicatorCard from "./indicatorCard";
 
 const IndicatorCardType = "indicator" as const;
-
+// tmp: for now, we support rect in dashboard because the number of fields in a view can be controlled here.
+const geomTypeMap: {[key: string]: any} = {
+  interval: 'bar',
+  line: 'line',
+  point: 'point',
+  density: 'rect'
+}
 interface CombinedChartProps {
   dashBoard: DashBoard;
   dataSource: DataSource;
@@ -20,10 +24,6 @@ interface CombinedChartProps {
 
 interface GlobalFilters {
   [key: string]: any[];
-}
-
-function getFieldScale (dataSource: DataSource, field: XMLDocument, type: 'quantitative' | 'norminal') {
-  return 
 }
 
 const CombinedChart: React.FC<CombinedChartProps> = props => {
@@ -103,6 +103,9 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       return false;
     }
     const fieldType = getFieldType(field);
+    if (geomType === 'rect') {
+      return fieldType !== 'quantitative'
+    }
     if (fieldType === "quantitative" && measures.includes(field)) {
       return true;
     }
@@ -120,15 +123,24 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
         };
       }
 
-      const markType =
+      let markType =
         schema.geomType![0] && geomTypeMap[schema.geomType![0]]
           ? geomTypeMap[schema.geomType![0]]
           : schema.geomType![0];
       const xType = getFieldType(schema.position![0]);
       const yType = getFieldType(schema.position![1]);
+      const colorType = getFieldType(schema.color![0]);
       const xAgg = shouldFieldAggregate(schema.position![0], dimensions, measures, markType);
       const yAgg = shouldFieldAggregate(schema.position![1], dimensions, measures, markType);
-      const mustDefineScale = xType === 'quantitative' && yType === 'quantitative';
+      let adjustColorField = schema.color![0];
+      if (markType === 'rect') {
+        if (schema.color![0] && colorType !== 'quantitative') {
+          markType = 'point';
+        } else if (schema.opacity![0] && schema.size![0]) {
+          adjustColorField = schema.size![0] || schema.opacity![0];
+        }
+      }
+      const mustDefineScale = xType === 'quantitative' && yType === 'quantitative' && markType !== 'rect';
       return {
         // transform: filters.length > 0 && [...filters],
         // width: 300,
@@ -148,13 +160,15 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
           x: schema.position![0] && {
             field: schema.position![0],
             type: getFieldType(schema.position![0]),
-            aggregate: xAgg && 'sum',
+            bin: markType === 'rect' && xType === 'quantitative' && { maxbins: 30 },
+            aggregate: markType !== 'rect' && xAgg && 'sum',
             scale: mustDefineScale && !xAgg ? { domain: filedDomains[schema.position![0]] } : undefined
           },
           y: schema.position![1] && {
             field: schema.position![1],
             type: getFieldType(schema.position![1]),
-            aggregate: yAgg && 'sum',
+            bin: markType === 'rect' && yType === 'quantitative' && { maxbins: 30 },
+            aggregate: markType !== 'rect' && yAgg && 'sum',
             scale: mustDefineScale && !yAgg ? { domain: filedDomains[schema.position![1]] } : undefined
           },
           size: schema.size![0] && {
@@ -169,14 +183,16 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
             field: schema.shape![0],
             type: getFieldType(schema.shape![0])
           },
-          color: schema.color![0] && {
-            field: schema.color![0],
-            type: schema.color![0] && getFieldType(schema.color![0])
+          color: (adjustColorField || markType === 'rect') && {
+            field: adjustColorField,
+            aggregate: markType === 'rect' && getFieldType(adjustColorField) === 'quantitative' && (adjustColorField ? 'sum' : 'count'),
+            type: adjustColorField && getFieldType(adjustColorField)
           }
         }
       };
     }) as any;
   }, [chartSpecList, filedDomains]);
+  console.log(specList)
   const dataSourceContainer = useMemo(() => {
     return { dataSource };
   }, [dataSource, specList, dimScores]);
@@ -282,6 +298,8 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
             </div>
             <div style={{ float: "left" }}>
               <IconButton
+                title="use as filter"
+                ariaLabel="use as filter"
                 iconProps={{
                   iconName: chartStateList[index] ? "FilterSolid" : "Filter"
                 }}

@@ -1,6 +1,6 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Subspace, FieldSummary } from '../../service';
+import { Subspace } from '../../service';
 import { DefaultButton, TeachingBubble, DirectionalHint } from 'office-ui-fabric-react';
 
 import './index.css';
