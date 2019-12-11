@@ -10,7 +10,7 @@ function numberWithCommas(x: number): string {
 }
 
 const Card = styled.div`
-  float: left;
+  display: inline-block;
   padding: 1rem;
   border: 1px solid #f5f5f5;
   margin: 1rem;

@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://ch-rath.oss-ap-northeast-1.aliyuncs.com",
+  "homepage": "https://ch-rath.oss-ap-northeast-1.aliyuncs.com/",
   "dependencies": {
     "@antv/g2": "^3.5.8-beta.3",
     "@types/chroma-js": "^1.4.3",

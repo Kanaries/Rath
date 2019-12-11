@@ -266,18 +266,21 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
   ]);
   return (
     <div>
-      {specList.map((spec, index) =>
-        spec.type === IndicatorCardType ? (
+      <div>
+      {specList.filter(spec => spec.type === IndicatorCardType).map((spec, index) =>
           <IndicatorCard
-            key={`ds-chart-${index}`}
+            key={`ds-ind-chart-${index}`}
             dataSource={vsourceList[index].dataSource}
             measures={spec.measures}
           />
-        ) : (
+      )}
+      </div>
+      <div>
+      {specList.filter(spec => spec.type !== IndicatorCardType).map((spec, index) =>
           <div
             key={`ds-chart-${index}`}
             style={{
-              float: "left",
+              display: 'inline-block',
               padding: "4px",
               margin: "2px",
               height: "380px",
@@ -313,8 +316,8 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
               />
             </div>
           </div>
-        )
       )}
+      </div>
     </div>
   );
 };
