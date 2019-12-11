@@ -12,6 +12,10 @@ export interface GlobalState {
    */
   currentPage: number;
   /**
+   * use server to complete computing task, if not, use web worker.
+   */
+  useServer: boolean;
+  /**
    * raw data is fetched and parsed data or uploaded data without any other changes.
    * computed value `dataSource` will be calculated 
    */
@@ -86,6 +90,7 @@ export type StateUpdater<S> = (draftState: Draft<S>) => void
 
 const initState: GlobalState = {
   currentPage: 0,
+  useServer: false,
   fields: [],
   rawData: [],
   cookedDataSource: [],

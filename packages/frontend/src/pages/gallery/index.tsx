@@ -101,7 +101,8 @@ const Gallery: React.FC<GalleryProps> = props => {
           measures: space.measures,
           matrix: space.correlationMatrix
         };
-      })
+      }),
+      state.useServer
     ).then(viewSpaces => {
       setViewSpaces(viewSpaces);
       updateState(draft => {

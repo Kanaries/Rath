@@ -1,14 +1,10 @@
 import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { Subspace } from '../../service';
-import { DetailsList, SelectionMode, IColumn, Icon, IDetailsRowProps, IDetailsRowStyles, DetailsRow, IRenderFunction, HoverCard, IExpandingCardProps } from 'office-ui-fabric-react';
 import embed from 'vega-embed';
 import { DataSource } from '../../global';
 
 function encodeArr (arr: any[]): string {
   return arr.join(',')
-}
-interface IndexSubspace extends Subspace {
-  index: number
 }
 interface SubspacesProps {
   subspaceList: Subspace[];

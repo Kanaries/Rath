@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useGlobalState, GlobalStateProvider } from "./state";
-import { Pivot, PivotItem } from "office-ui-fabric-react";
+import { Pivot, PivotItem, Toggle } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
 import "./App.css";
 
@@ -27,6 +27,9 @@ const pivotList = [
     itemKey: "pivot-" + 4
   }
 ];
+const getLogoSrc = (withGlasses: boolean) => {
+  return withGlasses ? 'http://chspace.oss-cn-hongkong.aliyuncs.com/logos/logo-glasses.png' : 'http://chspace.oss-cn-hongkong.aliyuncs.com/logos/logo.png';
+}
 
 interface PageStatus {
   show: {
@@ -63,10 +66,10 @@ function App() {
               href="https://github.com/ObservedObserver/visual-insights"
               className="logo"
             >
-              <img src="https://chspace.oss-cn-hongkong.aliyuncs.com/logos/logo.png" />
+              <img src={ getLogoSrc(state.useServer) } />
             </a>
           </div>
-          <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg11">
+          <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg8">
             <Pivot
               selectedKey={pageStatus.current.pivotKey}
               onLinkClick={item => {
@@ -86,6 +89,15 @@ function App() {
                 />
               ))}
             </Pivot>
+          </div>
+          <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3">
+          <div className="header-toolbar">
+              <Toggle label="use server" checked={state.useServer} inlineLabel onText="On" offText="Off" onChange={(ev: React.MouseEvent<HTMLElement>, checked?: boolean) => {
+                updateState(draft => {
+                  draft.useServer = checked || false;
+                })
+              }} />
+            </div>
           </div>
         </div>
       </div>

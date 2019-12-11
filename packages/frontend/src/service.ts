@@ -2,7 +2,24 @@ import { DataSource,  Field, FieldType, OperatorType } from './global';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import dashBoardGeneratorWorker from './workers/dashboard.worker'
+import dashBoardGeneratorWorker from './workers/dashboard.worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import clusterWorker from './workers/cluster.worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import combineFieldsWorker from './workers/combineFields.worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import fieldsSummaryWorker from './workers/fieldsSummary.worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import groupFieldsWorker from './workers/groupFields.worker';
+
 let server = '//lobay.moe:8443';
 
 if (process.env.NODE_ENV !== 'production') {
@@ -37,64 +54,12 @@ function workerService<T, R> (worker: Worker, data: R): Promise<Result<T>> {
   })
 }
 
-interface FieldAnalysisResponse {
-  dimScores: Array<[string, number, number, Field]>;
-  aggData: DataSource;
-}
-export interface FieldAnalysisResult extends FieldAnalysisResponse {
-  newDimensions: string[];
-}
-export async function fieldsAnalysisService (cleanData: DataSource, dimensions: string[], measures: string[]): Promise<FieldAnalysisResult> {
-  const res = await fetch(server + '/api/service/fieldsAnalysis', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      dataSource: cleanData,
-      dimensions,
-      measures
-    })
-  });
-  const result: Result<FieldAnalysisResponse> = await res.json();
-  if (result.success === true) {
-    const { dimScores, aggData } = result.data;
-    const newDimensions = dimScores.map(dim => dim[0]).filter(dim => !measures.includes(dim));
-    return {
-      dimScores,
-      aggData,
-      newDimensions
-    }
-  } else {
-    throw new Error('fieldsAnalysisService failed' + result.message);
-  }
-}
 export interface View {
   groups: string[][];
   detail: [string[], any, number[][]];
   score: number;
 }
 
-export async function getInsightViewsService (aggData: DataSource, newDimensions: string[], measures: string[]): Promise<View[]> {
-  const res = await fetch(server + '/api/service/getInsightViews', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      dataSource: aggData,
-      dimensions: newDimensions,
-      measures
-    })
-  });
-  const result: Result<View[]> = await res.json();
-  if (result.success === true) {
-    const views = result.data;
-    return views;
-  } else {
-    throw new Error('getInsightView service fail' + result.message);
-  }
-}
 /**
  * statistic description for a field
  */
@@ -105,28 +70,40 @@ export interface FieldSummary {
   distribution: Array<{ memberName: string; count: number }>
   type: FieldType
 }
-export async function getFieldsSummaryService (dataSource: DataSource, fields: string[] | Field[]): Promise<FieldSummary[] | undefined> {
-  try {
-    const res = await fetch(server + '/api/service/fieldsSummary', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        dataSource,
-        fields
+export async function getFieldsSummaryService (dataSource: DataSource, fields: string[] | Field[], useServer?: boolean): Promise<FieldSummary[]> {
+  let fieldSummaryList: FieldSummary[] = [];
+  if (useServer) {
+    try {
+      const res = await fetch(server + '/api/service/fieldsSummary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          dataSource,
+          fields
+        })
       })
-    })
-    const result: Result<FieldSummary[]> = await res.json();
+      const result: Result<FieldSummary[]> = await res.json();
+      if (result.success === true) {
+        fieldSummaryList = result.data;
+      } else {
+        throw new Error('[fields summary failed]' + result.message)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  } else {
+    const worker = new fieldsSummaryWorker();
+    const result = await workerService<FieldSummary[], any>(worker, { dataSource, fields });
     if (result.success === true) {
-      const fieldSummaryList = result.data;
-      return fieldSummaryList
+      fieldSummaryList = result.data;
     } else {
       throw new Error('[fields summary failed]' + result.message)
     }
-  } catch (error) {
-    console.error(error)
+    worker.terminate()
   }
+  return fieldSummaryList
 }
 
 interface GroupFieldsResponse {
@@ -134,28 +111,44 @@ interface GroupFieldsResponse {
   newFields: Field[];
   fields: Field[];
 }
-export async function getGroupFieldsService (dataSource: DataSource, fields: Field[]): Promise<GroupFieldsResponse | undefined> {
-  try {
-    const res = await fetch(server + '/api/service/groupFields', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        dataSource,
-        fields
+export async function getGroupFieldsService (dataSource: DataSource, fields: Field[], useServer?: boolean): Promise<GroupFieldsResponse> {
+  let ans: GroupFieldsResponse = {
+    groupedData: [],
+    newFields: [],
+    fields: []
+  };
+  if (useServer) {
+    try {
+      const res = await fetch(server + '/api/service/groupFields', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          dataSource,
+          fields
+        })
       })
-    })
-    const result: Result<GroupFieldsResponse> = await res.json();
+      const result: Result<GroupFieldsResponse> = await res.json();
+      if (result.success === true) {
+        ans = result.data;
+      } else {
+        throw new Error('[group fields failed]' + result.message)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  } else {
+    const worker = new groupFieldsWorker();
+    const result = await workerService<GroupFieldsResponse, any>(worker, { dataSource, fields });
     if (result.success === true) {
-      const { groupedData, newFields, fields } = result.data;
-      return { groupedData, newFields, fields }
+      ans = result.data;
     } else {
       throw new Error('[group fields failed]' + result.message)
     }
-  } catch (error) {
-    console.error(error)
+    worker.terminate();
   }
+  return ans;
 }
 
 export interface Subspace {
@@ -164,30 +157,42 @@ export interface Subspace {
   measures: Array<{name: string; value: number}>;
   correlationMatrix: number[][];
 }
-export async function combineFieldsService (dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType): Promise<Subspace[] | undefined> {
-  try {
-    const res = await fetch(server + '/api/service/combineFields', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        dataSource,
-        dimensions,
-        measures,
-        operator
+export async function combineFieldsService (dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType, useServer?: boolean): Promise<Subspace[]> {
+  let subspaceList: Subspace[] = [];
+  if (useServer) {
+    try {
+      const res = await fetch(server + '/api/service/combineFields', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          dataSource,
+          dimensions,
+          measures,
+          operator
+        })
       })
-    })
-    const result: Result<Subspace[]> = await res.json();
+      const result: Result<Subspace[]> = await res.json();
+      if (result.success === true) {
+        subspaceList = result.data;
+      } else {
+        throw new Error('[combine fields failed]' + result.message)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  } else {
+    const worker = new combineFieldsWorker();
+    const result = await workerService<Subspace[], any>(worker, { dataSource, dimensions, measures, operator });
     if (result.success === true) {
-      const subspaceList = result.data;
-      return subspaceList
+      subspaceList = result.data;
     } else {
       throw new Error('[combine fields failed]' + result.message)
     }
-  } catch (error) {
-    console.error(error)
+    worker.terminate()
   }
+  return subspaceList
 }
 
 export interface ViewCombinedSpace {
@@ -203,20 +208,37 @@ export interface ViewSpace {
   score: number;
 }
 
-export async function clusterMeasures (maxGroupNumber: number, combinedSpaces: ViewCombinedSpace[]): Promise<ViewSpace[]> {
+export async function clusterMeasures (maxGroupNumber: number, combinedSpaces: ViewCombinedSpace[], useServer?: boolean): Promise<ViewSpace[]> {
   let viewSpaces: ViewSpace[] = [];
-  try {
-    const res = await fetch(server + '/api/service/clusterMeasures', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        maxGroupNumber,
-        spaces: combinedSpaces
-      })
-    });
-    const result: Result<ViewSpace[]> = await res.json();
+  if (useServer) {
+    try {
+      const res = await fetch(server + '/api/service/clusterMeasures', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          maxGroupNumber,
+          spaces: combinedSpaces
+        })
+      });
+      const result: Result<ViewSpace[]> = await res.json();
+      if (result.success === true) {
+        viewSpaces = result.data.map((v, i) => {
+          return {
+            ...v,
+            index: i
+          }
+        });
+      } else {
+        throw new Error('[cluster measures]' + result.message)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  } else {
+    const worker = new clusterWorker();
+    const result = await workerService<ViewSpace[], any>(worker, { maxGroupNumber, spaces: combinedSpaces });
     if (result.success === true) {
       viewSpaces = result.data.map((v, i) => {
         return {
@@ -227,8 +249,7 @@ export async function clusterMeasures (maxGroupNumber: number, combinedSpaces: V
     } else {
       throw new Error('[cluster measures]' + result.message)
     }
-  } catch (error) {
-    console.error(error)
+    worker.terminate();
   }
   return viewSpaces;
 }
@@ -279,6 +300,7 @@ export async function generateDashBoard (dataSource: DataSource, dimensions: str
     } else {
       throw new Error('[generateDashBoard]' + result.message);
     }
+    worker.terminate()
   }
   
   return dashBoardList;
