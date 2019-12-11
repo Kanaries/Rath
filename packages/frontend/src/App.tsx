@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useGlobalState, GlobalStateProvider } from "./state";
 import { Pivot, PivotItem, Toggle } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
@@ -8,6 +8,7 @@ import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
+import UserSettings from './components/userSettings';
 
 const pivotList = [
   {
@@ -24,7 +25,7 @@ const pivotList = [
   },
   {
     title: "DashBaord",
-    itemKey: "pivot-" + 4
+    itemKey: "pivot-" + 4   
   }
 ];
 const getLogoSrc = (withGlasses: boolean) => {
@@ -92,11 +93,7 @@ function App() {
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3">
           <div className="header-toolbar">
-              <Toggle label="use server" checked={state.useServer} inlineLabel onText="On" offText="Off" onChange={(ev: React.MouseEvent<HTMLElement>, checked?: boolean) => {
-                updateState(draft => {
-                  draft.useServer = checked || false;
-                })
-              }} />
+              <UserSettings />
             </div>
           </div>
         </div>
