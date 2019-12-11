@@ -1,3 +1,4 @@
+/* eslint no-restricted-globals: 0 */
 import { DashBoard } from 'visual-insights';
 
 function transSubspaces2FieldsFeature(subspaces) {

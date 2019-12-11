@@ -1,3 +1,4 @@
+/* eslint no-restricted-globals: 0 */
 import { UnivariateSummary } from 'visual-insights';
 const { getAllFieldsDistribution, getAllFieldTypes, getAllFieldsEntropy } = UnivariateSummary;
 

@@ -1,3 +1,4 @@
+/* eslint no-restricted-globals: 0 */
 import { analysisDimensions } from 'visual-insights'
 
 const combineFields = (e) => {

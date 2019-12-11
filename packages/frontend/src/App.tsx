@@ -29,8 +29,10 @@ const pivotList = [
   }
 ];
 const getLogoSrc = (withGlasses: boolean) => {
-  return withGlasses ? 'http://chspace.oss-cn-hongkong.aliyuncs.com/logos/logo-glasses.png' : 'http://chspace.oss-cn-hongkong.aliyuncs.com/logos/logo.png';
-}
+  return withGlasses
+    ? "https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/rath-glasses.png"
+    : "https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/rath.png";
+};
 
 interface PageStatus {
   show: {
