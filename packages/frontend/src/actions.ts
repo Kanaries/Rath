@@ -28,7 +28,8 @@ const univariateSummary: Action<{dataSource: DataSource; fields: BIField[]}> = a
      */
     const originSummary = await getFieldsSummaryService(
       dataSource,
-      fields.map(f => f.name)
+      fields.map(f => f.name),
+      state.useServer
     );
     // todo only group dimension.
     let fieldWithTypeList: Field[] = originSummary
@@ -47,7 +48,8 @@ const univariateSummary: Action<{dataSource: DataSource; fields: BIField[]}> = a
      */
     const groupedResult = await getGroupFieldsService(
       dataSource,
-      fieldWithTypeList
+      fieldWithTypeList,
+      state.useServer
     );
     const { groupedData, newFields } = groupedResult
       ? groupedResult
@@ -75,7 +77,8 @@ const univariateSummary: Action<{dataSource: DataSource; fields: BIField[]}> = a
      */
     const groupedSummary = await getFieldsSummaryService(
       groupedData,
-      newFields
+      newFields,
+      state.useServer
     );
     
     updateState(draft => {
@@ -142,7 +145,8 @@ const subspaceSearch: Action<SubspaceSeachParams> = async (state, updateState, p
       dataSource,
       selectedDimensions,
       measures,
-      operator
+      operator,
+      state.useServer
     );
     if (subspaceList) {
       updateState(draft => {
@@ -194,7 +198,7 @@ const getDashBoard: Action<{dataSource: DataSource, dimensions: string[], measur
     draft.loading.dashBoard = true
   })
   try {
-    const dashBoardList = await generateDashBoard(dataSource, dimensions, measures, state.subspaceList)
+    const dashBoardList = await generateDashBoard(dataSource, dimensions, measures, state.subspaceList, state.useServer)
     updateState(draft => {
       draft.dashBoardList = dashBoardList;
     })

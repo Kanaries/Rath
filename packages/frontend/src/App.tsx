@@ -1,6 +1,6 @@
 import React from "react";
 import { useGlobalState, GlobalStateProvider } from "./state";
-import { Pivot, PivotItem } from "office-ui-fabric-react";
+import { Pivot, PivotItem, Toggle } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
 import "./App.css";
 
@@ -8,6 +8,7 @@ import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
+import UserSettings from './components/userSettings';
 
 const pivotList = [
   {
@@ -24,9 +25,14 @@ const pivotList = [
   },
   {
     title: "DashBaord",
-    itemKey: "pivot-" + 4
+    itemKey: "pivot-" + 4   
   }
 ];
+const getLogoSrc = (withGlasses: boolean) => {
+  return withGlasses
+    ? "https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/rath-glasses.png"
+    : "https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/rath.png";
+};
 
 interface PageStatus {
   show: {
@@ -63,10 +69,10 @@ function App() {
               href="https://github.com/ObservedObserver/visual-insights"
               className="logo"
             >
-              <img src="https://chspace.oss-cn-hongkong.aliyuncs.com/logos/logo.png" />
+              <img src={ getLogoSrc(state.useServer) } />
             </a>
           </div>
-          <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg11">
+          <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg8">
             <Pivot
               selectedKey={pageStatus.current.pivotKey}
               onLinkClick={item => {
@@ -86,6 +92,11 @@ function App() {
                 />
               ))}
             </Pivot>
+          </div>
+          <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3">
+          <div className="header-toolbar">
+              <UserSettings />
+            </div>
           </div>
         </div>
       </div>

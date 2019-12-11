@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://chspace.oss-cn-hongkong.aliyuncs.com/rath",
+  "homepage": "https://ch-rath.oss-ap-northeast-1.aliyuncs.com/",
   "dependencies": {
     "@antv/g2": "^3.5.8-beta.3",
     "@types/chroma-js": "^1.4.3",
@@ -21,6 +21,7 @@
     "office-ui-fabric-react": "^7.38.0",
     "papaparse": "^5.1.0",
     "react": "^16.9.0",
+    "react-app-rewired": "^2.1.5",
     "react-dom": "^16.9.0",
     "react-markdown": "^4.2.2",
     "react-scripts": "3.1.2",
@@ -30,13 +31,14 @@
     "vega": "^5.9.0",
     "vega-embed": "^6.2.1",
     "vega-lite": "^4.0.0",
-    "visual-insights": "^0.3.0"
+    "visual-insights": "^0.3.0",
+    "worker-loader": "^2.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject"
   },
   "browserslist": {
     "production": [

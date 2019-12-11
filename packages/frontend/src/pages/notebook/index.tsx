@@ -91,7 +91,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
           draft.topK.dimensionSize = value / 100;
         })
         const selectedDimensions = state.cookedDimensions.slice(0, Math.round(state.cookedDimensions.length * value / 100));
-        combineFieldsService(dataSource, selectedDimensions, state.cookedMeasures, 'sum')
+        combineFieldsService(dataSource, selectedDimensions, state.cookedMeasures, 'sum', state.useServer)
           .then(subspaces => {
             if (subspaces) {
               updateState(draft => {

@@ -92,3 +92,8 @@ h2, h3 {
   width: 100%;
   white-space: nowrap;
 }
+
+.header-toolbar{
+  float: right;
+  padding: 0.5rem;
+}
