@@ -192,7 +192,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       };
     }) as any;
   }, [chartSpecList, filedDomains]);
-  console.log(specList)
+
   const dataSourceContainer = useMemo(() => {
     return { dataSource };
   }, [dataSource, specList, dimScores]);
@@ -233,26 +233,26 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
           globalFilters[fieldName][0] < globalFilters[fieldName][1]
       };
     });
+    const ds = dataSource.filter(record => {
+      return filters.every(f => {
+        if (f.filter.length === 0) {
+          return true;
+        }
+        if (f.isRange) {
+          return (
+            record[f.fieldName] >= f.filter[0] &&
+            record[f.fieldName] <= f.filter[1]
+          );
+        } else {
+          return f.filter.includes(record[f.fieldName]);
+        }
+      });
+    });
     for (let i = 0; i < dashBoard.length; i++) {
       if (chartStateList[i]) {
         ans.push(dataSourceContainer);
         continue;
       }
-      const ds = dataSource.filter(record => {
-        return filters.every(f => {
-          if (f.filter.length === 0) {
-            return true;
-          }
-          if (f.isRange) {
-            return (
-              record[f.fieldName] >= f.filter[0] &&
-              record[f.fieldName] <= f.filter[1]
-            );
-          } else {
-            return f.filter.includes(record[f.fieldName]);
-          }
-        });
-      });
       ans.push({ dataSource: ds });
     }
     return ans;
@@ -310,6 +310,13 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
                   setChartStateList(list => {
                     let nextList = [...list];
                     nextList[index] = !nextList[index];
+                    if (!nextList[index]) {
+                      setGlobalFilters(draft => {
+                        for (let key in draft) {
+                          draft[key] = [];
+                        }
+                      });
+                    }
                     return nextList;
                   });
                 }}

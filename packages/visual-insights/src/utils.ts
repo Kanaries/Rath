@@ -34,7 +34,7 @@ function isFieldTime(dataSource: DataSource, fieldName: string): boolean {
   return dataSource.every(record => {
     return (!isNaN(Date.parse(record[fieldName]))
     && typeof record[fieldName] === 'string'
-    && /[0-9]{0,4}-[0-9]{0,2}(-[0-9]{0,2})?/.test(record[fieldName]))
+    && /^[0-9]{0,4}[-/][0-9]{0,2}([-/][0-9]{0,2}$)?/.test(record[fieldName]))
     || typeof record[fieldName] === 'undefined'
     || record[fieldName] === null;
   })

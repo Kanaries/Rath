@@ -89,23 +89,25 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     <h3 className="notebook header">Subspace Searching</h3>
     <p className="state-description">Try to choose one row(combination of dimensions) of the subspace and see the changes of the processes below.</p>
     {state.loading.subspaceSearching && <ProgressIndicator description="analyzing" />}
-    {!state.loading.subspaceSearching && <Slider value={state.topK.dimensionSize * 100} label="top k percent dimension used" max={100} valueFormat={(value: number) => `${value}%`} showValue={true}
+    {!state.loading.univariateSummary && <Slider disabled={state.loading.subspaceSearching} value={state.topK.dimensionSize * 100} label="top k percent dimension used" max={100} valueFormat={(value: number) => `${value}%`} showValue={true}
       onChange={(value: number) => {
         updateState(draft => {
           draft.topK.dimensionSize = value / 100;
+          draft.loading.subspaceSearching = true;
         })
         const selectedDimensions = state.cookedDimensions.slice(0, Math.round(state.cookedDimensions.length * value / 100));
         combineFieldsService(dataSource, selectedDimensions, state.cookedMeasures, 'sum', state.useServer)
           .then(subspaces => {
             if (subspaces) {
               updateState(draft => {
-                draft.subspaceList = subspaces
+                draft.subspaceList = subspaces;
+                draft.loading.subspaceSearching = false
               })
             }
           })
       }}/>}
       {
-        !state.loading.subspaceSearching && <Slider value={state.topK.subspacePercentSize * 100} label="top k percent subspace used" max={100} valueFormat={(value: number) => `${value}%`} showValue={true}
+        !state.loading.univariateSummary && <Slider disabled={state.loading.subspaceSearching} value={state.topK.subspacePercentSize * 100} label="top k percent subspace used" max={100} valueFormat={(value: number) => `${value}%`} showValue={true}
         onChange={(value: number) => {
           updateState(draft => {
             draft.topK.subspacePercentSize = value / 100;

@@ -68,9 +68,9 @@ function aestheticMapping (dimFields: Field[]) {
   });
   const priority: [FieldType, string[]][] = [
     ['quantitative', ['position', 'size', 'opacity', 'color', 'page', 'filter', 'hightFacets']],
+    ['temporal', ['position', 'page', 'filter']],
     ['ordinal', ['position', 'color' ,'opacity', 'facets', 'size', 'page', 'filter', 'highFacets']],
     ['nominal', ['position', 'color', 'facets', 'shape', 'page', 'filter', 'hightFacets']],
-    ['temporal', ['position', 'page', 'filter']]
   ];
   let fieldLeft = fieldRankList.length;
   for (let typeIndex = 0; typeIndex < priority.length && fieldLeft > 0; typeIndex++) {

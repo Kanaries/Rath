@@ -109,7 +109,7 @@ function App() {
       )}
       {pageStatus.current.pivotKey === "pivot-1" && <DataSourceBoard onExtractInsights={() => {
         setPageStatus(draft => {
-          draft.current.pivotKey = "pivot-3";
+          draft.current.pivotKey = "pivot-2";
           draft.show.insightBoard = true;
         });
       }

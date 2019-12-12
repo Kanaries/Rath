@@ -3,8 +3,10 @@ import {
   DefaultButton,
   IconButton,
   Stack,
-  ProgressIndicator
+  ProgressIndicator,
+  SpinButton
 } from "office-ui-fabric-react";
+import { Position } from 'office-ui-fabric-react/lib/utilities/positioning';
 import PreferencePanel, {
   PreferencePanelConfig
 } from "../../components/preference";
@@ -223,9 +225,6 @@ const Gallery: React.FC<GalleryProps> = props => {
           />
         </h2>
         <p className="state-description">
-          Page No. {currentPage + 1} of {viewSpaces.length}
-        </p>
-        <p className="state-description">
           Details of the recommendation process can be seen in <b>NoteBook</b>{" "}
           Board. You can adjust some of the parameters and operators and see how
           it influence recommendation results.
@@ -240,6 +239,26 @@ const Gallery: React.FC<GalleryProps> = props => {
               className="ms-Grid-col ms-sm6 ms-md8 ms-lg3"
               style={{ overflow: "auto" }}
             >
+              <div style={{ marginBottom: '1rem' }}>
+                <SpinButton
+                  label={'Current Page'}
+                  value={(currentPage + 1).toString()}
+                  min={0}
+                  max={viewSpaces.length}
+                  step={1}
+                  iconProps={{ iconName: 'Search' }}
+                  labelPosition={Position.end}
+                  // tslint:disable:jsx-no-lambda
+                  onValidate={(value: string) => { gotoPage((Number(value) - 1) % viewSpaces.length) }}
+                  onIncrement={() => { gotoPage((currentPage + 1) % viewSpaces.length); }}
+                  onDecrement={() => { gotoPage((currentPage - 1 + viewSpaces.length) % viewSpaces.length); }}
+                  incrementButtonAriaLabel={'Increase value by 1'}
+                  decrementButtonAriaLabel={'Decrease value by 1'}
+                />
+              </div>
+              <p className="state-description">
+                Page No. {currentPage + 1} of {viewSpaces.length}
+              </p>
               <Stack horizontal tokens={{ childrenGap: 20 }}>
                 <DefaultButton
                   text="Last"
