@@ -4,7 +4,7 @@ import { Subspace } from '../../service';
 
 import './index.css';
 import { Field } from '../../global';
-import { Specification } from '../../demo/vegaBase';
+import { Specification } from '../../visBuilder/vegaBase';
 
 interface VisDescriptionProps {
   lang?: 'zh' | 'en';

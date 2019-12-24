@@ -7,7 +7,7 @@ import ClusterBoard from './cluster';
 import { specification } from 'visual-insights';
 import { ProgressIndicator, Toggle, Slider } from 'office-ui-fabric-react';
 import { useGlobalState } from '../../state';
-import VegaBase from '../../demo/vegaBase';
+import VegaBase from '../../visBuilder/vegaBase';
 import './index.css';
 const maxMeasureInView = 4;
 interface NoteBookProps {

@@ -1,12 +1,11 @@
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useMemo, useEffect, useState, useRef, useCallback } from "react";
 import { DashBoard } from "../../service";
 import { DataSource, Field, FieldType } from "../../global";
 import { specification } from "visual-insights";
-import { VegaLite } from "react-vega";
-// import { geomTypeMap } from "../../demo/vegaBase";
 import { useComposeState } from "../../utils/index";
 import { IconButton } from "office-ui-fabric-react";
 import IndicatorCard from "./indicatorCard";
+import ReactVega from '../../components/react-vega';
 
 const IndicatorCardType = "indicator" as const;
 // tmp: for now, we support rect in dashboard because the number of fields in a view can be controlled here.
@@ -27,10 +26,9 @@ interface GlobalFilters {
 }
 
 const CombinedChart: React.FC<CombinedChartProps> = props => {
-  const { dashBoard, dataSource, dimScores } = props;
+  const { dashBoard = [], dataSource = [], dimScores = [] } = props;
   const [globalFilters, setGlobalFilters] = useComposeState<GlobalFilters>({});
   const [chartStateList, setChartStateList] = useState<boolean[]>([]);
-
   useEffect(() => {
     setChartStateList(dashBoard.map(() => false));
   }, [dashBoard]);
@@ -117,6 +115,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       const { dimensions, measures, schema, type } = spec;
       if (type === "target" && measures.length === 1) {
         return {
+          specIndex: index,
           type: IndicatorCardType,
           measures: measures,
           operator: "sum"
@@ -144,6 +143,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       return {
         // transform: filters.length > 0 && [...filters],
         // width: 300,
+        specIndex: index,
         data: { name: "dataSource" },
         // padding: 26,
         autosize: {
@@ -193,10 +193,6 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
     }) as any;
   }, [chartSpecList, filedDomains]);
 
-  const dataSourceContainer = useMemo(() => {
-    return { dataSource };
-  }, [dataSource, specList, dimScores]);
-
   const signalHandler = useMemo(() => {
     return dashBoard.map((d, index) => {
       return {
@@ -219,7 +215,8 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       };
     });
   }, [dashBoard, chartStateList, dimScores, specList]);
-  const vsourceList = useMemo<Array<{ dataSource: DataSource }>>(() => {
+
+  const vsourceList = useMemo<Array<DataSource>>(() => {
     let ans = [];
     const filters = Object.keys(globalFilters).map(fieldName => {
       return {
@@ -250,10 +247,10 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
     });
     for (let i = 0; i < dashBoard.length; i++) {
       if (chartStateList[i]) {
-        ans.push(dataSourceContainer);
+        ans.push(dataSource);
         continue;
       }
-      ans.push({ dataSource: ds });
+      ans.push(ds);
     }
     return ans;
   }, [
@@ -261,16 +258,56 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
     globalFilters,
     dataSource,
     chartStateList,
-    specList,
-    dataSourceContainer
+    dataSource
   ]);
+  // useEffect(() => {
+  //   console.log(chartContainers.current.length, specList.length)
+  //   if (chartContainers.current.length > specList.length) {
+  //     chartContainers.current = chartContainers.current.slice(0, specList.length);
+  //   } else {
+  //     let len = specList.length - chartContainers.current.length
+  //     for (let i = 0; i < len; i++) {
+  //       chartContainers.current.push(React.createRef<HTMLDivElement>())
+  //     }
+  //   }
+  // }, [specList])
+  // useEffect(() => {
+  //   const embedPromiseList = [];
+  //   console.log(chartContainers.current)
+  //   for (let i = 0; i < specList.length; i++ ) {
+  //     console.log(i, chartContainers.current[i].current)
+  //     if (chartContainers.current[i].current) {
+  //       embedPromiseList.push(embed(chartContainers.current[i].current as any, specList[i]).then(res => {
+  //         if (chartStateList[i]) {
+  //           res.view.addSignalListener('sl', (name, values) => { signalHandler(name, values, chartStateList[i])})
+  //         }
+  //         res.view.run()
+  //         return res.view;
+  //       }))
+  //     }
+  //   }
+  //   Promise.all(embedPromiseList).then(vList => {
+  //     console.log('promise', vList);
+  //     setVegaViewList(vList);
+  //   })
+    
+  // }, [specList, signalHandler, chartStateList])
+
+
+  // useEffect(()=> {
+  //   for (let i = 0; i < vegaViewList.length; i++) {
+  //       vegaViewList[i].change('dataSource', vega.changeset().remove(() => true).insert(vsourceList[i]))
+  //       vegaViewList[i].runAsync()
+      
+  //   }
+  // }, [vsourceList, vegaViewList, specList])
   return (
     <div>
       <div>
       {specList.filter(spec => spec.type === IndicatorCardType).map((spec, index) =>
           <IndicatorCard
             key={`ds-ind-chart-${index}`}
-            dataSource={vsourceList[index].dataSource}
+            dataSource={vsourceList[spec.specIndex]}
             measures={spec.measures}
           />
       )}
@@ -290,12 +327,12 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
             <div
               style={{ float: "left", minWidth: "300px", minHeight: "300px" }}
             >
-              <VegaLite
-                data={vsourceList[index]}
+              {/* <div ref={node => { rendererRef(node, spec.specIndex) }}></div> */}
+              <ReactVega
+                dataSource={vsourceList[spec.specIndex]}
                 spec={spec}
-                actions={true}
-                signalListeners={
-                  chartStateList[index] && (signalHandler[index] as any)
+                signalHandler={
+                  chartStateList[spec.specIndex] && (signalHandler[spec.specIndex] as any)
                 }
               />
             </div>
@@ -304,13 +341,13 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
                 title="use as filter"
                 ariaLabel="use as filter"
                 iconProps={{
-                  iconName: chartStateList[index] ? "FilterSolid" : "Filter"
+                  iconName: chartStateList[spec.specIndex] ? "FilterSolid" : "Filter"
                 }}
                 onClick={() => {
                   setChartStateList(list => {
                     let nextList = [...list];
-                    nextList[index] = !nextList[index];
-                    if (!nextList[index]) {
+                    nextList[spec.specIndex] = !nextList[spec.specIndex];
+                    if (!nextList[spec.specIndex]) {
                       setGlobalFilters(draft => {
                         for (let key in draft) {
                           draft[key] = [];
