@@ -15,6 +15,7 @@
     "chroma-js": "^2.0.6",
     "cube-core": "^2.13.0",
     "datalib": "^1.9.2",
+    "fuse.js": "^3.4.6",
     "immer": "^4.0.1",
     "mocha": "^6.2.0",
     "office-ui-fabric-core": "^10.1.0",
