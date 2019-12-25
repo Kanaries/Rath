@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState, useRef, useCallback } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { DashBoard } from "../../service";
 import { DataSource, Field, FieldType } from "../../global";
 import { specification } from "visual-insights";
@@ -6,15 +6,10 @@ import { useComposeState } from "../../utils/index";
 import { IconButton } from "office-ui-fabric-react";
 import IndicatorCard from "./indicatorCard";
 import ReactVega from '../../components/react-vega';
+import { DataField, featureVis, targetVis } from '../../queries/index';
 
 const IndicatorCardType = "indicator" as const;
-// tmp: for now, we support rect in dashboard because the number of fields in a view can be controlled here.
-const geomTypeMap: {[key: string]: any} = {
-  interval: 'bar',
-  line: 'line',
-  point: 'point',
-  density: 'rect'
-}
+
 interface CombinedChartProps {
   dashBoard: DashBoard;
   dataSource: DataSource;
@@ -75,6 +70,8 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       schema.size = schema.size || [];
       schema.shape = schema.shape || [];
       schema.geomType = schema.geomType || [];
+      schema.highFacets = schema.highFacets || [];
+      schema.facets = schema.facets || [];
       return {
         dimensions,
         measures,
@@ -86,33 +83,29 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
 
   const fieldFeatures = dimScores.map(dim => dim[3]);
 
-  function getFieldType(field: string): FieldType {
-    let targetField = fieldFeatures.find(f => f.name === field);
-    return targetField ? targetField.type : "nominal";
-  }
-
-  function shouldFieldAggregate(
-    field: string,
-    dimensions: string[],
-    measures: string[],
-    geomType: string
-  ): boolean {
-    if (geomType === "point") {
-      return false;
-    }
-    const fieldType = getFieldType(field);
-    if (geomType === 'rect') {
-      return fieldType !== 'quantitative'
-    }
-    if (fieldType === "quantitative" && measures.includes(field)) {
-      return true;
-    }
-    return false;
-  }
-
   const specList = useMemo<any[]>(() => {
     return chartSpecList.map((spec, index) => {
       const { dimensions, measures, schema, type } = spec;
+      let dataFields: DataField[] = [];
+      for (let dim of dimensions) {
+        let targetField = fieldFeatures.find(f => f.name === dim);
+
+        dataFields.push({
+          name: dim,
+          semanticType: (targetField ? targetField.type : 'nominal'),
+          type: 'dimension'
+        })
+      }
+      for (let mea of measures) {
+        let targetField = fieldFeatures.find(f => f.name === mea);
+
+        dataFields.push({
+          name: mea,
+          semanticType: (targetField ? targetField.type : 'nominal'),
+          type: 'measure'
+        })
+      }
+    
       if (type === "target" && measures.length === 1) {
         return {
           specIndex: index,
@@ -121,75 +114,16 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
           operator: "sum"
         };
       }
-
-      let markType =
-        schema.geomType![0] && geomTypeMap[schema.geomType![0]]
-          ? geomTypeMap[schema.geomType![0]]
-          : schema.geomType![0];
-      const xType = getFieldType(schema.position![0]);
-      const yType = getFieldType(schema.position![1]);
-      const colorType = getFieldType(schema.color![0]);
-      const xAgg = shouldFieldAggregate(schema.position![0], dimensions, measures, markType);
-      const yAgg = shouldFieldAggregate(schema.position![1], dimensions, measures, markType);
-      let adjustColorField = schema.color![0];
-      if (markType === 'rect') {
-        if (schema.color![0] && colorType !== 'quantitative') {
-          markType = 'point';
-        } else if (schema.opacity![0] && schema.size![0]) {
-          adjustColorField = schema.size![0] || schema.opacity![0];
-        }
+      let vegaSpec: any = {}
+      if (type === 'target') {
+        vegaSpec = targetVis(schema, dataFields)
       }
-      const mustDefineScale = xType === 'quantitative' && yType === 'quantitative' && markType !== 'rect';
-      return {
-        // transform: filters.length > 0 && [...filters],
-        // width: 300,
-        specIndex: index,
-        data: { name: "dataSource" },
-        // padding: 26,
-        autosize: {
-          type: "pad"
-        },
-        mark: markType,
-        selection: {
-          sl: {
-            type: markType === "bar" ? "single" : "interval",
-            encodings: markType === "bar" ? ["x"] : undefined
-          }
-        },
-        encoding: {
-          x: schema.position![0] && {
-            field: schema.position![0],
-            type: getFieldType(schema.position![0]),
-            bin: markType === 'rect' && xType === 'quantitative' && { maxbins: 30 },
-            aggregate: markType !== 'rect' && xAgg && 'sum',
-            scale: mustDefineScale && !xAgg ? { domain: filedDomains[schema.position![0]] } : undefined
-          },
-          y: schema.position![1] && {
-            field: schema.position![1],
-            type: getFieldType(schema.position![1]),
-            bin: markType === 'rect' && yType === 'quantitative' && { maxbins: 30 },
-            aggregate: markType !== 'rect' && yAgg && 'sum',
-            scale: mustDefineScale && !yAgg ? { domain: filedDomains[schema.position![1]] } : undefined
-          },
-          size: schema.size![0] && {
-            field: schema.size![0],
-            type: getFieldType(schema.size![0])
-          },
-          opacity: schema.opacity![0] && {
-            field: schema.opacity![0],
-            type: getFieldType(schema.opacity![0])
-          },
-          shape: schema.shape![0] && {
-            field: schema.shape![0],
-            type: getFieldType(schema.shape![0])
-          },
-          color: (adjustColorField || markType === 'rect') && {
-            field: adjustColorField,
-            aggregate: markType === 'rect' && getFieldType(adjustColorField) === 'quantitative' && (adjustColorField ? 'sum' : 'count'),
-            type: adjustColorField && getFieldType(adjustColorField)
-          }
-        }
-      };
+
+      if (type === 'feature') {
+        vegaSpec = featureVis(schema, dataFields)
+      }
+      vegaSpec.specIndex = index
+      return vegaSpec
     }) as any;
   }, [chartSpecList, filedDomains]);
 
@@ -260,47 +194,6 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
     chartStateList,
     dataSource
   ]);
-  // useEffect(() => {
-  //   console.log(chartContainers.current.length, specList.length)
-  //   if (chartContainers.current.length > specList.length) {
-  //     chartContainers.current = chartContainers.current.slice(0, specList.length);
-  //   } else {
-  //     let len = specList.length - chartContainers.current.length
-  //     for (let i = 0; i < len; i++) {
-  //       chartContainers.current.push(React.createRef<HTMLDivElement>())
-  //     }
-  //   }
-  // }, [specList])
-  // useEffect(() => {
-  //   const embedPromiseList = [];
-  //   console.log(chartContainers.current)
-  //   for (let i = 0; i < specList.length; i++ ) {
-  //     console.log(i, chartContainers.current[i].current)
-  //     if (chartContainers.current[i].current) {
-  //       embedPromiseList.push(embed(chartContainers.current[i].current as any, specList[i]).then(res => {
-  //         if (chartStateList[i]) {
-  //           res.view.addSignalListener('sl', (name, values) => { signalHandler(name, values, chartStateList[i])})
-  //         }
-  //         res.view.run()
-  //         return res.view;
-  //       }))
-  //     }
-  //   }
-  //   Promise.all(embedPromiseList).then(vList => {
-  //     console.log('promise', vList);
-  //     setVegaViewList(vList);
-  //   })
-    
-  // }, [specList, signalHandler, chartStateList])
-
-
-  // useEffect(()=> {
-  //   for (let i = 0; i < vegaViewList.length; i++) {
-  //       vegaViewList[i].change('dataSource', vega.changeset().remove(() => true).insert(vsourceList[i]))
-  //       vegaViewList[i].runAsync()
-      
-  //   }
-  // }, [vsourceList, vegaViewList, specList])
   return (
     <div>
       <div>
