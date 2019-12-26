@@ -4,7 +4,9 @@ import {
   FieldSummary,
   getGroupFieldsService,
   combineFieldsService,
-  generateDashBoard
+  generateDashBoard,
+  ViewSpace,
+  clusterMeasures
 } from "./service";
 import { GlobalState, StateUpdater } from './state';
 
@@ -163,6 +165,29 @@ const subspaceSearch: Action<SubspaceSeachParams> = async (state, updateState, p
   }
 }
 
+const getViewSpaces: Action<any> = async (state, updateState, params) => {
+  const { cookedDataSource: dataSorce, subspaceList, maxGroupNumber, useServer } = state
+  let viewSpaces: ViewSpace[] = [];
+  try {
+    viewSpaces = await clusterMeasures(
+      maxGroupNumber,
+      subspaceList.map(space => {
+        return {
+          dimensions: space.dimensions,
+          measures: space.measures,
+          matrix: space.correlationMatrix
+        };
+      }),
+      useServer
+    )
+    updateState(draft => {
+      draft.viewSpaces = viewSpaces
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 const extractInsights: Action<{dataSource: DataSource; fields: BIField[]}> = async (state, updateState, params) => {
   const { dataSource, fields } = params;
   updateState(draft => {
@@ -214,7 +239,8 @@ const actions = {
   univariateSummary,
   subspaceSearch,
   extractInsights,
-  getDashBoard
+  getDashBoard,
+  getViewSpaces
 }
 export type Actions =  typeof actions
 
