@@ -1,10 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { useGlobalState } from "../../state";
 import { FileLoader, useComposeState } from '../../utils/index';
-import { ComboBox, PrimaryButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider, Label } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider, Label, Checkbox } from 'office-ui-fabric-react';
 import DataTable from '../../components/table';
 import FieldPanel from '../../components/fieldConfig';
-import { DataSource,  BIField } from '../../global';
+import { DataSource,  BIField, Record } from '../../global';
 import {  cleanMethodList, CleanMethod } from './clean';
 import { Cleaner, Sampling } from 'visual-insights';
 import { useDataSource } from './useDataSource';
@@ -50,6 +50,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     }
   })
   const [cleanMethod, setCleanMethod] = useState<CleanMethod>('dropNull');
+  const [fixUnicodeField, setFixUnicodeField] = useState<boolean>(true);
   const [sampleMethod, setSampleMethod] = useState<SampleKey>(SampleKey.none)
   const [sampleSize, setSampleSize] = useState<number>(0.2);
 
@@ -80,7 +81,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         rawData = Sampling.reservoirSampling(rawData, Math.round(rawData.length * sampleSize));
       }
       rawData = Cleaner.dropNullColumn(rawData, Object.keys(rawData[0])).dataSource;
-      tmpFields = Object.keys(rawData[0]).map(fieldName => {
+      let keys = Object.keys(rawData[0]);
+      tmpFields = keys.map((fieldName, index) => {
         return {
           name: fieldName,
           type: rawData.every(row => {
@@ -88,6 +90,18 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           }) ? 'measure' : 'dimension'
         }
       });
+      if (fixUnicodeField) {
+        tmpFields.forEach((f, i) => {
+          f.name = `${f.name}-rid-${i}`
+        })
+        rawData = rawData.map(record => {
+          let fixedRecord: Record = {};
+          for (let i = 0; i < keys.length; i++) {
+            fixedRecord[tmpFields[i].name] = record[keys[i]]
+          }
+          return fixedRecord
+        })
+      }
       updateState(draft => {
         draft.fields = tmpFields;
         draft.rawData = rawData;
@@ -135,10 +149,10 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             iconProps={{ iconName: "Financial" }}
             text="Extract Insights"
             onClick={() => {
-              dispatch('extractInsights', {
+              dispatch("extractInsights", {
                 dataSource: preparedData,
                 fields: state.fields
-              })
+              });
               props.onExtractInsights();
             }}
           />
@@ -177,32 +191,49 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                   </p>
                 </div>
                 <div>
-                <Label id={labelId} required={true}>
-                  Sampling
-                </Label>
-                <ChoiceGroup
-                  defaultSelectedKey="B"
-                  options={SampleOptions}
-                  selectedKey={sampleMethod}
-                  onChange={(ev: any, option: IChoiceGroupOption | undefined) => {
-                    if (option) {
-                      setSampleMethod(option.key as SampleKey)
-                    }
-                  }}
-                  ariaLabelledBy={labelId}
-                />
-                {
-                  sampleMethod !== SampleKey.none && <Slider
-                    label="sample size(percent)"
-                    min={0}
-                    max={1}
-                    step={0.001}
-                    value={sampleSize}
-                    showValue={true}
-                    valueFormat={(value: number) => `${(value * 100).toFixed(1)}%`}
-                    onChange={(val: number) => { setSampleSize(val) }}
+                  <Checkbox
+                    label="fix unicode fields"
+                    checked={fixUnicodeField}
+                    onChange={(
+                      ev?: React.FormEvent<HTMLElement>,
+                      checked?: boolean
+                    ) => {
+                      setFixUnicodeField(!!checked);
+                    }}
                   />
-                }
+                  <Label id={labelId} required={true}>
+                    Sampling
+                  </Label>
+                  <ChoiceGroup
+                    defaultSelectedKey="B"
+                    options={SampleOptions}
+                    selectedKey={sampleMethod}
+                    onChange={(
+                      ev: any,
+                      option: IChoiceGroupOption | undefined
+                    ) => {
+                      if (option) {
+                        setSampleMethod(option.key as SampleKey);
+                      }
+                    }}
+                    ariaLabelledBy={labelId}
+                  />
+                  {sampleMethod !== SampleKey.none && (
+                    <Slider
+                      label="sample size(percent)"
+                      min={0}
+                      max={1}
+                      step={0.001}
+                      value={sampleSize}
+                      showValue={true}
+                      valueFormat={(value: number) =>
+                        `${(value * 100).toFixed(1)}%`
+                      }
+                      onChange={(val: number) => {
+                        setSampleSize(val);
+                      }}
+                    />
+                  )}
                 </div>
                 <div className="vi-callout-actions">
                   <input
