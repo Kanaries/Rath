@@ -2,10 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { SearchBox } from 'office-ui-fabric-react';
 import { useGlobalState } from '../../state';
 import Fuse, { FuseOptions } from 'fuse.js';
-import { Subspace } from '../../service';
 import { specification } from 'visual-insights';
 import { ViewSpace } from '../../service';
-import BaseChart, { Specification } from "../../visBuilder/vegaBase";
+import BaseChart from "../../visBuilder/vegaBase";
 import styled from 'styled-components';
 
 const VisCard = styled.div`
@@ -80,7 +79,6 @@ const SearchPage: React.FC = props => {
   }
 
   const {  currentPage, visPageRange, itemRange, gotoPage, lastPage, nextPage } = usePageController(targetViewSpaces.length);
-  console.log({  currentPage, visPageRange, itemRange, gotoPage, lastPage, nextPage })
 
   const specList = useMemo(() => {
     return targetViewSpaces.slice(itemRange[0], itemRange[1]).map(space => {
@@ -116,7 +114,7 @@ const SearchPage: React.FC = props => {
         <div>
           <PageLinkButton onClick={lastPage}>Last Page</PageLinkButton>
           {
-            targetViewSpaces.length > 0 && visPageRange.map(n => <PageLinkButton onClick={() => { gotoPage(n) }}>{ n + 1 }</PageLinkButton>)
+            targetViewSpaces.length > 0 && visPageRange.map(n => <PageLinkButton key={`page-btn-${n}`} onClick={() => { gotoPage(n) }}>{ n + 1 }</PageLinkButton>)
           }
           <PageLinkButton onClick={nextPage}>Next Page</PageLinkButton>
         </div>
