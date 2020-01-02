@@ -6,7 +6,7 @@
 Automatic insights extraction and visualization specification.
 
 Demo Video:
-[![Alt text](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png)](https://www.youtube.com/watch?v=o3_PH1Cbql4&feature=youtu.be)
+[![Alt text](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png)](https://www.youtube.com/watch?v=o3_PH1Cbql4)
 
 ## Introduction
 
