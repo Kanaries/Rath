@@ -5,7 +5,7 @@ import { DefaultButton, TeachingBubble, DirectionalHint } from 'office-ui-fabric
 
 import './index.css';
 import { Field } from '../../global';
-import { Specification } from '../../demo/vegaBase';
+import { Specification } from '../../visBuilder/vegaBase';
 
 interface StoryTellerProps {
   lang?: 'zh' | 'en';

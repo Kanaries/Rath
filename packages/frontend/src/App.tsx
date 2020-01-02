@@ -8,26 +8,19 @@ import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
+import SearchPage from './pages/search/index';
 import UserSettings from './components/userSettings';
 
 const pivotList = [
-  {
-    title: "DataSource",
-    itemKey: "pivot-" + 1
-  },
-  {
-    title: "NoteBook",
-    itemKey: "pivot-" + 2
-  },
-  {
-    title: "Explore",
-    itemKey: "pivot-" + 3
-  },
-  {
-    title: "DashBaord",
-    itemKey: "pivot-" + 4   
-  }
-];
+  'DataSource',
+  'NoteBook',
+  'Explore',
+  'DashBoard',
+  'Search'
+].map((page, index) => {
+  return { title: page, itemKey: 'pivot-' + (index + 1)}
+});
+
 const getLogoSrc = (withGlasses: boolean) => {
   return withGlasses
     ? "https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/rath-glasses.png"
@@ -127,6 +120,9 @@ function App() {
       )}
       {
         pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />
+      }
+      {
+        pageStatus.current.pivotKey === 'pivot-5' && <SearchPage />
       }
     </div>
   );

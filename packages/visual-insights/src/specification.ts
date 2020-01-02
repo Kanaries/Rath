@@ -27,7 +27,7 @@ function getVisualElements (): VisualElements {
     facets: 2,
     page: 1,
     filter: 1,
-    highFacets: Infinity
+    highFacets: 1000
   }
 }
 
@@ -67,7 +67,7 @@ function aestheticMapping (dimFields: Field[]) {
     }
   });
   const priority: [FieldType, string[]][] = [
-    ['quantitative', ['position', 'size', 'opacity', 'color', 'page', 'filter', 'hightFacets']],
+    ['quantitative', ['position', 'size', 'color', 'highFacets', 'opacity', 'page', 'filter']],
     ['temporal', ['position', 'page', 'filter']],
     ['ordinal', ['position', 'color' ,'opacity', 'facets', 'size', 'page', 'filter', 'highFacets']],
     ['nominal', ['position', 'color', 'facets', 'shape', 'page', 'filter', 'hightFacets']],

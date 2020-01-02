@@ -11,7 +11,7 @@ import PreferencePanel, {
   PreferencePanelConfig
 } from "../../components/preference";
 import { useComposeState } from "../../utils/index";
-import BaseChart, { Specification } from "../../demo/vegaBase";
+import BaseChart, { Specification } from "../../visBuilder/vegaBase";
 import { DataSource, Field } from "../../global";
 import { specification } from "visual-insights";
 import VisSummary from "../../plugins/visSummary/index";

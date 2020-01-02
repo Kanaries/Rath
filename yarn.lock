@@ -1511,9 +1511,9 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@16.9.16", "@types/react@^16.9.16", "@types/react@^16.9.6":
+"@types/react@*", "@types/react@16.9.16", "@types/react@^16.9.16":
   version "16.9.16"
-  resolved "https://registry.npm.taobao.org/@types/react/download/@types/react-16.9.16.tgz#4f12515707148b1f53a8eaa4341dae5dfefb066d"
+  resolved "https://registry.npm.taobao.org/@types/react/download/@types/react-16.9.16.tgz?cache=0&sync_timestamp=1576825860124&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Freact%2Fdownload%2F%40types%2Freact-16.9.16.tgz#4f12515707148b1f53a8eaa4341dae5dfefb066d"
   integrity sha1-TxJRVwcUix9TqOqkNB2uXf77Bm0=
   dependencies:
     "@types/prop-types" "*"
@@ -5037,6 +5037,11 @@ functional-red-black-tree@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npm.taobao.org/functional-red-black-tree/download/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
+
+fuse.js@^3.4.6:
+  version "3.4.6"
+  resolved "https://registry.npm.taobao.org/fuse.js/download/fuse.js-3.4.6.tgz#545c3411fed88bf2e27c457cab6e73e7af697a45"
+  integrity sha1-VFw0Ef7Yi/LifEV8q25z569pekU=
 
 gauge@~2.7.3:
   version "2.7.4"
@@ -9224,14 +9229,6 @@ react-scripts@3.1.2:
   optionalDependencies:
     fsevents "2.0.7"
 
-react-vega@^7.1.1:
-  version "7.1.1"
-  resolved "https://registry.npm.taobao.org/react-vega/download/react-vega-7.1.1.tgz#e4665f4935c8040a94ce8b547ea0fe074bf1f00d"
-  integrity sha1-5GZfSTXIBAqUzotUfqD+B0vx8A0=
-  dependencies:
-    "@types/react" "^16.9.6"
-    vega-embed "^6.0.0"
-
 react@^16.9.0:
   version "16.10.2"
   resolved "https://registry.npm.taobao.org/react/download/react-16.10.2.tgz?cache=0&sync_timestamp=1570138167819&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Freact%2Fdownload%2Freact-16.10.2.tgz#a5ede5cdd5c536f745173c8da47bda64797a4cf0"
@@ -11155,7 +11152,7 @@ vega-dataflow@^5.1.0, vega-dataflow@^5.1.1, vega-dataflow@^5.2.1, vega-dataflow@
     vega-loader "^4.0.0"
     vega-util "^1.11.0"
 
-vega-embed@5.1.3, vega-embed@^5.1.3, vega-embed@^6.0.0:
+vega-embed@^5.1.3:
   version "5.1.3"
   resolved "https://registry.npm.taobao.org/vega-embed/download/vega-embed-5.1.3.tgz#c5d76bc4808c7e1756a0d1793823ce9c50592e9e"
   integrity sha1-xddrxICMfhdWoNF5OCPOnFBZLp4=
