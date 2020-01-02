@@ -3,17 +3,22 @@
 ![](https://travis-ci.org/ObservedObserver/visual-insights.svg?branch=master)
 ![](https://img.shields.io/github/license/ObservedObserver/showme)
 
-Automatic insights extraction and visualization specification in data analysis.
+Automatic insights extraction and visualization specification.
 
+Demo Video:
+[![Alt text](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png)](https://www.youtube.com/watch?v=o3_PH1Cbql4&feature=youtu.be)
 
 ## Introduction
 
-visual insights helps you extract insights from data warehouse automatically and generate visualization with interesting findings.
+Rath helps you extract insights from datasource automatically and generate visualization with interesting findings.
 
-Now, there are three main modules in visual-insights application.
+In this repo,
++ `visual-insights` is the core lib containing insight finding algorithm, auto specification, dashboard generator, etc.
++ `frontend` is a demo build based on `visual-insights`. frontend can be run individually without server. All the computation service are running in webworker by default.
++ When you want to switch to server mode, you can run `backend` code.
 
 ### DataSource
-dataSource board is for data uploading and defining fields type(dimensions, measures). In visual insights, we regard dimensions as independent variable and measures as dependent variable.
+dataSource board is for data uploading, sampling, cleaning and defining fields type(dimensions, measures). In visual insights, we regard dimensions as independent variable and measures as dependent variable.
 
 ### Notebook
 Notebook is a board for user to know what happened in the automatic analysis process. It shows how decisions are made by the application and provide interactive interface to adjust some of the parameters and operators used by the algorithm. 
@@ -33,11 +38,13 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 
 
 ## Usage
-+ try online demo
-  + github [demo](https://kanaries.github.io/Rath/)
-  + aliyun [demo](https://chspace.oss-cn-hongkong.aliyuncs.com/rath/index.html)
 
-run local(dev)
+### Try online demo
++ Github [demo](https://kanaries.github.io/Rath/)
++ Toyko OSS [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
+
+### run locally
+(dev)
 ```bash
 # under project root dir
 yarn workspace visual-insights build
@@ -66,7 +73,7 @@ npm i visual-insights --save`
 ```
 
 ## How does it work
-The working process are visualized in notebook board in the application. *** Main process of the algorithm is shown in the `notebook` board. ***
+The working process are visualized in notebook board in the application.  *** Main process of the algorithm is shown in the `notebook` board. ***
 
 ![](https://cdn.nlark.com/yuque/0/2019/png/171008/1570692438037-b2ce208d-bd1d-4b38-be27-9251bbb171d2.png)
 
@@ -80,19 +87,19 @@ Then, it will find the fields with high entropy and try to reduce it by grouping
 ### Subspaces
 In this step, visual insights search the combination of fields, and calculate the entropy of each measure with some aggregation operators.
 
-![](https://cdn.nlark.com/yuque/0/2019/svg/171008/1570614537188-bf841fc7-90ba-47fe-a5f1-83304a4f464a.svg)
+![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/subspaces.svg)
 
 ### Correlation
 After one subspace is specified (try to click one row of subsapce in notebook), it will analyze the correlation of measures in the space.
 
-![](https://cdn.nlark.com/yuque/0/2019/svg/171008/1570614552078-2a6635c3-b81f-4381-b82d-e81b3d30826a.svg)
+![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/correlation.svg)
 
 ### Clustering
 It helps you to cluster all the measures based on their correlation. It puts all the variables who are strongly related together to make a specific view (with specified dimenions).
 
 Click one group of measures and visualization will be shown at the bottom of the page.
 
-![](https://cdn.nlark.com/yuque/0/2019/svg/171008/1570614439983-cf6d757a-928d-4f42-b46c-f1de3a76f4b1.svg)
+![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/clustering.svg)
 
 
 ### Specification & Visualization
@@ -108,10 +115,10 @@ visualization.
 
 ## Documentation
 
-+ doc for core-algorithm: [visual-insights](./packages/visual-insights/README.md)
-+ doc for react components: todos
++ visual insight api: [visual-insights](./packages/visual-insights/README.md)
++ doc for reuseable hooks: todos
 
-## Citation
+## Reference
 
 + T. Sellam, E. Müller and M. Kersten, "Semi-automated exploration of data warehouses," in 2015, . DOI: 10.1145/2806416.2806538.
 + Wongsuphasawat, Kanit, et al. "Voyager 2: Augmenting visual analysis with partial view specifications." Proceedings of the 2017 CHI Conference on Human Factors in Computing Systems. ACM, 2017.
