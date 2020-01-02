@@ -3,10 +3,11 @@
 ![](https://travis-ci.org/ObservedObserver/visual-insights.svg?branch=master)
 ![](https://img.shields.io/github/license/ObservedObserver/showme)
 
-Automatic insights extraction and visualization specification.
+Automatic insights extraction and visualization specification. [Demo Video](https://www.youtube.com/watch?v=o3_PH1Cbql4)
 
-Demo Video:
-[![Alt text](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png)](https://www.youtube.com/watch?v=o3_PH1Cbql4)
+
+![logo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png)
+
 
 ## Introduction
 
