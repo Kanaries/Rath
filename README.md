@@ -3,7 +3,10 @@
 ![](https://travis-ci.org/ObservedObserver/visual-insights.svg?branch=master)
 ![](https://img.shields.io/github/license/ObservedObserver/showme)
 
-Automatic insights extraction and visualization specification. [Demo Video](https://www.youtube.com/watch?v=o3_PH1Cbql4)
+Automatic insights extraction and visualization specification.
+
++ [Youtube Video Demo](https://www.youtube.com/watch?v=o3_PH1Cbql4)
++ [Bilibili Video Demo](https://www.bilibili.com/video/av82089992/)
 
 
 ![logo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png)
@@ -41,8 +44,8 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 ## Usage
 
 ### Try online demo
-+ Github [demo](https://kanaries.github.io/Rath/)
-+ Toyko OSS [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
++ on Github Pages [demo](https://kanaries.github.io/Rath/)
++ on Alibaba Cloud OSS [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
 
 ### run locally
 (dev)
