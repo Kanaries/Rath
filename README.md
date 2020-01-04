@@ -11,7 +11,7 @@ Automatic insights extraction and visualization specification. [Demo Video](http
 
 ## Introduction
 
-Rath helps you extract insights from datasource automatically and generate visualization with interesting findings.
+Rath helps you extract insights from datasource automatically and generate interactive visualization with interesting findings.
 
 In this repo,
 + `visual-insights` is the core lib containing insight finding algorithm, auto specification, dashboard generator, etc.
