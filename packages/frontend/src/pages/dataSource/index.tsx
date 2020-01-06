@@ -192,7 +192,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 </div>
                 <div>
                   <Checkbox
-                    label="fix unicode fields"
+                    label="Add unique ids for fields"
                     checked={fixUnicodeField}
                     onChange={(
                       ev?: React.FormEvent<HTMLElement>,
