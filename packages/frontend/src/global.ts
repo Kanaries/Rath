@@ -11,7 +11,7 @@ export interface Record {
 
 export type DataSource = Record[];
 
-// export Impurit
+// export Impurity
 export type BIFieldType = 'dimension' | 'measure';
 
 export interface BIField {
