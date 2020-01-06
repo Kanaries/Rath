@@ -6,8 +6,7 @@ import {
   ProgressIndicator,
   SpinButton,
   Pivot,
-  PivotItem,
-  Label
+  PivotItem
 } from "office-ui-fabric-react";
 import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
 import PreferencePanel, {
