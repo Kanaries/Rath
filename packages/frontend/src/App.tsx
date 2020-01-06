@@ -8,15 +8,13 @@ import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
-import SearchPage from './pages/search/index';
 import UserSettings from './components/userSettings';
 
 const pivotList = [
   'DataSource',
   'NoteBook',
   'Explore',
-  'DashBoard',
-  'Search'
+  'DashBoard'
 ].map((page, index) => {
   return { title: page, itemKey: 'pivot-' + (index + 1)}
 });
@@ -120,9 +118,6 @@ function App() {
       )}
       {
         pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />
-      }
-      {
-        pageStatus.current.pivotKey === 'pivot-5' && <SearchPage />
       }
     </div>
   );
