@@ -4,9 +4,12 @@ import {
   IconButton,
   Stack,
   ProgressIndicator,
-  SpinButton
+  SpinButton,
+  Pivot,
+  PivotItem,
+  Label
 } from "office-ui-fabric-react";
-import { Position } from 'office-ui-fabric-react/lib/utilities/positioning';
+import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
 import PreferencePanel, {
   PreferencePanelConfig
 } from "../../components/preference";
@@ -23,6 +26,14 @@ import {
   ViewSpace,
   FieldSummary
 } from "../../service";
+import SearchBoard from "./search/index";
+
+const pivotList = [
+  'Rank List',
+  'Search'
+].map((page, index) => {
+  return { title: page, itemKey: 'pivot-' + index}
+});
 
 interface PageStatus {
   show: {
@@ -55,6 +66,7 @@ interface GalleryProps {
 const Gallery: React.FC<GalleryProps> = props => {
   const { dataSource, summary, subspaceList } = props;
   const [currentPage, setCurrentPage] = useState(0);
+  const [pivotIndex, setPivotIndex] = useState(pivotList[0].itemKey);
   const [state, updateState] = useGlobalState();
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
@@ -151,7 +163,11 @@ const Gallery: React.FC<GalleryProps> = props => {
         // implement this in specification
         // + check geomType
         // + check geom number and aggregated geom number
-        if (schema.geomType && (schema.geomType.includes("point") || schema.geomType.includes("density"))) {
+        if (
+          schema.geomType &&
+          (schema.geomType.includes("point") ||
+            schema.geomType.includes("density"))
+        ) {
           setVisualConfig(config => {
             return {
               ...config,
@@ -197,121 +213,149 @@ const Gallery: React.FC<GalleryProps> = props => {
         }}
       />
 
-      <div className="card">
+      <div className="card" style={{ paddingTop: '0.2rem' }}>
+        <Pivot
+          selectedKey={pivotIndex}
+          onLinkClick={item => {
+            item && setPivotIndex(item.props.itemKey!)
+          }}
+        >
+          {
+            pivotList.map(pivot => (
+              <PivotItem headerText={pivot.title} key={pivot.itemKey} itemKey={pivot.itemKey} />
+            ))
+          }
+        </Pivot>
         {(state.loading.gallery ||
           state.loading.subspaceSearching ||
           state.loading.univariateSummary) && (
           <ProgressIndicator description="calculating" />
         )}
-        <h2 style={{ marginBottom: 0 }}>
-          Visual Insights{" "}
-          <IconButton
-            iconProps={{ iconName: "Settings" }}
-            title="Preference"
-            ariaLabel="preference"
-            onClick={() => {
-              setPageStatus(draft => {
-                draft.show.configPanel = true;
-              });
-            }}
-          />
-          <IconButton
-            iconProps={{ iconName: "Lightbulb" }}
-            title="Dig In"
-            ariaLabel="digIn"
-            onClick={() => {
-              setShowAssociation(true);
-            }}
-          />
-        </h2>
-        <p className="state-description">
-          Details of the recommendation process can be seen in <b>NoteBook</b>{" "}
-          Board. You can adjust some of the parameters and operators and see how
-          it influence recommendation results.
-        </p>
-        <p className="state-description">
-          Try to use the setting button beside the "visual insight" title to
-          adjust the visualization settings to get a view you prefer better.
-        </p>
-        <div className="ms-Grid" dir="ltr">
-          <div className="ms-Grid-row">
-            <div
-              className="ms-Grid-col ms-sm6 ms-md8 ms-lg3"
-              style={{ overflow: "auto" }}
-            >
-              <div style={{ marginBottom: '1rem' }}>
-                <SpinButton
-                  label={'Current Page'}
-                  value={(currentPage + 1).toString()}
-                  min={0}
-                  max={viewSpaces.length}
-                  step={1}
-                  iconProps={{ iconName: 'Search' }}
-                  labelPosition={Position.end}
-                  // tslint:disable:jsx-no-lambda
-                  onValidate={(value: string) => { gotoPage((Number(value) - 1) % viewSpaces.length) }}
-                  onIncrement={() => { gotoPage((currentPage + 1) % viewSpaces.length); }}
-                  onDecrement={() => { gotoPage((currentPage - 1 + viewSpaces.length) % viewSpaces.length); }}
-                  incrementButtonAriaLabel={'Increase value by 1'}
-                  decrementButtonAriaLabel={'Decrease value by 1'}
-                />
+        {pivotIndex === pivotList[0].itemKey && (
+          <div>
+            <h2 style={{ marginBottom: 0 }}>
+              Visual Insights{" "}
+              <IconButton
+                iconProps={{ iconName: "Settings" }}
+                title="Preference"
+                ariaLabel="preference"
+                onClick={() => {
+                  setPageStatus(draft => {
+                    draft.show.configPanel = true;
+                  });
+                }}
+              />
+              <IconButton
+                iconProps={{ iconName: "Lightbulb" }}
+                title="Dig In"
+                ariaLabel="digIn"
+                onClick={() => {
+                  setShowAssociation(true);
+                }}
+              />
+            </h2>
+            <p className="state-description">
+              Details of the recommendation process can be seen in{" "}
+              <b>NoteBook</b> Board. You can adjust some of the parameters and
+              operators and see how it influence recommendation results.
+            </p>
+            <p className="state-description">
+              Try to use the setting button beside the "visual insight" title to
+              adjust the visualization settings to get a view you prefer better.
+            </p>
+            <div className="ms-Grid" dir="ltr">
+              <div className="ms-Grid-row">
+                <div
+                  className="ms-Grid-col ms-sm6 ms-md8 ms-lg3"
+                  style={{ overflow: "auto" }}
+                >
+                  <div style={{ marginBottom: "1rem" }}>
+                    <SpinButton
+                      label={"Current Page"}
+                      value={(currentPage + 1).toString()}
+                      min={0}
+                      max={viewSpaces.length}
+                      step={1}
+                      iconProps={{ iconName: "Search" }}
+                      labelPosition={Position.end}
+                      // tslint:disable:jsx-no-lambda
+                      onValidate={(value: string) => {
+                        gotoPage((Number(value) - 1) % viewSpaces.length);
+                      }}
+                      onIncrement={() => {
+                        gotoPage((currentPage + 1) % viewSpaces.length);
+                      }}
+                      onDecrement={() => {
+                        gotoPage(
+                          (currentPage - 1 + viewSpaces.length) %
+                            viewSpaces.length
+                        );
+                      }}
+                      incrementButtonAriaLabel={"Increase value by 1"}
+                      decrementButtonAriaLabel={"Decrease value by 1"}
+                    />
+                  </div>
+                  <p className="state-description">
+                    Page No. {currentPage + 1} of {viewSpaces.length}
+                  </p>
+                  <Stack horizontal tokens={{ childrenGap: 20 }}>
+                    <DefaultButton
+                      text="Last"
+                      onClick={() => {
+                        gotoPage(
+                          (currentPage - 1 + viewSpaces.length) %
+                            viewSpaces.length
+                        );
+                      }}
+                      allowDisabledFocus
+                    />
+                    <DefaultButton
+                      text="Next"
+                      onClick={() => {
+                        gotoPage((currentPage + 1) % viewSpaces.length);
+                      }}
+                      allowDisabledFocus
+                    />
+                  </Stack>
+                  <h3>Specification</h3>
+                  <pre>{JSON.stringify(dataView.schema, null, 2)}</pre>
+                  <VisSummary
+                    dimensions={dataView.dimensions}
+                    measures={dataView.measures}
+                    dimScores={dimScores}
+                    space={currentSpace}
+                    spaceList={subspaceList}
+                    schema={dataView.schema}
+                  />
+                </div>
+                <div
+                  className="ms-Grid-col ms-sm6 ms-md4 ms-lg9"
+                  style={{ overflow: "auto" }}
+                >
+                  <BaseChart
+                    aggregator={visualConfig.aggregator}
+                    defaultAggregated={visualConfig.defaultAggregated}
+                    defaultStack={visualConfig.defaultStack}
+                    dimensions={dataView.dimensions}
+                    measures={dataView.measures}
+                    dataSource={dataView.aggData}
+                    schema={dataView.schema}
+                    fieldFeatures={dataView.fieldFeatures}
+                  />
+                </div>
               </div>
-              <p className="state-description">
-                Page No. {currentPage + 1} of {viewSpaces.length}
-              </p>
-              <Stack horizontal tokens={{ childrenGap: 20 }}>
-                <DefaultButton
-                  text="Last"
-                  onClick={() => {
-                    gotoPage(
-                      (currentPage - 1 + viewSpaces.length) % viewSpaces.length
-                    );
-                  }}
-                  allowDisabledFocus
-                />
-                <DefaultButton
-                  text="Next"
-                  onClick={() => {
-                    gotoPage((currentPage + 1) % viewSpaces.length);
-                  }}
-                  allowDisabledFocus
-                />
-              </Stack>
-              <h3>Specification</h3>
-              <pre>{JSON.stringify(dataView.schema, null, 2)}</pre>
-              <VisSummary
-                dimensions={dataView.dimensions}
-                measures={dataView.measures}
-                dimScores={dimScores}
-                space={currentSpace}
-                spaceList={subspaceList}
-                schema={dataView.schema}
-              />
-            </div>
-            <div
-              className="ms-Grid-col ms-sm6 ms-md4 ms-lg9"
-              style={{ overflow: "auto" }}
-            >
-              <BaseChart
-                aggregator={visualConfig.aggregator}
-                defaultAggregated={visualConfig.defaultAggregated}
-                defaultStack={visualConfig.defaultStack}
-                dimensions={dataView.dimensions}
-                measures={dataView.measures}
-                dataSource={dataView.aggData}
-                schema={dataView.schema}
-                fieldFeatures={dataView.fieldFeatures}
-              />
             </div>
           </div>
-        </div>
+        )}
+        {pivotIndex === pivotList[1].itemKey && <SearchBoard />}
       </div>
-      {showAssociation && (
+
+      {pivotIndex === pivotList[0].itemKey && showAssociation && (
         <div className="card">
           <h2> Related Views </h2>
           <Association
-            onSelectView={(index) => {
-              let pos = viewSpaces.findIndex(v => v.index === index)
+            onSelectView={index => {
+              let pos = viewSpaces.findIndex(v => v.index === index);
               if (pos > -1) {
                 gotoPage(pos);
               }

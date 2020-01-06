@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { SearchBox } from 'office-ui-fabric-react';
-import { useGlobalState } from '../../state';
+import { useGlobalState } from '../../../state';
 import Fuse, { FuseOptions } from 'fuse.js';
 import { specification } from 'visual-insights';
-import { ViewSpace } from '../../service';
-import BaseChart from "../../visBuilder/vegaBase";
+import { ViewSpace } from '../../../service';
+import BaseChart from "../../../visBuilder/vegaBase";
 import styled from 'styled-components';
 
 const VisCard = styled.div`
@@ -103,37 +103,35 @@ const SearchPage: React.FC = props => {
   }, [state.cookedDataSource, targetViewSpaces, itemRange])
   
   return (
-    <div className="content-container">
-      <div className="card">
-        <SearchBox
-          placeholder="Search"
-          onSearch={searchHandler}
-          underlined={true}
-        />
-        <p className="state-description">{targetViewSpaces.length} results are found. current page is {currentPage + 1}</p>
-        <div>
-          <PageLinkButton onClick={lastPage}>Last Page</PageLinkButton>
-          {
-            targetViewSpaces.length > 0 && visPageRange.map(n => <PageLinkButton key={`page-btn-${n}`} onClick={() => { gotoPage(n) }}>{ n + 1 }</PageLinkButton>)
-          }
-          <PageLinkButton onClick={nextPage}>Next Page</PageLinkButton>
-        </div>
-        <div>
-          {specList.map((spec, index) => (
-            <VisCard key={`result-${index}`}>
-              <BaseChart
-                aggregator={"sum"}
-                defaultAggregated={true}
-                defaultStack={true}
-                dimensions={spec.dimensions}
-                measures={spec.measures}
-                dataSource={spec.aggData}
-                schema={spec.schema}
-                fieldFeatures={spec.fieldFeatures}
-              />
-            </VisCard>
-          ))}
-        </div>
+    <div>
+      <SearchBox
+        placeholder="Search"
+        onSearch={searchHandler}
+        underlined={true}
+      />
+      <p className="state-description">{targetViewSpaces.length} results are found. current page is {currentPage + 1}</p>
+      <div>
+        <PageLinkButton onClick={lastPage}>Last Page</PageLinkButton>
+        {
+          targetViewSpaces.length > 0 && visPageRange.map(n => <PageLinkButton key={`page-btn-${n}`} onClick={() => { gotoPage(n) }}>{ n + 1 }</PageLinkButton>)
+        }
+        <PageLinkButton onClick={nextPage}>Next Page</PageLinkButton>
+      </div>
+      <div>
+        {specList.map((spec, index) => (
+          <VisCard key={`result-${index}`}>
+            <BaseChart
+              aggregator={"sum"}
+              defaultAggregated={true}
+              defaultStack={true}
+              dimensions={spec.dimensions}
+              measures={spec.measures}
+              dataSource={spec.aggData}
+              schema={spec.schema}
+              fieldFeatures={spec.fieldFeatures}
+            />
+          </VisCard>
+        ))}
       </div>
     </div>
   );

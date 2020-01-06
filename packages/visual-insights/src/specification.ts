@@ -102,7 +102,7 @@ function specification (dimScores: FieldImpurity[], aggData: DataSource, dimensi
   let rankedFields: Field[] = dimScores.sort((a, b) => a[1] - b[1]).map(dim => dim[3])
   let spec = aestheticMapping(rankedFields);
   // todo: design a better rule for choosing geom type.
-  if (spec.position.length === 2) {
+  if (spec.position && spec.position.length === 2) {
     if ((dimensions.includes(spec.position[0]) && measures.includes(spec.position[1])) ||
       (dimensions.includes(spec.position[1]) && measures.includes(spec.position[0]))) {
       const dimIndex = dimensions.includes(spec.position[0]) ? 0 : 1;
