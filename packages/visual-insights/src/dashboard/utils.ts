@@ -22,7 +22,7 @@ export function chiSquared(matrix: number[][] = [[]]): number {
   return chis;
 }
 
-export function crammersV(dataSource: DataSource, fieldX: string, fieldY: string) {
+export function crammersV(dataSource: DataSource, fieldX: string, fieldY: string): number {
   const xSet = new Set(dataSource.map(d => d[fieldX]))
   const ySet = new Set(dataSource.map(d => d[fieldY]))
   const xMembers = [...xSet];
@@ -35,7 +35,14 @@ export function crammersV(dataSource: DataSource, fieldX: string, fieldY: string
   for (let i = 0; i < yMembers.length; i++) {
     yDict[yMembers[i]] = i;
   }
-  let matrix: number[][] = xMembers.map(x => yMembers.map(y => 0));
+  // let matrix: number[][] = xMembers.map(x => yMembers.map(y => 0));
+  let matrix: number[][] = [];
+  for (let  i = 0; i < xMembers.length; i++) {
+    matrix.push([]);
+    for (let j = 0; j < yMembers.length; j++) {
+      matrix[i].push(0);
+    }
+  }
   for (let record of dataSource) {
     matrix[xDict[record[fieldX]]][yDict[record[fieldY]]]++;
   }

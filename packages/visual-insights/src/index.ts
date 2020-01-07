@@ -7,7 +7,7 @@ import * as Distribution from './distribution';
 
 import * as ImpurityMeasure from './impurityMeasure';
 
-import getInsightViews, { analysisDimensions, getCombination, clusterMeasures, kruskalMST } from './insights/index';
+import getInsightViews, { analysisDimensions, getCombination, clusterMeasures, kruskalMST, getDimSetsBasedOnClusterGroups } from './insights/index';
 import * as Cleaner from './cleaner/index';
 
 import * as UnivariateSummary from './univariateSummary/index'
@@ -29,6 +29,7 @@ export {
   Cleaner,
   getInsightViews,
   getCombination,
+  getDimSetsBasedOnClusterGroups,
   clusterMeasures,
   kruskalMST
 }

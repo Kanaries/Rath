@@ -1,4 +1,4 @@
-import { analysisDimensions, getCombination } from './impurity';
+import { analysisDimensions, getCombination, getDimSetsBasedOnClusterGroups } from './impurity';
 import { TopKSingleField, TopKPercentField, Depth, VisualLimit } from './config';
 import { entropy, normalize } from '../impurityMeasure';
 import { memberCount } from '../utils'
@@ -52,4 +52,10 @@ function getInsightViews(dataSource: DataSource, originDimensions: string[], mea
 }
 
 export default getInsightViews;
-export { analysisDimensions, getCombination, cluster as clusterMeasures, kruskalMST }
+export {
+  analysisDimensions,
+  getCombination,
+  getDimSetsBasedOnClusterGroups,
+  cluster as clusterMeasures,
+  kruskalMST
+};

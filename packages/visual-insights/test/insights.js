@@ -2,7 +2,7 @@ const fs = require('fs');
 const assert = require('assert');
 const path  = require('path');
 
-const { analysisDimensions, Cleaner, getInsightViews, getCombination } = require('../build/cjs/index');
+const { analysisDimensions, Cleaner, getInsightViews, getCombination, getDimSetsBasedOnClusterGroups } = require('../build/cjs/index');
 
 const datasetPath = path.resolve(__dirname, './dataset/airbnb.json');
 const dataset = JSON.parse(fs.readFileSync(datasetPath).toString());
@@ -34,6 +34,13 @@ describe('insights test', function () {
     let result = getCombination([1, 2, 3, 4, 5, 6]);
     console.log(result)
     assert.equal(result.length, Math.pow(2, 6) - 1)
+  })
+
+  it('print(clusterCombination vs. combination)', function () {
+    let result = getDimSetsBasedOnClusterGroups(cleanData, dimensions);
+    let unClusterResult = getCombination(dimensions);
+    console.log(result.length, unClusterResult.length, result)
+    assert.equal(result.length <= unClusterResult.length, true);
   })
 })
 

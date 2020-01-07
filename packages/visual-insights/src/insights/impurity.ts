@@ -2,6 +2,8 @@
 import aggregate from 'cube-core';
 import { entropy, normalize } from '../impurityMeasure';
 import { DataSource, OperatorType } from '../commonTypes';
+import { crammersV } from '../dashboard/utils';
+import cluster from './cluster';
 // insights like outlier and trend both request high impurity of dimension.
 const maxVisualChannel = 8;
 function getCombination(elements: string[], start: number = 1, end: number = elements.length): string[][] {
@@ -21,6 +23,35 @@ function getCombination(elements: string[], start: number = 1, end: number = ele
     combine(0, [], i);
   }
   return ans
+}
+function getDimCorrelationMatrix(dataSource: DataSource, dimensions: string[]): number[][] {
+  let matrix: number[][] = dimensions.map(d => dimensions.map(d => 0));
+  for (let i = 0; i < dimensions.length; i++) {
+    matrix[i][i] = 1;
+    for(let j = i + 1; j < dimensions.length; j++) {
+      matrix[i][j] = matrix[j][i] = crammersV(dataSource, dimensions[i], dimensions[j]);
+    }
+  }
+  return matrix;
+}
+
+export function getDimSetsBasedOnClusterGroups(dataSource: DataSource, dimensions: string[]): string[][] {
+  const maxDimNumberInView = 4;
+  let dimSets: string[][] = [];
+  let dimCorrelationMatrix = getDimCorrelationMatrix(dataSource, dimensions);
+  console.log(dimCorrelationMatrix)
+  // groupMaxSize here means group number.
+  let groups: string[][] = cluster({
+    matrix: dimCorrelationMatrix,
+    measures: dimensions,
+    groupMaxSize: Math.round(dimensions.length / maxDimNumberInView)
+  });
+  // todo: maybe a threhold would be better ?
+  for (let group of groups) {
+    let combineDimSet: string[][] = getCombination(group);
+    dimSets.push(...combineDimSet);
+  }
+  return dimSets;
 }
 
 export function linearMapPositive (arr: number[]): number[] {

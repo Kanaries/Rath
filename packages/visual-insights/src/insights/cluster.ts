@@ -201,7 +201,7 @@ interface ClusterProps {
   limitSize?: boolean;
 }
 
-function cluster ({ matrix, measures ,method = 'kruskal', groupMaxSize = 4, limitSize = false }: ClusterProps): string[][] {
+function cluster ({ matrix, measures, method = 'kruskal', groupMaxSize = 4, limitSize = false }: ClusterProps): string[][] {
   // const groups = kruskal({ matrix, groupMaxSize });
   let groups;
   if (limitSize) {
