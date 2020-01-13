@@ -1,11 +1,9 @@
 import { DataSource, FieldType, Field, FieldImpurity, Specification, View } from './commonTypes';
-import fieldsAnalysis from './fieldAnalysis';
 import {
   // isFieldCategory,
   // isFieldContinous,
   memberCount
 } from './utils';
-import { FieldSummary } from './univariateSummary';
 interface VisualElements {
   position: number;
   color: number;

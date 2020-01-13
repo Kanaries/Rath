@@ -127,7 +127,6 @@ export function kruskalMSTWithLimitSize(matrix: number[][], limitSize: number = 
   const parents = matrix.map((m, i) => i);
   const cloneParents = matrix.map((m, i) => i);
   const sizes = matrix.map(() => 1);
-  let inCutEdge = false;
   for (let edge of edges) {
     if (findWithEffect(parents, sizes, edge[0][0]) !== findWithEffect(parents, sizes, edge[0][1])) {
       if (sizes[edge[0][0]] + sizes[edge[0][1]] > limitSize) {

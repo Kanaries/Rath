@@ -1,6 +1,6 @@
 import { FieldsFeature, correlation, linearMapPositive } from "../insights/impurity";
 import { DataSource, OperatorType } from "../commonTypes";
-import cluster, { kruskalMST } from "../insights/cluster";
+import cluster from "../insights/cluster";
 import aggregate from 'cube-core';
 import { normalize, entropy } from "../impurityMeasure";
 import { crammersV } from './utils';
@@ -174,3 +174,5 @@ function minIndex(arr: number[]) {
   }
   return pos;
 }
+
+export { crammersV }

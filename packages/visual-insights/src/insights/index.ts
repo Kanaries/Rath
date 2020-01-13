@@ -1,5 +1,5 @@
 import { analysisDimensions, getCombination, getDimSetsBasedOnClusterGroups } from './impurity';
-import { TopKSingleField, TopKPercentField, Depth, VisualLimit } from './config';
+import { TopKPercentField } from './config';
 import { entropy, normalize } from '../impurityMeasure';
 import { memberCount } from '../utils'
 import cluster, { kruskalMST } from './cluster';
