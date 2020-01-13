@@ -1,6 +1,6 @@
 /* eslint no-restricted-globals: 0 */
 import { kruskalMST } from 'visual-insights';
-
+const PearsonThreshold = 0.5;
 function sum (arr) {
   let ans = 0;
   let len = arr.length;
@@ -15,7 +15,7 @@ const cluster = (e) => {
     const { spaces, maxGroupNumber } = e.data;
     let result = [];
     for (let space of spaces) {
-      const { edgesInMST, groups } = kruskalMST(space.matrix, maxGroupNumber);
+      const { edgesInMST, groups } = kruskalMST(space.matrix, maxGroupNumber, PearsonThreshold);
       let measureGroups = new Map();
       for (let i = 0; i < groups.length; i++) {
         if (!measureGroups.has(groups[i])) {

@@ -3,6 +3,7 @@ import aggregate from 'cube-core';
 import { entropy, normalize } from '../impurityMeasure';
 import { DataSource, OperatorType } from '../commonTypes';
 import { crammersV } from '../dashboard/utils';
+import { CrammersVThreshold } from './config';
 import cluster from './cluster';
 // insights like outlier and trend both request high impurity of dimension.
 const maxVisualChannel = 8;
@@ -44,7 +45,8 @@ export function getDimSetsBasedOnClusterGroups(dataSource: DataSource, dimension
   let groups: string[][] = cluster({
     matrix: dimCorrelationMatrix,
     measures: dimensions,
-    groupMaxSize: Math.round(dimensions.length / maxDimNumberInView)
+    groupMaxSize: Math.round(dimensions.length / maxDimNumberInView),
+    threshold: CrammersVThreshold
   });
   // todo: maybe a threhold would be better ?
   for (let group of groups) {
@@ -79,7 +81,7 @@ export function correlation(dataSource: DataSource, fieldX: string, fieldY: stri
 export type FieldsFeature = [string[], any, number[][]];
 function analysisDimensions(dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType | undefined = 'sum'): FieldsFeature[] {
   let impurityList: FieldsFeature[] = [];
-  let dimSet = getCombination(dimensions)
+  let dimSet = getDimSetsBasedOnClusterGroups(dataSource, dimensions);
   for (let dset of dimSet) {
     let impurity = {};
     let aggData = aggregate({
