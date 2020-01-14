@@ -1,9 +1,10 @@
 import { FieldsFeature, correlation, linearMapPositive } from "../insights/impurity";
 import { DataSource, OperatorType } from "../commonTypes";
-import cluster, { kruskalMST } from "../insights/cluster";
+import cluster from "../insights/cluster";
 import aggregate from 'cube-core';
 import { normalize, entropy } from "../impurityMeasure";
 import { crammersV } from './utils';
+import { CrammersVThreshold, PearsonCorrelation } from '../insights/config';
 
 interface DashBoardSpace {
   dimensions: string[];
@@ -48,7 +49,8 @@ export function getDashBoardSubspace (dataSource: DataSource, dimensions: string
   const measureGroups = cluster({
     matrix: correlationMatrix,
     measures,
-    groupMaxSize: Math.round(measures.length / 6) // todo: make a config: max 6 measures in a dashboard
+    groupMaxSize: Math.round(measures.length / 6), // todo: make a config: max 6 measures in a dashboard
+    threshold: PearsonCorrelation.weak
   })
 
   const dimCorrelationMatrix = dimensions.map(d => dimensions.map(d => 0));
@@ -119,7 +121,8 @@ export function getDashBoardView (dashBoardSpace: DashBoardSpace, dataSource: Da
   const measureGroups = cluster({
     matrix: dashBoardSpace.correlationMatrix,
     measures: measures,
-    groupMaxSize: Math.round(measures.length / 3) // todo: make a config: max 3 measures in a chart
+    groupMaxSize: Math.round(measures.length / 3), // todo: make a config: max 3 measures in a chart
+    threshold: PearsonCorrelation.strong
   });
   for (let group of measureGroups) {
     const meaIndexList = group.map(mea => measures.indexOf(mea))
@@ -145,7 +148,8 @@ export function getDashBoardView (dashBoardSpace: DashBoardSpace, dataSource: Da
     matrix: dimensionCorrelationMatrix,
     measures: dimensions,
     groupMaxSize: 2, // todo: make a config: max 2 dimensions in a chart
-    limitSize: true
+    limitSize: true,
+    threshold: CrammersVThreshold
   })
 
   const dimGroupEntropyMatrix = getEntropyMatrix(dimensionGroups, measures, dataSource);
@@ -174,3 +178,5 @@ function minIndex(arr: number[]) {
   }
   return pos;
 }
+
+export { crammersV }

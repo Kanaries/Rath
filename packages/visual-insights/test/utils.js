@@ -52,10 +52,10 @@ describe('utils test', function () {
     let t = true;
     for (let row of data) {
       if (typeof row[field] === 'number') {
-        let { groups: { left, right } } = /\[(?<left>([0-9.]+|-Infinity)), (?<right>[0-9.]+|Infinity)\)/.exec(row[newField]);
+        let { groups: { left, right } } = /.*\[(?<left>([0-9.e+]+|-Infinity)), (?<right>[0-9.e+]+|Infinity)\)/.exec(row[newField]);
           left = Number(left);
           right = Number(right);
-          if (!(left <= row[field] && row[field] < right)) {
+          if (!(left <= row[field] && row[field] <= right)) {
             t = false;
           }
       } else {
