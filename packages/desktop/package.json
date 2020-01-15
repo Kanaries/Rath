@@ -1,0 +1,79 @@
+{
+  "name": "desktop",
+  "version": "0.1.0",
+  "description": "Rath Desktop",
+  "main": "main.js",
+  "homepage": "./",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "build": {
+    "productName": "Kanaries Rath",
+    "appId": "ooer.kanaries.rath",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "icons/",
+      "node_modules/",
+      "package.json",
+      "main.js",
+      "build/"
+    ],
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "icons/icon.ico",
+      "uninstallerIcon": "icons/icon.ico",
+      "installerHeaderIcon": "icons/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "rath",
+      "include": "build/installer.nsh"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ]
+    },
+    "mac": {
+      "icon": "icons/icon.ico"
+    },
+    "win": {
+      "icon": "icons/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32"
+          ]
+        }
+      ]
+
+    },
+    "linux": {
+      "icon": "icons/icon.ico"
+    }
+  },
+  "keywords": [
+    "rath"
+  ],
+  "author": "ObservedObserver",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "electron": "^7.1.9",
+    "electron-builder": "^22.2.0"
+  }
+}

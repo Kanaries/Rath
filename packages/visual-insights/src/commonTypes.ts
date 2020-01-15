@@ -9,7 +9,7 @@ export type Measures = string[];
 export type FieldType = 'quantitative' | 'nominal' | 'ordinal' | 'temporal';
 export interface Field {
   name: string;
-  type: FieldType
+  type: FieldType;
 }
 
 export type FieldImpurity = [string, number, number, Field];

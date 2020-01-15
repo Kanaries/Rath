@@ -8,6 +8,10 @@ setAutoFreeze(false)
 
 export interface GlobalState {
   /**
+   * useless but cool.
+   */
+  beCool: boolean;
+  /**
    * `currentPage` is the current page number of visualization in explore board.
    */
   currentPage: number;
@@ -89,6 +93,7 @@ export type StateUpdater<S> = (draftState: Draft<S>) => void
 // }
 
 const initState: GlobalState = {
+  beCool: false,
   currentPage: 0,
   useServer: false,
   fields: [],

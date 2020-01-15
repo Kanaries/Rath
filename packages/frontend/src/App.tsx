@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { useGlobalState, GlobalStateProvider } from "./state";
 import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
 import "./App.css";
+import RathLogo from './assets/rath.png';
+import RathCoolLogo from './assets/rath-glasses.png';
 
 import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
@@ -21,8 +23,8 @@ const pivotList = [
 
 const getLogoSrc = (withGlasses: boolean) => {
   return withGlasses
-    ? "https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/rath-glasses.png"
-    : "https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/rath.png";
+    ? RathCoolLogo
+    : RathLogo;
 };
 
 interface PageStatus {
@@ -57,10 +59,11 @@ function App() {
         <div className="ms-Grid-row">
           <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg1">
             <a
+              // onClick={() => { window.location.reload(false); }}
               href="https://github.com/ObservedObserver/visual-insights"
               className="logo"
             >
-              <img src={ getLogoSrc(state.useServer) } alt="rath" />
+              <img src={ getLogoSrc(state.beCool) } alt="rath" />
             </a>
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg8">

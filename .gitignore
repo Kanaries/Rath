@@ -27,3 +27,4 @@ yarn-error.log*
 .vscode
 
 safety
+dist
