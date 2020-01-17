@@ -122,7 +122,7 @@ const Gallery: React.FC<GalleryProps> = props => {
         draft.loading.gallery = false;
       });
     });
-  }, [subspaceList, dataSource, state.maxGroupNumber]);
+  }, [subspaceList, dataSource, state.maxGroupNumber, state.useServer, updateState]);
 
   const dimScores = useMemo<[string, number, number, Field][]>(() => {
     return [...summary.origin, ...summary.grouped].map(field => {
@@ -185,12 +185,12 @@ const Gallery: React.FC<GalleryProps> = props => {
         console.log(error);
       }
     }
-  }, [viewSpaces, currentPage]);
+  }, [viewSpaces, currentPage, dataSource, dimScores]);
   const currentSpace = useMemo<Subspace>(() => {
     return subspaceList.find(subspace => {
       return subspace.dimensions.join(",") === dataView.dimensions.join(",");
     })!;
-  }, [subspaceList, currentPage, dataView]);
+  }, [subspaceList, dataView]);
   useEffect(() => {
     setShowAssociation(false);
   }, [currentPage]);

@@ -54,7 +54,7 @@ const IndicatorCard: React.FC<IndicatorProps> = props => {
       ans = Number(ans.toFixed(2));
     }
     return numberWithCommas(ans);
-  }, [dataSource, measures]);
+  }, [dataSource, measures, operator]);
 
   return (
     <Card>

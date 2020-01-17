@@ -1,8 +1,7 @@
 /* eslint no-restricted-globals: 0 */
 import { UnivariateSummary } from 'visual-insights';
-
+import { timer } from './timer';
 const groupFields = (e) => {
-  console.log('group fields worker');
   try {
     const { dataSource, fields } = e.data;
     const result = UnivariateSummary.groupFields(dataSource, fields);
@@ -18,4 +17,4 @@ const groupFields = (e) => {
   }
 }
 
-self.addEventListener('message', groupFields, false);
+self.addEventListener('message', timer(groupFields), false);

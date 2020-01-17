@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useCallback } from 'react';
 import produce, { Draft } from 'immer';
 /**
  * @param S type of the composed state
@@ -19,9 +19,11 @@ export type StateUpdater<S> = (draftState: Draft<S>) => void
  */
 export default function useComposeState<S>(initState: S): [S, (stateUpdater: StateUpdater<S>) => void] {
   const [state, setState] = useState<S>(initState)
-  const updateState = (stateUpdater: StateUpdater<S>) => {
-    const nextState = produce<S>(state, draftState => stateUpdater(draftState))
-    setState(nextState)
-  }
+  const updateState = useCallback((stateUpdater: StateUpdater<S>) => {
+    setState(state => {
+      const nextState = produce<S>(state, draftState => stateUpdater(draftState))
+      return nextState
+    })
+  }, [setState])
   return [state, updateState]
 }

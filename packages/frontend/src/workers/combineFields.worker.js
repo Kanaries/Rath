@@ -1,8 +1,8 @@
 /* eslint no-restricted-globals: 0 */
 import { analysisDimensions } from 'visual-insights'
+import { timer } from './timer';
 
 const combineFields = (e) => {
-  console.log('[combine fields]')
   try {
     const { dataSource, dimensions, measures, operator, topKPercent = 1 } = e.data;
     let impurityList = analysisDimensions(dataSource, dimensions, measures, operator).map(dimReport => {
@@ -41,4 +41,4 @@ const combineFields = (e) => {
   }
 }
 
-self.addEventListener('message', combineFields, false);
+self.addEventListener('message', timer(combineFields), false);

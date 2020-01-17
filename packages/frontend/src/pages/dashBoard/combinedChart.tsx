@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { DashBoard } from "../../service";
-import { DataSource, Field, FieldType } from "../../global";
+import { DataSource, Field } from "../../global";
 import { specification } from "visual-insights";
 import { useComposeState } from "../../utils/index";
 import { IconButton } from "office-ui-fabric-react";
@@ -27,28 +27,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
   useEffect(() => {
     setChartStateList(dashBoard.map(() => false));
   }, [dashBoard]);
-  const filedDomains = useMemo(() => {
-    const fieldList = dimScores.map(f => f[0]);
-    let domainDict: {[key: string]: any[]} = {};
-    let dsLen = dataSource.length;
-    let fLen = fieldList.length;
-    for (let i = 0; i < fLen; i++) {
-      if (dimScores[i][3].type !== 'quantitative') {
-        continue;
-        // tmp
-      }
-      let fieldName = fieldList[i];
-      domainDict[fieldName] = [0, 100];
-      let min = Infinity;
-      let max = -Infinity;
-      for (let j = 0; j < dsLen; j++) {
-        min = Math.min(dataSource[j][fieldName], min)
-        max = Math.max(dataSource[j][fieldName], max)
-      }
-      domainDict[fieldName] = [min, max];
-    }
-    return domainDict;
-  }, [dataSource, dimScores])
+
   const chartSpecList = useMemo(() => {
     if (!dashBoard || !dataSource || !dimScores) {
       return [];
@@ -81,7 +60,9 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
     });
   }, [dashBoard, dataSource, dimScores]);
 
-  const fieldFeatures = dimScores.map(dim => dim[3]);
+  const fieldFeatures = useMemo(() => {
+    return dimScores.map(dim => dim[3])
+  }, [dimScores]);
 
   const specList = useMemo<any[]>(() => {
     return chartSpecList.map((spec, index) => {
@@ -125,7 +106,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
       vegaSpec.specIndex = index
       return vegaSpec
     }) as any;
-  }, [chartSpecList, filedDomains]);
+  }, [chartSpecList, fieldFeatures]);
 
   const signalHandler = useMemo(() => {
     return dashBoard.map((d, index) => {
@@ -191,8 +172,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
     dashBoard,
     globalFilters,
     dataSource,
-    chartStateList,
-    dataSource
+    chartStateList
   ]);
   return (
     <div>

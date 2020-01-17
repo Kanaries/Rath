@@ -31,7 +31,7 @@ interface TreeData {
 }
 const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
   const { adjMatrix, measures, onFocusGroup } = props;
-  const [state, updateState] = useGlobalState();
+  const [state, ] = useGlobalState();
   const chart = useRef<HTMLDivElement>(null);
   // const groups = useMemo<string[][]>(() => {
   //   return clusterMeasures({
@@ -231,7 +231,7 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
         })
       })
     }
-  }, [treeData, measures])
+  }, [treeData, measures, clusterResult.groups, onFocusGroup])
   return <div ref={chart}>
   </div>
 }

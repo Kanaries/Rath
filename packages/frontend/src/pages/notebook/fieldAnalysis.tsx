@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { DetailsList, SelectionMode, IColumn, Icon, HoverCard, IExpandingCardProps } from 'office-ui-fabric-react';
-import chroma, { Color } from 'chroma-js';
+import chroma from 'chroma-js';
 import { FieldSummary } from '../../service';
 import DistributionChart from './distributionChart';
 import { FieldType, Record } from '../../global';
@@ -130,7 +130,6 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
         case 'entropy':
         case 'maxEntropy':
           bgColor = getValueColor(item[column.key], entropyRange);
-          let fontColor = contrastColor(bgColor)
           let bgColorStr = `rgb(${bgColor.join(',')})`
           let fontColorStr = `rgb(${contrastColor(bgColor).join(',')})`
           return (

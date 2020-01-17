@@ -56,7 +56,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
           actions: false
         })
       }
-    }, [x, y, dataSource])
+    }, [x, y, dataSource, fieldType])
   return <div ref={chart}></div>
 }
 

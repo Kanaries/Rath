@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { BIField, DataSource, Record } from '../../global';
 import { Transform } from '../../utils/index'
 import {  cleanData,  CleanMethod } from './clean';

@@ -1,8 +1,8 @@
 import produce, { Draft, setAutoFreeze } from 'immer';
-import React, { useState, useMemo, createContext, useContext } from 'react';
+import React, { useState, useMemo, createContext, useContext, useCallback, useRef } from 'react';
 import { DataSource, BIField, Field } from './global';
 import { Subspace, FieldSummary, ViewSpace, DashBoard } from './service';
-import actions, { Test, Actions } from './actions';
+import actions, { Test } from './actions';
 
 setAutoFreeze(false)
 
@@ -142,25 +142,28 @@ function useGetters(state: GlobalState) {
   return getters;
 }
 export function GlobalStateProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<GlobalState>(initState)
+  const [state, setState] = useState<GlobalState>(initState);
+  const stateHolder = useRef<GlobalState>(initState);
 
   const getters = useGetters(state);
-  const updateState = (stateUpdater: StateUpdater<GlobalState>) => {
+  const updateState = useCallback((stateUpdater: StateUpdater<GlobalState>) => {
     setState(state => {
       const nextState = produce<GlobalState>(state, draftState => stateUpdater(draftState))
+      stateHolder.current = nextState;
       return nextState;
     })
-  }
-
-  const dispatch: <P extends Test>(actionName: P['name'], params: P['params']) => void = (actionName, params) => {
+  }, [setState])
+  const dispatch: <P extends Test>(actionName: P['name'], params: P['params']) => void = useCallback((actionName, params) => {
     if (typeof actions[actionName] === 'function') {
-
+      function select (): GlobalState {
+        return stateHolder.current
+      }
       // todo: fix the any type
       
-      actions[actionName](state, updateState, params as any);
+      actions[actionName](select, updateState, params as any);
       // actions['subspaceSearch'](state, updateState, params)
     }
-  }
+  }, [updateState])
 
 
 

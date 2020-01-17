@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import { useGlobalState } from "../../state";
 import { FileLoader, useComposeState } from '../../utils/index';
 import { ComboBox, PrimaryButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider, Label, Checkbox } from 'office-ui-fabric-react';

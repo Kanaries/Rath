@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import aggregate from 'cube-core';
 import embed from 'vega-embed';
-import { DataSource, Field, FieldType } from '../global'
+import { DataSource, Field } from '../global'
 import { baseVis } from '../queries/index';
 export const geomTypeMap: {[key: string]: any} = {
   interval: 'bar',
@@ -53,7 +53,7 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
         as: `${mea}_${aggregator}`
       }
     })
-  }, [measures])
+  }, [measures, aggregator])
 
   let table = useMemo(() => {
     if (!defaultAggregated) {
