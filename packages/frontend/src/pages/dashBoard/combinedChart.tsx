@@ -129,7 +129,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
         }
       };
     });
-  }, [dashBoard, chartStateList, dimScores, specList]);
+  }, [dashBoard, chartStateList, setGlobalFilters]);
 
   const vsourceList = useMemo<Array<DataSource>>(() => {
     let ans = [];
