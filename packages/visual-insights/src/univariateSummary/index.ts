@@ -1,6 +1,6 @@
-import { DataSource, Field, FieldImpurity, FieldType, Record } from '../commonTypes';
-import { isFieldTime, isFieldContinous, memberCount, isFieldCategory, deepcopy, groupContinousField, groupCategoryField } from '../utils';
-import { normalize, entropy } from '../impurityMeasure';
+import { DataSource, Field, FieldType, Record } from '../commonTypes';
+import { isFieldTime, isFieldContinous, memberCount, isFieldCategory, deepcopy, groupContinousField, groupCategoryField } from '../utils/index';
+import { normalize, entropy } from '../statistics/index';
 import { isUniformDistribution } from '../distribution';
 
 const MIN_QUAN_MEMBER_SIZE = 25;

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { kruskalMST } from 'visual-insights';
+import { Cluster } from 'visual-insights';
 import { useGlobalState } from '../../state';
 import embed from 'vega-embed';
 // cluster should be used for small graph because the number of measure is limited. 
@@ -44,7 +44,7 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
      * todo: 
      * maxGroupNumber = the measures length / max visual channel for measure.
      */
-    let { edgesInMST, groups } = kruskalMST(adjMatrix, state.maxGroupNumber);
+    let { edgesInMST, groups } = Cluster.kruskalWithFullMST(adjMatrix, state.maxGroupNumber);
     return { edgesInMST, groups }
   }, [adjMatrix, state.maxGroupNumber])
   const treeData = useMemo<TreeData>(() => {

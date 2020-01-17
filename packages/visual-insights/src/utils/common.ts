@@ -1,4 +1,4 @@
-import { DataSource } from './commonTypes'
+import { DataSource } from '../commonTypes'
 const JOIN_SYMBOL = '_';
 const MAGIC_NUMBER = 5;
 

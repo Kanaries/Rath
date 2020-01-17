@@ -1,4 +1,4 @@
-import { deepcopy, isFieldNumeric, isFieldTime, memberCount } from '../utils';
+import { deepcopy, isFieldNumeric, memberCount } from '../utils/index';
 import { DataSource } from '../commonTypes';
 function dropNullColumn (dataSource: DataSource, fields: string[]): { fields: string[]; dataSource: DataSource} {
   let keepFields = fields.map(() => false);

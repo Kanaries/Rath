@@ -81,7 +81,7 @@ function kruskal(matrix: number[][], groupNumber: number, threshold: number | un
   }
   return groups;
 }
-
+// todo: delete kruskal with limit size, use largest size to limit it(uncontrolled group number but better), need discuss.
 /**
  * 
  * @param matrix 
