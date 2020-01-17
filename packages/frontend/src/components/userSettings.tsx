@@ -22,7 +22,22 @@ const UserSettings: React.FC = props => {
         >
           <div style={{ padding: '1rem' }}>
             <Toggle
-              label="use server"
+              label="Be Cool"
+              checked={state.beCool}
+              onText="On"
+              offText="Off"
+              onChange={(
+                ev: React.MouseEvent<HTMLElement>,
+                checked?: boolean
+              ) => {
+                updateState(draft => {
+                  draft.beCool = checked || false;
+                });
+              }}
+            />
+            <Toggle
+              label="Use Server"
+              disabled={true}
               checked={state.useServer}
               onText="On"
               offText="Off"

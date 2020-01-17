@@ -1,16 +1,17 @@
-# Rath (Visual Insights)
+<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> English | [简体中文](./README.zh-CN.md)
+
+# Rath
 
 ![](https://travis-ci.org/ObservedObserver/visual-insights.svg?branch=master)
 ![](https://img.shields.io/github/license/ObservedObserver/showme)
 
-Automatic insights extraction and visualization specification.
+
+<img src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png" alt="logo" width="360px" style="" />
+
+Automatic insights extraction and visualization specification based on `visual-insights`.
 
 + [Youtube Video Demo](https://www.youtube.com/watch?v=o3_PH1Cbql4)
 + [Bilibili Video Demo](https://www.bilibili.com/video/av82089992/)
-
-
-![logo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png)
-
 
 ## Introduction
 
@@ -21,14 +22,16 @@ In this repo,
 + `frontend` is a demo build based on `visual-insights`. frontend can be run individually without server. All the computation service are running in webworker by default.
 + When you want to switch to server mode, you can run `backend` code.
 
+Here are main parts in Rath,
+
 ### DataSource
-dataSource board is for data uploading, sampling, cleaning and defining fields type(dimensions, measures). In visual insights, we regard dimensions as independent variable and measures as dependent variable.
+dataSource board is for data uploading, sampling(currently support stream data, which means there is no limit of the size of file you uploaded), cleaning and defining fields type(dimensions, measures). In visual insights, we regard dimensions as independent variable or feature and measures as dependent variable or target.
 
 ### Notebook
-Notebook is a board for user to know what happened in the automatic analysis process. It shows how decisions are made by the application and provide interactive interface to adjust some of the parameters and operators used by the algorithm. 
+Notebook is a board for user to know what happened in the automatic analysis process and how rath uses visual-insights. It shows how decisions are made by the application and provide interactive interface to adjust some of the parameters and operators used by the algorithm. 
 
 ### Gallery
-Gallery displays parts of the visualization with interesting findings. There are some settings here to adjust some of the visual elements in the chart.
+Gallery displays parts of the visualization with interesting findings. In Gallery, you can find interesting visualizaiton and use association feature to find more related visualization. You can also search specific info in gallery. There are some settings here to adjust some of the visual elements in the chart.
 
 ### Dashboard
 automantic generate dashboard for you. rath will figure out a set of visulization of which contents are connected to each other and can be used to analysis a specific problem. 
@@ -46,6 +49,10 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 ### Try online demo
 + on Github Pages [demo](https://kanaries.github.io/Rath/)
 + on Alibaba Cloud OSS [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
+
+### Download Desktop Version
+- [MacOS](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0.dmg)
+- [Windows](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0-win.zip)
 
 ### run locally
 (dev)
@@ -77,12 +84,12 @@ npm i visual-insights --save`
 ```
 
 ## How does it work
-The working process are visualized in notebook board in the application.  *** Main process of the algorithm is shown in the `notebook` board. ***
+The working process are visualized in notebook board in the application.  *** Main process of the algorithm is shown in the `notebook` board. *** Here shows how rath use visual-insights to make a analytic pipeline.
 
 ![](https://cdn.nlark.com/yuque/0/2019/png/171008/1570692438037-b2ce208d-bd1d-4b38-be27-9251bbb171d2.png)
 
 ### Univariate summary
-For the first step, visual-insights analyze all the fields in the dataset independently. It gets the fields' distributions and calculate its entropy. Besides, it will define a semantic type (`quantitative`, `ordinal`, `temporal`, `nominal`) for each field. More details of the field will be displayed when hover your mouse on the fields.
+For the first step, rath analyze all the fields in the dataset independently. It gets the fields' distributions and calculate its entropy. Besides, it will define a semantic type (`quantitative`, `ordinal`, `temporal`, `nominal`) for each field. More details of the field will be displayed when hover your mouse on the fields.
 
 ![](https://cdn.nlark.com/yuque/0/2019/jpeg/171008/1570614609678-33d5f2c1-e51e-4bcd-8343-271a041f7519.jpeg)
 
@@ -124,8 +131,9 @@ visualization.
 
 ## Reference
 
-+ T. Sellam, E. Müller and M. Kersten, "Semi-automated exploration of data warehouses," in 2015, . DOI: 10.1145/2806416.2806538.
+Rath is insipired by several excellent works below:
+
 + Wongsuphasawat, Kanit, et al. "Voyager 2: Augmenting visual analysis with partial view specifications." Proceedings of the 2017 CHI Conference on Human Factors in Computing Systems. ACM, 2017.
 + B. Tang et al, "Extracting top-K insights from multi-dimensional data," in 2017, . DOI: 10.1145/3035918.3035922.
 + A. Satyanarayan, K. Wongsuphasawat and J. Heer, "Declarative interaction design for data visualization," in 2014, . DOI: 10.1145/2642918.2647360.
-+ P. Tan, M. Steinbach and V. Kumar, Introduction to Data Mining. (Pearson New International First ed.) Essex: Pearson, 2014.
++ Cleveland, W., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. Journal of the American Statistical Association, 79(387), 531-554. doi:10.2307/2288400
