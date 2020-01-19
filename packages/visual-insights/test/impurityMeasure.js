@@ -31,7 +31,7 @@ describe('Impurity Measure test', function () {
 
         let ans = entropy(probabilityList);
         assert.notEqual(ans, NaN);
-        assert.equal(Math.log2(size) >= ans, true);
+        assert.equal(Math.log2(size) + Number.EPSILON >= ans - Number.EPSILON, true);
       })
   })
 

@@ -17,7 +17,7 @@
     "buildback": "tsc -p ./tsconfig.cjs.json",
     "buildfront": "tsc -p ./tsconfig.esm.json",
     "test": "npm run buildback && mocha --no-timeouts",
-    "coverage": "istanbul cover _mocha -- --no-timeouts --report lcovonly && cat ./coverage/lcov.info | coveralls"
+    "coverage": "istanbul cover _mocha --report lcovonly -- --no-timeouts -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
   },
   "eslintConfig": {
     "extends": "react-app"

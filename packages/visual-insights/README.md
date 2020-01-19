@@ -1,7 +1,8 @@
 # Visual-Insights
 
-![](https://travis-ci.org/ObservedObserver/visual-insights.svg?branch=master)
+![](https://travis-ci.org/kanaries/Rath.svg?branch=master)
 ![](https://img.shields.io/npm/v/visual-insights?color=blue)
+[![Coverage Status](https://coveralls.io/repos/github/Kanaries/Rath/badge.svg?branch=master)](https://coveralls.io/github/Kanaries/Rath?branch=dev)
 
 ### API
 
