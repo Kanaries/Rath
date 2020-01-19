@@ -6,6 +6,7 @@
   "scripts": {
     "build": "yarn workspace visual-insights build",
     "test": "yarn workspace visual-insights test",
+    "coverage": "yarn workspace visual-insights coverage",
     "ui": "npm run test && npm run build && node start.js",
     "devfront": "yarn workspace frontend start",
     "devback": "yarn workspace backend dev"
