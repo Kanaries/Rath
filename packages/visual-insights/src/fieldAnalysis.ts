@@ -1,3 +1,6 @@
+/**
+ * todo: delete this file, fieldsAnalysis is an old api.
+ */
 import { DataSource, Field, FieldImpurity } from './commonTypes'
 
 import {
@@ -10,13 +13,10 @@ import {
   // isFieldNumeric,
   isFieldTime,
   isFieldContinous
-} from './utils';
+} from './utils/index';
 
 import { isUniformDistribution } from './distribution';
-import {
-  normalize,
-  entropy,
-} from './impurityMeasure';
+import { normalize, entropy } from './statistics/index';
 
 const MAGIC_NUMBER = 5;
 

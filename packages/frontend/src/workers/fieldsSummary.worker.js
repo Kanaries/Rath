@@ -1,7 +1,8 @@
 /* eslint no-restricted-globals: 0 */
 import { UnivariateSummary } from 'visual-insights';
-const { getAllFieldsDistribution, getAllFieldTypes, getAllFieldsEntropy } = UnivariateSummary;
+import { timer } from './timer';
 
+const { getAllFieldsDistribution, getAllFieldTypes, getAllFieldsEntropy } = UnivariateSummary;
 
 const fieldSummary = (e) => {
   const { fields, dataSource } = e.data;
@@ -43,4 +44,4 @@ const fieldSummary = (e) => {
   }
 }
 
-self.addEventListener('message', fieldSummary, false)
+self.addEventListener('message', timer(fieldSummary), false)

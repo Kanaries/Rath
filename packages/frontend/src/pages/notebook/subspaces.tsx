@@ -30,18 +30,8 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
       onSpaceChange(targetSpace.dimensions, targetSpace.measures.map(m => m.name), targetSpace.correlationMatrix);
       setCurIndex(index);
     }
-  }, [subspaceList])
-  const range = useMemo<[number, number]>(() => {
-    let max = 0;
-    let min = Infinity;
-    for (let space of subspaceList) {
-      for (let { name, value } of space.measures) {
-        max = Math.max(max, value);
-        min = Math.min(min, value);
-      }
-    }
-    return [min, max]
-  }, [subspaceList])
+  }, [subspaceList, onSpaceChange])
+
   const values = useMemo<DataSource>(() => {
     let ans = [];
     // todos:
@@ -63,7 +53,7 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
       }
     }
     return ans
-  }, [subspaceList, range])
+  }, [subspaceList])
   useEffect(() => {
     if (spaceChart.current && subspaceList.length > 0) {
       embed(spaceChart.current, {
@@ -113,6 +103,7 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
         })
       })
     }
+    // eslint-disable-next-line
   }, [subspaceList, values])
   useEffect(() => {
     let space = subspaceList[curIndex];

@@ -31,7 +31,7 @@ function usePageController (size: number) {
   const maxPageNumber = Math.ceil(size / PAGE_SIZE);
   const gotoPage = (num: number) => {
     let fixPageNum = (num + maxPageNumber) % maxPageNumber;
-    setCurrentPage(num)
+    setCurrentPage(fixPageNum)
   }
 
   const lastPage = () => {
@@ -57,13 +57,19 @@ function usePageController (size: number) {
 }
 
 const SearchPage: React.FC = props => {
-  const [state, updateState, dispatch, getters] = useGlobalState();
+  const [state, , dispatch, getters] = useGlobalState();
   const [targetViewSpaces, setTargetViewSpaces] = useState<ViewSpace[]>([]);
-  const { subspaceList, viewSpaces } = state;
+  const { subspaceList, viewSpaces, maxGroupNumber, useServer } = state;
   const { dimScores } = getters;
+
   useEffect(() => {
-    dispatch('getViewSpaces', {})
-  }, [subspaceList])
+    dispatch('getViewSpaces', {
+      subspaceList,
+      maxGroupNumber,
+      useServer
+    })
+  }, [subspaceList, maxGroupNumber, useServer, dispatch])
+
   const fuse = useMemo(() => {
     const options: FuseOptions<ViewSpace> = {
       keys: [
@@ -100,7 +106,7 @@ const SearchPage: React.FC = props => {
         measures
       }
     })
-  }, [state.cookedDataSource, targetViewSpaces, itemRange])
+  }, [state.cookedDataSource, targetViewSpaces, itemRange, dimScores])
   
   return (
     <div>

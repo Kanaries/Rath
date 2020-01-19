@@ -1,7 +1,5 @@
-import React, { useMemo } from 'react';
-import {
-  ViewSpace
-} from '../../../service';
+import { useMemo } from 'react';
+import { ViewSpace } from '../../../service';
 import { Field, DataSource } from '../../../global';
 import { specification } from 'visual-insights';
 import { PreferencePanelConfig } from '../../../components/preference';
@@ -41,7 +39,7 @@ export interface DigDimensionProps {
 }
 
 function useDigDimension(props: DigDimensionProps) {
-  const { viewSpaces, interestedViewSpace, fieldScores, dataSource, visualConfig } = props;
+  const { viewSpaces, interestedViewSpace, fieldScores, dataSource } = props;
   const relatedSpaces = useMemo<ViewSpace[]>(() => {
     let ans: ViewSpace[] = []
     for (let space of viewSpaces) {
@@ -69,7 +67,7 @@ function useDigDimension(props: DigDimensionProps) {
       }
     }
     return ans.sort((a, b) => a.relatedScore - b.relatedScore);
-  }, [relatedSpaces]);
+  }, [relatedSpaces, interestedViewSpace.measures]);
 
   const viewList = useMemo(() => {
     const ans = rankedRelatedSpaces.slice(0, topKRelatedSpace).map(space => {
@@ -82,7 +80,7 @@ function useDigDimension(props: DigDimensionProps) {
       };
     })
     return ans;
-  }, [rankedRelatedSpaces, fieldScores])
+  }, [rankedRelatedSpaces, fieldScores, dataSource])
 
   return viewList
 }

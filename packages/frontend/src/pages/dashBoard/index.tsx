@@ -4,7 +4,7 @@ import { useGlobalState } from "../../state";
 import CombinedChart from "./combinedChart";
 
 const DashBoardPage: React.FC = props => {
-  const [state, updateState, dispatch, getters] = useGlobalState();
+  const [state, , dispatch, getters] = useGlobalState();
   const [dashBoardIndex, setDashBoardIndex] = useState(0);
   const {
     subspaceList,

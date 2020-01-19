@@ -35,7 +35,7 @@ const StoryTeller: React.FC<StoryTellerProps> = (props) => {
         })
       }
     }
-  }, [])
+  }, [space, spaceList])
   const bestMeasure = useMemo<string | undefined>(() => {
     if (typeof space === 'undefined') return;
     const measuresInView = space.measures.filter(mea => measures.includes(mea.name));

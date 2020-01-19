@@ -3,7 +3,7 @@ import {
   // isFieldCategory,
   // isFieldContinous,
   memberCount
-} from './utils';
+} from './utils/index';
 interface VisualElements {
   position: number;
   color: number;
@@ -93,7 +93,7 @@ function aestheticMapping (dimFields: Field[]) {
   return spec
 }
 
-// todo:
+// todo (P1):
 // don't use dimScores: FieldImpurity.
 // it's a structure with redundency design.
 function specification (dimScores: FieldImpurity[], aggData: DataSource, dimensions: string[], measures: string[]): View {

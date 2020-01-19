@@ -54,6 +54,29 @@ export function crammersV(dataSource: DataSource, fieldX: string, fieldY: string
   const V = Math.sqrt(chis / (dataSource.length * Math.min(xSet.size - 1, ySet.size - 1)))
   return V;
 }
+/**
+ * Pearson correlation coefficient
+ * @param dataSource 
+ * @param fieldX 
+ * @param fieldY 
+ */
+export function pearsonCC(dataSource: DataSource, fieldX: string, fieldY: string): number {
+  let r = 0;
+  let xBar = sum(dataSource.map(r => r[fieldX])) / dataSource.length;
+  let yBar = sum(dataSource.map(r => r[fieldY])) / dataSource.length;
+  r = sum(dataSource.map(r => (r[fieldX] - xBar) * (r[fieldY] - yBar))) /
+  Math.sqrt(sum(dataSource.map(r => Math.pow(r[fieldX] - xBar, 2))) * sum(dataSource.map(r => Math.pow(r[fieldY] - yBar, 2))));
+  return r;
+}
+
+function sum(arr: number[]): number {
+  let sum = 0;
+  for (let i = 0, len = arr.length; i < len; i++) {
+    // if (typeof dataSource[i][field])
+    sum += arr[i];
+  }
+  return sum;
+}
 
 
 // can be used for test

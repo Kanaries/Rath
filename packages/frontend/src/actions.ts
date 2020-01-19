@@ -6,17 +6,19 @@ import {
   combineFieldsService,
   generateDashBoard,
   ViewSpace,
+  Subspace,
   clusterMeasures
 } from "./service";
 import { GlobalState, StateUpdater } from './state';
 
 
 
-type Action<T> = (state: GlobalState, updateState: (updater:StateUpdater<GlobalState>) => void, params: T) => any;
+type Action<T> = (select: () => GlobalState, updateState: (updater:StateUpdater<GlobalState>) => void, params: T) => any;
 
 
-const univariateSummary: Action<{dataSource: DataSource; fields: BIField[]}> = async (state, updateState, params) => {
+const univariateSummary: Action<{dataSource: DataSource; fields: BIField[]}> = async (select, updateState, params) => {
   const { dataSource, fields } = params;
+  const state = select();
   const dimensions = fields
     .filter(field => field.type === "dimension")
     .map(field => field.name);
@@ -117,8 +119,9 @@ interface SubspaceSeachParams {
   measures: string[];
   operator: OperatorType
 }
-const subspaceSearch: Action<SubspaceSeachParams> = async (state, updateState, params) => {
+const subspaceSearch: Action<SubspaceSeachParams> = async (select, updateState, params) => {
   const { groupedData: dataSource, summary, dimensions, measures, operator } = params;
+  const state = select();
   updateState(draft => {
     draft.loading.subspaceSearching = true;
   });
@@ -165,8 +168,13 @@ const subspaceSearch: Action<SubspaceSeachParams> = async (state, updateState, p
   }
 }
 
-const getViewSpaces: Action<any> = async (state, updateState, params) => {
-  const { cookedDataSource: dataSorce, subspaceList, maxGroupNumber, useServer } = state
+interface GetViewSpacesProps {
+  subspaceList: Subspace[];
+  maxGroupNumber: number;
+  useServer: boolean;
+}
+const getViewSpaces: Action<GetViewSpacesProps> = async (select, updateState, params) => {
+  const { subspaceList, maxGroupNumber, useServer } = params;
   let viewSpaces: ViewSpace[] = [];
   try {
     viewSpaces = await clusterMeasures(
@@ -217,7 +225,8 @@ const extractInsights: Action<{dataSource: DataSource; fields: BIField[]}> = asy
   }
 }
 
-const getDashBoard: Action<{dataSource: DataSource, dimensions: string[], measures: string[]}> = async (state, updateState, params) => {
+const getDashBoard: Action<{dataSource: DataSource, dimensions: string[], measures: string[]}> = async (select, updateState, params) => {
+  const state = select();
   const { dataSource, dimensions, measures } = params;
   updateState(draft => {
     draft.loading.dashBoard = true

@@ -1,9 +1,9 @@
-import { FieldsFeature, correlation, linearMapPositive } from "../insights/impurity";
+import { FieldsFeature } from "../insights/impurity";
 import { DataSource, OperatorType } from "../commonTypes";
-import cluster from "../insights/cluster";
+import { Cluster } from "../ml/index";
 import aggregate from 'cube-core';
-import { normalize, entropy } from "../impurityMeasure";
-import { crammersV } from './utils';
+import { normalize, entropy } from "../statistics/index";
+import { crammersV, pearsonCC, linearMapPositive } from '../statistics/index';
 import { CrammersVThreshold, PearsonCorrelation } from '../insights/config';
 
 interface DashBoardSpace {
@@ -41,12 +41,12 @@ export function getDashBoardSubspace (dataSource: DataSource, dimensions: string
   for (let i = 0; i < measures.length; i++) {
     correlationMatrix[i][i] = 1;
     for (let j = i + 1; j < measures.length; j++) {
-      let r = correlation(dataSource, measures[i], measures[j]);
+      let r = pearsonCC(dataSource, measures[i], measures[j]);
       correlationMatrix[j][i] = correlationMatrix[i][j] = r;
     }
   }
   
-  const measureGroups = cluster({
+  const measureGroups = Cluster.kruskal({
     matrix: correlationMatrix,
     measures,
     groupMaxSize: Math.round(measures.length / 6), // todo: make a config: max 6 measures in a dashboard
@@ -118,7 +118,7 @@ export function getDashBoardView (dashBoardSpace: DashBoardSpace, dataSource: Da
   /**
    * correlation view
    */
-  const measureGroups = cluster({
+  const measureGroups = Cluster.kruskal({
     matrix: dashBoardSpace.correlationMatrix,
     measures: measures,
     groupMaxSize: Math.round(measures.length / 3), // todo: make a config: max 3 measures in a chart
@@ -144,7 +144,7 @@ export function getDashBoardView (dashBoardSpace: DashBoardSpace, dataSource: Da
    * impact views
    * todo: protentional repeat view or very similiar view
    */
-  const dimensionGroups = cluster({
+  const dimensionGroups = Cluster.kruskal({
     matrix: dimensionCorrelationMatrix,
     measures: dimensions,
     groupMaxSize: 2, // todo: make a config: max 2 dimensions in a chart

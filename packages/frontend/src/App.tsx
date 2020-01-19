@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useGlobalState, GlobalStateProvider } from "./state";
 import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
@@ -52,7 +52,6 @@ function App() {
       pivotKey: pivotList[0].itemKey
     }
   });
-
   return (
     <div>
       <div className="header-bar">

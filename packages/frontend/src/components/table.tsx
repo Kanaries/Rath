@@ -1,6 +1,6 @@
 import React from 'react';
 import { DetailsList, SelectionMode } from 'office-ui-fabric-react';
-import { DataSource, BIField, BIFieldType } from '../global';
+import { DataSource, BIField } from '../global';
 export interface DataTableProps {
   dataSource: DataSource,
   fields: BIField[]

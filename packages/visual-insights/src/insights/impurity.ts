@@ -1,30 +1,13 @@
 // import { aggregate } from '../utils';
 import aggregate from 'cube-core';
-import { entropy, normalize } from '../impurityMeasure';
+import { entropy, normalize } from '../statistics/index';
 import { DataSource, OperatorType } from '../commonTypes';
-import { crammersV } from '../dashboard/utils';
+import { crammersV, getCombination, pearsonCC, linearMapPositive } from '../statistics/index';
 import { CrammersVThreshold } from './config';
-import cluster from './cluster';
+import { Cluster } from '../ml/index';
+import { CHANNEL } from '../constant';
 // insights like outlier and trend both request high impurity of dimension.
-const maxVisualChannel = 8;
-function getCombination(elements: string[], start: number = 1, end: number = elements.length): string[][] {
-  let ans: string[][] = [];
-  const combine = (step: number, set: string[], size: number) => {
-    if (set.length === size) {
-      ans.push([...set]);
-      return;
-    }
-    if (step >= elements.length) {
-      return;
-    }
-    combine(step + 1, [...set, elements[step]], size);
-    combine(step + 1, set, size);
-  }
-  for (let i = start; i <= Math.min(end, maxVisualChannel); i++) {
-    combine(0, [], i);
-  }
-  return ans
-}
+
 function getDimCorrelationMatrix(dataSource: DataSource, dimensions: string[]): number[][] {
   let matrix: number[][] = dimensions.map(d => dimensions.map(d => 0));
   for (let i = 0; i < dimensions.length; i++) {
@@ -40,9 +23,8 @@ export function getDimSetsBasedOnClusterGroups(dataSource: DataSource, dimension
   const maxDimNumberInView = 4;
   let dimSets: string[][] = [];
   let dimCorrelationMatrix = getDimCorrelationMatrix(dataSource, dimensions);
-  console.log(dimCorrelationMatrix)
   // groupMaxSize here means group number.
-  let groups: string[][] = cluster({
+  let groups: string[][] = Cluster.kruskal({
     matrix: dimCorrelationMatrix,
     measures: dimensions,
     groupMaxSize: Math.round(dimensions.length / maxDimNumberInView),
@@ -50,38 +32,24 @@ export function getDimSetsBasedOnClusterGroups(dataSource: DataSource, dimension
   });
   // todo: maybe a threhold would be better ?
   for (let group of groups) {
-    let combineDimSet: string[][] = getCombination(group);
+    let combineDimSet: string[][] = getCombination(group, 1, CHANNEL.maxDimensionNumber);
     dimSets.push(...combineDimSet);
   }
   return dimSets;
 }
 
-export function linearMapPositive (arr: number[]): number[] {
-  let min = Math.min(...arr);
-  return arr.map(a => a - min + 1);
-}
-
-function sum(arr: number[]): number {
-  let sum = 0;
-  for (let i = 0, len = arr.length; i < len; i++) {
-    // if (typeof dataSource[i][field])
-    sum += arr[i];
+export function subspaceSearching(dataSource: DataSource, dimensions: string[], shouldDimensionsCorrelated: boolean | undefined = true): string[][] {
+  if (shouldDimensionsCorrelated) {
+    return getDimSetsBasedOnClusterGroups(dataSource, dimensions);
+  } else {
+    return getCombination(dimensions)
   }
-  return sum;
 }
 
-export function correlation(dataSource: DataSource, fieldX: string, fieldY: string): number {
-  let r = 0;
-  let xBar = sum(dataSource.map(r => r[fieldX])) / dataSource.length;
-  let yBar = sum(dataSource.map(r => r[fieldY])) / dataSource.length;
-  r = sum(dataSource.map(r => (r[fieldX] - xBar) * (r[fieldY] - yBar))) /
-  Math.sqrt(sum(dataSource.map(r => Math.pow(r[fieldX] - xBar, 2))) * sum(dataSource.map(r => Math.pow(r[fieldY] - yBar, 2))));
-  return r;
-}
 export type FieldsFeature = [string[], any, number[][]];
-function analysisDimensions(dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType | undefined = 'sum'): FieldsFeature[] {
+export function insightExtraction(dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType | undefined = 'sum'): FieldsFeature[] {
   let impurityList: FieldsFeature[] = [];
-  let dimSet = getDimSetsBasedOnClusterGroups(dataSource, dimensions);
+  let dimSet = subspaceSearching(dataSource, dimensions, true);
   for (let dset of dimSet) {
     let impurity = {};
     let aggData = aggregate({
@@ -103,7 +71,7 @@ function analysisDimensions(dataSource: DataSource, dimensions: string[], measur
       for (let i = 0; i < measures.length; i++) {
         correlationMatrix[i][i] = 1;
         for (let j = i + 1; j < measures.length; j++) {
-          let r = correlation(aggData, measures[i], measures[j]);
+          let r = pearsonCC(aggData, measures[i], measures[j]);
           correlationMatrix[j][i] = correlationMatrix[i][j] = r;
         }
       }
@@ -111,5 +79,3 @@ function analysisDimensions(dataSource: DataSource, dimensions: string[], measur
   }
   return impurityList
 }
-
-export { analysisDimensions, getCombination }

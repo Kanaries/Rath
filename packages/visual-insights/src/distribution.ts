@@ -1,5 +1,5 @@
 import { DataSource } from './commonTypes';
-import { memberCount } from './utils';
+import { memberCount } from './utils/index';
 
 function isUniformDistribution(dataSource: DataSource, field: string): boolean {
   const members = memberCount(dataSource, field);

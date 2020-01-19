@@ -1,5 +1,6 @@
 /* eslint no-restricted-globals: 0 */
 import { DashBoard } from 'visual-insights';
+import { timer } from './timer';
 
 function transSubspaces2FieldsFeature(subspaces) {
   let fieldFeatureList = [];
@@ -43,4 +44,4 @@ const generateDashBoard = (e) => {
   }
 }
 
-self.addEventListener('message', generateDashBoard, false);
+self.addEventListener('message', timer(generateDashBoard), false);

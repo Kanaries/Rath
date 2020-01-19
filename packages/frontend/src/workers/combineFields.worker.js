@@ -1,11 +1,11 @@
 /* eslint no-restricted-globals: 0 */
-import { analysisDimensions } from 'visual-insights'
+import { Insight } from 'visual-insights'
+import { timer } from './timer';
 
 const combineFields = (e) => {
-  console.log('[combine fields]')
   try {
     const { dataSource, dimensions, measures, operator, topKPercent = 1 } = e.data;
-    let impurityList = analysisDimensions(dataSource, dimensions, measures, operator).map(dimReport => {
+    let impurityList = Insight.insightExtraction(dataSource, dimensions, measures, operator).map(dimReport => {
       let sum = 0;
       for (let key in dimReport[1]) {
         sum += dimReport[1][key];
@@ -41,4 +41,4 @@ const combineFields = (e) => {
   }
 }
 
-self.addEventListener('message', combineFields, false);
+self.addEventListener('message', timer(combineFields), false);
