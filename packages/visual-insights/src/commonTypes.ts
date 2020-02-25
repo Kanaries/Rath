@@ -2,6 +2,10 @@ export interface Record {
   [key: string]: any
 }
 
+export interface NormalizedRecord {
+  [key: string]: number
+}
+
 export type DataSource = Record[];
 
 export type Dimensions = string[];

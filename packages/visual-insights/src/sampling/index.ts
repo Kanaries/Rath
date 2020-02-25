@@ -17,3 +17,24 @@ export function reservoirSampling (dataSource: DataSource, size: number | undefi
   }
   return sampleSpace;
 }
+
+function linearCongruentialGenerator (size: number, seed: number): number[] {
+  if (size === 0) return [];
+  const m = 2147483647;
+  const a = 1103515245;
+  const c = 12345;
+  let ans: number[] = [seed];
+  for (let i = 1; i < size; i++) {
+    ans.push(((ans[i - 1] * a + c) % m));
+  }
+  return ans.map(v => v / m);
+}
+export function uniformSampling (dataSource: DataSource, size: number): DataSource {
+  let sampleIndexes: number[] = linearCongruentialGenerator(size, Math.random() * 2147483647);
+  let ans: DataSource = [];
+  for (let i = 0; i < size; i++) {
+    let index = Math.floor(sampleIndexes[i] * size) % size;
+    ans.push(dataSource[index]);
+  }
+  return ans;
+}

@@ -12,7 +12,7 @@ import * as DashBoard from './dashboard/index';
 
 import * as Sampling from './sampling/index';
 import * as Statistics from './statistics/index';
-import { Cluster } from './ml/index';
+import { Cluster, Outier } from './ml/index';
 
 export {
   DashBoard,
@@ -24,5 +24,6 @@ export {
   specification,
   Cleaner,
   Insight,
-  Cluster
+  Cluster,
+  Outier
 }
