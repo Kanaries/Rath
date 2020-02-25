@@ -23,7 +23,7 @@ export class IsolationForest {
     this.dimensions = dimensions;
     this.measures = measures;
     this.dataSource = dataSource;
-    if (dataSource.length < this.sampleSize) {
+    if (dataSource.length < Psi) {
       this.treeNumber = 20;
       this.sampleSize = dataSource.length / 5;
     } else {

@@ -18,40 +18,42 @@ let cleanData = Cleaner.dropNull(dataSource, dimensions, measures);
 describe('machine learning algorithms', function () {
   describe('outlier detection', function () {
     describe('isolation forest', function () {
-      it('random data test', function () {
-        let dataSource = [];
-        let total = 0;
-        while (total <= 4000) {
-          let x = -1 + Math.random() * 2;
-          let y = -1 + Math.random() * 2;
-          let z = -1 + Math.random() * 2;
-          let poss = Math.random();
-          if (poss > Math.sqrt(x ** 2 + y ** 2 + z ** 2) / Math.sqrt(3)) {
-            dataSource.push({
-              x, y, z
-            });
-            total++;
-          }
-        }
-        let iForest = new Outier.IsolationForest([], ['x', 'y', 'z'], dataSource);
-        iForest.buildIsolationForest();
-        let scoreList = iForest.estimateOutierScore();
-        assert.equal(iForest.treeNumber, 100);
-        assert.equal(iForest.sampleSize, 256);
-        let dataScore = dataSource.map((record, index) => {
-          return {
-            ...record,
-            score: scoreList[index]
-          }
-        })
-        dataScore.sort((a, b) => b.score - a.score);
-        assert.equal(scoreList.length, dataSource.length);
-        dataScore.slice(0, 40).forEach(record => {
-          assert.equal(record.x ** 2 + record.y ** 2 + record.z ** 2 > 1, true)
-        })
-      })
+      // it('random data test', function () {
+      //   let dataSource = [];
+      //   let total = 0;
+      //   while (total <= 4000) {
+      //     let x = -1 + Math.random() * 2;
+      //     let y = -1 + Math.random() * 2;
+      //     let z = -1 + Math.random() * 2;
+      //     let poss = Math.random();
+      //     if (poss > Math.sqrt(x ** 2 + y ** 2 + z ** 2) / Math.sqrt(3)) {
+      //       dataSource.push({
+      //         x, y, z
+      //       });
+      //       total++;
+      //     }
+      //   }
+      //   let iForest = new Outier.IsolationForest([], ['x', 'y', 'z'], dataSource);
+      //   iForest.buildIsolationForest();
+      //   let scoreList = iForest.estimateOutierScore();
+      //   assert.equal(iForest.treeNumber, 100);
+      //   assert.equal(iForest.sampleSize, 256);
+      //   let dataScore = dataSource.map((record, index) => {
+      //     return {
+      //       ...record,
+      //       score: scoreList[index]
+      //     }
+      //   })
+      //   dataScore.sort((a, b) => b.score - a.score);
+      //   assert.equal(scoreList.length, dataSource.length);
+      //   dataScore.slice(0, 40).forEach(record => {
+      //     assert.equal(record.x ** 2 + record.y ** 2 + record.z ** 2 > 1, true)
+      //   })
+      // })
       it('titanic', function () {
-        let iForest = new Outier.IsolationForest(['Sex', 'Pclass', 'Age', 'Parch'], ['Survived'], dataSource);
+        let iForest = new Outier.IsolationForest(['Sex', 'Pclass', 'Age', 'Parch'], ['Survived'], cleanData);
+        assert.equal(iForest.treeNumber < 100, true);
+        assert.equal(iForest.sampleSize < 256, true);
         iForest.buildIsolationForest();
         let scoreList = iForest.estimateOutierScore();
         let max = 0;
@@ -63,8 +65,8 @@ describe('machine learning algorithms', function () {
           }
           assert.equal(score <= 1, true)
         })
-        console.log(max, maxPos, dataSource[maxPos])
-        assert.equal(scoreList.length, dataSource.length);
+        console.log(max, maxPos, cleanData[maxPos])
+        assert.equal(scoreList.length, cleanData.length);
       })
     })
   })
