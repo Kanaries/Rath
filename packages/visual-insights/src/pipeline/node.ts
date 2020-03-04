@@ -2,7 +2,7 @@ import produce from 'immer';
 
 type NucleiFunction<P, R> = (params: P) => R;
 
-interface StateBase<P extends { source: any }, R> {
+export interface StateBase<P extends { source: any }, R> {
   startTime: number;
   endTime: number;
   params: P;
@@ -11,17 +11,26 @@ interface StateBase<P extends { source: any }, R> {
 
 type Injection<P> = (updater: (cytoplasmParams: P) => void) => void;
 
-type ChannelOperator<S extends StateBase<any, any>, Signal> = (cytoplasmState: S, inject?: Injection<S['params']>, params?: any) => Signal;
+export type ReleaseChannel<S extends StateBase<any, any>, Signal = any> = (cytoplasmState: S, inject?: Injection<S['params']>) => Signal;
+export type InjectChannel<S extends StateBase<any, any>, T> = (inject: Injection<S['params']>, params?: T) => any;
 
-interface Channel<S extends StateBase<any, any>, Signal = any> {
-  type: 'consumer' | 'producer';
-  operator: ChannelOperator<S, Signal>
-}
-export interface PipeLineNodeInterface<P extends { source: any }, R> {
+interface BaseChannel<P extends { source: any }, R> {
+  injection: {
+    source?: InjectChannel<StateBase<P, R>, any>,
+    [key: string]: InjectChannel<StateBase<P, R>, any>
+  };
+  release: {
+    [key: string]: ReleaseChannel<StateBase<P, R>, any>
+  }
+};
+
+export interface PipeLineNodeInterface<P extends { source: any } = { source: any }, R = any, C extends BaseChannel<P, R> = BaseChannel<any, any>> {
   nuclei: NucleiFunction<P, R>;
-  initParams: P
-}
-export class PipeLineNode<P extends { source: any }, R> {
+  initParams: P;
+  channels?: C
+};
+
+export class PipeLineNode<P extends { source: any } = { source: any }, R = any, C extends BaseChannel<P, R> = BaseChannel<any, any>> {
   /**
    * kernal function responsable for specific task of current node in pipeline.
    */
@@ -33,16 +42,25 @@ export class PipeLineNode<P extends { source: any }, R> {
   /**
    * service plugins / cytoplasm consumers
    */
-  public channels: Channel<StateBase<P, R>>[];
-  constructor (props: PipeLineNodeInterface<P, R>) {
-    this.nuclei = props.nuclei;
+  public channels: C;
+
+  constructor (props: PipeLineNodeInterface<P, R, C>) {
+    const { nuclei, initParams, channels } = props;
+    this.nuclei = nuclei;
     this.state = {
       startTime: 0,
       endTime: 0,
-      params: props.initParams,
+      params: initParams,
       returns: null
     }
-    this.channels = [];
+    if (channels) {
+      this.channels = channels
+    } else {
+      this.channels = {
+        injection: {},
+        release: {}
+      } as C;
+    }
   }
   /**
    * injection is used by channel to update the state.params in "cytoplasm".
@@ -51,33 +69,19 @@ export class PipeLineNode<P extends { source: any }, R> {
     let nextParams = produce(this.state.params, updater);
     this.state.params = nextParams;
   }
-  /**
-   * register a channel (or service plugin, or cytoplasm consumer)
-   * @param channel 
-   */
-  public openChannel (channel: Channel<StateBase<P, R>>) {
-    this.channels.push(channel);
-  }
-  // public absorbProps(params: P) {
-  //   this.state.params = params;
-  // }
 
   private beforeRun() {
-    this.state.startTime = new Date().getTime();
-    for (let channel of this.channels) {
-      if (channel.type === 'producer') {
-        channel.operator(this.state, this.injection);
-      }
+    if (this.channels.injection.source) {
+      this.channels.injection.source(this.injection)
     }
+    this.state.startTime = new Date().getTime();
   }
   private afterRun(returns: R) {
     this.state.endTime = new Date().getTime();
     this.state.returns = returns;
-    for (let channel of this.channels) {
+    for (let channelName in this.channels.release) {
       // todo: consumer type should not get injection ?
-      if (channel.type === 'consumer') {
-        channel.operator(this.state);
-      }
+      this.channels.release[channelName](this.state, this.injection)
     }
   }
   public run (): R {
