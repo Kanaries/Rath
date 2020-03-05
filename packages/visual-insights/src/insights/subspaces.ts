@@ -31,9 +31,8 @@ function getMeaCorrelationMatrix(dataSource: DataSource, measures: string[]): nu
   return matrix;
 }
 
-export function getDimSetsBasedOnClusterGroups(dataSource: DataSource, dimensions: string[]): string[][] {
+export function getDimClusterGroups(dataSource: DataSource, dimensions: string[]): string[][] {
   const maxDimNumberInView = 4;
-  let dimSets: string[][] = [];
   let dimCorrelationMatrix = getDimCorrelationMatrix(dataSource, dimensions);
   // groupMaxSize here means group number.
   let groups: string[][] = Cluster.kruskal({
@@ -42,7 +41,12 @@ export function getDimSetsBasedOnClusterGroups(dataSource: DataSource, dimension
     groupMaxSize: Math.round(dimensions.length / maxDimNumberInView),
     threshold: CrammersVThreshold
   });
-  // todo: maybe a threhold would be better ?
+  return groups;
+}
+
+export function getDimSetsBasedOnClusterGroups(dataSource: DataSource, dimensions: string[]): string[][] {
+  let dimSets: string[][] = [];
+  let groups = getDimClusterGroups(dataSource, dimensions);
   for (let group of groups) {
     let combineDimSet: string[][] = getCombination(group, 1, CHANNEL.maxDimensionNumber);
     dimSets.push(...combineDimSet);

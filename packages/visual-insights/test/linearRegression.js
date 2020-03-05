@@ -29,7 +29,7 @@ describe('linear regression', function () {
     })
     it('p-value', function () {
       let p = linearModel.pValue();
-      assert.equal(p < 1, 0)
+      assert.equal(p < 1, true)
     })
   })
 })
