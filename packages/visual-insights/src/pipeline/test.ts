@@ -80,5 +80,6 @@ let pipe = new PipeLine<Pip>({
 
 pipe.run();
 console.log('================')
-pipe.nodes[1].channels.injection.hack(pipe.nodes[1].injection, 2)
+// pipe.nodes[1].channels.injection.hack(pipe.nodes[1].injection, 2)
+pipe.nodes[1].openChannel('injection.hack', 2)
 pipe.run(1)

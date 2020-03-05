@@ -90,4 +90,16 @@ export class PipeLineNode<P extends { source: any } = { source: any }, R = any, 
     this.afterRun(returns);
     return returns;
   }
+  public openChannel (path: string, params) {
+    const paths = path.split('.');
+    let channel: any = this.channels;
+    for (let p of paths) {
+      channel = channel[p];
+    }
+    try {
+      channel(this.injection, params)
+    } catch (error) {
+      console.error('path or params not correct')
+    }
+  }
 }
