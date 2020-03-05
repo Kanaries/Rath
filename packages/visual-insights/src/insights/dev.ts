@@ -14,13 +14,14 @@ interface ViewSpace {
   dimensions: string[];
   measures: string[];
 }
-interface InsightSpace {
+export interface InsightSpace {
   dimensions: string[];
   measures: string[];
   type: 'general' | 'trend' | 'outlier';
   order: 'desc' | 'asc';
   score: number;
   significance: number;
+  description?: any
 }
 function crossGroups(dimensionGroups: string[][], measureGroups: string[][]): ViewSpace[] {
   let viewSpaces: ViewSpace[] = [];
@@ -81,20 +82,35 @@ export function getOutlierIntentionSpaces (cubePool: Map<string, DataSource>, vi
   let ansSpace: InsightSpace[] = [];
   for (let space of viewSpaces) {
     const { dimensions, measures } = space;
-    let key = dimensions.join(SPLITER);
+    let key = measures.length >= 2 ? '*' : dimensions.join(SPLITER);
     if (cubePool.has(key)) {
       let aggData = cubePool.get(key);
-      let iForest = new Outier.IsolationForest(dimensions, measures, aggData);
+      let iForest = new Outier.IsolationForest([], measures, aggData);
       iForest.buildIsolationForest();
       let scoreList = iForest.estimateOutierScore();
-      let score = Math.max(...scoreList);
+      // let rankScoreList = scoreList.map((s, i) => ({
+      //   score: s,
+      //   index: i
+      // }));
+      // rankScoreList.sort((a, b) => b.score - a.score);
+      let maxIndex = 0;
+      let score = 0;
+      for (let i = 0; i < scoreList.length; i++) {
+        if (scoreList[i] > score) {
+          score = scoreList[i];
+          maxIndex = i;
+        }
+      }
+      let des: {[key: string]: any} = {};
+      dimensions.concat(measures).forEach(mea => { des[mea] = aggData[maxIndex][mea]; })
       let insightSpace: InsightSpace = {
         dimensions,
         measures,
         type: 'outlier',
         score,
         significance: score,
-        order: 'desc'
+        order: 'desc',
+        description: des//rankScoreList.slice(0, 10).map(s => aggData[s.index])
       }
       ansSpace.push(insightSpace);
     }
@@ -160,6 +176,7 @@ export function getVisSpaces (dataSource: DataSource, dimensions: string[], meas
     });
     cubePool.set(key, aggData);
   }
+  cubePool.set('*', dataSource);
   ansSpace.push(...getGeneralIntentionSpaces(cubePool, viewSpaces));
   ansSpace.push(...getOutlierIntentionSpaces(cubePool, viewSpaces));
   let trendSpaces = viewSpaces.filter(space => space.dimensions.length === 1)
