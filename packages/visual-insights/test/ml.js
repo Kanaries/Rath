@@ -2,7 +2,7 @@ const fs = require('fs');
 const assert = require('assert');
 const path  = require('path');
 
-const { Outier, Cleaner } = require('../build/cjs/index');
+const { Outier, Cleaner, Classification } = require('../build/cjs/index');
 
 const datasetPath = path.resolve(__dirname, './dataset/titanic.json');
 const dataset = JSON.parse(fs.readFileSync(datasetPath).toString());
@@ -67,6 +67,23 @@ describe('machine learning algorithms', function () {
         })
         console.log(max, maxPos, cleanData[maxPos])
         assert.equal(scoreList.length, cleanData.length);
+      })
+    })
+  })
+  describe('classification', function () {
+    describe('KNN', function () {
+      it('titanic', function () {
+        let knn = new Classification.KNN({
+          dataSource,
+          dimensions,
+          measures,
+          K: 5
+        })
+        let sample = dataSource[0];
+        let neighbors = knn.getNeighbors(sample, ['Sex', 'Pclass', 'Age', 'Parch']);
+        // let predict = knn.getTargetValue(['Survived'], neighbors);
+        // console.log(sample, predict)
+        assert.equal(neighbors.length, 5);
       })
     })
   })

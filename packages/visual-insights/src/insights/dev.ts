@@ -9,6 +9,7 @@ import aggregate, { createCube } from 'cube-core';
 import { momentCube } from "cube-core/built/core";
 import { isFieldContinous, isFieldTime } from '../utils/common';
 import { oneDLinearRegression } from '../statistics/index'
+import { GroupIntention } from "./intention/groups";
 const SPLITER = '=;=';
 interface ViewSpace {
   dimensions: string[];
@@ -17,7 +18,7 @@ interface ViewSpace {
 export interface InsightSpace {
   dimensions: string[];
   measures: string[];
-  type: 'general' | 'trend' | 'outlier';
+  type: 'general' | 'trend' | 'outlier' | 'group';
   order: 'desc' | 'asc';
   score: number;
   significance: number;
@@ -152,6 +153,35 @@ export function getTrendIntentionSpaces (cubePool: Map<string, DataSource>, view
   return ansSpace;
 }
 
+export function getGroupIntentionSpaces (cubePool: Map<string, DataSource>, viewSpaces: ViewSpace[]): InsightSpace[] {
+  let ansSpace: InsightSpace[] = [];
+  for (let space of viewSpaces) {
+    const { dimensions, measures } = space;
+    let key = dimensions.join(SPLITER);
+    if (cubePool.has(key)) {
+      let aggData = cubePool.get(key);
+      let score = 0;
+      let groupIntention = new GroupIntention({
+        dataSource: aggData,
+        dimensions,
+        measures,
+        K: 8
+      });
+      score = groupIntention.getSignificance(measures.concat(dimensions.slice(0, -1)), dimensions.slice(-1));
+      let insightSpace: InsightSpace = {
+        dimensions,
+        measures,
+        type: 'group',
+        score,
+        significance: score,
+        order: 'desc'
+      }
+      ansSpace.push(insightSpace);
+    }
+  }
+  return ansSpace;
+}
+
 export function getVisSpaces (dataSource: DataSource, dimensions: string[], measures: string[]): InsightSpace[] {
   // 1. get dimension cluster groups.
   // 2. get measure cluster groups.
@@ -179,6 +209,7 @@ export function getVisSpaces (dataSource: DataSource, dimensions: string[], meas
   cubePool.set('*', dataSource);
   ansSpace.push(...getGeneralIntentionSpaces(cubePool, viewSpaces));
   ansSpace.push(...getOutlierIntentionSpaces(cubePool, viewSpaces));
+  ansSpace.push(...getGroupIntentionSpaces(cubePool, viewSpaces));
   let trendSpaces = viewSpaces.filter(space => space.dimensions.length === 1)
     // .filter(space => {
     //   return isFieldContinous(dataSource, space.dimensions[0]) || isFieldTime(dataSource, space.dimensions[0])

@@ -44,7 +44,8 @@ const ColorMap: {
 } = {
   'outlier': '#cf1322',
   'trend': '#7cb305',
-  'general': '#08979c'
+  'general': '#08979c',
+  'group': '#c41d7f'
 }
 
 function arrEqual (arr1: any[], arr2: any[]): boolean {
@@ -145,8 +146,9 @@ const DevPage: React.FC = props => {
       });
     }
   }, [dataView])
-  return <div className="content-container">
-    <PreferencePanel
+  return (
+    <div className="content-container">
+      <PreferencePanel
         show={pageStatus.show.configPanel}
         config={visualConfig}
         onUpdateConfig={config => {
@@ -161,97 +163,123 @@ const DevPage: React.FC = props => {
           });
         }}
       />
-    <div className="card">
-      <PrimaryButton text="Get Insights" onClick={() => {
-        setLoading(true);
-        getInsightViewSpace(cookedDataSource, cookedDimensions, cookedMeasures).then(res => {
-          setInsightViewSpace(res);
-          setLoading(false);
-        })
-      }} />
-      { loading && <ProgressIndicator description="generating dashboard" /> }
-      
-      <DashBoard>
-        <div className="left">
-          <SimpleTick x="type" y="significance" dataSource={insightViewSpace} threshold={sigThreshold} />
-          <Slider
-          label="significance threshold"
-          max={100}
-          value={sigThreshold * 100}
-          valueFormat={(value: number) => `${value}%`}
-          showValue={true}
-          onChange={(value: number) => {
-            setSigThreshold(value / 100);
-            setChartIndex(0);
+      <div className="card">
+        <PrimaryButton
+          text="Get Insights"
+          onClick={() => {
+            setLoading(true);
+            getInsightViewSpace(
+              cookedDataSource,
+              cookedDimensions,
+              cookedMeasures
+            ).then(res => {
+              setInsightViewSpace(res);
+              setLoading(false);
+            });
           }}
         />
-        <p className="state-description">
-            There are {viewSpaceList.length} of views of which insight significance is no less than {(sigThreshold * 100).toFixed(2)} %
-        </p>
-        </div>
-        <div className="right">
-        <div style={{ width: '280px' }}>
-          <SpinButton
-            label={"Current Index"}
-            value={(chartIndex + 1).toString()}
-            min={0}
-            max={viewSpaceList.length}
-            step={1}
-            iconProps={{ iconName: "Search" }}
-            labelPosition={Position.start}
-            // tslint:disable:jsx-no-lambda
-            onValidate={(value: string) => {
-              setChartIndex((Number(value) - 1) % viewSpaceList.length);
-            }}
-            onIncrement={() => {
-              setChartIndex((chartIndex + 1) % viewSpaceList.length);
-            }}
-            onDecrement={() => {
-              setChartIndex(
-                (chartIndex - 1 + viewSpaceList.length) %
-                  viewSpaceList.length
-              );
-            }}
-            incrementButtonAriaLabel={"Increase value by 1"}
-            decrementButtonAriaLabel={"Decrease value by 1"}
-          />
+        {loading && <ProgressIndicator description="generating dashboard" />}
+
+        <DashBoard>
+          <div className="left">
+            <SimpleTick
+              x="type"
+              y="significance"
+              dataSource={insightViewSpace}
+              threshold={sigThreshold}
+            />
+            <Slider
+              label="significance threshold"
+              max={100}
+              value={sigThreshold * 100}
+              valueFormat={(value: number) => `${value}%`}
+              showValue={true}
+              onChange={(value: number) => {
+                setSigThreshold(value / 100);
+                setChartIndex(0);
+              }}
+            />
+            <p className="state-description">
+              There are {viewSpaceList.length} of views of which insight
+              significance is no less than {(sigThreshold * 100).toFixed(2)} %
+            </p>
           </div>
-          <div style={{ display: 'flex', padding: '1em' }}>
-            <RadarChart dataSource={relatedViews} threshold={sigThreshold} keyField="type" valueField="significance" />
-            <div>
-              {
-                viewSpaceList[chartIndex] && <Tag color={ColorMap[viewSpaceList[chartIndex].type]}>{viewSpaceList[chartIndex].type}</Tag>
-              }
-              {
-                viewSpaceList[chartIndex] && <p className="state-description">
-                  Dimensions are {viewSpaceList[chartIndex].dimensions}, and measures are {viewSpaceList[chartIndex].measures}. <br />
-                  There is a significance of {(viewSpaceList[chartIndex].significance * 100).toFixed(2)}% that there exits a {viewSpaceList[chartIndex].type} in the graph. <br />
-                  { JSON.stringify(viewSpaceList[chartIndex].description) }
-                </p>
-              }
+          <div className="right">
+            <div style={{ width: "280px" }}>
+              <SpinButton
+                label={"Current Index"}
+                value={(chartIndex + 1).toString()}
+                min={0}
+                max={viewSpaceList.length}
+                step={1}
+                iconProps={{ iconName: "Search" }}
+                labelPosition={Position.start}
+                // tslint:disable:jsx-no-lambda
+                onValidate={(value: string) => {
+                  setChartIndex((Number(value) - 1) % viewSpaceList.length);
+                }}
+                onIncrement={() => {
+                  setChartIndex((chartIndex + 1) % viewSpaceList.length);
+                }}
+                onDecrement={() => {
+                  setChartIndex(
+                    (chartIndex - 1 + viewSpaceList.length) %
+                      viewSpaceList.length
+                  );
+                }}
+                incrementButtonAriaLabel={"Increase value by 1"}
+                decrementButtonAriaLabel={"Decrease value by 1"}
+              />
             </div>
+            <div style={{ display: "flex", padding: "1em" }}>
+              <RadarChart
+                dataSource={relatedViews}
+                threshold={sigThreshold}
+                keyField="type"
+                valueField="significance"
+              />
+              <div>
+                {
+                  relatedViews.length > 0 && relatedViews.filter(view => view.significance >= sigThreshold).map(view => (
+                    <Tag color={ColorMap[view.type]}>
+                      {view.type}
+                    </Tag>
+                  ))
+                }
+                {
+                  viewSpaceList[chartIndex] && <p className="state-description">
+                      Dimensions are {viewSpaceList[chartIndex].dimensions}, and
+                      measures are {viewSpaceList[chartIndex].measures}. <br />
+                      There is a significance of 
+                      {(viewSpaceList[chartIndex].significance * 100).toFixed(2)}%
+                      that there exits a {viewSpaceList[chartIndex].type} in the
+                      graph. <br />
+                      {JSON.stringify(viewSpaceList[chartIndex].description)}
+                    </p>
+                }
+              </div>
+            </div>
+
+            <div></div>
           </div>
-          
+        </DashBoard>
+        {viewSpaceList.length > 0 && dataView !== null && (
           <div>
+            <BaseChart
+              aggregator={visualConfig.aggregator}
+              defaultAggregated={visualConfig.defaultAggregated}
+              defaultStack={visualConfig.defaultStack}
+              dimensions={dataView.dimensions}
+              measures={dataView.measures}
+              dataSource={cookedDataSource}
+              schema={dataView.schema}
+              fieldFeatures={dataView.fieldFeatures}
+            />
           </div>
-        </div>
-      </DashBoard>
-      {
-        viewSpaceList.length > 0 && dataView !== null && <div>
-          <BaseChart
-            aggregator={visualConfig.aggregator}
-            defaultAggregated={visualConfig.defaultAggregated}
-            defaultStack={visualConfig.defaultStack}
-            dimensions={dataView.dimensions}
-            measures={dataView.measures}
-            dataSource={cookedDataSource}
-            schema={dataView.schema}
-            fieldFeatures={dataView.fieldFeatures}
-          />
-        </div>
-      }
+        )}
+      </div>
     </div>
-  </div>
+  );
 }
 
 export default DevPage;

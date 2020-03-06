@@ -28,7 +28,7 @@ const SimpleTick: React.FC<SimpleTickProps> = props => {
               field: x,
               type: 'nominal',
               scale: {
-                domain: ['outlier', 'trend', 'general']
+                domain: ['outlier', 'trend', 'general', 'group']
               }
             },
             y: {

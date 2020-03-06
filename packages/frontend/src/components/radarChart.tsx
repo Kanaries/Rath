@@ -26,7 +26,7 @@ const RadarChart: React.FC<RadarChartProps> = props => {
         category: 0
       }
     });
-    ['outlier', 'trend', 'general'].forEach(type => {
+    ['outlier', 'trend', 'general', 'group'].forEach(type => {
       if (!data.find(d => d.key === type)) {
         data.push({
           key: type,
@@ -85,7 +85,7 @@ const RadarChart: React.FC<RadarChartProps> = props => {
             range: { signal: "[0, radius]" },
             zero: true,
             nice: false,
-            domain: { data: "table", field: "value" },
+            domain: [0, 1],
             domainMin: 0
           },
           {
@@ -145,7 +145,7 @@ const RadarChart: React.FC<RadarChartProps> = props => {
                     text: { signal: "datum.datum.value" },
                     align: { value: "center" },
                     baseline: { value: "middle" },
-                    fill: { value: "black" }
+                    fill: { value: "#262626" }
                   }
                 }
               }
