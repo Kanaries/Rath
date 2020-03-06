@@ -12,10 +12,12 @@ import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
 
 import { useGlobalState } from "../../state";
 import { useComposeState } from '../../utils';
+import SimpleTick from '../../components/simpleTick';
+import RadarChart from '../../components/radarChart';
 
 const Tag = styled.div`
   display: inline-block;
-  padding: 0.2em 0.5em;
+  padding: 0.1em 0.3em;
   margin: 0.2em;
   border-radius: 3px;
   color: #fff;
@@ -23,12 +25,38 @@ const Tag = styled.div`
   background-color: ${props => props.color};
 `;
 
+const DashBoard = styled.div`
+  display: flex;
+  div.left{
+    flex-basis: 300px;
+    flex-grow: 1;
+    border-right: 1px solid #f0f0f0;
+  }
+  div.right{
+    margin-left: 1em;
+    flex-grow: 8;
+  }
+  padding: 1em 0em;
+`
+
 const ColorMap: {
   [key in InsightSpace['type']]: string
 } = {
   'outlier': '#cf1322',
   'trend': '#7cb305',
   'general': '#08979c'
+}
+
+function arrEqual (arr1: any[], arr2: any[]): boolean {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 const DevPage: React.FC = props => {
@@ -53,7 +81,11 @@ const DevPage: React.FC = props => {
     cookedMeasures
   } = state;
   const { dimScores } = getters;
-
+  console.log({
+    cookedDataSource,
+    cookedDimensions,
+    cookedMeasures
+  }, getters)
   const viewSpaceList = useMemo(() => {
     return insightViewSpace.filter(s => s.significance >= sigThreshold);
   }, [insightViewSpace, sigThreshold])
@@ -70,7 +102,6 @@ const DevPage: React.FC = props => {
       dimensions,
       measures
     );
-    console.log(viewSpaceList[chartIndex].description)
     return {
       schema,
       fieldFeatures: fieldScores.map(f => f[3]),
@@ -78,6 +109,19 @@ const DevPage: React.FC = props => {
       measures
     }
   }, [viewSpaceList, chartIndex, cookedDataSource])
+  const relatedViews = useMemo<InsightSpace[]>(() => {
+    if (dataView !== null) {
+      const { dimensions, measures } = dataView;
+      return insightViewSpace.filter(f => {
+        if (arrEqual(dimensions, f.dimensions) && arrEqual(measures, f.measures)) {
+          return true
+        }
+        return false
+      })
+    }
+    return []
+  }, [insightViewSpace, dataView])
+  console.log(relatedViews)
   useEffect(() => {
     if (dataView === null) return;
     const { schema } = dataView;
@@ -126,8 +170,11 @@ const DevPage: React.FC = props => {
         })
       }} />
       { loading && <ProgressIndicator description="generating dashboard" /> }
-      <div style={{ margin: "1rem", width: '280px' }}>
-        <Slider
+      
+      <DashBoard>
+        <div className="left">
+          <SimpleTick x="type" y="significance" dataSource={insightViewSpace} threshold={sigThreshold} />
+          <Slider
           label="significance threshold"
           max={100}
           value={sigThreshold * 100}
@@ -138,48 +185,57 @@ const DevPage: React.FC = props => {
             setChartIndex(0);
           }}
         />
-      </div>
-      <div style={{ margin: "1rem", width: '280px' }}>
-        <SpinButton
-          label={"Current Index"}
-          value={(chartIndex + 1).toString()}
-          min={0}
-          max={viewSpaceList.length}
-          step={1}
-          iconProps={{ iconName: "Search" }}
-          labelPosition={Position.end}
-          // tslint:disable:jsx-no-lambda
-          onValidate={(value: string) => {
-            setChartIndex((Number(value) - 1) % viewSpaceList.length);
-          }}
-          onIncrement={() => {
-            setChartIndex((chartIndex + 1) % viewSpaceList.length);
-          }}
-          onDecrement={() => {
-            setChartIndex(
-              (chartIndex - 1 + viewSpaceList.length) %
-                viewSpaceList.length
-            );
-          }}
-          incrementButtonAriaLabel={"Increase value by 1"}
-          decrementButtonAriaLabel={"Decrease value by 1"}
-        />
-      </div>
-      <p className="state-description">
-          There are {viewSpaceList.length} of views of which insight significance is no less than {(sigThreshold * 100).toFixed(2)} %
-      </p>
-      {
-        viewSpaceList[chartIndex] && <p className="state-description">
-          Dimensions are {viewSpaceList[chartIndex].dimensions}, and measures are {viewSpaceList[chartIndex].measures}. <br />
-          There is a significance of {(viewSpaceList[chartIndex].significance * 100).toFixed(2)}% that there exits a {viewSpaceList[chartIndex].type} in the graph. <br />
-          { JSON.stringify(viewSpaceList[chartIndex].description) }
+        <p className="state-description">
+            There are {viewSpaceList.length} of views of which insight significance is no less than {(sigThreshold * 100).toFixed(2)} %
         </p>
-      }
-      <div>
-        {
-          viewSpaceList[chartIndex] && <Tag color={ColorMap[viewSpaceList[chartIndex].type]}>{viewSpaceList[chartIndex].type}</Tag>
-        }
-      </div>
+        </div>
+        <div className="right">
+        <div style={{ width: '280px' }}>
+          <SpinButton
+            label={"Current Index"}
+            value={(chartIndex + 1).toString()}
+            min={0}
+            max={viewSpaceList.length}
+            step={1}
+            iconProps={{ iconName: "Search" }}
+            labelPosition={Position.start}
+            // tslint:disable:jsx-no-lambda
+            onValidate={(value: string) => {
+              setChartIndex((Number(value) - 1) % viewSpaceList.length);
+            }}
+            onIncrement={() => {
+              setChartIndex((chartIndex + 1) % viewSpaceList.length);
+            }}
+            onDecrement={() => {
+              setChartIndex(
+                (chartIndex - 1 + viewSpaceList.length) %
+                  viewSpaceList.length
+              );
+            }}
+            incrementButtonAriaLabel={"Increase value by 1"}
+            decrementButtonAriaLabel={"Decrease value by 1"}
+          />
+          </div>
+          <div style={{ display: 'flex', padding: '1em' }}>
+            <RadarChart dataSource={relatedViews} threshold={sigThreshold} keyField="type" valueField="significance" />
+            <div>
+              {
+                viewSpaceList[chartIndex] && <Tag color={ColorMap[viewSpaceList[chartIndex].type]}>{viewSpaceList[chartIndex].type}</Tag>
+              }
+              {
+                viewSpaceList[chartIndex] && <p className="state-description">
+                  Dimensions are {viewSpaceList[chartIndex].dimensions}, and measures are {viewSpaceList[chartIndex].measures}. <br />
+                  There is a significance of {(viewSpaceList[chartIndex].significance * 100).toFixed(2)}% that there exits a {viewSpaceList[chartIndex].type} in the graph. <br />
+                  { JSON.stringify(viewSpaceList[chartIndex].description) }
+                </p>
+              }
+            </div>
+          </div>
+          
+          <div>
+          </div>
+        </div>
+      </DashBoard>
       {
         viewSpaceList.length > 0 && dataView !== null && <div>
           <BaseChart
