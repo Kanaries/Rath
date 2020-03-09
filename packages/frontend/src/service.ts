@@ -19,6 +19,11 @@ import fieldsSummaryWorker from './workers/fieldsSummary.worker';
 // @ts-ignore
 // eslint-disable-next-line
 import groupFieldsWorker from './workers/groupFields.worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import InsightViewWorker from './workers/dev.worker';
+import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
 
 let server = '//lobay.moe:8443';
 
@@ -303,4 +308,25 @@ export async function generateDashBoard (dataSource: DataSource, dimensions: str
   }
   
   return dashBoardList;
-} 
+}
+
+export async function getInsightViewSpace (dataSource: DataSource, dimensions: string[], measures: string[]): Promise<InsightSpace[]> {
+  let ansSpace: InsightSpace[] = [];
+  try {
+    const worker = new InsightViewWorker();
+    const result = await workerService<InsightSpace[], any>(worker, {
+      dataSource,
+      dimensions,
+      measures
+    });
+    if (result.success) {
+      ansSpace = result.data;
+    } else {
+      throw new Error('[getInsightViewSpace]' + result.message);
+    }
+    worker.terminate();
+  } catch (error) {
+    console.error(error);
+  }
+  return ansSpace;
+}

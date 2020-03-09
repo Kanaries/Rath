@@ -3,7 +3,7 @@ const assert = require('assert');
 const path  = require('path');
 
 const { Insight, Cleaner, Statistics, Sampling } = require('../build/cjs/index');
-
+const { getVisSpaces } = require('../build/cjs/insights/dev');
 const datasetPath = path.resolve(__dirname, './dataset/airbnb.json');
 const dataset = JSON.parse(fs.readFileSync(datasetPath).toString());
 const {
@@ -20,17 +20,22 @@ describe('insights test', function () {
     const result = Insight.insightExtraction(cleanData, dimensions, measures);
     assert.equal(result.length > 0, true);
   })
+
+  it('print(dev pipeline)', function () {
+    const result = getVisSpaces(cleanData, dimensions, measures);
+    // console.log('new pipeline result', result)
+    assert.equal(result.length > 0, true);
+  })
   
   it('print(getCombination)', function () {
     let result = Statistics.getCombination([1, 2, 3, 4, 5, 6]);
-    console.log(result)
     assert.equal(result.length, Math.pow(2, 6) - 1)
   })
 
   it('print(clusterCombination vs. combination)', function () {
     let result = Insight.subspaceSearching(cleanData, dimensions, true);
     let unClusterResult = Statistics.getCombination(dimensions);
-    console.log(result.length, unClusterResult.length, result)
+    console.log(result.length, unClusterResult.length)
     assert.equal(result.length <= unClusterResult.length, true);
   })
 })

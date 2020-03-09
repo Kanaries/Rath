@@ -18,14 +18,15 @@ export class IsolationForest {
   public readonly limitHeight: number;
   public recordScoreList: number[];
   private valueSets: Array<Map<any, number> >;
+  private ranges: Array<[number, number]>;
   private iForest: ITree[];
   constructor (dimensions: string[], measures: string[], dataSource: DataSource, treeNumber: number = 100, Psi: number = 256) {
     this.dimensions = dimensions;
     this.measures = measures;
     this.dataSource = dataSource;
     if (dataSource.length < Psi) {
-      this.treeNumber = 20;
-      this.sampleSize = dataSource.length / 5;
+      this.treeNumber = Math.max(1, Math.ceil(Psi / 50));
+      this.sampleSize = Math.max(2, Math.floor(dataSource.length / 2));
     } else {
       this.treeNumber = treeNumber;
       this.sampleSize = Psi;
@@ -37,14 +38,25 @@ export class IsolationForest {
   private normalizeDimensions(): NormalizedRecord[] {
     this.normalizedDataSource = [];
     this.valueSets = [];
+    this.ranges = [];
     this.dimensions.forEach(() => {
       this.valueSets.push(new Map());
+    })
+    this.measures.forEach(() => {
+      this.ranges.push([Infinity, -Infinity])
     })
     this.dataSource.forEach(record => {
       this.dimensions.forEach((dim, index) => {
         let value = (record[dim] || 'others').toString();
         if (!this.valueSets[index].has(value)) {
           this.valueSets[index].set(value, this.valueSets[index].size);
+        }
+      })
+      this.measures.forEach((mea, index) => {
+        let value = record[mea];
+        if (typeof value === 'number') {
+          this.ranges[index][0] = Math.min(this.ranges[index][0], value);
+          this.ranges[index][1] = Math.max(this.ranges[index][1], value);
         }
       })
     })
@@ -65,12 +77,26 @@ export class IsolationForest {
     })
     return normalizedRecord;
   }
-  public buildIsolationTree (fields: string[], normalizedSampleData: NormalizedRecord[], depth: number): ITree {
+  public buildIsolationTree (normalizedSampleData: NormalizedRecord[], depth: number): ITree {
     if (depth >= this.limitHeight || normalizedSampleData.length <= 1) {
       return null;
     } else {
-      let randField = fields[Math.floor(Math.random() * fields.length) % fields.length];
-      let randValue = normalizedSampleData[Math.floor(Math.random() * normalizedSampleData.length) % normalizedSampleData.length][randField];
+      let rand: number = Math.random();
+      let randField: string = this.measures[0] || this.dimensions[0];
+      let dimLength = this.dimensions.length;
+      let meaLength = this.measures.length;
+      let randValue: number = 0;
+      if (rand >= dimLength / (dimLength + meaLength)) {
+        let index = Math.floor(Math.random() * meaLength) % meaLength
+        randField = this.measures[index];
+        randValue = this.ranges[index][0] + (this.ranges[index][1] - this.ranges[index][0]) * Math.random();
+      } else {
+        let index = Math.floor(Math.random() * dimLength) % dimLength;
+        randField = this.dimensions[index];
+        randValue = Math.floor(this.valueSets[index].size * Math.random()) % this.valueSets[index].size;
+      }
+      // random in range not in distribution.
+      // let randValue = normalizedSampleData[Math.floor(Math.random() * normalizedSampleData.length) % normalizedSampleData.length][randField];
       let leftSubData: DataSource = [];
       let rightSubData: DataSource = [];
       for (let record of normalizedSampleData) {
@@ -85,8 +111,8 @@ export class IsolationForest {
         value: randValue,
         size: normalizedSampleData.length
       }
-      node.left = this.buildIsolationTree(fields, leftSubData, depth + 1);
-      node.right = this.buildIsolationTree(fields, rightSubData, depth + 1);
+      node.left = this.buildIsolationTree(leftSubData, depth + 1);
+      node.right = this.buildIsolationTree(rightSubData, depth + 1);
       return node;
     }
   }
@@ -114,10 +140,9 @@ export class IsolationForest {
 
   public buildIsolationForest (): ITree[] {
     this.iForest = [];
-    let fields = this.dimensions.concat(this.measures);
     for (let i = 0; i < this.treeNumber; i++) {
       let samples = uniformSampling(this.normalizedDataSource, this.sampleSize);
-      let iTree = this.buildIsolationTree(fields, samples, 0);
+      let iTree = this.buildIsolationTree(samples, 0);
       this.iForest.push(iTree);
     }
     return this.iForest;

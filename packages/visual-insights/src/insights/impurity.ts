@@ -79,3 +79,50 @@ export function insightExtraction(dataSource: DataSource, dimensions: string[], 
   }
   return impurityList
 }
+// interface InsightSpace {
+//   dimensions: string[];
+//   type: 'entropy' | 'trend' | 'outlier';
+//   order: 'desc' | 'asc';
+//   score: {
+//     [meaName: string]: number;
+//   };
+//   correlationMatrix: number[][];
+// }
+// export function multiInsightExtraction(dataSource: DataSource, dimensions: string[], measures: string[]): InsightSpace[] {
+//   let impurityList: FieldsFeature[] = [];
+//   let dimSet = subspaceSearching(dataSource, dimensions, true);
+//   let correlationMatrix = measures.map(i => measures.map(j => 0));
+//   for (let i = 0; i < measures.length; i++) {
+//     correlationMatrix[i][i] = 1;
+//     for (let j = i + 1; j < measures.length; j++) {
+//       let r = pearsonCC(dataSource, measures[i], measures[j]);
+//       correlationMatrix[j][i] = correlationMatrix[i][j] = r;
+//     }
+//   }
+  
+//   for (let dset of dimSet) {
+//     let impurity = {};
+//     let trend = {};
+//     let outlier = {};
+//     let aggData = aggregate({
+//       dataSource,
+//       dimensions: dset,
+//       measures,
+//       asFields: measures,
+//       operator: operator || 'sum'//: operator as 
+//     });
+//     // let fList = aggData.map(r => r)
+//     for (let mea of measures) {
+//       // fl = frequency list, pL = probability list
+//       let fL = aggData.map(r => r[mea]);
+//       let pL = normalize(linearMapPositive(fL));
+//       let value = entropy(pL);
+//       impurity[mea] = value;
+//     }
+//     for (let mea of measures) {
+
+//     }
+//     impurityList.push([dset, impurity, correlationMatrix]);
+//   }
+//   return impurityList
+// }
