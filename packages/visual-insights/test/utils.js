@@ -9,7 +9,8 @@ const {
   groupContinousField,
   aggregate,
   isFieldCategory,
-  isFieldContinous
+  isFieldContinous,
+  isFieldUnique
 } = Utils;
 const dataPath = path.resolve(__dirname, './dataset/titanic.json');
 const data = JSON.parse(fs.readFileSync(dataPath).toString())
@@ -116,5 +117,10 @@ describe('utils test', function () {
     assert.equal(isFieldContinous(dataSource, 'Name'), false);
     assert.equal(isFieldContinous(dataSource, 'Count'), true);
     assert.equal(isFieldContinous(dataSource, 'Parch'), true);
+  })
+
+  it('isFieldUnique', function () {
+    assert(isFieldUnique(dataSource, 'PassengerId', ), true);
+    assert(isFieldUnique(dataSource, 'Name', true));
   })
 })

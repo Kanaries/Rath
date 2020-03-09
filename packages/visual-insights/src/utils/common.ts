@@ -209,6 +209,20 @@ function DKL (p1List: number[], p2List: number[]): number {
   return sum;
 }
 
+function isFieldUnique (dataSource: DataSource, field: string): boolean {
+  let set = new Set<any>();
+  let validCount = 0;
+  let len = dataSource.length;
+  for (let i = 0; i < len; i++) {
+    if (dataSource[i][field] !== undefined && dataSource[i][field] !== null && dataSource[i][field] === '') {
+      validCount++;
+      set.add(dataSource[i][field]);
+    }
+  }
+  if (set.size === validCount) return true;
+  return false;
+}
+
 export {
   deepcopy,
   memberCount,
@@ -220,6 +234,7 @@ export {
   isFieldTime,
   isFieldNumeric,
   JOIN_SYMBOL,
-  DKL
+  DKL,
+  isFieldUnique
 }
 

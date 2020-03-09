@@ -7,7 +7,7 @@ import { CHANNEL } from '../constant';
 import { entropy, normalize } from '../statistics/index';
 import aggregate, { createCube } from 'cube-core';
 import { momentCube } from "cube-core/built/core";
-import { isFieldContinous, isFieldTime } from '../utils/common';
+import { isFieldContinous, isFieldTime, isFieldUnique } from '../utils/common';
 import { oneDLinearRegression } from '../statistics/index'
 import { GroupIntention } from "./intention/groups";
 const SPLITER = '=;=';
@@ -22,6 +22,7 @@ export interface InsightSpace {
   order: 'desc' | 'asc';
   score: number;
   significance: number;
+  impurity?: number;
   description?: any
 }
 function crossGroups(dimensionGroups: string[][], measureGroups: string[][]): ViewSpace[] {
@@ -46,140 +47,119 @@ function getDimSetsFromClusterGroups(groups: string[][]): string[][] {
   return dimSets;
 }
 
-export function getGeneralIntentionSpaces (cubePool: Map<string, DataSource>, viewSpaces: ViewSpace[]): InsightSpace[] {
+export function getIntentionSpaces (cubePool: Map<string, DataSource>, viewSpaces: ViewSpace[]): InsightSpace[] {
   let ansSpace: InsightSpace[] = []
   for (let space of viewSpaces) {
     const { dimensions, measures } = space;
     let key = dimensions.join(SPLITER);
     if (cubePool.has(key)) {
       let aggData = cubePool.get(key);
-      let score = 0;
-      let significance = 0;
-      for (let mea of measures) {
-        let fL = aggData.map(r => r[mea]);
-        let pL = normalize(linearMapPositive(fL));
-        let value = entropy(pL);
-        score += value;
-        significance += value / Math.log2(fL.length)
+      let generalSpace = getGeneralIntentionSpace(aggData, dimensions, measures);
+      let outlierSpace = getOutlierIntentionSpace(aggData, dimensions, measures);
+      outlierSpace.impurity = generalSpace.impurity;
+      let groupSpace = getGroupIntentionSpace(aggData, dimensions, measures);
+      groupSpace.impurity = generalSpace.impurity;
+      ansSpace.push(generalSpace, outlierSpace, groupSpace);
+      if (dimensions.length === 1) {
+        let trendSpace = getTrendIntentionSpace(aggData, dimensions, measures);
+        trendSpace.impurity = generalSpace.impurity;
+        ansSpace.push(trendSpace);
       }
-      score /= measures.length;
-      significance /= measures.length;
-      significance = 1 - significance;
-      let insightSpace: InsightSpace = {
-        dimensions,
-        measures,
-        type: 'general',
-        score,
-        significance,
-        order: 'asc'
-      }
-      ansSpace.push(insightSpace);
     }
   }
   return ansSpace;
 }
 
-export function getOutlierIntentionSpaces (cubePool: Map<string, DataSource>, viewSpaces: ViewSpace[]): InsightSpace[] {
-  let ansSpace: InsightSpace[] = [];
-  for (let space of viewSpaces) {
-    const { dimensions, measures } = space;
-    let key = measures.length >= 2 ? '*' : dimensions.join(SPLITER);
-    if (cubePool.has(key)) {
-      let aggData = cubePool.get(key);
-      let iForest = new Outier.IsolationForest([], measures, aggData);
-      iForest.buildIsolationForest();
-      let scoreList = iForest.estimateOutierScore();
-      // let rankScoreList = scoreList.map((s, i) => ({
-      //   score: s,
-      //   index: i
-      // }));
-      // rankScoreList.sort((a, b) => b.score - a.score);
-      let maxIndex = 0;
-      let score = 0;
-      for (let i = 0; i < scoreList.length; i++) {
-        if (scoreList[i] > score) {
-          score = scoreList[i];
-          maxIndex = i;
-        }
-      }
-      let des: {[key: string]: any} = {};
-      dimensions.concat(measures).forEach(mea => { des[mea] = aggData[maxIndex][mea]; })
-      let insightSpace: InsightSpace = {
-        dimensions,
-        measures,
-        type: 'outlier',
-        score,
-        significance: score,
-        order: 'desc',
-        description: des//rankScoreList.slice(0, 10).map(s => aggData[s.index])
-      }
-      ansSpace.push(insightSpace);
-    }
+export function getGeneralIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace {
+  let score = 0;
+  let significance = 0;
+  for (let mea of measures) {
+    let fL = aggData.map(r => r[mea]);
+    let pL = normalize(linearMapPositive(fL));
+    let value = entropy(pL);
+    score += value;
+    significance += value / Math.log2(fL.length)
   }
-  return ansSpace;
+  score /= measures.length;
+  significance /= measures.length;
+  significance = 1 - significance;
+  return {
+    dimensions,
+    measures,
+    type: 'general',
+    score,
+    impurity: score,
+    significance,
+    order: 'asc'
+  }
 }
 
-export function getTrendIntentionSpaces (cubePool: Map<string, DataSource>, viewSpaces: ViewSpace[]): InsightSpace[] {
-  let ansSpace: InsightSpace[] = [];
-  for (let space of viewSpaces) {
-    const { dimensions, measures } = space;
-    let key = dimensions.join(SPLITER);
-    if (cubePool.has(key)) {
-      let aggData = cubePool.get(key);
-      let orderedData = [...aggData];
-      orderedData.sort((a, b) => {
-        if (a[dimensions[0]] > b[dimensions[0]]) return 1;
-        if (a[dimensions[0]] === b[dimensions[0]]) return 0;
-        if (a[dimensions[0]] < b[dimensions[0]]) return -1;
-      });
-      let score = 0;
-      for (let mea of measures) {
-        let linearModel = new oneDLinearRegression(orderedData, dimensions[0], mea);
-        linearModel.normalizeDimensions(dimensions);
-        score += linearModel.significance();
-      }
-      score /= measures.length;
-      let insightSpace: InsightSpace = {
-        dimensions,
-        measures,
-        type: 'trend',
-        score,
-        significance: score,
-        order: 'desc'
-      }
-      ansSpace.push(insightSpace);
+export function getOutlierIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace {
+  let iForest = new Outier.IsolationForest([], measures, aggData);
+  iForest.buildIsolationForest();
+  let scoreList = iForest.estimateOutierScore();
+  let maxIndex = 0;
+  let score = 0;
+  for (let i = 0; i < scoreList.length; i++) {
+    if (scoreList[i] > score) {
+      score = scoreList[i];
+      maxIndex = i;
     }
   }
-  return ansSpace;
+  let des: {[key: string]: any} = {};
+  dimensions.concat(measures).forEach(mea => { des[mea] = aggData[maxIndex][mea]; })
+  return {
+    dimensions,
+    measures,
+    type: 'outlier',
+    score,
+    significance: score,
+    order: 'desc',
+    description: des
+  }
 }
 
-export function getGroupIntentionSpaces (cubePool: Map<string, DataSource>, viewSpaces: ViewSpace[]): InsightSpace[] {
-  let ansSpace: InsightSpace[] = [];
-  for (let space of viewSpaces) {
-    const { dimensions, measures } = space;
-    let key = dimensions.join(SPLITER);
-    if (cubePool.has(key)) {
-      let aggData = cubePool.get(key);
-      let score = 0;
-      let groupIntention = new GroupIntention({
-        dataSource: aggData,
-        dimensions,
-        measures,
-        K: 8
-      });
-      score = groupIntention.getSignificance(measures.concat(dimensions.slice(0, -1)), dimensions.slice(-1));
-      let insightSpace: InsightSpace = {
-        dimensions,
-        measures,
-        type: 'group',
-        score,
-        significance: score,
-        order: 'desc'
-      }
-      ansSpace.push(insightSpace);
-    }
+export function getTrendIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace {
+  let orderedData = [...aggData];
+  orderedData.sort((a, b) => {
+    if (a[dimensions[0]] > b[dimensions[0]]) return 1;
+    if (a[dimensions[0]] === b[dimensions[0]]) return 0;
+    if (a[dimensions[0]] < b[dimensions[0]]) return -1;
+  });
+  let score = 0;
+  for (let mea of measures) {
+    let linearModel = new oneDLinearRegression(orderedData, dimensions[0], mea);
+    linearModel.normalizeDimensions(dimensions);
+    score += linearModel.significance();
   }
-  return ansSpace;
+  score /= measures.length;
+  return {
+    dimensions,
+    measures,
+    type: 'trend',
+    score,
+    significance: score,
+    order: 'desc'
+  }
+}
+
+export function getGroupIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace {
+  let score = 0;
+  let groupIntention = new GroupIntention({
+    dataSource: aggData,
+    dimensions,
+    measures,
+    K: 8
+  });
+  score = groupIntention.getSignificance(measures.concat(dimensions.slice(0, -1)), dimensions.slice(-1));
+  return {
+    dimensions,
+    measures,
+    type: 'group',
+    score,
+    significance: score,
+    order: 'desc'
+  }
 }
 
 export function getVisSpaces (dataSource: DataSource, dimensions: string[], measures: string[]): InsightSpace[] {
@@ -189,8 +169,8 @@ export function getVisSpaces (dataSource: DataSource, dimensions: string[], meas
   // 4. calculate each subspace intention score (entropy, outlier, trend for temporal & oridinal field)
   // 5. filter each intend subspaces with threadshold
   // 6.manage those spaces / order them.
-  let ansSpace: InsightSpace[] = [];
-  let dimensionGroups = getDimClusterGroups(dataSource, dimensions);
+  let visableDimensions = dimensions.filter(dim => isFieldUnique(dataSource, dim));
+  let dimensionGroups = getDimClusterGroups(dataSource, visableDimensions);
   let dimensionSets = getDimSetsFromClusterGroups(dimensionGroups);
   let measureGroups = getMeaSetsBasedOnClusterGroups(dataSource, measures);
   let viewSpaces = crossGroups(dimensionSets, measureGroups);
@@ -207,13 +187,6 @@ export function getVisSpaces (dataSource: DataSource, dimensions: string[], meas
     cubePool.set(key, aggData);
   }
   cubePool.set('*', dataSource);
-  ansSpace.push(...getGeneralIntentionSpaces(cubePool, viewSpaces));
-  ansSpace.push(...getOutlierIntentionSpaces(cubePool, viewSpaces));
-  ansSpace.push(...getGroupIntentionSpaces(cubePool, viewSpaces));
-  let trendSpaces = viewSpaces.filter(space => space.dimensions.length === 1)
-    // .filter(space => {
-    //   return isFieldContinous(dataSource, space.dimensions[0]) || isFieldTime(dataSource, space.dimensions[0])
-    // })
-  ansSpace.push(...getTrendIntentionSpaces(cubePool, trendSpaces));
+  let ansSpace: InsightSpace[] = getIntentionSpaces(cubePool, viewSpaces);
   return ansSpace;
 }
