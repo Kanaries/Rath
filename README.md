@@ -86,7 +86,7 @@ npm i visual-insights --save`
 ## How does it work
 The working process are visualized in notebook board in the application.  *** Main process of the algorithm is shown in the `notebook` board. *** Here shows how rath use visual-insights to make a analytic pipeline.
 
-![](https://cdn.nlark.com/yuque/0/2019/png/171008/1570692438037-b2ce208d-bd1d-4b38-be27-9251bbb171d2.png)
+![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/rath-arc.png)
 
 ### Univariate summary
 For the first step, rath analyze all the fields in the dataset independently. It gets the fields' distributions and calculate its entropy. Besides, it will define a semantic type (`quantitative`, `ordinal`, `temporal`, `nominal`) for each field. More details of the field will be displayed when hover your mouse on the fields.
@@ -96,22 +96,26 @@ For the first step, rath analyze all the fields in the dataset independently. It
 Then, it will find the fields with high entropy and try to reduce it by grouping the field (for example). Only dimensions participates this process.
 
 ### Subspaces
-In this step, visual insights search the combination of fields, and calculate the entropy of each measure with some aggregation operators.
+In this step, visual insights search the combination of fields. Visual-Insights suppose that any two fields appears in a view should be correlated with each other otherwise they should be display in seperated view. Visual-Insight now use crammver'V and pearson' cc for different types of fields' correlation.
 
 ![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/subspaces.svg)
 
-### Correlation
-After one subspace is specified (try to click one row of subsapce in notebook), it will analyze the correlation of measures in the space.
+#### Correlation
+
+for example, the correlation of measures:
 
 ![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/correlation.svg)
 
-### Clustering
+#### Clustering
 It helps you to cluster all the measures based on their correlation. It puts all the variables who are strongly related together to make a specific view (with specified dimenions).
 
-Click one group of measures and visualization will be shown at the bottom of the page.
 
 ![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/clustering.svg)
 
+### Insight Extraction
+After we get many subspaces, we can check the insight significance of each space. Currently, visual-insights support trend, outlier, group(whether different groups of data behave differently for spefic measures)
+
+![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/rath-demo.jpg)
 
 ### Specification & Visualization
 
