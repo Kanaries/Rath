@@ -79,7 +79,8 @@ const DevPage: React.FC = props => {
   const {
     cookedDataSource,
     cookedDimensions,
-    cookedMeasures
+    cookedMeasures,
+    topK
   } = state;
   const { dimScores } = getters;
   const viewSpaceList = useMemo(() => {
@@ -166,7 +167,7 @@ const DevPage: React.FC = props => {
               setLoading(true);
               getInsightViewSpace(
                 cookedDataSource,
-                cookedDimensions,
+                cookedDimensions.slice(0, cookedDimensions.length * topK.dimensionSize),
                 cookedMeasures
               ).then(res => {
                 setInsightViewSpace(res);

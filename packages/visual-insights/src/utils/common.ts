@@ -32,6 +32,10 @@ function isFieldNumeric(dataSource: DataSource, fieldName: string): boolean {
 
 function isFieldTime(dataSource: DataSource, fieldName: string): boolean {
   return dataSource.every(record => {
+    // todo: tmp solotion here.
+    if (Number(record[fieldName]) >= 1800 && Number(record[fieldName]) <= 2200) {
+      return true;
+    }
     return (!isNaN(Date.parse(record[fieldName]))
     && typeof record[fieldName] === 'string'
     && /^[0-9]{0,4}[-/][0-9]{0,2}([-/][0-9]{0,2}$)?/.test(record[fieldName]))
