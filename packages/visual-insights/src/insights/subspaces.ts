@@ -1,8 +1,5 @@
-// import { aggregate } from '../utils';
-import aggregate from 'cube-core';
-import { entropy, normalize } from '../statistics/index';
-import { DataSource, OperatorType } from '../commonTypes';
-import { crammersV, getCombination, pearsonCC, linearMapPositive } from '../statistics/index';
+import { DataSource } from '../commonTypes';
+import { crammersV, getCombination, pearsonCC } from '../statistics/index';
 import { CrammersVThreshold, PearsonCorrelation } from './config';
 import { Cluster } from '../ml/index';
 import { CHANNEL } from '../constant';
@@ -31,42 +28,58 @@ function getMeaCorrelationMatrix(dataSource: DataSource, measures: string[]): nu
   return matrix;
 }
 
-export function getDimClusterGroups(dataSource: DataSource, dimensions: string[]): string[][] {
-  const maxDimNumberInView = 4;
-  let dimCorrelationMatrix = getDimCorrelationMatrix(dataSource, dimensions);
-  // groupMaxSize here means group number.
-  let groups: string[][] = Cluster.kruskal({
-    matrix: dimCorrelationMatrix,
-    measures: dimensions,
-    groupMaxSize: Math.round(dimensions.length / maxDimNumberInView),
-    threshold: CrammersVThreshold
-  });
-  return groups;
-}
+export function getDimClusterGroups(
+         dataSource: DataSource,
+         dimensions: string[],
+         threshold: number | undefined = CrammersVThreshold,
+         max_number_of_group?: number
+       ): string[][] {
+         const maxDimNumberInView = 4;
+         let dimCorrelationMatrix = getDimCorrelationMatrix(
+           dataSource,
+           dimensions
+         );
+         // groupMaxSize here means group number.
+         let groups: string[][] = Cluster.kruskal({
+           matrix: dimCorrelationMatrix,
+           measures: dimensions,
+           groupMaxSize: max_number_of_group ? max_number_of_group : Math.round(dimensions.length / maxDimNumberInView),
+           threshold,
+         });
+         return groups;
+       }
 
-export function getDimSetsBasedOnClusterGroups(dataSource: DataSource, dimensions: string[]): string[][] {
+export function getDimSetsBasedOnClusterGroups(dataSource: DataSource, dimensions: string[], correlation_threshold?: number, max_dimensions_in_space?: number): string[][] {
   let dimSets: string[][] = [];
-  let groups = getDimClusterGroups(dataSource, dimensions);
+  let groups = getDimClusterGroups(dataSource, dimensions, correlation_threshold);
   for (let group of groups) {
-    let combineDimSet: string[][] = getCombination(group, 1, CHANNEL.maxDimensionNumber);
+    let combineDimSet: string[][] = getCombination(group, 1, max_dimensions_in_space ? max_dimensions_in_space : CHANNEL.maxDimensionNumber);
     dimSets.push(...combineDimSet);
   }
   return dimSets;
 }
 
-export function getMeaSetsBasedOnClusterGroups(dataSource: DataSource, measures: string[], maxFieldNumberInView: number = 3): string[][] {
+/**
+ * 
+ * @param dataSource 
+ * @param measures 
+ * @param correlation_threshold a threshold of correlation used to define min correlation value in a cluster of measure.
+ * @param max_measure_in_view 
+ */
+export function getMeaSetsBasedOnClusterGroups(dataSource: DataSource, measures: string[], correlation_threshold?: number, max_number_of_group: number | undefined = 3): string[][] {
+  const soft_max_measures_in_view = 3;
   let correlationMatrix: number[][] = getMeaCorrelationMatrix(dataSource, measures);
   let groups: string[][] = Cluster.kruskal({
     matrix: correlationMatrix,
     measures: measures,
-    groupMaxSize: Math.round(measures.length / maxFieldNumberInView),
-    threshold: PearsonCorrelation.strong
+    groupMaxSize: max_number_of_group ? max_number_of_group : Math.round(measures.length / soft_max_measures_in_view),
+    threshold: correlation_threshold ? correlation_threshold : PearsonCorrelation.strong
   });
   return groups;
 }
 
-export function subspaceSearching(dataSource: DataSource, dimensions: string[], shouldDimensionsCorrelated: boolean | undefined = true): string[][] {
-  if (shouldDimensionsCorrelated) {
+export function subspaceSearching(dataSource: DataSource, dimensions: string[], should_dimensions_correlated: boolean | undefined = true): string[][] {
+  if (should_dimensions_correlated) {
     return getDimSetsBasedOnClusterGroups(dataSource, dimensions);
   } else {
     return getCombination(dimensions)

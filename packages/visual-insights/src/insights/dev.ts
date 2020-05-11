@@ -18,13 +18,15 @@ interface ViewSpace {
 export interface InsightSpace {
   dimensions: string[];
   measures: string[];
-  type: 'general' | 'trend' | 'outlier' | 'group';
+  type?: string;
   order: 'desc' | 'asc';
   score: number;
   significance: number;
   impurity?: number;
   description?: any
 }
+export type IntentionWorker = (aggData: DataSource, dimensions: string[], measures: string[]) => InsightSpace | null;
+
 function crossGroups(dimensionGroups: string[][], measureGroups: string[][]): ViewSpace[] {
   let viewSpaces: ViewSpace[] = [];
   for (let dimensions of dimensionGroups) {
@@ -47,29 +49,6 @@ function getDimSetsFromClusterGroups(groups: string[][]): string[][] {
   return dimSets;
 }
 
-export function getIntentionSpaces (cubePool: Map<string, DataSource>, viewSpaces: ViewSpace[]): InsightSpace[] {
-  let ansSpace: InsightSpace[] = []
-  for (let space of viewSpaces) {
-    const { dimensions, measures } = space;
-    let key = dimensions.join(SPLITER);
-    if (cubePool.has(key)) {
-      let aggData = cubePool.get(key);
-      let generalSpace = getGeneralIntentionSpace(aggData, dimensions, measures);
-      let outlierSpace = getOutlierIntentionSpace(aggData, dimensions, measures);
-      outlierSpace.impurity = generalSpace.impurity;
-      let groupSpace = getGroupIntentionSpace(aggData, dimensions, measures);
-      groupSpace.impurity = generalSpace.impurity;
-      ansSpace.push(generalSpace, outlierSpace, groupSpace);
-      if (dimensions.length === 1) {
-        let trendSpace = getTrendIntentionSpace(aggData, dimensions, measures);
-        trendSpace.impurity = generalSpace.impurity;
-        ansSpace.push(trendSpace);
-      }
-    }
-  }
-  return ansSpace;
-}
-
 export function getGeneralIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace {
   let score = 0;
   let significance = 0;
@@ -86,7 +65,7 @@ export function getGeneralIntentionSpace (aggData: DataSource, dimensions: strin
   return {
     dimensions,
     measures,
-    type: 'general',
+    type: 'default_general',
     score,
     impurity: score,
     significance,
@@ -111,7 +90,6 @@ export function getOutlierIntentionSpace (aggData: DataSource, dimensions: strin
   return {
     dimensions,
     measures,
-    type: 'outlier',
     score,
     significance: score,
     order: 'desc',
@@ -119,7 +97,8 @@ export function getOutlierIntentionSpace (aggData: DataSource, dimensions: strin
   }
 }
 
-export function getTrendIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace {
+export function getTrendIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace | null {
+  if (dimensions.length !== 1) return null;
   let orderedData = [...aggData];
   orderedData.sort((a, b) => {
     if (a[dimensions[0]] > b[dimensions[0]]) return 1;
@@ -136,7 +115,6 @@ export function getTrendIntentionSpace (aggData: DataSource, dimensions: string[
   return {
     dimensions,
     measures,
-    type: 'trend',
     score,
     significance: score,
     order: 'desc'
@@ -155,14 +133,88 @@ export function getGroupIntentionSpace (aggData: DataSource, dimensions: string[
   return {
     dimensions,
     measures,
-    type: 'group',
     score,
     significance: score,
     order: 'desc'
   }
 }
 
-export function getVisSpaces (dataSource: DataSource, dimensions: string[], measures: string[]): InsightSpace[] {
+// export const IntentionWorkerCollection: Map<string, IntentionWorker> = new Map();
+export enum DefaultIWorker {
+  outlier = "default_outlier",
+  cluster = "default_group",
+  trend = "default_trend"
+}
+
+class IntentionWorkerCollection {
+  public static colletion: IntentionWorkerCollection;
+  private workers: Map<string, [boolean, IntentionWorker]>;
+  private constructor() {
+    this.workers = new Map();
+  }
+  public register (name: string, iWorker: IntentionWorker) {
+    if (this.workers.has(name)) {
+      throw new Error(`There has been a worker named: ${name} already.`);
+    } else { 
+      this.workers.set(name, [true, iWorker])
+    }
+  }
+  public enable (name: string, status: boolean) {
+    if (!this.workers.has(name)) {
+      throw new Error(`Intention Worker "${name}" does not exist.`)
+    } else {
+      let iWorkerWithStatus = this.workers.get(name);
+      iWorkerWithStatus[0] = status;
+      this.workers.set(name, iWorkerWithStatus);
+    }
+  }
+  public each (func: (iWorker: IntentionWorker, name?: string) => void) {
+    for (let [name, iWorker] of this.workers) {
+      if (iWorker[0]) {
+        func(iWorker[1], name)
+      }
+    }
+  }
+  public static init(props: { withDefaultIWorkers?: boolean } = { withDefaultIWorkers: true}) {
+    const { withDefaultIWorkers = true } = props;
+    if (!IntentionWorkerCollection.colletion) {
+      IntentionWorkerCollection.colletion = new IntentionWorkerCollection();
+      if (withDefaultIWorkers) {
+        IntentionWorkerCollection.colletion.register(DefaultIWorker.outlier, getOutlierIntentionSpace)
+        IntentionWorkerCollection.colletion.register(DefaultIWorker.cluster, getGroupIntentionSpace)
+        IntentionWorkerCollection.colletion.register(DefaultIWorker.trend, getTrendIntentionSpace)
+      }
+    }
+    for (let key in DefaultIWorker) {
+      IntentionWorkerCollection.colletion.enable(DefaultIWorker[key], withDefaultIWorkers)
+    }
+    return IntentionWorkerCollection.colletion;
+  }
+}
+
+
+export function getIntentionSpaces (cubePool: Map<string, DataSource>, viewSpaces: ViewSpace[], Collection: IntentionWorkerCollection): InsightSpace[] {
+  let ansSpace: InsightSpace[] = []
+  for (let space of viewSpaces) {
+    const { dimensions, measures } = space;
+    let key = dimensions.join(SPLITER);
+    if (cubePool.has(key)) {
+      let aggData = cubePool.get(key);
+      let generalSpace = getGeneralIntentionSpace(aggData, dimensions, measures);
+      Collection.each((iWorker, name) => {
+        let iSpace = iWorker(aggData, dimensions, measures);
+        if (iSpace !== null) {
+          iSpace.type = name;
+          iSpace.impurity = generalSpace.impurity;
+          ansSpace.push(iSpace);
+        }
+      })
+    }
+  }
+  return ansSpace;
+}
+
+export function getVisSpaces (dataSource: DataSource, dimensions: string[], measures: string[], Collection?: IntentionWorkerCollection): InsightSpace[] {
   // 1. get dimension cluster groups.
   // 2. get measure cluster groups.
   // 3. get dimension groups * measure groups = subspaces + aggregate
@@ -187,6 +239,6 @@ export function getVisSpaces (dataSource: DataSource, dimensions: string[], meas
     cubePool.set(key, aggData);
   }
   cubePool.set('*', dataSource);
-  let ansSpace: InsightSpace[] = getIntentionSpaces(cubePool, viewSpaces);
+  let ansSpace: InsightSpace[] = getIntentionSpaces(cubePool, viewSpaces, Collection || IntentionWorkerCollection.init());
   return ansSpace;
 }

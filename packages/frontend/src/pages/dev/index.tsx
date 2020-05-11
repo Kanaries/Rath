@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
+import { InsightSpace, DefaultIWorker } from 'visual-insights/build/esm/insights/dev';
 import { specification } from "visual-insights";
 import { getInsightViewSpace } from '../../service';
 import { PrimaryButton, SpinButton, Slider, ProgressIndicator } from "office-ui-fabric-react";
@@ -40,12 +40,12 @@ const DashBoard = styled.div`
 `
 
 const ColorMap: {
-  [key in InsightSpace['type']]: string
+  [key: string]: string
 } = {
-  'outlier': '#cf1322',
-  'trend': '#7cb305',
+  [DefaultIWorker.outlier]: '#cf1322',
+  [DefaultIWorker.trend]: '#7cb305',
   'general': '#08979c',
-  'group': '#c41d7f'
+  [DefaultIWorker.cluster]: '#c41d7f'
 }
 
 function arrEqual (arr1: any[], arr2: any[]): boolean {
@@ -237,8 +237,8 @@ const DevPage: React.FC = props => {
                 />
                 <div>
                   {
-                    relatedViews.length > 0 && relatedViews.filter(view => view.significance >= sigThreshold).map(view => (
-                      <Tag color={ColorMap[view.type]}>
+                    relatedViews.length > 0 && relatedViews.filter(view => view.significance >= sigThreshold).map((view, i) => (
+                      <Tag key={i} color={ColorMap[view.type as string]}>
                         {view.type}
                       </Tag>
                     ))

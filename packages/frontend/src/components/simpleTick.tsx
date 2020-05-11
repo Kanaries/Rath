@@ -26,10 +26,7 @@ const SimpleTick: React.FC<SimpleTickProps> = props => {
           encoding: {
             x: {
               field: x,
-              type: 'nominal',
-              scale: {
-                domain: ['outlier', 'trend', 'general', 'group']
-              }
+              type: 'nominal'
             },
             y: {
               field: y,

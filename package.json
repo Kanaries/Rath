@@ -28,7 +28,9 @@
     "url": "https://github.com/ObservedObserver/showme/issues"
   },
   "workspaces": [
-    "packages/*"
+    "packages/backend",
+    "packages/frontend",
+    "packages/visual-insights"
   ],
   "homepage": "https://github.com/ObservedObserver/showme#readme",
   "devDependencies": {
