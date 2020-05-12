@@ -5,7 +5,7 @@ import { timer } from './timer';
 const generateDashBoard = (e) => {
   const { dataSource, dimensions, measures } = e.data;
   try {
-    let ansSpace = getVisSpaces(dataSource, dimensions, measures);
+    let ansSpace = getVisSpaces({ dataSource, dimensions, measures });
     ansSpace.sort((a, b) => (a.impurity / a.significance) - (b.impurity / b.significance));
     self.postMessage({
       success: true,

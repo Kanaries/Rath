@@ -22,7 +22,11 @@ describe('insights test', function () {
   })
 
   it('print(dev pipeline)', function () {
-    const result = getVisSpaces(cleanData, dimensions, measures);
+    const result = getVisSpaces({
+      dataSource: cleanData,
+      dimensions,
+      measures,
+    });
     // console.log('new pipeline result', result)
     assert.equal(result.length > 0, true);
   })

@@ -1,6 +1,6 @@
 import { DataSource, View } from "../commonTypes";
 import { getDimSetsBasedOnClusterGroups, getMeaSetsBasedOnClusterGroups, getDimClusterGroups } from './subspaces';
-import { CrammersVThreshold } from './config';
+import { CrammersVThreshold, PearsonCorrelation } from './config';
 import { Cluster, Outier } from '../ml/index';
 import { crammersV, getCombination, pearsonCC, linearMapPositive } from '../statistics/index';
 import { CHANNEL } from '../constant';
@@ -10,6 +10,7 @@ import { momentCube } from "cube-core/built/core";
 import { isFieldContinous, isFieldTime, isFieldUnique } from '../utils/common';
 import { oneDLinearRegression } from '../statistics/index'
 import { GroupIntention } from "./intention/groups";
+
 const SPLITER = '=;=';
 interface ViewSpace {
   dimensions: string[];
@@ -47,6 +48,19 @@ function getDimSetsFromClusterGroups(groups: string[][]): string[][] {
     dimSets.push(...combineDimSet);
   }
   return dimSets;
+}
+
+function getCombinationFromClusterGroups(groups: string[][], limitSize: number = CHANNEL.maxDimensionNumber): string[][] {
+  let fieldSets: string[][] = [];
+  for (let group of groups) {
+    let combineFieldSet: string[][] = getCombination(
+      group,
+      1,
+      limitSize
+    );
+    fieldSets.push(...combineFieldSet);
+  }
+  return fieldSets;
 }
 
 export function getGeneralIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace {
@@ -213,21 +227,44 @@ export function getIntentionSpaces (cubePool: Map<string, DataSource>, viewSpace
   }
   return ansSpace;
 }
-
-export function getVisSpaces (dataSource: DataSource, dimensions: string[], measures: string[], Collection?: IntentionWorkerCollection): InsightSpace[] {
+interface VisSpaceProps {
+  dataSource: DataSource;
+  dimensions: string[];
+  measures: string[];
+  collection?: IntentionWorkerCollection;
+  dimension_correlation_threshold?: number;
+  measure_correlation_threshold?: number;
+  max_dimension_num_in_view?: number;
+  max_measure_num_in_view?: number;
+}
+export function getVisSpaces (props: VisSpaceProps): InsightSpace[] {
+  const {
+    dataSource,
+    dimensions,
+    measures,
+    collection,
+    dimension_correlation_threshold = CrammersVThreshold,
+    measure_correlation_threshold = PearsonCorrelation.strong,
+    max_dimension_num_in_view = 3,
+    max_measure_num_in_view = 3,
+  } = props;
   // 1. get dimension cluster groups.
   // 2. get measure cluster groups.
   // 3. get dimension groups * measure groups = subspaces + aggregate
   // 4. calculate each subspace intention score (entropy, outlier, trend for temporal & oridinal field)
   // 5. filter each intend subspaces with threadshold
   // 6.manage those spaces / order them.
-  let visableDimensions = dimensions.filter(dim => isFieldUnique(dataSource, dim));
-  let dimensionGroups = getDimClusterGroups(dataSource, visableDimensions);
-  let dimensionSets = getDimSetsFromClusterGroups(dimensionGroups);
-  let measureGroups = getMeaSetsBasedOnClusterGroups(dataSource, measures);
-  let viewSpaces = crossGroups(dimensionSets, measureGroups);
+  let visableDimensions = dimensions;//.filter(dim => !isFieldUnique(dataSource, dim));
+  let dimensionGroups = getDimClusterGroups(dataSource, visableDimensions, dimension_correlation_threshold);
+  // let dimensionSets = getDimSetsFromClusterGroups(dimensionGroups);
+  let dimensionSets = getCombinationFromClusterGroups(dimensionGroups, max_dimension_num_in_view);
+  let measureGroups = getMeaSetsBasedOnClusterGroups(dataSource, measures, measure_correlation_threshold);
+  let measureSets = getCombinationFromClusterGroups(measureGroups, max_measure_num_in_view);
+  let viewSpaces = crossGroups(dimensionSets, measureSets);
   let cubePool: Map<string, DataSource> = new Map();
-  for (let group of dimensionGroups) {
+  // for (let group of dimensionGroups) {
+  // todo: similar cuboids computation using cube-core
+  for (let group of dimensionSets) {
     let key = group.join(SPLITER);
     let aggData = aggregate({
       dataSource,
@@ -239,6 +276,6 @@ export function getVisSpaces (dataSource: DataSource, dimensions: string[], meas
     cubePool.set(key, aggData);
   }
   cubePool.set('*', dataSource);
-  let ansSpace: InsightSpace[] = getIntentionSpaces(cubePool, viewSpaces, Collection || IntentionWorkerCollection.init());
+  let ansSpace: InsightSpace[] = getIntentionSpaces(cubePool, viewSpaces, collection || IntentionWorkerCollection.init());
   return ansSpace;
 }
