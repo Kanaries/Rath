@@ -5,7 +5,7 @@ import { Cluster } from '../ml/index';
 import { CHANNEL } from '../constant';
 // insights like outlier and trend both request high impurity of dimension.
 
-function getDimCorrelationMatrix(dataSource: DataSource, dimensions: string[]): number[][] {
+export function getDimCorrelationMatrix(dataSource: DataSource, dimensions: string[]): number[][] {
   let matrix: number[][] = dimensions.map(d => dimensions.map(d => 0));
   for (let i = 0; i < dimensions.length; i++) {
     matrix[i][i] = 1;
@@ -16,7 +16,7 @@ function getDimCorrelationMatrix(dataSource: DataSource, dimensions: string[]): 
   return matrix;
 }
 
-function getMeaCorrelationMatrix(dataSource: DataSource, measures: string[]): number[][] {
+export function getMeaCorrelationMatrix(dataSource: DataSource, measures: string[]): number[][] {
   let matrix = measures.map(i => measures.map(j => 0));
   for (let i = 0; i < measures.length; i++) {
     matrix[i][i] = 1;
@@ -84,4 +84,36 @@ export function subspaceSearching(dataSource: DataSource, dimensions: string[], 
   } else {
     return getCombination(dimensions)
   }
+}
+
+type Edge = [number, [number, number]];
+type RelatedEdge = { field: string; corValue: number };
+export function getRelatedVertices(adjMatrix: number[][], vertices: string[], verticesInGraph: string[], topK?: number): RelatedEdge[] {
+  let verStatus: boolean[] = vertices.map(v => verticesInGraph.includes(v));
+  let edges: Edge[] = [];
+  let ans: RelatedEdge[] = [];
+  for (let i = 0; i < adjMatrix.length; i++) {
+    // if vertex in graph, then check all the edges from this vertex
+    if (verStatus[i]) {
+      for (let j = 0; j < adjMatrix[i].length; j++) {
+        if (!verStatus[j]) {
+          edges.push([adjMatrix[i][j], [i, j]])
+        }
+      }
+    }
+  }
+  edges.sort((a, b) => {
+    return b[0] - a[0];
+  })
+  for (let i = 0; i < edges.length; i++) {
+    let targetVertexIndex = edges[i][1][1];
+    if (!verStatus[targetVertexIndex]) {
+      verStatus[targetVertexIndex] = true;
+      ans.push({
+        field: vertices[targetVertexIndex],
+        corValue: edges[i][0]
+      })
+    }
+  }
+  return ans.slice(0, topK ? topK : ans.length);
 }

@@ -1,18 +1,16 @@
-import { DataSource, View } from "../commonTypes";
-import { getDimSetsBasedOnClusterGroups, getMeaSetsBasedOnClusterGroups, getDimClusterGroups } from './subspaces';
+import { DataSource} from "../commonTypes";
+import { getMeaSetsBasedOnClusterGroups, getDimClusterGroups } from './subspaces';
 import { CrammersVThreshold, PearsonCorrelation } from './config';
 import { Cluster, Outier } from '../ml/index';
 import { crammersV, getCombination, pearsonCC, linearMapPositive } from '../statistics/index';
 import { CHANNEL } from '../constant';
 import { entropy, normalize } from '../statistics/index';
 import aggregate, { createCube } from 'cube-core';
-import { momentCube } from "cube-core/built/core";
-import { isFieldContinous, isFieldTime, isFieldUnique } from '../utils/common';
 import { oneDLinearRegression } from '../statistics/index'
 import { GroupIntention } from "./intention/groups";
 
 const SPLITER = '=;=';
-interface ViewSpace {
+export interface ViewSpace {
   dimensions: string[];
   measures: string[];
 }
@@ -26,7 +24,7 @@ export interface InsightSpace {
   impurity?: number;
   description?: any
 }
-export type IntentionWorker = (aggData: DataSource, dimensions: string[], measures: string[]) => InsightSpace | null;
+export type IntentionWorker = (aggData: DataSource, dimensions: string[], measures: string[]) => Promise<InsightSpace | null>;
 
 function crossGroups(dimensionGroups: string[][], measureGroups: string[][]): ViewSpace[] {
   let viewSpaces: ViewSpace[] = [];
@@ -63,7 +61,7 @@ function getCombinationFromClusterGroups(groups: string[][], limitSize: number =
   return fieldSets;
 }
 
-export function getGeneralIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace {
+export const getGeneralIntentionSpace: IntentionWorker = async function (aggData, dimensions, measures) {
   let score = 0;
   let significance = 0;
   for (let mea of measures) {
@@ -87,7 +85,7 @@ export function getGeneralIntentionSpace (aggData: DataSource, dimensions: strin
   }
 }
 
-export function getOutlierIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace {
+export const getOutlierIntentionSpace: IntentionWorker = async function getOutlierIntentionSpace (aggData, dimensions, measures) {
   let iForest = new Outier.IsolationForest([], measures, aggData);
   iForest.buildIsolationForest();
   let scoreList = iForest.estimateOutierScore();
@@ -111,7 +109,7 @@ export function getOutlierIntentionSpace (aggData: DataSource, dimensions: strin
   }
 }
 
-export function getTrendIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace | null {
+export const getTrendIntentionSpace: IntentionWorker = async function (aggData, dimensions, measures) {
   if (dimensions.length !== 1) return null;
   let orderedData = [...aggData];
   orderedData.sort((a, b) => {
@@ -135,7 +133,8 @@ export function getTrendIntentionSpace (aggData: DataSource, dimensions: string[
   }
 }
 
-export function getGroupIntentionSpace (aggData: DataSource, dimensions: string[], measures: string[]): InsightSpace {
+export const getGroupIntentionSpace: IntentionWorker = async function (aggData, dimensions, measures) {
+  if (dimensions.length < 2) return null;
   let score = 0;
   let groupIntention = new GroupIntention({
     dataSource: aggData,
@@ -160,7 +159,7 @@ export enum DefaultIWorker {
   trend = "default_trend"
 }
 
-class IntentionWorkerCollection {
+export class IntentionWorkerCollection {
   public static colletion: IntentionWorkerCollection;
   private workers: Map<string, [boolean, IntentionWorker]>;
   private constructor() {
@@ -207,16 +206,16 @@ class IntentionWorkerCollection {
 }
 
 
-export function getIntentionSpaces (cubePool: Map<string, DataSource>, viewSpaces: ViewSpace[], Collection: IntentionWorkerCollection): InsightSpace[] {
+export async function getIntentionSpaces (cubePool: Map<string, DataSource>, viewSpaces: ViewSpace[], Collection: IntentionWorkerCollection): Promise<InsightSpace[]> {
   let ansSpace: InsightSpace[] = []
   for (let space of viewSpaces) {
     const { dimensions, measures } = space;
     let key = dimensions.join(SPLITER);
     if (cubePool.has(key)) {
       let aggData = cubePool.get(key);
-      let generalSpace = getGeneralIntentionSpace(aggData, dimensions, measures);
-      Collection.each((iWorker, name) => {
-        let iSpace = iWorker(aggData, dimensions, measures);
+      let generalSpace = await getGeneralIntentionSpace(aggData, dimensions, measures);
+      Collection.each(async (iWorker, name) => {
+        let iSpace = await iWorker(aggData, dimensions, measures);
         if (iSpace !== null) {
           iSpace.type = name;
           iSpace.impurity = generalSpace.impurity;
@@ -237,7 +236,7 @@ interface VisSpaceProps {
   max_dimension_num_in_view?: number;
   max_measure_num_in_view?: number;
 }
-export function getVisSpaces (props: VisSpaceProps): InsightSpace[] {
+export async function getVisSpaces (props: VisSpaceProps): Promise<InsightSpace[]> {
   const {
     dataSource,
     dimensions,
@@ -264,6 +263,7 @@ export function getVisSpaces (props: VisSpaceProps): InsightSpace[] {
   let cubePool: Map<string, DataSource> = new Map();
   // for (let group of dimensionGroups) {
   // todo: similar cuboids computation using cube-core
+  let t0 = new Date().getTime();
   for (let group of dimensionSets) {
     let key = group.join(SPLITER);
     let aggData = aggregate({
@@ -275,7 +275,11 @@ export function getVisSpaces (props: VisSpaceProps): InsightSpace[] {
     });
     cubePool.set(key, aggData);
   }
+  let t1 = new Date().getTime();
+  console.log('cube cost', t1 - t0);
   cubePool.set('*', dataSource);
-  let ansSpace: InsightSpace[] = getIntentionSpaces(cubePool, viewSpaces, collection || IntentionWorkerCollection.init());
+  const usedCollection = collection || IntentionWorkerCollection.init();;
+  // usedCollection.enable(DefaultIWorker.cluster, false);
+  let ansSpace: InsightSpace[] = await getIntentionSpaces(cubePool, viewSpaces, usedCollection);
   return ansSpace;
 }

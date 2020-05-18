@@ -2,7 +2,7 @@ const fs = require('fs');
 const assert = require('assert');
 const path  = require('path');
 
-const { Insight, Cleaner, Statistics, Sampling } = require('../build/cjs/index');
+const { Insight, Cleaner, Statistics, Sampling, Utils } = require('../build/cjs/index');
 const { getVisSpaces } = require('../build/cjs/insights/dev');
 const datasetPath = path.resolve(__dirname, './dataset/airbnb.json');
 const dataset = JSON.parse(fs.readFileSync(datasetPath).toString());
@@ -21,15 +21,17 @@ describe('insights test', function () {
     assert.equal(result.length > 0, true);
   })
 
-  it('print(dev pipeline)', function () {
-    const result = getVisSpaces({
-      dataSource: cleanData,
-      dimensions,
-      measures,
-    });
-    // console.log('new pipeline result', result)
-    assert.equal(result.length > 0, true);
-  })
+  // it('print(dev pipeline)', async function () {
+  //   const collection = Insight.IntentionWorkerCollection.init();
+  //   collection.enable(Insight.DefaultIWorker.cluster, false);
+  //   const result = await getVisSpaces({
+  //     dataSource: cleanData,
+  //     dimensions: dimensions.filter(dim => !Utils.isFieldUnique(cleanData, dim)),
+  //     measures,
+  //     collection
+  //   });
+  //   assert.equal(result.length > 0, true);
+  // })
   
   it('print(getCombination)', function () {
     let result = Statistics.getCombination([1, 2, 3, 4, 5, 6]);

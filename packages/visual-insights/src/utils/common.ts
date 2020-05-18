@@ -218,7 +218,7 @@ function isFieldUnique (dataSource: DataSource, field: string): boolean {
   let validCount = 0;
   let len = dataSource.length;
   for (let i = 0; i < len; i++) {
-    if (dataSource[i][field] !== undefined && dataSource[i][field] !== null && dataSource[i][field] === '') {
+    if (dataSource[i][field] !== undefined && dataSource[i][field] !== null && dataSource[i][field] !== '') {
       validCount++;
       set.add(dataSource[i][field]);
     }

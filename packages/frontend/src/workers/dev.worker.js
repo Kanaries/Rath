@@ -2,10 +2,10 @@
 import { getVisSpaces } from 'visual-insights/build/esm/insights/dev';
 import { timer } from './timer';
 
-const generateDashBoard = (e) => {
+const generateDashBoard = async (e) => {
   const { dataSource, dimensions, measures } = e.data;
   try {
-    let ansSpace = getVisSpaces({ dataSource, dimensions, measures });
+    let ansSpace = await getVisSpaces({ dataSource, dimensions, measures });
     ansSpace.sort((a, b) => (a.impurity / a.significance) - (b.impurity / b.significance));
     self.postMessage({
       success: true,

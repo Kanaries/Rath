@@ -30,3 +30,5 @@ safety
 dist
 
 coverage
+
+.cache

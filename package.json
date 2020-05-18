@@ -12,7 +12,9 @@
     "devback": "yarn workspace backend dev"
   },
   "resolutions": {
-    "@types/react": "16.9.16"
+    "@types/react": "16.9.16",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,7 @@
   "workspaces": [
     "packages/backend",
     "packages/frontend",
+    "packages/augmented-pivot-table",
     "packages/visual-insights"
   ],
   "homepage": "https://github.com/ObservedObserver/showme#readme",
