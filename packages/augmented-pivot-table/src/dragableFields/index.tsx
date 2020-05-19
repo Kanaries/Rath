@@ -69,9 +69,16 @@ const initDraggableState: DraggableFieldState = {
   measures: [],
 };
 
-const draggableStateKeys = Object.keys(initDraggableState) as Array<
-  keyof DraggableFieldState
->;
+// const draggableStateKeys = Object.keys(initDraggableState) as Array<
+//   keyof DraggableFieldState
+// >;
+
+const draggableStateKeys: Array<{ id: keyof DraggableFieldState; name: string }> = [
+  { id: 'fields', name: 'Fields' },
+  { id: 'columns', name: 'Columns' },
+  { id: 'rows', name: 'Rows' },
+  { id: 'measures', name: 'measures' }
+];
 
 export interface RecField {
   id: string;
@@ -150,14 +157,14 @@ const DraggableFields: React.FC<DraggableFieldsProps> = (props) => {
     <RootContainer>
       <DragDropContext onDragEnd={onDragEnd}>
         {draggableStateKeys.map((dkey) => (
-          <FieldListContainer name={dkey} key={dkey}>
-            <Droppable droppableId={dkey} direction="horizontal">
+          <FieldListContainer name={dkey.name} key={dkey.id}>
+            <Droppable droppableId={dkey.id} direction="horizontal">
               {(provided, snapshot) => (
                 <FieldsContainer
                   {...provided.droppableProps}
                   ref={provided.innerRef}
                 >
-                  {state[dkey].map((f, index) => (
+                  {state[dkey.id].map((f, index) => (
                     <Draggable key={f.id} draggableId={f.id} index={index}>
                       {(provided, snapshot) => {
                         let targetIndex = highlightFields.findIndex((h) => h.id === f.id);
@@ -179,7 +186,7 @@ const DraggableFields: React.FC<DraggableFieldsProps> = (props) => {
                               </div>
                           }
                           {f.name}&nbsp;
-                          {dkey === "measures" && (
+                          {dkey.id === "measures" && (
                             <Select
                               options={aggregatorList}
                               value={f.aggName}
@@ -188,7 +195,7 @@ const DraggableFields: React.FC<DraggableFieldsProps> = (props) => {
                                   const nextState = produce<
                                     DraggableFieldState
                                   >(state, (draft) => {
-                                    draft[dkey][index].aggName = value;
+                                    draft[dkey.id][index].aggName = value;
                                   });
                                   return nextState;
                                 });

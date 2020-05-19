@@ -29,6 +29,7 @@ export const FieldListSegment = styled.div`
     background-color: #dfe3e8;
     h4 {
       margin: 0.6em;
+      font-weight: 400;
     }
   }
   div.fl-container {

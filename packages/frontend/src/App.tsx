@@ -3,7 +3,7 @@ import { useGlobalState, GlobalStateProvider } from "./state";
 import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
 import "./App.css";
-import RathLogo from './assets/rath.png';
+import RathLogo from './assets/kanaries-lite.png';
 import RathCoolLogo from './assets/rath-glasses.png';
 
 import Gallery from "./pages/gallery/index";
@@ -64,7 +64,7 @@ function App() {
               href="https://github.com/ObservedObserver/visual-insights"
               className="logo"
             >
-              <img src={ getLogoSrc(state.beCool) } alt="rath" />
+              <img style={!state.beCool ? { width: '48px', marginTop: '4px' } : undefined} src={ getLogoSrc(state.beCool) } alt="rath" />
             </a>
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg8">
