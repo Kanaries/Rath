@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import embed from 'vega-embed';
 import { scheme } from 'vega';
+import { DefaultIWorker } from "visual-insights/build/esm/insights/dev";
 
 scheme('threshold', ['#1890ff', '#ffccc7']);
 
@@ -26,7 +27,7 @@ const RadarChart: React.FC<RadarChartProps> = props => {
         category: 0
       }
     });
-    ['outlier', 'trend', 'general', 'group'].forEach(type => {
+    Object.values(DefaultIWorker).forEach(type => {
       if (!data.find(d => d.key === type)) {
         data.push({
           key: type,

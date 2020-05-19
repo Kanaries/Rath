@@ -12,7 +12,9 @@
     "devback": "yarn workspace backend dev"
   },
   "resolutions": {
-    "@types/react": "16.9.16"
+    "@types/react": "16.9.16",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   },
   "repository": {
     "type": "git",
@@ -27,9 +29,22 @@
   "bugs": {
     "url": "https://github.com/ObservedObserver/showme/issues"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "*/webpack-dev-server",
+      "*/webpack-cli",
+      "**/react",
+      "**/react-dom",
+      "**/vega",
+      "**/vega-lite",
+      "**/vega-embed",
+      "augmented-pivot-table/pivot-chart",
+      "augmented-pivot-table/pivot-chart/**"
+    ]
+  },
   "homepage": "https://github.com/ObservedObserver/showme#readme",
   "devDependencies": {
     "concurrently": "^4.1.2",

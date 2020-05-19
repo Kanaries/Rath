@@ -30,9 +30,9 @@ function getVisualElements (): VisualElements {
 }
 
 const geomTypes = {
-  interval: [0, 20],
-  line: [21, Infinity],
-  area: [21, Infinity],
+  interval: [0, 10],
+  line: [11, Infinity],
+  area: [11, Infinity],
   point: [0, 1000],
   path: [0, 100],
   density: [1001, Infinity]

@@ -120,7 +120,9 @@ describe('utils test', function () {
   })
 
   it('isFieldUnique', function () {
-    assert(isFieldUnique(dataSource, 'PassengerId', ), true);
-    assert(isFieldUnique(dataSource, 'Name', true));
+    assert.equal(isFieldUnique(dataSource, 'PassengerId'), true);
+    assert.equal(isFieldUnique(dataSource, 'Name'), true);
+    assert.equal(isFieldUnique(dataSource, 'Pclass'), false);
+    assert.equal(isFieldUnique(dataSource, 'Parch'), false);
   })
 })
