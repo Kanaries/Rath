@@ -21,17 +21,17 @@ describe('insights test', function () {
     assert.equal(result.length > 0, true);
   })
 
-  // it('print(dev pipeline)', async function () {
-  //   const collection = Insight.IntentionWorkerCollection.init();
-  //   collection.enable(Insight.DefaultIWorker.cluster, false);
-  //   const result = await getVisSpaces({
-  //     dataSource: cleanData,
-  //     dimensions: dimensions.filter(dim => !Utils.isFieldUnique(cleanData, dim)),
-  //     measures,
-  //     collection
-  //   });
-  //   assert.equal(result.length > 0, true);
-  // })
+  it('print(dev pipeline)', async function () {
+    const collection = Insight.IntentionWorkerCollection.init();
+    collection.enable(Insight.DefaultIWorker.cluster, false);
+    const result = await getVisSpaces({
+      dataSource: cleanData,
+      dimensions: dimensions.filter(dim => !Utils.isFieldUnique(cleanData, dim)),
+      measures,
+      collection
+    });
+    assert.equal(result.length > 0, true);
+  })
   
   it('print(getCombination)', function () {
     let result = Statistics.getCombination([1, 2, 3, 4, 5, 6]);
