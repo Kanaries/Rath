@@ -2274,10 +2274,18 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@16.9.16", "@types/react@^16.9.16", "@types/react@^16.9.35":
+"@types/react@*", "@types/react@^16.9.16":
   version "16.9.16"
   resolved "https://registry.npm.taobao.org/@types/react/download/@types/react-16.9.16.tgz?cache=0&sync_timestamp=1589160578767&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Freact%2Fdownload%2F%40types%2Freact-16.9.16.tgz#4f12515707148b1f53a8eaa4341dae5dfefb066d"
   integrity sha1-TxJRVwcUix9TqOqkNB2uXf77Bm0=
+  dependencies:
+    "@types/prop-types" "*"
+    csstype "^2.2.0"
+
+"@types/react@^16.9.35":
+  version "16.9.35"
+  resolved "https://registry.npm.taobao.org/@types/react/download/@types/react-16.9.35.tgz?cache=0&sync_timestamp=1589160578767&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Freact%2Fdownload%2F%40types%2Freact-16.9.35.tgz#a0830d172e8aadd9bd41709ba2281a3124bbd368"
+  integrity sha1-oIMNFy6Krdm9QXCboigaMSS702g=
   dependencies:
     "@types/prop-types" "*"
     csstype "^2.2.0"
@@ -9492,10 +9500,10 @@ pirates@^4.0.1:
   dependencies:
     node-modules-regexp "^1.0.0"
 
-pivot-chart@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.npm.taobao.org/pivot-chart/download/pivot-chart-0.1.3.tgz#4bfd4031128a2cc6b46d7c6f31079fbe3d7a1d97"
-  integrity sha1-S/1AMRKKLMa0bXxvMQefvj16HZc=
+pivot-chart@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.npm.taobao.org/pivot-chart/download/pivot-chart-0.1.4.tgz#964e785684da261802c38f6c39f01f695c4c1e88"
+  integrity sha1-lk54VoTaJhgCw49sOfAfaVxMHog=
   dependencies:
     "@types/react-beautiful-dnd" "^11.0.4"
     cube-core "^2.13.0"

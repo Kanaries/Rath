@@ -18,8 +18,8 @@ export interface InsightSpace {
   dimensions: string[];
   measures: string[];
   type?: string;
-  order: 'desc' | 'asc';
-  score: number;
+  order?: 'desc' | 'asc';
+  score?: number;
   significance: number;
   impurity?: number;
   description?: any
