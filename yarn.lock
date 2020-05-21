@@ -9500,10 +9500,10 @@ pirates@^4.0.1:
   dependencies:
     node-modules-regexp "^1.0.0"
 
-pivot-chart@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.npm.taobao.org/pivot-chart/download/pivot-chart-0.1.4.tgz#964e785684da261802c38f6c39f01f695c4c1e88"
-  integrity sha1-lk54VoTaJhgCw49sOfAfaVxMHog=
+pivot-chart@0.1.7:
+  version "0.1.7"
+  resolved "https://registry.npm.taobao.org/pivot-chart/download/pivot-chart-0.1.7.tgz?cache=0&sync_timestamp=1590076512074&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fpivot-chart%2Fdownload%2Fpivot-chart-0.1.7.tgz#2ac68089add8d2b7741bba9855f2a53600c8edd3"
+  integrity sha1-KsaAia3Y0rd0G7qYVfKlNgDI7dM=
   dependencies:
     "@types/react-beautiful-dnd" "^11.0.4"
     cube-core "^2.13.0"

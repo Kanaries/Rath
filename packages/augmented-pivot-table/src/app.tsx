@@ -227,6 +227,11 @@ function AsyncApp() {
     
   }, [nestTrees, fstate.measures])
 
+  const highlightList = useMemo<any[]>(() => {
+    let scoreList = [...rowScoreList.slice(0, 1), ...colScoreList.slice(0, 1)];
+    return scoreList.map(s => s[0].slice(0, -1).map(f => f.dimValue))
+  }, [rowScoreList, colScoreList])
+  console.log('high', highlightList)
   return (
     <div>
       <DragableFields
@@ -287,6 +292,7 @@ function AsyncApp() {
           rowDepth: 1,
           columnDepth: 1
         }}
+        highlightPathList={highlightList}
       />
     </div>
   );
