@@ -251,31 +251,6 @@ function AsyncApp() {
           setAggNodeConfig(value);
         }}
       />
-      <div style={{ padding: "1em 0em" }}>
-        <h4 className="ui header">Recommanded Path</h4>
-        <div className="ui segment">
-          {rowScoreList.slice(0, 1).map((space) => (
-            <div>
-              {space[0].slice(0, -1).map((dim) => (
-                <div className="ui blue label">
-                  {dim.dimCode}: {dim.dimValue}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-        <div className="ui segment">
-          {colScoreList.slice(0, 1).map((space) => (
-            <div>
-              {space[0].slice(0, -1).map((dim) => (
-                <div className="ui teal label">
-                  {dim.dimCode}: {dim.dimValue}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
 
       <AsyncPivotChart
         cubeRef={cubeRef}

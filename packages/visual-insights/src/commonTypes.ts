@@ -36,3 +36,20 @@ export interface View {
 }
 
 export type OperatorType = 'sum' | 'mean' | 'count';
+
+export interface InsightSpace {
+  dimensions: string[]
+  measures: string[]
+  type?: string
+  order?: 'desc' | 'asc'
+  score?: number
+  significance: number
+  impurity?: number
+  description?: any
+}
+
+export type InsightWorker = (
+  aggData: Record[],
+  dimensions: string[],
+  measures: string[]
+) => Promise<InsightSpace | null>

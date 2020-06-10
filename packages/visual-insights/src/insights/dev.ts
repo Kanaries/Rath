@@ -215,11 +215,15 @@ export async function getIntentionSpaces (cubePool: Map<string, DataSource>, vie
       let aggData = cubePool.get(key);
       let generalSpace = await getGeneralIntentionSpace(aggData, dimensions, measures);
       Collection.each(async (iWorker, name) => {
-        let iSpace = await iWorker(aggData, dimensions, measures);
-        if (iSpace !== null) {
-          iSpace.type = name;
-          iSpace.impurity = generalSpace.impurity;
-          ansSpace.push(iSpace);
+        try {
+          let iSpace = await iWorker(aggData, dimensions, measures);
+          if (iSpace !== null) {
+            iSpace.type = name;
+            iSpace.impurity = generalSpace.impurity;
+            ansSpace.push(iSpace);
+          }
+        } catch (error) {
+          console.error('worker failed', { dimensions, measures, aggData }, error);
         }
       })
     }

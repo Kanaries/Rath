@@ -1,0 +1,20 @@
+{
+  "extends": "tslint:recommended",
+  "rulesDirectory": [
+    "src"
+  ],
+  "rules": {
+    "max-line-length": {
+      "options": [
+        180
+      ]
+    },
+    "new-parens": true,
+    "no-arg": true,
+    "no-bitwise": true,
+    "no-conditional-assignment": true,
+    "no-consecutive-blank-lines": false,
+    "prefer-const": false,
+    "no-console": false
+  }
+}

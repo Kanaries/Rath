@@ -1,6 +1,16 @@
-import { DataSource } from "../commonTypes";
-type nestTree = Map<string, Map<string, number>>;
-export function chiSquared(nestTree: nestTree, xSet: Set<string>, ySet: Set<string>): number {
+import { Record } from "../commonTypes";
+type NestTree = Map<string, Map<string, number>>;
+/**
+ * correlation coefficient function. returns a value in range [0, 1].
+ */
+export type CorrelationCoefficient = (dataSource: Record[], fieldX: string, fieldY: string) => number
+/**
+ * chiSquared implementation using adjacency list(spare graph), which is ableto handle fields with large cardinality.
+ * @param nestTree hash tree with depth = 2, represents the relationship between var x and var y.
+ * @param xSet value set of var x.
+ * @param ySet value set of var y.
+ */
+export function chiSquared(nestTree: NestTree, xSet: Set<string>, ySet: Set<string>): number {
   if (typeof nestTree === 'undefined' || typeof xSet === 'undefined' || typeof ySet === 'undefined') {
     return 0;
   }
@@ -31,8 +41,13 @@ export function chiSquared(nestTree: nestTree, xSet: Set<string>, ySet: Set<stri
   return chis;
 }
 
-
-export function crammersV(dataSource: DataSource, fieldX: string, fieldY: string): number {
+/**
+ * crammersV implementation using adjacency list(spare graph), which is ableto handle fields with large cardinality.
+ * @param dataSource array of records.
+ * @param fieldX field key of var X.
+ * @param fieldY field key of varY.
+ */
+export const crammersV: CorrelationCoefficient = (dataSource, fieldX, fieldY) => {
   const xSet = new Set<string>()
   const ySet = new Set<string>()
   const nestTree = new Map<string, Map<string, number>>();
@@ -56,30 +71,30 @@ export function crammersV(dataSource: DataSource, fieldX: string, fieldY: string
 }
 /**
  * Pearson correlation coefficient
- * @param dataSource 
- * @param fieldX 
- * @param fieldY 
+ * @param dataSource array of records
+ * @param fieldX field key of var X.
+ * @param fieldY field key of var Y.
  */
-export function pearsonCC(dataSource: DataSource, fieldX: string, fieldY: string): number {
+export const pearsonCC: CorrelationCoefficient = (dataSource, fieldX, fieldY) => {
   let r = 0;
-  let xBar = sum(dataSource.map(r => r[fieldX])) / dataSource.length;
-  let yBar = sum(dataSource.map(r => r[fieldY])) / dataSource.length;
-  r = sum(dataSource.map(r => (r[fieldX] - xBar) * (r[fieldY] - yBar))) /
-  Math.sqrt(sum(dataSource.map(r => Math.pow(r[fieldX] - xBar, 2))) * sum(dataSource.map(r => Math.pow(r[fieldY] - yBar, 2))));
+  let xBar = sum(dataSource.map(row => row[fieldX])) / dataSource.length;
+  let yBar = sum(dataSource.map(row => row[fieldY])) / dataSource.length;
+  r = sum(dataSource.map(row => (row[fieldX] - xBar) * (row[fieldY] - yBar))) /
+  Math.sqrt(sum(dataSource.map(row => Math.pow(row[fieldX] - xBar, 2))) * sum(dataSource.map(row => Math.pow(row[fieldY] - yBar, 2))));
   return r;
 }
 
 function sum(arr: number[]): number {
-  let sum = 0;
+  let s = 0;
   for (let i = 0, len = arr.length; i < len; i++) {
     // if (typeof dataSource[i][field])
-    sum += arr[i];
+    s += arr[i];
   }
-  return sum;
+  return s;
 }
 
 
-// can be used for test
+// can be used for test. do not delete these code. it is implementation with adj matrix. can be faster in dense graph cases.
 // export function crammersV(dataSource: DataSource, fieldX: string, fieldY: string): number {
 //   const xSet = new Set(dataSource.map(d => d[fieldX]))
 //   const ySet = new Set(dataSource.map(d => d[fieldY]))
