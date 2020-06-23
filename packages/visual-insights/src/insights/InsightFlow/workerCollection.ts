@@ -1,4 +1,4 @@
-import { InsightWorker } from "../../commonTypes"
+import { InsightWorker } from "./interfaces"
 import { IForestOutlierWorker } from '../workers/IForestOutlier';
 import { KNNClusterWorker } from '../workers/KNNCluster';
 import { LRTrendWorker } from '../workers/LRTrend';

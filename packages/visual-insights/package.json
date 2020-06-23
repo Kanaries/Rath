@@ -21,6 +21,10 @@
     "jest": "jest",
     "coverage": "istanbul cover _mocha --report lcovonly -- --no-timeouts -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
   },
+  "prettier": {
+    "tabWidth": 4,
+    "printWidth": 120
+  },
   "eslintConfig": {
     "extends": "react-app"
   },

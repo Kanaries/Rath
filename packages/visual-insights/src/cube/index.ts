@@ -131,23 +131,79 @@ export class Cube implements ICube {
         })
         this.cuboids = new Map();
     }
-    public getCuboid (dimensions: string[]): Cuboid {
+    // public contains(dimensions: string[]): boolean {
+    //     if (dimensions.length > )
+    // }
+    public sortDimension(dimensions: string[]): string[] {
         const orderedDims = [...dimensions];
         orderedDims.sort((d1, d2) => {
             return this.dimOrder.get(d1) - this.dimOrder.get(d2)
         })
+        return orderedDims;
+    }
+    public getCuboid (dimensions: string[]): Cuboid {
+        const orderedDims = this.sortDimension(dimensions);
         const dimKey = orderedDims.join(CUBOID_KEY_SPLITOR);
         // this.cuboids.get(dimKey)
         if (this.cuboids.has(dimKey)) {
+            console.log('target cached!!!')
             return this.cuboids.get(dimKey);
         }
         // does not get cuboid
+        let currDimSet = new Set(dimensions);
+        const existingParentKeys: string[] = [];
+        const nullParentKeys: string[] = [];
+        for (let dim of this.dimensions) {
+            if (!currDimSet.has(dim)) {
+                // use insert O(n) instead of sort O(nlogn)
+                const parentDimensions = this.sortDimension([...orderedDims, dim]);
+                const parentKey = parentDimensions.join(CUBOID_KEY_SPLITOR);
+                if (this.cuboids.has(parentKey)) existingParentKeys.push(parentKey);
+                else {
+                    nullParentKeys.push(parentKey);
+                }
+            }
+        }
+        let minCost = this.dataSource.length;
+        let minCuboidKey = this.dimensions.join(CUBOID_KEY_SPLITOR);
+        if (existingParentKeys.length > 0) {
+            for (let key of existingParentKeys) {
+                const pCuboid = this.cuboids.get(key);
+                if (pCuboid.size < minCost) {
+                    minCost = pCuboid.size;
+                    minCuboidKey = key;
+                }
+            }
+        } else if (nullParentKeys.length > 0) {
+            minCuboidKey = nullParentKeys[0];
+        }
+
+        const parentCuboid = this.getCuboid(minCuboidKey.split(CUBOID_KEY_SPLITOR));
+        // console.log('based on parents cube: ', minCuboidKey)
+        // todo: 递归构建相关的cuboid，可能要依赖field dict来判断递归的路径
         let cuboid = new Cuboid({
+          dimensions,
+          measures: this.measures,
+          ops: this.ops,
+        })
+        cuboid.setData(parentCuboid.state);
+        return cuboid;
+    }
+    public buildBaseCuboid(): Cuboid {
+        let baseCuboid = new Cuboid({
             dimensions: this.dimensions,
             measures: this.measures,
             ops: this.ops
         });
-        // todo: 递归构建相关的cuboid，可能要依赖field dict来判断递归的路径
-        cuboid.setData(this.dataSource);
+        baseCuboid.setData(this.dataSource)
+        this.cuboids.set(this.dimensions.join(CUBOID_KEY_SPLITOR), baseCuboid);
+        return baseCuboid;
+    }
+    public get baseCuboid () {
+        const baseKey = this.dimensions.join(CUBOID_KEY_SPLITOR);
+        if (!this.cuboids.has(baseKey)) {
+            return this.buildBaseCuboid()
+        }
+        return this.cuboids.get(baseKey);
     }
 }

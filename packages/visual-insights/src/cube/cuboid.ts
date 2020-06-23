@@ -11,6 +11,7 @@ export class Cuboid {
         this.dimensions = dimensions;
         this.measures = measures;
         this.ops = ops;
+        this.state = [];
     }
     public setData(dataSource: Record[]): Record[] {
         this.state = simpleAggregate({
@@ -20,5 +21,8 @@ export class Cuboid {
             dataSource
         })
         return this.state
+    }
+    public get size () {
+        return this.state.length;
     }
 }
