@@ -5,7 +5,7 @@ import { LRTrendWorker } from '../workers/LRTrend';
 
 export enum DefaultIWorker {
   outlier = 'default_outlier',
-  cluster = 'default_group',
+  // cluster = 'default_group',
   trend = 'default_trend',
 }
 
@@ -56,7 +56,7 @@ export class InsightWorkerCollection {
       InsightWorkerCollection.colletion = new InsightWorkerCollection()
       if (withDefaultIWorkers) {
         InsightWorkerCollection.colletion.register(DefaultIWorker.outlier, IForestOutlierWorker)
-        InsightWorkerCollection.colletion.register(DefaultIWorker.cluster, KNNClusterWorker)
+        // InsightWorkerCollection.colletion.register(DefaultIWorker.cluster, KNNClusterWorker)
         InsightWorkerCollection.colletion.register(DefaultIWorker.trend, LRTrendWorker)
       }
     }

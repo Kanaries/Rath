@@ -91,7 +91,12 @@ export class oneDLinearRegression {
   }
   public pValue () {
     const [, beta] = this.getRegressionEquation();
-    return 2 * (1 - this.cumulativeLogisticDistribution(Math.abs(beta)));
+    const value = this.cumulativeLogisticDistribution(Math.abs(beta));
+    if (value > 0.5) {
+      return 2 * (1 - value);
+    } else {
+      return 2 * value;
+    }
   }
   public significance (): number {
     let r_squared = this.r_squared();

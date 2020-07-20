@@ -10,6 +10,7 @@
   "module": "./build/esm/index.js",
   "types": "./build/esm/index.d.ts",
   "dependencies": {
+    "assert": "^2.0.0",
     "cube-core": "^2.13.0",
     "simple-statistics": "^7.1.0"
   },

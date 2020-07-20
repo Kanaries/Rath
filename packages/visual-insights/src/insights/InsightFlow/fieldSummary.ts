@@ -51,8 +51,14 @@ export function getFieldsSummary(
     const fields: IFieldSummary[] = [];
     const dictonary: FieldDictonary = new Map();
     for (let f of fieldKeys) {
-        const values = dataSource.map(r => r[f]);
-        const dataType = inferDataType(values);
+        const valueMap: Map<any, number> = new Map();
+        dataSource.forEach(row => {
+          if (!valueMap.has(row[f])) {
+            valueMap.set(row[f], 0)
+          }
+          valueMap.set(row[f], valueMap.get(row[f]) + 1);
+        })
+        const dataType = inferDataType([...valueMap.keys()]);
 
         const semanticType = getFieldType(dataSource, f) as ISemanticType;
         let analyticType: IAnalyticType = 'dimension';
@@ -62,7 +68,7 @@ export function getFieldsSummary(
             analyticType,
             semanticType,
             dataType,
-            domain: new Set(values)
+            domain: valueMap
         };
 
         fields.push(field);

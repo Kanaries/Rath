@@ -146,7 +146,7 @@ export class Cube implements ICube {
         const dimKey = orderedDims.join(CUBOID_KEY_SPLITOR);
         // this.cuboids.get(dimKey)
         if (this.cuboids.has(dimKey)) {
-            console.log('target cached!!!')
+            // console.log('target cached!!!')
             return this.cuboids.get(dimKey);
         }
         // does not get cuboid
