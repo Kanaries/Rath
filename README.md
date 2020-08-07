@@ -6,7 +6,7 @@
 ![](https://img.shields.io/github/license/ObservedObserver/showme)
 
 
-<img src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png" alt="logo" width="360px" style="" />
+<img src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png" alt="logo" width="180px" style="" />
 
 Automatic insights extraction and visualization specification based on `visual-insights`.
 
@@ -141,3 +141,13 @@ Rath is insipired by several excellent works below:
 + B. Tang et al, "Extracting top-K insights from multi-dimensional data," in 2017, . DOI: 10.1145/3035918.3035922.
 + A. Satyanarayan, K. Wongsuphasawat and J. Heer, "Declarative interaction design for data visualization," in 2014, . DOI: 10.1145/2642918.2647360.
 + Cleveland, W., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. Journal of the American Statistical Association, 79(387), 531-554. doi:10.2307/2288400
+
+## Story behind Rath
+
+Rath is original from Mome Raths in *Alice's Adventures in Wonderland*.
+
+<div style="text-align:center;">
+    <img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/mome-raths.png" alt="logo" width="280px" />
+</div>
+
+The word Rath is used in SAO Alicization as name of org. developing Soul Translator (STL) and Under World, which creates A.L.I.C.E.

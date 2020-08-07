@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { Insight } from 'visual-insights';
 import {
   ToolBar,
@@ -8,12 +8,14 @@ import {
   VisType,
   Field,
   AggNodeConfig,
+  NestTree,
 } from "pivot-chart";
 import { TitanicCubeService, getTitanicData } from "./service";
-import { QueryPath, queryCube } from "pivot-chart/build/utils";
+import { QueryPath, queryCube, AsyncCacheCube } from "pivot-chart/build/utils";
 import { ViewSpace } from "visual-insights/build/esm/insights/dev";
 import DragableFields, { DraggableFieldState, RecField } from './dragableFields/index'
 import { buildCubePool } from "./dragableFields/utils";
+import { enumerateExpandableNode, getViewFinalScore } from "./autoPath";
 
 const initDraggableState: DraggableFieldState = {
   fields: [],
@@ -21,6 +23,9 @@ const initDraggableState: DraggableFieldState = {
   columns: [],
   measures: [],
 };
+interface ViewSpaceWithCor extends ViewSpace {
+  corValue: number;
+}
 interface Dataset {
   dataSource: DataSource;
   fields: Field[];
@@ -32,10 +37,14 @@ function AsyncApp() {
   const [recFields, setRecFields] = useState<RecField[]>([]);
   const [fstate, setFstate] = useState<DraggableFieldState>(initDraggableState);
   const [visType, setVisType] = useState<VisType>("number");
+  const [rowScoreList, setRowScoreList] = useState<Array<[QueryPath, number]>>([]);
+  const [colScoreList, setColScoreList] = useState<Array<[QueryPath, number]>>([]);
   const [aggNodeConfig, setAggNodeConfig] = useState<AggNodeConfig>({
     row: false,
     column: false,
   });
+  const cubeRef = useRef<AsyncCacheCube>();
+  const [nestTrees, setNestTrees] = useState<{left: NestTree; top: NestTree}>({ left: null, top: null });
 
   const cubeQuery = useCallback(async (path: QueryPath, measures: string[]) => {
     return TitanicCubeService(
@@ -79,9 +88,7 @@ function AsyncApp() {
       dimensions,
       [...fstate.rows, ...fstate.columns].map((d) => d.id)
     );
-    interface ViewSpaceWithCor extends ViewSpace {
-      corValue: number;
-    }
+
     const viewSpaces: ViewSpaceWithCor[] = [];
     for (let recDim of result) {
         const dimsInView = [...fstate.rows, ...fstate.columns]
@@ -125,6 +132,106 @@ function AsyncApp() {
     
   }, [fstate.rows, fstate.columns, fstate.measures, dataset])
 
+  useEffect(() => {
+    console.log('nestTrees', nestTrees)
+    if (nestTrees.left !== null && nestTrees.top !== null) {
+
+      let leftStatus = {
+        isEnd: false,
+        count: 0,
+        asyncCount: 0,
+        ans: []
+      };
+      let topStatus = {
+        isEnd: false,
+        count: 0,
+        asyncCount: 0,
+        ans: [],
+      };
+      enumerateExpandableNode(nestTrees.left, fstate.rows.map(f => f.id), (path) => {
+        console.log(path)
+        leftStatus.count++;
+        cubeRef.current.cacheQuery(path, fstate.measures.map(m => m.id))
+          .then(res => {
+            console.log('cube res', res)
+            let cubePool = new Map();
+            const viewSpace: ViewSpace = {
+              dimensions: path.map(p => p.dimCode),
+              measures: fstate.measures.map(m => m.id)
+            }
+            cubePool.set(viewSpace.dimensions.join('=;='), res)
+            return Insight.getIntentionSpaces(
+              cubePool,
+              [viewSpace],
+              Insight.IntentionWorkerCollection.init()
+            );
+          })
+          .then(spaces => {
+            leftStatus.asyncCount++;
+            console.log('spaces', spaces, path.map(p => p.dimValue))
+            const score = getViewFinalScore(spaces);
+            leftStatus.ans.push([path, score])
+            if (leftStatus.isEnd && leftStatus.count === leftStatus.asyncCount) {
+              leftStatus.ans.sort((a, b) => b[1] - a[1])
+              setRowScoreList(leftStatus.ans);
+            }
+          })
+      }, () => {
+        leftStatus.isEnd = true;
+      });
+      enumerateExpandableNode(
+        nestTrees.top,
+        fstate.columns.map((f) => f.id),
+        (path) => {
+          console.log(path);
+          topStatus.count++;
+          cubeRef.current
+            .cacheQuery(
+              path,
+              fstate.measures.map((m) => m.id)
+            )
+            .then((res) => {
+              console.log("cube res", res);
+              let cubePool = new Map();
+              const viewSpace: ViewSpace = {
+                dimensions: path.map((p) => p.dimCode),
+                measures: fstate.measures.map((m) => m.id),
+              };
+              cubePool.set(viewSpace.dimensions.join("=;="), res);
+              return Insight.getIntentionSpaces(
+                cubePool,
+                [viewSpace],
+                Insight.IntentionWorkerCollection.init()
+              );
+            })
+            .then((spaces) => {
+              topStatus.asyncCount++;
+              console.log(
+                "spaces",
+                spaces,
+                path.map((p) => p.dimValue)
+              );
+              const score = getViewFinalScore(spaces);
+              topStatus.ans.push([path, score]);
+              if (topStatus.isEnd && topStatus.count === topStatus.asyncCount) {
+                topStatus.ans.sort((a, b) => b[1] - a[1]);
+                setColScoreList(topStatus.ans);
+              }
+            });
+        },
+        () => {
+          topStatus.isEnd = true;
+        }
+      );
+    }
+    
+  }, [nestTrees, fstate.measures])
+
+  const highlightList = useMemo<any[]>(() => {
+    let scoreList = [...rowScoreList.slice(0, 1), ...colScoreList.slice(0, 1)];
+    return scoreList.map(s => s[0].slice(0, -1).map(f => f.dimValue))
+  }, [rowScoreList, colScoreList])
+  console.log('high', highlightList)
   return (
     <div>
       <DragableFields
@@ -146,18 +253,22 @@ function AsyncApp() {
       />
 
       <AsyncPivotChart
+        cubeRef={cubeRef}
         visType={visType}
         rows={fstate["rows"]}
         columns={fstate["columns"]}
-        defaultExpandedDepth={{
-          rowDepth: 20,
-          columnDepth: 20,
-        }}
         showAggregatedNode={aggNodeConfig}
         cubeQuery={cubeQuery}
         measures={choosenMeasures}
+        onNestTreeChange={(left, top) => {
+          setNestTrees({ left, top });
+        }}
+        defaultExpandedDepth={{
+          rowDepth: 1,
+          columnDepth: 1
+        }}
+        highlightPathList={highlightList}
       />
-
     </div>
   );
 }
