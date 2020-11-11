@@ -1,4 +1,4 @@
-import { Specification, FieldType } from "visual-insights/src/commonTypes";
+import { Specification, FieldType } from "visual-insights/build/esm/commonTypes";
 import { geomTypeMap, DataField } from './index';
 
 export function featureVis(query: Specification, fields: DataField[]) {

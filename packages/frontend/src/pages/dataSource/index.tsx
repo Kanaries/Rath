@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import intl from 'react-intl-universal'
 import { useGlobalState } from "../../state";
 import { FileLoader, useComposeState } from '../../utils/index';
 import { ComboBox, PrimaryButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider, Label, Checkbox } from 'office-ui-fabric-react';
@@ -125,46 +126,47 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
       }
     }
   ]
+  console.log('label', intl.get('extract-insight'))
 
   return (
     <div className="content-container">
       <FieldPanel
         fields={state.fields}
         show={pageStatus.show.fieldConfig}
-        onUpdateConfig={fields => {
-          updateState(draft => {
-            draft.fields = fields;
-          });
+        onUpdateConfig={(fields) => {
+          updateState((draft) => {
+            draft.fields = fields
+          })
         }}
         onClose={() => {
-          setPageStatus(draft => {
-            draft.show.fieldConfig = false;
-          });
+          setPageStatus((draft) => {
+            draft.show.fieldConfig = false
+          })
         }}
       />
       <div className="card">
         <Stack horizontal>
           <PrimaryButton
             disabled={dataSource.length === 0}
-            iconProps={{ iconName: "Financial" }}
-            text="Extract Insights"
+            iconProps={{ iconName: 'Financial' }}
+            text={intl.get('extract-insight')}
             onClick={() => {
-              dispatch("extractInsights", {
+              dispatch('extractInsights', {
                 dataSource: preparedData,
-                fields: state.fields
-              });
-              props.onExtractInsights();
+                fields: state.fields,
+              })
+              props.onExtractInsights()
             }}
           />
           <div ref={dataSetting}>
             <IconButton
-              iconProps={{ iconName: "ExcelDocument" }}
+              iconProps={{ iconName: 'ExcelDocument' }}
               title="Upload"
               ariaLabel="upload data"
               onClick={() => {
-                setPageStatus(draft => {
-                  draft.show.dataConfig = true;
-                });
+                setPageStatus((draft) => {
+                  draft.show.dataConfig = true
+                })
               }}
             />
             <Callout
@@ -174,9 +176,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
               gapSpace={0}
               target={dataSetting.current}
               onDismiss={() => {
-                setPageStatus(draft => {
-                  draft.show.dataConfig = false;
-                });
+                setPageStatus((draft) => {
+                  draft.show.dataConfig = false
+                })
               }}
               setInitialFocus={true}
               hidden={!pageStatus.show.dataConfig}
@@ -186,19 +188,14 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
               </div>
               <div className="vi-callout-inner">
                 <div className="vi-callout-content">
-                  <p className="vi-callout-subTex">
-                    .csv, .json are supportted.
-                  </p>
+                  <p className="vi-callout-subTex">.csv, .json are supportted.</p>
                 </div>
                 <div>
                   <Checkbox
                     label="Add unique ids for fields"
                     checked={fixUnicodeField}
-                    onChange={(
-                      ev?: React.FormEvent<HTMLElement>,
-                      checked?: boolean
-                    ) => {
-                      setFixUnicodeField(!!checked);
+                    onChange={(ev?: React.FormEvent<HTMLElement>, checked?: boolean) => {
+                      setFixUnicodeField(!!checked)
                     }}
                   />
                   <Label id={labelId} required={true}>
@@ -208,12 +205,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                     defaultSelectedKey="B"
                     options={SampleOptions}
                     selectedKey={sampleMethod}
-                    onChange={(
-                      ev: any,
-                      option: IChoiceGroupOption | undefined
-                    ) => {
+                    onChange={(ev: any, option: IChoiceGroupOption | undefined) => {
                       if (option) {
-                        setSampleMethod(option.key as SampleKey);
+                        setSampleMethod(option.key as SampleKey)
                       }
                     }}
                     ariaLabelledBy={labelId}
@@ -226,11 +220,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                       step={0.001}
                       value={sampleSize}
                       showValue={true}
-                      valueFormat={(value: number) =>
-                        `${(value * 100).toFixed(1)}%`
-                      }
+                      valueFormat={(value: number) => `${(value * 100).toFixed(1)}%`}
                       onChange={(val: number) => {
-                        setSampleSize(val);
+                        setSampleSize(val)
                       }}
                     />
                   )}
@@ -241,52 +233,46 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                     ref={fileEle}
                     multiple
                     accept="*"
-                    style={{ display: "none" }}
+                    style={{ display: 'none' }}
                     onChange={fileUploadHanlder}
                   />
-                  <CommandBar
-                    overflowButtonProps={{ name: "More" }}
-                    items={commandBarList}
-                  />
+                  <CommandBar overflowButtonProps={{ name: 'More' }} items={commandBarList} />
                 </div>
               </div>
             </Callout>
           </div>
           <IconButton
-            iconProps={{ iconName: "Settings" }}
+            iconProps={{ iconName: 'Settings' }}
             title="Field Setting"
             ariaLabel="field setting"
             onClick={() => {
-              setPageStatus(draft => {
-                draft.show.fieldConfig = true;
-              });
+              setPageStatus((draft) => {
+                draft.show.fieldConfig = true
+              })
             }}
           />
         </Stack>
-        <div style={{ margin: "20px 0px" }}>
+        <div style={{ margin: '20px 0px' }}>
           <ComboBox
-            styles={{ root: { maxWidth: "180px" } }}
+            styles={{ root: { maxWidth: '180px' } }}
             selectedKey={cleanMethod}
             label="Clean Method"
             allowFreeform={true}
             autoComplete="on"
             options={cleanMethodList}
             onChange={(e, option) => {
-              option && setCleanMethod(option.key as CleanMethod);
+              option && setCleanMethod(option.key as CleanMethod)
             }}
           />
         </div>
-        <p style={{ fontSize: 12, fontWeight: 400, color: "#595959" }}>
-          Remember to adjust the fields' types and cleaning strategy before
-          extracting insights.
+        <p style={{ fontSize: 12, fontWeight: 400, color: '#595959' }}>
+          Remember to adjust the fields' types and cleaning strategy before extracting insights.
         </p>
-        <i style={{ fontSize: 12, fontWeight: 300, color: "#595959" }}>
-          Number of records {preparedData.length}
-        </i>
+        <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>Number of records {preparedData.length}</i>
         <DataTable fields={state.fields} dataSource={preparedData} />
       </div>
     </div>
-  );
+  )
 };
 
 export default DataSourceBoard;

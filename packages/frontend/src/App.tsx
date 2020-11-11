@@ -13,6 +13,9 @@ import DashBoardPage from './pages/dashBoard/index';
 import DevPage from './pages/dev';
 import UserSettings from './components/userSettings';
 
+require('intl/locale-data/jsonp/en.js')
+require('intl/locale-data/jsonp/zh.js')
+
 const pivotList = [
   'DataSource',
   'NoteBook',
@@ -64,70 +67,61 @@ function App() {
               href="https://github.com/ObservedObserver/visual-insights"
               className="logo"
             >
-              <img style={!state.beCool ? { width: '48px', marginTop: '4px' } : undefined} src={ getLogoSrc(state.beCool) } alt="rath" />
+              <img
+                style={!state.beCool ? { width: '48px', marginTop: '4px' } : undefined}
+                src={getLogoSrc(state.beCool)}
+                alt="rath"
+              />
             </a>
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg8">
             <Pivot
               selectedKey={pageStatus.current.pivotKey}
-              onLinkClick={item => {
+              onLinkClick={(item) => {
                 item &&
                   item.props.itemKey &&
-                  setPageStatus(draft => {
-                    draft.current.pivotKey = item.props.itemKey!;
-                  });
+                  setPageStatus((draft) => {
+                    draft.current.pivotKey = item.props.itemKey!
+                  })
               }}
               headersOnly={true}
             >
-              {pivotList.map(pivot => (
-                <PivotItem
-                  key={pivot.itemKey}
-                  headerText={pivot.title}
-                  itemKey={pivot.itemKey}
-                />
+              {pivotList.map((pivot) => (
+                <PivotItem key={pivot.itemKey} headerText={pivot.title} itemKey={pivot.itemKey} />
               ))}
             </Pivot>
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3">
-          <div className="header-toolbar">
+            <div className="header-toolbar">
               <UserSettings />
             </div>
           </div>
         </div>
       </div>
-      {pageStatus.current.pivotKey === "pivot-3" && (
-        <Gallery
-          subspaceList={state.subspaceList}
-          dataSource={state.cookedDataSource}
-          summary={state.summary}
+      {pageStatus.current.pivotKey === 'pivot-3' && (
+        <Gallery subspaceList={state.subspaceList} dataSource={state.cookedDataSource} summary={state.summary} />
+      )}
+      {pageStatus.current.pivotKey === 'pivot-1' && (
+        <DataSourceBoard
+          onExtractInsights={() => {
+            setPageStatus((draft) => {
+              draft.current.pivotKey = 'pivot-2'
+              draft.show.insightBoard = true
+            })
+          }}
         />
       )}
-      {pageStatus.current.pivotKey === "pivot-1" && <DataSourceBoard onExtractInsights={() => {
-        setPageStatus(draft => {
-          draft.current.pivotKey = "pivot-2";
-          draft.show.insightBoard = true;
-        });
-      }
-      } />}
-      {pageStatus.current.pivotKey === "pivot-2" && (
+      {pageStatus.current.pivotKey === 'pivot-2' && (
         <div className="content-container">
           <div className="card">
-            <NoteBook
-              summary={state.summary}
-              subspaceList={state.subspaceList}
-              dataSource={state.cookedDataSource}
-            />
+            <NoteBook summary={state.summary} subspaceList={state.subspaceList} dataSource={state.cookedDataSource} />
           </div>
         </div>
       )}
-      {
-        pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />
-      }
-      {
-        pageStatus.current.pivotKey === 'pivot-5' && <DevPage />
-      }
+      {pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />}
+      {pageStatus.current.pivotKey === 'pivot-5' && <DevPage />}
     </div>
-  );
+  )
 }
 
 export default function() {
