@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import intl from 'react-intl-universal'
 import { useGlobalState } from "../../state";
 import { FileLoader, useComposeState } from '../../utils/index';
@@ -117,7 +117,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   const commandBarList = [
     {
       key: 'upload',
-      name: 'Upload',
+      name: intl.get('dataSource.upload.upload'),
       iconProps: { iconName: 'Upload' },
       onClick: () => {
         if (fileEle.current) {
@@ -126,7 +126,15 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
       }
     }
   ]
-  console.log('label', intl.get('extract-insight'))
+
+  const cleanMethodListLang = useMemo<typeof cleanMethodList>(() => {
+    return cleanMethodList.map(m => {
+      return {
+        key: m.key,
+        text: intl.get(`dataSource.methods.${m.key}`)
+      }
+    })
+  }, [state.lang])
 
   return (
     <div className="content-container">
@@ -149,7 +157,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           <PrimaryButton
             disabled={dataSource.length === 0}
             iconProps={{ iconName: 'Financial' }}
-            text={intl.get('extract-insight')}
+            text={intl.get('dataSource.extractInsight')}
             onClick={() => {
               dispatch('extractInsights', {
                 dataSource: preparedData,
@@ -184,22 +192,22 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
               hidden={!pageStatus.show.dataConfig}
             >
               <div className="vi-callout-header">
-                <p className="vi-callout-title">Upload Your own dataset</p>
+                <p className="vi-callout-title">{intl.get('dataSource.upload.title')}</p>
               </div>
               <div className="vi-callout-inner">
                 <div className="vi-callout-content">
-                  <p className="vi-callout-subTex">.csv, .json are supportted.</p>
+                  <p className="vi-callout-subTex">{intl.get('dataSource.upload.fileTypes')}</p>
                 </div>
                 <div>
                   <Checkbox
-                    label="Add unique ids for fields"
+                    label={intl.get('dataSource.upload.uniqueIdIssue')}
                     checked={fixUnicodeField}
                     onChange={(ev?: React.FormEvent<HTMLElement>, checked?: boolean) => {
                       setFixUnicodeField(!!checked)
                     }}
                   />
                   <Label id={labelId} required={true}>
-                    Sampling
+                    {intl.get('dataSource.upload.sampling')}
                   </Label>
                   <ChoiceGroup
                     defaultSelectedKey="B"
@@ -214,7 +222,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                   />
                   {sampleMethod !== SampleKey.none && (
                     <Slider
-                      label="sample size(percent)"
+                      label={intl.get('dataSource.upload.percentSize')}
                       min={0}
                       max={1}
                       step={0.001}
@@ -256,19 +264,19 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           <ComboBox
             styles={{ root: { maxWidth: '180px' } }}
             selectedKey={cleanMethod}
-            label="Clean Method"
+            label={intl.get('dataSource.cleanMethod')}
             allowFreeform={true}
             autoComplete="on"
-            options={cleanMethodList}
+            options={cleanMethodListLang}
             onChange={(e, option) => {
               option && setCleanMethod(option.key as CleanMethod)
             }}
           />
         </div>
-        <p style={{ fontSize: 12, fontWeight: 400, color: '#595959' }}>
-          Remember to adjust the fields' types and cleaning strategy before extracting insights.
-        </p>
-        <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>Number of records {preparedData.length}</i>
+        <p style={{ fontSize: 12, fontWeight: 400, color: '#595959' }}>{intl.get('dataSource.tip')}</p>
+        <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
+          {intl.get('dataSource.recordCount', { count: preparedData.length })}
+        </i>
         <DataTable fields={state.fields} dataSource={preparedData} />
       </div>
     </div>

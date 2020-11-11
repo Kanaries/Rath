@@ -1,3 +1,31 @@
 {
-    "extract-insight": "Extract Insights"
+    "menu": {
+        "dataSource": "DataSource",
+        "noteBook": "NoteBook",
+        "explore": "Explore",
+        "dashBoard": "DashBoard",
+        "explainer": "Explainer"
+    },
+    "preference": {
+        "title": "preference"
+    },
+    "dataSource": {
+        "extractInsight": "Extract Insights",
+        "cleanMethod": "Clean Method",
+        "methods": {
+            "dropNull": "drop null records",
+            "useMode": "replace null with mode",
+            "simpleClean": "simple cleaning"
+        },
+        "tip": "Remember to adjust the fields' types and cleaning strategy before extracting insights.",
+        "recordCount": "Number of records {count}",
+        "upload": {
+            "title": "Upload Your own dataset",
+            "fileTypes": ".csv, .json are supportted.",
+            "uniqueIdIssue": "Add unique ids for fields",
+            "sampling": "Sampling",
+            "percentSize": "sample size(percent)",
+            "upload": "Upload"
+        }
+    }
 }

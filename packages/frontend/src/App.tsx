@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useMemo } from "react";
+import intl from 'react-intl-universal';
 import { useGlobalState, GlobalStateProvider } from "./state";
 import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
@@ -15,16 +16,6 @@ import UserSettings from './components/userSettings';
 
 require('intl/locale-data/jsonp/en.js')
 require('intl/locale-data/jsonp/zh.js')
-
-const pivotList = [
-  'DataSource',
-  'NoteBook',
-  'Explore',
-  'DashBoard',
-  'Dev'
-].map((page, index) => {
-  return { title: page, itemKey: 'pivot-' + (index + 1)}
-});
 
 const getLogoSrc = (withGlasses: boolean) => {
   return withGlasses
@@ -46,17 +37,28 @@ interface PageStatus {
 
 function App() {
   const [state, ] = useGlobalState();
+  const pivotList = useMemo(() => {
+    return [
+      intl.get('menu.dataSource'),
+      intl.get('menu.noteBook'),
+      intl.get('menu.explore'),
+      intl.get('menu.dashBoard'),
+      intl.get('menu.explainer')
+    ].map((page, index) => {
+      return { title: page, itemKey: 'pivot-' + (index + 1) }
+    })
+  }, [state.lang])
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
       fieldConfig: false,
       configPanel: false,
-      dataConfig: false
+      dataConfig: false,
     },
     current: {
-      pivotKey: pivotList[0].itemKey
-    }
-  });
+      pivotKey: pivotList[0].itemKey,
+    },
+  })
   return (
     <div>
       <div className="header-bar">

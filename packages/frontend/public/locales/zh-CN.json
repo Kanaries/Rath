@@ -1,3 +1,31 @@
 {
-    "extract-insight": "提取洞察"
+    "menu": {
+        "dataSource": "数据源",
+        "noteBook": "工作簿",
+        "explore": "探索",
+        "dashBoard": "报表",
+        "explainer": "数据解读"
+    },
+    "preference": {
+        "title": "个人偏好"
+    },
+    "dataSource": {
+        "extractInsight": "洞察提取",
+        "cleanMethod": "清洗方法",
+        "methods": {
+            "dropNull": "删除空值记录",
+            "useMode": "使用众数代替空",
+            "simpleClean": "简单的替换"
+        },
+        "tip": "记得在提取洞察前先调整数据的清洗策略并配置字段的属性",
+        "recordCount": "记录数 {count}",
+        "upload": {
+            "title": "上传你的数据集，根据需求调整以下配置",
+            "fileTypes": "支持.csv, .json文件",
+            "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
+            "sampling": "数据采样",
+            "percentSize": "样本大小(%)",
+            "upload": "上传文件"
+        }
+    }
 }

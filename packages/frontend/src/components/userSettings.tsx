@@ -51,7 +51,7 @@ const UserSettings: React.FC = props => {
       />
       <div ref={target}>
         <ActionButton
-          text="Preference"
+          text={intl.get('preference.title')}
           iconProps={{ iconName: 'PlayerSettings' }}
           onClick={() => {
             setShow(true)
