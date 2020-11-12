@@ -27,5 +27,39 @@
             "percentSize": "sample size(percent)",
             "upload": "Upload"
         }
+    },
+    "meta": {
+        "title": "Meta Config",
+        "save": "Save",
+        "dimension": "dimension",
+        "measure": "measure"
+    },
+    "noteBook": {
+        "univariate": {
+            "title": "Univariate Summary",
+            "desc": "Hover your mouse over the fields and see the distails and entropy reducing strategy.",
+            "columns": {
+                "fieldName": "field name",
+                "type": "type",
+                "entropy": "impurity",
+                "maxEntropy": "impurity(max)"
+            }
+        },
+        "subspace": {
+            "title": "Subspace Searching",
+            "desc": "Try to choose one row(combination of dimensions) of the subspace and see the changes of the processes below.",
+            "topKDimension": "top k percent dimension used",
+            "topKSubspace": "top k percent subspace used"
+        },
+        "clustering": {
+            "title": "Measurement Clustering",
+            "desc": "Try to choose one group to visualize them.",
+            "maxGroupNum": "Max Group Number"
+        },
+        "vis": {
+            "title": "Visualization",
+            "desc": "If there is no result here, try to click one group of measures in ***Clustering*** process above.",
+            "aggMea": "aggregate measures"
+        }
     }
 }

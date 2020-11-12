@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import intl from 'react-intl-universal';
 import { DataSource, Field } from '../../global';
 import FieldAnalysisBoard from './fieldAnalysis';
 import Subspaces from './subspaces';
@@ -93,60 +94,43 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
   }, [])
   return (
     <div>
-      <h3 className="notebook header">Univariate Summary</h3>
-      <p className="state-description">
-        Hover your mouse over the fields and see the distails and entropy
-        reducing strategy.
-      </p>
-      {state.loading.univariateSummary && (
-        <ProgressIndicator description="analyzing" />
-      )}
+      <h3 className="notebook header">{intl.get('noteBook.univariate.title')}</h3>
+      <p className="state-description">{intl.get('noteBook.univariate.desc')}</p>
+      {state.loading.univariateSummary && <ProgressIndicator description="analyzing" />}
       <div className="notebook content container">
-        <FieldAnalysisBoard
-          originSummary={summary.origin}
-          groupedSummary={summary.grouped}
-        />
+        <FieldAnalysisBoard originSummary={summary.origin} groupedSummary={summary.grouped} />
       </div>
 
-      <h3 className="notebook header">Subspace Searching</h3>
-      <p className="state-description">
-        Try to choose one row(combination of dimensions) of the subspace and see
-        the changes of the processes below.
-      </p>
-      {state.loading.subspaceSearching && (
-        <ProgressIndicator description="analyzing" />
-      )}
+      <h3 className="notebook header">{intl.get('noteBook.subspace.title')}</h3>
+      <p className="state-description">{intl.get('noteBook.subspace.desc')}</p>
+      {state.loading.subspaceSearching && <ProgressIndicator description="analyzing" />}
       {!state.loading.univariateSummary && (
         <Slider
           disabled={state.loading.subspaceSearching}
           value={state.topK.dimensionSize * 100}
-          label="top k percent dimension used"
+          label={intl.get('noteBook.subspace.topKDimension')}
           max={100}
           valueFormat={(value: number) => `${value}%`}
           showValue={true}
           onChange={(value: number) => {
-            updateState(draft => {
-              draft.topK.dimensionSize = value / 100;
-              draft.loading.subspaceSearching = true;
-            });
+            updateState((draft) => {
+              draft.topK.dimensionSize = value / 100
+              draft.loading.subspaceSearching = true
+            })
             const selectedDimensions = state.cookedDimensions.slice(
               0,
               Math.round((state.cookedDimensions.length * value) / 100)
-            );
-            combineFieldsService(
-              dataSource,
-              selectedDimensions,
-              state.cookedMeasures,
-              "sum",
-              state.useServer
-            ).then(subspaces => {
-              if (subspaces) {
-                updateState(draft => {
-                  draft.subspaceList = subspaces;
-                  draft.loading.subspaceSearching = false;
-                });
+            )
+            combineFieldsService(dataSource, selectedDimensions, state.cookedMeasures, 'sum', state.useServer).then(
+              (subspaces) => {
+                if (subspaces) {
+                  updateState((draft) => {
+                    draft.subspaceList = subspaces
+                    draft.loading.subspaceSearching = false
+                  })
+                }
               }
-            });
+            )
           }}
         />
       )}
@@ -154,30 +138,25 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
         <Slider
           disabled={state.loading.subspaceSearching}
           value={state.topK.subspacePercentSize * 100}
-          label="top k percent subspace used"
+          label={intl.get('noteBook.subspace.topKSubspace')}
           max={100}
           valueFormat={(value: number) => `${value}%`}
           showValue={true}
           onChange={(value: number) => {
-            updateState(draft => {
-              draft.topK.subspacePercentSize = value / 100;
-            });
+            updateState((draft) => {
+              draft.topK.subspacePercentSize = value / 100
+            })
           }}
         />
       )}
       <div className="notebook content center container">
-        <Subspaces
-          subspaceList={usedSubspaceList}
-          onSpaceChange={onSpaceChange}
-        />
+        <Subspaces subspaceList={usedSubspaceList} onSpaceChange={onSpaceChange} />
       </div>
 
-      <h3 className="notebook header">Measurement Clustering</h3>
-      <p className="state-description">
-        Try to choose one group to visualize them.
-      </p>
+      <h3 className="notebook header">{intl.get('noteBook.clustering.title')}</h3>
+      <p className="state-description">{intl.get('noteBook.clustering.desc')}</p>
       <Slider
-        label="Max Group Number"
+        label={intl.get('noteBook.clustering.maxGroupNum')}
         min={1}
         max={state.cookedMeasures.length || 4}
         step={1}
@@ -185,48 +164,41 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
         value={state.maxGroupNumber}
         showValue={true}
         onChange={(value: number) => {
-          updateState(draft => {
-            draft.maxGroupNumber = value;
-          });
+          updateState((draft) => {
+            draft.maxGroupNumber = value
+          })
         }}
       />
       <div className="notebook content center container">
-        <ClusterBoard
-          adjMatrix={clusterState.matrix}
-          measures={clusterState.measures}
-          onFocusGroup={onFocusGroup}
-        />
+        <ClusterBoard adjMatrix={clusterState.matrix} measures={clusterState.measures} onFocusGroup={onFocusGroup} />
       </div>
 
-      <h3 className="notebook header">Visualization</h3>
-      <p className="state-description">
-        If there is no result here, try to click one group of measures in{" "}
-        <b>Clustering</b> process above.
-      </p>
+      <h3 className="notebook header">{intl.get('noteBook.vis.title')}</h3>
+      <p className="state-description">{intl.get('noteBook.vis.desc')}</p>
       <Toggle
         checked={isAggregated}
-        label="aggregate measures"
+        label={intl.get('noteBook.vis.aggMea')}
         defaultChecked
         onText="On"
         offText="Off"
         onChange={(e, checked: boolean | undefined) => {
-          setIsAggregated(!!checked);
+          setIsAggregated(!!checked)
         }}
       />
       <div className="notebook content center container">
         <VegaBase
           defaultAggregated={isAggregated}
           defaultStack={true}
-          aggregator={"sum"}
+          aggregator={'sum'}
           schema={spec}
-          fieldFeatures={dimScores.map(dim => dim[3])}
+          fieldFeatures={dimScores.map((dim) => dim[3])}
           dataSource={dataSource}
           dimensions={clusterState.dimensions}
           measures={measuresInView}
         />
       </div>
     </div>
-  );
+  )
 }
 
 export default NoteBook;

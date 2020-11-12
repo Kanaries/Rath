@@ -5,6 +5,7 @@
   "homepage": "./",
   "dependencies": {
     "@antv/g2": "^3.5.8-beta.3",
+    "@kanaries/web-data-loader": "0.1.0",
     "@types/chroma-js": "^1.4.3",
     "@types/jest": "^24.0.18",
     "@types/node": "^12.7.8",

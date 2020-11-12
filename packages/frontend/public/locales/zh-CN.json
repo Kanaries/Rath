@@ -27,5 +27,39 @@
             "percentSize": "样本大小(%)",
             "upload": "上传文件"
         }
+    },
+    "meta": {
+        "title": "字段元信息配置",
+        "save": "保存",
+        "dimension": "维度",
+        "measure": "度量"
+    },
+    "noteBook": {
+        "univariate": {
+            "title": "单变量分析",
+            "desc": "把鼠标悬浮在你关心的字段上，了解其分布细节及加工策略。",
+            "columns": {
+                "fieldName": "字段名",
+                "type": "类型",
+                "entropy": "不纯度",
+                "maxEntropy": "不纯度(max)"
+            }
+        },
+        "subspace": {
+            "title": "组合搜索",
+            "desc": "尝试选择一行(一个维度组合)，来看后续的分析过程针对当前行所做的具体细节。",
+            "topKDimension": "使用前百分之 k 的维度",
+            "topKSubspace": "使用前百分之 k 的维度组合"
+        },
+        "clustering": {
+            "title": "度量聚类",
+            "desc": "尝试选择一个度量组来可视化他们",
+            "maxGroupNum": "最多的组的数量"
+        },
+        "vis": {
+            "title": "可视化",
+            "desc": "如果这里没有可视化，尝试点击上一步中的某个度量节点",
+            "aggMea": "聚合度量"
+        }
     }
 }

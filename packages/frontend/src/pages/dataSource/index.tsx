@@ -2,7 +2,7 @@ import React, { useState, useRef, useMemo } from "react";
 import intl from 'react-intl-universal'
 import { useGlobalState } from "../../state";
 import { FileLoader, useComposeState } from '../../utils/index';
-import { ComboBox, PrimaryButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider, Label, Checkbox } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider, Label, Checkbox, SpinButton } from 'office-ui-fabric-react';
 import DataTable from '../../components/table';
 import FieldPanel from '../../components/fieldConfig';
 import { DataSource,  BIField, Record } from '../../global';
@@ -10,22 +10,7 @@ import {  cleanMethodList, CleanMethod } from './clean';
 import { Cleaner, Sampling } from 'visual-insights';
 import { useDataSource } from './useDataSource';
 import { useId } from '@uifabric/react-hooks';
-
-enum SampleKey {
-  none = 'none',
-  reservoir = 'reservoir',
-}
-
-const SampleOptions = [
-  {
-    key: SampleKey.none,
-    text: 'none'
-  },
-  {
-    key: SampleKey.reservoir,
-    text: 'reservoir'
-  }
-];
+import { loadDataFile, SampleKey, SampleOptions } from "./utils";
 
 interface PageStatus {
   show: {
@@ -51,9 +36,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     }
   })
   const [cleanMethod, setCleanMethod] = useState<CleanMethod>('dropNull');
-  const [fixUnicodeField, setFixUnicodeField] = useState<boolean>(true);
   const [sampleMethod, setSampleMethod] = useState<SampleKey>(SampleKey.none)
-  const [sampleSize, setSampleSize] = useState<number>(0.2);
+  const [sampleSize, setSampleSize] = useState<number>(500);
 
   const dataSetting = useRef<HTMLDivElement>(null);
   const fileEle = useRef<HTMLInputElement>(null);
@@ -65,47 +49,10 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   async function fileUploadHanlder () {
     if (fileEle.current !== null && fileEle.current.files !== null) {
       const file = fileEle.current.files[0];
-      /**
-       * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
-       */
-      let tmpFields: BIField[] = [];
-      let rawData: DataSource = [];
-
-      if (file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
-        rawData = await FileLoader.csvLoader(file);
-      } else if (file.type === 'application/json') {
-        rawData = await FileLoader.jsonLoader(file);
-      } else {
-        throw new Error(`unsupported file type=${file.type} `)
-      }
-      if (sampleMethod === SampleKey.reservoir) {
-        rawData = Sampling.reservoirSampling(rawData, Math.round(rawData.length * sampleSize));
-      }
-      rawData = Cleaner.dropNullColumn(rawData, Object.keys(rawData[0])).dataSource;
-      let keys = Object.keys(rawData[0]);
-      tmpFields = keys.map((fieldName, index) => {
-        return {
-          name: fieldName,
-          type: rawData.every(row => {
-            return !isNaN(row[fieldName]) || row[fieldName] === undefined;
-          }) ? 'measure' : 'dimension'
-        }
-      });
-      if (fixUnicodeField) {
-        tmpFields.forEach((f, i) => {
-          f.name = `${f.name}-rid-${i}`
-        })
-        rawData = rawData.map(record => {
-          let fixedRecord: Record = {};
-          for (let i = 0; i < keys.length; i++) {
-            fixedRecord[tmpFields[i].name] = record[keys[i]]
-          }
-          return fixedRecord
-        })
-      }
+      const { fields, dataSource } = await loadDataFile(file, sampleMethod, sampleSize)
       updateState(draft => {
-        draft.fields = tmpFields;
-        draft.rawData = rawData;
+        draft.fields = fields;
+        draft.rawData = dataSource;
       })
       setPageStatus(draft => {
         draft.show.dataConfig = false;
@@ -199,13 +146,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                   <p className="vi-callout-subTex">{intl.get('dataSource.upload.fileTypes')}</p>
                 </div>
                 <div>
-                  <Checkbox
-                    label={intl.get('dataSource.upload.uniqueIdIssue')}
-                    checked={fixUnicodeField}
-                    onChange={(ev?: React.FormEvent<HTMLElement>, checked?: boolean) => {
-                      setFixUnicodeField(!!checked)
-                    }}
-                  />
                   <Label id={labelId} required={true}>
                     {intl.get('dataSource.upload.sampling')}
                   </Label>
@@ -220,7 +160,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                     }}
                     ariaLabelledBy={labelId}
                   />
-                  {sampleMethod !== SampleKey.none && (
+                  {/* {sampleMethod !== SampleKey.none && (
                     <Slider
                       label={intl.get('dataSource.upload.percentSize')}
                       min={0}
@@ -231,6 +171,23 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                       valueFormat={(value: number) => `${(value * 100).toFixed(1)}%`}
                       onChange={(val: number) => {
                         setSampleSize(val)
+                      }}
+                    />
+                  )} */}
+                  {sampleMethod === SampleKey.reservoir && (
+                    <SpinButton
+                      label={intl.get('dataSource.upload.percentSize')}
+                      min={0}
+                      step={1}
+                      value={sampleSize.toString()}
+                      onValidate={(value) => {
+                        setSampleSize(Number(value));
+                      }}
+                      onIncrement={() => {
+                        setSampleSize(v => v + 1)
+                      }}
+                      onDecrement={() => {
+                        setSampleSize(v => Math.max(v - 1, 0))
                       }}
                     />
                   )}

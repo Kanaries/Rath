@@ -10,7 +10,6 @@ export function useLocales (callback: (lang: string) => void) {
         })
         .then(res => res.json())
         .then(res => {
-            console.log('res',res)
             return intl.init({
                 currentLocale: lang,
                 locales: {
