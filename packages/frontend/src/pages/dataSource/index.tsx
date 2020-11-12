@@ -1,13 +1,11 @@
 import React, { useState, useRef, useMemo } from "react";
 import intl from 'react-intl-universal'
 import { useGlobalState } from "../../state";
-import { FileLoader, useComposeState } from '../../utils/index';
-import { ComboBox, PrimaryButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Slider, Label, Checkbox, SpinButton } from 'office-ui-fabric-react';
+import { useComposeState } from '../../utils/index';
+import { ComboBox, PrimaryButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Label, SpinButton } from 'office-ui-fabric-react';
 import DataTable from '../../components/table';
 import FieldPanel from '../../components/fieldConfig';
-import { DataSource,  BIField, Record } from '../../global';
 import {  cleanMethodList, CleanMethod } from './clean';
-import { Cleaner, Sampling } from 'visual-insights';
 import { useDataSource } from './useDataSource';
 import { useId } from '@uifabric/react-hooks';
 import { loadDataFile, SampleKey, SampleOptions } from "./utils";
