@@ -61,5 +61,45 @@
             "desc": "如果这里没有可视化，尝试点击上一步中的某个度量节点",
             "aggMea": "聚合度量"
         }
+    },
+    "explore": {
+        "title": "可视化洞察探索",
+        "preference": "可视化偏好设置",
+        "rankList": "推荐列表",
+        "search": "搜索",
+        "digIn": "联想",
+        "desc": "整个推荐的过程在  <b>工作簿</b> 中可见. 如果你对可视化效果不满意，可以返回工作簿根据自己的需求调整参数，再返回来检查新的推荐结果。",
+        "tip": "尝试使用设置按钮(在 \"可视化洞察探索\"标题附近) 来调整一些可视化的配置项，可以根据需求微调可视化的样式，以便你更好的理解它.",
+        "currentPage": "当前序号",
+        "last": "上一个",
+        "next": "下一个",
+        "summary": "解读",
+        "related": {
+            "title": "联想视图"
+        }
+    },
+    "dashBoard": {
+        "generateButton": "生成报表",
+        "last": "上一个",
+        "next": "下一个",
+        "desc": "可以在图标上选择你关心的数据以观察其在其他图标上的展示联动。双击空白区域可以消除选中。",
+        "pageNo": "报表序号: 当前 {current} 总 {total}"
+    },
+    "explainer": {
+        "notReadyTip": "如果你看到这段文字，说明你还没有在数据页面上传你的数据或者还没有点击数据集页面的获取洞察按钮(它会产生一个当前页面需要使用的计算结果)",
+        "insightButton": "获取洞察",
+        "sigThreshold": "显著性阈值",
+        "desc": "总共有 {num} 个视图中的洞察显著性不低于 {threshold} %",
+        "currentIndex": "当前序号",
+        "explainTemp": {
+            "viewDesc": "维度是 {dimensions}, 度量是 {measures}.",
+            "sig": "当前视图中有 {sig} % 的显著性存在 {itype} 类型的洞察。"
+        },
+        "insightTypes": {
+            "default_outlier": "异常",
+            "general": "模糊",
+            "default_group": "组间分布差异",
+            "default_trend": "趋势"
+        }
     }
 }
