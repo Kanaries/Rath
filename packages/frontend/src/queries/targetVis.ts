@@ -1,5 +1,6 @@
 import { Specification, FieldType } from 'visual-insights/build/esm/commonTypes'
 import { geomTypeMap, DataField } from './index';
+import { inferFieldSemanticTypeWithDict, inferFieldTypeWithDict } from './utils';
 
 export function targetVis(query: Specification, fields: DataField[]) {
   let fieldTypeDict: {[key: string]: DataField} = {};
@@ -7,12 +8,8 @@ export function targetVis(query: Specification, fields: DataField[]) {
     fieldTypeDict[field.name] = field
   }
 
-  function getFieldSemanticType(field: string): FieldType {
-    return fieldTypeDict[field].semanticType || "nominal";
-  }
-  function getFieldType(field: string): DataField['type'] {
-    return fieldTypeDict[field].type || 'dimension'
-  }
+  const getFieldSemanticType = (field: string) => inferFieldSemanticTypeWithDict(field, fieldTypeDict);
+  const getFieldType = (field: string) => inferFieldTypeWithDict(field, fieldTypeDict);
   
   function shouldFieldAggregate(
     field: string,
