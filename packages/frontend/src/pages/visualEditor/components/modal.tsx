@@ -23,11 +23,11 @@ const Container = styled.div`
   border-radius: 4px;
   z-index: 999;
 `;
-interface ModelProps {
+interface ModalProps {
   onClose?: () => void
   title?: string;
 }
-const Model: React.FC<ModelProps> = props => {
+const Modal: React.FC<ModalProps> = props => {
   const { onClose, title } = props;
   return (
     <Container>
@@ -45,4 +45,4 @@ const Model: React.FC<ModelProps> = props => {
   )
 }
 
-export default Model;
+export default Modal;

@@ -9,7 +9,7 @@ import ClickMenu from './components/clickMenu';
 import InsightBoard from './InsightBoard';
 import { Button, DropdownSelect, Checkbox } from '@tableau/tableau-ui';
 import { ProgressIndicator } from 'office-ui-fabric-react'
-import Model from './components/model';
+import Modal from './components/modal';
 import DataSourcePanel from './dataSource/index';
 import { useLocalState } from './store';
 import { preAnalysis, destroyWorker } from './services'
@@ -174,7 +174,7 @@ const App: React.FC<EditorProps> = props => {
           创建数据集
         </Button>
         {showDSPanel && (
-          <Model
+          <Modal
             title="创建数据源"
             onClose={() => {
               setShowDSPanel(false)
@@ -186,7 +186,7 @@ const App: React.FC<EditorProps> = props => {
                 setShowDSPanel(false)
               }}
             />
-          </Model>
+          </Modal>
         )}
         {insightReady && <span style={{ margin: '1em' }}>iready</span>}
       </Container>
@@ -229,7 +229,7 @@ const App: React.FC<EditorProps> = props => {
       {GS.dataBase[GS.currentDBIndex] && (
         <Container>
           {showInsight && (
-            <Model
+            <Modal
               onClose={() => {
                 setShowInsight(false)
               }}
@@ -241,7 +241,7 @@ const App: React.FC<EditorProps> = props => {
                 viewMs={viewMeasures}
                 filters={filters}
               />
-            </Model>
+            </Modal>
           )}
           {showMenu && (
             <ClickMenu x={position[0]} y={position[1]}>
