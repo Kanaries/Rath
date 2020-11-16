@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
+import intl from 'react-intl-universal'
 import { InsightSpace, DefaultIWorker } from 'visual-insights/build/esm/insights/dev';
 import { specification } from "visual-insights";
 import { getInsightViewSpace } from '../../service';
@@ -147,88 +148,79 @@ const DevPage: React.FC = props => {
       <PreferencePanel
         show={pageStatus.show.configPanel}
         config={visualConfig}
-        onUpdateConfig={config => {
-          setVisualConfig(config);
-          setPageStatus(draft => {
-            draft.show.configPanel = false;
-          });
+        onUpdateConfig={(config) => {
+          setVisualConfig(config)
+          setPageStatus((draft) => {
+            draft.show.configPanel = false
+          })
         }}
         onClose={() => {
-          setPageStatus(draft => {
-            draft.show.configPanel = false;
-          });
+          setPageStatus((draft) => {
+            draft.show.configPanel = false
+          })
         }}
       />
-      {
-        cookedDataSource.length > 0 && <div className="card">
+      {cookedDataSource.length > 0 && (
+        <div className="card">
           <PrimaryButton
-            text="Get Insights"
+            text={intl.get('explainer.insightButton')}
             onClick={() => {
-              setLoading(true);
+              setLoading(true)
               getInsightViewSpace(
                 cookedDataSource,
                 cookedDimensions.slice(0, cookedDimensions.length * topK.dimensionSize),
                 cookedMeasures
-              ).then(res => {
-                setInsightViewSpace(res);
-                setLoading(false);
-              });
+              ).then((res) => {
+                setInsightViewSpace(res)
+                setLoading(false)
+              })
             }}
           />
           {loading && <ProgressIndicator description="generating dashboard" />}
 
           <DashBoard>
             <div className="left">
-              <SimpleTick
-                x="type"
-                y="significance"
-                dataSource={insightViewSpace}
-                threshold={sigThreshold}
-              />
+              <SimpleTick x="type" y="significance" dataSource={insightViewSpace} threshold={sigThreshold} />
               <Slider
-                label="significance threshold"
+                label={intl.get('explainer.sigThreshold')}
                 max={100}
                 value={sigThreshold * 100}
                 valueFormat={(value: number) => `${value}%`}
                 showValue={true}
                 onChange={(value: number) => {
-                  setSigThreshold(value / 100);
-                  setChartIndex(0);
+                  setSigThreshold(value / 100)
+                  setChartIndex(0)
                 }}
               />
               <p className="state-description">
-                There are {viewSpaceList.length} of views of which insight
-                significance is no less than {(sigThreshold * 100).toFixed(2)} %
+                {intl.get('explainer.desc', { num: viewSpaceList.length, threshold: (sigThreshold * 100).toFixed(2) })}
               </p>
             </div>
             <div className="right">
-              <div style={{ width: "280px" }}>
+              <div style={{ width: '280px' }}>
                 <SpinButton
-                  label={"Current Index"}
+                  label={intl.get('explainer.currentIndex')}
                   value={(chartIndex + 1).toString()}
                   min={0}
                   max={viewSpaceList.length}
                   step={1}
-                  iconProps={{ iconName: "Search" }}
+                  iconProps={{ iconName: 'Search' }}
                   labelPosition={Position.start}
                   // tslint:disable:jsx-no-lambda
                   onValidate={(value: string) => {
-                    setChartIndex((Number(value) - 1) % viewSpaceList.length);
+                    setChartIndex((Number(value) - 1) % viewSpaceList.length)
                   }}
                   onIncrement={() => {
-                    setChartIndex((chartIndex + 1) % viewSpaceList.length);
+                    setChartIndex((chartIndex + 1) % viewSpaceList.length)
                   }}
                   onDecrement={() => {
-                    setChartIndex(
-                      (chartIndex - 1 + viewSpaceList.length) %
-                        viewSpaceList.length
-                    );
+                    setChartIndex((chartIndex - 1 + viewSpaceList.length) % viewSpaceList.length)
                   }}
-                  incrementButtonAriaLabel={"Increase value by 1"}
-                  decrementButtonAriaLabel={"Decrease value by 1"}
+                  incrementButtonAriaLabel={'Increase value by 1'}
+                  decrementButtonAriaLabel={'Decrease value by 1'}
                 />
               </div>
-              <div style={{ display: "flex", padding: "1em" }}>
+              <div style={{ display: 'flex', padding: '1em' }}>
                 <RadarChart
                   dataSource={relatedViews}
                   threshold={sigThreshold}
@@ -236,24 +228,27 @@ const DevPage: React.FC = props => {
                   valueField="significance"
                 />
                 <div>
-                  {
-                    relatedViews.length > 0 && relatedViews.filter(view => view.significance >= sigThreshold).map((view, i) => (
-                      <Tag key={i} color={ColorMap[view.type as string]}>
-                        {view.type}
-                      </Tag>
-                    ))
-                  }
-                  {
-                    viewSpaceList[chartIndex] && <p className="state-description">
-                        Dimensions are {viewSpaceList[chartIndex].dimensions}, and
-                        measures are {viewSpaceList[chartIndex].measures}. <br />
-                        There is a significance of 
-                        {(viewSpaceList[chartIndex].significance * 100).toFixed(2)}%
-                        that there exits a {viewSpaceList[chartIndex].type} in the
-                        graph. <br />
-                        {JSON.stringify(viewSpaceList[chartIndex].description)}
-                      </p>
-                  }
+                  {relatedViews.length > 0 &&
+                    relatedViews
+                      .filter((view) => view.significance >= sigThreshold)
+                      .map((view, i) => (
+                        <Tag key={i} color={ColorMap[view.type as string]}>
+                          {intl.get(`explainer.insightTypes.${view.type}`)}
+                        </Tag>
+                      ))}
+                  {viewSpaceList[chartIndex] && (
+                    <p className="state-description">
+                      {intl.get('explainer.explainTemp.viewDesc', {
+                        dimensions: viewSpaceList[chartIndex].dimensions.join(', '),
+                        measures: viewSpaceList[chartIndex].measures.join(', '),
+                      })}
+                      <br />
+                      {intl.get('explainer.explainTemp.sig', {
+                        sig: (viewSpaceList[chartIndex].significance * 100).toFixed(2),
+                        itype: viewSpaceList[chartIndex].type,
+                      })}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -275,19 +270,14 @@ const DevPage: React.FC = props => {
             </div>
           )}
         </div>
-      }
-      {
-        cookedDataSource.length === 0 && <div className="card">
-          <p>
-            Dev Page now is testing for different types of insight worker.
-            <br />
-            If you see this hint, it means you have not upload dataSource or not click the 'extract insights' button
-             in dataSource page which will produce a cooked dataSource for dev page.
-          </p>
+      )}
+      {cookedDataSource.length === 0 && (
+        <div className="card">
+          <p>{intl.get('explainer.notReadyTip')}</p>
         </div>
-      }
+      )}
     </div>
-  );
+  )
 }
 
 export default DevPage;

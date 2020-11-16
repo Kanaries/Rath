@@ -1,5 +1,0 @@
-- Tutorial
-    - [basic](./tutorial/basic.md)
-- API 
-    - [VisualInsights](./API/main.md)
-    - [Engine](./API/engine.md)

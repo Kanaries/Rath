@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import intl from 'react-intl-universal';
 import { DetailsList, SelectionMode, IColumn, Icon, HoverCard, IExpandingCardProps } from 'office-ui-fabric-react';
 import chroma from 'chroma-js';
 import { FieldSummary } from '../../service';
@@ -13,33 +14,44 @@ interface FieldAnalsisProps {
   originSummary: FieldSummary[];
   groupedSummary: FieldSummary[];
 }
-const columns: IColumn[] = [
+
+const baseColumns: IColumn[] = [
   {
     key: 'fieldName',
     name: 'fieldName',
     fieldName: 'fieldName',
     minWidth: 70,
-    maxWidth: 150
+    maxWidth: 150,
   },
   {
     key: 'type',
     name: 'type',
     fieldName: 'type',
-    minWidth: 50
+    minWidth: 50,
   },
   {
     key: 'entropy',
     name: 'entropy',
     fieldName: 'entropy',
-    minWidth: 120
+    minWidth: 120,
   },
   {
     key: 'maxEntropy',
     name: 'maxEntropy',
     fieldName: 'maxEntropy',
-    minWidth: 120
-  }
-];
+    minWidth: 120,
+  },
+]
+
+function getColumns (): IColumn[] {
+  return baseColumns.map(col => {
+    return {
+      ...col,
+      name: intl.get(`noteBook.univariate.columns.${col.key}`)
+    }
+  })
+}
+
 function getIconNameByFieldType (type: string): string {
   switch (type) {
     case 'nominal':
@@ -71,6 +83,8 @@ function contrastColor(color: [number, number, number]): [number, number, number
 const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
 
   const { originSummary, groupedSummary } = props;
+
+  const columns = getColumns();
 
   const entropyRange = useMemo<[number, number]>(() => {
     const originEntropy = originSummary.map(s => s.maxEntropy);

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import intl from 'react-intl-universal';
 import { PrimaryButton, DefaultButton, Stack, Separator, ProgressIndicator } from "office-ui-fabric-react";
 import { useGlobalState } from "../../state";
 import CombinedChart from "./combinedChart";
@@ -18,43 +19,43 @@ const DashBoardPage: React.FC = props => {
     <div className="content-container">
       <div className="card">
         <PrimaryButton
-          text="Generate Dashboard"
+          text={intl.get('dashBoard.generateButton')}
           disabled={subspaceList.length === 0}
-          iconProps={{ iconName: "AreaChart" }}
+          iconProps={{ iconName: 'AreaChart' }}
           onClick={() => {
-            dispatch("getDashBoard", {
+            dispatch('getDashBoard', {
               dataSource: cookedDataSource,
               dimensions: cookedDimensions,
-              measures: cookedMeasures
-            });
+              measures: cookedMeasures,
+            })
           }}
         />
-        { state.loading.dashBoard && <ProgressIndicator description="generating dashboard" /> }
-        <Separator>current page no: {dashBoardIndex + 1} of {dashBoardList.length}</Separator>
+        {state.loading.dashBoard && <ProgressIndicator description="generating dashboard" />}
+        <Separator>
+          {intl.get('dashBoard.pageNo', { current: dashBoardIndex + 1, total: dashBoardList.length })}
+        </Separator>
         <Stack horizontal tokens={{ childrenGap: 20 }}>
           <DefaultButton
-            text="Last"
+            text={intl.get('dashBoard.last')}
             onClick={() => {
-              setDashBoardIndex(index => (index + dashBoardList.length - 1) % dashBoardList.length)
+              setDashBoardIndex((index) => (index + dashBoardList.length - 1) % dashBoardList.length)
             }}
             allowDisabledFocus
           />
           <DefaultButton
-            text="Next"
+            text={intl.get('dashBoard.next')}
             onClick={() => {
-              setDashBoardIndex(index => (index + 1) % dashBoardList.length)
+              setDashBoardIndex((index) => (index + 1) % dashBoardList.length)
             }}
             allowDisabledFocus
           />
         </Stack>
-        <p className="state-description">
-          Double click the chart with selection to clear selection(filter).
-        </p>
+          <p className="state-description">{intl.get('dashBoard.desc')}</p>
         <div
           style={{
-            overflowX: "auto",
-            margin: "1rem",
-            border: "1px solid #e8e8e8"
+            overflowX: 'auto',
+            margin: '1rem',
+            border: '1px solid #e8e8e8',
           }}
         >
           {dashBoardList[dashBoardIndex] && dashBoardList[dashBoardIndex].length > 0 && (
@@ -67,7 +68,7 @@ const DashBoardPage: React.FC = props => {
         </div>
       </div>
     </div>
-  );
+  )
 };
 
 export default DashBoardPage;

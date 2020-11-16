@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PrimaryButton, Panel, PanelType, Toggle } from 'office-ui-fabric-react';
-
+import intl from 'react-intl-universal';
 import { BIField, BIFieldType } from '../global';
 
 interface FieldPanelProps {
@@ -38,24 +38,35 @@ const FieldPanel: React.FC<FieldPanelProps> = (props) => {
 
   const onRenderFooterContent = () => <div>
     <PrimaryButton onClick={() => { onUpdateConfig(fields); onClose(); }}>
-      Save
+      {intl.get('meta.save')}
     </PrimaryButton>
   </div>
   
-  return <Panel
-    isOpen={show}
-    type={PanelType.smallFixedFar}
-    onDismiss={onClose}
-    headerText="Meta Config"
-    closeButtonAriaLabel="Close"
-    onRenderFooterContent={onRenderFooterContent}
-  >
-    <div>
-      {
-        fields.map(field => <Toggle key={field.name} checked={field.type === 'dimension'} label={field.name} onText="dimension" offText="measure" onChange={(e, checked) => { updateFieldType(field, checked ? 'dimension' : 'measure')}} />)
-      }
-    </div>
-  </Panel>
+  return (
+    <Panel
+      isOpen={show}
+      type={PanelType.smallFixedFar}
+      onDismiss={onClose}
+      headerText={intl.get('meta.title')}
+      closeButtonAriaLabel="Close"
+      onRenderFooterContent={onRenderFooterContent}
+    >
+      <div>
+        {fields.map((field) => (
+          <Toggle
+            key={field.name}
+            checked={field.type === 'dimension'}
+            label={field.name}
+            onText={intl.get('meta.dimension')}
+            offText={intl.get('meta.measure')}
+            onChange={(e, checked) => {
+              updateFieldType(field, checked ? 'dimension' : 'measure')
+            }}
+          />
+        ))}
+      </div>
+    </Panel>
+  )
 }
 
 export default FieldPanel;

@@ -1,15 +1,62 @@
-import React, { useRef, useState } from "react";
-import { Callout, ActionButton, Toggle, DirectionalHint } from "office-ui-fabric-react";
+import React, { useEffect, useRef, useState } from "react";
+import intl from 'react-intl-universal';
+import styled from 'styled-components';
+import {
+  Callout,
+  ActionButton,
+  Toggle,
+  DirectionalHint,
+  IDropdownOption,
+  Dropdown
+} from 'office-ui-fabric-react'
 import { useGlobalState } from "../state";
+import { SUPPORT_LANG } from "../locales";
+import { useLocales } from "../utils/useLocales";
+const langOptions: IDropdownOption[] = SUPPORT_LANG.map(lang => ({
+  key: lang.value,
+  text: lang.name
+}))
 
+const Container = styled.div`
+  display: flex;
+  align-items: center;
+`
 const UserSettings: React.FC = props => {
   const target = useRef<HTMLDivElement>(null);
   const [show, setShow] = useState<boolean>(false);
   const [state, updateState] = useGlobalState();
+  const loadLocales = useLocales((lang) => {
+    updateState(s => {
+      s.lang = lang;
+    })
+  });
+  useEffect(() => {
+    let currentLocale = intl.determineLocale({
+      urlLocaleKey: 'lang',
+      cookieLocaleKey: 'lang',
+    })
+    if (!SUPPORT_LANG.find(f => f.value === currentLocale)) {
+      currentLocale = langOptions[0].key as string
+    }
+    loadLocales(currentLocale)
+  }, [])
   return (
-    <div>
+    <Container>
+      <Dropdown
+        options={langOptions}
+        selectedKey={state.lang}
+        onChange={(e, option) => {
+          option && loadLocales(option.key as string)
+        }}
+      />
       <div ref={target}>
-        <ActionButton text="Preference" iconProps={{ iconName: 'PlayerSettings' }} onClick={() => {setShow(true)}}></ActionButton>
+        <ActionButton
+          text={intl.get('preference.title')}
+          iconProps={{ iconName: 'PlayerSettings' }}
+          onClick={() => {
+            setShow(true)
+          }}
+        ></ActionButton>
       </div>
 
       {show && (
@@ -17,7 +64,7 @@ const UserSettings: React.FC = props => {
           target={target.current}
           directionalHint={DirectionalHint.bottomLeftEdge}
           onDismiss={() => {
-            setShow(false);
+            setShow(false)
           }}
         >
           <div style={{ padding: '1rem' }}>
@@ -26,13 +73,10 @@ const UserSettings: React.FC = props => {
               checked={state.beCool}
               onText="On"
               offText="Off"
-              onChange={(
-                ev: React.MouseEvent<HTMLElement>,
-                checked?: boolean
-              ) => {
-                updateState(draft => {
-                  draft.beCool = checked || false;
-                });
+              onChange={(ev: React.MouseEvent<HTMLElement>, checked?: boolean) => {
+                updateState((draft) => {
+                  draft.beCool = checked || false
+                })
               }}
             />
             <Toggle
@@ -41,20 +85,17 @@ const UserSettings: React.FC = props => {
               checked={state.useServer}
               onText="On"
               offText="Off"
-              onChange={(
-                ev: React.MouseEvent<HTMLElement>,
-                checked?: boolean
-              ) => {
-                updateState(draft => {
-                  draft.useServer = checked || false;
-                });
+              onChange={(ev: React.MouseEvent<HTMLElement>, checked?: boolean) => {
+                updateState((draft) => {
+                  draft.useServer = checked || false
+                })
               }}
             />
           </div>
         </Callout>
       )}
-    </div>
-  );
+    </Container>
+  )
 };
 
 export default UserSettings;

@@ -3,10 +3,15 @@ import React, { useState, useMemo, createContext, useContext, useCallback, useRe
 import { DataSource, BIField, Field } from './global';
 import { Subspace, FieldSummary, ViewSpace, DashBoard } from './service';
 import actions, { Test } from './actions';
+import { SUPPORT_LANG } from './locales';
 
 setAutoFreeze(false)
 
 export interface GlobalState {
+  /**
+   * language settings.
+   */
+  lang: string;
   /**
    * useless but cool.
    */
@@ -93,6 +98,7 @@ export type StateUpdater<S> = (draftState: Draft<S>) => void
 // }
 
 const initState: GlobalState = {
+  lang: SUPPORT_LANG[0].value,
   beCool: false,
   currentPage: 0,
   useServer: false,

@@ -4,9 +4,8 @@
   "version": "1.0.0",
   "description": "![](https://www.travis-ci.org/ObservedObserver/showme.svg?branch=master) ![](https://img.shields.io/github/license/ObservedObserver/showme)",
   "scripts": {
-    "build": "yarn workspace visual-insights build",
-    "test": "yarn workspace visual-insights test",
-    "coverage": "yarn workspace visual-insights coverage",
+    "build": "yarn workspace frontend build",
+    "test": "yarn workspace frontend test",
     "ui": "npm run test && npm run build && node start.js",
     "devfront": "yarn workspace frontend start",
     "devback": "yarn workspace backend dev"

@@ -17,11 +17,6 @@ Automatic insights extraction and visualization specification based on `visual-i
 
 Rath helps you extract insights from datasource automatically and generate interactive visualization with interesting findings.
 
-In this repo,
-+ `visual-insights` is the core lib containing insight finding algorithm, auto specification, dashboard generator, etc.
-+ `frontend` is a demo build based on `visual-insights`. frontend can be run individually without server. All the computation service are running in webworker by default.
-+ When you want to switch to server mode, you can run `backend` code.
-
 Here are main parts in Rath,
 
 ### DataSource

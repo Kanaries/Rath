@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import intl from 'react-intl-universal';
 import {
   DefaultButton,
   IconButton,
@@ -27,12 +28,10 @@ import {
 } from "../../service";
 import SearchBoard from "./search/index";
 
-const pivotList = [
-  'Rank List',
-  'Search'
-].map((page, index) => {
-  return { title: page, itemKey: 'pivot-' + index}
-});
+const pivotKeyList = [
+  'rankList',
+  'search'
+];
 
 interface PageStatus {
   show: {
@@ -64,9 +63,15 @@ interface GalleryProps {
 
 const Gallery: React.FC<GalleryProps> = props => {
   const { dataSource, summary, subspaceList } = props;
+  const [state, updateState] = useGlobalState()
+  const pivotList = useMemo(() => {
+    return pivotKeyList.map((page, index) => {
+      return { title: intl.get(`explore.${page}`), itemKey: 'pivot-' + index }
+    })
+  }, [state.lang])
+
   const [currentPage, setCurrentPage] = useState(0);
   const [pivotIndex, setPivotIndex] = useState(pivotList[0].itemKey);
-  const [state, updateState] = useGlobalState();
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
@@ -233,11 +238,11 @@ const Gallery: React.FC<GalleryProps> = props => {
         {pivotIndex === pivotList[0].itemKey && (
           <div>
             <h2 style={{ marginBottom: 0 }}>
-              Visual Insights{" "}
+              {intl.get('explore.title')}
               <IconButton
                 iconProps={{ iconName: "Settings" }}
-                title="Preference"
-                ariaLabel="preference"
+                title={intl.get('explore.preference')}
+                ariaLabel={intl.get('explore.preference')}
                 onClick={() => {
                   setPageStatus(draft => {
                     draft.show.configPanel = true;
@@ -246,22 +251,15 @@ const Gallery: React.FC<GalleryProps> = props => {
               />
               <IconButton
                 iconProps={{ iconName: "Lightbulb" }}
-                title="Dig In"
-                ariaLabel="digIn"
+                title={intl.get('explore.digIn')}
+                ariaLabel={intl.get('explore.digIn')}
                 onClick={() => {
                   setShowAssociation(true);
                 }}
               />
             </h2>
-            <p className="state-description">
-              Details of the recommendation process can be seen in{" "}
-              <b>NoteBook</b> Board. You can adjust some of the parameters and
-              operators and see how it influence recommendation results.
-            </p>
-            <p className="state-description">
-              Try to use the setting button beside the "visual insight" title to
-              adjust the visualization settings to get a view you prefer better.
-            </p>
+            <p className="state-description">{intl.get('explore.desc')}</p>
+            <p className="state-description">{intl.get('explore.tip')}</p>
             <div className="ms-Grid" dir="ltr">
               <div className="ms-Grid-row">
                 <div
@@ -270,7 +268,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                 >
                   <div style={{ marginBottom: "1rem" }}>
                     <SpinButton
-                      label={"Current Page"}
+                      label={intl.get('expore.currentPage')}
                       value={(currentPage + 1).toString()}
                       min={0}
                       max={viewSpaces.length}
@@ -299,7 +297,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                   </p>
                   <Stack horizontal tokens={{ childrenGap: 20 }}>
                     <DefaultButton
-                      text="Last"
+                      text={intl.get('explore.last')}
                       onClick={() => {
                         gotoPage(
                           (currentPage - 1 + viewSpaces.length) %
@@ -309,7 +307,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                       allowDisabledFocus
                     />
                     <DefaultButton
-                      text="Next"
+                      text={intl.get('explore.next')}
                       onClick={() => {
                         gotoPage((currentPage + 1) % viewSpaces.length);
                       }}
@@ -351,7 +349,7 @@ const Gallery: React.FC<GalleryProps> = props => {
 
       {pivotIndex === pivotList[0].itemKey && showAssociation && (
         <div className="card">
-          <h2> Related Views </h2>
+          <h2> {intl.get('explore.related.title')} </h2>
           <Association
             onSelectView={index => {
               let pos = viewSpaces.findIndex(v => v.index === index);
