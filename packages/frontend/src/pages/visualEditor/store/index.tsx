@@ -1,8 +1,6 @@
 import React, { useContext, useState, useCallback } from 'react';
 import { DataSet } from '../interfaces';
 import produce, { setAutoFreeze } from 'immer';
-// import { getTitanicData } from '../data/titanic';
-// import { getStudentsData } from '../data/students';
 setAutoFreeze(false);
 interface IGlobalState {
     dataBase: DataSet[];
