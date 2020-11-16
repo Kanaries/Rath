@@ -1,4 +1,4 @@
-import { FieldType } from "visual-insights/src/commonTypes";
+import { FieldType } from "visual-insights/build/esm/commonTypes";
 import { DataField } from "./index";
 interface FieldTypeDictonary {
     [key: string]: DataField

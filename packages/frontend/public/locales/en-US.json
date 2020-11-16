@@ -4,7 +4,8 @@
         "noteBook": "NoteBook",
         "explore": "Explore",
         "dashBoard": "DashBoard",
-        "explainer": "Explainer"
+        "explainer": "Explainer",
+        "editor": "Visual Editor"
     },
     "preference": {
         "title": "preference"
