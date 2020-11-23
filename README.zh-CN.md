@@ -48,7 +48,7 @@ Rath 可能帮助你快速完成对一个数据集的自动化可视化分析。
 
 ## Documentation
 
-+ 使用Rath底层的SDK将增强分析能力嵌入你自己的应用: [visual-insights](./packages/visual-insights/README.md)
++ 使用Rath底层的SDK将增强分析能力嵌入你自己的应用: [visual-insights](https://github.com/Kanaries/visual-insights/blob/master/README.md)
 
 ## Reference
 
