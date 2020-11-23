@@ -125,7 +125,7 @@ visualization.
 
 ## Documentation
 
-+ visual insight api: [visual-insights](./packages/visual-insights/README.md)
++ visual insight api: [visual-insights](https://github.com/Kanaries/visual-insights/blob/master/README.md)
 + doc for reuseable hooks: todos
 
 ## Reference
