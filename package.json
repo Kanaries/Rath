@@ -10,11 +10,6 @@
     "devfront": "yarn workspace frontend start",
     "devback": "yarn workspace backend dev"
   },
-  "resolutions": {
-    "@types/react": "16.9.16",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ObservedObserver/showme.git"
@@ -39,9 +34,7 @@
       "**/react-dom",
       "**/vega",
       "**/vega-lite",
-      "**/vega-embed",
-      "augmented-pivot-table/pivot-chart",
-      "augmented-pivot-table/pivot-chart/**"
+      "**/vega-embed"
     ]
   },
   "homepage": "https://github.com/ObservedObserver/showme#readme",

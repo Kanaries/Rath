@@ -4,46 +4,60 @@
   "private": true,
   "homepage": "./",
   "dependencies": {
-    "@antv/g2": "^3.5.8-beta.3",
     "@kanaries/web-data-loader": "0.1.0",
     "@tableau/tableau-ui": "^3.0.0",
+    "@testing-library/jest-dom": "^5.11.8",
+    "@testing-library/react": "^11.2.3",
+    "@testing-library/user-event": "^12.6.0",
     "@types/chroma-js": "^1.4.3",
-    "@types/jest": "^24.0.18",
-    "@types/node": "^12.7.8",
+    "@types/jest": "^26.0.20",
+    "@types/node": "^12.19.12",
     "@types/papaparse": "^5.0.1",
-    "@types/react": "^16.9.16",
-    "@types/react-dom": "^16.9.4",
-    "@uifabric/icons": "^7.3.0",
+    "@types/react": "^16.14.2",
+    "@types/react-dom": "^16.9.10",
+    "@uifabric/icons": "^7.5.17",
+    "@uifabric/react-hooks": "^7.13.9",
     "chroma-js": "^2.0.6",
     "cube-core": "^2.13.0",
     "datalib": "^1.9.2",
     "fuse.js": "^3.4.6",
     "immer": "^4.0.1",
     "mocha": "^6.2.0",
-    "office-ui-fabric-core": "^10.1.0",
-    "office-ui-fabric-react": "^7.38.0",
+    "office-ui-fabric-core": "^11.0.0",
+    "office-ui-fabric-react": "^7.155.3",
     "papaparse": "^5.1.0",
-    "react": "^16.9.0",
+    "react": "^17.0.1",
     "react-app-rewired": "^2.1.5",
     "react-beautiful-dnd": "^13.0.0",
-    "react-dom": "^16.9.0",
+    "react-dom": "^17.0.1",
     "react-intl-universal": "^2.4.2",
     "react-json-view": "^1.19.1",
-    "react-markdown": "^4.2.2",
-    "react-scripts": "^3.3.0",
+    "react-markdown": "^5.0.3",
+    "react-scripts": "4.0.1",
     "styled-components": "^4.4.1",
-    "typescript": "^3.7.5",
+    "typescript": "^4.1.3",
     "vega": "^5.6.0",
     "vega-embed": "^5.1.3",
     "vega-lite": "^4.0.0",
     "visual-insights": "^0.5.5",
-    "worker-loader": "^2.0.0"
+    "web-vitals": "^0.2.4",
+    "worker-loader": "^3.0.7"
+  },
+  "devDependencies": {
+    "@types/react-beautiful-dnd": "^13.0.0",
+    "@types/styled-components": "4.1.8"
   },
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [
@@ -56,9 +70,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@types/react-beautiful-dnd": "^13.0.0",
-    "@types/styled-components": "4.1.8"
   }
 }
