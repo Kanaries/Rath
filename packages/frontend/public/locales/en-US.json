@@ -11,7 +11,7 @@
         "title": "preference"
     },
     "dataSource": {
-        "extractInsight": "Extract Insights",
+        "extractInsight": "Insight Analysis",
         "cleanMethod": "Clean Method",
         "methods": {
             "dropNull": "drop null records",

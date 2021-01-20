@@ -11,7 +11,7 @@
         "title": "个人偏好"
     },
     "dataSource": {
-        "extractInsight": "洞察提取",
+        "extractInsight": "开始分析",
         "cleanMethod": "清洗方法",
         "methods": {
             "dropNull": "删除空值记录",

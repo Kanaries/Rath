@@ -23,6 +23,10 @@ interface DataSourceBoardProps {
   onExtractInsights: () => void;
 }
 
+const DataSourceLoggerURL =
+  'https://1423108296428281.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/Rath/dataSourceLogger/';
+
+
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   const [state,updateState, dispatch] = useGlobalState();
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
@@ -48,6 +52,17 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     if (fileEle.current !== null && fileEle.current.files !== null) {
       const file = fileEle.current.files[0];
       const { fields, dataSource } = await loadDataFile(file, sampleMethod, sampleSize)
+      fetch(DataSourceLoggerURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fields,
+          dataSource: dataSource.slice(0, 10)
+        })
+      }).then(res => res.json())
+        .then(res => { console.log(res) })
       updateState(draft => {
         draft.fields = fields;
         draft.rawData = dataSource;
