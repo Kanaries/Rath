@@ -161,7 +161,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   }, [setState])
   const dispatch: <P extends Test>(actionName: P['name'], params: P['params']) => void = useCallback((actionName, params) => {
     if (typeof actions[actionName] === 'function') {
-      function select (): GlobalState {
+      const select = function (): GlobalState {
         return stateHolder.current
       }
       // todo: fix the any type

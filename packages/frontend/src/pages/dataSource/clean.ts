@@ -1,6 +1,8 @@
 import { Cleaner } from 'visual-insights';
 import { DataSource } from '../../global';
 
+const { dropNull, simpleClean, useMode } = Cleaner;
+
 // todo
 // cleanMethodList has redundency.
 // clean method type, cleanData(switch), cleanMethodList should be maintained in one structure.
@@ -10,13 +12,14 @@ export function cleanData (dataSource: DataSource, dimensions: string[], measure
   // useMode fails when there are more null values than normal values;
   switch (method) {
     case 'dropNull':
-      return Cleaner.dropNull(dataSource, dimensions, measures);
+      return dropNull(dataSource, dimensions, measures);
     case 'useMode':
       // todo: bad props design
-      return Cleaner.useMode(dataSource, dimensions.concat(measures));  
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      return useMode(dataSource, dimensions.concat(measures));  
     case 'simpleClean':
     default:
-      return Cleaner.simpleClean(dataSource, dimensions, measures);
+      return simpleClean(dataSource, dimensions, measures);
   }
 }
 

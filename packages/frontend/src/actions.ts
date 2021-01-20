@@ -104,6 +104,7 @@ const univariateSummary: Action<{dataSource: DataSource; fields: BIField[]}> = a
     }
     // await SubspaceSeach(groupedData, summary, newDimensions, measures, "sum");
   } catch (error) {
+    console.error(error)
     updateState(draft => {
       draft.loading.univariateSummary = false;
     });

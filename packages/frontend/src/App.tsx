@@ -9,6 +9,7 @@ import RathCoolLogo from './assets/rath-glasses.png';
 
 import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
+import VisualEditor from './pages/visualEditor';
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
 import DevPage from './pages/dev';
@@ -43,7 +44,8 @@ function App() {
       intl.get('menu.noteBook'),
       intl.get('menu.explore'),
       intl.get('menu.dashBoard'),
-      intl.get('menu.explainer')
+      intl.get('menu.explainer'),
+      intl.get('menu.editor')
     ].map((page, index) => {
       return { title: page, itemKey: 'pivot-' + (index + 1) }
     })
@@ -62,7 +64,7 @@ function App() {
   return (
     <div>
       <div className="header-bar">
-        <div className="ms-Grid-row">
+        <div className="ms-Grid-row" dir="ltr">
           <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg1">
             <a
               // onClick={() => { window.location.reload(false); }}
@@ -122,6 +124,7 @@ function App() {
       )}
       {pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />}
       {pageStatus.current.pivotKey === 'pivot-5' && <DevPage />}
+      {pageStatus.current.pivotKey === 'pivot-6' && <VisualEditor dataSource={state.cookedDataSource} dimensions={state.cookedDimensions} measures={state.cookedMeasures} />}
     </div>
   )
 }

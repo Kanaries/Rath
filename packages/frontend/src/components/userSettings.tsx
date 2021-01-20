@@ -9,6 +9,7 @@ import {
   IDropdownOption,
   Dropdown
 } from 'office-ui-fabric-react'
+import { DropdownSelect } from '@tableau/tableau-ui';
 import { useGlobalState } from "../state";
 import { SUPPORT_LANG } from "../locales";
 import { useLocales } from "../utils/useLocales";
@@ -42,13 +43,16 @@ const UserSettings: React.FC = props => {
   }, [])
   return (
     <Container>
-      <Dropdown
-        options={langOptions}
-        selectedKey={state.lang}
-        onChange={(e, option) => {
-          option && loadLocales(option.key as string)
+      <DropdownSelect
+        value={state.lang}
+        onChange={(e) => {
+          loadLocales(e.target.value as string)
         }}
-      />
+      >
+        {
+          langOptions.map(lang => <option key={lang.key} value={lang.key}>{lang.text}</option>)
+        }
+      </DropdownSelect>
       <div ref={target}>
         <ActionButton
           text={intl.get('preference.title')}

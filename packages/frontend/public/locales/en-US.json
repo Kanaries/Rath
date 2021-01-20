@@ -4,13 +4,14 @@
         "noteBook": "NoteBook",
         "explore": "Explore",
         "dashBoard": "DashBoard",
-        "explainer": "Explainer"
+        "explainer": "Explainer",
+        "editor": "Visual Editor"
     },
     "preference": {
         "title": "preference"
     },
     "dataSource": {
-        "extractInsight": "Extract Insights",
+        "extractInsight": "Insight Analysis",
         "cleanMethod": "Clean Method",
         "methods": {
             "dropNull": "drop null records",

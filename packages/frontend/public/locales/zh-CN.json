@@ -4,13 +4,14 @@
         "noteBook": "工作簿",
         "explore": "探索",
         "dashBoard": "报表",
-        "explainer": "数据解读"
+        "explainer": "数据解读",
+        "editor": "自助分析"
     },
     "preference": {
         "title": "个人偏好"
     },
     "dataSource": {
-        "extractInsight": "洞察提取",
+        "extractInsight": "开始分析",
         "cleanMethod": "清洗方法",
         "methods": {
             "dropNull": "删除空值记录",
