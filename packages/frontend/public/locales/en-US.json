@@ -5,14 +5,35 @@
         "explore": "Explore",
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
-        "editor": "Visual Editor"
+        "editor": "Visual Editor",
+        "support": "Support"
     },
     "preference": {
         "title": "preference"
     },
+    "support": {
+        "title": "How to Get Support",
+        "link": "https://www.yuque.com/docs/share/65511730-af74-46eb-86fe-356c4f52402b?# 《Get Support》"
+    },
     "dataSource": {
         "extractInsight": "Insight Analysis",
         "cleanMethod": "Clean Method",
+        "importData": {
+            "buttonName": "Import Data",
+            "type": {
+                "file": "File",
+                "restful": "RESTFUL",
+                "mysql": "MySQL",
+                "demo": "Demo"
+            },
+            "demo": {
+                "available": "Available Datasets"
+            }
+        },
+        "sampling": {
+            "none": "none",
+            "reservoir": "fixed sample size"
+        },
         "methods": {
             "dropNull": "drop null records",
             "useMode": "replace null with mode",

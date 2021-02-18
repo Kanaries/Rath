@@ -3,22 +3,31 @@ import { BIField, Record } from "../../global";
 import { FileLoader, isASCII } from "../../utils";
 import { Cleaner, Sampling } from 'visual-insights';
 import { FileReader } from '@kanaries/web-data-loader'
+import intl from 'react-intl-universal';
+import { useMemo } from "react";
 
 export enum SampleKey {
   none = 'none',
   reservoir = 'reservoir',
 }
 
-export const SampleOptions = [
-  {
-    key: SampleKey.none,
-    text: 'none'
-  },
-  {
-    key: SampleKey.reservoir,
-    text: 'reservoir'
-  }
-];
+export const useSampleOptions = function () {
+    const noneText = intl.get(`dataSource.sampling.${SampleKey.none}`);
+    const reservoirText = intl.get(`dataSource.sampling.${SampleKey.reservoir}`);
+    const options = useMemo(() => {
+        return [
+            {
+                key: SampleKey.none,
+                text: noneText,
+            },
+            {
+                key: SampleKey.reservoir,
+                text: reservoirText,
+            },
+        ];
+    }, [noneText, reservoirText])
+    return options;
+}
 
 /**
  * 给数据添加特殊的index key，注意这是一个会修改参数的函数

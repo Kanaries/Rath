@@ -16,8 +16,10 @@ ReactDOM.render(
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals(console.log);
 
-document.write(
-  unescape(
-    "%3Cspan id='cnzz_stat_icon_1279593444'%3E%3C/span%3E%3Cscript src='https://s9.cnzz.com/z_stat.php%3Fid%3D1279593444%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"
-  )
-)
+if (process.env.NODE_ENV === 'production') {
+  document.write(
+    unescape(
+      "%3Cspan id='cnzz_stat_icon_1279593444'%3E%3C/span%3E%3Cscript src='https://s9.cnzz.com/z_stat.php%3Fid%3D1279593444%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"
+    )
+  );
+}

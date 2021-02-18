@@ -13,6 +13,7 @@ import VisualEditor from './pages/visualEditor';
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
 import DevPage from './pages/dev';
+import SupportPage from './pages/support/index';
 import UserSettings from './components/userSettings';
 
 require('intl/locale-data/jsonp/en.js')
@@ -45,7 +46,8 @@ function App() {
       intl.get('menu.explore'),
       intl.get('menu.dashBoard'),
       intl.get('menu.explainer'),
-      intl.get('menu.editor')
+      intl.get('menu.editor'),
+      intl.get('menu.support')
     ].map((page, index) => {
       return { title: page, itemKey: 'pivot-' + (index + 1) }
     })
@@ -125,11 +127,12 @@ function App() {
       {pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />}
       {pageStatus.current.pivotKey === 'pivot-5' && <DevPage />}
       {pageStatus.current.pivotKey === 'pivot-6' && <VisualEditor dataSource={state.cookedDataSource} dimensions={state.cookedDimensions} measures={state.cookedMeasures} />}
+      {pageStatus.current.pivotKey === 'pivot-7' && <SupportPage />}
     </div>
   )
 }
 
-export default function() {
+export default function WrappedApp() {
   return (
     <GlobalStateProvider>
       <App />

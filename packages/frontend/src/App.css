@@ -63,10 +63,13 @@ h2, h3 {
 }
 
 .vi-callout{
-  min-Width: 300px;
+  min-Width: 600px;
 }
 .vi-callout-header{
   padding: 18px 24px 12px;
+}
+.vi-callout-close-icon{
+  float: right;
 }
 .vi-callout-title{
   margin: 0;
@@ -86,7 +89,7 @@ h2, h3 {
   color: #323130;
   font-weight: 300;
 }
-.vi-callout-action{
+.vi-callout-actions{
   position: relative;
   margin-top: 20px;
   width: 100%;
