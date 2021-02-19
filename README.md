@@ -139,10 +139,7 @@ Rath is insipired by several excellent works below:
 
 ## Story behind Rath
 
-Rath is original from Mome Raths in *Alice's Adventures in Wonderland*.
 
-<div style="text-align:center;">
-    <img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/mome-raths.png" alt="logo" width="280px" />
-</div>
 
-The word Rath is used in SAO Alicization as name of org. developing Soul Translator (STL) and Under World, which creates A.L.I.C.E.
+
+The word Rath is used in SAO Alicization as name of org. developing Soul Translator (STL) and Under World, which creates A.L.I.C.E. ('Rath' is original from Mome Raths in *Alice's Adventures in Wonderland*.) I use the name Rath for this project for hoping it can create something for more than I expected like Alice.
