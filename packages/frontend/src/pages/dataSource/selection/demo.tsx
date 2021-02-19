@@ -4,6 +4,7 @@ import { useId } from "@uifabric/react-hooks";
 import intl from 'react-intl-universal';
 import { BIField, Record } from '../../../global';
 import { DemoDataAssets, IDemoDataKey, useDemoDataOptions } from '../config';
+import { logDataImport } from '../../../loggers/dataImport';
 
 interface DemoDataProps {
     onClose: () => void;
@@ -34,6 +35,13 @@ const DemoData: React.FC<DemoDataProps> = props => {
         requestDemoData(dsKey).then(data => {
             const { dataSource, fields } = data;
             onDataLoaded(fields, dataSource);
+            logDataImport({
+                dataType: "Demo",
+                name: dsKey,
+                fields,
+                dataSource: [],
+                size: dataSource.length,
+            });
         })
         onClose();
     }, [dsKey, onDataLoaded, onClose])

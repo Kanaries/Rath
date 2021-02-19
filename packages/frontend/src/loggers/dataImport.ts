@@ -3,12 +3,15 @@ import { BIField, Record } from "../global"
 const DATA_SOURCE_LOGGER_URL =
   'https://1423108296428281.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/Rath/dataSourceLogger/'
 
-
-export async function logDataImport (fields: BIField[], dataSource: Record[]) {
-    const loggerBody = {
-        fields,
-        dataSource: dataSource.slice(0, 10),
-    };
+interface IDataImportInfo {
+    dataType: string;
+    fields: BIField[];
+    dataSource: Record[];
+    name?: string;
+    info?: any;
+    size: number;
+}
+export async function logDataImport (props: IDataImportInfo) {
     if (process.env.NODE_ENV === 'production') {
         try {
           const res = await fetch(DATA_SOURCE_LOGGER_URL, {
@@ -16,7 +19,7 @@ export async function logDataImport (fields: BIField[], dataSource: Record[]) {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(loggerBody),
+            body: JSON.stringify(props),
           })
           const result = await res.json()
           console.log(result)
@@ -24,6 +27,6 @@ export async function logDataImport (fields: BIField[], dataSource: Record[]) {
           console.error(error)
         }
     } else {
-        console.log(`Current Env: ${process.env.NODE_ENV}.`, loggerBody);
+        console.log(`Current Env: ${process.env.NODE_ENV}.`, props);
     }
 }

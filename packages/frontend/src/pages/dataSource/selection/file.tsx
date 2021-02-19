@@ -22,7 +22,12 @@ const FileData: React.FC<FileDataProps> = (props) => {
         if (fileEle.current !== null && fileEle.current.files !== null) {
             const file = fileEle.current.files[0];
             const { fields, dataSource } = await loadDataFile(file, sampleMethod, sampleSize);
-            logDataImport(fields, dataSource);
+            logDataImport({
+                dataType: 'File',
+                fields,
+                dataSource: dataSource.slice(0, 10),
+                size: dataSource.length
+            });
             onDataLoaded(fields, dataSource);
             onClose();
         }

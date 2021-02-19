@@ -111,7 +111,7 @@ function App() {
         <DataSourceBoard
           onExtractInsights={() => {
             setPageStatus((draft) => {
-              draft.current.pivotKey = 'pivot-2'
+              draft.current.pivotKey = 'pivot-3'
               draft.show.insightBoard = true
             })
           }}

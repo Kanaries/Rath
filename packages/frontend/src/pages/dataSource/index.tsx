@@ -3,12 +3,13 @@ import intl from 'react-intl-universal'
 import { useGlobalState } from "../../state";
 import { useComposeState } from '../../utils/index';
 import { ComboBox, PrimaryButton, IconButton, Stack, DefaultButton } from 'office-ui-fabric-react';
-import DataTable from '../../components/table';
+// import DataTable from '../../components/table';
+import DataTable from './dataTable/index';
 import FieldPanel from '../../components/fieldConfig';
 import {  cleanMethodList, CleanMethod } from './clean';
 import { useDataSource } from './useDataSource';
 import Selection from './selection/index';
-import { Record } from "../../global";
+import { BIFieldType, Record } from "../../global";
 interface PageStatus {
   show: {
     insightBoard: boolean;
@@ -63,6 +64,15 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         />
     );
   }, [])
+
+  const updateFieldBIType = useCallback((type: BIFieldType, fieldKey: string) => {
+    updateState(draft => {
+      const target = draft.fields.find(f => f.name === fieldKey);
+      if (target) {
+        target.type = type;
+      }
+    })
+  }, []);
 
   useEffect(() => {
     if (dataSource && dataSource.length === 0) {
@@ -157,7 +167,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
           {intl.get('dataSource.recordCount', { count: preparedData.length })}
         </i>
-        <DataTable fields={state.fields} dataSource={preparedData} />
+        <DataTable fields={state.fields} dataSource={preparedData} onChangeBIType={updateFieldBIType} />
       </div>
     </div>
   )

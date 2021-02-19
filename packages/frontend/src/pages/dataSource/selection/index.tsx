@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Label, ChoiceGroup, IChoiceGroupOption, SpinButton, IconButton, DefaultButton } from 'office-ui-fabric-react';
+import React, { useState } from 'react';
+import { Modal, ChoiceGroup, IconButton } from 'office-ui-fabric-react';
 import { useId } from '@uifabric/react-hooks';
 import intl from 'react-intl-universal';
-import { loadDataFile, SampleKey, useSampleOptions } from '../utils'
 import { BIField, IDataSourceType, Record } from '../../../global';
-import { logDataImport } from '../../../loggers/dataImport';
+
 import { useDataSourceTypeOptions } from '../config';
 import FileData from './file';
 import DemoData from './demo';

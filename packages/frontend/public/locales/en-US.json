@@ -37,7 +37,8 @@
         "methods": {
             "dropNull": "drop null records",
             "useMode": "replace null with mode",
-            "simpleClean": "simple cleaning"
+            "simpleClean": "simple cleaning",
+            "none": "none(use original data)"
         },
         "tip": "Remember to adjust the fields' types and cleaning strategy before extracting insights.",
         "recordCount": "Number of records {count}",

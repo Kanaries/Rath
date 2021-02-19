@@ -1,56 +1,52 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import intl from 'react-intl-universal';
-import { DetailsList, SelectionMode, IColumn, Icon, HoverCard, IExpandingCardProps } from 'office-ui-fabric-react';
+import { Icon, HoverCard, IExpandingCardProps } from 'office-ui-fabric-react';
 import chroma from 'chroma-js';
 import { FieldSummary } from '../../service';
 import DistributionChart from './distributionChart';
 import { FieldType, Record } from '../../global';
+import { BaseTable, ArtColumn } from 'ali-react-table';
+import styled from 'styled-components';
 
 import './fieldAnalysis.css';
+import { IRow } from '../../interfaces';
 
 // todo: distribution info
+
+const CustomBaseTable = styled(BaseTable)`
+    --header-bgcolor: #fafafa;
+    --bgcolor: rgba(0, 0, 0, 0);
+    --header-row-height: 48px;
+`;
 
 interface FieldAnalsisProps {
   originSummary: FieldSummary[];
   groupedSummary: FieldSummary[];
 }
 
-const baseColumns: IColumn[] = [
+const baseColumns: ArtColumn[] = [
   {
-    key: 'fieldName',
+    code: 'fieldName',
     name: 'fieldName',
-    fieldName: 'fieldName',
-    minWidth: 70,
-    maxWidth: 150,
   },
   {
-    key: 'type',
+    code: 'type',
     name: 'type',
-    fieldName: 'type',
-    minWidth: 50,
+    width: 160,
   },
   {
-    key: 'entropy',
+    code: 'entropy',
     name: 'entropy',
-    fieldName: 'entropy',
-    minWidth: 120,
+    width: 220,
+    align: 'right'
   },
   {
-    key: 'maxEntropy',
+    code: 'maxEntropy',
     name: 'maxEntropy',
-    fieldName: 'maxEntropy',
-    minWidth: 120,
+    width: 220,
+    align: 'right'
   },
 ]
-
-function getColumns (): IColumn[] {
-  return baseColumns.map(col => {
-    return {
-      ...col,
-      name: intl.get(`noteBook.univariate.columns.${col.key}`)
-    }
-  })
-}
 
 function getIconNameByFieldType (type: string): string {
   switch (type) {
@@ -84,88 +80,99 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
 
   const { originSummary, groupedSummary } = props;
 
-  const columns = getColumns();
-
   const entropyRange = useMemo<[number, number]>(() => {
     const originEntropy = originSummary.map(s => s.maxEntropy);
     return [0, Math.max(...originEntropy)];
   }, [originSummary])
 
-  const onRenderCompactCard = (item: Record) => {
-    return (
-      <div className="field-hover-card">
-        <h2>{item.fieldName}</h2>
-        <div>Field entropy is { Number(item.entropy).toFixed(2) }</div>
-        <div className="chart-vertical-margin-container" >
-          <DistributionChart x="memberName" y="count" fieldType={item.type as FieldType} dataSource={item.distribution} />
-        </div>
-        
-      </div>
-    )
-  }
-  const onRenderExpandedCard = (item: Record) => {
-    const name = item.fieldName;
-    const target = groupedSummary.find(s => s.fieldName === name + '(group)')
-    return (
-      <div className="field-hover-card">
-        {
-          target ? <div>
-            <h3>{target.fieldName}</h3>
-            <div>Field entropy is { Number(target.entropy).toFixed(2) }</div>
-            <div className="chart-vertical-margin-container">
-              <DistributionChart x="memberName" y="count" fieldType={target.type as FieldType} dataSource={target.distribution} />
-            </div>
-          </div> : <div>This field is not grouped.</div>
-        }
-      </div>
-    )
-  }
-
-
-
-  const renderItemColumn = (item: Record, index?: number, column?: IColumn) => {
-    if (column !== undefined) {
-      const name = item.fieldName;
-      const target = groupedSummary.find(s => s.fieldName === name + '(group)')
-      const expandingCardProps: IExpandingCardProps = {
-        onRenderCompactCard,
-        onRenderExpandedCard,
-        renderData: item,
-        compactCardHeight: 320,
-        expandedCardHeight: target ? 320 : 40
-      }
-      const fieldContent = item[column.fieldName!];
-      let bgColor: [number, number, number] = [255, 255, 255];
-      switch (column.key) {
-        case 'type':
-          return <div>
-            <Icon iconName={getIconNameByFieldType(fieldContent)} /> {fieldContent}
+  const onRenderCompactCard = useCallback((item: Record) => {
+      return (
+          <div className="field-hover-card">
+              <h2>{item.fieldName}</h2>
+              <div>Field entropy is {Number(item.entropy).toFixed(2)}</div>
+              <div className="chart-vertical-margin-container">
+                  <DistributionChart x="memberName" y="count" fieldType={item.type as FieldType} dataSource={item.distribution} />
+              </div>
           </div>
-        case 'entropy':
-        case 'maxEntropy':
-          bgColor = getValueColor(item[column.key], entropyRange);
-          let bgColorStr = `rgb(${bgColor.join(',')})`
-          let fontColorStr = `rgb(${contrastColor(bgColor).join(',')})`
-          return (
-            <HoverCard expandedCardOpenDelay={800} expandingCardProps={expandingCardProps} instantOpenOnClick={true}>
-              <div style={{ boxShadow: `${bgColorStr} 0px 0px 0px 10px`, backgroundColor: bgColorStr, color: fontColorStr }}>{fieldContent}</div>
-            </HoverCard>
-          )
-        default:
-          return <HoverCard expandedCardOpenDelay={800} expandingCardProps={expandingCardProps} instantOpenOnClick={true}>
-          <div>{fieldContent}</div>
-        </HoverCard>
-      }
-    }
-  }
+      );
+  }, []);
+  const onRenderExpandedCard = useCallback((item: Record) => {
+      const name = item.fieldName;
+      const target = groupedSummary.find((s) => s.fieldName === name + "(group)");
+      return (
+          <div className="field-hover-card">
+              {target ? (
+                  <div>
+                      <h3>{target.fieldName}</h3>
+                      <div>Field entropy is {Number(target.entropy).toFixed(2)}</div>
+                      <div className="chart-vertical-margin-container">
+                          <DistributionChart
+                              x="memberName"
+                              y="count"
+                              fieldType={target.type as FieldType}
+                              dataSource={target.distribution}
+                          />
+                      </div>
+                  </div>
+              ) : (
+                  <div>This field is not grouped.</div>
+              )}
+          </div>
+      );
+  }, [groupedSummary]);
 
-  // const onRenderRow: IRenderFunction<any> = (props) => {
-  //   const customStyles: Partial<IDetailsRowStyles> = {};
-  //   customStyles.root = { backgroundColor: getValueColor(props.item['entropy'], entropyRange), color: '#fff' }
-  //   return <DetailsRow {...props} styles={customStyles} />;
-  // };
+  const columns = useMemo<ArtColumn[]>(() => {
+    return baseColumns.map((col) => {
+        const nextCol: ArtColumn = {
+            ...col,
+            name: intl.get(`noteBook.univariate.columns.${col.code}`),
+            render(value: any, record: Record, rowIndex?: number) {
+                const name = record.fieldName;
+                const target = groupedSummary.find((s) => s.fieldName === name + "(group)");
+                const expandingCardProps: IExpandingCardProps = {
+                    onRenderCompactCard,
+                    onRenderExpandedCard,
+                    renderData: record,
+                    compactCardHeight: 320,
+                    expandedCardHeight: target ? 320 : 40,
+                };
+                const fieldContent = record[col.code!];
+                switch (col.code) {
+                    case "type":
+                        return (
+                            <div>
+                                <Icon iconName={getIconNameByFieldType(fieldContent)} /> {fieldContent}
+                            </div>
+                        );
+                    case "entropy":
+                    case "maxEntropy":
+                    default:
+                        return (
+                            <HoverCard expandedCardOpenDelay={800} expandingCardProps={expandingCardProps} instantOpenOnClick={true}>
+                                <div>{fieldContent}</div>
+                            </HoverCard>
+                        );
+                }
+            },
+        };
+        if (col.code === 'entropy' || col.code === 'maxEntropy') {
+          nextCol.getCellProps = function (value: any, record: IRow, rowIndex?: number) {
+            const bgColor = getValueColor(value, entropyRange);
+            let bgColorStr = `rgb(${bgColor.join(",")})`;
+            let fontColorStr = `rgb(${contrastColor(bgColor).join(",")})`;
+            return {
+              style: {
+                backgroundColor: bgColorStr,
+                color: fontColorStr
+              }
+            }
+          }
+        }
+        return nextCol;
+    });
+  }, [entropyRange, groupedSummary, onRenderExpandedCard, onRenderCompactCard])
 
-  return <DetailsList compact={true} columns={columns} items={originSummary} selectionMode={SelectionMode.none} onRenderItemColumn={renderItemColumn} />
+  return <CustomBaseTable dataSource={originSummary} columns={columns} style={{ height: "600px" }} />;
 }
 
 export default FieldAnalsis;
