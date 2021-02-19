@@ -134,12 +134,9 @@ Rath is insipired by several excellent works below:
 
 + Wongsuphasawat, Kanit, et al. "Voyager 2: Augmenting visual analysis with partial view specifications." Proceedings of the 2017 CHI Conference on Human Factors in Computing Systems. ACM, 2017.
 + B. Tang et al, "Extracting top-K insights from multi-dimensional data," in 2017, . DOI: 10.1145/3035918.3035922.
-+ A. Satyanarayan, K. Wongsuphasawat and J. Heer, "Declarative interaction design for data visualization," in 2014, . DOI: 10.1145/2642918.2647360.
++ Vega-Lite: A Grammar of Interactive Graphics. Arvind Satyanarayan, Dominik Moritz, Kanit Wongsuphasawat, Jeffrey Heer. IEEE Trans. Visualization & Comp. Graphics (Proc. InfoVis), 2017
 + Cleveland, W., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. Journal of the American Statistical Association, 79(387), 531-554. doi:10.2307/2288400
 
 ## Story behind Rath
 
-
-
-
-The word Rath is used in SAO Alicization as name of org. developing Soul Translator (STL) and Under World, which creates A.L.I.C.E. ('Rath' is original from Mome Raths in *Alice's Adventures in Wonderland*.) I use the name Rath for this project for hoping it can create something for more than I expected like Alice.
+The word Rath is used in SAO Alicization as name of org. developing Soul Translator (STL) and Under World, which creates A.L.I.C.E. ('Rath' is original from Mome Raths in *Alice's Adventures in Wonderland*.) I use the Rath as the name of the project for hoping it can create something far more than I could imagine like Alice.
