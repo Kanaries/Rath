@@ -28,7 +28,7 @@
     "mocha": "^6.2.0",
     "office-ui-fabric-core": "^11.0.0",
     "office-ui-fabric-react": "^7.155.3",
-    "papaparse": "^5.1.0",
+    "papaparse": "^5.2.0",
     "react": "^17.0.1",
     "react-app-rewired": "^2.1.5",
     "react-beautiful-dnd": "^13.0.0",
