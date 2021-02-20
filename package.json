@@ -40,6 +40,6 @@
   "homepage": "https://github.com/ObservedObserver/showme#readme",
   "devDependencies": {
     "concurrently": "^4.1.2",
-    "yarn": "^1.19.0"
+    "yarn": "^1.22.0"
   }
 }
