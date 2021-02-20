@@ -5,18 +5,40 @@
         "explore": "探索",
         "dashBoard": "报表",
         "explainer": "数据解读",
-        "editor": "自助分析"
+        "editor": "自助分析",
+        "support": "帮助"
     },
     "preference": {
         "title": "个人偏好"
     },
+    "support": {
+        "title": "如何获取帮助/支持",
+        "link": "https://www.yuque.com/docs/share/c1e4077d-c433-422b-9dc9-9486bf772f9c"
+    },
     "dataSource": {
         "extractInsight": "开始分析",
         "cleanMethod": "清洗方法",
+        "importData": {
+            "buttonName": "导入数据",
+            "type": {
+                "file": "文件",
+                "restful": "RESTFUL",
+                "mysql": "MySQL",
+                "demo": "示例数据"
+            },
+            "demo": {
+                "available": "可选数据集"
+            }
+        },
+        "sampling": {
+            "none": "不采样(使用原始数据)",
+            "reservoir": "固定样本大小(数据集较大时使用)"
+        },
         "methods": {
             "dropNull": "删除空值记录",
             "useMode": "使用众数代替空",
-            "simpleClean": "简单的替换"
+            "simpleClean": "简单的替换",
+            "none": "无(使用原始数据)"
         },
         "tip": "记得在提取洞察前先调整数据的清洗策略并配置字段的属性",
         "recordCount": "记录数 {count}",

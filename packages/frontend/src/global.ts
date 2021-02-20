@@ -22,3 +22,10 @@ export interface BIField {
 export type FieldImpurity = [string, number, number, Field];
 
 export type OperatorType = 'sum' | 'mean' | 'count';
+
+export enum IDataSourceType {
+  FILE = 'file',
+  RESTFUL = 'restful',
+  MYSQL = 'mysql',
+  DEMO = 'demo'
+}

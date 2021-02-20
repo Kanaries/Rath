@@ -1,15 +1,15 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import intl from 'react-intl-universal'
 import { useGlobalState } from "../../state";
 import { useComposeState } from '../../utils/index';
-import { ComboBox, PrimaryButton, IconButton, Callout, Stack, CommandBar, ChoiceGroup, IChoiceGroupOption, Label, SpinButton } from 'office-ui-fabric-react';
-import DataTable from '../../components/table';
+import { ComboBox, PrimaryButton, IconButton, Stack, DefaultButton } from 'office-ui-fabric-react';
+// import DataTable from '../../components/table';
+import DataTable from './dataTable/index';
 import FieldPanel from '../../components/fieldConfig';
 import {  cleanMethodList, CleanMethod } from './clean';
 import { useDataSource } from './useDataSource';
-import { useId } from '@uifabric/react-hooks';
-import { loadDataFile, SampleKey, SampleOptions } from "./utils";
-
+import Selection from './selection/index';
+import { BIFieldType, Record } from "../../global";
 interface PageStatus {
   show: {
     insightBoard: boolean;
@@ -23,12 +23,8 @@ interface DataSourceBoardProps {
   onExtractInsights: () => void;
 }
 
-const DataSourceLoggerURL =
-  'https://1423108296428281.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/Rath/dataSourceLogger/';
-
-
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-  const [state,updateState, dispatch] = useGlobalState();
+  const [state, updateState, dispatch] = useGlobalState();
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
@@ -38,54 +34,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     }
   })
   const [cleanMethod, setCleanMethod] = useState<CleanMethod>('dropNull');
-  const [sampleMethod, setSampleMethod] = useState<SampleKey>(SampleKey.none)
-  const [sampleSize, setSampleSize] = useState<number>(500);
 
   const dataSetting = useRef<HTMLDivElement>(null);
-  const fileEle = useRef<HTMLInputElement>(null);
 
   const [dataSource, preparedData] = useDataSource(state.rawData, state.fields, cleanMethod);
 
-  const labelId = useId('labelElement');
-
-  async function fileUploadHanlder () {
-    if (fileEle.current !== null && fileEle.current.files !== null) {
-      const file = fileEle.current.files[0];
-      const { fields, dataSource } = await loadDataFile(file, sampleMethod, sampleSize)
-      fetch(DataSourceLoggerURL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          fields,
-          dataSource: dataSource.slice(0, 10)
-        })
-      }).then(res => res.json())
-        .then(res => { console.log(res) })
-      updateState(draft => {
-        draft.fields = fields;
-        draft.rawData = dataSource;
-      })
-      setPageStatus(draft => {
-        draft.show.dataConfig = false;
-      });
-    }
-  }
-  // const analysisHandler = startAnalysis(preparedData, state.fields);
-
-  const commandBarList = [
-    {
-      key: 'upload',
-      name: intl.get('dataSource.upload.upload'),
-      iconProps: { iconName: 'Upload' },
-      onClick: () => {
-        if (fileEle.current) {
-          fileEle.current.click();
-        }
-      }
-    }
-  ]
 
   const cleanMethodListLang = useMemo<typeof cleanMethodList>(() => {
     return cleanMethodList.map(m => {
@@ -95,6 +48,40 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
       }
     })
   }, [state.lang])
+
+  const dataImportButton = useCallback((text: string, dataSource: Record[]) => {
+    let UsedButton = dataSource.length === 0 ? PrimaryButton : DefaultButton;
+    return (
+        <UsedButton
+            style={{ marginLeft: "10px" }}
+            iconProps={{ iconName: "ExcelDocument" }}
+            text={text}
+            onClick={() => {
+                setPageStatus((draft) => {
+                    draft.show.dataConfig = true;
+                });
+            }}
+        />
+    );
+  }, [])
+
+  const updateFieldBIType = useCallback((type: BIFieldType, fieldKey: string) => {
+    updateState(draft => {
+      const target = draft.fields.find(f => f.name === fieldKey);
+      if (target) {
+        target.type = type;
+      }
+    })
+  }, []);
+
+  useEffect(() => {
+    if (dataSource && dataSource.length === 0) {
+      setPageStatus(draft => {
+        draft.show.dataConfig = true;
+      })
+    }
+    // 不要加依赖，这里是应用加载第一次时的判断逻辑！
+  }, [])
 
   return (
     <div className="content-container">
@@ -126,6 +113,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
               props.onExtractInsights()
             }}
           />
+          { dataImportButton(intl.get('dataSource.importData.buttonName'), dataSource) }
           <div ref={dataSetting}>
             <IconButton
               iconProps={{ iconName: 'ExcelDocument' }}
@@ -137,88 +125,20 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 })
               }}
             />
-            <Callout
-              style={{ maxWidth: 300 }}
-              className="vi-callout-callout"
-              role="alertdialog"
-              gapSpace={0}
-              target={dataSetting.current}
-              onDismiss={() => {
-                setPageStatus((draft) => {
-                  draft.show.dataConfig = false
+          </div>
+          <Selection show={pageStatus.show.dataConfig}
+              onClose={() => {
+                setPageStatus(draft => {
+                  draft.show.dataConfig = false;
                 })
               }}
-              setInitialFocus={true}
-              hidden={!pageStatus.show.dataConfig}
-            >
-              <div className="vi-callout-header">
-                <p className="vi-callout-title">{intl.get('dataSource.upload.title')}</p>
-              </div>
-              <div className="vi-callout-inner">
-                <div className="vi-callout-content">
-                  <p className="vi-callout-subTex">{intl.get('dataSource.upload.fileTypes')}</p>
-                </div>
-                <div>
-                  <Label id={labelId} required={true}>
-                    {intl.get('dataSource.upload.sampling')}
-                  </Label>
-                  <ChoiceGroup
-                    defaultSelectedKey="B"
-                    options={SampleOptions}
-                    selectedKey={sampleMethod}
-                    onChange={(ev: any, option: IChoiceGroupOption | undefined) => {
-                      if (option) {
-                        setSampleMethod(option.key as SampleKey)
-                      }
-                    }}
-                    ariaLabelledBy={labelId}
-                  />
-                  {/* {sampleMethod !== SampleKey.none && (
-                    <Slider
-                      label={intl.get('dataSource.upload.percentSize')}
-                      min={0}
-                      max={1}
-                      step={0.001}
-                      value={sampleSize}
-                      showValue={true}
-                      valueFormat={(value: number) => `${(value * 100).toFixed(1)}%`}
-                      onChange={(val: number) => {
-                        setSampleSize(val)
-                      }}
-                    />
-                  )} */}
-                  {sampleMethod === SampleKey.reservoir && (
-                    <SpinButton
-                      label={intl.get('dataSource.upload.percentSize')}
-                      min={0}
-                      step={1}
-                      value={sampleSize.toString()}
-                      onValidate={(value) => {
-                        setSampleSize(Number(value));
-                      }}
-                      onIncrement={() => {
-                        setSampleSize(v => v + 1)
-                      }}
-                      onDecrement={() => {
-                        setSampleSize(v => Math.max(v - 1, 0))
-                      }}
-                    />
-                  )}
-                </div>
-                <div className="vi-callout-actions">
-                  <input
-                    type="file"
-                    ref={fileEle}
-                    multiple
-                    accept="*"
-                    style={{ display: 'none' }}
-                    onChange={fileUploadHanlder}
-                  />
-                  <CommandBar overflowButtonProps={{ name: 'More' }} items={commandBarList} />
-                </div>
-              </div>
-            </Callout>
-          </div>
+              onDataLoaded={(fields, dataSource) => {
+                updateState(draft => {
+                  draft.fields = fields;
+                  draft.rawData = dataSource;
+                })
+              }}
+          />
           <IconButton
             iconProps={{ iconName: 'Settings' }}
             title="Field Setting"
@@ -247,7 +167,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
           {intl.get('dataSource.recordCount', { count: preparedData.length })}
         </i>
-        <DataTable fields={state.fields} dataSource={preparedData} />
+        <DataTable fields={state.fields} dataSource={preparedData} onChangeBIType={updateFieldBIType} />
       </div>
     </div>
   )

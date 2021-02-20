@@ -4,7 +4,7 @@ export const SUPPORT_LANG = [
         value: 'en-US'
     },
     {
-        name: '中文',
+        name: '中文(Chinese)',
         value: 'zh-CN'
     }
 ]

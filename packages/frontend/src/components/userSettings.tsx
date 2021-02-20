@@ -6,8 +6,7 @@ import {
   ActionButton,
   Toggle,
   DirectionalHint,
-  IDropdownOption,
-  Dropdown
+  IDropdownOption
 } from 'office-ui-fabric-react'
 import { DropdownSelect } from '@tableau/tableau-ui';
 import { useGlobalState } from "../state";
