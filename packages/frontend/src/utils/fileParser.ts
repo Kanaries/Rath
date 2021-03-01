@@ -5,7 +5,7 @@ export function csvLoader (file: File) {
   return new Promise<DataSource>((resolve, reject) => {
     Papa.parse(file, {
       complete (results, file) {
-        let data: string[][] = results.data;
+        let data = results.data as string[][];
         let fields: string[] = data[0];
         let rawData = data.slice(1).map(row => {
           let record: Record = {};

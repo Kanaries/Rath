@@ -1,0 +1,102 @@
+.button{
+  background-color: #fa8c16;
+  color: #fff;
+  font-weight: 600;
+  margin: 10px;
+  border-radius: 4px;
+  /* float: left; */
+  display: inline-block;
+  min-width: 60px;
+  height: 40px;
+  padding: 6px;
+  text-align: center;
+  line-height: 38px;
+  cursor: pointer;
+}
+.content-container{
+  padding: 28px 9% 0px 9%;
+}
+.header-bar{
+  position: relative;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  background-color: #fff;
+  min-height: 60px;
+}
+.logo{
+  float: right;
+  width: 36px;
+  padding: 1px;
+  cursor: pointer;
+}
+.logo>img{
+  width: 100%;
+}
+h2, h3 {
+  color: #323130;
+  font-weight: 500;
+}
+.state-description{
+  margin-top: 10px;
+  font-weight: 360;
+  font-size: 12px;
+  color: #8a8886;
+}
+.card{
+  background-color: #fff;
+  padding: 28px;
+  border-radius: 2px;
+  box-shadow: 0 1.6px 3.6px 0 rgba(0,0,0,0.132), 0 0.3px 0.9px 0 rgba(0,0,0,0.108);
+  margin-bottom: 28px;
+  animation-duration: 0.5s;
+  animation-name: showCard;
+}
+
+@keyframes showCard {
+  from {
+    transform: scaleY(0);
+  }
+  end{
+    transform: scaleY(1);
+  }
+}
+
+.vi-callout{
+  min-Width: 600px;
+}
+.vi-callout-header{
+  padding: 18px 24px 12px;
+}
+.vi-callout-close-icon{
+  float: right;
+}
+.vi-callout-title{
+  margin: 0;
+  font-size: 21px;
+  font-weight: 100;
+  color: #323130;
+  font-weight: 300;
+}
+.vi-callout-inner{
+  height: 100%;
+  padding: 0px 24px 20px;
+}
+.vi-callout-subText{
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #323130;
+  font-weight: 300;
+}
+.vi-callout-actions{
+  position: relative;
+  margin-top: 20px;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.header-toolbar{
+  float: right;
+  padding: 0.5rem;
+}

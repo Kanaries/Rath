@@ -16,8 +16,8 @@ import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
 import UserSettings from './components/userSettings';
 
-require('intl/locale-data/jsonp/en.js')
-require('intl/locale-data/jsonp/zh.js')
+// require('intl/locale-data/jsonp/en.js')
+// require('intl/locale-data/jsonp/zh.js')
 
 const getLogoSrc = (withGlasses: boolean) => {
   return withGlasses
