@@ -13,7 +13,6 @@ import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
 import PreferencePanel, {
   PreferencePanelConfig
 } from "../../components/preference";
-import { useComposeState } from "../../utils/index";
 import BaseChart, { Specification } from "../../visBuilder/vegaBase";
 import { DataSource, Field } from "../../global";
 import { specification } from "visual-insights";
@@ -35,14 +34,6 @@ const pivotKeyList = [
   'search'
 ];
 
-interface PageStatus {
-  show: {
-    insightBoard: boolean;
-    configPanel: boolean;
-    fieldConfig: boolean;
-    dataConfig: boolean;
-  };
-}
 interface DataView {
   schema: Specification;
   aggData: DataSource;
@@ -67,29 +58,25 @@ const Gallery: React.FC<GalleryProps> = props => {
   const { dataSource, summary, subspaceList } = props;
   const [state, updateState] = useGlobalState();
   const store = useGalleryStore();
+  const {
+    currentPage,
+    showAssociation,
+    showConfigPanel
+  } = store;
   const pivotList = useMemo(() => {
     return pivotKeyList.map((page, index) => {
       return { title: intl.get(`explore.${page}`), itemKey: 'pivot-' + index }
     })
   }, [state.lang])
 
-  const [currentPage, setCurrentPage] = useState(0);
   const [pivotIndex, setPivotIndex] = useState(pivotList[0].itemKey);
-  const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
-    show: {
-      insightBoard: false,
-      fieldConfig: false,
-      configPanel: false,
-      dataConfig: false
-    }
-  });
-  const [showAssociation, setShowAssociation] = useState(false);
+
   const [visualConfig, setVisualConfig] = useState<PreferencePanelConfig>({
     aggregator: "sum",
     defaultAggregated: true,
     defaultStack: true
   });
-  const [viewSpaces, setViewSpaces] = useState<ViewSpace[]>([]);
+  // const [viewSpaces, setViewSpaces] = useState<ViewSpace[]>([]);
 
   const [dataView, setDataView] = useState<DataView>({
     schema: {
@@ -103,10 +90,6 @@ const Gallery: React.FC<GalleryProps> = props => {
     dimensions: [],
     measures: []
   });
-
-  const gotoPage = (pageNo: number) => {
-    setCurrentPage(pageNo);
-  };
 
   useEffect(() => {
     updateState(draft => {
@@ -125,7 +108,7 @@ const Gallery: React.FC<GalleryProps> = props => {
       }),
       state.useServer
     ).then(viewSpaces => {
-      setViewSpaces(viewSpaces);
+      store.setViewSpaces(viewSpaces);
       updateState(draft => {
         draft.loading.gallery = false;
       });
@@ -145,7 +128,7 @@ const Gallery: React.FC<GalleryProps> = props => {
   }, [summary.origin, summary.grouped]);
 
   useEffect(() => {
-    const viewState = viewSpaces[currentPage];
+    const viewState = store.currentViewSpace;
     if (viewState) {
       const { dimensions, measures } = viewState;
       try {
@@ -194,30 +177,28 @@ const Gallery: React.FC<GalleryProps> = props => {
         console.log(error);
       }
     }
-  }, [viewSpaces, currentPage, dataSource, dimScores]);
+  }, [store.currentViewSpace, dataSource, dimScores]);
   const currentSpace = useMemo<Subspace>(() => {
     return subspaceList.find(subspace => {
       return subspace.dimensions.join(",") === dataView.dimensions.join(",");
     })!;
   }, [subspaceList, dataView]);
+
   useEffect(() => {
-    setShowAssociation(false);
+    store.showAssociation = false;
   }, [currentPage]);
+
   return (
     <div className="content-container">
       <PreferencePanel
-        show={pageStatus.show.configPanel}
+        show={showConfigPanel}
         config={visualConfig}
         onUpdateConfig={(config) => {
           setVisualConfig(config)
-          setPageStatus((draft) => {
-            draft.show.configPanel = false
-          })
+          store.showConfigPanel = false;
         }}
         onClose={() => {
-          setPageStatus((draft) => {
-            draft.show.configPanel = false
-          })
+          store.showConfigPanel = false;
         }}
       />
 
@@ -244,9 +225,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                 title={intl.get('explore.preference')}
                 ariaLabel={intl.get('explore.preference')}
                 onClick={() => {
-                  setPageStatus((draft) => {
-                    draft.show.configPanel = true
-                  })
+                  store.showConfigPanel = true;
                 }}
               />
               <IconButton
@@ -254,7 +233,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                 title={intl.get('explore.digIn')}
                 ariaLabel={intl.get('explore.digIn')}
                 onClick={() => {
-                  setShowAssociation(true)
+                  store.showAssociation = true;
                 }}
               />
             </h2>
@@ -268,39 +247,39 @@ const Gallery: React.FC<GalleryProps> = props => {
                       label={intl.get('expore.currentPage')}
                       value={(currentPage + 1).toString()}
                       min={0}
-                      max={viewSpaces.length}
+                      max={store.viewSpaces.length}
                       step={1}
                       iconProps={{ iconName: 'Search' }}
                       labelPosition={Position.end}
                       // tslint:disable:jsx-no-lambda
                       onValidate={(value: string) => {
-                        gotoPage((Number(value) - 1) % viewSpaces.length)
+                        store.goToPage((Number(value) - 1) % store.viewSpaces.length)
                       }}
                       onIncrement={() => {
-                        gotoPage((currentPage + 1) % viewSpaces.length)
+                        store.nextPage();
                       }}
                       onDecrement={() => {
-                        gotoPage((currentPage - 1 + viewSpaces.length) % viewSpaces.length)
+                        store.lastPage();
                       }}
                       incrementButtonAriaLabel={'Increase value by 1'}
                       decrementButtonAriaLabel={'Decrease value by 1'}
                     />
                   </div>
                   <p className="state-description">
-                    Page No. {currentPage + 1} of {viewSpaces.length}
+                    Page No. {currentPage + 1} of {store.viewSpaces.length}
                   </p>
                   <Stack horizontal tokens={{ childrenGap: 20 }}>
                     <DefaultButton
                       text={intl.get('explore.last')}
                       onClick={() => {
-                        gotoPage((currentPage - 1 + viewSpaces.length) % viewSpaces.length)
+                        store.lastPage();
                       }}
                       allowDisabledFocus
                     />
                     <DefaultButton
                       text={intl.get('explore.next')}
                       onClick={() => {
-                        gotoPage((currentPage + 1) % viewSpaces.length)
+                        store.nextPage();
                       }}
                       allowDisabledFocus
                     />
@@ -313,7 +292,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                       }}
                       text={intl.get('explore.like')}
                       onClick={() => {
-                        store.likeIt(currentPage, viewSpaces.length, dataView.schema, )
+                        store.likeIt(currentPage, dataView.schema )
                       }}
                     />
                   </div>
@@ -352,18 +331,18 @@ const Gallery: React.FC<GalleryProps> = props => {
           <h2> {intl.get('explore.related.title')} </h2>
           <Association
             onSelectView={(index) => {
-              let pos = viewSpaces.findIndex((v) => v.index === index)
+              let pos = store.viewSpaces.findIndex((v) => v.index === index)
               if (pos > -1) {
-                gotoPage(pos)
+                store.goToPage(pos)
               }
             }}
             subspaceList={subspaceList}
             digDimensionProps={{
               visualConfig,
               dataSource,
-              viewSpaces,
+              viewSpaces: store.viewSpaces,
               fieldScores: dimScores,
-              interestedViewSpace: viewSpaces[currentPage],
+              interestedViewSpace: store.currentViewSpace,
             }}
           />
         </div>

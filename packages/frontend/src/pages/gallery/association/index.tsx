@@ -33,6 +33,7 @@ const Association: React.FC<AssociationProps> = props => {
           return (
             <div key={`associate-row-${i}`}
               className="ms-Grid-row"
+              dir="ltr"
               style={{
                 border: "solid 1px #bfbfbf",
                 margin: "1em",
