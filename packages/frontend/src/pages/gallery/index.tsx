@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import intl from 'react-intl-universal';
 import {
   DefaultButton,
@@ -7,7 +7,7 @@ import {
   ProgressIndicator,
   SpinButton,
   Pivot,
-  PivotItem
+  PivotItem,
 } from "office-ui-fabric-react";
 import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
 import PreferencePanel, {
@@ -27,6 +27,8 @@ import {
   FieldSummary
 } from "../../service";
 import SearchBoard from "./search/index";
+import { observer } from 'mobx-react-lite'
+import { useGalleryStore } from './store';
 
 const pivotKeyList = [
   'rankList',
@@ -63,7 +65,8 @@ interface GalleryProps {
 
 const Gallery: React.FC<GalleryProps> = props => {
   const { dataSource, summary, subspaceList } = props;
-  const [state, updateState] = useGlobalState()
+  const [state, updateState] = useGlobalState();
+  const store = useGalleryStore();
   const pivotList = useMemo(() => {
     return pivotKeyList.map((page, index) => {
       return { title: intl.get(`explore.${page}`), itemKey: 'pivot-' + index }
@@ -126,8 +129,9 @@ const Gallery: React.FC<GalleryProps> = props => {
       updateState(draft => {
         draft.loading.gallery = false;
       });
+      store.clearLikes();
     });
-  }, [subspaceList, dataSource, state.maxGroupNumber, state.useServer, updateState]);
+  }, [subspaceList, dataSource, state.maxGroupNumber, state.useServer, updateState, store]);
 
   const dimScores = useMemo<[string, number, number, Field][]>(() => {
     return [...summary.origin, ...summary.grouped].map(field => {
@@ -204,35 +208,31 @@ const Gallery: React.FC<GalleryProps> = props => {
       <PreferencePanel
         show={pageStatus.show.configPanel}
         config={visualConfig}
-        onUpdateConfig={config => {
-          setVisualConfig(config);
-          setPageStatus(draft => {
-            draft.show.configPanel = false;
-          });
+        onUpdateConfig={(config) => {
+          setVisualConfig(config)
+          setPageStatus((draft) => {
+            draft.show.configPanel = false
+          })
         }}
         onClose={() => {
-          setPageStatus(draft => {
-            draft.show.configPanel = false;
-          });
+          setPageStatus((draft) => {
+            draft.show.configPanel = false
+          })
         }}
       />
 
       <div className="card" style={{ paddingTop: '0.2rem' }}>
         <Pivot
           selectedKey={pivotIndex}
-          onLinkClick={item => {
+          onLinkClick={(item) => {
             item && setPivotIndex(item.props.itemKey!)
           }}
         >
-          {
-            pivotList.map(pivot => (
-              <PivotItem headerText={pivot.title} key={pivot.itemKey} itemKey={pivot.itemKey} />
-            ))
-          }
+          {pivotList.map((pivot) => (
+            <PivotItem headerText={pivot.title} key={pivot.itemKey} itemKey={pivot.itemKey} />
+          ))}
         </Pivot>
-        {(state.loading.gallery ||
-          state.loading.subspaceSearching ||
-          state.loading.univariateSummary) && (
+        {(state.loading.gallery || state.loading.subspaceSearching || state.loading.univariateSummary) && (
           <ProgressIndicator description="calculating" />
         )}
         {pivotIndex === pivotList[0].itemKey && (
@@ -240,21 +240,21 @@ const Gallery: React.FC<GalleryProps> = props => {
             <h2 style={{ marginBottom: 0 }}>
               {intl.get('explore.title')}
               <IconButton
-                iconProps={{ iconName: "Settings" }}
+                iconProps={{ iconName: 'Settings' }}
                 title={intl.get('explore.preference')}
                 ariaLabel={intl.get('explore.preference')}
                 onClick={() => {
-                  setPageStatus(draft => {
-                    draft.show.configPanel = true;
-                  });
+                  setPageStatus((draft) => {
+                    draft.show.configPanel = true
+                  })
                 }}
               />
               <IconButton
-                iconProps={{ iconName: "Lightbulb" }}
+                iconProps={{ iconName: 'Lightbulb' }}
                 title={intl.get('explore.digIn')}
                 ariaLabel={intl.get('explore.digIn')}
                 onClick={() => {
-                  setShowAssociation(true);
+                  setShowAssociation(true)
                 }}
               />
             </h2>
@@ -262,34 +262,28 @@ const Gallery: React.FC<GalleryProps> = props => {
             <p className="state-description">{intl.get('explore.tip')}</p>
             <div className="ms-Grid" dir="ltr">
               <div className="ms-Grid-row">
-                <div
-                  className="ms-Grid-col ms-sm6 ms-md8 ms-lg3"
-                  style={{ overflow: "auto" }}
-                >
-                  <div style={{ marginBottom: "1rem" }}>
+                <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3" style={{ overflow: 'auto' }}>
+                  <div style={{ marginBottom: '1rem' }}>
                     <SpinButton
                       label={intl.get('expore.currentPage')}
                       value={(currentPage + 1).toString()}
                       min={0}
                       max={viewSpaces.length}
                       step={1}
-                      iconProps={{ iconName: "Search" }}
+                      iconProps={{ iconName: 'Search' }}
                       labelPosition={Position.end}
                       // tslint:disable:jsx-no-lambda
                       onValidate={(value: string) => {
-                        gotoPage((Number(value) - 1) % viewSpaces.length);
+                        gotoPage((Number(value) - 1) % viewSpaces.length)
                       }}
                       onIncrement={() => {
-                        gotoPage((currentPage + 1) % viewSpaces.length);
+                        gotoPage((currentPage + 1) % viewSpaces.length)
                       }}
                       onDecrement={() => {
-                        gotoPage(
-                          (currentPage - 1 + viewSpaces.length) %
-                            viewSpaces.length
-                        );
+                        gotoPage((currentPage - 1 + viewSpaces.length) % viewSpaces.length)
                       }}
-                      incrementButtonAriaLabel={"Increase value by 1"}
-                      decrementButtonAriaLabel={"Decrease value by 1"}
+                      incrementButtonAriaLabel={'Increase value by 1'}
+                      decrementButtonAriaLabel={'Decrease value by 1'}
                     />
                   </div>
                   <p className="state-description">
@@ -299,21 +293,30 @@ const Gallery: React.FC<GalleryProps> = props => {
                     <DefaultButton
                       text={intl.get('explore.last')}
                       onClick={() => {
-                        gotoPage(
-                          (currentPage - 1 + viewSpaces.length) %
-                            viewSpaces.length
-                        );
+                        gotoPage((currentPage - 1 + viewSpaces.length) % viewSpaces.length)
                       }}
                       allowDisabledFocus
                     />
                     <DefaultButton
                       text={intl.get('explore.next')}
                       onClick={() => {
-                        gotoPage((currentPage + 1) % viewSpaces.length);
+                        gotoPage((currentPage + 1) % viewSpaces.length)
                       }}
                       allowDisabledFocus
                     />
                   </Stack>
+                  <div style={{ margin: '10px 0px'}}>
+                    <DefaultButton
+                      iconProps={{
+                        iconName: store.likes.has(currentPage) ? 'HeartFill' : 'Heart',
+                        style: { color: '#f5222d' },
+                      }}
+                      text={intl.get('explore.like')}
+                      onClick={() => {
+                        store.likeIt(currentPage, viewSpaces.length, dataView.schema, )
+                      }}
+                    />
+                  </div>
                   <h3>Specification</h3>
                   <pre>{JSON.stringify(dataView.schema, null, 2)}</pre>
                   <VisSummary
@@ -325,10 +328,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                     schema={dataView.schema}
                   />
                 </div>
-                <div
-                  className="ms-Grid-col ms-sm6 ms-md4 ms-lg9"
-                  style={{ overflow: "auto" }}
-                >
+                <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg9" style={{ overflow: 'auto' }}>
                   <BaseChart
                     aggregator={visualConfig.aggregator}
                     defaultAggregated={visualConfig.defaultAggregated}
@@ -351,10 +351,10 @@ const Gallery: React.FC<GalleryProps> = props => {
         <div className="card">
           <h2> {intl.get('explore.related.title')} </h2>
           <Association
-            onSelectView={index => {
-              let pos = viewSpaces.findIndex(v => v.index === index);
+            onSelectView={(index) => {
+              let pos = viewSpaces.findIndex((v) => v.index === index)
               if (pos > -1) {
-                gotoPage(pos);
+                gotoPage(pos)
               }
             }}
             subspaceList={subspaceList}
@@ -363,13 +363,13 @@ const Gallery: React.FC<GalleryProps> = props => {
               dataSource,
               viewSpaces,
               fieldScores: dimScores,
-              interestedViewSpace: viewSpaces[currentPage]
+              interestedViewSpace: viewSpaces[currentPage],
             }}
           />
         </div>
       )}
     </div>
-  );
+  )
 };
 
-export default Gallery;
+export default observer(Gallery);

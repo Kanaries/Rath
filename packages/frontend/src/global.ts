@@ -29,3 +29,9 @@ export enum IDataSourceType {
   MYSQL = 'mysql',
   DEMO = 'demo'
 }
+
+export const globalRef: {
+  baseVisSpec: any
+} = {
+  baseVisSpec: null
+}
