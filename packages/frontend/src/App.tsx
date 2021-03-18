@@ -4,8 +4,8 @@ import { useGlobalState, GlobalStateProvider } from "./state";
 import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
 import "./App.css";
-import RathLogo from './assets/kanaries-lite.png';
-import RathCoolLogo from './assets/rath-glasses.png';
+// import RathLogo from './assets/kanaries-lite.png';
+// import RathCoolLogo from './assets/rath-glasses.png';
 
 import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
@@ -16,13 +16,12 @@ import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
 import UserSettings from './components/userSettings';
 
-// require('intl/locale-data/jsonp/en.js')
-// require('intl/locale-data/jsonp/zh.js')
+// FIXME: 这两代码好像没什么用
+require('intl/locale-data/jsonp/en.js')
+require('intl/locale-data/jsonp/zh.js')
 
 const getLogoSrc = (withGlasses: boolean) => {
-  return withGlasses
-    ? RathCoolLogo
-    : RathLogo;
+  return withGlasses ? "/assets/rath-glasses.png" : "/assets/kanaries-lite.png";
 };
 
 interface PageStatus {

@@ -1,1 +1,0 @@
-export const RATH_INDEX_COLUMN_KEY = '__rath_index_col_key__';
