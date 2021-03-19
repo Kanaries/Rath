@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Subspace } from '../../service';
+import { FieldSummary, Subspace } from '../../service';
 
 import './index.css';
 import { Field } from '../../global';
@@ -8,7 +8,7 @@ import { Specification } from '../../visBuilder/vegaBase';
 
 interface VisDescriptionProps {
   lang?: 'zh' | 'en';
-  dimScores: Array<[string, number, number, Field]>;
+  dimScores: FieldSummary[];
   space: Subspace;
   spaceList: Subspace[];
   dimensions: string[];
@@ -19,9 +19,9 @@ interface VisDescriptionProps {
 const VisDescription: React.FC<VisDescriptionProps> = (props) => {
   const { space, dimensions = [], measures = [], dimScores = [], spaceList = [], schema } = props;
 
-  const sortedFieldsScores = useMemo<Array<[string, number, number, Field]>>(() => {
-    return [...dimScores].sort((a, b) => a[1] - b[1]);
-  }, [dimScores])
+  const sortedFieldsScores = useMemo(() => {
+      return [...dimScores].sort((a, b) => a.entropy - b.entropy);
+  }, [dimScores]);
   const mostInfluencedDimension = useMemo<string | undefined>(() => {
     if (typeof space === 'undefined') return;
     for (let sp of spaceList) {
@@ -49,8 +49,8 @@ const VisDescription: React.FC<VisDescriptionProps> = (props) => {
   }, [measures, space])
 
   const countDiffField = useMemo<string | undefined>(() => {
-    let ans = sortedFieldsScores.find(dim => dimensions.includes(dim[0]));
-    return ans ? ans[0] : undefined;
+    let ans = sortedFieldsScores.find(dim => dimensions.includes(dim.fieldName));
+    return ans ? ans.fieldName : undefined;
   }, [sortedFieldsScores, dimensions])
   const result = `
   ${ schema && schema.position ? `Current chart mainly focus on the relationship between ***${schema.position[0]}*** and ***${schema.position[1]}***` : ''}

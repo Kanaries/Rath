@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import intl from 'react-intl-universal';
 import {
   DefaultButton,
@@ -10,37 +10,25 @@ import {
   PivotItem,
 } from "office-ui-fabric-react";
 import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
-import PreferencePanel, {
-  PreferencePanelConfig
-} from "../../components/preference";
-import BaseChart, { Specification } from "../../visBuilder/vegaBase";
+import PreferencePanel from "../../components/preference";
 import { DataSource, Field } from "../../global";
-import { specification } from "visual-insights";
 import VisSummary from "../../plugins/visSummary/index";
 import { useGlobalState } from "../../state";
 import Association from "./association/index";
 import {
   Subspace,
-  clusterMeasures,
-  ViewSpace,
   FieldSummary
 } from "../../service";
 import SearchBoard from "./search/index";
 import { observer } from 'mobx-react-lite'
 import { useGalleryStore } from './store';
+import ObserverChart from "./observerChart";
+import VizPreference from "./vizPreference";
 
 const pivotKeyList = [
   'rankList',
   'search'
 ];
-
-interface DataView {
-  schema: Specification;
-  aggData: DataSource;
-  fieldFeatures: Field[];
-  dimensions: string[];
-  measures: string[];
-}
 
 interface GalleryProps {
   subspaceList: Subspace[];
@@ -56,12 +44,15 @@ interface GalleryProps {
 
 const Gallery: React.FC<GalleryProps> = props => {
   const { dataSource, summary, subspaceList } = props;
-  const [state, updateState] = useGlobalState();
+  const [state, ] = useGlobalState();
   const store = useGalleryStore();
   const {
     currentPage,
     showAssociation,
-    showConfigPanel
+    visualConfig,
+    currentSpace,
+    fields,
+    vizRecommand
   } = store;
   const pivotList = useMemo(() => {
     return pivotKeyList.map((page, index) => {
@@ -71,136 +62,23 @@ const Gallery: React.FC<GalleryProps> = props => {
 
   const [pivotIndex, setPivotIndex] = useState(pivotList[0].itemKey);
 
-  const [visualConfig, setVisualConfig] = useState<PreferencePanelConfig>({
-    aggregator: "sum",
-    defaultAggregated: true,
-    defaultStack: true
-  });
-  // const [viewSpaces, setViewSpaces] = useState<ViewSpace[]>([]);
-
-  const [dataView, setDataView] = useState<DataView>({
-    schema: {
-      position: [],
-      color: [],
-      opacity: [],
-      geomType: []
-    },
-    fieldFeatures: [],
-    aggData: [],
-    dimensions: [],
-    measures: []
-  });
+  useEffect(() => {
+      const fields = [...summary.origin, ...summary.grouped];
+      store.init(dataSource, fields, subspaceList);
+  }, [dataSource, subspaceList, summary.origin, summary.grouped, store]);
 
   useEffect(() => {
-    updateState(draft => {
-      draft.loading.gallery = true;
-    });
-    // todo:
-    // should group number be the same for different subspaces?
-    clusterMeasures(
-      state.maxGroupNumber,
-      subspaceList.map(space => {
-        return {
-          dimensions: space.dimensions,
-          measures: space.measures,
-          matrix: space.correlationMatrix
-        };
-      }),
-      state.useServer
-    ).then(viewSpaces => {
-      store.setViewSpaces(viewSpaces);
-      updateState(draft => {
-        draft.loading.gallery = false;
-      });
-      store.clearLikes();
-    });
-  }, [subspaceList, dataSource, state.maxGroupNumber, state.useServer, updateState, store]);
-
-  const dimScores = useMemo<[string, number, number, Field][]>(() => {
-    return [...summary.origin, ...summary.grouped].map(field => {
-      return [
-        field.fieldName,
-        field.entropy,
-        field.maxEntropy,
-        { name: field.fieldName, type: field.type }
-      ];
-    });
-  }, [summary.origin, summary.grouped]);
+    store.clusterMeasures(state.maxGroupNumber, state.useServer)
+  }, [subspaceList, dataSource, state.maxGroupNumber, state.useServer, store]);
 
   useEffect(() => {
-    const viewState = store.currentViewSpace;
-    if (viewState) {
-      const { dimensions, measures } = viewState;
-      try {
-        // todo: find the strict confition instead of using try catch
-        const fieldScores = dimScores.filter(field => {
-          return dimensions.includes(field[0]) || measures.includes(field[0]);
-        });
-        const { schema } = specification(
-          fieldScores,
-          dataSource,
-          dimensions,
-          measures
-        );
-        setDataView({
-          schema,
-          fieldFeatures: fieldScores.map(f => f[3]),
-          aggData: dataSource,
-          dimensions,
-          measures
-        });
-        // ugly code
-        // todo:
-        // implement this in specification
-        // + check geomType
-        // + check geom number and aggregated geom number
-        if (
-          schema.geomType &&
-          (schema.geomType.includes("point") ||
-            schema.geomType.includes("density"))
-        ) {
-          setVisualConfig(config => {
-            return {
-              ...config,
-              defaultAggregated: false
-            };
-          });
-        } else {
-          setVisualConfig(config => {
-            return {
-              ...config,
-              defaultAggregated: true
-            };
-          });
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  }, [store.currentViewSpace, dataSource, dimScores]);
-  const currentSpace = useMemo<Subspace>(() => {
-    return subspaceList.find(subspace => {
-      return subspace.dimensions.join(",") === dataView.dimensions.join(",");
-    })!;
-  }, [subspaceList, dataView]);
-
-  useEffect(() => {
+    // 换页的时候强制关闭联想.
     store.showAssociation = false;
   }, [currentPage]);
 
   return (
     <div className="content-container">
-      <PreferencePanel
-        show={showConfigPanel}
-        config={visualConfig}
-        onUpdateConfig={(config) => {
-          setVisualConfig(config)
-          store.showConfigPanel = false;
-        }}
-        onClose={() => {
-          store.showConfigPanel = false;
-        }}
-      />
+      <VizPreference />
 
       <div className="card" style={{ paddingTop: '0.2rem' }}>
         <Pivot
@@ -213,7 +91,7 @@ const Gallery: React.FC<GalleryProps> = props => {
             <PivotItem headerText={pivot.title} key={pivot.itemKey} itemKey={pivot.itemKey} />
           ))}
         </Pivot>
-        {(state.loading.gallery || state.loading.subspaceSearching || state.loading.univariateSummary) && (
+        {(store.loading || state.loading.subspaceSearching || state.loading.univariateSummary) && (
           <ProgressIndicator description="calculating" />
         )}
         {pivotIndex === pivotList[0].itemKey && (
@@ -244,7 +122,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                 <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg3" style={{ overflow: 'auto' }}>
                   <div style={{ marginBottom: '1rem' }}>
                     <SpinButton
-                      label={intl.get('expore.currentPage')}
+                      label={intl.get('explore.currentPage')}
                       value={(currentPage + 1).toString()}
                       min={0}
                       max={store.viewSpaces.length}
@@ -292,32 +170,23 @@ const Gallery: React.FC<GalleryProps> = props => {
                       }}
                       text={intl.get('explore.like')}
                       onClick={() => {
-                        store.likeIt(currentPage, dataView.schema )
+                        store.likeIt(currentPage, vizRecommand.schema )
                       }}
                     />
                   </div>
                   <h3>Specification</h3>
-                  <pre>{JSON.stringify(dataView.schema, null, 2)}</pre>
+                  <pre>{JSON.stringify(vizRecommand.schema, null, 2)}</pre>
                   <VisSummary
-                    dimensions={dataView.dimensions}
-                    measures={dataView.measures}
-                    dimScores={dimScores}
+                    dimensions={vizRecommand.dimensions}
+                    measures={vizRecommand.measures}
+                    dimScores={fields}
                     space={currentSpace}
                     spaceList={subspaceList}
-                    schema={dataView.schema}
+                    schema={vizRecommand.schema}
                   />
                 </div>
                 <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg9" style={{ overflow: 'auto' }}>
-                  <BaseChart
-                    aggregator={visualConfig.aggregator}
-                    defaultAggregated={visualConfig.defaultAggregated}
-                    defaultStack={visualConfig.defaultStack}
-                    dimensions={dataView.dimensions}
-                    measures={dataView.measures}
-                    dataSource={dataView.aggData}
-                    schema={dataView.schema}
-                    fieldFeatures={dataView.fieldFeatures}
-                  />
+                  <ObserverChart />
                 </div>
               </div>
             </div>
@@ -341,7 +210,7 @@ const Gallery: React.FC<GalleryProps> = props => {
               visualConfig,
               dataSource,
               viewSpaces: store.viewSpaces,
-              fieldScores: dimScores,
+              fieldScores: fields,
               interestedViewSpace: store.currentViewSpace,
             }}
           />

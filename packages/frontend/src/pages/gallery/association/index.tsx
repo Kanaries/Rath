@@ -22,7 +22,10 @@ const Association: React.FC<AssociationProps> = props => {
   const { digDimensionProps, subspaceList, onSelectView } = props;
   const { dataSource, visualConfig, fieldScores } = digDimensionProps;
   const relatedCharts = useDigDimension(digDimensionProps);
-  const fieldFeatures = fieldScores.map(f => f[3]);
+  const fieldFeatures = fieldScores.map(f => ({
+    name: f.fieldName,
+    type: f.type
+  }));
   return (
     <div>
       <div className="ms-Grid">
