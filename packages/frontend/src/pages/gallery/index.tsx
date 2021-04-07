@@ -10,8 +10,8 @@ import {
   PivotItem,
 } from "office-ui-fabric-react";
 import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
-import PreferencePanel from "../../components/preference";
-import { DataSource, Field } from "../../global";
+
+import { DataSource } from "../../global";
 import VisSummary from "../../plugins/visSummary/index";
 import { useGlobalState } from "../../state";
 import Association from "./association/index";
@@ -21,9 +21,10 @@ import {
 } from "../../service";
 import SearchBoard from "./search/index";
 import { observer } from 'mobx-react-lite'
-import { useGalleryStore } from './store';
+
 import ObserverChart from "./observerChart";
 import VizPreference from "./vizPreference";
+import { useGlobalStore } from "../../store";
 
 const pivotKeyList = [
   'rankList',
@@ -45,7 +46,8 @@ interface GalleryProps {
 const Gallery: React.FC<GalleryProps> = props => {
   const { dataSource, summary, subspaceList } = props;
   const [state, ] = useGlobalState();
-  const store = useGalleryStore();
+  // const store = useGalleryStore();
+  const { galleryStore, langStore } = useGlobalStore();
   const {
     currentPage,
     showAssociation,
@@ -53,28 +55,28 @@ const Gallery: React.FC<GalleryProps> = props => {
     currentSpace,
     fields,
     vizRecommand
-  } = store;
+  } = galleryStore;
   const pivotList = useMemo(() => {
     return pivotKeyList.map((page, index) => {
       return { title: intl.get(`explore.${page}`), itemKey: 'pivot-' + index }
     })
-  }, [state.lang])
+  }, [langStore.lang])
 
   const [pivotIndex, setPivotIndex] = useState(pivotList[0].itemKey);
 
   useEffect(() => {
       const fields = [...summary.origin, ...summary.grouped];
-      store.init(dataSource, fields, subspaceList);
-  }, [dataSource, subspaceList, summary.origin, summary.grouped, store]);
+      galleryStore.init(dataSource, fields, subspaceList);
+  }, [dataSource, subspaceList, summary.origin, summary.grouped, galleryStore]);
 
   useEffect(() => {
-    store.clusterMeasures(state.maxGroupNumber, state.useServer)
-  }, [subspaceList, dataSource, state.maxGroupNumber, state.useServer, store]);
+    galleryStore.clusterMeasures(state.maxGroupNumber, state.useServer)
+  }, [subspaceList, dataSource, state.maxGroupNumber, state.useServer, galleryStore]);
 
   useEffect(() => {
     // 换页的时候强制关闭联想.
-    store.showAssociation = false;
-  }, [currentPage]);
+    galleryStore.showAssociation = false;
+  }, [currentPage, galleryStore]);
 
   return (
     <div className="content-container">
@@ -91,7 +93,7 @@ const Gallery: React.FC<GalleryProps> = props => {
             <PivotItem headerText={pivot.title} key={pivot.itemKey} itemKey={pivot.itemKey} />
           ))}
         </Pivot>
-        {(store.loading || state.loading.subspaceSearching || state.loading.univariateSummary) && (
+        {(galleryStore.loading || state.loading.subspaceSearching || state.loading.univariateSummary) && (
           <ProgressIndicator description="calculating" />
         )}
         {pivotIndex === pivotList[0].itemKey && (
@@ -103,7 +105,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                 title={intl.get('explore.preference')}
                 ariaLabel={intl.get('explore.preference')}
                 onClick={() => {
-                  store.showConfigPanel = true;
+                  galleryStore.showConfigPanel = true;
                 }}
               />
               <IconButton
@@ -111,7 +113,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                 title={intl.get('explore.digIn')}
                 ariaLabel={intl.get('explore.digIn')}
                 onClick={() => {
-                  store.showAssociation = true;
+                  galleryStore.showAssociation = true;
                 }}
               />
             </h2>
@@ -125,39 +127,39 @@ const Gallery: React.FC<GalleryProps> = props => {
                       label={intl.get('explore.currentPage')}
                       value={(currentPage + 1).toString()}
                       min={0}
-                      max={store.viewSpaces.length}
+                      max={galleryStore.viewSpaces.length}
                       step={1}
                       iconProps={{ iconName: 'Search' }}
                       labelPosition={Position.end}
                       // tslint:disable:jsx-no-lambda
                       onValidate={(value: string) => {
-                        store.goToPage((Number(value) - 1) % store.viewSpaces.length)
+                        galleryStore.goToPage((Number(value) - 1) % galleryStore.viewSpaces.length)
                       }}
                       onIncrement={() => {
-                        store.nextPage();
+                        galleryStore.nextPage();
                       }}
                       onDecrement={() => {
-                        store.lastPage();
+                        galleryStore.lastPage();
                       }}
                       incrementButtonAriaLabel={'Increase value by 1'}
                       decrementButtonAriaLabel={'Decrease value by 1'}
                     />
                   </div>
                   <p className="state-description">
-                    Page No. {currentPage + 1} of {store.viewSpaces.length}
+                    Page No. {currentPage + 1} of {galleryStore.viewSpaces.length}
                   </p>
                   <Stack horizontal tokens={{ childrenGap: 20 }}>
                     <DefaultButton
                       text={intl.get('explore.last')}
                       onClick={() => {
-                        store.lastPage();
+                        galleryStore.lastPage();
                       }}
                       allowDisabledFocus
                     />
                     <DefaultButton
                       text={intl.get('explore.next')}
                       onClick={() => {
-                        store.nextPage();
+                        galleryStore.nextPage();
                       }}
                       allowDisabledFocus
                     />
@@ -165,12 +167,12 @@ const Gallery: React.FC<GalleryProps> = props => {
                   <div style={{ margin: '10px 0px'}}>
                     <DefaultButton
                       iconProps={{
-                        iconName: store.likes.has(currentPage) ? 'HeartFill' : 'Heart',
+                        iconName: galleryStore.likes.has(currentPage) ? 'HeartFill' : 'Heart',
                         style: { color: '#f5222d' },
                       }}
                       text={intl.get('explore.like')}
                       onClick={() => {
-                        store.likeIt(currentPage, vizRecommand.schema )
+                        galleryStore.likeIt(currentPage, vizRecommand.schema )
                       }}
                     />
                   </div>
@@ -200,18 +202,18 @@ const Gallery: React.FC<GalleryProps> = props => {
           <h2> {intl.get('explore.related.title')} </h2>
           <Association
             onSelectView={(index) => {
-              let pos = store.viewSpaces.findIndex((v) => v.index === index)
+              let pos = galleryStore.viewSpaces.findIndex((v) => v.index === index)
               if (pos > -1) {
-                store.goToPage(pos)
+                galleryStore.goToPage(pos)
               }
             }}
             subspaceList={subspaceList}
             digDimensionProps={{
               visualConfig,
               dataSource,
-              viewSpaces: store.viewSpaces,
+              viewSpaces: galleryStore.viewSpaces,
               fieldScores: fields,
-              interestedViewSpace: store.currentViewSpace,
+              interestedViewSpace: galleryStore.currentViewSpace,
             }}
           />
         </div>

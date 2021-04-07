@@ -1,5 +1,4 @@
 import { DataSource, BIField, Field, OperatorType } from "./global";
-import { getGalleryStore } from "./pages/gallery/store";
 import {
   getFieldsSummaryService,
   FieldSummary,
@@ -11,6 +10,7 @@ import {
   clusterMeasures
 } from "./service";
 import { GlobalState, StateUpdater } from './state';
+import { getGlobalStore } from "./store";
 
 
 
@@ -200,7 +200,7 @@ const getViewSpaces: Action<GetViewSpacesProps> = async (select, updateState, pa
 
 const extractInsights: Action<{dataSource: DataSource; fields: BIField[]}> = async (state, updateState, params) => {
   const { dataSource, fields } = params;
-  const galleryStore = getGalleryStore();
+  const { galleryStore } = getGlobalStore();
   galleryStore.loading = true;
   try {
     const univariateResult = await univariateSummary(state, updateState, {

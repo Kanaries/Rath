@@ -9,9 +9,11 @@ import {
   IDropdownOption
 } from 'office-ui-fabric-react'
 import { DropdownSelect } from '@tableau/tableau-ui';
+import { observer } from 'mobx-react-lite'
 import { useGlobalState } from "../state";
 import { SUPPORT_LANG } from "../locales";
-import { useLocales } from "../utils/useLocales";
+
+import { useGlobalStore } from "../store";
 const langOptions: IDropdownOption[] = SUPPORT_LANG.map(lang => ({
   key: lang.value,
   text: lang.name
@@ -21,31 +23,22 @@ const Container = styled.div`
   display: flex;
   align-items: center;
 `
-const UserSettings: React.FC = props => {
+const UserSettings: React.FC = () => {
   const target = useRef<HTMLDivElement>(null);
   const [show, setShow] = useState<boolean>(false);
   const [state, updateState] = useGlobalState();
-  const loadLocales = useLocales((lang) => {
-    updateState(s => {
-      s.lang = lang;
-    })
-  });
+  const { langStore } = useGlobalStore();
+
   useEffect(() => {
-    let currentLocale = intl.determineLocale({
-      urlLocaleKey: 'lang',
-      cookieLocaleKey: 'lang',
-    })
-    if (!SUPPORT_LANG.find(f => f.value === currentLocale)) {
-      currentLocale = langOptions[0].key as string
-    }
-    loadLocales(currentLocale)
+    langStore.initLocales()
   }, [])
+
   return (
     <Container>
       <DropdownSelect
-        value={state.lang}
+        value={langStore.lang}
         onChange={(e) => {
-          loadLocales(e.target.value as string)
+          langStore.useLocales(e.target.value)
         }}
       >
         {
@@ -101,5 +94,4 @@ const UserSettings: React.FC = props => {
   )
 };
 
-export default UserSettings;
-
+export default observer(UserSettings);

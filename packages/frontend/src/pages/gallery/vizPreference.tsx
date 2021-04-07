@@ -2,8 +2,8 @@ import React from "react";
 import { observer } from 'mobx-react-lite';
 import { PrimaryButton, Stack, Checkbox, Panel, PanelType, ComboBox, Label } from "office-ui-fabric-react";
 import { Aggregator } from "../../global";
-import { useGalleryStore } from "./store";
 import { action } from "mobx";
+import { useGlobalStore } from "../../store";
 const checkboxStyles = () => {
     return {
         root: {
@@ -25,13 +25,13 @@ export interface PreferencePanelConfig {
 }
 
 const PreferencePanel: React.FC = () => {
-    const store = useGalleryStore();
-    const { visualConfig, showConfigPanel } = store;
+    const { galleryStore } = useGlobalStore()
+    const { visualConfig, showConfigPanel } = galleryStore;
 
     const { aggregator, defaultAggregated, defaultStack } = visualConfig;
 
     const closeVisualPannel = action(() => {
-        store.showConfigPanel = false;
+        galleryStore.showConfigPanel = false;
     })
 
     const onRenderFooterContent = () => (
@@ -63,7 +63,7 @@ const PreferencePanel: React.FC = () => {
                     options={aggregationList}
                     onChange={action((e, option) => {
                         if (option) {
-                            store.visualConfig.aggregator = option.key as Aggregator;
+                            galleryStore.visualConfig.aggregator = option.key as Aggregator;
                         }
                     })}
                 />
@@ -72,7 +72,7 @@ const PreferencePanel: React.FC = () => {
                     label="measurement aggregation"
                     checked={defaultAggregated}
                     onChange={action((e, isChecked) => {
-                        store.visualConfig.defaultAggregated = isChecked || false;
+                        galleryStore.visualConfig.defaultAggregated = isChecked || false;
                     })}
                 />
                 <Checkbox
@@ -80,7 +80,7 @@ const PreferencePanel: React.FC = () => {
                     label="measurement stack"
                     checked={defaultStack}
                     onChange={action((e, isChecked) => {
-                        store.visualConfig.defaultStack = isChecked || false;
+                        galleryStore.visualConfig.defaultStack = isChecked || false;
                     })}
                 />
             </Stack>

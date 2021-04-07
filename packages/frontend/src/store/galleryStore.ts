@@ -1,9 +1,9 @@
-import { action, computed, makeAutoObservable, makeObservable, observable, reaction } from 'mobx'
-import { clusterMeasures, FieldSummary, Subspace, ViewSpace } from '../../service';
-import { Aggregator, Field, globalRef, Record } from '../../global';
-import { recallLogger } from '../../loggers/recall';
-import { Specification } from '../../visBuilder/vegaBase';
-import { specification } from 'visual-insights';
+import { makeAutoObservable, observable } from "mobx";
+import { clusterMeasures, FieldSummary, Subspace, ViewSpace } from "../service";
+import { Aggregator, globalRef, Record } from "../global";
+import { recallLogger } from "../loggers/recall";
+import { Specification } from "../visBuilder/vegaBase";
+import { specification } from "visual-insights";
 
 interface DataView {
     schema: Specification;
@@ -36,7 +36,7 @@ export class GalleryStore {
     public likes: Set<number> = new Set();
     public currentPage: number = 0;
     public showAssociation: boolean = false;
-    public showConfigPanel: boolean = false; 
+    public showConfigPanel: boolean = false;
     public viewSpaces: ViewSpace[] = [];
     public visualConfig: PreferencePanelConfig;
     public loading: boolean = false;
@@ -54,14 +54,14 @@ export class GalleryStore {
             dataSource: observable.shallow,
             fields: observable.shallow,
             subspaceList: observable.shallow,
-            viewSpaces: observable.shallow
+            viewSpaces: observable.shallow,
         });
     }
     public get currentViewSpace() {
         return this.viewSpaces[this.currentPage];
     }
 
-    public get currentSpace () {
+    public get currentSpace() {
         return this.subspaceList.find((subspace) => {
             return subspace.dimensions.join(",") === this.vizRecommand.dimensions.join(",");
         })!;
@@ -109,10 +109,10 @@ export class GalleryStore {
     // + check geomType
     // + check geom number and aggregated geom number
     public scatterAdjust(schema: Specification) {
-        if (schema.geomType && (schema.geomType.includes('point') || schema.geomType.includes('density'))) {
+        if (schema.geomType && (schema.geomType.includes("point") || schema.geomType.includes("density"))) {
             this.visualConfig.defaultAggregated = false;
         } else {
-            this.visualConfig.defaultAggregated = true
+            this.visualConfig.defaultAggregated = true;
         }
     }
     public get vizRecommand(): DataView {
@@ -122,7 +122,7 @@ export class GalleryStore {
             const fieldsInView = fields.filter((f) => dimensions.includes(f.fieldName) || measures.includes(f.fieldName));
             try {
                 const { schema } = specification(
-                    fieldsInView.map((f) => [f.fieldName, f.entropy!, f.maxEntropy!, {name: f.fieldName, type: f.type}]),
+                    fieldsInView.map((f) => [f.fieldName, f.entropy!, f.maxEntropy!, { name: f.fieldName, type: f.type }]),
                     dataSource,
                     dimensions,
                     measures
@@ -137,39 +137,27 @@ export class GalleryStore {
                     measures,
                 };
             } catch (error) {
-                console.error(error)
+                console.error(error);
             }
         }
-        return DEFAULT_DATA_VIEW
+        return DEFAULT_DATA_VIEW;
     }
-    public async clusterMeasures (maxGroupNumber: number, useServer: boolean) {
+    public async clusterMeasures(maxGroupNumber: number, useServer: boolean) {
         const { subspaceList } = this;
         this.loading = true;
-        const viewSpaces = await clusterMeasures(maxGroupNumber, subspaceList.map(space => {
-            return {
-            dimensions: space.dimensions,
-            measures: space.measures,
-            matrix: space.correlationMatrix
-            };
-        }), useServer);
+        const viewSpaces = await clusterMeasures(
+            maxGroupNumber,
+            subspaceList.map((space) => {
+                return {
+                    dimensions: space.dimensions,
+                    measures: space.measures,
+                    matrix: space.correlationMatrix,
+                };
+            }),
+            useServer
+        );
         this.viewSpaces = viewSpaces;
         this.loading = false;
         this.clearLikes();
     }
-}
-
-const storeRef = {
-    store: new GalleryStore()
-}
-
-export function useGalleryStore () {
-    // const store = useMemo<GalleryStore>(() => {
-    //     return new GalleryStore();
-    // }, [])
-    // return store;
-    return storeRef.store
-}
-
-export function getGalleryStore () {
-    return storeRef.store;
 }

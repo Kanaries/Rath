@@ -1,5 +1,9 @@
+import { useObserver } from 'mobx-react-lite';
+import { useMemo } from 'react';
+import intl from "react-intl-universal";
 import { Cleaner } from 'visual-insights';
 import { DataSource } from '../../global';
+import { useGlobalStore } from '../../store';
 
 const { dropNull, simpleClean, useMode } = Cleaner;
 
@@ -34,3 +38,16 @@ export const cleanMethodList: Array<{ key: CleanMethod; text: string }> = [
   { key: 'simpleClean', text: 'simple cleaning' },
   { key: 'none', text: 'none' }
 ]
+
+export const useCleanMethodList = function (): typeof cleanMethodList {
+  const { langStore } = useGlobalStore();
+  const lang = useObserver(() =>  langStore.lang);
+  return useMemo(() => {
+    return cleanMethodList.map((m) => {
+        return {
+            key: m.key,
+            text: intl.get(`dataSource.methods.${m.key}`),
+        };
+    });
+  }, [lang])
+}

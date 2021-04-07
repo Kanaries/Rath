@@ -2,11 +2,11 @@ import React, { useMemo } from 'react';
 
 import { observer } from 'mobx-react-lite'
 import BaseChart from '../../visBuilder/vegaBase';
-import { useGalleryStore } from './store';
+import { useGlobalStore } from '../../store';
 
 const ObserverChart: React.FC = () => {
-    const store = useGalleryStore();
-    const { visualConfig, vizRecommand } = store;
+    const { galleryStore } = useGlobalStore()
+    const { visualConfig, vizRecommand } = galleryStore;
     const { aggregator, defaultAggregated, defaultStack } = visualConfig;
     const { dimensions, measures, aggData, schema, fieldFeatures } = vizRecommand;
 
