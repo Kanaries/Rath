@@ -5,7 +5,8 @@
   "homepage": "./",
   "prettier": {
     "tabWidth": 4,
-    "printWidth": 140
+    "printWidth": 140,
+    "singleQuote": true
   },
   "dependencies": {
     "@kanaries/web-data-loader": "0.1.0",
