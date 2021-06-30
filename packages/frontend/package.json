@@ -16,7 +16,6 @@
     "@types/chroma-js": "^1.4.3",
     "@types/jest": "^26.0.20",
     "@types/node": "^12.19.12",
-    "@types/papaparse": "^5.0.1",
     "@uifabric/icons": "^7.5.17",
     "@uifabric/react-hooks": "^7.13.9",
     "ali-react-table": "^2.3.1",
@@ -28,7 +27,6 @@
     "mocha": "^6.2.0",
     "office-ui-fabric-core": "^11.0.0",
     "office-ui-fabric-react": "^7.155.3",
-    "papaparse": "^5.1.0",
     "react": "^17.0.1",
     "react-app-rewired": "^2.1.5",
     "react-beautiful-dnd": "^13.0.0",
@@ -44,7 +42,8 @@
     "vega-lite": "^4.17.0",
     "visual-insights": "^0.5.5",
     "web-vitals": "^0.2.4",
-    "worker-loader": "^3.0.7"
+    "worker-loader": "^3.0.7",
+    "yarn": "^1.19.0"
   },
   "devDependencies": {
     "@types/react": "^17.0.2",

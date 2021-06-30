@@ -77,7 +77,7 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
     let rawData: Record[] = []
 
     if (file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
-        rawData = await FileLoader.csvLoader(file)
+        rawData = []
         if (sampleMethod === SampleKey.reservoir) {
             rawData = (await FileReader.csvReader({
               file,
