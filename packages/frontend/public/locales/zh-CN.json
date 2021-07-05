@@ -99,7 +99,8 @@
         "summary": "解读",
         "related": {
             "title": "联想视图"
-        }
+        },
+        "like": "喜欢这张图表"
     },
     "dashBoard": {
         "generateButton": "生成报表",

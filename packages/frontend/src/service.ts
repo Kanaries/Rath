@@ -2,27 +2,27 @@ import { DataSource,  Field, FieldType, OperatorType } from './global';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import dashBoardGeneratorWorker from './workers/dashboard.worker';
+import dashBoardGeneratorWorker from './workers/dashboard.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import clusterWorker from './workers/cluster.worker';
+import clusterWorker from './workers/cluster.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import combineFieldsWorker from './workers/combineFields.worker';
+import combineFieldsWorker from './workers/combineFields.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import fieldsSummaryWorker from './workers/fieldsSummary.worker';
+import fieldsSummaryWorker from './workers/fieldsSummary.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import groupFieldsWorker from './workers/groupFields.worker';
+import groupFieldsWorker from './workers/groupFields.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import InsightViewWorker from './workers/dev.worker';
+import InsightViewWorker from './workers/dev.worker?worker';
 import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
 
 let server = '//lobay.moe:8443';

@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { ViewSpace } from '../../../service';
+import { FieldSummary, ViewSpace } from '../../../service';
 import { Field, DataSource } from '../../../global';
 import { specification } from 'visual-insights';
 import { PreferencePanelConfig } from '../../../components/preference';
+// import { FieldSummary } from '\';
 const similarityThrehold = 0.2;
 const topKRelatedSpace = 5;
 
@@ -33,7 +34,7 @@ export interface DigDimensionProps {
    */
   viewSpaces: ViewSpace[];
   interestedViewSpace: ViewSpace;
-  fieldScores: Array<[string, number, number, Field]>;
+  fieldScores: FieldSummary[];
   dataSource: DataSource;
   visualConfig: PreferencePanelConfig
 }
@@ -71,9 +72,9 @@ function useDigDimension(props: DigDimensionProps) {
 
   const viewList = useMemo(() => {
     const ans = rankedRelatedSpaces.slice(0, topKRelatedSpace).map(space => {
-      let spaceFieldScores = fieldScores.filter(field => {
-        return space.dimensions.includes(field[0]) || space.measures.includes(field[0])
-      })
+      let spaceFieldScores: [string, number, number, Field][] = fieldScores.filter(field => {
+        return space.dimensions.includes(field.fieldName) || space.measures.includes(field.fieldName)
+      }).map(f => [f.fieldName, f.entropy, f.maxEntropy, {name: f.fieldName, type: f.type}])
       return {
         ...space,
         schema: specification(spaceFieldScores, dataSource, space.dimensions, space.measures).schema

@@ -22,7 +22,6 @@ export async function logDataImport (props: IDataImportInfo) {
             body: JSON.stringify(props),
           })
           const result = await res.json()
-          console.log(result)
         } catch (error) {
           console.error(error)
         }

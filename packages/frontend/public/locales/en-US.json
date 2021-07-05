@@ -99,7 +99,8 @@
         "summary": "Summary",
         "related": {
             "title": "Related Views"
-        }
+        },
+        "like": "like"
     },
     "dashBoard": {
         "generateButton": "Generate Dashboard",

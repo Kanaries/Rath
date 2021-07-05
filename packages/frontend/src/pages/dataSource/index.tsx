@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import intl from 'react-intl-universal'
 import { useGlobalState } from "../../state";
 import { useComposeState } from '../../utils/index';
@@ -6,7 +6,7 @@ import { ComboBox, PrimaryButton, IconButton, Stack, DefaultButton } from 'offic
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import FieldPanel from '../../components/fieldConfig';
-import {  cleanMethodList, CleanMethod } from './clean';
+import {  CleanMethod, useCleanMethodList } from './clean';
 import { useDataSource } from './useDataSource';
 import Selection from './selection/index';
 import { BIFieldType, Record } from "../../global";
@@ -40,14 +40,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   const [dataSource, preparedData] = useDataSource(state.rawData, state.fields, cleanMethod);
 
 
-  const cleanMethodListLang = useMemo<typeof cleanMethodList>(() => {
-    return cleanMethodList.map(m => {
-      return {
-        key: m.key,
-        text: intl.get(`dataSource.methods.${m.key}`)
-      }
-    })
-  }, [state.lang])
+  const cleanMethodListLang = useCleanMethodList();
 
   const dataImportButton = useCallback((text: string, dataSource: Record[]) => {
     let UsedButton = dataSource.length === 0 ? PrimaryButton : DefaultButton;

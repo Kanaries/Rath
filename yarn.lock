@@ -8476,6 +8476,16 @@ mkdirp@^1.0.3, mkdirp@^1.0.4:
   resolved "https://registry.npm.taobao.org/mkdirp/download/mkdirp-1.0.4.tgz#3eb5ed62622756d79a5f0e2a221dfebad75c2f7e"
   integrity sha1-PrXtYmInVteaXw4qIh3+utdcL34=
 
+mobx-react-lite@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.npm.taobao.org/mobx-react-lite/download/mobx-react-lite-3.2.0.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fmobx-react-lite%2Fdownload%2Fmobx-react-lite-3.2.0.tgz#331d7365a6b053378dfe9c087315b4e41c5df69f"
+  integrity sha1-Mx1zZaawUzeN/pwIcxW05Bxd9p8=
+
+mobx@^6.1.8:
+  version "6.1.8"
+  resolved "https://registry.npm.taobao.org/mobx/download/mobx-6.1.8.tgz?cache=0&sync_timestamp=1614609948693&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fmobx%2Fdownload%2Fmobx-6.1.8.tgz#5d03cb76d8f7694dd82bfb2578d886945b66450d"
+  integrity sha1-XQPLdtj3aU3YK/sleNiGlFtmRQ0=
+
 mocha@^6.2.0:
   version "6.2.3"
   resolved "https://registry.nlark.com/mocha/download/mocha-6.2.3.tgz#e648432181d8b99393410212664450a4c1e31912"

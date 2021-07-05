@@ -1,9 +1,8 @@
 /* eslint no-restricted-globals: 0 */
 /* eslint-disable */ 
-import { Record, Filters } from '../interfaces';
+// import { Record, Filters } from '../interfaces';
 import { getPredicatesFromVegaSignals } from '../utils';
 import { DataExplainer } from '../insights';
-
 const state = {
     de: null
 };

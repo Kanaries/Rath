@@ -1,11 +1,12 @@
 import React, { useMemo } from "react";
 import intl from 'react-intl-universal';
 import { useGlobalState, GlobalStateProvider } from "./state";
+import { useGlobalStore, StoreWrapper } from './store/index'
 import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
 import "./App.css";
-import RathLogo from './assets/kanaries-lite.png';
-import RathCoolLogo from './assets/rath-glasses.png';
+// import RathLogo from './assets/kanaries-lite.png';
+// import RathCoolLogo from './assets/rath-glasses.png';
 
 import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
@@ -15,14 +16,14 @@ import DashBoardPage from './pages/dashBoard/index';
 import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
 import UserSettings from './components/userSettings';
+import { observer } from "mobx-react-lite";
 
+// FIXME: 这两代码好像没什么用
 require('intl/locale-data/jsonp/en.js')
 require('intl/locale-data/jsonp/zh.js')
 
 const getLogoSrc = (withGlasses: boolean) => {
-  return withGlasses
-    ? RathCoolLogo
-    : RathLogo;
+  return withGlasses ? "/assets/rath-glasses.png" : "/assets/kanaries-lite.png";
 };
 
 interface PageStatus {
@@ -39,6 +40,7 @@ interface PageStatus {
 
 function App() {
   const [state, ] = useGlobalState();
+  const { langStore } = useGlobalStore()
   const pivotList = useMemo(() => {
     return [
       intl.get('menu.dataSource'),
@@ -51,7 +53,8 @@ function App() {
     ].map((page, index) => {
       return { title: page, itemKey: 'pivot-' + (index + 1) }
     })
-  }, [state.lang])
+    // FIXME: 未来完全mobx化之后，就可以不缓存
+  }, [langStore.lang])
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
@@ -132,10 +135,14 @@ function App() {
   )
 }
 
+const OBApp = observer(App);
+
 export default function WrappedApp() {
   return (
-    <GlobalStateProvider>
-      <App />
-    </GlobalStateProvider>
+    <StoreWrapper>
+      <GlobalStateProvider>
+        <OBApp />
+      </GlobalStateProvider>
+    </StoreWrapper>
   );
 }
