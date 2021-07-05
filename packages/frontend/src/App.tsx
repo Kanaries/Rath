@@ -68,7 +68,7 @@ function App() {
       <div className="header-bar">
         <div className="ms-Grid-row" dir="ltr">
           <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg1">
-            <a
+            {/* <a
               // onClick={() => { window.location.reload(false); }}
               href="https://github.com/ObservedObserver/visual-insights"
               className="logo"
@@ -78,7 +78,7 @@ function App() {
                 src={getLogoSrc(state.beCool)}
                 alt="rath"
               />
-            </a>
+            </a> */}
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg8">
             <Pivot
