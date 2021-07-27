@@ -25,7 +25,7 @@
     "datalib": "^1.9.2",
     "fuse.js": "^3.4.6",
     "immer": "^4.0.1",
-    "mobx": "^6.1.8",
+    "mobx": "^6.3.2",
     "mobx-react-lite": "^3.2.0",
     "mocha": "^6.2.0",
     "office-ui-fabric-core": "^11.0.0",
