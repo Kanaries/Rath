@@ -22,17 +22,26 @@ const HeaderCellContainer = styled.div`
     .mea {
         background-color: #13c2c2;
     }
+    .disable {
+        background-color: #9e9e9e;
+    }
     .header{
         margin-top: 0px;
         margin-bottom: 0px;
     }
 `;
 
+function getClassName (type: 'dimension' | 'measure', disable: boolean) {
+    if (disable) return 'disable'
+    return type === "dimension" ? "dim" : "mea"
+}
+
 interface HeaderCellProps {
     name: string;
     code: string;
     type: 'dimension' | 'measure';
-    onChangeBIType?: (type: BIFieldType, fieldKey: string) => void;
+    disable: boolean;
+    onChange?: (fid: string, propKey: string, value: any) => void
     summary: FieldSummary | null;
 }
 
@@ -58,7 +67,7 @@ function useBIFieldTypeOptions (): IOption<BIFieldType>[] {
 }
 
 const HeaderCell: React.FC<HeaderCellProps> = props => {
-    const { name, code, type, summary, onChangeBIType } = props;
+    const { name, code, type, summary, disable, onChange } = props;
     const optionsOfBIFieldType = useBIFieldTypeOptions();
     return (
         <HeaderCellContainer>
@@ -74,8 +83,9 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
             )}
             {
                 <DropdownSelect kind="text" value={type} onChange={(e) => {
-                    if (onChangeBIType) {
-                        onChangeBIType(e.target.value as BIFieldType, code);
+                    if (onChange) {
+                        // FIXME: 弱约束问题
+                        onChange(code, 'type', e.target.value as BIFieldType);
                     }
                 }}>
                     {
@@ -83,8 +93,18 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                     }
                 </DropdownSelect>
             }
+            <div>
+                <label>{intl.get('dataSource.useField')}</label>
+                <input checked={!disable} type="checkbox" onChange={e => {
+                    console.log('event', onChange)
+                    onChange && onChange(code, 'disable', !e.target.checked)
+                }} />
+            </div>
+            {/* <Checkbox label="use" checked={!disable} onChange={(e, isChecked) => {
+                onChange && onChange(code, 'disable', !isChecked)
+            }} /> */}
             {summary && <DistributionMiniChart dataSource={summary.distribution} x="memberName" y="count" fieldType={summary.type} />}
-            <div className={`bottom-bar ${type === "dimension" ? "dim" : "mea"}`}></div>
+            <div className={`bottom-bar ${getClassName(type, disable)}`}></div>
         </HeaderCellContainer>
     );
 }

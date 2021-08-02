@@ -1,15 +1,18 @@
 import React, { useContext } from 'react';
 import { LangStore } from "./langStore";
 import { GalleryStore } from './galleryStore'
+import { DataSourceStore } from './dataSourceStore';
 
 export interface StoreCollection {
     langStore: LangStore;
     galleryStore: GalleryStore;
+    dataSourceStore: DataSourceStore
 }
 
 const storeCol: StoreCollection = {
     langStore: new LangStore(),
-    galleryStore: new GalleryStore()
+    galleryStore: new GalleryStore(),
+    dataSourceStore: new DataSourceStore()
 }
 
 const StoreContext = React.createContext<StoreCollection>(null!);

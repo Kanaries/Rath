@@ -51,10 +51,10 @@ export class GalleryStore {
             defaultStack: true,
         };
         makeAutoObservable(this, {
-            dataSource: observable.shallow,
-            fields: observable.shallow,
-            subspaceList: observable.shallow,
-            viewSpaces: observable.shallow,
+            dataSource: observable.ref,
+            fields: observable.ref,
+            subspaceList: observable.ref,
+            viewSpaces: observable.ref,
         });
     }
     public get currentViewSpace() {

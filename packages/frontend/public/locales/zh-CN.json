@@ -18,6 +18,7 @@
     "dataSource": {
         "extractInsight": "开始分析",
         "cleanMethod": "清洗方法",
+        "useField": "允许使用",
         "importData": {
             "buttonName": "导入数据",
             "type": {

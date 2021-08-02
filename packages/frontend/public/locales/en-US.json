@@ -18,6 +18,7 @@
     "dataSource": {
         "extractInsight": "Insight Analysis",
         "cleanMethod": "Clean Method",
+        "useField": "use field",
         "importData": {
             "buttonName": "Import Data",
             "type": {

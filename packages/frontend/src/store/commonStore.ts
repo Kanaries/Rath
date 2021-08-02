@@ -3,6 +3,9 @@ import { BIField, Record } from '../global';
 import { cleanData, CleanMethod } from '../pages/dataSource/clean';
 import { deepcopy, Transform } from '../utils';
 
+interface IRawFields extends BIField {
+    disable: boolean;
+}
 export class CommonStore {
     /**
      * raw data is fetched and parsed data or uploaded data without any other changes.
@@ -14,10 +17,15 @@ export class CommonStore {
      * currently, this kind of type is not computed property unlike 'quantitative', 'nominal'...
      * This is defined by user's purpose or domain knowledge.
      */
-    public fields: BIField[] = [];
+    public rawFields: IRawFields[] = [];
+    // public fields: BIField[] = [];
     public cleanMethod: CleanMethod = 'dropNull';
     constructor() {
         makeAutoObservable(this);
+    }
+
+    public get fields () {
+        return this.rawFields.filter(f => !f.disable);
     }
 
     public get dimensions() {
