@@ -8,14 +8,14 @@
 
 <img src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png" alt="logo" width="180px" style="" />
 
-Automatic insights extraction and visualization specification based on `visual-insights`.
+Augmented Analytics tool. Help you automate data analysis and visualization recommendation.
 
 + [Youtube Video Demo](https://www.youtube.com/watch?v=o3_PH1Cbql4)
 + [Bilibili Video Demo](https://www.bilibili.com/video/av82089992/)
 
 ## Introduction
 
-Rath helps you extract insights from datasource automatically and generate interactive visualization with interesting findings.
+Rath helps you extract insights from datasource automatically and generate interactive visualization with interesting findings. Rath can generate dashboards from a raw dataset(as fact table) and explain some patterns to help you understand the data.
 
 Here are main parts in Rath,
 
