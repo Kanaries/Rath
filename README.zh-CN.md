@@ -8,7 +8,7 @@
 
 <img src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png" alt="logo" width="360px" style="" />
 
-Rath是新一代的可视化分析工具，它提供了自动化的数据探索分析能力与自动可视化设计能力。Rath既可以在你对数据无从下手时提供分析入口的建议，也可以在你的分析过程中提供实时的分析辅助和建议。Rath会帮你完成大部分数据探索分析的工作，使得你可以专注于领域问题本身。
+Rath是新一代的基于增强分析技术的可视化分析工具，它提供了自动化的数据探索分析能力与自动可视化设计能力。Rath既可以在你对数据无从下手时提供分析入口的建议，也可以在你的分析过程中提供实时的分析辅助和建议。Rath会帮你完成大部分数据探索分析的工作，使得你可以专注于领域问题本身。
 
 + [Youtube 视频 Demo](https://www.youtube.com/watch?v=o3_PH1Cbql4)
 + [Bilibili 视频 Demo](https://www.bilibili.com/video/av82089992/)
@@ -20,6 +20,8 @@ Rath 可能帮助你快速完成对一个数据集的自动化可视化分析。
 相比于tableau、Congos Analytics等可视化分析工具，Rath可以大幅降低数据分析的门槛，使用户可以关注于实际的问题。
 
 相比于PowerBI、帆软等报表搭建工具，Rath可以制作动态的可视化报表。使得你的报表可以针对数据的特性实时变化，始终把重要的问题暴露出来。
+
+与其他大多数增强分析或自动化可视化工具不同，Rath提供高维的复杂洞察发现能力与针对高维数据的可视化推荐技术。这使得Rath可以发现更深层次的洞察和线索，而不是局限在简单的低维可视化所展示的基础统计特征上。
 
 
 作者极力推荐的必看 Rath使用教程：[《Tutorial: 使用Rath快速获取数据洞察》](https://www.yuque.com/docs/share/3f32e044-3530-4ebe-9b01-287bfbdb7ce0?#)
@@ -37,6 +39,7 @@ Rath 可能帮助你快速完成对一个数据集的自动化可视化分析。
 ## 使用
 
 ### 线上demo
++ 官网 [kanaries.net](https://kanaries.net/)
 + Github Pages [demo](https://kanaries.github.io/Rath/)
 + 阿里云OSS [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
 
