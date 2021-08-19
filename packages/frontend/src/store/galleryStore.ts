@@ -1,9 +1,11 @@
-import { makeAutoObservable, observable } from "mobx";
-import { clusterMeasures, FieldSummary, Subspace, ViewSpace } from "../service";
+import { makeAutoObservable, runInAction } from "mobx";
+import { FieldSummary } from "../service";
 import { Aggregator, globalRef, Record } from "../global";
 import { recallLogger } from "../loggers/recall";
 import { Specification } from "../visBuilder/vegaBase";
 import { specification } from "visual-insights";
+import { fieldMeta2fieldSummary } from "../utils/transform";
+import { LitePipeStore } from "./pipeLineStore/lite";
 
 interface DataView {
     schema: Specification;
@@ -37,47 +39,54 @@ export class GalleryStore {
     public currentPage: number = 0;
     public showAssociation: boolean = false;
     public showConfigPanel: boolean = false;
-    public viewSpaces: ViewSpace[] = [];
     public visualConfig: PreferencePanelConfig;
     public loading: boolean = false;
-    public dataSource: Record[] = [];
-    public fields: FieldSummary[] = [];
-    public subspaceList: Subspace[] = [];
+    private pipeLine: LitePipeStore;
 
-    constructor() {
+    constructor(pipeStore: LitePipeStore) {
         this.visualConfig = {
             aggregator: "sum",
             defaultAggregated: true,
             defaultStack: true,
         };
-        makeAutoObservable(this, {
-            dataSource: observable.ref,
-            fields: observable.ref,
-            subspaceList: observable.ref,
-            viewSpaces: observable.ref,
-        });
+        makeAutoObservable(this);
+        this.pipeLine = pipeStore;
+
     }
     public get currentViewSpace() {
         return this.viewSpaces[this.currentPage];
     }
 
-    public get currentSpace() {
-        return this.subspaceList.find((subspace) => {
-            return subspace.dimensions.join(",") === this.vizRecommand.dimensions.join(",");
-        })!;
+    public get progressTag () {
+        return this.pipeLine.progressTag;
+    }
+
+    public get dataSource () {
+        return this.pipeLine.cookedDataset.transedData;
+    }
+
+    public get subspaceList () {
+        return this.pipeLine.dataSubspaces;
+    }
+
+    public get fields () {
+        const metas = this.pipeLine.cookedDataset.transedMetas;
+        return fieldMeta2fieldSummary(metas);
+        // return this.dataSourceStore.cookedDatasetRef.current.transedMetas.map(f )
+    }
+
+    public get viewSpaces () {
+        console.log(this.pipeLine.viewSpaces)
+        return this.pipeLine.viewSpaces;
     }
 
     public setVisualConfig(config: PreferencePanelConfig) {
         this.visualConfig = config;
     }
 
-    public init(dataSource: Record[], fields: FieldSummary[], subspaceList: Subspace[]) {
+    public init() {
         this.likes = new Set();
         this.currentPage = 0;
-        this.viewSpaces = [];
-        this.dataSource = dataSource;
-        this.fields = fields;
-        this.subspaceList = subspaceList;
     }
     public clearLikes() {
         this.likes = new Set();
@@ -91,9 +100,7 @@ export class GalleryStore {
             vegaSpec: globalRef.baseVisSpec,
         });
     }
-    public setViewSpaces(viewSpaces: ViewSpace[]) {
-        this.viewSpaces = viewSpaces;
-    }
+
     public goToPage(pageNo: number) {
         this.currentPage = pageNo;
     }
@@ -142,22 +149,10 @@ export class GalleryStore {
         }
         return DEFAULT_DATA_VIEW;
     }
-    public async clusterMeasures(maxGroupNumber: number, useServer: boolean) {
-        const { subspaceList } = this;
-        this.loading = true;
-        const viewSpaces = await clusterMeasures(
-            maxGroupNumber,
-            subspaceList.map((space) => {
-                return {
-                    dimensions: space.dimensions,
-                    measures: space.measures,
-                    matrix: space.correlationMatrix,
-                };
-            }),
-            useServer
-        );
-        this.viewSpaces = viewSpaces;
-        this.loading = false;
-        this.clearLikes();
+
+    public changeVisualConfig (updater: (config: PreferencePanelConfig) => void) {
+        runInAction(() => {
+            updater(this.visualConfig);
+        })
     }
 }

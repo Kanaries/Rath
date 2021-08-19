@@ -43,7 +43,6 @@ const FileData: React.FC<FileDataProps> = (props) => {
                     {intl.get("dataSource.upload.sampling")}
                 </Label>
                 <ChoiceGroup
-                    defaultSelectedKey="B"
                     options={sampleOptions}
                     selectedKey={sampleMethod}
                     onChange={(ev: any, option: IChoiceGroupOption | undefined) => {

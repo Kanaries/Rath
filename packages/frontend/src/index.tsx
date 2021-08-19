@@ -1,3 +1,7 @@
+// redux rxjs mobx同时出现导致的symbol.observable的问题。
+// 项目中react-beautiful-dnd 使用了redux
+// https://github.com/benlesh/symbol-observable/issues/38
+import 'symbol-observable'
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'office-ui-fabric-core/dist/css/fabric.css'

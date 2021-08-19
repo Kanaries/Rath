@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Cluster } from 'visual-insights';
-import { useGlobalState } from '../../state';
+import { observer } from 'mobx-react-lite'
 import embed from 'vega-embed';
+import { useGlobalStore } from '../../store';
 // cluster should be used for small graph because the number of measure is limited. 
 // Browser may be more likely crashed by other algorithm or data structure or memory used in the whole analysis pipline.
 /**
@@ -31,7 +32,7 @@ interface TreeData {
 }
 const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
   const { adjMatrix, measures, onFocusGroup } = props;
-  const [state, ] = useGlobalState();
+  const { noteBookStore } = useGlobalStore()
   const chart = useRef<HTMLDivElement>(null);
   // const groups = useMemo<string[][]>(() => {
   //   return clusterMeasures({
@@ -44,9 +45,9 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
      * todo: 
      * maxGroupNumber = the measures length / max visual channel for measure.
      */
-    let { edgesInMST, groups } = Cluster.kruskalWithFullMST(adjMatrix, state.maxGroupNumber);
+    let { edgesInMST, groups } = Cluster.kruskalWithFullMST(adjMatrix,  noteBookStore.MAX_MEA_GROUP_NUM);
     return { edgesInMST, groups }
-  }, [adjMatrix, state.maxGroupNumber])
+  }, [adjMatrix, noteBookStore.MAX_MEA_GROUP_NUM])
   const treeData = useMemo<TreeData>(() => {
     let { edgesInMST, groups } = clusterResult;
     const edges: VegaEdge[] = edgesInMST.map(edge => {
@@ -236,4 +237,4 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
   </div>
 }
 
-export default ClusterBoard;
+export default observer(ClusterBoard);

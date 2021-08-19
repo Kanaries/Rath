@@ -1,12 +1,10 @@
-import React, { useMemo } from "react";
+import React from "react";
 import intl from 'react-intl-universal';
 import { useGlobalState, GlobalStateProvider } from "./state";
 import { useGlobalStore, StoreWrapper } from './store/index'
 import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
 import "./App.css";
-// import RathLogo from './assets/kanaries-lite.png';
-// import RathCoolLogo from './assets/rath-glasses.png';
 
 import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
@@ -21,10 +19,6 @@ import { observer } from "mobx-react-lite";
 // FIXME: 这两代码好像没什么用
 require('intl/locale-data/jsonp/en.js')
 require('intl/locale-data/jsonp/zh.js')
-
-const getLogoSrc = (withGlasses: boolean) => {
-  return withGlasses ? "/assets/rath-glasses.png" : "/assets/kanaries-lite.png";
-};
 
 interface PageStatus {
   show: {
@@ -41,20 +35,20 @@ interface PageStatus {
 function App() {
   const [state, ] = useGlobalState();
   const { langStore } = useGlobalStore()
-  const pivotList = useMemo(() => {
-    return [
-      intl.get('menu.dataSource'),
-      intl.get('menu.noteBook'),
-      intl.get('menu.explore'),
-      intl.get('menu.dashBoard'),
-      intl.get('menu.explainer'),
-      intl.get('menu.editor'),
-      intl.get('menu.support')
-    ].map((page, index) => {
-      return { title: page, itemKey: 'pivot-' + (index + 1) }
-    })
-    // FIXME: 未来完全mobx化之后，就可以不缓存
-  }, [langStore.lang])
+
+  let pivotKeys: string[] = ['dataSource', 'noteBook', 'explore', 'dashBoard', 'explainer', 'editor', 'support'];
+
+  let pivotList = pivotKeys.map((page, index) => {
+    return { title: page, itemKey: 'pivot-' + (index + 1) }
+  })
+
+  if (langStore.loaded) {
+    pivotList = pivotKeys.map(p => intl.get(`menu.${p}`))
+      .map((page, index) => {
+        return { title: page, itemKey: 'pivot-' + (index + 1) }
+      })
+  }
+
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
@@ -66,22 +60,27 @@ function App() {
       pivotKey: pivotList[0].itemKey,
     },
   })
+
+  if (!langStore.loaded) {
+    return <div></div>
+  }
+
   return (
     <div>
       <div className="header-bar">
         <div className="ms-Grid-row" dir="ltr">
           <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg1">
-            {/* <a
+            <a
               // onClick={() => { window.location.reload(false); }}
-              href="https://github.com/ObservedObserver/visual-insights"
+              href="https://github.com/Kanaries/Rath"
               className="logo"
             >
               <img
-                style={!state.beCool ? { width: '48px', marginTop: '4px' } : undefined}
-                src={getLogoSrc(state.beCool)}
+                style={{ width: '38px', marginTop: '4px' }}
+                src="/assets/kanaries-lite.png"
                 alt="rath"
               />
-            </a> */}
+            </a>
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg8">
             <Pivot
@@ -108,7 +107,7 @@ function App() {
         </div>
       </div>
       {pageStatus.current.pivotKey === 'pivot-3' && (
-        <Gallery subspaceList={state.subspaceList} dataSource={state.cookedDataSource} summary={state.summary} />
+        <Gallery />
       )}
       {pageStatus.current.pivotKey === 'pivot-1' && (
         <DataSourceBoard
@@ -123,7 +122,7 @@ function App() {
       {pageStatus.current.pivotKey === 'pivot-2' && (
         <div className="content-container">
           <div className="card">
-            <NoteBook summary={state.summary} subspaceList={state.subspaceList} dataSource={state.cookedDataSource} />
+            <NoteBook />
           </div>
         </div>
       )}

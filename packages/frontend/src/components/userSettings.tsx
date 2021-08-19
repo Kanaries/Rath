@@ -29,10 +29,6 @@ const UserSettings: React.FC = () => {
   const [state, updateState] = useGlobalState();
   const { langStore } = useGlobalStore();
 
-  useEffect(() => {
-    langStore.initLocales()
-  }, [])
-
   return (
     <Container>
       <DropdownSelect

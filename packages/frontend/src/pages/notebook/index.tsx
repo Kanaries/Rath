@@ -1,33 +1,31 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import intl from 'react-intl-universal';
-import { DataSource, Field } from '../../global';
+import {  Field } from '../../global';
 import FieldAnalysisBoard from './fieldAnalysis';
 import Subspaces from './subspaces';
-import { FieldSummary, Subspace, combineFieldsService } from '../../service';
+import { Subspace, combineFieldsService } from '../../service';
 import ClusterBoard from './cluster';
 import { specification } from 'visual-insights';
 import { ProgressIndicator, Toggle, Slider } from 'office-ui-fabric-react';
 import { useGlobalState } from '../../state';
 import VegaBase from '../../visBuilder/vegaBase';
 import './index.css';
-const maxMeasureInView = 4;
-interface NoteBookProps {
-  dataSource: DataSource;
-  // dimScores: [string, number, number, Field][],
-  summary: {
-    origin: FieldSummary[];
-    grouped: FieldSummary[]
-  };
-  subspaceList: Subspace[]
-}
+import { observer } from 'mobx-react-lite';
+import { useGlobalStore } from '../../store';
+// const maxMeasureInView = 4;
+
+const EXPECTED_MAX_MEA_IN_VIEW = 3;
+
 interface ClusterState {
   measures: string[];
   dimensions: string[];
   matrix: number[][];
 }
-const NoteBook: React.FC<NoteBookProps> = (props) => {
-  const { summary, subspaceList, dataSource } = props;
-  const [state, updateState] = useGlobalState();
+const NoteBook: React.FC = (props) => {
+  // const { summary, subspaceList, dataSource } = props;
+  // const [state, updateState] = useGlobalState();
+  const { noteBookStore } = useGlobalStore();
+  const { summary, dataSource, subspaceList } = noteBookStore;
   const [isAggregated, setIsAggregated] = useState(true);
   
   const [clusterState, setClusterState] = useState<ClusterState>({
@@ -45,7 +43,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     return [...summary.origin, ...summary.grouped].map(field => {
       return [field.fieldName, field.entropy, field.maxEntropy, { name: field.fieldName, type: field.type }]
     });
-  }, [summary.origin, summary.grouped])
+  }, [summary])
 
   const spec = useMemo(() => {
     const { dimensions } = clusterState;
@@ -72,14 +70,6 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
 
   }, [dimScores, clusterState, dataSource, measuresInView])
 
-  const usedSubspaceList = useMemo<Subspace[]>(() => {
-    return subspaceList.slice(0, Math.round(subspaceList.length * state.topK.subspacePercentSize))
-  }, [subspaceList, state.topK.subspacePercentSize]);
-  useEffect(() => {
-    updateState(draft => {
-      draft.maxGroupNumber = Math.round(state.cookedMeasures.length / maxMeasureInView)
-    })
-  }, [state.cookedMeasures, updateState])
 
   const onSpaceChange = useCallback((dimensions, measures, matrix) => {
     setClusterState({
@@ -96,61 +86,42 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     <div>
       <h3 className="notebook header">{intl.get('noteBook.univariate.title')}</h3>
       <p className="state-description">{intl.get('noteBook.univariate.desc')}</p>
-      {state.loading.univariateSummary && <ProgressIndicator description="analyzing" />}
+      {noteBookStore.progressTag === 'univar' && <ProgressIndicator description="analyzing" />}
       <div className="notebook content container">
         <FieldAnalysisBoard originSummary={summary.origin} groupedSummary={summary.grouped} />
       </div>
 
       <h3 className="notebook header">{intl.get('noteBook.subspace.title')}</h3>
       <p className="state-description">{intl.get('noteBook.subspace.desc')}</p>
-      {state.loading.subspaceSearching && <ProgressIndicator description="analyzing" />}
-      {!state.loading.univariateSummary && (
+      {noteBookStore.progressTag === 'subspace' && <ProgressIndicator description="analyzing" />}
+      {noteBookStore.progressTag !== 'univar' && (
         <Slider
-          disabled={state.loading.subspaceSearching}
-          value={state.topK.dimensionSize * 100}
+          disabled={noteBookStore.progressTag === 'subspace'}
+          value={noteBookStore.TOP_K_DIM_PERCENT * 100}
           label={intl.get('noteBook.subspace.topKDimension')}
           max={100}
           valueFormat={(value: number) => `${value}%`}
           showValue={true}
           onChange={(value: number) => {
-            updateState((draft) => {
-              draft.topK.dimensionSize = value / 100
-              draft.loading.subspaceSearching = true
-            })
-            const selectedDimensions = state.cookedDimensions.slice(
-              0,
-              Math.round((state.cookedDimensions.length * value) / 100)
-            )
-            combineFieldsService(dataSource, selectedDimensions, state.cookedMeasures, 'sum', state.useServer).then(
-              (subspaces) => {
-                if (subspaces) {
-                  updateState((draft) => {
-                    draft.subspaceList = subspaces
-                    draft.loading.subspaceSearching = false
-                  })
-                }
-              }
-            )
+            noteBookStore.setParams('TOP_K_DIM_PERCENT', value / 100);
           }}
         />
       )}
-      {!state.loading.univariateSummary && (
+      {noteBookStore.progressTag !== 'univar' && (
         <Slider
-          disabled={state.loading.subspaceSearching}
-          value={state.topK.subspacePercentSize * 100}
+          disabled={noteBookStore.progressTag === 'subspace'}
+          value={noteBookStore.TOP_K_DIM_GROUP_PERCENT * 100}
           label={intl.get('noteBook.subspace.topKSubspace')}
           max={100}
           valueFormat={(value: number) => `${value}%`}
           showValue={true}
           onChange={(value: number) => {
-            updateState((draft) => {
-              draft.topK.subspacePercentSize = value / 100
-            })
+            noteBookStore.setParams('TOP_K_DIM_GROUP_PERCENT', value / 100)
           }}
         />
       )}
       <div className="notebook content center container">
-        <Subspaces subspaceList={usedSubspaceList} onSpaceChange={onSpaceChange} />
+        <Subspaces subspaceList={noteBookStore.subspaceList} onSpaceChange={onSpaceChange} />
       </div>
 
       <h3 className="notebook header">{intl.get('noteBook.clustering.title')}</h3>
@@ -158,15 +129,13 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
       <Slider
         label={intl.get('noteBook.clustering.maxGroupNum')}
         min={1}
-        max={state.cookedMeasures.length || 4}
+        max={noteBookStore.measureAmount || 4}
         step={1}
         // defaultValue={clusterState.measures.length / 4}
-        value={state.maxGroupNumber}
+        value={noteBookStore.MAX_MEA_GROUP_NUM}
         showValue={true}
         onChange={(value: number) => {
-          updateState((draft) => {
-            draft.maxGroupNumber = value
-          })
+          noteBookStore.setParams('MAX_MEA_GROUP_NUM', value);
         }}
       />
       <div className="notebook content center container">
@@ -201,4 +170,4 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
   )
 }
 
-export default NoteBook;
+export default observer(NoteBook);

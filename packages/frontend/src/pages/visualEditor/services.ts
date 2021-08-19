@@ -89,9 +89,7 @@ export async function preAnalysis(props: PreAnalysisParams) {
     }
     try {
         workerState.worker = new ExplainerWorker() as Worker;
-        console.log('props', props);
         const tmp = await workerService<boolean, { type: string; data: PreAnalysisParams}>(workerState.worker, { type: 'preAnalysis', data: props });
-        console.log('tmp', tmp)
     } catch (error) {
         console.error(error)
     }

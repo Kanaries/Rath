@@ -24,7 +24,7 @@ interface DataSourceBoardProps {
 }
 
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-  const { dataSourceStore } = useGlobalStore();
+  const { dataSourceStore, pipeLineStore } = useGlobalStore();
 
   const { mutFields ,cleanedData, cleanMethod, rawData } = dataSourceStore;
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
@@ -75,6 +75,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
               //   dataSource: preparedData,
               //   fields: state.fields,
               // })
+              pipeLineStore.startTask();
               props.onExtractInsights()
             }}
           />

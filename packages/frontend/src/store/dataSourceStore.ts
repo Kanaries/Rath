@@ -4,6 +4,7 @@ import { IRawField, IRow } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
 import { deepcopy, Transform } from "../utils";
 
+
 export class DataSourceStore {
     /**
      * raw data is fetched and parsed data or uploaded data without any other changes.
@@ -21,11 +22,13 @@ export class DataSourceStore {
     public cookedDimensions: string[] = [];
     public cookedMeasures: string[] = [];
     public cleanMethod: CleanMethod = 'dropNull';
+
     constructor() {
         makeAutoObservable(this, {
             rawData: observable.ref,
             cookedDataSource: observable.ref,
-            cookedMeasures: observable.ref
+            cookedMeasures: observable.ref,
+            // subscriptions: false
         });
     }
 
@@ -53,7 +56,6 @@ export class DataSourceStore {
 
     public get cleanedData () {
         const { dataSource, dimensions, measures, cleanMethod} = this;
-        console.log(dimensions, measures, dataSource)
         return cleanData(deepcopy(dataSource), dimensions, measures, cleanMethod)
     }
 
@@ -71,7 +73,6 @@ export class DataSourceStore {
     public updateFieldInfo (fieldId: string, fieldPropKey: string, value: any) {
         // type a = keyof IRawField
         const target = this.mutFields.find(f => f.name === fieldId);
-        console.log(target, 'change', fieldId, fieldPropKey, value)
         if (target) {
             // @ts-ignore
             target[fieldPropKey] = value;

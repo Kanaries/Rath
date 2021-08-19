@@ -11,50 +11,29 @@ import {
 } from "office-ui-fabric-react";
 import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
 
-import { DataSource } from "../../global";
-import VisSummary from "../../plugins/visSummary/index";
-import { useGlobalState } from "../../state";
-import Association from "./association/index";
-import {
-  Subspace,
-  FieldSummary
-} from "../../service";
 import SearchBoard from "./search/index";
 import { observer } from 'mobx-react-lite'
 
 import ObserverChart from "./observerChart";
 import VizPreference from "./vizPreference";
 import { useGlobalStore } from "../../store";
+import Association from "./association";
+import { toJS } from "mobx";
 
 const pivotKeyList = [
   'rankList',
   'search'
 ];
 
-interface GalleryProps {
-  subspaceList: Subspace[];
-  /**
-   * dataSource here should be cookedData.
-   */
-  dataSource: DataSource;
-  summary: {
-    origin: FieldSummary[];
-    grouped: FieldSummary[];
-  };
-}
-
-const Gallery: React.FC<GalleryProps> = props => {
-  const { dataSource, summary, subspaceList } = props;
-  const [state, ] = useGlobalState();
-  // const store = useGalleryStore();
+const Gallery: React.FC = props => {
   const { galleryStore, langStore } = useGlobalStore();
   const {
     currentPage,
     showAssociation,
-    visualConfig,
-    currentSpace,
+    vizRecommand,
     fields,
-    vizRecommand
+    visualConfig,
+    
   } = galleryStore;
   const pivotList = useMemo(() => {
     return pivotKeyList.map((page, index) => {
@@ -63,15 +42,6 @@ const Gallery: React.FC<GalleryProps> = props => {
   }, [langStore.lang])
 
   const [pivotIndex, setPivotIndex] = useState(pivotList[0].itemKey);
-
-  useEffect(() => {
-      const fields = [...summary.origin, ...summary.grouped];
-      galleryStore.init(dataSource, fields, subspaceList);
-  }, [dataSource, subspaceList, summary.origin, summary.grouped, galleryStore]);
-
-  useEffect(() => {
-    galleryStore.clusterMeasures(state.maxGroupNumber, state.useServer)
-  }, [subspaceList, dataSource, state.maxGroupNumber, state.useServer, galleryStore]);
 
   useEffect(() => {
     // 换页的时候强制关闭联想.
@@ -93,7 +63,7 @@ const Gallery: React.FC<GalleryProps> = props => {
             <PivotItem headerText={pivot.title} key={pivot.itemKey} itemKey={pivot.itemKey} />
           ))}
         </Pivot>
-        {(galleryStore.loading || state.loading.subspaceSearching || state.loading.univariateSummary) && (
+        {galleryStore.progressTag !== 'none' && (
           <ProgressIndicator description="calculating" />
         )}
         {pivotIndex === pivotList[0].itemKey && (
@@ -178,14 +148,14 @@ const Gallery: React.FC<GalleryProps> = props => {
                   </div>
                   <h3>Specification</h3>
                   <pre>{JSON.stringify(vizRecommand.schema, null, 2)}</pre>
-                  <VisSummary
+                  {/* <VisSummary
                     dimensions={vizRecommand.dimensions}
                     measures={vizRecommand.measures}
                     dimScores={fields}
                     space={currentSpace}
                     spaceList={subspaceList}
                     schema={vizRecommand.schema}
-                  />
+                  /> */}
                 </div>
                 <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg9" style={{ overflow: 'auto' }}>
                   <ObserverChart />
@@ -207,10 +177,10 @@ const Gallery: React.FC<GalleryProps> = props => {
                 galleryStore.goToPage(pos)
               }
             }}
-            subspaceList={subspaceList}
+            subspaceList={galleryStore.subspaceList}
             digDimensionProps={{
-              visualConfig,
-              dataSource,
+              visualConfig: toJS(visualConfig),
+              dataSource: galleryStore.dataSource,
               viewSpaces: galleryStore.viewSpaces,
               fieldScores: fields,
               interestedViewSpace: galleryStore.currentViewSpace,

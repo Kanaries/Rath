@@ -1,11 +1,13 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { SUPPORT_LANG } from "../locales";
 import intl from 'react-intl-universal';
 
 export class LangStore {
     public lang: string = SUPPORT_LANG[0].value;
+    public loaded: boolean = false;
     constructor () {
         makeAutoObservable(this)
+        this.initLocales();
     }
     public async useLocales (lang: string) {
         try {
@@ -22,12 +24,15 @@ export class LangStore {
                     [lang]: result,
                 },
             });
-            this.lang = lang
+            runInAction(() => {
+                this.lang = lang
+                this.loaded = true;
+            })
         } catch (error) {
             console.error(error);
         }
     }
-    public initLocales () {
+    public async initLocales () {
         let currentLocale = intl.determineLocale({
             urlLocaleKey: "lang",
             cookieLocaleKey: "lang",
@@ -35,6 +40,6 @@ export class LangStore {
         if (!SUPPORT_LANG.find((f) => f.value === currentLocale)) {
             currentLocale = SUPPORT_LANG[0].value;
         }
-        this.useLocales(currentLocale);
+        await this.useLocales(currentLocale);
     }
 }
