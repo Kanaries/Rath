@@ -13073,10 +13073,10 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-visual-insights@^0.5.5:
-  version "0.5.5"
-  resolved "https://registry.npm.taobao.org/visual-insights/download/visual-insights-0.5.5.tgz#e0b5455c87cf4640e8dbdecc3211718374b356c7"
-  integrity sha1-4LVFXIfPRkDo297MMhFxg3SzVsc=
+visual-insights@^0.5.6:
+  version "0.5.6"
+  resolved "https://registry.nlark.com/visual-insights/download/visual-insights-0.5.6.tgz#cbed0323eaf0bd131d30b7c7cd23a70228c36b52"
+  integrity sha1-y+0DI+rwvRMdMLfHzSOnAijDa1I=
   dependencies:
     assert "^2.0.0"
     cube-core "^2.13.0"
