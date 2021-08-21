@@ -6,7 +6,6 @@ const combineFields = (e) => {
   try {
     const { dataSource, dimensions, measures, operator, topKPercent = 1 } = e.data;
     let impurityList = Insight.insightExtraction(dataSource, dimensions, measures, operator).map(dimReport => {
-      console.log(JSON.stringify(dimReport, null, 2))
       let sum = 0;
       for (let key in dimReport[1]) {
         sum += dimReport[1][key];

@@ -96,7 +96,6 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
             <div>
                 <label>{intl.get('dataSource.useField')}</label>
                 <input checked={!disable} type="checkbox" onChange={e => {
-                    console.log('event', onChange)
                     onChange && onChange(code, 'disable', !e.target.checked)
                 }} />
             </div>

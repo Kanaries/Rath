@@ -8,8 +8,7 @@ import "./App.css";
 
 import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
-// import VisualEditor from './pages/visualEditor';
-import { GraphicWalker } from 'graphic-walker'
+import VisualInterface from './pages/visualInterface';
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
 import DevPage from './pages/dev';
@@ -129,7 +128,7 @@ function App() {
       )}
       {pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />}
       {pageStatus.current.pivotKey === 'pivot-5' && <DevPage />}
-      {pageStatus.current.pivotKey === 'pivot-6' && <GraphicWalker dataSource={[]} dimensions={[]} measures={[]} />}
+      {pageStatus.current.pivotKey === 'pivot-6' && <VisualInterface />}
       {pageStatus.current.pivotKey === 'pivot-7' && <SupportPage />}
     </div>
   )
