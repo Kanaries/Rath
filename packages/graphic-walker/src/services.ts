@@ -1,13 +1,13 @@
 import { Record, Filters, SemanticType, IMeasure } from './interfaces';
-import { Insight } from 'visual-insights';
+// import { Insight } from 'visual-insights';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import InsightSpaceWorker from './workers/InsightService.worker';
+// import InsightSpaceWorker from './workers/InsightService.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import ExplainerWorker from './workers/explainer.worker';
+import ExplainerWorker from './workers/explainer.worker?worker';
 import { View, Specification } from 'visual-insights/build/esm/commonTypes';
 import { IExplaination, IMeasureWithStat } from './insights';
 
@@ -89,7 +89,7 @@ export async function preAnalysis(props: PreAnalysisParams) {
     }
     try {
         workerState.worker = new ExplainerWorker() as Worker;
-        await workerService<boolean, { type: string; data: PreAnalysisParams}>(workerState.worker, { type: 'preAnalysis', data: props });
+        const tmp = await workerService<boolean, { type: string; data: PreAnalysisParams}>(workerState.worker, { type: 'preAnalysis', data: props });
     } catch (error) {
         console.error(error)
     }

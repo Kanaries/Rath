@@ -9,9 +9,11 @@ import {
   IDropdownOption
 } from 'office-ui-fabric-react'
 import { DropdownSelect } from '@tableau/tableau-ui';
-import { useGlobalState } from "../state";
+import { observer } from 'mobx-react-lite'
 import { SUPPORT_LANG } from "../locales";
-import { useLocales } from "../utils/useLocales";
+
+import { useGlobalStore } from "../store";
+import { IComputeMode } from "../interfaces";
 const langOptions: IDropdownOption[] = SUPPORT_LANG.map(lang => ({
   key: lang.value,
   text: lang.name
@@ -21,31 +23,17 @@ const Container = styled.div`
   display: flex;
   align-items: center;
 `
-const UserSettings: React.FC = props => {
+const UserSettings: React.FC = () => {
   const target = useRef<HTMLDivElement>(null);
   const [show, setShow] = useState<boolean>(false);
-  const [state, updateState] = useGlobalState();
-  const loadLocales = useLocales((lang) => {
-    updateState(s => {
-      s.lang = lang;
-    })
-  });
-  useEffect(() => {
-    let currentLocale = intl.determineLocale({
-      urlLocaleKey: 'lang',
-      cookieLocaleKey: 'lang',
-    })
-    if (!SUPPORT_LANG.find(f => f.value === currentLocale)) {
-      currentLocale = langOptions[0].key as string
-    }
-    loadLocales(currentLocale)
-  }, [])
+  const { langStore, pipeLineStore } = useGlobalStore();
+
   return (
     <Container>
       <DropdownSelect
-        value={state.lang}
+        value={langStore.lang}
         onChange={(e) => {
-          loadLocales(e.target.value as string)
+          langStore.useLocales(e.target.value)
         }}
       >
         {
@@ -72,26 +60,13 @@ const UserSettings: React.FC = props => {
         >
           <div style={{ padding: '1rem' }}>
             <Toggle
-              label="Be Cool"
-              checked={state.beCool}
-              onText="On"
-              offText="Off"
-              onChange={(ev: React.MouseEvent<HTMLElement>, checked?: boolean) => {
-                updateState((draft) => {
-                  draft.beCool = checked || false
-                })
-              }}
-            />
-            <Toggle
-              label="Use Server"
+              label="Compute Mode"
               disabled={true}
-              checked={state.useServer}
-              onText="On"
-              offText="Off"
+              checked={pipeLineStore.computateMode === IComputeMode.server}
+              onText="Server"
+              offText="Worker"
               onChange={(ev: React.MouseEvent<HTMLElement>, checked?: boolean) => {
-                updateState((draft) => {
-                  draft.useServer = checked || false
-                })
+                pipeLineStore.setComputeMode(checked ? IComputeMode.server : IComputeMode.worker)
               }}
             />
           </div>
@@ -101,5 +76,4 @@ const UserSettings: React.FC = props => {
   )
 };
 
-export default UserSettings;
-
+export default observer(UserSettings);

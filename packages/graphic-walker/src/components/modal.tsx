@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { IconButton } from 'office-ui-fabric-react';
+import { IconButton } from '@fluentui/react';
 const Container = styled.div`
   width: 880px;
   max-height: 800px;

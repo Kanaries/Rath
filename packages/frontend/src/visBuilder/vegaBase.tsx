@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import aggregate from 'cube-core';
 import embed from 'vega-embed';
-import { DataSource, Field } from '../global'
+import { DataSource, Field, globalRef } from '../global'
 import { baseVis } from '../queries/index';
 export const geomTypeMap: {[key: string]: any} = {
   interval: 'bar',
@@ -66,6 +66,7 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
     if (container.current !== null) {
       if (schema.position && schema.position.length > 0 && schema.geomType && schema.geomType.length > 0) {
         let spec = baseVis(schema, table, dimensions, measures, aggregatedMeasures, fieldFeatures, defaultAggregated, defaultStack);
+        globalRef.baseVisSpec = spec;
         embed(container.current, spec);
       }
     }

@@ -10,6 +10,7 @@ import {
   clusterMeasures
 } from "./service";
 import { GlobalState, StateUpdater } from './state';
+import { getGlobalStore } from "./store";
 
 
 
@@ -199,9 +200,8 @@ const getViewSpaces: Action<GetViewSpacesProps> = async (select, updateState, pa
 
 const extractInsights: Action<{dataSource: DataSource; fields: BIField[]}> = async (state, updateState, params) => {
   const { dataSource, fields } = params;
-  updateState(draft => {
-    draft.loading.gallery = true
-  })
+  const { galleryStore } = getGlobalStore();
+  galleryStore.loading = true;
   try {
     const univariateResult = await univariateSummary(state, updateState, {
       dataSource, fields
@@ -219,10 +219,7 @@ const extractInsights: Action<{dataSource: DataSource; fields: BIField[]}> = asy
       }
   } catch (error) {
   } finally {
-    updateState(draft => {
-      draft.loading.gallery = false
-      draft.loading.gallery = false
-    })
+    galleryStore.loading = false;
   }
 }
 

@@ -15,12 +15,14 @@ Augmented Analytics tool. Help you automate data analysis and visualization reco
 
 ## Introduction
 
-Rath helps you extract insights from datasource automatically and generate interactive visualization with interesting findings. Rath can generate dashboards from a raw dataset(as fact table) and explain some patterns to help you understand the data.
+Rath helps you extract insights from datasource automatically and generate interactive visualizations with interesting findings. Rath can auto generate high dimensional visualization contains complex patterns while most other auto-EDA tools only provideing simple low dimensional charts with basic statistics pattern. Its means you can use Rath to explore the data to a deep level and find more insights.
+
+Rath design a algorithm recommanding visualization with lowest perception error by human eyes, which means you can read the info in visualization much accuracte. 
 
 Here are main parts in Rath,
 
 ### DataSource
-dataSource board is for data uploading, sampling(currently support stream data, which means there is no limit of the size of file you uploaded), cleaning and defining fields type(dimensions, measures). In visual insights, we regard dimensions as independent variable or feature and measures as dependent variable or target.
+DataSource board is for data uploading, sampling(currently support stream data, which means there is no limit of the size of file you uploaded), cleaning and defining fields type(dimensions, measures). In visual insights, we regard dimensions as independent variable or feature and measures as dependent variable or target.
 
 ### Notebook
 Notebook is a board for user to know what happened in the automatic analysis process and how rath uses visual-insights. It shows how decisions are made by the application and provide interactive interface to adjust some of the parameters and operators used by the algorithm. 
@@ -28,8 +30,11 @@ Notebook is a board for user to know what happened in the automatic analysis pro
 ### Gallery
 Gallery displays parts of the visualization with interesting findings. In Gallery, you can find interesting visualizaiton and use association feature to find more related visualization. You can also search specific info in gallery. There are some settings here to adjust some of the visual elements in the chart.
 
+### Explainer
+Explainer uses serveral insight discoverary algorithm to detect what is the specific insight type is shown in a visualization recommanded. Explainer is an extension of B. Tang 's Top K insight paper.
+
 ### Dashboard
-automantic generate dashboard for you. rath will figure out a set of visulization of which contents are connected to each other and can be used to analysis a specific problem. 
+Generate interactive dashboards for your. Rath will figure out sets of visulizations of which contents are connected to each other and can be used to analysis a specific problem. 
 
 ## Examples
 
@@ -49,26 +54,25 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 - [MacOS](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0.dmg)
 - [Windows](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0-win.zip)
 
-### run locally
+### deploy
+
+Rath now runs all the computation tasks on webworker. If you are interested in a server version, check the older version or contact us.
+
 (dev)
 ```bash
 # under project root dir
-yarn workspace visual-insights build
+yarn workspace graphic-walker build
 
 yarn workspace frontend start
-
-yarn workspace backend dev
 
 # localhost:3000
 ```
 
 production mode
 ```bash
-yarn workspace visual-insights build
+yarn workspace graphic-walker build
 
 yarn workspace frontend build
-
-yarn workspace backend dev
 
 # server:8000
 ```
@@ -78,53 +82,8 @@ only use the algorithm package. (`/packages/visual-insights`) ![](https://img.sh
 npm i visual-insights --save`
 ```
 
-## How does it work
-The working process are visualized in notebook board in the application.  *** Main process of the algorithm is shown in the `notebook` board. *** Here shows how rath use visual-insights to make a analytic pipeline.
-
-![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/rath-arc.png)
-
-### Univariate summary
-For the first step, rath analyze all the fields in the dataset independently. It gets the fields' distributions and calculate its entropy. Besides, it will define a semantic type (`quantitative`, `ordinal`, `temporal`, `nominal`) for each field. More details of the field will be displayed when hover your mouse on the fields.
-
-![](https://cdn.nlark.com/yuque/0/2019/jpeg/171008/1570614609678-33d5f2c1-e51e-4bcd-8343-271a041f7519.jpeg)
-
-Then, it will find the fields with high entropy and try to reduce it by grouping the field (for example). Only dimensions participates this process.
-
-### Subspaces
-In this step, visual insights search the combination of fields. Visual-Insights suppose that any two fields appears in a view should be correlated with each other otherwise they should be display in seperated view. Visual-Insight now use crammver'V and pearson' cc for different types of fields' correlation.
-
-![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/subspaces.svg)
-
-#### Correlation
-
-for example, the correlation of measures:
-
-![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/correlation.svg)
-
-#### Clustering
-It helps you to cluster all the measures based on their correlation. It puts all the variables who are strongly related together to make a specific view (with specified dimenions).
-
-
-![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/clustering.svg)
-
-### Insight Extraction
-After we get many subspaces, we can check the insight significance of each space. Currently, visual-insights support trend, outlier, group(whether different groups of data behave differently for spefic measures)
-
-![](https://chspace.oss-cn-hongkong.aliyuncs.com/visual-insights/rath-demo.jpg)
-
-### Specification & Visualization
-
-specification
-
-![](https://cdn.nlark.com/yuque/0/2019/png/171008/1570615741670-48941c9a-2788-4277-a946-6a75c400870d.png)
-
-visualization.
-
-![](https://cdn.nlark.com/yuque/0/2019/svg/171008/1570614529099-de4ead0d-5332-40c4-8101-e122ee0cf1d2.svg)
-
-
 ## Documentation
-
++ [Tutorial: Using Rath to find deep insight in your data](https://www.yuque.com/docs/share/3f32e044-3530-4ebe-9b01-287bfbdb7ce0?#)
 + visual insight api: [visual-insights](https://github.com/Kanaries/visual-insights/blob/master/README.md)
 + doc for reuseable hooks: todos
 
@@ -137,6 +96,3 @@ Rath is insipired by several excellent works below:
 + Vega-Lite: A Grammar of Interactive Graphics. Arvind Satyanarayan, Dominik Moritz, Kanit Wongsuphasawat, Jeffrey Heer. IEEE Trans. Visualization & Comp. Graphics (Proc. InfoVis), 2017
 + Cleveland, W., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. Journal of the American Statistical Association, 79(387), 531-554. doi:10.2307/2288400
 
-## Story behind Rath
-
-The word Rath is used in SAO Alicization as name of org. developing Soul Translator (STL) and Under World, which creates A.L.I.C.E. ('Rath' is original from Mome Raths in *Alice's Adventures in Wonderland*.) I use the Rath as the name of the project for hoping it can create something far more than I could imagine like Alice.

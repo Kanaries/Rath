@@ -18,6 +18,7 @@
     "dataSource": {
         "extractInsight": "开始分析",
         "cleanMethod": "清洗方法",
+        "useField": "允许使用",
         "importData": {
             "buttonName": "导入数据",
             "type": {
@@ -99,7 +100,8 @@
         "summary": "解读",
         "related": {
             "title": "联想视图"
-        }
+        },
+        "like": "喜欢这张图表"
     },
     "dashBoard": {
         "generateButton": "生成报表",

@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BaseTable, ArtColumn, Classes } from "ali-react-table";
-import { IRow } from "../../../interfaces";
+import { IRawField, IRow } from "../../../interfaces";
 import { BIField, BIFieldType } from "../../../global";
 import HeaderCell from "./headerCell";
 import styled from "styled-components";
 import intl from 'react-intl-universal';
 import { FieldSummary, getFieldsSummaryService } from "../../../service";
-
+import { observer } from 'mobx-react-lite'
+import { useGlobalStore } from "../../../store";
 const CustomBaseTable = styled(BaseTable)`
     --header-bgcolor: #fafafa;
     --bgcolor: rgba(0, 0, 0, 0);
@@ -20,48 +21,44 @@ const TableInnerStyle = {
     overflow: "auto",
 };
 
-interface DataTableProps {
-    dataSource: IRow[];
-    fields: BIField[];
-    onChangeBIType?: (type: BIFieldType, fieldKey: string) => void;
-}
-
-const DataTable: React.FC<DataTableProps> = (props) => {
-    const { dataSource, fields, onChangeBIType } = props;
+const DataTable: React.FC = (props) => {
+    const { dataSourceStore } = useGlobalStore();
+    const { mutFields, rawData, cleanedData, fields } = dataSourceStore;
     const [summary, setSummary] = useState<FieldSummary[]>([]);
     useEffect(() => {
-        getFieldsSummaryService(dataSource, fields.map(f => f.name)).then(res => {
+        getFieldsSummaryService(cleanedData, fields.map(f => f.name)).then(res => {
             setSummary(res);
         })
-    }, [dataSource, fields])
+    }, [cleanedData, fields])
 
-    // FIXME: 这里是一种临时hack写法，为了让语言环境切换时,column里的headerCell里的内容也能识别到。
-    const dimensionLabel = intl.get("meta.dimension");
 
-    const columns = useMemo<ArtColumn[]>(() => {
-        return fields.map((f) => {
-            const targetSummary = summary.find((s) => s.fieldName === f.name) || null;
-            return {
-                name: f.name,
-                code: f.name,
-                width: 220,
-                title: (
-                    <HeaderCell
-                        name={f.name}
-                        code={f.name}
-                        type={f.type}
-                        summary={targetSummary}
-                        onChangeBIType={onChangeBIType}
-                    />
-                ),
-            };
-        });
-    // 见上面的FIXME
-    }, [fields, summary, onChangeBIType, dimensionLabel]);
+    const updateFieldInfo = useCallback((fieldId: string, fieldPropKey: string, value: any) => {
+        dataSourceStore.updateFieldInfo(fieldId, fieldPropKey, value);
+    }, [])
+
+
+    const columns = mutFields.map((f) => {
+        const targetSummary = summary.find((s) => s.fieldName === f.name) || null;
+        return {
+            name: f.name,
+            code: f.name,
+            width: 220,
+            title: (
+                <HeaderCell
+                    disable={f.disable}
+                    name={f.name}
+                    code={f.name}
+                    type={f.type}
+                    summary={targetSummary}
+                    onChange={updateFieldInfo}
+                />
+            ),
+        };
+    });
 
     const rowPropsCallback = useCallback((record: IRow) => {
         const hasEmpty = fields.some((f) => {
-            return record[f.name] === null || record[f.name] === undefined || record[f.name] === "";
+            return !f.disable && (record[f.name] === null || record[f.name] === undefined || record[f.name] === "");
         });
         return {
             style: {
@@ -75,9 +72,9 @@ const DataTable: React.FC<DataTableProps> = (props) => {
             <CustomBaseTable
                 useVirtual={true}
                 getRowProps={rowPropsCallback}
-                style={TableInnerStyle} dataSource={dataSource} columns={columns} />
+                style={TableInnerStyle} dataSource={rawData} columns={columns} />
         </div>
     );
 };
 
-export default DataTable;
+export default observer(DataTable);

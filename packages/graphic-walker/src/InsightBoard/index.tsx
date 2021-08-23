@@ -68,6 +68,7 @@ const InsightBoard: React.FC<InsightBoardProps> = props => {
           })),
       };
       setLoading(true);
+
       getExplaination({
         dimensions,
         measures,
@@ -75,6 +76,7 @@ const InsightBoard: React.FC<InsightBoardProps> = props => {
         currentSpace,
         filters
       }).then(({ visSpaces, explainations, valueExp }) => {
+        console.log({ visSpaces, explainations, valueExp })
         setRecSpaces(explainations);
         setVisSpaces(visSpaces);
         setValueExp(valueExp);

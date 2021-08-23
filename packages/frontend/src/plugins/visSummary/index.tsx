@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Subspace } from '../../service';
+import { FieldSummary, Subspace } from '../../service';
 import { DefaultButton, TeachingBubble, DirectionalHint } from 'office-ui-fabric-react';
 
 import './index.css';
 import { Field } from '../../global';
 import { Specification } from '../../visBuilder/vegaBase';
 
+
 interface StoryTellerProps {
   lang?: 'zh' | 'en';
-  dimScores: Array<[string, number, number, Field]>;
+  dimScores: FieldSummary[];
   space: Subspace;
   spaceList: Subspace[];
   dimensions: string[];
@@ -21,8 +22,8 @@ const StoryTeller: React.FC<StoryTellerProps> = (props) => {
   const { space, dimensions = [], measures = [], dimScores = [], spaceList = [], schema } = props;
   const [isTeachingBubbleVisible, setIsTeachingBubbleVisible] = useState(false);
 
-  const sortedFieldsScores = useMemo<Array<[string, number, number, Field]>>(() => {
-    return [...dimScores].sort((a, b) => a[1] - b[1]);
+  const sortedFieldsScores = useMemo(() => {
+    return [...dimScores].sort((a, b) => a.entropy - b.entropy);
   }, [dimScores])
   const mostInfluencedDimension = useMemo<string | undefined>(() => {
     if (typeof space === 'undefined') return;
@@ -51,8 +52,8 @@ const StoryTeller: React.FC<StoryTellerProps> = (props) => {
   }, [measures, space])
 
   const countDiffField = useMemo<string | undefined>(() => {
-    let ans = sortedFieldsScores.find(dim => dimensions.includes(dim[0]));
-    return ans ? ans[0] : undefined;
+    let ans = sortedFieldsScores.find(dim => dimensions.includes(dim.fieldName));
+    return ans ? ans.fieldName : undefined;
   }, [sortedFieldsScores, dimensions])
   const result = `
   ${ schema && schema.position ? `Current chart mainly focus on the relationship between ***${schema.position[0]}*** and ***${schema.position[1]}***` : ''}

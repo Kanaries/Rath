@@ -11,10 +11,12 @@ import PreferencePanel, {
 import BaseChart from "../../visBuilder/vegaBase";
 import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
 
-import { useGlobalState } from "../../state";
 import { useComposeState } from '../../utils';
 import SimpleTick from '../../components/simpleTick';
 import RadarChart from '../../components/radarChart';
+import { observer } from 'mobx-react-lite';
+import { useGlobalStore } from '../../store';
+import { meta2fieldScores } from '../../utils/transform';
 
 const Tag = styled.div`
   display: inline-block;
@@ -75,15 +77,16 @@ const DevPage: React.FC = props => {
       configPanel: false
     }
   });
-  const [state, , dispatch, getters] = useGlobalState();
+  const { pipeLineStore } = useGlobalStore();
+  const { cookedDataset, TOP_K_DIM_PERCENT } = pipeLineStore;
   const [chartIndex, setChartIndex] = useState(0);
-  const {
-    cookedDataSource,
-    cookedDimensions,
-    cookedMeasures,
-    topK
-  } = state;
-  const { dimScores } = getters;
+  const { transedData: cookedDataSource, transedMetas, dimMetas, meaMetas } = cookedDataset
+
+  const dimScores = useMemo(() => {
+    return meta2fieldScores(transedMetas)
+  }, [transedMetas]);
+  const cookedDimensions = dimMetas.map(f => f.fid);
+  const cookedMeasures = meaMetas.map(f => f.fid);
   const viewSpaceList = useMemo(() => {
     return insightViewSpace.filter(s => s.significance >= sigThreshold);
   }, [insightViewSpace, sigThreshold])
@@ -106,7 +109,7 @@ const DevPage: React.FC = props => {
       dimensions,
       measures
     }
-  }, [viewSpaceList, chartIndex, cookedDataSource])
+  }, [viewSpaceList, chartIndex, cookedDataSource, dimScores])
   const relatedViews = useMemo<InsightSpace[]>(() => {
     if (dataView !== null) {
       const { dimensions, measures } = dataView;
@@ -121,6 +124,7 @@ const DevPage: React.FC = props => {
   }, [insightViewSpace, dataView])
 
   useEffect(() => {
+    console.log('side effect')
     if (dataView === null) return;
     const { schema } = dataView;
     if (
@@ -168,7 +172,7 @@ const DevPage: React.FC = props => {
               setLoading(true)
               getInsightViewSpace(
                 cookedDataSource,
-                cookedDimensions.slice(0, cookedDimensions.length * topK.dimensionSize),
+                cookedDimensions.slice(0, cookedDimensions.length * TOP_K_DIM_PERCENT),
                 cookedMeasures
               ).then((res) => {
                 setInsightViewSpace(res)
@@ -280,4 +284,4 @@ const DevPage: React.FC = props => {
   )
 }
 
-export default DevPage;
+export default observer(DevPage);

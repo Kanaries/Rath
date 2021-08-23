@@ -8,7 +8,7 @@ import { Container } from './components/container';
 import ClickMenu from './components/clickMenu';
 import InsightBoard from './InsightBoard';
 import { Button, DropdownSelect, Checkbox } from '@tableau/tableau-ui';
-import { ProgressIndicator } from 'office-ui-fabric-react'
+import { ProgressIndicator } from '@fluentui/react'
 import Modal from './components/modal';
 import DataSourcePanel from './dataSource/index';
 import { useLocalState } from './store';
@@ -25,13 +25,13 @@ const INIT_DF_STATE: DraggableFieldState = {
 };
 
 export interface EditorProps {
-  dataSource: Record[];
-  dimensions: string[];
-  measures: string[];
+  dataSource?: Record[];
+  dimensions?: string[];
+  measures?: string[];
 }
 
 const App: React.FC<EditorProps> = props => {
-  const { dataSource, dimensions, measures } = props;
+  const { dataSource = [], dimensions = [], measures = [] } = props;
   const [GS, updateGS] = useLocalState();
   const [fields, setFields] = useState<Field[]>([]);
   const [fstate, setFstate] = useState<DraggableFieldState>(INIT_DF_STATE);

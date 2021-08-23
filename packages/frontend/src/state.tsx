@@ -3,15 +3,13 @@ import React, { useState, useMemo, createContext, useContext, useCallback, useRe
 import { DataSource, BIField, Field } from './global';
 import { Subspace, FieldSummary, ViewSpace, DashBoard } from './service';
 import actions, { Test } from './actions';
-import { SUPPORT_LANG } from './locales';
 
 setAutoFreeze(false)
 
+/**
+ * @deprecated
+ */
 export interface GlobalState {
-  /**
-   * language settings.
-   */
-  lang: string;
   /**
    * useless but cool.
    */
@@ -74,6 +72,9 @@ export interface GlobalState {
   dashBoardList: DashBoard[];
 }
 
+/**
+ * @deprecated
+ */
 interface Getters {
   /**
    * `dataSource` is computed data based on fields' property(dimension or measure).
@@ -98,7 +99,6 @@ export type StateUpdater<S> = (draftState: Draft<S>) => void
 // }
 
 const initState: GlobalState = {
-  lang: SUPPORT_LANG[0].value,
   beCool: false,
   currentPage: 0,
   useServer: false,

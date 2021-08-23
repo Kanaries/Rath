@@ -1,29 +1,23 @@
-import React, { useMemo } from "react";
+import React from "react";
 import intl from 'react-intl-universal';
-import { useGlobalState, GlobalStateProvider } from "./state";
+import { useGlobalStore, StoreWrapper } from './store/index'
 import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
 import "./App.css";
-import RathLogo from './assets/kanaries-lite.png';
-import RathCoolLogo from './assets/rath-glasses.png';
 
 import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
-import VisualEditor from './pages/visualEditor';
+import VisualInterface from './pages/visualInterface';
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
 import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
 import UserSettings from './components/userSettings';
+import { observer } from "mobx-react-lite";
 
+// FIXME: 这两代码好像没什么用
 require('intl/locale-data/jsonp/en.js')
 require('intl/locale-data/jsonp/zh.js')
-
-const getLogoSrc = (withGlasses: boolean) => {
-  return withGlasses
-    ? RathCoolLogo
-    : RathLogo;
-};
 
 interface PageStatus {
   show: {
@@ -38,20 +32,21 @@ interface PageStatus {
 }
 
 function App() {
-  const [state, ] = useGlobalState();
-  const pivotList = useMemo(() => {
-    return [
-      intl.get('menu.dataSource'),
-      intl.get('menu.noteBook'),
-      intl.get('menu.explore'),
-      intl.get('menu.dashBoard'),
-      intl.get('menu.explainer'),
-      intl.get('menu.editor'),
-      intl.get('menu.support')
-    ].map((page, index) => {
-      return { title: page, itemKey: 'pivot-' + (index + 1) }
-    })
-  }, [state.lang])
+  const { langStore } = useGlobalStore()
+
+  let pivotKeys: string[] = ['dataSource', 'noteBook', 'explore', 'dashBoard', 'explainer', 'editor', 'support'];
+
+  let pivotList = pivotKeys.map((page, index) => {
+    return { title: page, itemKey: 'pivot-' + (index + 1) }
+  })
+
+  if (langStore.loaded) {
+    pivotList = pivotKeys.map(p => intl.get(`menu.${p}`))
+      .map((page, index) => {
+        return { title: page, itemKey: 'pivot-' + (index + 1) }
+      })
+  }
+
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
@@ -63,6 +58,11 @@ function App() {
       pivotKey: pivotList[0].itemKey,
     },
   })
+
+  if (!langStore.loaded) {
+    return <div></div>
+  }
+
   return (
     <div>
       <div className="header-bar">
@@ -70,12 +70,12 @@ function App() {
           <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg1">
             <a
               // onClick={() => { window.location.reload(false); }}
-              href="https://github.com/ObservedObserver/visual-insights"
+              href="https://github.com/Kanaries/Rath"
               className="logo"
             >
               <img
-                style={!state.beCool ? { width: '48px', marginTop: '4px' } : undefined}
-                src={getLogoSrc(state.beCool)}
+                style={{ width: '38px', marginTop: '4px' }}
+                src="/assets/kanaries-lite.png"
                 alt="rath"
               />
             </a>
@@ -105,7 +105,7 @@ function App() {
         </div>
       </div>
       {pageStatus.current.pivotKey === 'pivot-3' && (
-        <Gallery subspaceList={state.subspaceList} dataSource={state.cookedDataSource} summary={state.summary} />
+        <Gallery />
       )}
       {pageStatus.current.pivotKey === 'pivot-1' && (
         <DataSourceBoard
@@ -120,22 +120,24 @@ function App() {
       {pageStatus.current.pivotKey === 'pivot-2' && (
         <div className="content-container">
           <div className="card">
-            <NoteBook summary={state.summary} subspaceList={state.subspaceList} dataSource={state.cookedDataSource} />
+            <NoteBook />
           </div>
         </div>
       )}
       {pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />}
       {pageStatus.current.pivotKey === 'pivot-5' && <DevPage />}
-      {pageStatus.current.pivotKey === 'pivot-6' && <VisualEditor dataSource={state.cookedDataSource} dimensions={state.cookedDimensions} measures={state.cookedMeasures} />}
+      {pageStatus.current.pivotKey === 'pivot-6' && <VisualInterface />}
       {pageStatus.current.pivotKey === 'pivot-7' && <SupportPage />}
     </div>
   )
 }
 
+const OBApp = observer(App);
+
 export default function WrappedApp() {
   return (
-    <GlobalStateProvider>
-      <App />
-    </GlobalStateProvider>
+    <StoreWrapper>
+        <OBApp />
+    </StoreWrapper>
   );
 }
