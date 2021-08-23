@@ -19,7 +19,7 @@ interface ClusterState {
 }
 const NoteBook: React.FC = (props) => {
   const { noteBookStore } = useGlobalStore();
-  const { summary, dataSource, subspaceList } = noteBookStore;
+  const { summary, dataSource } = noteBookStore;
   const [isAggregated, setIsAggregated] = useState(true);
   
   const [clusterState, setClusterState] = useState<ClusterState>({
