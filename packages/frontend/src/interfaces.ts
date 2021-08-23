@@ -20,3 +20,8 @@ export interface IFieldMeta {
     analyticType: BIFieldType;
     semanticType: FieldType
 }
+
+export enum IComputeMode {
+    server = 'server',
+    worker = 'worker'
+}

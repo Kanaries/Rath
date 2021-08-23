@@ -10,10 +10,10 @@ import {
 } from 'office-ui-fabric-react'
 import { DropdownSelect } from '@tableau/tableau-ui';
 import { observer } from 'mobx-react-lite'
-import { useGlobalState } from "../state";
 import { SUPPORT_LANG } from "../locales";
 
 import { useGlobalStore } from "../store";
+import { IComputeMode } from "../interfaces";
 const langOptions: IDropdownOption[] = SUPPORT_LANG.map(lang => ({
   key: lang.value,
   text: lang.name
@@ -26,8 +26,7 @@ const Container = styled.div`
 const UserSettings: React.FC = () => {
   const target = useRef<HTMLDivElement>(null);
   const [show, setShow] = useState<boolean>(false);
-  const [state, updateState] = useGlobalState();
-  const { langStore } = useGlobalStore();
+  const { langStore, pipeLineStore } = useGlobalStore();
 
   return (
     <Container>
@@ -61,26 +60,13 @@ const UserSettings: React.FC = () => {
         >
           <div style={{ padding: '1rem' }}>
             <Toggle
-              label="Be Cool"
-              checked={state.beCool}
-              onText="On"
-              offText="Off"
-              onChange={(ev: React.MouseEvent<HTMLElement>, checked?: boolean) => {
-                updateState((draft) => {
-                  draft.beCool = checked || false
-                })
-              }}
-            />
-            <Toggle
-              label="Use Server"
+              label="Compute Mode"
               disabled={true}
-              checked={state.useServer}
-              onText="On"
-              offText="Off"
+              checked={pipeLineStore.computateMode === IComputeMode.server}
+              onText="Server"
+              offText="Worker"
               onChange={(ev: React.MouseEvent<HTMLElement>, checked?: boolean) => {
-                updateState((draft) => {
-                  draft.useServer = checked || false
-                })
+                pipeLineStore.setComputeMode(checked ? IComputeMode.server : IComputeMode.worker)
               }}
             />
           </div>

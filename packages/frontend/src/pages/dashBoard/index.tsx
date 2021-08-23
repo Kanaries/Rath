@@ -1,51 +1,51 @@
-import React, { useState } from "react";
+import React from "react";
 import intl from 'react-intl-universal';
 import { PrimaryButton, DefaultButton, Stack, Separator, ProgressIndicator } from "office-ui-fabric-react";
-import { useGlobalState } from "../../state";
 import CombinedChart from "./combinedChart";
+import { useMemo } from "react";
+import { useGlobalStore } from "../../store";
+import { meta2fieldScores } from "../../utils/transform";
+import { observer } from "mobx-react-lite";
 
 const DashBoardPage: React.FC = props => {
-  const [state, , dispatch, getters] = useGlobalState();
-  const [dashBoardIndex, setDashBoardIndex] = useState(0);
-  const {
-    subspaceList,
-    cookedDataSource,
-    cookedDimensions,
-    cookedMeasures,
-    dashBoardList
-  } = state;
-  const { dimScores } = getters;
+  const { pipeLineStore, dashBoardStore } = useGlobalStore();
+  // const [dashBoardIndex, setDashBoardIndex] = useState(0);
+
+  const { dashBoardList, pageIndex } = dashBoardStore;
+  const { cookedDataset } = pipeLineStore;
+  const { transedData, transedMetas } = cookedDataset;
+
+  const dimScores = useMemo(() => {
+    return meta2fieldScores(transedMetas)
+  }, [transedMetas])
+
   return (
     <div className="content-container">
       <div className="card">
         <PrimaryButton
           text={intl.get('dashBoard.generateButton')}
-          disabled={subspaceList.length === 0}
+          disabled={dashBoardStore.pageDisabled}
           iconProps={{ iconName: 'AreaChart' }}
           onClick={() => {
-            dispatch('getDashBoard', {
-              dataSource: cookedDataSource,
-              dimensions: cookedDimensions,
-              measures: cookedMeasures,
-            })
+            dashBoardStore.generateDashBoard();
           }}
         />
-        {state.loading.dashBoard && <ProgressIndicator description="generating dashboard" />}
+        {dashBoardStore.loading && <ProgressIndicator description="generating dashboard" />}
         <Separator>
-          {intl.get('dashBoard.pageNo', { current: dashBoardIndex + 1, total: dashBoardList.length })}
+          {intl.get('dashBoard.pageNo', { current: pageIndex + 1, total: dashBoardList.length })}
         </Separator>
         <Stack horizontal tokens={{ childrenGap: 20 }}>
           <DefaultButton
             text={intl.get('dashBoard.last')}
             onClick={() => {
-              setDashBoardIndex((index) => (index + dashBoardList.length - 1) % dashBoardList.length)
+              dashBoardStore.setPageIndex((pageIndex + dashBoardList.length - 1) % dashBoardList.length)
             }}
             allowDisabledFocus
           />
           <DefaultButton
             text={intl.get('dashBoard.next')}
             onClick={() => {
-              setDashBoardIndex((index) => (index + 1) % dashBoardList.length)
+              dashBoardStore.setPageIndex((pageIndex + dashBoardList.length + 1) % dashBoardList.length)
             }}
             allowDisabledFocus
           />
@@ -58,10 +58,10 @@ const DashBoardPage: React.FC = props => {
             border: '1px solid #e8e8e8',
           }}
         >
-          {dashBoardList[dashBoardIndex] && dashBoardList[dashBoardIndex].length > 0 && (
+          {dashBoardList[pageIndex] && dashBoardList[pageIndex].length > 0 && (
             <CombinedChart
-              dataSource={cookedDataSource}
-              dashBoard={dashBoardList[dashBoardIndex]}
+              dataSource={transedData}
+              dashBoard={dashBoardList[pageIndex]}
               dimScores={dimScores}
             />
           )}
@@ -71,4 +71,4 @@ const DashBoardPage: React.FC = props => {
   )
 };
 
-export default DashBoardPage;
+export default observer(DashBoardPage);

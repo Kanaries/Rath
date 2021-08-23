@@ -3,18 +3,14 @@ import intl from 'react-intl-universal';
 import {  Field } from '../../global';
 import FieldAnalysisBoard from './fieldAnalysis';
 import Subspaces from './subspaces';
-import { Subspace, combineFieldsService } from '../../service';
 import ClusterBoard from './cluster';
 import { specification } from 'visual-insights';
 import { ProgressIndicator, Toggle, Slider } from 'office-ui-fabric-react';
-import { useGlobalState } from '../../state';
 import VegaBase from '../../visBuilder/vegaBase';
 import './index.css';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 // const maxMeasureInView = 4;
-
-const EXPECTED_MAX_MEA_IN_VIEW = 3;
 
 interface ClusterState {
   measures: string[];
@@ -22,8 +18,6 @@ interface ClusterState {
   matrix: number[][];
 }
 const NoteBook: React.FC = (props) => {
-  // const { summary, subspaceList, dataSource } = props;
-  // const [state, updateState] = useGlobalState();
   const { noteBookStore } = useGlobalStore();
   const { summary, dataSource, subspaceList } = noteBookStore;
   const [isAggregated, setIsAggregated] = useState(true);

@@ -6,6 +6,9 @@ import actions, { Test } from './actions';
 
 setAutoFreeze(false)
 
+/**
+ * @deprecated
+ */
 export interface GlobalState {
   /**
    * useless but cool.
@@ -69,6 +72,9 @@ export interface GlobalState {
   dashBoardList: DashBoard[];
 }
 
+/**
+ * @deprecated
+ */
 interface Getters {
   /**
    * `dataSource` is computed data based on fields' property(dimension or measure).

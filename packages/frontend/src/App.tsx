@@ -1,6 +1,5 @@
 import React from "react";
 import intl from 'react-intl-universal';
-import { useGlobalState, GlobalStateProvider } from "./state";
 import { useGlobalStore, StoreWrapper } from './store/index'
 import { Pivot, PivotItem } from "office-ui-fabric-react";
 import { useComposeState } from "./utils/index";
@@ -33,7 +32,6 @@ interface PageStatus {
 }
 
 function App() {
-  const [state, ] = useGlobalState();
   const { langStore } = useGlobalStore()
 
   let pivotKeys: string[] = ['dataSource', 'noteBook', 'explore', 'dashBoard', 'explainer', 'editor', 'support'];
@@ -139,9 +137,7 @@ const OBApp = observer(App);
 export default function WrappedApp() {
   return (
     <StoreWrapper>
-      <GlobalStateProvider>
         <OBApp />
-      </GlobalStateProvider>
     </StoreWrapper>
   );
 }

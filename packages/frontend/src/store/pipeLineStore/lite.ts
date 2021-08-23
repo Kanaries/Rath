@@ -1,6 +1,7 @@
 import { makeAutoObservable, reaction } from "mobx";
 import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { from, Subscription } from "rxjs";
+import { IComputeMode } from "../../interfaces";
 import { Subspace, ViewSpace } from "../../service";
 import { getDataEventStreams, ICookedDataset, IDataEventStreams, IUnivarateSummary } from "../../stream/litePipe";
 import { DataSourceStore } from "../dataSourceStore";
@@ -12,6 +13,7 @@ const EXPECTED_MAX_MEA_IN_VIEW = 3;
 
 export class LitePipeStore {
     private dataSourceStore: DataSourceStore;
+    public computateMode: IComputeMode = IComputeMode.worker;
     private streams: IDataEventStreams;
     private subscrptions: Subscription[] = [];
     public cookedDatasetRef: IStreamListener<ICookedDataset>;
@@ -82,6 +84,9 @@ export class LitePipeStore {
     public async startTask () {
         this.progressTag = 'univar';
         this.streams.start$.next(true);
+    }
+    public setComputeMode (mode: IComputeMode) {
+        this.computateMode = mode;
     }
     /**
      * 应用初始化，订阅事件流，并把订阅集中存储用于未来释放。

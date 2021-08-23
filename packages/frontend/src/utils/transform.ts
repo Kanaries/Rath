@@ -1,3 +1,4 @@
+import { Field } from "../global"
 import { IFieldMeta } from "../interfaces"
 import { FieldSummary } from "../service"
 
@@ -16,4 +17,14 @@ export function fieldMeta2fieldSummary(metas: IFieldMeta[]): FieldSummary[] {
         type: f.semanticType,
         distribution: f.distribution
     }))
+}
+
+/**
+ * @deprecated
+ */
+export function meta2fieldScores(metas: IFieldMeta[]): [string, number, number, Field][] {
+    return metas.map(m => [m.fid, m.features.entropy, m.features.maxEntropy, {
+        name: m.fid,
+        type: m.semanticType
+    }])
 }

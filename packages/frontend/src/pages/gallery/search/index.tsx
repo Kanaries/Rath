@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { SearchBox } from 'office-ui-fabric-react';
-import { useGlobalState } from '../../../state';
 import Fuse, { FuseOptions } from 'fuse.js';
 import { specification } from 'visual-insights';
 import { ViewSpace } from '../../../service';
 import BaseChart from "../../../visBuilder/vegaBase";
 import styled from 'styled-components';
+import { useGlobalStore } from '../../../store';
+import { meta2fieldScores } from '../../../utils/transform';
+import { observer } from 'mobx-react-lite';
 
 const VisCard = styled.div`
   padding: 1rem;
@@ -57,18 +59,14 @@ function usePageController (size: number) {
 }
 
 const SearchPage: React.FC = props => {
-  const [state, , dispatch, getters] = useGlobalState();
+  const { pipeLineStore } = useGlobalStore();
   const [targetViewSpaces, setTargetViewSpaces] = useState<ViewSpace[]>([]);
-  const { subspaceList, viewSpaces, maxGroupNumber, useServer } = state;
-  const { dimScores } = getters;
 
-  useEffect(() => {
-    dispatch('getViewSpaces', {
-      subspaceList,
-      maxGroupNumber,
-      useServer
-    })
-  }, [subspaceList, maxGroupNumber, useServer, dispatch])
+  const { viewSpaces, cookedDataset } = pipeLineStore;
+
+  const dimScores = useMemo(() => {
+    return meta2fieldScores(cookedDataset.transedMetas)
+  }, [cookedDataset.transedMetas])
 
   const fuse = useMemo(() => {
     const options: FuseOptions<ViewSpace> = {
@@ -94,19 +92,19 @@ const SearchPage: React.FC = props => {
       });
       let { schema } = specification(
         fieldScores,
-        state.cookedDataSource,
+        cookedDataset.transedData,
         dimensions,
         measures
       );
       return {
         schema,
         fieldFeatures: fieldScores.map(f => f[3]),
-        aggData: state.cookedDataSource,
+        aggData: cookedDataset.transedData,
         dimensions,
         measures
       }
     })
-  }, [state.cookedDataSource, targetViewSpaces, itemRange, dimScores])
+  }, [cookedDataset.transedData, targetViewSpaces, itemRange, dimScores])
   
   return (
     <div>
@@ -143,4 +141,4 @@ const SearchPage: React.FC = props => {
   );
 }
 
-export default SearchPage
+export default observer(SearchPage)
