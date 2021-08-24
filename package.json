@@ -30,8 +30,6 @@
     "nohoist": [
       "*/webpack-dev-server",
       "*/webpack-cli",
-      "**/react",
-      "**/react-dom",
       "**/vega",
       "**/vega-lite",
       "**/vega-embed"
