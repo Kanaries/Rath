@@ -36,6 +36,11 @@ Explainer uses serveral insight discoverary algorithm to detect what is the spec
 ### Dashboard
 Generate interactive dashboards for your. Rath will figure out sets of visulizations of which contents are connected to each other and can be used to analysis a specific problem. 
 
+### Graphic Walker
+Graphic Walker is a lite tableau style visual analysis interface. It is used for cases when users have specific analytic target or user want to analysis further result based on the recommanded results by Rath's auto insights.
+
+You can also use Graphic Walker as a lite tableau style analysis app independently. It can be used as an independent app or an embeding module.
+
 ## Examples
 
 + [DataSet: NASA - Kepler](https://www.kaggle.com/nasa/kepler-exoplanet-search-results)
