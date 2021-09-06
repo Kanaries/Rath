@@ -1,10 +1,12 @@
 import { RATH_INDEX_COLUMN_KEY } from "../../constants";
-import { BIField, Record } from "../../global";
-import { FileLoader, isASCII } from "../../utils";
-import { Cleaner, Sampling } from 'visual-insights';
+// import { BIField, Record } from "../../global";
+import { FileLoader, inferAnalyticType, isASCII } from "../../utils";
+import { Cleaner, Sampling, UnivariateSummary } from 'visual-insights';
 import { FileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
+import { IRawField, IRow } from "../../interfaces";
+import dataSource from ".";
 
 export enum SampleKey {
   none = 'none',
@@ -33,28 +35,34 @@ export const useSampleOptions = function () {
  * 给数据添加特殊的index key，注意这是一个会修改参数的函数
  * @param data 
  */
-export function setIndexKey(data: Record[]): Record[] {
+export function setIndexKey(data: IRow[]): IRow[] {
     data.forEach((record, i) => {
         record[RATH_INDEX_COLUMN_KEY] = i;
     })
     return data;
 }
 
-export function fixUnicodeFields(fields: BIField[], dataSource: Record[]): {
-    fields: BIField[],
-    dataSource: Record[]
+/**
+ * 针对vega中对Unicode字段的相关bug做的调整（非ascii字符会被删除掉，会导致字段名不唯一的bug问题）
+ * @param fields 
+ * @param dataSource 
+ * @returns 
+ */
+export function fixUnicodeFields(fields: IRawField[], dataSource: IRow[]): {
+    fields: IRawField[],
+    dataSource: IRow[]
 } {
-    const newFields: BIField[] = fields.map((f, i) => {
+    const newFields: IRawField[] = fields.map((f, i) => {
         const nF = { ...f };
-        if (!isASCII(nF.name)) {
-            nF.name = `${f.name}-cid-${i}`
+        if (!isASCII(nF.fid)) {
+            nF.fid = `${f.fid}(Rath_Field_${i})`
         }
         return nF
     })
-    const newDataSource: Record[] = dataSource.map(row => {
-        const newRow: Record = {};
+    const newDataSource: IRow[] = dataSource.map(row => {
+        const newRow: IRow = {};
         for (let i = 0; i < newFields.length; i++) {
-            newRow[newFields[i].name] = row[fields[i].name] 
+            newRow[newFields[i].fid] = row[fields[i].fid] 
         }
         return newRow
     })
@@ -62,6 +70,17 @@ export function fixUnicodeFields(fields: BIField[], dataSource: Record[]): {
         fields: newFields,
         dataSource: newDataSource
     }
+}
+
+/**
+ * 这里目前暂时包一层，是为了解耦具体的推断实现。后续这里要调整推断的逻辑。
+ * 需要讨论这一层是否和交互层有关，如果没有关系，这一层包裹可以不存在这里，而是在visual-insights中。
+ * @param data 原始数据
+ * @param fid 字段id
+ * @returns semantic type 列表
+ */
+function inferFieldType (data: IRow[], fid: string) {
+    return UnivariateSummary.getFieldType(data, fid);
 }
 
 const onDataLoading = (value: number) => {
@@ -73,8 +92,8 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
     /**
      * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
      */
-    let tmpFields: BIField[] = []
-    let rawData: Record[] = []
+    let tmpFields: IRawField[] = []
+    let rawData: IRow[] = []
 
     if (file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
         rawData = []
@@ -86,12 +105,12 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
                 size: sampleSize,
               },
               onLoading: onDataLoading
-            })) as Record[]
+            })) as IRow[]
         } else {
             rawData = (await FileReader.csvReader({
               file,
               onLoading: onDataLoading
-            })) as Record[]
+            })) as IRow[]
         }
     } else if (file.type === 'application/json') {
         rawData = await FileLoader.jsonLoader(file)
@@ -103,19 +122,20 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
     }
     rawData = Cleaner.dropNullColumn(rawData, Object.keys(rawData[0])).dataSource
     rawData = setIndexKey(rawData);
-    let keys = Object.keys(rawData[0])
-    tmpFields = keys.map((fieldName, index) => {
-        if (fieldName === RATH_INDEX_COLUMN_KEY) return {
-            name: fieldName,
-            type: 'dimension'
+    // FIXME: 第一条数据取meta的危险性
+    let fids = Object.keys(rawData[0])
+    tmpFields = fids.map((fid, index) => {
+        if (fid === RATH_INDEX_COLUMN_KEY) return {
+            fid,
+            analyticType: 'dimension',
+            semanticType: 'nominal',
+            disable: false
         }
         return {
-            name: fieldName,
-            type: rawData.every((row) => {
-                    return !isNaN(row[fieldName]) || row[fieldName] === undefined
-                })
-                ? 'measure'
-                : 'dimension',
+            fid,
+            analyticType: inferAnalyticType(rawData, fid),
+            semanticType: inferFieldType(rawData, fid),
+            disable: false
         }
     })
     const fixedDataSet = fixUnicodeFields(tmpFields, rawData);

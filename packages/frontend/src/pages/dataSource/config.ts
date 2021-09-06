@@ -38,8 +38,8 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
 };
 
 export const DemoDataAssets = {
-    CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/cars-service.json",
-    STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/students-service.json",
+    CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
+    STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
 } as const;
 
 export type IDemoDataKey = keyof typeof DemoDataAssets;

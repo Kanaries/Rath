@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { Modal, ChoiceGroup, IconButton } from 'office-ui-fabric-react';
 import { useId } from '@uifabric/react-hooks';
 import intl from 'react-intl-universal';
-import { BIField, IDataSourceType, Record } from '../../../global';
+import { IDataSourceType } from '../../../global';
 
 import { useDataSourceTypeOptions } from '../config';
 import FileData from './file';
 import DemoData from './demo';
+import { IRawField, IRow } from '../../../interfaces';
 
 interface SelectionProps {
     show: boolean;
     onClose: () => void;
-    onDataLoaded: (fields: BIField[], dataSource: Record[]) => void;
+    onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
 }
 const Selection: React.FC<SelectionProps> = props => {
     const { show, onClose, onDataLoaded } = props;

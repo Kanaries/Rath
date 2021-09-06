@@ -1,3 +1,5 @@
+import { IAnalyticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces"
+import { inferAnalyticTypeFromSemanticType } from "."
 import { Field } from "../global"
 import { IFieldMeta } from "../interfaces"
 import { FieldSummary } from "../service"
@@ -16,6 +18,23 @@ export function fieldMeta2fieldSummary(metas: IFieldMeta[]): FieldSummary[] {
         maxEntropy: f.features.maxEntropy,
         type: f.semanticType,
         distribution: f.distribution
+    }))
+}
+
+export function fieldSummary2fieldMeta(summary: FieldSummary[], analyticTypes?: IAnalyticType[]): IFieldMeta[] {
+    if (typeof analyticTypes === 'undefined') {
+        console.warn('You are using analytic types infered from semantic type, it may not be safe.')
+    }
+    return summary.map((s, i) => ({
+        fid: s.fieldName,
+        features: {
+            maxEntropy: s.maxEntropy,
+            entropy: s.entropy
+        },
+        semanticType: s.type,
+        analyticType: analyticTypes ? analyticTypes[i] : inferAnalyticTypeFromSemanticType(s.type),
+        distribution: s.distribution,
+        disable: false
     }))
 }
 

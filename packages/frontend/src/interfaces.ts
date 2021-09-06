@@ -9,19 +9,21 @@ export interface IRawField extends BIField {
     disable: boolean;
 }
 
-export interface IFieldMeta {
-    fid: string;
+export interface IFieldMeta extends IFieldBase {
+    /**
+     * 性质上是计算属性，只读。
+     */
     features: {
         entropy: number;
         maxEntropy: number;
         [key: string]: any
     };
     distribution: Array<{ memberName: string; count: number }>;
-    analyticType: BIFieldType;
-    semanticType: FieldType
 }
 
 export enum IComputeMode {
     server = 'server',
     worker = 'worker'
 }
+
+export type IAnalyticType = 'dimension' | 'measure';

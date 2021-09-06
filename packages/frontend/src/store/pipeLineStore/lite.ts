@@ -9,7 +9,7 @@ import { DataSourceStore } from "../dataSourceStore";
 export type IPipeProgressTag = 'univar' | 'subspace' | 'others' | 'none'
 
 // 老版本是 4，这里我随便改的。发现不对劲的话就改回去
-const EXPECTED_MAX_MEA_IN_VIEW = 3;
+const EXPECTED_MAX_MEA_IN_VIEW = 4;
 
 export class LitePipeStore {
     private dataSourceStore: DataSourceStore;
@@ -19,21 +19,25 @@ export class LitePipeStore {
     public cookedDatasetRef: IStreamListener<ICookedDataset>;
     // public viewSpaces: ViewSpace[] = [];
     public viewSpacesRef: IStreamListener<ViewSpace[]>;
+    public fullDataSubspacesRef: IStreamListener<Subspace[]>;
     public univarRef: IStreamListener<IUnivarateSummary>;
     public dataSubspacesRef: IStreamListener<Subspace[]>;
     public TOP_K_DIM_PERCENT: number = 0.72;
     public TOP_K_MEA_PERCENT: number = 1;
-    public TOP_K_DIM_GROUP_PERCENT: number = 0.3;
+    public TOP_K_DIM_GROUP_NUM: number = 100;
     public MAX_MEA_GROUP_NUM: number = 4;
-    public progressTag: IPipeProgressTag = 'none'
+    public progressTag: IPipeProgressTag = 'none';
+    public auto: boolean = false;
     constructor (dataSourceStore: DataSourceStore) {
         makeAutoObservable(this);
         this.dataSourceStore = dataSourceStore;
         const dataSource$ = from(toStream(() => dataSourceStore.cleanedData));
         const fields$ = from(toStream(() => dataSourceStore.fields));
+        const auto$ = from(toStream(() => this.auto, true));
         const streams = getDataEventStreams(dataSource$, fields$, {
+            auto$,
             TOP_K_DIM_PERCENT$: from(toStream(() => this.TOP_K_DIM_PERCENT, true)),
-            TOP_K_DIM_GROUP_PERCENT$: from(toStream(() => this.TOP_K_DIM_GROUP_PERCENT, true)),
+            TOP_K_DIM_GROUP_NUM$: from(toStream(() => this.TOP_K_DIM_GROUP_NUM, true)),
             MAX_MEA_GROUP_NUM$: from(toStream(() => this.MAX_MEA_GROUP_NUM, true))
         });
         this.streams = streams;
@@ -46,6 +50,7 @@ export class LitePipeStore {
         });
         this.viewSpacesRef = fromStream(streams.viewSpaces$, []);
         this.univarRef = fromStream(streams.univar$, { transedData: [], transedMetas: [], originMetas: [] });
+        this.fullDataSubspacesRef = fromStream(streams.fullDataSubspaces$, []);
         this.dataSubspacesRef = fromStream(streams.dataSubspaces$, []);
 
         // 订阅流，用于捕获计算阶段转换信号。

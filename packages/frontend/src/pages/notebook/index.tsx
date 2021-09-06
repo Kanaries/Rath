@@ -19,7 +19,7 @@ interface ClusterState {
 }
 const NoteBook: React.FC = (props) => {
   const { noteBookStore } = useGlobalStore();
-  const { summary, dataSource } = noteBookStore;
+  const { summary, dataSource, totalDataSubspaceSize } = noteBookStore;
   const [isAggregated, setIsAggregated] = useState(true);
   
   const [clusterState, setClusterState] = useState<ClusterState>({
@@ -39,6 +39,8 @@ const NoteBook: React.FC = (props) => {
     });
   }, [summary])
 
+  console.log('summary', summary, dimScores)
+
   const spec = useMemo(() => {
     const { dimensions } = clusterState;
     // todo
@@ -54,6 +56,13 @@ const NoteBook: React.FC = (props) => {
         return dimensions.includes(field[0]) || measuresInView.includes(field[0])
       })
       const { schema } = specification(fieldScores, dataSource, dimensions, measuresInView)
+      console.log({
+        schema,
+        fieldScores,
+        dimensions,
+        measuresInView,
+        dataSource
+      })
       return schema;
     } catch (error) {
       console.log(error)
@@ -104,13 +113,13 @@ const NoteBook: React.FC = (props) => {
       {noteBookStore.progressTag !== 'univar' && (
         <Slider
           disabled={noteBookStore.progressTag === 'subspace'}
-          value={noteBookStore.TOP_K_DIM_GROUP_PERCENT * 100}
+          value={noteBookStore.TOP_K_DIM_GROUP_NUM}
           label={intl.get('noteBook.subspace.topKSubspace')}
-          max={100}
-          valueFormat={(value: number) => `${value}%`}
+          max={totalDataSubspaceSize}
+          valueFormat={(value: number) => `${value}`}
           showValue={true}
           onChange={(value: number) => {
-            noteBookStore.setParams('TOP_K_DIM_GROUP_PERCENT', value / 100)
+            noteBookStore.setParams('TOP_K_DIM_GROUP_NUM', value)
           }}
         />
       )}

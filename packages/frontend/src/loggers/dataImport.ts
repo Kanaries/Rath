@@ -1,12 +1,12 @@
-import { BIField, Record } from "../global"
+import { IRawField, IRow } from "../interfaces"
 
 const DATA_SOURCE_LOGGER_URL =
   'https://1423108296428281.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/Rath/dataSourceLogger/'
 
 interface IDataImportInfo {
     dataType: string;
-    fields: BIField[];
-    dataSource: Record[];
+    fields: IRawField[];
+    dataSource: IRow[];
     name?: string;
     info?: any;
     size: number;
