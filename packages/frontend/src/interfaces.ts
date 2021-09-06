@@ -5,7 +5,16 @@ export interface IRow {
     [key: string]: number | string | boolean | null | undefined;
 }
 
-export interface IRawField extends BIField {
+// export interface IRawField extends BIField {
+//     disable: boolean;
+// }
+
+interface IFieldBase {
+    fid: string;
+    analyticType: BIFieldType;
+    semanticType: FieldType;
+}
+export interface IRawField extends IFieldBase {
     disable: boolean;
 }
 
