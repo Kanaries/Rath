@@ -86,7 +86,8 @@ export interface IDataEventStreams {
     cookedDataset$: Observable<ICookedDataset>;
     fullDataSubspaces$: Observable<Subspace[]>;
     dataSubspaces$: Observable<Subspace[]>;
-    viewSpaces$: Observable<ViewSpace[]>
+    viewSpaces$: Observable<ViewSpace[]>;
+    auto_TOP_K_DIM_GROUP_NUM$: Observable<number>;
 }
 
 interface IParamStreams {
@@ -172,7 +173,7 @@ export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: O
         op.share()
     )
 
-    const { auto_K$, USED_TOP_K_DIM_GROUP_NUM$ } = get_TOP_K_DIM_GROUP_NUM$(TOP_K_DIM_GROUP_NUM$, auto$, fullDataSubspaces$);
+    const { auto_K$: auto_TOP_K_DIM_GROUP_NUM$, USED_TOP_K_DIM_GROUP_NUM$ } = get_TOP_K_DIM_GROUP_NUM$(TOP_K_DIM_GROUP_NUM$, auto$, fullDataSubspaces$);
 
 
     const dataSubspaces$: Observable<Subspace[]> = combineLatest([fullDataSubspaces$, USED_TOP_K_DIM_GROUP_NUM$]).pipe(
@@ -205,6 +206,7 @@ export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: O
         fullDataSubspaces$,
         dataSubspaces$,
         // fields$,
+        auto_TOP_K_DIM_GROUP_NUM$,
         viewSpaces$
     }
 }

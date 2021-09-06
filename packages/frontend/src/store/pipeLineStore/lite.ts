@@ -26,8 +26,9 @@ export class LitePipeStore {
     public TOP_K_MEA_PERCENT: number = 1;
     public TOP_K_DIM_GROUP_NUM: number = 100;
     public MAX_MEA_GROUP_NUM: number = 4;
+    public AUTO_TOP_K_DIM_GROUP_NUM_Ref: IStreamListener<number>;
     public progressTag: IPipeProgressTag = 'none';
-    public auto: boolean = false;
+    public auto: boolean = true;
     constructor (dataSourceStore: DataSourceStore) {
         makeAutoObservable(this);
         this.dataSourceStore = dataSourceStore;
@@ -52,6 +53,8 @@ export class LitePipeStore {
         this.univarRef = fromStream(streams.univar$, { transedData: [], transedMetas: [], originMetas: [] });
         this.fullDataSubspacesRef = fromStream(streams.fullDataSubspaces$, []);
         this.dataSubspacesRef = fromStream(streams.dataSubspaces$, []);
+        this.AUTO_TOP_K_DIM_GROUP_NUM_Ref = fromStream(streams.auto_TOP_K_DIM_GROUP_NUM$, 100);
+
 
         // 订阅流，用于捕获计算阶段转换信号。
         this.subscrptions.push(streams.univar$.subscribe(() => {
@@ -70,6 +73,9 @@ export class LitePipeStore {
             console.log('length change', length, length / EXPECTED_MAX_MEA_IN_VIEW)
             this.MAX_MEA_GROUP_NUM = Math.round(length / EXPECTED_MAX_MEA_IN_VIEW);
         })
+    }
+    public get AUTO_TOP_K_DIM_GROUP_NUM () {
+        return this.AUTO_TOP_K_DIM_GROUP_NUM_Ref.current;
     }
     public get viewSpaces () {
         return this.viewSpacesRef.current;
@@ -92,6 +98,9 @@ export class LitePipeStore {
     }
     public setComputeMode (mode: IComputeMode) {
         this.computateMode = mode;
+    }
+    public setAuto (value: boolean) {
+        this.auto = value;
     }
     /**
      * 应用初始化，订阅事件流，并把订阅集中存储用于未来释放。

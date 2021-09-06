@@ -6,7 +6,6 @@ import { FileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
 import { IRawField, IRow } from "../../interfaces";
-import dataSource from ".";
 
 export enum SampleKey {
   none = 'none',

@@ -59,6 +59,11 @@
         "measure": "measure"
     },
     "noteBook": {
+        "autoParams": {
+            "title": "Auto Recommand Parameters",
+            "auto": "Auto",
+            "manual": "Manual"
+        },
         "univariate": {
             "title": "Univariate Summary",
             "desc": "Hover your mouse over the fields and see the distails and entropy reducing strategy.",
@@ -73,7 +78,7 @@
             "title": "Subspace Searching",
             "desc": "Try to choose one row(combination of dimensions) of the subspace and see the changes of the processes below.",
             "topKDimension": "top k percent dimension used",
-            "topKSubspace": "top k percent subspace used"
+            "topKSubspace": "top ( {k} / {total} ) number of subspaces used"
         },
         "clustering": {
             "title": "Measurement Clustering",

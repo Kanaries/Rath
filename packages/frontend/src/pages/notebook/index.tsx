@@ -19,7 +19,7 @@ interface ClusterState {
 }
 const NoteBook: React.FC = (props) => {
   const { noteBookStore } = useGlobalStore();
-  const { summary, dataSource, totalDataSubspaceSize } = noteBookStore;
+  const { summary, dataSource, totalDataSubspaceSize, autoParamsEnable, AUTO_TOP_K_DIM_GROUP_NUM } = noteBookStore;
   const [isAggregated, setIsAggregated] = useState(true);
   
   const [clusterState, setClusterState] = useState<ClusterState>({
@@ -85,6 +85,16 @@ const NoteBook: React.FC = (props) => {
   }, [])
   return (
     <div>
+      <Toggle
+        checked={autoParamsEnable}
+        label={intl.get('noteBook.autoParams.title')}
+        defaultChecked
+        onText={intl.get('noteBook.autoParams.auto')}
+        offText={intl.get('noteBook.autoParams.manual')}
+        onChange={(e, checked: boolean | undefined) => {
+          noteBookStore.setAutoParamsEnable(Boolean(checked))
+        }}
+      />
       <h3 className="notebook header">{intl.get('noteBook.univariate.title')}</h3>
       <p className="state-description">{intl.get('noteBook.univariate.desc')}</p>
       {noteBookStore.progressTag === 'univar' && <ProgressIndicator description="analyzing" />}
@@ -97,7 +107,7 @@ const NoteBook: React.FC = (props) => {
       {noteBookStore.progressTag === 'subspace' && <ProgressIndicator description="analyzing" />}
       {noteBookStore.progressTag !== 'univar' && (
         <Slider
-          disabled={noteBookStore.progressTag === 'subspace'}
+          disabled={autoParamsEnable || noteBookStore.progressTag === 'subspace'}
           value={noteBookStore.TOP_K_DIM_PERCENT * 100}
           label={intl.get('noteBook.subspace.topKDimension')}
           max={100}
@@ -110,11 +120,10 @@ const NoteBook: React.FC = (props) => {
       )}
       {noteBookStore.progressTag !== 'univar' && (
         <Slider
-          disabled={noteBookStore.progressTag === 'subspace'}
-          value={noteBookStore.TOP_K_DIM_GROUP_NUM}
-          label={intl.get('noteBook.subspace.topKSubspace')}
+          disabled={autoParamsEnable || noteBookStore.progressTag === 'subspace'}
+          value={autoParamsEnable ? AUTO_TOP_K_DIM_GROUP_NUM : noteBookStore.TOP_K_DIM_GROUP_NUM}
+          label={intl.get('noteBook.subspace.topKSubspace', { k: autoParamsEnable ? AUTO_TOP_K_DIM_GROUP_NUM : noteBookStore.TOP_K_DIM_GROUP_NUM, total: totalDataSubspaceSize })}
           max={totalDataSubspaceSize}
-          valueFormat={(value: number) => `${value}`}
           showValue={true}
           onChange={(value: number) => {
             noteBookStore.setParams('TOP_K_DIM_GROUP_NUM', value)
@@ -132,6 +141,7 @@ const NoteBook: React.FC = (props) => {
         min={1}
         max={noteBookStore.measureAmount || 4}
         step={1}
+        disabled={autoParamsEnable}
         // defaultValue={clusterState.measures.length / 4}
         value={noteBookStore.MAX_MEA_GROUP_NUM}
         showValue={true}

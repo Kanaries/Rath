@@ -59,6 +59,11 @@
         "measure": "度量"
     },
     "noteBook": {
+        "autoParams": {
+            "title": "自动推荐参数",
+            "auto": "自动",
+            "manual": "手动"
+        },
         "univariate": {
             "title": "单变量分析",
             "desc": "把鼠标悬浮在你关心的字段上，了解其分布细节及加工策略。",
@@ -73,7 +78,7 @@
             "title": "组合搜索",
             "desc": "尝试选择一行(一个维度组合)，来看后续的分析过程针对当前行所做的具体细节。",
             "topKDimension": "使用前百分之 k 的维度",
-            "topKSubspace": "使用前百分之 k 的维度组合"
+            "topKSubspace": "使用前 ( {k} / {total} ) 的维度组合"
         },
         "clustering": {
             "title": "度量聚类",
