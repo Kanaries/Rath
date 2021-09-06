@@ -124,7 +124,6 @@ const DevPage: React.FC = props => {
   }, [insightViewSpace, dataView])
 
   useEffect(() => {
-    console.log('side effect')
     if (dataView === null) return;
     const { schema } = dataView;
     if (

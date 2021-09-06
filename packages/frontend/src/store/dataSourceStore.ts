@@ -74,7 +74,6 @@ export class DataSourceStore {
 
     public get cleanedData () {
         const { dataSource, dimensions, measures, cleanMethod} = this;
-        console.log('data',dimensions, measures, dataSource, cleanData(deepcopy(dataSource), dimensions, measures, cleanMethod))
         return cleanData(deepcopy(dataSource), dimensions, measures, cleanMethod)
     }
 
@@ -107,7 +106,6 @@ export class DataSourceStore {
     }
 
     public loadData (fields: IRawField[], rawData: IRow[]) {
-        console.log('fields', fields)
         this.mutFields = fields.map(f => ({
             ...f,
             disable: false
@@ -117,17 +115,11 @@ export class DataSourceStore {
 
     public async getFieldsMetas () {
         const ableFiledIds = this.fields.map(f => f.fid);
-        console.log(1)
         const summary = await getFieldsSummaryService(this.cleanedData, ableFiledIds);
-        console.log(2)
         const analyticTypes = this.fields.map(f => f.analyticType);
-        console.log(3)
         const metas = fieldSummary2fieldMeta(summary, analyticTypes);
-        console.log(4)
         runInAction(() => {
             this.fieldMetas = metas;
-            console.log('meta update', metas, summary, this.cleanedData)
-            console.log(5)
         })
     }
 }

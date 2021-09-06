@@ -70,7 +70,6 @@ function useBIFieldTypeOptions (): IOption<BIFieldType>[] {
 const HeaderCell: React.FC<HeaderCellProps> = props => {
     const { name, code, meta, disable, onChange } = props;
     const optionsOfBIFieldType = useBIFieldTypeOptions();
-    console.log(meta)
     return (
         <HeaderCellContainer>
             <h3 className="header">{name}</h3>

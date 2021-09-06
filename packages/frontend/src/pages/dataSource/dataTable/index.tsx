@@ -18,8 +18,6 @@ const TableInnerStyle = {
     overflow: "auto",
 };
 
-let i = 0;
-
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
     const { mutFields, rawData, fieldMetas, fields, cleanedData } = dataSourceStore;
@@ -29,9 +27,6 @@ const DataTable: React.FC = (props) => {
     const updateFieldInfo = useCallback((fieldId: string, fieldPropKey: string, value: any) => {
         dataSourceStore.updateFieldInfo(fieldId, fieldPropKey, value);
     }, [dataSourceStore])
-
-    console.log(i++)
-    console.log('start')
 
     useEffect(() => {
         dataSourceStore.getFieldsMetas();
@@ -74,7 +69,6 @@ const DataTable: React.FC = (props) => {
                 ),
             };
     })
-    console.log('end', rawData.length, columns.length)
 
     const rowPropsCallback = useCallback((record: IRow) => {
         const hasEmpty = fields.some((f) => {

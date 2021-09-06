@@ -76,7 +76,6 @@ export class GalleryStore {
     }
 
     public get viewSpaces () {
-        console.log(this.pipeLine.viewSpaces)
         return this.pipeLine.viewSpaces;
     }
 

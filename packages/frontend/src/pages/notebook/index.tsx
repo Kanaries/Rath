@@ -39,8 +39,6 @@ const NoteBook: React.FC = (props) => {
     });
   }, [summary])
 
-  console.log('summary', summary, dimScores)
-
   const spec = useMemo(() => {
     const { dimensions } = clusterState;
     // todo
