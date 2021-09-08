@@ -6,7 +6,8 @@
         "dashBoard": "报表",
         "explainer": "数据解读",
         "editor": "自助分析",
-        "support": "帮助"
+        "support": "帮助",
+        "lts": "lts"
     },
     "preference": {
         "title": "个人偏好"

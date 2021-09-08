@@ -6,7 +6,8 @@
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
         "editor": "Visual Editor",
-        "support": "Support"
+        "support": "Support",
+        "lts": "lts"
     },
     "preference": {
         "title": "preference"
