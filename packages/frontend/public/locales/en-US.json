@@ -7,7 +7,7 @@
         "explainer": "Explainer",
         "editor": "Visual Editor",
         "support": "Support",
-        "lts": "lts"
+        "lts": "v2 Engine(β)"
     },
     "preference": {
         "title": "preference"

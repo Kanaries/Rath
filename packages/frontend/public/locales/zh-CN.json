@@ -7,7 +7,7 @@
         "explainer": "数据解读",
         "editor": "自助分析",
         "support": "帮助",
-        "lts": "lts"
+        "lts": "v2引擎(β)"
     },
     "preference": {
         "title": "个人偏好"
