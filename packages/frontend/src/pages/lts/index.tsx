@@ -1,7 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import React from 'react';
-import { useEffect } from 'react';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGlobalStore } from '../../store';
 import BaseChart from '../../visBuilder/vegaBase';
 
@@ -14,13 +12,13 @@ const LTSPage: React.FC = props => {
         ltsPipeLineStore.startTask();
     }, [])
     const spec = ltsPipeLineStore.specify(pageIndex);
-    return <div>
+    return <div className="content-container">
         <button onClick={() => {
             setPageIndex(p => (p + 1) % insightSpaces.length)
         }}>next</button>
         <button onClick={() => {
             setIsAgg(a => !a)
-        }}>agg: {isAgg}</button>
+        }}>agg: {Number(isAgg)}</button>
         <h1>subspaces length: {insightSpaces.length}</h1>
         <div>
             view {pageIndex} {insightSpaces.length > 0 && insightSpaces[pageIndex].score}:

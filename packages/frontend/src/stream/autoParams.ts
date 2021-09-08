@@ -1,6 +1,7 @@
 import { combineLatest, Observable } from "rxjs";
 import { Subspace } from "../service";
 import * as op from 'rxjs/operators';
+import { INIT_TOP_K_DIM_GROUP_NUM } from "../constants";
 /**
  * A temporay implement of auto params, should be replaced by using recommanded advice from vi engine.
  * @param TOP_K_DIM_GROUP_PERCENT$ 
@@ -12,8 +13,8 @@ TOP_K_DIM_GROUP_NUM$: Observable<number>,
 auto$: Observable<boolean>,
 fullDataSubspaces$: Observable<Subspace[]>) {
     // return fullDataSubspaces$
-    const auto_K$ = combineLatest([fullDataSubspaces$]).pipe(
-        op.map(([subspaces]) => {
+    const auto_K$ = fullDataSubspaces$.pipe(
+        op.map((subspaces) => {
             const x = subspaces.length;
             if (subspaces.length < 50) return x;
             if (subspaces.length < 500) return Math.sqrt(x - 50) + 50;
@@ -33,11 +34,12 @@ fullDataSubspaces$: Observable<Subspace[]>) {
         op.map(([TOP_K_DIM_GROUP_NUM, auto]) => {
             return TOP_K_DIM_GROUP_NUM;
         }),
+        op.startWith(INIT_TOP_K_DIM_GROUP_NUM)
     )
     const USED_TOP_K_DIM_GROUP_NUM$ = combineLatest([auto_K$, auto$, EFFECTIVE_TOP_K_DIM_GROUP_NUM$]).pipe(
-        op.map(([auto_K, auto, TOP_K_DIM_GROUP_PERCENT]) => {
+        op.map(([auto_K, auto, TOP_K_DIM_GROUP_NUM]) => {
             if (auto) return auto_K;
-            return TOP_K_DIM_GROUP_PERCENT
+            return TOP_K_DIM_GROUP_NUM
         }),
         op.share()
     )
