@@ -1,19 +1,20 @@
 import { makeAutoObservable, observable, runInAction } from "mobx";
-import { InsightWorker } from "visual-insights/build/esm/commonTypes";
+// import { InsightWorker } from "visual-insights/build/esm/commonTypes";
 import { DefaultIWorker, VIEngine } from "visual-insights/build/esm/insights";
 import { ViewSpace } from "visual-insights/build/esm/insights/dev";
 import { IInsightSpace } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
+import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
 // import { simpleAggregate } from "visual-insights/build/esm/statistics";
 import { IRow } from "../../interfaces";
 import { DataSourceStore } from "../dataSourceStore";
 
-const identityWorker: InsightWorker = async (aggData, dimensions, measures) => {
-    return {
-        dimensions,
-        measures,
-        significance: 1
-    }
-}
+// const identityWorker: InsightWorker = async (aggData, dimensions, measures) => {
+//     return {
+//         dimensions,
+//         measures,
+//         significance: 1
+//     }
+// }
 
 class TestEngine extends VIEngine {
     public async insightExtraction(viewSpaces: ViewSpace[] = this.subSpaces): Promise<IInsightSpace[]> {
@@ -37,6 +38,28 @@ class TestEngine extends VIEngine {
         context.insightSpaces = ansSpace;
         return ansSpace;
     }
+    public async scanDetail (viewSpace: ViewSpace) {
+        const context = this;
+        // @ts-ignore TODO: FIX this in visual insights
+        const { cube, fieldDictonary } = context;
+        const { dimensions, measures } = viewSpace;
+        const cuboid = cube.getCuboid(viewSpace.dimensions);
+        const aggData = cuboid.getState(measures, measures.map(() => 'sum'));
+        const insightSpaces: IInsightSpace[] = []
+        const taskPool: Promise<void>[] = [];
+        this.workerCollection.each((iWorker, name) => {
+            const task = async () => {
+                const result = await iWorker(aggData, dimensions, measures, fieldDictonary, context);
+                if (result) {
+                    result.type = name;
+                    insightSpaces.push(result)
+                }
+            }
+            taskPool.push(task());
+        })
+        await Promise.all(taskPool);
+        return insightSpaces
+    }
 }
 export class LTSPipeLine {
     private dataSourceStore: DataSourceStore;
@@ -50,9 +73,11 @@ export class LTSPipeLine {
         this.dataSourceStore = dataSourceStore;
         const vie = new TestEngine();
         // const vie = new VIEngine();
-        vie.workerCollection.register('identity', identityWorker);
-        vie.workerCollection.enable(DefaultIWorker.outlier, false);
-        vie.workerCollection.enable(DefaultIWorker.trend, false);
+        vie.workerCollection.register('clusters', KNNClusterWorker);
+        vie.workerCollection.enable('clusters', true);
+        // vie.workerCollection.register('identity', identityWorker);
+        // vie.workerCollection.enable(DefaultIWorker.outlier, false);
+        // vie.workerCollection.enable(DefaultIWorker.trend, false);
         // vie.setDataSource(dataSourceStore.cleanedData)
         this.vie = vie;
         this.insightSpaces = [] as IInsightSpace[];
@@ -108,5 +133,12 @@ export class LTSPipeLine {
         if (this.vie.insightSpaces && spaceIndex < this.insightSpaces.length) {
             return this.vie.specification(this.insightSpaces[spaceIndex])
         }
+    }
+    public async scanDetails (spaceIndex: number): Promise<IInsightSpace[]> {
+        const space = this.insightSpaces[spaceIndex];
+        if (space) {
+            return this.vie.scanDetail(space);
+        }
+        return []
     }
 }

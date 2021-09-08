@@ -3,20 +3,24 @@ import { observer } from 'mobx-react-lite';
 import { DefaultButton, PrimaryButton, Toggle, Stack } from 'office-ui-fabric-react';
 import React, { useEffect, useState } from 'react';
 import { useRef } from 'react';
+import { IInsightSpace } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
 import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
 import { IRow } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { LTSPipeLine } from '../../store/pipeLineStore/lts';
 import BaseChart from '../../visBuilder/vegaBase';
+import RadarChart from '../../components/radarChart';
 
 class PageTMPStore {
     public pageIndex: number = 0;
     public aggState: boolean = false;
     private ltsPipeLineStore: LTSPipeLine;
     public spec: { schema: ISpec; dataView: IRow[] } | undefined = undefined;
+    public details: IInsightSpace[] = [];
     constructor (ltsPipeLineStore: LTSPipeLine) {
         makeAutoObservable(this, {
-            spec: observable.ref
+            spec: observable.ref,
+            details: observable.ref
         });
         this.ltsPipeLineStore = ltsPipeLineStore;
     }
@@ -31,12 +35,19 @@ class PageTMPStore {
                     this.spec = spec;
                     this.aggState = agg;
                     this.pageIndex = index;
+                    this.details = []
                 })
             }
         }
     }
     public setAggState (aggState: boolean) {
         this.aggState = aggState;
+    }
+    public async scanDetails (spaceIndex: number) {
+        const result = await this.ltsPipeLineStore.scanDetails(spaceIndex);
+        runInAction(() => {
+            this.details = result;
+        })
     }
 }
 
@@ -110,6 +121,21 @@ const LTSPage: React.FC = props => {
                             aggregator="sum"
                         />
                     </div>}
+                    {
+                        insightSpaces.length > 0 && spec && <div>
+                            <PrimaryButton text="details" onClick={() => {tmpStore.scanDetails(pageIndex)}} />
+                            <div>
+                            {
+                                tmpStore.details.length > 0 && <RadarChart
+                                    dataSource={tmpStore.details}
+                                    threshold={0.8}
+                                    keyField="type"
+                                    valueField="significance"
+                                />
+                            }
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
