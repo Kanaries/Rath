@@ -13,8 +13,8 @@ import ReactJson from 'react-json-view';
 const collection  = Insight.IntentionWorkerCollection.init();
 
 const ReasonTypeNames: { [key: string]: string} = {
-  'selection_dim_distribution': '选择集+新维度',
-  'selection_mea_distribution': '选择集+新度量',
+  'selection_dim_distribution': '维度线索',
+  'selection_mea_distribution': '度量线索',
   'children_major_factor': '子节点主因',
   'children_outlier': '子节点异常'
 }
@@ -158,9 +158,9 @@ const InsightBoard: React.FC<InsightBoardProps> = props => {
                       choosenIndex={visIndex}
                       options={recSpaces.map((s, i) => ({
                           value: s.type || '' + i,
-                          label: `${s.type ? ReasonTypeNames[s.type] : '未识别'}: ${Math.round(
-                              s.score * 100
-                          )}%`,
+                          label: `${s.type ? ReasonTypeNames[s.type] : '未识别'}: ${
+                              s.score.toFixed(2)
+                          }`,
                       }))}
                       onChange={(v, i) => {
                           setVisIndex(i);
@@ -177,7 +177,7 @@ const InsightBoard: React.FC<InsightBoardProps> = props => {
                           {recSpaces[visIndex].type
                               ? ReasonTypeNames[recSpaces[visIndex].type!]
                               : '未识别'}{' '}
-                          ，显著性为{Math.round(recSpaces[visIndex].score * 100)}%。
+                          ，评分为{recSpaces[visIndex].score}。
                           <br />
                           {recSpaces[visIndex].description &&
                               recSpaces[visIndex].description.intMeasures &&
