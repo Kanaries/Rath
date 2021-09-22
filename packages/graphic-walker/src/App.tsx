@@ -9,11 +9,11 @@ import ClickMenu from './components/clickMenu';
 import InsightBoard from './InsightBoard';
 import { useFieldsState } from './Fields/useFieldsState'
 import { Button, DropdownSelect, Checkbox } from '@tableau/tableau-ui';
-import { ProgressIndicator } from '@fluentui/react'
 import Modal from './components/modal';
-import DataSourcePanel from './dataSource/index';
-import { useLocalState } from './store';
+import DataSourceSegment from './dataSource/index';
+import { useGlobalStore } from './store';
 import { preAnalysis, destroyWorker } from './services'
+import { observer } from 'mobx-react-lite';
 
 export interface EditorProps {
   dataSource?: Record[];
@@ -22,7 +22,7 @@ export interface EditorProps {
 
 const App: React.FC<EditorProps> = props => {
   const { dataSource = [], rawFields = [] } = props;
-  const [GS, updateGS] = useLocalState();
+  const store = useGlobalStore();
   const [fields, setFields] = useState<Field[]>([]);
   const [geomType, setGeomType] = useState<string>(GEMO_TYPES[0].value);
   const [aggregated, setAggregated] = useState<boolean>(true);
@@ -30,29 +30,26 @@ const App: React.FC<EditorProps> = props => {
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const [showInsight, setShowInsight] = useState<boolean>(false);
   const [filters, setFilters] = useState<Filters>({});
-  const [showDSPanel, setShowDSPanel] = useState<boolean>(false);
   const [insightReady, setInsightReady] = useState<boolean>(true);
-  const [newDBIndex, setNewDBIndex] = useState<number>(0);
 
   const { fstate, setFstate, viewDimensions, viewMeasures } = useFieldsState();
+  const { currentDataset, datasets } = store;
 
+  // use as an embeding module, use outside datasource from props.
   useEffect(() => {
     if (dataSource.length > 0) {
-      updateGS(state => {
-        state.dataBase = [
-          {
-            id: 'default',
-            name: 'context dataset',
-            dataSource: dataSource,
-            rawFields
-          }
-        ]
+      store.addAndUseDS({
+        name: 'context dataset',
+        dataSource: dataSource,
+        rawFields
       })
     }
   }, [dataSource, rawFields])
+
+  // change selected dataset, update fields, ...
   useEffect(() => {
     const fs: Field[] = [];
-    const ds = GS.dataBase[GS.currentDBIndex];
+    const ds = currentDataset;
     if (ds) {
       ds.rawFields.forEach((f) => {
         fs.push({
@@ -64,11 +61,12 @@ const App: React.FC<EditorProps> = props => {
       })
       setFields(fs)
     }
-  }, [GS.currentDBIndex, GS.dataBase]);
+  }, [currentDataset]);
 
+  // do preparation analysis work when using a new dataset
   useEffect(() => {
-    const ds = GS.dataBase[GS.currentDBIndex];
-    if (ds) {
+    const ds = currentDataset;
+    if (ds && ds.dataSource.length > 0 && ds.rawFields.length > 0) {
       setInsightReady(false)
       preAnalysis({
         dataSource: ds.dataSource,
@@ -80,68 +78,11 @@ const App: React.FC<EditorProps> = props => {
     return () => {
       destroyWorker();
     }
-  }, [GS.currentDBIndex, GS.dataBase]);
-
-  const createDB = useCallback(() => {
-    updateGS(draft => {
-      const newLastIndex = draft.dataBase.length;
-      draft.dataBase.push({
-        id: 'ds_' + newLastIndex,
-        name: '新数据源' + newLastIndex,
-        dataSource: [],
-        rawFields: []
-      })
-      setNewDBIndex(newLastIndex);
-    })
-  }, []);
+  }, [currentDataset]);
 
   return (
     <div className="App">
-      <Container>
-        {!insightReady && <ProgressIndicator description="analyzing" />}
-        <label style={{ fontSize: '12px', marginRight: '4px' }}>当前数据集</label>
-        <DropdownSelect
-          value={GS.dataBase[GS.currentDBIndex] ? GS.dataBase[GS.currentDBIndex].id : 'empty'}
-          onChange={(e) => {
-            // setDSKey(e.target.value);
-            updateGS((draft) => {
-              const index = draft.dataBase.findIndex((ds) => ds.id === e.target.value)
-              draft.currentDBIndex = index
-            })
-          }}
-        >
-          {GS.dataBase.map((ds) => (
-            <option value={ds.id} key={ds.id}>
-              {ds.name}
-            </option>
-          ))}
-        </DropdownSelect>
-        <Button
-          style={{ marginLeft: '8px' }}
-          onClick={() => {
-            createDB()
-            setShowDSPanel(true)
-          }}
-        >
-          创建数据集
-        </Button>
-        {showDSPanel && (
-          <Modal
-            title="创建数据源"
-            onClose={() => {
-              setShowDSPanel(false)
-            }}
-          >
-            <DataSourcePanel
-              dbIndex={newDBIndex}
-              onSubmit={() => {
-                setShowDSPanel(false)
-              }}
-            />
-          </Modal>
-        )}
-        {insightReady && <span style={{ margin: '1em' }}>iready</span>}
-      </Container>
+      <DataSourceSegment preWorkDone={insightReady} />
       <Container>
         <DraggableFields
           onStateChange={(state) => {
@@ -178,7 +119,7 @@ const App: React.FC<EditorProps> = props => {
           </div>
         </LiteForm>
       </Container>
-      {GS.dataBase[GS.currentDBIndex] && (
+      {datasets.length > 0 && (
         <Container>
           {showInsight && (
             <Modal
@@ -187,7 +128,7 @@ const App: React.FC<EditorProps> = props => {
               }}
             >
               <InsightBoard
-                dataSource={GS.dataBase[GS.currentDBIndex].dataSource}
+                dataSource={currentDataset.dataSource}
                 fields={fields}
                 viewDs={viewDimensions}
                 viewMs={viewMeasures}
@@ -211,7 +152,7 @@ const App: React.FC<EditorProps> = props => {
           <ReactVega
             geomType={geomType}
             defaultAggregate={aggregated}
-            dataSource={GS.dataBase[GS.currentDBIndex].dataSource}
+            dataSource={currentDataset.dataSource}
             rows={fstate.rows}
             columns={fstate.columns}
             color={fstate.color[0]}
@@ -229,4 +170,4 @@ const App: React.FC<EditorProps> = props => {
   )
 }
 
-export default App;
+export default observer(App);

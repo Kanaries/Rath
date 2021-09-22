@@ -3,12 +3,11 @@ import { Record, IField, IMutField } from '../interfaces';
 import styled from 'styled-components';
 import { DropdownSelect } from '@tableau/tableau-ui';
 import produce from 'immer';
+import { observer } from 'mobx-react-lite';
+import { useGlobalStore } from '../store';
 
 interface TableProps {
-    fields: IMutField[];
-    dataSource: Record[];
     size?: number;
-    onFieldsUpdate: (fields: IMutField[]) => void
 }
 const Container = styled.div`
     overflow-x: auto;
@@ -62,21 +61,20 @@ function getHeaderType(field: IMutField): 'number' | 'text' {
     return field.analyticType === 'dimension'? 'text' : 'number';
 }
 const Table: React.FC<TableProps> = props => {
-    const { fields, dataSource, size = 10, onFieldsUpdate } = props;
+    const { size = 10 } = props;
+    const store = useGlobalStore();
+    const { tmpDSRawFields, tmpDataSource } = store;
     return (
         <Container>
             <table>
                 <thead>
                     <tr>
-                        {fields.map((field, fIndex) => (
+                        {tmpDSRawFields.map((field, fIndex) => (
                             <th key={field.key} className={getHeaderType(field)}>
                                 <b>{field.key}</b>({field.dataType})
                                 <div>
                                     <DropdownSelect kind="line" value={field.analyticType} onChange={(e) => {
-                                        const nextFields = produce(fields, draft => {
-                                            draft[fIndex].analyticType = e.target.value as any;
-                                        })
-                                        onFieldsUpdate(nextFields);
+                                        store.updateTempFieldAnalyticType(field.key, e.target.value as IMutField['analyticType'])
                                     }}>
                                         {
                                             TYPE_LIST.map(type => <option key={type.value} value={type.value}>{type.label}</option>)
@@ -89,9 +87,9 @@ const Table: React.FC<TableProps> = props => {
                     </tr>
                 </thead>
                 <tbody>
-                    {dataSource.slice(0, size).map((record, index) => (
+                    {tmpDataSource.slice(0, size).map((record, index) => (
                         <tr key={index}>
-                            {fields.map((field) => (
+                            {tmpDSRawFields.map((field) => (
                                 <td
                                     key={field.key + index}
                                     className={getCellType(field)}
@@ -107,4 +105,4 @@ const Table: React.FC<TableProps> = props => {
     );
 }
 
-export default Table;
+export default observer(Table);

@@ -8805,6 +8805,11 @@ mobx-react-lite@^3.2.0:
   resolved "https://registry.npm.taobao.org/mobx-react-lite/download/mobx-react-lite-3.2.0.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fmobx-react-lite%2Fdownload%2Fmobx-react-lite-3.2.0.tgz#331d7365a6b053378dfe9c087315b4e41c5df69f"
   integrity sha1-Mx1zZaawUzeN/pwIcxW05Bxd9p8=
 
+mobx-react-lite@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.nlark.com/mobx-react-lite/download/mobx-react-lite-3.2.1.tgz#c549a3722f1eae51a78b12f839311614d5689c58"
+  integrity sha1-xUmjci8erlGnixL4OTEWFNVonFg=
+
 mobx-utils@^6.0.4:
   version "6.0.4"
   resolved "https://registry.npm.taobao.org/mobx-utils/download/mobx-utils-6.0.4.tgz#5283a466ece8de0ac36ae3cfa1b1c032ec302b37"
@@ -8814,6 +8819,11 @@ mobx@^6.3.2:
   version "6.3.2"
   resolved "https://registry.nlark.com/mobx/download/mobx-6.3.2.tgz#125590961f702a572c139ab69392bea416d2e51b"
   integrity sha1-ElWQlh9wKlcsE5q2k5K+pBbS5Rs=
+
+mobx@^6.3.3:
+  version "6.3.3"
+  resolved "https://registry.nlark.com/mobx/download/mobx-6.3.3.tgz#a3006c56243b1c7ea4ee671a66f963b9f43cf1af"
+  integrity sha1-owBsViQ7HH6k7mcaZvljufQ88a8=
 
 mocha@^6.2.0:
   version "6.2.3"

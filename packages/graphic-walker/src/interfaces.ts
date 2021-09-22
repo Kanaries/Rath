@@ -60,3 +60,23 @@ export interface IMeasure {
     key: string;
     op: StatFuncName
 }
+
+export interface IDataSet {
+    id: string;
+    name: string;
+    rawFields: IMutField[];
+    dsId: string;
+}
+/**
+ * use as props to create a new dataset(IDataSet).
+ */
+export interface IDataSetInfo {
+    name: string;
+    rawFields: IMutField[];
+    dataSource: Record[]
+}
+
+export interface IDataSource {
+    id: string;
+    data: Record[]
+}
