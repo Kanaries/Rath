@@ -26,7 +26,7 @@ interface DataSourceBoardProps {
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   const { dataSourceStore, pipeLineStore } = useGlobalStore();
 
-  const { mutFields ,cleanedData, cleanMethod, rawData } = dataSourceStore;
+  const { cleanedData, cleanMethod, rawData } = dataSourceStore;
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
@@ -62,6 +62,12 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     }
     // 不要加依赖，这里是应用加载第一次时的判断逻辑！
   }, [])
+
+  // useEffect(() => {
+  //   console.log('meta update')
+  //   dataSourceStore.getFieldsMetas();
+  // }, [fields, cleanedData])
+
   return (
     <div className="content-container">
       <div className="card">

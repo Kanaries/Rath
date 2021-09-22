@@ -3,12 +3,12 @@ import { Label, ChoiceGroup, IChoiceGroupOption, SpinButton, DefaultButton } fro
 import { useId } from "@uifabric/react-hooks";
 import intl from "react-intl-universal";
 import { loadDataFile, SampleKey, useSampleOptions } from "../utils";
-import { BIField, Record } from "../../../global";
 import { logDataImport } from "../../../loggers/dataImport";
+import { IRawField, IRow } from "../../../interfaces";
 
 interface FileDataProps {
     onClose: () => void;
-    onDataLoaded: (fields: BIField[], dataSource: Record[]) => void;
+    onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
 }
 const FileData: React.FC<FileDataProps> = (props) => {
     const { onClose, onDataLoaded } = props;

@@ -11,10 +11,17 @@ export class NoteBookStore {
     }
     public get summary (): { origin: FieldSummary[]; grouped: FieldSummary[]; } {
         const { originMetas, transedMetas } = this.pipeLineStore.cookedDataset;
+        const metasOnlyInTransedMetas = transedMetas.filter(tm => originMetas.findIndex(om => tm.fid !== om.fid) === -1);
         return {
             origin: fieldMeta2fieldSummary(originMetas),
-            grouped: fieldMeta2fieldSummary(transedMetas)
+            grouped: fieldMeta2fieldSummary(metasOnlyInTransedMetas)
         }
+    }
+    public get AUTO_TOP_K_DIM_GROUP_NUM () {
+        return this.pipeLineStore.AUTO_TOP_K_DIM_GROUP_NUM;
+    }
+    public get totalDataSubspaceSize () {
+        return this.pipeLineStore.fullDataSubspacesRef.current.length;
     }
     public get subspaceList (): Subspace[] {
         return this.pipeLineStore.dataSubspaces;
@@ -34,11 +41,17 @@ export class NoteBookStore {
     public get progressTag () {
         return this.pipeLineStore.progressTag;
     }
+    public get autoParamsEnable () {
+        return this.pipeLineStore.auto;
+    }
     public get TOP_K_DIM_PERCENT () { return this.pipeLineStore.TOP_K_DIM_PERCENT }
     public get TOP_K_MEA_PERCENT () { return this.pipeLineStore.TOP_K_MEA_PERCENT }
-    public get TOP_K_DIM_GROUP_PERCENT () { return this.pipeLineStore.TOP_K_DIM_GROUP_PERCENT }
+    public get TOP_K_DIM_GROUP_NUM () { return this.pipeLineStore.TOP_K_DIM_GROUP_NUM }
     public get MAX_MEA_GROUP_NUM () { return this.pipeLineStore.MAX_MEA_GROUP_NUM }
-    public setParams (paramKey: 'TOP_K_DIM_PERCENT' | 'TOP_K_MEA_PERCENT' | 'TOP_K_DIM_GROUP_PERCENT' | 'MAX_MEA_GROUP_NUM', value: number) {
+    public setParams (paramKey: 'TOP_K_DIM_PERCENT' | 'TOP_K_MEA_PERCENT' | 'TOP_K_DIM_GROUP_NUM' | 'MAX_MEA_GROUP_NUM', value: number) {
         this.pipeLineStore[paramKey] = value;
+    }
+    public setAutoParamsEnable (value: boolean) {
+        this.pipeLineStore.setAuto(value)
     }
 }

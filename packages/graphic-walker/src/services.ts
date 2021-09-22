@@ -7,7 +7,7 @@ import { Record, Filters, SemanticType, IMeasure } from './interfaces';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import ExplainerWorker from './workers/explainer.worker?worker';
+import ExplainerWorker from './workers/explainer.worker?worker&inline';
 import { View, Specification } from 'visual-insights/build/esm/commonTypes';
 import { IExplaination, IMeasureWithStat } from './insights';
 

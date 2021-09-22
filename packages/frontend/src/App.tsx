@@ -12,6 +12,7 @@ import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
 import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
+import LTSPage from './pages/lts';
 import UserSettings from './components/userSettings';
 import { observer } from "mobx-react-lite";
 
@@ -34,7 +35,7 @@ interface PageStatus {
 function App() {
   const { langStore } = useGlobalStore()
 
-  let pivotKeys: string[] = ['dataSource', 'noteBook', 'explore', 'dashBoard', 'explainer', 'editor', 'support'];
+  let pivotKeys: string[] = ['dataSource', 'noteBook', 'explore', 'dashBoard', 'explainer', 'editor', 'support', 'lts'];
 
   let pivotList = pivotKeys.map((page, index) => {
     return { title: page, itemKey: 'pivot-' + (index + 1) }
@@ -128,6 +129,7 @@ function App() {
       {pageStatus.current.pivotKey === 'pivot-5' && <DevPage />}
       {pageStatus.current.pivotKey === 'pivot-6' && <VisualInterface />}
       {pageStatus.current.pivotKey === 'pivot-7' && <SupportPage />}
+      {pageStatus.current.pivotKey === 'pivot-8' && <LTSPage />}
     </div>
   )
 }

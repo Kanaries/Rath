@@ -5,6 +5,8 @@ import DistributionMiniChart from './distributionMiniChart';
 import { FieldSummary } from '../../../service';
 import { DropdownSelect } from '@tableau/tableau-ui'
 import { BIFieldType, FieldType } from '../../../global';
+import { IFieldMeta, IRawField } from '../../../interfaces';
+import { ISemanticType } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
 
 const HeaderCellContainer = styled.div`
     .bottom-bar {
@@ -39,10 +41,9 @@ function getClassName (type: 'dimension' | 'measure', disable: boolean) {
 interface HeaderCellProps {
     name: string;
     code: string;
-    type: 'dimension' | 'measure';
     disable: boolean;
-    onChange?: (fid: string, propKey: string, value: any) => void
-    summary: FieldSummary | null;
+    onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
+    meta: IFieldMeta | null;
 }
 
 interface IOption<T = string> { key: T; text: string };
@@ -67,13 +68,17 @@ function useBIFieldTypeOptions (): IOption<BIFieldType>[] {
 }
 
 const HeaderCell: React.FC<HeaderCellProps> = props => {
-    const { name, code, type, summary, disable, onChange } = props;
+    const { name, code, meta, disable, onChange } = props;
     const optionsOfBIFieldType = useBIFieldTypeOptions();
     return (
         <HeaderCellContainer>
             <h3 className="header">{name}</h3>
-            {summary && (
-                <DropdownSelect aria-readonly kind="text" disabled={true} defaultValue={summary.type}>
+            {meta && (
+                <DropdownSelect aria-readonly kind="text" disabled={true} value={meta.semanticType} onChange={e => {
+                    if (onChange) {
+                        onChange(code, 'semanticType', e.target.value as ISemanticType)
+                    }
+                }}>
                     {DataTypeOptions.map((op) => (
                         <option key={op.key} value={op.key}>
                             {op.text}
@@ -82,10 +87,10 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                 </DropdownSelect>
             )}
             {
-                <DropdownSelect kind="text" value={type} onChange={(e) => {
+                <DropdownSelect kind="text" value={meta?.analyticType} onChange={(e) => {
                     if (onChange) {
                         // FIXME: 弱约束问题
-                        onChange(code, 'type', e.target.value as BIFieldType);
+                        onChange(code, 'analyticType', e.target.value as BIFieldType);
                     }
                 }}>
                     {
@@ -102,8 +107,8 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
             {/* <Checkbox label="use" checked={!disable} onChange={(e, isChecked) => {
                 onChange && onChange(code, 'disable', !isChecked)
             }} /> */}
-            {summary && <DistributionMiniChart dataSource={summary.distribution} x="memberName" y="count" fieldType={summary.type} />}
-            <div className={`bottom-bar ${getClassName(type, disable)}`}></div>
+            {meta && <DistributionMiniChart dataSource={meta ? meta.distribution : []} x="memberName" y="count" fieldType={meta?.semanticType || 'nominal'} />}
+            <div className={`bottom-bar ${getClassName(meta?.analyticType || 'dimension', disable)}`}></div>
         </HeaderCellContainer>
     );
 }

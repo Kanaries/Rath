@@ -2,16 +2,16 @@ import { ChoiceGroup, DefaultButton, Label } from 'office-ui-fabric-react';
 import React, { useCallback, useState } from 'react';
 import { useId } from "@uifabric/react-hooks";
 import intl from 'react-intl-universal';
-import { BIField, Record } from '../../../global';
 import { DemoDataAssets, IDemoDataKey, useDemoDataOptions } from '../config';
 import { logDataImport } from '../../../loggers/dataImport';
+import { IRawField, IRow } from '../../../interfaces';
 
 interface DemoDataProps {
     onClose: () => void;
-    onDataLoaded: (fields: BIField[], dataSource: Record[]) => void;
+    onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
 }
 
-async function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<{dataSource: Record[], fields: BIField[]}> {
+async function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<{dataSource: IRow[], fields: IRawField[]}> {
     const assetUrl = DemoDataAssets[dsKey];
     try {
         const res = await fetch(assetUrl);

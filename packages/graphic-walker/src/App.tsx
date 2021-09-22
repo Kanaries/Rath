@@ -42,7 +42,7 @@ const App: React.FC<EditorProps> = props => {
   const [showInsight, setShowInsight] = useState<boolean>(false);
   const [filters, setFilters] = useState<Filters>({});
   const [showDSPanel, setShowDSPanel] = useState<boolean>(false);
-  const [insightReady, setInsightReady] = useState<boolean>(false);
+  const [insightReady, setInsightReady] = useState<boolean>(true);
   // const [ds, setDS] = useState<Dataset>({ dimensions: [], measures: [], dataSource: []});
   const [newDBIndex, setNewDBIndex] = useState<number>(0);
   // useEffect(() => {
@@ -52,31 +52,33 @@ const App: React.FC<EditorProps> = props => {
   //   }
   // }, [dsKey])
   useEffect(() => {
-    const fields: IField[] = [];
-    dimensions.forEach(f => {
-      fields.push({
-        key: f,
-        type: 'D',
-        analyticType: 'dimension'
+    if (dataSource.length > 0) {
+      const fields: IField[] = [];
+      dimensions.forEach(f => {
+        fields.push({
+          key: f,
+          type: 'D',
+          analyticType: 'dimension'
+        })
+      });
+      measures.forEach(f => {
+        fields.push({
+          key: f,
+          type: 'D',
+          analyticType: 'measure'
+        })
+      });
+      updateGS(state => {
+        state.dataBase = [
+          {
+            id: 'default',
+            name: 'context dataset',
+            dataSource: dataSource,
+            fields
+          }
+        ]
       })
-    });
-    measures.forEach(f => {
-      fields.push({
-        key: f,
-        type: 'D',
-        analyticType: 'measure'
-      })
-    });
-    updateGS(state => {
-      state.dataBase = [
-        {
-          id: 'default',
-          name: 'context dataset',
-          dataSource: dataSource,
-          fields
-        }
-      ]
-    })
+    }
   }, [dataSource, dimensions, measures])
   useEffect(() => {
     const fs: Field[] = [];

@@ -5,30 +5,33 @@
 import { BehaviorSubject, combineLatest, from, Observable, Subject } from 'rxjs';
 import * as op from 'rxjs/operators';
 import { BIField, Field, OperatorType } from '../global';
-import { IFieldMeta, IRow } from '../interfaces';
+import { IFieldMeta, IRawField, IRow } from '../interfaces';
 import { clusterMeasures, combineFieldsService, FieldSummary, getFieldsSummaryService, getGroupFieldsService, Subspace, ViewSpace } from '../service';
+import { fieldSummary2fieldMeta } from '../utils/transform';
+import { get_TOP_K_DIM_GROUP_NUM$ } from './autoParams';
 
-function createBIFieldSet (fields: BIField[]) {
+function createAnalyticFieldSet (fields: IRawField[]) {
     const dimSet: Set<string> = new Set();
     const meaSet: Set<string> = new Set();
     for (let i = 0; i < fields.length; i++) {
-        if (fields[i].type === 'dimension') {
-            dimSet.add(fields[i].name);
+        if (fields[i].analyticType === 'dimension') {
+            dimSet.add(fields[i].fid);
         } else {
-            meaSet.add(fields[i].name)
+            meaSet.add(fields[i].fid)
         }
     }
     return { dimSet, meaSet }
 }
 
 // FUTURE: 字段数多时可以优化
-function mergeFields (originFields: BIField[], transedFields: Field[]): BIField[] {
+// TODO: FIXME '(group)'
+function mergeFields (originFields: IRawField[], transedFields: Field[]): BIField[] {
     return originFields.map(oF => {
-        let nF = transedFields.find(tF => tF.name === oF.name + '(group)')
+        let nF = transedFields.find(tF => tF.name === oF.fid + '(group)')
         return {
-            name: nF ? nF.name : oF.name,
+            name: nF ? nF.name : oF.fid,
             // 保留用户定义的BI Type
-            type: oF.type
+            type: oF.analyticType
         }
     });
 }
@@ -81,29 +84,32 @@ export interface IDataEventStreams {
     univar$: Observable<IUnivarateSummary>;
     aggOperator$: BehaviorSubject<OperatorType>;
     cookedDataset$: Observable<ICookedDataset>;
+    fullDataSubspaces$: Observable<Subspace[]>;
     dataSubspaces$: Observable<Subspace[]>;
-    viewSpaces$: Observable<ViewSpace[]>
+    viewSpaces$: Observable<ViewSpace[]>;
+    auto_TOP_K_DIM_GROUP_NUM$: Observable<number>;
 }
 
 interface IParamStreams {
     TOP_K_DIM_PERCENT$: Observable<number>;
-    TOP_K_DIM_GROUP_PERCENT$: Observable<number>;
+    TOP_K_DIM_GROUP_NUM$: Observable<number>;
     // TODO: Idea: MAX_GROUP_NUM是不是可以用MAX_IMPURITY_IN_VIEW之类的metric来替换。
     MAX_MEA_GROUP_NUM$: Observable<number>;
+    auto$: Observable<boolean>;
 }
 
-export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: Observable<BIField[]>, params: IParamStreams): IDataEventStreams {
-    const { TOP_K_DIM_GROUP_PERCENT$, TOP_K_DIM_PERCENT$, MAX_MEA_GROUP_NUM$ } = params;
+export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: Observable<IRawField[]>, params: IParamStreams): IDataEventStreams {
+    const { TOP_K_DIM_GROUP_NUM$, TOP_K_DIM_PERCENT$, MAX_MEA_GROUP_NUM$, auto$ } = params;
     const start$: Subject<boolean> = new Subject();
     const univar$ = start$.pipe(
         op.withLatestFrom(dataSource$, fields$),
         op.map(([_start, dataSource, fields]) => {
-            const fieldIds = fields.map(f => f.name);
-            const { dimSet, meaSet } = createBIFieldSet(fields);
+            const fieldIds = fields.map(f => f.fid);
+            const { dimSet, meaSet } = createAnalyticFieldSet(fields);
             return from(getFieldsSummaryService(dataSource, fieldIds, false)).pipe(
                 // field with semantic type info
                 op.map(summary => ({
-                    originMetas: generateFieldMetaList(fields, summary),
+                    originMetas: fieldSummary2fieldMeta(summary, fields.map(f => f.analyticType)),
                     originSummary: summary,
                     semanticFields: summary
                         .filter(f => dimSet.has(f.fieldName))
@@ -167,9 +173,12 @@ export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: O
         op.share()
     )
 
-    const dataSubspaces$: Observable<Subspace[]> = combineLatest([fullDataSubspaces$, TOP_K_DIM_GROUP_PERCENT$]).pipe(
-        op.map(([subspaces, TOP_K_DIM_GROUP_PERCENT]) => {
-            return subspaces.slice(0, Math.round(TOP_K_DIM_GROUP_PERCENT * subspaces.length))
+    const { auto_K$: auto_TOP_K_DIM_GROUP_NUM$, USED_TOP_K_DIM_GROUP_NUM$ } = get_TOP_K_DIM_GROUP_NUM$(TOP_K_DIM_GROUP_NUM$, auto$, fullDataSubspaces$);
+
+
+    const dataSubspaces$: Observable<Subspace[]> = combineLatest([fullDataSubspaces$, USED_TOP_K_DIM_GROUP_NUM$]).pipe(
+        op.map(([subspaces, USED_TOP_K_DIM_GROUP_NUM]) => {
+            return subspaces.slice(0, Math.round(USED_TOP_K_DIM_GROUP_NUM))
         }),
         op.share()
     )
@@ -194,8 +203,10 @@ export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: O
         univar$,
         cookedDataset$,
         aggOperator$,
+        fullDataSubspaces$,
         dataSubspaces$,
         // fields$,
+        auto_TOP_K_DIM_GROUP_NUM$,
         viewSpaces$
     }
 }

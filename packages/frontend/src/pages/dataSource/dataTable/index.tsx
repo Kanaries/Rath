@@ -1,11 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { BaseTable, ArtColumn, Classes } from "ali-react-table";
 import { IRawField, IRow } from "../../../interfaces";
-import { BIField, BIFieldType } from "../../../global";
 import HeaderCell from "./headerCell";
 import styled from "styled-components";
-import intl from 'react-intl-universal';
-import { FieldSummary, getFieldsSummaryService } from "../../../service";
 import { observer } from 'mobx-react-lite'
 import { useGlobalStore } from "../../../store";
 const CustomBaseTable = styled(BaseTable)`
@@ -23,42 +20,59 @@ const TableInnerStyle = {
 
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
-    const { mutFields, rawData, cleanedData, fields } = dataSourceStore;
-    const [summary, setSummary] = useState<FieldSummary[]>([]);
-    useEffect(() => {
-        getFieldsSummaryService(cleanedData, fields.map(f => f.name)).then(res => {
-            setSummary(res);
-        })
-    }, [cleanedData, fields])
+    const { mutFields, rawData, fieldMetas, fields, cleanedData } = dataSourceStore;
+
 
 
     const updateFieldInfo = useCallback((fieldId: string, fieldPropKey: string, value: any) => {
         dataSourceStore.updateFieldInfo(fieldId, fieldPropKey, value);
-    }, [])
+    }, [dataSourceStore])
 
+    useEffect(() => {
+        dataSourceStore.getFieldsMetas();
+    }, [fields, cleanedData, dataSourceStore])
+    // 这是一个非常有趣的数据流写法的bug，可以总结一下
+    // const columns = useMemo(() => {
+    //     return fieldMetas.map((f, i) => {
+    //         const mutField = mutFields[i].fid === f.fid ? mutFields[i] : mutFields.find(mf => mf.fid === f.fid);
+        //     return {
+        //         name: f.fid,
+        //         code: f.fid,
+        //         width: 220,
+        //         title: (
+        //             <HeaderCell
+        //                 disable={Boolean(mutField?.disable)}
+        //                 name={f.fid}
+        //                 code={f.fid}
+        //                 // meta={f}
+        //                 onChange={updateFieldInfo}
+        //             />
+        //         ),
+        //     };
+        // });
+    // }, [fieldMetas, mutFields, updateFieldInfo])
 
-    const columns = mutFields.map((f) => {
-        const targetSummary = summary.find((s) => s.fieldName === f.name) || null;
+    const columns = mutFields.map((f, i) => {
+        const fm = (fieldMetas[i] && fieldMetas[i].fid === mutFields[i].fid) ? fieldMetas[i] : fieldMetas.find(m => m.fid === f.fid);
         return {
-            name: f.name,
-            code: f.name,
-            width: 220,
-            title: (
-                <HeaderCell
-                    disable={f.disable}
-                    name={f.name}
-                    code={f.name}
-                    type={f.type}
-                    summary={targetSummary}
-                    onChange={updateFieldInfo}
-                />
-            ),
-        };
-    });
+                name: f.fid,
+                code: f.fid,
+                width: 220,
+                title: (
+                    <HeaderCell
+                        disable={Boolean(f.disable)}
+                        name={f.fid}
+                        code={f.fid}
+                        meta={fm || null}
+                        onChange={updateFieldInfo}
+                    />
+                ),
+            };
+    })
 
     const rowPropsCallback = useCallback((record: IRow) => {
         const hasEmpty = fields.some((f) => {
-            return !f.disable && (record[f.name] === null || record[f.name] === undefined || record[f.name] === "");
+            return !f.disable && (record[f.fid] === null || record[f.fid] === undefined || record[f.fid] === "");
         });
         return {
             style: {
@@ -69,10 +83,12 @@ const DataTable: React.FC = (props) => {
 
     return (
         <div>
-            <CustomBaseTable
+            {
+                columns.length > 0 && <CustomBaseTable
                 useVirtual={true}
                 getRowProps={rowPropsCallback}
                 style={TableInnerStyle} dataSource={rawData} columns={columns} />
+            }
         </div>
     );
 };
