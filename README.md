@@ -41,6 +41,8 @@ Graphic Walker is a lite tableau style visual analysis interface. It is used for
 
 You can also use Graphic Walker as a lite tableau style analysis app independently. It can be used as an independent app or an embeding module.
 
+more details can be found in README.md in graphic-walker folder.
+
 ## Examples
 
 + [DataSet: NASA - Kepler](https://www.kaggle.com/nasa/kepler-exoplanet-search-results)
