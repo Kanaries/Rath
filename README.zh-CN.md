@@ -60,6 +60,8 @@ Rath中包含一个tableau风格的自助分析工具，它是一个和基于图
 
 + [《Tutorial: 使用Rath快速获取数据洞察》](https://www.yuque.com/docs/share/3f32e044-3530-4ebe-9b01-287bfbdb7ce0?#)
 + 使用Rath底层的SDK将增强分析能力嵌入你自己的应用: [visual-insights](https://github.com/Kanaries/visual-insights/blob/master/README.md)
++ QQ交流群：129132269
++ 微信公众号：Kanaries
 
 ## Reference
 

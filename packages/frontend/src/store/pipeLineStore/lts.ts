@@ -16,6 +16,8 @@ import { DataSourceStore } from "../dataSourceStore";
 //     }
 // }
 
+const PRINT_PERFORMANCE = new URL(window.location.href).searchParams.get('performance');
+
 class TestEngine extends VIEngine {
     public async insightExtraction(viewSpaces: ViewSpace[] = this.subSpaces): Promise<IInsightSpace[]> {
         const context = this;
@@ -83,35 +85,42 @@ export class LTSPipeLine {
         this.insightSpaces = [] as IInsightSpace[];
     }
     public async startTask () {
-        const { cleanedData, dimensions, measures } = this.dataSourceStore;
-        // const times: number[] = [];
-        // const prints: IRow[] = [];
-        // times.push(performance.now())
-        this.vie.setDataSource(cleanedData)
-        .setFieldKeys([...dimensions, ...measures])
-            .buildfieldsSummary()
-            .setDimensions(dimensions)
-            .setMeasures(measures)
-        // times.push(performance.now())
-        // prints.push({ task: 'init&univar', value: times[times.length - 1] - times[times.length - 2] })
+        const { cleanedData, fieldMetas } = this.dataSourceStore;
+        const times: number[] = [];
+        const prints: IRow[] = [];
+        times.push(performance.now())
+        const fieldsProps = fieldMetas.map(f => ({ key: f.fid, semanticType: f.semanticType, analyticType: f.analyticType, dataType: '?' as '?' }));
+        console.log(fieldsProps, cleanedData)
+        this.vie.setData(cleanedData)
+            .setFields(fieldsProps)
+        this.vie.univarSelection();
+        console.log(this.vie.dimensions, this.vie.measures)
+        // this.vie.setDataSource(cleanedData)
+        // .setFieldKeys([...dimensions, ...measures])
+        //     .buildfieldsSummary()
+        //     .setDimensions(dimensions)
+        //     .setMeasures(measures)
+        times.push(performance.now())
+        prints.push({ task: 'init&univar', value: times[times.length - 1] - times[times.length - 2] })
         this.vie.buildGraph();
-        // times.push(performance.now())
-        // prints.push({ task: 'co-graph', value: times[times.length - 1] - times[times.length - 2] })
+        times.push(performance.now())
+        prints.push({ task: 'co-graph', value: times[times.length - 1] - times[times.length - 2] })
         this.vie.clusterFields();
-        // times.push(performance.now())
-        // prints.push({ task: 'clusters', value: times[times.length - 1] - times[times.length - 2] })
+        times.push(performance.now())
+        prints.push({ task: 'clusters', value: times[times.length - 1] - times[times.length - 2] })
         this.vie.buildCube();
-        // times.push(performance.now())
-        // prints.push({ task: 'cube', value: times[times.length - 1] - times[times.length - 2] })
+        times.push(performance.now())
+        prints.push({ task: 'cube', value: times[times.length - 1] - times[times.length - 2] })
         this.vie.buildSubspaces();
-        // times.push(performance.now())
-        // prints.push({ task: 'subspaces', value: times[times.length - 1] - times[times.length - 2] })
+        times.push(performance.now())
+        prints.push({ task: 'subspaces', value: times[times.length - 1] - times[times.length - 2] })
         await this.vie.insightExtraction();
-        // times.push(performance.now())
-        // prints.push({ task: 'insights', value: times[times.length - 1] - times[times.length - 2] })
+        times.push(performance.now())
+        prints.push({ task: 'insights', value: times[times.length - 1] - times[times.length - 2] })
         this.vie.setInsightScores();
-        // times.push(performance.now())
-        // prints.push({ task: 'scores', value: times[times.length - 1] - times[times.length - 2] })
+        times.push(performance.now())
+        prints.push({ task: 'scores', value: times[times.length - 1] - times[times.length - 2] })
+        PRINT_PERFORMANCE && console.log(JSON.stringify(prints, null, 2))
         // console.log(JSON.stringify(prints, null, 2))
         const _insightSpaces = this.vie.insightSpaces.filter(s => typeof s.score === 'number' && !isNaN(s.score));
         const insightSpaces: IInsightSpace[] = [];
