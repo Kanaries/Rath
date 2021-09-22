@@ -1,6 +1,6 @@
-import { Specification } from 'visual-insights/build/esm/commonTypes';
+import { Specification } from 'visual-insights';
 import { Record, SemanticType } from '../interfaces';
-import { deepcopy } from 'visual-insights/build/esm/utils';
+import { Utils } from 'visual-insights';
 import { IPredicate } from '../utils';
 export type IReasonType = 'selection_dim_distribution' | 'selection_mea_distribution' | 'children_major_factor' | 'children_outlier';
 export const geomTypeMap: { [key: string]: any } = {
@@ -129,7 +129,7 @@ export function baseVis(
             ...basicSpec,
         };
     }
-    const basicSpecFilter = deepcopy(basicSpec);
+    const basicSpecFilter = Utils.deepcopy(basicSpec);
     basicSpec.mark.opacity = 0.9;
     basicSpec.mark.color = '#8c8c8c';
     // basicSpecFilter.mark.color = '#f5222d';

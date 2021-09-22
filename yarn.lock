@@ -13451,10 +13451,10 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-visual-insights@0.6.2:
-  version "0.6.2"
-  resolved "https://registry.nlark.com/visual-insights/download/visual-insights-0.6.2.tgz?cache=0&sync_timestamp=1631964426593&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fvisual-insights%2Fdownload%2Fvisual-insights-0.6.2.tgz#590a7339192c2b79ee6dcf4f6db06b1d505829db"
-  integrity sha1-WQpzORksK3nubc9PbbBrHVBYKds=
+visual-insights@0.6.3:
+  version "0.6.3"
+  resolved "https://registry.nlark.com/visual-insights/download/visual-insights-0.6.3.tgz#ed398cf2b26946d03b49aea4c48ea857f6abddeb"
+  integrity sha1-7TmM8rJpRtA7Sa6kxI6oV/ar3es=
   dependencies:
     assert "^2.0.0"
     cube-core "^2.13.0"

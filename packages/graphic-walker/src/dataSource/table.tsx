@@ -1,14 +1,14 @@
 import React from 'react';
-import { Record, IField } from '../interfaces';
+import { Record, IField, IMutField } from '../interfaces';
 import styled from 'styled-components';
 import { DropdownSelect } from '@tableau/tableau-ui';
 import produce from 'immer';
 
 interface TableProps {
-    fields: IField[];
+    fields: IMutField[];
     dataSource: Record[];
     size?: number;
-    onFieldsUpdate: (fields: IField[]) => void
+    onFieldsUpdate: (fields: IMutField[]) => void
 }
 const Container = styled.div`
     overflow-x: auto;
@@ -55,10 +55,10 @@ const TYPE_LIST = [
         label: '度量'
     }
 ];
-function getCellType(field: IField): 'number' | 'text' {
-    return field.type === 'number' || field.type === 'integer' ? 'number' : 'text';
+function getCellType(field: IMutField): 'number' | 'text' {
+    return field.dataType === 'number' || field.dataType === 'integer' ? 'number' : 'text';
 }
-function getHeaderType(field: IField): 'number' | 'text' {
+function getHeaderType(field: IMutField): 'number' | 'text' {
     return field.analyticType === 'dimension'? 'text' : 'number';
 }
 const Table: React.FC<TableProps> = props => {
@@ -70,7 +70,7 @@ const Table: React.FC<TableProps> = props => {
                     <tr>
                         {fields.map((field, fIndex) => (
                             <th key={field.key} className={getHeaderType(field)}>
-                                <b>{field.key}</b>({field.type})
+                                <b>{field.key}</b>({field.dataType})
                                 <div>
                                     <DropdownSelect kind="line" value={field.analyticType} onChange={(e) => {
                                         const nextFields = produce(fields, draft => {

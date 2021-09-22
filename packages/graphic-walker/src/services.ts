@@ -1,4 +1,4 @@
-import { Record, Filters, SemanticType, IMeasure } from './interfaces';
+import { Record, Filters, SemanticType, IMeasure, IMutField } from './interfaces';
 // import { Insight } from 'visual-insights';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
@@ -8,7 +8,7 @@ import { Record, Filters, SemanticType, IMeasure } from './interfaces';
 // @ts-ignore
 // eslint-disable-next-line
 import ExplainerWorker from './workers/explainer.worker?worker&inline';
-import { View, Specification } from 'visual-insights/build/esm/commonTypes';
+import { View, Specification } from 'visual-insights';
 import { IExplaination, IMeasureWithStat } from './insights';
 
 interface WorkerState {
@@ -79,8 +79,7 @@ export async function getExplaination(props: ExplainParams) {
 }
 
 interface PreAnalysisParams {
-    dimensions: string[];
-    measures: string[];
+    fields: IMutField[];
     dataSource: Record[];
 }
 export async function preAnalysis(props: PreAnalysisParams) {

@@ -1,4 +1,4 @@
-import { Specification } from 'visual-insights/build/esm/commonTypes';
+import { Specification } from 'visual-insights';
 import { Record, SemanticType } from '../interfaces';
 export const geomTypeMap: { [key: string]: any } = {
     interval: 'bar',

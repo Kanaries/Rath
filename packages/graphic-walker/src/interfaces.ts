@@ -1,6 +1,6 @@
 import { StatFuncName } from "visual-insights/build/esm/statistics";
 import { AggFC } from 'cube-core/built/types';
-
+import { IMutField as VIMutField } from 'visual-insights';
 export interface Record {
     [key: string]: any;
 }
@@ -16,6 +16,8 @@ export interface IField {
     type: string;
     analyticType: 'dimension' | 'measure';
 }
+
+export type IMutField = VIMutField;
 
 export interface Field {
     /**
@@ -45,7 +47,7 @@ export interface Measure extends Field {
 export interface DataSet {
     id: string;
     name: string;
-    fields: IField[];
+    rawFields: IMutField[];
     dataSource: Record[];
 }
 

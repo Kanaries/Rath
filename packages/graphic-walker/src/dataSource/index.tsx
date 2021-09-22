@@ -1,7 +1,7 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { Button, TextField } from '@tableau/tableau-ui';
 import { FileReader } from '@kanaries/web-data-loader';
-import { Record, IField } from '../interfaces';
+import { Record, IField, IMutField } from '../interfaces';
 import { Insight } from 'visual-insights';
 import Table from './table';
 import styled from 'styled-components';
@@ -30,7 +30,7 @@ const Container = styled.div`
 `;
 function transData(dataSource: Record[]): {
     dataSource: Record[];
-    fields: IField[]
+    fields: IMutField[]
 } {
     if (dataSource.length === 0) return {
         dataSource: [],
@@ -38,10 +38,18 @@ function transData(dataSource: Record[]): {
     };
     let ans: Record[] = [];
     const keys = Object.keys(dataSource[0]);
+    // TODO: 冗余设计，单变量统计被进行了多次重复计算。另外对于这种不完整的分析任务，不建议使用VIEngine。
     const vie = new Insight.VIEngine();
-    vie.setDataSource(dataSource)
-        .setFieldKeys(keys)
-        .buildfieldsSummary();
+    vie.setData(dataSource)
+        .setFields(keys.map(k => ({
+            key: k,
+            analyticType: '?',
+            dataType: '?',
+            semanticType: '?'
+        })))
+    // TODO: 结合上面的TODO，讨论，VIEngine是否要提供不需要进行univarSelection就提供summary的接口。
+    // 这里我们使用了一种非原API设计时期待的用法，即强制指定单变量选择时要全选字段。但我们无法阻止对变量的转换。
+    vie.univarSelection('percent', 1);
     const fields = vie.fields;
     // console.log(fields)
     for (let record of dataSource) {
@@ -59,8 +67,9 @@ function transData(dataSource: Record[]): {
         dataSource: ans,
         fields: fields.map(f => ({
             key: f.key,
-            type: f.dataType,
-            analyticType: f.analyticType
+            analyticType: f.analyticType,
+            dataType: f.dataType,
+            semanticType: f.semanticType
         }))
     }
 }
@@ -72,26 +81,29 @@ const DataSourcePanel: React.FC<DSPanelProps> = props => {
     const { dbIndex, onSubmit } = props;
     const fileRef = useRef<HTMLInputElement>(null);
     const [dataSource, setDataSource] = useState<Record[]>([]);
-    const [fields, setFields] = useState<IField[]>([]);
-    const [GS, updateGS] = useLocalState();
+    const [rawFields, setRawFields] = useState<IMutField[]>([]);
+    const [, updateGS] = useLocalState();
     const [dsName, setDSName] = useState<string>('新数据集')
 
-    const onFieldsChange = useCallback((fields: IField[]) => {
-        setFields(fields);
+    const onFieldsChange = useCallback((fields: IMutField[]) => {
+        setRawFields(fields);
     }, [])
+
+
+
     const onSubmitData = useCallback(() => {
         updateGS(draft => {
             draft.dataBase[dbIndex] = {
                 id: 'test' + dbIndex,
                 name: dsName,
-                fields,
+                rawFields,
                 dataSource
             }
         })
         if (onSubmit) {
             onSubmit();
         }
-    }, [dbIndex, fields, dataSource, dsName])
+    }, [dbIndex, rawFields, dataSource, dsName])
     return (
         <Container>
             <input
@@ -112,7 +124,7 @@ const DataSourcePanel: React.FC<DSPanelProps> = props => {
                             console.log(result);
                             // TODO: need fix web-data-loader issue #2
                             setDataSource(result.dataSource.slice(0, -1));
-                            setFields(result.fields);
+                            setRawFields(result.fields);
                         });
                     }
                 }}
@@ -137,7 +149,7 @@ const DataSourcePanel: React.FC<DSPanelProps> = props => {
                     setDSName(e.target.value)
                 }} />
             </div>
-            <Table dataSource={dataSource} fields={fields} onFieldsUpdate={onFieldsChange} />
+            <Table dataSource={dataSource} fields={rawFields} onFieldsUpdate={onFieldsChange} />
         </Container>
     );
 }
