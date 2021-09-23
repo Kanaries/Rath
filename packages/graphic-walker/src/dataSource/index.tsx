@@ -1,5 +1,3 @@
-import { ProgressIndicator } from '@fluentui/react';
-import { Button, DropdownSelect } from '@tableau/tableau-ui';
 import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import { Container } from '../components/container';
@@ -18,9 +16,10 @@ const DataSourceSegment: React.FC<DSSegmentProps> = props => {
     const { currentDataset, datasets, showDSPanel } = store;
 
     return <Container>
-        {!preWorkDone && <ProgressIndicator description="analyzing" />}
-        <label style={{ fontSize: '12px', marginRight: '4px' }}>当前数据集</label>
-        <DropdownSelect
+        {!preWorkDone && <div className="animate-spin inline-block mr-2 ml-2 w-4 h-4 rounded-full border-t-2 border-l-2 border-blue-500"></div>}
+        <label className="text-xs mr-1">当前数据集</label>
+        <select
+            className="border border-gray-500 rounded-sm text-xs pt-0.5 pb-0.5 pl-2 pr-2"
             value={currentDataset.id}
             onChange={(e) => { store.useDS(e.target.value); }}
         >
@@ -29,13 +28,11 @@ const DataSourceSegment: React.FC<DSSegmentProps> = props => {
                     {ds.name}
                 </option>
             ))}
-        </DropdownSelect>
-        <Button
-            style={{ marginLeft: '8px' }}
+        </select>
+
+        <button className="inline-block min-w-96 text-xs ml-2 pt-1 pb-1 pl-6 pr-6 border border-gray-500 rounded-sm hover:bg-gray-200"
             onClick={() => { store.startDSBuildingTask() }}
-        >
-            创建数据集
-        </Button>
+        >创建数据集</button>
         {showDSPanel && (
             <Modal
                 title="创建数据源"
@@ -44,7 +41,7 @@ const DataSourceSegment: React.FC<DSSegmentProps> = props => {
                 <DataSourcePanel />
             </Modal>
         )}
-        {preWorkDone && <span style={{ margin: '1em' }}>iready</span>}
+        {preWorkDone && <span className="ml-2">iready</span>}
     </Container>
 }
 

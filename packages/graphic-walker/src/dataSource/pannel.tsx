@@ -1,5 +1,4 @@
 import React, { useRef, useState, useCallback } from 'react';
-import { Button, TextField } from '@tableau/tableau-ui';
 import { FileReader } from '@kanaries/web-data-loader';
 import { Record } from '../interfaces';
 import Table from './table';
@@ -42,24 +41,26 @@ const DataSourcePanel: React.FC<DSPanelProps> = props => {
                 }}
             />
             <div style={{ margin: '1em 0em' }}>
-                <Button
-                    style={{ marginRight: 12 }}
-                    onClick={() => {
-                        if (fileRef.current) {
-                            fileRef.current.click();
-                        }
-                    }}
+                <button className="inline-block min-w-96 text-xs mr-2 pt-1 pb-1 pl-6 pr-6 border border-gray-500 rounded-sm cursor-pointer hover:bg-gray-200"
+                    onClick={() => { if (fileRef.current) { fileRef.current.click(); }}}
                 >
                     上传数据
-                </Button>
-                <Button kind="primary" disabled={tmpDataSource.length === 0} onClick={() => {
-                    onSubmitData();
-                }}>确认</Button>
+                </button>
+                <button className="inline-block min-w-96 text-xs mr-2 pt-1 pb-1 pl-6 pr-6 bg-indigo-600 rounded-sm hover:bg-indigo-500 text-white font-bold"
+                    disabled={tmpDataSource.length === 0}
+                    onClick={() => { onSubmitData(); }}
+                >
+                    确认
+                </button>
             </div>
-            <div style={{ margin: '1em 0em' }}>
-                <TextField label="数据集名称" value={tmpDSName} onChange={(e) => {
-                    store.updateTempName(e.target.value)
-                }} />
+            <div className="mt-1 mb-1">
+                <label className="block text-xs text-gray-800">数据集名称</label>
+                <input type="text" placeholder="数据集名称"
+                    onChange={e => {
+                        store.updateTempName(e.target.value)
+                    }}
+                    className="text-xs p-1 border border-gray-300 outline-none focus:outline-none focus:border-blue-500"
+                />
             </div>
             <Table />
         </Container>

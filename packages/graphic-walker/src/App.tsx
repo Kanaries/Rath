@@ -8,12 +8,12 @@ import { Container } from './components/container';
 import ClickMenu from './components/clickMenu';
 import InsightBoard from './InsightBoard';
 import { useFieldsState } from './Fields/useFieldsState'
-import { Button, DropdownSelect, Checkbox } from '@tableau/tableau-ui';
 import Modal from './components/modal';
 import DataSourceSegment from './dataSource/index';
 import { useGlobalStore } from './store';
 import { preAnalysis, destroyWorker } from './services'
 import { observer } from 'mobx-react-lite';
+import { toJS } from 'mobx';
 
 export interface EditorProps {
   dataSource?: Record[];
@@ -70,7 +70,7 @@ const App: React.FC<EditorProps> = props => {
       setInsightReady(false)
       preAnalysis({
         dataSource: ds.dataSource,
-        fields: ds.rawFields
+        fields: toJS(ds.rawFields)
       }).then(() => {
         setInsightReady(true);
       })
@@ -94,18 +94,15 @@ const App: React.FC<EditorProps> = props => {
       <Container>
         <LiteForm style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
           <div className="item">
-            <Checkbox
-              checked={aggregated}
-              onChange={(e) => {
+            <input type="checkbox" checked={aggregated} onChange={(e) => {
                 setAggregated(e.target.checked)
-              }}
-            >
-              聚合度量
-            </Checkbox>
+              }} />
+            <label className="text-xs text-color-gray-700 ml-2">聚合度量</label>
           </div>
           <div className="item">
             <label>标记类型</label>
-            <DropdownSelect
+            <select
+              className="border border-gray-500 rounded-sm text-xs pt-0.5 pb-0.5 pl-2 pr-2"
               onChange={(e) => {
                 setGeomType(e.target.value)
               }}
@@ -115,7 +112,7 @@ const App: React.FC<EditorProps> = props => {
                   {g.label}
                 </option>
               ))}
-            </DropdownSelect>
+            </select>
           </div>
         </LiteForm>
       </Container>

@@ -1396,14 +1396,6 @@
     "@uifabric/set-version" "^7.0.24"
     tslib "^1.10.0"
 
-"@fluentui/date-time-utilities@^8.2.2":
-  version "8.2.2"
-  resolved "https://registry.nlark.com/@fluentui/date-time-utilities/download/@fluentui/date-time-utilities-8.2.2.tgz#535d5bb6ee7ccfa8cc774c790e31d3d5d4edbad6"
-  integrity sha1-U11btu58z6jMd0x5DjHT1dTtutY=
-  dependencies:
-    "@fluentui/set-version" "^8.1.4"
-    tslib "^2.1.0"
-
 "@fluentui/dom-utilities@^1.1.2":
   version "1.1.2"
   resolved "https://registry.nlark.com/@fluentui/dom-utilities/download/@fluentui/dom-utilities-1.1.2.tgz#1a53e51e1ab1d40696ae7d355a970c68d496845f"
@@ -1412,55 +1404,12 @@
     "@uifabric/set-version" "^7.0.24"
     tslib "^1.10.0"
 
-"@fluentui/dom-utilities@^2.1.4":
-  version "2.1.4"
-  resolved "https://registry.nlark.com/@fluentui/dom-utilities/download/@fluentui/dom-utilities-2.1.4.tgz?cache=0&sync_timestamp=1627978008693&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40fluentui%2Fdom-utilities%2Fdownload%2F%40fluentui%2Fdom-utilities-2.1.4.tgz#a8eeaf906cc19f547ae40c662d2776cb2540ea11"
-  integrity sha1-qO6vkGzBn1R65AxmLSd2yyVA6hE=
-  dependencies:
-    "@fluentui/set-version" "^8.1.4"
-    tslib "^2.1.0"
-
-"@fluentui/font-icons-mdl2@^8.1.9":
-  version "8.1.9"
-  resolved "https://registry.nlark.com/@fluentui/font-icons-mdl2/download/@fluentui/font-icons-mdl2-8.1.9.tgz#fa22050d3d8a22a4247ebff5513f617dd757d488"
-  integrity sha1-+iIFDT2KIqQkfr/1UT9hfddX1Ig=
-  dependencies:
-    "@fluentui/set-version" "^8.1.4"
-    "@fluentui/style-utilities" "^8.3.0"
-    tslib "^2.1.0"
-
-"@fluentui/foundation-legacy@^8.1.9":
-  version "8.1.9"
-  resolved "https://registry.nlark.com/@fluentui/foundation-legacy/download/@fluentui/foundation-legacy-8.1.9.tgz#2e31f4db71f3f0f799b78a2740978cee2fe27559"
-  integrity sha1-LjH023Hz8PeZt4onQJeM7i/idVk=
-  dependencies:
-    "@fluentui/merge-styles" "^8.1.4"
-    "@fluentui/set-version" "^8.1.4"
-    "@fluentui/style-utilities" "^8.3.0"
-    "@fluentui/utilities" "^8.3.0"
-    tslib "^2.1.0"
-
 "@fluentui/keyboard-key@^0.2.12":
   version "0.2.17"
   resolved "https://registry.nlark.com/@fluentui/keyboard-key/download/@fluentui/keyboard-key-0.2.17.tgz#61c037c3a596986926ad8812b58e9e5cebf9f972"
   integrity sha1-YcA3w6WWmGkmrYgStY6eXOv5+XI=
   dependencies:
     tslib "^1.10.0"
-
-"@fluentui/keyboard-key@^0.3.4":
-  version "0.3.4"
-  resolved "https://registry.nlark.com/@fluentui/keyboard-key/download/@fluentui/keyboard-key-0.3.4.tgz#27c95ea9d43d91cc9c64c318feb10986250584cd"
-  integrity sha1-J8leqdQ9kcycZMMY/rEJhiUFhM0=
-  dependencies:
-    tslib "^2.1.0"
-
-"@fluentui/merge-styles@^8.1.4":
-  version "8.1.4"
-  resolved "https://registry.nlark.com/@fluentui/merge-styles/download/@fluentui/merge-styles-8.1.4.tgz#d08035eee47945f48d991ed2555e432d49e892b5"
-  integrity sha1-0IA17uR5RfSNmR7SVV5DLUnokrU=
-  dependencies:
-    "@fluentui/set-version" "^8.1.4"
-    tslib "^2.1.0"
 
 "@fluentui/react-focus@^7.17.6":
   version "7.17.6"
@@ -1474,28 +1423,6 @@
     "@uifabric/utilities" "^7.33.5"
     tslib "^1.10.0"
 
-"@fluentui/react-focus@^8.1.11":
-  version "8.1.11"
-  resolved "https://registry.nlark.com/@fluentui/react-focus/download/@fluentui/react-focus-8.1.11.tgz#ced96a040858e36e4acbd493054c3a6f997dccc0"
-  integrity sha1-ztlqBAhY425Ky9STBUw6b5l9zMA=
-  dependencies:
-    "@fluentui/keyboard-key" "^0.3.4"
-    "@fluentui/merge-styles" "^8.1.4"
-    "@fluentui/set-version" "^8.1.4"
-    "@fluentui/style-utilities" "^8.3.0"
-    "@fluentui/utilities" "^8.3.0"
-    tslib "^2.1.0"
-
-"@fluentui/react-hooks@^8.2.7":
-  version "8.2.7"
-  resolved "https://registry.nlark.com/@fluentui/react-hooks/download/@fluentui/react-hooks-8.2.7.tgz#7521dd16c41b8acf12a7e67142d5bd13da2dbeed"
-  integrity sha1-dSHdFsQbis8Sp+ZxQtW9E9otvu0=
-  dependencies:
-    "@fluentui/react-window-provider" "^2.1.4"
-    "@fluentui/set-version" "^8.1.4"
-    "@fluentui/utilities" "^8.3.0"
-    tslib "^2.1.0"
-
 "@fluentui/react-window-provider@^1.0.2":
   version "1.0.2"
   resolved "https://registry.nlark.com/@fluentui/react-window-provider/download/@fluentui/react-window-provider-1.0.2.tgz#634f1f2e77fca9b3e8dbff9599d0c86d6c77dd73"
@@ -1503,52 +1430,6 @@
   dependencies:
     "@uifabric/set-version" "^7.0.24"
     tslib "^1.10.0"
-
-"@fluentui/react-window-provider@^2.1.4":
-  version "2.1.4"
-  resolved "https://registry.nlark.com/@fluentui/react-window-provider/download/@fluentui/react-window-provider-2.1.4.tgz?cache=0&sync_timestamp=1627978008240&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40fluentui%2Freact-window-provider%2Fdownload%2F%40fluentui%2Freact-window-provider-2.1.4.tgz#2e8368fd85f9e10062c726b060b146ffc1f916b3"
-  integrity sha1-LoNo/YX54QBixyawYLFG/8H5FrM=
-  dependencies:
-    "@fluentui/set-version" "^8.1.4"
-    tslib "^2.1.0"
-
-"@fluentui/react@^8.29.0":
-  version "8.29.0"
-  resolved "https://registry.nlark.com/@fluentui/react/download/@fluentui/react-8.29.0.tgz#e1e233315a541ce36edf970d5938b8ed448011bb"
-  integrity sha1-4eIzMVpUHONu35cNWTi47USAEbs=
-  dependencies:
-    "@fluentui/date-time-utilities" "^8.2.2"
-    "@fluentui/font-icons-mdl2" "^8.1.9"
-    "@fluentui/foundation-legacy" "^8.1.9"
-    "@fluentui/merge-styles" "^8.1.4"
-    "@fluentui/react-focus" "^8.1.11"
-    "@fluentui/react-hooks" "^8.2.7"
-    "@fluentui/react-window-provider" "^2.1.4"
-    "@fluentui/set-version" "^8.1.4"
-    "@fluentui/style-utilities" "^8.3.0"
-    "@fluentui/theme" "^2.2.2"
-    "@fluentui/utilities" "^8.3.0"
-    "@microsoft/load-themed-styles" "^1.10.26"
-    tslib "^2.1.0"
-
-"@fluentui/set-version@^8.1.4":
-  version "8.1.4"
-  resolved "https://registry.nlark.com/@fluentui/set-version/download/@fluentui/set-version-8.1.4.tgz#89fa88223f421981427dfd5372d46210045354e8"
-  integrity sha1-ifqIIj9CGYFCff1TctRiEARTVOg=
-  dependencies:
-    tslib "^2.1.0"
-
-"@fluentui/style-utilities@^8.3.0":
-  version "8.3.0"
-  resolved "https://registry.nlark.com/@fluentui/style-utilities/download/@fluentui/style-utilities-8.3.0.tgz#dcc76b310da0e4366a249c7e9c5ecedcfd212f33"
-  integrity sha1-3MdrMQ2g5DZqJJx+nF7O3P0hLzM=
-  dependencies:
-    "@fluentui/merge-styles" "^8.1.4"
-    "@fluentui/set-version" "^8.1.4"
-    "@fluentui/theme" "^2.2.2"
-    "@fluentui/utilities" "^8.3.0"
-    "@microsoft/load-themed-styles" "^1.10.26"
-    tslib "^2.1.0"
 
 "@fluentui/theme@^1.7.4":
   version "1.7.4"
@@ -1559,26 +1440,6 @@
     "@uifabric/set-version" "^7.0.24"
     "@uifabric/utilities" "^7.33.5"
     tslib "^1.10.0"
-
-"@fluentui/theme@^2.2.2":
-  version "2.2.2"
-  resolved "https://registry.nlark.com/@fluentui/theme/download/@fluentui/theme-2.2.2.tgz#5a381d9904424f161a32383835d4beaf6e237b98"
-  integrity sha1-WjgdmQRCTxYaMjg4NdS+r24je5g=
-  dependencies:
-    "@fluentui/merge-styles" "^8.1.4"
-    "@fluentui/set-version" "^8.1.4"
-    "@fluentui/utilities" "^8.3.0"
-    tslib "^2.1.0"
-
-"@fluentui/utilities@^8.3.0":
-  version "8.3.0"
-  resolved "https://registry.nlark.com/@fluentui/utilities/download/@fluentui/utilities-8.3.0.tgz#cee8088424b5632fd433b7caae863266f1b77ec9"
-  integrity sha1-zugIhCS1Yy/UM7fKroYyZvG3fsk=
-  dependencies:
-    "@fluentui/dom-utilities" "^2.1.4"
-    "@fluentui/merge-styles" "^8.1.4"
-    "@fluentui/set-version" "^8.1.4"
-    tslib "^2.1.0"
 
 "@formatjs/intl-unified-numberformat@^3.2.0":
   version "3.3.7"
@@ -1623,6 +1484,11 @@
   integrity sha1-aNk1+j6uf91asNf5U/MgXYsr/Ck=
   dependencies:
     "@hapi/hoek" "^8.3.0"
+
+"@heroicons/react@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.nlark.com/@heroicons/react/download/@heroicons/react-1.0.4.tgz#11847eb2ea5510419d7ada9ff150a33af0ad0863"
+  integrity sha1-EYR+supVEEGdetqf8VCjOvCtCGM=
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
@@ -2039,7 +1905,7 @@
     "@svgr/plugin-svgo" "^5.4.0"
     loader-utils "^2.0.0"
 
-"@tableau/tableau-ui@^3.0.0", "@tableau/tableau-ui@^3.2.0":
+"@tableau/tableau-ui@^3.0.0":
   version "3.2.0"
   resolved "https://registry.nlark.com/@tableau/tableau-ui/download/@tableau/tableau-ui-3.2.0.tgz#25277a07111e281042d70cd610e52ba1104aaf25"
   integrity sha1-JSd6BxEeKBBC1wzWEOUroRBKryU=
@@ -12926,11 +12792,6 @@ tslib@^2.0.3, tslib@^2.2.0:
   version "2.3.0"
   resolved "https://registry.nlark.com/tslib/download/tslib-2.3.0.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.nlark.com%2Ftslib%2Fdownload%2Ftslib-2.3.0.tgz#803b8cdab3e12ba581a4ca41c8839bbb0dacb09e"
   integrity sha1-gDuM2rPhK6WBpMpByIObuw2ssJ4=
-
-tslib@^2.1.0:
-  version "2.3.1"
-  resolved "https://registry.nlark.com/tslib/download/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
-  integrity sha1-6KM1rdXOrlGqJh0ypJAVjvBC7wE=
 
 tslib@~2.0.3:
   version "2.0.3"

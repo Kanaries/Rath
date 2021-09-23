@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { IconButton } from '@fluentui/react';
+import { XCircleIcon } from '@heroicons/react/outline';
 const Container = styled.div`
   width: 880px;
   max-height: 800px;
@@ -31,12 +31,10 @@ const Modal: React.FC<ModalProps> = props => {
   const { onClose, title } = props;
   return (
     <Container>
-      <div className="header">
+      <div className="header relative">
         {title}
-        <IconButton
-          iconProps={{ iconName: 'Cancel' }}
-          title="Upload"
-          ariaLabel="upload data"
+        <XCircleIcon
+          className="text-red-600 absolute right-2 w-6 cursor-pointer"
           onClick={onClose}
         />
       </div>

@@ -1,8 +1,6 @@
 import React from 'react';
 import { Record, IField, IMutField } from '../interfaces';
 import styled from 'styled-components';
-import { DropdownSelect } from '@tableau/tableau-ui';
-import produce from 'immer';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../store';
 
@@ -73,13 +71,15 @@ const Table: React.FC<TableProps> = props => {
                             <th key={field.key} className={getHeaderType(field)}>
                                 <b>{field.key}</b>({field.dataType})
                                 <div>
-                                    <DropdownSelect kind="line" value={field.analyticType} onChange={(e) => {
+                                    <select
+                                        className="border-b border-gray-300 hover:bg-gray-100 hover:border-gray-600"
+                                        value={field.analyticType} onChange={(e) => {
                                         store.updateTempFieldAnalyticType(field.key, e.target.value as IMutField['analyticType'])
                                     }}>
                                         {
                                             TYPE_LIST.map(type => <option key={type.value} value={type.value}>{type.label}</option>)
                                         }
-                                    </DropdownSelect>
+                                    </select>
                                 </div>
 
                             </th>

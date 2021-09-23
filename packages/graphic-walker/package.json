@@ -20,8 +20,7 @@
   },
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@fluentui/react": "^8.29.0",
-    "@tableau/tableau-ui": "^3.2.0",
+    "@heroicons/react": "^1.0.4",
     "autoprefixer": "^10.3.5",
     "mobx": "^6.3.3",
     "mobx-react-lite": "^3.2.1",

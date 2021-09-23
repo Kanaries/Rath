@@ -4,7 +4,6 @@ import { Insight, Utils, UnivariateSummary } from 'visual-insights';
 import { baseVis, IReasonType } from './std2vegaSpec';
 import embed from 'vega-embed';
 import { getExplaination, IVisSpace } from '../services';
-import { Spinner } from '@tableau/tableau-ui';
 import RadioGroupButtons from './radioGroupButtons';
 import { IExplaination, IMeasureWithStat } from '../insights';
 import { mergeMeasures } from './utils';
@@ -148,9 +147,7 @@ const InsightBoard: React.FC<InsightBoardProps> = props => {
               {FilterDesc}, {valueDesc}
           </p>
           {loading && (
-              <div aria-busy style={{ display: 'inline-block' }}>
-                  <Spinner />
-              </div>
+              <div className="animate-spin inline-block mr-2 ml-2 w-16 h-16 rounded-full border-t-2 border-l-2 border-blue-500"></div>
           )}
           <div style={{ display: 'flex' }}>
               <div style={{ flexBasis: '200px', flexShrink: 0 }}>

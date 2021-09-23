@@ -9,11 +9,10 @@ import {
 } from "react-beautiful-dnd";
 import styled from "styled-components";
 import produce from "immer";
-import { FieldListContainer, FieldsContainer } from "./components";
+import { FieldListContainer, FieldsContainer, Pill } from "./components";
 import { move, reorder } from "./utils";
 import { Field } from "../interfaces";
 import { Container } from '../components/container'
-import { Pill, DropdownSelect } from '@tableau/tableau-ui';
 
 const RootContainer = styled.div`
   font-size: 12px;
@@ -154,15 +153,14 @@ const DraggableFields: React.FC<DraggableFieldsProps> = (props) => {
                             <Pill
                               ref={provided.innerRef}
                               // type={f.type}
-                              kind={f.type === 'D' ? 'discrete' : 'continuous'}
+                              colType={f.type === 'D' ? 'discrete' : 'continuous'}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                             >
                               {f.name}&nbsp;
                               {f.type === 'M' && (
-                                <DropdownSelect
-                                  kind="text"
-                                  style={{ float: 'right' }}
+                                <select
+                                  className="bg-transparent text-gray-700 float-right focus:outline-none focus:border-gray-500"
                                   value={f.aggName || ''}
                                   onChange={(e) => {
                                     setState((state) => {
@@ -178,7 +176,7 @@ const DraggableFields: React.FC<DraggableFieldsProps> = (props) => {
                                   {
                                     aggregatorList.map(op => <option value={op.value} key={op.value}>{op.label}</option>)
                                   }
-                                </DropdownSelect>
+                                </select>
                               )}
                             </Pill>
                           );
@@ -213,15 +211,14 @@ const DraggableFields: React.FC<DraggableFieldsProps> = (props) => {
                                 <Pill
                                   ref={provided.innerRef}
                                   // type={f.type}
-                                  kind={f.type === 'D' ? 'discrete' : 'continuous'}
+                                  colType={f.type === 'D' ? 'discrete' : 'continuous'}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
                                 >
                                   {f.name}&nbsp;
                                   {f.type === 'M' && (
-                                    <DropdownSelect
-                                      kind="text"
-                                      style={{ float: 'right' }}
+                                    <select
+                                      className="bg-transparent text-gray-700 float-right focus:outline-none focus:border-gray-500"
                                       value={f.aggName || ''}
                                       onChange={(e) => {
                                         setState((state) => {
@@ -240,7 +237,7 @@ const DraggableFields: React.FC<DraggableFieldsProps> = (props) => {
                                           {op.label}
                                         </option>
                                       ))}
-                                    </DropdownSelect>
+                                    </select>
                                   )}
                                 </Pill>
                               );
