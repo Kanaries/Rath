@@ -31,7 +31,7 @@ const Modal: React.FC<ModalProps> = props => {
   const { onClose, title } = props;
   return (
     <Container>
-      <div className="header relative">
+      <div className="header relative h-9">
         {title}
         <XCircleIcon
           className="text-red-600 absolute right-2 w-6 cursor-pointer"
