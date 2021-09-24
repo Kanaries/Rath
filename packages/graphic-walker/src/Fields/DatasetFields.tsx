@@ -1,57 +1,81 @@
 import React from 'react';
-import { FieldListContainer, FieldsContainer, Pill } from "./components";
 import { NestContainer } from '../components/container'
 import { observer } from 'mobx-react-lite';
 import {
-    DragDropContext,
     Droppable,
     Draggable,
-    DropResult,
-    ResponderProvided,
-    DraggableLocation,
   } from "react-beautiful-dnd";
 
-import { AGGREGATOR_LIST, DRAGGABLE_STATE_KEYS } from './fieldsContext';
+import { DraggableFieldState } from './fieldsContext';
 import { useGlobalStore } from '../store';
+import DataTypeIcon from '../components/dataTypeIcon';
+import { IViewField } from '../interfaces';
 
-const rowsAndCols = DRAGGABLE_STATE_KEYS.filter(f => f.id === 'fields');
+const FIELDS_KEY: keyof DraggableFieldState = 'fields';
+
 const DatasetFields: React.FC = props => {
     const { vizStore } = useGlobalStore();
     const { draggableFieldState } = vizStore;
+    const { fields } = draggableFieldState;
+
+    const dimensions: IViewField[] = []; // = draggableFieldState[FIELDS_KEY].filter(f => f.type === 'D');
+    const measures: IViewField[] = []; // = draggableFieldState[FIELDS_KEY].filter(f => f.type === 'M');
+    const dimOriginIndices: number[] = [];
+    const meaOriginIndices: number[] = [];
+
+    for (let i = 0; i < fields.length; i++) {
+        if (fields[i].type === 'D') {
+            dimensions.push(fields[i]);
+            dimOriginIndices.push(i)
+        } else {
+            measures.push(fields[i])
+            meaOriginIndices.push(i);
+        }
+    }
 
     return <NestContainer style={{ minHeight: '680px', overflowY: 'auto' }}>
         <h4 className="text-xs mb-2">字段列表</h4>
-        {
-            rowsAndCols.map(dkey => <div key={dkey.id}>
-                <Droppable droppableId={dkey.id} direction="vertical">
-                    {(provided, snapshot) => (
-                        <div
-                            {...provided.droppableProps}
-                            ref={provided.innerRef}
-                        >
-                            {draggableFieldState[dkey.id].map((f, index) => (
-                                <Draggable key={f.id} draggableId={f.id} index={index}>
-                                    {(provided, snapshot) => {
-                                        return (
-                                            <div
-                                                className="pt-0.5 pb-0.5 pl-2 pr-2 m-1 text-xs hover:bg-blue-100 rounded-full"
-                                                ref={provided.innerRef}
-                                                // type={f.type}
-                                                // colType={f.type === 'D' ? 'discrete' : 'continuous'}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                            >
-                                                {f.name}&nbsp;
-                                            </div>
-                                        );
-                                    }}
-                                </Draggable>
-                            ))}
-                        </div>
-                    )}
-                </Droppable>
-            </div>)
-        }
+        <Droppable droppableId={FIELDS_KEY} direction="vertical">
+            {(provided, snapshot) => (
+                <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                >
+                    {dimensions.map((f, index) => (
+                        <Draggable key={f.id} draggableId={f.id} index={dimOriginIndices[index]}>
+                            {(provided, snapshot) => {
+                                return (
+                                    <div
+                                        className="pt-0.5 pb-0.5 pl-2 pr-2 m-1 text-xs hover:bg-blue-100 rounded-full"
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                    >
+                                        <DataTypeIcon dataType="string" /> {f.name}&nbsp;
+                                    </div>
+                                );
+                            }}
+                        </Draggable>
+                    ))}
+                    {measures.map((f, index) => (
+                        <Draggable key={f.id} draggableId={f.id} index={meaOriginIndices[index]}>
+                            {(provided, snapshot) => {
+                                return (
+                                    <div
+                                        className="pt-0.5 pb-0.5 pl-2 pr-2 m-1 text-xs hover:bg-blue-100 rounded-full"
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                    >
+                                        <DataTypeIcon dataType="number" /> {f.name}&nbsp;
+                                    </div>
+                                );
+                            }}
+                        </Draggable>
+                    ))}
+                </div>
+            )}
+        </Droppable>
     </NestContainer>
 }
 

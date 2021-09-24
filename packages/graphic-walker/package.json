@@ -1,5 +1,5 @@
 {
-  "name": "graphic-walker",
+  "name": "@kanaries/graphic-walker",
   "version": "0.0.1",
   "scripts": {
     "dev": "vite",
