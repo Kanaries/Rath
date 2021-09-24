@@ -1,38 +1,34 @@
-import React, { useContext, useState, useCallback } from 'react';
-import { DataSet } from '../interfaces';
-import produce, { setAutoFreeze } from 'immer';
-setAutoFreeze(false);
-interface IGlobalState {
-    dataBase: DataSet[];
-    currentDBIndex: number;
+import React, { useContext, useEffect } from 'react';
+import { CommonStore } from './commonStore'
+import { VizSpecStore } from './visualSpecStore'
+
+interface GlobalStore {
+    commonStore: CommonStore;
+    vizStore: VizSpecStore;
 }
 
-export function getInitGState(): IGlobalState {
-    return {
-        dataBase: [
-            // getStudentsData(),
-            // getTitanicData()
-        ],
-        currentDBIndex: 0,
-    };
-}
-type IUpdater<T> = (draft: T) => void;
-const initState = getInitGState();
-export const GlobalContext = React.createContext<[IGlobalState, (updater: IUpdater<IGlobalState>) => void]>(null!);
+const commonStore = new CommonStore();
+const vizStore = new VizSpecStore(commonStore);
 
-export function useLocalState() {
-    return useContext(GlobalContext);
+const initStore: GlobalStore = {
+    commonStore,
+    vizStore
 }
 
-export const GlobalContextWrapper: React.FC = props => {
-    const [gs, setGS] = useState<IGlobalState>(initState);
-    const updateGlobalState = useCallback((updater: IUpdater<IGlobalState>) => {
-        const nextState = produce<IGlobalState>(gs, updater);
-        setGS(nextState);
-    }, [gs])
-    return <GlobalContext.Provider value={[gs, updateGlobalState]}>
-        {
-            props.children
+const StoreContext = React.createContext<GlobalStore>(initStore);
+
+export const StoreWrapper: React.FC = props => {
+    useEffect(() => {
+        return () => {
+            initStore.vizStore.destroy();
+            initStore.commonStore.destroy();
         }
-    </GlobalContext.Provider>
+    }, [])
+    return <StoreContext.Provider value={initStore}>
+        { props.children }
+    </StoreContext.Provider>
+}
+
+export function useGlobalStore() {
+    return useContext(StoreContext);
 }

@@ -1,9 +1,12 @@
 import React from 'react';
 import App, { EditorProps } from './App';
-import { GlobalContextWrapper } from './store/index';
+import { StoreWrapper } from './store/index';
+import { FieldsContextWrapper } from './Fields/fieldsContext';
 
 export const GraphicWalker: React.FC<EditorProps> = props => {
-    return <GlobalContextWrapper>
-      <App {...props} />
-    </GlobalContextWrapper>
+    return <StoreWrapper>
+        <FieldsContextWrapper>
+            <App {...props} />
+        </FieldsContextWrapper>
+    </StoreWrapper>
 }

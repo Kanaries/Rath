@@ -8,9 +8,10 @@ const state = {
 };
 
 function preAnalysis (props) {
-    const { dimensions, measures, dataSource } = props; // as ReqData;
+    const { fields, dataSource } = props; // as ReqData;
     const de = new DataExplainer(dataSource);
-    de.setDimensions(dimensions).setMeasures(measures).preAnalysis();
+    de.setFields(fields);
+    de.preAnalysis();
     state.de = de;
     return true
 }

@@ -1,145 +1,50 @@
-import React, { useRef, useState, useCallback } from 'react';
-import { Button, TextField } from '@tableau/tableau-ui';
-import { FileReader } from '@kanaries/web-data-loader';
-import { Record, IField } from '../interfaces';
-import { Insight } from 'visual-insights';
-import Table from './table';
-import styled from 'styled-components';
-import { useLocalState } from '../store';
+import { observer } from 'mobx-react-lite';
+import React, { useState } from 'react';
+import { Container } from '../components/container';
+import Modal from '../components/modal';
+import DataSourcePanel from './pannel';
+import { useGlobalStore } from '../store';
+import { CheckCircleIcon, RefreshIcon } from '@heroicons/react/outline';
 
-const Container = styled.div`
-    overflow-x: auto;
-    table {
-        box-sizing: content-box;
-        font-family: Lato, 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        border-collapse: collapse;
-        thead {
-            td {
-                text-align: left;
-            }
-        }
-        tbody {
-            td.number {
-                text-align: right;
-            }
-            td.text {
-                text-align: left;
-            }
-        }
-    }
-`;
-function transData(dataSource: Record[]): {
-    dataSource: Record[];
-    fields: IField[]
-} {
-    if (dataSource.length === 0) return {
-        dataSource: [],
-        fields: []
-    };
-    let ans: Record[] = [];
-    const keys = Object.keys(dataSource[0]);
-    const vie = new Insight.VIEngine();
-    vie.setDataSource(dataSource)
-        .setFieldKeys(keys)
-        .buildfieldsSummary();
-    const fields = vie.fields;
-    // console.log(fields)
-    for (let record of dataSource) {
-        const newRecord: Record = {};
-        for (let field of fields) {
-            if (field.dataType === 'number' || field.dataType === 'integer') {
-                newRecord[field.key] = Number(record[field.key])
-            } else {
-                newRecord[field.key] = record[field.key]
-            }
-        }
-        ans.push(newRecord);
-    }
-    return {
-        dataSource: ans,
-        fields: fields.map(f => ({
-            key: f.key,
-            type: f.dataType,
-            analyticType: f.analyticType
-        }))
-    }
-}
-interface DSPanelProps {
-    dbIndex: number;
-    onSubmit?: () => void
-}
-const DataSourcePanel: React.FC<DSPanelProps> = props => {
-    const { dbIndex, onSubmit } = props;
-    const fileRef = useRef<HTMLInputElement>(null);
-    const [dataSource, setDataSource] = useState<Record[]>([]);
-    const [fields, setFields] = useState<IField[]>([]);
-    const [GS, updateGS] = useLocalState();
-    const [dsName, setDSName] = useState<string>('新数据集')
-
-    const onFieldsChange = useCallback((fields: IField[]) => {
-        setFields(fields);
-    }, [])
-    const onSubmitData = useCallback(() => {
-        updateGS(draft => {
-            draft.dataBase[dbIndex] = {
-                id: 'test' + dbIndex,
-                name: dsName,
-                fields,
-                dataSource
-            }
-        })
-        if (onSubmit) {
-            onSubmit();
-        }
-    }, [dbIndex, fields, dataSource, dsName])
-    return (
-        <Container>
-            <input
-                style={{ display: 'none' }}
-                type="file"
-                ref={fileRef}
-                onChange={(e) => {
-                    const files = e.target.files;
-                    if (files !== null) {
-                        const file = files[0];
-                        FileReader.csvReader({
-                            file,
-                            config: { type: 'reservoirSampling', size: Infinity },
-                            onLoading: () => {}
-                        }).then((data) => {
-                            // console.log(data)
-                            const result = transData(data as Record[]);
-                            console.log(result);
-                            // TODO: need fix web-data-loader issue #2
-                            setDataSource(result.dataSource.slice(0, -1));
-                            setFields(result.fields);
-                        });
-                    }
-                }}
-            />
-            <div style={{ margin: '1em 0em' }}>
-                <Button
-                    style={{ marginRight: 12 }}
-                    onClick={() => {
-                        if (fileRef.current) {
-                            fileRef.current.click();
-                        }
-                    }}
-                >
-                    上传数据
-                </Button>
-                <Button kind="primary" disabled={dataSource.length === 0} onClick={() => {
-                    onSubmitData();
-                }}>确认</Button>
-            </div>
-            <div style={{ margin: '1em 0em' }}>
-                <TextField label="数据集名称" value={dsName} onChange={(e) => {
-                    setDSName(e.target.value)
-                }} />
-            </div>
-            <Table dataSource={dataSource} fields={fields} onFieldsUpdate={onFieldsChange} />
-        </Container>
-    );
+interface DSSegmentProps {
+    preWorkDone: boolean;
 }
 
-export default DataSourcePanel;
+const DataSourceSegment: React.FC<DSSegmentProps> = props => {
+    const { preWorkDone } = props;
+    const { commonStore } = useGlobalStore();
+
+    const { currentDataset, datasets, showDSPanel } = commonStore;
+
+    return <Container>
+        {!preWorkDone && <div className="animate-spin inline-block mr-2 ml-2 w-4 h-4 rounded-full border-t-2 border-l-2 border-blue-500"></div>}
+        <label className="text-xs mr-1">当前数据集</label>
+        <select
+            className="border border-gray-500 rounded-sm text-xs pt-0.5 pb-0.5 pl-2 pr-2"
+            value={currentDataset.id}
+            onChange={(e) => { commonStore.useDS(e.target.value); }}
+        >
+            {datasets.map((ds) => (
+                <option value={ds.id} key={ds.id}>
+                    {ds.name}
+                </option>
+            ))}
+        </select>
+
+        <button className="inline-block min-w-96 text-xs ml-2 pt-1 pb-1 pl-6 pr-6 border border-gray-500 rounded-sm hover:bg-gray-200"
+            onClick={() => { commonStore.startDSBuildingTask() }}
+        >创建数据集</button>
+        {showDSPanel && (
+            <Modal
+                title="创建数据源"
+                onClose={() => { commonStore.setShowDSPanel(false) }}
+            >
+                <DataSourcePanel />
+            </Modal>
+        )}
+        { preWorkDone && <CheckCircleIcon className="text-green-500 w-5 inline-block ml-2" /> }
+        { !preWorkDone && <RefreshIcon className="text-yellow-500 w-5 inline-block ml-2" />}
+    </Container>
+}
+
+export default observer(DataSourceSegment);

@@ -20,16 +20,21 @@
   },
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@fluentui/react": "^8.29.0",
-    "@tableau/tableau-ui": "^3.2.0",
+    "@heroicons/react": "^1.0.4",
+    "autoprefixer": "^10.3.5",
+    "mobx": "^6.3.3",
+    "mobx-react-lite": "^3.2.1",
+    "postcss": "^8.3.7",
     "react": "^17.0.2",
     "react-beautiful-dnd": "^13.1.0",
     "react-dom": "^17.0.2",
     "react-json-view": "^1.21.3",
     "styled-components": "^5.3.0",
+    "tailwindcss": "^2.2.15",
     "vega": "^5.20.2",
     "vega-embed": "^6.18.2",
-    "vega-lite": "^5.1.0"
+    "vega-lite": "^5.1.0",
+    "visual-insights": "0.6.3"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.2.5",

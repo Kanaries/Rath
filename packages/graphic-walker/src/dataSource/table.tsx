@@ -1,14 +1,13 @@
 import React from 'react';
-import { Record, IField } from '../interfaces';
+import { Record, IField, IMutField } from '../interfaces';
 import styled from 'styled-components';
-import { DropdownSelect } from '@tableau/tableau-ui';
-import produce from 'immer';
+import { observer } from 'mobx-react-lite';
+import { useGlobalStore } from '../store';
+import { useCallback } from 'react';
+import { DocumentTextIcon, HashtagIcon } from '@heroicons/react/outline';
 
 interface TableProps {
-    fields: IField[];
-    dataSource: Record[];
     size?: number;
-    onFieldsUpdate: (fields: IField[]) => void
 }
 const Container = styled.div`
     overflow-x: auto;
@@ -21,8 +20,10 @@ const Container = styled.div`
             th {
                 text-align: left;
                 border: 1px solid #f5f5f5;
-                padding: 8px;
+                padding: 12px;
+                background-color: #f7f7f7;
                 margin: 2px;
+                white-space: nowrap;
             }
             th.number {
                 border-top: 3px solid #5cdbd3;
@@ -34,7 +35,11 @@ const Container = styled.div`
         tbody {
             td {
                 border: 1px solid #f5f5f5;
-                padding: 0px 8px;
+                padding: 4px 12px;
+                color: #434343;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
             td.number {
                 text-align: right;
@@ -55,33 +60,47 @@ const TYPE_LIST = [
         label: '度量'
     }
 ];
-function getCellType(field: IField): 'number' | 'text' {
-    return field.type === 'number' || field.type === 'integer' ? 'number' : 'text';
+function getCellType(field: IMutField): 'number' | 'text' {
+    return field.dataType === 'number' || field.dataType === 'integer' ? 'number' : 'text';
 }
-function getHeaderType(field: IField): 'number' | 'text' {
+function getHeaderType(field: IMutField): 'number' | 'text' {
     return field.analyticType === 'dimension'? 'text' : 'number';
 }
+const DataTypeIcon: React.FC<{dataType: IMutField['dataType']}> = props => {
+    const { dataType } = props;
+    switch (dataType) {
+        case 'integer':
+        case 'number':
+            return <HashtagIcon className="w-3 inline-block mr-0.5 text-green-500" />
+        default:
+            return <DocumentTextIcon className="w-3 inline-block mr-0.5 text-blue-500" />
+    }
+}
 const Table: React.FC<TableProps> = props => {
-    const { fields, dataSource, size = 10, onFieldsUpdate } = props;
+    const { size = 10 } = props;
+    const { commonStore } = useGlobalStore();
+    const { tmpDSRawFields, tmpDataSource } = commonStore;
+    const dataTypeIcon = useCallback(() => {
+
+    }, [])
     return (
         <Container>
             <table>
                 <thead>
                     <tr>
-                        {fields.map((field, fIndex) => (
+                        {tmpDSRawFields.map((field, fIndex) => (
                             <th key={field.key} className={getHeaderType(field)}>
-                                <b>{field.key}</b>({field.type})
+                                <DataTypeIcon dataType={field.dataType} /> <b>{field.key}</b>
                                 <div>
-                                    <DropdownSelect kind="line" value={field.analyticType} onChange={(e) => {
-                                        const nextFields = produce(fields, draft => {
-                                            draft[fIndex].analyticType = e.target.value as any;
-                                        })
-                                        onFieldsUpdate(nextFields);
+                                    <select
+                                        className="border-b border-gray-300 hover:bg-gray-100 hover:border-gray-600"
+                                        value={field.analyticType} onChange={(e) => {
+                                        commonStore.updateTempFieldAnalyticType(field.key, e.target.value as IMutField['analyticType'])
                                     }}>
                                         {
                                             TYPE_LIST.map(type => <option key={type.value} value={type.value}>{type.label}</option>)
                                         }
-                                    </DropdownSelect>
+                                    </select>
                                 </div>
 
                             </th>
@@ -89,9 +108,9 @@ const Table: React.FC<TableProps> = props => {
                     </tr>
                 </thead>
                 <tbody>
-                    {dataSource.slice(0, size).map((record, index) => (
+                    {tmpDataSource.slice(0, size).map((record, index) => (
                         <tr key={index}>
-                            {fields.map((field) => (
+                            {tmpDSRawFields.map((field) => (
                                 <td
                                     key={field.key + index}
                                     className={getCellType(field)}
@@ -107,4 +126,4 @@ const Table: React.FC<TableProps> = props => {
     );
 }
 
-export default Table;
+export default observer(Table);

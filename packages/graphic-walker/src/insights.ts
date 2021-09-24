@@ -1,4 +1,4 @@
-import { Insight } from 'visual-insights';
+import { IMutField, Insight } from 'visual-insights';
 import { Record, IMeasure } from './interfaces';
 import { checkMajorFactor, filterByPredicates, checkChildOutlier, IPredicate } from './utils';
 import { normalizeWithParent, compareDistribution, normalizeByMeasures, getDistributionDifference } from './utils/normalization';
@@ -19,45 +19,35 @@ export interface IMeasureWithStat extends IMeasure {
 }
 export class DataExplainer {
     public dataSource: Record[];
-    private dimensions: string[];
-    private measures: string[];
     private engine: Insight.VIEngine;
     private defaultAggs: StatFuncName[] = ['min', 'max', 'sum', 'count', 'mean'];
     constructor (dataSource: Record[] = []) {
         this.engine = new Insight.VIEngine();
         this.dataSource = dataSource;
-        this.dimensions = [];
-        this.measures = [];
         let keys: string[] = [];
         if (dataSource.length > 0) {
             keys = Object.keys(dataSource[0]);
         }
-        this.engine.setDataSource(dataSource)
-            .setFieldKeys(keys)
-            .buildfieldsSummary();
+        this.engine.setData(dataSource)
+            // .setFieldKeys(keys)
+            // .buildfieldsSummary();
         // const newKeys = this.engine.fields.filter(f => f.domain.size < 40).map(f => f.key);
         // this.engine.setFieldKeys(keys);
         // const keys = Object.keys(dataSource[0])
     }
-    public setDimensions (dimensions: string[]) {
-        this.dimensions = dimensions;
-        this.engine.setDimensions(dimensions);
-        return this;
-    }
-    public setMeasures (measures: string[]) {
-        this.measures = measures;
-        this.engine.setMeasures(measures);
-        return this;
+    public setFields(fields: IMutField[]) {
+        this.engine.setFields(fields);
+        this.engine.univarSelection();
     }
     public preAnalysis() {
-        console.log('start')
+        console.log('[graphic-walker:preAnalysis]start')
         this.engine.buildGraph();
         this.engine.dataGraph.DIMENSION_CORRELATION_THRESHOLD = 0.6;
         this.engine.dataGraph.MEASURE_CORRELATION_THRESHOLD = 0.8;
-        console.log('graph finish')
+        console.log('[graphic-walker:preAnalysis]graph finish')
         this.engine
             .clusterFields();
-        console.log('cluster finish')
+        console.log('[graphic-walker:preAnalysis]cluster finish')
         this.engine.buildSubspaces({
                 MAX: 2,
                 MIN: 1
@@ -67,9 +57,9 @@ export class DataExplainer {
                 MIN: 1
             }
             );
-        console.log('subspaces finsh. start build-cube')
+        console.log('[graphic-walker:preAnalysis]subspaces finsh. start build-cube')
         this.engine.buildCube();
-        console.log('cube finish')
+        console.log('[graphic-walker:preAnalysis]cube finish')
         return this;
     }
     public explain (predicates: IPredicate[], dimensions: string[], measures: IMeasure[], threshold: number = 0.3): IExplaination[] {
