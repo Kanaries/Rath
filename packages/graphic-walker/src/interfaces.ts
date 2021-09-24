@@ -19,6 +19,9 @@ export interface IField {
 
 export type IMutField = VIMutField;
 
+/**
+ * @deprecated
+ */
 export interface Field {
     /**
      * id: key in data record
@@ -35,6 +38,24 @@ export interface Field {
     type: 'D' | 'M';
     [key: string]: any;
     cmp?: (a: any, b: any) => number;
+}
+
+export interface IViewField {
+    /**
+     * id: key in data record
+     */
+     id: string;
+     /**
+      * display name for field
+      */
+     name: string;
+     /**
+      * aggregator's name
+      */
+     aggName?: string;
+     type: 'D' | 'M';
+     [key: string]: any;
+     cmp?: (a: any, b: any) => number;
 }
 
 export interface Measure extends Field {

@@ -2,11 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import DraggableFields from './Fields';
 import { Record, Filters, Field, IMutField } from './interfaces';
 import ReactVega from './vis/react-vega';
-import { GEMO_TYPES } from './config';
-import { LiteForm } from './components/liteForm';
-import { Container } from './components/container';
+import VisualSettings from './visualSettings';
+import { Container, NestContainer } from './components/container';
 import ClickMenu from './components/clickMenu';
-import InsightBoard from './InsightBoard';
+import InsightBoard from './InsightBoard/index';
+import PosFields from './Fields/posFields';
+import AestheticFields from './Fields/AestheticFields';
+import DatasetFields from './Fields/DatasetFields';
+import ReactiveRenderer from './renderer/index';
 import { useFieldsState } from './Fields/useFieldsState'
 import Modal from './components/modal';
 import DataSourceSegment from './dataSource/index';
@@ -22,46 +25,29 @@ export interface EditorProps {
 
 const App: React.FC<EditorProps> = props => {
   const { dataSource = [], rawFields = [] } = props;
-  const store = useGlobalStore();
-  const [fields, setFields] = useState<Field[]>([]);
-  const [geomType, setGeomType] = useState<string>(GEMO_TYPES[0].value);
-  const [aggregated, setAggregated] = useState<boolean>(true);
-  const [position, setPosition] = useState<[number, number]>([0, 0]);
-  const [showMenu, setShowMenu] = useState<boolean>(false);
-  const [showInsight, setShowInsight] = useState<boolean>(false);
-  const [filters, setFilters] = useState<Filters>({});
+  const { commonStore, vizStore } = useGlobalStore();
+  // const [fields, setFields] = useState<Field[]>([]);
+  // const [geomType, setGeomType] = useState<string>(GEMO_TYPES[0].value);
+  // const [aggregated, setAggregated] = useState<boolean>(true);
+  // const [position, setPosition] = useState<[number, number]>([0, 0]);
+  // const [showMenu, setShowMenu] = useState<boolean>(false);
+  // const [showInsight, setShowInsight] = useState<boolean>(false);
+  // const [filters, setFilters] = useState<Filters>({});
   const [insightReady, setInsightReady] = useState<boolean>(true);
 
-  const { fstate, setFstate, viewDimensions, viewMeasures } = useFieldsState();
-  const { currentDataset, datasets } = store;
+  const { currentDataset, datasets, filters, vizEmbededMenu, showInsightBoard } = commonStore;
+  const { viewDimensions, viewMeasures, draggableFieldState } = vizStore
 
   // use as an embeding module, use outside datasource from props.
   useEffect(() => {
     if (dataSource.length > 0) {
-      store.addAndUseDS({
+      commonStore.addAndUseDS({
         name: 'context dataset',
         dataSource: dataSource,
         rawFields
       })
     }
   }, [dataSource, rawFields])
-
-  // change selected dataset, update fields, ...
-  useEffect(() => {
-    const fs: Field[] = [];
-    const ds = currentDataset;
-    if (ds) {
-      ds.rawFields.forEach((f) => {
-        fs.push({
-          id: f.key,
-          name: f.key,
-          type: f.analyticType === 'dimension' ? 'D' : 'M',
-          aggName: f.analyticType === 'measure' ? 'sum' : undefined,
-        })
-      })
-      setFields(fs)
-    }
-  }, [currentDataset]);
 
   // do preparation analysis work when using a new dataset
   useEffect(() => {
@@ -83,86 +69,46 @@ const App: React.FC<EditorProps> = props => {
   return (
     <div className="App">
       <DataSourceSegment preWorkDone={insightReady} />
-      <Container>
+      {/* <Container>
         <DraggableFields
           onStateChange={(state) => {
             setFstate(state)
           }}
           fields={fields}
         />
-      </Container>
+      </Container> */}
+      <VisualSettings />
       <Container>
-        <LiteForm style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div className="item">
-            <input type="checkbox" checked={aggregated} onChange={(e) => {
-                setAggregated(e.target.checked)
-              }} />
-            <label className="text-xs text-color-gray-700 ml-2">聚合度量</label>
+      <div className="grid grid-cols-6">
+        <div className="col-span-1">
+          <DatasetFields />
+        </div>
+        <div className="col-span-1">
+          <AestheticFields />
+        </div>
+        <div className="col-span-4">
+          <div>
+            <PosFields />
           </div>
-          <div className="item">
-            <label>标记类型</label>
-            <select
-              className="border border-gray-500 rounded-sm text-xs pt-0.5 pb-0.5 pl-2 pr-2"
-              onChange={(e) => {
-                setGeomType(e.target.value)
-              }}
-            >
-              {GEMO_TYPES.map((g) => (
-                <option key={g.value} value={g.value}>
-                  {g.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </LiteForm>
+          <NestContainer style={{ minHeight: '600px', overflow: 'auto' }}>
+            {datasets.length > 0 && <ReactiveRenderer />}
+            <InsightBoard />
+            {vizEmbededMenu.show && (
+              <ClickMenu x={vizEmbededMenu.position[0]} y={vizEmbededMenu.position[1]}>
+                <div
+                  onClick={() => {
+                    commonStore.closeEmbededMenu();
+                    commonStore.setShowInsightBoard(true)
+                  }}
+                >
+                  深度解读
+                </div>
+              </ClickMenu>
+            )}
+          </NestContainer>
+        </div>
+      </div>
       </Container>
-      {datasets.length > 0 && (
-        <Container>
-          {showInsight && (
-            <Modal
-              onClose={() => {
-                setShowInsight(false)
-              }}
-            >
-              <InsightBoard
-                dataSource={currentDataset.dataSource}
-                fields={fields}
-                viewDs={viewDimensions}
-                viewMs={viewMeasures}
-                filters={filters}
-              />
-            </Modal>
-          )}
-          {showMenu && (
-            <ClickMenu x={position[0]} y={position[1]}>
-              <div
-                onClick={() => {
-                  setShowMenu(false)
-                  setShowInsight(true)
-                }}
-              >
-                深度解读
-              </div>
-            </ClickMenu>
-          )}
-
-          <ReactVega
-            geomType={geomType}
-            defaultAggregate={aggregated}
-            dataSource={currentDataset.dataSource}
-            rows={fstate.rows}
-            columns={fstate.columns}
-            color={fstate.color[0]}
-            opacity={fstate.opacity[0]}
-            size={fstate.size[0]}
-            onGeomClick={(values, e) => {
-              setFilters(values)
-              setPosition([e.pageX, e.pageY])
-              setShowMenu(true)
-            }}
-          />
-        </Container>
-      )}
     </div>
   )
 }

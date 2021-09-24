@@ -2,8 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 const RGBContainer = styled.div`
+    font-size: 14px;
     .option {
-        padding: 1em;
+        padding: 0.8em;
         margin: 4px;
         border: 1px solid #f0f0f0;
         background-color: #f0f0f0;

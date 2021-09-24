@@ -8,7 +8,8 @@ const Container = styled.div`
   > div.header {
     background-color: #f0f0f0;
     display: flex;
-    padding: 8px;
+    padding: 12px;
+    font-size: 14px;
     align-items: center;
   }
   > div.container {
@@ -19,7 +20,7 @@ const Container = styled.div`
   top: 50%;
   transform: translate(-50%, -50%);
   background-color: #fff;
-  box-shadow: 0px 0px 12px 3px rgba(0, 0, 0, 0.19);
+  /* box-shadow: 0px 0px 12px 3px rgba(0, 0, 0, 0.19); */
   border-radius: 4px;
   z-index: 999;
 `;
@@ -30,7 +31,7 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = props => {
   const { onClose, title } = props;
   return (
-    <Container>
+    <Container className="shadow-lg">
       <div className="header relative h-9">
         {title}
         <XCircleIcon

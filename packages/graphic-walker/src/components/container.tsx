@@ -6,3 +6,10 @@ export const Container = styled.div`
   margin: 1em;
   background-color: #fff;
 `;
+
+export const NestContainer = styled.div`
+  border: 1px solid #d9d9d9;
+  padding: 0.4em;
+  margin: 0.2em;
+  background-color: #fff;
+`
