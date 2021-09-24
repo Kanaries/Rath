@@ -68,14 +68,25 @@ export class VizSpecStore {
         }
     }
     public reorderField(stateKey: keyof DraggableFieldState, sourceIndex: number, destinationIndex: number) {
+        if (stateKey === 'fields') return;
         if (sourceIndex === destinationIndex) return;
         const fields = this.draggableFieldState[stateKey];
         const [field] = fields.splice(sourceIndex, 1);
         fields.splice(destinationIndex, 0, field);
     }
     public moveField(sourceKey: keyof DraggableFieldState, sourceIndex: number, destinationKey: keyof DraggableFieldState, destinationIndex: number) {
-        const [field] = this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
-        this.draggableFieldState[destinationKey].splice(destinationIndex, 1, field)
+        let movingField: IViewField;
+        if (sourceKey === 'fields') {
+            movingField = this.draggableFieldState[sourceKey][sourceIndex]
+        } else {
+            [movingField] = this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
+        }
+        if (destinationKey === 'fields')return;
+        this.draggableFieldState[destinationKey].splice(destinationIndex, 1, movingField)
+    }
+    public removeField(sourceKey: keyof DraggableFieldState, sourceIndex: number) {
+        if (sourceKey === 'fields')return;
+        this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
     }
     public setFieldAggregator (stateKey: keyof DraggableFieldState, index: number, aggName: string) {
         const fields = this.draggableFieldState[stateKey]

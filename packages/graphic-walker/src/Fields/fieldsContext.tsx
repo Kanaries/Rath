@@ -29,6 +29,7 @@ export const FieldsContextWrapper: React.FC = props => {
     const { vizStore } = useGlobalStore();
     const onDragEnd = useCallback((result: DropResult, provided: ResponderProvided) => {
         if (!result.destination) {
+            vizStore.removeField(result.source.droppableId as keyof DraggableFieldState, result.source.index)
             return;
         }
         const destination = result.destination as DraggableLocation;

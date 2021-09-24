@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import DraggableFields from './Fields';
 import { Record, Filters, Field, IMutField } from './interfaces';
-import ReactVega from './vis/react-vega';
 import VisualSettings from './visualSettings';
 import { Container, NestContainer } from './components/container';
 import ClickMenu from './components/clickMenu';
@@ -10,8 +8,6 @@ import PosFields from './Fields/posFields';
 import AestheticFields from './Fields/AestheticFields';
 import DatasetFields from './Fields/DatasetFields';
 import ReactiveRenderer from './renderer/index';
-import { useFieldsState } from './Fields/useFieldsState'
-import Modal from './components/modal';
 import DataSourceSegment from './dataSource/index';
 import { useGlobalStore } from './store';
 import { preAnalysis, destroyWorker } from './services'
@@ -25,18 +21,10 @@ export interface EditorProps {
 
 const App: React.FC<EditorProps> = props => {
   const { dataSource = [], rawFields = [] } = props;
-  const { commonStore, vizStore } = useGlobalStore();
-  // const [fields, setFields] = useState<Field[]>([]);
-  // const [geomType, setGeomType] = useState<string>(GEMO_TYPES[0].value);
-  // const [aggregated, setAggregated] = useState<boolean>(true);
-  // const [position, setPosition] = useState<[number, number]>([0, 0]);
-  // const [showMenu, setShowMenu] = useState<boolean>(false);
-  // const [showInsight, setShowInsight] = useState<boolean>(false);
-  // const [filters, setFilters] = useState<Filters>({});
+  const { commonStore } = useGlobalStore();
   const [insightReady, setInsightReady] = useState<boolean>(true);
 
-  const { currentDataset, datasets, filters, vizEmbededMenu, showInsightBoard } = commonStore;
-  const { viewDimensions, viewMeasures, draggableFieldState } = vizStore
+  const { currentDataset, datasets, vizEmbededMenu } = commonStore;
 
   // use as an embeding module, use outside datasource from props.
   useEffect(() => {
@@ -69,14 +57,6 @@ const App: React.FC<EditorProps> = props => {
   return (
     <div className="App">
       <DataSourceSegment preWorkDone={insightReady} />
-      {/* <Container>
-        <DraggableFields
-          onStateChange={(state) => {
-            setFstate(state)
-          }}
-          fields={fields}
-        />
-      </Container> */}
       <VisualSettings />
       <Container>
       <div className="grid grid-cols-6">
