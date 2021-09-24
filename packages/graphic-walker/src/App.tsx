@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Record, Filters, Field, IMutField } from './interfaces';
+import React, { useState, useEffect } from 'react';
+import { Record, IMutField } from './interfaces';
 import VisualSettings from './visualSettings';
 import { Container, NestContainer } from './components/container';
 import ClickMenu from './components/clickMenu';
@@ -13,6 +13,8 @@ import { useGlobalStore } from './store';
 import { preAnalysis, destroyWorker } from './services'
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
+import "tailwindcss/tailwind.css"
+import './index.css'
 
 export interface EditorProps {
   dataSource?: Record[];

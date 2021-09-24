@@ -4,6 +4,7 @@ import { GraphicWalker } from 'graphic-walker';
 import { useGlobalStore } from '../../store';
 import { useMemo } from 'react';
 import { IMutField } from 'graphic-walker/dist/interfaces';
+import 'graphic-walker/dist/style.css';
 
 const VisualInterface: React.FC = props => {
     const { dataSourceStore } = useGlobalStore();

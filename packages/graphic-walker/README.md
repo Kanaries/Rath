@@ -18,6 +18,7 @@ npm run build
 In your app:
 ```typescript
 import { GraphicWalker } from 'graphic-walker';
+import 'graphic-walker/dist/style.css'
 
 const YourEmbeddingTableauStyleApp: React.FC = props => {
     const { dataSource, fields } = props;
