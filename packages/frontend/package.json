@@ -9,6 +9,7 @@
     "singleQuote": true
   },
   "dependencies": {
+    "@kanaries/graphic-walker": "^0.0.1",
     "@kanaries/web-data-loader": "0.1.0",
     "@tableau/tableau-ui": "^3.0.0",
     "@testing-library/jest-dom": "^5.11.8",
@@ -24,7 +25,6 @@
     "cube-core": "^2.13.0",
     "datalib": "^1.9.2",
     "fuse.js": "^3.4.6",
-    "@kanaries/graphic-walker": "^0.0.1",
     "immer": "^4.0.1",
     "mobx": "^6.3.2",
     "mobx-react-lite": "^3.2.0",
