@@ -1,11 +1,7 @@
 import React from 'react';
 import {
-    DragDropContext,
     Droppable,
     Draggable,
-    DropResult,
-    ResponderProvided,
-    DraggableLocation,
 } from "react-beautiful-dnd";
 import { AGGREGATOR_LIST, DRAGGABLE_STATE_KEYS } from './fieldsContext';
 import { AestheticFieldContainer, FieldsContainer, Pill } from './components'

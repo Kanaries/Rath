@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import React, { useState } from 'react';
+import React from 'react';
 import { Container } from '../components/container';
 import Modal from '../components/modal';
 import DataSourcePanel from './pannel';

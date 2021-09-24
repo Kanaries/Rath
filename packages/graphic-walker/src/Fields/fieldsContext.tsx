@@ -1,15 +1,12 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Field } from '../interfaces';
 import {
     DragDropContext,
-    Droppable,
-    Draggable,
     DropResult,
     ResponderProvided,
     DraggableLocation,
 } from "react-beautiful-dnd";
 import { useGlobalStore } from '../store';
-import { useCallback } from 'react';
 
 export interface DraggableFieldState {
     fields: Field[];
@@ -18,11 +15,6 @@ export interface DraggableFieldState {
     color: Field[];
     opacity: Field[];
     size: Field[];
-}
-
-interface DraggableFieldsProps {
-    fields: Field[];
-    onStateChange?: (state: DraggableFieldState) => void;
 }
 
 export const FieldsContextWrapper: React.FC = props => {

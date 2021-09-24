@@ -25,23 +25,23 @@ const Container = styled.div`
   z-index: 999;
 `;
 interface ModalProps {
-  onClose?: () => void
-  title?: string;
+    onClose?: () => void
+    title?: string;
 }
 const Modal: React.FC<ModalProps> = props => {
-  const { onClose, title } = props;
-  return (
-    <Container className="shadow-lg">
-      <div className="header relative h-9">
-        {title}
-        <XCircleIcon
-          className="text-red-600 absolute right-2 w-6 cursor-pointer"
-          onClick={onClose}
-        />
-      </div>
-      <div className="container">{props.children}</div>
-    </Container>
-  )
+    const { onClose, title } = props;
+    return (
+        <Container className="shadow-lg">
+            <div className="header relative h-9">
+                {title}
+                <XCircleIcon
+                    className="text-red-600 absolute right-2 w-6 cursor-pointer"
+                    onClick={onClose}
+                />
+            </div>
+            <div className="container">{props.children}</div>
+        </Container>
+    )
 }
 
 export default Modal;
