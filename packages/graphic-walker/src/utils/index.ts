@@ -1,5 +1,4 @@
 import { Record, Filters } from '../interfaces';
-import { max } from 'rxjs/operators';
 interface NRReturns {
     normalizedData: Record[];
     maxMeasures: Record;

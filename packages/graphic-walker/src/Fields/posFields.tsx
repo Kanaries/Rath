@@ -2,17 +2,13 @@ import React from 'react';
 import { FieldListContainer, FieldsContainer, Pill } from "./components";
 import { observer } from 'mobx-react-lite';
 import {
-    DragDropContext,
     Droppable,
-    Draggable,
-    DropResult,
-    ResponderProvided,
-    DraggableLocation,
+    Draggable
   } from "react-beautiful-dnd";
 
 import { AGGREGATOR_LIST, DRAGGABLE_STATE_KEYS } from './fieldsContext';
 import { useGlobalStore } from '../store';
-import { useCallback } from 'react';
+
 const rowsAndCols = DRAGGABLE_STATE_KEYS.filter(f => f.id === 'columns' || f.id === 'rows');
 const PosFields: React.FC = props => {
     const { vizStore } = useGlobalStore();
@@ -27,8 +23,9 @@ const PosFields: React.FC = props => {
                             {...provided.droppableProps}
                             ref={provided.innerRef}
                         >
+                            {provided.placeholder}
                             {draggableFieldState[dkey.id].map((f, index) => (
-                                <Draggable key={f.id} draggableId={f.id} index={index}>
+                                <Draggable key={`${dkey.id}-${f.id}`} draggableId={`${dkey.id}-${f.id}`} index={index}>
                                     {(provided, snapshot) => {
                                         return (
                                             <Pill

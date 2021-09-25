@@ -1,10 +1,9 @@
 import React from 'react';
-import { Record, IField, IMutField } from '../interfaces';
+import { IMutField } from '../interfaces';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../store';
-import { useCallback } from 'react';
-import { DocumentTextIcon, HashtagIcon } from '@heroicons/react/outline';
+import DataTypeIcon from '../components/dataTypeIcon';
 
 interface TableProps {
     size?: number;
@@ -66,23 +65,12 @@ function getCellType(field: IMutField): 'number' | 'text' {
 function getHeaderType(field: IMutField): 'number' | 'text' {
     return field.analyticType === 'dimension'? 'text' : 'number';
 }
-const DataTypeIcon: React.FC<{dataType: IMutField['dataType']}> = props => {
-    const { dataType } = props;
-    switch (dataType) {
-        case 'integer':
-        case 'number':
-            return <HashtagIcon className="w-3 inline-block mr-0.5 text-green-500" />
-        default:
-            return <DocumentTextIcon className="w-3 inline-block mr-0.5 text-blue-500" />
-    }
-}
+
 const Table: React.FC<TableProps> = props => {
     const { size = 10 } = props;
     const { commonStore } = useGlobalStore();
     const { tmpDSRawFields, tmpDataSource } = commonStore;
-    const dataTypeIcon = useCallback(() => {
-
-    }, [])
+ 
     return (
         <Container>
             <table>

@@ -17,82 +17,82 @@ import "tailwindcss/tailwind.css"
 import './index.css'
 
 export interface EditorProps {
-  dataSource?: Record[];
-  rawFields?: IMutField[];
+	dataSource?: Record[];
+	rawFields?: IMutField[];
 }
 
 const App: React.FC<EditorProps> = props => {
-  const { dataSource = [], rawFields = [] } = props;
-  const { commonStore } = useGlobalStore();
-  const [insightReady, setInsightReady] = useState<boolean>(true);
+	const { dataSource = [], rawFields = [] } = props;
+	const { commonStore } = useGlobalStore();
+	const [insightReady, setInsightReady] = useState<boolean>(true);
 
-  const { currentDataset, datasets, vizEmbededMenu } = commonStore;
+	const { currentDataset, datasets, vizEmbededMenu } = commonStore;
 
-  // use as an embeding module, use outside datasource from props.
-  useEffect(() => {
-    if (dataSource.length > 0) {
-      commonStore.addAndUseDS({
-        name: 'context dataset',
-        dataSource: dataSource,
-        rawFields
-      })
-    }
-  }, [dataSource, rawFields])
+	// use as an embeding module, use outside datasource from props.
+	useEffect(() => {
+		if (dataSource.length > 0) {
+			commonStore.addAndUseDS({
+				name: 'context dataset',
+				dataSource: dataSource,
+				rawFields
+			})
+		}
+	}, [dataSource, rawFields])
 
-  // do preparation analysis work when using a new dataset
-  useEffect(() => {
-    const ds = currentDataset;
-    if (ds && ds.dataSource.length > 0 && ds.rawFields.length > 0) {
-      setInsightReady(false)
-      preAnalysis({
-        dataSource: ds.dataSource,
-        fields: toJS(ds.rawFields)
-      }).then(() => {
-        setInsightReady(true);
-      })
-    }
-    return () => {
-      destroyWorker();
-    }
-  }, [currentDataset]);
+	// do preparation analysis work when using a new dataset
+	useEffect(() => {
+		const ds = currentDataset;
+		if (ds && ds.dataSource.length > 0 && ds.rawFields.length > 0) {
+			setInsightReady(false)
+			preAnalysis({
+				dataSource: ds.dataSource,
+				fields: toJS(ds.rawFields)
+			}).then(() => {
+				setInsightReady(true);
+			})
+		}
+		return () => {
+			destroyWorker();
+		}
+	}, [currentDataset]);
 
-  return (
-    <div className="App">
-      <DataSourceSegment preWorkDone={insightReady} />
-      <VisualSettings />
-      <Container>
-      <div className="grid grid-cols-6">
-        <div className="col-span-1">
-          <DatasetFields />
-        </div>
-        <div className="col-span-1">
-          <AestheticFields />
-        </div>
-        <div className="col-span-4">
-          <div>
-            <PosFields />
-          </div>
-          <NestContainer style={{ minHeight: '600px', overflow: 'auto' }}>
-            {datasets.length > 0 && <ReactiveRenderer />}
-            <InsightBoard />
-            {vizEmbededMenu.show && (
-              <ClickMenu x={vizEmbededMenu.position[0]} y={vizEmbededMenu.position[1]}>
-                <div
-                  onClick={() => {
-                    commonStore.closeEmbededMenu();
-                    commonStore.setShowInsightBoard(true)
-                  }}
-                >
-                  深度解读
-                </div>
-              </ClickMenu>
-            )}
-          </NestContainer>
-        </div>
-      </div>
-      </Container>
-    </div>
-  )
+	return (
+		<div className="App">
+			<DataSourceSegment preWorkDone={insightReady} />
+			<VisualSettings />
+			<Container>
+				<div className="grid grid-cols-6">
+					<div className="col-span-1">
+						<DatasetFields />
+					</div>
+					<div className="col-span-1">
+						<AestheticFields />
+					</div>
+					<div className="col-span-4">
+						<div>
+							<PosFields />
+						</div>
+						<NestContainer style={{ minHeight: '600px', overflow: 'auto' }}>
+							{datasets.length > 0 && <ReactiveRenderer />}
+							<InsightBoard />
+							{vizEmbededMenu.show && (
+								<ClickMenu x={vizEmbededMenu.position[0]} y={vizEmbededMenu.position[1]}>
+									<div
+										onClick={() => {
+											commonStore.closeEmbededMenu();
+											commonStore.setShowInsightBoard(true)
+										}}
+									>
+										深度解读
+									</div>
+								</ClickMenu>
+							)}
+						</NestContainer>
+					</div>
+				</div>
+			</Container>
+		</div>
+	)
 }
 
 export default observer(App);

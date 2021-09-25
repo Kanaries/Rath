@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { FileReader } from '@kanaries/web-data-loader';
 import { Record } from '../interfaces';
 import Table from './table';

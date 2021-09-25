@@ -9,15 +9,19 @@ Main features:
 + A Data Explainer which explain some why some patterns occur / what may cause them.
 
 ## Usage
+
+### use as an embedding module
 ```bash
-cd graphic-waler
-yarn install
-npm run build
+yarn add @kanaries/graphic-walker
+
+# or
+
+npm i --save @kanaries/graphic-walker
 ```
 
 In your app:
 ```typescript
-import { GraphicWalker } from 'graphic-walker';
+import { GraphicWalker } from '@kanaries/graphic-walker';
 import 'graphic-walker/dist/style.css'
 
 const YourEmbeddingTableauStyleApp: React.FC = props => {
@@ -30,4 +34,10 @@ const YourEmbeddingTableauStyleApp: React.FC = props => {
 }
 
 export default YourEmbeddingTableauStyleApp;
+```
+
+### try local
+```bash
+# packages/graphic-walker
+npm run dev
 ```

@@ -1,4 +1,4 @@
-import { Record, IField, IMutField } from '../interfaces';
+import { Record, IMutField } from '../interfaces';
 import { Insight } from 'visual-insights';
 
 export function transData(dataSource: Record[]): {
