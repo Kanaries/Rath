@@ -7,6 +7,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
     const mysqlText = intl.get(`dataSource.importData.type.${IDataSourceType.MYSQL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
+    const clickHouseText = 'ClickHouse';
 
     const options = useMemo<Array<{ key: IDataSourceType; text: string }>>(() => {
         return [
@@ -32,6 +33,12 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 iconProps: { iconName: "LinkedDatabase" },
                 disabled: true,
             },
+            {
+                key: IDataSourceType.CLICKHOUSE,
+                text: clickHouseText,
+                iconProps: { iconName: "TripleColumn" },
+                disabled: true,
+            }
         ];
     }, [fileText, restfulText, mysqlText, demoText]);
     return options;

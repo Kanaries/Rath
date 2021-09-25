@@ -1,0 +1,30 @@
+{
+  "name": "connectors",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "ts-node ./app/main.ts",
+    "dev": "npm run start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@koa/cors": "^3.1.0",
+    "@koa/router": "^10.1.1",
+    "axios": "^0.21.4",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.13.3",
+    "koa-body": "^4.2.0",
+    "mysql2": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.5",
+    "@types/koa": "^2.13.4",
+    "@types/koa__cors": "^3.0.3",
+    "@types/koa__router": "^8.0.8",
+    "@types/node": "^16.10.1",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
+  }
+}

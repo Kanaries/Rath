@@ -27,7 +27,8 @@ export enum IDataSourceType {
   FILE = 'file',
   RESTFUL = 'restful',
   MYSQL = 'mysql',
-  DEMO = 'demo'
+  DEMO = 'demo',
+  CLICKHOUSE = 'clickhouse'
 }
 
 export const globalRef: {
