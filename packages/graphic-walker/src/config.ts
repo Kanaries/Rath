@@ -1,7 +1,7 @@
 export const GEMO_TYPES = [
     {
         value: 'bar',
-        label: '区间',
+        label: '矩形',
     },
     {
         value: 'line',

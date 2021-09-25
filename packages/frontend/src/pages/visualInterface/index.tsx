@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import { useGlobalStore } from '../../store';
-import { useMemo } from 'react';
 import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
 import '@kanaries/graphic-walker/dist/style.css';
 

@@ -41,6 +41,7 @@ const DatasetFields: React.FC = props => {
                     {...provided.droppableProps}
                     ref={provided.innerRef}
                 >
+                    {provided.placeholder}
                     {dimensions.map((f, index) => (
                         <Draggable key={f.id} draggableId={f.id} index={dimOriginIndices[index]}>
                             {(provided, snapshot) => {

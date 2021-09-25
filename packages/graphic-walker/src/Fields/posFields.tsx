@@ -23,8 +23,9 @@ const PosFields: React.FC = props => {
                             {...provided.droppableProps}
                             ref={provided.innerRef}
                         >
+                            {provided.placeholder}
                             {draggableFieldState[dkey.id].map((f, index) => (
-                                <Draggable key={f.id} draggableId={f.id} index={index}>
+                                <Draggable key={`${dkey.id}-${f.id}`} draggableId={`${dkey.id}-${f.id}`} index={index}>
                                     {(provided, snapshot) => {
                                         return (
                                             <Pill

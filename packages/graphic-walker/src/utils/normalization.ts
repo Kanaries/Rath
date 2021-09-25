@@ -72,7 +72,7 @@ export function compareDistribution (distribution1: Record[], distribution2: Rec
                     Math.max(targetRecord[mea], record[mea]) /
                         Math.min(targetRecord[mea], record[mea])
                 );
-                console.log('score', score)
+                // console.log('score', score)
                 count++;
             }
         } else {
