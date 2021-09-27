@@ -2,10 +2,11 @@ import { makeAutoObservable, observable, runInAction } from "mobx";
 // import { InsightWorker } from "visual-insights/build/esm/commonTypes";
 import { DefaultIWorker, VIEngine } from "visual-insights/build/esm/insights";
 import { ViewSpace } from "visual-insights/build/esm/insights/dev";
-import { IInsightSpace } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
+import { IFieldSummary, IInsightSpace } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
 // import { simpleAggregate } from "visual-insights/build/esm/statistics";
 import { IRow } from "../../interfaces";
+import { IVizSpace } from "../../pages/lts/association/assCharts";
 import { DataSourceStore } from "../dataSourceStore";
 
 // const identityWorker: InsightWorker = async (aggData, dimensions, measures) => {
@@ -15,6 +16,14 @@ import { DataSourceStore } from "../dataSourceStore";
 //         significance: 1
 //     }
 // }
+
+function intersect (A: string[], B: string[]) {
+    const bset = new Set(B);
+    for (let a of A) {
+        if (bset.has(a)) return true
+    }
+    return false;
+}
 
 const PRINT_PERFORMANCE = new URL(window.location.href).searchParams.get('performance');
 
@@ -68,9 +77,13 @@ export class LTSPipeLine {
     private vie: TestEngine;
     // private vie: VIEngine;
     public insightSpaces: IInsightSpace[];
+    public fields: IFieldSummary[] = [];
+    public dataSource: IRow[] = [];
     constructor (dataSourceStore: DataSourceStore) {
         makeAutoObservable(this, {
-            insightSpaces: observable.ref
+            insightSpaces: observable.ref,
+            fields: observable.ref,
+            dataSource: observable.ref
         });
         this.dataSourceStore = dataSourceStore;
         const vie = new TestEngine();
@@ -84,6 +97,7 @@ export class LTSPipeLine {
         this.vie = vie;
         this.insightSpaces = [] as IInsightSpace[];
     }
+    // public get in
     public async startTask () {
         const { cleanedData, fieldMetas } = this.dataSourceStore;
         const times: number[] = [];
@@ -136,6 +150,8 @@ export class LTSPipeLine {
         runInAction(() => {
             // this.vie.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
             this.insightSpaces = insightSpaces;
+            this.dataSource = this.vie.dataSource;
+            this.fields = this.vie.fields;
         })
     }
     public specify (spaceIndex: number) {
@@ -149,5 +165,72 @@ export class LTSPipeLine {
             return this.vie.scanDetail(space);
         }
         return []
+    }
+    /**
+     * currently provide view in insightSpaces only.
+     * in future providing any view close to it (data or design)
+     * adjust specify
+     */
+    public getAssociatedViews (spaceIndex: number) {
+        const { insightSpaces } = this;
+        const space = insightSpaces[spaceIndex];
+        const { dimensions, measures, dataGraph } = this.vie;
+        // type1: meas cor assSpacesT1
+        // type2: dims cor assSpacesT2
+        // this.vie.dataGraph.DG
+        const dimIndices = space.dimensions.map(f => dimensions.findIndex(d => f === d));
+        const meaIndices = space.measures.map(f => measures.findIndex(m => f === m));
+        const assSpacesT1: IVizSpace[] = [];
+        const assSpacesT2: IVizSpace[] = [];
+        for (let i = 0; i < insightSpaces.length; i++) {
+            if (i === spaceIndex) continue;
+            if (!intersect(insightSpaces[i].dimensions, space.dimensions)) continue;
+            let t1_score = 0;
+            const iteMeaIndices = insightSpaces[i].measures.map(f => measures.findIndex(m => f === m));
+            for (let j = 0; j < meaIndices.length; j++) {
+                for (let k = 0; k < iteMeaIndices.length; k++) {
+                    t1_score += dataGraph.MG[j][k]
+                }
+            }
+            t1_score /= (meaIndices.length * iteMeaIndices.length)
+            if (t1_score > 0.7) {
+                const spec = this.specify(i);
+                if (spec) {
+                    assSpacesT1.push({
+                        ...insightSpaces[i],
+                        score: t1_score,
+                        ...spec
+                    })
+                }
+            }
+        }
+        for (let i = 0; i < insightSpaces.length; i++) {
+            if (i === spaceIndex) continue;
+            if (!intersect(insightSpaces[i].measures, space.measures)) continue;
+            let t1_score = 0;
+            const iteDimIndices = insightSpaces[i].dimensions.map(f => dimensions.findIndex(m => f === m));
+            for (let j = 0; j < dimIndices.length; j++) {
+                for (let k = 0; k < iteDimIndices.length; k++) {
+                    t1_score += dataGraph.DG[j][k]
+                }
+            }
+            t1_score /= (dimIndices.length * iteDimIndices.length)
+            if (t1_score > 0.5) {
+                const spec = this.specify(i);
+                if (spec) {
+                    assSpacesT2.push({
+                        ...insightSpaces[i],
+                        score: t1_score,
+                        ...spec
+                    })
+                }
+            }
+        }
+        assSpacesT1.sort((a, b) => (b.score || 0) - (a.score || 0))
+        assSpacesT2.sort((a, b) => (b.score || 0) - (a.score || 0))
+        return {
+            assSpacesT1,
+            assSpacesT2
+        }
     }
 }

@@ -1,7 +1,7 @@
 {
     "port": 2333,
     "clickhouse": {
-        "protocol": "http:",
+        "protocol": "http",
         "host": "localhost",
         "port": 8123
     }

@@ -1,9 +1,9 @@
 import Router from '@koa/router';
 // import { UserController } from './controllers/user';
-import { CHSelectProxy } from './controllers/clickHouseProxy';
+import { CHGeneralProxy } from './controllers/clickHouseProxy';
 const router = new Router();
 
-router.get('/api/clickhouse/select', CHSelectProxy);
+router.get('/api/clickhouse/general', CHGeneralProxy);
 
 // router.post('/api/login', UserController.login);
 // router.post('/api/register', UserController.register);

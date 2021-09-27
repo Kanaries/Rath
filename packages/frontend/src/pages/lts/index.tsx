@@ -1,70 +1,16 @@
-import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { DefaultButton, PrimaryButton, Toggle, Stack } from 'office-ui-fabric-react';
 import React, { useEffect, useState } from 'react';
-import { useRef } from 'react';
-import { IInsightSpace } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
-import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
-import { IRow } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import { LTSPipeLine } from '../../store/pipeLineStore/lts';
 import BaseChart from '../../visBuilder/vegaBase';
 import RadarChart from '../../components/radarChart';
-
-class PageTMPStore {
-    public pageIndex: number = 0;
-    public aggState: boolean = false;
-    private ltsPipeLineStore: LTSPipeLine;
-    public spec: { schema: ISpec; dataView: IRow[] } | undefined = undefined;
-    public details: IInsightSpace[] = [];
-    constructor (ltsPipeLineStore: LTSPipeLine) {
-        makeAutoObservable(this, {
-            spec: observable.ref,
-            details: observable.ref
-        });
-        this.ltsPipeLineStore = ltsPipeLineStore;
-    }
-    public async emitViewChangeTransaction(index: number) {
-        // pipleLineStore统一提供校验逻辑
-        if (this.ltsPipeLineStore.insightSpaces && this.ltsPipeLineStore.insightSpaces.length > index) {
-            const spec = this.ltsPipeLineStore.specify(index);
-            if (spec) {
-                // this.spec = spec;
-                const agg = !spec.schema.geomType?.includes('point');
-                runInAction(() => {
-                    this.spec = spec;
-                    this.aggState = agg;
-                    this.pageIndex = index;
-                    this.details = []
-                })
-            }
-        }
-    }
-    public setAggState (aggState: boolean) {
-        this.aggState = aggState;
-    }
-    public async scanDetails (spaceIndex: number) {
-        const result = await this.ltsPipeLineStore.scanDetails(spaceIndex);
-        runInAction(() => {
-            this.details = result;
-        })
-    }
-}
-
-function useTMPStore (ltsPipeLineStore: LTSPipeLine) {
-    const storeRef = useRef<PageTMPStore>(new PageTMPStore(ltsPipeLineStore));
-    return storeRef.current;
-}
+import Ass from './association/index'
 
 const LTSPage: React.FC = props => {
-    const { ltsPipeLineStore, dataSourceStore } = useGlobalStore();
+    const { ltsPipeLineStore, dataSourceStore, exploreStore } = useGlobalStore();
     const { insightSpaces } = ltsPipeLineStore;
-    const tmpStore = useTMPStore(ltsPipeLineStore);
 
-    if (tmpStore === null) return null;
-
-    const { pageIndex, aggState, spec } = tmpStore;
-
+    const { pageIndex, aggState, spec, showAsso } = exploreStore;
 
     return <div className="content-container">
         <div className="card">
@@ -74,7 +20,7 @@ const LTSPage: React.FC = props => {
                     disabled={dataSourceStore.cleanedData.length === 0}
                     onClick={() => {
                         ltsPipeLineStore.startTask().then(() => {
-                            tmpStore.emitViewChangeTransaction(0)
+                            exploreStore.emitViewChangeTransaction(0)
                         })
                     }}
                 />
@@ -82,14 +28,14 @@ const LTSPage: React.FC = props => {
                     style={{ marginLeft: "10px" }}
                     text="←"
                     onClick={() => {
-                        tmpStore.emitViewChangeTransaction((pageIndex - 1 + insightSpaces.length) % insightSpaces.length)
+                        exploreStore.emitViewChangeTransaction((pageIndex - 1 + insightSpaces.length) % insightSpaces.length)
                     }}
                 />
                 <DefaultButton
                     style={{ marginLeft: "10px" }}
                     text="→"
                     onClick={() => {
-                        tmpStore.emitViewChangeTransaction((pageIndex + 1) % insightSpaces.length)
+                        exploreStore.emitViewChangeTransaction((pageIndex + 1) % insightSpaces.length)
                     }}
                 />
             </Stack>
@@ -99,7 +45,7 @@ const LTSPage: React.FC = props => {
                 offText="Off"
                 label="Default Aggregate"
                 onChange={(e, checked) => {
-                    tmpStore.setAggState(Boolean(checked))
+                    exploreStore.setAggState(Boolean(checked))
                 }}
             />
             <h2>Visual Insights(v2 engine β)</h2>
@@ -123,11 +69,12 @@ const LTSPage: React.FC = props => {
                     </div>}
                     {
                         insightSpaces.length > 0 && spec && <div>
-                            <PrimaryButton text="details" onClick={() => {tmpStore.scanDetails(pageIndex)}} />
+                            <PrimaryButton text="details" onClick={() => {exploreStore.scanDetails(pageIndex)}} />
+                            <PrimaryButton style={{ marginLeft: '1em' }} text="Associate" onClick={() => {exploreStore.getAssociatedViews()}} />
                             <div>
                             {
-                                tmpStore.details.length > 0 && <RadarChart
-                                    dataSource={tmpStore.details}
+                                exploreStore.details.length > 0 && <RadarChart
+                                    dataSource={exploreStore.details}
                                     threshold={0.8}
                                     keyField="type"
                                     valueField="significance"
@@ -135,6 +82,11 @@ const LTSPage: React.FC = props => {
                             }
                             </div>
                         </div>
+                    }
+                </div>
+                <div>
+                    {
+                        showAsso && <Ass />
                     }
                 </div>
             </div>

@@ -6,6 +6,7 @@ import { LitePipeStore } from './pipeLineStore/lite';
 import { NoteBookStore } from './notebookStore';
 import { DashBoardStore } from './dashboard';
 import { LTSPipeLine } from './pipeLineStore/lts';
+import { ExploreStore } from './exploreStore';
 
 export interface StoreCollection {
     langStore: LangStore;
@@ -15,6 +16,7 @@ export interface StoreCollection {
     noteBookStore: NoteBookStore;
     dashBoardStore: DashBoardStore;
     ltsPipeLineStore: LTSPipeLine;
+    exploreStore: ExploreStore;
 }
 
 const langStore = new LangStore();
@@ -24,6 +26,7 @@ const ltsPipeLineStore = new LTSPipeLine(dataSourceStore);
 const galleryStore = new GalleryStore(litePipeStore);
 const noteBookStore = new NoteBookStore(litePipeStore);
 const dashBoardStore = new DashBoardStore(litePipeStore);
+const exploreStore = new ExploreStore(ltsPipeLineStore);
 
 const storeCol: StoreCollection = {
     langStore,
@@ -32,7 +35,8 @@ const storeCol: StoreCollection = {
     pipeLineStore: litePipeStore,
     noteBookStore,
     dashBoardStore,
-    ltsPipeLineStore
+    ltsPipeLineStore,
+    exploreStore
 }
 
 const StoreContext = React.createContext<StoreCollection>(null!);
