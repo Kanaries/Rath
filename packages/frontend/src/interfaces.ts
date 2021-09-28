@@ -1,5 +1,5 @@
 // define new interfaces here, global.ts is no longer maintained.
-import { BIField, BIFieldType, FieldType } from "./global";
+import { Aggregator, BIField, BIFieldType, FieldType } from "./global";
 
 export interface IRow {
     [key: string]: number | string | boolean | null | undefined;
@@ -36,3 +36,9 @@ export enum IComputeMode {
 }
 
 export type IAnalyticType = 'dimension' | 'measure';
+
+export interface PreferencePanelConfig {
+    aggregator: Aggregator;
+    defaultAggregated: boolean;
+    defaultStack: boolean;
+}

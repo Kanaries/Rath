@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useState } from "react";
 import { DashBoard } from "../../service";
 import { DataSource, Field } from "../../global";
 import { specification } from "visual-insights";
-import { useComposeState } from "../../utils/index";
+import { useComposeState } from "../../hooks/index";
 import { IconButton } from "office-ui-fabric-react";
 import IndicatorCard from "./indicatorCard";
 import ReactVega from '../../components/react-vega';

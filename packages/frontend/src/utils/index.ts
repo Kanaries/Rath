@@ -1,17 +1,16 @@
 import * as FileLoader from './fileParser';
 import * as Transform from './transform';
-import useComposeState from './useComposeState';
 import deepcopy from './deepcopy';
 import { IRow } from '../interfaces';
 // TODO: Rath和VI中都有一套，弱约束关联，可能带来潜在的迭代负担或bug
 import { IAnalyticType, ISemanticType } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
 
-export function isASCII(str: string) {
+function isASCII(str: string) {
   return /^[\x00-\x7F]*$/.test(str)
 }
 
 
-export function inferAnalyticType (dataSource: IRow[], fid: string): IAnalyticType {
+function inferAnalyticType (dataSource: IRow[], fid: string): IAnalyticType {
   return dataSource.every((row) => {
     // TODO: 推断逻辑抽象一下
         return !isNaN(Number(row[fid])) || row[fid] === undefined
@@ -20,7 +19,7 @@ export function inferAnalyticType (dataSource: IRow[], fid: string): IAnalyticTy
     : 'dimension'
 }
 
-export function inferAnalyticTypeFromSemanticType (semanticType: ISemanticType): IAnalyticType {
+function inferAnalyticTypeFromSemanticType (semanticType: ISemanticType): IAnalyticType {
   switch (semanticType) {
     case 'quantitative':
       return 'measure';
@@ -29,9 +28,21 @@ export function inferAnalyticTypeFromSemanticType (semanticType: ISemanticType):
   }
 }
 
+function isSetEqual (A: string[], B: string[]) {
+  if (A.length !== B.length) return false;
+  const bset = new Set(B);
+  for (let a of A) {
+    if (!bset.has(a)) return false;
+  }
+  return true;
+}
+
 export {
+  isASCII,
+  inferAnalyticType,
+  inferAnalyticTypeFromSemanticType,
+  isSetEqual,
   FileLoader,
-  useComposeState,
   deepcopy,
   Transform
 }

@@ -2,7 +2,7 @@ import React from "react";
 import intl from 'react-intl-universal';
 import { useGlobalStore, StoreWrapper } from './store/index'
 import { Pivot, PivotItem } from "office-ui-fabric-react";
-import { useComposeState } from "./utils/index";
+import { useComposeState } from "./hooks/index";
 import "./App.css";
 
 import Gallery from "./pages/gallery/index";
@@ -15,6 +15,8 @@ import SupportPage from './pages/support/index';
 import LTSPage from './pages/lts';
 import UserSettings from './components/userSettings';
 import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
+import { destroyRathWorker, initRathWorker } from "./service";
 
 // FIXME: 这两代码好像没什么用
 require('intl/locale-data/jsonp/en.js')
@@ -47,6 +49,13 @@ function App() {
         return { title: page, itemKey: 'pivot-' + (index + 1) }
       })
   }
+
+  useEffect(() => {
+    initRathWorker();
+    return () => {
+      destroyRathWorker();
+    }
+  }, [])
 
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {

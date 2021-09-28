@@ -1,15 +1,14 @@
 import React, {  useCallback, useEffect } from "react";
 import intl from 'react-intl-universal'
-import { useComposeState } from '../../utils/index';
+import { useComposeState } from '../../hooks/index';
 import { ComboBox, PrimaryButton, Stack, DefaultButton } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import { CleanMethod, useCleanMethodList } from './clean';
 import Selection from './selection/index';
-import { BIFieldType, Record } from "../../global";
+import { Record } from "../../global";
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
-import { IRawField } from "../../interfaces";
 interface PageStatus {
   show: {
     insightBoard: boolean;

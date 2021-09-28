@@ -132,5 +132,18 @@
             "default_group": "group distribution",
             "default_trend": "trend"
         }
+    },
+    "lts": {
+        "autoAnalysis": "Auto Analysis",
+        "computing": "computing",
+        "title": "Visual Insights",
+        "hintMain": "Here are some interesting patterns and insights found by Rath. If you are interested in some of them, try to use 'summary' to know more details about current view and use 'associate' to explore relative visualizations.",
+        "summary": "Summary",
+        "associate": "Associate",
+        "asso": {
+            "T1": "Associated Measures",
+            "T2": "Associated Dimensions",
+            "hint": "Associated Measures refers to keep the dimensions similar, find correlated measures. Associated Dimensions refers to keep the measures similar, find correlated dimensions."
+        }
     }
 }

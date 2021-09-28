@@ -1,61 +1,107 @@
 import { observer } from 'mobx-react-lite';
-import { DefaultButton, PrimaryButton, Toggle, Stack } from 'office-ui-fabric-react';
-import React, { useEffect, useState } from 'react';
+import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, IconButton, SpinButton, Position, CommandBarButton } from 'office-ui-fabric-react';
+import React, { useCallback } from 'react';
 import { useGlobalStore } from '../../store';
 import BaseChart from '../../visBuilder/vegaBase';
 import RadarChart from '../../components/radarChart';
 import Ass from './association/index'
+import intl from 'react-intl-universal'
+import { runInAction } from 'mobx';
+import VizPreference from '../../components/vizPreference';
+
+const MARGIN_LEFT = { marginLeft: '1em' };
+const MARGIN_TOP = { marginTop: '1em' };
 
 const LTSPage: React.FC = props => {
     const { ltsPipeLineStore, dataSourceStore, exploreStore } = useGlobalStore();
-    const { insightSpaces } = ltsPipeLineStore;
+    const { insightSpaces, computing } = ltsPipeLineStore;
 
-    const { pageIndex, aggState, spec, showAsso } = exploreStore;
+    const { pageIndex, visualConfig, spec, showAsso } = exploreStore;
+
+    const startAnalysis = useCallback(() => {
+        ltsPipeLineStore.startTask().then(() => {
+            exploreStore.emitViewChangeTransaction(0)
+        })
+    }, [])
+
+    const goToLastView = useCallback(() => {
+        exploreStore.goToLastView();
+    }, [exploreStore])
+
+    const goToNextView = useCallback(() => {
+        exploreStore.goToNextView();
+    }, [exploreStore])
 
     return <div className="content-container">
+        <VizPreference />
         <div className="card">
-            <Stack horizontal>
-                <PrimaryButton
-                    text="Analysis"
-                    disabled={dataSourceStore.cleanedData.length === 0}
-                    onClick={() => {
-                        ltsPipeLineStore.startTask().then(() => {
-                            exploreStore.emitViewChangeTransaction(0)
-                        })
-                    }}
-                />
-                <DefaultButton
-                    style={{ marginLeft: "10px" }}
-                    text="←"
-                    onClick={() => {
-                        exploreStore.emitViewChangeTransaction((pageIndex - 1 + insightSpaces.length) % insightSpaces.length)
-                    }}
-                />
-                <DefaultButton
-                    style={{ marginLeft: "10px" }}
-                    text="→"
-                    onClick={() => {
-                        exploreStore.emitViewChangeTransaction((pageIndex + 1) % insightSpaces.length)
-                    }}
-                />
-            </Stack>
-            <Toggle
-                checked={aggState}
-                onText="On"
-                offText="Off"
-                label="Default Aggregate"
-                onChange={(e, checked) => {
-                    exploreStore.setAggState(Boolean(checked))
+            <CommandBarButton
+                style={{ float: 'right' }}
+                iconProps={{ iconName: 'Settings' }}
+                text={intl.get('explore.preference')}
+                ariaLabel={intl.get('explore.preference')}
+                onClick={() => {
+                    runInAction(() => { exploreStore.showPreferencePannel = true; })
                 }}
             />
-            <h2>Visual Insights(v2 engine β)</h2>
+            <Stack horizontal>
+                {
+                    insightSpaces.length > 0 && <DefaultButton
+                        text={intl.get('lts.autoAnalysis')}
+                        iconProps={{ iconName: 'Financial' }}
+                        disabled={dataSourceStore.cleanedData.length === 0}
+                        onClick={startAnalysis}
+                    />
+                }
+                {
+                    insightSpaces.length === 0 && <PrimaryButton
+                        text={intl.get('lts.autoAnalysis')}
+                        iconProps={{ iconName: 'Financial' }}
+                        disabled={dataSourceStore.cleanedData.length === 0}
+                        onClick={startAnalysis}
+                    />
+                }
+            </Stack>
+            <Stack horizontal style={MARGIN_TOP}>
+                <DefaultButton
+                    disabled={insightSpaces.length === 0}
+                    text="←"
+                    onClick={goToLastView}
+                />
+                <DefaultButton
+                    disabled={insightSpaces.length === 0}
+                    style={MARGIN_LEFT}
+                    text="→"
+                    onClick={goToNextView}
+                />
+                <SpinButton
+                    disabled={insightSpaces.length === 0}
+                    style={{ marginLeft: "10px", width: '4em' }}
+                    value={`${pageIndex + 1} / ${insightSpaces.length}`}
+                    min={0}
+                    max={insightSpaces.length}
+                    step={1}
+                    labelPosition={Position.start}
+                    // tslint:disable:jsx-no-lambda
+                    onValidate={(value: string) => { exploreStore.emitViewChangeTransaction((Number(value) - 1) % insightSpaces.length) }}
+                    onIncrement={goToNextView}
+                    onDecrement={goToLastView}
+                    incrementButtonAriaLabel={'Increase value by 1'}
+                    decrementButtonAriaLabel={'Decrease value by 1'}
+                    />
+            </Stack>
+            <div className="h-4">
+            { computing && <ProgressIndicator description={intl.get('lts.computing')} />}
+            </div>
+            <h1 className="state-header" style={MARGIN_TOP}>{intl.get('lts.title')}</h1>
+            <p className="state-description">{intl.get('lts.hintMain')}</p>
             <div>
                 <p className="state-description">results: {pageIndex + 1} / {insightSpaces.length}. score: {insightSpaces.length > 0 && insightSpaces[pageIndex].score?.toFixed(2)}</p>
                 <div>
                     {insightSpaces.length > 0 && spec && <div>
                         <BaseChart
-                            defaultAggregated={aggState}
-                            defaultStack={true}
+                            defaultAggregated={visualConfig.defaultAggregated}
+                            defaultStack={visualConfig.defaultStack}
                             dimensions={insightSpaces[pageIndex].dimensions}
                             measures={insightSpaces[pageIndex].measures}
                             dataSource={dataSourceStore.cleanedData}
@@ -64,13 +110,15 @@ const LTSPage: React.FC = props => {
                                 name: f.fid,
                                 type: f.semanticType
                             }))}
-                            aggregator="sum"
+                            aggregator={visualConfig.aggregator}
                         />
                     </div>}
                     {
                         insightSpaces.length > 0 && spec && <div>
-                            <PrimaryButton text="details" onClick={() => {exploreStore.scanDetails(pageIndex)}} />
-                            <PrimaryButton style={{ marginLeft: '1em' }} text="Associate" onClick={() => {exploreStore.getAssociatedViews()}} />
+                            <Stack horizontal>
+                                <PrimaryButton iconProps={{ iconName: 'Lightbulb' }} text={intl.get('lts.associate')} onClick={() => {exploreStore.getAssociatedViews()}} />
+                                <DefaultButton disabled style={MARGIN_LEFT} text={intl.get('lts.summary')} onClick={() => {exploreStore.scanDetails(pageIndex)}} />
+                            </Stack>
                             <div>
                             {
                                 exploreStore.details.length > 0 && <RadarChart
