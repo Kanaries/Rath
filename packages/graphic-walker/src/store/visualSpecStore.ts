@@ -87,7 +87,7 @@ export class VizSpecStore {
             [movingField] = this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
         }
         if (destinationKey === 'fields')return;
-        this.draggableFieldState[destinationKey].splice(destinationIndex, 1, movingField)
+        this.draggableFieldState[destinationKey].splice(destinationIndex, 0, movingField)
     }
     public removeField(sourceKey: keyof DraggableFieldState, sourceIndex: number) {
         if (sourceKey === 'fields')return;
