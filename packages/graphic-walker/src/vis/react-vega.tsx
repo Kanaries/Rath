@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Field, IViewField, Record } from '../interfaces';
+import { Field, Record } from '../interfaces';
 import embed from 'vega-embed';
 import { Subject } from 'rxjs'
 import * as op from 'rxjs/operators';
@@ -39,7 +39,7 @@ function getFieldType(field: Field): 'quantitative' | 'nominal' | 'ordinal' | 't
   return 'nominal';
 }
 
-function getSingleView(xField: IViewField, yField: IViewField, color: IViewField, opacity: IViewField, size: IViewField, row: IViewField, col: IViewField, defaultAggregated: boolean, geomType: string) {
+function getSingleView(xField: Field, yField: Field, color: Field, opacity: Field, size: Field, row: Field, col: Field, defaultAggregated: boolean, geomType: string) {
   return {
     mark: geomType,
     encoding: {

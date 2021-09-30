@@ -35,7 +35,7 @@ const DatasetFields: React.FC = props => {
 
     return <NestContainer style={{ minHeight: '680px', overflowY: 'auto' }}>
         <h4 className="text-xs mb-2">字段列表</h4>
-        <Droppable droppableId={FIELDS_KEY} direction="vertical">
+        <Droppable droppableId={FIELDS_KEY} direction="vertical" isDropDisabled={true}>
             {(provided, snapshot) => (
                 <div
                     {...provided.droppableProps}
@@ -43,7 +43,7 @@ const DatasetFields: React.FC = props => {
                 >
                     {provided.placeholder}
                     {dimensions.map((f, index) => (
-                        <Draggable key={f.id} draggableId={f.id} index={dimOriginIndices[index]}>
+                        <Draggable key={f.dragId} draggableId={f.dragId} index={dimOriginIndices[index]}>
                             {(provided, snapshot) => {
                                 return (
                                     <div

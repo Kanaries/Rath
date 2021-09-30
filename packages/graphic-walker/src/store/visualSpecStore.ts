@@ -1,6 +1,7 @@
 import { IReactionDisposer, makeAutoObservable, reaction, toJS } from "mobx";
 import { IViewField } from "../interfaces";
 import { CommonStore } from "./commonStore";
+import { v4 as uuidv4 } from 'uuid';
 
 export interface DraggableFieldState {
     fields: IViewField[];
@@ -28,6 +29,7 @@ export class VizSpecStore {
         this.reactions.push(reaction(() => commonStore.currentDataset, (dataset) => {
             this.initState();
             this.draggableFieldState.fields = dataset.rawFields.map((f) => ({
+                dragId: uuidv4(),
                 id: f.key,
                 name: f.key,
                 type: f.analyticType === 'dimension' ? 'D' : 'M',
@@ -77,7 +79,10 @@ export class VizSpecStore {
     public moveField(sourceKey: keyof DraggableFieldState, sourceIndex: number, destinationKey: keyof DraggableFieldState, destinationIndex: number) {
         let movingField: IViewField;
         if (sourceKey === 'fields') {
-            movingField = this.draggableFieldState[sourceKey][sourceIndex]
+            console.log('sourcekey', sourceKey)
+            // use toJS for cloning
+            movingField = toJS(this.draggableFieldState[sourceKey][sourceIndex])
+            movingField.dragId = uuidv4();
         } else {
             [movingField] = this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
         }
