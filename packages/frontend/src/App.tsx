@@ -29,13 +29,11 @@ interface PageStatus {
     fieldConfig: boolean;
     dataConfig: boolean;
   };
-  current: {
-    pivotKey: string;
-  };
 }
 
 function App() {
-  const { langStore } = useGlobalStore()
+  const { langStore, commonStore } = useGlobalStore()
+  const { appKey } = commonStore;
 
   let pivotKeys: string[] = ['dataSource', 'noteBook', 'explore', 'dashBoard', 'explainer', 'editor', 'support', 'lts'];
 
@@ -63,10 +61,7 @@ function App() {
       fieldConfig: false,
       configPanel: false,
       dataConfig: false,
-    },
-    current: {
-      pivotKey: pivotList[0].itemKey,
-    },
+    }
   })
 
   if (!langStore.loaded) {
@@ -92,13 +87,11 @@ function App() {
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg8">
             <Pivot
-              selectedKey={pageStatus.current.pivotKey}
+              selectedKey={appKey}
               onLinkClick={(item) => {
                 item &&
                   item.props.itemKey &&
-                  setPageStatus((draft) => {
-                    draft.current.pivotKey = item.props.itemKey!
-                  })
+                  commonStore.setAppKey(item.props.itemKey)
               }}
               headersOnly={true}
             >
@@ -114,31 +107,31 @@ function App() {
           </div>
         </div>
       </div>
-      {pageStatus.current.pivotKey === 'pivot-3' && (
+      {appKey === 'pivot-3' && (
         <Gallery />
       )}
-      {pageStatus.current.pivotKey === 'pivot-1' && (
+      {appKey === 'pivot-1' && (
         <DataSourceBoard
           onExtractInsights={() => {
+            commonStore.setAppKey('pivot-3')
             setPageStatus((draft) => {
-              draft.current.pivotKey = 'pivot-3'
               draft.show.insightBoard = true
             })
           }}
         />
       )}
-      {pageStatus.current.pivotKey === 'pivot-2' && (
+      {appKey === 'pivot-2' && (
         <div className="content-container">
           <div className="card">
             <NoteBook />
           </div>
         </div>
       )}
-      {pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />}
-      {pageStatus.current.pivotKey === 'pivot-5' && <DevPage />}
-      {pageStatus.current.pivotKey === 'pivot-6' && <VisualInterface />}
-      {pageStatus.current.pivotKey === 'pivot-7' && <SupportPage />}
-      {pageStatus.current.pivotKey === 'pivot-8' && <LTSPage />}
+      {appKey === 'pivot-4' && <DashBoardPage />}
+      {appKey === 'pivot-5' && <DevPage />}
+      {appKey === 'pivot-6' && <VisualInterface />}
+      {appKey === 'pivot-7' && <SupportPage />}
+      {appKey === 'pivot-8' && <LTSPage />}
     </div>
   )
 }

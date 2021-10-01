@@ -16,6 +16,7 @@ export class ExploreStore {
     public pageIndex: number = 0;
     private ltsPipeLineStore: LTSPipeLine;
     public spec: { schema: ISpec; dataView: IRow[] } | undefined = undefined;
+    public specForGraphicWalker: ISpec | undefined = undefined;
     public details: IInsightSpace[] = [];
     public assoListT1: IVizSpace[] = []
     public assoListT2: IVizSpace[] = []
@@ -30,6 +31,7 @@ export class ExploreStore {
         };
         makeAutoObservable(this, {
             spec: observable.ref,
+            specForGraphicWalker: observable.ref,
             details: observable.ref,
             assoListT1: observable.ref,
             assoListT2: observable.ref
@@ -108,5 +110,10 @@ export class ExploreStore {
             this.showAsso = true;
         })
         // console.log(this.assoList)
+    }
+    public bringToGrphicWalker () {
+        if (this.spec && this.spec.schema) {
+            this.specForGraphicWalker = this.spec.schema;
+        }
     }
 }

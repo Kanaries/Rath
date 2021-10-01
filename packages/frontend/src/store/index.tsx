@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { LangStore } from "./langStore";
+import { CommonStore } from './commonStore';
 import { GalleryStore } from './galleryStore'
 import { DataSourceStore } from './dataSourceStore';
 import { LitePipeStore } from './pipeLineStore/lite';
@@ -17,9 +18,11 @@ export interface StoreCollection {
     dashBoardStore: DashBoardStore;
     ltsPipeLineStore: LTSPipeLine;
     exploreStore: ExploreStore;
+    commonStore: CommonStore;
 }
 
 const langStore = new LangStore();
+const commonStore = new CommonStore();
 const dataSourceStore = new DataSourceStore();
 const litePipeStore = new LitePipeStore(dataSourceStore);
 const ltsPipeLineStore = new LTSPipeLine(dataSourceStore);
@@ -29,6 +32,7 @@ const dashBoardStore = new DashBoardStore(litePipeStore);
 const exploreStore = new ExploreStore(ltsPipeLineStore);
 
 const storeCol: StoreCollection = {
+    commonStore,
     langStore,
     galleryStore,
     dataSourceStore,

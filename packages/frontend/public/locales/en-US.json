@@ -144,6 +144,7 @@
             "T1": "Associated Measures",
             "T2": "Associated Dimensions",
             "hint": "Associated Measures refers to keep the dimensions similar, find correlated measures. Associated Dimensions refers to keep the measures similar, find correlated dimensions."
-        }
+        },
+        "bring": "Customize Analysis"
     }
 }

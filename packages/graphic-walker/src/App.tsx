@@ -15,15 +15,17 @@ import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import "tailwindcss/tailwind.css"
 import './index.css'
+import { Specification } from 'visual-insights';
 
 export interface EditorProps {
 	dataSource?: Record[];
 	rawFields?: IMutField[];
+	spec?: Specification
 }
 
 const App: React.FC<EditorProps> = props => {
-	const { dataSource = [], rawFields = [] } = props;
-	const { commonStore } = useGlobalStore();
+	const { dataSource = [], rawFields = [], spec } = props;
+	const { commonStore, vizStore } = useGlobalStore();
 	const [insightReady, setInsightReady] = useState<boolean>(true);
 
 	const { currentDataset, datasets, vizEmbededMenu } = commonStore;
@@ -38,6 +40,12 @@ const App: React.FC<EditorProps> = props => {
 			})
 		}
 	}, [dataSource, rawFields])
+
+	useEffect(() => {
+		if (spec) {
+			vizStore.renderSpec(spec);
+		}
+	}, [spec])
 
 	// do preparation analysis work when using a new dataset
 	useEffect(() => {

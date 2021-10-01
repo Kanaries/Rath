@@ -13,7 +13,7 @@ const MARGIN_LEFT = { marginLeft: '1em' };
 const MARGIN_TOP = { marginTop: '1em' };
 
 const LTSPage: React.FC = props => {
-    const { ltsPipeLineStore, dataSourceStore, exploreStore } = useGlobalStore();
+    const { ltsPipeLineStore, dataSourceStore, exploreStore, commonStore } = useGlobalStore();
     const { insightSpaces, computing } = ltsPipeLineStore;
 
     const { pageIndex, visualConfig, spec, showAsso } = exploreStore;
@@ -31,6 +31,11 @@ const LTSPage: React.FC = props => {
     const goToNextView = useCallback(() => {
         exploreStore.goToNextView();
     }, [exploreStore])
+
+    const customizeAnalysis = useCallback(() => {
+        exploreStore.bringToGrphicWalker();
+        commonStore.setAppKey('pivot-6')
+    }, [exploreStore, commonStore])
 
     return <div className="content-container">
         <VizPreference />
@@ -96,7 +101,7 @@ const LTSPage: React.FC = props => {
             <h1 className="state-header" style={MARGIN_TOP}>{intl.get('lts.title')}</h1>
             <p className="state-description">{intl.get('lts.hintMain')}</p>
             <div>
-                <p className="state-description">results: {pageIndex + 1} / {insightSpaces.length}. score: {insightSpaces.length > 0 && insightSpaces[pageIndex].score?.toFixed(2)}</p>
+                <p className="state-description">results: {pageIndex + 1} / {insightSpaces.length}. score: {insightSpaces.length > 0 && insightSpaces[pageIndex].score?.toFixed(6)}</p>
                 <div>
                     {insightSpaces.length > 0 && spec && <div>
                         <BaseChart
@@ -118,6 +123,7 @@ const LTSPage: React.FC = props => {
                             <Stack horizontal>
                                 <PrimaryButton iconProps={{ iconName: 'Lightbulb' }} text={intl.get('lts.associate')} onClick={() => {exploreStore.getAssociatedViews()}} />
                                 <DefaultButton disabled style={MARGIN_LEFT} text={intl.get('lts.summary')} onClick={() => {exploreStore.scanDetails(pageIndex)}} />
+                                <DefaultButton style={MARGIN_LEFT} text={intl.get('lts.bring')} onClick={customizeAnalysis} />
                             </Stack>
                             <div>
                             {
