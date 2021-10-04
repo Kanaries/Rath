@@ -18,7 +18,23 @@ export interface DraggableFieldState {
     color: IViewField[];
     opacity: IViewField[];
     size: IViewField[];
-  }
+}
+
+function geomAdapter (geom: string) {
+    switch (geom) {
+        case 'interval':
+            return 'bar';
+        case 'line':
+            return 'line';
+        case 'point':
+            return 'point';
+        case 'heatmap':
+            return 'circle'
+        case 'tick':
+        default:
+            return 'tick'
+    }
+}
 
 export class VizSpecStore {
     // public fields: IViewField[] = [];
@@ -89,6 +105,9 @@ export class VizSpecStore {
             }
         }
     }
+    public setVisualConfig (configKey: keyof VisualConfig, value: any) {
+        this.visualConfig[configKey] = value;
+    }
     public reorderField(stateKey: keyof DraggableFieldState, sourceIndex: number, destinationIndex: number) {
         if (stateKey === 'fields') return;
         if (sourceIndex === destinationIndex) return;
@@ -131,14 +150,14 @@ export class VizSpecStore {
         // thi
         // const [xField, yField, ] = spec.position;
         this.clearState();
+        if (spec.geomType && spec.geomType.length > 0) {
+            this.setVisualConfig('geoms', spec.geomType.map(g => geomAdapter(g)));
+        }
         if (spec.facets && spec.facets.length > 0) {
             const facets = (spec.facets || []).concat(spec.highFacets || []);
             for (let facet of facets) {
                 this.appendField('rows', fields.find(f => f.id === facet));
             }
-        }
-        if (spec.color && spec.color.length > 0) {
-            this.appendField('color', fields.find(f => f.id === spec.color![0]));
         }
         if (spec.position && spec.position.length > 1) {
             this.appendField('rows', fields.find(f => f.id === spec.position![1]));
