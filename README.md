@@ -8,7 +8,11 @@
 
 <img src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png" alt="logo" width="180px" style="" />
 
-Augmented Analytics tool. Help you automate data analysis and visualization recommendation.
+Augmented Analytics tool. Help you automate explore data and recommend visualization based on human visual perception.
+
+
+Rath can recommend high-dimensional visualization which contains deep and complex patterns.
+
 + Try Latest version !! [demo(latest)](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
 + Try Stable version [demo(stable)](https://kanaries.github.io/Rath/)
 + [Youtube Video Demo](https://www.youtube.com/watch?v=o3_PH1Cbql4)
@@ -16,31 +20,48 @@ Augmented Analytics tool. Help you automate data analysis and visualization reco
 
 ## Introduction
 
-Rath helps you extract insights from datasource automatically and generate interactive visualizations with interesting findings. Rath can auto generate high dimensional visualization contains complex patterns while most other auto-EDA tools only provideing simple low dimensional charts with basic statistics pattern. Its means you can use Rath to explore the data to a deep level and find more insights.
+Rath helps you extract insights from datasource automatically and generate interactive visualizations with interesting findings. Rath can auto generate high dimensional visualization contains complex patterns while most other auto-EDA tools only providing simple low dimensional charts with basic statistics pattern. Its means you can use Rath to explore the data to a deep level and find more insights.
 
-Rath design a algorithm recommanding visualization with lowest perception error by human eyes, which means you can read the info in visualization much accuracte. 
+Rath design an algorithm recommending visualization with lowest perception error by human eyes, which means you can read the info in visualization much accurate.
 
 Here are main parts in Rath,
 
 ### DataSource
 DataSource board is for data uploading, sampling(currently support stream data, which means there is no limit of the size of file you uploaded), cleaning and defining fields type(dimensions, measures). In visual insights, we regard dimensions as independent variable or feature and measures as dependent variable or target.
 
-### Notebook
-Notebook is a board for user to know what happened in the automatic analysis process and how rath uses visual-insights. It shows how decisions are made by the application and provide interactive interface to adjust some of the parameters and operators used by the algorithm. 
+![dataSource-en.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/kanaries/Rath-Demos/dataSource-en.png)
 
-### Gallery
-Gallery displays parts of the visualization with interesting findings. In Gallery, you can find interesting visualizaiton and use association feature to find more related visualization. You can also search specific info in gallery. There are some settings here to adjust some of the visual elements in the chart.
+### Gallery / Explore
+Rath automate scan your datasource and find interesting deep patterns which will be displayed in Gallery / Explore segment.
+ In Gallery, you can find interesting visualization and use association feature to find more related visualization. You can also search specific info in gallery. There are some settings here to adjust some of the visual elements in the chart.
 
-### Explainer
-Explainer uses serveral insight discoverary algorithm to detect what is the specific insight type is shown in a visualization recommanded. Explainer is an extension of B. Tang 's Top K insight paper.
-
-### Dashboard
-Generate interactive dashboards for your. Rath will figure out sets of visulizations of which contents are connected to each other and can be used to analysis a specific problem. 
+![gallery.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/kanaries/Rath-Demos/explore-en.png)
 
 ### Graphic Walker
-Graphic Walker is a lite tableau style visual analysis interface. It is used for cases when users have specific analytic target or user want to analysis further result based on the recommanded results by Rath's auto insights.
+Graphic Walker is a lite tableau style visual analysis interface. It is used for cases when users have specific analytic target or user want to analysis further result based on the recommended results by Rath's auto insights.
+![graphic-walker.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/kanaries/Rath-Demos/graphic-walker-en.png)
 
-You can also use Graphic Walker as a lite tableau style analysis app independently. It can be used as an independent app or an embeding module.
+Graphic Walker is an independent embedding module. You can use it independently in your own app. See more details in `packages/graphic-walker/README.md`
+
+```bash
+yarn add @kanaries/graphic-walker
+# or
+
+npm i --save @kanaries/graphic-walker
+```
+
+### Dashboard
+Generate interactive dashboards for your. Rath will figure out sets of visualizations of which contents are connected to each other and can be used to analysis a specific problem.
+![](https://ch-resources.oss-cn-shanghai.aliyuncs.com/kanaries/Rath-Demos/dashboard-en.png)
+
+### Notebook
+Notebook is a board for user to know what happened in the automatic analysis process and how rath uses visual-insights. It shows how decisions are made by the application and provide interactive interface to adjust some of the parameters and operators used by the algorithm.
+
+### Explainer
+Explainer uses several insight discovery algorithm to detect what is the specific insight type is shown in a visualization recommended. Explainer is an extension of B. Tang 's Top K insight paper.
+
+
+You can also use Graphic Walker as a lite tableau style analysis app independently. It can be used as an independent app or an embedding module.
 
 more details can be found in README.md in graphic-walker folder.
 
@@ -68,6 +89,7 @@ Rath now runs all the computation tasks on webworker. If you are interested in a
 
 (dev)
 ```bash
+yarn install
 # under project root dir
 yarn workspace graphic-walker build
 
@@ -78,6 +100,8 @@ yarn workspace frontend start
 
 production mode
 ```bash
+yarn install
+
 yarn workspace graphic-walker build
 
 yarn workspace frontend build
@@ -87,7 +111,7 @@ yarn workspace frontend build
 
 only use the algorithm package. (`/packages/visual-insights`) ![](https://img.shields.io/npm/v/visual-insights?color=blue)
 ```bash
-npm i visual-insights --save`
+npm i visual-insights --save
 ```
 
 ## Documentation
@@ -103,4 +127,3 @@ Rath is insipired by several excellent works below:
 + B. Tang et al, "Extracting top-K insights from multi-dimensional data," in 2017, . DOI: 10.1145/3035918.3035922.
 + Vega-Lite: A Grammar of Interactive Graphics. Arvind Satyanarayan, Dominik Moritz, Kanit Wongsuphasawat, Jeffrey Heer. IEEE Trans. Visualization & Comp. Graphics (Proc. InfoVis), 2017
 + Cleveland, W., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. Journal of the American Statistical Association, 79(387), 531-554. doi:10.2307/2288400
-
