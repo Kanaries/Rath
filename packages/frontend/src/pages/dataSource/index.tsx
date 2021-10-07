@@ -9,6 +9,7 @@ import Selection from './selection/index';
 import { Record } from "../../global";
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
+import { PIVOT_KEYS } from "../../constants";
 interface PageStatus {
   show: {
     insightBoard: boolean;
@@ -18,12 +19,13 @@ interface PageStatus {
   }
 }
 
+const MARGIN_LEFT = { marginLeft: "1em" }
+
 interface DataSourceBoardProps {
-  onExtractInsights: () => void;
 }
 
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-  const { dataSourceStore, pipeLineStore } = useGlobalStore();
+  const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, exploreStore } = useGlobalStore();
 
   const { cleanedData, cleanMethod, rawData } = dataSourceStore;
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
@@ -41,7 +43,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     let UsedButton = dataSource.length === 0 ? PrimaryButton : DefaultButton;
     return (
       <UsedButton
-        style={{ marginLeft: "10px" }}
+        style={MARGIN_LEFT}
         iconProps={{ iconName: "ExcelDocument" }}
         text={text}
         onClick={() => {
@@ -62,6 +64,18 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     // 不要加依赖，这里是应用加载第一次时的判断逻辑！
   }, [])
 
+  const onOrignEngineStart = useCallback(() => {
+    pipeLineStore.startTask();
+    commonStore.setAppKey(PIVOT_KEYS.gallery);
+  }, [commonStore, pipeLineStore])
+
+  const onV1EngineStart = useCallback(() => {
+    ltsPipeLineStore.startTask().then(() => {
+      exploreStore.emitViewChangeTransaction(0);
+    })
+    commonStore.setAppKey(PIVOT_KEYS.lts);
+  }, [ltsPipeLineStore, exploreStore, commonStore])
+
   // useEffect(() => {
   //   console.log('meta update')
   //   dataSourceStore.getFieldsMetas();
@@ -75,16 +89,16 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             disabled={rawData.length === 0}
             iconProps={{ iconName: 'Financial' }}
             text={intl.get('dataSource.extractInsight')}
-            onClick={() => {
-              // dispatch('extractInsights', {
-              //   dataSource: preparedData,
-              //   fields: state.fields,
-              // })
-              pipeLineStore.startTask();
-              props.onExtractInsights()
-            }}
+            onClick={onV1EngineStart}
           />
           {dataImportButton(intl.get('dataSource.importData.buttonName'), rawData)}
+          <DefaultButton
+            style={MARGIN_LEFT}
+            disabled={rawData.length === 0}
+            iconProps={{ iconName: 'TestBeakerSolid' }}
+            text={intl.get('dataSource.extractInsightOld')}
+            onClick={onOrignEngineStart}
+          />
           
           <Selection show={pageStatus.show.dataConfig}
             onClose={() => {

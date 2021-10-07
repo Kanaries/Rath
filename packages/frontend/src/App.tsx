@@ -2,7 +2,6 @@ import React from "react";
 import intl from 'react-intl-universal';
 import { useGlobalStore, StoreWrapper } from './store/index'
 import { Pivot, PivotItem } from "office-ui-fabric-react";
-import { useComposeState } from "./hooks/index";
 import "./App.css";
 
 import Gallery from "./pages/gallery/index";
@@ -17,34 +16,35 @@ import UserSettings from './components/userSettings';
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { destroyRathWorker, initRathWorker } from "./service";
+import { PIVOT_KEYS } from "./constants";
 
 // FIXME: 这两代码好像没什么用
 require('intl/locale-data/jsonp/en.js')
 require('intl/locale-data/jsonp/zh.js')
 
-interface PageStatus {
-  show: {
-    insightBoard: boolean;
-    configPanel: boolean;
-    fieldConfig: boolean;
-    dataConfig: boolean;
-  };
-}
-
 function App() {
   const { langStore, commonStore } = useGlobalStore()
   const { appKey } = commonStore;
 
-  let pivotKeys: string[] = ['dataSource', 'noteBook', 'explore', 'dashBoard', 'explainer', 'editor', 'support', 'lts'];
+  let pivotKeys: string[] = [
+    PIVOT_KEYS.dataSource,
+    PIVOT_KEYS.lts,
+    PIVOT_KEYS.editor,
+    PIVOT_KEYS.dashBoard,
+    PIVOT_KEYS.noteBook,
+    PIVOT_KEYS.gallery,
+    PIVOT_KEYS.explainer,
+    PIVOT_KEYS.support
+  ]
 
   let pivotList = pivotKeys.map((page, index) => {
-    return { title: page, itemKey: 'pivot-' + (index + 1) }
+    return { title: page, itemKey: page }
   })
 
   if (langStore.loaded) {
     pivotList = pivotKeys.map(p => intl.get(`menu.${p}`))
       .map((page, index) => {
-        return { title: page, itemKey: 'pivot-' + (index + 1) }
+        return { title: page, itemKey: pivotKeys[index] }
       })
   }
 
@@ -54,15 +54,6 @@ function App() {
       destroyRathWorker();
     }
   }, [])
-
-  const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
-    show: {
-      insightBoard: false,
-      fieldConfig: false,
-      configPanel: false,
-      dataConfig: false,
-    }
-  })
 
   if (!langStore.loaded) {
     return <div></div>
@@ -107,31 +98,24 @@ function App() {
           </div>
         </div>
       </div>
-      {appKey === 'pivot-3' && (
+      {appKey === PIVOT_KEYS.gallery && (
         <Gallery />
       )}
-      {appKey === 'pivot-1' && (
-        <DataSourceBoard
-          onExtractInsights={() => {
-            commonStore.setAppKey('pivot-3')
-            setPageStatus((draft) => {
-              draft.show.insightBoard = true
-            })
-          }}
-        />
+      {appKey === PIVOT_KEYS.dataSource && (
+        <DataSourceBoard />
       )}
-      {appKey === 'pivot-2' && (
+      {appKey === PIVOT_KEYS.noteBook && (
         <div className="content-container">
           <div className="card">
             <NoteBook />
           </div>
         </div>
       )}
-      {appKey === 'pivot-4' && <DashBoardPage />}
-      {appKey === 'pivot-5' && <DevPage />}
-      {appKey === 'pivot-6' && <VisualInterface />}
-      {appKey === 'pivot-7' && <SupportPage />}
-      {appKey === 'pivot-8' && <LTSPage />}
+      {appKey === PIVOT_KEYS.dashBoard && <DashBoardPage />}
+      {appKey === PIVOT_KEYS.explainer && <DevPage />}
+      {appKey === PIVOT_KEYS.editor && <VisualInterface />}
+      {appKey === PIVOT_KEYS.support && <SupportPage />}
+      {appKey === PIVOT_KEYS.lts && <LTSPage />}
     </div>
   )
 }

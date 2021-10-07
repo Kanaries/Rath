@@ -8,9 +8,15 @@ import Ass from './association/index'
 import intl from 'react-intl-universal'
 import { runInAction } from 'mobx';
 import VizPreference from '../../components/vizPreference';
+import { Divider, Pagination } from '@material-ui/core';
+import styled from 'styled-components';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
-const MARGIN_TOP = { marginTop: '1em' };
+
+const MainHeader = styled.div`
+    font-size: 1.5em;
+    font-weight: 500;
+`
 
 const LTSPage: React.FC = props => {
     const { ltsPipeLineStore, dataSourceStore, exploreStore, commonStore } = useGlobalStore();
@@ -23,14 +29,6 @@ const LTSPage: React.FC = props => {
             exploreStore.emitViewChangeTransaction(0)
         })
     }, [])
-
-    const goToLastView = useCallback(() => {
-        exploreStore.goToLastView();
-    }, [exploreStore])
-
-    const goToNextView = useCallback(() => {
-        exploreStore.goToNextView();
-    }, [exploreStore])
 
     const customizeAnalysis = useCallback(() => {
         exploreStore.bringToGrphicWalker();
@@ -67,39 +65,15 @@ const LTSPage: React.FC = props => {
                     />
                 }
             </Stack>
-            <Stack horizontal style={MARGIN_TOP}>
-                <DefaultButton
-                    disabled={insightSpaces.length === 0}
-                    text="←"
-                    onClick={goToLastView}
-                />
-                <DefaultButton
-                    disabled={insightSpaces.length === 0}
-                    style={MARGIN_LEFT}
-                    text="→"
-                    onClick={goToNextView}
-                />
-                <SpinButton
-                    disabled={insightSpaces.length === 0}
-                    style={{ marginLeft: "10px", width: '4em' }}
-                    value={`${pageIndex + 1} / ${insightSpaces.length}`}
-                    min={0}
-                    max={insightSpaces.length}
-                    step={1}
-                    labelPosition={Position.start}
-                    // tslint:disable:jsx-no-lambda
-                    onValidate={(value: string) => { exploreStore.emitViewChangeTransaction((Number(value) - 1) % insightSpaces.length) }}
-                    onIncrement={goToNextView}
-                    onDecrement={goToLastView}
-                    incrementButtonAriaLabel={'Increase value by 1'}
-                    decrementButtonAriaLabel={'Decrease value by 1'}
-                    />
-            </Stack>
             <div className="h-4">
             { computing && <ProgressIndicator description={intl.get('lts.computing')} />}
             </div>
-            <h1 className="state-header" style={MARGIN_TOP}>{intl.get('lts.title')}</h1>
+            <MainHeader>{intl.get('lts.title')}</MainHeader>
             <p className="state-description">{intl.get('lts.hintMain')}</p>
+            <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
+            <Pagination style={{ marginBottom: '1em', marginTop: '1em' }} variant="outlined" shape="rounded" count={insightSpaces.length} page={pageIndex + 1} onChange={(e, v) => {
+                exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
+            }} />
             <div>
                 <p className="state-description">results: {pageIndex + 1} / {insightSpaces.length}. score: {insightSpaces.length > 0 && insightSpaces[pageIndex].score?.toFixed(6)}</p>
                 <div>
