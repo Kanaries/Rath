@@ -9,7 +9,8 @@
 <img src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png" alt="logo" width="360px" style="" />
 
 Rath是新一代的基于增强分析技术的可视化分析工具，它提供了自动化的数据探索分析能力与自动可视化设计能力。Rath既可以在你对数据无从下手时提供分析入口的建议，也可以在你的分析过程中提供实时的分析辅助和建议。Rath会帮你完成大部分数据探索分析的工作，使得你可以专注于领域问题本身。当数据越复杂时，Rath的自动化能力带来的优势就越加显著。
-
++ 体验最新版 !! [demo(latest)](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
++ 体验稳定版 [demo(stable)](https://kanaries.github.io/Rath/)
 + [Youtube 视频 Demo](https://www.youtube.com/watch?v=o3_PH1Cbql4)
 + [Bilibili 视频 Demo](https://www.bilibili.com/video/av82089992/)
 
@@ -49,8 +50,8 @@ Rath中包含一个tableau风格的自助分析工具，它是一个和基于图
 
 ### 线上demo
 + 官网 [kanaries.net](https://kanaries.net/)
-+ Github Pages [demo](https://kanaries.github.io/Rath/)
-+ 阿里云OSS [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
++ Github Pages(稳定版) [demo](https://kanaries.github.io/Rath/)
++ 阿里云OSS(最新版) [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
 
 ### 桌面版下载
 - [Mac版](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0.dmg)

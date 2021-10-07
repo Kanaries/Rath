@@ -9,7 +9,8 @@
 <img src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png" alt="logo" width="180px" style="" />
 
 Augmented Analytics tool. Help you automate data analysis and visualization recommendation.
-
++ Try Latest version !! [demo(latest)](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
++ Try Stable version [demo(stable)](https://kanaries.github.io/Rath/)
 + [Youtube Video Demo](https://www.youtube.com/watch?v=o3_PH1Cbql4)
 + [Bilibili Video Demo](https://www.bilibili.com/video/av82089992/)
 
@@ -54,8 +55,8 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 ## Usage
 
 ### Try online demo
-+ on Github Pages [demo](https://kanaries.github.io/Rath/)
-+ on Alibaba Cloud OSS [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
++ on Github Pages(Stable version) [demo](https://kanaries.github.io/Rath/)
++ on Alibaba Cloud OSS(Latest version) [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
 
 ### Download Desktop Version
 - [MacOS](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0.dmg)
