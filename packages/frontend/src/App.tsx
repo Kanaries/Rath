@@ -41,7 +41,7 @@ function App() {
     return { title: page, itemKey: page }
   })
 
-  if (langStore.loaded) {
+  if (langStore.loaded && langStore.lang) {
     pivotList = pivotKeys.map(p => intl.get(`menu.${p}`))
       .map((page, index) => {
         return { title: page, itemKey: pivotKeys[index] }

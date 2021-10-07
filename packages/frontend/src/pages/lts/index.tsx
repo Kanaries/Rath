@@ -10,6 +10,7 @@ import { runInAction } from 'mobx';
 import VizPreference from '../../components/vizPreference';
 import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
+import { PIVOT_KEYS } from '../../constants';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -32,7 +33,7 @@ const LTSPage: React.FC = props => {
 
     const customizeAnalysis = useCallback(() => {
         exploreStore.bringToGrphicWalker();
-        commonStore.setAppKey('pivot-6')
+        commonStore.setAppKey(PIVOT_KEYS.editor)
     }, [exploreStore, commonStore])
 
     return <div className="content-container">
