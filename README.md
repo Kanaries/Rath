@@ -22,7 +22,11 @@ Rath can recommend high-dimensional visualization which contains deep and comple
 
 Rath helps you extract insights from datasource automatically and generate interactive visualizations with interesting findings. Rath can auto generate high dimensional visualization contains complex patterns while most other auto-EDA tools only providing simple low dimensional charts with basic statistics pattern. Its means you can use Rath to explore the data to a deep level and find more insights.
 
-Rath design an algorithm recommending visualization with lowest perception error by human eyes, which means you can read the info in visualization much accurate.
+Rath design an algorithm recommending visualization with lowest perception error by human eyes, which means you can read the info in visualization much accurate[1]. The origin idea is mentioned in APT, 1987 by Mackinlay[2]. It suggests using visual channel with lower perception error to encode more important fields. However, 'the importance of field' usually is hard to measure. Works like data voyager (compassQL)[3] suppose the fields chosen earlier by user are more important, which means it cannot be used in an automated process where exists no chosen order.
+
+Rath compute how much extra view entropy(similar thoughts like entropy, but not exactly the same) a field will bring to a visualization, and use lower perception error visual channel to encode field bring more entropy to the visualization view.
+
+Rath can also automate generate best interactive logic of visualizations in a dashboard. It builds a relation graph of visualization set and choose a sub graph which has max sum of edge score(represent relation). It make the `selection-filter` interaction represents more meaningful correlation or dependency between fields in different visualization.
 
 Here are main parts in Rath,
 
@@ -58,7 +62,7 @@ Generate interactive dashboards for your. Rath will figure out sets of visualiza
 Notebook is a board for user to know what happened in the automatic analysis process and how rath uses visual-insights. It shows how decisions are made by the application and provide interactive interface to adjust some of the parameters and operators used by the algorithm.
 
 ### Explainer
-Explainer uses several insight discovery algorithm to detect what is the specific insight type is shown in a visualization recommended. Explainer is an extension of B. Tang 's Top K insight paper.
+Explainer uses several insight discovery algorithm to detect what is the specific insight type is shown in a visualization recommended. Explainer is an extension of B. Tang 's Top K insight paper[4].
 
 
 You can also use Graphic Walker as a lite tableau style analysis app independently. It can be used as an independent app or an embedding module.
@@ -122,8 +126,8 @@ npm i visual-insights --save
 ## Reference
 
 Rath is insipired by several excellent works below:
-
-+ Wongsuphasawat, Kanit, et al. "Voyager 2: Augmenting visual analysis with partial view specifications." Proceedings of the 2017 CHI Conference on Human Factors in Computing Systems. ACM, 2017.
-+ B. Tang et al, "Extracting top-K insights from multi-dimensional data," in 2017, . DOI: 10.1145/3035918.3035922.
-+ Vega-Lite: A Grammar of Interactive Graphics. Arvind Satyanarayan, Dominik Moritz, Kanit Wongsuphasawat, Jeffrey Heer. IEEE Trans. Visualization & Comp. Graphics (Proc. InfoVis), 2017
-+ Cleveland, W., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. Journal of the American Statistical Association, 79(387), 531-554. doi:10.2307/2288400
++ [1] Cleveland, W., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. Journal of the American Statistical Association, 79(387), 531-554. doi:10.2307/2288400
++ [2] Mackinlay, Jock D. Automatic design of graphical presentations. Stanford Univ., CA (USA), 1987.
++ [3] Wongsuphasawat, Kanit, et al. "Voyager 2: Augmenting visual analysis with partial view specifications." Proceedings of the 2017 CHI Conference on Human Factors in Computing Systems. ACM, 2017.
++ [4] B. Tang et al, "Extracting top-K insights from multi-dimensional data," in 2017, . DOI: 10.1145/3035918.3035922.
++ [5] Vega-Lite: A Grammar of Interactive Graphics. Arvind Satyanarayan, Dominik Moritz, Kanit Wongsuphasawat, Jeffrey Heer. IEEE Trans. Visualization & Comp. Graphics (Proc. InfoVis), 2017
