@@ -42,3 +42,7 @@ export interface PreferencePanelConfig {
     defaultAggregated: boolean;
     defaultStack: boolean;
 }
+export interface IDBFieldMeta {
+    fid: string;
+    dataType: string;
+}

@@ -12,3 +12,8 @@ export const PIVOT_KEYS = {
     support: 'support',
     lts: 'lts'
   } as const;
+
+export const COMPUTATION_ENGINE = {
+  clickhouse: 'clickhouse',
+  webworker: 'webworker'
+}

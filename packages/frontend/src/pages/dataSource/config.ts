@@ -37,7 +37,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 key: IDataSourceType.CLICKHOUSE,
                 text: clickHouseText,
                 iconProps: { iconName: "TripleColumn" },
-                disabled: true,
+                disabled: false,
             }
         ];
     }, [fileText, restfulText, mysqlText, demoText]);

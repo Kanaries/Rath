@@ -16,9 +16,17 @@
         "title": "How to Get Support",
         "link": "https://www.yuque.com/docs/share/65511730-af74-46eb-86fe-356c4f52402b?# 《Get Support》"
     },
+    "config": {
+        "computationEngine": {
+            "title": "Computation Engine",
+            "clickhouse": "ClickHouse",
+            "webworker": "Browser(Web Worker)",
+            "notCompatible": "Not compatible with datasource"
+        }
+    },
     "dataSource": {
         "extractInsight": "Insight Analysis",
-        "extractInsightOld": "Insight Analysis(Reactive)",
+        "extractInsightOld": "Insight Analysis(Debug)",
         "cleanMethod": "Clean Method",
         "useField": "use field",
         "importData": {

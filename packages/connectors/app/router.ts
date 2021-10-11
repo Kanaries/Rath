@@ -1,9 +1,22 @@
 import Router from '@koa/router';
 // import { UserController } from './controllers/user';
-import { CHGeneralProxy } from './controllers/clickHouseProxy';
+import {
+    CHGeneralProxy,
+    CHDBListProxy,
+    CHSampleData,
+    CHTableDescProxy,
+    CHTableListProxy
+} from './controllers/clickHouseProxy';
+import { ping } from './controllers/ping';
 const router = new Router();
 
-router.get('/api/clickhouse/general', CHGeneralProxy);
+router.get('/ping', ping);
+router.get('/api/ch/general', CHGeneralProxy);
+router.post('/api/ch/general', CHGeneralProxy);
+
+router.get('/api/ch/dbs', CHDBListProxy);
+router.get('/api/ch/sampleData', CHSampleData);
+router.get('/api/ch/tables', CHTableListProxy);
 
 // router.post('/api/login', UserController.login);
 // router.post('/api/register', UserController.register);

@@ -7,6 +7,7 @@ import { IDataSourceType } from '../../../global';
 import { useDataSourceTypeOptions } from '../config';
 import FileData from './file';
 import DemoData from './demo';
+import ClickHouseData from './clickhouse';
 import { IRawField, IRow } from '../../../interfaces';
 
 interface SelectionProps {
@@ -42,6 +43,7 @@ const Selection: React.FC<SelectionProps> = props => {
                 />
                 {dataSourceType === IDataSourceType.FILE && <FileData onClose={onClose} onDataLoaded={onDataLoaded} />}
                 {dataSourceType === IDataSourceType.DEMO && <DemoData onClose={onClose} onDataLoaded={onDataLoaded} />}
+                {dataSourceType === IDataSourceType.CLICKHOUSE && <ClickHouseData onClose={onClose} onDataLoaded={onDataLoaded} />}
             </div>
         </Modal>
     );

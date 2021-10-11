@@ -1,7 +1,7 @@
 import React, {  useCallback, useEffect } from "react";
 import intl from 'react-intl-universal'
 import { useComposeState } from '../../hooks/index';
-import { ComboBox, PrimaryButton, Stack, DefaultButton } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, Stack, DefaultButton, Toggle, Dropdown, IDropdownOption } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import { CleanMethod, useCleanMethodList } from './clean';
@@ -9,7 +9,7 @@ import Selection from './selection/index';
 import { Record } from "../../global";
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
-import { PIVOT_KEYS } from "../../constants";
+import { COMPUTATION_ENGINE, PIVOT_KEYS } from "../../constants";
 interface PageStatus {
   show: {
     insightBoard: boolean;
@@ -76,6 +76,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     commonStore.setAppKey(PIVOT_KEYS.lts);
   }, [ltsPipeLineStore, exploreStore, commonStore])
 
+  const engineOptions: IDropdownOption[] = [
+    { text: intl.get(`config.computationEngine.${COMPUTATION_ENGINE.clickhouse}`), key: COMPUTATION_ENGINE.clickhouse },
+    { text: intl.get(`config.computationEngine.${COMPUTATION_ENGINE.webworker}`), key: COMPUTATION_ENGINE.webworker }
+  ]
+
   // useEffect(() => {
   //   console.log('meta update')
   //   dataSourceStore.getFieldsMetas();
@@ -111,7 +116,17 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             }}
           />
         </Stack>
-        <div style={{ margin: '20px 0px' }}>
+        <div style={{ margin: '1em 0px' }}>
+            <Dropdown style={{ maxWidth: '180px' }}
+              selectedKey={commonStore.computationEngine}
+              options={engineOptions}
+              label={intl.get('config.computationEngine.title')}
+              onChange={(e, item) => {
+                item && commonStore.setComputationEngine(item.key as string);
+              }}
+            />
+        </div>
+        <div style={{ margin: '1em 0px' }}>
           <ComboBox
             styles={{ root: { maxWidth: '180px' } }}
             selectedKey={cleanMethod}
