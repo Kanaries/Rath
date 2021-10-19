@@ -23,7 +23,7 @@ const AestheticFields: React.FC = props => {
                         >
                             {provided.placeholder}
                             {draggableFieldState[dkey.id].map((f, index) => (
-                                <Draggable key={`${dkey.id}-${f.id}`} draggableId={`${dkey.id}-${f.id}`} index={index}>
+                                <Draggable key={f.dragId} draggableId={f.dragId} index={index}>
                                     {(provided, snapshot) => {
                                         return (
                                             <Pill

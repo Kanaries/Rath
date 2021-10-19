@@ -1,11 +1,19 @@
-import { Insight } from 'visual-insights'
+/* eslint no-restricted-globals: 0 */
 
-const vieRef = {
-    current: null
-}
-
-vieRef.current = new Insight.VIEngine();
+import { router } from './service';
 
 function main (e) {
-    // const {} = e.data
+    router(e, (res) => {
+        self.postMessage({
+            success: true,
+            data: res
+        })
+    }, (message) => {
+        self.postMessage({
+            success: false,
+            message: `[worker]${message}`
+        })
+    })
 }
+
+self.addEventListener('message', main, false);

@@ -23,7 +23,14 @@ import groupFieldsWorker from './workers/groupFields.worker?worker';
 // @ts-ignore
 // eslint-disable-next-line
 import InsightViewWorker from './workers/dev.worker?worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import RathEngineWorker from './workers/engine/index.worker?worker';
 import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
+import { MessageProps } from './workers/engine/service';
+import { COMPUTATION_ENGINE } from './constants';
+import { RathCHEngine } from './workers/engine/clickhouse';
 
 let server = '//lobay.moe:8443';
 
@@ -56,6 +63,45 @@ function workerService<T, R> (worker: Worker, data: R): Promise<Result<T>> {
       })
     }
   })
+}
+
+const rathGlobalWorkerRef: { current: Worker | null } = {
+  current: null
+}
+
+export function getRathWorker (): Worker {
+  if (rathGlobalWorkerRef.current === null) {
+    console.log('create another')
+    throw new Error('Worker is not created.')
+  } return rathGlobalWorkerRef.current!
+}
+
+export function destroyRathWorker () {
+  if (rathGlobalWorkerRef.current) {
+    rathGlobalWorkerRef.current.terminate();
+    rathGlobalWorkerRef.current = null;
+  }
+}
+
+export function initRathWorker (engineMode: string) {
+  if (rathGlobalWorkerRef.current === null) {
+    // if (engineMode === COMPUTATION_ENGINE.clickhouse) {
+    //   rathGlobalWorkerRef.current = new RathCHEngine();
+    // } else {
+    //   rathGlobalWorkerRef.current = new RathEngineWorker();
+    // }
+    rathGlobalWorkerRef.current = new RathEngineWorker();
+  }
+}
+
+export async function rathEngineService (props: MessageProps) {
+  const worker = getRathWorker();
+  const res = await workerService<any, MessageProps>(worker, props)
+  if (res.success) {
+    return res.data
+  } else {
+    throw new Error(res.message);
+  }
 }
 
 export interface View {

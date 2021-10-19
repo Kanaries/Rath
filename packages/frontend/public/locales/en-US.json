@@ -2,12 +2,12 @@
     "menu": {
         "dataSource": "DataSource",
         "noteBook": "NoteBook",
-        "explore": "Explore",
+        "explore": "Explore(alpha version)",
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
         "editor": "Visual Editor",
         "support": "Support",
-        "lts": "v2 Engine(β)"
+        "lts": "Explore"
     },
     "preference": {
         "title": "preference"
@@ -16,8 +16,17 @@
         "title": "How to Get Support",
         "link": "https://www.yuque.com/docs/share/65511730-af74-46eb-86fe-356c4f52402b?# 《Get Support》"
     },
+    "config": {
+        "computationEngine": {
+            "title": "Computation Engine",
+            "clickhouse": "ClickHouse",
+            "webworker": "Browser(Web Worker)",
+            "notCompatible": "Not compatible with datasource"
+        }
+    },
     "dataSource": {
         "extractInsight": "Insight Analysis",
+        "extractInsightOld": "Insight Analysis(Debug)",
         "cleanMethod": "Clean Method",
         "useField": "use field",
         "importData": {
@@ -132,5 +141,19 @@
             "default_group": "group distribution",
             "default_trend": "trend"
         }
+    },
+    "lts": {
+        "autoAnalysis": "Auto Analysis",
+        "computing": "computing",
+        "title": "Visual Insights",
+        "hintMain": "Here are some interesting patterns and insights found by Rath. If you are interested in some of them, try to use 'summary' to know more details about current view and use 'associate' to explore relative visualizations.",
+        "summary": "Summary",
+        "associate": "Associate",
+        "asso": {
+            "T1": "Associated Measures",
+            "T2": "Associated Dimensions",
+            "hint": "Associated Measures refers to keep the dimensions similar, find correlated measures. Associated Dimensions refers to keep the measures similar, find correlated dimensions."
+        },
+        "bring": "Customize Analysis"
     }
 }

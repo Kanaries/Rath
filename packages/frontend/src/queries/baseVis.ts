@@ -17,7 +17,7 @@ export function baseVis(
   fieldFeatures: Field[],
   defaultAggregated?: boolean,
   defaultStack?: boolean,
-  
+  fixedWidth?: boolean
 ) {
   const {
     position = [],
@@ -26,7 +26,7 @@ export function baseVis(
     facets = [],
     opacity = [],
     geomType = [],
-    page = []
+    page = [],
   } = query;
 
   function adjustField(fieldName: string): string {
@@ -55,13 +55,13 @@ export function baseVis(
     column: facets[1]
   };
   let spec: any = {
-    width: chartWidth,
+    // width: chartWidth,
     data: {
       values: dataSource
     }
   };
   let basicSpec: any = {
-    width: chartWidth,
+    // width: chartWidth,
     mark: {
       type:
         geomType[0] && geomTypeMap[geomType[0]]
@@ -71,6 +71,10 @@ export function baseVis(
     },
     encoding: {}
   };
+  if (fixedWidth) {
+    spec.width = chartWidth;
+    basicSpec.width = chartWidth;
+  }
   for (let channel in fieldMap) {
     if (fieldMap[channel]) {
       basicSpec.encoding[channel] = {

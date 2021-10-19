@@ -2,12 +2,12 @@
     "menu": {
         "dataSource": "数据源",
         "noteBook": "工作簿",
-        "explore": "探索",
+        "explore": "探索分析(旧)",
         "dashBoard": "报表",
         "explainer": "数据解读",
         "editor": "自助分析",
         "support": "帮助",
-        "lts": "v2引擎(β)"
+        "lts": "探索分析"
     },
     "preference": {
         "title": "个人偏好"
@@ -16,8 +16,17 @@
         "title": "如何获取帮助/支持",
         "link": "https://www.yuque.com/docs/share/c1e4077d-c433-422b-9dc9-9486bf772f9c"
     },
+    "config": {
+        "computationEngine": {
+            "title": "计算引擎",
+            "clickhouse": "ClickHouse",
+            "webworker": "浏览器(Web Worker)",
+            "notCompatible": "与数据源暂不兼容"
+        }
+    },
     "dataSource": {
         "extractInsight": "开始分析",
+        "extractInsightOld": "开始分析(调试模式)",
         "cleanMethod": "清洗方法",
         "useField": "允许使用",
         "importData": {
@@ -132,5 +141,19 @@
             "default_group": "组间分布差异",
             "default_trend": "趋势"
         }
+    },
+    "lts": {
+        "autoAnalysis": "自动分析",
+        "computing": "计算中",
+        "title": "洞察推荐",
+        "hintMain": "洞察推荐板块展示了Rath自动化挖掘数据时发现的有趣的规律和洞察，如果你对其中的某些图表感兴趣，尝试使用'概览'来获取更多细节或使用'联想'来探索与当前图表相关的内容。",
+        "summary": "概览",
+        "associate": "联想",
+        "asso": {
+            "T1": "关联度量",
+            "T2": "关联维度",
+            "hint": "『关联度量』是指探索和当前图表中，度量/指标关联程度更高的图表，这可以帮你研究哪些指标的表现和当前关注的指标相近。『关联维度』是指探索和当前图表中，维度相关度更高的图表，这可以帮助你研究对于当前的度量下，相似维度对度量分布的划分差异。"
+        },
+        "bring": "自定义分析"
     }
 }

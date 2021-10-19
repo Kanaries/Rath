@@ -17,7 +17,7 @@ export type StateUpdater<S> = (draftState: Draft<S>) => void
  * })
  * ```
  */
-export default function useComposeState<S>(initState: S): [S, (stateUpdater: StateUpdater<S>) => void] {
+export function useComposeState<S>(initState: S): [S, (stateUpdater: StateUpdater<S>) => void] {
   const [state, setState] = useState<S>(initState)
   const updateState = useCallback((stateUpdater: StateUpdater<S>) => {
     setState(state => {

@@ -21,11 +21,6 @@ export class CommonStore {
     public vizEmbededMenu: { show: boolean; position: [number, number] } = { show: false, position: [0, 0] };
 
     public filters: Filters = {};
-    public visualConfig: VisualConfig ={
-        defaultAggregated: true,
-        geoms: [GEMO_TYPES[0].value],
-        defaultStack: true
-    }
     constructor () {
         this.datasets = [];
         this.dataSources = [];
@@ -51,9 +46,6 @@ export class CommonStore {
             rawFields: [],
             dataSource: []
         }
-    }
-    public setVisualConfig (configKey: keyof VisualConfig, value: any) {
-        this.visualConfig[configKey] = value;
     }
     public setShowDSPanel (show: boolean) {
         this.showDSPanel = show;

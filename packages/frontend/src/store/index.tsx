@@ -1,11 +1,14 @@
 import React, { useContext, useEffect } from 'react';
 import { LangStore } from "./langStore";
+import { CommonStore } from './commonStore';
 import { GalleryStore } from './galleryStore'
 import { DataSourceStore } from './dataSourceStore';
 import { LitePipeStore } from './pipeLineStore/lite';
 import { NoteBookStore } from './notebookStore';
 import { DashBoardStore } from './dashboard';
 import { LTSPipeLine } from './pipeLineStore/lts';
+import { ExploreStore } from './exploreStore';
+import { ClickHouseStore } from './clickhouseStore';
 
 export interface StoreCollection {
     langStore: LangStore;
@@ -15,24 +18,34 @@ export interface StoreCollection {
     noteBookStore: NoteBookStore;
     dashBoardStore: DashBoardStore;
     ltsPipeLineStore: LTSPipeLine;
+    exploreStore: ExploreStore;
+    commonStore: CommonStore;
+    clickHouseStore: ClickHouseStore;
 }
 
 const langStore = new LangStore();
+const commonStore = new CommonStore();
 const dataSourceStore = new DataSourceStore();
+const clickHouseStore = new ClickHouseStore();
 const litePipeStore = new LitePipeStore(dataSourceStore);
-const ltsPipeLineStore = new LTSPipeLine(dataSourceStore);
+const ltsPipeLineStore = new LTSPipeLine(dataSourceStore, commonStore, clickHouseStore);
 const galleryStore = new GalleryStore(litePipeStore);
 const noteBookStore = new NoteBookStore(litePipeStore);
 const dashBoardStore = new DashBoardStore(litePipeStore);
+const exploreStore = new ExploreStore(ltsPipeLineStore);
+
 
 const storeCol: StoreCollection = {
+    commonStore,
     langStore,
     galleryStore,
     dataSourceStore,
     pipeLineStore: litePipeStore,
     noteBookStore,
     dashBoardStore,
-    ltsPipeLineStore
+    ltsPipeLineStore,
+    exploreStore,
+    clickHouseStore
 }
 
 const StoreContext = React.createContext<StoreCollection>(null!);

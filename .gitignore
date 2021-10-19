@@ -33,3 +33,7 @@ coverage
 
 .cache
 .eslintcache
+
+*.cert
+*.key
+*.pem

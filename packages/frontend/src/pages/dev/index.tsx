@@ -11,7 +11,7 @@ import PreferencePanel, {
 import BaseChart from "../../visBuilder/vegaBase";
 import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
 
-import { useComposeState } from '../../utils';
+import { useComposeState } from '../../hooks/index';
 import SimpleTick from '../../components/simpleTick';
 import RadarChart from '../../components/radarChart';
 import { observer } from 'mobx-react-lite';

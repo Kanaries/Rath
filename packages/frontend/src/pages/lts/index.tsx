@@ -1,133 +1,109 @@
-import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { DefaultButton, PrimaryButton, Toggle, Stack } from 'office-ui-fabric-react';
-import React, { useEffect, useState } from 'react';
-import { useRef } from 'react';
-import { IInsightSpace } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
-import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
-import { IRow } from '../../interfaces';
+import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton } from 'office-ui-fabric-react';
+import React, { useCallback } from 'react';
 import { useGlobalStore } from '../../store';
-import { LTSPipeLine } from '../../store/pipeLineStore/lts';
 import BaseChart from '../../visBuilder/vegaBase';
 import RadarChart from '../../components/radarChart';
+import Ass from './association/index'
+import intl from 'react-intl-universal'
+import { runInAction } from 'mobx';
+import VizPreference from '../../components/vizPreference';
+import { Divider, Pagination } from '@material-ui/core';
+import styled from 'styled-components';
+import { PIVOT_KEYS } from '../../constants';
 
-class PageTMPStore {
-    public pageIndex: number = 0;
-    public aggState: boolean = false;
-    private ltsPipeLineStore: LTSPipeLine;
-    public spec: { schema: ISpec; dataView: IRow[] } | undefined = undefined;
-    public details: IInsightSpace[] = [];
-    constructor (ltsPipeLineStore: LTSPipeLine) {
-        makeAutoObservable(this, {
-            spec: observable.ref,
-            details: observable.ref
-        });
-        this.ltsPipeLineStore = ltsPipeLineStore;
-    }
-    public async emitViewChangeTransaction(index: number) {
-        // pipleLineStore统一提供校验逻辑
-        if (this.ltsPipeLineStore.insightSpaces && this.ltsPipeLineStore.insightSpaces.length > index) {
-            const spec = this.ltsPipeLineStore.specify(index);
-            if (spec) {
-                // this.spec = spec;
-                const agg = !spec.schema.geomType?.includes('point');
-                runInAction(() => {
-                    this.spec = spec;
-                    this.aggState = agg;
-                    this.pageIndex = index;
-                    this.details = []
-                })
-            }
-        }
-    }
-    public setAggState (aggState: boolean) {
-        this.aggState = aggState;
-    }
-    public async scanDetails (spaceIndex: number) {
-        const result = await this.ltsPipeLineStore.scanDetails(spaceIndex);
-        runInAction(() => {
-            this.details = result;
-        })
-    }
-}
+const MARGIN_LEFT = { marginLeft: '1em' };
 
-function useTMPStore (ltsPipeLineStore: LTSPipeLine) {
-    const storeRef = useRef<PageTMPStore>(new PageTMPStore(ltsPipeLineStore));
-    return storeRef.current;
-}
+const MainHeader = styled.div`
+    font-size: 1.5em;
+    font-weight: 500;
+`
 
 const LTSPage: React.FC = props => {
-    const { ltsPipeLineStore, dataSourceStore } = useGlobalStore();
-    const { insightSpaces } = ltsPipeLineStore;
-    const tmpStore = useTMPStore(ltsPipeLineStore);
+    const { ltsPipeLineStore, dataSourceStore, exploreStore, commonStore } = useGlobalStore();
+    const { insightSpaces, computing } = ltsPipeLineStore;
 
-    if (tmpStore === null) return null;
+    const { pageIndex, visualConfig, spec, showAsso } = exploreStore;
 
-    const { pageIndex, aggState, spec } = tmpStore;
+    const startAnalysis = useCallback(() => {
+        ltsPipeLineStore.startTask().then(() => {
+            exploreStore.emitViewChangeTransaction(0)
+        })
+    }, [])
 
+    const customizeAnalysis = useCallback(() => {
+        exploreStore.bringToGrphicWalker();
+        commonStore.setAppKey(PIVOT_KEYS.editor)
+    }, [exploreStore, commonStore])
 
     return <div className="content-container">
+        <VizPreference />
         <div className="card">
-            <Stack horizontal>
-                <PrimaryButton
-                    text="Analysis"
-                    disabled={dataSourceStore.cleanedData.length === 0}
-                    onClick={() => {
-                        ltsPipeLineStore.startTask().then(() => {
-                            tmpStore.emitViewChangeTransaction(0)
-                        })
-                    }}
-                />
-                <DefaultButton
-                    style={{ marginLeft: "10px" }}
-                    text="←"
-                    onClick={() => {
-                        tmpStore.emitViewChangeTransaction((pageIndex - 1 + insightSpaces.length) % insightSpaces.length)
-                    }}
-                />
-                <DefaultButton
-                    style={{ marginLeft: "10px" }}
-                    text="→"
-                    onClick={() => {
-                        tmpStore.emitViewChangeTransaction((pageIndex + 1) % insightSpaces.length)
-                    }}
-                />
-            </Stack>
-            <Toggle
-                checked={aggState}
-                onText="On"
-                offText="Off"
-                label="Default Aggregate"
-                onChange={(e, checked) => {
-                    tmpStore.setAggState(Boolean(checked))
+            <CommandBarButton
+                style={{ float: 'right' }}
+                iconProps={{ iconName: 'Settings' }}
+                text={intl.get('explore.preference')}
+                ariaLabel={intl.get('explore.preference')}
+                onClick={() => {
+                    runInAction(() => { exploreStore.showPreferencePannel = true; })
                 }}
             />
-            <h2>Visual Insights(v2 engine β)</h2>
+            <Stack horizontal>
+                {
+                    insightSpaces.length > 0 && <DefaultButton
+                        text={intl.get('lts.autoAnalysis')}
+                        iconProps={{ iconName: 'Financial' }}
+                        disabled={dataSourceStore.cleanedData.length === 0}
+                        onClick={startAnalysis}
+                    />
+                }
+                {
+                    insightSpaces.length === 0 && <PrimaryButton
+                        text={intl.get('lts.autoAnalysis')}
+                        iconProps={{ iconName: 'Financial' }}
+                        disabled={dataSourceStore.cleanedData.length === 0}
+                        onClick={startAnalysis}
+                    />
+                }
+            </Stack>
+            <div className="h-4">
+            { computing && <ProgressIndicator description={intl.get('lts.computing')} />}
+            </div>
+            <MainHeader>{intl.get('lts.title')}</MainHeader>
+            <p className="state-description">{intl.get('lts.hintMain')}</p>
+            <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
+            <Pagination style={{ marginBottom: '1em', marginTop: '1em' }} variant="outlined" shape="rounded" count={insightSpaces.length} page={pageIndex + 1} onChange={(e, v) => {
+                exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
+            }} />
             <div>
-                <p className="state-description">results: {pageIndex + 1} / {insightSpaces.length}. score: {insightSpaces.length > 0 && insightSpaces[pageIndex].score?.toFixed(2)}</p>
+                <p className="state-description">results: {pageIndex + 1} / {insightSpaces.length}. score: {insightSpaces.length > 0 && insightSpaces[pageIndex].score?.toFixed(6)}</p>
                 <div>
                     {insightSpaces.length > 0 && spec && <div>
                         <BaseChart
-                            defaultAggregated={aggState}
-                            defaultStack={true}
+                            defaultAggregated={visualConfig.defaultAggregated}
+                            defaultStack={visualConfig.defaultStack}
                             dimensions={insightSpaces[pageIndex].dimensions}
                             measures={insightSpaces[pageIndex].measures}
-                            dataSource={dataSourceStore.cleanedData}
+                            dataSource={visualConfig.defaultAggregated ? spec.dataView : dataSourceStore.cleanedData}
                             schema={spec.schema}
                             fieldFeatures={dataSourceStore.fieldMetas.map(f => ({
                                 name: f.fid,
                                 type: f.semanticType
                             }))}
-                            aggregator="sum"
+                            aggregator={visualConfig.aggregator}
                         />
                     </div>}
                     {
                         insightSpaces.length > 0 && spec && <div>
-                            <PrimaryButton text="details" onClick={() => {tmpStore.scanDetails(pageIndex)}} />
+                            <Stack horizontal>
+                                <PrimaryButton iconProps={{ iconName: 'Lightbulb' }} text={intl.get('lts.associate')} onClick={() => {exploreStore.getAssociatedViews()}} />
+                                <DefaultButton disabled style={MARGIN_LEFT} text={intl.get('lts.summary')} onClick={() => {exploreStore.scanDetails(pageIndex)}} />
+                                <DefaultButton style={MARGIN_LEFT} text={intl.get('lts.bring')} onClick={customizeAnalysis} />
+                            </Stack>
                             <div>
                             {
-                                tmpStore.details.length > 0 && <RadarChart
-                                    dataSource={tmpStore.details}
+                                exploreStore.details.length > 0 && <RadarChart
+                                    dataSource={exploreStore.details}
                                     threshold={0.8}
                                     keyField="type"
                                     valueField="significance"
@@ -135,6 +111,11 @@ const LTSPage: React.FC = props => {
                             }
                             </div>
                         </div>
+                    }
+                </div>
+                <div>
+                    {
+                        showAsso && <Ass />
                     }
                 </div>
             </div>

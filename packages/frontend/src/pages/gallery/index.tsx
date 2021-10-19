@@ -68,7 +68,7 @@ const Gallery: React.FC = props => {
         )}
         {pivotIndex === pivotList[0].itemKey && (
           <div>
-            <h2 style={{ marginBottom: 0 }}>
+            <h2 className="state-header" style={{ marginBottom: 0 }}>
               {intl.get('explore.title')}
               <IconButton
                 iconProps={{ iconName: 'Settings' }}

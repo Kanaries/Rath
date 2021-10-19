@@ -7,8 +7,8 @@ import ReactVega from '../vis/react-vega';
 
 const ReactiveRenderer: React.FC = props => {
     const { vizStore, commonStore } = useGlobalStore();
-    const { draggableFieldState } = vizStore;
-    const { visualConfig, currentDataset } = commonStore;
+    const { draggableFieldState, visualConfig } = vizStore;
+    const { currentDataset } = commonStore;
 
     const rows = toJS(draggableFieldState.rows)
     const columns = toJS(draggableFieldState.columns)

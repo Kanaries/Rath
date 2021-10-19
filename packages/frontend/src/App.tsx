@@ -2,7 +2,6 @@ import React from "react";
 import intl from 'react-intl-universal';
 import { useGlobalStore, StoreWrapper } from './store/index'
 import { Pivot, PivotItem } from "office-ui-fabric-react";
-import { useComposeState } from "./utils/index";
 import "./App.css";
 
 import Gallery from "./pages/gallery/index";
@@ -15,50 +14,46 @@ import SupportPage from './pages/support/index';
 import LTSPage from './pages/lts';
 import UserSettings from './components/userSettings';
 import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
+import { destroyRathWorker, initRathWorker } from "./service";
+import { PIVOT_KEYS } from "./constants";
 
 // FIXME: 这两代码好像没什么用
 require('intl/locale-data/jsonp/en.js')
 require('intl/locale-data/jsonp/zh.js')
 
-interface PageStatus {
-  show: {
-    insightBoard: boolean;
-    configPanel: boolean;
-    fieldConfig: boolean;
-    dataConfig: boolean;
-  };
-  current: {
-    pivotKey: string;
-  };
-}
-
 function App() {
-  const { langStore } = useGlobalStore()
+  const { langStore, commonStore } = useGlobalStore()
+  const { appKey } = commonStore;
 
-  let pivotKeys: string[] = ['dataSource', 'noteBook', 'explore', 'dashBoard', 'explainer', 'editor', 'support', 'lts'];
+  let pivotKeys: string[] = [
+    PIVOT_KEYS.dataSource,
+    PIVOT_KEYS.lts,
+    PIVOT_KEYS.editor,
+    PIVOT_KEYS.dashBoard,
+    PIVOT_KEYS.noteBook,
+    PIVOT_KEYS.gallery,
+    PIVOT_KEYS.explainer,
+    PIVOT_KEYS.support
+  ]
 
   let pivotList = pivotKeys.map((page, index) => {
-    return { title: page, itemKey: 'pivot-' + (index + 1) }
+    return { title: page, itemKey: page }
   })
 
-  if (langStore.loaded) {
+  if (langStore.loaded && langStore.lang) {
     pivotList = pivotKeys.map(p => intl.get(`menu.${p}`))
       .map((page, index) => {
-        return { title: page, itemKey: 'pivot-' + (index + 1) }
+        return { title: page, itemKey: pivotKeys[index] }
       })
   }
 
-  const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
-    show: {
-      insightBoard: false,
-      fieldConfig: false,
-      configPanel: false,
-      dataConfig: false,
-    },
-    current: {
-      pivotKey: pivotList[0].itemKey,
-    },
-  })
+  useEffect(() => {
+    initRathWorker(commonStore.computationEngine);
+    return () => {
+      destroyRathWorker();
+    }
+  }, [commonStore])
 
   if (!langStore.loaded) {
     return <div></div>
@@ -83,13 +78,11 @@ function App() {
           </div>
           <div className="ms-Grid-col ms-sm6 ms-md8 ms-lg8">
             <Pivot
-              selectedKey={pageStatus.current.pivotKey}
+              selectedKey={appKey}
               onLinkClick={(item) => {
                 item &&
                   item.props.itemKey &&
-                  setPageStatus((draft) => {
-                    draft.current.pivotKey = item.props.itemKey!
-                  })
+                  commonStore.setAppKey(item.props.itemKey)
               }}
               headersOnly={true}
             >
@@ -105,31 +98,24 @@ function App() {
           </div>
         </div>
       </div>
-      {pageStatus.current.pivotKey === 'pivot-3' && (
+      {appKey === PIVOT_KEYS.gallery && (
         <Gallery />
       )}
-      {pageStatus.current.pivotKey === 'pivot-1' && (
-        <DataSourceBoard
-          onExtractInsights={() => {
-            setPageStatus((draft) => {
-              draft.current.pivotKey = 'pivot-3'
-              draft.show.insightBoard = true
-            })
-          }}
-        />
+      {appKey === PIVOT_KEYS.dataSource && (
+        <DataSourceBoard />
       )}
-      {pageStatus.current.pivotKey === 'pivot-2' && (
+      {appKey === PIVOT_KEYS.noteBook && (
         <div className="content-container">
           <div className="card">
             <NoteBook />
           </div>
         </div>
       )}
-      {pageStatus.current.pivotKey === 'pivot-4' && <DashBoardPage />}
-      {pageStatus.current.pivotKey === 'pivot-5' && <DevPage />}
-      {pageStatus.current.pivotKey === 'pivot-6' && <VisualInterface />}
-      {pageStatus.current.pivotKey === 'pivot-7' && <SupportPage />}
-      {pageStatus.current.pivotKey === 'pivot-8' && <LTSPage />}
+      {appKey === PIVOT_KEYS.dashBoard && <DashBoardPage />}
+      {appKey === PIVOT_KEYS.explainer && <DevPage />}
+      {appKey === PIVOT_KEYS.editor && <VisualInterface />}
+      {appKey === PIVOT_KEYS.support && <SupportPage />}
+      {appKey === PIVOT_KEYS.lts && <LTSPage />}
     </div>
   )
 }
