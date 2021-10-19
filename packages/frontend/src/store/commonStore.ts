@@ -1,5 +1,6 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { COMPUTATION_ENGINE, PIVOT_KEYS } from '../constants';
+import { destroyRathWorker, initRathWorker, rathEngineService } from '../service';
 
 export class CommonStore {
     public appKey: string = PIVOT_KEYS.dataSource;
@@ -10,7 +11,19 @@ export class CommonStore {
     public setAppKey (key: string) {
         this.appKey = key
     }
-    public setComputationEngine(engine: string) {
-        this.computationEngine = engine;
+    public async setComputationEngine(engine: string) {
+        try {
+            destroyRathWorker();
+            initRathWorker(engine);
+            await rathEngineService({
+                task: 'init',
+                props: engine
+            })
+            runInAction(() => {
+                this.computationEngine = engine;
+            })
+        } catch (error) {
+            console.error(error);
+        }
     }
 }

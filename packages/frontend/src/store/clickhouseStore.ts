@@ -2,7 +2,7 @@ import { makeAutoObservable, observable, runInAction } from "mobx";
 import { IDBFieldMeta, IRawField, IRow } from "../interfaces";
 import { dbDataType2DataType, inferAnalyticTypeFromDataType, inferSemanticTypeFromDataType } from "../utils";
 const CH_CONGIH = {
-    connectorURL: 'http://localhost:2333'
+    connectorURL: 'https://localhost:2333'
 }
 export class ClickHouseStore {
     public databases: string[] = [];

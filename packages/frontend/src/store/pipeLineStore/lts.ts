@@ -7,6 +7,8 @@ import { IRow } from "../../interfaces";
 import { IVizSpace } from "../../pages/lts/association/assCharts";
 import { initRathWorker, rathEngineService } from "../../service";
 import { RathEngine } from "../../workers/engine/core";
+import { ClickHouseStore } from "../clickhouseStore";
+import { CommonStore } from "../commonStore";
 import { DataSourceStore } from "../dataSourceStore";
 
 // const identityWorker: InsightWorker = async (aggData, dimensions, measures) => {
@@ -30,28 +32,33 @@ const PRINT_PERFORMANCE = new URL(window.location.href).searchParams.get('perfor
 
 export class LTSPipeLine {
     private dataSourceStore: DataSourceStore;
+    private commonStore: CommonStore;
+    private clickHouseStore: ClickHouseStore;
     // private vie: RathEngine;
     // private vie: VIEngine;
     public insightSpaces: IInsightSpace[];
     public fields: IFieldSummary[] = [];
     public dataSource: IRow[] = [];
     public computing: boolean = false;
-    constructor (dataSourceStore: DataSourceStore) {
+    constructor (dataSourceStore: DataSourceStore, commonStore: CommonStore, clickHouseStore: ClickHouseStore) {
         makeAutoObservable(this, {
             insightSpaces: observable.ref,
             fields: observable.ref,
             dataSource: observable.ref
         });
         this.dataSourceStore = dataSourceStore;
+        this.commonStore = commonStore;
+        this.clickHouseStore = clickHouseStore;
 
         this.insightSpaces = [] as IInsightSpace[];
         this.initEngine();
     }
     public async initEngine () {
         try {
-            initRathWorker();
+            initRathWorker(this.commonStore.computationEngine);
             const res = await rathEngineService({
-                task: 'init'
+                task: 'init',
+                props: this.commonStore.computationEngine
             })
         } catch (error) {
             console.error(error)
@@ -65,8 +72,10 @@ export class LTSPipeLine {
             const res = await rathEngineService({
                 task: 'start',
                 props: {
+                    mode: this.commonStore.computationEngine,
                     dataSource: cleanedData,
-                    fieldMetas
+                    fieldMetas,
+                    viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`
                 }
             })
             PRINT_PERFORMANCE && console.log(res.performance)

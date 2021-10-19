@@ -18,20 +18,6 @@ const ObservableAssociation: React.FC = props => {
     const [pivotKey, setPivotKey] = useState<string>('T1')
     const [assoIndex, setAssoIndex] = useState<number>(0);
 
-    const fieldScores: FieldSummary[] = fields.map(f => {
-        const distribution = [...f.domain.entries()].map(c => ({
-            memberName: c[0],
-            count: c[1]
-        }))
-        return ({
-            fieldName: f.key,
-            distribution,
-            entropy: f.features.entropy,
-            maxEntropy: f.features.maxEntropy,
-            type: f.semanticType
-        })
-    })
-
     useEffect(() => {
         setAssoIndex(0);
     }, [pivotKey, assoListT1, assoListT2])
@@ -59,7 +45,7 @@ const ObservableAssociation: React.FC = props => {
             }}
             dataSource={dataSource}
             visualConfig={toJS(visualConfig)}
-            fieldScores={fieldScores}
+            fieldScores={fields}
             vizList={assoShownList}
           />
     </div>

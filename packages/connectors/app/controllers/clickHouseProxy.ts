@@ -1,7 +1,7 @@
 import { Context } from "koa";
 import axios from 'axios';
 import { useGlobalStore } from "../store";
-import { sendFailResponse, sendSuccessResponse } from "../utils";
+import { sendFailResponse, sendPureResponse, sendSuccessResponse } from "../utils";
 import { CHQuery, getFieldMetas } from "../services/chmeta";
 import { parseTable } from "../services/chparser";
 
@@ -14,7 +14,6 @@ export async function CHGeneralProxy (ctx: Context) {
     // http://localhost:8123?query=SELECT * from datasets.suicideRate;
     const config = useGlobalStore().getConfig();
     const url = ctx.request.URL;
-    console.log(url);
     try {
         const paramsObj: {[key: string]: any} = {};
         for (let [pk, pv] of url.searchParams.entries()) {
@@ -24,7 +23,7 @@ export async function CHGeneralProxy (ctx: Context) {
             method: ctx.request.method as 'post' | 'get',
             params: paramsObj
         });
-        sendSuccessResponse(ctx, res.data)
+        sendPureResponse(ctx, res.data);
     } catch (error) {
         console.error(error);
         sendFailResponse(ctx, error)

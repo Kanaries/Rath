@@ -26,13 +26,14 @@ export interface StoreCollection {
 const langStore = new LangStore();
 const commonStore = new CommonStore();
 const dataSourceStore = new DataSourceStore();
+const clickHouseStore = new ClickHouseStore();
 const litePipeStore = new LitePipeStore(dataSourceStore);
-const ltsPipeLineStore = new LTSPipeLine(dataSourceStore);
+const ltsPipeLineStore = new LTSPipeLine(dataSourceStore, commonStore, clickHouseStore);
 const galleryStore = new GalleryStore(litePipeStore);
 const noteBookStore = new NoteBookStore(litePipeStore);
 const dashBoardStore = new DashBoardStore(litePipeStore);
 const exploreStore = new ExploreStore(ltsPipeLineStore);
-const clickHouseStore = new ClickHouseStore();
+
 
 const storeCol: StoreCollection = {
     commonStore,

@@ -1,73 +1,118 @@
+import { IFieldSummary, IInsightSpace } from "visual-insights";
+import { StatFuncName } from "visual-insights/build/esm/statistics";
 import { IFieldMeta, IRow } from "../../interfaces";
 import { IVizSpace } from "../../store/exploreStore";
+import { RathCHEngine } from "./clickhouse";
 // import { isSetEqual } from "../../utils/index";
 import { RathEngine } from "./core";
 
-const EngineRef: { current: RathEngine | null } = {
+const EngineRef: { current: RathEngine | null, mode: 'webworker' } | { current: RathCHEngine | null, mode: 'clickhouse' } = {
+    mode: 'webworker',
     current: null
 }
 
 export interface MessageProps {
-    task: 'init' | 'destroy' | 'start' | 'specification' | 'associate' | 'detail';
+    task: 'init' | 'destroy' | 'start' | 'specification' | 'associate' | 'detail' | 'cube';
     props?: any
 }
 
-function initEngine () {
-    EngineRef.current = new RathEngine();
-    console.log('rath engine is created.')
+function initEngine (engineMode: string) {
+    if (engineMode === 'webworker') {
+        EngineRef.current = new RathEngine();
+        EngineRef.mode = engineMode;
+    } else if (engineMode === 'clickhouse') {
+        EngineRef.current = new RathCHEngine();
+        EngineRef.current.utils.setCHConfig({
+            protocol: 'https',
+            host: 'localhost',
+            port: 2333,
+            path: '/api/ch/general'
+        })
+        EngineRef.mode = engineMode;
+    }
+    console.log(`Rath engine is created, engine mode is [${EngineRef.mode}].`)
 }
 
 function destroyEngine () {
     EngineRef.current = null;
 }
 
-interface StartPipeLineProps {
+type StartPipeLineProps = {
+    mode: 'webworker';
     dataSource: IRow[];
     fieldMetas: IFieldMeta[];
+} | {
+    mode: 'clickhouse';
+    fieldMetas: IFieldMeta[];
+    viewName: string;
 }
-function startPipeLine (props: StartPipeLineProps) {
-    const { dataSource, fieldMetas } = props;
-    const engine = EngineRef.current;
-    if (engine === null) throw new Error('Engine is not created.');
+
+async function startPipeLine (props: StartPipeLineProps) {
     const times: number[] = [];
     const prints: IRow[] = [];
+    let insightSpaces: IInsightSpace[] = [];
+    let viewSampleData: IRow[] = [];
+    let viewFields: IFieldSummary[] = [];
     times.push(performance.now())
-    const fieldsProps = fieldMetas.map(f => ({ key: f.fid, semanticType: f.semanticType, analyticType: f.analyticType, dataType: '?' as '?' }));
+    console.log('[computation engine mode]', props.mode)
+    if (EngineRef.mode === 'webworker' && props.mode === 'webworker') {
+        const { dataSource, fieldMetas } = props;
+        const fieldsProps = fieldMetas.map(f => ({ key: f.fid, semanticType: f.semanticType, analyticType: f.analyticType, dataType: '?' as '?' }));
+        const engine = EngineRef.current;
+        if (engine === null) throw new Error('Engine is not created.');
+        engine.setData(dataSource)
+            .setFields(fieldsProps)
+        engine.univarSelection();
+        times.push(performance.now())
+        prints.push({ task: 'init&univar', value: times[times.length - 1] - times[times.length - 2] })
+        engine.buildGraph();
+        times.push(performance.now())
+        prints.push({ task: 'co-graph', value: times[times.length - 1] - times[times.length - 2] })
+        engine.clusterFields();
+        times.push(performance.now())
+        prints.push({ task: 'clusters', value: times[times.length - 1] - times[times.length - 2] })
+        engine.buildCube();
+        times.push(performance.now())
+        prints.push({ task: 'cube', value: times[times.length - 1] - times[times.length - 2] })
+        engine.buildSubspaces();
+        times.push(performance.now())
+        prints.push({ task: 'subspaces', value: times[times.length - 1] - times[times.length - 2] });
+        engine.createInsightSpaces();
+        times.push(performance.now())
+        prints.push({ task: 'insights', value: times[times.length - 1] - times[times.length - 2] })
+        engine.setInsightScores();
+        times.push(performance.now())
+        prints.push({ task: 'scores', value: times[times.length - 1] - times[times.length - 2] })
+        engine.insightSpaces = engine.insightSpaces.filter(s => typeof s.score === 'number' && !isNaN(s.score));
+        engine.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
 
-    engine.setData(dataSource)
-        .setFields(fieldsProps)
-    engine.univarSelection();
-    times.push(performance.now())
-    prints.push({ task: 'init&univar', value: times[times.length - 1] - times[times.length - 2] })
-    engine.buildGraph();
-    times.push(performance.now())
-    prints.push({ task: 'co-graph', value: times[times.length - 1] - times[times.length - 2] })
-    engine.clusterFields();
-    times.push(performance.now())
-    prints.push({ task: 'clusters', value: times[times.length - 1] - times[times.length - 2] })
-    engine.buildCube();
-    times.push(performance.now())
-    prints.push({ task: 'cube', value: times[times.length - 1] - times[times.length - 2] })
-    engine.buildSubspaces();
-    times.push(performance.now())
-    prints.push({ task: 'subspaces', value: times[times.length - 1] - times[times.length - 2] });
-    engine.createInsightSpaces();
-    times.push(performance.now())
-    prints.push({ task: 'insights', value: times[times.length - 1] - times[times.length - 2] })
-    engine.setInsightScores();
-    times.push(performance.now())
-    prints.push({ task: 'scores', value: times[times.length - 1] - times[times.length - 2] })
-    engine.insightSpaces = engine.insightSpaces.filter(s => typeof s.score === 'number' && !isNaN(s.score));
-    engine.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
+        viewFields = engine.fields;
+        insightSpaces = engine.insightSpaces;
+        viewSampleData = engine.dataSource;
+    } else if (EngineRef.mode === 'clickhouse' && props.mode === 'clickhouse') {
+        const engine = EngineRef.current;
+        if (engine === null) throw new Error('Engine is not created.');
+        const { fieldMetas, viewName } = props;
+        // engine.setRawFields(fieldsProps);
+        await engine.uvsView(viewName);
+        await engine.buildDataGraph();
+        engine.clusterFields();
+        engine.buildSubspaces();
+        insightSpaces = await engine.fastInsightRecommand();
+        viewFields = engine.fields;
+        viewSampleData = await engine.loadData(viewName);
+    } else {
+        throw new Error(`Engine mode is not support: ${props.mode}`)
+    }
     return {
-        insightSpaces: engine.insightSpaces,
-        fields: engine.fields,
-        dataSource: engine.dataSource,
+        insightSpaces,
+        fields: viewFields,
+        dataSource: viewSampleData,
         performance: prints
     };
 }
 
-function specify (spaceIndex: number) {
+async function specify (spaceIndex: number) {
     const engine = EngineRef.current;
     if (engine === null) throw new Error('Engine is not created.');
     if (engine.insightSpaces && spaceIndex < engine.insightSpaces.length) {
@@ -94,79 +139,73 @@ function intersect (A: string[], B: string[]) {
     return false;
 }
 
-function associate (spaceIndex: number) {
+async function associate (spaceIndex: number) {
     const engine = EngineRef.current;
     if (engine === null) throw new Error('Engine is not created.');
-    const { insightSpaces } = engine;
-    const space = insightSpaces[spaceIndex];
-    const { dimensions, measures, dataGraph } = engine;
-    // type1: meas cor assSpacesT1
-    // type2: dims cor assSpacesT2
-    // this.vie.dataGraph.DG
-    const dimIndices = space.dimensions.map(f => dimensions.findIndex(d => f === d));
-    const meaIndices = space.measures.map(f => measures.findIndex(m => f === m));
-    const assSpacesT1: IVizSpace[] = [];
-    const assSpacesT2: IVizSpace[] = [];
-    for (let i = 0; i < insightSpaces.length; i++) {
-        if (i === spaceIndex) continue;
-        if (!intersect(insightSpaces[i].dimensions, space.dimensions)) continue;
-        let t1_score = 0;
-        const iteMeaIndices = insightSpaces[i].measures.map(f => measures.findIndex(m => f === m));
-        for (let j = 0; j < meaIndices.length; j++) {
-            for (let k = 0; k < iteMeaIndices.length; k++) {
-                t1_score += dataGraph.MG[j][k]
-            }
-        }
-        t1_score /= (meaIndices.length * iteMeaIndices.length)
-        if (t1_score > 0.7) {
-            const spec = specify(i);
-            if (spec) {
-                assSpacesT1.push({
-                    ...insightSpaces[i],
-                    score: t1_score,
-                    ...spec
-                })
-            }
-        }
-    }
-    for (let i = 0; i < insightSpaces.length; i++) {
-        if (i === spaceIndex) continue;
-        if (!intersect(insightSpaces[i].measures, space.measures)) continue;
-        // if (!isSetEqual(insightSpaces[i].measures, space.measures)) continue;
-        let t1_score = 0;
-        const iteDimIndices = insightSpaces[i].dimensions.map(f => dimensions.findIndex(m => f === m));
-        for (let j = 0; j < dimIndices.length; j++) {
-            for (let k = 0; k < iteDimIndices.length; k++) {
-                t1_score += dataGraph.DG[j][k]
-            }
-        }
-        t1_score /= (dimIndices.length * iteDimIndices.length)
-        if (t1_score > 0.65) { // (1 + 0.3) / 2
-            const spec = specify(i);
-            if (spec) {
-                assSpacesT2.push({
-                    ...insightSpaces[i],
-                    score: t1_score,
-                    ...spec
-                })
-            }
-        }
-    }
-    assSpacesT1.sort((a, b) => (b.score || 0) - (a.score || 0))
-    assSpacesT2.sort((a, b) => (b.score || 0) - (a.score || 0))
-    return {
-        assSpacesT1,
-        assSpacesT2
+    engine.associate(spaceIndex);
+    if (EngineRef.mode === 'webworker' && EngineRef.mode === 'webworker') {
+        return engine.associate(spaceIndex);
+    } else if (EngineRef.mode === 'clickhouse' && EngineRef.mode === 'clickhouse') {
+        return engine.associate(spaceIndex);
     }
 }
 
+function aggregate (props: { dimensions: string[]; measures: string[]; aggregators: StatFuncName[] }): IRow[] {
+    if (EngineRef.mode === 'webworker' && EngineRef.mode === 'webworker') {
+        const engine = EngineRef.current;
+        if (engine === null) throw new Error('Engine is not created.');
+        const { dimensions, measures, aggregators } = props;
+        const cube = engine.cube;
+        const cuboid = cube.getCuboid(dimensions);
+        const aggData = cuboid.getState(measures, aggregators);
+        return aggData;
+    } else if (EngineRef.mode === 'clickhouse' && EngineRef.mode === 'clickhouse') {
+        const engine = EngineRef.current;
+        if (engine === null) throw new Error('Engine is not created.');
+        // engine.loadD
+        // return engine.associate(spaceIndex);
+        return []
+    }
+    return []
+}
 
-export function router (e: { data: MessageProps }, onSuccess: (res?: any) => void, onFailed: (res: string) => void) {
+// class WorkerRouter {
+//     private routeMap: Map<string, (props?: any) => Promise<any>> = new Map();
+//     private onSuccess: (res?: any) => void;
+//     private onFailed: (res: string) => void
+//     constructor (onSuccess: (res?: any) => void, onFailed: (res: string) => void) {
+//         this.onFailed = onFailed;
+//         this.onSuccess = onSuccess;
+//     }
+//     public route(task: MessageProps['task'], callback: (props?: any) => Promise<any>) {
+//         this.routeMap.set(task, callback);
+//     }
+//     public async handle (task: MessageProps['task'], props: any) {
+//         try {
+//             if (!this.routeMap.has(task)) {
+//                 throw new Error(`Unknow task: "${task}".`)
+//             }
+//             const taskHandler = this.routeMap.get('task')!;
+//             const res = await taskHandler(props);
+//             this.onSuccess(res)
+//             return res;
+//         } catch (error: any) {
+//             this.onFailed(error.toString())
+//         }
+//     }
+// }
+
+export async function router (e: { data: MessageProps }, onSuccess: (res?: any) => void, onFailed: (res: string) => void) {
     const req = e.data;
+    console.log(req.task, 'worker router')
     try {
         switch (req.task) {
+            case 'cube':
+                const aggData = aggregate(req.props);
+                onSuccess(aggData);
+                break;
             case 'init':
-                initEngine();
+                initEngine(req.props);
                 onSuccess()
                 break;
             case 'destroy':
@@ -174,15 +213,15 @@ export function router (e: { data: MessageProps }, onSuccess: (res?: any) => voi
                 onSuccess()
                 break;
             case 'start':
-                const res_start = startPipeLine(req.props);
+                const res_start = await startPipeLine(req.props);
                 onSuccess(res_start);
                 break;
             case 'specification':
-                const res_spec = specify(req.props);
+                const res_spec = await specify(req.props);
                 onSuccess(res_spec)
                 break;
             case 'associate':
-                const res_asso = associate(req.props);
+                const res_asso = await associate(req.props);
                 onSuccess(res_asso)
                 break;
             case 'detail':

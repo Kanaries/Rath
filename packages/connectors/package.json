@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "start": "ts-node ./app/main.ts",
-    "dev": "npm run start"
+    "dev": "npm run start",
+    "init": "./https.sh"
   },
   "keywords": [],
   "author": "",

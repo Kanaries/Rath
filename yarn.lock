@@ -3558,6 +3558,13 @@ axios@^0.21.4:
   dependencies:
     follow-redirects "^1.14.0"
 
+axios@^0.22.0:
+  version "0.22.0"
+  resolved "https://registry.npmmirror.com/axios/download/axios-0.22.0.tgz?cache=0&sync_timestamp=1634053131158&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Faxios%2Fdownload%2Faxios-0.22.0.tgz#bf702c41fb50fbca4539589d839a077117b79b25"
+  integrity sha1-v3AsQftQ+8pFOVidg5oHcRe3myU=
+  dependencies:
+    follow-redirects "^1.14.4"
+
 axobject-query@^2.2.0:
   version "2.2.0"
   resolved "https://registry.npm.taobao.org/axobject-query/download/axobject-query-2.2.0.tgz#943d47e10c0b704aa42275e20edf3722648989be"
@@ -6729,7 +6736,7 @@ follow-redirects@^1.0.0:
   resolved "https://registry.nlark.com/follow-redirects/download/follow-redirects-1.14.1.tgz#d9114ded0a1cfdd334e164e6662ad02bfd91ff43"
   integrity sha1-2RFN7Qoc/dM04WTmZirQK/2R/0M=
 
-follow-redirects@^1.14.0:
+follow-redirects@^1.14.0, follow-redirects@^1.14.4:
   version "1.14.4"
   resolved "https://registry.nlark.com/follow-redirects/download/follow-redirects-1.14.4.tgz?cache=0&sync_timestamp=1631622129411&other_urls=https%3A%2F%2Fregistry.nlark.com%2Ffollow-redirects%2Fdownload%2Ffollow-redirects-1.14.4.tgz#838fdf48a8bbdd79e52ee51fb1c94e3ed98b9379"
   integrity sha1-g4/fSKi73XnlLuUfsclOPtmLk3k=
@@ -14509,6 +14516,16 @@ visual-insights@0.6.3:
   integrity sha1-7TmM8rJpRtA7Sa6kxI6oV/ar3es=
   dependencies:
     assert "^2.0.0"
+    cube-core "^2.13.0"
+    simple-statistics "^7.1.0"
+
+visual-insights@0.7.2:
+  version "0.7.2"
+  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.2.tgz?cache=0&sync_timestamp=1634558175507&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fvisual-insights%2Fdownload%2Fvisual-insights-0.7.2.tgz#6bc9e598673bd06a1ffefa43d256355be8ecd929"
+  integrity sha1-a8nlmGc70Gof/vpD0lY1W+js2Sk=
+  dependencies:
+    assert "^2.0.0"
+    axios "^0.22.0"
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 

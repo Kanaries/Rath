@@ -49,11 +49,11 @@ function App() {
   }
 
   useEffect(() => {
-    initRathWorker();
+    initRathWorker(commonStore.computationEngine);
     return () => {
       destroyRathWorker();
     }
-  }, [])
+  }, [commonStore])
 
   if (!langStore.loaded) {
     return <div></div>

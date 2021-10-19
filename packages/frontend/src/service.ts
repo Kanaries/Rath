@@ -29,6 +29,8 @@ import InsightViewWorker from './workers/dev.worker?worker';
 import RathEngineWorker from './workers/engine/index.worker?worker';
 import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
 import { MessageProps } from './workers/engine/service';
+import { COMPUTATION_ENGINE } from './constants';
+import { RathCHEngine } from './workers/engine/clickhouse';
 
 let server = '//lobay.moe:8443';
 
@@ -81,8 +83,13 @@ export function destroyRathWorker () {
   }
 }
 
-export function initRathWorker () {
+export function initRathWorker (engineMode: string) {
   if (rathGlobalWorkerRef.current === null) {
+    // if (engineMode === COMPUTATION_ENGINE.clickhouse) {
+    //   rathGlobalWorkerRef.current = new RathCHEngine();
+    // } else {
+    //   rathGlobalWorkerRef.current = new RathEngineWorker();
+    // }
     rathGlobalWorkerRef.current = new RathEngineWorker();
   }
 }

@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, IconButton, SpinButton, Position, CommandBarButton } from 'office-ui-fabric-react';
+import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton } from 'office-ui-fabric-react';
 import React, { useCallback } from 'react';
 import { useGlobalStore } from '../../store';
 import BaseChart from '../../visBuilder/vegaBase';
@@ -84,7 +84,7 @@ const LTSPage: React.FC = props => {
                             defaultStack={visualConfig.defaultStack}
                             dimensions={insightSpaces[pageIndex].dimensions}
                             measures={insightSpaces[pageIndex].measures}
-                            dataSource={dataSourceStore.cleanedData}
+                            dataSource={visualConfig.defaultAggregated ? spec.dataView : dataSourceStore.cleanedData}
                             schema={spec.schema}
                             fieldFeatures={dataSourceStore.fieldMetas.map(f => ({
                                 name: f.fid,

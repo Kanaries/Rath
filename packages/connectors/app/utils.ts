@@ -12,6 +12,11 @@ export async function sendSuccessResponse(ctx: Context, payload: any) {
         data: payload
     }
 }
+
+export async function sendPureResponse(ctx: Context, payload: any) {
+    ctx.body = payload
+}
+
 export async function sendFailResponse(ctx: Context, payload: any) {
     ctx.body = {
         success: false,

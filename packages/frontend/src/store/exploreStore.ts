@@ -3,6 +3,7 @@ import { Specification } from 'visual-insights';
 import { IInsightSpace } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
 import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
 import { IRow, PreferencePanelConfig } from '../interfaces';
+// import { rathEngineService } from '../service';
 import { isSetEqual } from '../utils';
 import { LTSPipeLine } from './pipeLineStore/lts';
 
@@ -23,6 +24,7 @@ export class ExploreStore {
     public showAsso: boolean = false;
     public showPreferencePannel: boolean = false;
     public visualConfig: PreferencePanelConfig;
+    // public viewData: IRow[] = []
     constructor (ltsPipeLineStore: LTSPipeLine) {
         this.visualConfig = {
             aggregator: "sum",
@@ -34,7 +36,8 @@ export class ExploreStore {
             specForGraphicWalker: observable.ref,
             details: observable.ref,
             assoListT1: observable.ref,
-            assoListT2: observable.ref
+            assoListT2: observable.ref,
+            // viewData: observable.ref
         });
         this.ltsPipeLineStore = ltsPipeLineStore;
     }
@@ -65,6 +68,21 @@ export class ExploreStore {
     public setShowPreferencePannel(show: boolean) {
         this.showPreferencePannel = show;
     }
+    // public async getViewData (dimensions: string[], measures: string[]) {
+    //     try {
+    //         const data = await rathEngineService({
+    //             task: 'cube',
+    //             props: {
+    //                 dimensions,
+    //                 measures,
+    //                 aggregators: measures.map(m => 'sum')
+    //             }
+    //         })
+    //         return data;
+    //     } catch (error) {
+    //         return []
+    //     }
+    // }
     public async goToLastView () {
         const { pageIndex, insightSpaces } = this;
         this.emitViewChangeTransaction((pageIndex - 1 + insightSpaces.length) % insightSpaces.length)
@@ -76,12 +94,15 @@ export class ExploreStore {
     public async emitViewChangeTransaction(index: number) {
         // pipleLineStore统一提供校验逻辑
         if (this.ltsPipeLineStore.insightSpaces && this.ltsPipeLineStore.insightSpaces.length > index) {
+            const iSpace = this.ltsPipeLineStore.insightSpaces[index];
             const spec = await this.ltsPipeLineStore.specify(index);
+            // const viewData = await this.getViewData(iSpace.dimensions, iSpace.measures);
             if (spec) {
                 // this.spec = spec;
                 const agg = !spec.schema.geomType?.includes('point');
                 runInAction(() => {
                     this.spec = spec;
+                    // this.viewData = viewData;
                     this.visualConfig.defaultAggregated = agg;
                     this.pageIndex = index;
                     this.details = []
@@ -102,14 +123,12 @@ export class ExploreStore {
         })
     }
     public async getAssociatedViews () {
-        console.log('get')
         const asso = await this.ltsPipeLineStore.getAssociatedViews(this.pageIndex);
         runInAction(() => {
             this.assoListT1 = asso.assSpacesT1;
             this.assoListT2 = asso.assSpacesT2;
             this.showAsso = true;
         })
-        // console.log(this.assoList)
     }
     public bringToGrphicWalker () {
         if (this.spec && this.spec.schema) {
