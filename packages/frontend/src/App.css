@@ -110,3 +110,7 @@ h2, h3 {
   float: right;
   padding: 0.5rem;
 }
+
+.message-container {
+  padding: 0.2em 6em;
+}

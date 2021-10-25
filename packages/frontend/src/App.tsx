@@ -13,6 +13,7 @@ import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
 import LTSPage from './pages/lts';
 import UserSettings from './components/userSettings';
+import MessageSegment from "./components/messageSegment";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { destroyRathWorker, initRathWorker } from "./service";
@@ -97,6 +98,9 @@ function App() {
             </div>
           </div>
         </div>
+      </div>
+      <div className="message-container">
+        <MessageSegment />
       </div>
       {appKey === PIVOT_KEYS.gallery && (
         <Gallery />
