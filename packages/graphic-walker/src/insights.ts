@@ -352,7 +352,7 @@ export class DataExplainer {
                         neighbors.push({
                             dis,
                             index: i,
-                            imp: tf?.domain.size || Infinity,
+                            imp: tf?.features.unique || Infinity,
                         });
                     }
                 }

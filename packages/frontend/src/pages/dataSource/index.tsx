@@ -1,5 +1,5 @@
 import React, {  useCallback, useEffect } from "react";
-import intl from 'react-intl-universal'
+import intl, { load } from 'react-intl-universal'
 import { useComposeState } from '../../hooks/index';
 import { ComboBox, PrimaryButton, Stack, DefaultButton, Toggle, Dropdown, IDropdownOption } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
@@ -10,6 +10,7 @@ import { Record } from "../../global";
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
 import { COMPUTATION_ENGINE, PIVOT_KEYS } from "../../constants";
+import { IRawField, IRow } from "../../interfaces";
 interface PageStatus {
   show: {
     insightBoard: boolean;
@@ -27,7 +28,7 @@ interface DataSourceBoardProps {
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, exploreStore } = useGlobalStore();
 
-  const { cleanedData, cleanMethod, rawData } = dataSourceStore;
+  const { cleanedData, cleanMethod, rawData, loading } = dataSourceStore;
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
@@ -76,6 +77,25 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     commonStore.setAppKey(PIVOT_KEYS.lts);
   }, [ltsPipeLineStore, exploreStore, commonStore])
 
+  const onSelectPannelClose = useCallback(() => {
+    setPageStatus(draft => {
+      draft.show.dataConfig = false;
+    })
+  }, [setPageStatus])
+
+  const onSelectDataLoaded = useCallback((fields: IRawField[], dataSource: IRow[]) => {
+    dataSourceStore.loadData(fields, dataSource);
+  }, [dataSourceStore])
+
+  const onSelectStartLoading = useCallback(() => {
+    dataSourceStore.setLoading(true);
+  }, [dataSourceStore])
+
+  const onSelectLoadingFailed = useCallback((err: any) => {
+    dataSourceStore.setLoading(false);
+    commonStore.showError('error', `[Data Loading Error]${err}`)
+  }, [dataSourceStore, commonStore])
+
   const engineOptions: IDropdownOption[] = [
     { text: intl.get(`config.computationEngine.${COMPUTATION_ENGINE.clickhouse}`), key: COMPUTATION_ENGINE.clickhouse },
     { text: intl.get(`config.computationEngine.${COMPUTATION_ENGINE.webworker}`), key: COMPUTATION_ENGINE.webworker }
@@ -106,14 +126,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           />
           
           <Selection show={pageStatus.show.dataConfig}
-            onClose={() => {
-              setPageStatus(draft => {
-                draft.show.dataConfig = false;
-              })
-            }}
-            onDataLoaded={(fields, dataSource) => {
-              dataSourceStore.loadData(fields, dataSource);
-            }}
+            loading={loading}
+            onClose={onSelectPannelClose}
+            onDataLoaded={onSelectDataLoaded}
+            onStartLoading={onSelectStartLoading}
+            onLoadingFailed={onSelectLoadingFailed}
           />
         </Stack>
         <div style={{ margin: '1em 0px' }}>

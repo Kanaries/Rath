@@ -17,3 +17,5 @@ export const COMPUTATION_ENGINE = {
   clickhouse: 'clickhouse',
   webworker: 'webworker'
 }
+
+export const DEMO_DATA_REQUEST_TIMEOUT = 1000 * 10;

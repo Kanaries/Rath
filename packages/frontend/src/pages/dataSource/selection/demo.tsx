@@ -5,33 +5,53 @@ import intl from 'react-intl-universal';
 import { DemoDataAssets, IDemoDataKey, useDemoDataOptions } from '../config';
 import { logDataImport } from '../../../loggers/dataImport';
 import { IRawField, IRow } from '../../../interfaces';
+import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 
 interface DemoDataProps {
     onClose: () => void;
+    onStartLoading: () => void;
+    onLoadingFailed: (err: any) => void;
     onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
 }
 
-async function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<{dataSource: IRow[], fields: IRawField[]}> {
-    const assetUrl = DemoDataAssets[dsKey];
-    try {
-        const res = await fetch(assetUrl);
-        const { dataSource, fields } = await res.json();
-        return { dataSource, fields };
-    } catch (error) {
-        console.error(error)
-        return {
-            dataSource: [],
-            fields: []
-        }
-    }
+function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<{dataSource: IRow[], fields: IRawField[]}> {
+    return new Promise<{dataSource: IRow[], fields: IRawField[]}>((resolve, reject) => {
+        const assetUrl = DemoDataAssets[dsKey];
+        let isTimeout = false;
+        setTimeout(() => {
+            isTimeout = true;
+        }, DEMO_DATA_REQUEST_TIMEOUT)
+        fetch(assetUrl).then(res => res.json())
+            .then(res => {
+                if (!isTimeout) {
+                    resolve(res)
+                } else {
+                    reject('Demo Data Request Timeout.')
+                }
+            })
+            .catch(err => reject(err));
+    })
+    // const assetUrl = DemoDataAssets[dsKey];
+    // try {
+    //     const res = await fetch(assetUrl);
+    //     const { dataSource, fields } = await res.json();
+    //     return { dataSource, fields };
+    // } catch (error) {
+    //     console.error(error)
+    //     return {
+    //         dataSource: [],
+    //         fields: []
+    //     }
+    // }
 } 
 
 const DemoData: React.FC<DemoDataProps> = props => {
-    const { onDataLoaded, onClose } = props;
+    const { onDataLoaded, onClose, onStartLoading, onLoadingFailed } = props;
     const options = useDemoDataOptions();
     const [dsKey, setDSKey] = useState<IDemoDataKey>('CARS');
 
     const loadData = useCallback(() => {
+        onStartLoading();
         requestDemoData(dsKey).then(data => {
             const { dataSource, fields } = data;
             onDataLoaded(fields, dataSource);
@@ -42,9 +62,11 @@ const DemoData: React.FC<DemoDataProps> = props => {
                 dataSource: [],
                 size: dataSource.length,
             });
+        }).catch((err) => {
+            onLoadingFailed(err);
         })
         onClose();
-    }, [dsKey, onDataLoaded, onClose])
+    }, [dsKey, onDataLoaded, onClose, onStartLoading, onLoadingFailed])
 
     const labelId = useId('demo-ds');
     return (

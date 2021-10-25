@@ -14510,19 +14510,10 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-visual-insights@0.6.3:
-  version "0.6.3"
-  resolved "https://registry.nlark.com/visual-insights/download/visual-insights-0.6.3.tgz#ed398cf2b26946d03b49aea4c48ea857f6abddeb"
-  integrity sha1-7TmM8rJpRtA7Sa6kxI6oV/ar3es=
-  dependencies:
-    assert "^2.0.0"
-    cube-core "^2.13.0"
-    simple-statistics "^7.1.0"
-
-visual-insights@0.7.2:
-  version "0.7.2"
-  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.2.tgz?cache=0&sync_timestamp=1634558175507&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fvisual-insights%2Fdownload%2Fvisual-insights-0.7.2.tgz#6bc9e598673bd06a1ffefa43d256355be8ecd929"
-  integrity sha1-a8nlmGc70Gof/vpD0lY1W+js2Sk=
+visual-insights@0.7.3:
+  version "0.7.3"
+  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.3.tgz#5c1520a916602e43a9097d70558e1d04afed6785"
+  integrity sha1-XBUgqRZgLkOpCX1wVY4dBK/tZ4U=
   dependencies:
     assert "^2.0.0"
     axios "^0.22.0"

@@ -1,6 +1,6 @@
-import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
+import { makeAutoObservable, observable, runInAction } from "mobx";
 import { ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
-import { BIField, BIFieldType, Record } from "../global";
+import { BIFieldType } from "../global";
 import { IFieldMeta, IRawField, IRow } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
 import { getFieldsSummaryService } from "../service";
@@ -34,6 +34,7 @@ export class DataSourceStore {
      * 作为计算属性来考虑
      */
     public fieldMetas: IFieldMeta[] = [];
+    public loading: boolean = false;
 
     constructor() {
         makeAutoObservable(this, {
@@ -77,6 +78,10 @@ export class DataSourceStore {
         return cleanData(deepcopy(dataSource), dimensions, measures, cleanMethod)
     }
 
+    public setLoading (loading: boolean) {
+        this.loading = loading;
+    }
+
     public setCleanMethod (method: CleanMethod) {
         this.cleanMethod = method;
     }
@@ -111,6 +116,7 @@ export class DataSourceStore {
             disable: false
         }))
         this.rawData = rawData
+        this.loading = false;
     }
 
     public async getFieldsMetas () {
