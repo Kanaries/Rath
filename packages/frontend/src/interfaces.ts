@@ -46,3 +46,5 @@ export interface IDBFieldMeta {
     fid: string;
     dataType: string;
 }
+
+export type IECStatus = 'none' | 'proxy' | 'engine';

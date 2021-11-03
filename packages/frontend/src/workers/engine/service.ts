@@ -1,7 +1,6 @@
 import { IFieldSummary, IInsightSpace } from "visual-insights";
 import { StatFuncName } from "visual-insights/build/esm/statistics";
 import { IFieldMeta, IRow } from "../../interfaces";
-import { IVizSpace } from "../../store/exploreStore";
 import { RathCHEngine } from "./clickhouse";
 // import { isSetEqual } from "../../utils/index";
 import { RathEngine } from "./core";

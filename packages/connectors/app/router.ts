@@ -7,10 +7,13 @@ import {
     CHTableDescProxy,
     CHTableListProxy
 } from './controllers/clickHouseProxy';
-import { ping } from './controllers/ping';
+import { connectionTest } from './controllers/connection';
+import { indexPage } from './controllers/index';
 const router = new Router();
 
-router.get('/ping', ping);
+router.get('/', indexPage);
+router.options('/connect', connectionTest);
+router.post('/connect', connectionTest);
 router.get('/api/ch/general', CHGeneralProxy);
 router.post('/api/ch/general', CHGeneralProxy);
 

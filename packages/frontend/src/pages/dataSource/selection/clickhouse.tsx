@@ -1,6 +1,7 @@
-import { observer } from 'mobx-react-lite';
-import { Dropdown, IDropdownOption, PrimaryButton, ProgressIndicator } from 'office-ui-fabric-react';
 import React, { useCallback, useEffect } from  'react';
+import { observer } from 'mobx-react-lite';
+import ConnectionStatus from '../../../components/connectionStatus';
+import { Dropdown, IDropdownOption, PrimaryButton, ProgressIndicator } from 'office-ui-fabric-react';
 import { IRawField, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 
@@ -11,13 +12,16 @@ interface CHDataProps {
 
 const ClickHouseData: React.FC<CHDataProps> = props => {
     const { onDataLoaded, onClose } = props;
-    const { clickHouseStore } = useGlobalStore();
+    const { clickHouseStore, commonStore } = useGlobalStore();
 
-    const { databases, viewNames, currentDB, currentView, loadingDBs, loadingViews } = clickHouseStore;
+    const { databases, viewNames, currentDB, currentView, loadingDBs, loadingViews, connectStatus } = clickHouseStore;
 
     useEffect(() => {
-        clickHouseStore.loadDBList();
-    }, [clickHouseStore])
+        clickHouseStore.loadDBList()
+            .catch((err) => {
+                commonStore.showError('error', err.toString());
+            })
+    }, [clickHouseStore, commonStore])
 
     const dbOptions: IDropdownOption[] = databases.map(db => ({
         key: db,
@@ -37,7 +41,12 @@ const ClickHouseData: React.FC<CHDataProps> = props => {
             })
     }, [clickHouseStore, onDataLoaded, onClose])
 
+    useEffect(() => {
+        clickHouseStore.testConnection();
+    }, [clickHouseStore])
+
     return <div>
+        <ConnectionStatus status={connectStatus} />
         { loadingDBs && <ProgressIndicator label="loading" description="loading database list from clickhouse" />}
         <Dropdown
             options={dbOptions}
