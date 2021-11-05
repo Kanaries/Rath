@@ -1,4 +1,4 @@
-import { DataSource,  Field, FieldType, OperatorType } from './global';
+import { Aggregator, DataSource,  Field, FieldType, OperatorType } from './global';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
@@ -31,6 +31,7 @@ import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
 import { MessageProps } from './workers/engine/service';
 import { COMPUTATION_ENGINE } from './constants';
 import { RathCHEngine } from './workers/engine/clickhouse';
+import { IRow } from './interfaces';
 
 let server = '//lobay.moe:8443';
 
@@ -312,7 +313,27 @@ interface ViewInDashBoard {
 
 export type DashBoard = ViewInDashBoard[];
 
-export async function generateDashBoard (dataSource: DataSource, dimensions: string[], measures: string[], subspaces: Subspace[], useServer?: boolean): Promise<DashBoard[]> {
+interface IDashBoardServiceProps{
+  dataSource: IRow[];
+  dimensions: string[];
+  measures: string[];
+  subspaces: Subspace[];
+  useServer?: boolean;
+}
+export async function generateDashBoard (props: IDashBoardServiceProps): Promise<DashBoard[]> {
+  const {
+    dataSource,
+    dimensions,
+    measures,
+    subspaces,
+    useServer
+  } = props;
+  const reqBody: {[key: string]: any} = {
+    dataSource,
+    dimensions,
+    measures,
+    subspaces
+  }
   let dashBoardList: DashBoard[] = [];
   if (useServer) {
     try {
@@ -321,12 +342,7 @@ export async function generateDashBoard (dataSource: DataSource, dimensions: str
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          dataSource,
-          dimensions,
-          measures,
-          subspaces
-        })
+        body: JSON.stringify(reqBody)
       });
       const result = await res.json();
       if (result.success) {
@@ -339,12 +355,7 @@ export async function generateDashBoard (dataSource: DataSource, dimensions: str
     }
   } else {
     const worker = new dashBoardGeneratorWorker();
-    const result = await workerService<DashBoard[], any>(worker, {
-        dataSource,
-        dimensions,
-        measures,
-        subspaces
-      });
+    const result = await workerService<DashBoard[], any>(worker, reqBody);
     if (result.success) {
       dashBoardList = result.data;
     } else {

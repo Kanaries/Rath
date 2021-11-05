@@ -1,8 +1,9 @@
 import { Specification, FieldType } from 'visual-insights/build/esm/commonTypes'
+import { Aggregator } from '../global';
 import { geomTypeMap, DataField } from './index';
 import { inferFieldSemanticTypeWithDict, inferFieldTypeWithDict } from './utils';
 
-export function targetVis(query: Specification, fields: DataField[]) {
+export function targetVis(query: Specification, fields: DataField[], aggregator: Aggregator | undefined = 'sum') {
   let fieldTypeDict: {[key: string]: DataField} = {};
   for (let field of fields) {
     fieldTypeDict[field.name] = field
@@ -71,13 +72,13 @@ export function targetVis(query: Specification, fields: DataField[]) {
               field: query.position![0],
               type: getFieldSemanticType(query.position![0]),
               bin: markType === 'rect' && xType === 'quantitative' && { maxbins: 20 },
-              aggregate: markType !== 'rect' && xAgg && 'sum'
+              aggregate: markType !== 'rect' && xAgg && aggregator
             },
             y: repeat[0] && {
               field: { repeat: 'repeat' },
               type: getFieldSemanticType(repeat[0]),
               bin: markType === 'rect' && yType === 'quantitative' && { maxbins: 20 },
-              aggregate: markType !== 'rect' && yAgg && 'sum',
+              aggregate: markType !== 'rect' && yAgg && aggregator,
               // scale: mustDefineScale && !yAgg ? { domain: filedDomains[repeat[0]] } : undefined
             },
             size: query.size![0] && {
@@ -94,7 +95,7 @@ export function targetVis(query: Specification, fields: DataField[]) {
             },
             color: (adjustColorField || markType === 'rect') && {
               field: adjustColorField,
-              aggregate: markType === 'rect' && getFieldSemanticType(adjustColorField) === 'quantitative' && (adjustColorField ? 'sum' : 'count'),
+              aggregate: markType === 'rect' && getFieldSemanticType(adjustColorField) === 'quantitative' && (adjustColorField ? aggregator : 'count'),
               type: adjustColorField && getFieldSemanticType(adjustColorField)
             }
           }
