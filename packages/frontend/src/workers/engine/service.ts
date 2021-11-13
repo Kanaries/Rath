@@ -83,8 +83,8 @@ async function startPipeLine (props: StartPipeLineProps) {
         times.push(performance.now())
         prints.push({ task: 'scores', value: times[times.length - 1] - times[times.length - 2] })
         engine.insightSpaces = engine.insightSpaces.filter(s => typeof s.score === 'number' && !isNaN(s.score));
-        engine.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
-
+        // engine.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
+        engine.insightSpaces.sort((a, b) => Number(b.impurity) - Number(a.impurity));
         viewFields = engine.fields;
         insightSpaces = engine.insightSpaces;
         viewSampleData = engine.dataSource;
