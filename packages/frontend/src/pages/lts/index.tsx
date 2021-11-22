@@ -75,7 +75,7 @@ const LTSPage: React.FC = props => {
                     insightSpaces.length > 0 && <DefaultButton
                         style={MARGIN_LEFT}
                         text={intl.get('function.exportStorage.title')}
-                        iconProps={{ iconName: 'Download' }}
+                        iconProps={{ iconName: 'DownloadDocument' }}
                         disabled={dataIsEmpty}
                         onClick={downloadResults}
                     />

@@ -145,6 +145,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           <DefaultButton
             style={MARGIN_LEFT}
             text={intl.get('function.importStorage.title')}
+            iconProps={{ iconName: 'BulkUpload' }}
             onClick={() => {
               commonStore.setShowStorageModal(true)
             }}
