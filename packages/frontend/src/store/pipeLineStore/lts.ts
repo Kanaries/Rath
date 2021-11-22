@@ -80,7 +80,6 @@ export class LTSPipeLine {
                 }
             })
             PRINT_PERFORMANCE && console.log(res.performance)
-            console.log(res)
             runInAction(() => {
                 // this.vie.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
                 this.insightSpaces = res.insightSpaces;

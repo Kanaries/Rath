@@ -72,7 +72,7 @@ function App() {
             >
               <img
                 style={{ width: '38px', marginTop: '4px' }}
-                src="/assets/kanaries-lite.png"
+                src="./assets/kanaries-lite.png"
                 alt="rath"
               />
             </a>
