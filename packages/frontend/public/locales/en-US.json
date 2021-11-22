@@ -24,6 +24,28 @@
             "notCompatible": "Not compatible with datasource"
         }
     },
+    "function": {
+        "analysis": {
+            "start": "Insight Analysis",
+            "checkResult": "Check Existed Results"
+        },
+        "importStorage": {
+            "title": "Import Rath Storage",
+            "desc": "Import a Rath storage file, which was exported from Rath, containing analysis history records in Rath.",
+            "type": {
+                "file": "File",
+                "indexdb": "Index DB"
+            }
+        },
+        "exportStorage": {
+            "title": "Export Rath Storage",
+            "type": {
+                "file": "File",
+                "indexdb": "Index DB"
+            }
+        },
+        "upload": "Upload"
+    },
     "dataSource": {
         "extractInsight": "Insight Analysis",
         "extractInsightOld": "Insight Analysis(Debug)",

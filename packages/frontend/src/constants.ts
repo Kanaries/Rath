@@ -27,3 +27,7 @@ export const ENGINE_CONNECTION_STAGES: Array<{ stage: number; name: IECStatus }>
   { stage: 1, name: 'proxy' },
   { stage: 2, name: 'engine' }
 ];
+
+export const RESULT_STORAGE_SPLITOR = '\n===RATH_STORAGE_SPLITOR===\n'
+
+export const STORAGE_FILE_SUFFIX = 'krs'

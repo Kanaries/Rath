@@ -24,6 +24,28 @@
             "notCompatible": "与数据源暂不兼容"
         }
     },
+    "function": {
+        "analysis": {
+            "start": "开始分析",
+            "checkResult": "查看已有结果"
+        },
+        "importStorage": {
+            "title": "导入分析文件",
+            "desc": "导入一个Rath的分析结果文件，这个文件是曾经从Rath中导出分析记录文件。",
+            "type": {
+                "file": "文件",
+                "indexdb": "Index DB"
+            }
+        },
+        "exportStorage": {
+            "title": "导出分析文件",
+            "type": {
+                "file": "文件",
+                "indexdb": "Index DB"
+            }
+        },
+        "upload": "上传文件"
+    },
     "dataSource": {
         "extractInsight": "开始分析",
         "extractInsightOld": "开始分析(调试模式)",

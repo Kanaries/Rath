@@ -11,7 +11,15 @@ import { fieldSummary2fieldMeta } from "../utils/transform";
 // ds目前这里设置的是用户可能进行一定的数据类型定义，转换操作。用户此时关心的是单变量的信息，并不需要自动的触发后续流的计算，
 // 所以这里不会干预主pipeline，是一个断层的解构。在用户完成设置之后，才会把它作为参数同步给pipeline。
 // 但这并不意味着其不可以用stream的方式写，我们只需要把它放在流的缓存中，主流程在其他stream里即可(withLatestFrom)
-
+interface IDataSourceStoreStorage {
+    rawData: IRow[];
+    mutFields: IRawField[];
+    cookedDataSource: IRow[];
+    cookedDimensions: string[];
+    cookedMeasures: string[];
+    cleanMethod: CleanMethod;
+    fieldMetas: IFieldMeta[];
+}
 export class DataSourceStore {
     /**
      * raw data is fetched and parsed data or uploaded data without any other changes.
@@ -127,5 +135,28 @@ export class DataSourceStore {
         runInAction(() => {
             this.fieldMetas = metas;
         })
+    }
+
+    public exportStore(): IDataSourceStoreStorage {
+        const { rawData, mutFields, cookedDataSource, cookedDimensions, cookedMeasures, cleanMethod, fieldMetas } = this;
+        return {
+            rawData,
+            mutFields,
+            cookedDataSource,
+            cookedDimensions,
+            cookedMeasures,
+            cleanMethod,
+            fieldMetas
+        }
+    }
+
+    public importStore(state: IDataSourceStoreStorage) {
+        this.rawData = state.rawData;
+        this.mutFields = state.mutFields;
+        this.cookedDataSource = state.cookedDataSource;
+        this.cookedDimensions = state.cookedDimensions;
+        this.cookedMeasures = state.cookedMeasures;
+        this.cleanMethod = state.cleanMethod;
+        this.fieldMetas = state.fieldMetas
     }
 }

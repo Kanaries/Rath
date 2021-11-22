@@ -1,6 +1,7 @@
 import { IFieldSummary, IInsightSpace } from "visual-insights";
 import { StatFuncName } from "visual-insights/build/esm/statistics";
-import { IFieldMeta, IRow } from "../../interfaces";
+import { RESULT_STORAGE_SPLITOR } from "../../constants";
+import { IFieldMeta, IRow, ISyncEngine } from "../../interfaces";
 import { RathCHEngine } from "./clickhouse";
 // import { isSetEqual } from "../../utils/index";
 import { RathEngine } from "./core";
@@ -11,7 +12,7 @@ const EngineRef: { current: RathEngine | null, mode: 'webworker' } | { current: 
 }
 
 export interface MessageProps {
-    task: 'init' | 'destroy' | 'start' | 'specification' | 'associate' | 'detail' | 'cube';
+    task: 'init' | 'destroy' | 'start' | 'specification' | 'associate' | 'detail' | 'cube' | 'download' | 'upload' | 'sync';
     props?: any
 }
 
@@ -168,6 +169,52 @@ function aggregate (props: { dimensions: string[]; measures: string[]; aggregato
     return []
 }
 
+function exportResult () {
+    if (EngineRef.mode === 'webworker') {
+        const engine = EngineRef.current
+        if (engine === null) throw new Error('Engine is not created.');
+        const ser = engine.serialize();
+        let result = ''
+        result += JSON.stringify(ser.dataStorage)
+        result += RESULT_STORAGE_SPLITOR
+        result += JSON.stringify(ser.storage)
+        return result
+    } else {
+        throw new Error('Not supported current data engine type.')
+    }
+}
+
+export interface EngineUploadsProps {
+    dataContent: string;
+    stateContent: string
+}
+function importFromUploads(props: EngineUploadsProps) {
+    if (EngineRef.mode === 'webworker') {
+        const engine = EngineRef.current
+        if (engine === null) throw new Error('Engine is not created.');
+        const { dataContent, stateContent } = props;
+        const dataStorage = JSON.parse(dataContent) as any
+        const storage = JSON.parse(stateContent) as any
+        engine.deSerialize(storage, dataStorage)
+    } else {
+        throw new Error('Not supported current data engine type.')
+    }
+}
+
+function syncEngine (): ISyncEngine {
+    if (EngineRef.mode === 'webworker') {
+        const engine = EngineRef.current
+        if (engine === null) throw new Error('Engine is not created.');
+        return {
+            fields: engine.fields,
+            dataSource: engine.dataSource,
+            insightSpaces: engine.insightSpaces
+        }
+    } else {
+        throw new Error('Not supported current data engine type.')
+    }
+}
+
 // class WorkerRouter {
 //     private routeMap: Map<string, (props?: any) => Promise<any>> = new Map();
 //     private onSuccess: (res?: any) => void;
@@ -226,6 +273,18 @@ export async function router (e: { data: MessageProps }, onSuccess: (res?: any) 
             case 'detail':
                 const res_details = scanDetails(req.props);
                 onSuccess(res_details)
+                break;
+            case 'download':
+                const res_result = exportResult();
+                onSuccess(res_result)
+                break;
+            case 'sync':
+                const res_sync = syncEngine();
+                onSuccess(res_sync);
+                break;
+            case 'upload':
+                const res_upload = importFromUploads(req.props);
+                onSuccess(res_upload)
                 break;
             default:
                 throw new Error(`Unknow task: "${req.task}".`)

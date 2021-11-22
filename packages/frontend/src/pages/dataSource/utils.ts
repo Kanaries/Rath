@@ -1,4 +1,4 @@
-import { RATH_INDEX_COLUMN_KEY } from "../../constants";
+import { RATH_INDEX_COLUMN_KEY, RESULT_STORAGE_SPLITOR, STORAGE_FILE_SUFFIX } from "../../constants";
 // import { BIField, Record } from "../../global";
 import { FileLoader, inferAnalyticType, isASCII } from "../../utils";
 import { Cleaner, Sampling, UnivariateSummary } from 'visual-insights';
@@ -139,4 +139,15 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
     })
     const fixedDataSet = fixUnicodeFields(tmpFields, rawData);
     return fixedDataSet;
+}
+
+export async function loadRathStorageFile (file: File): Promise<string[]> {
+    // FIXME file type
+    if (file.name.split('.').slice(-1)[0] === STORAGE_FILE_SUFFIX) {
+        const rawContent = await FileLoader.textLoader(file);
+        const contents = rawContent.split(RESULT_STORAGE_SPLITOR);
+        return contents
+    } else {
+        throw new Error(`file type not supported: ${file.name.split('.').slice(-1)[0]}`)
+    }
 }

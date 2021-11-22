@@ -2,6 +2,7 @@ import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Specification } from 'visual-insights';
 import { IInsightSpace } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
 import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
+import { RESULT_STORAGE_SPLITOR, STORAGE_FILE_SUFFIX } from '../constants';
 import { IRow, PreferencePanelConfig } from '../interfaces';
 // import { rathEngineService } from '../service';
 import { isSetEqual } from '../utils';
@@ -121,6 +122,21 @@ export class ExploreStore {
         runInAction(() => {
             this.details = result;
         })
+    }
+    public async downloadResults () {
+        // TODO: 序列化相关工程问题
+        // 1. 下载与上传的处理逻辑尽量放在同一文件处理（待议）
+        // 2. 要提供同一的parser处理，编解码逻辑可以集中管理并维护。目前这部分逻辑过分散乱。
+        const pipeContent = await this.ltsPipeLineStore.downloadResults();
+        const dataContent = JSON.stringify(this.ltsPipeLineStore.exportDataStore());
+        const ele = document.createElement('a');
+        ele.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(dataContent + RESULT_STORAGE_SPLITOR + pipeContent));
+        ele.setAttribute('download', `Rath_Analysis_Notebook.${STORAGE_FILE_SUFFIX}`)
+        ele.style.display = 'none'
+        document.body.appendChild(ele)
+        ele.click();
+
+        document.body.removeChild(ele);
     }
     public async getAssociatedViews () {
         const asso = await this.ltsPipeLineStore.getAssociatedViews(this.pageIndex);

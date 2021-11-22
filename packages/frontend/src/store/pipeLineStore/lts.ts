@@ -3,10 +3,11 @@ import { Specification } from "visual-insights";
 import { IFieldSummary, IInsightSpace } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
 // import { simpleAggregate } from "visual-insights/build/esm/statistics";
-import { IRow } from "../../interfaces";
+import { IRow, ISyncEngine } from "../../interfaces";
 import { IVizSpace } from "../../pages/lts/association/assCharts";
 import { initRathWorker, rathEngineService } from "../../service";
 import { RathEngine } from "../../workers/engine/core";
+import { EngineUploadsProps } from "../../workers/engine/service";
 import { ClickHouseStore } from "../clickhouseStore";
 import { CommonStore } from "../commonStore";
 import { DataSourceStore } from "../dataSourceStore";
@@ -79,6 +80,7 @@ export class LTSPipeLine {
                 }
             })
             PRINT_PERFORMANCE && console.log(res.performance)
+            console.log(res)
             runInAction(() => {
                 // this.vie.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
                 this.insightSpaces = res.insightSpaces;
@@ -171,6 +173,59 @@ export class LTSPipeLine {
             return res;
         } catch (error) {
             console.error(error)
+            runInAction(() => {
+                this.computing = false;
+            })
+            throw error;
+        }
+    }
+    public async syncStateFromEngine () {
+        try {
+            const engineState: ISyncEngine = await rathEngineService({
+                task: 'sync'
+            })
+            runInAction(() => {
+                this.dataSource = engineState.dataSource
+                this.fields = engineState.fields
+                console.log(engineState.insightSpaces)
+                this.insightSpaces = engineState.insightSpaces
+            })
+        } catch (error) {
+            throw error;
+        }
+    }
+    public async downloadResults (): Promise<string> {
+        try {
+            this.computing = true;
+            const res = await rathEngineService({
+                task: 'download'
+            })
+            runInAction(() => {
+                this.computing = false;
+            })
+            return res
+        } catch (error) {
+            runInAction(() => {
+                this.computing = false;
+            })
+            throw error
+        }
+    }
+    public exportDataStore () {
+        return this.dataSourceStore.exportStore();
+    }
+    public async importFromUploads (props: EngineUploadsProps) {
+        try {
+            this.computing = true;
+            await rathEngineService({
+                task: 'upload',
+                props
+            })
+            runInAction(() => {
+                this.computing = false;
+            })
+            this.syncStateFromEngine();
+        } catch (error) {
             runInAction(() => {
                 this.computing = false;
             })

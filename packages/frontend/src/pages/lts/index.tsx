@@ -20,7 +20,7 @@ const MainHeader = styled.div`
 `
 
 const LTSPage: React.FC = props => {
-    const { ltsPipeLineStore, dataSourceStore, exploreStore, commonStore } = useGlobalStore();
+    const { ltsPipeLineStore, exploreStore, commonStore } = useGlobalStore();
     const { insightSpaces, computing } = ltsPipeLineStore;
 
     const { pageIndex, visualConfig, spec, showAsso } = exploreStore;
@@ -29,12 +29,18 @@ const LTSPage: React.FC = props => {
         ltsPipeLineStore.startTask().then(() => {
             exploreStore.emitViewChangeTransaction(0)
         })
-    }, [])
+    }, [ltsPipeLineStore, exploreStore])
 
     const customizeAnalysis = useCallback(() => {
         exploreStore.bringToGrphicWalker();
         commonStore.setAppKey(PIVOT_KEYS.editor)
     }, [exploreStore, commonStore])
+
+    const downloadResults = useCallback(() => {
+        exploreStore.downloadResults();
+    }, [exploreStore])
+
+    const dataIsEmpty = ltsPipeLineStore.dataSource.length === 0;
 
     return <div className="content-container">
         <VizPreference />
@@ -53,7 +59,7 @@ const LTSPage: React.FC = props => {
                     insightSpaces.length > 0 && <DefaultButton
                         text={intl.get('lts.autoAnalysis')}
                         iconProps={{ iconName: 'Financial' }}
-                        disabled={dataSourceStore.cleanedData.length === 0}
+                        disabled={dataIsEmpty}
                         onClick={startAnalysis}
                     />
                 }
@@ -61,8 +67,17 @@ const LTSPage: React.FC = props => {
                     insightSpaces.length === 0 && <PrimaryButton
                         text={intl.get('lts.autoAnalysis')}
                         iconProps={{ iconName: 'Financial' }}
-                        disabled={dataSourceStore.cleanedData.length === 0}
+                        disabled={dataIsEmpty}
                         onClick={startAnalysis}
+                    />
+                }
+                {
+                    insightSpaces.length > 0 && <DefaultButton
+                        style={MARGIN_LEFT}
+                        text={intl.get('function.exportStorage.title')}
+                        iconProps={{ iconName: 'Download' }}
+                        disabled={dataIsEmpty}
+                        onClick={downloadResults}
                     />
                 }
             </Stack>
@@ -84,10 +99,10 @@ const LTSPage: React.FC = props => {
                             defaultStack={visualConfig.defaultStack}
                             dimensions={insightSpaces[pageIndex].dimensions}
                             measures={insightSpaces[pageIndex].measures}
-                            dataSource={visualConfig.defaultAggregated ? spec.dataView : dataSourceStore.cleanedData}
+                            dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
                             schema={spec.schema}
-                            fieldFeatures={dataSourceStore.fieldMetas.map(f => ({
-                                name: f.fid,
+                            fieldFeatures={ltsPipeLineStore.fields.map(f =>({
+                                name: f.key,
                                 type: f.semanticType
                             }))}
                             aggregator={visualConfig.aggregator}
