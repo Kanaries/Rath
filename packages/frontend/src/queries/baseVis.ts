@@ -7,18 +7,31 @@ export const geomTypeMap: { [key: string]: any } = {
   // density: 'rect'
   density: "point"
 };
-
-export function baseVis(
-  query: Specification,
-  dataSource: DataSource,
-  dimensions: string[],
-  measures: string[],
-  aggregatedMeasures: Array<{op: string; field: string; as: string}>,
-  fieldFeatures: Field[],
-  defaultAggregated?: boolean,
-  defaultStack?: boolean,
-  fixedWidth?: boolean
-) {
+interface BaseVisProps {
+  query: Specification;
+  dataSource: DataSource;
+  dimensions: string[];
+  measures: string[];
+  aggregatedMeasures: Array<{op: string; field: string; as: string}>;
+  fieldFeatures: Field[];
+  defaultAggregated?: boolean;
+  defaultStack?: boolean;
+  stepSize?: number;
+  viewSize?: number
+}
+export function baseVis(props: BaseVisProps) {
+  const {
+    query,
+    dataSource,
+    // dimensions,
+    measures,
+    aggregatedMeasures,
+    fieldFeatures,
+    defaultAggregated,
+    defaultStack,
+    stepSize,
+    viewSize
+  } = props;
   const {
     position = [],
     color = [],
@@ -26,7 +39,7 @@ export function baseVis(
     facets = [],
     opacity = [],
     geomType = [],
-    page = [],
+    // page = [],
   } = query;
 
   function adjustField(fieldName: string): string {
@@ -44,7 +57,6 @@ export function baseVis(
     return targetField ? targetField.type : "nominal";
   }
 
-  let chartWidth = 600; //container.current ? container.current.offsetWidth * 0.8 : 600;
   const fieldMap: any = {
     x: position[0],
     y: position[1],
@@ -71,10 +83,16 @@ export function baseVis(
     },
     encoding: {}
   };
-  if (fixedWidth) {
-    spec.width = chartWidth;
-    basicSpec.width = chartWidth;
+
+  if (typeof stepSize === 'number' && typeof viewSize === 'number') {
+    const xFieldType = getFieldType(fieldMap['x']);
+    const yFieldType = getFieldType(fieldMap['y']);
+    spec.width = (xFieldType === 'quantitative' || xFieldType === 'temporal') ? viewSize : { step: stepSize };
+    spec.height = (yFieldType === 'quantitative' || xFieldType === 'temporal') ? viewSize : { step: stepSize };
+    basicSpec.width = spec.width;
+    basicSpec.height = spec.height
   }
+
   for (let channel in fieldMap) {
     if (fieldMap[channel]) {
       basicSpec.encoding[channel] = {
@@ -93,30 +111,12 @@ export function baseVis(
   if (!defaultStack && opacity.length === 0) {
     basicSpec.encoding.opacity = { value: 0.7 };
   }
-  if (page.length === 0) {
+  // if (page.length === 0) {
+  // if 单一spec的情况，后续要支持多spec concat的情况，可以参考本次提交记录删除的page的情况。
     spec = {
       ...spec,
       ...basicSpec
     };
-  } else if (page.length > 0) {
-    basicSpec.transform = [
-      { filter: { selection: "brush" } },
-      defaultAggregated
-        ? {
-            aggregate: aggregatedMeasures,
-            groupby: dimensions.filter(dim => dim !== page[0])
-          }
-        : null
-    ].filter(Boolean);
-    let sliderSpec = {
-      width: chartWidth,
-      mark: "tick",
-      selection: { brush: { encodings: ["x"], type: "interval" } },
-      encoding: {
-        x: { field: page[0], type: getFieldType(page[0]) }
-      }
-    };
-    spec.vconcat = [basicSpec, sliderSpec];
-  }
+  // }
   return spec;
 }

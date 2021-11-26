@@ -8,6 +8,7 @@ import Ass from './association/index'
 import intl from 'react-intl-universal'
 import { runInAction } from 'mobx';
 import VizPreference from '../../components/vizPreference';
+import VizOperation from './vizOperation';
 import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import { PIVOT_KEYS } from '../../constants';
@@ -17,6 +18,21 @@ const MARGIN_LEFT = { marginLeft: '1em' };
 const MainHeader = styled.div`
     font-size: 1.5em;
     font-weight: 500;
+`
+
+const InsightContainer = styled.div`
+    display: flex;
+    .insight-viz{
+        flex-grow: 1;
+        flex-shrink: 2;
+        overflow: auto;
+    }
+    .insight-info{
+        flex-grow: 2;
+        flex-shrink: 1;
+        flex-basis: 300px;
+        padding: 1em;
+    }
 `
 
 const LTSPage: React.FC = props => {
@@ -90,44 +106,52 @@ const LTSPage: React.FC = props => {
             <Pagination style={{ marginBottom: '1em', marginTop: '1em' }} variant="outlined" shape="rounded" count={insightSpaces.length} page={pageIndex + 1} onChange={(e, v) => {
                 exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
             }} />
-            <div>
-                <p className="state-description">results: {pageIndex + 1} / {insightSpaces.length}. score: {insightSpaces.length > 0 && insightSpaces[pageIndex].score?.toFixed(6)}</p>
-                <div>
-                    {insightSpaces.length > 0 && spec && <div>
-                        <BaseChart
-                            defaultAggregated={visualConfig.defaultAggregated}
-                            defaultStack={visualConfig.defaultStack}
-                            dimensions={insightSpaces[pageIndex].dimensions}
-                            measures={insightSpaces[pageIndex].measures}
-                            dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
-                            schema={spec.schema}
-                            fieldFeatures={ltsPipeLineStore.fields.map(f =>({
-                                name: f.key,
-                                type: f.semanticType
-                            }))}
-                            aggregator={visualConfig.aggregator}
-                        />
-                    </div>}
-                    {
-                        insightSpaces.length > 0 && spec && <div>
-                            <Stack horizontal>
-                                <PrimaryButton iconProps={{ iconName: 'Lightbulb' }} text={intl.get('lts.associate')} onClick={() => {exploreStore.getAssociatedViews()}} />
-                                <DefaultButton disabled style={MARGIN_LEFT} text={intl.get('lts.summary')} onClick={() => {exploreStore.scanDetails(pageIndex)}} />
-                                <DefaultButton style={MARGIN_LEFT} text={intl.get('lts.bring')} onClick={customizeAnalysis} />
-                            </Stack>
-                            <div>
-                            {
-                                exploreStore.details.length > 0 && <RadarChart
-                                    dataSource={exploreStore.details}
-                                    threshold={0.8}
-                                    keyField="type"
-                                    valueField="significance"
-                                />
-                            }
-                            </div>
-                        </div>
-                    }
+            <InsightContainer>
+                <div className="insight-viz">
+                {insightSpaces.length > 0 && spec && <div>
+                            <BaseChart
+                                defaultAggregated={visualConfig.defaultAggregated}
+                                defaultStack={visualConfig.defaultStack}
+                                dimensions={insightSpaces[pageIndex].dimensions}
+                                measures={insightSpaces[pageIndex].measures}
+                                dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
+                                schema={spec.schema}
+                                fieldFeatures={ltsPipeLineStore.fields.map(f =>({
+                                    name: f.key,
+                                    type: f.semanticType
+                                }))}
+                                aggregator={visualConfig.aggregator}
+                                viewSize={320}
+                                stepSize={32}
+                            />
+                        </div>}
                 </div>
+                <div className="insight-info">
+                    <VizOperation />
+                </div>
+            </InsightContainer>
+            <div>
+                {
+                    insightSpaces.length > 0 && spec && <div>
+                        <Stack horizontal>
+                            <PrimaryButton iconProps={{ iconName: 'Lightbulb' }} text={intl.get('lts.associate')} onClick={() => {exploreStore.getAssociatedViews()}} />
+                            <DefaultButton disabled style={MARGIN_LEFT} text={intl.get('lts.summary')} onClick={() => {exploreStore.scanDetails(pageIndex)}} />
+                            <DefaultButton style={MARGIN_LEFT} text={intl.get('lts.bring')} onClick={customizeAnalysis} />
+                        </Stack>
+                        <div>
+                        {
+                            exploreStore.details.length > 0 && <RadarChart
+                                dataSource={exploreStore.details}
+                                threshold={0.8}
+                                keyField="type"
+                                valueField="significance"
+                            />
+                        }
+                        </div>
+                    </div>
+                }
+                <p className="state-description">results: {pageIndex + 1} / {insightSpaces.length}. score: {insightSpaces.length > 0 && insightSpaces[pageIndex].score?.toFixed(6)}</p>
+                
                 <div>
                     {
                         showAsso && <Ass />

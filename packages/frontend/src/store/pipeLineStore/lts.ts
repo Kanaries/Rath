@@ -110,13 +110,13 @@ export class LTSPipeLine {
         //     keyset.add(_key);
         // }
     }
-    public async specify (spaceIndex: number): Promise<{ schema: Specification, dataView: IRow[] } | undefined> {
-        if (spaceIndex < this.insightSpaces.length) {
+    public async specify (space: IInsightSpace): Promise<{ schema: Specification, dataView: IRow[] } | undefined> {
+        if (space) {
             this.computing = true;
             try {
                 const res = await rathEngineService({
                     task: 'specification',
-                    props: spaceIndex
+                    props: space
                 })
                 runInAction(() => {
                     this.computing = false;

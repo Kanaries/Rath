@@ -112,12 +112,10 @@ async function startPipeLine (props: StartPipeLineProps) {
     };
 }
 
-async function specify (spaceIndex: number) {
+async function specify (space: IInsightSpace) {
     const engine = EngineRef.current;
     if (engine === null) throw new Error('Engine is not created.');
-    if (engine.insightSpaces && spaceIndex < engine.insightSpaces.length) {
-        return engine.specification(engine.insightSpaces[spaceIndex])
-    }
+    return engine.specification(space)
 }
 
 function scanDetails (spaceIndex: number) {

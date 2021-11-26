@@ -84,7 +84,7 @@ function viewImp (dataSource: IRow[], dimensions: string[], measures: string[]):
         // }
         // console.log(logs)
         // console.log('H(X), H(X|Y)]]]]]]', ent, condEnt)
-        totalEntLoss += (ent - condEnt);
+        totalEntLoss += noiseGroup.length > 0 ? (ent - condEnt) / Math.log2(BIN_SIZE) : (ent - condEnt) / Math.log2(groups.size);
 
     }
     // const groupFL: number[] = [];
@@ -94,7 +94,7 @@ function viewImp (dataSource: IRow[], dimensions: string[], measures: string[]):
 
     // totalEntLoss = totalEntLoss / Math.log2(groups.size)//groups.size;
     // console.log({ dimensions, measures, score: totalEntLoss / measures.length, totalEntLoss })
-    return totalEntLoss;
+    return totalEntLoss / measures.length;
 }
 export class RathEngine extends VIEngine {
     public constructor() {
