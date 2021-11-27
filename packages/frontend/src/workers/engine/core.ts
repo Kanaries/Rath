@@ -3,6 +3,7 @@ import { ViewSpace } from 'visual-insights/build/esm/insights/InsightFlow/engine
 import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
 import { IRow } from '../../interfaces';
 import { IVizSpace } from '../../store/exploreStore';
+import { isSetEqual } from '../../utils';
 import { intersect } from './utils';
 
 const VIEngine = Insight.VIEngine;
@@ -164,12 +165,14 @@ export class RathEngine extends VIEngine {
         for (let i = 0; i < insightSpaces.length; i++) {
             if (i === spaceIndex) continue;
             if (!intersect(insightSpaces[i].dimensions, space.dimensions)) continue;
+            if (isSetEqual(insightSpaces[i].measures, space.measures)) continue;
+            if (!isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
             let t1_score = 0;
             const iteMeaIndices = insightSpaces[i].measures.map(f => measures.findIndex(m => f === m));
             if (dataGraph !== null) {
                 for (let j = 0; j < meaIndices.length; j++) {
                     for (let k = 0; k < iteMeaIndices.length; k++) {
-                        t1_score += dataGraph.MG[j][k]
+                        t1_score += dataGraph.MG[meaIndices[j]][iteMeaIndices[k]]
                     }
                 }
             }
@@ -194,13 +197,14 @@ export class RathEngine extends VIEngine {
         for (let i = 0; i < insightSpaces.length; i++) {
             if (i === spaceIndex) continue;
             if (!intersect(insightSpaces[i].measures, space.measures)) continue;
-            // if (!isSetEqual(insightSpaces[i].measures, space.measures)) continue;
+            if (isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
+            if (!isSetEqual(insightSpaces[i].measures, space.measures)) continue;
             let t1_score = 0;
             const iteDimIndices = insightSpaces[i].dimensions.map(f => dimensions.findIndex(m => f === m));
             if (dataGraph !== null) {
                 for (let j = 0; j < dimIndices.length; j++) {
                     for (let k = 0; k < iteDimIndices.length; k++) {
-                        t1_score += dataGraph.DG[j][k]
+                        t1_score += dataGraph.DG[dimIndices[j]][iteDimIndices[k]]
                     }
                 }
             }
@@ -216,6 +220,8 @@ export class RathEngine extends VIEngine {
                 }
             }
         }
+        // assSpacesT1.sort((a, b) => (b.score || 0) / (b.impurity || 0) - (a.score || 0) / (a.impurity || 0))
+        // assSpacesT2.sort((a, b) => (b.score || 0) / (b.impurity || 0) - (a.score || 0) / (a.impurity || 0))
         assSpacesT1.sort((a, b) => (b.score || 0) - (a.score || 0))
         assSpacesT2.sort((a, b) => (b.score || 0) - (a.score || 0))
         return {
