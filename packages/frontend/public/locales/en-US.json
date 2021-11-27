@@ -185,6 +185,11 @@
             "editing": "editing chart",
             "associate": "associate views",
             "constraints": "analysis constraints"
+        },
+        "constraints": {
+            "exclude": "exclude field",
+            "auto": "include if exists insights",
+            "include": "force include"
         }
     }
 }

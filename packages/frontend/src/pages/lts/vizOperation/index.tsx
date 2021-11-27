@@ -6,6 +6,7 @@ import { CommandBarButton, Stack, IContextualMenuProps, Panel, PanelType } from 
 import ViewField from './viewField';
 import BaseChart from '../../../visBuilder/vegaBase';
 import Association from '../association';
+import ConstraintsPanel from './constraints';
 import { PIVOT_KEYS } from '../../../constants';
 import intl from 'react-intl-universal';
 
@@ -49,13 +50,27 @@ const VizOperation: React.FC = props => {
                 <CommandBarButton text={intl.get('lts.commandBar.associate')} iconProps={{ iconName: 'Lightbulb' }} onClick={() => {
                     exploreStore.getAssociatedViews();
                 }} />
-                <CommandBarButton text={intl.get('lts.commandBar.constraints')} iconProps={{ iconName: 'MultiSelect' }} />
+                <CommandBarButton text={intl.get('lts.commandBar.constraints')} iconProps={{ iconName: 'MultiSelect' }} onClick={() => {
+                    exploreStore.setShowContraints(true);
+                }} />
             </Stack>
             <FieldsContainer>
-                {forkView.dimensions.map(f => <ViewField type="dimension" text={f} key={f} />)}
+                {forkView.dimensions.map(f => <ViewField type="dimension"
+                    text={f}
+                    key={f}
+                    onRemove={() => {
+                        exploreStore.removeFieldFromForkView('dimensions', f)
+                    }}
+                />)}
             </FieldsContainer>
             <FieldsContainer>
-                {forkView.measures.map((f, fIndex) => <ViewField type="measure" text={`${f}${visualConfig.defaultAggregated ? `(${forkView.ops[fIndex]})` : ''}`} key={f} />)}
+                {forkView.measures.map((f, fIndex) => <ViewField
+                    type="measure" text={`${f}${visualConfig.defaultAggregated ? `(${forkView.ops[fIndex]})` : ''}`}
+                    key={f}
+                    onRemove={() => {
+                        exploreStore.removeFieldFromForkView('measures', f)
+                    }}
+                />)}
             </FieldsContainer>
             <Panel isOpen={showAsso}
                 type={PanelType.medium}
@@ -64,6 +79,7 @@ const VizOperation: React.FC = props => {
             }}>
                 <Association />
             </Panel>
+            <ConstraintsPanel />
             {
                 forkViewSpec && <BaseChart
                     defaultAggregated={visualConfig.defaultAggregated}

@@ -30,6 +30,7 @@ export class ExploreStore {
     public assoListT1: IVizSpace[] = []
     public assoListT2: IVizSpace[] = []
     public showAsso: boolean = false;
+    public showConstraints: boolean = false;
     public showPreferencePannel: boolean = false;
     public visualConfig: PreferencePanelConfig;
     public forkView: IExploreView | null = null;
@@ -38,6 +39,10 @@ export class ExploreStore {
         schema: Specification;
         dataView: IRow[];
     } | null = null;
+    public globalConstraints: {
+        dimensions: Array<{fid: string; state: number}>;
+        measures: Array<{fid: string; state: number}>
+    }
     // public viewData: IRow[] = []
     constructor (ltsPipeLineStore: LTSPipeLine) {
         this.visualConfig = {
@@ -45,6 +50,10 @@ export class ExploreStore {
             defaultAggregated: true,
             defaultStack: true,
         };
+        this.globalConstraints = {
+            dimensions: [],
+            measures: []
+        }
         makeAutoObservable(this, {
             spec: observable.ref,
             specForGraphicWalker: observable.ref,
@@ -95,6 +104,24 @@ export class ExploreStore {
                     this.forkViewSpec = spec
                 })
             }
+        }
+    }
+    public initConstraints () {
+        const fields = this.ltsPipeLineStore.fields;
+        this.globalConstraints.dimensions = fields.filter(f => f.analyticType === 'dimension')
+            .map(f => ({
+                fid: f.key,
+                state: 0
+            }));
+        this.globalConstraints.measures = fields.filter(f => f.analyticType === 'measure')
+            .map(f => ({
+                fid: f.key,
+                state: 0
+            }));
+    }
+    public updateConstraints (ckey: 'dimensions' | 'measures', index: number) {
+        if (index < this.globalConstraints[ckey].length) {
+            this.globalConstraints[ckey][index].state = (this.globalConstraints[ckey][index].state + 1 + 1) % 3 - 1
         }
     }
     // public async getViewData (dimensions: string[], measures: string[]) {
@@ -150,6 +177,9 @@ export class ExploreStore {
     }
     public setShowAsso (show: boolean) {
         this.showAsso = show;
+    }
+    public setShowContraints (show: boolean) {
+        this.showConstraints = show;
     }
     public async addFieldToForkView(analyticType: 'dimensions' | 'measures', fid: string) {
         if (this.forkView !== null) {
