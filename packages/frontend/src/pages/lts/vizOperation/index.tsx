@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite'
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
-import { DefaultButton, Dropdown, IconButton, IContextualMenuProps } from 'office-ui-fabric-react';
+import { CommandBarButton, Stack, IContextualMenuProps, Panel, PanelType } from 'office-ui-fabric-react';
 import ViewField from './viewField';
 import BaseChart from '../../../visBuilder/vegaBase';
+import Association from '../association';
+import { PIVOT_KEYS } from '../../../constants';
+import intl from 'react-intl-universal';
 
 const FieldsContainer = styled.div`
     margin-top: 1em;
@@ -13,8 +16,8 @@ const FieldsContainer = styled.div`
 `
 
 const VizOperation: React.FC = props => {
-    const { exploreStore, dataSourceStore, ltsPipeLineStore } = useGlobalStore();
-    const { forkView, visualConfig } = exploreStore
+    const { exploreStore, dataSourceStore, ltsPipeLineStore, commonStore } = useGlobalStore();
+    const { forkView, visualConfig, showAsso } = exploreStore
     const { dimensions, measures } = dataSourceStore;
     const dimensionOptions: IContextualMenuProps = {
         items: dimensions.map(f => ({
@@ -30,18 +33,37 @@ const VizOperation: React.FC = props => {
             onClick: (e) => { exploreStore.addFieldToForkView('measures', f) }
         }))
     }
+
+    const customizeAnalysis = useCallback(() => {
+        exploreStore.bringToGrphicWalker();
+        commonStore.setAppKey(PIVOT_KEYS.editor)
+    }, [exploreStore, commonStore])
+
     const forkViewSpec = exploreStore.forkViewSpec;
     if (forkView !== null) {
         return <div>
-            <DefaultButton menuProps={dimensionOptions} text="Add Field" iconProps={{ iconName: 'Add' }} />
+            <Stack horizontal>
+                <CommandBarButton menuProps={dimensionOptions} text={intl.get('common.dimension')} iconProps={{ iconName: 'AddTo' }} />
+                <CommandBarButton menuProps={measureOptions} text={intl.get('common.measure')} iconProps={{ iconName: 'AddTo' }} />
+                <CommandBarButton text={intl.get('lts.commandBar.editing')} iconProps={{ iconName: 'BarChartVerticalEdit' }} onClick={customizeAnalysis} />
+                <CommandBarButton text={intl.get('lts.commandBar.associate')} iconProps={{ iconName: 'Lightbulb' }} onClick={() => {
+                    exploreStore.getAssociatedViews();
+                }} />
+                <CommandBarButton text={intl.get('lts.commandBar.constraints')} iconProps={{ iconName: 'MultiSelect' }} />
+            </Stack>
             <FieldsContainer>
                 {forkView.dimensions.map(f => <ViewField type="dimension" text={f} key={f} />)}
             </FieldsContainer>
-            <DefaultButton menuProps={measureOptions} text="Add Field" iconProps={{ iconName: 'Add' }} />
             <FieldsContainer>
                 {forkView.measures.map((f, fIndex) => <ViewField type="measure" text={`${f}${visualConfig.defaultAggregated ? `(${forkView.ops[fIndex]})` : ''}`} key={f} />)}
             </FieldsContainer>
-            {forkViewSpec == null ? 'null' : 'value'}
+            <Panel isOpen={showAsso}
+                type={PanelType.medium}
+                onDismiss={() => {
+                    exploreStore.setShowAsso(false);
+            }}>
+                <Association />
+            </Panel>
             {
                 forkViewSpec && <BaseChart
                     defaultAggregated={visualConfig.defaultAggregated}

@@ -148,6 +148,9 @@ export class ExploreStore {
     public setAggState (aggState: boolean) {
         this.visualConfig.defaultAggregated = aggState;
     }
+    public setShowAsso (show: boolean) {
+        this.showAsso = show;
+    }
     public async addFieldToForkView(analyticType: 'dimensions' | 'measures', fid: string) {
         if (this.forkView !== null) {
             if (!this.forkView[analyticType].includes(fid)) {

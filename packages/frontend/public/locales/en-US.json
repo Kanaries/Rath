@@ -1,4 +1,8 @@
 {
+    "common": {
+        "dimension": "dimension",
+        "measure": "measure"
+    },
     "menu": {
         "dataSource": "DataSource",
         "noteBook": "NoteBook",
@@ -176,6 +180,11 @@
             "T2": "Associated Dimensions",
             "hint": "Associated Measures refers to keep the dimensions similar, find correlated measures. Associated Dimensions refers to keep the measures similar, find correlated dimensions."
         },
-        "bring": "Customize Analysis"
+        "bring": "Customize Analysis",
+        "commandBar": {
+            "editing": "editing chart",
+            "associate": "associate views",
+            "constraints": "analysis constraints"
+        }
     }
 }

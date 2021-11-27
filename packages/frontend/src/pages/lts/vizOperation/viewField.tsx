@@ -43,6 +43,7 @@ export const Pill = styled.div<{colType: IFieldMeta['analyticType']}>`
   overflow-y: hidden;
   padding: 0 10px;
   user-select: none;
+  margin-right: 4px;
 `
 
 interface ViewFieldProps {

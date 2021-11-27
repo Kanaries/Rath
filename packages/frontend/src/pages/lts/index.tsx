@@ -3,15 +3,12 @@ import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButto
 import React, { useCallback } from 'react';
 import { useGlobalStore } from '../../store';
 import BaseChart from '../../visBuilder/vegaBase';
-import RadarChart from '../../components/radarChart';
-import Ass from './association/index'
 import intl from 'react-intl-universal'
 import { runInAction } from 'mobx';
 import VizPreference from '../../components/vizPreference';
 import VizOperation from './vizOperation';
 import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
-import { PIVOT_KEYS } from '../../constants';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -30,27 +27,23 @@ const InsightContainer = styled.div`
     .insight-info{
         flex-grow: 2;
         flex-shrink: 1;
-        flex-basis: 300px;
-        padding: 1em;
+        flex-basis: 500px;
+        padding: 0em 1em;
+        border-left: 1px solid #f5f5f5;
     }
 `
 
 const LTSPage: React.FC = props => {
-    const { ltsPipeLineStore, exploreStore, commonStore } = useGlobalStore();
+    const { ltsPipeLineStore, exploreStore } = useGlobalStore();
     const { insightSpaces, computing } = ltsPipeLineStore;
 
-    const { pageIndex, visualConfig, spec, showAsso } = exploreStore;
+    const { pageIndex, visualConfig, spec} = exploreStore;
 
     const startAnalysis = useCallback(() => {
         ltsPipeLineStore.startTask().then(() => {
             exploreStore.emitViewChangeTransaction(0)
         })
     }, [ltsPipeLineStore, exploreStore])
-
-    const customizeAnalysis = useCallback(() => {
-        exploreStore.bringToGrphicWalker();
-        commonStore.setAppKey(PIVOT_KEYS.editor)
-    }, [exploreStore, commonStore])
 
     const downloadResults = useCallback(() => {
         exploreStore.downloadResults();
@@ -102,10 +95,11 @@ const LTSPage: React.FC = props => {
             </div>
             <MainHeader>{intl.get('lts.title')}</MainHeader>
             <p className="state-description">{intl.get('lts.hintMain')}</p>
-            <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
+            {/* <Divider style={{ marginBottom: '1em', marginTop: '1em' }} /> */}
             <Pagination style={{ marginBottom: '1em', marginTop: '1em' }} variant="outlined" shape="rounded" count={insightSpaces.length} page={pageIndex + 1} onChange={(e, v) => {
                 exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
             }} />
+            <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
             <InsightContainer>
                 <div className="insight-viz">
                 {insightSpaces.length > 0 && spec && <div>
@@ -130,34 +124,6 @@ const LTSPage: React.FC = props => {
                     <VizOperation />
                 </div>
             </InsightContainer>
-            <div>
-                {
-                    insightSpaces.length > 0 && spec && <div>
-                        <Stack horizontal>
-                            <PrimaryButton iconProps={{ iconName: 'Lightbulb' }} text={intl.get('lts.associate')} onClick={() => {exploreStore.getAssociatedViews()}} />
-                            <DefaultButton disabled style={MARGIN_LEFT} text={intl.get('lts.summary')} onClick={() => {exploreStore.scanDetails(pageIndex)}} />
-                            <DefaultButton style={MARGIN_LEFT} text={intl.get('lts.bring')} onClick={customizeAnalysis} />
-                        </Stack>
-                        <div>
-                        {
-                            exploreStore.details.length > 0 && <RadarChart
-                                dataSource={exploreStore.details}
-                                threshold={0.8}
-                                keyField="type"
-                                valueField="significance"
-                            />
-                        }
-                        </div>
-                    </div>
-                }
-                <p className="state-description">results: {pageIndex + 1} / {insightSpaces.length}. score: {insightSpaces.length > 0 && insightSpaces[pageIndex].score?.toFixed(6)}</p>
-                
-                <div>
-                    {
-                        showAsso && <Ass />
-                    }
-                </div>
-            </div>
         </div>
     </div>
 }
