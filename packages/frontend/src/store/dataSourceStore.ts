@@ -151,6 +151,7 @@ export class DataSourceStore {
     }
 
     public importStore(state: IDataSourceStoreStorage) {
+        console.log('import store', state)
         this.rawData = state.rawData;
         this.mutFields = state.mutFields;
         this.cookedDataSource = state.cookedDataSource;

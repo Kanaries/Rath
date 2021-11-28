@@ -29,16 +29,24 @@
         }
     },
     "function": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
         "analysis": {
             "start": "Insight Analysis",
             "checkResult": "Check Existed Results"
         },
         "importStorage": {
-            "title": "Import Rath Storage",
+            "title": "Import History Storage",
             "desc": "Import a Rath storage file, which was exported from Rath, containing analysis history records in Rath.",
             "type": {
                 "file": "File",
-                "indexdb": "Index DB"
+                "indexdb": "Local Storage"
+            },
+            "storageColumns": {
+                "name": "Name",
+                "createTime": "Create Time",
+                "size": "Size",
+                "operation": "Operation"
             }
         },
         "exportStorage": {
@@ -47,6 +55,9 @@
                 "file": "File",
                 "indexdb": "Index DB"
             }
+        },
+        "save": {
+            "title": "Save"
         },
         "upload": "Upload"
     },

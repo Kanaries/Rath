@@ -1,7 +1,7 @@
 import React, {  useCallback, useEffect } from "react";
-import intl, { load } from 'react-intl-universal'
+import intl from 'react-intl-universal'
 import { useComposeState } from '../../hooks/index';
-import { ComboBox, PrimaryButton, Stack, DefaultButton, Toggle, Dropdown, IDropdownOption, IContextualMenuProps } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import { CleanMethod, useCleanMethodList } from './clean';
@@ -145,7 +145,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           <DefaultButton
             style={MARGIN_LEFT}
             text={intl.get('function.importStorage.title')}
-            iconProps={{ iconName: 'BulkUpload' }}
+            iconProps={{ iconName: 'CloudUpload' }}
             onClick={() => {
               commonStore.setShowStorageModal(true)
             }}

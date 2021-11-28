@@ -1,14 +1,13 @@
 import { makeAutoObservable, observable, runInAction, toJS } from 'mobx';
-import { Specification } from 'visual-insights';
-import { IInsightSpace } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
+import { Specification, IInsightSpace } from 'visual-insights';
 import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
-import { RESULT_STORAGE_SPLITOR, STORAGE_FILE_SUFFIX } from '../constants';
+import { STORAGE_FILE_SUFFIX } from '../constants';
 import { Aggregator } from '../global';
 import { IRow, PreferencePanelConfig } from '../interfaces';
-// import { rathEngineService } from '../service';
+import { rathEngineService } from '../service';
 import { isSetEqual } from '../utils';
+import { RathStorageDump } from '../utils/storage';
 import { LTSPipeLine } from './pipeLineStore/lts';
-
 
 export interface IVizSpace extends IInsightSpace {
     schema: Specification;
@@ -32,6 +31,7 @@ export class ExploreStore {
     public showAsso: boolean = false;
     public showConstraints: boolean = false;
     public showPreferencePannel: boolean = false;
+    public showSaveModal: boolean = false;
     public visualConfig: PreferencePanelConfig;
     public forkView: IExploreView | null = null;
     public view: IExploreView | null = null;
@@ -124,21 +124,21 @@ export class ExploreStore {
             this.globalConstraints[ckey][index].state = (this.globalConstraints[ckey][index].state + 1 + 1) % 3 - 1
         }
     }
-    // public async getViewData (dimensions: string[], measures: string[]) {
-    //     try {
-    //         const data = await rathEngineService({
-    //             task: 'cube',
-    //             props: {
-    //                 dimensions,
-    //                 measures,
-    //                 aggregators: measures.map(m => 'sum')
-    //             }
-    //         })
-    //         return data;
-    //     } catch (error) {
-    //         return []
-    //     }
-    // }
+    public async getViewData (dimensions: string[], measures: string[], ops: string[]) {
+        try {
+            const data = await rathEngineService({
+                task: 'cube',
+                props: {
+                    dimensions,
+                    measures,
+                    aggregators: ops
+                }
+            })
+            return data;
+        } catch (error) {
+            return []
+        }
+    }
     public async goToLastView () {
         const { pageIndex, insightSpaces } = this;
         this.emitViewChangeTransaction((pageIndex - 1 + insightSpaces.length) % insightSpaces.length)
@@ -181,6 +181,9 @@ export class ExploreStore {
     public setShowContraints (show: boolean) {
         this.showConstraints = show;
     }
+    public setShowSaveModal (show: boolean) {
+        this.showSaveModal = show;
+    }
     public async addFieldToForkView(analyticType: 'dimensions' | 'measures', fid: string) {
         if (this.forkView !== null) {
             if (!this.forkView[analyticType].includes(fid)) {
@@ -205,14 +208,21 @@ export class ExploreStore {
             this.details = result;
         })
     }
-    public async downloadResults () {
+    public async getStorageContent (): Promise<string> {
         // TODO: 序列化相关工程问题
         // 1. 下载与上传的处理逻辑尽量放在同一文件处理（待议）
         // 2. 要提供同一的parser处理，编解码逻辑可以集中管理并维护。目前这部分逻辑过分散乱。
         const pipeContent = await this.ltsPipeLineStore.downloadResults();
         const dataContent = JSON.stringify(this.ltsPipeLineStore.exportDataStore());
+        return RathStorageDump({
+            ...pipeContent,
+            appStorage: dataContent
+        })
+    }
+    public async downloadResults () {
+        const content = await this.getStorageContent();
         const ele = document.createElement('a');
-        ele.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(dataContent + RESULT_STORAGE_SPLITOR + pipeContent));
+        ele.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
         ele.setAttribute('download', `Rath_Analysis_Notebook.${STORAGE_FILE_SUFFIX}`)
         ele.style.display = 'none'
         document.body.appendChild(ele)

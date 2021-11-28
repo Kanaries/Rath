@@ -1,14 +1,16 @@
-import { observer } from 'mobx-react-lite';
-import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton } from 'office-ui-fabric-react';
 import React, { useCallback } from 'react';
-import { useGlobalStore } from '../../store';
-import BaseChart from '../../visBuilder/vegaBase';
-import intl from 'react-intl-universal'
-import { runInAction } from 'mobx';
-import VizPreference from '../../components/vizPreference';
-import VizOperation from './vizOperation';
+import { observer } from 'mobx-react-lite';
 import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
+import intl from 'react-intl-universal'
+import { runInAction } from 'mobx';
+import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton, IconButton } from 'office-ui-fabric-react';
+
+import { useGlobalStore } from '../../store';
+import BaseChart from '../../visBuilder/vegaBase';
+import VizPreference from '../../components/vizPreference';
+import VizOperation from './vizOperation';
+import SaveModal from './save';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -34,7 +36,7 @@ const InsightContainer = styled.div`
 `
 
 const LTSPage: React.FC = props => {
-    const { ltsPipeLineStore, exploreStore } = useGlobalStore();
+    const { ltsPipeLineStore, exploreStore, commonStore } = useGlobalStore();
     const { insightSpaces, computing } = ltsPipeLineStore;
 
     const { pageIndex, visualConfig, spec} = exploreStore;
@@ -42,8 +44,10 @@ const LTSPage: React.FC = props => {
     const startAnalysis = useCallback(() => {
         ltsPipeLineStore.startTask().then(() => {
             exploreStore.emitViewChangeTransaction(0)
+        }).catch(err => {
+            commonStore.showError('error', err)
         })
-    }, [ltsPipeLineStore, exploreStore])
+    }, [ltsPipeLineStore, exploreStore, commonStore])
 
     const downloadResults = useCallback(() => {
         exploreStore.downloadResults();
@@ -53,6 +57,7 @@ const LTSPage: React.FC = props => {
 
     return <div className="content-container">
         <VizPreference />
+        <SaveModal />
         <div className="card">
             <CommandBarButton
                 style={{ float: 'right' }}
@@ -80,15 +85,22 @@ const LTSPage: React.FC = props => {
                         onClick={startAnalysis}
                     />
                 }
-                {
-                    insightSpaces.length > 0 && <DefaultButton
-                        style={MARGIN_LEFT}
-                        text={intl.get('function.exportStorage.title')}
-                        iconProps={{ iconName: 'DownloadDocument' }}
-                        disabled={dataIsEmpty}
-                        onClick={downloadResults}
-                    />
-                }
+                <DefaultButton
+                    style={MARGIN_LEFT}
+                    text={intl.get('function.save.title')}
+                    iconProps={{ iconName: 'clouddownload' }}
+                    disabled={dataIsEmpty}
+                    onClick={() => {
+                        exploreStore.setShowSaveModal(true);
+                    }}
+                />
+                <IconButton
+                    style={MARGIN_LEFT}
+                    text={intl.get('function.exportStorage.title')}
+                    iconProps={{ iconName: 'DownloadDocument' }}
+                    disabled={dataIsEmpty}
+                    onClick={downloadResults}
+                />
             </Stack>
             <div className="h-4">
             { computing && <ProgressIndicator description={intl.get('lts.computing')} />}

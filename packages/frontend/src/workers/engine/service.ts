@@ -1,7 +1,7 @@
 import { IFieldSummary, IInsightSpace } from "visual-insights";
 import { StatFuncName } from "visual-insights/build/esm/statistics";
-import { RESULT_STORAGE_SPLITOR } from "../../constants";
 import { IFieldMeta, IRow, ISyncEngine } from "../../interfaces";
+import { IRathStorage } from "../../utils/storage";
 import { RathCHEngine } from "./clickhouse";
 // import { isSetEqual } from "../../utils/index";
 import { RathEngine } from "./core";
@@ -92,7 +92,7 @@ async function startPipeLine (props: StartPipeLineProps) {
     } else if (EngineRef.mode === 'clickhouse' && props.mode === 'clickhouse') {
         const engine = EngineRef.current;
         if (engine === null) throw new Error('Engine is not created.');
-        const { fieldMetas, viewName } = props;
+        const { viewName } = props;
         // engine.setRawFields(fieldsProps);
         await engine.uvsView(viewName);
         await engine.buildDataGraph();
@@ -129,14 +129,6 @@ function scanDetails (spaceIndex: number) {
     }
 }
 
-function intersect (A: string[], B: string[]) {
-    const bset = new Set(B);
-    for (let a of A) {
-        if (bset.has(a)) return true
-    }
-    return false;
-}
-
 async function associate (spaceIndex: number) {
     const engine = EngineRef.current;
     if (engine === null) throw new Error('Engine is not created.');
@@ -167,33 +159,26 @@ function aggregate (props: { dimensions: string[]; measures: string[]; aggregato
     return []
 }
 
-function exportResult () {
+function exportResult (): Pick<IRathStorage, 'dataStorage' | 'engineStorage'> {
     if (EngineRef.mode === 'webworker') {
         const engine = EngineRef.current
         if (engine === null) throw new Error('Engine is not created.');
         const ser = engine.serialize();
-        let result = ''
-        result += JSON.stringify(ser.dataStorage)
-        result += RESULT_STORAGE_SPLITOR
-        result += JSON.stringify(ser.storage)
-        return result
+        return {
+            dataStorage: JSON.stringify(ser.dataStorage),
+            engineStorage: JSON.stringify(ser.storage)
+        }
     } else {
         throw new Error('Not supported current data engine type.')
     }
 }
 
-export interface EngineUploadsProps {
-    dataContent: string;
-    stateContent: string
-}
-function importFromUploads(props: EngineUploadsProps) {
+function importFromUploads(props: Pick<IRathStorage, 'dataStorage' | 'engineStorage'>) {
     if (EngineRef.mode === 'webworker') {
         const engine = EngineRef.current
         if (engine === null) throw new Error('Engine is not created.');
-        const { dataContent, stateContent } = props;
-        const dataStorage = JSON.parse(dataContent) as any
-        const storage = JSON.parse(stateContent) as any
-        engine.deSerialize(storage, dataStorage)
+        const { dataStorage, engineStorage } = props;
+        engine.deSerialize(JSON.parse(engineStorage), JSON.parse(dataStorage))
     } else {
         throw new Error('Not supported current data engine type.')
     }
@@ -212,32 +197,6 @@ function syncEngine (): ISyncEngine {
         throw new Error('Not supported current data engine type.')
     }
 }
-
-// class WorkerRouter {
-//     private routeMap: Map<string, (props?: any) => Promise<any>> = new Map();
-//     private onSuccess: (res?: any) => void;
-//     private onFailed: (res: string) => void
-//     constructor (onSuccess: (res?: any) => void, onFailed: (res: string) => void) {
-//         this.onFailed = onFailed;
-//         this.onSuccess = onSuccess;
-//     }
-//     public route(task: MessageProps['task'], callback: (props?: any) => Promise<any>) {
-//         this.routeMap.set(task, callback);
-//     }
-//     public async handle (task: MessageProps['task'], props: any) {
-//         try {
-//             if (!this.routeMap.has(task)) {
-//                 throw new Error(`Unknow task: "${task}".`)
-//             }
-//             const taskHandler = this.routeMap.get('task')!;
-//             const res = await taskHandler(props);
-//             this.onSuccess(res)
-//             return res;
-//         } catch (error: any) {
-//             this.onFailed(error.toString())
-//         }
-//     }
-// }
 
 export async function router (e: { data: MessageProps }, onSuccess: (res?: any) => void, onFailed: (res: string) => void) {
     const req = e.data;

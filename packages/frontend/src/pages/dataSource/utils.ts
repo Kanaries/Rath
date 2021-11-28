@@ -1,4 +1,4 @@
-import { RATH_INDEX_COLUMN_KEY, RESULT_STORAGE_SPLITOR, STORAGE_FILE_SUFFIX } from "../../constants";
+import { RATH_INDEX_COLUMN_KEY, STORAGE_FILE_SUFFIX } from "../../constants";
 // import { BIField, Record } from "../../global";
 import { FileLoader, inferAnalyticType, isASCII } from "../../utils";
 import { Cleaner, Sampling, UnivariateSummary } from 'visual-insights';
@@ -6,6 +6,7 @@ import { FileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
 import { IRawField, IRow } from "../../interfaces";
+import { IRathStorage, RathStorageParse } from "../../utils/storage";
 
 export enum SampleKey {
   none = 'none',
@@ -141,12 +142,11 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
     return fixedDataSet;
 }
 
-export async function loadRathStorageFile (file: File): Promise<string[]> {
+export async function loadRathStorageFile (file: File): Promise<IRathStorage> {
     // FIXME file type
     if (file.name.split('.').slice(-1)[0] === STORAGE_FILE_SUFFIX) {
         const rawContent = await FileLoader.textLoader(file);
-        const contents = rawContent.split(RESULT_STORAGE_SPLITOR);
-        return contents
+        return RathStorageParse(rawContent);
     } else {
         throw new Error(`file type not supported: ${file.name.split('.').slice(-1)[0]}`)
     }
