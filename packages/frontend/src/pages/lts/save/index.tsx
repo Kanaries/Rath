@@ -22,15 +22,9 @@ const SaveModal: React.FC = props => {
     const [name, setName] = useState<string>('')
     const { showSaveModal } = exploreStore;
 
-    useEffect(() => {
-        if (showSaveModal) {
-            setName(`[Rath_Storage]${dayjs().unix()}`)
-        }
-    }, [showSaveModal])
-
     const saveInIndexDB = useCallback(() => {
         exploreStore.getStorageContent()
-            .then(content => setStorageByIdInLocal(`[Rath_Storage]${dayjs().unix()}`, name, content))
+            .then(content => setStorageByIdInLocal(`[Rath_Storage]${dayjs().unix()}`, name === '' ? `[Rath_Storage]${dayjs().unix()}` : name, content))
             .catch(err => {
                 commonStore.showError('error', err);
             })
@@ -44,7 +38,7 @@ const SaveModal: React.FC = props => {
         <Container>
             <h2>{intl.get('function.save.title')}</h2>
             <div className="form-row">
-                <TextField label="name" value={name} onChange={(e, value) => {
+                <TextField placeholder="Name" label={intl.get('common.name')} value={name} onChange={(e, value) => {
                     value && setName(value);
                     }}
                 />

@@ -1,7 +1,8 @@
 {
     "common": {
         "dimension": "dimension",
-        "measure": "measure"
+        "measure": "measure",
+        "name": "Name"
     },
     "menu": {
         "dataSource": "DataSource",
