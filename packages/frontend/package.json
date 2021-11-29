@@ -29,7 +29,7 @@
     "datalib": "^1.9.2",
     "dayjs": "^1.10.7",
     "fuse.js": "^3.4.6",
-    "immer": "^4.0.1",
+    "immer": "^9.0.6",
     "localforage": "^1.10.0",
     "mobx": "^6.3.2",
     "mobx-react-lite": "^3.2.0",
