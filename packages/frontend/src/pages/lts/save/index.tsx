@@ -28,6 +28,7 @@ const SaveModal: React.FC = props => {
             .catch(err => {
                 commonStore.showError('error', err);
             })
+        exploreStore.setShowSaveModal(false)
     }, [exploreStore, commonStore, name])
 
     const closeModal = useCallback(() => {
