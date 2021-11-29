@@ -29,7 +29,7 @@ async function start () {
             key: serverKey,
             cert: serverCert
         }, app.callback()).listen(config.port, () => {
-            console.log(`[server started] running on port: ${config.port}.`)
+            console.log(`[Connectors Server Started] running on port: ${config.port}.`)
         });
     } catch (error) {
         console.error('应用启动失败', error)

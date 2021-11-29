@@ -1,7 +1,7 @@
 import { IFieldSummary, IInsightSpace } from "visual-insights";
 import { StatFuncName } from "visual-insights/build/esm/statistics";
-import { IFieldMeta, IRow } from "../../interfaces";
-import { IVizSpace } from "../../store/exploreStore";
+import { IFieldMeta, IRow, ISyncEngine } from "../../interfaces";
+import { IRathStorage } from "../../utils/storage";
 import { RathCHEngine } from "./clickhouse";
 // import { isSetEqual } from "../../utils/index";
 import { RathEngine } from "./core";
@@ -12,7 +12,7 @@ const EngineRef: { current: RathEngine | null, mode: 'webworker' } | { current: 
 }
 
 export interface MessageProps {
-    task: 'init' | 'destroy' | 'start' | 'specification' | 'associate' | 'detail' | 'cube';
+    task: 'init' | 'destroy' | 'start' | 'specification' | 'associate' | 'detail' | 'cube' | 'download' | 'upload' | 'sync';
     props?: any
 }
 
@@ -84,15 +84,15 @@ async function startPipeLine (props: StartPipeLineProps) {
         times.push(performance.now())
         prints.push({ task: 'scores', value: times[times.length - 1] - times[times.length - 2] })
         engine.insightSpaces = engine.insightSpaces.filter(s => typeof s.score === 'number' && !isNaN(s.score));
-        engine.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
-
+        // engine.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
+        engine.insightSpaces.sort((a, b) => Number(b.impurity) - Number(a.impurity));
         viewFields = engine.fields;
         insightSpaces = engine.insightSpaces;
         viewSampleData = engine.dataSource;
     } else if (EngineRef.mode === 'clickhouse' && props.mode === 'clickhouse') {
         const engine = EngineRef.current;
         if (engine === null) throw new Error('Engine is not created.');
-        const { fieldMetas, viewName } = props;
+        const { viewName } = props;
         // engine.setRawFields(fieldsProps);
         await engine.uvsView(viewName);
         await engine.buildDataGraph();
@@ -112,12 +112,10 @@ async function startPipeLine (props: StartPipeLineProps) {
     };
 }
 
-async function specify (spaceIndex: number) {
+async function specify (space: IInsightSpace) {
     const engine = EngineRef.current;
     if (engine === null) throw new Error('Engine is not created.');
-    if (engine.insightSpaces && spaceIndex < engine.insightSpaces.length) {
-        return engine.specification(engine.insightSpaces[spaceIndex])
-    }
+    return engine.specification(space)
 }
 
 function scanDetails (spaceIndex: number) {
@@ -129,14 +127,6 @@ function scanDetails (spaceIndex: number) {
     } else {
         throw new Error(`insightSpaces(${spaceIndex}/${engine.insightSpaces.length}) not exist.`)
     }
-}
-
-function intersect (A: string[], B: string[]) {
-    const bset = new Set(B);
-    for (let a of A) {
-        if (bset.has(a)) return true
-    }
-    return false;
 }
 
 async function associate (spaceIndex: number) {
@@ -169,31 +159,44 @@ function aggregate (props: { dimensions: string[]; measures: string[]; aggregato
     return []
 }
 
-// class WorkerRouter {
-//     private routeMap: Map<string, (props?: any) => Promise<any>> = new Map();
-//     private onSuccess: (res?: any) => void;
-//     private onFailed: (res: string) => void
-//     constructor (onSuccess: (res?: any) => void, onFailed: (res: string) => void) {
-//         this.onFailed = onFailed;
-//         this.onSuccess = onSuccess;
-//     }
-//     public route(task: MessageProps['task'], callback: (props?: any) => Promise<any>) {
-//         this.routeMap.set(task, callback);
-//     }
-//     public async handle (task: MessageProps['task'], props: any) {
-//         try {
-//             if (!this.routeMap.has(task)) {
-//                 throw new Error(`Unknow task: "${task}".`)
-//             }
-//             const taskHandler = this.routeMap.get('task')!;
-//             const res = await taskHandler(props);
-//             this.onSuccess(res)
-//             return res;
-//         } catch (error: any) {
-//             this.onFailed(error.toString())
-//         }
-//     }
-// }
+function exportResult (): Pick<IRathStorage, 'dataStorage' | 'engineStorage'> {
+    if (EngineRef.mode === 'webworker') {
+        const engine = EngineRef.current
+        if (engine === null) throw new Error('Engine is not created.');
+        const ser = engine.serialize();
+        return {
+            dataStorage: JSON.stringify(ser.dataStorage),
+            engineStorage: JSON.stringify(ser.storage)
+        }
+    } else {
+        throw new Error('Not supported current data engine type.')
+    }
+}
+
+function importFromUploads(props: Pick<IRathStorage, 'dataStorage' | 'engineStorage'>) {
+    if (EngineRef.mode === 'webworker') {
+        const engine = EngineRef.current
+        if (engine === null) throw new Error('Engine is not created.');
+        const { dataStorage, engineStorage } = props;
+        engine.deSerialize(JSON.parse(engineStorage), JSON.parse(dataStorage))
+    } else {
+        throw new Error('Not supported current data engine type.')
+    }
+}
+
+function syncEngine (): ISyncEngine {
+    if (EngineRef.mode === 'webworker') {
+        const engine = EngineRef.current
+        if (engine === null) throw new Error('Engine is not created.');
+        return {
+            fields: engine.fields,
+            dataSource: engine.dataSource,
+            insightSpaces: engine.insightSpaces
+        }
+    } else {
+        throw new Error('Not supported current data engine type.')
+    }
+}
 
 export async function router (e: { data: MessageProps }, onSuccess: (res?: any) => void, onFailed: (res: string) => void) {
     const req = e.data;
@@ -227,6 +230,18 @@ export async function router (e: { data: MessageProps }, onSuccess: (res?: any) 
             case 'detail':
                 const res_details = scanDetails(req.props);
                 onSuccess(res_details)
+                break;
+            case 'download':
+                const res_result = exportResult();
+                onSuccess(res_result)
+                break;
+            case 'sync':
+                const res_sync = syncEngine();
+                onSuccess(res_sync);
+                break;
+            case 'upload':
+                const res_upload = importFromUploads(req.props);
+                onSuccess(res_upload)
                 break;
             default:
                 throw new Error(`Unknow task: "${req.task}".`)

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, ChoiceGroup, IconButton } from 'office-ui-fabric-react';
+import { Modal, ChoiceGroup, IconButton, ProgressIndicator } from 'office-ui-fabric-react';
 import { useId } from '@uifabric/react-hooks';
 import intl from 'react-intl-universal';
 import { IDataSourceType } from '../../../global';
@@ -12,11 +12,14 @@ import { IRawField, IRow } from '../../../interfaces';
 
 interface SelectionProps {
     show: boolean;
+    loading: boolean;
     onClose: () => void;
+    onStartLoading: () => void;
+    onLoadingFailed: (err: any) => void;
     onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
 }
 const Selection: React.FC<SelectionProps> = props => {
-    const { show, onClose, onDataLoaded } = props;
+    const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed } = props;
 
     const [dataSourceType, setDataSourceType] = useState<IDataSourceType>(IDataSourceType.FILE);
     const dsTypeOptions = useDataSourceTypeOptions();
@@ -41,8 +44,9 @@ const Selection: React.FC<SelectionProps> = props => {
                     }}
                     ariaLabelledBy={dsTypeLabelId}
                 />
-                {dataSourceType === IDataSourceType.FILE && <FileData onClose={onClose} onDataLoaded={onDataLoaded} />}
-                {dataSourceType === IDataSourceType.DEMO && <DemoData onClose={onClose} onDataLoaded={onDataLoaded} />}
+                {loading && <ProgressIndicator description="loading" />}
+                {dataSourceType === IDataSourceType.FILE && <FileData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
+                {dataSourceType === IDataSourceType.DEMO && <DemoData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
                 {dataSourceType === IDataSourceType.CLICKHOUSE && <ClickHouseData onClose={onClose} onDataLoaded={onDataLoaded} />}
             </div>
         </Modal>

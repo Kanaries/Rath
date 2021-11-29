@@ -14,7 +14,7 @@
   cursor: pointer;
 }
 .content-container{
-  padding: 28px 9% 0px 9%;
+  padding: 1em 9% 0px 9%;
 }
 .header-bar{
   position: relative;
@@ -109,4 +109,8 @@ h2, h3 {
 .header-toolbar{
   float: right;
   padding: 0.5rem;
+}
+
+.message-container {
+  padding: 1em 4em 0em 4em;
 }

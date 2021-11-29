@@ -1,15 +1,17 @@
 import React, {  useCallback, useEffect } from "react";
 import intl from 'react-intl-universal'
 import { useComposeState } from '../../hooks/index';
-import { ComboBox, PrimaryButton, Stack, DefaultButton, Toggle, Dropdown, IDropdownOption } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import { CleanMethod, useCleanMethodList } from './clean';
 import Selection from './selection/index';
+import ImportStorage from "./importStorage";
 import { Record } from "../../global";
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
 import { COMPUTATION_ENGINE, PIVOT_KEYS } from "../../constants";
+import { IRawField, IRow } from "../../interfaces";
 interface PageStatus {
   show: {
     insightBoard: boolean;
@@ -27,7 +29,7 @@ interface DataSourceBoardProps {
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, exploreStore } = useGlobalStore();
 
-  const { cleanedData, cleanMethod, rawData } = dataSourceStore;
+  const { cleanedData, cleanMethod, rawData, loading } = dataSourceStore;
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
@@ -76,10 +78,50 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     commonStore.setAppKey(PIVOT_KEYS.lts);
   }, [ltsPipeLineStore, exploreStore, commonStore])
 
+  const onCheckResults = useCallback(() => {
+    exploreStore.emitViewChangeTransaction(0)
+    commonStore.setAppKey(PIVOT_KEYS.lts)
+  }, [exploreStore, commonStore])
+
+  const onSelectPannelClose = useCallback(() => {
+    setPageStatus(draft => {
+      draft.show.dataConfig = false;
+    })
+  }, [setPageStatus])
+
+  const onSelectDataLoaded = useCallback((fields: IRawField[], dataSource: IRow[]) => {
+    dataSourceStore.loadData(fields, dataSource);
+  }, [dataSourceStore])
+
+  const onSelectStartLoading = useCallback(() => {
+    dataSourceStore.setLoading(true);
+  }, [dataSourceStore])
+
+  const onSelectLoadingFailed = useCallback((err: any) => {
+    dataSourceStore.setLoading(false);
+    commonStore.showError('error', `[Data Loading Error]${err}`)
+  }, [dataSourceStore, commonStore])
+
   const engineOptions: IDropdownOption[] = [
     { text: intl.get(`config.computationEngine.${COMPUTATION_ENGINE.clickhouse}`), key: COMPUTATION_ENGINE.clickhouse },
     { text: intl.get(`config.computationEngine.${COMPUTATION_ENGINE.webworker}`), key: COMPUTATION_ENGINE.webworker }
   ]
+  const analysisOptions: IContextualMenuProps = {
+    items: [
+      {
+        key: 'function.analysis.start',
+        text: intl.get('function.analysis.start'),
+        onClick: onV1EngineStart
+      },
+      {
+        key: 'function.analysis.checkResult',
+        text: intl.get('function.analysis.checkResult'),
+        onClick: onCheckResults
+      }
+    ]
+  }
+
+  const hasResults = exploreStore.insightSpaces.length > 0;
 
   // useEffect(() => {
   //   console.log('meta update')
@@ -89,14 +131,25 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   return (
     <div className="content-container">
       <div className="card">
+        <ImportStorage />
         <Stack horizontal>
           <PrimaryButton
+            split
             disabled={rawData.length === 0}
             iconProps={{ iconName: 'Financial' }}
-            text={intl.get('dataSource.extractInsight')}
-            onClick={onV1EngineStart}
+            text={intl.get(`function.analysis.${hasResults ? 'checkResult' : 'start'}`)}
+            menuProps={analysisOptions}
+            onClick={hasResults ? onCheckResults : onV1EngineStart}
           />
           {dataImportButton(intl.get('dataSource.importData.buttonName'), rawData)}
+          <DefaultButton
+            style={MARGIN_LEFT}
+            text={intl.get('function.importStorage.title')}
+            iconProps={{ iconName: 'CloudUpload' }}
+            onClick={() => {
+              commonStore.setShowStorageModal(true)
+            }}
+          />
           <DefaultButton
             style={MARGIN_LEFT}
             disabled={rawData.length === 0}
@@ -106,14 +159,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           />
           
           <Selection show={pageStatus.show.dataConfig}
-            onClose={() => {
-              setPageStatus(draft => {
-                draft.show.dataConfig = false;
-              })
-            }}
-            onDataLoaded={(fields, dataSource) => {
-              dataSourceStore.loadData(fields, dataSource);
-            }}
+            loading={loading}
+            onClose={onSelectPannelClose}
+            onDataLoaded={onSelectDataLoaded}
+            onStartLoading={onSelectStartLoading}
+            onLoadingFailed={onSelectLoadingFailed}
           />
         </Stack>
         <div style={{ margin: '1em 0px' }}>

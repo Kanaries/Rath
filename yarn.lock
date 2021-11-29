@@ -5401,6 +5401,11 @@ date-fns@^1.30.1:
   resolved "https://registry.nlark.com/date-fns/download/date-fns-1.30.1.tgz?cache=0&sync_timestamp=1622203607219&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fdate-fns%2Fdownload%2Fdate-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
   integrity sha1-LnG/CxGRU9u0zE6I2epaz7UNwFw=
 
+dayjs@^1.10.7:
+  version "1.10.7"
+  resolved "https://registry.nlark.com/dayjs/download/dayjs-1.10.7.tgz?cache=0&sync_timestamp=1631266519235&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fdayjs%2Fdownload%2Fdayjs-1.10.7.tgz#2cf5f91add28116748440866a0a1d26f3a6ce468"
+  integrity sha1-LPX5Gt0oEWdIRAhmoKHSbzps5Gg=
+
 debug@2.6.9, debug@^2.2.0, debug@^2.3.3, debug@^2.6.0, debug@^2.6.9:
   version "2.6.9"
   resolved "https://registry.npm.taobao.org/debug/download/debug-2.6.9.tgz?cache=0&sync_timestamp=1614330710870&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fdebug%2Fdownload%2Fdebug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
@@ -7559,6 +7564,11 @@ ignore@^5.1.4:
   resolved "https://registry.nlark.com/ignore/download/ignore-5.1.8.tgz#f150a8b50a34289b33e22f5889abd4d8016f0e57"
   integrity sha1-8VCotQo0KJsz4i9YiavU2AFvDlc=
 
+immediate@~3.0.5:
+  version "3.0.6"
+  resolved "https://registry.nlark.com/immediate/download/immediate-3.0.6.tgz#9db1dbd0faf8de6fbe0f5dd5e56bb606280de69b"
+  integrity sha1-nbHb0Pr43m++D13V5Wu2BigN5ps=
+
 immer@8.0.1:
   version "8.0.1"
   resolved "https://registry.nlark.com/immer/download/immer-8.0.1.tgz?cache=0&sync_timestamp=1623232631798&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fimmer%2Fdownload%2Fimmer-8.0.1.tgz#9c73db683e2b3975c424fb0572af5889877ae656"
@@ -9004,6 +9014,13 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
+lie@3.1.1:
+  version "3.1.1"
+  resolved "https://registry.nlark.com/lie/download/lie-3.1.1.tgz#9a436b2cc7746ca59de7a41fa469b3efb76bd87e"
+  integrity sha1-mkNrLMd0bKWd56QfpGmz77dr2H4=
+  dependencies:
+    immediate "~3.0.5"
+
 lilconfig@^2.0.3:
   version "2.0.3"
   resolved "https://registry.nlark.com/lilconfig/download/lilconfig-2.0.3.tgz#68f3005e921dafbd2a2afb48379986aa6d2579fd"
@@ -9055,6 +9072,13 @@ loader-utils@^1.1.0, loader-utils@^1.2.3, loader-utils@^1.4.0:
     big.js "^5.2.2"
     emojis-list "^3.0.0"
     json5 "^1.0.1"
+
+localforage@^1.10.0:
+  version "1.10.0"
+  resolved "https://registry.nlark.com/localforage/download/localforage-1.10.0.tgz#5c465dc5f62b2807c3a84c0c6a1b1b3212781dd4"
+  integrity sha1-XEZdxfYrKAfDqEwMahsbMhJ4HdQ=
+  dependencies:
+    lie "3.1.1"
 
 locate-path@^2.0.0:
   version "2.0.0"
@@ -14510,19 +14534,20 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-visual-insights@0.6.3:
-  version "0.6.3"
-  resolved "https://registry.nlark.com/visual-insights/download/visual-insights-0.6.3.tgz#ed398cf2b26946d03b49aea4c48ea857f6abddeb"
-  integrity sha1-7TmM8rJpRtA7Sa6kxI6oV/ar3es=
+visual-insights@0.7.3:
+  version "0.7.3"
+  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.3.tgz#5c1520a916602e43a9097d70558e1d04afed6785"
+  integrity sha1-XBUgqRZgLkOpCX1wVY4dBK/tZ4U=
   dependencies:
     assert "^2.0.0"
+    axios "^0.22.0"
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 
-visual-insights@0.7.2:
-  version "0.7.2"
-  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.2.tgz?cache=0&sync_timestamp=1634558175507&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fvisual-insights%2Fdownload%2Fvisual-insights-0.7.2.tgz#6bc9e598673bd06a1ffefa43d256355be8ecd929"
-  integrity sha1-a8nlmGc70Gof/vpD0lY1W+js2Sk=
+visual-insights@0.7.5:
+  version "0.7.5"
+  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.5.tgz?cache=0&sync_timestamp=1637562103232&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fvisual-insights%2Fdownload%2Fvisual-insights-0.7.5.tgz#46f66d2cf601e0100047a8add5545620cb2ead2f"
+  integrity sha512-kaHHMDYiEf21NqrBHQGQ2xtF631uXPU/vL2JKIpCXyZATKKrz3X4sHxQBEeyQffRhc4m6wniD/6bCeARBLXoDg==
   dependencies:
     assert "^2.0.0"
     axios "^0.22.0"

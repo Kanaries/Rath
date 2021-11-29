@@ -1,4 +1,9 @@
 {
+    "common": {
+        "dimension": "dimension",
+        "measure": "measure",
+        "name": "Name"
+    },
     "menu": {
         "dataSource": "DataSource",
         "noteBook": "NoteBook",
@@ -23,6 +28,39 @@
             "webworker": "Browser(Web Worker)",
             "notCompatible": "Not compatible with datasource"
         }
+    },
+    "function": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "analysis": {
+            "start": "Insight Analysis",
+            "checkResult": "Check Existed Results"
+        },
+        "importStorage": {
+            "title": "Import History Storage",
+            "desc": "Import a Rath storage file, which was exported from Rath, containing analysis history records in Rath.",
+            "type": {
+                "file": "File",
+                "indexdb": "Local Storage"
+            },
+            "storageColumns": {
+                "name": "Name",
+                "createTime": "Create Time",
+                "size": "Size",
+                "operation": "Operation"
+            }
+        },
+        "exportStorage": {
+            "title": "Export Rath Storage",
+            "type": {
+                "file": "File",
+                "indexdb": "Index DB"
+            }
+        },
+        "save": {
+            "title": "Save"
+        },
+        "upload": "Upload"
     },
     "dataSource": {
         "extractInsight": "Insight Analysis",
@@ -154,6 +192,16 @@
             "T2": "Associated Dimensions",
             "hint": "Associated Measures refers to keep the dimensions similar, find correlated measures. Associated Dimensions refers to keep the measures similar, find correlated dimensions."
         },
-        "bring": "Customize Analysis"
+        "bring": "Customize Analysis",
+        "commandBar": {
+            "editing": "editing chart",
+            "associate": "associate views",
+            "constraints": "analysis constraints"
+        },
+        "constraints": {
+            "exclude": "exclude field",
+            "auto": "include if exists insights",
+            "include": "force include"
+        }
     }
 }

@@ -1,12 +1,14 @@
 {
   "name": "desktop",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Rath Desktop",
   "main": "main.js",
   "homepage": "./",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "build": {
     "productName": "Kanaries Rath",
@@ -61,7 +63,6 @@
           ]
         }
       ]
-
     },
     "linux": {
       "icon": "icons/icon.ico"

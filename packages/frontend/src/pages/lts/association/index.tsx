@@ -1,7 +1,6 @@
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useState, useEffect } from 'react';
-import { FieldSummary } from '../../../service';
 import { useGlobalStore } from '../../../store';
 import Association from './assCharts';
 import { Pivot, PivotItem } from 'office-ui-fabric-react'

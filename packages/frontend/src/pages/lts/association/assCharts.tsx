@@ -45,7 +45,6 @@ const AssociationCharts: React.FC<AssociationProps> = props => {
                             }}
                         >
                             <BaseChart
-                                fixedWidth={false}
                                 aggregator={visualConfig.aggregator}
                                 defaultAggregated={vizAggregate}
                                 defaultStack={visualConfig.defaultStack}

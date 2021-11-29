@@ -1,8 +1,9 @@
 import { Specification } from "visual-insights/build/esm/commonTypes";
+import { Aggregator } from "../global";
 import { geomTypeMap, DataField } from './index';
 import { inferFieldSemanticTypeWithDict, inferFieldTypeWithDict } from "./utils";
 
-export function featureVis(query: Specification, fields: DataField[]) {
+export function featureVis(query: Specification, fields: DataField[], aggregator: Aggregator | undefined = 'sum') {
   console.log({ query, fields })
   // bug: sometimes there are fields in query but not in fields
   let fieldTypeDict: {[key: string]: DataField} = {};
@@ -65,13 +66,13 @@ export function featureVis(query: Specification, fields: DataField[]) {
             field: query.position![0],
             type: getFieldSemanticType(query.position![0]),
             bin: markType === 'rect' && xType === 'quantitative' && { maxbins: 20 },
-            aggregate: markType !== 'rect' && xAgg && 'sum'
+            aggregate: markType !== 'rect' && xAgg && aggregator
           },
           y: query.position![1] && {
             field: query.position![1],
             type: getFieldSemanticType(query.position![1]),
             bin: markType === 'rect' && yType === 'quantitative' && { maxbins: 20 },
-            aggregate: markType !== 'rect' && yAgg && 'sum',
+            aggregate: markType !== 'rect' && yAgg && aggregator,
           },
           size: query.size![0] && {
             field: query.size![0],
@@ -95,7 +96,7 @@ export function featureVis(query: Specification, fields: DataField[]) {
           },
           color: (adjustColorField || markType === 'rect') && {
             field: adjustColorField,
-            aggregate: markType === 'rect' && getFieldSemanticType(adjustColorField) === 'quantitative' && (adjustColorField ? 'sum' : 'count'),
+            aggregate: markType === 'rect' && getFieldSemanticType(adjustColorField) === 'quantitative' && (adjustColorField ? aggregator : 'count'),
             type: adjustColorField && getFieldSemanticType(adjustColorField)
           }
         }

@@ -8,10 +8,12 @@ import { IRawField, IRow } from "../../../interfaces";
 
 interface FileDataProps {
     onClose: () => void;
+    onStartLoading: () => void;
+    onLoadingFailed: (err: any) => void;
     onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
 }
 const FileData: React.FC<FileDataProps> = (props) => {
-    const { onClose, onDataLoaded } = props;
+    const { onClose, onDataLoaded, onStartLoading, onLoadingFailed } = props;
     const sampleOptions = useSampleOptions();
     const labelId = useId("labelElement");
     const [sampleMethod, setSampleMethod] = useState<SampleKey>(SampleKey.none);
@@ -21,14 +23,19 @@ const FileData: React.FC<FileDataProps> = (props) => {
     async function fileUploadHanlder() {
         if (fileEle.current !== null && fileEle.current.files !== null) {
             const file = fileEle.current.files[0];
-            const { fields, dataSource } = await loadDataFile(file, sampleMethod, sampleSize);
-            logDataImport({
-                dataType: 'File',
-                fields,
-                dataSource: dataSource.slice(0, 10),
-                size: dataSource.length
-            });
-            onDataLoaded(fields, dataSource);
+            onStartLoading();
+            try {
+                const { fields, dataSource } = await loadDataFile(file, sampleMethod, sampleSize);
+                logDataImport({
+                    dataType: 'File',
+                    fields,
+                    dataSource: dataSource.slice(0, 10),
+                    size: dataSource.length
+                });
+                onDataLoaded(fields, dataSource);
+            } catch (error) {
+                onLoadingFailed(error)
+            }
             onClose();
         }
     }

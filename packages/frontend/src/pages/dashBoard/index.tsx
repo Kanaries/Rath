@@ -1,17 +1,18 @@
 import React from "react";
 import intl from 'react-intl-universal';
-import { PrimaryButton, DefaultButton, Stack, Separator, ProgressIndicator } from "office-ui-fabric-react";
+import { PrimaryButton, DefaultButton, Stack, Separator, ProgressIndicator, IconButton } from "office-ui-fabric-react";
 import CombinedChart from "./combinedChart";
 import { useMemo } from "react";
 import { useGlobalStore } from "../../store";
 import { meta2fieldScores } from "../../utils/transform";
 import { observer } from "mobx-react-lite";
+import ConfigPannel from "./configPannel";
 
 const DashBoardPage: React.FC = props => {
   const { pipeLineStore, dashBoardStore } = useGlobalStore();
   // const [dashBoardIndex, setDashBoardIndex] = useState(0);
 
-  const { dashBoardList, pageIndex } = dashBoardStore;
+  const { dashBoardList, pageIndex, config } = dashBoardStore;
   const { cookedDataset } = pipeLineStore;
   const { transedData, transedMetas } = cookedDataset;
 
@@ -21,6 +22,7 @@ const DashBoardPage: React.FC = props => {
 
   return (
     <div className="content-container">
+      <ConfigPannel />
       <div className="card">
         <PrimaryButton
           text={intl.get('dashBoard.generateButton')}
@@ -49,6 +51,14 @@ const DashBoardPage: React.FC = props => {
             }}
             allowDisabledFocus
           />
+          <IconButton
+                iconProps={{ iconName: 'Settings' }}
+                title={intl.get('explore.preference')}
+                ariaLabel={intl.get('explore.preference')}
+                onClick={() => {
+                  dashBoardStore.setShowConfig(true);
+                }}
+              />
         </Stack>
           <p className="state-description">{intl.get('dashBoard.desc')}</p>
         <div
@@ -60,6 +70,7 @@ const DashBoardPage: React.FC = props => {
         >
           {dashBoardList[pageIndex] && dashBoardList[pageIndex].length > 0 && (
             <CombinedChart
+              aggregator={config.aggregator}
               dataSource={transedData}
               dashBoard={dashBoardList[pageIndex]}
               dimScores={dimScores}

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import styled from "styled-components";
-import { DataSource } from "../../global";
+import { Aggregator, DataSource } from "../../global";
 import datalib from "datalib";
 
 function numberWithCommas(x: number): string {
@@ -36,7 +36,7 @@ const Card = styled.div`
 interface IndicatorProps {
   dataSource: DataSource;
   measures: string[];
-  operator?: 'sum' | 'mean' | 'max' | 'min';
+  operator?: Aggregator;
 }
 const IndicatorCard: React.FC<IndicatorProps> = props => {
   const { dataSource = [], measures = [], operator = 'sum' } = props;
@@ -46,7 +46,11 @@ const IndicatorCard: React.FC<IndicatorProps> = props => {
     }
     let ans = 0;
     try {
-      ans = datalib[operator](dataSource.map(d => d[measures[0]]));
+      if (operator === 'count') {
+        ans = dataSource.length;
+      } else {
+        ans = datalib[operator](dataSource.map(d => d[measures[0]]));
+      }
     } catch (error) {
       console.log('operator does not exist or not in vega/datalib.')
     }

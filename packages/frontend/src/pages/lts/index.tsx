@@ -1,16 +1,16 @@
-import { observer } from 'mobx-react-lite';
-import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton } from 'office-ui-fabric-react';
 import React, { useCallback } from 'react';
-import { useGlobalStore } from '../../store';
-import BaseChart from '../../visBuilder/vegaBase';
-import RadarChart from '../../components/radarChart';
-import Ass from './association/index'
-import intl from 'react-intl-universal'
-import { runInAction } from 'mobx';
-import VizPreference from '../../components/vizPreference';
+import { observer } from 'mobx-react-lite';
 import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
-import { PIVOT_KEYS } from '../../constants';
+import intl from 'react-intl-universal'
+import { runInAction } from 'mobx';
+import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton, IconButton } from 'office-ui-fabric-react';
+
+import { useGlobalStore } from '../../store';
+import BaseChart from '../../visBuilder/vegaBase';
+import VizPreference from '../../components/vizPreference';
+import VizOperation from './vizOperation';
+import SaveModal from './save';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -19,25 +19,45 @@ const MainHeader = styled.div`
     font-weight: 500;
 `
 
+const InsightContainer = styled.div`
+    display: flex;
+    .insight-viz{
+        flex-grow: 1;
+        flex-shrink: 2;
+        overflow: auto;
+    }
+    .insight-info{
+        flex-grow: 2;
+        flex-shrink: 1;
+        flex-basis: 500px;
+        padding: 0em 1em;
+        border-left: 1px solid #f5f5f5;
+    }
+`
+
 const LTSPage: React.FC = props => {
-    const { ltsPipeLineStore, dataSourceStore, exploreStore, commonStore } = useGlobalStore();
+    const { ltsPipeLineStore, exploreStore, commonStore } = useGlobalStore();
     const { insightSpaces, computing } = ltsPipeLineStore;
 
-    const { pageIndex, visualConfig, spec, showAsso } = exploreStore;
+    const { pageIndex, visualConfig, spec} = exploreStore;
 
     const startAnalysis = useCallback(() => {
         ltsPipeLineStore.startTask().then(() => {
             exploreStore.emitViewChangeTransaction(0)
+        }).catch(err => {
+            commonStore.showError('error', err)
         })
-    }, [])
+    }, [ltsPipeLineStore, exploreStore, commonStore])
 
-    const customizeAnalysis = useCallback(() => {
-        exploreStore.bringToGrphicWalker();
-        commonStore.setAppKey(PIVOT_KEYS.editor)
-    }, [exploreStore, commonStore])
+    const downloadResults = useCallback(() => {
+        exploreStore.downloadResults();
+    }, [exploreStore])
+
+    const dataIsEmpty = ltsPipeLineStore.dataSource.length === 0;
 
     return <div className="content-container">
         <VizPreference />
+        <SaveModal />
         <div className="card">
             <CommandBarButton
                 style={{ float: 'right' }}
@@ -53,7 +73,7 @@ const LTSPage: React.FC = props => {
                     insightSpaces.length > 0 && <DefaultButton
                         text={intl.get('lts.autoAnalysis')}
                         iconProps={{ iconName: 'Financial' }}
-                        disabled={dataSourceStore.cleanedData.length === 0}
+                        disabled={dataIsEmpty}
                         onClick={startAnalysis}
                     />
                 }
@@ -61,64 +81,61 @@ const LTSPage: React.FC = props => {
                     insightSpaces.length === 0 && <PrimaryButton
                         text={intl.get('lts.autoAnalysis')}
                         iconProps={{ iconName: 'Financial' }}
-                        disabled={dataSourceStore.cleanedData.length === 0}
+                        disabled={dataIsEmpty}
                         onClick={startAnalysis}
                     />
                 }
+                <DefaultButton
+                    style={MARGIN_LEFT}
+                    text={intl.get('function.save.title')}
+                    iconProps={{ iconName: 'clouddownload' }}
+                    disabled={dataIsEmpty}
+                    onClick={() => {
+                        exploreStore.setShowSaveModal(true);
+                    }}
+                />
+                <IconButton
+                    style={MARGIN_LEFT}
+                    text={intl.get('function.exportStorage.title')}
+                    iconProps={{ iconName: 'DownloadDocument' }}
+                    disabled={dataIsEmpty}
+                    onClick={downloadResults}
+                />
             </Stack>
             <div className="h-4">
             { computing && <ProgressIndicator description={intl.get('lts.computing')} />}
             </div>
             <MainHeader>{intl.get('lts.title')}</MainHeader>
             <p className="state-description">{intl.get('lts.hintMain')}</p>
-            <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
+            {/* <Divider style={{ marginBottom: '1em', marginTop: '1em' }} /> */}
             <Pagination style={{ marginBottom: '1em', marginTop: '1em' }} variant="outlined" shape="rounded" count={insightSpaces.length} page={pageIndex + 1} onChange={(e, v) => {
                 exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
             }} />
-            <div>
-                <p className="state-description">results: {pageIndex + 1} / {insightSpaces.length}. score: {insightSpaces.length > 0 && insightSpaces[pageIndex].score?.toFixed(6)}</p>
-                <div>
-                    {insightSpaces.length > 0 && spec && <div>
-                        <BaseChart
-                            defaultAggregated={visualConfig.defaultAggregated}
-                            defaultStack={visualConfig.defaultStack}
-                            dimensions={insightSpaces[pageIndex].dimensions}
-                            measures={insightSpaces[pageIndex].measures}
-                            dataSource={visualConfig.defaultAggregated ? spec.dataView : dataSourceStore.cleanedData}
-                            schema={spec.schema}
-                            fieldFeatures={dataSourceStore.fieldMetas.map(f => ({
-                                name: f.fid,
-                                type: f.semanticType
-                            }))}
-                            aggregator={visualConfig.aggregator}
-                        />
-                    </div>}
-                    {
-                        insightSpaces.length > 0 && spec && <div>
-                            <Stack horizontal>
-                                <PrimaryButton iconProps={{ iconName: 'Lightbulb' }} text={intl.get('lts.associate')} onClick={() => {exploreStore.getAssociatedViews()}} />
-                                <DefaultButton disabled style={MARGIN_LEFT} text={intl.get('lts.summary')} onClick={() => {exploreStore.scanDetails(pageIndex)}} />
-                                <DefaultButton style={MARGIN_LEFT} text={intl.get('lts.bring')} onClick={customizeAnalysis} />
-                            </Stack>
-                            <div>
-                            {
-                                exploreStore.details.length > 0 && <RadarChart
-                                    dataSource={exploreStore.details}
-                                    threshold={0.8}
-                                    keyField="type"
-                                    valueField="significance"
-                                />
-                            }
-                            </div>
-                        </div>
-                    }
+            <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
+            <InsightContainer>
+                <div className="insight-viz">
+                {insightSpaces.length > 0 && spec && <div>
+                            <BaseChart
+                                defaultAggregated={visualConfig.defaultAggregated}
+                                defaultStack={visualConfig.defaultStack}
+                                dimensions={insightSpaces[pageIndex].dimensions}
+                                measures={insightSpaces[pageIndex].measures}
+                                dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
+                                schema={spec.schema}
+                                fieldFeatures={ltsPipeLineStore.fields.map(f =>({
+                                    name: f.key,
+                                    type: f.semanticType
+                                }))}
+                                aggregator={visualConfig.aggregator}
+                                viewSize={320}
+                                stepSize={32}
+                            />
+                        </div>}
                 </div>
-                <div>
-                    {
-                        showAsso && <Ass />
-                    }
+                <div className="insight-info">
+                    <VizOperation />
                 </div>
-            </div>
+            </InsightContainer>
         </div>
     </div>
 }

@@ -1,34 +1,16 @@
 import { makeAutoObservable, observable, runInAction } from "mobx";
 import { Specification } from "visual-insights";
 import { IFieldSummary, IInsightSpace } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
-import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
-// import { simpleAggregate } from "visual-insights/build/esm/statistics";
-import { IRow } from "../../interfaces";
+
+import { IRow, ISyncEngine } from "../../interfaces";
 import { IVizSpace } from "../../pages/lts/association/assCharts";
 import { initRathWorker, rathEngineService } from "../../service";
-import { RathEngine } from "../../workers/engine/core";
+import { IRathStorage } from "../../utils/storage";
 import { ClickHouseStore } from "../clickhouseStore";
 import { CommonStore } from "../commonStore";
 import { DataSourceStore } from "../dataSourceStore";
 
-// const identityWorker: InsightWorker = async (aggData, dimensions, measures) => {
-//     return {
-//         dimensions,
-//         measures,
-//         significance: 1
-//     }
-// }
-
-function intersect (A: string[], B: string[]) {
-    const bset = new Set(B);
-    for (let a of A) {
-        if (bset.has(a)) return true
-    }
-    return false;
-}
-
 const PRINT_PERFORMANCE = new URL(window.location.href).searchParams.get('performance');
-
 
 export class LTSPipeLine {
     private dataSourceStore: DataSourceStore;
@@ -56,7 +38,7 @@ export class LTSPipeLine {
     public async initEngine () {
         try {
             initRathWorker(this.commonStore.computationEngine);
-            const res = await rathEngineService({
+            await rathEngineService({
                 task: 'init',
                 props: this.commonStore.computationEngine
             })
@@ -109,13 +91,13 @@ export class LTSPipeLine {
         //     keyset.add(_key);
         // }
     }
-    public async specify (spaceIndex: number): Promise<{ schema: Specification, dataView: IRow[] } | undefined> {
-        if (spaceIndex < this.insightSpaces.length) {
+    public async specify (space: IInsightSpace): Promise<{ schema: Specification, dataView: IRow[] } | undefined> {
+        if (space) {
             this.computing = true;
             try {
                 const res = await rathEngineService({
                     task: 'specification',
-                    props: spaceIndex
+                    props: space
                 })
                 runInAction(() => {
                     this.computing = false;
@@ -171,6 +153,58 @@ export class LTSPipeLine {
             return res;
         } catch (error) {
             console.error(error)
+            runInAction(() => {
+                this.computing = false;
+            })
+            throw error;
+        }
+    }
+    public async syncStateFromEngine () {
+        try {
+            const engineState: ISyncEngine = await rathEngineService({
+                task: 'sync'
+            })
+            runInAction(() => {
+                this.dataSource = engineState.dataSource
+                this.fields = engineState.fields
+                this.insightSpaces = engineState.insightSpaces
+            })
+        } catch (error) {
+            throw error;
+        }
+    }
+    public async downloadResults (): Promise<Pick<IRathStorage, 'engineStorage' | 'dataStorage'>> {
+        try {
+            this.computing = true;
+            const res = await rathEngineService({
+                task: 'download'
+            })
+            runInAction(() => {
+                this.computing = false;
+            })
+            return res
+        } catch (error) {
+            runInAction(() => {
+                this.computing = false;
+            })
+            throw error
+        }
+    }
+    public exportDataStore () {
+        return this.dataSourceStore.exportStore();
+    }
+    public async importFromUploads (props: Pick<IRathStorage, 'engineStorage' | 'dataStorage'>) {
+        try {
+            this.computing = true;
+            await rathEngineService({
+                task: 'upload',
+                props
+            })
+            runInAction(() => {
+                this.computing = false;
+            })
+            this.syncStateFromEngine();
+        } catch (error) {
             runInAction(() => {
                 this.computing = false;
             })

@@ -6,10 +6,11 @@ let win;
 function createWindow () {
   // 创建浏览器窗口。
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1400,
+    height: 800,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      // webSecurity: false,
     }
   })
 
@@ -41,6 +42,13 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+  // On certificate error we disable default behaviour (stop loading the page)
+  // and we then say "it is all fine - true" to the callback
+  event.preventDefault();
+  callback(true);
+});
 
 app.on('activate', () => {
   // 在macOS上，当单击dock图标并且没有其他窗口打开时，

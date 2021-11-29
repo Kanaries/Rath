@@ -1,8 +1,9 @@
 // define new interfaces here, global.ts is no longer maintained.
+import { IFieldSummary, IInsightSpace } from "visual-insights";
 import { Aggregator, BIField, BIFieldType, FieldType } from "./global";
 
 export interface IRow {
-    [key: string]: number | string | boolean | null | undefined;
+    [key: string]: any
 }
 
 // export interface IRawField extends BIField {
@@ -45,4 +46,12 @@ export interface PreferencePanelConfig {
 export interface IDBFieldMeta {
     fid: string;
     dataType: string;
+}
+
+export type IECStatus = 'none' | 'proxy' | 'engine';
+
+export interface ISyncEngine {
+    fields: IFieldSummary[];
+    dataSource: IRow[];
+    insightSpaces: IInsightSpace[]
 }

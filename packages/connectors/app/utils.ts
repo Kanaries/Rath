@@ -1,9 +1,7 @@
 import { Context } from "koa";
-import { createConnection } from "mysql2/promise";
 import fs from 'fs/promises';
 import path from 'path';
 import { IAPP_CONFIG } from "./interfaces";
-import { useGlobalStore } from "./store";
 import { createHash } from 'crypto';
 
 export async function sendSuccessResponse(ctx: Context, payload: any) {

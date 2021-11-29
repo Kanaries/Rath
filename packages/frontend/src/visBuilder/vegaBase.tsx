@@ -30,7 +30,8 @@ interface BaseChartProps {
   measures: string[];
   fieldFeatures: Field[];
   schema: Specification;
-  fixedWidth?: boolean;
+  viewSize?: number;
+  stepSize?: number;
 }
 
 const BaseChart: React.FC<BaseChartProps> = (props) => {
@@ -43,7 +44,8 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
     measures = [],
     schema = {},
     fieldFeatures = [],
-    fixedWidth = true
+    viewSize,
+    stepSize
   } = props;
 
   const container = useRef<HTMLDivElement>(null);
@@ -67,12 +69,23 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
   useEffect(() => {
     if (container.current !== null) {
       if (schema.position && schema.position.length > 0 && schema.geomType && schema.geomType.length > 0) {
-        let spec = baseVis(schema, table, dimensions, measures, aggregatedMeasures, fieldFeatures, defaultAggregated, defaultStack, fixedWidth);
+        let spec = baseVis({
+          query: schema,
+          dataSource: table,
+          dimensions,
+          measures,
+          aggregatedMeasures,
+          fieldFeatures,
+          defaultAggregated,
+          defaultStack,
+          viewSize,
+          stepSize
+        });
         globalRef.baseVisSpec = spec;
         embed(container.current, spec);
       }
     }
-  }, [schema, table, dimensions, measures, aggregatedMeasures, fieldFeatures, defaultAggregated, defaultStack, fixedWidth])
+  }, [schema, table, dimensions, measures, aggregatedMeasures, fieldFeatures, defaultAggregated, defaultStack, viewSize, stepSize])
   return <div ref={container}></div>
 }
 

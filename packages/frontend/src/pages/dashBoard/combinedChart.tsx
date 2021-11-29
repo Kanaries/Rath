@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { DashBoard } from "../../service";
-import { DataSource, Field } from "../../global";
+import { Aggregator, DataSource, Field } from "../../global";
 import { specification } from "visual-insights";
 import { useComposeState } from "../../hooks/index";
 import { IconButton } from "office-ui-fabric-react";
@@ -14,6 +14,7 @@ interface CombinedChartProps {
   dashBoard: DashBoard;
   dataSource: DataSource;
   dimScores: [string, number, number, Field][];
+  aggregator?: Aggregator;
 }
 
 interface GlobalFilters {
@@ -21,7 +22,7 @@ interface GlobalFilters {
 }
 
 const CombinedChart: React.FC<CombinedChartProps> = props => {
-  const { dashBoard = [], dataSource = [], dimScores = [] } = props;
+  const { dashBoard = [], dataSource = [], dimScores = [], aggregator = 'sum' } = props;
   const [globalFilters, setGlobalFilters] = useComposeState<GlobalFilters>({});
   const [chartStateList, setChartStateList] = useState<boolean[]>([]);
   useEffect(() => {
@@ -92,21 +93,21 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
           specIndex: index,
           type: IndicatorCardType,
           measures: measures,
-          operator: "sum"
+          operator: aggregator
         };
       }
       let vegaSpec: any = {}
       if (type === 'target') {
-        vegaSpec = targetVis(schema, dataFields)
+        vegaSpec = targetVis(schema, dataFields, aggregator)
       }
 
       if (type === 'feature') {
-        vegaSpec = featureVis(schema, dataFields)
+        vegaSpec = featureVis(schema, dataFields, aggregator)
       }
       vegaSpec.specIndex = index
       return vegaSpec
     }) as any;
-  }, [chartSpecList, fieldFeatures]);
+  }, [chartSpecList, fieldFeatures, aggregator]);
 
   const signalHandler = useMemo(() => {
     return dashBoard.map((d, index) => {
@@ -182,6 +183,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
             key={`ds-ind-chart-${index}`}
             dataSource={vsourceList[spec.specIndex]}
             measures={spec.measures}
+            operator={aggregator}
           />
       )}
       </div>

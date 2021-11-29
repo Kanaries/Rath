@@ -1,4 +1,9 @@
 {
+    "common": {
+        "dimension": "维度",
+        "measure": "度量",
+        "name": "名称"
+    },
     "menu": {
         "dataSource": "数据源",
         "noteBook": "工作簿",
@@ -23,6 +28,39 @@
             "webworker": "浏览器(Web Worker)",
             "notCompatible": "与数据源暂不兼容"
         }
+    },
+    "function": {
+        "confirm": "确认",
+        "cancel": "取消",
+        "analysis": {
+            "start": "开始分析",
+            "checkResult": "查看已有结果"
+        },
+        "importStorage": {
+            "title": "导入历史分析",
+            "desc": "导入一个Rath的分析结果文件，这个文件是曾经从Rath中导出分析记录文件。",
+            "type": {
+                "file": "文件",
+                "indexdb": "本地存储"
+            },
+            "storageColumns": {
+                "name": "名称",
+                "createTime": "创建时间",
+                "size": "大小",
+                "operation": "操作"
+            }
+        },
+        "exportStorage": {
+            "title": "导出分析文件",
+            "type": {
+                "file": "文件",
+                "indexdb": "Index DB"
+            }
+        },
+        "save": {
+            "title": "保存"
+        },
+        "upload": "上传文件"
     },
     "dataSource": {
         "extractInsight": "开始分析",
@@ -154,6 +192,16 @@
             "T2": "关联维度",
             "hint": "『关联度量』是指探索和当前图表中，度量/指标关联程度更高的图表，这可以帮你研究哪些指标的表现和当前关注的指标相近。『关联维度』是指探索和当前图表中，维度相关度更高的图表，这可以帮助你研究对于当前的度量下，相似维度对度量分布的划分差异。"
         },
-        "bring": "自定义分析"
+        "bring": "自定义分析",
+        "commandBar": {
+            "editing": "编辑图表",
+            "associate": "联想",
+            "constraints": "分析约束"
+        },
+        "constraints": {
+            "exclude": "排除字段",
+            "auto": "机器判断（有洞察则包含）",
+            "include": "强制包含"
+        }
     }
 }

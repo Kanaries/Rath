@@ -1,4 +1,5 @@
-import { makeAutoObservable, observable, runInAction } from "mobx";
+import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
+import { Aggregator } from "../global";
 import { DashBoard, generateDashBoard } from "../service";
 import { LitePipeStore } from "./pipeLineStore/lite";
 
@@ -7,7 +8,14 @@ export class DashBoardStore {
     public pageIndex: number = 0;
     public loading: boolean = false;
     private pipeLineStore: LitePipeStore;
+    public showConfigPanel: boolean = false;
+    public config: {
+        aggregator: Aggregator;
+    }
     constructor (pipleLineStore: LitePipeStore) {
+        this.config = {
+            aggregator: 'sum'
+        }
         makeAutoObservable(this, {
             dashBoardList: observable.ref
         });
@@ -17,12 +25,12 @@ export class DashBoardStore {
         // this.pipeLineStore = 
         this.loading = true;
         try {
-            const dashBoardList = await generateDashBoard(
-                this.pipeLineStore.cookedDataset.transedData,
-                this.pipeLineStore.cookedDataset.dimMetas.map(f => f.fid),
-                this.pipeLineStore.cookedDataset.meaMetas.map(f => f.fid),
-                this.pipeLineStore.dataSubspaces
-            );
+            const dashBoardList = await generateDashBoard({
+                dataSource: this.pipeLineStore.cookedDataset.transedData,
+                dimensions: this.pipeLineStore.cookedDataset.dimMetas.map(f => f.fid),
+                measures: this.pipeLineStore.cookedDataset.meaMetas.map(f => f.fid),
+                subspaces: this.pipeLineStore.dataSubspaces
+            });
             runInAction(() => {
                 this.dashBoardList = dashBoardList;
                 this.loading = false;
@@ -37,9 +45,15 @@ export class DashBoardStore {
     public get pageDisabled () {
         return this.pipeLineStore.dataSubspaces.length === 0
     }
+    public setShowConfig (show: boolean) {
+        this.showConfigPanel = show;
+    }
     public setPageIndex (index: number) {
         if (!isNaN(index)) {
             this.pageIndex = index;
         }
+    }
+    public setAggregator (op: Aggregator) {
+        this.config.aggregator = op;
     }
 }
