@@ -61,6 +61,7 @@ function viewImp (dataSource: IRow[], dimensions: string[], measures: string[]):
         entries.sort((a, b) => b[1].length - a[1].length);
 
         for (let i = 0; i < entries.length; i++) {
+            if (i >= BIN_SIZE - 1) break;
             const groupRows = entries[i][1];
             let groupProb = groupRows.length / dataSource.length;
             const subEnt = meaImp(groupRows, mea, _min, _max);
