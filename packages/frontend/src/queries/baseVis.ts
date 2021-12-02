@@ -1,7 +1,7 @@
 import { Specification } from "visual-insights/build/esm/commonTypes";
 import { DataSource, Field, FieldType } from "../global";
 export const geomTypeMap: { [key: string]: any } = {
-  interval: "bar",
+  interval: "boxplot",
   line: "line",
   point: "point",
   // density: 'rect'
@@ -79,7 +79,8 @@ export function baseVis(props: BaseVisProps) {
         geomType[0] && geomTypeMap[geomType[0]]
           ? geomTypeMap[geomType[0]]
           : geomType[0],
-      tooltip: true
+      tooltip: true,
+      opacity: 0.89
     },
     encoding: {}
   };
@@ -111,12 +112,39 @@ export function baseVis(props: BaseVisProps) {
   if (!defaultStack && opacity.length === 0) {
     basicSpec.encoding.opacity = { value: 0.7 };
   }
-  // if (page.length === 0) {
-  // if 单一spec的情况，后续要支持多spec concat的情况，可以参考本次提交记录删除的page的情况。
+  if (geomType[0] === 'line') {
+    const lineLayer = { ...basicSpec };
+    for (let channel in fieldMap) {
+      if (getFieldType(fieldMap[channel]) === 'quantitative') {
+        // Discuss: should aggregator be controlled by top layer?
+        lineLayer.encoding[channel]['aggregate'] = 'mean'
+      }
+    }
     spec = {
       ...spec,
-      ...basicSpec
-    };
-  // }
+      layer: [
+        lineLayer,
+        {
+          ...basicSpec
+        },
+        {
+          ...basicSpec,
+          mark: {
+            type: 'errorband',
+            opacity: 0.6
+          }
+        }
+      ]
+    }
+  } else {
+    // if (page.length === 0) {
+    // if 单一spec的情况，后续要支持多spec concat的情况，可以参考本次提交记录删除的page的情况。
+      spec = {
+        ...spec,
+        ...basicSpec
+      };
+    // }
+  }
+  
   return spec;
 }

@@ -48,20 +48,26 @@
     "rxjs": "6.x",
     "styled-components": "^5.2.1",
     "symbol-observable": "^4.0.0",
-    "typescript": "^4.1.3",
     "vega": "^5.19.1",
     "vega-embed": "^6.15.1",
     "vega-lite": "^4.17.0",
-    "visual-insights": "0.7.5",
+    "visual-insights": "^0.7.6",
     "web-vitals": "^0.2.4",
     "worker-loader": "^3.0.7",
     "yarn": "^1.19.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.11.8",
+    "@testing-library/react": "^11.2.3",
+    "@testing-library/user-event": "^12.6.0",
+    "@types/chroma-js": "^1.4.3",
+    "@types/jest": "^26.0.20",
+    "@types/node": "^12.19.12",
     "@types/react": "^17.0.2",
     "@types/react-beautiful-dnd": "^13.0.0",
     "@types/react-dom": "^17.0.1",
-    "@types/styled-components": "^5.1.7"
+    "@types/styled-components": "^5.1.7",
+    "typescript": "^4.1.3"
   },
   "scripts": {
     "start": "react-app-rewired start",

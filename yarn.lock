@@ -14544,10 +14544,10 @@ visual-insights@0.7.3:
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 
-visual-insights@0.7.5:
-  version "0.7.5"
-  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.5.tgz?cache=0&sync_timestamp=1637562103232&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fvisual-insights%2Fdownload%2Fvisual-insights-0.7.5.tgz#46f66d2cf601e0100047a8add5545620cb2ead2f"
-  integrity sha512-kaHHMDYiEf21NqrBHQGQ2xtF631uXPU/vL2JKIpCXyZATKKrz3X4sHxQBEeyQffRhc4m6wniD/6bCeARBLXoDg==
+visual-insights@^0.7.6:
+  version "0.7.6"
+  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.6.tgz#8c5c3c5965d1d770d32af2b0828ec58302c33845"
+  integrity sha512-LdD7XFAkWuCMvowhRYYjGxUIv8b4jiuVXDKbXuJO5m8+WweSRHkUfx5miFzdsl/2Gx/CPn9pkPxtAKs5NY/vrg==
   dependencies:
     assert "^2.0.0"
     axios "^0.22.0"

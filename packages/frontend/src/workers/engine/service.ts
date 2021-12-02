@@ -77,12 +77,12 @@ async function startPipeLine (props: StartPipeLineProps) {
         engine.buildSubspaces();
         times.push(performance.now())
         prints.push({ task: 'subspaces', value: times[times.length - 1] - times[times.length - 2] });
-        engine.createInsightSpaces();
+        await engine.createInsightSpaces();
         times.push(performance.now())
         prints.push({ task: 'insights', value: times[times.length - 1] - times[times.length - 2] })
-        engine.setInsightScores();
-        times.push(performance.now())
-        prints.push({ task: 'scores', value: times[times.length - 1] - times[times.length - 2] })
+        // engine.setInsightScores();
+        // times.push(performance.now())
+        // prints.push({ task: 'scores', value: times[times.length - 1] - times[times.length - 2] })
         engine.insightSpaces = engine.insightSpaces.filter(s => typeof s.score === 'number' && !isNaN(s.score));
         // engine.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
         engine.insightSpaces.sort((a, b) => Number(b.impurity) - Number(a.impurity));
