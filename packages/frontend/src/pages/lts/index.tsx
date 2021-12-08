@@ -8,6 +8,7 @@ import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButto
 
 import { useGlobalStore } from '../../store';
 import BaseChart from '../../visBuilder/vegaBase';
+import VisErrorBoundary from '../../visBuilder/visErrorBoundary';
 import VizPreference from '../../components/vizPreference';
 import VizOperation from './vizOperation';
 import SaveModal from './save';
@@ -117,21 +118,23 @@ const LTSPage: React.FC = props => {
             <InsightContainer>
                 <div className="insight-viz">
                 {insightSpaces.length > 0 && spec && <div>
-                            <BaseChart
-                                defaultAggregated={visualConfig.defaultAggregated}
-                                defaultStack={visualConfig.defaultStack}
-                                dimensions={insightSpaces[pageIndex].dimensions}
-                                measures={insightSpaces[pageIndex].measures}
-                                dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
-                                schema={spec.schema}
-                                fieldFeatures={ltsPipeLineStore.fields.map(f =>({
-                                    name: f.key,
-                                    type: f.semanticType
-                                }))}
-                                aggregator={visualConfig.aggregator}
-                                viewSize={320}
-                                stepSize={32}
-                            />
+                            <VisErrorBoundary>
+                                <BaseChart
+                                    defaultAggregated={visualConfig.defaultAggregated}
+                                    defaultStack={visualConfig.defaultStack}
+                                    dimensions={insightSpaces[pageIndex].dimensions}
+                                    measures={insightSpaces[pageIndex].measures}
+                                    dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
+                                    schema={spec.schema}
+                                    fieldFeatures={ltsPipeLineStore.fields.map(f =>({
+                                        name: f.key,
+                                        type: f.semanticType
+                                    }))}
+                                    aggregator={visualConfig.aggregator}
+                                    viewSize={320}
+                                    stepSize={32}
+                                />
+                            </VisErrorBoundary>
                         </div>}
                 </div>
                 <div className="insight-info">

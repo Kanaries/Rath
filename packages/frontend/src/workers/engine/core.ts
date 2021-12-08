@@ -1,7 +1,6 @@
 import { IInsightSpace, Insight } from 'visual-insights'
 import { ViewSpace } from 'visual-insights/build/esm/insights/InsightFlow/engine';
 import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
-import { IRow } from '../../interfaces';
 import { IVizSpace } from '../../store/exploreStore';
 import { isSetEqual } from '../../utils';
 import { intersect } from './utils';

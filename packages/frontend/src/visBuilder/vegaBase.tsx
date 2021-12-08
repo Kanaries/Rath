@@ -91,7 +91,9 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
         }
         let spec = mode === 'dist' ? baseVis(params) : commonVis(params);
         globalRef.baseVisSpec = spec;
-        embed(container.current, spec);
+        embed(container.current, spec).catch(err => {
+          console.error('[VIS ERROR]', err)
+        })
       }
     }
   }, [schema, table, dimensions, measures, aggregatedMeasures, fieldFeatures, defaultAggregated, defaultStack, viewSize, stepSize, mode])

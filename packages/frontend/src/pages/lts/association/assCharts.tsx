@@ -1,5 +1,6 @@
 import React from "react";
 import BaseChart from "../../../visBuilder/vegaBase";
+import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
 import { IFieldSummary, IInsightSpace, Specification } from "visual-insights";
 import { PreferencePanelConfig } from "../../../components/preference";
 import { IRow } from "../../../interfaces";
@@ -44,16 +45,18 @@ const AssociationCharts: React.FC<AssociationProps> = props => {
                                 padding: "1em"
                             }}
                         >
-                            <BaseChart
-                                aggregator={visualConfig.aggregator}
-                                defaultAggregated={vizAggregate}
-                                defaultStack={visualConfig.defaultStack}
-                                dimensions={view.dimensions}
-                                measures={view.measures}
-                                dataSource={vizAggregate ? view.dataView : dataSource}
-                                schema={view.schema}
-                                fieldFeatures={fieldFeatures}
-                            />
+                            <VisErrorBoundary>
+                                <BaseChart
+                                    aggregator={visualConfig.aggregator}
+                                    defaultAggregated={vizAggregate}
+                                    defaultStack={visualConfig.defaultStack}
+                                    dimensions={view.dimensions}
+                                    measures={view.measures}
+                                    dataSource={vizAggregate ? view.dataView : dataSource}
+                                    schema={view.schema}
+                                    fieldFeatures={fieldFeatures}
+                                />
+                            </VisErrorBoundary>
                             <IconButton
                                 iconProps={{ iconName: 'Lightbulb' }}
                                 title={intl.get('explore.digIn')}
