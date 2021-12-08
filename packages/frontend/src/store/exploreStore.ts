@@ -47,7 +47,7 @@ export class ExploreStore {
     constructor (ltsPipeLineStore: LTSPipeLine) {
         this.visualConfig = {
             aggregator: "sum",
-            defaultAggregated: true,
+            defaultAggregated: false,
             defaultStack: true,
         };
         this.globalConstraints = {
@@ -154,12 +154,12 @@ export class ExploreStore {
             const spec = await this.ltsPipeLineStore.specify(iSpace);
             // const viewData = await this.getViewData(iSpace.dimensions, iSpace.measures);
             if (spec) {
-                // this.spec = spec;
-                const agg = !spec.schema.geomType?.includes('point');
+                // default aggregate 推断逻辑，旧时，推荐为业务图表时使用。
+                // const agg = !spec.schema.geomType?.includes('point');
                 runInAction(() => {
                     this.spec = spec;
                     // this.viewData = viewData;
-                    this.visualConfig.defaultAggregated = agg;
+                    // this.visualConfig.defaultAggregated = agg;
                     this.pageIndex = index;
                     this.details = []
                     this.showAsso = false;
