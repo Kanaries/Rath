@@ -12,7 +12,8 @@
         "explainer": "数据解读",
         "editor": "自助分析",
         "support": "帮助",
-        "lts": "探索分析"
+        "lts": "探索分析",
+        "devCollection": "调试模式"
     },
     "preference": {
         "title": "个人偏好"

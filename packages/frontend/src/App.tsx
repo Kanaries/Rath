@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import intl from 'react-intl-universal';
 import { useGlobalStore, StoreWrapper } from './store/index'
-import { Pivot, PivotItem } from "office-ui-fabric-react";
+import { observer } from "mobx-react-lite";
 import "./App.css";
 
 import Gallery from "./pages/gallery/index";
@@ -12,12 +12,12 @@ import DashBoardPage from './pages/dashBoard/index';
 import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
 import LTSPage from './pages/lts';
-import UserSettings from './components/userSettings';
 import MessageSegment from "./components/messageSegment";
-import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import AppNav from "./components/appNav";
 import { destroyRathWorker, initRathWorker } from "./service";
 import { PIVOT_KEYS } from "./constants";
+import CrInfo from "./components/crInfo";
+
 
 // FIXME: 这两代码好像没什么用
 require('intl/locale-data/jsonp/en.js')
@@ -62,7 +62,7 @@ function App() {
 
   return (
     <div>
-      <div className="header-bar">
+      {/* <div className="header-bar">
         <div className="ms-Grid-row" dir="ltr">
           <div className="ms-Grid-col ms-sm6 ms-md4 ms-lg1">
             <a
@@ -98,28 +98,36 @@ function App() {
             </div>
           </div>
         </div>
-      </div>
-      <div className="message-container">
-        <MessageSegment />
-      </div>
-      {appKey === PIVOT_KEYS.gallery && (
-        <Gallery />
-      )}
-      {appKey === PIVOT_KEYS.dataSource && (
-        <DataSourceBoard />
-      )}
-      {appKey === PIVOT_KEYS.noteBook && (
-        <div className="content-container">
-          <div className="card">
-            <NoteBook />
-          </div>
+      </div> */}
+      <div className="main-app-container">
+        <div className="main-app-nav">
+          <AppNav />
         </div>
-      )}
-      {appKey === PIVOT_KEYS.dashBoard && <DashBoardPage />}
-      {appKey === PIVOT_KEYS.explainer && <DevPage />}
-      {appKey === PIVOT_KEYS.editor && <VisualInterface />}
-      {appKey === PIVOT_KEYS.support && <SupportPage />}
-      {appKey === PIVOT_KEYS.lts && <LTSPage />}
+        <div className="main-app-content">
+        <div className="message-container">
+          <MessageSegment />
+        </div>
+        {appKey === PIVOT_KEYS.gallery && (
+          <Gallery />
+        )}
+        {appKey === PIVOT_KEYS.dataSource && (
+          <DataSourceBoard />
+        )}
+        {appKey === PIVOT_KEYS.noteBook && (
+          <div className="content-container">
+            <div className="card">
+              <NoteBook />
+            </div>
+          </div>
+        )}
+        {appKey === PIVOT_KEYS.dashBoard && <DashBoardPage />}
+        {appKey === PIVOT_KEYS.explainer && <DevPage />}
+        {appKey === PIVOT_KEYS.editor && <VisualInterface />}
+        {appKey === PIVOT_KEYS.support && <SupportPage />}
+        {appKey === PIVOT_KEYS.lts && <LTSPage />}
+        <CrInfo />
+        </div>
+      </div>
     </div>
   )
 }

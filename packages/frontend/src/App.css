@@ -14,7 +14,8 @@
   cursor: pointer;
 }
 .content-container{
-  padding: 1em 9% 0px 9%;
+  /* padding: 1em 9% 0px 9%; */
+  padding: 1em 3em;
 }
 .header-bar{
   position: relative;
@@ -113,4 +114,44 @@ h2, h3 {
 
 .message-container {
   padding: 1em 4em 0em 4em;
+}
+
+.main-app-container{
+  display: flex;
+  overflow: auto;
+  position: fixed;
+  /* top: 60px; */
+  top:0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+}
+
+.main-app-container > .main-app-nav{
+  /* position: fixed;
+  left: 0px;
+  bottom: 0px; */
+  flex-basis: 260px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  background-color: #fff;
+}
+
+.main-app-container > .main-app-content{
+  flex-basis: 800px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow: auto;
+}
+
+.kanaries-copy-right-footer{
+  position: absolute;
+  bottom: 4px;
+  font-size: 12px;
+  left: 50%;
+  color: #1f1f1f;
+  transform: translateX(-50%);
+}
+.kanaries-copy-right-footer>a{
+  text-decoration: underline;
 }

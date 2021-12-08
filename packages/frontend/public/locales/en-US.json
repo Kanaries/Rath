@@ -12,7 +12,8 @@
         "explainer": "Explainer",
         "editor": "Visual Editor",
         "support": "Support",
-        "lts": "Explore"
+        "lts": "Explore",
+        "devCollection": "Debug"
     },
     "preference": {
         "title": "preference"
