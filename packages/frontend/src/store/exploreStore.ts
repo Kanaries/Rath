@@ -49,6 +49,7 @@ export class ExploreStore {
             aggregator: "sum",
             defaultAggregated: false,
             defaultStack: true,
+            visMode: 'dist'
         };
         this.globalConstraints = {
             dimensions: [],

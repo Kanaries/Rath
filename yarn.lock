@@ -14618,7 +14618,7 @@ visual-insights@0.7.3:
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 
-visual-insights@^0.7.6:
+visual-insights@0.7.6:
   version "0.7.6"
   resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.6.tgz#8c5c3c5965d1d770d32af2b0828ec58302c33845"
   integrity sha512-LdD7XFAkWuCMvowhRYYjGxUIv8b4jiuVXDKbXuJO5m8+WweSRHkUfx5miFzdsl/2Gx/CPn9pkPxtAKs5NY/vrg==

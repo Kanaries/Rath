@@ -6,7 +6,7 @@
     },
     "menu": {
         "dataSource": "数据源",
-        "noteBook": "工作簿",
+        "noteBook": "交互式算法可视化",
         "explore": "探索分析(旧)",
         "dashBoard": "报表",
         "explainer": "数据解读",
@@ -203,6 +203,9 @@
             "exclude": "排除字段",
             "auto": "机器判断（有洞察则包含）",
             "include": "强制包含"
+        },
+        "commonVis": {
+            "text": "常规可视化"
         }
     }
 }

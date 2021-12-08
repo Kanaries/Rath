@@ -42,6 +42,7 @@ export interface PreferencePanelConfig {
     aggregator: Aggregator;
     defaultAggregated: boolean;
     defaultStack: boolean;
+    visMode: 'common' | 'dist'
 }
 export interface IDBFieldMeta {
     fid: string;

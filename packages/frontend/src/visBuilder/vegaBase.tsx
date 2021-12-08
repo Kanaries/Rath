@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import aggregate from 'cube-core';
 import embed from 'vega-embed';
 import { DataSource, Field, globalRef } from '../global'
-import { baseVis } from '../queries/index';
+import { baseVis, commonVis } from '../queries/index';
+
+// import { simpleAggregate } from 'visual-insights/build/esm/statistics';
 export const geomTypeMap: {[key: string]: any} = {
   interval: 'bar',
   line: 'line',
@@ -21,7 +23,7 @@ export interface Specification {
   page?: string[];
   filter?: string[]
 }
-interface BaseChartProps {
+export interface BaseChartProps {
   defaultAggregated: boolean;
   defaultStack: boolean;
   aggregator: 'sum' | 'mean' | 'count';
@@ -32,6 +34,7 @@ interface BaseChartProps {
   schema: Specification;
   viewSize?: number;
   stepSize?: number;
+  mode?: 'dist' | 'common'
 }
 
 const BaseChart: React.FC<BaseChartProps> = (props) => {
@@ -45,7 +48,8 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
     schema = {},
     fieldFeatures = [],
     viewSize,
-    stepSize
+    stepSize,
+    mode = 'dist'
   } = props;
 
   const container = useRef<HTMLDivElement>(null);
@@ -64,12 +68,16 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
       return dataSource
     }
     return aggregate({ dataSource, dimensions, measures, operator: aggregator, asFields: aggregatedMeasures.map(mea => mea.as)})
+    // return simpleAggregate({dataSource, dimensions, measures, ops: measures.map(m => aggregator) }).map(r => ({
+    //   ...r,
+    //   []
+    // }))
   }, [defaultAggregated, dataSource, dimensions, measures, aggregator, aggregatedMeasures])
 
   useEffect(() => {
     if (container.current !== null) {
       if (schema.position && schema.position.length > 0 && schema.geomType && schema.geomType.length > 0) {
-        let spec = baseVis({
+        const params = {
           query: schema,
           dataSource: table,
           dimensions,
@@ -80,12 +88,13 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
           defaultStack,
           viewSize,
           stepSize
-        });
+        }
+        let spec = mode === 'dist' ? baseVis(params) : commonVis(params);
         globalRef.baseVisSpec = spec;
         embed(container.current, spec);
       }
     }
-  }, [schema, table, dimensions, measures, aggregatedMeasures, fieldFeatures, defaultAggregated, defaultStack, viewSize, stepSize])
+  }, [schema, table, dimensions, measures, aggregatedMeasures, fieldFeatures, defaultAggregated, defaultStack, viewSize, stepSize, mode])
   return <div ref={container}></div>
 }
 

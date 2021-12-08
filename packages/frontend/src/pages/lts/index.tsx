@@ -1,16 +1,17 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
 import { runInAction } from 'mobx';
-import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton, IconButton } from 'office-ui-fabric-react';
+import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton, IconButton, Toggle } from 'office-ui-fabric-react';
 
 import { useGlobalStore } from '../../store';
 import BaseChart from '../../visBuilder/vegaBase';
 import VizPreference from '../../components/vizPreference';
 import VizOperation from './vizOperation';
 import SaveModal from './save';
+import CommonVisSegment from './commonVisSegment';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -39,7 +40,8 @@ const LTSPage: React.FC = props => {
     const { ltsPipeLineStore, exploreStore, commonStore } = useGlobalStore();
     const { insightSpaces, computing } = ltsPipeLineStore;
 
-    const { pageIndex, visualConfig, spec} = exploreStore;
+    const { pageIndex, visualConfig, spec } = exploreStore;
+    const [showCommonVis, setShowCommonVis] = useState<boolean>(true);
 
     const startAnalysis = useCallback(() => {
         ltsPipeLineStore.startTask().then(() => {
@@ -136,6 +138,29 @@ const LTSPage: React.FC = props => {
                     <VizOperation />
                 </div>
             </InsightContainer>
+            <div>
+                <Toggle checked={showCommonVis}
+                    onText={intl.get('lts.commonVis.text')}
+                    offText={intl.get('lts.commonVis.text')}
+                    onChange={(e, checked) => {
+                    setShowCommonVis(Boolean(checked))
+                }} />
+                {
+                    insightSpaces.length > 0 && showCommonVis && spec && <CommonVisSegment
+                        defaultAggregated={true}
+                        defaultStack={visualConfig.defaultStack}
+                        dimensions={insightSpaces[pageIndex].dimensions}
+                        measures={insightSpaces[pageIndex].measures}
+                        dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
+                        schema={spec.schema}
+                        fieldFeatures={ltsPipeLineStore.fields.map(f =>({
+                            name: f.key,
+                            type: f.semanticType
+                        }))}
+                        aggregator={visualConfig.aggregator}
+                    />
+                }
+            </div>
         </div>
     </div>
 }

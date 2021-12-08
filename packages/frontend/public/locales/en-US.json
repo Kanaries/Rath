@@ -6,7 +6,7 @@
     },
     "menu": {
         "dataSource": "DataSource",
-        "noteBook": "NoteBook",
+        "noteBook": "Interactive Pipeline Visualization",
         "explore": "Explore(alpha version)",
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
@@ -203,6 +203,9 @@
             "exclude": "exclude field",
             "auto": "include if exists insights",
             "include": "force include"
+        },
+        "commonVis": {
+            "text": "common visualization"
         }
     }
 }
