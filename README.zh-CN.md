@@ -80,8 +80,58 @@ npm i --save @kanaries/graphic-walker
 + 阿里云OSS(最新版) [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
 
 ### 桌面版下载
-- [Mac版](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0.dmg)
-- [Win版](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0-win.zip)
+- [Mac版](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath%20Setup%201.0.0.exe)
+- [Win版](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-1.0.0.dmg)
+
+## 部署/集成
+
+### 关于数据规模的问题
+对于小规模数据而言，Rath默认使用在浏览器中webworker进行分析计算，充分借助客户端算力。Rath本身是快速帮助你发现数据中的大概问题和规律，其本质并不需要精确的数据查询，所以，对于较大量的数据，可以对数据进行采样。
+
+对于更大规模的数据，Rath可以将涉及到数据体量较大的计算以SQL的形式下发给具备分布式计算能力的计算引擎，在Rath中，目前提供了clickhouse的案例。
+
+### 如何集成
+Rath目前对于小规模数据的场景，只需要部署客户端的代码即可。
+
+如果你要使用自己的计算引擎（如clickhouse），则需要部署一个连接器(rath/packages/connectors)。连接器的原理非常简单，只是对Rath下发的SQL请求进行转发。如果你本身拥有自己的http-sql的服务，你也可以直接让Rath它。
+
+#### 1.使用docker
+
+建议docker可使用内存在4G以上
+
+```bash
+docker compose up -d
+
+# 在127.0.0.1:2233访问Rath
+```
+#### 2.手动部署
+
++ 确保本地node版本 > 14(lts)
+
+```bash
+git clone git@github.com:Kanaries/Rath.git
+# git clone https://github.com/Kanaries/Rath.git
+
+cd Rath
+
+yarn install
+
+yarn workspace @kanaries/graphic-walker build
+yarn workspace frontend rath-client build
+
+mv ./packages/frontend/build ./rath-build
+
+# 构建好的资源都位于./rath-build下，你可以将其部署在你的静态资源服务中。
+```
+
+#### 3.直接使用官方编译的版本
+如果你不想在本地进行构建，也可以使用我们发布的构建完成的版本。你只需要将其下载并部署到自己的服务器上即可，[下载链接](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/rath-client-build.zip)。
+
+```bash
+# 下载预构建的版本
+curl -O https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/rath-client-build.zip
+```
+
 
 
 
@@ -92,14 +142,6 @@ npm i --save @kanaries/graphic-walker
 + QQ交流群：129132269
 + 微信公众号：Kanaries
 
-## Reference
-
-Rath is insipired by several excellent works below:
-
-+ Wongsuphasawat, Kanit, et al. "Voyager 2: Augmenting visual analysis with partial view specifications." Proceedings of the 2017 CHI Conference on Human Factors in Computing Systems. ACM, 2017.
-+ B. Tang et al, "Extracting top-K insights from multi-dimensional data," in 2017, . DOI: 10.1145/3035918.3035922.
-+ A. Satyanarayan, K. Wongsuphasawat and J. Heer, "Declarative interaction design for data visualization," in 2014, . DOI: 10.1145/2642918.2647360.
-+ Cleveland, W., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. Journal of the American Statistical Association, 79(387), 531-554. doi:10.2307/2288400
 
 ## LICENSE (GPL)
 Rath is a automated pattern discovery and visualization tool (auto-EDA).

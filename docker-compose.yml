@@ -1,3 +1,5 @@
 services:
     rath:
         build: .
+        ports:
+          - 2233:80
