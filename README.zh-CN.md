@@ -95,6 +95,8 @@ Rath目前对于小规模数据的场景，只需要部署客户端的代码即�
 
 如果你要使用自己的计算引擎（如clickhouse），则需要部署一个连接器(rath/packages/connectors)。连接器的原理非常简单，只是对Rath下发的SQL请求进行转发。如果你本身拥有自己的http-sql的服务，你也可以直接让Rath它。
 
+Rath中的嵌入式类tableau的拖拽式自助分析工具@kanaries/graphic-walker是可以以React组件的形式嵌入到你自己的项目中的。但对于Rath本身，建议作为独立的应用部署（也可以以iframe的形式嵌入到你的系统中）
+
 #### 1.使用docker
 
 建议docker可使用内存在4G以上
