@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "win": "electron-builder --win"
   },
   "build": {
     "productName": "Kanaries Rath",
@@ -33,7 +34,7 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "rath",
-      "include": "build/installer.nsh"
+      "include": "installer.nsh"
     },
     "dmg": {
       "contents": [
