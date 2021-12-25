@@ -244,4 +244,19 @@ export class ExploreStore {
             this.specForGraphicWalker = this.spec.schema;
         }
     }
+    public async getSubInsights (dimensions: string[], measures: string[]) {
+        try {
+            const data = await rathEngineService({
+                task: 'subinsight',
+                props: {
+                    dimensions,
+                    measures
+                }
+            })
+            return data;
+        } catch (error) {
+            console.error(error)
+            return []
+        }
+    }
 }

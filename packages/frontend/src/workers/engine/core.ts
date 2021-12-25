@@ -43,6 +43,77 @@ export class RathEngine extends VIEngine {
         await Promise.all(taskPool);
         return insightSpaces
     }
+    public async searchPointInterests(viewSpace: ViewSpace) {
+        // const globalMeasures = this.measures;
+        let ansSet: any[] = []
+        if (viewSpace.dimensions.length > 0) {
+            const cuboid = this.cube.getCuboid(viewSpace.dimensions);
+            const globalDist = this.cube.getCuboid([]).getState(viewSpace.measures, viewSpace.measures.map(() => 'dist'));
+            const localDist = cuboid.getState(viewSpace.measures, viewSpace.measures.map(() => 'dist'))
+            if (globalDist.length === 0) return ansSet;
+            const globalDistMapByMeasure: Map<string, number[]> = new Map();
+            for (let mea of viewSpace.measures) {
+                const _sum: number = globalDist[0][mea].reduce((total: number, value: number) => total + value, 0)
+                const pbDist: number[] = globalDist[0][mea].map((v: number) => v / _sum)
+                globalDistMapByMeasure.set(mea, pbDist);
+            }
+            for (let ld of localDist) {
+                let EKL = 0;
+                for (let mea of viewSpace.measures) {
+                    let kl = 0;
+                    const globalPbDist: number[] = globalDistMapByMeasure.get(mea)!;
+                    const localDist: number[] = ld[mea];
+                    const localSum: number = localDist.reduce((total, value) => total + value, 0);
+                    for (let b = 0; b < globalPbDist.length; b++) {
+                        const px = localDist[b] / localSum;
+                        const py = globalPbDist[b]
+                        if (px > 0 && py > 0) {
+                            kl += px * Math.log2(px / py)
+                        }
+                    }
+                    EKL += kl;
+                }
+                EKL /= viewSpace.measures.length
+                ansSet.push({
+                    ...ld,
+                    kl: EKL
+                })
+            }
+            
+        //     for (let mea of viewSpace.measures) {
+        //         const distList = localDist.map(r => ({
+        //             // TODO: 讨论是否应当直接使用count
+        //             // props: 节省计算量
+        //             // cons: 强依赖于cube必须去计算count
+        //             ...r,
+        //             freq: r[mea].reduce((total: number, value: number) => total + value, 0),
+        //             dist: r[mea]
+        //         }))
+        //         if (globalDist.length > 0) {
+        //             const globalSum = globalDist[0][mea].reduce((total: number, value: number) => total + value, 0);
+        //             const globalProbDist = globalDist[0][mea].map((v: number) => v / globalSum)
+        //             for (let i = 0; i < distList.length; i++) {
+        //                 let kl = 0;
+        //                 for (let b = 0; b < distList[i].dist.length; b++) {
+        //                     const px = distList[i].dist[b] / distList[i].freq
+        //                     const py = globalProbDist[b];
+        //                     if (px > 0 && py > 0) {
+        //                         kl += px * Math.log2(px / py);
+        //                     }
+        //                 }
+        //                 ansSet.push({
+        //                     ...distList[i],
+        //                     kl
+        //                 })
+        //             }
+        //         }
+        //     }
+        } else {
+            // todo
+        }
+        ansSet.sort((a, b) => b.kl - a.kl)
+        return ansSet
+    }
     public async associate(spaceIndex: number) {
         const { insightSpaces } = this;
         const space = insightSpaces[spaceIndex];

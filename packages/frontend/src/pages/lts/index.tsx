@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
-import { runInAction } from 'mobx';
+import { runInAction, toJS } from 'mobx';
 import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton, IconButton, Toggle } from 'office-ui-fabric-react';
 
 import { useGlobalStore } from '../../store';
@@ -148,6 +148,15 @@ const LTSPage: React.FC = props => {
                     onChange={(e, checked) => {
                     setShowCommonVis(Boolean(checked))
                 }} />
+                <DefaultButton
+                    text="subinsight"
+                    onClick={() => {
+                        exploreStore.getSubInsights(
+                            toJS(insightSpaces[pageIndex].dimensions),
+                            toJS(insightSpaces[pageIndex].measures))
+                        .then(console.log)
+                    }}
+                />
                 {
                     insightSpaces.length > 0 && showCommonVis && spec && <CommonVisSegment
                         defaultAggregated={true}

@@ -1,4 +1,5 @@
 import { IFieldSummary, IInsightSpace } from "visual-insights";
+import { ViewSpace } from "visual-insights/build/esm/insights/InsightFlow/engine";
 import { StatFuncName } from "visual-insights/build/esm/statistics";
 import { IFieldMeta, IRow, ISyncEngine } from "../../interfaces";
 import { IRathStorage } from "../../utils/storage";
@@ -12,7 +13,7 @@ const EngineRef: { current: RathEngine | null, mode: 'webworker' } | { current: 
 }
 
 export interface MessageProps {
-    task: 'init' | 'destroy' | 'start' | 'specification' | 'associate' | 'detail' | 'cube' | 'download' | 'upload' | 'sync';
+    task: 'init' | 'destroy' | 'start' | 'specification' | 'associate' | 'detail' | 'cube' | 'download' | 'upload' | 'sync' | 'subinsight';
     props?: any
 }
 
@@ -198,6 +199,17 @@ function syncEngine (): ISyncEngine {
     }
 }
 
+async function subInsight (props: ViewSpace) {
+    if (EngineRef.mode === 'webworker') {
+        const engine = EngineRef.current
+        if (engine === null) throw new Error('Engine is not created.');
+        const res = await engine.searchPointInterests(props)
+        return res
+    } else {
+        throw new Error('Not supported current data engine type.')
+    }
+}
+
 export async function router (e: { data: MessageProps }, onSuccess: (res?: any) => void, onFailed: (res: string) => void) {
     const req = e.data;
     console.log(req.task, 'worker router')
@@ -238,6 +250,10 @@ export async function router (e: { data: MessageProps }, onSuccess: (res?: any) 
             case 'sync':
                 const res_sync = syncEngine();
                 onSuccess(res_sync);
+                break;
+            case 'subinsight':
+                const res_subinsight = await subInsight(req.props);
+                onSuccess(res_subinsight);
                 break;
             case 'upload':
                 const res_upload = importFromUploads(req.props);
