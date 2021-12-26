@@ -18,7 +18,7 @@ interface CVSProps extends CommonVisSegmentBase {
 
 const CommonVisSegment: React.FC<CVSProps> = props => {
     const { dimensions, measures, schema, fieldFeatures, defaultStack, defaultAggregated, dataSource } = props;
-    return <div>
+    return <div style={{ overflow: 'auto', marginTop: '1em' }}>
         {
             (['sum', 'mean', 'count'] as const).map(a => <BaseChart
                 key={a}

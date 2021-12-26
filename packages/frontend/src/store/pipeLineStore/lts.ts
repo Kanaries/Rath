@@ -1,5 +1,5 @@
 import { makeAutoObservable, observable, runInAction } from "mobx";
-import { Specification } from "visual-insights";
+import { Sampling, Specification } from "visual-insights";
 import { IFieldSummary, IInsightSpace } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 
 import { IRow, ISyncEngine } from "../../interfaces";
@@ -21,12 +21,14 @@ export class LTSPipeLine {
     public insightSpaces: IInsightSpace[];
     public fields: IFieldSummary[] = [];
     public dataSource: IRow[] = [];
+    public samplingDataSource: IRow[] = [];
     public computing: boolean = false;
     constructor (dataSourceStore: DataSourceStore, commonStore: CommonStore, clickHouseStore: ClickHouseStore) {
         makeAutoObservable(this, {
             insightSpaces: observable.ref,
             fields: observable.ref,
-            dataSource: observable.ref
+            dataSource: observable.ref,
+            samplingDataSource: observable.ref
         });
         this.dataSourceStore = dataSourceStore;
         this.commonStore = commonStore;
@@ -67,6 +69,7 @@ export class LTSPipeLine {
                 this.dataSource = res.dataSource;
                 this.fields = res.fields;
                 this.computing = false;
+                this.getSampleData()
             })
         } catch (error) {
             console.error(error)
@@ -90,6 +93,9 @@ export class LTSPipeLine {
         //     }
         //     keyset.add(_key);
         // }
+    }
+    public async getSampleData(maxSampleSize: number = 500) {
+        this.samplingDataSource = Sampling.reservoirSampling(this.dataSource, maxSampleSize);
     }
     public async specify (space: IInsightSpace): Promise<{ schema: Specification, dataView: IRow[] } | undefined> {
         if (space) {

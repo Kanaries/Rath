@@ -13,6 +13,7 @@ import VizPreference from '../../components/vizPreference';
 import VizOperation from './vizOperation';
 import SaveModal from './save';
 import CommonVisSegment from './commonVisSegment';
+import SubinsightSegment from './subinsights';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -41,8 +42,9 @@ const LTSPage: React.FC = props => {
     const { ltsPipeLineStore, exploreStore, commonStore } = useGlobalStore();
     const { insightSpaces, computing } = ltsPipeLineStore;
 
-    const { pageIndex, visualConfig, spec } = exploreStore;
+    const { pageIndex, visualConfig, spec, showSubinsights } = exploreStore;
     const [showCommonVis, setShowCommonVis] = useState<boolean>(true);
+    const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
     const startAnalysis = useCallback(() => {
         ltsPipeLineStore.startTask().then(() => {
@@ -58,9 +60,17 @@ const LTSPage: React.FC = props => {
 
     const dataIsEmpty = ltsPipeLineStore.dataSource.length === 0;
 
+    const getSubinsights = useCallback((dimensions: string[], measures: string[]) => {
+        exploreStore.getSubInsights(dimensions, measures).then(res => {
+            setSubinsightsData(res)
+            exploreStore.setShowSubinsights(true)
+        })
+    }, [exploreStore])
+
     return <div className="content-container">
         <VizPreference />
         <SaveModal />
+        <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { exploreStore.setShowSubinsights(false) }} />
         <div className="card">
             <CommandBarButton
                 style={{ float: 'right' }}
@@ -142,21 +152,23 @@ const LTSPage: React.FC = props => {
                 </div>
             </InsightContainer>
             <div>
-                <Toggle checked={showCommonVis}
-                    onText={intl.get('lts.commonVis.text')}
-                    offText={intl.get('lts.commonVis.text')}
-                    onChange={(e, checked) => {
-                    setShowCommonVis(Boolean(checked))
-                }} />
-                <DefaultButton
-                    text="subinsight"
-                    onClick={() => {
-                        exploreStore.getSubInsights(
-                            toJS(insightSpaces[pageIndex].dimensions),
-                            toJS(insightSpaces[pageIndex].measures))
-                        .then(console.log)
-                    }}
-                />
+                <Stack horizontal>
+                    <Toggle checked={showCommonVis}
+                        onText={intl.get('lts.commonVis.text')}
+                        offText={intl.get('lts.commonVis.text')}
+                        onChange={(e, checked) => {
+                        setShowCommonVis(Boolean(checked))
+                    }} />
+                    <DefaultButton
+                        text={intl.get('lts.subinsights')}
+                        style={MARGIN_LEFT}
+                        onClick={() => {
+                            getSubinsights(
+                                toJS(insightSpaces[pageIndex].dimensions),
+                                toJS(insightSpaces[pageIndex].measures))
+                        }}
+                    />
+                </Stack>
                 {
                     insightSpaces.length > 0 && showCommonVis && spec && <CommonVisSegment
                         defaultAggregated={true}

@@ -33,7 +33,8 @@ const AssociationCharts: React.FC<AssociationProps> = props => {
 
             <div style={{ display: 'flex', flexWrap: 'wrap', overflow: 'auto' }}>
                 {vizList.map((view, i) => {
-                    const vizAggregate = view.schema.geomType && view.schema.geomType.includes("point") ? false : true;
+                    // 旧：业务图表用
+                    // const vizAggregate = view.schema.geomType && view.schema.geomType.includes("point") ? false : true;
                     return (
                         <div key={`associate-row-${i}`}
                             //   className="ms-Grid-row"
@@ -48,11 +49,12 @@ const AssociationCharts: React.FC<AssociationProps> = props => {
                             <VisErrorBoundary>
                                 <BaseChart
                                     aggregator={visualConfig.aggregator}
-                                    defaultAggregated={vizAggregate}
+                                    defaultAggregated={false}
                                     defaultStack={visualConfig.defaultStack}
                                     dimensions={view.dimensions}
                                     measures={view.measures}
-                                    dataSource={vizAggregate ? view.dataView : dataSource}
+                                    // dataSource={vizAggregate ? view.dataView : dataSource}
+                                    dataSource={dataSource}
                                     schema={view.schema}
                                     fieldFeatures={fieldFeatures}
                                 />

@@ -206,6 +206,7 @@
         },
         "commonVis": {
             "text": "common visualization"
-        }
+        },
+        "subinsights": "SubInsights"
     }
 }

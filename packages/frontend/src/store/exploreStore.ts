@@ -32,6 +32,7 @@ export class ExploreStore {
     public showConstraints: boolean = false;
     public showPreferencePannel: boolean = false;
     public showSaveModal: boolean = false;
+    public showSubinsights: boolean = false;
     public visualConfig: PreferencePanelConfig;
     public forkView: IExploreView | null = null;
     public view: IExploreView | null = null;
@@ -75,10 +76,16 @@ export class ExploreStore {
     public get dataSource () {
         return this.ltsPipeLineStore.dataSource
     }
+    public get samplingDataSource () {
+        return this.ltsPipeLineStore.samplingDataSource;
+    }
     public setVisualConig (updater: (config: PreferencePanelConfig) => void) {
         runInAction(() => {
             updater(this.visualConfig)
         });
+    }
+    public setShowSubinsights (show: boolean) {
+        this.showSubinsights = show;
     }
     public jumpToView (viz: IVizSpace) {
         const { insightSpaces } = this;

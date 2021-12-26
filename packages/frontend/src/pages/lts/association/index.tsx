@@ -11,7 +11,7 @@ const PAGE_SIZE = 7;
 
 const ObservableAssociation: React.FC = props => {
     const { galleryStore, exploreStore } = useGlobalStore()
-    const { dataSource, fields, assoListT1, assoListT2 } = exploreStore;
+    const { samplingDataSource, fields, assoListT1, assoListT2 } = exploreStore;
     const { visualConfig } = galleryStore;
 
     const [pivotKey, setPivotKey] = useState<string>('T1')
@@ -32,8 +32,8 @@ const ObservableAssociation: React.FC = props => {
                 setPivotKey(item.props.itemKey)
             }
         }}>
-            <PivotItem headerText={intl.get('lts.asso.T1')} itemKey="T1" />
-            <PivotItem headerText={intl.get('lts.asso.T2')} itemKey="T2" />
+            <PivotItem headerText={`${intl.get('lts.asso.T1')}(${assoListT1.length})`} itemKey="T1" />
+            <PivotItem headerText={`${intl.get('lts.asso.T2')}(${assoListT2.length})`} itemKey="T2" />
         </Pivot>
         <Pagination count={Math.floor(assoShownFullList.length / PAGE_SIZE) + 1} page={assoIndex + 1} onChange={(e, v) => {
             setAssoIndex(Math.max(v - 1, 0));
@@ -42,7 +42,7 @@ const ObservableAssociation: React.FC = props => {
             onSelectView={(viz) => {
               exploreStore.jumpToView(viz)
             }}
-            dataSource={dataSource}
+            dataSource={samplingDataSource}
             visualConfig={toJS(visualConfig)}
             fieldScores={fields}
             vizList={assoShownList}

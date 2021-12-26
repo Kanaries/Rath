@@ -206,6 +206,7 @@
         },
         "commonVis": {
             "text": "常规可视化"
-        }
+        },
+        "subinsights": "获取子洞察"
     }
 }
