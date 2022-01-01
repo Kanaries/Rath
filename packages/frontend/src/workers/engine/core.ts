@@ -114,9 +114,8 @@ export class RathEngine extends VIEngine {
         ansSet.sort((a, b) => b.kl - a.kl)
         return ansSet
     }
-    public async associate(spaceIndex: number) {
+    public async associate(space: { dimensions: string[]; measures: string[] }) {
         const { insightSpaces } = this;
-        const space = insightSpaces[spaceIndex];
         const { dimensions, measures, dataGraph } = this;
         // type1: meas cor assSpacesT1
         // type2: dims cor assSpacesT2
@@ -126,7 +125,7 @@ export class RathEngine extends VIEngine {
         const assSpacesT1: IVizSpace[] = [];
         const assSpacesT2: IVizSpace[] = [];
         for (let i = 0; i < insightSpaces.length; i++) {
-            if (i === spaceIndex) continue;
+            // if (i === spaceIndex) continue;
             if (!intersect(insightSpaces[i].dimensions, space.dimensions)) continue;
             if (isSetEqual(insightSpaces[i].measures, space.measures)) continue;
             if (!isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
@@ -141,6 +140,10 @@ export class RathEngine extends VIEngine {
             }
             t1_score /= (meaIndices.length * iteMeaIndices.length)
             if (t1_score > 0.7) {
+                const card = insightSpaces[i].dimensions.map(d => this.fields.find(f => f.key === d))
+                .filter(f => f !== undefined)
+                .map(f => Number(f?.features.unique))
+                .reduce((t, v) => t * v, 1)
                 const spec = this.specification(insightSpaces[i])
                 if (spec) {
                     // assSpacesT1.push({
@@ -149,7 +152,8 @@ export class RathEngine extends VIEngine {
                     // })
                     assSpacesT1.push({
                         ...insightSpaces[i],
-                        score: t1_score,
+                        score: t1_score / card / iteMeaIndices.length,
+                        card,
                         // ...spec,
                         schema: spec.schema,
                         dataView: spec.dataView
@@ -158,10 +162,10 @@ export class RathEngine extends VIEngine {
             }
         }
         for (let i = 0; i < insightSpaces.length; i++) {
-            if (i === spaceIndex) continue;
+            // if (i === spaceIndex) continue;
             if (!intersect(insightSpaces[i].measures, space.measures)) continue;
             if (isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
-            if (!isSetEqual(insightSpaces[i].measures, space.measures)) continue;
+            // if (!isSetEqual(insightSpaces[i].measures, space.measures)) continue;
             let t1_score = 0;
             const iteDimIndices = insightSpaces[i].dimensions.map(f => dimensions.findIndex(m => f === m));
             if (dataGraph !== null) {
@@ -172,12 +176,18 @@ export class RathEngine extends VIEngine {
                 }
             }
             t1_score /= (dimIndices.length * iteDimIndices.length)
-            if (t1_score > 0.65) { // (1 + 0.3) / 2
+            if (t1_score > 0.35) { // (1 + 0.3) / 2
+                const card = insightSpaces[i].dimensions.map(d => this.fields.find(f => f.key === d))
+                .filter(f => f !== undefined)
+                .map(f => Number(f?.features.unique))
+                // .reduce((t, v) => t * v, 1)
+                .reduce((t, v) => t + v, 0)
                 const spec = this.specification(insightSpaces[i])
                 if (spec) {
                     assSpacesT2.push({
                         ...insightSpaces[i],
-                        score: t1_score,
+                        score: t1_score / card,
+                        card,
                         ...spec
                     })
                 }

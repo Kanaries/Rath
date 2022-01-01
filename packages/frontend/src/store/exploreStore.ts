@@ -1,4 +1,4 @@
-import { makeAutoObservable, observable, runInAction, toJS } from 'mobx';
+import { computed, makeAutoObservable, observable, runInAction, toJS } from 'mobx';
 import { Specification, IInsightSpace } from 'visual-insights';
 import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
 import { STORAGE_FILE_SUFFIX } from '../constants';
@@ -20,6 +20,12 @@ interface IExploreView {
     ops: Aggregator[]
 }
 
+export const EXPLORE_VIEW_ORDER = {
+    DEFAULT: 'default',
+    FIELD_NUM: 'field_num',
+    CARDINALITY: 'cardinality'
+} as const;
+
 export class ExploreStore {
     public pageIndex: number = 0;
     private ltsPipeLineStore: LTSPipeLine;
@@ -36,6 +42,7 @@ export class ExploreStore {
     public visualConfig: PreferencePanelConfig;
     public forkView: IExploreView | null = null;
     public view: IExploreView | null = null;
+    public orderBy: string = EXPLORE_VIEW_ORDER.DEFAULT;
     public forkViewSpec: {
         schema: Specification;
         dataView: IRow[];
@@ -63,12 +70,41 @@ export class ExploreStore {
             assoListT1: observable.ref,
             assoListT2: observable.ref,
             forkViewSpec: observable.ref,
+            insightSpaces: computed
             // viewData: observable.ref
         });
         this.ltsPipeLineStore = ltsPipeLineStore;
     }
     public get insightSpaces () {
-        return this.ltsPipeLineStore.insightSpaces
+        const cloneSpaces = [...this.ltsPipeLineStore.insightSpaces];
+        console.log(this.orderBy)
+        if (this.orderBy === EXPLORE_VIEW_ORDER.FIELD_NUM) {
+            cloneSpaces.sort((a, b) => {
+                return a.dimensions.length + a.measures.length - b.dimensions.length - b.measures.length
+            })
+        } else if (this.orderBy === EXPLORE_VIEW_ORDER.CARDINALITY) {
+            cloneSpaces.sort((a, b) => {
+                let cardOfA = 0;
+                let cardOfB = 0;
+                // TODO: This is an non-accurate cardinalitity estimate.
+                // should get the correct number from OLAP query.
+                // but it cost time.(need a discussion.)
+                for (let dim of a.dimensions) {
+                    const field = this.fields.find(f => f.key === dim)
+                    if (field) {
+                        cardOfA += field.features.unique;
+                    }
+                }
+                for (let dim of b.dimensions) {
+                    const field = this.fields.find(f => f.key === dim)
+                    if (field) {
+                        cardOfB += field.features.unique;
+                    }
+                }
+                return cardOfA - cardOfB;
+            })
+        }
+        return cloneSpaces
     }
     public get fields () {
         return this.ltsPipeLineStore.fields;
@@ -86,6 +122,10 @@ export class ExploreStore {
     }
     public setShowSubinsights (show: boolean) {
         this.showSubinsights = show;
+    }
+    public async setExploreOrder (orderBy: string) {
+        this.orderBy = orderBy;
+        this.emitViewChangeTransaction(this.pageIndex);
     }
     public jumpToView (viz: IVizSpace) {
         const { insightSpaces } = this;
@@ -157,8 +197,8 @@ export class ExploreStore {
     }
     public async emitViewChangeTransaction(index: number) {
         // pipleLineStore统一提供校验逻辑
-        if (this.ltsPipeLineStore.insightSpaces && this.ltsPipeLineStore.insightSpaces.length > index) {
-            const iSpace = this.ltsPipeLineStore.insightSpaces[index];
+        if (this.insightSpaces && this.insightSpaces.length > index) {
+            const iSpace = this.insightSpaces[index];
             const spec = await this.ltsPipeLineStore.specify(iSpace);
             // const viewData = await this.getViewData(iSpace.dimensions, iSpace.measures);
             if (spec) {
@@ -239,7 +279,8 @@ export class ExploreStore {
         document.body.removeChild(ele);
     }
     public async getAssociatedViews () {
-        const asso = await this.ltsPipeLineStore.getAssociatedViews(this.pageIndex);
+        const space = this.insightSpaces[this.pageIndex];
+        const asso = await this.ltsPipeLineStore.getAssociatedViews(space.dimensions, space.measures);
         runInAction(() => {
             this.assoListT1 = asso.assSpacesT1;
             this.assoListT2 = asso.assSpacesT2;

@@ -146,12 +146,14 @@ export class LTSPipeLine {
      * in future providing any view close to it (data or design)
      * adjust specify
      */
-    public async getAssociatedViews (spaceIndex: number): Promise<{ assSpacesT1: IVizSpace[], assSpacesT2: IVizSpace[] }> {
+    public async getAssociatedViews (dimensions: string[], measures: string[]): Promise<{ assSpacesT1: IVizSpace[], assSpacesT2: IVizSpace[] }> {
         try {
             this.computing = true;
             const res = await rathEngineService({
                 task: 'associate',
-                props: spaceIndex
+                props: {
+                    dimensions, measures
+                }
             })
             runInAction(() => {
                 this.computing = false;

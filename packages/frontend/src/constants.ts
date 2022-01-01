@@ -20,6 +20,12 @@ export const COMPUTATION_ENGINE = {
   webworker: 'webworker'
 }
 
+export const EXPLORE_MODE = {
+  first: 'first',
+  familiar: 'familiar',
+  comprehensive: 'comprehensive'
+}
+
 export const DEMO_DATA_REQUEST_TIMEOUT = 1000 * 10;
 
 export const ENGINE_CONNECTION_STAGES: Array<{ stage: number; name: IECStatus }> = [

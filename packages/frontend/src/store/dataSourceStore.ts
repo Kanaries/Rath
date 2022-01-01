@@ -75,7 +75,15 @@ export class DataSourceStore {
                 // } else {
                 //     record[field.name] = Transform.transNumber(row[field.name]);
                 // }
-                record[field.fid] = field.analyticType === "dimension" ? row[field.fid] : Transform.transNumber(row[field.fid]);
+                if (field.analyticType === 'dimension') {
+                    if (field.semanticType === 'temporal' || field.semanticType === 'nominal') {
+                        record[field.fid] = String(row[field.fid])
+                    } else {
+                        record[field.fid] = row[field.fid]
+                    }
+                } else {
+                    record[field.fid] = Transform.transNumber(row[field.fid]);
+                }
             });
             return record;
         });

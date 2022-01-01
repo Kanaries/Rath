@@ -130,14 +130,14 @@ function scanDetails (spaceIndex: number) {
     }
 }
 
-async function associate (spaceIndex: number) {
+async function associate (props: { dimensions: string[]; measures: string[] }) {
     const engine = EngineRef.current;
     if (engine === null) throw new Error('Engine is not created.');
-    engine.associate(spaceIndex);
+    engine.associate(props);
     if (EngineRef.mode === 'webworker' && EngineRef.mode === 'webworker') {
-        return engine.associate(spaceIndex);
+        return engine.associate(props);
     } else if (EngineRef.mode === 'clickhouse' && EngineRef.mode === 'clickhouse') {
-        return engine.associate(spaceIndex);
+        return engine.associate(props);
     }
 }
 

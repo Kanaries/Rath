@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from "react";
-import { BaseTable, ArtColumn, Classes } from "ali-react-table";
-import { IRawField, IRow } from "../../../interfaces";
+import { BaseTable, Classes } from "ali-react-table";
+import { IRow } from "../../../interfaces";
 import HeaderCell from "./headerCell";
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite'

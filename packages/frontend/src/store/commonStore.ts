@@ -1,11 +1,12 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { COMPUTATION_ENGINE, PIVOT_KEYS } from '../constants';
+import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../service';
 
 export type ErrorType = 'error' | 'info' | 'success';
 export class CommonStore {
     public appKey: string = PIVOT_KEYS.dataSource;
     public computationEngine: string = COMPUTATION_ENGINE.webworker;
+    public exploreMode: string = EXPLORE_MODE.comprehensive;
     public messages: Array<{type: ErrorType, content: string}> = []; //[{type:'error', content: 'This is a test.'}];
     public showStorageModal: boolean = false;
     constructor() {
@@ -40,5 +41,8 @@ export class CommonStore {
         } catch (error) {
             console.error(error);
         }
+    }
+    public async setExploreMode(mode: string) {
+        this.exploreMode = mode;
     }
 }

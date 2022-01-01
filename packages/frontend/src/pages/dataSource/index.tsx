@@ -10,7 +10,7 @@ import ImportStorage from "./importStorage";
 import { Record } from "../../global";
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
-import { COMPUTATION_ENGINE, PIVOT_KEYS } from "../../constants";
+import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
 import { IRawField, IRow } from "../../interfaces";
 interface PageStatus {
   show: {
@@ -106,6 +106,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     { text: intl.get(`config.computationEngine.${COMPUTATION_ENGINE.clickhouse}`), key: COMPUTATION_ENGINE.clickhouse },
     { text: intl.get(`config.computationEngine.${COMPUTATION_ENGINE.webworker}`), key: COMPUTATION_ENGINE.webworker }
   ]
+  const exploreOptions: IDropdownOption[] = [
+    { text: intl.get('dataSource.exploreMode.firstTime'), key: EXPLORE_MODE.first },
+    { text: intl.get('dataSource.exploreMode.familiar'), key: EXPLORE_MODE.familiar },
+    { text: intl.get('dataSource.exploreMode.comprehensive'), key: EXPLORE_MODE.comprehensive }
+  ]
   const analysisOptions: IContextualMenuProps = {
     items: [
       {
@@ -167,14 +172,25 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           />
         </Stack>
         <div style={{ margin: '1em 0px' }}>
-            <Dropdown style={{ maxWidth: '180px' }}
-              selectedKey={commonStore.computationEngine}
-              options={engineOptions}
-              label={intl.get('config.computationEngine.title')}
-              onChange={(e, item) => {
-                item && commonStore.setComputationEngine(item.key as string);
-              }}
-            />
+          <Stack horizontal>
+            <Dropdown style={{ minWidth: '180px', marginRight: '1em' }}
+                selectedKey={commonStore.computationEngine}
+                options={engineOptions}
+                label={intl.get('config.computationEngine.title')}
+                onChange={(e, item) => {
+                  item && commonStore.setComputationEngine(item.key as string);
+                }}
+              />
+              <Dropdown style={{ minWidth: '180px', marginRight: '1em' }}
+                disabled
+                selectedKey={commonStore.exploreMode}
+                options={exploreOptions}
+                label={intl.get('dataSource.exploreMode.title')}
+                onChange={(e, item) => {
+                  item && commonStore.setExploreMode(item.key as string);
+                }}
+              />
+          </Stack>
         </div>
         <div style={{ margin: '1em 0px' }}>
           <ComboBox

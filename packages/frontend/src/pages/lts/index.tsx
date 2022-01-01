@@ -4,7 +4,7 @@ import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
 import { runInAction, toJS } from 'mobx';
-import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton, IconButton, Toggle } from 'office-ui-fabric-react';
+import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton, IconButton, Toggle, Dropdown, IDropdownOption } from 'office-ui-fabric-react';
 
 import { useGlobalStore } from '../../store';
 import BaseChart from '../../visBuilder/vegaBase';
@@ -14,6 +14,7 @@ import VizOperation from './vizOperation';
 import SaveModal from './save';
 import CommonVisSegment from './commonVisSegment';
 import SubinsightSegment from './subinsights';
+import { EXPLORE_VIEW_ORDER } from '../../store/exploreStore';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -40,9 +41,9 @@ const InsightContainer = styled.div`
 
 const LTSPage: React.FC = props => {
     const { ltsPipeLineStore, exploreStore, commonStore } = useGlobalStore();
-    const { insightSpaces, computing } = ltsPipeLineStore;
+    const { computing } = ltsPipeLineStore;
 
-    const { pageIndex, visualConfig, spec, showSubinsights } = exploreStore;
+    const { pageIndex, visualConfig, spec, showSubinsights, insightSpaces } = exploreStore;
     const [showCommonVis, setShowCommonVis] = useState<boolean>(true);
     const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
@@ -67,6 +68,11 @@ const LTSPage: React.FC = props => {
         })
     }, [exploreStore])
 
+    const orderOptions: IDropdownOption[] = Object.values(EXPLORE_VIEW_ORDER).map(or => ({
+        text: intl.get(`lts.orderBy.${or}`),
+        key: or
+    }))
+    // console.log('explore order insight spaces', exploreStore.insightSpaces)
     return <div className="content-container">
         <VizPreference />
         <SaveModal />
@@ -121,9 +127,19 @@ const LTSPage: React.FC = props => {
             <MainHeader>{intl.get('lts.title')}</MainHeader>
             <p className="state-description">{intl.get('lts.hintMain')}</p>
             {/* <Divider style={{ marginBottom: '1em', marginTop: '1em' }} /> */}
-            <Pagination style={{ marginBottom: '1em', marginTop: '1em' }} variant="outlined" shape="rounded" count={insightSpaces.length} page={pageIndex + 1} onChange={(e, v) => {
-                exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
-            }} />
+            <Dropdown style={{ maxWidth: '180px' }}
+                    selectedKey={exploreStore.orderBy}
+                    options={orderOptions}
+                    label={intl.get('lts.orderBy.title')}
+                    onChange={(e, item) => {
+                    item && exploreStore.setExploreOrder(item.key as string);
+                    }}
+                />
+            <Stack style={{ marginRight: '1em' }} horizontal>
+                <Pagination style={{ marginBottom: '1em', marginTop: '1em' }} variant="outlined" shape="rounded" count={insightSpaces.length} page={pageIndex + 1} onChange={(e, v) => {
+                    exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
+                }} />
+            </Stack>
             <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
             <InsightContainer>
                 <div className="insight-viz">
