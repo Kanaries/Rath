@@ -4,7 +4,6 @@ import { geomTypeMap, DataField } from './index';
 import { inferFieldSemanticTypeWithDict, inferFieldTypeWithDict } from "./utils";
 
 export function featureVis(query: Specification, fields: DataField[], aggregator: Aggregator | undefined = 'sum') {
-  console.log({ query, fields })
   // bug: sometimes there are fields in query but not in fields
   let fieldTypeDict: {[key: string]: DataField} = {};
   for (let field of fields) {

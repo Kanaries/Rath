@@ -54,13 +54,13 @@ const NoteBook: React.FC = (props) => {
         return dimensions.includes(field[0]) || measuresInView.includes(field[0])
       })
       const { schema } = specification(fieldScores, dataSource, dimensions, measuresInView)
-      console.log({
-        schema,
-        fieldScores,
-        dimensions,
-        measuresInView,
-        dataSource
-      })
+      // console.log({
+      //   schema,
+      //   fieldScores,
+      //   dimensions,
+      //   measuresInView,
+      //   dataSource
+      // })
       return schema;
     } catch (error) {
       console.log(error)

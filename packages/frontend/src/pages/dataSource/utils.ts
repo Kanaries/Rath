@@ -7,6 +7,8 @@ import intl from 'react-intl-universal';
 import { useMemo } from "react";
 import { IRawField, IRow } from "../../interfaces";
 import { IRathStorage, RathStorageParse } from "../../utils/storage";
+import { formatTimeField } from "../../utils/transform";
+// import { isFieldTime } from "visual-insights/build/esm/utils";
 
 export enum SampleKey {
   none = 'none',
@@ -138,6 +140,8 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
             disable: false
         }
     })
+    const timeFieldKeys = tmpFields.filter(f => f.semanticType === 'temporal').map(f => f.fid);
+    formatTimeField(rawData, timeFieldKeys);
     const fixedDataSet = fixUnicodeFields(tmpFields, rawData);
     return fixedDataSet;
 }

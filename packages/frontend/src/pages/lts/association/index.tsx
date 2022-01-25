@@ -22,7 +22,6 @@ const ObservableAssociation: React.FC = props => {
     }, [pivotKey, assoListT1, assoListT2])
 
     const assoShownFullList = pivotKey === 'T1' ? assoListT1 : assoListT2;
-    // console.log(assoShownFullList)
 
     const assoShownList =  assoShownFullList.slice(assoIndex * PAGE_SIZE, (assoIndex + 1) * PAGE_SIZE);
 

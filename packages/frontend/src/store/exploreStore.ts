@@ -77,7 +77,6 @@ export class ExploreStore {
     }
     public get insightSpaces () {
         const cloneSpaces = [...this.ltsPipeLineStore.insightSpaces];
-        console.log(this.orderBy)
         if (this.orderBy === EXPLORE_VIEW_ORDER.FIELD_NUM) {
             cloneSpaces.sort((a, b) => {
                 return a.dimensions.length + a.measures.length - b.dimensions.length - b.measures.length

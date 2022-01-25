@@ -4,7 +4,7 @@ import { BIFieldType } from "../global";
 import { IFieldMeta, IRawField, IRow } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
 import { getFieldsSummaryService } from "../service";
-import { deepcopy, Transform } from "../utils";
+import { Transform } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
@@ -66,8 +66,9 @@ export class DataSourceStore {
         return this.fields.filter(field => field.analyticType === 'measure').map(field => field.fid)
     }
 
-    public get dataSource (): IRow[] {
-        return this.rawData.map((row) => {
+    public get cleanedData () {
+        const { rawData, dimensions, measures, cleanMethod } = this;
+        const dataSource = rawData.map((row) => {
             let record: IRow = {};
             this.fields.forEach((field) => {
                 // if (field.type === 'dimension') {
@@ -87,11 +88,8 @@ export class DataSourceStore {
             });
             return record;
         });
-    }
 
-    public get cleanedData () {
-        const { dataSource, dimensions, measures, cleanMethod} = this;
-        return cleanData(deepcopy(dataSource), dimensions, measures, cleanMethod)
+        return cleanData(dataSource, dimensions, measures, cleanMethod)
     }
 
     public setLoading (loading: boolean) {
@@ -143,6 +141,7 @@ export class DataSourceStore {
         runInAction(() => {
             this.fieldMetas = metas;
         })
+        return metas;
     }
 
     public exportStore(): IDataSourceStoreStorage {
@@ -159,7 +158,6 @@ export class DataSourceStore {
     }
 
     public importStore(state: IDataSourceStoreStorage) {
-        console.log('import store', state)
         this.rawData = state.rawData;
         this.mutFields = state.mutFields;
         this.cookedDataSource = state.cookedDataSource;

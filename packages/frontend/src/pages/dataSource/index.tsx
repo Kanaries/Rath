@@ -29,13 +29,13 @@ interface DataSourceBoardProps {
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, exploreStore } = useGlobalStore();
 
-  const { cleanedData, cleanMethod, rawData, loading } = dataSourceStore;
+  const { cleanedData, cleanMethod, rawData, loading, fieldMetas } = dataSourceStore;
   const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
     show: {
       insightBoard: false,
       fieldConfig: false,
       configPanel: false,
-      dataConfig: false
+      dataConfig: rawData && rawData.length === 0
     }
   })
 
@@ -55,15 +55,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         }}
       />
     );
-  }, [])
-
-  useEffect(() => {
-    if (rawData && rawData.length === 0) {
-      setPageStatus(draft => {
-        draft.show.dataConfig = true;
-      })
-    }
-    // 不要加依赖，这里是应用加载第一次时的判断逻辑！
   }, [])
 
   const onOrignEngineStart = useCallback(() => {

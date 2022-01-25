@@ -4,12 +4,11 @@ import { observer } from 'mobx-react-lite';
 import {
     Droppable,
     Draggable,
-  } from "react-beautiful-dnd";
+} from "react-beautiful-dnd";
 
-import { DraggableFieldState } from './fieldsContext';
 import { useGlobalStore } from '../store';
 import DataTypeIcon from '../components/dataTypeIcon';
-import { IViewField } from '../interfaces';
+import { IViewField, DraggableFieldState } from '../interfaces';
 
 const FIELDS_KEY: keyof DraggableFieldState = 'fields';
 
