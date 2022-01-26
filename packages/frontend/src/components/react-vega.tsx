@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import embed, { vega, Result } from 'vega-embed';
 import { Spec } from 'vega';
+import { EDITOR_URL } from '../constants';
 // import { Result } from 'vega-embed';
 
 interface ReactVegaProps {
@@ -16,7 +17,9 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
   const [view, setView] = useState<Result['view']>()
   useEffect(() => {
     if (container.current) {
-      embed(container.current, spec).then(res => {
+      embed(container.current, spec, {
+        editorUrl: EDITOR_URL
+      }).then(res => {
         setView(res.view);
       })
     }

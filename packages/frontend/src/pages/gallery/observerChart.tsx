@@ -4,7 +4,6 @@ import { observer } from 'mobx-react-lite'
 import BaseChart from '../../visBuilder/vegaBase';
 import { useGlobalStore } from '../../store';
 import { useEffect } from 'react';
-import { config } from 'rxjs';
 
 // TODO: 这里有针对散点图类型的聚合逻辑调整，
 // 后续这部分逻辑要讨论之后，集成在引擎层，是否聚合要有推荐的值，而不是用默认值或用户指定
@@ -42,6 +41,7 @@ const ObserverChart: React.FC = () => {
             dataSource={aggData}
             schema={schema}
             fieldFeatures={fields}
+            mode="common"
         />
     );
 }
