@@ -6,7 +6,7 @@ import ClickMenu from './components/clickMenu';
 import InsightBoard from './InsightBoard/index';
 import PosFields from './Fields/posFields';
 import AestheticFields from './Fields/AestheticFields';
-import DatasetFields from './Fields/DatasetFields';
+import DatasetFields from './Fields/datasetFields/index';
 import ReactiveRenderer from './renderer/index';
 import DataSourceSegment from './dataSource/index';
 import { useGlobalStore } from './store';

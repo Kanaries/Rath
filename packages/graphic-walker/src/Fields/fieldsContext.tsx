@@ -28,7 +28,10 @@ export const FieldsContextWrapper: React.FC = props => {
             vizStore.moveField(sourceKey, result.source.index, targetKey, destination.index)
         }
     }, [])
-    return <DragDropContext onDragEnd={onDragEnd}>
+    return <DragDropContext onDragEnd={onDragEnd}
+        onDragStart={() => {}}
+        onDragUpdate={() => {}}
+    >
         { props.children }
     </DragDropContext>
 }

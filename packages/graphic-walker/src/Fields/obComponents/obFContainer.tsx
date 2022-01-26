@@ -24,7 +24,7 @@ const OBFieldContainer: React.FC<FieldContainerProps> = props => {
         {...provided.droppableProps}
         ref={provided.innerRef}
     >
-        {provided.placeholder}
+        {/* {provided.placeholder} */}
         {draggableFieldState[dkey.id].map((f, index) => (
             <Draggable key={f.dragId} draggableId={f.dragId} index={index}>
                 {(provided, snapshot) => {
