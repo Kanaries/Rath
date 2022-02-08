@@ -1,12 +1,19 @@
 {
+    "common": {
+        "dimension": "dimension",
+        "measure": "measure",
+        "name": "Name"
+    },
     "menu": {
         "dataSource": "DataSource",
-        "noteBook": "NoteBook",
-        "explore": "Explore",
+        "noteBook": "Interactive Pipeline Visualization",
+        "explore": "Explore(alpha version)",
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
         "editor": "Visual Editor",
-        "support": "Support"
+        "support": "Support",
+        "lts": "Explore",
+        "devCollection": "Debug"
     },
     "preference": {
         "title": "preference"
@@ -15,9 +22,52 @@
         "title": "How to Get Support",
         "link": "https://www.yuque.com/docs/share/65511730-af74-46eb-86fe-356c4f52402b?# 《Get Support》"
     },
+    "config": {
+        "computationEngine": {
+            "title": "Computation Engine",
+            "clickhouse": "ClickHouse",
+            "webworker": "Browser(Web Worker)",
+            "notCompatible": "Not compatible with datasource"
+        }
+    },
+    "function": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "analysis": {
+            "start": "Insight Analysis",
+            "checkResult": "Check Existed Results"
+        },
+        "importStorage": {
+            "title": "Import History Storage",
+            "desc": "Import a Rath storage file, which was exported from Rath, containing analysis history records in Rath.",
+            "type": {
+                "file": "File",
+                "indexdb": "Local Storage"
+            },
+            "storageColumns": {
+                "name": "Name",
+                "createTime": "Create Time",
+                "size": "Size",
+                "operation": "Operation"
+            }
+        },
+        "exportStorage": {
+            "title": "Export Rath Storage",
+            "type": {
+                "file": "File",
+                "indexdb": "Index DB"
+            }
+        },
+        "save": {
+            "title": "Save"
+        },
+        "upload": "Upload"
+    },
     "dataSource": {
         "extractInsight": "Insight Analysis",
+        "extractInsightOld": "Insight Analysis(Debug)",
         "cleanMethod": "Clean Method",
+        "useField": "use field",
         "importData": {
             "buttonName": "Import Data",
             "type": {
@@ -49,6 +99,12 @@
             "sampling": "Sampling",
             "percentSize": "sample size(percent)",
             "upload": "Upload"
+        },
+        "exploreMode": {
+            "title": "Explore Mode",
+            "firstTime": "Meet the data first time",
+            "familiar": "Familiar with the data",
+            "comprehensive": "Comprehensive"
         }
     },
     "meta": {
@@ -58,6 +114,11 @@
         "measure": "measure"
     },
     "noteBook": {
+        "autoParams": {
+            "title": "Auto Recommand Parameters",
+            "auto": "Auto",
+            "manual": "Manual"
+        },
         "univariate": {
             "title": "Univariate Summary",
             "desc": "Hover your mouse over the fields and see the distails and entropy reducing strategy.",
@@ -72,7 +133,7 @@
             "title": "Subspace Searching",
             "desc": "Try to choose one row(combination of dimensions) of the subspace and see the changes of the processes below.",
             "topKDimension": "top k percent dimension used",
-            "topKSubspace": "top k percent subspace used"
+            "topKSubspace": "top ( {k} / {total} ) number of subspaces used"
         },
         "clustering": {
             "title": "Measurement Clustering",
@@ -99,7 +160,8 @@
         "summary": "Summary",
         "related": {
             "title": "Related Views"
-        }
+        },
+        "like": "like"
     },
     "dashBoard": {
         "generateButton": "Generate Dashboard",
@@ -123,6 +185,40 @@
             "general": "general",
             "default_group": "group distribution",
             "default_trend": "trend"
+        }
+    },
+    "lts": {
+        "autoAnalysis": "Auto Analysis",
+        "computing": "computing",
+        "title": "Visual Insights",
+        "hintMain": "Here are some interesting patterns and insights found by Rath. If you are interested in some of them, try to use 'summary' to know more details about current view and use 'associate' to explore relative visualizations.",
+        "summary": "Summary",
+        "associate": "Associate",
+        "asso": {
+            "T1": "Associated Measures",
+            "T2": "Associated Dimensions",
+            "hint": "Associated Measures refers to keep the dimensions similar, find correlated measures. Associated Dimensions refers to keep the measures similar, find correlated dimensions."
+        },
+        "bring": "Customize Analysis",
+        "commandBar": {
+            "editing": "editing chart",
+            "associate": "associate views",
+            "constraints": "analysis constraints"
+        },
+        "constraints": {
+            "exclude": "exclude field",
+            "auto": "include if exists insights",
+            "include": "force include"
+        },
+        "commonVis": {
+            "text": "common visualization"
+        },
+        "subinsights": "SubInsights",
+        "orderBy": {
+            "title": "Result Order By",
+            "default": "Default",
+            "field_num": "Field Number",
+            "cardinality": "Cardinality"
         }
     }
 }

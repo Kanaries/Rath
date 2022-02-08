@@ -1,12 +1,19 @@
 {
+    "common": {
+        "dimension": "维度",
+        "measure": "度量",
+        "name": "名称"
+    },
     "menu": {
         "dataSource": "数据源",
-        "noteBook": "工作簿",
-        "explore": "探索",
+        "noteBook": "交互式算法可视化",
+        "explore": "探索分析(旧)",
         "dashBoard": "报表",
         "explainer": "数据解读",
         "editor": "自助分析",
-        "support": "帮助"
+        "support": "帮助",
+        "lts": "探索分析",
+        "devCollection": "调试模式"
     },
     "preference": {
         "title": "个人偏好"
@@ -15,9 +22,52 @@
         "title": "如何获取帮助/支持",
         "link": "https://www.yuque.com/docs/share/c1e4077d-c433-422b-9dc9-9486bf772f9c"
     },
+    "config": {
+        "computationEngine": {
+            "title": "计算引擎",
+            "clickhouse": "ClickHouse",
+            "webworker": "浏览器(Web Worker)",
+            "notCompatible": "与数据源暂不兼容"
+        }
+    },
+    "function": {
+        "confirm": "确认",
+        "cancel": "取消",
+        "analysis": {
+            "start": "开始分析",
+            "checkResult": "查看已有结果"
+        },
+        "importStorage": {
+            "title": "导入历史分析",
+            "desc": "导入一个Rath的分析结果文件，这个文件是曾经从Rath中导出分析记录文件。",
+            "type": {
+                "file": "文件",
+                "indexdb": "本地存储"
+            },
+            "storageColumns": {
+                "name": "名称",
+                "createTime": "创建时间",
+                "size": "大小",
+                "operation": "操作"
+            }
+        },
+        "exportStorage": {
+            "title": "导出分析文件",
+            "type": {
+                "file": "文件",
+                "indexdb": "Index DB"
+            }
+        },
+        "save": {
+            "title": "保存"
+        },
+        "upload": "上传文件"
+    },
     "dataSource": {
         "extractInsight": "开始分析",
+        "extractInsightOld": "开始分析(调试模式)",
         "cleanMethod": "清洗方法",
+        "useField": "允许使用",
         "importData": {
             "buttonName": "导入数据",
             "type": {
@@ -49,6 +99,12 @@
             "sampling": "数据采样",
             "percentSize": "样本大小(%)",
             "upload": "上传文件"
+        },
+        "exploreMode": {
+            "title": "探索模式",
+            "firstTime": "第一次接触该数据集",
+            "familiar": "基本熟悉该数据集",
+            "comprehensive": "综合模式"
         }
     },
     "meta": {
@@ -58,6 +114,11 @@
         "measure": "度量"
     },
     "noteBook": {
+        "autoParams": {
+            "title": "自动推荐参数",
+            "auto": "自动",
+            "manual": "手动"
+        },
         "univariate": {
             "title": "单变量分析",
             "desc": "把鼠标悬浮在你关心的字段上，了解其分布细节及加工策略。",
@@ -72,7 +133,7 @@
             "title": "组合搜索",
             "desc": "尝试选择一行(一个维度组合)，来看后续的分析过程针对当前行所做的具体细节。",
             "topKDimension": "使用前百分之 k 的维度",
-            "topKSubspace": "使用前百分之 k 的维度组合"
+            "topKSubspace": "使用前 ( {k} / {total} ) 的维度组合"
         },
         "clustering": {
             "title": "度量聚类",
@@ -99,7 +160,8 @@
         "summary": "解读",
         "related": {
             "title": "联想视图"
-        }
+        },
+        "like": "喜欢这张图表"
     },
     "dashBoard": {
         "generateButton": "生成报表",
@@ -123,6 +185,40 @@
             "general": "模糊",
             "default_group": "组间分布差异",
             "default_trend": "趋势"
+        }
+    },
+    "lts": {
+        "autoAnalysis": "自动分析",
+        "computing": "计算中",
+        "title": "洞察推荐",
+        "hintMain": "洞察推荐板块展示了Rath自动化挖掘数据时发现的有趣的规律和洞察，如果你对其中的某些图表感兴趣，尝试使用'概览'来获取更多细节或使用'联想'来探索与当前图表相关的内容。",
+        "summary": "概览",
+        "associate": "联想",
+        "asso": {
+            "T1": "关联度量",
+            "T2": "关联维度",
+            "hint": "『关联度量』是指探索和当前图表中，度量/指标关联程度更高的图表，这可以帮你研究哪些指标的表现和当前关注的指标相近。『关联维度』是指探索和当前图表中，维度相关度更高的图表，这可以帮助你研究对于当前的度量下，相似维度对度量分布的划分差异。"
+        },
+        "bring": "自定义分析",
+        "commandBar": {
+            "editing": "编辑图表",
+            "associate": "联想",
+            "constraints": "分析约束"
+        },
+        "constraints": {
+            "exclude": "排除字段",
+            "auto": "机器判断（有洞察则包含）",
+            "include": "强制包含"
+        },
+        "commonVis": {
+            "text": "常规可视化"
+        },
+        "subinsights": "获取子洞察",
+        "orderBy": {
+            "title": "结果排序规则",
+            "default": "默认",
+            "field_num": "字段数",
+            "cardinality": "字段总基数"
         }
     }
 }
