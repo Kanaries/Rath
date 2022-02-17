@@ -7,7 +7,7 @@ import { GEMO_TYPES } from "../config";
 
 interface VisualConfig {
     defaultAggregated: boolean;
-    geoms: string[];
+    geoms: string[];        
     defaultStack: boolean;
 }
 

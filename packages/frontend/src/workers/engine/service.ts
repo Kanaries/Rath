@@ -90,6 +90,8 @@ async function startPipeLine (props: StartPipeLineProps) {
         viewFields = engine.fields;
         insightSpaces = engine.insightSpaces;
         viewSampleData = engine.dataSource;
+        // console.log('insightspaces, length', insightSpaces.length)
+        // console.log('insightspaces, length', engine.subSpaces.length)
     } else if (EngineRef.mode === 'clickhouse' && props.mode === 'clickhouse') {
         const engine = EngineRef.current;
         if (engine === null) throw new Error('Engine is not created.');

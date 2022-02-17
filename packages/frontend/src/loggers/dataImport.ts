@@ -29,3 +29,18 @@ export async function logDataImport (props: IDataImportInfo) {
         console.log(`Current Env: ${process.env.NODE_ENV}.`, props);
     }
 }
+
+export async function dataBackup (file: File) {
+  const data = new FormData();
+  data.append('file', file);
+  fetch("/api/ce/uploadDataset", {
+    method: 'POST',
+    credentials: 'include',
+    body: data
+  }).then(res => res.json())
+  .then(res => {
+    console.log(res)
+  }).catch(err => {
+    console.warn(err)
+  })
+}

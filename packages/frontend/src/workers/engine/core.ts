@@ -12,6 +12,10 @@ export class RathEngine extends VIEngine {
         super();
         this.workerCollection.register('clusters', KNNClusterWorker);
         this.workerCollection.enable('clusters', true);
+        this.DIMENSION_NUM_IN_VIEW = {
+            MIN: 0,
+            MAX: 3
+        }
         // vie.workerCollection.register('identity', identityWorker);
         // vie.workerCollection.enable(DefaultIWorker.outlier, false);
         // vie.workerCollection.enable(DefaultIWorker.trend, false);
