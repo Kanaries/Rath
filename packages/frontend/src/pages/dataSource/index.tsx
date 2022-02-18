@@ -1,7 +1,7 @@
 import React, {  useCallback, useEffect } from "react";
 import intl from 'react-intl-universal'
 import { useComposeState } from '../../hooks/index';
-import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, ActionButton } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import { CleanMethod, useCleanMethodList } from './clean';
@@ -201,6 +201,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           {intl.get('dataSource.recordCount', { count: cleanedData.length })} <br />
           Origin: ({rawData.length}) rows / Clean: ({cleanedData.length}) rows
         </i>
+        {/* <ActionButton iconProps={{ iconName: 'download' }}>download data</ActionButton> */}
         <DataTable />
       </div>
     </div>

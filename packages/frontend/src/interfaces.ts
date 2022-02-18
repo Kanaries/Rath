@@ -12,6 +12,7 @@ export interface IRow {
 
 interface IFieldBase {
     fid: string;
+    name?: string;
     analyticType: BIFieldType;
     semanticType: FieldType;
 }

@@ -4,6 +4,7 @@ import embed from 'vega-embed';
 import { DataSource, Field, globalRef } from '../global'
 import { baseVis, commonVis } from '../queries/index';
 import { EDITOR_URL } from '../constants';
+import { IFieldMeta } from '../interfaces';
 
 // import { simpleAggregate } from 'visual-insights/build/esm/statistics';
 export const geomTypeMap: {[key: string]: any} = {
@@ -31,7 +32,7 @@ export interface BaseChartProps {
   dataSource: DataSource;
   dimensions: string[];
   measures: string[];
-  fieldFeatures: Field[];
+  fieldFeatures: IFieldMeta[];
   schema: Specification;
   viewSize?: number;
   stepSize?: number;

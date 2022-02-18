@@ -4,6 +4,7 @@ import useDigDimension, { DigDimensionProps } from "./digDimension";
 import BaseChart from "../../../visBuilder/vegaBase";
 import { Subspace } from "../../../service";
 import { IconButton, Stack } from "office-ui-fabric-react";
+import { IFieldMeta } from "../../../interfaces";
 
 function isDimensionEqual(dimensions1: string[], dimensions2: string[]) {
   if (dimensions1.length !== dimensions2.length) {
@@ -16,16 +17,14 @@ function isDimensionEqual(dimensions1: string[], dimensions2: string[]) {
 interface AssociationProps {
   digDimensionProps: DigDimensionProps;
   subspaceList: Subspace[];
+  fieldMetas: IFieldMeta[];
   onSelectView: (index: number) => void
 }
 const Association: React.FC<AssociationProps> = props => {
-  const { digDimensionProps, subspaceList, onSelectView } = props;
+  const { digDimensionProps, subspaceList, onSelectView, fieldMetas } = props;
   const { dataSource, visualConfig, fieldScores } = digDimensionProps;
   const relatedCharts = useDigDimension(digDimensionProps);
-  const fieldFeatures = fieldScores.map(f => ({
-    name: f.fieldName,
-    type: f.type
-  }));
+
   return (
     <div>
       <div className="ms-Grid">
@@ -55,7 +54,7 @@ const Association: React.FC<AssociationProps> = props => {
                   measures={view.measures}
                   dataSource={dataSource}
                   schema={view.schema}
-                  fieldFeatures={fieldFeatures}
+                  fieldFeatures={fieldMetas}
                 />
               </div>
               <div

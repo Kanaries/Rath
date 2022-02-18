@@ -1,4 +1,7 @@
 import { makeAutoObservable, observable, runInAction } from "mobx";
+import { fromStream, IStreamListener, toStream } from "mobx-utils";
+import { combineLatest, from } from "rxjs";
+import * as op from 'rxjs/operators'
 import { ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 import { BIFieldType } from "../global";
 import { IFieldMeta, IRawField, IRow } from "../interfaces";
@@ -41,21 +44,66 @@ export class DataSourceStore {
     /**
      * 作为计算属性来考虑
      */
-    public fieldMetas: IFieldMeta[] = [];
+    // public fieldMetas: IFieldMeta[] = [];
     public loading: boolean = false;
-
+    private fieldMetasRef: IStreamListener<IFieldMeta[]>;
     constructor() {
         makeAutoObservable(this, {
             rawData: observable.ref,
             cookedDataSource: observable.ref,
-            cookedMeasures: observable.ref,
-            fieldMetas: observable.ref
+            cookedMeasures: observable.ref
             // subscriptions: false
         });
+        const fields$ = from(toStream(() => this.fields, true));
+        const cleanedData$ = from(toStream(() => this.cleanedData, true))
+        const fieldsNames$ = from(toStream(() => this.fieldNames, true));
+        const originFieldMetas$ =  combineLatest([fields$, cleanedData$]).pipe(
+            op.map(([fields, cleanedData]) => {
+                const ableFiledIds = fields.map(f => f.fid);
+                return from(getFieldsSummaryService(cleanedData, ableFiledIds)).pipe(
+                    op.map(summary => {
+                        const analyticTypes = fields.map(f => f.analyticType);
+                        const metas = fieldSummary2fieldMeta({
+                            summary,
+                            analyticTypes,
+                            semanticTypes: fields.map(f => f.semanticType)
+                        });
+                        // console.log('metas1', metas, fields)
+                        // metas.forEach(m => {
+                        //     const f = fields.find(f => f.fid === m.fid);
+                        //     if (f) {
+                        //         m.name = f.name
+                        //     }
+                        // })
+                        // console.log('metas2', metas, fields)
+                        return metas
+                    })
+                )
+            }),
+            op.switchAll(),
+            op.share()
+        )
+        // 弱约束关系：fieldNames必须保证和metas是对应的顺序，这一对应可能会被fieldSummary的服务破坏。
+        const fieldMetas$ = combineLatest([originFieldMetas$, fieldsNames$]).pipe(
+            op.map(([originFieldMetas, fieldNames]) => {
+                return originFieldMetas.map((m, index) => {
+                    return {
+                        ...m,
+                        name: fieldNames[index]
+                    }
+                })
+            }),
+            op.share()
+        )
+        this.fieldMetasRef = fromStream(fieldMetas$, [])
     }
 
     public get fields () {
         return this.mutFields.filter(f => !f.disable);
+    }
+    public get fieldMetas () {
+        console.log('fields_metas', this.fieldMetasRef.current)
+        return this.fieldMetasRef.current
     }
 
     public get dimensions () {
@@ -64,6 +112,9 @@ export class DataSourceStore {
 
     public get measures () {
         return this.fields.filter(field => field.analyticType === 'measure').map(field => field.fid)
+    }
+    public get fieldNames (): string[] {
+        return this.fields.map(f => `${f.name}`)
     }
 
     public get cleanedData () {
@@ -127,25 +178,15 @@ export class DataSourceStore {
     public loadData (fields: IRawField[], rawData: IRow[]) {
         this.mutFields = fields.map(f => ({
             ...f,
+            name: f.name ? f.name : f.fid,
             disable: false
         }))
         this.rawData = rawData
         this.loading = false;
     }
 
-    public async getFieldsMetas () {
-        const ableFiledIds = this.fields.map(f => f.fid);
-        const summary = await getFieldsSummaryService(this.cleanedData, ableFiledIds);
-        const analyticTypes = this.fields.map(f => f.analyticType);
-        const metas = fieldSummary2fieldMeta({
-            summary,
-            analyticTypes,
-            semanticTypes: this.fields.map(f => f.semanticType)
-        });
-        runInAction(() => {
-            this.fieldMetas = metas;
-        })
-        return metas;
+    public setFieldName (fIndex: number, name: string) {
+        this.mutFields[fIndex].name = name
     }
 
     public exportStore(): IDataSourceStoreStorage {
@@ -168,6 +209,7 @@ export class DataSourceStore {
         this.cookedDimensions = state.cookedDimensions;
         this.cookedMeasures = state.cookedMeasures;
         this.cleanMethod = state.cleanMethod;
-        this.fieldMetas = state.fieldMetas
+        // FIXMe
+        this.fieldMetasRef.current = state.fieldMetas
     }
 }

@@ -62,7 +62,7 @@ const SearchPage: React.FC = props => {
   const { pipeLineStore } = useGlobalStore();
   const [targetViewSpaces, setTargetViewSpaces] = useState<ViewSpace[]>([]);
 
-  const { viewSpaces, cookedDataset } = pipeLineStore;
+  const { viewSpaces, cookedDataset, fieldMetas } = pipeLineStore;
 
   const dimScores = useMemo(() => {
     return meta2fieldScores(cookedDataset.transedMetas)
@@ -132,7 +132,7 @@ const SearchPage: React.FC = props => {
               measures={spec.measures}
               dataSource={spec.aggData}
               schema={spec.schema}
-              fieldFeatures={spec.fieldFeatures}
+              fieldFeatures={fieldMetas}
             />
           </VisCard>
         ))}

@@ -14,6 +14,7 @@ const VisualInterface: React.FC = props => {
         return mutFields.map(f => {
             return {
                 key: f.fid,
+                name: f.name,
                 semanticType: f.semanticType,
                 dataType: '?',
                 analyticType: f.analyticType

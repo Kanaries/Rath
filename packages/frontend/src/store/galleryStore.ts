@@ -75,6 +75,10 @@ export class GalleryStore {
         // return this.dataSourceStore.cookedDatasetRef.current.transedMetas.map(f )
     }
 
+    public get fieldMetas () {
+        return this.pipeLine.cookedDataset.transedMetas;
+    }
+
     public get viewSpaces () {
         return this.pipeLine.viewSpaces;
     }

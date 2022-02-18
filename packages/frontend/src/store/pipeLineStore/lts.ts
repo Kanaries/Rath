@@ -48,6 +48,10 @@ export class LTSPipeLine {
             console.error(error)
         }
     }
+    public get fieldMetas () {
+        console.log('cmoputed', this.dataSourceStore.fieldMetas)
+        return this.dataSourceStore.fieldMetas;
+    }
     // public get in
     public async startTask () {
         const { cleanedData, fieldMetas } = this.dataSourceStore;

@@ -47,8 +47,8 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
 export const DemoDataAssets = {
     CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
-    BTC_GOLD: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds_btc_gold_service.json",
-    // BTC_GOLD: "http://localhost:3000/datasets/demo.json",
+    // BTC_GOLD: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds_btc_gold_service.json",
+    BTC_GOLD: "http://localhost:3000/datasets/demo.json",
 } as const;
 
 export type IDemoDataKey = keyof typeof DemoDataAssets;

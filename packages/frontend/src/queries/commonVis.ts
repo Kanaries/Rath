@@ -1,5 +1,7 @@
+import { ISemanticType } from "visual-insights";
 import { Specification } from "visual-insights/build/esm/commonTypes";
-import { DataSource, Field, FieldType } from "../global";
+import { DataSource } from "../global";
+import { IFieldMeta } from "../interfaces";
 export const geomTypeMap: { [key: string]: any } = {
     interval: "bar",
     line: "line",
@@ -13,7 +15,7 @@ interface BaseVisProps {
     dimensions: string[];
     measures: string[];
     aggregatedMeasures: Array<{ op: string; field: string; as: string }>;
-    fieldFeatures: Field[];
+    fieldFeatures: IFieldMeta[];
     defaultAggregated?: boolean;
     defaultStack?: boolean;
     stepSize?: number;
@@ -52,10 +54,18 @@ export function commonVis(props: BaseVisProps) {
         return fieldName;
     }
 
-    function getFieldType(field: string): FieldType {
-        let targetField = fieldFeatures.find(f => f.name === field);
-        return targetField ? targetField.type : "nominal";
+    function getFieldSemanticType(fieldId: string): ISemanticType {
+        let targetField = fieldFeatures.find(f => f.fid === fieldId);
+        return targetField ? targetField.semanticType : "nominal";
     }
+
+    function getFieldName(fieldId: string): string {
+        let targetField = fieldFeatures.find(f => f.fid === fieldId);
+        if (targetField) {
+          return targetField.name ? targetField.name : targetField.fid
+        }
+        return '_'
+      }
 
     const fieldMap: any = {
         x: position[0],
@@ -85,8 +95,8 @@ export function commonVis(props: BaseVisProps) {
     };
 
     if (typeof stepSize === 'number' && typeof viewSize === 'number') {
-        const xFieldType = getFieldType(fieldMap['x']);
-        const yFieldType = getFieldType(fieldMap['y']);
+        const xFieldType = getFieldSemanticType(fieldMap['x']);
+        const yFieldType = getFieldSemanticType(fieldMap['y']);
         spec.width = (xFieldType === 'quantitative' || xFieldType === 'temporal') ? viewSize : { step: stepSize };
         spec.height = (yFieldType === 'quantitative' || xFieldType === 'temporal') ? viewSize : { step: stepSize };
         basicSpec.width = spec.width;
@@ -97,11 +107,12 @@ export function commonVis(props: BaseVisProps) {
         if (fieldMap[channel]) {
             basicSpec.encoding[channel] = {
                 field: adjustField(fieldMap[channel]),
-                type: getFieldType(fieldMap[channel])
+                type: getFieldSemanticType(fieldMap[channel]),
+                title: getFieldName(fieldMap[channel])
             };
             if (
                 ["x", "y"].includes(channel) &&
-                getFieldType(fieldMap[channel]) === "quantitative" &&
+                getFieldSemanticType(fieldMap[channel]) === "quantitative" &&
                 !defaultStack
             ) {
                 basicSpec.encoding[channel].stack = null;

@@ -5,6 +5,7 @@ import HeaderCell from "./headerCell";
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite'
 import { useGlobalStore } from "../../../store";
+import { toJS } from "mobx";
 const CustomBaseTable = styled(BaseTable)`
     --header-bgcolor: #fafafa;
     --bgcolor: rgba(0, 0, 0, 0);
@@ -20,7 +21,7 @@ const TableInnerStyle = {
 
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
-    const { mutFields, rawData, fieldMetas, fields, cleanedData } = dataSourceStore;
+    const { mutFields, rawData, fieldMetas, fields } = dataSourceStore;
 
 
 
@@ -28,9 +29,8 @@ const DataTable: React.FC = (props) => {
         dataSourceStore.updateFieldInfo(fieldId, fieldPropKey, value);
     }, [dataSourceStore])
 
-    useEffect(() => {
-        dataSourceStore.getFieldsMetas();
-    }, [fields, cleanedData, dataSourceStore])
+    console.log('data table', fieldMetas, toJS(mutFields), toJS(fields))
+
     // 这是一个非常有趣的数据流写法的bug，可以总结一下
     // const columns = useMemo(() => {
     //     return fieldMetas.map((f, i) => {
@@ -55,13 +55,13 @@ const DataTable: React.FC = (props) => {
     const columns = mutFields.map((f, i) => {
         const fm = (fieldMetas[i] && fieldMetas[i].fid === mutFields[i].fid) ? fieldMetas[i] : fieldMetas.find(m => m.fid === f.fid);
         return {
-                name: f.fid,
+                name: f.name || f.fid,
                 code: f.fid,
                 width: 220,
                 title: (
                     <HeaderCell
                         disable={Boolean(f.disable)}
-                        name={f.fid}
+                        name={f.name || f.fid}
                         code={f.fid}
                         meta={fm || null}
                         onChange={updateFieldInfo}

@@ -268,7 +268,7 @@ const DevPage: React.FC = props => {
                 measures={dataView.measures}
                 dataSource={cookedDataSource}
                 schema={dataView.schema}
-                fieldFeatures={dataView.fieldFeatures}
+                fieldFeatures={pipeLineStore.fieldMetas}
               />
             </div>
           )}

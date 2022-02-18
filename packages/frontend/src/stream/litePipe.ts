@@ -113,6 +113,12 @@ export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: O
                         summary,
                         analyticTypes: fields.map(f => f.analyticType),
                         semanticTypes: fields.map(f => f.semanticType)
+                    }).map(m => {
+                        let tf = fields.find(f => f.fid === m.fid);
+                        return {
+                            ...m,
+                            name: tf ? tf.name : m.name
+                        }
                     }),
                     originSummary: summary,
                     semanticFields: summary

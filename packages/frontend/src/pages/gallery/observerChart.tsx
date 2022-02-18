@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { observer } from 'mobx-react-lite'
 import BaseChart from '../../visBuilder/vegaBase';
@@ -10,13 +10,9 @@ import { useEffect } from 'react';
 // 针对部分视图，要有自动的采样机制（允许用户配置），避免视图渲染崩溃。（这部分逻辑在应用层，不要交给引擎层）
 const ObserverChart: React.FC = () => {
     const { galleryStore } = useGlobalStore()
-    const { visualConfig, vizRecommand } = galleryStore;
+    const { visualConfig, vizRecommand, fieldMetas } = galleryStore;
     const { aggregator, defaultAggregated, defaultStack } = visualConfig;
-    const { dimensions, measures, aggData, schema, fieldFeatures } = vizRecommand;
-
-    const fields = useMemo(() => {
-        return fieldFeatures.map((f) => ({ ...f, name: f.fieldName }));
-    }, [fieldFeatures])
+    const { dimensions, measures, aggData, schema } = vizRecommand;
 
     // schema发生变化（当前视图）时，提供一个默认聚合的调整。
     useEffect(() => {
@@ -40,7 +36,7 @@ const ObserverChart: React.FC = () => {
             measures={measures}
             dataSource={aggData}
             schema={schema}
-            fieldFeatures={fields}
+            fieldFeatures={fieldMetas}
             mode="common"
         />
     );

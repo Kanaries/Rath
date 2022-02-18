@@ -19,7 +19,7 @@ interface ClusterState {
 }
 const NoteBook: React.FC = (props) => {
   const { noteBookStore } = useGlobalStore();
-  const { summary, dataSource, totalDataSubspaceSize, autoParamsEnable, AUTO_TOP_K_DIM_GROUP_NUM } = noteBookStore;
+  const { summary, dataSource, totalDataSubspaceSize, autoParamsEnable, AUTO_TOP_K_DIM_GROUP_NUM, fieldMetas } = noteBookStore;
   const [isAggregated, setIsAggregated] = useState(true);
   
   const [clusterState, setClusterState] = useState<ClusterState>({
@@ -171,7 +171,7 @@ const NoteBook: React.FC = (props) => {
           defaultStack={true}
           aggregator={'sum'}
           schema={spec}
-          fieldFeatures={dimScores.map((dim) => dim[3])}
+          fieldFeatures={fieldMetas}
           dataSource={dataSource}
           dimensions={clusterState.dimensions}
           measures={measuresInView}

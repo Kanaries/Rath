@@ -3,7 +3,7 @@ import BaseChart from "../../../visBuilder/vegaBase";
 import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
 import { IFieldSummary, IInsightSpace, Specification } from "visual-insights";
 import { PreferencePanelConfig } from "../../../components/preference";
-import { IRow } from "../../../interfaces";
+import { IFieldMeta, IRow } from "../../../interfaces";
 import { IconButton } from "office-ui-fabric-react";
 import intl from 'react-intl-universal';
 export interface IVizSpace extends IInsightSpace {
@@ -16,11 +16,12 @@ interface AssociationProps {
     //   subspaceList: Subspace[];
     vizList: IVizSpace[];
     fieldScores: IFieldSummary[];
+    fieldMetas: IFieldMeta[];
     dataSource: IRow[];
     onSelectView: (viz: IVizSpace) => void
 }
 const AssociationCharts: React.FC<AssociationProps> = props => {
-    const { vizList, onSelectView, visualConfig, fieldScores, dataSource } = props;
+    const { vizList, onSelectView, visualConfig, fieldScores, dataSource, fieldMetas } = props;
     //   const { dataSource, fieldScores } = digDimensionProps;
     //   const relatedCharts = useDigDimension(digDimensionProps);
     const fieldFeatures = fieldScores.map(f => ({
@@ -56,7 +57,7 @@ const AssociationCharts: React.FC<AssociationProps> = props => {
                                     // dataSource={vizAggregate ? view.dataView : dataSource}
                                     dataSource={dataSource}
                                     schema={view.schema}
-                                    fieldFeatures={fieldFeatures}
+                                    fieldFeatures={fieldMetas}
                                 />
                             </VisErrorBoundary>
                             <IconButton

@@ -41,7 +41,7 @@ const InsightContainer = styled.div`
 
 const LTSPage: React.FC = props => {
     const { ltsPipeLineStore, exploreStore, commonStore } = useGlobalStore();
-    const { computing } = ltsPipeLineStore;
+    const { computing, fieldMetas } = ltsPipeLineStore;
 
     const { pageIndex, visualConfig, spec, showSubinsights, insightSpaces } = exploreStore;
     const [showCommonVis, setShowCommonVis] = useState<boolean>(true);
@@ -72,6 +72,7 @@ const LTSPage: React.FC = props => {
         text: intl.get(`lts.orderBy.${or}`),
         key: or
     }))
+    console.log(fieldMetas)
     // console.log('explore order insight spaces', exploreStore.insightSpaces)
     return <div className="content-container">
         <VizPreference />
@@ -152,10 +153,7 @@ const LTSPage: React.FC = props => {
                                     measures={insightSpaces[pageIndex].measures}
                                     dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
                                     schema={spec.schema}
-                                    fieldFeatures={ltsPipeLineStore.fields.map(f =>({
-                                        name: f.key,
-                                        type: f.semanticType
-                                    }))}
+                                    fieldFeatures={fieldMetas}
                                     aggregator={visualConfig.aggregator}
                                     viewSize={320}
                                     stepSize={32}
@@ -193,10 +191,7 @@ const LTSPage: React.FC = props => {
                         measures={insightSpaces[pageIndex].measures}
                         dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
                         schema={spec.schema}
-                        fieldFeatures={ltsPipeLineStore.fields.map(f =>({
-                            name: f.key,
-                            type: f.semanticType
-                        }))}
+                        fieldFeatures={fieldMetas}
                         aggregator={visualConfig.aggregator}
                     />
                 }

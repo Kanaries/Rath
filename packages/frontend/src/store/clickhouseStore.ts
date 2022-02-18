@@ -108,6 +108,10 @@ export class ClickHouseStore {
             console.error(error)
         }
     }
+    /**
+     * 获取采样数据
+     * @returns 
+     */
     public async loadSampleData (): Promise<{ fieldMetas: IRawField[], data: IRow[] }> {
         try {
             const res = await fetch(`${this.getProxyURL()}/api/ch/sampleData?dbName=${this.currentDB}&table=${this.currentView}`);
@@ -118,6 +122,7 @@ export class ClickHouseStore {
                     const dataType = dbDataType2DataType(f.dataType);
                     return {
                         fid: f.fid,
+                        name: f.fid,
                         dataType,
                         disable: false,
                         semanticType: inferSemanticTypeFromDataType(dataType),
