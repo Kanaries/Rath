@@ -21,7 +21,7 @@ interface SelectionProps {
 const Selection: React.FC<SelectionProps> = props => {
     const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed } = props;
 
-    const [dataSourceType, setDataSourceType] = useState<IDataSourceType>(IDataSourceType.FILE);
+    const [dataSourceType, setDataSourceType] = useState<IDataSourceType>(IDataSourceType.DEMO);
     const dsTypeOptions = useDataSourceTypeOptions();
 
     const dsTypeLabelId = useId('dataSourceType');

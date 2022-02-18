@@ -1,7 +1,7 @@
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
 import { IRow } from "visual-insights"
-import { IAnalyticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces"
+import { IAnalyticType, ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces"
 import { inferAnalyticTypeFromSemanticType } from "."
 import { Field } from "../global"
 import { IFieldMeta } from "../interfaces"
@@ -26,21 +26,32 @@ export function fieldMeta2fieldSummary(metas: IFieldMeta[]): FieldSummary[] {
     }))
 }
 
-export function fieldSummary2fieldMeta(summary: FieldSummary[], analyticTypes?: IAnalyticType[]): IFieldMeta[] {
+export function fieldSummary2fieldMeta(props: {
+    summary: FieldSummary[];
+    analyticTypes?: IAnalyticType[];
+    semanticTypes?: (ISemanticType | '?')[]
+}): IFieldMeta[] {
+    const { summary, analyticTypes, semanticTypes } = props;
     if (typeof analyticTypes === 'undefined') {
         console.warn('You are using analytic types infered from semantic type, it may not be safe.')
     }
-    return summary.map((s, i) => ({
-        fid: s.fieldName,
-        features: {
-            maxEntropy: s.maxEntropy,
-            entropy: s.entropy
-        },
-        semanticType: s.type,
-        analyticType: analyticTypes ? analyticTypes[i] : inferAnalyticTypeFromSemanticType(s.type),
-        distribution: s.distribution,
-        disable: false
-    }))
+    return summary.map((s, i) => {
+        let sType: ISemanticType = s.type;
+        if (semanticTypes && semanticTypes[i] !== '?') {
+            sType = semanticTypes[i] as ISemanticType;
+        }
+        return {
+            fid: s.fieldName,
+            features: {
+                maxEntropy: s.maxEntropy,
+                entropy: s.entropy
+            },
+            semanticType: sType,
+            analyticType: analyticTypes ? analyticTypes[i] : inferAnalyticTypeFromSemanticType(sType),
+            distribution: s.distribution,
+            disable: false
+        }
+    })
 }
 
 /**

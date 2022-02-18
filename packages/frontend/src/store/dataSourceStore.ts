@@ -137,7 +137,11 @@ export class DataSourceStore {
         const ableFiledIds = this.fields.map(f => f.fid);
         const summary = await getFieldsSummaryService(this.cleanedData, ableFiledIds);
         const analyticTypes = this.fields.map(f => f.analyticType);
-        const metas = fieldSummary2fieldMeta(summary, analyticTypes);
+        const metas = fieldSummary2fieldMeta({
+            summary,
+            analyticTypes,
+            semanticTypes: this.fields.map(f => f.semanticType)
+        });
         runInAction(() => {
             this.fieldMetas = metas;
         })

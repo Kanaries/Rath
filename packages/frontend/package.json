@@ -11,7 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
-    "@kanaries/graphic-walker": "^0.0.1",
+    "@kanaries/graphic-walker": "0.1.0",
     "@kanaries/web-data-loader": "0.1.0",
     "@material-ui/core": "^5.0.0-beta.5",
     "@tableau/tableau-ui": "^3.0.0",
@@ -45,7 +45,7 @@
     "vega": "^5.19.1",
     "vega-embed": "^6.15.1",
     "vega-lite": "^4.17.0",
-    "visual-insights": "0.7.11",
+    "visual-insights": "0.7.12",
     "web-vitals": "^0.2.4",
     "worker-loader": "^3.0.7"
   },

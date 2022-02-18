@@ -113,9 +113,9 @@ export function baseVis(props: BaseVisProps) {
     basicSpec.encoding.opacity = { value: 0.7 };
   }
   // [start]图表配置修复，为了节省一些计算。这一部分和自动化推荐无关，只是对vega默认配置的调整
-  if (basicSpec.mark.type === 'boxplot') {
-    basicSpec.mark.extent = 'min-max';
-  }
+  // if (basicSpec.mark.type === 'boxplot') {
+  //   basicSpec.mark.extent = 'min-max';
+  // }
   // [end]
   if (geomType[0] === 'line') {
     const lineLayer = { ...basicSpec };

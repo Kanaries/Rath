@@ -109,7 +109,11 @@ export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: O
             return from(getFieldsSummaryService(dataSource, fieldIds, false)).pipe(
                 // field with semantic type info
                 op.map(summary => ({
-                    originMetas: fieldSummary2fieldMeta(summary, fields.map(f => f.analyticType)),
+                    originMetas: fieldSummary2fieldMeta({
+                        summary,
+                        analyticTypes: fields.map(f => f.analyticType),
+                        semanticTypes: fields.map(f => f.semanticType)
+                    }),
                     originSummary: summary,
                     semanticFields: summary
                         .filter(f => dimSet.has(f.fieldName))

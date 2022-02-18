@@ -47,6 +47,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
 export const DemoDataAssets = {
     CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
+    BTC_GOLD: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds_btc_gold_service.json",
 } as const;
 
 export type IDemoDataKey = keyof typeof DemoDataAssets;
@@ -54,6 +55,10 @@ export type IDemoDataKey = keyof typeof DemoDataAssets;
 export const useDemoDataOptions = function (): Array<{key: IDemoDataKey; text: string}> {
     const options = useMemo<Array<{ key: IDemoDataKey; text: string }>>(() => {
         return [
+            {
+                key: 'BTC_GOLD',
+                text: "2022MCM Problem C: Trading Strategies"
+            },
             {
                 key: "CARS",
                 text: "Cars",
