@@ -48,7 +48,7 @@ function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<{dataSource: IR
 const DemoData: React.FC<DemoDataProps> = props => {
     const { onDataLoaded, onClose, onStartLoading, onLoadingFailed } = props;
     const options = useDemoDataOptions();
-    const [dsKey, setDSKey] = useState<IDemoDataKey>('CARS');
+    const [dsKey, setDSKey] = useState<IDemoDataKey>('BTC_GOLD');
 
     const loadData = useCallback(() => {
         onStartLoading();

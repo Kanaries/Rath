@@ -117,6 +117,11 @@ export function baseVis(props: BaseVisProps) {
   //   basicSpec.mark.extent = 'min-max';
   // }
   // [end]
+  if (basicSpec.mark.type === 'boxplot') {
+    if (query.color && query.color.length > 0 && !(query.facets && query.facets.length > 0) && getFieldType(query.color[0]) === 'nominal') {
+      basicSpec.encoding.column = basicSpec.encoding.color
+    }
+  }
   if (geomType[0] === 'line') {
     const lineLayer = { ...basicSpec };
     for (let channel in fieldMap) {
