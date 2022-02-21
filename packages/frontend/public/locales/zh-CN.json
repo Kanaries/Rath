@@ -78,6 +78,10 @@
             },
             "demo": {
                 "available": "可选数据集"
+            },
+            "restful": {
+                "requestData": "请求数据",
+                "exampleDataStruct": "示例数据结构"
             }
         },
         "sampling": {

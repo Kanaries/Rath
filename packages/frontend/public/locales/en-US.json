@@ -78,6 +78,10 @@
             },
             "demo": {
                 "available": "Available Datasets"
+            },
+            "restful": {
+                "requestData": "Request Data",
+                "exampleDataStruct": "Example Data Structure"
             }
         },
         "sampling": {

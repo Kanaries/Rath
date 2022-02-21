@@ -4,7 +4,7 @@ import { useId } from "@uifabric/react-hooks";
 import intl from 'react-intl-universal';
 import { DemoDataAssets, IDemoDataKey, useDemoDataOptions } from '../config';
 import { logDataImport } from '../../../loggers/dataImport';
-import { IRawField, IRow } from '../../../interfaces';
+import { IDatasetBase, IRawField, IRow } from '../../../interfaces';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 
 interface DemoDataProps {
@@ -14,8 +14,8 @@ interface DemoDataProps {
     onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
 }
 
-function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<{dataSource: IRow[], fields: IRawField[]}> {
-    return new Promise<{dataSource: IRow[], fields: IRawField[]}>((resolve, reject) => {
+function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<IDatasetBase> {
+    return new Promise<IDatasetBase>((resolve, reject) => {
         const assetUrl = DemoDataAssets[dsKey];
         let isTimeout = false;
         setTimeout(() => {

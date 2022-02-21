@@ -57,3 +57,8 @@ export interface ISyncEngine {
     dataSource: IRow[];
     insightSpaces: IInsightSpace[]
 }
+
+export interface IDatasetBase {
+    dataSource: IRow[];
+    fields: IRawField[];
+}

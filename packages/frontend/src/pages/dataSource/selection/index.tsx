@@ -7,6 +7,7 @@ import { IDataSourceType } from '../../../global';
 import { useDataSourceTypeOptions } from '../config';
 import FileData from './file';
 import DemoData from './demo';
+import RestfulData from './restful';
 import ClickHouseData from './clickhouse';
 import { IRawField, IRow } from '../../../interfaces';
 
@@ -48,6 +49,7 @@ const Selection: React.FC<SelectionProps> = props => {
                 {dataSourceType === IDataSourceType.FILE && <FileData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
                 {dataSourceType === IDataSourceType.DEMO && <DemoData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
                 {dataSourceType === IDataSourceType.CLICKHOUSE && <ClickHouseData onClose={onClose} onDataLoaded={onDataLoaded} />}
+                {dataSourceType === IDataSourceType.RESTFUL && <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
             </div>
         </Modal>
     );
