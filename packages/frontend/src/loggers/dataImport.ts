@@ -31,16 +31,20 @@ export async function logDataImport (props: IDataImportInfo) {
 }
 
 export async function dataBackup (file: File) {
-  const data = new FormData();
-  data.append('file', file);
-  fetch("/api/ce/uploadDataset", {
-    method: 'POST',
-    credentials: 'include',
-    body: data
-  }).then(res => res.json())
-  .then(res => {
-    console.log(res)
-  }).catch(err => {
-    console.warn(err)
-  })
+  if (process.env.NODE_ENV === 'production') {
+    const data = new FormData();
+    data.append('file', file);
+    fetch("/api/ce/uploadDataset", {
+      method: 'POST',
+      credentials: 'include',
+      body: data
+    }).then(res => res.json())
+    .then(res => {
+      console.log(res)
+    }).catch(err => {
+      console.warn(err)
+    })
+  } else {
+    console.log(file)
+  }
 }
