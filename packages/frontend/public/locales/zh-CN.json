@@ -84,6 +84,10 @@
                 "exampleDataStruct": "示例数据结构"
             }
         },
+        "table": {
+            "edit": "编辑字段名称",
+            "fieldName": "字段名称"
+        },
         "sampling": {
             "none": "不采样(使用原始数据)",
             "reservoir": "固定样本大小(数据集较大时使用)"

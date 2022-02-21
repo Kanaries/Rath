@@ -91,9 +91,9 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                     onDismiss={() => { setShowNameEditor(false); }}
                 >
                     <div className="p-4">
-                        <h1 className="text-xl">Edit Filed Name</h1>
+                        <h1 className="text-xl">{intl.get('dataSource.table.edit')}</h1>
                         <div className="p-4">
-                            <TextField label="field name" value={name} onChange={(e, val) => {
+                            <TextField label={intl.get('dataSource.table.fieldName')} value={name} onChange={(e, val) => {
                                 onChange && onChange(code, 'name', `${val}`)
                             }} />
                         </div>
@@ -101,7 +101,7 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                 </Callout>
             }
             {meta && (
-                <DropdownSelect aria-readonly kind="text" disabled={true} value={meta.semanticType} onChange={e => {
+                <DropdownSelect aria-readonly kind="text" value={meta.semanticType} onChange={e => {
                     if (onChange) {
                         onChange(code, 'semanticType', e.target.value as ISemanticType)
                     }

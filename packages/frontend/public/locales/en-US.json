@@ -84,6 +84,10 @@
                 "exampleDataStruct": "Example Data Structure"
             }
         },
+        "table": {
+            "edit": "Edit Field Name",
+            "fieldName": "field name"
+        },
         "sampling": {
             "none": "none",
             "reservoir": "fixed sample size"
