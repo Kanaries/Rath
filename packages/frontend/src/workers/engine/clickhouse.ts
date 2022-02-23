@@ -1,5 +1,6 @@
 import { Computation, IDataViewMeta, IInsightSpace } from 'visual-insights';
 import { IVizSpace } from '../../store/exploreStore';
+import { isSetEqual } from '../../utils';
 import { intersect } from './utils';
 export class RathCHEngine extends Computation.ClickHouseEngine {
     public async createInsightSpaces(dataViewMetas: IDataViewMeta[] = this.dataViewMetas): Promise<IInsightSpace[]> {
@@ -8,9 +9,9 @@ export class RathCHEngine extends Computation.ClickHouseEngine {
     public async scanDetail() {
         return []
     }
-    public async associate(spaceIndex: number) {
+    public async associate(space: { dimensions: string[]; measures: string[] }) {
         const { insightSpaces } = this;
-        const space = insightSpaces[spaceIndex];
+        // const space = insightSpaces[spaceIndex];
         const { dimensions, measures, dataGraph } = this;
         // type1: meas cor assSpacesT1
         // type2: dims cor assSpacesT2
@@ -20,8 +21,9 @@ export class RathCHEngine extends Computation.ClickHouseEngine {
         const assSpacesT1: IVizSpace[] = [];
         const assSpacesT2: IVizSpace[] = [];
         for (let i = 0; i < insightSpaces.length; i++) {
-            if (i === spaceIndex) continue;
             if (!intersect(insightSpaces[i].dimensions, space.dimensions)) continue;
+            if (isSetEqual(insightSpaces[i].measures, space.measures)) continue;
+            if (!isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
             let t1_score = 0;
             const iteMeaIndices = insightSpaces[i].measures.map(f => measures.findIndex(m => f === m));
             if (dataGraph !== null) {
@@ -46,8 +48,8 @@ export class RathCHEngine extends Computation.ClickHouseEngine {
             }
         }
         for (let i = 0; i < insightSpaces.length; i++) {
-            if (i === spaceIndex) continue;
             if (!intersect(insightSpaces[i].measures, space.measures)) continue;
+            if (isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
             // if (!isSetEqual(insightSpaces[i].measures, space.measures)) continue;
             let t1_score = 0;
             const iteDimIndices = insightSpaces[i].dimensions.map(f => dimensions.findIndex(m => f === m));

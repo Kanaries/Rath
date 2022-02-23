@@ -37,3 +37,5 @@ coverage
 *.cert
 *.key
 *.pem
+
+packages/frontend/public/datasets/*

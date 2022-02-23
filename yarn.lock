@@ -14608,20 +14608,20 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-visual-insights@0.7.3:
-  version "0.7.3"
-  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.3.tgz#5c1520a916602e43a9097d70558e1d04afed6785"
-  integrity sha1-XBUgqRZgLkOpCX1wVY4dBK/tZ4U=
+visual-insights@0.7.12:
+  version "0.7.12"
+  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.7.12.tgz#d3ea4da3ec32ae15be6f53e227dbb3630a68820f"
+  integrity sha512-sstYHvpdGUJKzoz1ilCkEs8Qi2Lt6uasHMhl0FOn0EAhlZXKONR8KfjvXf2OpFkAZA+dV2xX0//Q0Q80gAzV0g==
   dependencies:
     assert "^2.0.0"
     axios "^0.22.0"
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 
-visual-insights@0.7.6:
-  version "0.7.6"
-  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.6.tgz#8c5c3c5965d1d770d32af2b0828ec58302c33845"
-  integrity sha512-LdD7XFAkWuCMvowhRYYjGxUIv8b4jiuVXDKbXuJO5m8+WweSRHkUfx5miFzdsl/2Gx/CPn9pkPxtAKs5NY/vrg==
+visual-insights@0.7.3:
+  version "0.7.3"
+  resolved "https://registry.npmmirror.com/visual-insights/download/visual-insights-0.7.3.tgz#5c1520a916602e43a9097d70558e1d04afed6785"
+  integrity sha1-XBUgqRZgLkOpCX1wVY4dBK/tZ4U=
   dependencies:
     assert "^2.0.0"
     axios "^0.22.0"

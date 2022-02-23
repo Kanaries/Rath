@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Field } from '../interfaces';
+import { DraggableFieldState, Field, IDraggableStateKey } from '../interfaces';
 import {
     DragDropContext,
     DropResult,
@@ -8,14 +8,6 @@ import {
 } from "react-beautiful-dnd";
 import { useGlobalStore } from '../store';
 
-export interface DraggableFieldState {
-    fields: Field[];
-    rows: Field[];
-    columns: Field[];
-    color: Field[];
-    opacity: Field[];
-    size: Field[];
-}
 
 export const FieldsContextWrapper: React.FC = props => {
     const { vizStore } = useGlobalStore();
@@ -36,18 +28,17 @@ export const FieldsContextWrapper: React.FC = props => {
             vizStore.moveField(sourceKey, result.source.index, targetKey, destination.index)
         }
     }, [])
-    return <DragDropContext onDragEnd={onDragEnd}>
+    return <DragDropContext onDragEnd={onDragEnd}
+        onDragStart={() => {}}
+        onDragUpdate={() => {}}
+    >
         { props.children }
     </DragDropContext>
 }
 
 export default FieldsContextWrapper;
 
-export const DRAGGABLE_STATE_KEYS: Array<{
-    id: keyof DraggableFieldState;
-    name: string;
-    mode: number
-  }> = [
+export const DRAGGABLE_STATE_KEYS: Array<IDraggableStateKey> = [
     { id: 'fields', name: '字段', mode: 0 },
     { id: 'columns', name: '列', mode: 0 },
     { id: 'rows', name: '行', mode: 0 },

@@ -93,7 +93,11 @@ const AppNav: React.FC<AppNavProps> = props => {
                         PIVOT_KEYS.explainer
                     ])
                 },
-                ...getLinks([PIVOT_KEYS.support])
+                {
+                    url: '/',
+                    name: intl.get('common.home')
+                },
+                ...getLinks([PIVOT_KEYS.support]),
                 // ...pivotList.map(item => {
                 //     return {
                 //         url: `#${item.itemKey}`,
@@ -113,7 +117,7 @@ const AppNav: React.FC<AppNavProps> = props => {
         <LogoBar>
             <a
                 // onClick={() => { window.location.reload(false); }}
-                href="https://github.com/Kanaries/Rath"
+                href="https://kanaries.cn/"
             >
                 <img
                     style={{ width: '38px', marginTop: '4px' }}

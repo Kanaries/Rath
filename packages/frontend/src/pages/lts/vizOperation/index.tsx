@@ -20,6 +20,7 @@ const VizOperation: React.FC = props => {
     const { exploreStore, dataSourceStore, ltsPipeLineStore, commonStore } = useGlobalStore();
     const { forkView, visualConfig, showAsso } = exploreStore
     const { dimensions, measures } = dataSourceStore;
+    const { fieldMetas } = ltsPipeLineStore
     const dimensionOptions: IContextualMenuProps = {
         items: dimensions.map(f => ({
             key: f,
@@ -88,10 +89,7 @@ const VizOperation: React.FC = props => {
                     measures={forkView.measures}
                     dataSource={visualConfig.defaultAggregated ? forkViewSpec.dataView : ltsPipeLineStore.dataSource}
                     schema={forkViewSpec.schema}
-                    fieldFeatures={ltsPipeLineStore.fields.map(f =>({
-                        name: f.key,
-                        type: f.semanticType
-                    }))}
+                    fieldFeatures={fieldMetas}
                     aggregator={visualConfig.aggregator}
                 />
             }

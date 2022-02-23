@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import DistributionMiniChart from './distributionMiniChart';
@@ -7,6 +7,8 @@ import { DropdownSelect } from '@tableau/tableau-ui'
 import { BIFieldType, FieldType } from '../../../global';
 import { IFieldMeta, IRawField } from '../../../interfaces';
 import { ISemanticType } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
+import { Callout, IconButton, TextField } from 'office-ui-fabric-react';
+import { useId } from '@uifabric/react-hooks';
 
 const HeaderCellContainer = styled.div`
     .bottom-bar {
@@ -69,12 +71,37 @@ function useBIFieldTypeOptions (): IOption<BIFieldType>[] {
 
 const HeaderCell: React.FC<HeaderCellProps> = props => {
     const { name, code, meta, disable, onChange } = props;
+    const [showNameEditor, setShowNameEditor] = useState<boolean>(false);
     const optionsOfBIFieldType = useBIFieldTypeOptions();
+    const buttonId = useId('edit-button');
     return (
         <HeaderCellContainer>
-            <h3 className="header">{name}</h3>
+            <h3 className="header">
+                {name}
+                <IconButton id={buttonId}
+                    iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
+                    onClick={() => {
+                        setShowNameEditor(true)
+                    }}
+                />
+            </h3>
+            {
+                showNameEditor && <Callout
+                    target={`#${buttonId}`}
+                    onDismiss={() => { setShowNameEditor(false); }}
+                >
+                    <div className="p-4">
+                        <h1 className="text-xl">{intl.get('dataSource.table.edit')}</h1>
+                        <div className="p-4">
+                            <TextField label={intl.get('dataSource.table.fieldName')} value={name} onChange={(e, val) => {
+                                onChange && onChange(code, 'name', `${val}`)
+                            }} />
+                        </div>
+                    </div>
+                </Callout>
+            }
             {meta && (
-                <DropdownSelect aria-readonly kind="text" disabled={true} value={meta.semanticType} onChange={e => {
+                <DropdownSelect aria-readonly kind="text" value={meta.semanticType} onChange={e => {
                     if (onChange) {
                         onChange(code, 'semanticType', e.target.value as ISemanticType)
                     }

@@ -84,3 +84,17 @@ export interface IDataSource {
     id: string;
     data: Record[]
 }
+export interface DraggableFieldState {
+    fields: Field[];
+    rows: Field[];
+    columns: Field[];
+    color: Field[];
+    opacity: Field[];
+    size: Field[];
+}
+
+export interface IDraggableStateKey {
+    id: keyof DraggableFieldState;
+    name: string;
+    mode: number
+}

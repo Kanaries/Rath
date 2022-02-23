@@ -4,18 +4,18 @@ import { useId } from "@uifabric/react-hooks";
 import intl from 'react-intl-universal';
 import { DemoDataAssets, IDemoDataKey, useDemoDataOptions } from '../config';
 import { logDataImport } from '../../../loggers/dataImport';
-import { IRawField, IRow } from '../../../interfaces';
+import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 
 interface DemoDataProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 
-function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<{dataSource: IRow[], fields: IRawField[]}> {
-    return new Promise<{dataSource: IRow[], fields: IRawField[]}>((resolve, reject) => {
+function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<IDatasetBase> {
+    return new Promise<IDatasetBase>((resolve, reject) => {
         const assetUrl = DemoDataAssets[dsKey];
         let isTimeout = false;
         setTimeout(() => {
@@ -48,7 +48,7 @@ function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<{dataSource: IR
 const DemoData: React.FC<DemoDataProps> = props => {
     const { onDataLoaded, onClose, onStartLoading, onLoadingFailed } = props;
     const options = useDemoDataOptions();
-    const [dsKey, setDSKey] = useState<IDemoDataKey>('CARS');
+    const [dsKey, setDSKey] = useState<IDemoDataKey>('BTC_GOLD');
 
     const loadData = useCallback(() => {
         onStartLoading();

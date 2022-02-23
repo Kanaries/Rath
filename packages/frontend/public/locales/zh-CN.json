@@ -2,7 +2,8 @@
     "common": {
         "dimension": "维度",
         "measure": "度量",
-        "name": "名称"
+        "name": "名称",
+        "home": "主页"
     },
     "menu": {
         "dataSource": "数据源",
@@ -78,7 +79,15 @@
             },
             "demo": {
                 "available": "可选数据集"
+            },
+            "restful": {
+                "requestData": "请求数据",
+                "exampleDataStruct": "示例数据结构"
             }
+        },
+        "table": {
+            "edit": "编辑字段名称",
+            "fieldName": "字段名称"
         },
         "sampling": {
             "none": "不采样(使用原始数据)",
@@ -99,6 +108,12 @@
             "sampling": "数据采样",
             "percentSize": "样本大小(%)",
             "upload": "上传文件"
+        },
+        "exploreMode": {
+            "title": "探索模式",
+            "firstTime": "第一次接触该数据集",
+            "familiar": "基本熟悉该数据集",
+            "comprehensive": "综合模式"
         }
     },
     "meta": {
@@ -206,6 +221,13 @@
         },
         "commonVis": {
             "text": "常规可视化"
+        },
+        "subinsights": "获取子洞察",
+        "orderBy": {
+            "title": "结果排序规则",
+            "default": "默认",
+            "field_num": "字段数",
+            "cardinality": "字段总基数"
         }
     }
 }

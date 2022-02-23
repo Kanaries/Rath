@@ -74,6 +74,9 @@ export class LitePipeStore {
             this.MAX_MEA_GROUP_NUM = Math.round(length / EXPECTED_MAX_MEA_IN_VIEW);
         })
     }
+    public get fieldMetas () {
+        return this.dataSourceStore.fieldMetas;
+    }
     public get AUTO_TOP_K_DIM_GROUP_NUM () {
         return this.AUTO_TOP_K_DIM_GROUP_NUM_Ref.current;
     }

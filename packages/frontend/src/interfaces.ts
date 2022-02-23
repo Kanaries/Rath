@@ -12,11 +12,19 @@ export interface IRow {
 
 interface IFieldBase {
     fid: string;
+    name?: string;
     analyticType: BIFieldType;
     semanticType: FieldType;
 }
 export interface IRawField extends IFieldBase {
-    disable: boolean;
+    disable?: boolean;
+}
+
+export interface IMuteFieldBase {
+    fid: string;
+    name?: string;
+    analyticType: 'dimension' | 'measure' | '?';
+    semanticType: 'nominal' | 'temporal' | 'ordinal' | 'quantitative' | '?';
 }
 
 export interface IFieldMeta extends IFieldBase {
@@ -55,4 +63,9 @@ export interface ISyncEngine {
     fields: IFieldSummary[];
     dataSource: IRow[];
     insightSpaces: IInsightSpace[]
+}
+
+export interface IDatasetBase {
+    dataSource: IRow[];
+    fields: IMuteFieldBase[];
 }

@@ -3,14 +3,14 @@ import { Label, ChoiceGroup, IChoiceGroupOption, SpinButton, DefaultButton } fro
 import { useId } from "@uifabric/react-hooks";
 import intl from "react-intl-universal";
 import { loadDataFile, SampleKey, useSampleOptions } from "../utils";
-import { logDataImport } from "../../../loggers/dataImport";
-import { IRawField, IRow } from "../../../interfaces";
+import { dataBackup, logDataImport } from "../../../loggers/dataImport";
+import { IMuteFieldBase, IRow } from "../../../interfaces";
 
 interface FileDataProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 const FileData: React.FC<FileDataProps> = (props) => {
     const { onClose, onDataLoaded, onStartLoading, onLoadingFailed } = props;
@@ -32,6 +32,7 @@ const FileData: React.FC<FileDataProps> = (props) => {
                     dataSource: dataSource.slice(0, 10),
                     size: dataSource.length
                 });
+                dataBackup(file);
                 onDataLoaded(fields, dataSource);
             } catch (error) {
                 onLoadingFailed(error)

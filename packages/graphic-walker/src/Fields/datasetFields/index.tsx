@@ -1,15 +1,16 @@
 import React from 'react';
-import { NestContainer } from '../components/container'
+import { NestContainer } from '../../components/container'
 import { observer } from 'mobx-react-lite';
 import {
     Droppable,
     Draggable,
-  } from "react-beautiful-dnd";
+} from "react-beautiful-dnd";
 
-import { DraggableFieldState } from './fieldsContext';
-import { useGlobalStore } from '../store';
-import DataTypeIcon from '../components/dataTypeIcon';
-import { IViewField } from '../interfaces';
+import { useGlobalStore } from '../../store';
+import DataTypeIcon from '../../components/dataTypeIcon';
+import { IViewField, DraggableFieldState } from '../../interfaces';
+import DimFields from './dimFields';
+import MeaFields from './meaFields';
 
 const FIELDS_KEY: keyof DraggableFieldState = 'fields';
 
@@ -33,11 +34,23 @@ const DatasetFields: React.FC = props => {
         }
     }
 
-    console.log('render')
-
-    return <NestContainer style={{ minHeight: '680px', overflowY: 'auto' }}>
-        <h4 className="text-xs mb-2">字段列表</h4>
-        <Droppable droppableId={FIELDS_KEY} direction="vertical" isDropDisabled={true}>
+    return <NestContainer className="flex flex-col" style={{ height: '680px' }}>
+        <h4 className="text-xs mb-2 flex-grow-0">字段列表</h4>
+        <div className="flex-grow pd-1 overflow-y-auto" style={{ flexBasis: '200px'}}>
+            <Droppable droppableId="dimensions" direction="vertical" isDropDisabled={true}>
+                {
+                    (provided, snapshot) => <DimFields provided={provided} />
+                }
+            </Droppable>
+        </div>
+        <div className="border-t flex-grow pd-1 overflow-y-auto">
+            <Droppable droppableId="measures" direction="vertical" isDropDisabled={true}>
+                {
+                    (provided, snapshot) => <MeaFields provided={provided} />
+                }
+            </Droppable>
+        </div>
+        {/* <Droppable droppableId={FIELDS_KEY} direction="vertical" isDropDisabled={true}>
             {(provided, snapshot) => (
                 <div
                     {...provided.droppableProps}
@@ -57,7 +70,7 @@ const DatasetFields: React.FC = props => {
                                             <DataTypeIcon dataType="string" /> {f.name}&nbsp;
                                         </div>
                                         {
-                                            snapshot.isDragging && <div className="pt-0.5 pb-0.5 pl-2 pr-2 m-1 text-xs hover:bg-blue-100 rounded-full border-blue-400 border">
+                                            <div className={`pt-0.5 pb-0.5 pl-2 pr-2 m-1 text-xs hover:bg-blue-100 rounded-full border-blue-400 border ${snapshot.isDragging ? '' : 'hidden'}`}>
                                                 <DataTypeIcon dataType="string" /> {f.name}&nbsp;
                                             </div>
                                         }
@@ -92,7 +105,7 @@ const DatasetFields: React.FC = props => {
                     {provided.placeholder}
                 </div>
             )}
-        </Droppable>
+        </Droppable> */}
     </NestContainer>
 }
 

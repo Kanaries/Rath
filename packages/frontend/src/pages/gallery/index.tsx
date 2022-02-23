@@ -33,7 +33,7 @@ const Gallery: React.FC = props => {
     vizRecommand,
     fields,
     visualConfig,
-    
+    fieldMetas
   } = galleryStore;
   const pivotList = useMemo(() => {
     return pivotKeyList.map((page, index) => {
@@ -178,6 +178,7 @@ const Gallery: React.FC = props => {
               }
             }}
             subspaceList={galleryStore.subspaceList}
+            fieldMetas={fieldMetas}
             digDimensionProps={{
               visualConfig: toJS(visualConfig),
               dataSource: galleryStore.dataSource,

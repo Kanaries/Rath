@@ -36,6 +36,12 @@ class LangIntl {
     public get (keyStr: string) {
         return this.deepGet(keyStr)
     }
+    private initFromBrowser() {
+        return navigator.language;
+    }
+    public init () {
+        this.currentLocale = this.initFromBrowser();
+    }
 }
 function intl () {
 

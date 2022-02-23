@@ -7,18 +7,26 @@ import { GEMO_TYPES } from "../config";
 
 interface VisualConfig {
     defaultAggregated: boolean;
-    geoms: string[];
+    geoms: string[];        
     defaultStack: boolean;
 }
 
 export interface DraggableFieldState {
     fields: IViewField[];
+    dimensions: IViewField[];
+    measures: IViewField[];
     rows: IViewField[];
     columns: IViewField[];
     color: IViewField[];
     opacity: IViewField[];
     size: IViewField[];
 }
+
+export const MetaFieldKeys: Array<keyof DraggableFieldState> = [
+    'dimensions',
+    'measures',
+    'fields'
+]
 
 function geomAdapter (geom: string) {
     switch (geom) {
@@ -47,6 +55,8 @@ export class VizSpecStore {
     }
     constructor (commonStore: CommonStore) {
         this.draggableFieldState = {
+            dimensions: [],
+            measures: [],
             fields: [],
             rows: [],
             columns: [],
@@ -64,25 +74,48 @@ export class VizSpecStore {
                 type: f.analyticType === 'dimension' ? 'D' : 'M',
                 aggName: f.analyticType === 'measure' ? 'sum' : undefined,
             }))
+            this.draggableFieldState.dimensions = dataset.rawFields
+                .filter(f => f.analyticType === 'dimension')
+                .map((f) => ({
+                    dragId: uuidv4(),
+                    id: f.key,
+                    name: f.key,
+                    type: 'D'
+            }))
+            this.draggableFieldState.measures = dataset.rawFields
+                .filter(f => f.analyticType === 'measure')
+                .map((f) => ({
+                    dragId: uuidv4(),
+                    id: f.key,
+                    name: f.key,
+                    type: 'M',
+                    aggName: 'sum'
+            }))
         }))
     }
+    /**
+     * dimension fields in visualization
+     */
     public get viewDimensions (): IViewField[] {
         const { draggableFieldState } = this;
         const state = toJS(draggableFieldState);
         const fields: IViewField[] = [];
         (Object.keys(state) as (keyof DraggableFieldState)[])
-            .filter(dkey => dkey !== 'fields')
+            .filter(dkey => !MetaFieldKeys.includes(dkey))
             .forEach(dkey => {
                 fields.push(...draggableFieldState[dkey].filter(f => f.type === 'D'))
             })
         return fields;
     }
+    /**
+     * dimension fields in visualization
+     */
     public get viewMeasures (): IViewField[] {
         const { draggableFieldState } = this;
         const state = toJS(draggableFieldState);
         const fields: IViewField[] = [];
         (Object.keys(state) as (keyof DraggableFieldState)[])
-            .filter(dkey => dkey !== 'fields')
+            .filter(dkey => MetaFieldKeys.includes(dkey))
             .forEach(dkey => {
                 fields.push(...draggableFieldState[dkey].filter(f => f.type === 'M'))
             })
@@ -90,6 +123,8 @@ export class VizSpecStore {
     }
     public initState () {
         this.draggableFieldState = {
+            dimensions: [],
+            measures: [],
             fields: [],
             rows: [],
             columns: [],
@@ -100,7 +135,7 @@ export class VizSpecStore {
     }
     public clearState () {
         for (let key in this.draggableFieldState) {
-            if (key !== 'fields') {
+            if (!MetaFieldKeys.includes(key as keyof DraggableFieldState)) {
                 this.draggableFieldState[key] = []
             }
         }
@@ -109,7 +144,7 @@ export class VizSpecStore {
         this.visualConfig[configKey] = value;
     }
     public reorderField(stateKey: keyof DraggableFieldState, sourceIndex: number, destinationIndex: number) {
-        if (stateKey === 'fields') return;
+        if (MetaFieldKeys.includes(stateKey)) return;
         if (sourceIndex === destinationIndex) return;
         const fields = this.draggableFieldState[stateKey];
         const [field] = fields.splice(sourceIndex, 1);
@@ -117,19 +152,18 @@ export class VizSpecStore {
     }
     public moveField(sourceKey: keyof DraggableFieldState, sourceIndex: number, destinationKey: keyof DraggableFieldState, destinationIndex: number) {
         let movingField: IViewField;
-        if (sourceKey === 'fields') {
-            console.log('sourcekey', sourceKey)
+        if (MetaFieldKeys.includes(sourceKey)) {
             // use toJS for cloning
             movingField = toJS(this.draggableFieldState[sourceKey][sourceIndex])
             movingField.dragId = uuidv4();
         } else {
             [movingField] = this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
         }
-        if (destinationKey === 'fields')return;
+        if (MetaFieldKeys.includes(destinationKey))return;
         this.draggableFieldState[destinationKey].splice(destinationIndex, 0, movingField)
     }
     public removeField(sourceKey: keyof DraggableFieldState, sourceIndex: number) {
-        if (sourceKey === 'fields')return;
+        if (MetaFieldKeys.includes(sourceKey))return;
         this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
     }
     public setFieldAggregator (stateKey: keyof DraggableFieldState, index: number, aggName: string) {
@@ -139,7 +173,7 @@ export class VizSpecStore {
         }
     }
     public appendField (destinationKey: keyof DraggableFieldState, field: IViewField | undefined) {
-        if (destinationKey === 'fields') return;
+        if (MetaFieldKeys.includes(destinationKey)) return;
         if (typeof field === 'undefined') return;
         const cloneField = toJS(field);
         cloneField.dragId = uuidv4();

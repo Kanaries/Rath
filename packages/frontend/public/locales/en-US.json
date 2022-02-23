@@ -2,7 +2,8 @@
     "common": {
         "dimension": "dimension",
         "measure": "measure",
-        "name": "Name"
+        "name": "Name",
+        "home": "Home"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -78,7 +79,15 @@
             },
             "demo": {
                 "available": "Available Datasets"
+            },
+            "restful": {
+                "requestData": "Request Data",
+                "exampleDataStruct": "Example Data Structure"
             }
+        },
+        "table": {
+            "edit": "Edit Field Name",
+            "fieldName": "field name"
         },
         "sampling": {
             "none": "none",
@@ -99,6 +108,12 @@
             "sampling": "Sampling",
             "percentSize": "sample size(percent)",
             "upload": "Upload"
+        },
+        "exploreMode": {
+            "title": "Explore Mode",
+            "firstTime": "Meet the data first time",
+            "familiar": "Familiar with the data",
+            "comprehensive": "Comprehensive"
         }
     },
     "meta": {
@@ -206,6 +221,13 @@
         },
         "commonVis": {
             "text": "common visualization"
+        },
+        "subinsights": "SubInsights",
+        "orderBy": {
+            "title": "Result Order By",
+            "default": "Default",
+            "field_num": "Field Number",
+            "cardinality": "Cardinality"
         }
     }
 }

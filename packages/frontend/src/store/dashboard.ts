@@ -1,4 +1,4 @@
-import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
+import { makeAutoObservable, observable, runInAction } from "mobx";
 import { Aggregator } from "../global";
 import { DashBoard, generateDashBoard } from "../service";
 import { LitePipeStore } from "./pipeLineStore/lite";

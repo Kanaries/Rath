@@ -180,7 +180,7 @@ export class DataExplainer {
         const parentData = filterByPredicates(parentCuboid.getState(measureNames, ops), predicates);
         // console.log(parentData)
         const knn = this.getGeneralizeKNN('dimension', dimensions, K_Neighbor, 0);
-        console.log('knn', knn)
+
         const majorList: Array<{key: string; score: number; dimensions: string[]; measures: IMeasure[]}> = [];
         const outlierList: Array<{key: string; score: number; dimensions: string[]; measures: IMeasure[]}> = [];
         for (let extendDim of knn) {

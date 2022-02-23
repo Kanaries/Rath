@@ -27,11 +27,14 @@ import InsightViewWorker from './workers/dev.worker?worker';
 // @ts-ignore
 // eslint-disable-next-line
 import RathEngineWorker from './workers/engine/index.worker?worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import InferMetaWorker from './workers/metaInfer.worker?worker';
 import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
 import { MessageProps } from './workers/engine/service';
-import { COMPUTATION_ENGINE } from './constants';
-import { RathCHEngine } from './workers/engine/clickhouse';
-import { IRow } from './interfaces';
+
+import { IMuteFieldBase, IRawField, IRow } from './interfaces';
 
 let server = '//lobay.moe:8443';
 
@@ -386,4 +389,25 @@ export async function getInsightViewSpace (dataSource: DataSource, dimensions: s
     console.error(error);
   }
   return ansSpace;
+}
+
+interface InferMetaServiceProps {
+  dataSource: IRow[];
+  fields: IMuteFieldBase[];
+}
+export async function inferMetaService(props: InferMetaServiceProps): Promise<IRawField[]> {
+  let metas: IRawField[] = [];
+  try {
+    const worker = new InferMetaWorker();
+    const result = await workerService<IRawField[], InferMetaServiceProps>(worker, props);
+    if (result.success) {
+      metas = result.data
+    } else {
+      throw new Error('[meta infer worker]' + result.message);
+    }
+    worker.terminate();
+  } catch (error) {
+    console.error(error)
+  }
+  return metas;
 }

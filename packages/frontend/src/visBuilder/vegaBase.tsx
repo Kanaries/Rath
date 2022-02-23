@@ -3,6 +3,8 @@ import aggregate from 'cube-core';
 import embed from 'vega-embed';
 import { DataSource, Field, globalRef } from '../global'
 import { baseVis, commonVis } from '../queries/index';
+import { EDITOR_URL } from '../constants';
+import { IFieldMeta } from '../interfaces';
 
 // import { simpleAggregate } from 'visual-insights/build/esm/statistics';
 export const geomTypeMap: {[key: string]: any} = {
@@ -30,7 +32,7 @@ export interface BaseChartProps {
   dataSource: DataSource;
   dimensions: string[];
   measures: string[];
-  fieldFeatures: Field[];
+  fieldFeatures: IFieldMeta[];
   schema: Specification;
   viewSize?: number;
   stepSize?: number;
@@ -91,7 +93,10 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
         }
         let spec = mode === 'dist' ? baseVis(params) : commonVis(params);
         globalRef.baseVisSpec = spec;
-        embed(container.current, spec).catch(err => {
+        embed(container.current, spec, {
+          mode: 'vega-lite',
+          editorUrl: EDITOR_URL
+        }).catch(err => {
           console.error('[VIS ERROR]', err)
         })
       }

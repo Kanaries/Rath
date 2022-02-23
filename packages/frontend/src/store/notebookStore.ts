@@ -17,6 +17,9 @@ export class NoteBookStore {
             grouped: fieldMeta2fieldSummary(metasOnlyInTransedMetas)
         }
     }
+    public get fieldMetas () {
+        return this.pipeLineStore.fieldMetas
+    }
     public get AUTO_TOP_K_DIM_GROUP_NUM () {
         return this.pipeLineStore.AUTO_TOP_K_DIM_GROUP_NUM;
     }

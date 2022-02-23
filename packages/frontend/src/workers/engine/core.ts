@@ -12,6 +12,10 @@ export class RathEngine extends VIEngine {
         super();
         this.workerCollection.register('clusters', KNNClusterWorker);
         this.workerCollection.enable('clusters', true);
+        // this.DIMENSION_NUM_IN_VIEW = {
+        //     MIN: 0,
+        //     MAX: 3
+        // }
         // vie.workerCollection.register('identity', identityWorker);
         // vie.workerCollection.enable(DefaultIWorker.outlier, false);
         // vie.workerCollection.enable(DefaultIWorker.trend, false);
@@ -43,9 +47,79 @@ export class RathEngine extends VIEngine {
         await Promise.all(taskPool);
         return insightSpaces
     }
-    public async associate(spaceIndex: number) {
+    public async searchPointInterests(viewSpace: ViewSpace) {
+        // const globalMeasures = this.measures;
+        let ansSet: any[] = []
+        if (viewSpace.dimensions.length > 0) {
+            const cuboid = this.cube.getCuboid(viewSpace.dimensions);
+            const globalDist = this.cube.getCuboid([]).getState(viewSpace.measures, viewSpace.measures.map(() => 'dist'));
+            const localDist = cuboid.getState(viewSpace.measures, viewSpace.measures.map(() => 'dist'))
+            if (globalDist.length === 0) return ansSet;
+            const globalDistMapByMeasure: Map<string, number[]> = new Map();
+            for (let mea of viewSpace.measures) {
+                const _sum: number = globalDist[0][mea].reduce((total: number, value: number) => total + value, 0)
+                const pbDist: number[] = globalDist[0][mea].map((v: number) => v / _sum)
+                globalDistMapByMeasure.set(mea, pbDist);
+            }
+            for (let ld of localDist) {
+                let EKL = 0;
+                for (let mea of viewSpace.measures) {
+                    let kl = 0;
+                    const globalPbDist: number[] = globalDistMapByMeasure.get(mea)!;
+                    const localDist: number[] = ld[mea];
+                    const localSum: number = localDist.reduce((total, value) => total + value, 0);
+                    for (let b = 0; b < globalPbDist.length; b++) {
+                        const px = localDist[b] / localSum;
+                        const py = globalPbDist[b]
+                        if (px > 0 && py > 0) {
+                            kl += px * Math.log2(px / py)
+                        }
+                    }
+                    EKL += kl;
+                }
+                EKL /= viewSpace.measures.length
+                ansSet.push({
+                    ...ld,
+                    kl: EKL
+                })
+            }
+            
+        //     for (let mea of viewSpace.measures) {
+        //         const distList = localDist.map(r => ({
+        //             // TODO: 讨论是否应当直接使用count
+        //             // props: 节省计算量
+        //             // cons: 强依赖于cube必须去计算count
+        //             ...r,
+        //             freq: r[mea].reduce((total: number, value: number) => total + value, 0),
+        //             dist: r[mea]
+        //         }))
+        //         if (globalDist.length > 0) {
+        //             const globalSum = globalDist[0][mea].reduce((total: number, value: number) => total + value, 0);
+        //             const globalProbDist = globalDist[0][mea].map((v: number) => v / globalSum)
+        //             for (let i = 0; i < distList.length; i++) {
+        //                 let kl = 0;
+        //                 for (let b = 0; b < distList[i].dist.length; b++) {
+        //                     const px = distList[i].dist[b] / distList[i].freq
+        //                     const py = globalProbDist[b];
+        //                     if (px > 0 && py > 0) {
+        //                         kl += px * Math.log2(px / py);
+        //                     }
+        //                 }
+        //                 ansSet.push({
+        //                     ...distList[i],
+        //                     kl
+        //                 })
+        //             }
+        //         }
+        //     }
+        } else {
+            // todo
+        }
+        ansSet.sort((a, b) => b.kl - a.kl)
+        return ansSet
+    }
+    public async associate(space: { dimensions: string[]; measures: string[] }) {
         const { insightSpaces } = this;
-        const space = insightSpaces[spaceIndex];
         const { dimensions, measures, dataGraph } = this;
         // type1: meas cor assSpacesT1
         // type2: dims cor assSpacesT2
@@ -55,7 +129,7 @@ export class RathEngine extends VIEngine {
         const assSpacesT1: IVizSpace[] = [];
         const assSpacesT2: IVizSpace[] = [];
         for (let i = 0; i < insightSpaces.length; i++) {
-            if (i === spaceIndex) continue;
+            // if (i === spaceIndex) continue;
             if (!intersect(insightSpaces[i].dimensions, space.dimensions)) continue;
             if (isSetEqual(insightSpaces[i].measures, space.measures)) continue;
             if (!isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
@@ -70,6 +144,10 @@ export class RathEngine extends VIEngine {
             }
             t1_score /= (meaIndices.length * iteMeaIndices.length)
             if (t1_score > 0.7) {
+                const card = insightSpaces[i].dimensions.map(d => this.fields.find(f => f.key === d))
+                .filter(f => f !== undefined)
+                .map(f => Number(f?.features.unique))
+                .reduce((t, v) => t * v, 1)
                 const spec = this.specification(insightSpaces[i])
                 if (spec) {
                     // assSpacesT1.push({
@@ -78,7 +156,8 @@ export class RathEngine extends VIEngine {
                     // })
                     assSpacesT1.push({
                         ...insightSpaces[i],
-                        score: t1_score,
+                        score: t1_score / card / iteMeaIndices.length,
+                        card,
                         // ...spec,
                         schema: spec.schema,
                         dataView: spec.dataView
@@ -87,10 +166,10 @@ export class RathEngine extends VIEngine {
             }
         }
         for (let i = 0; i < insightSpaces.length; i++) {
-            if (i === spaceIndex) continue;
+            // if (i === spaceIndex) continue;
             if (!intersect(insightSpaces[i].measures, space.measures)) continue;
             if (isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
-            if (!isSetEqual(insightSpaces[i].measures, space.measures)) continue;
+            // if (!isSetEqual(insightSpaces[i].measures, space.measures)) continue;
             let t1_score = 0;
             const iteDimIndices = insightSpaces[i].dimensions.map(f => dimensions.findIndex(m => f === m));
             if (dataGraph !== null) {
@@ -101,12 +180,18 @@ export class RathEngine extends VIEngine {
                 }
             }
             t1_score /= (dimIndices.length * iteDimIndices.length)
-            if (t1_score > 0.65) { // (1 + 0.3) / 2
+            if (t1_score > 0.35) { // (1 + 0.3) / 2
+                const card = insightSpaces[i].dimensions.map(d => this.fields.find(f => f.key === d))
+                .filter(f => f !== undefined)
+                .map(f => Number(f?.features.unique))
+                // .reduce((t, v) => t * v, 1)
+                .reduce((t, v) => t + v, 0)
                 const spec = this.specification(insightSpaces[i])
                 if (spec) {
                     assSpacesT2.push({
                         ...insightSpaces[i],
-                        score: t1_score,
+                        score: t1_score / card,
+                        card,
                         ...spec
                     })
                 }

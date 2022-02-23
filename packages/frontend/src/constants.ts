@@ -20,6 +20,12 @@ export const COMPUTATION_ENGINE = {
   webworker: 'webworker'
 }
 
+export const EXPLORE_MODE = {
+  first: 'first',
+  familiar: 'familiar',
+  comprehensive: 'comprehensive'
+}
+
 export const DEMO_DATA_REQUEST_TIMEOUT = 1000 * 10;
 
 export const ENGINE_CONNECTION_STAGES: Array<{ stage: number; name: IECStatus }> = [
@@ -31,3 +37,5 @@ export const ENGINE_CONNECTION_STAGES: Array<{ stage: number; name: IECStatus }>
 export const RESULT_STORAGE_SPLITOR = '\n===RATH_STORAGE_SPLITOR===\n'
 
 export const STORAGE_FILE_SUFFIX = 'krs'
+
+export const EDITOR_URL = 'https://kanaries.cn/vega-editor/'
