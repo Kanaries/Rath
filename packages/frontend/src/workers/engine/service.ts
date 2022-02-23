@@ -13,7 +13,7 @@ const EngineRef: { current: RathEngine | null, mode: 'webworker' } | { current: 
 }
 
 export interface MessageProps {
-    task: 'init' | 'destroy' | 'start' | 'specification' | 'associate' | 'detail' | 'cube' | 'download' | 'upload' | 'sync' | 'subinsight';
+    task: 'init' | 'destroy' | 'start' | 'specification' | 'associate' | 'detail' | 'cube' | 'download' | 'upload' | 'sync' | 'subinsight' | 'infermeta';
     props?: any
 }
 

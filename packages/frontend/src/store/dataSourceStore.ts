@@ -4,11 +4,16 @@ import { combineLatest, from } from "rxjs";
 import * as op from 'rxjs/operators'
 import { ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 import { BIFieldType } from "../global";
-import { IFieldMeta, IRawField, IRow } from "../interfaces";
+import { IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
-import { getFieldsSummaryService } from "../service";
+import { getFieldsSummaryService, inferMetaService } from "../service";
 import { Transform } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
+
+interface IDataMessage {
+    type: 'init_data' | 'others';
+    data: IDatasetBase
+}
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
 // ds目前这里设置的是用户可能进行一定的数据类型定义，转换操作。用户此时关心的是单变量的信息，并不需要自动的触发后续流的计算，
@@ -46,6 +51,7 @@ export class DataSourceStore {
      */
     // public fieldMetas: IFieldMeta[] = [];
     public loading: boolean = false;
+    public showDataImportSelection: boolean = false;
     private fieldMetasRef: IStreamListener<IFieldMeta[]>;
     constructor() {
         makeAutoObservable(this, {
@@ -96,13 +102,22 @@ export class DataSourceStore {
             op.share()
         )
         this.fieldMetasRef = fromStream(fieldMetas$, [])
+        window.addEventListener('message', (ev) => {
+            const msg = ev.data as IDataMessage;
+            if (ev.source && msg.type === 'init_data') {
+                console.log('[Get DataSource From Other Pages]', msg)
+                // @ts-ignore
+                ev.source.postMessage(true, ev.origin)
+                this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
+                this.setShowDataImportSelection(false);
+            }
+        })
     }
 
     public get fields () {
         return this.mutFields.filter(f => !f.disable);
     }
     public get fieldMetas () {
-        console.log('fields_metas', this.fieldMetasRef.current)
         return this.fieldMetasRef.current
     }
 
@@ -145,6 +160,10 @@ export class DataSourceStore {
 
     public setLoading (loading: boolean) {
         this.loading = loading;
+    }
+
+    public setShowDataImportSelection (show: boolean) {
+        this.showDataImportSelection = show;
     }
 
     public setCleanMethod (method: CleanMethod) {
@@ -211,5 +230,16 @@ export class DataSourceStore {
         this.cleanMethod = state.cleanMethod;
         // FIXMe
         this.fieldMetasRef.current = state.fieldMetas
+    }
+
+    public async loadDataWithInferMetas (dataSource: IRow[], fields: IMuteFieldBase[]) {
+        this.showDataImportSelection = false;
+        if (fields.length > 0 && dataSource.length > 0) {
+            const metas = await inferMetaService({ dataSource, fields })
+            runInAction(() => {
+                this.mutFields = metas;
+                this.rawData = dataSource;
+            })
+        }
     }
 }

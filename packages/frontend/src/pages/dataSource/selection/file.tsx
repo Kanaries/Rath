@@ -4,13 +4,13 @@ import { useId } from "@uifabric/react-hooks";
 import intl from "react-intl-universal";
 import { loadDataFile, SampleKey, useSampleOptions } from "../utils";
 import { dataBackup, logDataImport } from "../../../loggers/dataImport";
-import { IRawField, IRow } from "../../../interfaces";
+import { IMuteFieldBase, IRow } from "../../../interfaces";
 
 interface FileDataProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 const FileData: React.FC<FileDataProps> = (props) => {
     const { onClose, onDataLoaded, onStartLoading, onLoadingFailed } = props;

@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback} from "react";
 import { BaseTable, Classes } from "ali-react-table";
 import { IRow } from "../../../interfaces";
 import HeaderCell from "./headerCell";
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite'
 import { useGlobalStore } from "../../../store";
-import { toJS } from "mobx";
+
 const CustomBaseTable = styled(BaseTable)`
     --header-bgcolor: #fafafa;
     --bgcolor: rgba(0, 0, 0, 0);
@@ -28,8 +28,6 @@ const DataTable: React.FC = (props) => {
     const updateFieldInfo = useCallback((fieldId: string, fieldPropKey: string, value: any) => {
         dataSourceStore.updateFieldInfo(fieldId, fieldPropKey, value);
     }, [dataSourceStore])
-
-    console.log('data table', fieldMetas, toJS(mutFields), toJS(fields))
 
     // 这是一个非常有趣的数据流写法的bug，可以总结一下
     // const columns = useMemo(() => {

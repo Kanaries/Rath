@@ -10,9 +10,8 @@ import { Pagination } from '@material-ui/core';
 const PAGE_SIZE = 7;
 
 const ObservableAssociation: React.FC = props => {
-    const { galleryStore, exploreStore } = useGlobalStore()
-    const { samplingDataSource, fields, assoListT1, assoListT2 } = exploreStore;
-    const { visualConfig, fieldMetas } = galleryStore;
+    const {  exploreStore } = useGlobalStore()
+    const { samplingDataSource,  assoListT1, assoListT2, visualConfig, fieldMetas } = exploreStore;
 
     const [pivotKey, setPivotKey] = useState<string>('T1')
     const [assoIndex, setAssoIndex] = useState<number>(0);
@@ -44,7 +43,6 @@ const ObservableAssociation: React.FC = props => {
             }}
             dataSource={samplingDataSource}
             visualConfig={toJS(visualConfig)}
-            fieldScores={fields}
             fieldMetas={fieldMetas}
             vizList={assoShownList}
           />

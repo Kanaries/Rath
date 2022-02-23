@@ -1,7 +1,7 @@
 import React from "react";
 import BaseChart from "../../../visBuilder/vegaBase";
 import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
-import { IFieldSummary, IInsightSpace, Specification } from "visual-insights";
+import { IInsightSpace, Specification } from "visual-insights";
 import { PreferencePanelConfig } from "../../../components/preference";
 import { IFieldMeta, IRow } from "../../../interfaces";
 import { IconButton } from "office-ui-fabric-react";
@@ -15,19 +15,15 @@ interface AssociationProps {
     visualConfig: PreferencePanelConfig;
     //   subspaceList: Subspace[];
     vizList: IVizSpace[];
-    fieldScores: IFieldSummary[];
     fieldMetas: IFieldMeta[];
     dataSource: IRow[];
     onSelectView: (viz: IVizSpace) => void
 }
 const AssociationCharts: React.FC<AssociationProps> = props => {
-    const { vizList, onSelectView, visualConfig, fieldScores, dataSource, fieldMetas } = props;
+    const { vizList, onSelectView, visualConfig, dataSource, fieldMetas } = props;
     //   const { dataSource, fieldScores } = digDimensionProps;
     //   const relatedCharts = useDigDimension(digDimensionProps);
-    const fieldFeatures = fieldScores.map(f => ({
-        name: f.key,
-        type: f.semanticType
-    }));
+
     //className="ms-Grid"
     return (
         <div style={{ border: "solid 1px #bfbfbf", marginTop: '2em', backgroundColor: '#e7e7e7' }}>

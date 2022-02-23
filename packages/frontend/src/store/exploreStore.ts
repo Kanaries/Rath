@@ -108,6 +108,9 @@ export class ExploreStore {
     public get fields () {
         return this.ltsPipeLineStore.fields;
     }
+    public get fieldMetas () {
+        return this.ltsPipeLineStore.fieldMetas;
+    }
     public get dataSource () {
         return this.ltsPipeLineStore.dataSource
     }

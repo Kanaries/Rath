@@ -9,7 +9,7 @@ import FileData from './file';
 import DemoData from './demo';
 import RestfulData from './restful';
 import ClickHouseData from './clickhouse';
-import { IRawField, IRow } from '../../../interfaces';
+import { IMuteFieldBase, IRow } from '../../../interfaces';
 
 interface SelectionProps {
     show: boolean;
@@ -17,7 +17,7 @@ interface SelectionProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 const Selection: React.FC<SelectionProps> = props => {
     const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed } = props;

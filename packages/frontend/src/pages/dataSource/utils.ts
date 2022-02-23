@@ -1,7 +1,7 @@
 import { RATH_INDEX_COLUMN_KEY, STORAGE_FILE_SUFFIX } from "../../constants";
 // import { BIField, Record } from "../../global";
-import { FileLoader, inferAnalyticType, isASCII } from "../../utils";
-import { Cleaner, Sampling, UnivariateSummary } from 'visual-insights';
+import { FileLoader, inferAnalyticType, inferSemanticType, isASCII } from "../../utils";
+import { Cleaner, Sampling } from 'visual-insights';
 import { FileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
@@ -74,17 +74,6 @@ export function fixUnicodeFields(fields: IRawField[], dataSource: IRow[]): {
     }
 }
 
-/**
- * 这里目前暂时包一层，是为了解耦具体的推断实现。后续这里要调整推断的逻辑。
- * 需要讨论这一层是否和交互层有关，如果没有关系，这一层包裹可以不存在这里，而是在visual-insights中。
- * @param data 原始数据
- * @param fid 字段id
- * @returns semantic type 列表
- */
-function inferFieldType (data: IRow[], fid: string) {
-    return UnivariateSummary.getFieldType(data, fid);
-}
-
 const onDataLoading = (value: number) => {
     console.log('data loading', Math.round(value * 100) + '%')
 }
@@ -136,7 +125,7 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
         return {
             fid,
             analyticType: inferAnalyticType(rawData, fid),
-            semanticType: inferFieldType(rawData, fid),
+            semanticType: inferSemanticType(rawData, fid),
             disable: false
         }
     })

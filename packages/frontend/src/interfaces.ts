@@ -17,7 +17,14 @@ interface IFieldBase {
     semanticType: FieldType;
 }
 export interface IRawField extends IFieldBase {
-    disable: boolean;
+    disable?: boolean;
+}
+
+export interface IMuteFieldBase {
+    fid: string;
+    name?: string;
+    analyticType: 'dimension' | 'measure' | '?';
+    semanticType: 'nominal' | 'temporal' | 'ordinal' | 'quantitative' | '?';
 }
 
 export interface IFieldMeta extends IFieldBase {
@@ -60,5 +67,5 @@ export interface ISyncEngine {
 
 export interface IDatasetBase {
     dataSource: IRow[];
-    fields: IRawField[];
+    fields: IMuteFieldBase[];
 }

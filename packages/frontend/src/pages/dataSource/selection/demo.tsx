@@ -4,14 +4,14 @@ import { useId } from "@uifabric/react-hooks";
 import intl from 'react-intl-universal';
 import { DemoDataAssets, IDemoDataKey, useDemoDataOptions } from '../config';
 import { logDataImport } from '../../../loggers/dataImport';
-import { IDatasetBase, IRawField, IRow } from '../../../interfaces';
+import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 
 interface DemoDataProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 
 function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<IDatasetBase> {

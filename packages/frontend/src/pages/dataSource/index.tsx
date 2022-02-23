@@ -1,7 +1,6 @@
 import React, {  useCallback, useEffect } from "react";
 import intl from 'react-intl-universal'
-import { useComposeState } from '../../hooks/index';
-import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, ActionButton } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import { CleanMethod, useCleanMethodList } from './clean';
@@ -11,15 +10,7 @@ import { Record } from "../../global";
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
-import { IRawField, IRow } from "../../interfaces";
-interface PageStatus {
-  show: {
-    insightBoard: boolean;
-    configPanel: boolean;
-    fieldConfig: boolean;
-    dataConfig: boolean;
-  }
-}
+import { IMuteFieldBase, IRow } from "../../interfaces";
 
 const MARGIN_LEFT = { marginLeft: "1em" }
 
@@ -29,15 +20,15 @@ interface DataSourceBoardProps {
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, exploreStore } = useGlobalStore();
 
-  const { cleanedData, cleanMethod, rawData, loading, fieldMetas } = dataSourceStore;
-  const [pageStatus, setPageStatus] = useComposeState<PageStatus>({
-    show: {
-      insightBoard: false,
-      fieldConfig: false,
-      configPanel: false,
-      dataConfig: rawData && rawData.length === 0
+  const { cleanedData, cleanMethod, rawData, loading, showDataImportSelection } = dataSourceStore;
+
+  useEffect(() => {
+    // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
+
+    if (rawData && rawData.length === 0) {
+      dataSourceStore.setShowDataImportSelection(true);
     }
-  })
+  }, [dataSourceStore])
 
   const cleanMethodListLang = useCleanMethodList();
 
@@ -49,13 +40,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         iconProps={{ iconName: "ExcelDocument" }}
         text={text}
         onClick={() => {
-          setPageStatus((draft) => {
-            draft.show.dataConfig = true;
-          });
+          dataSourceStore.setShowDataImportSelection(true)
         }}
       />
     );
-  }, [])
+  }, [dataSourceStore])
 
   const onOrignEngineStart = useCallback(() => {
     pipeLineStore.startTask();
@@ -75,13 +64,12 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   }, [exploreStore, commonStore])
 
   const onSelectPannelClose = useCallback(() => {
-    setPageStatus(draft => {
-      draft.show.dataConfig = false;
-    })
-  }, [setPageStatus])
+    dataSourceStore.setShowDataImportSelection(false)
+  }, [dataSourceStore])
 
-  const onSelectDataLoaded = useCallback((fields: IRawField[], dataSource: IRow[]) => {
-    dataSourceStore.loadData(fields, dataSource);
+  const onSelectDataLoaded = useCallback((fields: IMuteFieldBase[], dataSource: IRow[]) => {
+    // dataSourceStore.loadData(fields, dataSource);
+    dataSourceStore.loadDataWithInferMetas(dataSource, fields);
   }, [dataSourceStore])
 
   const onSelectStartLoading = useCallback(() => {
@@ -154,7 +142,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             onClick={onOrignEngineStart}
           />
           
-          <Selection show={pageStatus.show.dataConfig}
+          <Selection show={showDataImportSelection}
             loading={loading}
             onClose={onSelectPannelClose}
             onDataLoaded={onSelectDataLoaded}

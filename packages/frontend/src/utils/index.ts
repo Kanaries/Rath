@@ -3,7 +3,7 @@ import * as Transform from './transform';
 import deepcopy from './deepcopy';
 import { IRow } from '../interfaces';
 // TODO: Rath和VI中都有一套，弱约束关联，可能带来潜在的迭代负担或bug
-import { IAnalyticType, IDataType, ISemanticType } from 'visual-insights';
+import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visual-insights';
 
 function isASCII(str: string) {
   return /^[\x00-\x7F]*$/.test(str)
@@ -26,6 +26,17 @@ function inferAnalyticTypeFromSemanticType (semanticType: ISemanticType): IAnaly
     default:
       return 'dimension'
   }
+}
+
+/**
+ * 这里目前暂时包一层，是为了解耦具体的推断实现。后续这里要调整推断的逻辑。
+ * 需要讨论这一层是否和交互层有关，如果没有关系，这一层包裹可以不存在这里，而是在visual-insights中。
+ * @param data 原始数据
+ * @param fid 字段id
+ * @returns semantic type 列表
+ */
+ export function inferSemanticType (data: IRow[], fid: string) {
+  return UnivariateSummary.getFieldType(data, fid);
 }
 
 function isSetEqual (A: string[], B: string[]) {

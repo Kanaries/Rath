@@ -2,22 +2,20 @@ import React, { useCallback, useEffect } from  'react';
 import { observer } from 'mobx-react-lite';
 import ConnectionStatus from '../../../components/connectionStatus';
 import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, ProgressIndicator, Stack, TextField } from 'office-ui-fabric-react';
-import { IRawField, IRow } from '../../../interfaces';
+import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 
 const StackTokens = {
     childrenGap: 20
 }
 
-// const TextFieldStyle = { width: '200px' }
-
-const PROTOCOL_LIST: IDropdownOption[] = [
-    { text: 'https', key: 'https' },
-    { text: 'http', key: 'http' }
-]
+// const PROTOCOL_LIST: IDropdownOption[] = [
+//     { text: 'https', key: 'https' },
+//     { text: 'http', key: 'http' }
+// ]
 interface CHDataProps {
     onClose: () => void;
-    onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 
 const ClickHouseData: React.FC<CHDataProps> = props => {

@@ -1,11 +1,11 @@
-import { IRawField, IRow } from "../interfaces"
+import { IMuteFieldBase, IRawField, IRow } from "../interfaces"
 
 const DATA_SOURCE_LOGGER_URL =
   'https://1423108296428281.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/Rath/dataSourceLogger/'
 
 interface IDataImportInfo {
     dataType: string;
-    fields: IRawField[];
+    fields: IMuteFieldBase[];
     dataSource: IRow[];
     name?: string;
     info?: any;

@@ -2,7 +2,7 @@ import { PrimaryButton, Stack, TextField } from 'office-ui-fabric-react';
 import React, { useCallback, useState } from 'react';
 import ReactJson from 'react-json-view';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
-import { IDatasetBase, IRawField, IRow } from '../../../interfaces';
+import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
 import { logDataImport } from '../../../loggers/dataImport';
 import styled from 'styled-components'
 import intl from 'react-intl-universal'
@@ -31,8 +31,8 @@ const EXAMPLE_DATA: IDatasetBase = {
         {x: 2, y: 20}
     ],
     fields: [
-        { fid: 'x', name: 'FieldX', analyticType: 'dimension', semanticType: 'ordinal', disable: false },
-        { fid: 'y', name: 'FieldY', analyticType: 'measure', semanticType: 'quantitative', disable: false },
+        { fid: 'x', name: 'FieldX', analyticType: 'dimension', semanticType: 'ordinal' },
+        { fid: 'y', name: 'FieldY', analyticType: 'measure', semanticType: 'quantitative' },
     ]
 }
 const Cont = styled.div`
@@ -46,7 +46,7 @@ interface RestFulProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IRawField[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 const RestFul: React.FC<RestFulProps> = props => {
     const { onClose, onStartLoading, onLoadingFailed, onDataLoaded } = props;

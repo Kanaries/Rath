@@ -2,7 +2,8 @@
     "common": {
         "dimension": "dimension",
         "measure": "measure",
-        "name": "Name"
+        "name": "Name",
+        "home": "Home"
     },
     "menu": {
         "dataSource": "DataSource",

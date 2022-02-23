@@ -2,7 +2,8 @@
     "common": {
         "dimension": "维度",
         "measure": "度量",
-        "name": "名称"
+        "name": "名称",
+        "home": "主页"
     },
     "menu": {
         "dataSource": "数据源",
