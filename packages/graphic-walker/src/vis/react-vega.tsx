@@ -170,7 +170,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       spec.mark = singleView.mark;
       spec.encoding = singleView.encoding;
       if (viewPlaceholders.length > 0 && viewPlaceholders[0].current) {
-        embed(viewPlaceholders[0].current, spec, { mode: 'vega-lite', actions: true }).then(res => {
+        embed(viewPlaceholders[0].current, spec, { mode: 'vega-lite', actions: false }).then(res => {
           res.view.addEventListener('click', (e) => {
             click$.next(e);
           })
