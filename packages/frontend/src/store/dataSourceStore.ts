@@ -233,12 +233,13 @@ export class DataSourceStore {
     }
 
     public async loadDataWithInferMetas (dataSource: IRow[], fields: IMuteFieldBase[]) {
-        this.showDataImportSelection = false;
         if (fields.length > 0 && dataSource.length > 0) {
             const metas = await inferMetaService({ dataSource, fields })
             runInAction(() => {
                 this.mutFields = metas;
                 this.rawData = dataSource;
+                this.loading = false;
+                this.showDataImportSelection = false;
             })
         }
     }
