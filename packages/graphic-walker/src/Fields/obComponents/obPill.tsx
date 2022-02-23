@@ -14,6 +14,7 @@ interface PillProps {
 const OBPill: React.FC<PillProps> = props => {
     const { provided, dkey, fIndex } = props;
     const { vizStore } = useGlobalStore();
+    const { visualConfig } = vizStore;
     const field = vizStore.draggableFieldState[dkey.id][fIndex];
     return <Pill
         ref={provided.innerRef}
@@ -23,7 +24,7 @@ const OBPill: React.FC<PillProps> = props => {
         {...provided.dragHandleProps}
     >
         {field.name}&nbsp;
-        {field.type === 'M' && (
+        {field.type === 'M' && visualConfig.defaultAggregated && (
             <select
                 className="bg-transparent text-gray-700 float-right focus:outline-none focus:border-gray-500"
                 value={field.aggName || ''}

@@ -11,6 +11,7 @@ interface ReactVegaProps {
   columns: Field[];
   dataSource: Record[];
   defaultAggregate?: boolean;
+  defaultStack?: boolean;
   geomType: string;
   color?: Field;
   opacity?: Field;
@@ -39,25 +40,27 @@ function getFieldType(field: Field): 'quantitative' | 'nominal' | 'ordinal' | 't
   return 'nominal';
 }
 
-function getSingleView(xField: Field, yField: Field, color: Field, opacity: Field, size: Field, row: Field, col: Field, defaultAggregated: boolean, geomType: string) {
-  return {
-    mark: geomType,
+function getSingleView(xField: Field, yField: Field, color: Field, opacity: Field, size: Field, row: Field, col: Field, defaultAggregated: boolean, defaultStack: boolean, geomType: string) {
+  const xFieldAgg = (xField.type === 'M' && defaultAggregated && (xField.aggName as any));
+  const yFieldAgg = (yField.type === 'M' && defaultAggregated && (yField.aggName as any)) ;
+
+  const spec = {
+    mark: {
+      type: geomType,
+      opacity: 0.96
+    },
     encoding: {
       x: {
         field: xField.id,
         type: getFieldType(xField),
-        aggregate:
-          xField.type === 'M' &&
-          defaultAggregated &&
-          (xField.aggName as any),
+        aggregate: xFieldAgg,
+        stack: defaultStack
       },
       y: {
         field: yField.id,
         type: getFieldType(yField),
-        aggregate:
-          yField.type === 'M' &&
-          defaultAggregated &&
-          (yField.aggName as any),
+        aggregate: yFieldAgg,
+        stack: defaultStack
       },
       row: row !== NULL_FIELD ? {
         field: row.id,
@@ -81,6 +84,7 @@ function getSingleView(xField: Field, yField: Field, color: Field, opacity: Fiel
       } : undefined
     }
   };
+  return spec;
 }
 const ReactVega: React.FC<ReactVegaProps> = props => {
   const {
@@ -88,6 +92,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     rows = [],
     columns = [],
     defaultAggregate = true,
+    defaultStack = true,
     geomType,
     color,
     opacity,
@@ -131,8 +136,11 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     const yField = rows.length > 0 ? rows[rows.length - 1] : NULL_FIELD;
     const xField = columns.length > 0 ? columns[columns.length - 1] : NULL_FIELD;
 
-    const rowFacetField = rowFacetFields.length > 0 ? rowFacetFields[rowFacetFields.length - 1] : NULL_FIELD;
-    const colFacetField = colFacetFields.length > 0 ? colFacetFields[colFacetFields.length - 1] : NULL_FIELD;
+    const rowLeftFacetFields = rows.slice(0, -1).filter(f => f.type === 'D');
+    const colLeftFacetFields = columns.slice(0, -1).filter(f => f.type === 'D');
+
+    const rowFacetField = rowLeftFacetFields.length > 0 ? rowLeftFacetFields[rowLeftFacetFields.length - 1] : NULL_FIELD;
+    const colFacetField = colLeftFacetFields.length > 0 ? colLeftFacetFields[colLeftFacetFields.length - 1] : NULL_FIELD;
 
     const spec: any = {
       data: {
@@ -146,6 +154,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       }
     };
     if (rowRepeatFields.length <= 1 && colRepeatFields.length <= 1) {
+      console.log({ rowFacetField, colFacetField, rowFacetFields, colFacetFields })
       const singleView = getSingleView(
         xField,
         yField,
@@ -155,12 +164,13 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
         rowFacetField,
         colFacetField,
         defaultAggregate,
+        defaultStack,
         geomType
       );
       spec.mark = singleView.mark;
       spec.encoding = singleView.encoding;
       if (viewPlaceholders.length > 0 && viewPlaceholders[0].current) {
-        embed(viewPlaceholders[0].current, spec, { mode: 'vega-lite', actions: false }).then(res => {
+        embed(viewPlaceholders[0].current, spec, { mode: 'vega-lite', actions: true }).then(res => {
           res.view.addEventListener('click', (e) => {
             click$.next(e);
           })
@@ -170,7 +180,6 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
         });
       }
     } else {
-      console.log('latest', rowRepeatFields, colRepeatFields, rowDims, colDims.slice(-1))
       for (let i = 0; i < rowRepeatFields.length; i++) {
         for (let j = 0; j < colRepeatFields.length; j++) {
           const singleView = getSingleView(
@@ -182,6 +191,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
             rowFacetField,
             colFacetField,
             defaultAggregate,
+            defaultStack,
             geomType
           );
           const node = i * colRepeatFields.length + j < viewPlaceholders.length ? viewPlaceholders[i * colRepeatFields.length + j].current : null
@@ -214,7 +224,8 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     rowFacetFields,
     colFacetFields,
     rowRepeatFields,
-    colRepeatFields
+    colRepeatFields,
+    defaultStack
   ]);
   return <div>
     {/* <div ref={container}></div> */}

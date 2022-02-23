@@ -34,6 +34,10 @@ function geomAdapter (geom: string) {
             return 'bar';
         case 'line':
             return 'line';
+        case 'boxplot':
+            return 'boxplot';
+        case 'area':
+            return 'area';
         case 'point':
             return 'point';
         case 'heatmap':

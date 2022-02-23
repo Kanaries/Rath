@@ -8,6 +8,10 @@ export const GEMO_TYPES = [
         label: '线',
     },
     {
+        value: 'area',
+        label: '面',
+    },
+    {
         value: 'point',
         label: '点',
     },
@@ -15,6 +19,10 @@ export const GEMO_TYPES = [
         value: 'tick',
         label: '标记',
     },
+    {
+        value: 'boxplot',
+        label: '统计箱'
+    }
 ];
 
 export const COLORS = {

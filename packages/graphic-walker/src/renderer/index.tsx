@@ -26,6 +26,7 @@ const ReactiveRenderer: React.FC = props => {
     return <ReactVega
         geomType={visualConfig.geoms[0]}
         defaultAggregate={visualConfig.defaultAggregated}
+        defaultStack={visualConfig.defaultStack}
         dataSource={currentDataset.dataSource}
         rows={rows}
         columns={columns}
