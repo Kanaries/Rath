@@ -9,6 +9,7 @@ import NoteBook from "./pages/notebook/index";
 import VisualInterface from './pages/visualInterface';
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
+import PatternPage from './pages/pattern/index';
 import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
 import LTSPage from './pages/lts';
@@ -125,6 +126,7 @@ function App() {
         {appKey === PIVOT_KEYS.editor && <VisualInterface />}
         {appKey === PIVOT_KEYS.support && <SupportPage />}
         {appKey === PIVOT_KEYS.lts && <LTSPage />}
+        {appKey === PIVOT_KEYS.pattern && <PatternPage />}
         <CrInfo />
         </div>
       </div>

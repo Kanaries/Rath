@@ -14,6 +14,7 @@
         "editor": "Visual Editor",
         "support": "Support",
         "lts": "Explore",
+        "pattern": "新模块测试",
         "devCollection": "Debug"
     },
     "preference": {

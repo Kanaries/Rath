@@ -12,7 +12,8 @@ export const PIVOT_KEYS = {
     explainer: 'explainer',
     editor: 'editor',
     support: 'support',
-    lts: 'lts'
+    lts: 'lts',
+    pattern: 'pattern'
   } as const;
 
 export const COMPUTATION_ENGINE = {

@@ -3,6 +3,7 @@ import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from } from "rxjs";
 import * as op from 'rxjs/operators'
 import { ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
+import { NextVICore } from "../dev";
 import { BIFieldType } from "../global";
 import { IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
@@ -242,5 +243,11 @@ export class DataSourceStore {
                 this.showDataImportSelection = false;
             })
         }
+    }
+    public dev() {
+        const core = new NextVICore(this.cleanedData, this.fieldMetas);
+        // console.log(core.firstPattern())
+        // console.log(core.secondPattern())
+        console.log(core.featureSelectForSecondPattern())
     }
 }
