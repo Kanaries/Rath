@@ -3,7 +3,8 @@ import { Specification } from "visual-insights/build/esm/commonTypes";
 import { DataSource } from "../global";
 import { IFieldMeta } from "../interfaces";
 export const geomTypeMap: { [key: string]: any } = {
-  interval: "boxplot",
+  interval: "tick",
+  // interval: 'boxplot',
   line: "line",
   point: "point",
   // density: 'rect'

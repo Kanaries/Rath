@@ -12,7 +12,8 @@ export function inferMeta (props: { dataSource: IRow[]; fields: IMuteFieldBase[]
             fid: field.fid,
             name: field.name ? field.name : field.fid,
             analyticType,
-            semanticType
+            semanticType,
+            disable: field.disable
         })
     }
     return finalFieldMetas

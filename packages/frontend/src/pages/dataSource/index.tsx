@@ -24,10 +24,10 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
   useEffect(() => {
     // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
-
     if (rawData && rawData.length === 0) {
       dataSourceStore.setShowDataImportSelection(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSourceStore])
 
   const cleanMethodListLang = useCleanMethodList();

@@ -1,4 +1,4 @@
-import { IMuteFieldBase, IRawField, IRow } from "../interfaces"
+import { IMuteFieldBase, IRow } from "../interfaces"
 
 const DATA_SOURCE_LOGGER_URL =
   'https://1423108296428281.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/Rath/dataSourceLogger/'
@@ -21,7 +21,7 @@ export async function logDataImport (props: IDataImportInfo) {
             },
             body: JSON.stringify(props),
           })
-          const result = await res.json()
+          await res.json()
         } catch (error) {
           console.error(error)
         }

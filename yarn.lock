@@ -14608,10 +14608,10 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-visual-insights@0.7.12:
-  version "0.7.12"
-  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.7.12.tgz#d3ea4da3ec32ae15be6f53e227dbb3630a68820f"
-  integrity sha512-sstYHvpdGUJKzoz1ilCkEs8Qi2Lt6uasHMhl0FOn0EAhlZXKONR8KfjvXf2OpFkAZA+dV2xX0//Q0Q80gAzV0g==
+visual-insights@0.7.13:
+  version "0.7.13"
+  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.7.13.tgz#d3d0a305c52397dcedd112f3a41d4c514d92ef4f"
+  integrity sha512-NWOXyioA+iqkiuslR30d/QoMj+JyupgI3B19FVvlOeJ6MRj3eQUKEUfcrqWUSC6fJeY9YOk2LH9gS6KZAdssaA==
   dependencies:
     assert "^2.0.0"
     axios "^0.22.0"

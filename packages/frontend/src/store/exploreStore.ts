@@ -208,6 +208,7 @@ export class ExploreStore {
                 // const agg = !spec.schema.geomType?.includes('point');
                 runInAction(() => {
                     this.spec = spec;
+                    this.forkViewSpec = null;
                     // this.viewData = viewData;
                     // this.visualConfig.defaultAggregated = agg;
                     this.pageIndex = index;

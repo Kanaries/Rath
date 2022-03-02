@@ -1,11 +1,11 @@
 import { RATH_INDEX_COLUMN_KEY, STORAGE_FILE_SUFFIX } from "../../constants";
 // import { BIField, Record } from "../../global";
-import { FileLoader, inferAnalyticType, inferSemanticType, isASCII } from "../../utils";
+import { FileLoader, isASCII } from "../../utils";
 import { Cleaner, Sampling } from 'visual-insights';
 import { FileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
-import { IRawField, IRow } from "../../interfaces";
+import { IMuteFieldBase, IRow } from "../../interfaces";
 import { IRathStorage, RathStorageParse } from "../../utils/storage";
 import { formatTimeField } from "../../utils/transform";
 // import { isFieldTime } from "visual-insights/build/esm/utils";
@@ -50,14 +50,15 @@ export function setIndexKey(data: IRow[]): IRow[] {
  * @param dataSource 
  * @returns 
  */
-export function fixUnicodeFields(fields: IRawField[], dataSource: IRow[]): {
-    fields: IRawField[],
+export function fixUnicodeFields(fields: IMuteFieldBase[], dataSource: IRow[]): {
+    fields: IMuteFieldBase[],
     dataSource: IRow[]
 } {
-    const newFields: IRawField[] = fields.map((f, i) => {
+    const newFields: IMuteFieldBase[] = fields.map((f, i) => {
         const nF = { ...f };
         if (!isASCII(nF.fid)) {
             nF.fid = `${f.fid}(Rath_Field_${i})`
+            nF.name = f.name ? f.name : f.fid;
         }
         return nF
     })
@@ -83,7 +84,7 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
     /**
      * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
      */
-    let tmpFields: IRawField[] = []
+    let tmpFields: IMuteFieldBase[] = []
     let rawData: IRow[] = []
 
     if (file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
@@ -115,17 +116,18 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
     rawData = setIndexKey(rawData);
     // FIXME: 第一条数据取meta的危险性
     let fids = Object.keys(rawData[0])
+    const rathIndexColRef: IMuteFieldBase = {
+        fid: RATH_INDEX_COLUMN_KEY,
+        analyticType: 'dimension',
+        semanticType: 'nominal',
+        disable: false
+    }
     tmpFields = fids.map((fid, index) => {
-        if (fid === RATH_INDEX_COLUMN_KEY) return {
-            fid,
-            analyticType: 'dimension',
-            semanticType: 'nominal',
-            disable: false
-        }
+        if (fid === RATH_INDEX_COLUMN_KEY) return rathIndexColRef;
         return {
             fid,
-            analyticType: inferAnalyticType(rawData, fid),
-            semanticType: inferSemanticType(rawData, fid),
+            analyticType: '?', //inferAnalyticType(rawData, fid),
+            semanticType: '?', //inferSemanticType(rawData, fid),
             disable: false
         }
     })

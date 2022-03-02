@@ -4,6 +4,7 @@ import deepcopy from './deepcopy';
 import { IRow } from '../interfaces';
 // TODO: Rath和VI中都有一套，弱约束关联，可能带来潜在的迭代负担或bug
 import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visual-insights';
+import { RATH_INDEX_COLUMN_KEY } from '../constants';
 
 function isASCII(str: string) {
   return /^[\x00-\x7F]*$/.test(str)
@@ -89,6 +90,13 @@ export function inferSemanticTypeFromDataType (dataType: IDataType): ISemanticTy
 
 export function inferAnalyticTypeFromDataType (dataType: IDataType): IAnalyticType {
   return DEFAULT_ANALYTIC_TYPE[dataType];
+}
+
+interface IGeneralColumn {
+  fid: string;
+}
+export function findRathSafeColumnIndex<T extends IGeneralColumn> (fields: T[]): number {
+  return fields.findIndex(f => f.fid === RATH_INDEX_COLUMN_KEY);
 }
 
 export {

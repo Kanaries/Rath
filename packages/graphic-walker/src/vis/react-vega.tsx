@@ -154,7 +154,6 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       }
     };
     if (rowRepeatFields.length <= 1 && colRepeatFields.length <= 1) {
-      console.log({ rowFacetField, colFacetField, rowFacetFields, colFacetFields })
       const singleView = getSingleView(
         xField,
         yField,

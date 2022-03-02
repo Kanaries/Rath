@@ -67,7 +67,7 @@ export class DataExplainer {
         // 讨论：知道selection，但是分析的维度是什么？
         this.explainConditionalValue(predicates, dimensions, measures);
         const selectAll = dimensions.length === 0 || predicates.length === 0;
-        console.log({ selectAll })
+
         const dimSelectionSpaces = selectAll ? [] : this.explainBySelection(
             predicates,
             dimensions,
@@ -142,7 +142,6 @@ export class DataExplainer {
         const knn = this.getGeneralizeKNN('dimension', dimensions, K_Neighbor, 0);
         for (let extendDim of knn) {
             const result = this.explainValue(predicates, [...dimensions, extendDim], measures);
-            console.log(extendDim, measures, result)
         }
     }
     public explainValue(predicates: IPredicate[], dimensions: string[], measures: IMeasure[]): number[] {

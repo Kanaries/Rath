@@ -20,11 +20,15 @@ export interface IRawField extends IFieldBase {
     disable?: boolean;
 }
 
+/**
+ * ImuteFieldBase 是未来替换IRawField的新interface，其扩展了'?'类型，方便告诉后续的类型推断机制来做。
+ */
 export interface IMuteFieldBase {
     fid: string;
     name?: string;
     analyticType: 'dimension' | 'measure' | '?';
     semanticType: 'nominal' | 'temporal' | 'ordinal' | 'quantitative' | '?';
+    disable?: boolean;
 }
 
 export interface IFieldMeta extends IFieldBase {

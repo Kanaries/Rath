@@ -8,7 +8,7 @@ import { BIFieldType } from "../global";
 import { IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
 import { getFieldsSummaryService, inferMetaService } from "../service";
-import { Transform } from "../utils";
+import { findRathSafeColumnIndex, Transform } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
 
 interface IDataMessage {
@@ -64,6 +64,7 @@ export class DataSourceStore {
         const fields$ = from(toStream(() => this.fields, true));
         const cleanedData$ = from(toStream(() => this.cleanedData, true))
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
+        // const fieldSemanticTypes
         const originFieldMetas$ =  combineLatest([fields$, cleanedData$]).pipe(
             op.map(([fields, cleanedData]) => {
                 const ableFiledIds = fields.map(f => f.fid);
@@ -182,6 +183,8 @@ export class DataSourceStore {
         const target = this.mutFields.find(f => f.fid === fid);
         if (target) {
             target.semanticType = type;
+            // 触发fieldsMeta监控可以被执行
+            this.mutFields = [...this.mutFields];
         }
     }
     // public updateFieldInfo <K extends keyof IRawField> (fieldId: string, fieldPropKey: K, value: IRawField[K]) {
@@ -192,6 +195,8 @@ export class DataSourceStore {
             // @ts-ignore
             target[fieldPropKey] = value;
             // target.type = type;
+            // 触发fieldsMeta监控可以被执行
+            this.mutFields = [...this.mutFields];
         }
     }
 
@@ -237,10 +242,17 @@ export class DataSourceStore {
         if (fields.length > 0 && dataSource.length > 0) {
             const metas = await inferMetaService({ dataSource, fields })
             runInAction(() => {
-                this.mutFields = metas;
                 this.rawData = dataSource;
                 this.loading = false;
                 this.showDataImportSelection = false;
+                // 如果除了安全维度，数据集本身就有维度
+                if (metas.filter(f => f.analyticType === 'dimension').length > 1) {
+                    const rathColIndex = findRathSafeColumnIndex(metas);
+                    if (rathColIndex > -1) {
+                        metas[rathColIndex].disable = true
+                    }
+                }
+                this.mutFields = metas;
             })
         }
     }
