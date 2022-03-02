@@ -43,13 +43,16 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
     return options;
 };
 
-export const DemoDataAssets = {
+export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
+    CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
+    STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
+    BTC_GOLD: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds_btc_gold_service.json",
+} : {
     // CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     CARS: "http://localhost:3000/datasets/ds-cars-service.json",
     // STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
     STUDENTS: "http://localhost:3000/datasets/ds-students-service.json",
-    BTC_GOLD: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds_btc_gold_service.json",
-    // BTC_GOLD: "http://localhost:3000/datasets/demo.json",
+    BTC_GOLD: "http://localhost:3000/datasets/ds_btc_gold_service.json",
 } as const;
 
 export type IDemoDataKey = keyof typeof DemoDataAssets;
