@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "./static/css/main.1fa27f69.chunk.css",
-    "main.js": "./static/js/main.fb5dfa0a.chunk.js",
-    "main.js.map": "./static/js/main.fb5dfa0a.chunk.js.map",
+    "main.js": "./static/js/main.41e15c82.chunk.js",
+    "main.js.map": "./static/js/main.41e15c82.chunk.js.map",
     "runtime-main.js": "./static/js/runtime-main.0f2630df.js",
     "runtime-main.js.map": "./static/js/runtime-main.0f2630df.js.map",
     "static/css/2.1d0b0966.chunk.css": "./static/css/2.1d0b0966.chunk.css",
@@ -26,7 +26,7 @@
     "static/js/groupFields.worker.cc2249d4.worker.js.map": "./static/js/groupFields.worker.cc2249d4.worker.js.map",
     "static/js/index.worker.ba6b36bc.worker.js": "./static/js/index.worker.ba6b36bc.worker.js",
     "static/js/index.worker.ba6b36bc.worker.js.map": "./static/js/index.worker.ba6b36bc.worker.js.map",
-    "static/js/main.fb5dfa0a.chunk.js.LICENSE.txt": "./static/js/main.fb5dfa0a.chunk.js.LICENSE.txt",
+    "static/js/main.41e15c82.chunk.js.LICENSE.txt": "./static/js/main.41e15c82.chunk.js.LICENSE.txt",
     "static/js/metaInfer.worker.bc8f6f02.worker.js": "./static/js/metaInfer.worker.bc8f6f02.worker.js",
     "static/js/metaInfer.worker.bc8f6f02.worker.js.map": "./static/js/metaInfer.worker.bc8f6f02.worker.js.map"
   },
@@ -35,6 +35,6 @@
     "static/css/2.1d0b0966.chunk.css",
     "static/js/2.a87be687.chunk.js",
     "static/css/main.1fa27f69.chunk.css",
-    "static/js/main.fb5dfa0a.chunk.js"
+    "static/js/main.41e15c82.chunk.js"
   ]
 }
