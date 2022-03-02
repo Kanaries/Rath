@@ -2,7 +2,8 @@
     "common": {
         "dimension": "维度",
         "measure": "度量",
-        "name": "名称"
+        "name": "名称",
+        "home": "主页"
     },
     "menu": {
         "dataSource": "数据源",
@@ -13,6 +14,7 @@
         "editor": "自助分析",
         "support": "帮助",
         "lts": "探索分析",
+        "pattern": "新模块测试",
         "devCollection": "调试模式"
     },
     "preference": {
@@ -78,7 +80,15 @@
             },
             "demo": {
                 "available": "可选数据集"
+            },
+            "restful": {
+                "requestData": "请求数据",
+                "exampleDataStruct": "示例数据结构"
             }
+        },
+        "table": {
+            "edit": "编辑字段名称",
+            "fieldName": "字段名称"
         },
         "sampling": {
             "none": "不采样(使用原始数据)",

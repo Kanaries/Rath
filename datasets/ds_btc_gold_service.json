@@ -1,0 +1,4189 @@
+{
+    "dataSource": [
+        {
+            "Date": "2016-09-12",
+            "BitcoinPrice": 770.02,
+            "GoldPrice": 1324.6,
+            "Year": "2016",
+            "Month": "9",
+            "Day": "12",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2016-10-10",
+            "BitcoinPrice": 617.54,
+            "GoldPrice": 1259.5,
+            "Year": "2016",
+            "Month": "10",
+            "Day": "10",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2016-10-11",
+            "BitcoinPrice": 721.5,
+            "GoldPrice": 1253.45,
+            "Year": "2016",
+            "Month": "10",
+            "Day": "11",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2016-10-12",
+            "BitcoinPrice": 769.08,
+            "GoldPrice": 1256.5,
+            "Year": "2016",
+            "Month": "10",
+            "Day": "12",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2016-11-09",
+            "BitcoinPrice": 621.65,
+            "GoldPrice": 1281.4,
+            "Year": "2016",
+            "Month": "11",
+            "Day": "9",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2016-11-10",
+            "BitcoinPrice": 614.77,
+            "GoldPrice": 1267.5,
+            "Year": "2016",
+            "Month": "11",
+            "Day": "10",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2016-11-11",
+            "BitcoinPrice": 715.45,
+            "GoldPrice": 1236.45,
+            "Year": "2016",
+            "Month": "11",
+            "Day": "11",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2016-12-09",
+            "BitcoinPrice": 609.67,
+            "GoldPrice": 1163.6,
+            "Year": "2016",
+            "Month": "12",
+            "Day": "9",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2016-12-12",
+            "BitcoinPrice": 777,
+            "GoldPrice": 1156.1,
+            "Year": "2016",
+            "Month": "12",
+            "Day": "12",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-01-03",
+            "BitcoinPrice": 1190.89,
+            "GoldPrice": 1151,
+            "Year": "2017",
+            "Month": "1",
+            "Day": "3",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-01-04",
+            "BitcoinPrice": 1086.929571,
+            "GoldPrice": 1164.25,
+            "Year": "2017",
+            "Month": "1",
+            "Day": "4",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-01-05",
+            "BitcoinPrice": 1417.172813,
+            "GoldPrice": 1176.7,
+            "Year": "2017",
+            "Month": "1",
+            "Day": "5",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-01-06",
+            "BitcoinPrice": 2399.242671,
+            "GoldPrice": 1175.85,
+            "Year": "2017",
+            "Month": "1",
+            "Day": "6",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-01-09",
+            "BitcoinPrice": 4911.740017,
+            "GoldPrice": 1178.5,
+            "Year": "2017",
+            "Month": "1",
+            "Day": "9",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-01-10",
+            "BitcoinPrice": 4360.722967,
+            "GoldPrice": 1189.5,
+            "Year": "2017",
+            "Month": "1",
+            "Day": "10",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-01-11",
+            "BitcoinPrice": 6665.306683,
+            "GoldPrice": 1178.55,
+            "Year": "2017",
+            "Month": "1",
+            "Day": "11",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-01-12",
+            "BitcoinPrice": 10883.912,
+            "GoldPrice": 1205.05,
+            "Year": "2017",
+            "Month": "1",
+            "Day": "12",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-02-01",
+            "BitcoinPrice": 1015.97,
+            "GoldPrice": 1203.65,
+            "Year": "2017",
+            "Month": "2",
+            "Day": "1",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-02-02",
+            "BitcoinPrice": 983.42,
+            "GoldPrice": 1221.95,
+            "Year": "2017",
+            "Month": "2",
+            "Day": "2",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-02-03",
+            "BitcoinPrice": 1259.410817,
+            "GoldPrice": 1215.2,
+            "Year": "2017",
+            "Month": "2",
+            "Day": "3",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-02-06",
+            "BitcoinPrice": 2409.93,
+            "GoldPrice": 1226.75,
+            "Year": "2017",
+            "Month": "2",
+            "Day": "6",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-02-07",
+            "BitcoinPrice": 2421.26,
+            "GoldPrice": 1231,
+            "Year": "2017",
+            "Month": "2",
+            "Day": "7",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-02-08",
+            "BitcoinPrice": 2693.633983,
+            "GoldPrice": 1242.1,
+            "Year": "2017",
+            "Month": "2",
+            "Day": "8",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-02-09",
+            "BitcoinPrice": 4580.38748,
+            "GoldPrice": 1236.8,
+            "Year": "2017",
+            "Month": "2",
+            "Day": "9",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-02-10",
+            "BitcoinPrice": 4386.88375,
+            "GoldPrice": 1228.3,
+            "Year": "2017",
+            "Month": "2",
+            "Day": "10",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-03-01",
+            "BitcoinPrice": 1013.42,
+            "GoldPrice": 1240.4,
+            "Year": "2017",
+            "Month": "3",
+            "Day": "1",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-03-02",
+            "BitcoinPrice": 1013.027,
+            "GoldPrice": 1238.1,
+            "Year": "2017",
+            "Month": "3",
+            "Day": "2",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-03-03",
+            "BitcoinPrice": 1285.14,
+            "GoldPrice": 1226.5,
+            "Year": "2017",
+            "Month": "3",
+            "Day": "3",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-03-06",
+            "BitcoinPrice": 2525.765158,
+            "GoldPrice": 1230.95,
+            "Year": "2017",
+            "Month": "3",
+            "Day": "6",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-03-07",
+            "BitcoinPrice": 2561.225429,
+            "GoldPrice": 1216.65,
+            "Year": "2017",
+            "Month": "3",
+            "Day": "7",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-03-08",
+            "BitcoinPrice": 2794.117717,
+            "GoldPrice": 1209.2,
+            "Year": "2017",
+            "Month": "3",
+            "Day": "8",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-03-09",
+            "BitcoinPrice": 4585.57,
+            "GoldPrice": 1206.55,
+            "Year": "2017",
+            "Month": "3",
+            "Day": "9",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-03-10",
+            "BitcoinPrice": 4394.07,
+            "GoldPrice": 1202.65,
+            "Year": "2017",
+            "Month": "3",
+            "Day": "10",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-04-03",
+            "BitcoinPrice": 1287,
+            "GoldPrice": 1247.25,
+            "Year": "2017",
+            "Month": "4",
+            "Day": "3",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-04-04",
+            "BitcoinPrice": 1141.600363,
+            "GoldPrice": 1257.65,
+            "Year": "2017",
+            "Month": "4",
+            "Day": "4",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-04-05",
+            "BitcoinPrice": 1508.292125,
+            "GoldPrice": 1245.8,
+            "Year": "2017",
+            "Month": "4",
+            "Day": "5",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-04-06",
+            "BitcoinPrice": 2516.173143,
+            "GoldPrice": 1252.5,
+            "Year": "2017",
+            "Month": "4",
+            "Day": "6",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-04-07",
+            "BitcoinPrice": 2599.729838,
+            "GoldPrice": 1266.45,
+            "Year": "2017",
+            "Month": "4",
+            "Day": "7",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-04-10",
+            "BitcoinPrice": 4225.175,
+            "GoldPrice": 1250.05,
+            "Year": "2017",
+            "Month": "4",
+            "Day": "10",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-04-11",
+            "BitcoinPrice": 7437.543317,
+            "GoldPrice": 1252.9,
+            "Year": "2017",
+            "Month": "4",
+            "Day": "11",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-04-12",
+            "BitcoinPrice": 11584.83,
+            "GoldPrice": 1274.3,
+            "Year": "2017",
+            "Month": "4",
+            "Day": "12",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-05-02",
+            "BitcoinPrice": 1034.07,
+            "GoldPrice": 1255.45,
+            "Year": "2017",
+            "Month": "5",
+            "Day": "2",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-05-03",
+            "BitcoinPrice": 1270.9333,
+            "GoldPrice": 1250.3,
+            "Year": "2017",
+            "Month": "5",
+            "Day": "3",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-05-04",
+            "BitcoinPrice": 1133.079314,
+            "GoldPrice": 1228.45,
+            "Year": "2017",
+            "Month": "5",
+            "Day": "4",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-05-05",
+            "BitcoinPrice": 1533.335071,
+            "GoldPrice": 1228.05,
+            "Year": "2017",
+            "Month": "5",
+            "Day": "5",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-05-08",
+            "BitcoinPrice": 3218.115017,
+            "GoldPrice": 1229.8,
+            "Year": "2017",
+            "Month": "5",
+            "Day": "8",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-05-09",
+            "BitcoinPrice": 4488.72014,
+            "GoldPrice": 1220.4,
+            "Year": "2017",
+            "Month": "5",
+            "Day": "9",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-05-10",
+            "BitcoinPrice": 4338.852,
+            "GoldPrice": 1222.95,
+            "Year": "2017",
+            "Month": "5",
+            "Day": "10",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-05-11",
+            "BitcoinPrice": 7365.99,
+            "GoldPrice": 1223.15,
+            "Year": "2017",
+            "Month": "5",
+            "Day": "11",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-05-12",
+            "BitcoinPrice": 11591.22,
+            "GoldPrice": 1231.25,
+            "Year": "2017",
+            "Month": "5",
+            "Day": "12",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-06-01",
+            "BitcoinPrice": 999.65,
+            "GoldPrice": 1264.85,
+            "Year": "2017",
+            "Month": "6",
+            "Day": "1",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-06-02",
+            "BitcoinPrice": 1024.01375,
+            "GoldPrice": 1274.95,
+            "Year": "2017",
+            "Month": "6",
+            "Day": "2",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-06-05",
+            "BitcoinPrice": 1518.75,
+            "GoldPrice": 1279.95,
+            "Year": "2017",
+            "Month": "6",
+            "Day": "5",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-06-06",
+            "BitcoinPrice": 2883.313697,
+            "GoldPrice": 1293.5,
+            "Year": "2017",
+            "Month": "6",
+            "Day": "6",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-06-07",
+            "BitcoinPrice": 2609.96775,
+            "GoldPrice": 1291,
+            "Year": "2017",
+            "Month": "6",
+            "Day": "7",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-06-08",
+            "BitcoinPrice": 3252.562533,
+            "GoldPrice": 1273.1,
+            "Year": "2017",
+            "Month": "6",
+            "Day": "8",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-06-09",
+            "BitcoinPrice": 4385.02,
+            "GoldPrice": 1266.55,
+            "Year": "2017",
+            "Month": "6",
+            "Day": "9",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-06-12",
+            "BitcoinPrice": 13540.98,
+            "GoldPrice": 1266.4,
+            "Year": "2017",
+            "Month": "6",
+            "Day": "12",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-07-03",
+            "BitcoinPrice": 1279.5,
+            "GoldPrice": 1229.25,
+            "Year": "2017",
+            "Month": "7",
+            "Day": "3",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-07-04",
+            "BitcoinPrice": 1190.45425,
+            "GoldPrice": 1223.75,
+            "Year": "2017",
+            "Month": "7",
+            "Day": "4",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-07-05",
+            "BitcoinPrice": 1535.868429,
+            "GoldPrice": 1220.3,
+            "Year": "2017",
+            "Month": "7",
+            "Day": "5",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-07-06",
+            "BitcoinPrice": 2664.920863,
+            "GoldPrice": 1224.9,
+            "Year": "2017",
+            "Month": "7",
+            "Day": "6",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-07-07",
+            "BitcoinPrice": 2491.201214,
+            "GoldPrice": 1215.65,
+            "Year": "2017",
+            "Month": "7",
+            "Day": "7",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-07-10",
+            "BitcoinPrice": 4376.191667,
+            "GoldPrice": 1211.9,
+            "Year": "2017",
+            "Month": "7",
+            "Day": "10",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-07-11",
+            "BitcoinPrice": 7092.127233,
+            "GoldPrice": 1211.05,
+            "Year": "2017",
+            "Month": "7",
+            "Day": "11",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-07-12",
+            "BitcoinPrice": 16501.97167,
+            "GoldPrice": 1218.8,
+            "Year": "2017",
+            "Month": "7",
+            "Day": "12",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-08-01",
+            "BitcoinPrice": 908.14,
+            "GoldPrice": 1270.95,
+            "Year": "2017",
+            "Month": "8",
+            "Day": "1",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-08-02",
+            "BitcoinPrice": 1052.84,
+            "GoldPrice": 1269.6,
+            "Year": "2017",
+            "Month": "8",
+            "Day": "2",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-08-03",
+            "BitcoinPrice": 1157.3933,
+            "GoldPrice": 1268.1,
+            "Year": "2017",
+            "Month": "8",
+            "Day": "3",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-08-04",
+            "BitcoinPrice": 1181.149838,
+            "GoldPrice": 1257.7,
+            "Year": "2017",
+            "Month": "8",
+            "Day": "4",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-08-07",
+            "BitcoinPrice": 2502.86,
+            "GoldPrice": 1258,
+            "Year": "2017",
+            "Month": "8",
+            "Day": "7",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-08-08",
+            "BitcoinPrice": 3457.374333,
+            "GoldPrice": 1261.8,
+            "Year": "2017",
+            "Month": "8",
+            "Day": "8",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-08-09",
+            "BitcoinPrice": 4310.750183,
+            "GoldPrice": 1271.05,
+            "Year": "2017",
+            "Month": "8",
+            "Day": "9",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-08-10",
+            "BitcoinPrice": 4602.280883,
+            "GoldPrice": 1284.4,
+            "Year": "2017",
+            "Month": "8",
+            "Day": "10",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-08-11",
+            "BitcoinPrice": 7128.64,
+            "GoldPrice": 1286.1,
+            "Year": "2017",
+            "Month": "8",
+            "Day": "11",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-09-01",
+            "BitcoinPrice": 910.49,
+            "GoldPrice": 1320.4,
+            "Year": "2017",
+            "Month": "9",
+            "Day": "1",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-09-04",
+            "BitcoinPrice": 1184.03,
+            "GoldPrice": 1333.1,
+            "Year": "2017",
+            "Month": "9",
+            "Day": "4",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-09-05",
+            "BitcoinPrice": 1651.1,
+            "GoldPrice": 1335.55,
+            "Year": "2017",
+            "Month": "9",
+            "Day": "5",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-09-06",
+            "BitcoinPrice": 2827.4913,
+            "GoldPrice": 1337.85,
+            "Year": "2017",
+            "Month": "9",
+            "Day": "6",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-09-07",
+            "BitcoinPrice": 2536.238938,
+            "GoldPrice": 1343.5,
+            "Year": "2017",
+            "Month": "9",
+            "Day": "7",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-09-08",
+            "BitcoinPrice": 3357.326317,
+            "GoldPrice": 1346.25,
+            "Year": "2017",
+            "Month": "9",
+            "Day": "8",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-09-11",
+            "BitcoinPrice": 7158.03706,
+            "GoldPrice": 1334.2,
+            "Year": "2017",
+            "Month": "9",
+            "Day": "11",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-09-12",
+            "BitcoinPrice": 15142.83415,
+            "GoldPrice": 1326.5,
+            "Year": "2017",
+            "Month": "9",
+            "Day": "12",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-10-02",
+            "BitcoinPrice": 999.1035,
+            "GoldPrice": 1273.7,
+            "Year": "2017",
+            "Month": "10",
+            "Day": "2",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-10-03",
+            "BitcoinPrice": 1192.09,
+            "GoldPrice": 1271.25,
+            "Year": "2017",
+            "Month": "10",
+            "Day": "3",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-10-04",
+            "BitcoinPrice": 1207.744875,
+            "GoldPrice": 1274.25,
+            "Year": "2017",
+            "Month": "10",
+            "Day": "4",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-10-05",
+            "BitcoinPrice": 1762.88625,
+            "GoldPrice": 1274.5,
+            "Year": "2017",
+            "Month": "10",
+            "Day": "5",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-10-06",
+            "BitcoinPrice": 2845.372857,
+            "GoldPrice": 1261.8,
+            "Year": "2017",
+            "Month": "10",
+            "Day": "6",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-10-09",
+            "BitcoinPrice": 4329.955,
+            "GoldPrice": 1278.75,
+            "Year": "2017",
+            "Month": "10",
+            "Day": "9",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-10-10",
+            "BitcoinPrice": 4782.28,
+            "GoldPrice": 1291.4,
+            "Year": "2017",
+            "Month": "10",
+            "Day": "10",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-10-11",
+            "BitcoinPrice": 6719.39785,
+            "GoldPrice": 1289.25,
+            "Year": "2017",
+            "Month": "10",
+            "Day": "11",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-10-12",
+            "BitcoinPrice": 14869.805,
+            "GoldPrice": 1290.25,
+            "Year": "2017",
+            "Month": "10",
+            "Day": "12",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-11-01",
+            "BitcoinPrice": 785.22,
+            "GoldPrice": 1277.05,
+            "Year": "2017",
+            "Month": "11",
+            "Day": "1",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-11-02",
+            "BitcoinPrice": 997.59,
+            "GoldPrice": 1279.2,
+            "Year": "2017",
+            "Month": "11",
+            "Day": "2",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-11-03",
+            "BitcoinPrice": 1179.159875,
+            "GoldPrice": 1267.2,
+            "Year": "2017",
+            "Month": "11",
+            "Day": "3",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-11-06",
+            "BitcoinPrice": 2898.63,
+            "GoldPrice": 1270.9,
+            "Year": "2017",
+            "Month": "11",
+            "Day": "6",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-11-07",
+            "BitcoinPrice": 2327.09,
+            "GoldPrice": 1275.6,
+            "Year": "2017",
+            "Month": "11",
+            "Day": "7",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-11-08",
+            "BitcoinPrice": 3632.506667,
+            "GoldPrice": 1284,
+            "Year": "2017",
+            "Month": "11",
+            "Day": "8",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-11-09",
+            "BitcoinPrice": 4248.090017,
+            "GoldPrice": 1284.8,
+            "Year": "2017",
+            "Month": "11",
+            "Day": "9",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-11-10",
+            "BitcoinPrice": 4819.485767,
+            "GoldPrice": 1284.3,
+            "Year": "2017",
+            "Month": "11",
+            "Day": "10",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-12-01",
+            "BitcoinPrice": 780.92,
+            "GoldPrice": 1275.5,
+            "Year": "2017",
+            "Month": "12",
+            "Day": "1",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-12-04",
+            "BitcoinPrice": 1219.09,
+            "GoldPrice": 1273.45,
+            "Year": "2017",
+            "Month": "12",
+            "Day": "4",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-12-05",
+            "BitcoinPrice": 1829,
+            "GoldPrice": 1266.3,
+            "Year": "2017",
+            "Month": "12",
+            "Day": "5",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2017-12-06",
+            "BitcoinPrice": 2657.675063,
+            "GoldPrice": 1263.7,
+            "Year": "2017",
+            "Month": "12",
+            "Day": "6",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2017-12-07",
+            "BitcoinPrice": 2385.748571,
+            "GoldPrice": 1255,
+            "Year": "2017",
+            "Month": "12",
+            "Day": "7",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2017-12-08",
+            "BitcoinPrice": 3852.802914,
+            "GoldPrice": 1250.65,
+            "Year": "2017",
+            "Month": "12",
+            "Day": "8",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2017-12-11",
+            "BitcoinPrice": 5716.301583,
+            "GoldPrice": 1247.15,
+            "Year": "2017",
+            "Month": "12",
+            "Day": "11",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2017-12-12",
+            "BitcoinPrice": 17276.39333,
+            "GoldPrice": 1240.9,
+            "Year": "2017",
+            "Month": "12",
+            "Day": "12",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-01-02",
+            "BitcoinPrice": 9083.258333,
+            "GoldPrice": 1312.05,
+            "Year": "2018",
+            "Month": "1",
+            "Day": "2",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-01-03",
+            "BitcoinPrice": 11009.38167,
+            "GoldPrice": 1314.9,
+            "Year": "2018",
+            "Month": "1",
+            "Day": "3",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-01-04",
+            "BitcoinPrice": 6937.56,
+            "GoldPrice": 1314.5,
+            "Year": "2018",
+            "Month": "1",
+            "Day": "4",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-01-05",
+            "BitcoinPrice": 9239.55,
+            "GoldPrice": 1317.15,
+            "Year": "2018",
+            "Month": "1",
+            "Day": "5",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-01-08",
+            "BitcoinPrice": 7570.869167,
+            "GoldPrice": 1319.95,
+            "Year": "2018",
+            "Month": "1",
+            "Day": "8",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-01-09",
+            "BitcoinPrice": 7018.78,
+            "GoldPrice": 1311,
+            "Year": "2018",
+            "Month": "1",
+            "Day": "9",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-01-10",
+            "BitcoinPrice": 6611.02,
+            "GoldPrice": 1319.75,
+            "Year": "2018",
+            "Month": "1",
+            "Day": "10",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-01-11",
+            "BitcoinPrice": 6342.280833,
+            "GoldPrice": 1323.05,
+            "Year": "2018",
+            "Month": "1",
+            "Day": "11",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-01-12",
+            "BitcoinPrice": 4116.7775,
+            "GoldPrice": 1326.8,
+            "Year": "2018",
+            "Month": "1",
+            "Day": "12",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-02-01",
+            "BitcoinPrice": 15005.85667,
+            "GoldPrice": 1341.35,
+            "Year": "2018",
+            "Month": "2",
+            "Day": "1",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-02-02",
+            "BitcoinPrice": 8901.901667,
+            "GoldPrice": 1331.15,
+            "Year": "2018",
+            "Month": "2",
+            "Day": "2",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-02-05",
+            "BitcoinPrice": 9221.426,
+            "GoldPrice": 1333.6,
+            "Year": "2018",
+            "Month": "2",
+            "Day": "5",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-02-06",
+            "BitcoinPrice": 7645.146667,
+            "GoldPrice": 1331.4,
+            "Year": "2018",
+            "Month": "2",
+            "Day": "6",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-02-07",
+            "BitcoinPrice": 6466.069167,
+            "GoldPrice": 1324.65,
+            "Year": "2018",
+            "Month": "2",
+            "Day": "7",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-02-08",
+            "BitcoinPrice": 7607.7,
+            "GoldPrice": 1315.45,
+            "Year": "2018",
+            "Month": "2",
+            "Day": "8",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-02-09",
+            "BitcoinPrice": 7247.935385,
+            "GoldPrice": 1314.1,
+            "Year": "2018",
+            "Month": "2",
+            "Day": "9",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-02-12",
+            "BitcoinPrice": 4167.546667,
+            "GoldPrice": 1322.3,
+            "Year": "2018",
+            "Month": "2",
+            "Day": "12",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-03-01",
+            "BitcoinPrice": 15053.26167,
+            "GoldPrice": 1307.75,
+            "Year": "2018",
+            "Month": "3",
+            "Day": "1",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-03-02",
+            "BitcoinPrice": 8852.73,
+            "GoldPrice": 1322.3,
+            "Year": "2018",
+            "Month": "3",
+            "Day": "2",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-03-05",
+            "BitcoinPrice": 9639.268333,
+            "GoldPrice": 1320.4,
+            "Year": "2018",
+            "Month": "3",
+            "Day": "5",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-03-06",
+            "BitcoinPrice": 7637.14,
+            "GoldPrice": 1331.4,
+            "Year": "2018",
+            "Month": "3",
+            "Day": "6",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-03-07",
+            "BitcoinPrice": 6626.44,
+            "GoldPrice": 1329.4,
+            "Year": "2018",
+            "Month": "3",
+            "Day": "7",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-03-08",
+            "BitcoinPrice": 7394.499167,
+            "GoldPrice": 1321,
+            "Year": "2018",
+            "Month": "3",
+            "Day": "8",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-03-09",
+            "BitcoinPrice": 7260.949231,
+            "GoldPrice": 1320.6,
+            "Year": "2018",
+            "Month": "3",
+            "Day": "9",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-03-12",
+            "BitcoinPrice": 4140.6,
+            "GoldPrice": 1319.15,
+            "Year": "2018",
+            "Month": "3",
+            "Day": "12",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-04-03",
+            "BitcoinPrice": 11430.18167,
+            "GoldPrice": 1333.45,
+            "Year": "2018",
+            "Month": "4",
+            "Day": "3",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-04-04",
+            "BitcoinPrice": 7426.48,
+            "GoldPrice": 1337.3,
+            "Year": "2018",
+            "Month": "4",
+            "Day": "4",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-04-05",
+            "BitcoinPrice": 9753.35,
+            "GoldPrice": 1327.7,
+            "Year": "2018",
+            "Month": "4",
+            "Day": "5",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-04-06",
+            "BitcoinPrice": 7500.273333,
+            "GoldPrice": 1331.2,
+            "Year": "2018",
+            "Month": "4",
+            "Day": "6",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-04-09",
+            "BitcoinPrice": 7265.08,
+            "GoldPrice": 1331.95,
+            "Year": "2018",
+            "Month": "4",
+            "Day": "9",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-04-10",
+            "BitcoinPrice": 6483.73,
+            "GoldPrice": 1338.95,
+            "Year": "2018",
+            "Month": "4",
+            "Day": "10",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-04-11",
+            "BitcoinPrice": 6391.873333,
+            "GoldPrice": 1350.75,
+            "Year": "2018",
+            "Month": "4",
+            "Day": "11",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-04-12",
+            "BitcoinPrice": 3961.493333,
+            "GoldPrice": 1341.35,
+            "Year": "2018",
+            "Month": "4",
+            "Day": "12",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-05-01",
+            "BitcoinPrice": 17174.12,
+            "GoldPrice": 1307.1,
+            "Year": "2018",
+            "Month": "5",
+            "Day": "1",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-05-02",
+            "BitcoinPrice": 6838.816667,
+            "GoldPrice": 1304.2,
+            "Year": "2018",
+            "Month": "5",
+            "Day": "2",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-05-03",
+            "BitcoinPrice": 11516.83,
+            "GoldPrice": 1315.05,
+            "Year": "2018",
+            "Month": "5",
+            "Day": "3",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-05-04",
+            "BitcoinPrice": 6826.51,
+            "GoldPrice": 1309.4,
+            "Year": "2018",
+            "Month": "5",
+            "Day": "4",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-05-08",
+            "BitcoinPrice": 7011.28,
+            "GoldPrice": 1306.6,
+            "Year": "2018",
+            "Month": "5",
+            "Day": "8",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-05-09",
+            "BitcoinPrice": 7113.069231,
+            "GoldPrice": 1313.85,
+            "Year": "2018",
+            "Month": "5",
+            "Day": "9",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-05-10",
+            "BitcoinPrice": 6568.549167,
+            "GoldPrice": 1318.8,
+            "Year": "2018",
+            "Month": "5",
+            "Day": "10",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-05-11",
+            "BitcoinPrice": 6436.965,
+            "GoldPrice": 1324.35,
+            "Year": "2018",
+            "Month": "5",
+            "Day": "11",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-06-01",
+            "BitcoinPrice": 17319.198,
+            "GoldPrice": 1294.6,
+            "Year": "2018",
+            "Month": "6",
+            "Day": "1",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-06-04",
+            "BitcoinPrice": 6603.876667,
+            "GoldPrice": 1295.45,
+            "Year": "2018",
+            "Month": "6",
+            "Day": "4",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-06-05",
+            "BitcoinPrice": 9630.136277,
+            "GoldPrice": 1292.05,
+            "Year": "2018",
+            "Month": "6",
+            "Day": "5",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-06-06",
+            "BitcoinPrice": 7619.43,
+            "GoldPrice": 1300.1,
+            "Year": "2018",
+            "Month": "6",
+            "Day": "6",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-06-07",
+            "BitcoinPrice": 6555.51,
+            "GoldPrice": 1297.25,
+            "Year": "2018",
+            "Month": "6",
+            "Day": "7",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-06-08",
+            "BitcoinPrice": 6988.079167,
+            "GoldPrice": 1298.25,
+            "Year": "2018",
+            "Month": "6",
+            "Day": "8",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-06-11",
+            "BitcoinPrice": 6437.76,
+            "GoldPrice": 1299.6,
+            "Year": "2018",
+            "Month": "6",
+            "Day": "11",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-06-12",
+            "BitcoinPrice": 3744.98,
+            "GoldPrice": 1298.65,
+            "Year": "2018",
+            "Month": "6",
+            "Day": "12",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-07-02",
+            "BitcoinPrice": 8099.958333,
+            "GoldPrice": 1247.8,
+            "Year": "2018",
+            "Month": "7",
+            "Day": "2",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-07-03",
+            "BitcoinPrice": 10118.058,
+            "GoldPrice": 1251.75,
+            "Year": "2018",
+            "Month": "7",
+            "Day": "3",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-07-04",
+            "BitcoinPrice": 6634.68,
+            "GoldPrice": 1255.65,
+            "Year": "2018",
+            "Month": "7",
+            "Day": "4",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-07-05",
+            "BitcoinPrice": 9631.44,
+            "GoldPrice": 1255.5,
+            "Year": "2018",
+            "Month": "7",
+            "Day": "5",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-07-06",
+            "BitcoinPrice": 7676.271667,
+            "GoldPrice": 1255.35,
+            "Year": "2018",
+            "Month": "7",
+            "Day": "6",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-07-09",
+            "BitcoinPrice": 6501.19,
+            "GoldPrice": 1262.05,
+            "Year": "2018",
+            "Month": "7",
+            "Day": "9",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-07-10",
+            "BitcoinPrice": 6573.62,
+            "GoldPrice": 1254,
+            "Year": "2018",
+            "Month": "7",
+            "Day": "10",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-07-11",
+            "BitcoinPrice": 6538.79,
+            "GoldPrice": 1251.4,
+            "Year": "2018",
+            "Month": "7",
+            "Day": "11",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-07-12",
+            "BitcoinPrice": 3405.643333,
+            "GoldPrice": 1245.9,
+            "Year": "2018",
+            "Month": "7",
+            "Day": "12",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-08-01",
+            "BitcoinPrice": 15265.90667,
+            "GoldPrice": 1219,
+            "Year": "2018",
+            "Month": "8",
+            "Day": "1",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-08-02",
+            "BitcoinPrice": 8240.536667,
+            "GoldPrice": 1215.45,
+            "Year": "2018",
+            "Month": "8",
+            "Day": "2",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-08-03",
+            "BitcoinPrice": 9920.46,
+            "GoldPrice": 1216.3,
+            "Year": "2018",
+            "Month": "8",
+            "Day": "3",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-08-06",
+            "BitcoinPrice": 7620.153333,
+            "GoldPrice": 1209.65,
+            "Year": "2018",
+            "Month": "8",
+            "Day": "6",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-08-07",
+            "BitcoinPrice": 6753.559167,
+            "GoldPrice": 1212.35,
+            "Year": "2018",
+            "Month": "8",
+            "Day": "7",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-08-08",
+            "BitcoinPrice": 6718.23,
+            "GoldPrice": 1209.55,
+            "Year": "2018",
+            "Month": "8",
+            "Day": "8",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-08-09",
+            "BitcoinPrice": 6366.1075,
+            "GoldPrice": 1214.35,
+            "Year": "2018",
+            "Month": "8",
+            "Day": "9",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-08-10",
+            "BitcoinPrice": 6618.567692,
+            "GoldPrice": 1214.4,
+            "Year": "2018",
+            "Month": "8",
+            "Day": "10",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-09-03",
+            "BitcoinPrice": 9089.278333,
+            "GoldPrice": 1200.05,
+            "Year": "2018",
+            "Month": "9",
+            "Day": "3",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-09-04",
+            "BitcoinPrice": 6699.273333,
+            "GoldPrice": 1190.85,
+            "Year": "2018",
+            "Month": "9",
+            "Day": "4",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-09-05",
+            "BitcoinPrice": 9322.041667,
+            "GoldPrice": 1196.7,
+            "Year": "2018",
+            "Month": "9",
+            "Day": "5",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-09-06",
+            "BitcoinPrice": 7615.54,
+            "GoldPrice": 1205.15,
+            "Year": "2018",
+            "Month": "9",
+            "Day": "6",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-09-07",
+            "BitcoinPrice": 6724.04,
+            "GoldPrice": 1198.9,
+            "Year": "2018",
+            "Month": "9",
+            "Day": "7",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-09-10",
+            "BitcoinPrice": 6621.711667,
+            "GoldPrice": 1196.6,
+            "Year": "2018",
+            "Month": "9",
+            "Day": "10",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-09-11",
+            "BitcoinPrice": 6444.97,
+            "GoldPrice": 1189.85,
+            "Year": "2018",
+            "Month": "9",
+            "Day": "11",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-09-12",
+            "BitcoinPrice": 3453.66,
+            "GoldPrice": 1195.6,
+            "Year": "2018",
+            "Month": "9",
+            "Day": "12",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-10-01",
+            "BitcoinPrice": 14437.42,
+            "GoldPrice": 1189.35,
+            "Year": "2018",
+            "Month": "10",
+            "Day": "1",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-10-02",
+            "BitcoinPrice": 8319.876566,
+            "GoldPrice": 1204.7,
+            "Year": "2018",
+            "Month": "10",
+            "Day": "2",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-10-03",
+            "BitcoinPrice": 8746.002,
+            "GoldPrice": 1201.2,
+            "Year": "2018",
+            "Month": "10",
+            "Day": "3",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-10-04",
+            "BitcoinPrice": 6784.41,
+            "GoldPrice": 1203.45,
+            "Year": "2018",
+            "Month": "10",
+            "Day": "4",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-10-05",
+            "BitcoinPrice": 9310.37,
+            "GoldPrice": 1203.8,
+            "Year": "2018",
+            "Month": "10",
+            "Day": "5",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-10-08",
+            "BitcoinPrice": 6396.494667,
+            "GoldPrice": 1186.95,
+            "Year": "2018",
+            "Month": "10",
+            "Day": "8",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-10-09",
+            "BitcoinPrice": 6240.98,
+            "GoldPrice": 1185.55,
+            "Year": "2018",
+            "Month": "10",
+            "Day": "9",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-10-10",
+            "BitcoinPrice": 6626.85,
+            "GoldPrice": 1188.6,
+            "Year": "2018",
+            "Month": "10",
+            "Day": "10",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-10-11",
+            "BitcoinPrice": 6399.033333,
+            "GoldPrice": 1205.55,
+            "Year": "2018",
+            "Month": "10",
+            "Day": "11",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-10-12",
+            "BitcoinPrice": 3523.96,
+            "GoldPrice": 1219.75,
+            "Year": "2018",
+            "Month": "10",
+            "Day": "12",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-11-01",
+            "BitcoinPrice": 13296.794,
+            "GoldPrice": 1231.15,
+            "Year": "2018",
+            "Month": "11",
+            "Day": "1",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-11-02",
+            "BitcoinPrice": 8343.455,
+            "GoldPrice": 1232.1,
+            "Year": "2018",
+            "Month": "11",
+            "Day": "2",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-11-05",
+            "BitcoinPrice": 8468.788,
+            "GoldPrice": 1232.25,
+            "Year": "2018",
+            "Month": "11",
+            "Day": "5",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-11-06",
+            "BitcoinPrice": 6875.678333,
+            "GoldPrice": 1231.6,
+            "Year": "2018",
+            "Month": "11",
+            "Day": "6",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-11-07",
+            "BitcoinPrice": 6377.363333,
+            "GoldPrice": 1229.95,
+            "Year": "2018",
+            "Month": "11",
+            "Day": "7",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-11-08",
+            "BitcoinPrice": 6138.96,
+            "GoldPrice": 1224.15,
+            "Year": "2018",
+            "Month": "11",
+            "Day": "8",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-11-09",
+            "BitcoinPrice": 6296.320833,
+            "GoldPrice": 1211.4,
+            "Year": "2018",
+            "Month": "11",
+            "Day": "9",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-11-12",
+            "BitcoinPrice": 3426.19,
+            "GoldPrice": 1205.55,
+            "Year": "2018",
+            "Month": "11",
+            "Day": "12",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-12-03",
+            "BitcoinPrice": 9182.843333,
+            "GoldPrice": 1230.3,
+            "Year": "2018",
+            "Month": "12",
+            "Day": "3",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-12-04",
+            "BitcoinPrice": 7847.845,
+            "GoldPrice": 1240.3,
+            "Year": "2018",
+            "Month": "12",
+            "Day": "4",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-12-05",
+            "BitcoinPrice": 8484.346667,
+            "GoldPrice": 1235.9,
+            "Year": "2018",
+            "Month": "12",
+            "Day": "5",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2018-12-06",
+            "BitcoinPrice": 6879.31,
+            "GoldPrice": 1242.55,
+            "Year": "2018",
+            "Month": "12",
+            "Day": "6",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2018-12-07",
+            "BitcoinPrice": 6403.18,
+            "GoldPrice": 1243.3,
+            "Year": "2018",
+            "Month": "12",
+            "Day": "7",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2018-12-10",
+            "BitcoinPrice": 6260.530833,
+            "GoldPrice": 1245.35,
+            "Year": "2018",
+            "Month": "12",
+            "Day": "10",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2018-12-11",
+            "BitcoinPrice": 6408.53,
+            "GoldPrice": 1245.3,
+            "Year": "2018",
+            "Month": "12",
+            "Day": "11",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2018-12-12",
+            "BitcoinPrice": 3407.28,
+            "GoldPrice": 1245.75,
+            "Year": "2018",
+            "Month": "12",
+            "Day": "12",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-01-02",
+            "BitcoinPrice": 3444.81,
+            "GoldPrice": 1282.9,
+            "Year": "2019",
+            "Month": "1",
+            "Day": "2",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-01-03",
+            "BitcoinPrice": 3850.08,
+            "GoldPrice": 1290.45,
+            "Year": "2019",
+            "Month": "1",
+            "Day": "3",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-01-04",
+            "BitcoinPrice": 4114.16,
+            "GoldPrice": 1279.9,
+            "Year": "2019",
+            "Month": "1",
+            "Day": "4",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-01-07",
+            "BitcoinPrice": 10737.73,
+            "GoldPrice": 1292.2,
+            "Year": "2019",
+            "Month": "1",
+            "Day": "7",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-01-08",
+            "BitcoinPrice": 10084.7,
+            "GoldPrice": 1286.45,
+            "Year": "2019",
+            "Month": "1",
+            "Day": "8",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-01-09",
+            "BitcoinPrice": 9600.9,
+            "GoldPrice": 1288.6,
+            "Year": "2019",
+            "Month": "1",
+            "Day": "9",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-01-10",
+            "BitcoinPrice": 8307.74,
+            "GoldPrice": 1291.9,
+            "Year": "2019",
+            "Month": "1",
+            "Day": "10",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-01-11",
+            "BitcoinPrice": 9147.98,
+            "GoldPrice": 1288.95,
+            "Year": "2019",
+            "Month": "1",
+            "Day": "11",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-02-01",
+            "BitcoinPrice": 3855.88,
+            "GoldPrice": 1318.7,
+            "Year": "2019",
+            "Month": "2",
+            "Day": "1",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-02-04",
+            "BitcoinPrice": 4152.53,
+            "GoldPrice": 1312.15,
+            "Year": "2019",
+            "Month": "2",
+            "Day": "4",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-02-05",
+            "BitcoinPrice": 5326.67,
+            "GoldPrice": 1314.2,
+            "Year": "2019",
+            "Month": "2",
+            "Day": "5",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-02-06",
+            "BitcoinPrice": 8554.8,
+            "GoldPrice": 1312.4,
+            "Year": "2019",
+            "Month": "2",
+            "Day": "6",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-02-07",
+            "BitcoinPrice": 10578.72,
+            "GoldPrice": 1310,
+            "Year": "2019",
+            "Month": "2",
+            "Day": "7",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-02-08",
+            "BitcoinPrice": 10407.17,
+            "GoldPrice": 1314.85,
+            "Year": "2019",
+            "Month": "2",
+            "Day": "8",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-02-11",
+            "BitcoinPrice": 9252.99,
+            "GoldPrice": 1306.4,
+            "Year": "2019",
+            "Month": "2",
+            "Day": "11",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-02-12",
+            "BitcoinPrice": 7402.69,
+            "GoldPrice": 1310,
+            "Year": "2019",
+            "Month": "2",
+            "Day": "12",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-03-01",
+            "BitcoinPrice": 3865.7975,
+            "GoldPrice": 1311.95,
+            "Year": "2019",
+            "Month": "3",
+            "Day": "1",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-03-04",
+            "BitcoinPrice": 4882.88,
+            "GoldPrice": 1285.4,
+            "Year": "2019",
+            "Month": "3",
+            "Day": "4",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-03-05",
+            "BitcoinPrice": 5390.16,
+            "GoldPrice": 1283.8,
+            "Year": "2019",
+            "Month": "3",
+            "Day": "5",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-03-06",
+            "BitcoinPrice": 8739.03,
+            "GoldPrice": 1285.85,
+            "Year": "2019",
+            "Month": "3",
+            "Day": "6",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-03-07",
+            "BitcoinPrice": 10805.4,
+            "GoldPrice": 1285.3,
+            "Year": "2019",
+            "Month": "3",
+            "Day": "7",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-03-08",
+            "BitcoinPrice": 10529.55,
+            "GoldPrice": 1296.75,
+            "Year": "2019",
+            "Month": "3",
+            "Day": "8",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-03-11",
+            "BitcoinPrice": 9301.18,
+            "GoldPrice": 1292.75,
+            "Year": "2019",
+            "Month": "3",
+            "Day": "11",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-03-12",
+            "BitcoinPrice": 7309.59,
+            "GoldPrice": 1297.05,
+            "Year": "2019",
+            "Month": "3",
+            "Day": "12",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-04-01",
+            "BitcoinPrice": 3822.626667,
+            "GoldPrice": 1293.5,
+            "Year": "2019",
+            "Month": "4",
+            "Day": "1",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-04-02",
+            "BitcoinPrice": 3456.02,
+            "GoldPrice": 1290.3,
+            "Year": "2019",
+            "Month": "4",
+            "Day": "2",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-04-03",
+            "BitcoinPrice": 3814.58,
+            "GoldPrice": 1290.45,
+            "Year": "2019",
+            "Month": "4",
+            "Day": "3",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-04-04",
+            "BitcoinPrice": 4959.81,
+            "GoldPrice": 1283.15,
+            "Year": "2019",
+            "Month": "4",
+            "Day": "4",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-04-05",
+            "BitcoinPrice": 5657.14,
+            "GoldPrice": 1288.45,
+            "Year": "2019",
+            "Month": "4",
+            "Day": "5",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-04-08",
+            "BitcoinPrice": 10814.57,
+            "GoldPrice": 1300,
+            "Year": "2019",
+            "Month": "4",
+            "Day": "8",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-04-09",
+            "BitcoinPrice": 10621.29,
+            "GoldPrice": 1303,
+            "Year": "2019",
+            "Month": "4",
+            "Day": "9",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-04-10",
+            "BitcoinPrice": 8236.17,
+            "GoldPrice": 1305.45,
+            "Year": "2019",
+            "Month": "4",
+            "Day": "10",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-04-11",
+            "BitcoinPrice": 9206.16,
+            "GoldPrice": 1298.8,
+            "Year": "2019",
+            "Month": "4",
+            "Day": "11",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-04-12",
+            "BitcoinPrice": 7296.77,
+            "GoldPrice": 1294.3,
+            "Year": "2019",
+            "Month": "4",
+            "Day": "12",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-05-01",
+            "BitcoinPrice": 3856.62,
+            "GoldPrice": 1283.8,
+            "Year": "2019",
+            "Month": "5",
+            "Day": "1",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-05-02",
+            "BitcoinPrice": 3452.35,
+            "GoldPrice": 1270.95,
+            "Year": "2019",
+            "Month": "5",
+            "Day": "2",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-05-03",
+            "BitcoinPrice": 3730.98,
+            "GoldPrice": 1278.55,
+            "Year": "2019",
+            "Month": "5",
+            "Day": "3",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-05-07",
+            "BitcoinPrice": 11160.49,
+            "GoldPrice": 1281.2,
+            "Year": "2019",
+            "Month": "5",
+            "Day": "7",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-05-08",
+            "BitcoinPrice": 10980.23,
+            "GoldPrice": 1285.2,
+            "Year": "2019",
+            "Month": "5",
+            "Day": "8",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-05-09",
+            "BitcoinPrice": 10584.16,
+            "GoldPrice": 1286.1,
+            "Year": "2019",
+            "Month": "5",
+            "Day": "9",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-05-10",
+            "BitcoinPrice": 8155.48,
+            "GoldPrice": 1287.1,
+            "Year": "2019",
+            "Month": "5",
+            "Day": "10",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-06-03",
+            "BitcoinPrice": 3872.25,
+            "GoldPrice": 1317.1,
+            "Year": "2019",
+            "Month": "6",
+            "Day": "3",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-06-04",
+            "BitcoinPrice": 5028.77,
+            "GoldPrice": 1324.25,
+            "Year": "2019",
+            "Month": "6",
+            "Day": "4",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-06-05",
+            "BitcoinPrice": 5717.66,
+            "GoldPrice": 1335.05,
+            "Year": "2019",
+            "Month": "6",
+            "Day": "5",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-06-06",
+            "BitcoinPrice": 7786.04,
+            "GoldPrice": 1335.5,
+            "Year": "2019",
+            "Month": "6",
+            "Day": "6",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-06-07",
+            "BitcoinPrice": 10955.16,
+            "GoldPrice": 1340.65,
+            "Year": "2019",
+            "Month": "6",
+            "Day": "7",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-06-10",
+            "BitcoinPrice": 8147.69,
+            "GoldPrice": 1328.6,
+            "Year": "2019",
+            "Month": "6",
+            "Day": "10",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-06-11",
+            "BitcoinPrice": 9310.19,
+            "GoldPrice": 1324.3,
+            "Year": "2019",
+            "Month": "6",
+            "Day": "11",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-06-12",
+            "BitcoinPrice": 7395.97,
+            "GoldPrice": 1332.35,
+            "Year": "2019",
+            "Month": "6",
+            "Day": "12",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-07-01",
+            "BitcoinPrice": 4036.093333,
+            "GoldPrice": 1390.1,
+            "Year": "2019",
+            "Month": "7",
+            "Day": "1",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-07-02",
+            "BitcoinPrice": 3405.7,
+            "GoldPrice": 1391.05,
+            "Year": "2019",
+            "Month": "7",
+            "Day": "2",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-07-03",
+            "BitcoinPrice": 3876.85,
+            "GoldPrice": 1413.5,
+            "Year": "2019",
+            "Month": "7",
+            "Day": "3",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-07-04",
+            "BitcoinPrice": 5053.52,
+            "GoldPrice": 1414.9,
+            "Year": "2019",
+            "Month": "7",
+            "Day": "4",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-07-05",
+            "BitcoinPrice": 5684.47,
+            "GoldPrice": 1388.65,
+            "Year": "2019",
+            "Month": "7",
+            "Day": "5",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-07-08",
+            "BitcoinPrice": 11465.67,
+            "GoldPrice": 1400.1,
+            "Year": "2019",
+            "Month": "7",
+            "Day": "8",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-07-09",
+            "BitcoinPrice": 10317.47,
+            "GoldPrice": 1391.55,
+            "Year": "2019",
+            "Month": "7",
+            "Day": "9",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-07-10",
+            "BitcoinPrice": 7869.74,
+            "GoldPrice": 1408.3,
+            "Year": "2019",
+            "Month": "7",
+            "Day": "10",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-07-11",
+            "BitcoinPrice": 9343.34,
+            "GoldPrice": 1413.75,
+            "Year": "2019",
+            "Month": "7",
+            "Day": "11",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-07-12",
+            "BitcoinPrice": 7547.19,
+            "GoldPrice": 1407.6,
+            "Year": "2019",
+            "Month": "7",
+            "Day": "12",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-08-01",
+            "BitcoinPrice": 4032.25,
+            "GoldPrice": 1406.8,
+            "Year": "2019",
+            "Month": "8",
+            "Day": "1",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-08-02",
+            "BitcoinPrice": 3394.76,
+            "GoldPrice": 1441.75,
+            "Year": "2019",
+            "Month": "8",
+            "Day": "2",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-08-05",
+            "BitcoinPrice": 5755.72,
+            "GoldPrice": 1465.25,
+            "Year": "2019",
+            "Month": "8",
+            "Day": "5",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-08-06",
+            "BitcoinPrice": 7998.29,
+            "GoldPrice": 1465.25,
+            "Year": "2019",
+            "Month": "8",
+            "Day": "6",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-08-07",
+            "BitcoinPrice": 11477.01,
+            "GoldPrice": 1506.05,
+            "Year": "2019",
+            "Month": "8",
+            "Day": "7",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-08-08",
+            "BitcoinPrice": 11960.82,
+            "GoldPrice": 1495.75,
+            "Year": "2019",
+            "Month": "8",
+            "Day": "8",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-08-09",
+            "BitcoinPrice": 10487.21,
+            "GoldPrice": 1497.7,
+            "Year": "2019",
+            "Month": "8",
+            "Day": "9",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-08-12",
+            "BitcoinPrice": 7504.83,
+            "GoldPrice": 1504.7,
+            "Year": "2019",
+            "Month": "8",
+            "Day": "12",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-09-02",
+            "BitcoinPrice": 3661.08,
+            "GoldPrice": 1525.95,
+            "Year": "2019",
+            "Month": "9",
+            "Day": "2",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-09-03",
+            "BitcoinPrice": 3875.96,
+            "GoldPrice": 1537.85,
+            "Year": "2019",
+            "Month": "9",
+            "Day": "3",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-09-04",
+            "BitcoinPrice": 5268.71,
+            "GoldPrice": 1546.1,
+            "Year": "2019",
+            "Month": "9",
+            "Day": "4",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-09-05",
+            "BitcoinPrice": 5936.72,
+            "GoldPrice": 1529.1,
+            "Year": "2019",
+            "Month": "9",
+            "Day": "5",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-09-06",
+            "BitcoinPrice": 7931.34,
+            "GoldPrice": 1523.7,
+            "Year": "2019",
+            "Month": "9",
+            "Day": "6",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-09-09",
+            "BitcoinPrice": 10406.31,
+            "GoldPrice": 1509.2,
+            "Year": "2019",
+            "Month": "9",
+            "Day": "9",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-09-10",
+            "BitcoinPrice": 8190,
+            "GoldPrice": 1498.25,
+            "Year": "2019",
+            "Month": "9",
+            "Day": "10",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-09-11",
+            "BitcoinPrice": 8766.04,
+            "GoldPrice": 1490.65,
+            "Year": "2019",
+            "Month": "9",
+            "Day": "11",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-09-12",
+            "BitcoinPrice": 7522.39,
+            "GoldPrice": 1515.2,
+            "Year": "2019",
+            "Month": "9",
+            "Day": "12",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-10-01",
+            "BitcoinPrice": 3812.585833,
+            "GoldPrice": 1473.45,
+            "Year": "2019",
+            "Month": "10",
+            "Day": "1",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-10-02",
+            "BitcoinPrice": 3664.38,
+            "GoldPrice": 1492.6,
+            "Year": "2019",
+            "Month": "10",
+            "Day": "2",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-10-03",
+            "BitcoinPrice": 3950.56,
+            "GoldPrice": 1517.1,
+            "Year": "2019",
+            "Month": "10",
+            "Day": "3",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-10-04",
+            "BitcoinPrice": 5175.81,
+            "GoldPrice": 1499.15,
+            "Year": "2019",
+            "Month": "10",
+            "Day": "4",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-10-07",
+            "BitcoinPrice": 12586.78,
+            "GoldPrice": 1501.25,
+            "Year": "2019",
+            "Month": "10",
+            "Day": "7",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-10-08",
+            "BitcoinPrice": 11856.64,
+            "GoldPrice": 1505.85,
+            "Year": "2019",
+            "Month": "10",
+            "Day": "8",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-10-09",
+            "BitcoinPrice": 10313.66,
+            "GoldPrice": 1507.25,
+            "Year": "2019",
+            "Month": "10",
+            "Day": "9",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-10-10",
+            "BitcoinPrice": 8587.92,
+            "GoldPrice": 1494.8,
+            "Year": "2019",
+            "Month": "10",
+            "Day": "10",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-10-11",
+            "BitcoinPrice": 8809.41,
+            "GoldPrice": 1479.15,
+            "Year": "2019",
+            "Month": "10",
+            "Day": "11",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-11-01",
+            "BitcoinPrice": 3646.25,
+            "GoldPrice": 1508.8,
+            "Year": "2019",
+            "Month": "11",
+            "Day": "1",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-11-04",
+            "BitcoinPrice": 5310.18,
+            "GoldPrice": 1509.45,
+            "Year": "2019",
+            "Month": "11",
+            "Day": "4",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-11-05",
+            "BitcoinPrice": 6348.02,
+            "GoldPrice": 1488.95,
+            "Year": "2019",
+            "Month": "11",
+            "Day": "5",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-11-06",
+            "BitcoinPrice": 8020.38,
+            "GoldPrice": 1486.05,
+            "Year": "2019",
+            "Month": "11",
+            "Day": "6",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-11-07",
+            "BitcoinPrice": 12099.9,
+            "GoldPrice": 1484.25,
+            "Year": "2019",
+            "Month": "11",
+            "Day": "7",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-11-08",
+            "BitcoinPrice": 11282.22,
+            "GoldPrice": 1464.15,
+            "Year": "2019",
+            "Month": "11",
+            "Day": "8",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-11-11",
+            "BitcoinPrice": 9037.12,
+            "GoldPrice": 1458.7,
+            "Year": "2019",
+            "Month": "11",
+            "Day": "11",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-11-12",
+            "BitcoinPrice": 7220.76,
+            "GoldPrice": 1452.05,
+            "Year": "2019",
+            "Month": "11",
+            "Day": "12",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-12-02",
+            "BitcoinPrice": 3629.47,
+            "GoldPrice": 1461.15,
+            "Year": "2019",
+            "Month": "12",
+            "Day": "2",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-12-03",
+            "BitcoinPrice": 3881.09,
+            "GoldPrice": 1477.3,
+            "Year": "2019",
+            "Month": "12",
+            "Day": "3",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-12-04",
+            "BitcoinPrice": 5035.02,
+            "GoldPrice": 1475.1,
+            "Year": "2019",
+            "Month": "12",
+            "Day": "4",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-12-05",
+            "BitcoinPrice": 7248.31,
+            "GoldPrice": 1475.95,
+            "Year": "2019",
+            "Month": "12",
+            "Day": "5",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2019-12-06",
+            "BitcoinPrice": 7917.58,
+            "GoldPrice": 1459.65,
+            "Year": "2019",
+            "Month": "12",
+            "Day": "6",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2019-12-09",
+            "BitcoinPrice": 10159.32,
+            "GoldPrice": 1461.7,
+            "Year": "2019",
+            "Month": "12",
+            "Day": "9",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2019-12-10",
+            "BitcoinPrice": 8269.73,
+            "GoldPrice": 1464.95,
+            "Year": "2019",
+            "Month": "12",
+            "Day": "10",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2019-12-11",
+            "BitcoinPrice": 8717.81,
+            "GoldPrice": 1466.8,
+            "Year": "2019",
+            "Month": "12",
+            "Day": "11",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2019-12-12",
+            "BitcoinPrice": 7202.31,
+            "GoldPrice": 1467.8,
+            "Year": "2019",
+            "Month": "12",
+            "Day": "12",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-01-02",
+            "BitcoinPrice": 9333.77,
+            "GoldPrice": 1527.1,
+            "Year": "2020",
+            "Month": "1",
+            "Day": "2",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-01-03",
+            "BitcoinPrice": 8534.17,
+            "GoldPrice": 1548.75,
+            "Year": "2020",
+            "Month": "1",
+            "Day": "3",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-01-06",
+            "BitcoinPrice": 9450.84,
+            "GoldPrice": 1573.1,
+            "Year": "2020",
+            "Month": "1",
+            "Day": "6",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-01-07",
+            "BitcoinPrice": 9133.97,
+            "GoldPrice": 1567.85,
+            "Year": "2020",
+            "Month": "1",
+            "Day": "7",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-01-08",
+            "BitcoinPrice": 11343.88,
+            "GoldPrice": 1571.95,
+            "Year": "2020",
+            "Month": "1",
+            "Day": "8",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-01-09",
+            "BitcoinPrice": 11659.57,
+            "GoldPrice": 1550.75,
+            "Year": "2020",
+            "Month": "1",
+            "Day": "9",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-01-10",
+            "BitcoinPrice": 10777.92,
+            "GoldPrice": 1553.6,
+            "Year": "2020",
+            "Month": "1",
+            "Day": "10",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-02-03",
+            "BitcoinPrice": 8912.82,
+            "GoldPrice": 1574.75,
+            "Year": "2020",
+            "Month": "2",
+            "Day": "3",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-02-04",
+            "BitcoinPrice": 6652.87,
+            "GoldPrice": 1558.35,
+            "Year": "2020",
+            "Month": "2",
+            "Day": "4",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-02-05",
+            "BitcoinPrice": 8824.66,
+            "GoldPrice": 1553.3,
+            "Year": "2020",
+            "Month": "2",
+            "Day": "5",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-02-06",
+            "BitcoinPrice": 10204.23,
+            "GoldPrice": 1563.3,
+            "Year": "2020",
+            "Month": "2",
+            "Day": "6",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-02-07",
+            "BitcoinPrice": 9236.38,
+            "GoldPrice": 1572.65,
+            "Year": "2020",
+            "Month": "2",
+            "Day": "7",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-02-10",
+            "BitcoinPrice": 10619.24,
+            "GoldPrice": 1573.2,
+            "Year": "2020",
+            "Month": "2",
+            "Day": "10",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-02-11",
+            "BitcoinPrice": 13758.88,
+            "GoldPrice": 1570.5,
+            "Year": "2020",
+            "Month": "2",
+            "Day": "11",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-02-12",
+            "BitcoinPrice": 18792.52,
+            "GoldPrice": 1563.7,
+            "Year": "2020",
+            "Month": "2",
+            "Day": "12",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-03-02",
+            "BitcoinPrice": 9314.56,
+            "GoldPrice": 1599.65,
+            "Year": "2020",
+            "Month": "3",
+            "Day": "2",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-03-03",
+            "BitcoinPrice": 8912.82,
+            "GoldPrice": 1615.5,
+            "Year": "2020",
+            "Month": "3",
+            "Day": "3",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-03-04",
+            "BitcoinPrice": 6809.11,
+            "GoldPrice": 1641.85,
+            "Year": "2020",
+            "Month": "3",
+            "Day": "4",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-03-05",
+            "BitcoinPrice": 8973.82,
+            "GoldPrice": 1659.6,
+            "Year": "2020",
+            "Month": "3",
+            "Day": "5",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-03-06",
+            "BitcoinPrice": 9525.57,
+            "GoldPrice": 1683.65,
+            "Year": "2020",
+            "Month": "3",
+            "Day": "6",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-03-09",
+            "BitcoinPrice": 11397.44,
+            "GoldPrice": 1672.5,
+            "Year": "2020",
+            "Month": "3",
+            "Day": "9",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-03-10",
+            "BitcoinPrice": 10575.06,
+            "GoldPrice": 1655.7,
+            "Year": "2020",
+            "Month": "3",
+            "Day": "10",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-03-11",
+            "BitcoinPrice": 13575.17,
+            "GoldPrice": 1653.75,
+            "Year": "2020",
+            "Month": "3",
+            "Day": "11",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-03-12",
+            "BitcoinPrice": 19226.97,
+            "GoldPrice": 1570.7,
+            "Year": "2020",
+            "Month": "3",
+            "Day": "12",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-04-01",
+            "BitcoinPrice": 7326.35,
+            "GoldPrice": 1576.55,
+            "Year": "2020",
+            "Month": "4",
+            "Day": "1",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-04-02",
+            "BitcoinPrice": 9162.14,
+            "GoldPrice": 1616.8,
+            "Year": "2020",
+            "Month": "4",
+            "Day": "2",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-04-03",
+            "BitcoinPrice": 8754.34,
+            "GoldPrice": 1613.1,
+            "Year": "2020",
+            "Month": "4",
+            "Day": "3",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-04-06",
+            "BitcoinPrice": 9658.04,
+            "GoldPrice": 1648.3,
+            "Year": "2020",
+            "Month": "4",
+            "Day": "6",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-04-07",
+            "BitcoinPrice": 9072.42,
+            "GoldPrice": 1649.25,
+            "Year": "2020",
+            "Month": "4",
+            "Day": "7",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-04-08",
+            "BitcoinPrice": 11242.57,
+            "GoldPrice": 1647.8,
+            "Year": "2020",
+            "Month": "4",
+            "Day": "8",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-04-09",
+            "BitcoinPrice": 10187.51,
+            "GoldPrice": 1680.65,
+            "Year": "2020",
+            "Month": "4",
+            "Day": "9",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-05-01",
+            "BitcoinPrice": 7347.89,
+            "GoldPrice": 1686.25,
+            "Year": "2020",
+            "Month": "5",
+            "Day": "1",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-05-04",
+            "BitcoinPrice": 6871.69,
+            "GoldPrice": 1709.1,
+            "Year": "2020",
+            "Month": "5",
+            "Day": "4",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-05-05",
+            "BitcoinPrice": 8885.93,
+            "GoldPrice": 1699.55,
+            "Year": "2020",
+            "Month": "5",
+            "Day": "5",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-05-06",
+            "BitcoinPrice": 9794.56,
+            "GoldPrice": 1691.5,
+            "Year": "2020",
+            "Month": "5",
+            "Day": "6",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-05-07",
+            "BitcoinPrice": 9131.31,
+            "GoldPrice": 1704.05,
+            "Year": "2020",
+            "Month": "5",
+            "Day": "7",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-05-11",
+            "BitcoinPrice": 14155.59,
+            "GoldPrice": 1702.75,
+            "Year": "2020",
+            "Month": "5",
+            "Day": "11",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-05-12",
+            "BitcoinPrice": 18670.49,
+            "GoldPrice": 1702.4,
+            "Year": "2020",
+            "Month": "5",
+            "Day": "12",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-06-01",
+            "BitcoinPrice": 7351.57,
+            "GoldPrice": 1730.6,
+            "Year": "2020",
+            "Month": "6",
+            "Day": "1",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-06-02",
+            "BitcoinPrice": 9614.9,
+            "GoldPrice": 1742.15,
+            "Year": "2020",
+            "Month": "6",
+            "Day": "2",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-06-03",
+            "BitcoinPrice": 9067.39,
+            "GoldPrice": 1705.35,
+            "Year": "2020",
+            "Month": "6",
+            "Day": "3",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-06-04",
+            "BitcoinPrice": 6777.44,
+            "GoldPrice": 1700.05,
+            "Year": "2020",
+            "Month": "6",
+            "Day": "4",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-06-05",
+            "BitcoinPrice": 9030.96,
+            "GoldPrice": 1683.45,
+            "Year": "2020",
+            "Month": "6",
+            "Day": "5",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-06-08",
+            "BitcoinPrice": 11750.28,
+            "GoldPrice": 1690.35,
+            "Year": "2020",
+            "Month": "6",
+            "Day": "8",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-06-09",
+            "BitcoinPrice": 10159.62,
+            "GoldPrice": 1713.5,
+            "Year": "2020",
+            "Month": "6",
+            "Day": "9",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-06-10",
+            "BitcoinPrice": 10788.56,
+            "GoldPrice": 1722.05,
+            "Year": "2020",
+            "Month": "6",
+            "Day": "10",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-06-11",
+            "BitcoinPrice": 15591.39,
+            "GoldPrice": 1738.25,
+            "Year": "2020",
+            "Month": "6",
+            "Day": "11",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-06-12",
+            "BitcoinPrice": 19155.06,
+            "GoldPrice": 1733.5,
+            "Year": "2020",
+            "Month": "6",
+            "Day": "12",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-07-01",
+            "BitcoinPrice": 7759.24,
+            "GoldPrice": 1771.05,
+            "Year": "2020",
+            "Month": "7",
+            "Day": "1",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-07-02",
+            "BitcoinPrice": 9755.66,
+            "GoldPrice": 1777.45,
+            "Year": "2020",
+            "Month": "7",
+            "Day": "2",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-07-03",
+            "BitcoinPrice": 9155.89,
+            "GoldPrice": 1772.9,
+            "Year": "2020",
+            "Month": "7",
+            "Day": "3",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-07-06",
+            "BitcoinPrice": 9670.43,
+            "GoldPrice": 1787.9,
+            "Year": "2020",
+            "Month": "7",
+            "Day": "6",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-07-07",
+            "BitcoinPrice": 9348.91,
+            "GoldPrice": 1789.55,
+            "Year": "2020",
+            "Month": "7",
+            "Day": "7",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-07-08",
+            "BitcoinPrice": 11772.94,
+            "GoldPrice": 1811.1,
+            "Year": "2020",
+            "Month": "7",
+            "Day": "8",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-07-09",
+            "BitcoinPrice": 10254.93,
+            "GoldPrice": 1812.1,
+            "Year": "2020",
+            "Month": "7",
+            "Day": "9",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-07-10",
+            "BitcoinPrice": 10603.74,
+            "GoldPrice": 1803.1,
+            "Year": "2020",
+            "Month": "7",
+            "Day": "10",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-08-03",
+            "BitcoinPrice": 8898.63,
+            "GoldPrice": 1958.55,
+            "Year": "2020",
+            "Month": "8",
+            "Day": "3",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-08-04",
+            "BitcoinPrice": 7205.55,
+            "GoldPrice": 1977.9,
+            "Year": "2020",
+            "Month": "8",
+            "Day": "4",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-08-05",
+            "BitcoinPrice": 10002.48,
+            "GoldPrice": 2048.15,
+            "Year": "2020",
+            "Month": "8",
+            "Day": "5",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-08-06",
+            "BitcoinPrice": 9753.85,
+            "GoldPrice": 2067.15,
+            "Year": "2020",
+            "Month": "8",
+            "Day": "6",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-08-07",
+            "BitcoinPrice": 9256.23,
+            "GoldPrice": 2031.15,
+            "Year": "2020",
+            "Month": "8",
+            "Day": "7",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-08-10",
+            "BitcoinPrice": 10670.8,
+            "GoldPrice": 2044.5,
+            "Year": "2020",
+            "Month": "8",
+            "Day": "10",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-08-11",
+            "BitcoinPrice": 14839.84,
+            "GoldPrice": 1939.65,
+            "Year": "2020",
+            "Month": "8",
+            "Day": "11",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-08-12",
+            "BitcoinPrice": 19181.41,
+            "GoldPrice": 1931.9,
+            "Year": "2020",
+            "Month": "8",
+            "Day": "12",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-09-01",
+            "BitcoinPrice": 8042.65,
+            "GoldPrice": 1972.35,
+            "Year": "2020",
+            "Month": "9",
+            "Day": "1",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-09-02",
+            "BitcoinPrice": 9907.12,
+            "GoldPrice": 1947.05,
+            "Year": "2020",
+            "Month": "9",
+            "Day": "2",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-09-03",
+            "BitcoinPrice": 8039.38,
+            "GoldPrice": 1940.45,
+            "Year": "2020",
+            "Month": "9",
+            "Day": "3",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-09-04",
+            "BitcoinPrice": 7365.03,
+            "GoldPrice": 1926.3,
+            "Year": "2020",
+            "Month": "9",
+            "Day": "4",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-09-07",
+            "BitcoinPrice": 9440.07,
+            "GoldPrice": 1928.45,
+            "Year": "2020",
+            "Month": "9",
+            "Day": "7",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-09-08",
+            "BitcoinPrice": 11767.6,
+            "GoldPrice": 1910.95,
+            "Year": "2020",
+            "Month": "9",
+            "Day": "8",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-09-09",
+            "BitcoinPrice": 10121.52,
+            "GoldPrice": 1947.2,
+            "Year": "2020",
+            "Month": "9",
+            "Day": "9",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-09-10",
+            "BitcoinPrice": 10923.3,
+            "GoldPrice": 1966.25,
+            "Year": "2020",
+            "Month": "9",
+            "Day": "10",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-09-11",
+            "BitcoinPrice": 15490.6,
+            "GoldPrice": 1947.4,
+            "Year": "2020",
+            "Month": "9",
+            "Day": "11",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-10-01",
+            "BitcoinPrice": 7817.92,
+            "GoldPrice": 1902,
+            "Year": "2020",
+            "Month": "10",
+            "Day": "1",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-10-02",
+            "BitcoinPrice": 10162.41,
+            "GoldPrice": 1903.05,
+            "Year": "2020",
+            "Month": "10",
+            "Day": "2",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-10-05",
+            "BitcoinPrice": 9527.39,
+            "GoldPrice": 1909.6,
+            "Year": "2020",
+            "Month": "10",
+            "Day": "5",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-10-06",
+            "BitcoinPrice": 9775.15,
+            "GoldPrice": 1913.4,
+            "Year": "2020",
+            "Month": "10",
+            "Day": "6",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-10-07",
+            "BitcoinPrice": 9238.04,
+            "GoldPrice": 1884.5,
+            "Year": "2020",
+            "Month": "10",
+            "Day": "7",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-10-08",
+            "BitcoinPrice": 11684.06,
+            "GoldPrice": 1887.45,
+            "Year": "2020",
+            "Month": "10",
+            "Day": "8",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-10-09",
+            "BitcoinPrice": 10227.83,
+            "GoldPrice": 1923.25,
+            "Year": "2020",
+            "Month": "10",
+            "Day": "9",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-10-12",
+            "BitcoinPrice": 18554.15,
+            "GoldPrice": 1925.5,
+            "Year": "2020",
+            "Month": "10",
+            "Day": "12",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-11-02",
+            "BitcoinPrice": 9854.79,
+            "GoldPrice": 1889.9,
+            "Year": "2020",
+            "Month": "11",
+            "Day": "2",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-11-03",
+            "BitcoinPrice": 7885.46,
+            "GoldPrice": 1908.3,
+            "Year": "2020",
+            "Month": "11",
+            "Day": "3",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-11-04",
+            "BitcoinPrice": 6873.24,
+            "GoldPrice": 1900.15,
+            "Year": "2020",
+            "Month": "11",
+            "Day": "4",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-11-05",
+            "BitcoinPrice": 8754.46,
+            "GoldPrice": 1938.45,
+            "Year": "2020",
+            "Month": "11",
+            "Day": "5",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-11-06",
+            "BitcoinPrice": 9892.13,
+            "GoldPrice": 1940.8,
+            "Year": "2020",
+            "Month": "11",
+            "Day": "6",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-11-09",
+            "BitcoinPrice": 10352.66,
+            "GoldPrice": 1867.3,
+            "Year": "2020",
+            "Month": "11",
+            "Day": "9",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-11-10",
+            "BitcoinPrice": 11302.67,
+            "GoldPrice": 1878.7,
+            "Year": "2020",
+            "Month": "11",
+            "Day": "10",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-11-11",
+            "BitcoinPrice": 15317.04,
+            "GoldPrice": 1860.95,
+            "Year": "2020",
+            "Month": "11",
+            "Day": "11",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-11-12",
+            "BitcoinPrice": 18247.76,
+            "GoldPrice": 1874.85,
+            "Year": "2020",
+            "Month": "11",
+            "Day": "12",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-12-01",
+            "BitcoinPrice": 8021.49,
+            "GoldPrice": 1810.75,
+            "Year": "2020",
+            "Month": "12",
+            "Day": "1",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-12-02",
+            "BitcoinPrice": 10275.38,
+            "GoldPrice": 1822.6,
+            "Year": "2020",
+            "Month": "12",
+            "Day": "2",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-12-03",
+            "BitcoinPrice": 7936.65,
+            "GoldPrice": 1832.35,
+            "Year": "2020",
+            "Month": "12",
+            "Day": "3",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-12-04",
+            "BitcoinPrice": 6891.6,
+            "GoldPrice": 1843,
+            "Year": "2020",
+            "Month": "12",
+            "Day": "4",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2020-12-07",
+            "BitcoinPrice": 9235.96,
+            "GoldPrice": 1859.95,
+            "Year": "2020",
+            "Month": "12",
+            "Day": "7",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2020-12-08",
+            "BitcoinPrice": 11392.43,
+            "GoldPrice": 1868.15,
+            "Year": "2020",
+            "Month": "12",
+            "Day": "8",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2020-12-09",
+            "BitcoinPrice": 10395.44,
+            "GoldPrice": 1841.75,
+            "Year": "2020",
+            "Month": "12",
+            "Day": "9",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2020-12-10",
+            "BitcoinPrice": 11376.61,
+            "GoldPrice": 1844.35,
+            "Year": "2020",
+            "Month": "12",
+            "Day": "10",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2020-12-11",
+            "BitcoinPrice": 15708.65,
+            "GoldPrice": 1842,
+            "Year": "2020",
+            "Month": "12",
+            "Day": "11",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-01-04",
+            "BitcoinPrice": 58735.25,
+            "GoldPrice": 1943.2,
+            "Year": "2021",
+            "Month": "1",
+            "Day": "4",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2021-01-05",
+            "BitcoinPrice": 57796.62,
+            "GoldPrice": 1940.35,
+            "Year": "2021",
+            "Month": "1",
+            "Day": "5",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-01-06",
+            "BitcoinPrice": 37310.54,
+            "GoldPrice": 1931.95,
+            "Year": "2021",
+            "Month": "1",
+            "Day": "6",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-01-07",
+            "BitcoinPrice": 35047.36,
+            "GoldPrice": 1920.1,
+            "Year": "2021",
+            "Month": "1",
+            "Day": "7",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-01-08",
+            "BitcoinPrice": 41659.06,
+            "GoldPrice": 1862.9,
+            "Year": "2021",
+            "Month": "1",
+            "Day": "8",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-02-01",
+            "BitcoinPrice": 29393.75,
+            "GoldPrice": 1862.95,
+            "Year": "2021",
+            "Month": "2",
+            "Day": "1",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2021-02-02",
+            "BitcoinPrice": 33522.9,
+            "GoldPrice": 1833.1,
+            "Year": "2021",
+            "Month": "2",
+            "Day": "2",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-02-03",
+            "BitcoinPrice": 49618.43,
+            "GoldPrice": 1835.45,
+            "Year": "2021",
+            "Month": "2",
+            "Day": "3",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-02-04",
+            "BitcoinPrice": 58736.92,
+            "GoldPrice": 1785.9,
+            "Year": "2021",
+            "Month": "2",
+            "Day": "4",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-02-05",
+            "BitcoinPrice": 57857.5,
+            "GoldPrice": 1802.95,
+            "Year": "2021",
+            "Month": "2",
+            "Day": "5",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-02-08",
+            "BitcoinPrice": 40000.46,
+            "GoldPrice": 1835.25,
+            "Year": "2021",
+            "Month": "2",
+            "Day": "8",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2021-02-09",
+            "BitcoinPrice": 48862.76,
+            "GoldPrice": 1839.6,
+            "Year": "2021",
+            "Month": "2",
+            "Day": "9",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-03-01",
+            "BitcoinPrice": 32195.46,
+            "GoldPrice": 1734.15,
+            "Year": "2021",
+            "Month": "3",
+            "Day": "1",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2021-03-02",
+            "BitcoinPrice": 35529.66,
+            "GoldPrice": 1723.85,
+            "Year": "2021",
+            "Month": "3",
+            "Day": "2",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-03-03",
+            "BitcoinPrice": 48356.04,
+            "GoldPrice": 1711.4,
+            "Year": "2021",
+            "Month": "3",
+            "Day": "3",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-03-04",
+            "BitcoinPrice": 59031.32,
+            "GoldPrice": 1712.1,
+            "Year": "2021",
+            "Month": "3",
+            "Day": "4",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-03-05",
+            "BitcoinPrice": 56610.46,
+            "GoldPrice": 1696.25,
+            "Year": "2021",
+            "Month": "3",
+            "Day": "5",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-03-08",
+            "BitcoinPrice": 39193.94,
+            "GoldPrice": 1687.05,
+            "Year": "2021",
+            "Month": "3",
+            "Day": "8",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2021-03-09",
+            "BitcoinPrice": 49329.01,
+            "GoldPrice": 1716.9,
+            "Year": "2021",
+            "Month": "3",
+            "Day": "9",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-04-01",
+            "BitcoinPrice": 33000.78,
+            "GoldPrice": 1726.05,
+            "Year": "2021",
+            "Month": "4",
+            "Day": "1",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-04-06",
+            "BitcoinPrice": 39188.59,
+            "GoldPrice": 1744.65,
+            "Year": "2021",
+            "Month": "4",
+            "Day": "6",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-04-07",
+            "BitcoinPrice": 34688.98,
+            "GoldPrice": 1738.05,
+            "Year": "2021",
+            "Month": "4",
+            "Day": "7",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-04-08",
+            "BitcoinPrice": 38138,
+            "GoldPrice": 1755.5,
+            "Year": "2021",
+            "Month": "4",
+            "Day": "8",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-04-09",
+            "BitcoinPrice": 50035.33,
+            "GoldPrice": 1741.2,
+            "Year": "2021",
+            "Month": "4",
+            "Day": "9",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-05-04",
+            "BitcoinPrice": 58206.55,
+            "GoldPrice": 1797.75,
+            "Year": "2021",
+            "Month": "5",
+            "Day": "4",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-05-05",
+            "BitcoinPrice": 53241.72,
+            "GoldPrice": 1782.25,
+            "Year": "2021",
+            "Month": "5",
+            "Day": "5",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-05-06",
+            "BitcoinPrice": 36885.51,
+            "GoldPrice": 1813.15,
+            "Year": "2021",
+            "Month": "5",
+            "Day": "6",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-05-07",
+            "BitcoinPrice": 35309.3,
+            "GoldPrice": 1836.55,
+            "Year": "2021",
+            "Month": "5",
+            "Day": "7",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-06-01",
+            "BitcoinPrice": 34046.67,
+            "GoldPrice": 1899.35,
+            "Year": "2021",
+            "Month": "6",
+            "Day": "1",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-06-02",
+            "BitcoinPrice": 38278.61,
+            "GoldPrice": 1902.75,
+            "Year": "2021",
+            "Month": "6",
+            "Day": "2",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-06-03",
+            "BitcoinPrice": 48861.38,
+            "GoldPrice": 1866.55,
+            "Year": "2021",
+            "Month": "6",
+            "Day": "3",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-06-04",
+            "BitcoinPrice": 59054.1,
+            "GoldPrice": 1890.6,
+            "Year": "2021",
+            "Month": "6",
+            "Day": "4",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-06-07",
+            "BitcoinPrice": 33747.97,
+            "GoldPrice": 1888.4,
+            "Year": "2021",
+            "Month": "6",
+            "Day": "7",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2021-06-08",
+            "BitcoinPrice": 40882,
+            "GoldPrice": 1893.15,
+            "Year": "2021",
+            "Month": "6",
+            "Day": "8",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-06-09",
+            "BitcoinPrice": 51769.06,
+            "GoldPrice": 1894.6,
+            "Year": "2021",
+            "Month": "6",
+            "Day": "9",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-07-01",
+            "BitcoinPrice": 36860.41,
+            "GoldPrice": 1781.5,
+            "Year": "2021",
+            "Month": "7",
+            "Day": "1",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-07-02",
+            "BitcoinPrice": 39323.26,
+            "GoldPrice": 1786.15,
+            "Year": "2021",
+            "Month": "7",
+            "Day": "2",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-07-05",
+            "BitcoinPrice": 56428.16,
+            "GoldPrice": 1791.35,
+            "Year": "2021",
+            "Month": "7",
+            "Day": "5",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2021-07-06",
+            "BitcoinPrice": 35816.17,
+            "GoldPrice": 1809.85,
+            "Year": "2021",
+            "Month": "7",
+            "Day": "6",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-07-07",
+            "BitcoinPrice": 34211.01,
+            "GoldPrice": 1804.65,
+            "Year": "2021",
+            "Month": "7",
+            "Day": "7",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-07-08",
+            "BitcoinPrice": 42825.95,
+            "GoldPrice": 1807.7,
+            "Year": "2021",
+            "Month": "7",
+            "Day": "8",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-07-09",
+            "BitcoinPrice": 52677.4,
+            "GoldPrice": 1806,
+            "Year": "2021",
+            "Month": "7",
+            "Day": "9",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-08-02",
+            "BitcoinPrice": 38928.1,
+            "GoldPrice": 1811.45,
+            "Year": "2021",
+            "Month": "8",
+            "Day": "2",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2021-08-03",
+            "BitcoinPrice": 51169.7,
+            "GoldPrice": 1812.65,
+            "Year": "2021",
+            "Month": "8",
+            "Day": "3",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-08-04",
+            "BitcoinPrice": 55947.27,
+            "GoldPrice": 1829.1,
+            "Year": "2021",
+            "Month": "8",
+            "Day": "4",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-08-05",
+            "BitcoinPrice": 57380.27,
+            "GoldPrice": 1800.75,
+            "Year": "2021",
+            "Month": "8",
+            "Day": "5",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-08-06",
+            "BitcoinPrice": 33514.87,
+            "GoldPrice": 1762.9,
+            "Year": "2021",
+            "Month": "8",
+            "Day": "6",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-08-09",
+            "BitcoinPrice": 46809.17,
+            "GoldPrice": 1738.85,
+            "Year": "2021",
+            "Month": "8",
+            "Day": "9",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2021-09-01",
+            "BitcoinPrice": 40670.25,
+            "GoldPrice": 1811.8,
+            "Year": "2021",
+            "Month": "9",
+            "Day": "1",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-09-02",
+            "BitcoinPrice": 46364.3,
+            "GoldPrice": 1812.55,
+            "Year": "2021",
+            "Month": "9",
+            "Day": "2",
+            "DayOfWeek": "Thursday"
+        },
+        {
+            "Date": "2021-09-03",
+            "BitcoinPrice": 52299.33,
+            "GoldPrice": 1823.7,
+            "Year": "2021",
+            "Month": "9",
+            "Day": "3",
+            "DayOfWeek": "Friday"
+        },
+        {
+            "Date": "2021-09-06",
+            "BitcoinPrice": 33450.19,
+            "GoldPrice": 1821.6,
+            "Year": "2021",
+            "Month": "9",
+            "Day": "6",
+            "DayOfWeek": "Monday"
+        },
+        {
+            "Date": "2021-09-07",
+            "BitcoinPrice": 32877.41,
+            "GoldPrice": 1802.15,
+            "Year": "2021",
+            "Month": "9",
+            "Day": "7",
+            "DayOfWeek": "Tuesday"
+        },
+        {
+            "Date": "2021-09-08",
+            "BitcoinPrice": 43816.14,
+            "GoldPrice": 1786,
+            "Year": "2021",
+            "Month": "9",
+            "Day": "8",
+            "DayOfWeek": "Wednesday"
+        },
+        {
+            "Date": "2021-09-09",
+            "BitcoinPrice": 46078.38,
+            "GoldPrice": 1788.25,
+            "Year": "2021",
+            "Month": "9",
+            "Day": "9",
+            "DayOfWeek": "Thursday"
+        }
+    ],
+    "fields": [
+        { "fid": "Date", "analyticType": "dimension", "semanticType": "temporal" },
+        { "fid": "Year", "analyticType": "dimension", "semanticType": "nominal" },
+        { "fid": "Month", "analyticType": "dimension", "semanticType": "ordinal" },
+        { "fid": "Day", "analyticType": "dimension", "semanticType": "ordinal" },
+        { "fid": "DayOfWeek", "analyticType": "dimension", "semanticType": "nominal" },
+        { "fid": "BitcoinPrice", "analyticType": "measure", "semanticType": "quantitative" },
+        { "fid": "GoldPrice", "analyticType": "measure", "semanticType": "quantitative" }
+    ]
+}
