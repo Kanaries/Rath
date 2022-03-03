@@ -79,13 +79,13 @@ const AppNav: React.FC<AppNavProps> = props => {
                     PIVOT_KEYS.lts,
                     PIVOT_KEYS.editor,
                     PIVOT_KEYS.dashBoard,
-                    PIVOT_KEYS.pattern
+                    // PIVOT_KEYS.pattern
                 ]),
                 {
                     url: '#dev-mode',
                     key: intl.get('menu.devCollection'),
                     name: intl.get('menu.devCollection'),
-                    isExpanded: true,
+                    isExpanded: false,
                     forceAnchor: true,
                     onClick (e: any) { e.preventDefault() },
                     links: getLinks([

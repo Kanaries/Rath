@@ -1,8 +1,9 @@
 import React, {  useCallback, useEffect } from "react";
 import intl from 'react-intl-universal'
-import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, Toggle } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
+import MetaView from './metaView/index';
 import { CleanMethod, useCleanMethodList } from './clean';
 import Selection from './selection/index';
 import ImportStorage from "./importStorage";
@@ -10,7 +11,7 @@ import { Record } from "../../global";
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
-import { IMuteFieldBase, IRow } from "../../interfaces";
+import { IDataPreviewMode, IMuteFieldBase, IRow } from "../../interfaces";
 
 const MARGIN_LEFT = { marginLeft: "1em" }
 
@@ -20,7 +21,7 @@ interface DataSourceBoardProps {
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, exploreStore } = useGlobalStore();
 
-  const { cleanedData, cleanMethod, rawData, loading, showDataImportSelection } = dataSourceStore;
+  const { cleanedData, cleanMethod, rawData, loading, showDataImportSelection, dataPreviewMode } = dataSourceStore;
 
   useEffect(() => {
     // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
@@ -189,8 +190,21 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           {intl.get('dataSource.recordCount', { count: cleanedData.length })} <br />
           Origin: ({rawData.length}) rows / Clean: ({cleanedData.length}) rows
         </i>
+        <Toggle checked={dataPreviewMode === IDataPreviewMode.meta}
+          label={intl.get('dataSource.viewMode')}
+          onText={intl.get('dataSource.metaView')}
+          offText={intl.get('dataSource.dataView')}
+          onChange={(ev, checked) => {
+            dataSourceStore.setDataPreviewMode(checked ? IDataPreviewMode.meta : IDataPreviewMode.data)
+          }}
+        />
         {/* <ActionButton iconProps={{ iconName: 'download' }}>download data</ActionButton> */}
-        <DataTable />
+        {
+          dataPreviewMode === IDataPreviewMode.data && <DataTable />
+        }
+        {
+          dataPreviewMode === IDataPreviewMode.meta && <MetaView />
+        }
       </div>
     </div>
   )

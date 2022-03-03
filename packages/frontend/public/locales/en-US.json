@@ -70,6 +70,19 @@
         "extractInsightOld": "Insight Analysis(Debug)",
         "cleanMethod": "Clean Method",
         "useField": "use field",
+        "viewMode": "View Mode",
+        "metaView": "Meta View",
+        "dataView": "Table View",
+        "meta": {
+            "uniqueValue": "Unique Value",
+            "analyticType": "analytic type",
+            "semanticType": "semantic Type",
+            "disable": {
+                "title": "Disable Column",
+                "on": "able",
+                "off": "disable"
+            }
+        },
         "importData": {
             "buttonName": "Import Data",
             "type": {

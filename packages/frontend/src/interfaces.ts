@@ -1,6 +1,6 @@
 // define new interfaces here, global.ts is no longer maintained.
 import { IFieldSummary, IInsightSpace } from "visual-insights";
-import { Aggregator, BIField, BIFieldType, FieldType } from "./global";
+import { Aggregator, BIFieldType, FieldType } from "./global";
 
 export interface IRow {
     [key: string]: any
@@ -41,6 +41,7 @@ export interface IFieldMeta extends IFieldBase {
         [key: string]: any
     };
     distribution: Array<{ memberName: string; count: number }>;
+    disable?: boolean;
 }
 
 export enum IComputeMode {
@@ -72,4 +73,9 @@ export interface ISyncEngine {
 export interface IDatasetBase {
     dataSource: IRow[];
     fields: IMuteFieldBase[];
+}
+
+export enum IDataPreviewMode {
+    meta = 'meta',
+    data = 'data'
 }

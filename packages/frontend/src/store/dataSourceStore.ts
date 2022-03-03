@@ -5,7 +5,7 @@ import * as op from 'rxjs/operators'
 import { ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 import { NextVICore } from "../dev";
 import { BIFieldType } from "../global";
-import { IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
+import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
 import { getFieldsSummaryService, inferMetaService } from "../service";
 import { findRathSafeColumnIndex, Transform } from "../utils";
@@ -52,6 +52,7 @@ export class DataSourceStore {
      */
     // public fieldMetas: IFieldMeta[] = [];
     public loading: boolean = false;
+    public dataPreviewMode: IDataPreviewMode = IDataPreviewMode.data;
     public showDataImportSelection: boolean = false;
     private fieldMetasRef: IStreamListener<IFieldMeta[]>;
     constructor() {
@@ -162,6 +163,10 @@ export class DataSourceStore {
 
     public setLoading (loading: boolean) {
         this.loading = loading;
+    }
+
+    public setDataPreviewMode(mode: IDataPreviewMode) {
+        this.dataPreviewMode = mode;
     }
 
     public setShowDataImportSelection (show: boolean) {
