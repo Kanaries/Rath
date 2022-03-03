@@ -70,6 +70,20 @@
         "extractInsightOld": "开始分析(调试模式)",
         "cleanMethod": "清洗方法",
         "useField": "允许使用",
+        "viewMode": "视图模式",
+        "metaView": "元数据视图",
+        "dataView": "数据视图",
+        "meta": {
+            "title": "元数据视图",
+            "uniqueValue": "唯一值数量",
+            "analyticType": "分析类型",
+            "semanticType": "数据类型",
+            "disable": {
+                "title": "是否使用该列",
+                "on": "使用",
+                "off": "禁用"
+            }
+        },
         "importData": {
             "buttonName": "导入数据",
             "type": {
