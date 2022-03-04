@@ -14,7 +14,7 @@
         "editor": "Visual Editor",
         "support": "Support",
         "lts": "Explore",
-        "pattern": "新模块测试",
+        "pattern": "Pattern Explore",
         "devCollection": "Debug"
     },
     "preference": {
@@ -37,7 +37,8 @@
         "cancel": "Cancel",
         "analysis": {
             "start": "Insight Analysis",
-            "checkResult": "Check Existed Results"
+            "checkResult": "Check Existed Results",
+            "pattern": "Build Knowledge"
         },
         "importStorage": {
             "title": "Import History Storage",

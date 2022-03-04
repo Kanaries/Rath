@@ -4,8 +4,11 @@ import { NextVICore } from '../../dev';
 import { useGlobalStore } from '../../store';
 import { distVis } from '../../queries/distVis'
 import ReactVega from '../../components/react-vega';
-import { DefaultButton, Stack } from 'office-ui-fabric-react';
+import { DefaultButton, Stack, IconButton, PrimaryButton } from 'office-ui-fabric-react';
 import { AssoContainer, MainViewContainer } from './components';
+import ViewField from '../lts/vizOperation/viewField';
+import { IFieldMeta } from '../../interfaces';
+
 
 const BUTTON_STYLE = { marginRight: '1em' }
 
@@ -54,11 +57,22 @@ const PatternPage: React.FC = props => {
 
     const advicePureFeature = useCallback(() => {
         const ans = core.pureFeatureRecommand(pined.measures);
-        console.log(ans)
         setViews(ans.map(([fs, score]) => ({
             measures: fs,
             imp: score
         })))
+    }, [pined])
+
+    const removeFromPined = useCallback((fid: string) => {
+        const fields: IFieldMeta[] = [...pined.measures];
+        const targetIndex = fields.findIndex(f => f.fid === fid);
+        if (targetIndex > -1) {
+            fields.splice(targetIndex, 1)
+            setPined({
+                ...pined,
+                measures: fields
+            })
+        }
     }, [pined])
 
     useEffect(() => {
@@ -72,18 +86,40 @@ const PatternPage: React.FC = props => {
             <MainViewContainer>
                 <h2>Main View</h2>
                 <div className="vis-container">
-                    {pined !== null && <ReactVega spec={distVis({ measures: pined.measures })} dataSource={cleanedData} />}
-                    {mergeView !== null && <ReactVega spec={distVis({ measures: mergeView.measures })} dataSource={cleanedData} />}
+                    {pined !== null && <div>
+                        <ReactVega spec={distVis({ measures: pined.measures })} dataSource={cleanedData} />
+                        <hr />
+                        <div className="fields-container">
+                        {
+                            pined.measures.map((f: IFieldMeta) => <ViewField
+                                key={f.fid}
+                                type={f.analyticType}
+                                text={f.name || f.fid}
+                                onRemove={() => { removeFromPined(f.fid) }}
+                            />)
+                        }
+                        </div>
+                    </div>}
+                    {mergeView !== null && <div>
+                        <ReactVega spec={distVis({ measures: mergeView.measures })} dataSource={cleanedData} />
+                        {/* <hr />
+                        <div className="fields-container">
+                        </div> */}
+                    </div>}
                 </div>
                 <div className="action-buttons">
-                    <DefaultButton style={BUTTON_STYLE} text="related patterns" onClick={() => {
-                        assViews(pined)
-                    }} />
-                    <DefaultButton style={BUTTON_STYLE} text="related features"
+                    <DefaultButton style={BUTTON_STYLE}
+                        disabled={pined === null}
+                        text="related patterns" onClick={() => {
+                            assViews(pined)
+                        }}
+                    />
+                    <PrimaryButton style={BUTTON_STYLE} text="related features"
+                        iconProps={{ iconName: 'AddLink'}}
                         disabled={pined === null}
                         onClick={advicePureFeature}
                     />
-                    <DefaultButton style={BUTTON_STYLE} text="explain diff"
+                    <PrimaryButton style={BUTTON_STYLE} text="explain diff"
                         disabled={pined === null || mergeView === null}
                         onClick={adviceCompareFeature}
                     />
@@ -93,16 +129,17 @@ const PatternPage: React.FC = props => {
             <AssoContainer>
                 {
                     specs.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                        <Stack horizontal>
+                            <IconButton iconProps={{ iconName: 'Pinned' }} onClick={() => {
+                                setPined(views[i])
+                            }} />
+                            <IconButton iconProps={{ iconName: 'Compare' }} onClick={() => {
+                                setMergeView(views[i])
+                            }} />
+                        </Stack>
                         <div className="chart-container">
                             <ReactVega spec={spec} dataSource={cleanedData} />
                         </div>
-                        <Stack horizontal>
-                            <DefaultButton style={BUTTON_STYLE} text="Specify" onClick={() => {
-                                setPined(views[i])
-                            }} />
-                            <DefaultButton style={BUTTON_STYLE} text="Compare" onClick={() => {
-                                setMergeView(views[i])
-                            }} /></Stack>
                     </div>)
                 }
             </AssoContainer>

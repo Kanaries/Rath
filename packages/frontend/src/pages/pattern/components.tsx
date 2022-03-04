@@ -24,8 +24,15 @@ export const MainViewContainer = styled.div`
     .vis-container{
         display: flex;
         margin: 6px 0px;
+        .fields-container{
+            display: flex;
+            padding: 2em 0em;
+        }
     }
     .action-buttons{
         margin: 6px 0px;
+        display: flex;
+        /* justify-content: center; */
+        align-items: flex;
     }
 `

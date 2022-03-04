@@ -65,6 +65,10 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     commonStore.setAppKey(PIVOT_KEYS.lts)
   }, [exploreStore, commonStore])
 
+  const onBuildKnowledge = useCallback(() => {
+    commonStore.setAppKey(PIVOT_KEYS.pattern)
+  }, [commonStore])
+
   const onSelectPannelClose = useCallback(() => {
     dataSourceStore.setShowDataImportSelection(false)
   }, [dataSourceStore])
@@ -103,6 +107,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         key: 'function.analysis.checkResult',
         text: intl.get('function.analysis.checkResult'),
         onClick: onCheckResults
+      },
+      {
+        key: 'function.analysis.pattern',
+        text: intl.get('function.analysis.pattern'),
+        onClick: onBuildKnowledge
       }
     ]
   }

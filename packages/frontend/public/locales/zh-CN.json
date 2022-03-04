@@ -9,12 +9,12 @@
         "dataSource": "数据源",
         "noteBook": "交互式算法可视化",
         "explore": "探索分析(旧)",
-        "dashBoard": "报表",
+        "dashBoard": "报表推荐",
         "explainer": "数据解读",
         "editor": "自助分析",
         "support": "帮助",
         "lts": "探索分析",
-        "pattern": "新模块测试",
+        "pattern": "建立认知",
         "devCollection": "调试模式"
     },
     "preference": {
@@ -37,7 +37,8 @@
         "cancel": "取消",
         "analysis": {
             "start": "开始分析",
-            "checkResult": "查看已有结果"
+            "checkResult": "查看已有结果",
+            "pattern": "建立认知"
         },
         "importStorage": {
             "title": "导入历史分析",
