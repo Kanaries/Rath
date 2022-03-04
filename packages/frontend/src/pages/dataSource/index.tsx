@@ -12,6 +12,7 @@ import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
 import { IDataPreviewMode, IMuteFieldBase, IRow } from "../../interfaces";
+import { Card } from "../../components/card";
 
 const MARGIN_LEFT = { marginLeft: "1em" }
 
@@ -113,9 +114,10 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   //   dataSourceStore.getFieldsMetas();
   // }, [fields, cleanedData])
 
+
   return (
     <div className="content-container">
-      <div className="card">
+      <Card>
         <ImportStorage />
         <Stack horizontal>
           <PrimaryButton
@@ -205,7 +207,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         {
           dataPreviewMode === IDataPreviewMode.meta && <MetaView />
         }
-      </div>
+      </Card>
     </div>
   )
 };

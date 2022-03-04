@@ -10,17 +10,39 @@ const MetaContainer = styled.div`
     overflow: auto;
 `
 const MetaItemContainer = styled.div`
+    over-flow: hidden;
+    position: relative;
+    color: #333;
+    .bottom-bar {
+        position: absolute;
+        height: 4px;
+        border-radius: 0px 0px 2px 2px;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        margin: 0px 1px;
+    }
+    .dimension {
+        background-color: #1890ff;
+    }
+    .measure {
+        background-color: #13c2c2;
+    }
+    .disable {
+        background-color: #9e9e9e;
+    }
     h1{
         font-weight: 500;
         font-size: 26px;
+        color: #333;
     }
     .fid{
         font-size: 12px; font-weight: 400; color: rgb(89, 89, 89);
     }
     padding: 1em;
-    margin: 8px;
+    margin: 1em;
     box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%);
-    border-radius: 4px;
+    border-radius: 8px;
     .flex-container {
         display: flex;
     }
@@ -38,7 +60,11 @@ const IndicatorCard = styled.div`
     padding: 0em 1em;
     margin-left: 1em;
     .ind-title{
-
+        font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: rgb(50, 49, 48);
+        box-sizing: border-box;
     }
     .ind-value{
         font-size: 3em;
@@ -69,7 +95,13 @@ const ANALYTIC_TYPE_CHOICES: IChoiceGroupOption[] = [
 ]
 const MetaItem: React.FC<MetaItemProps> = props => {
     const { colKey, colName, semanticType, analyticType, dist, disable, onChange } = props;
+    const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map(ch => ({
+        ...ch,
+        text: intl.get('common.dimension')
+    }))
+    
     return <MetaItemContainer className="ms-depth-4">
+        <div className={`${analyticType} bottom-bar`}></div>
         <h1>{colName}</h1>
         <div className="fid">Column ID: {colKey}</div>
         <Separator />
@@ -87,7 +119,7 @@ const MetaItem: React.FC<MetaItemProps> = props => {
             <div className="operation-column">
                 <ChoiceGroup
                     label={intl.get('dataSource.meta.analyticType')}
-                    options={ANALYTIC_TYPE_CHOICES}
+                    options={ANALYTIC_TYPE_CHOICES_LANG}
                     selectedKey={analyticType}
                     onChange={(ev, option) => {
                         onChange && option && onChange(colKey, 'analyticType', option.key)

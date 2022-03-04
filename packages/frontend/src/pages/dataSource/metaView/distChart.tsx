@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import embed from 'vega-embed';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
-import { FieldType, DataSource } from '../../../global';
 import { IRow } from '../../../interfaces';
 
 function fl2bins (data: IRow[], valueField: string, ctField: string) {
@@ -32,7 +31,7 @@ export interface DistributionChartProps {
 
 const DistributionChart: React.FC<DistributionChartProps> = (props) => {
   const chart = useRef<HTMLDivElement>(null);
-  const { x, y, dataSource, analyticType, semanticType } = props;
+  const { x, y, dataSource,  semanticType } = props;
     useEffect(() => {
       if (chart.current) {
         let values: typeof dataSource = [];

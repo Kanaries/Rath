@@ -138,10 +138,14 @@ export class NextVICore {
     public pureFeatureRecommand (fields: IFieldMeta[]): [IFieldMeta[], number][] {
         const { dataSource } = this;
         const dimensions = this.fields.filter(f => f.analyticType === 'dimension');
+        const measures = this.fields.filter(f => f.analyticType === 'measure');
         const viewMeasures = fields.filter(f => f.analyticType === 'measure');
+        const viewDimensions = fields.filter(f => f.analyticType === 'dimension');
+        const nonViewMeasures = measures.filter(f => viewMeasures.findIndex(vf => vf.fid === f.fid) === -1);
+        const nonViewDimensions = dimensions.filter(f => viewDimensions.findIndex(vf => vf.fid === f.fid) === -1);
         const ans: [IFieldMeta[], number][] = [];
-
-        dimensions.forEach(dim => {
+        // fixme: 多个维度时，要渐进的算增益
+        nonViewDimensions.forEach(dim => {
             const dimValues = dataSource.map(row => row[dim.fid]);
             let meanScore =  0;
             viewMeasures.forEach(mea => {
@@ -152,6 +156,17 @@ export class NextVICore {
             meanScore /= viewMeasures.length;
             ans.push([[...fields, dim], meanScore])
         })
+        // nonViewMeasures.forEach(meaFeat => {
+        //     const dimValues = dataSource.map(row => row[meaFeat.fid]);
+        //     let meanScore =  0;
+        //     viewMeasures.forEach(mea => {
+        //         const meaValues =  dataSource.map(row => row[mea.fid]);
+        //         const score = mic(dimValues, meaValues);
+        //         meanScore += score;
+        //     })
+        //     meanScore /= viewMeasures.length;
+        //     ans.push([[...fields, meaFeat], meanScore])
+        // })
         ans.sort((a, b) => b[1] - a[1])
         return ans;
     }

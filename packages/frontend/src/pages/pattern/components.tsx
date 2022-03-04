@@ -7,7 +7,11 @@ export const AssoContainer = styled.div`
     background-color: #eee;
     margin-top: 1em;
     .asso-segment{
+        flex-grow: 1;
         background-color: #fff;
+        /* max-width: 400px; */
+        max-height: 400px;
+        overflow: auto;
         margin: 4px;
         padding: 10px;
         .chart-container{

@@ -18,6 +18,8 @@ import AppNav from "./components/appNav";
 import { destroyRathWorker, initRathWorker } from "./service";
 import { PIVOT_KEYS } from "./constants";
 import CrInfo from "./components/crInfo";
+// import { loadTheme } from "office-ui-fabric-react";
+// import { RATH_DARK_PALETTE, RATH_DARK_THEME } from "./theme";
 
 
 // FIXME: 这两代码好像没什么用
@@ -135,6 +137,8 @@ function App() {
 }
 
 const OBApp = observer(App);
+
+// loadTheme(RATH_DARK_THEME);
 
 export default function WrappedApp() {
   return (

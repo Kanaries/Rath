@@ -4,7 +4,7 @@ import { NextVICore } from '../../dev';
 import { useGlobalStore } from '../../store';
 import { distVis } from '../../queries/distVis'
 import ReactVega from '../../components/react-vega';
-import { DefaultButton, IconButton, Stack } from 'office-ui-fabric-react';
+import { DefaultButton, Stack } from 'office-ui-fabric-react';
 import { AssoContainer, MainViewContainer } from './components';
 
 const BUTTON_STYLE = { marginRight: '1em' }
@@ -60,6 +60,13 @@ const PatternPage: React.FC = props => {
             imp: score
         })))
     }, [pined])
+
+    useEffect(() => {
+        if (pined) {
+            assViews(pined)
+        }
+    }, [pined, assViews])
+
     return <div className="content-container">
         <div className="card">
             <MainViewContainer>
@@ -69,14 +76,14 @@ const PatternPage: React.FC = props => {
                     {mergeView !== null && <ReactVega spec={distVis({ measures: mergeView.measures })} dataSource={cleanedData} />}
                 </div>
                 <div className="action-buttons">
-                    <DefaultButton style={BUTTON_STYLE} text="asso" onClick={() => {
+                    <DefaultButton style={BUTTON_STYLE} text="related patterns" onClick={() => {
                         assViews(pined)
                     }} />
-                    <DefaultButton style={BUTTON_STYLE} text="sv recommand"
+                    <DefaultButton style={BUTTON_STYLE} text="related features"
                         disabled={pined === null}
                         onClick={advicePureFeature}
                     />
-                    <DefaultButton style={BUTTON_STYLE} text="feature recommand"
+                    <DefaultButton style={BUTTON_STYLE} text="explain diff"
                         disabled={pined === null || mergeView === null}
                         onClick={adviceCompareFeature}
                     />
@@ -90,10 +97,10 @@ const PatternPage: React.FC = props => {
                             <ReactVega spec={spec} dataSource={cleanedData} />
                         </div>
                         <Stack horizontal>
-                            <DefaultButton style={BUTTON_STYLE} text="Pin" onClick={() => {
+                            <DefaultButton style={BUTTON_STYLE} text="Specify" onClick={() => {
                                 setPined(views[i])
                             }} />
-                            <DefaultButton style={BUTTON_STYLE} text="merge" onClick={() => {
+                            <DefaultButton style={BUTTON_STYLE} text="Compare" onClick={() => {
                                 setMergeView(views[i])
                             }} /></Stack>
                     </div>)
