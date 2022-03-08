@@ -128,8 +128,16 @@ export class DataSourceStore {
         return this.fields.filter((field) => field.analyticType === "dimension").map((field) => field.fid);
     }
 
+    public get dimFields () {
+        return this.fields.filter((field) => field.analyticType === "dimension")
+    }
+
     public get measures () {
         return this.fields.filter(field => field.analyticType === 'measure').map(field => field.fid)
+    }
+
+    public get meaFields () {
+        return this.fields.filter(field => field.analyticType === 'measure')
     }
     public get fieldNames (): string[] {
         return this.fields.map(f => `${f.name}`)

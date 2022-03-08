@@ -1,6 +1,6 @@
-import React, {  useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import intl from 'react-intl-universal'
-import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, Toggle } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
@@ -24,12 +24,14 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
   const { cleanedData, cleanMethod, rawData, loading, showDataImportSelection, dataPreviewMode } = dataSourceStore;
 
+  const { exploreMode } = commonStore;
+
   useEffect(() => {
     // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
     if (rawData && rawData.length === 0) {
       dataSourceStore.setShowDataImportSelection(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSourceStore])
 
   const cleanMethodListLang = useCleanMethodList();
@@ -93,30 +95,53 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   ]
   const exploreOptions: IDropdownOption[] = [
     { text: intl.get('dataSource.exploreMode.firstTime'), key: EXPLORE_MODE.first },
-    { text: intl.get('dataSource.exploreMode.familiar'), key: EXPLORE_MODE.familiar },
-    { text: intl.get('dataSource.exploreMode.comprehensive'), key: EXPLORE_MODE.comprehensive }
+    { text: intl.get('dataSource.exploreMode.comprehensive'), key: EXPLORE_MODE.comprehensive },
+    { text: intl.get('dataSource.exploreMode.familiar'), key: EXPLORE_MODE.familiar, disabled: true },
+    { text: intl.get('dataSource.exploreMode.manual'), key: EXPLORE_MODE.manual }
   ]
-  const analysisOptions: IContextualMenuProps = {
-    items: [
-      {
-        key: 'function.analysis.start',
-        text: intl.get('function.analysis.start'),
-        onClick: onV1EngineStart
-      },
-      {
-        key: 'function.analysis.checkResult',
-        text: intl.get('function.analysis.checkResult'),
-        onClick: onCheckResults
-      },
-      {
-        key: 'function.analysis.pattern',
-        text: intl.get('function.analysis.pattern'),
-        onClick: onBuildKnowledge
-      }
-    ]
-  }
+  const analysisOptions: IContextualMenuProps = useMemo(() => {
+    return {
+      items: [
+        {
+          key: 'function.analysis.start',
+          text: intl.get('function.analysis.start'),
+          onClick: onV1EngineStart
+        },
+        {
+          key: 'function.analysis.checkResult',
+          text: intl.get('function.analysis.checkResult'),
+          onClick: onCheckResults
+        },
+        {
+          key: 'function.analysis.pattern',
+          text: intl.get('function.analysis.pattern'),
+          onClick: onBuildKnowledge
+        },
+        {
+          key: 'function.analysis.manual',
+          text: intl.get('function.analysis.manual'),
+          onClick: () => {
+            commonStore.setAppKey(PIVOT_KEYS.editor)
+          }
+        }
+      ]
+    }
+  }, [onV1EngineStart, onCheckResults, onBuildKnowledge, commonStore])
 
   const hasResults = exploreStore.insightSpaces.length > 0;
+
+  const startMode = useMemo<IContextualMenuItem>(() => {
+    if (exploreMode === EXPLORE_MODE.first) {
+      return analysisOptions.items[2];
+    }
+    if (exploreMode === EXPLORE_MODE.manual) {
+      return analysisOptions.items[3]
+    }
+    if (hasResults) {
+      return analysisOptions.items[1]
+    }
+    return analysisOptions.items[0]
+  }, [hasResults, exploreMode, analysisOptions])
 
   // useEffect(() => {
   //   console.log('meta update')
@@ -133,27 +158,29 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             split
             disabled={rawData.length === 0}
             iconProps={{ iconName: 'Financial' }}
-            text={intl.get(`function.analysis.${hasResults ? 'checkResult' : 'start'}`)}
+            text={intl.get(`${startMode.key}`)}
             menuProps={analysisOptions}
-            onClick={hasResults ? onCheckResults : onV1EngineStart}
+            onClick={() => { startMode.onClick && startMode.onClick() }}
           />
           {dataImportButton(intl.get('dataSource.importData.buttonName'), rawData)}
-          <DefaultButton
+          <IconButton
             style={MARGIN_LEFT}
-            text={intl.get('function.importStorage.title')}
+            title={intl.get('function.importStorage.title')}
+            ariaLabel={intl.get('function.importStorage.title')}
             iconProps={{ iconName: 'CloudUpload' }}
             onClick={() => {
               commonStore.setShowStorageModal(true)
             }}
           />
-          <DefaultButton
+          <IconButton
             style={MARGIN_LEFT}
             disabled={rawData.length === 0}
             iconProps={{ iconName: 'TestBeakerSolid' }}
-            text={intl.get('dataSource.extractInsightOld')}
+            title={intl.get('dataSource.extractInsightOld')}
+            ariaLabel={intl.get('dataSource.extractInsightOld')}
             onClick={onOrignEngineStart}
           />
-          
+
           <Selection show={showDataImportSelection}
             loading={loading}
             onClose={onSelectPannelClose}
@@ -165,22 +192,22 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         <div style={{ margin: '1em 0px' }}>
           <Stack horizontal>
             <Dropdown style={{ minWidth: '180px', marginRight: '1em' }}
-                selectedKey={commonStore.computationEngine}
-                options={engineOptions}
-                label={intl.get('config.computationEngine.title')}
-                onChange={(e, item) => {
-                  item && commonStore.setComputationEngine(item.key as string);
-                }}
-              />
-              <Dropdown style={{ minWidth: '180px', marginRight: '1em' }}
-                disabled
-                selectedKey={commonStore.exploreMode}
-                options={exploreOptions}
-                label={intl.get('dataSource.exploreMode.title')}
-                onChange={(e, item) => {
-                  item && commonStore.setExploreMode(item.key as string);
-                }}
-              />
+              // disabled
+              selectedKey={commonStore.exploreMode}
+              options={exploreOptions}
+              label={intl.get('dataSource.exploreMode.title')}
+              onChange={(e, item) => {
+                item && commonStore.setExploreMode(item.key as string);
+              }}
+            />
+            <Dropdown style={{ minWidth: '180px', marginRight: '1em' }}
+              selectedKey={commonStore.computationEngine}
+              options={engineOptions}
+              label={intl.get('config.computationEngine.title')}
+              onChange={(e, item) => {
+                item && commonStore.setComputationEngine(item.key as string);
+              }}
+            />
           </Stack>
         </div>
         <div style={{ margin: '1em 0px' }}>

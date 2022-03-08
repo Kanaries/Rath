@@ -127,13 +127,50 @@ export function generalMic (T: string[], X: number[]) {
     const uniqueValueSet = new Set(T);
     const uniqueValues = [...uniqueValueSet];
 
+    const dists: Array<{freq: number; bins: number[]}> = [];
+
     for (let i = 0; i < uniqueValues.length; i++) {
         const conditionalX = X.filter((x, ti) => T[ti] === uniqueValues[i]);
-        const bins = binShareRange(conditionalX, _min, _max).filter(v => v > 0);
-        const subEnt = entropy(rangeNormilize(bins))
-        const px = conditionalX.length / X.length;
+        const bins = binShareRange(conditionalX, _min, _max)
+        dists.push({
+            freq: conditionalX.length,
+            bins
+        })
+    }
+
+    dists.sort((a, b) => b.freq - a.freq)
+    const noise: {freq: number; bins: number[]} = {
+        freq: 0,
+        bins: new Array(BIN_SIZE).fill(0)
+    };
+
+    for (let i = 0; i < dists.length; i++) {
+        const { bins, freq } = dists[i]
+        if (i < BIN_SIZE - 1) {
+            const subEnt = entropy(rangeNormilize(bins.filter(v => v > 0)))
+            const px = freq / X.length;
+            condH += px * subEnt;
+        } else {
+            noise.freq += freq
+            for (let j = 0; j < BIN_SIZE; j++) {
+                noise.bins[j] += bins[j];
+            }
+        }
+    }
+    if (noise.freq > 0) {
+        const { bins, freq } = noise
+        const subEnt = entropy(rangeNormilize(bins.filter(v => v > 0)))
+        const px = freq / X.length;
         condH += px * subEnt;
     }
+
+    // for (let i = 0; i < uniqueValues.length; i++) {
+    //     const conditionalX = X.filter((x, ti) => T[ti] === uniqueValues[i]);
+    //     const bins = binShareRange(conditionalX, _min, _max).filter(v => v > 0);
+    //     const subEnt = entropy(rangeNormilize(bins))
+    //     const px = conditionalX.length / X.length;
+    //     condH += px * subEnt;
+    // }
     return (H - condH) / Math.log2(uniqueValues.length);
 }
 

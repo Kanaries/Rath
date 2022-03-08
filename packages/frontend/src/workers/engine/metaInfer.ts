@@ -2,18 +2,51 @@ import { IAnalyticType, IRow, ISemanticType } from "visual-insights";
 import { IMuteFieldBase, IRawField } from "../../interfaces";
 import { inferAnalyticType, inferSemanticType } from "../../utils";
 
+export function emptyCount (dataSource: IRow[], colKey: string): number {
+    // const counter: Map<string, number> = new Map();
+    let counter = 0;
+    for (let i = 0; i < dataSource.length; i++) {
+        if (dataSource[i][colKey] === null || dataSource[i][colKey] === undefined || dataSource[i][colKey] === '') {
+            counter++;
+        }
+    }
+    return counter
+}
+
+function inferDisable (dataSource: IRow[], colKey: string) {
+    // 1. sparse column
+    // 2. constant column
+    const emptyAmount = emptyCount(dataSource, colKey);
+    if (emptyAmount / dataSource.length > 0.25) {
+        return true;
+    }
+    let valueSet: Set<any> = new Set();
+    for (let i = 0; i < dataSource.length; i++) {
+        if (dataSource[i][colKey] !== null && dataSource[i][colKey] !== '' && dataSource[i][colKey] !== undefined) {
+            valueSet.add(dataSource[i][colKey])
+        }
+    }
+    if (valueSet.size === 1) return true;
+    return false;
+}
+
 export function inferMeta (props: { dataSource: IRow[]; fields: IMuteFieldBase[] }) {
     const { dataSource, fields } = props;
     const finalFieldMetas: IRawField[] = [];
     for (let field of fields) {
-        const semanticType: ISemanticType = field.semanticType === '?' ? inferSemanticType(dataSource, field.fid) : field.semanticType;
-        const analyticType: IAnalyticType = field.analyticType === '?' ? inferAnalyticType(dataSource, field.fid) : field.analyticType;
+        let semanticType: ISemanticType = field.semanticType === '?' ? inferSemanticType(dataSource, field.fid) : field.semanticType;
+        let analyticType: IAnalyticType = field.analyticType === '?' ? inferAnalyticType(dataSource, field.fid) : field.analyticType;
+        const disable: boolean = field.disable === '?' ? inferDisable(dataSource, field.fid) : Boolean(field.disable);
+        // TODO: 临时处理逻辑。后续可视化部分扩展好了，这部分要消除掉。（使用dist图表就可以解决）
+        if (analyticType === 'measure' && semanticType === 'ordinal') {
+            semanticType = 'quantitative'
+        }
         finalFieldMetas.push({
             fid: field.fid,
             name: field.name ? field.name : field.fid,
             analyticType,
             semanticType,
-            disable: field.disable
+            disable
         })
     }
     return finalFieldMetas

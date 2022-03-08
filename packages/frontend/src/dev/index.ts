@@ -1,15 +1,28 @@
-import { IViewField } from "@kanaries/graphic-walker/dist/interfaces";
 import { IRow } from "visual-insights";
 import { entropy } from "visual-insights/build/esm/statistics";
 import { IFieldMeta } from "../interfaces";
-import { bin, binMap, binMapShareRange, generalMic, incSim, l1Dis2, mic, normalizeScatter, rangeNormilize } from "./utils";
+import { bin, binMapShareRange, generalMic, incSim, l1Dis2, mic, normalizeScatter, rangeNormilize } from "./utils";
 
+export interface IFilter {
+    field: IFieldMeta;
+    values: any[];
+}
 export interface IPattern {
-    measures: IFieldMeta[];
+    fields: IFieldMeta[];
     imp: number;
+    filters?: IFilter[]
     // rows: IRow[];
 }
 
+export function applyFilter (dataSource: IRow[], filters?: IFilter[]): IRow[] {
+    if (!filters || filters.length === 0) return dataSource;
+    return dataSource.filter(row => {
+        return filters.every(f => f.values.includes(row[f.field.fid]))
+    })
+}
+// FIXME: 洞察计算时，没有考虑把数据集做filter
+// TODO: 要能清洗的看出来，filter前后的比对
+// TODO: 每次要计算当前层级的信息增益。
 export class NextVICore {
     public BIN_SIZE = 16;
     public dataSource: IRow[] = [];
@@ -24,6 +37,56 @@ export class NextVICore {
         this.fields = fields;
         this.patterns = [];
     }
+    public recommandFilter (view: IPattern) {
+        const viewDimensions = view.fields.filter(f => f.analyticType === 'dimension');
+        const viewMeasures = view.fields.filter(f => f.analyticType === 'measure');
+        let viewDimNotInFilters: IFieldMeta[] = [...viewDimensions];
+        if (typeof view.filters !== 'undefined') {
+            viewDimNotInFilters = viewDimensions.filter(vd => !view.filters!.find(vf => vf.field.fid === vd.fid));
+        }
+        const ans: IPattern[] = [];
+        if (viewDimNotInFilters.length > 0) {
+            let ansDimKey = '';
+            let dimvs: any[] = [];
+            let bestScore = 0;
+            viewDimNotInFilters.forEach(dim => {
+                const dimValues = this.dataSource.map(row => row[dim.fid]);
+                let meanScore =  0;
+                viewMeasures.forEach(mea => {
+                    const meaValues =  this.dataSource.map(row => row[mea.fid]);
+                    const score = generalMic(dimValues, meaValues);
+                    meanScore += score;
+                })
+                meanScore /= viewMeasures.length;
+                if (meanScore > bestScore) {
+                    bestScore = meanScore;
+                    ansDimKey = dim.fid;
+                    dimvs = dimValues;
+                }
+            })
+            if (ansDimKey!== '') {
+                const dimUniques = new Set(dimvs);
+                // ansDim.
+                for (let v of dimUniques.values()) {
+                    let ansFilters: IFilter[] = [];
+                    if (view.filters){ 
+                        ansFilters.push(...view.filters)
+                    }
+                    ansFilters.push({
+                        field: view.fields.find(f => f.fid === ansDimKey)!,
+                        values: [v]
+                    })
+                    ans.push({
+                        imp: 0,
+                        fields: view.fields.filter(f => f.fid !== ansDimKey),
+                        filters: ansFilters
+                    })
+                }
+            }
+            // for (let )
+        }
+        return ans;
+    }
     public searchPatterns () {
         const { dataSource } = this;
         const measures = this.fields.filter(f => f.analyticType === 'measure');
@@ -36,7 +99,7 @@ export class NextVICore {
             const pl = rangeNormilize(bins.filter(f => f > 0))
             const ent = entropy(pl);
             this.patterns.push({
-                measures: [measures[i]],
+                fields: [measures[i]],
                 imp: ent,
                 // rows: bins.map((v, vi) => ({
                 //     bin: _min + vi * step,
@@ -53,7 +116,7 @@ export class NextVICore {
         for (let i = 0; i < measures.length; i++) {
             if (!fieldsInView.find(f => f.fid === measures[i].fid)) {
                 patterns.push({
-                    measures: [...fieldsInView, measures[i]],
+                    fields: [...fieldsInView, measures[i]],
                     imp: 0
                 })
             }
@@ -135,26 +198,31 @@ export class NextVICore {
         }
     }
 
-    public pureFeatureRecommand (fields: IFieldMeta[]): [IFieldMeta[], number][] {
+    public pureFeatureRecommand (pattern: IPattern): IPattern[] {
         const { dataSource } = this;
+        const viewData = applyFilter(dataSource, pattern.filters);
         const dimensions = this.fields.filter(f => f.analyticType === 'dimension');
-        const measures = this.fields.filter(f => f.analyticType === 'measure');
-        const viewMeasures = fields.filter(f => f.analyticType === 'measure');
-        const viewDimensions = fields.filter(f => f.analyticType === 'dimension');
-        const nonViewMeasures = measures.filter(f => viewMeasures.findIndex(vf => vf.fid === f.fid) === -1);
+        // const measures = this.fields.filter(f => f.analyticType === 'measure');
+        const viewMeasures = pattern.fields.filter(f => f.analyticType === 'measure');
+        const viewDimensions = pattern.fields.filter(f => f.analyticType === 'dimension');
+        // const nonViewMeasures = measures.filter(f => viewMeasures.findIndex(vf => vf.fid === f.fid) === -1);
         const nonViewDimensions = dimensions.filter(f => viewDimensions.findIndex(vf => vf.fid === f.fid) === -1);
-        const ans: [IFieldMeta[], number][] = [];
+        const ans: IPattern[] = [];
         // fixme: 多个维度时，要渐进的算增益
         nonViewDimensions.forEach(dim => {
-            const dimValues = dataSource.map(row => row[dim.fid]);
+            const dimValues = viewData.map(row => row[dim.fid]);
             let meanScore =  0;
             viewMeasures.forEach(mea => {
-                const meaValues =  dataSource.map(row => row[mea.fid]);
+                const meaValues =  viewData.map(row => row[mea.fid]);
                 const score = generalMic(dimValues, meaValues);
                 meanScore += score;
             })
             meanScore /= viewMeasures.length;
-            ans.push([[...fields, dim], meanScore])
+            ans.push({
+                imp: meanScore,
+                fields: [...pattern.fields, dim],
+                filters: pattern.filters
+            })
         })
         // nonViewMeasures.forEach(meaFeat => {
         //     const dimValues = dataSource.map(row => row[meaFeat.fid]);
@@ -167,7 +235,7 @@ export class NextVICore {
         //     meanScore /= viewMeasures.length;
         //     ans.push([[...fields, meaFeat], meanScore])
         // })
-        ans.sort((a, b) => b[1] - a[1])
+        ans.sort((a, b) => b.imp - a.imp)
         return ans;
     }
 

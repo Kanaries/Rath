@@ -19,20 +19,20 @@ const FieldsContainer = styled.div`
 const VizOperation: React.FC = props => {
     const { exploreStore, dataSourceStore, ltsPipeLineStore, commonStore } = useGlobalStore();
     const { forkView, visualConfig, showAsso } = exploreStore
-    const { dimensions, measures } = dataSourceStore;
+    const { dimFields, meaFields } = dataSourceStore;
     const { fieldMetas } = ltsPipeLineStore
     const dimensionOptions: IContextualMenuProps = {
-        items: dimensions.map(f => ({
-            key: f,
-            text: f,
-            onClick: (e) => { exploreStore.addFieldToForkView('dimensions', f) }
+        items: dimFields.map(f => ({
+            key: f.fid,
+            text: f.name,
+            onClick: (e) => { exploreStore.addFieldToForkView('dimensions', f.fid) }
         }))
     }
     const measureOptions: IContextualMenuProps = {
-        items: measures.map(f => ({
-            key: f,
-            text: f,
-            onClick: (e) => { exploreStore.addFieldToForkView('measures', f) }
+        items: meaFields.map(f => ({
+            key: f.fid,
+            text: f.name,
+            onClick: (e) => { exploreStore.addFieldToForkView('measures', f.fid) }
         }))
     }
 
@@ -56,22 +56,28 @@ const VizOperation: React.FC = props => {
                 }} />
             </Stack>
             <FieldsContainer>
-                {forkView.dimensions.map(f => <ViewField type="dimension"
-                    text={f}
-                    key={f}
-                    onRemove={() => {
-                        exploreStore.removeFieldFromForkView('dimensions', f)
-                    }}
-                />)}
+                {forkView.dimensions.map(f => {
+                    const field = dimFields.find(d => d.fid === f);
+                    return <ViewField type="dimension"
+                        text={(field ? field.name : f) || f}
+                        key={f}
+                        onRemove={() => {
+                            exploreStore.removeFieldFromForkView('dimensions', f)
+                        }}
+                    />
+                })}
             </FieldsContainer>
             <FieldsContainer>
-                {forkView.measures.map((f, fIndex) => <ViewField
-                    type="measure" text={`${f}${visualConfig.defaultAggregated ? `(${forkView.ops[fIndex]})` : ''}`}
-                    key={f}
-                    onRemove={() => {
-                        exploreStore.removeFieldFromForkView('measures', f)
-                    }}
-                />)}
+                {forkView.measures.map((f, fIndex) => {
+                    const field = meaFields.find(d => d.fid === f);
+                    return <ViewField
+                        type="measure" text={`${(field ? field.name : f) || f}${visualConfig.defaultAggregated ? `(${forkView.ops[fIndex]})` : ''}`}
+                        key={f}
+                        onRemove={() => {
+                            exploreStore.removeFieldFromForkView('measures', f)
+                        }}
+                    />
+                })}
             </FieldsContainer>
             <Panel isOpen={showAsso}
                 type={PanelType.medium}

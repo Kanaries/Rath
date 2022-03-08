@@ -97,7 +97,7 @@ const MetaItem: React.FC<MetaItemProps> = props => {
     const { colKey, colName, semanticType, analyticType, dist, disable, onChange } = props;
     const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map(ch => ({
         ...ch,
-        text: intl.get('common.dimension')
+        text: intl.get(`common.${ch.key}`)
     }))
     
     return <MetaItemContainer className="ms-depth-4">

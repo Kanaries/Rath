@@ -28,7 +28,7 @@ export interface IMuteFieldBase {
     name?: string;
     analyticType: 'dimension' | 'measure' | '?';
     semanticType: 'nominal' | 'temporal' | 'ordinal' | 'quantitative' | '?';
-    disable?: boolean;
+    disable?: boolean | '?';
 }
 
 export interface IFieldMeta extends IFieldBase {

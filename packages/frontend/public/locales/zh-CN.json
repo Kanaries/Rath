@@ -14,7 +14,7 @@
         "editor": "自助分析",
         "support": "帮助",
         "lts": "探索分析",
-        "pattern": "建立认知",
+        "pattern": "建立认知(beta)",
         "devCollection": "调试模式"
     },
     "preference": {
@@ -38,7 +38,8 @@
         "analysis": {
             "start": "开始分析",
             "checkResult": "查看已有结果",
-            "pattern": "建立认知"
+            "pattern": "建立认知(beta)",
+            "manual": "自助分析"
         },
         "importStorage": {
             "title": "导入历史分析",
@@ -86,7 +87,7 @@
             }
         },
         "importData": {
-            "buttonName": "导入数据",
+            "buttonName": "选择数据",
             "type": {
                 "file": "文件",
                 "restful": "RESTFUL",
@@ -115,7 +116,7 @@
             "simpleClean": "简单的替换",
             "none": "无(使用原始数据)"
         },
-        "tip": "记得在提取洞察前先调整数据的清洗策略并配置字段的属性",
+        "tip": "记得在开始分析前先调整数据的清洗策略并配置字段的属性",
         "recordCount": "记录数 {count}",
         "upload": {
             "title": "上传你的数据集，根据需求调整以下配置",
@@ -129,7 +130,8 @@
             "title": "探索模式",
             "firstTime": "第一次接触该数据集",
             "familiar": "基本熟悉该数据集",
-            "comprehensive": "综合模式"
+            "comprehensive": "综合模式",
+            "manual": "手动（有明确分析目的）"
         }
     },
     "meta": {

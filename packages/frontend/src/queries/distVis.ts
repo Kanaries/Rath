@@ -1,3 +1,4 @@
+import { IPattern } from "../dev";
 import { IFieldMeta } from "../interfaces";
 export const geomTypeMap: { [key: string]: any } = {
     interval: "boxplot",
@@ -6,16 +7,8 @@ export const geomTypeMap: { [key: string]: any } = {
     // density: 'rect'
     density: "point"
 };
-const channels = [
-    'x', 'y',
-    'size',
-    'color',
-    'opacity',
-    'rows',
-    'columns'
-];
 
-const ch = {
+const channels = {
     quantitative: ['x' , 'y', 'size', 'opacity', 'color'],
     ordinal: ['x', 'y', 'opacity', 'color', 'size', 'shape'],
     nominal: ['x', 'y', 'color', 'row', 'column', 'opacity', 'size', 'shape'],
@@ -27,16 +20,9 @@ const highOrderChannels = {
     measure: ['repeat']
 } as const;
 
-// const highOrderChannels = {
-//     quantitative: ['x' , 'y', 'size', 'opacity', 'color'],
-//     ordinal: ['x', 'y', 'opacity', 'color', 'size', 'shape'],
-//     nominal: ['x', 'y', 'color', 'opacity', 'size', 'shape'],
-//     temporal: ['x', 'y', 'opacity', 'color', 'shape']
-// }
-
 interface BaseVisProps {
     // dataSource: DataSource;
-    measures: IFieldMeta[];
+    pattern: IPattern
 }
 function humanHabbit (encoding: any) {
     if (encoding.x && encoding.x.type !== 'temporal') {
@@ -50,14 +36,12 @@ function humanHabbit (encoding: any) {
 function encode (fields: IFieldMeta[], usedChannels: Set<string> = new Set()) {
     const orderFields = [...fields];
     let encoding: any = {}
-    // let inHighOrderStatus: typeof highOrderChannels = '';
     let inHighOrderStatus: keyof typeof highOrderChannels | null = null;
     let highOrderIndex: number = 0;
-    console.log('[score]', orderFields)
     orderFields.sort((a, b) => b.features.entropy - a.features.entropy);
 
     for (let i = 0; i < orderFields.length; i++) {
-        const chs = ch[orderFields[i].semanticType];
+        const chs = channels[orderFields[i].semanticType];
         let encoded: boolean = false;
         for (let j = 0; j < chs.length; j++) {
             if (!usedChannels.has(chs[j])) {
@@ -79,7 +63,6 @@ function encode (fields: IFieldMeta[], usedChannels: Set<string> = new Set()) {
                 }
                 highOrderIndex++
             }
-            // inHighOrderStatus = true;
         }
     }
     return encoding
@@ -125,30 +108,7 @@ function markFixEncoding (markType: string, usedChannels: Set<string>) {
     }
 }
 
-function fastEncoding(fields: IFieldMeta[]) {
-    let encoding: any = {}
-    if (fields.length === 1) {
-        encoding.x = {
-            field: fields[0].fid,
-            type: 'ordinal',
-            bin: true
-        }
-        encoding.y = {
-            aggregate: 'count'
-        }
-    } else {
-        let usedFieldSize = Math.min(fields.length, channels.length);
-        for (let i = 0; i < usedFieldSize; i++) {
-            encoding[channels[i]] = {
-                field: fields[i].fid,
-                type: fields[i].semanticType
-            }
-        }
-    }
-    return encoding
-}
-
-function autoAgg (encoding: any, fields: IFieldMeta[], markType: string) {
+function autoAgg (encoding: any, fields: IFieldMeta[], markType: string, op: string = 'mean') {
     if (fields.length === 1) {
         if (fields[0].semanticType === 'quantitative') {
             encoding.x.bin = true;
@@ -160,42 +120,56 @@ function autoAgg (encoding: any, fields: IFieldMeta[], markType: string) {
     } else {
         if (markType === 'bar' || markType === 'line') {
             if (encoding.x && encoding.x.type === 'quantitative') {
-                encoding.x.aggregate = 'median'
+                encoding.x.aggregate = op
             }
             if (encoding.y && encoding.y.type === 'quantitative') {
-                encoding.y.aggregate = 'median'
+                encoding.y.aggregate = op
             }
         }
     }
 }
 
 export function distVis(props: BaseVisProps) {
-    const {
-        // dataSource,
-        // dimensions,
-        measures,
-    } = props;
-    // let markType = measures.length === 1 ? 'bar' : 'point';
+    const { pattern } = props;
+    const { fields } = pattern;
     const usedChannels: Set<string> = new Set();
-    let markType = autoMark(measures)
+    let markType = autoMark(fields)
     markFixEncoding(markType, usedChannels)
-    const enc = encode(measures, usedChannels)
-    autoAgg(enc, measures, markType)
+    // if (filters && filters.length > 0) {
+    //     usedChannels.add('color')
+    // }
+    const enc = encode(fields, usedChannels)
+    // if (filters && filters.length > 0) {
+    //     const field = filters[0].field;
+    //     enc.color = {
+    //         // field: field.fid,
+    //         // type: field.semanticType,
+    //         condition: {
+    //             test: `datum['${field.fid}'] == '${filters[0].values[0]}'`
+    //         },
+    //         value: '#aaa'
+    //         // value: '#000'
+    //     }
+    // }
+    autoAgg(enc, fields, markType)
     humanHabbit(enc);
 
     let basicSpec: any = {
-        // width: chartWidth,\
-        data: {
-            name: 'dataSource'
-            // values: dataSource
-        },
+        data: { name: 'dataSource' },
         mark: {
             type: markType
         },
-        // encoding: fastEncoding(measures)
         encoding: enc
     };
-
-
+    // if (filters && filters.length > 1) {
+    //     basicSpec.transform = filters.slice(1).map(f => ({
+    //         filter: `datum.${f.field.fid} == '${f.values[0]}'`
+    //     }))
+    // }
+    // if (filters && filters.length > 0) {
+    //     basicSpec.transform = filters.map(f => ({
+    //         filter: `datum.${f.field.fid} == '${f.values[0]}'`
+    //     }))
+    // }
     return basicSpec;
 }

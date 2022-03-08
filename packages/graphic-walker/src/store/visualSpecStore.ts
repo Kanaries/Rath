@@ -74,7 +74,7 @@ export class VizSpecStore {
             this.draggableFieldState.fields = dataset.rawFields.map((f) => ({
                 dragId: uuidv4(),
                 id: f.key,
-                name: f.key,
+                name: f.name || f.key,
                 type: f.analyticType === 'dimension' ? 'D' : 'M',
                 aggName: f.analyticType === 'measure' ? 'sum' : undefined,
             }))
@@ -83,7 +83,7 @@ export class VizSpecStore {
                 .map((f) => ({
                     dragId: uuidv4(),
                     id: f.key,
-                    name: f.key,
+                    name: f.name || f.key,
                     type: 'D'
             }))
             this.draggableFieldState.measures = dataset.rawFields
@@ -91,7 +91,7 @@ export class VizSpecStore {
                 .map((f) => ({
                     dragId: uuidv4(),
                     id: f.key,
-                    name: f.key,
+                    name: f.name || f.key,
                     type: 'M',
                     aggName: 'sum'
             }))

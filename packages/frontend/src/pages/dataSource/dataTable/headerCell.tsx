@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import DistributionMiniChart from './distributionMiniChart';
-import { FieldSummary } from '../../../service';
 import { DropdownSelect } from '@tableau/tableau-ui'
 import { BIFieldType, FieldType } from '../../../global';
 import { IFieldMeta, IRawField } from '../../../interfaces';

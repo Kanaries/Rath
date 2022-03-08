@@ -1,6 +1,6 @@
 import { RATH_INDEX_COLUMN_KEY, STORAGE_FILE_SUFFIX } from "../../constants";
 // import { BIField, Record } from "../../global";
-import { FileLoader, isASCII } from "../../utils";
+import { FileLoader } from "../../utils";
 import { Cleaner, Sampling } from 'visual-insights';
 import { FileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
@@ -44,42 +44,36 @@ export function setIndexKey(data: IRow[]): IRow[] {
     return data;
 }
 
-/**
- * 针对vega中对Unicode字段的相关bug做的调整（非ascii字符会被删除掉，会导致字段名不唯一的bug问题）
- * @param fields 
- * @param dataSource 
- * @returns 
- */
-export function fixUnicodeFields(fields: IMuteFieldBase[], dataSource: IRow[]): {
-    fields: IMuteFieldBase[],
-    dataSource: IRow[]
-} {
-    const newFields: IMuteFieldBase[] = fields.map((f, i) => {
-        const nF = { ...f };
-        if (!isASCII(nF.fid)) {
-            nF.fid = `${f.fid}(Rath_Field_${i})`
-            nF.name = f.name ? f.name : f.fid;
-        }
-        return nF
-    })
-    const newDataSource: IRow[] = dataSource.map(row => {
-        const newRow: IRow = {};
-        for (let i = 0; i < newFields.length; i++) {
-            newRow[newFields[i].fid] = row[fields[i].fid] 
-        }
-        return newRow
-    })
-    return {
-        fields: newFields,
-        dataSource: newDataSource
-    }
-}
-
 const onDataLoading = (value: number) => {
     console.log('data loading', Math.round(value * 100) + '%')
 }
+/**
+ * 调整字段key，避免一些非法符号的影响。
+ * 这个可以
+ * @param colKeys 
+ */
+function formatColKeys(colKeys: string[]): string[] {
+    return colKeys.map((col, colIndex) => {
+        return `col_${colIndex}_${Math.round(Math.random() * 100)}`
+    })
+}
 
-export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSize: number = 500) {
+function formatColKeysInRow(originalKeys: string[], newKeys: string[], data: IRow[]): IRow[] {
+    const newData: IRow[] = [];
+    for (let i = 0; i < data.length; i++) {
+        const newRow: IRow = {};
+        for (let j = 0; j < newKeys.length; j++) {
+            newRow[newKeys[j]] = data[i][originalKeys[j]];
+        }
+        newData.push(newRow)
+    }
+    return newData
+}
+
+export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSize: number = 500): Promise<{
+    fields: IMuteFieldBase[];
+    dataSource: IRow[]
+}> {
 
     /**
      * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
@@ -115,26 +109,31 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
     rawData = Cleaner.dropNullColumn(rawData, Object.keys(rawData[0])).dataSource
     rawData = setIndexKey(rawData);
     // FIXME: 第一条数据取meta的危险性
-    let fids = Object.keys(rawData[0])
+    let names = Object.keys(rawData[0])
+    const fids = formatColKeys(names);
+    rawData = formatColKeysInRow(names, fids, rawData)
     const rathIndexColRef: IMuteFieldBase = {
         fid: RATH_INDEX_COLUMN_KEY,
         analyticType: 'dimension',
         semanticType: 'nominal',
         disable: false
     }
-    tmpFields = fids.map((fid, index) => {
-        if (fid === RATH_INDEX_COLUMN_KEY) return rathIndexColRef;
+    tmpFields = names.map((name, index) => {
+        if (name === RATH_INDEX_COLUMN_KEY) return rathIndexColRef;
         return {
-            fid,
+            fid: fids[index],
+            name,
             analyticType: '?', //inferAnalyticType(rawData, fid),
             semanticType: '?', //inferSemanticType(rawData, fid),
-            disable: false
+            disable: '?'
         }
     })
     const timeFieldKeys = tmpFields.filter(f => f.semanticType === 'temporal').map(f => f.fid);
     formatTimeField(rawData, timeFieldKeys);
-    const fixedDataSet = fixUnicodeFields(tmpFields, rawData);
-    return fixedDataSet;
+    return {
+        fields: tmpFields,
+        dataSource: rawData
+    }
 }
 
 export async function loadRathStorageFile (file: File): Promise<IRathStorage> {
