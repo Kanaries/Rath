@@ -19,6 +19,7 @@ const ReactiveRenderer: React.FC = props => {
     const onGeomClick = useCallback((values: any, e: any) => {
         runInAction(() => {
             commonStore.showEmbededMenu([e.pageX, e.pageY])
+            console.log({ values })
             commonStore.setFilters(values);
         })
     }, [])

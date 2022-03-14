@@ -44,16 +44,17 @@ const LTSPage: React.FC = props => {
     const { computing, fieldMetas } = ltsPipeLineStore;
 
     const { pageIndex, visualConfig, spec, showSubinsights, insightSpaces } = exploreStore;
+    const { taskMode } = commonStore
     const [showCommonVis, setShowCommonVis] = useState<boolean>(true);
     const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
     const startAnalysis = useCallback(() => {
-        ltsPipeLineStore.startTask().then(() => {
+        ltsPipeLineStore.startTask(taskMode).then(() => {
             exploreStore.emitViewChangeTransaction(0)
         }).catch(err => {
             commonStore.showError('error', err)
         })
-    }, [ltsPipeLineStore, exploreStore, commonStore])
+    }, [ltsPipeLineStore, exploreStore, commonStore, taskMode])
 
     const downloadResults = useCallback(() => {
         exploreStore.downloadResults();

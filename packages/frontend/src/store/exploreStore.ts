@@ -3,7 +3,7 @@ import { Specification, IInsightSpace } from 'visual-insights';
 import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
 import { STORAGE_FILE_SUFFIX } from '../constants';
 import { Aggregator } from '../global';
-import { IRow, PreferencePanelConfig } from '../interfaces';
+import { IRow, ITaskTestMode, PreferencePanelConfig } from '../interfaces';
 import { rathEngineService } from '../service';
 import { isSetEqual } from '../utils';
 import { RathStorageDump } from '../utils/storage';
@@ -281,9 +281,9 @@ export class ExploreStore {
 
         document.body.removeChild(ele);
     }
-    public async getAssociatedViews () {
+    public async getAssociatedViews (taskMode = ITaskTestMode.local) {
         const space = this.insightSpaces[this.pageIndex];
-        const asso = await this.ltsPipeLineStore.getAssociatedViews(space.dimensions, space.measures);
+        const asso = await this.ltsPipeLineStore.getAssociatedViews(space.dimensions, space.measures, taskMode);
         runInAction(() => {
             this.assoListT1 = asso.assSpacesT1;
             this.assoListT2 = asso.assSpacesT2;

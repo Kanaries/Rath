@@ -2,9 +2,9 @@ import { makeAutoObservable, observable, runInAction } from "mobx";
 import { Sampling, Specification } from "visual-insights";
 import { IFieldSummary, IInsightSpace } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 
-import { IRow, ISyncEngine } from "../../interfaces";
+import { IRow, ISyncEngine, ITaskTestMode } from "../../interfaces";
 import { IVizSpace } from "../../pages/lts/association/assCharts";
-import { initRathWorker, rathEngineService } from "../../service";
+import { initRathWorker, rathEngineServerService, rathEngineService } from "../../service";
 import { IRathStorage } from "../../utils/storage";
 import { ClickHouseStore } from "../clickhouseStore";
 import { CommonStore } from "../commonStore";
@@ -51,20 +51,42 @@ export class LTSPipeLine {
     public get fieldMetas () {
         return this.dataSourceStore.fieldMetas;
     }
-    // public get in
-    public async startTask () {
+
+    public async startTask (taskMode: ITaskTestMode = ITaskTestMode.local) {
         const { cleanedData, fieldMetas } = this.dataSourceStore;
         this.computing = true;
         try {
-            const res = await rathEngineService({
-                task: 'start',
-                props: {
-                    mode: this.commonStore.computationEngine,
+            let res: any;
+            if (taskMode === ITaskTestMode.local) {
+                res = await rathEngineService({
+                    task: 'start',
+                    props: {
+                        mode: this.commonStore.computationEngine,
+                        dataSource: cleanedData,
+                        fieldMetas,
+                        viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`
+                    }
+                })
+            } else {
+                await rathEngineService({
+                    task: 'start',
+                    props: {
+                        mode: this.commonStore.computationEngine,
+                        dataSource: cleanedData,
+                        fieldMetas,
+                        viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`
+                    }
+                })
+                res = await rathEngineServerService({
+                    task: 'start',
                     dataSource: cleanedData,
-                    fieldMetas,
-                    viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`
-                }
-            })
+                    fields: fieldMetas,
+                    props: {
+                        mode: this.commonStore.computationEngine,
+                        viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`
+                    }
+                })
+            }
             PRINT_PERFORMANCE && console.log(res.performance)
             runInAction(() => {
                 // this.vie.insightSpaces.sort((a, b) => Number(a.score) - Number(b.score));
@@ -149,15 +171,74 @@ export class LTSPipeLine {
      * in future providing any view close to it (data or design)
      * adjust specify
      */
-    public async getAssociatedViews (dimensions: string[], measures: string[]): Promise<{ assSpacesT1: IVizSpace[], assSpacesT2: IVizSpace[] }> {
+    public async getAssociatedViews (dimensions: string[], measures: string[], mode: ITaskTestMode): Promise<{ assSpacesT1: IVizSpace[], assSpacesT2: IVizSpace[] }> {
         try {
             this.computing = true;
-            const res = await rathEngineService({
-                task: 'associate',
-                props: {
-                    dimensions, measures
+            let res: { assSpacesT1: IVizSpace[], assSpacesT2: IVizSpace[] } = {
+                assSpacesT1: [],
+                assSpacesT2: []
+            }
+            if (mode === ITaskTestMode.local) {
+                res = await rathEngineService({
+                    task: 'associate',
+                    props: {
+                        dimensions, measures
+                    }
+                })
+            } else {
+                const { fieldMetas, cleanedData: dataSource } = this.dataSourceStore;
+                const { t1, t2 } = await rathEngineServerService({
+                    task: 'associate',
+                    dataSource,
+                    fields: fieldMetas,
+                    props: {
+                        dimensions,
+                        measures
+                    }
+                }) as { t1: {dimensions: string[], measures: string[], score: number}[]; t2: {dimensions: string[], measures: string[], score: number}[] }
+                t1.sort((a, b) => b.score - a.score)
+                t2.sort((a, b) => b.score - a.score)
+                const assSpacesT1: IVizSpace[] = [];
+                const assSpacesT2: IVizSpace[] = [];
+                for (let  i = 0; i < t1.length; i++) {
+                    const view = await this.specify({
+                        dimensions: t1[i].dimensions,
+                        measures: t1[i].measures,
+                        significance: t1[i].score,
+                        score: t1[i].score
+                    })
+                    if (view) {
+                        assSpacesT1.push({
+                            ...view,
+                            dimensions: [],
+                            measures: [],
+                            score: t1[i].score,
+                            significance: t1[i].score
+                        });
+                    }
                 }
-            })
+                for (let  i = 0; i < t2.length; i++) {
+                    const view = await this.specify({
+                        dimensions: t2[i].dimensions,
+                        measures: t2[i].measures,
+                        significance: t2[i].score,
+                        score: t2[i].score
+                    })
+                    if (view) {
+                        assSpacesT2.push({
+                            ...view,
+                            dimensions: [],
+                            measures: [],
+                            score: t2[i].score,
+                            significance: t2[i].score
+                        });
+                    }
+                }
+                res = {
+                    assSpacesT1,
+                    assSpacesT2
+                }
+            }
             runInAction(() => {
                 this.computing = false;
             })

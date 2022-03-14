@@ -19,6 +19,7 @@ const FieldsContainer = styled.div`
 const VizOperation: React.FC = props => {
     const { exploreStore, dataSourceStore, ltsPipeLineStore, commonStore } = useGlobalStore();
     const { forkView, visualConfig, showAsso } = exploreStore
+    const { taskMode } = commonStore;
     const { dimFields, meaFields } = dataSourceStore;
     const { fieldMetas } = ltsPipeLineStore
     const dimensionOptions: IContextualMenuProps = {
@@ -49,7 +50,7 @@ const VizOperation: React.FC = props => {
                 <CommandBarButton menuProps={measureOptions} text={intl.get('common.measure')} iconProps={{ iconName: 'AddTo' }} />
                 <CommandBarButton text={intl.get('lts.commandBar.editing')} iconProps={{ iconName: 'BarChartVerticalEdit' }} onClick={customizeAnalysis} />
                 <CommandBarButton text={intl.get('lts.commandBar.associate')} iconProps={{ iconName: 'Lightbulb' }} onClick={() => {
-                    exploreStore.getAssociatedViews();
+                    exploreStore.getAssociatedViews(taskMode);
                 }} />
                 <CommandBarButton text={intl.get('lts.commandBar.constraints')} iconProps={{ iconName: 'MultiSelect' }} onClick={() => {
                     exploreStore.setShowContraints(true);

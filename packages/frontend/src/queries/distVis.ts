@@ -48,6 +48,7 @@ function encode (fields: IFieldMeta[], usedChannels: Set<string> = new Set()) {
                 encoding[chs[j]] = {
                     field: orderFields[i].fid,
                     type: orderFields[i].semanticType,
+                    title: orderFields[i].name || orderFields[i].fid
                 }
                 usedChannels.add(chs[j])
                 encoded = true;
@@ -120,10 +121,16 @@ function autoAgg (encoding: any, fields: IFieldMeta[], markType: string, op: str
     } else {
         if (markType === 'bar' || markType === 'line') {
             if (encoding.x && encoding.x.type === 'quantitative') {
-                encoding.x.aggregate = op
+                encoding.x.aggregate = op;
+                if (encoding.x.title) {
+                    encoding.x.title = `${op}(${encoding.x.title})`
+                }
             }
             if (encoding.y && encoding.y.type === 'quantitative') {
-                encoding.y.aggregate = op
+                encoding.y.aggregate = op;
+                if (encoding.y.title) {
+                    encoding.y.title = `${op}[${encoding.y.title}]`
+                }
             }
         }
     }
@@ -155,6 +162,13 @@ export function distVis(props: BaseVisProps) {
     humanHabbit(enc);
 
     let basicSpec: any = {
+        // "config": {
+        //     "range": {
+        //       "category": {
+        //         "scheme": "set2"
+        //       }
+        //     }
+        //   },
         data: { name: 'dataSource' },
         mark: {
             type: markType

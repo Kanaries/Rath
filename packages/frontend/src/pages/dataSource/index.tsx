@@ -24,7 +24,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
   const { cleanedData, cleanMethod, rawData, loading, showDataImportSelection, dataPreviewMode } = dataSourceStore;
 
-  const { exploreMode } = commonStore;
+  const { exploreMode, taskMode } = commonStore;
 
   useEffect(() => {
     // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
@@ -56,11 +56,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   }, [commonStore, pipeLineStore])
 
   const onV1EngineStart = useCallback(() => {
-    ltsPipeLineStore.startTask().then(() => {
+    ltsPipeLineStore.startTask(taskMode).then(() => {
       exploreStore.emitViewChangeTransaction(0);
     })
     commonStore.setAppKey(PIVOT_KEYS.lts);
-  }, [ltsPipeLineStore, exploreStore, commonStore])
+  }, [ltsPipeLineStore, exploreStore, commonStore, taskMode])
 
   const onCheckResults = useCallback(() => {
     exploreStore.emitViewChangeTransaction(0)

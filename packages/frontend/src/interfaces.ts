@@ -79,3 +79,8 @@ export enum IDataPreviewMode {
     meta = 'meta',
     data = 'data'
 }
+
+export enum ITaskTestMode {
+    local = 'local',
+    server = 'server'
+}

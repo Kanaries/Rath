@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
 import {
@@ -6,18 +6,23 @@ import {
   ActionButton,
   Toggle,
   DirectionalHint,
-  IDropdownOption
+  IDropdownOption,
+  Dropdown
 } from 'office-ui-fabric-react'
 import { DropdownSelect } from '@tableau/tableau-ui';
 import { observer } from 'mobx-react-lite'
 import { SUPPORT_LANG } from "../locales";
 
 import { useGlobalStore } from "../store";
-import { IComputeMode } from "../interfaces";
+import { IComputeMode, ITaskTestMode } from "../interfaces";
 const langOptions: IDropdownOption[] = SUPPORT_LANG.map(lang => ({
   key: lang.value,
   text: lang.name
 }))
+const TASK_MODE_LIST: IDropdownOption[] = [
+  { text: 'local', key: ITaskTestMode.local },
+  { text: 'server', key: ITaskTestMode.server }
+]
 
 const Container = styled.div`
   display: flex;
@@ -26,7 +31,7 @@ const Container = styled.div`
 const UserSettings: React.FC = () => {
   const target = useRef<HTMLDivElement>(null);
   const [show, setShow] = useState<boolean>(false);
-  const { langStore, pipeLineStore } = useGlobalStore();
+  const { langStore, pipeLineStore, commonStore } = useGlobalStore();
 
   return (
     <Container>
@@ -68,6 +73,14 @@ const UserSettings: React.FC = () => {
               onChange={(ev: React.MouseEvent<HTMLElement>, checked?: boolean) => {
                 pipeLineStore.setComputeMode(checked ? IComputeMode.server : IComputeMode.worker)
               }}
+            />
+            <Dropdown
+                label="task test mode"
+                options={TASK_MODE_LIST}
+                selectedKey={commonStore.taskMode}
+                onChange={(e, option) => {
+                    option && commonStore.setTaskTestMode(option.key as any)
+                }}
             />
           </div>
         </Callout>

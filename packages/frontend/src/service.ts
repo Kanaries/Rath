@@ -1,4 +1,4 @@
-import { Aggregator, DataSource,  Field, FieldType, OperatorType } from './global';
+import { DataSource,  Field, FieldType, OperatorType } from './global';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
@@ -34,7 +34,7 @@ import InferMetaWorker from './workers/metaInfer.worker?worker';
 import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
 import { MessageProps } from './workers/engine/service';
 
-import { IMuteFieldBase, IRawField, IRow } from './interfaces';
+import { IFieldMeta, IMuteFieldBase, IRawField, IRow } from './interfaces';
 
 let server = '//lobay.moe:8443';
 
@@ -391,7 +391,7 @@ export async function getInsightViewSpace (dataSource: DataSource, dimensions: s
   return ansSpace;
 }
 
-interface InferMetaServiceProps {
+export interface InferMetaServiceProps {
   dataSource: IRow[];
   fields: IMuteFieldBase[];
 }
@@ -410,4 +410,43 @@ export async function inferMetaService(props: InferMetaServiceProps): Promise<IR
     console.error(error)
   }
   return metas;
+}
+
+export interface MessageServerProps extends MessageProps {
+  dataSource: IRow[];
+  fields: IFieldMeta[];
+}
+
+function getTestServerUrl (): URL | null {
+  const url = new URL(window.location.href).searchParams.get('server');
+  if (url !== null) {
+    return new URL(url);
+  }
+  return null;
+}
+export async function rathEngineServerService (props: MessageServerProps) {
+  try {
+    const testServer = getTestServerUrl();
+    if (testServer) {
+      testServer.pathname = props.task;
+    } else {
+      throw new Error('url does not contains params called "server="');
+    }
+    const res = await fetch(testServer.href, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(props)
+    });
+    const result = await res.json();
+    if (result.success) {
+      return result.data;
+    } else {
+      throw new Error(`[result.fail] ${result.message}`);
+    }
+  } catch (error) {
+    // throw error;
+    console.error(error)
+  }
 }
