@@ -70,7 +70,6 @@ export class LitePipeStore {
         }))
 
         reaction<number>(() => this.cookedDataset.transedMetas.length, (length) => {
-            console.log('length change', length, length / EXPECTED_MAX_MEA_IN_VIEW)
             this.MAX_MEA_GROUP_NUM = Math.round(length / EXPECTED_MAX_MEA_IN_VIEW);
         })
     }

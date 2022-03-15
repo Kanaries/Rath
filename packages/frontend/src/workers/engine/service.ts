@@ -150,7 +150,7 @@ function aggregate (props: { dimensions: string[]; measures: string[]; aggregato
         const { dimensions, measures, aggregators } = props;
         const cube = engine.cube;
         const cuboid = cube.getCuboid(dimensions);
-        const aggData = cuboid.getState(measures, aggregators);
+        const aggData = cuboid.getAggregatedRows(measures, aggregators);
         return aggData;
     } else if (EngineRef.mode === 'clickhouse' && EngineRef.mode === 'clickhouse') {
         const engine = EngineRef.current;

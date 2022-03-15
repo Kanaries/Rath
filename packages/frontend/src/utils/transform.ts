@@ -44,7 +44,8 @@ export function fieldSummary2fieldMeta(props: {
             fid: s.fieldName,
             features: {
                 maxEntropy: s.maxEntropy,
-                entropy: s.entropy
+                entropy: s.entropy,
+                unique: s.distribution.length
             },
             semanticType: sType,
             analyticType: analyticTypes ? analyticTypes[i] : inferAnalyticTypeFromSemanticType(sType),

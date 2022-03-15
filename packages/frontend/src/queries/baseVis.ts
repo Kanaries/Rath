@@ -7,6 +7,7 @@ export const geomTypeMap: { [key: string]: any } = {
   // interval: 'boxplot',
   line: "line",
   point: "point",
+  area: 'area',
   // density: 'rect'
   density: "point"
 };
@@ -61,6 +62,10 @@ export function baseVis(props: BaseVisProps) {
     return targetField ? targetField.semanticType : "nominal";
   }
 
+  function getFieldMeta (fieldId: string): IFieldMeta | undefined {
+    return fieldFeatures.find(f => f.fid === fieldId);
+  }
+
   function getFieldName(fieldId: string): string {
     let targetField = fieldFeatures.find(f => f.fid === fieldId);
     if (targetField) {
@@ -78,6 +83,13 @@ export function baseVis(props: BaseVisProps) {
     row: facets[0],
     column: facets[1]
   };
+  if (geomType[0] && geomType[0] === 'line') {
+    const discreteChannels = Object.values(query).flatMap(c => c).filter(c => getFieldSemanticType(c) !== 'quantitative');
+    const crossValues = discreteChannels.map(c => getFieldMeta(c)).filter(c => c !== undefined).map(c => c!.features.unique).reduce((t, v) => t * v, 1)
+    if (dataSource.length < crossValues) {
+      geomType[0] = 'area';
+    }
+  }
   let spec: any = {
     // width: chartWidth,
     data: {
@@ -100,10 +112,14 @@ export function baseVis(props: BaseVisProps) {
   if (typeof stepSize === 'number' && typeof viewSize === 'number') {
     const xFieldType = getFieldSemanticType(fieldMap['x']);
     const yFieldType = getFieldSemanticType(fieldMap['y']);
-    spec.width = (xFieldType === 'quantitative' || xFieldType === 'temporal') ? viewSize : { step: stepSize };
-    spec.height = (yFieldType === 'quantitative' || xFieldType === 'temporal') ? viewSize : { step: stepSize };
-    basicSpec.width = spec.width;
-    basicSpec.height = spec.height
+    if (fieldMap['x']) {
+      spec.width = (xFieldType === 'quantitative' || xFieldType === 'temporal') ? viewSize : { step: stepSize };
+      basicSpec.width = spec.width;
+    }
+    if (fieldMap['y']) {
+      spec.height = (yFieldType === 'quantitative' || xFieldType === 'temporal') ? viewSize : { step: stepSize };
+      basicSpec.height = spec.height
+    }
   }
 
   for (let channel in fieldMap) {
@@ -122,6 +138,7 @@ export function baseVis(props: BaseVisProps) {
       }
     }
   }
+
   if (!defaultStack && opacity.length === 0) {
     basicSpec.encoding.opacity = { value: 0.7 };
   }

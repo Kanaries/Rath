@@ -38,6 +38,7 @@ export interface IFieldMeta extends IFieldBase {
     features: {
         entropy: number;
         maxEntropy: number;
+        unique: number;
         [key: string]: any
     };
     distribution: Array<{ memberName: string; count: number }>;

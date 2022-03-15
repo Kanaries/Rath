@@ -1,6 +1,7 @@
 import { IInsightSpace, Insight } from 'visual-insights'
 import { ViewSpace } from 'visual-insights/build/esm/insights/InsightFlow/engine';
 import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
+// import { entropy } from 'visual-insights/build/esm/statistics';
 import { IVizSpace } from '../../store/exploreStore';
 import { isSetEqual } from '../../utils';
 import { intersect } from './utils';
@@ -42,7 +43,7 @@ export class RathEngine extends VIEngine {
         const { cube, fieldDictonary } = context;
         const { dimensions, measures } = viewSpace;
         const cuboid = cube.getCuboid(viewSpace.dimensions);
-        const aggData = cuboid.getState(measures, measures.map(() => 'sum'));
+        const aggData = cuboid.getAggregatedRows(measures, measures.map(() => 'sum'));
         const insightSpaces: IInsightSpace[] = []
         const taskPool: Promise<void>[] = [];
         this.workerCollection.each((iWorker, name) => {
@@ -63,8 +64,8 @@ export class RathEngine extends VIEngine {
         let ansSet: any[] = []
         if (viewSpace.dimensions.length > 0) {
             const cuboid = this.cube.getCuboid(viewSpace.dimensions);
-            const globalDist = this.cube.getCuboid([]).getState(viewSpace.measures, viewSpace.measures.map(() => 'dist'));
-            const localDist = cuboid.getState(viewSpace.measures, viewSpace.measures.map(() => 'dist'))
+            const globalDist = this.cube.getCuboid([]).getAggregatedRows(viewSpace.measures, viewSpace.measures.map(() => 'dist'));
+            const localDist = cuboid.getAggregatedRows(viewSpace.measures, viewSpace.measures.map(() => 'dist'))
             if (globalDist.length === 0) return ansSet;
             const globalDistMapByMeasure: Map<string, number[]> = new Map();
             for (let mea of viewSpace.measures) {
@@ -220,14 +221,33 @@ export class RathEngine extends VIEngine {
     public async exploreViews(viewSpaces: ViewSpace[] = this.subSpaces): Promise<IInsightSpace[]> {
         const context = this;
         const DEFAULT_BIN_NUM = 16;
-        console.log('using new score system')
-        const { measures: globalMeasures, fieldDictonary, dataSource } = context
+        const { measures: globalMeasures, fieldDictonary } = context
         let ansSpace: IInsightSpace[] = [];
-        const globalDist = context.cube.getCuboid([]).getState(globalMeasures, globalMeasures.map(() => 'dist'));
+        const globalDist = context.cube.getCuboid([]).getAggregatedRows(globalMeasures, globalMeasures.map(() => 'dist'));
+        for (let measures of context.dataGraph.MClusters) {
+            // const ent = 
+            let totalEntLoss = 0;
+            for (let mea of measures) {
+                let ent = 0;
+                if (globalDist.length > 0) {
+                    ent = entropyAcc(globalDist[0][mea].filter((d: number) => d > 0))
+                }
+                totalEntLoss += (Math.log2(DEFAULT_BIN_NUM) - ent) / Math.log2(DEFAULT_BIN_NUM)
+            }
+            totalEntLoss /= measures.length;
+            
+            ansSpace.push({
+                dimensions: [],
+                measures: measures,
+                significance: 1,
+                score: totalEntLoss,
+                impurity: totalEntLoss
+            })
+        }
         for (let space of viewSpaces) {
             const { dimensions, measures } = space;
             let dropSpace = false;
-            const localDist = context.cube.getCuboid(dimensions).getState(measures, measures.map(() => 'dist'));
+            const localDist = context.cube.getCuboid(dimensions).getAggregatedRows(measures, measures.map(() => 'dist'));
             let totalEntLoss = 0;
             for (let mea of measures) {
                 let ent = 0;
@@ -235,6 +255,7 @@ export class RathEngine extends VIEngine {
                     ent = entropyAcc(globalDist[0][mea].filter((d: number) => d > 0))
                 }
                 let conEnt = 0;
+                // let tEnt = 0;
                 const totalCount = fieldDictonary.get(mea)!.features.size;
                 const distList = localDist.map(r => ({
                     // TODO: 讨论是否应当直接使用count
@@ -243,10 +264,12 @@ export class RathEngine extends VIEngine {
                     freq: r[mea].reduce((total: number, value: number) => total + value, 0),
                     dist: r[mea]
                 }))
+                const useNestInfluence = false;
+                // tEnt = entropy(distList.map(d => d.freq).filter(f => f > 0))
                 distList.sort((a, b) => b.freq - a.freq);
                 for (let i = 0; i < distList.length; i++) {
                     if (i >= DEFAULT_BIN_NUM - 1) break;
-                    if (distList[i].freq < DEFAULT_BIN_NUM) {
+                    if (useNestInfluence && distList[i].freq < DEFAULT_BIN_NUM) {
                         conEnt += (distList[i].freq / totalCount) * ent
                     } else {
                         const subEnt1 = entropyAcc(distList[i].dist.filter((d: number) => d > 0));
@@ -262,14 +285,16 @@ export class RathEngine extends VIEngine {
                     noiseFre += distList[i].freq;
                 }
                 if (noiseFre > 0) {
-                    if (noiseFre < DEFAULT_BIN_NUM) {
+                    if (useNestInfluence && noiseFre < DEFAULT_BIN_NUM) {
                         conEnt += (noiseFre / totalCount) * ent;
                     } else {
                         conEnt += (noiseFre / totalCount) * entropyAcc(noiseGroup.filter(d => d > 0));
                     }
                 }
                 totalEntLoss += (ent - conEnt) / Math.log2(Math.min(DEFAULT_BIN_NUM, distList.length))
-                if ((ent - conEnt) / ent < 0.05) {
+                // totalEntLoss += (ent - conEnt) / Math.log2(DEFAULT_BIN_NUM)
+                // totalEntLoss += (ent - conEnt) / Math.min(DEFAULT_BIN_NUM, distList.length)
+                if ((ent - conEnt) / ent < 0.005) {
                     dropSpace = true;
                     break;
                 }

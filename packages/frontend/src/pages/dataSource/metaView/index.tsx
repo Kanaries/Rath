@@ -14,11 +14,12 @@ const MetaView: React.FC = props => {
 
     const expandMetas: IFieldMeta[] = mutFields.map(f => {
         const meta = fieldMetas.find(m => m.fid === f.fid);
+        const dist = meta ? meta.distribution : []
         return {
             ...f,
             disable: f.disable,
-            distribution: meta ? meta.distribution : [],
-            features: meta ? meta.features: { entropy: 0, maxEntropy: 0 }
+            distribution: dist,
+            features: meta ? meta.features: { entropy: 0, maxEntropy: 0, unique: dist.length }
         }
     })
 

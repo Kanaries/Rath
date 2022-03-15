@@ -41,7 +41,7 @@ function generateFieldMetaList(fields: BIField[], summary: FieldSummary[]): IFie
     for (let i = 0; i < fields.length; i++) {
         const meta: IFieldMeta = {
             fid: fields[i].name,
-            features: { entropy: Infinity, maxEntropy: Infinity },
+            features: { entropy: Infinity, maxEntropy: Infinity, unique: 0 },
             semanticType: 'nominal',
             analyticType: fields[i].type,
             distribution: []
@@ -58,6 +58,7 @@ function generateFieldMetaList(fields: BIField[], summary: FieldSummary[]): IFie
             meta.features.maxEntropy = summary[matchIndex].entropy;
             meta.semanticType = summary[matchIndex].type;
             meta.distribution = summary[matchIndex].distribution;
+            meta.features.unique = summary[matchIndex].distribution.length
             metas.push(meta);
         }
     }
