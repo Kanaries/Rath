@@ -3,6 +3,7 @@ import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from } from "rxjs";
 import * as op from 'rxjs/operators'
 import { ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
+import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import { NextVICore } from "../dev";
 import { BIFieldType } from "../global";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
@@ -141,6 +142,47 @@ export class DataSourceStore {
     }
     public get fieldNames (): string[] {
         return this.fields.map(f => `${f.name}`)
+    }
+
+    public get hasOriginalDimensionInData () {
+        if (this.dimensions.length === 0) return false;
+        if (this.dimensions.length === 1) {
+            return !Boolean(this.dimensions.find(f => f === RATH_INDEX_COLUMN_KEY))
+        }
+        return true;
+    }
+
+    public get staisfyAnalysisCondition (): boolean {
+        if (this.cleanedData.length === 0 || this.measures.length === 0 || this.dimensions.length === 0) {
+            return false;
+        }
+        if (!this.hasOriginalDimensionInData) {
+            return false;
+        }
+        return true;
+    }
+
+    // public get groupCounts () {
+    //     return this.fieldMetas.filter(f => f.analyticType === 'dimension')
+    //         .map(f => f.features.unique)
+    //         .reduce((t, v) => t * v, 1)
+    // }
+    // /**
+    //  * 防止groupCounts累乘的时候很快就超过int最大范围的情况
+    //  */
+    // public get groupCountsLog () {
+    //     return this.fieldMetas.filter(f => f.analyticType === 'dimension')
+    //         .map(f => f.features.maxEntropy)
+    //         .reduce((t, v) => t + v, 0)
+    // }
+    public get groupMeanLimitCountsLog () {
+        const valueCountsList = this.fieldMetas.filter(f => f.analyticType === 'dimension')
+            .map(f => f.features.unique);
+        const m = valueCountsList.reduce((t, v) => t + v, 0) / valueCountsList.length;
+        // 3: 有意义的下钻层数
+        // -1: 放款一个标准，到底层的时候允许是小样本
+        const size = Math.min(3 - 1, valueCountsList.length)
+        return size * Math.log2(m)
     }
 
     public get cleanedData () {

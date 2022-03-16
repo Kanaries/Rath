@@ -13,6 +13,7 @@ import { useGlobalStore } from "../../store";
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
 import { IDataPreviewMode, IMuteFieldBase, IRow } from "../../interfaces";
 import { Card } from "../../components/card";
+import Advice from "./advice";
 
 const MARGIN_LEFT = { marginLeft: "1em" }
 
@@ -22,7 +23,15 @@ interface DataSourceBoardProps {
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
   const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, exploreStore } = useGlobalStore();
 
-  const { cleanedData, cleanMethod, rawData, loading, showDataImportSelection, dataPreviewMode } = dataSourceStore;
+  const {
+    cleanedData,
+    cleanMethod,
+    rawData,
+    loading,
+    showDataImportSelection,
+    dataPreviewMode,
+    staisfyAnalysisCondition
+  } = dataSourceStore;
 
   const { exploreMode, taskMode } = commonStore;
 
@@ -156,7 +165,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         <Stack horizontal>
           <PrimaryButton
             split
-            disabled={rawData.length === 0}
+            disabled={!staisfyAnalysisCondition}
             iconProps={{ iconName: 'Financial' }}
             text={intl.get(`${startMode.key}`)}
             menuProps={analysisOptions}
@@ -189,6 +198,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             onLoadingFailed={onSelectLoadingFailed}
           />
         </Stack>
+        { rawData.length > 0 && <Advice /> }
         <div style={{ margin: '1em 0px' }}>
           <Stack horizontal>
             <Dropdown style={{ minWidth: '180px', marginRight: '1em' }}
