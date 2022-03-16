@@ -75,6 +75,12 @@
         "viewMode": "View Mode",
         "metaView": "Meta View",
         "dataView": "Table View",
+        "advice": {
+            "lackData": "Lack of Data",
+            "lackDimension": "There should includes dimensions in the datasource.",
+            "lackMeasure": "There should includes measures in the datasource",
+            "smallSample": "The sample size is not big enough, which may influence the reliability of recommandation."
+        },
         "meta": {
             "uniqueValue": "Unique Value",
             "analyticType": "analytic type",
