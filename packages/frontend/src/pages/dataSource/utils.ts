@@ -38,8 +38,8 @@ export const useSampleOptions = function () {
  * @param data 
  */
 export function setIndexKey(data: IRow[]): IRow[] {
-    data.forEach((record, i) => {
-        record[RATH_INDEX_COLUMN_KEY] = i;
+    data.forEach((record, i, arr) => {
+        arr[i][RATH_INDEX_COLUMN_KEY] = i;
     })
     return data;
 }
@@ -107,19 +107,13 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
         throw new Error(`unsupported file type=${file.type} `)
     }
     rawData = Cleaner.dropNullColumn(rawData, Object.keys(rawData[0])).dataSource
-    rawData = setIndexKey(rawData);
     // FIXME: 第一条数据取meta的危险性
     let names = Object.keys(rawData[0])
     const fids = formatColKeys(names);
     rawData = formatColKeysInRow(names, fids, rawData)
-    const rathIndexColRef: IMuteFieldBase = {
-        fid: RATH_INDEX_COLUMN_KEY,
-        analyticType: 'dimension',
-        semanticType: 'nominal',
-        disable: false
-    }
+
+    rawData = setIndexKey(rawData);
     tmpFields = names.map((name, index) => {
-        if (name === RATH_INDEX_COLUMN_KEY) return rathIndexColRef;
         return {
             fid: fids[index],
             name,
@@ -128,8 +122,19 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
             disable: '?'
         }
     })
+    tmpFields.push({
+        fid: RATH_INDEX_COLUMN_KEY,
+        name: 'Rath Row ID',
+        analyticType: 'dimension',
+        semanticType: 'ordinal',
+        disable: false
+    })
     const timeFieldKeys = tmpFields.filter(f => f.semanticType === 'temporal').map(f => f.fid);
     formatTimeField(rawData, timeFieldKeys);
+    console.log({
+        fields: tmpFields,
+        dataSource: rawData
+    })
     return {
         fields: tmpFields,
         dataSource: rawData
