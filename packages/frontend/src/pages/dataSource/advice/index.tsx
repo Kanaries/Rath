@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { MessageBar, MessageBarType } from 'office-ui-fabric-react';
+import { MessageBar, MessageBarButton, MessageBarType } from 'office-ui-fabric-react';
 import React from 'react';
 import { useGlobalStore } from '../../../store';
 import styled from 'styled-components';
@@ -13,7 +13,12 @@ const AdviceContainer = styled.div`
 
 `
 
-const Advice: React.FC = props => {
+interface AdviceProps {
+    onForceAnalysis?: () => void;
+}
+
+const Advice: React.FC<AdviceProps> = props => {
+    const { onForceAnalysis } = props;
     const { dataSourceStore } = useGlobalStore();
     const { measures, cleanedData, hasOriginalDimensionInData, groupMeanLimitCountsLog } = dataSourceStore;
 
@@ -25,13 +30,21 @@ const Advice: React.FC = props => {
         }
         {
             !hasOriginalDimensionInData && <MessageBar className="row"
-                messageBarType={MessageBarType.error}>
+                isMultiline={false}
+                actions={<div>
+                    <MessageBarButton onClick={onForceAnalysis}>{intl.get('dataSource.advice.forceAnalysis')}</MessageBarButton>
+                </div>}
+                messageBarType={MessageBarType.blocked}>
                     {intl.get('dataSource.advice.lackDimension')}
                 </MessageBar>
         }
         {
             measures.length === 0 && <MessageBar className="row"
-                messageBarType={MessageBarType.error}>
+                isMultiline={false}
+                actions={<div>
+                    <MessageBarButton onClick={onForceAnalysis}>{intl.get('dataSource.advice.forceAnalysis')}</MessageBarButton>
+                </div>}
+                messageBarType={MessageBarType.blocked}>
                     {intl.get('dataSource.advice.lackMeasure')}
                 </MessageBar>
         }

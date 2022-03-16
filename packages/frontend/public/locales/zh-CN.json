@@ -77,9 +77,10 @@
         "dataView": "数据视图",
         "advice": {
             "lackData": "缺少有效数据",
-            "lackDimension": "数据集中缺少维度。",
-            "lackMeasure": "数据集中缺少度量。",
-            "smallSample": "数据集中样本数量低于预期，可能会对推荐结果的一般性造成影响。（小样本问题）"
+            "lackDimension": "数据集中缺少维度，无法进行完整的分析任务。",
+            "lackMeasure": "数据集中缺少度量，无法进行完整的分析任务。",
+            "smallSample": "数据集中样本数量低于预期，可能会对推荐结果的一般性造成影响。（小样本问题）",
+            "forceAnalysis": "强制分析"
         },
         "meta": {
             "title": "元数据视图",

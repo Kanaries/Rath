@@ -198,7 +198,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             onLoadingFailed={onSelectLoadingFailed}
           />
         </Stack>
-        { rawData.length > 0 && <Advice /> }
+        { rawData.length > 0 && <Advice onForceAnalysis={() => { startMode.onClick && startMode.onClick() }} /> }
         <div style={{ margin: '1em 0px' }}>
           <Stack horizontal>
             <Dropdown style={{ minWidth: '180px', marginRight: '1em' }}
