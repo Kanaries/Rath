@@ -1,4 +1,4 @@
-import { DataSource,  Field, FieldType, OperatorType } from './global';
+import { Field, OperatorType } from './global';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
@@ -35,6 +35,7 @@ import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
 import { MessageProps } from './workers/engine/service';
 
 import { IFieldMeta, IMuteFieldBase, IRawField, IRow } from './interfaces';
+import { ISemanticType } from 'visual-insights';
 
 let server = '//lobay.moe:8443';
 
@@ -122,9 +123,9 @@ export interface FieldSummary {
   entropy: number;
   maxEntropy: number;
   distribution: Array<{ memberName: string; count: number }>
-  type: FieldType
+  type: ISemanticType
 }
-export async function getFieldsSummaryService (dataSource: DataSource, fields: string[] | Field[], useServer?: boolean): Promise<FieldSummary[]> {
+export async function getFieldsSummaryService (dataSource: IRow[], fields: string[] | Field[], useServer?: boolean): Promise<FieldSummary[]> {
   let fieldSummaryList: FieldSummary[] = [];
   if (useServer) {
     try {
@@ -161,11 +162,11 @@ export async function getFieldsSummaryService (dataSource: DataSource, fields: s
 }
 
 interface GroupFieldsResponse {
-  groupedData: DataSource;
+  groupedData: IRow[];
   newFields: Field[];
   fields: Field[];
 }
-export async function getGroupFieldsService (dataSource: DataSource, fields: Field[], useServer?: boolean): Promise<GroupFieldsResponse> {
+export async function getGroupFieldsService (dataSource: IRow[], fields: Field[], useServer?: boolean): Promise<GroupFieldsResponse> {
   let ans: GroupFieldsResponse = {
     groupedData: [],
     newFields: [],
@@ -211,7 +212,7 @@ export interface Subspace {
   measures: Array<{name: string; value: number}>;
   correlationMatrix: number[][];
 }
-export async function combineFieldsService (dataSource: DataSource, dimensions: string[], measures: string[], operator: OperatorType, useServer?: boolean): Promise<Subspace[]> {
+export async function combineFieldsService (dataSource: IRow[], dimensions: string[], measures: string[], operator: OperatorType, useServer?: boolean): Promise<Subspace[]> {
   let subspaceList: Subspace[] = [];
   if (useServer) {
     try {
@@ -370,7 +371,7 @@ export async function generateDashBoard (props: IDashBoardServiceProps): Promise
   return dashBoardList;
 }
 
-export async function getInsightViewSpace (dataSource: DataSource, dimensions: string[], measures: string[]): Promise<InsightSpace[]> {
+export async function getInsightViewSpace (dataSource: IRow[], dimensions: string[], measures: string[]): Promise<InsightSpace[]> {
   let ansSpace: InsightSpace[] = [];
   try {
     const worker = new InsightViewWorker();

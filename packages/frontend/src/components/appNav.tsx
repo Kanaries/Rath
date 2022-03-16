@@ -32,20 +32,9 @@ const LogoBar = styled.div`
 
 interface AppNavProps {}
 const AppNav: React.FC<AppNavProps> = props => {
-    const { langStore, commonStore } = useGlobalStore()
+    const { commonStore } = useGlobalStore()
 
     const { appKey } = commonStore;
-
-    let pivotKeys: string[] = [
-        PIVOT_KEYS.dataSource,
-        PIVOT_KEYS.lts,
-        PIVOT_KEYS.editor,
-        PIVOT_KEYS.dashBoard,
-        PIVOT_KEYS.noteBook,
-        PIVOT_KEYS.gallery,
-        PIVOT_KEYS.explainer,
-        PIVOT_KEYS.support
-    ]
 
     const getLinks = useCallback((pivotKeys: string[]) => {
         return pivotKeys.map(p => {
@@ -62,16 +51,6 @@ const AppNav: React.FC<AppNavProps> = props => {
         })
     }, [commonStore])
 
-    let pivotList = pivotKeys.map((page, index) => {
-        return { title: page, itemKey: page }
-    })
-
-    if (langStore.loaded && langStore.lang) {
-        pivotList = pivotKeys.map(p => intl.get(`menu.${p}`))
-            .map((page, index) => {
-                return { title: page, itemKey: pivotKeys[index] }
-            })
-    }
     const groups: INavLinkGroup[] = [
         {
             links: [

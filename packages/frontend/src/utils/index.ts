@@ -7,6 +7,7 @@ import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visu
 import { RATH_INDEX_COLUMN_KEY } from '../constants';
 
 function isASCII(str: string) {
+  // eslint-disable-next-line no-control-regex
   return /^[\x00-\x7F]*$/.test(str)
 }
 

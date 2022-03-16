@@ -2122,13 +2122,6 @@
     "@svgr/plugin-svgo" "^5.4.0"
     loader-utils "^2.0.0"
 
-"@tableau/tableau-ui@^3.0.0":
-  version "3.2.0"
-  resolved "https://registry.nlark.com/@tableau/tableau-ui/download/@tableau/tableau-ui-3.2.0.tgz#25277a07111e281042d70cd610e52ba1104aaf25"
-  integrity sha1-JSd6BxEeKBBC1wzWEOUroRBKryU=
-  dependencies:
-    typestyle "2.0.4"
-
 "@testing-library/dom@^7.28.1":
   version "7.31.2"
   resolved "https://registry.nlark.com/@testing-library/dom/download/@testing-library/dom-7.31.2.tgz#df361db38f5212b88555068ab8119f5d841a8c4a"
@@ -5199,11 +5192,6 @@ cssstyle@^2.3.0:
   dependencies:
     cssom "~0.3.6"
 
-csstype@^2.4.0:
-  version "2.6.17"
-  resolved "https://registry.nlark.com/csstype/download/csstype-2.6.17.tgz#4cf30eb87e1d1a005d8b6510f95292413f6a1c0e"
-  integrity sha1-TPMOuH4dGgBdi2UQ+VKSQT9qHA4=
-
 csstype@^3.0.2:
   version "3.0.8"
   resolved "https://registry.nlark.com/csstype/download/csstype-3.0.8.tgz#d2266a792729fb227cd216fb572f43728e1ad340"
@@ -6846,11 +6834,6 @@ fragment-cache@^0.2.1:
   integrity sha1-QpD60n8T6Jvn8zeZxrxaCr//DRk=
   dependencies:
     map-cache "^0.2.2"
-
-free-style@2.6.1:
-  version "2.6.1"
-  resolved "https://registry.npm.taobao.org/free-style/download/free-style-2.6.1.tgz#6af512568291195854842cbbaacd95578a6a9a8b"
-  integrity sha1-avUSVoKRGVhUhCy7qs2VV4pqmos=
 
 fresh@0.5.2, fresh@~0.5.2:
   version "0.5.2"
@@ -13864,14 +13847,6 @@ typescript@^4.4.3:
   version "4.4.3"
   resolved "https://registry.npmmirror.com/typescript/download/typescript-4.4.3.tgz?cache=0&sync_timestamp=1632554372698&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Ftypescript%2Fdownload%2Ftypescript-4.4.3.tgz#bdc5407caa2b109efd4f82fe130656f977a29324"
   integrity sha1-vcVAfKorEJ79T4L+EwZW+XeikyQ=
-
-typestyle@2.0.4:
-  version "2.0.4"
-  resolved "https://registry.npm.taobao.org/typestyle/download/typestyle-2.0.4.tgz#b8da5feaf8a4f9d1f69066f3cc4659098bd08457"
-  integrity sha1-uNpf6vik+dH2kGbzzEZZCYvQhFc=
-  dependencies:
-    csstype "^2.4.0"
-    free-style "2.6.1"
 
 ua-parser-js@^0.7.18:
   version "0.7.28"

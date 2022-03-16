@@ -1,13 +1,14 @@
-import { DataSource } from '../global';
+import { IRow } from "../interfaces";
 
-export function jsonLoader (file: File): Promise<DataSource> {
+
+export function jsonLoader (file: File): Promise<IRow[]> {
   return new Promise((resolve, reject) => {
     let reader = new FileReader()
     reader.readAsText(file)
     reader.onload = (ev) => {
       if (ev.target) {
         try {
-          const rawData: DataSource = JSON.parse(ev.target.result as string);
+          const rawData: IRow[] = JSON.parse(ev.target.result as string);
           resolve(rawData);
         } catch (error) {
           reject(error)

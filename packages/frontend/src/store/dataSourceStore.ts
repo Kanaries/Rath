@@ -2,10 +2,9 @@ import { makeAutoObservable, observable, runInAction } from "mobx";
 import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from } from "rxjs";
 import * as op from 'rxjs/operators'
-import { ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
+import { IAnalyticType, ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import { NextVICore } from "../dev";
-import { BIFieldType } from "../global";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
 import { getFieldsSummaryService, inferMetaService } from "../service";
@@ -227,7 +226,7 @@ export class DataSourceStore {
         this.cleanMethod = method;
     }
 
-    public updateFieldAnalyticType (type: BIFieldType, fid: string) {
+    public updateFieldAnalyticType (type: IAnalyticType, fid: string) {
         const target = this.mutFields.find(f => f.fid === fid);
         if (target) {
             target.analyticType = type;

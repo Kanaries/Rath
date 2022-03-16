@@ -7,7 +7,6 @@ import MetaView from './metaView/index';
 import { CleanMethod, useCleanMethodList } from './clean';
 import Selection from './selection/index';
 import ImportStorage from "./importStorage";
-import { Record } from "../../global";
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
@@ -45,7 +44,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
   const cleanMethodListLang = useCleanMethodList();
 
-  const dataImportButton = useCallback((text: string, dataSource: Record[]) => {
+  const dataImportButton = useCallback((text: string, dataSource: IRow[]) => {
     let UsedButton = dataSource.length === 0 ? PrimaryButton : DefaultButton;
     return (
       <UsedButton

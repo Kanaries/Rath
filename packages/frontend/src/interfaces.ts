@@ -1,6 +1,6 @@
 // define new interfaces here, global.ts is no longer maintained.
-import { IFieldSummary, IInsightSpace } from "visual-insights";
-import { Aggregator, BIFieldType, FieldType } from "./global";
+import { IAnalyticType, IFieldSummary, IInsightSpace, ISemanticType } from "visual-insights";
+import { Aggregator } from "./global";
 
 export interface IRow {
     [key: string]: any
@@ -13,8 +13,8 @@ export interface IRow {
 interface IFieldBase {
     fid: string;
     name?: string;
-    analyticType: BIFieldType;
-    semanticType: FieldType;
+    analyticType: IAnalyticType;
+    semanticType: ISemanticType;
 }
 export interface IRawField extends IFieldBase {
     disable?: boolean;
@@ -49,8 +49,6 @@ export enum IComputeMode {
     server = 'server',
     worker = 'worker'
 }
-
-export type IAnalyticType = 'dimension' | 'measure';
 
 export interface PreferencePanelConfig {
     aggregator: Aggregator;

@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import aggregate from 'cube-core';
 import embed from 'vega-embed';
-import { DataSource, Field, globalRef } from '../global'
+import { globalRef } from '../global'
 import { baseVis, commonVis } from '../queries/index';
 import { EDITOR_URL } from '../constants';
-import { IFieldMeta } from '../interfaces';
+import { IFieldMeta, IRow } from '../interfaces';
 
 // import { simpleAggregate } from 'visual-insights/build/esm/statistics';
 export const geomTypeMap: {[key: string]: any} = {
@@ -29,7 +29,7 @@ export interface BaseChartProps {
   defaultAggregated: boolean;
   defaultStack: boolean;
   aggregator: 'sum' | 'mean' | 'count';
-  dataSource: DataSource;
+  dataSource: IRow[];
   dimensions: string[];
   measures: string[];
   fieldFeatures: IFieldMeta[];

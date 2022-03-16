@@ -1,7 +1,7 @@
 import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { Subspace } from '../../service';
 import embed from 'vega-embed';
-import { DataSource } from '../../global';
+import { IRow } from '../../interfaces';
 
 function encodeArr (arr: any[]): string {
   return arr.join(',')
@@ -32,7 +32,7 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
     }
   }, [subspaceList, onSpaceChange])
 
-  const values = useMemo<DataSource>(() => {
+  const values = useMemo<IRow[]>(() => {
     let ans = [];
     // todos:
     // the fold operation here is a tmp solution. it is designed when I don't there is a api in vega to handle event listener.
@@ -108,7 +108,7 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
   useEffect(() => {
     let space = subspaceList[curIndex];
     if (relationChart.current && subspaceList.length > 0 && space) {
-      let matrix: DataSource = [];
+      let matrix: IRow[] = [];
       
       for (let i = 0; i < space.correlationMatrix.length; i++) {
           for (let j = 0; j < space.correlationMatrix[i].length; j++) {

@@ -1,18 +1,19 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { DashBoard } from "../../service";
-import { Aggregator, DataSource, Field } from "../../global";
+import { Aggregator, Field } from "../../global";
 import { specification } from "visual-insights";
 import { useComposeState } from "../../hooks/index";
 import { IconButton } from "office-ui-fabric-react";
 import IndicatorCard from "./indicatorCard";
 import ReactVega from '../../components/react-vega';
 import { DataField, featureVis, targetVis } from '../../queries/index';
+import { IRow } from "../../interfaces";
 
 const IndicatorCardType = "indicator" as const;
 
 interface CombinedChartProps {
   dashBoard: DashBoard;
-  dataSource: DataSource;
+  dataSource: IRow[];
   dimScores: [string, number, number, Field][];
   aggregator?: Aggregator;
 }
@@ -132,7 +133,7 @@ const CombinedChart: React.FC<CombinedChartProps> = props => {
     });
   }, [dashBoard, chartStateList, setGlobalFilters]);
 
-  const vsourceList = useMemo<Array<DataSource>>(() => {
+  const vsourceList = useMemo<IRow[][]>(() => {
     let ans = [];
     const filters = Object.keys(globalFilters).map(fieldName => {
       return {

@@ -9,7 +9,7 @@ import {
   IDropdownOption,
   Dropdown
 } from 'office-ui-fabric-react'
-import { DropdownSelect } from '@tableau/tableau-ui';
+import DropdownSelect from "./dropDownSelect";
 import { observer } from 'mobx-react-lite'
 import { SUPPORT_LANG } from "../locales";
 
@@ -36,6 +36,7 @@ const UserSettings: React.FC = () => {
   return (
     <Container>
       <DropdownSelect
+        border
         value={langStore.lang}
         onChange={(e) => {
           langStore.useLocales(e.target.value)

@@ -2,7 +2,7 @@ import { useObserver } from 'mobx-react-lite';
 import { useMemo } from 'react';
 import intl from "react-intl-universal";
 import { Cleaner } from 'visual-insights';
-import { DataSource } from '../../global';
+import { IRow } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 
 const { dropNull, simpleClean, useMode } = Cleaner;
@@ -11,10 +11,10 @@ const { dropNull, simpleClean, useMode } = Cleaner;
 // cleanMethodList has redundency.
 // clean method type, cleanData(switch), cleanMethodList should be maintained in one structure.
 export type CleanMethod = 'dropNull' | 'useMode' | 'simpleClean' | 'none';
-function unClean(dataSource: DataSource) {
+function unClean(dataSource: IRow[]) {
   return [...dataSource];
 }
-export function cleanData (dataSource: DataSource, dimensions: string[], measures: string[], method: CleanMethod): DataSource {
+export function cleanData (dataSource: IRow[], dimensions: string[], measures: string[], method: CleanMethod): IRow[] {
   // hint: dropNull works really bad when we test titanic dataset.
   // useMode fails when there are more null values than normal values;
   switch (method) {

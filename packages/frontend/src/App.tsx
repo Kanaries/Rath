@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import intl from 'react-intl-universal';
 import { useGlobalStore, StoreWrapper } from './store/index'
 import { observer } from "mobx-react-lite";
 import "./App.css";
@@ -29,28 +28,6 @@ require('intl/locale-data/jsonp/zh.js')
 function App() {
   const { langStore, commonStore } = useGlobalStore()
   const { appKey } = commonStore;
-
-  let pivotKeys: string[] = [
-    PIVOT_KEYS.dataSource,
-    PIVOT_KEYS.lts,
-    PIVOT_KEYS.editor,
-    PIVOT_KEYS.dashBoard,
-    PIVOT_KEYS.noteBook,
-    PIVOT_KEYS.gallery,
-    PIVOT_KEYS.explainer,
-    PIVOT_KEYS.support
-  ]
-
-  let pivotList = pivotKeys.map((page, index) => {
-    return { title: page, itemKey: page }
-  })
-
-  if (langStore.loaded && langStore.lang) {
-    pivotList = pivotKeys.map(p => intl.get(`menu.${p}`))
-      .map((page, index) => {
-        return { title: page, itemKey: pivotKeys[index] }
-      })
-  }
 
   useEffect(() => {
     initRathWorker(commonStore.computationEngine);
