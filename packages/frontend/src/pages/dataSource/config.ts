@@ -47,12 +47,22 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
     CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
     BTC_GOLD: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds_btc_gold_service.json",
+    BIKE_SHARING: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-bikesharing-service.json',
+    CAR_SALES: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-bikesharing-service.json',
+    COLLAGE: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-collage-service.json',
+    TITANIC: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-titanic-service.json',
+    KELPER: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-kelper-service.json',
 } : {
     // CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     CARS: "http://localhost:3000/datasets/ds-cars-service.json",
     // STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
     STUDENTS: "http://localhost:3000/datasets/ds-students-service.json",
     BTC_GOLD: "http://localhost:3000/datasets/ds_btc_gold_service.json",
+    BIKE_SHARING: 'http://localhost:3000/datasets/ds-bikesharing-service.json',
+    CAR_SALES: 'http://localhost:3000/datasets/ds-bikesharing-service.json',
+    COLLAGE: 'http://localhost:3000/datasets/ds-collage-service.json',
+    TITANIC: 'http://localhost:3000/datasets/ds-titanic-service.json',
+    KELPER: 'http://localhost:3000/datasets/ds-kelper-service.json',
 } as const;
 
 export type IDemoDataKey = keyof typeof DemoDataAssets;
@@ -61,16 +71,36 @@ export const useDemoDataOptions = function (): Array<{key: IDemoDataKey; text: s
     const options = useMemo<Array<{ key: IDemoDataKey; text: string }>>(() => {
         return [
             {
-                key: 'BTC_GOLD',
-                text: "2022MCM Problem C: Trading Strategies"
-            },
-            {
                 key: "CARS",
                 text: "Cars",
             },
             {
                 key: "STUDENTS",
-                text: "students"
+                text: "Students' Performance"
+            },
+            {
+                key: "BIKE_SHARING",
+                text: "Bike Sharing"
+            },
+            {
+                key: "CAR_SALES",
+                text: "Car Sales"
+            },
+            {
+                key: "COLLAGE",
+                text: "Collage"
+            },
+            {
+                key: "KELPER",
+                text: "NASA Kelper"
+            },
+            {
+                key: 'BTC_GOLD',
+                text: "2022MCM Problem C: Trading Strategies"
+            },
+            {
+                key: "TITANIC",
+                text: "Titanic"
             }
         ];
     }, []);

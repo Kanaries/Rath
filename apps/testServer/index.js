@@ -27,38 +27,32 @@ app.all("*", function (req, res, next) {
     }
 });
 app.post("/associate", function (req, res) {
-    console.log("[/assocaite]", req);
+    // console.log("[/assocaite]", req);
     const fields = req.body.fields;
-    res.json({
-        success: true,
-        data: {
-            t1: [
-                {
-                    dimensions: fields
-                        .filter((f) => f.analyticType === "dimension")
-                        .slice(0, 1)
-                        .map((f) => f.fid),
-                    measures: fields
-                        .filter((f) => f.analyticType === "measure")
-                        .slice(0, 1)
-                        .map((f) => f.fid),
-                    score: 2,
-                },
-                {
-                    dimensions: fields
-                        .filter((f) => f.analyticType === "dimension")
-                        .slice(1, 2)
-                        .map((f) => f.fid),
-                    measures: fields
-                        .filter((f) => f.analyticType === "measure")
-                        .slice(1, 2)
-                        .map((f) => f.fid),
-                    score: 1,
-                },
-            ],
-            t2: [],
-        },
-    });
+    const returns = JSON.parse(fs.readFileSync('/Users/chenhao/Downloads/result(3).json').toString())
+    const result1 = returns.data.t1;
+    for (let i = 0; i < result1.length; i++) {
+        result1[i].dimensions = result1[i].dimensions.map(d => {
+            const target = fields.find(f => f.fid.split('_')[1] === d.split('_')[1]);
+            return target.fid;
+        }).filter(f => Boolean(f));
+        result1[i].measures = result1[i].measures.map(d => {
+            const target = fields.find(f => f.fid.split('_')[1] === d.split('_')[1]);
+            return target.fid;
+        }).filter(f => Boolean(f));
+    }
+    const result2 = returns.data.t2;
+    for (let i = 0; i < result2.length; i++) {
+        result2[i].dimensions = result2[i].dimensions.map(d => {
+            const target = fields.find(f => f.fid.split('_')[1] === d.split('_')[1]);
+            return target.fid;
+        }).filter(f => Boolean(f));
+        result2[i].measures = result2[i].measures.map(d => {
+            const target = fields.find(f => f.fid.split('_')[1] === d.split('_')[1]);
+            return target.fid;
+        }).filter(f => Boolean(f));
+    }
+    res.json(returns);
 });
 
 app.post("/start", function (req, res) {

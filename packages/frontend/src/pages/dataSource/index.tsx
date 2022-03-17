@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import intl from 'react-intl-universal'
-import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, Icon } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
@@ -151,6 +151,20 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     return analysisOptions.items[0]
   }, [hasResults, exploreMode, analysisOptions])
 
+  const exportData = useCallback(() => {
+    const ds = dataSourceStore.exportDataAsDSService()
+    const content = JSON.stringify(ds);
+    const ele = document.createElement('a');
+    ele.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+    ele.setAttribute('download', 'dataset-service.json')
+    ele.style.display = 'none';
+    document.body.appendChild(ele)
+    ele.click();
+
+    document.body.removeChild(ele);
+
+  }, [dataSourceStore])
+
   // useEffect(() => {
   //   console.log('meta update')
   //   dataSourceStore.getFieldsMetas();
@@ -220,17 +234,20 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           </Stack>
         </div>
         <div style={{ margin: '1em 0px' }}>
-          <ComboBox
-            styles={{ root: { maxWidth: '180px' } }}
-            selectedKey={cleanMethod}
-            label={intl.get('dataSource.cleanMethod')}
-            allowFreeform={true}
-            autoComplete="on"
-            options={cleanMethodListLang}
-            onChange={(e, option) => {
-              option && dataSourceStore.setCleanMethod(option.key as CleanMethod)
-            }}
-          />
+          <Stack horizontal>
+            <ComboBox
+              styles={{ root: { maxWidth: '180px' } }}
+              selectedKey={cleanMethod}
+              label={intl.get('dataSource.cleanMethod')}
+              allowFreeform={true}
+              autoComplete="on"
+              options={cleanMethodListLang}
+              onChange={(e, option) => {
+                option && dataSourceStore.setCleanMethod(option.key as CleanMethod)
+              }}
+            />
+            <IconButton onClick={exportData} iconProps={{ iconName: 'download' }}>download</IconButton>
+          </Stack>
         </div>
         <p style={{ fontSize: 12, fontWeight: 400, color: '#595959' }}>{intl.get('dataSource.tip')}</p>
         <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>

@@ -256,6 +256,9 @@ export class RathEngine extends VIEngine {
                 }
                 let conEnt = 0;
                 // let tEnt = 0;
+                if (!fieldDictonary.has(mea)) {
+                    continue;
+                }
                 const totalCount = fieldDictonary.get(mea)!.features.size;
                 const distList = localDist.map(r => ({
                     // TODO: 讨论是否应当直接使用count

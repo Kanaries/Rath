@@ -281,6 +281,20 @@ export class DataSourceStore {
         }
     }
 
+    public exportDataAsDSService(): IDatasetBase {
+        const { cleanedData, fieldMetas } = this;
+        return {
+            dataSource: cleanedData,
+            fields: fieldMetas.map(f => ({
+                name: f.name,
+                analyticType: f.analyticType,
+                semanticType: f.semanticType,
+                disable: f.disable,
+                fid: f.fid
+            }))
+        }
+    }
+
     public importStore(state: IDataSourceStoreStorage) {
         this.rawData = state.rawData;
         this.mutFields = state.mutFields;
