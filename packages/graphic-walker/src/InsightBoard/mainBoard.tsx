@@ -120,29 +120,38 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
     }
   }, [visIndex, recSpaces, visSpaces, fieldsWithType, dataSource])
 
-  const FilterDesc = useMemo<string>(() => {
+  const FilterDesc = useMemo<React.ReactElement[]>(() => {
     if (filters) {
       const dimValues = Object.keys(filters)
       .filter(k => filters[k].length > 0)
-        .map((k) => {
-          return `${k}=${filters[k]}`;
+        .map((k, ki) => {
+          return <div key={`dim-${ki}`}>
+            <div className="inline bg-gray-400 p-1 rounded underline text-white">{k}</div>
+            <div className="inline text-lg ml-1 mr-1">=</div>
+            <div className="inline bg-blue-600 p-1 rounded text-white">{filters[k]}</div>
+          </div>
         });
-      return `选中对象${dimValues.join(', ')}的数据`; 
+     return dimValues
     }
-    return ''
+    return []
   }, [filters])
 
-  const valueDesc = useMemo<string>(() => {
-    const meaStatus = valueExp.map(
-        (mea) => `${mea.key}(${mea.op})的取值${mea.score === 1 ? '大于' : '小于'}预期`
+  const valueDesc = useMemo<React.ReactElement[]>(() => {
+    const meaStatus = valueExp.map((mea, mi) => 
+      <div key={`mea-${mi}`}>
+        <span className="bg-gray-400 p-1 rounded underline text-white">{mea.key}({mea.op})</span>的取值<span className="bg-red-500 p-1 rounded text-white">{mea.score === 1 ? '大于' : '小于'}预期 </span>
+      </div>
     );
-    return meaStatus.join(', ');
+    return meaStatus
   }, [valueExp])
 
   return (
       <div style={{ maxHeight: '720px', minHeight: '200px', overflowY: 'auto', maxWidth: '880px' }}>
-          <p>
-              {FilterDesc}, {valueDesc}
+          <p className="text-xs">
+              {FilterDesc}
+          </p>
+          <p className="text-xs mt-2 mb-2">
+          {valueDesc}
           </p>
           {loading && (
               <div className="animate-spin inline-block mr-2 ml-2 w-16 h-16 rounded-full border-t-2 border-l-2 border-blue-500"></div>

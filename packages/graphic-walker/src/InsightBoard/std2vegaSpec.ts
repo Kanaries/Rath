@@ -166,6 +166,7 @@ export function baseVis(
         spec = {
             ...spec,
             layer: [basicSpec, basicSpecFilter],
+            "resolve": {"scale": {"y": "independent"}}
         };
     }
     return spec;

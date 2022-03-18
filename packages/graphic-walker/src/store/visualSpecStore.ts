@@ -122,7 +122,7 @@ export class VizSpecStore {
         (Object.keys(state) as (keyof DraggableFieldState)[])
             .filter(dkey => !MetaFieldKeys.includes(dkey))
             .forEach(dkey => {
-                fields.push(...draggableFieldState[dkey].filter(f => f.type === 'D'))
+                fields.push(...state[dkey].filter(f => f.type === 'D'))
             })
         return fields;
     }
@@ -134,9 +134,9 @@ export class VizSpecStore {
         const state = toJS(draggableFieldState);
         const fields: IViewField[] = [];
         (Object.keys(state) as (keyof DraggableFieldState)[])
-            .filter(dkey => MetaFieldKeys.includes(dkey))
+            .filter(dkey => !MetaFieldKeys.includes(dkey))
             .forEach(dkey => {
-                fields.push(...draggableFieldState[dkey].filter(f => f.type === 'M'))
+                fields.push(...state[dkey].filter(f => f.type === 'M'))
             })
         return fields;
     }

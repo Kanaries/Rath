@@ -158,7 +158,6 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
                 // spec.encoding = singleView.encoding;
             } else {
                 spec.concat = [];
-                console.log('latest', rowRepeatFields, colRepeatFields, rowDims, colDims.slice(-1))
                 for (let i = 0; i < rowRepeatFields.length; i++) {
                     for (let j = 0; j < colRepeatFields.length; j++) {
                         const singleView = getSingleView(
