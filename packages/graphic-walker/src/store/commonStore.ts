@@ -87,6 +87,12 @@ export class CommonStore {
         this.tmpDSRawFields = result.fields;
     }
 
+    public updateTempSTDDS (dataset: IDataSetInfo) {
+        this.tmpDataSource = dataset.dataSource;
+        this.tmpDSRawFields = dataset.rawFields;
+        this.tmpDSName = dataset.name;
+    }
+
     public commitTempDS () {
         const { tmpDSName, tmpDSRawFields, tmpDataSource } = this;
         this.addAndUseDS({

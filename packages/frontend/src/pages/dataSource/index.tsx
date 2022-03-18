@@ -234,7 +234,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           </Stack>
         </div>
         <div style={{ margin: '1em 0px' }}>
-          <Stack horizontal>
+          <Stack horizontal verticalAlign="end">
             <ComboBox
               styles={{ root: { maxWidth: '180px' } }}
               selectedKey={cleanMethod}
@@ -246,7 +246,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 option && dataSourceStore.setCleanMethod(option.key as CleanMethod)
               }}
             />
-            <IconButton onClick={exportData} iconProps={{ iconName: 'download' }}>download</IconButton>
+            <IconButton title="Download Dataset" onClick={exportData} iconProps={{ iconName: 'download' }} />
           </Stack>
         </div>
         <p style={{ fontSize: 12, fontWeight: 400, color: '#595959' }}>{intl.get('dataSource.tip')}</p>

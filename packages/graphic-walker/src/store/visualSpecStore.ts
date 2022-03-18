@@ -28,6 +28,21 @@ export const MetaFieldKeys: Array<keyof DraggableFieldState> = [
     'fields'
 ]
 
+const CHANNEL_LIMIT = {
+    rows: Infinity,
+    columns: Infinity,
+    color: 1,
+    opacity: 1,
+    size: 1,
+}
+
+function getChannelSizeLimit (channel: string): number {
+    if (typeof CHANNEL_LIMIT[channel] === 'undefined') return 0;
+    return CHANNEL_LIMIT[channel];
+}
+
+
+
 function geomAdapter (geom: string) {
     switch (geom) {
         case 'interval':
@@ -164,7 +179,10 @@ export class VizSpecStore {
             [movingField] = this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
         }
         if (MetaFieldKeys.includes(destinationKey))return;
-        this.draggableFieldState[destinationKey].splice(destinationIndex, 0, movingField)
+        const limitSize = getChannelSizeLimit(destinationKey);
+        const fixedDestinationIndex = Math.min(destinationIndex, limitSize - 1);
+        const overflowSize = Math.max(0, this.draggableFieldState[destinationKey].length + 1 - limitSize);
+        this.draggableFieldState[destinationKey].splice(fixedDestinationIndex, overflowSize, movingField)
     }
     public removeField(sourceKey: keyof DraggableFieldState, sourceIndex: number) {
         if (MetaFieldKeys.includes(sourceKey))return;
