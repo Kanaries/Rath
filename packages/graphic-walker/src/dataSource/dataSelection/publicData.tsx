@@ -20,7 +20,7 @@ const PublicData: React.FC<IPublicDataProps> = props => {
                             commonStore.updateTempSTDDS({
                                 dataSource: res.dataSource,
                                 rawFields: res.fields.map(f => ({
-                                    key: f.fid,
+                                    fid: f.fid,
                                     name: f.name,
                                     analyticType: f.analyticType,
                                     semanticType: f.semanticType,

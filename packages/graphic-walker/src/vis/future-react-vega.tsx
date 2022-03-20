@@ -21,8 +21,10 @@ interface ReactVegaProps {
     onGeomClick?: (values: any, e: any) => void
 }
 const NULL_FIELD: Field = {
-    id: '',
+    fid: '',
     name: '',
+    semanticType: 'quantitative',
+    analyticType: 'measure',
     aggName: 'sum',
     type: 'D'
 }
@@ -47,7 +49,7 @@ function getSingleView(xField: Field, yField: Field, color: Field, opacity: Fiel
         mark: geomType,
         encoding: {
             x: {
-                field: xField.id,
+                field: xField.fid,
                 type: getFieldType(xField),
                 aggregate:
                     xField.type === 'M' &&
@@ -55,7 +57,7 @@ function getSingleView(xField: Field, yField: Field, color: Field, opacity: Fiel
                     (xField.aggName as any),
             },
             y: {
-                field: yField.id,
+                field: yField.fid,
                 type: getFieldType(yField),
                 aggregate:
                     yField.type === 'M' &&
@@ -63,23 +65,23 @@ function getSingleView(xField: Field, yField: Field, color: Field, opacity: Fiel
                     (yField.aggName as any),
             },
             row: row !== NULL_FIELD ? {
-                field: row.id,
+                field: row.fid,
                 type: getFieldType(row),
             } : undefined,
             column: col !== NULL_FIELD ? {
-                field: col.id,
+                field: col.fid,
                 type: getFieldType(col),
             } : undefined,
             color: color !== NULL_FIELD ? {
-                field: color.id,
+                field: color.fid,
                 type: getFieldType(color)
             } : undefined,
             opacity: opacity !== NULL_FIELD ? {
-                field: opacity.id,
+                field: opacity.fid,
                 type: getFieldType(opacity)
             } : undefined,
             size: size !== NULL_FIELD ? {
-                field: size.id,
+                field: size.fid,
                 type: getFieldType(size)
             } : undefined
         }
@@ -129,7 +131,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
             const rowRepeatField = rowRepeatFields.length > 0 ? rowRepeatFields[rowRepeatFields.length - 1] : NULL_FIELD;
             const colRepeatField = colRepeatFields.length > 0 ? colRepeatFields[colRepeatFields.length - 1] : NULL_FIELD;
 
-            const dimensions = [...rows, ...columns, color, opacity, size].filter(f => Boolean(f)).map(f => (f as Field).id)
+            const dimensions = [...rows, ...columns, color, opacity, size].filter(f => Boolean(f)).map(f => (f as Field).fid)
 
             const spec: any = {
                 data: {

@@ -1,6 +1,6 @@
 import { StatFuncName } from "visual-insights/build/esm/statistics";
 import { AggFC } from 'cube-core/built/types';
-import { IMutField as VIMutField } from 'visual-insights';
+import { IAnalyticType, IMutField as VIMutField, ISemanticType } from 'visual-insights';
 export interface Record {
     [key: string]: any;
 }
@@ -11,19 +11,19 @@ export interface Filters {
     [key: string]: any[];
 }
 
+export interface IMutField {
+    fid: string;
+    name?: string;
+    disable?: boolean;
+    semanticType: ISemanticType;
+    analyticType: IAnalyticType;
+};
+
 export interface IField {
-    key: string;
-    type: string;
-    analyticType: 'dimension' | 'measure';
-}
-
-export type IMutField = VIMutField;
-
-export interface Field {
     /**
-     * id: key in data record
+     * fid: key in data record
      */
-    id: string;
+    fid: string;
     /**
      * display name for field
      */
@@ -33,15 +33,16 @@ export interface Field {
      */
     aggName?: string;
     type: 'D' | 'M';
-    [key: string]: any;
+    semanticType: ISemanticType;
+    analyticType: IAnalyticType;
     cmp?: (a: any, b: any) => number;
 }
 
-export interface IViewField extends Field {
+export interface IViewField extends IField {
     dragId: string;
 }
 
-export interface Measure extends Field {
+export interface Measure extends IField {
     aggregator?: AggFC;
     minWidth?: number;
     formatter?: (value: number | undefined) => number | string;
@@ -85,12 +86,12 @@ export interface IDataSource {
     data: Record[]
 }
 export interface DraggableFieldState {
-    fields: Field[];
-    rows: Field[];
-    columns: Field[];
-    color: Field[];
-    opacity: Field[];
-    size: Field[];
+    fields: IField[];
+    rows: IField[];
+    columns: IField[];
+    color: IField[];
+    opacity: IField[];
+    size: IField[];
 }
 
 export interface IDraggableStateKey {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { Record, Field, Filters, IMeasure } from '../interfaces';
+import { Record, IField, Filters, IMeasure } from '../interfaces';
 import { Insight, Utils, UnivariateSummary } from 'visual-insights';
 import { baseVis, IReasonType } from './std2vegaSpec';
 import embed from 'vega-embed';
@@ -25,10 +25,10 @@ interface SubSpace {
 
 interface InsightMainBoardProps {
   dataSource: Record[];
-  fields: Field[];
+  fields: IField[];
   filters?: Filters;
-  viewDs: Field[];
-  viewMs: Field[];
+  viewDs: IField[];
+  viewMs: IField[];
 }
 const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
   const { dataSource, fields, viewDs, viewMs, filters } = props;
@@ -42,13 +42,13 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
   const dimsWithTypes = useMemo(() => {
     const dimensions = fields
       .filter((f) => f.type === 'D')
-      .map((f) => f.id)
+      .map((f) => f.fid)
       .filter((f) => !Utils.isFieldUnique(dataSource, f));
     return UnivariateSummary.getAllFieldTypes(dataSource, dimensions);
   }, [fields, dataSource])
 
   const measWithTypes = useMemo(() => {
-    const measures = fields.filter((f) => f.type === 'M').map((f) => f.id);
+    const measures = fields.filter((f) => f.type === 'M').map((f) => f.fid);
     return measures.map((m) => ({
       name: m,
       type: 'quantitative',
@@ -57,12 +57,12 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
 
   useEffect(() => {
     if (dimsWithTypes.length > 0 && measWithTypes.length > 0 && dataSource.length > 0) {
-      const measures = fields.filter((f) => f.type === 'M').map((f) => f.id);
+      const measures = fields.filter((f) => f.type === 'M').map((f) => f.fid);
       const dimensions = dimsWithTypes.map(d => d.name);
       const currentSpace: SubSpace = {
-          dimensions: viewDs.map((f) => f.id),
+          dimensions: viewDs.map((f) => f.fid),
           measures: viewMs.map((f) => ({
-            key: f.id,
+            key: f.fid,
             op: f.aggName as any
           })),
       };

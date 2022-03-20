@@ -1,5 +1,9 @@
 export const GEMO_TYPES = [
     {
+        value: 'auto',
+        label: '自动'
+    },
+    {
         value: 'bar',
         label: '矩形',
     },

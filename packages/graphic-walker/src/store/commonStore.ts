@@ -1,7 +1,6 @@
 import { DataSet, Filters, IDataSet, IDataSetInfo, IDataSource, IMutField, Record } from '../interfaces';
 import { makeAutoObservable, observable } from 'mobx';
 import { transData } from '../dataSource/utils';
-import { GEMO_TYPES } from '../config';
 
 interface VisualConfig {
     defaultAggregated: boolean;
@@ -70,7 +69,7 @@ export class CommonStore {
     }
 
     public updateTempFieldAnalyticType (fieldKey: string, analyticType: IMutField['analyticType']) {
-        const field = this.tmpDSRawFields.find(f => f.key === fieldKey);
+        const field = this.tmpDSRawFields.find(f => f.fid === fieldKey);
         if (field) {
             field.analyticType = analyticType;
         }

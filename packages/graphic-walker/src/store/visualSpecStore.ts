@@ -84,32 +84,48 @@ export class VizSpecStore {
             size: []
         }
         makeAutoObservable(this);
+        // FIXME!!!!!
         this.reactions.push(reaction(() => commonStore.currentDataset, (dataset) => {
             this.initState();
             this.draggableFieldState.fields = dataset.rawFields.map((f) => ({
                 dragId: uuidv4(),
-                id: f.key,
-                name: f.name || f.key,
+                fid: f.fid,
+                name: f.name || f.fid,
                 type: f.analyticType === 'dimension' ? 'D' : 'M',
                 aggName: f.analyticType === 'measure' ? 'sum' : undefined,
+                analyticType: f.analyticType,
+                semanticType: f.semanticType
             }))
             this.draggableFieldState.dimensions = dataset.rawFields
                 .filter(f => f.analyticType === 'dimension')
                 .map((f) => ({
                     dragId: uuidv4(),
-                    id: f.key,
-                    name: f.name || f.key,
+                    fid: f.fid,
+                    name: f.name || f.fid,
+                    semanticType: f.semanticType,
+                    analyticType: f.analyticType,
                     type: 'D'
             }))
             this.draggableFieldState.measures = dataset.rawFields
                 .filter(f => f.analyticType === 'measure')
                 .map((f) => ({
                     dragId: uuidv4(),
-                    id: f.key,
-                    name: f.name || f.key,
+                    fid: f.fid,
+                    name: f.name || f.fid,
+                    analyticType: f.analyticType,
+                    semanticType: f.semanticType,
                     type: 'M',
                     aggName: 'sum'
             }))
+            this.draggableFieldState.measures.push({
+                dragId: uuidv4(),
+                fid: '',
+                name: '记录数',
+                analyticType: 'measure',
+                semanticType: 'quantitative',
+                type: 'M',
+                aggName: 'count'
+            })
         }))
     }
     /**
@@ -212,21 +228,21 @@ export class VizSpecStore {
         if (spec.facets && spec.facets.length > 0) {
             const facets = (spec.facets || []).concat(spec.highFacets || []);
             for (let facet of facets) {
-                this.appendField('rows', fields.find(f => f.id === facet));
+                this.appendField('rows', fields.find(f => f.fid === facet));
             }
         }
         if (spec.position && spec.position.length > 1) {
-            this.appendField('rows', fields.find(f => f.id === spec.position![1]));
-            this.appendField('columns', fields.find(f => f.id === spec.position![0]));
+            this.appendField('rows', fields.find(f => f.fid === spec.position![1]));
+            this.appendField('columns', fields.find(f => f.fid === spec.position![0]));
         }
         if (spec.color && spec.color.length > 0) {
-            this.appendField('color', fields.find(f => f.id === spec.color![0]));
+            this.appendField('color', fields.find(f => f.fid === spec.color![0]));
         }
         if (spec.size && spec.size.length > 0) {
-            this.appendField('size', fields.find(f => f.id === spec.size![0]));
+            this.appendField('size', fields.find(f => f.fid === spec.size![0]));
         }
         if (spec.opacity && spec.opacity.length > 0) {
-            this.appendField('opacity', fields.find(f => f.id === spec.opacity![0]));
+            this.appendField('opacity', fields.find(f => f.fid === spec.opacity![0]));
         }
 
     }
