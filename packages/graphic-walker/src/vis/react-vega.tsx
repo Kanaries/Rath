@@ -25,8 +25,7 @@ const NULL_FIELD: IField = {
   name: '',
   semanticType: 'quantitative',
   analyticType: 'measure',
-  aggName: 'sum',
-  type: 'D'
+  aggName: 'sum'
 }
 const click$ = new Subject<ScenegraphEvent>();
 const selection$ = new Subject<any>();
@@ -73,8 +72,8 @@ function getSingleView(props: SingleViewProps) {
     defaultStack,
     geomType
   } = props
-  const xFieldAgg = (xField.type === 'M' && defaultAggregated && (xField.aggName as any));
-  const yFieldAgg = (yField.type === 'M' && defaultAggregated && (yField.aggName as any)) ;
+  const xFieldAgg = (xField.analyticType === 'measure' && defaultAggregated && (xField.aggName as any));
+  const yFieldAgg = (yField.analyticType === 'measure' && defaultAggregated && (yField.aggName as any)) ;
   let markType = geomType;
   if (geomType === 'auto') {
     const types: ISemanticType[] = [];
@@ -174,10 +173,10 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       clickSub.unsubscribe();
     }
   }, []);
-  const rowDims = useMemo(() => rows.filter(f => f.type === 'D'), [rows]);
-  const colDims = useMemo(() => columns.filter(f => f.type === 'D'), [columns]);
-  const rowMeas = useMemo(() => rows.filter(f => f.type === 'M'), [rows]);
-  const colMeas = useMemo(() => columns.filter(f => f.type === 'M'), [columns]);
+  const rowDims = useMemo(() => rows.filter(f => f.analyticType === 'dimension'), [rows]);
+  const colDims = useMemo(() => columns.filter(f => f.analyticType === 'dimension'), [columns]);
+  const rowMeas = useMemo(() => rows.filter(f => f.analyticType === 'measure'), [rows]);
+  const colMeas = useMemo(() => columns.filter(f => f.analyticType === 'measure'), [columns]);
   const rowFacetFields = useMemo(() => rowDims.slice(0, -1), [rowDims]);
   const colFacetFields = useMemo(() => colDims.slice(0, -1), [colDims]);
   const rowRepeatFields = useMemo(() => rowMeas.length === 0 ? rowDims.slice(-1) : rowMeas, [rowDims, rowMeas]);//rowMeas.slice(0, -1);
@@ -198,8 +197,8 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     const yField = rows.length > 0 ? rows[rows.length - 1] : NULL_FIELD;
     const xField = columns.length > 0 ? columns[columns.length - 1] : NULL_FIELD;
 
-    const rowLeftFacetFields = rows.slice(0, -1).filter(f => f.type === 'D');
-    const colLeftFacetFields = columns.slice(0, -1).filter(f => f.type === 'D');
+    const rowLeftFacetFields = rows.slice(0, -1).filter(f => f.analyticType === 'dimension');
+    const colLeftFacetFields = columns.slice(0, -1).filter(f => f.analyticType === 'dimension');
 
     const rowFacetField = rowLeftFacetFields.length > 0 ? rowLeftFacetFields[rowLeftFacetFields.length - 1] : NULL_FIELD;
     const colFacetField = colLeftFacetFields.length > 0 ? colLeftFacetFields[colLeftFacetFields.length - 1] : NULL_FIELD;

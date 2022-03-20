@@ -41,14 +41,14 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
 
   const dimsWithTypes = useMemo(() => {
     const dimensions = fields
-      .filter((f) => f.type === 'D')
+      .filter((f) => f.analyticType === 'dimension')
       .map((f) => f.fid)
       .filter((f) => !Utils.isFieldUnique(dataSource, f));
     return UnivariateSummary.getAllFieldTypes(dataSource, dimensions);
   }, [fields, dataSource])
 
   const measWithTypes = useMemo(() => {
-    const measures = fields.filter((f) => f.type === 'M').map((f) => f.fid);
+    const measures = fields.filter((f) => f.analyticType === 'measure').map((f) => f.fid);
     return measures.map((m) => ({
       name: m,
       type: 'quantitative',
@@ -57,7 +57,7 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
 
   useEffect(() => {
     if (dimsWithTypes.length > 0 && measWithTypes.length > 0 && dataSource.length > 0) {
-      const measures = fields.filter((f) => f.type === 'M').map((f) => f.fid);
+      const measures = fields.filter((f) => f.analyticType === 'measure').map((f) => f.fid);
       const dimensions = dimsWithTypes.map(d => d.name);
       const currentSpace: SubSpace = {
           dimensions: viewDs.map((f) => f.fid),

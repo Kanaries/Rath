@@ -19,12 +19,12 @@ const OBPill: React.FC<PillProps> = props => {
     return <Pill
         ref={provided.innerRef}
         // type={f.type}
-        colType={field.type === 'D' ? 'discrete' : 'continuous'}
+        colType={field.analyticType === 'dimension' ? 'discrete' : 'continuous'}
         {...provided.draggableProps}
         {...provided.dragHandleProps}
     >
         {field.name}&nbsp;
-        {field.type === 'M' && visualConfig.defaultAggregated && (
+        {field.analyticType === 'measure' && visualConfig.defaultAggregated && (
             <select
                 className="bg-transparent text-gray-700 float-right focus:outline-none focus:border-gray-500"
                 value={field.aggName || ''}

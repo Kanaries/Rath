@@ -91,7 +91,6 @@ export class VizSpecStore {
                 dragId: uuidv4(),
                 fid: f.fid,
                 name: f.name || f.fid,
-                type: f.analyticType === 'dimension' ? 'D' : 'M',
                 aggName: f.analyticType === 'measure' ? 'sum' : undefined,
                 analyticType: f.analyticType,
                 semanticType: f.semanticType
@@ -104,7 +103,6 @@ export class VizSpecStore {
                     name: f.name || f.fid,
                     semanticType: f.semanticType,
                     analyticType: f.analyticType,
-                    type: 'D'
             }))
             this.draggableFieldState.measures = dataset.rawFields
                 .filter(f => f.analyticType === 'measure')
@@ -114,7 +112,6 @@ export class VizSpecStore {
                     name: f.name || f.fid,
                     analyticType: f.analyticType,
                     semanticType: f.semanticType,
-                    type: 'M',
                     aggName: 'sum'
             }))
             this.draggableFieldState.measures.push({
@@ -123,7 +120,6 @@ export class VizSpecStore {
                 name: '记录数',
                 analyticType: 'measure',
                 semanticType: 'quantitative',
-                type: 'M',
                 aggName: 'count'
             })
         }))
@@ -138,7 +134,7 @@ export class VizSpecStore {
         (Object.keys(state) as (keyof DraggableFieldState)[])
             .filter(dkey => !MetaFieldKeys.includes(dkey))
             .forEach(dkey => {
-                fields.push(...state[dkey].filter(f => f.type === 'D'))
+                fields.push(...state[dkey].filter(f => f.analyticType === 'dimension'))
             })
         return fields;
     }
@@ -152,7 +148,7 @@ export class VizSpecStore {
         (Object.keys(state) as (keyof DraggableFieldState)[])
             .filter(dkey => !MetaFieldKeys.includes(dkey))
             .forEach(dkey => {
-                fields.push(...state[dkey].filter(f => f.type === 'M'))
+                fields.push(...state[dkey].filter(f => f.analyticType === 'measure'))
             })
         return fields;
     }

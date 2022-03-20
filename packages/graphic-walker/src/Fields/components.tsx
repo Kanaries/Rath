@@ -78,17 +78,6 @@ export const FieldListSegment = styled.div`
   }
 `;
 
-export const FieldLabel = styled.div<{ highlight?: boolean; type?: 'D' | 'M' }>`
-  padding: 0.2em 0.4em;
-  margin: 0.2em;
-  border-radius: 0.2em;
-  background-color: ${props => (props.type === 'D' ? '#2185d0' : '#21ba45')};
-  color: #fff;
-  ${(props) =>
-    props.highlight ? "box-shadow: 0px 0px 5px 1px #21ba45" : null};
-  position: relative;
-`;
-
 export const Pill = styled.div<{colType: 'discrete' | 'continuous'}>`
   background-color: ${props => props.colType === 'continuous' ? COLORS.measure : COLORS.dimension};
   color: #fff;

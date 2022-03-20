@@ -32,7 +32,6 @@ export interface IField {
      * aggregator's name
      */
     aggName?: string;
-    type: 'D' | 'M';
     semanticType: ISemanticType;
     analyticType: IAnalyticType;
     cmp?: (a: any, b: any) => number;

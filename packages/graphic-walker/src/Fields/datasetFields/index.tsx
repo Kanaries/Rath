@@ -19,13 +19,13 @@ const DatasetFields: React.FC = props => {
     const { draggableFieldState } = vizStore;
     const { fields } = draggableFieldState;
 
-    const dimensions: IViewField[] = []; // = draggableFieldState[FIELDS_KEY].filter(f => f.type === 'D');
-    const measures: IViewField[] = []; // = draggableFieldState[FIELDS_KEY].filter(f => f.type === 'M');
+    const dimensions: IViewField[] = [];
+    const measures: IViewField[] = [];
     const dimOriginIndices: number[] = [];
     const meaOriginIndices: number[] = [];
 
     for (let i = 0; i < fields.length; i++) {
-        if (fields[i].type === 'D') {
+        if (fields[i].analyticType === 'dimension') {
             dimensions.push(fields[i]);
             dimOriginIndices.push(i)
         } else {
