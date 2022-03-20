@@ -12,6 +12,7 @@ import DataSourceSegment from './dataSource/index';
 import { useGlobalStore } from './store';
 import { preAnalysis, destroyWorker } from './services'
 import { observer } from 'mobx-react-lite';
+import { LightBulbIcon } from '@heroicons/react/outline'
 import { toJS } from 'mobx';
 import "tailwindcss/tailwind.css"
 import './index.css'
@@ -85,13 +86,13 @@ const App: React.FC<EditorProps> = props => {
 							<InsightBoard />
 							{vizEmbededMenu.show && (
 								<ClickMenu x={vizEmbededMenu.position[0]} y={vizEmbededMenu.position[1]}>
-									<div
+									<div className="flex items-center"
 										onClick={() => {
 											commonStore.closeEmbededMenu();
 											commonStore.setShowInsightBoard(true)
 										}}
 									>
-										深度解读
+										数据解读<LightBulbIcon className="ml-1 w-3 inline-block" />
 									</div>
 								</ClickMenu>
 							)}

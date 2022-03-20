@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+
 const MenuContainer = styled.div`
     width: 100px;
     background-color: #fff;
@@ -7,8 +8,8 @@ const MenuContainer = styled.div`
     position: absolute;
     z-index: 99;
     cursor: pointer;
-    box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.09);
-    border-radius: 2px;
+    /* box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.09); */
+    /* border-radius: 2px; */
     padding: 4px;
 `;
 interface ClickMenuProps {
@@ -18,7 +19,7 @@ interface ClickMenuProps {
 
 const ClickMenu: React.FC<ClickMenuProps> = props => {
     const { x, y, children } = props
-    return <MenuContainer style={{ left: x + 'px', top: y + 'px' }}>
+    return <MenuContainer className="shadow-lg text-sm" style={{ left: x + 'px', top: y + 'px' }}>
         {
             children
         }

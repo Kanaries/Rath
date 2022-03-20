@@ -1,10 +1,19 @@
 import { StatFuncName } from "visual-insights/build/esm/statistics";
 import { AggFC } from 'cube-core/built/types';
 import { IAnalyticType, IMutField as VIMutField, ISemanticType } from 'visual-insights';
+/**
+ * @deprecated
+ */
 export interface Record {
     [key: string]: any;
 }
 
+export interface IRow {
+    [key: string]: any;
+}
+/**
+ * @deprecated
+ */
 export type SemanticType = 'quantitative' | 'nominal' | 'ordinal' | 'temporal';
 
 export interface Filters {
@@ -52,7 +61,7 @@ export interface DataSet {
     id: string;
     name: string;
     rawFields: IMutField[];
-    dataSource: Record[];
+    dataSource: IRow[];
 }
 
 export interface IFieldNeighbor {
@@ -77,12 +86,12 @@ export interface IDataSet {
 export interface IDataSetInfo {
     name: string;
     rawFields: IMutField[];
-    dataSource: Record[]
+    dataSource: IRow[]
 }
 
 export interface IDataSource {
     id: string;
-    data: Record[]
+    data: IRow[]
 }
 export interface DraggableFieldState {
     fields: IField[];
