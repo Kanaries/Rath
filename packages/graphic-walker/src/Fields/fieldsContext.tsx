@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { DraggableFieldState, Field, IDraggableStateKey } from '../interfaces';
+import { DraggableFieldState, IDraggableStateKey } from '../interfaces';
 import {
     DragDropContext,
     DropResult,
