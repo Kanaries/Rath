@@ -13,7 +13,7 @@ const VisualInterface: React.FC = props => {
     const gwRawFields = useMemo<IMutField[]>(() => {
         return mutFields.map(f => {
             return {
-                key: f.fid,
+                fid: f.fid,
                 name: f.name,
                 semanticType: f.semanticType,
                 dataType: '?',

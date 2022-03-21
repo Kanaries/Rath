@@ -31,11 +31,16 @@ import RathEngineWorker from './workers/engine/index.worker?worker';
 // @ts-ignore
 // eslint-disable-next-line
 import InferMetaWorker from './workers/metaInfer.worker?worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import FootmanWorker from './workers/footman/index.worker?worker';
 import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
 import { MessageProps } from './workers/engine/service';
 
 import { IFieldMeta, IMuteFieldBase, IRawField, IRow } from './interfaces';
 import { ISemanticType } from 'visual-insights';
+import { IFootmanProps } from './workers/footman/service';
 
 let server = '//lobay.moe:8443';
 
@@ -449,5 +454,43 @@ export async function rathEngineServerService (props: MessageServerProps) {
   } catch (error) {
     // throw error;
     console.error(error)
+  }
+}
+
+export async function footmanEngineService<R = any> (props: IFootmanProps, mode: 'server' | 'local' = 'local'): Promise<R> {
+  try {
+    if (mode === 'server') {
+      const testServer = getTestServerUrl();
+      if (testServer) {
+        testServer.pathname = props.task;
+      } else {
+        throw new Error('url does not contains params called "server="');
+      }
+      const res = await fetch(testServer.href, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(props)
+      });
+      const result = await res.json();
+      if (result.success) {
+        return result.data as R;
+      } else {
+        throw new Error(`[result.fail] ${result.message}`);
+      }
+    } else {
+      const worker = new FootmanWorker();
+      const result = await workerService<R, IFootmanProps>(worker, props);
+      worker.terminate();
+      if (result.success) {
+        return result.data
+      } else {
+        throw new Error('[meta infer worker]' + result.message);
+      }
+    }
+  } catch (error) {
+    console.error(error)
+    throw error;
   }
 }

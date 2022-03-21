@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { IFilter, IPattern, NextVICore } from '../../dev';
+import { IFilter, IPattern } from '../../dev';
 import { useGlobalStore } from '../../store';
 import { distVis } from '../../queries/distVis'
 import ReactVega from '../../components/react-vega';
@@ -8,6 +8,7 @@ import { DefaultButton, Stack, IconButton, PrimaryButton } from 'office-ui-fabri
 import { AssoContainer, MainViewContainer } from './components';
 import ViewField from '../lts/vizOperation/viewField';
 import { IFieldMeta, IRow } from '../../interfaces';
+import { footmanEngineService } from '../../service';
 
 
 const BUTTON_STYLE = { marginRight: '1em' }
@@ -21,7 +22,7 @@ function applyFilter (dataSource: IRow[], filters?: IFilter[]): IRow[] {
 
 const RENDER_BATCH_SIZE = 5;
 
-const core = new NextVICore([], []);
+// const core = new NextVICore([], []);
 const PatternPage: React.FC = props => {
     const { dataSourceStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
@@ -30,9 +31,17 @@ const PatternPage: React.FC = props => {
     const [renderAmount, setRenderAmount] = useState<number>(RENDER_BATCH_SIZE);
     const [mergeView, setMergeView] = useState<IPattern | null>(null);
     useEffect(() => {
-        core.init(cleanedData, fieldMetas)
-        const patterns = core.searchPatterns();
-        setViews(patterns);
+        // core.init(cleanedData, fieldMetas)
+        footmanEngineService({
+            dataSource: cleanedData,
+            fields: fieldMetas,
+            task: 'univar',
+        }, 'local').then(res => {
+            console.log(res)
+            setViews(res);
+        }).catch(console.error)
+        // const patterns = core.searchPatterns();
+        // setViews(patterns);
     }, [fieldMetas, cleanedData])
 
     const specs = useMemo(() => {
@@ -40,36 +49,58 @@ const PatternPage: React.FC = props => {
     }, [views])
 
     const assViews = useCallback((view: IPattern) => {
-        core.firstPattern();
-        const morePatterns = core.createHighOrderPatterns(view.fields);
-        // core.patterns[index]
-        setViews(morePatterns);
-        setRenderAmount(RENDER_BATCH_SIZE)
-    }, [])
+        footmanEngineService({
+            dataSource: cleanedData,
+            fields: fieldMetas,
+            task: 'patterns',
+            props: view
+        }).then(res => {
+            setViews(res);
+            setRenderAmount(RENDER_BATCH_SIZE)
+        }).catch(console.error);
+    }, [fieldMetas, cleanedData])
 
     const adviceCompareFeature = useCallback(() => {
         if (pined === null || mergeView === null) return;
-        const ans = core.fewatureSelectionForSecondPatternWithSpecifiedViews(pined.fields.slice(0, 2) as [IFieldMeta, IFieldMeta], mergeView.fields.slice(0, 2) as [IFieldMeta, IFieldMeta])
-        if (ans !== null) {
-            setViews([
-                {
-                    ...pined,
-                    fields: [...pined.fields, ...ans.features]
-                },
-                {
-                    ...mergeView,
-                    fields: [...mergeView.fields, ...ans.features]
-                },
-            ])
-        }
-    }, [pined, mergeView])
+        // footmanEngineService({
+        //     dataSource: cleanedData,
+        //     fields: fieldMetas,
+        //     task: 'featureSelection',
+        //     props: 
+        // })
+        footmanEngineService({
+            dataSource: cleanedData,
+            fields: fieldMetas,
+            task: 'comparison',
+            props: [pined, mergeView]
+        }).then(res => {
+            if (res !== null) {
+                setViews([
+                    {
+                        ...pined,
+                        fields: [...pined.fields, ...res.features]
+                    },
+                    {
+                        ...mergeView,
+                        fields: [...mergeView.fields, ...res.features]
+                    },
+                ])
+            }
+        }).catch(console.error)
+    }, [pined, mergeView, cleanedData, fieldMetas])
 
     const advicePureFeature = useCallback(() => {
         if (pined === null) return;
-        const ans = core.pureFeatureRecommand(pined);
-        setViews(ans)
-        setRenderAmount(RENDER_BATCH_SIZE)
-    }, [pined])
+        footmanEngineService({
+            dataSource: cleanedData,
+            fields: fieldMetas,
+            task: 'featureSelection',
+            props: pined
+        }).then(ans => {
+            setViews(ans)
+            setRenderAmount(RENDER_BATCH_SIZE)
+        }).catch(console.error);
+    }, [pined, cleanedData, fieldMetas])
 
     const removeFromPined = useCallback((fid: string) => {
         if (pined === null) return;
@@ -86,10 +117,17 @@ const PatternPage: React.FC = props => {
 
     const recommandFilter = useCallback(() => {
         if (pined === null) return;
-        const ans = core.recommandFilter(pined)
-        setViews(ans);
-        setRenderAmount(RENDER_BATCH_SIZE)
-    }, [pined])
+        footmanEngineService({
+            task: 'filterSelection',
+            fields: fieldMetas,
+            dataSource: cleanedData,
+            props: pined
+        }).then(res => {
+            setViews(res);
+            setRenderAmount(RENDER_BATCH_SIZE)
+        }).catch(console.error);
+
+    }, [cleanedData, fieldMetas, pined])
 
     useEffect(() => {
         if (pined) {
