@@ -201,9 +201,6 @@ const PatternPage: React.FC = props => {
                         <div className="chart-container">
                             <ReactVega spec={spec} dataSource={applyFilter(cleanedData, views[i].filters)} />
                         </div>
-                        <div>
-                            {}
-                        </div>
                     </div>)
                 }
             </AssoContainer>

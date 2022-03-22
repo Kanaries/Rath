@@ -2,7 +2,7 @@ import { ISemanticType } from "visual-insights";
 import { Specification } from "visual-insights/build/esm/commonTypes";
 import { IFieldMeta, IRow } from "../interfaces";
 export const geomTypeMap: { [key: string]: any } = {
-  interval: "point",
+  interval: "tick",
   // interval: 'boxplot',
   line: "line",
   point: "point",
@@ -95,15 +95,15 @@ export function baseVis(props: BaseVisProps) {
       values: dataSource
     }
   };
+  const markType =  geomType[0] && geomTypeMap[geomType[0]]
+  ? geomTypeMap[geomType[0]]
+  : geomType[0]
   let basicSpec: any = {
     // width: chartWidth,
     mark: {
-      type:
-        geomType[0] && geomTypeMap[geomType[0]]
-          ? geomTypeMap[geomType[0]]
-          : geomType[0],
+      type: markType,
       tooltip: true,
-      opacity: 0.89
+      opacity: 0.88
     },
     encoding: {}
   };
@@ -136,6 +136,18 @@ export function baseVis(props: BaseVisProps) {
         basicSpec.encoding[channel].stack = null;
       }
     }
+  }
+  if (position.length === 1) {
+    if (basicSpec.encoding.x) {
+      basicSpec.encoding.x.bin = true;
+      basicSpec.encoding.y = { aggregate: 'count' }
+    } else {
+      if (basicSpec.encoding.y) {
+        basicSpec.encoding.x.bin = true;
+        basicSpec.encoding.x = { aggregate: 'count' }
+      }
+    }
+    basicSpec.mark.type = 'bar'
   }
 
   if (!defaultStack && opacity.length === 0) {

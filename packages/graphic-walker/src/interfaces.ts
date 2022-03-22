@@ -22,6 +22,7 @@ export interface Filters {
 
 export interface IMutField {
     fid: string;
+    key?: string;
     name?: string;
     disable?: boolean;
     semanticType: ISemanticType;

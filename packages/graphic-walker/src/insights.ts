@@ -36,7 +36,12 @@ export class DataExplainer {
         // const keys = Object.keys(dataSource[0])
     }
     public setFields(fields: IMutField[]) {
-        this.engine.setFields(fields);
+        this.engine.setFields(fields.map(f => ({
+            ...f,
+            // @ts-ignore
+            key: f.key || f.fid
+        })));
+        // console.log('set fields', fields, fields.map(f => f.fid))
         this.engine.univarSelection();
     }
     public preAnalysis() {

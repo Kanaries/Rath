@@ -1,7 +1,7 @@
 import { IRow } from "visual-insights";
-import { entropy } from "visual-insights/build/esm/statistics";
+import { entropy, getCombination } from "visual-insights/build/esm/statistics";
 import { IFieldMeta } from "../interfaces";
-import { bin, binMapShareRange, generalMic, incSim, l1Dis2, mic, normalizeScatter, rangeNormilize } from "./utils";
+import { bin, binMapShareRange, generalMatMic, generalMic, incSim, l1Dis2, mic, normalizeScatter, rangeNormilize } from "./utils";
 
 export interface IFilter {
     field: IFieldMeta;
@@ -140,6 +140,10 @@ export class NextVICore {
         return matrix;
     }
 
+    /**
+     * 这里其实是比较机制，不是二阶的pattern
+     * @returns 
+     */
     public secondPattern () {
         const { dataSource } = this;
         const measures = this.fields.filter(f => f.analyticType === 'measure');
@@ -212,12 +216,21 @@ export class NextVICore {
         nonViewDimensions.forEach(dim => {
             const dimValues = viewData.map(row => row[dim.fid]);
             let meanScore =  0;
-            viewMeasures.forEach(mea => {
+            if (viewMeasures.length === 1) {
+                const mea = viewMeasures[0];
                 const meaValues =  viewData.map(row => row[mea.fid]);
                 const score = generalMic(dimValues, meaValues);
                 meanScore += score;
-            })
-            meanScore /= viewMeasures.length;
+            } else if (viewMeasures.length > 1) {
+                const meaIds = viewMeasures.map(m => m.fid);
+                const projections = getCombination(meaIds, 2, 2);
+                for (let pro of projections) {
+                    const meaProValues: [number, number][] = viewData.map(row => [row[pro[0]], row[pro[1]]])
+                    const score = generalMatMic(dimValues, meaProValues);
+                    meanScore += score;
+                }
+                meanScore /= projections.length
+            }
             ans.push({
                 imp: meanScore,
                 fields: [...pattern.fields, dim],

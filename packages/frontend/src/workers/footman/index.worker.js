@@ -12,7 +12,7 @@ function main (e) {
     } catch (error) {
         self.postMessage({
             success: false,
-            data: `[worker]${error}`
+            message: `[worker]${error}`
         })        
     }
 }

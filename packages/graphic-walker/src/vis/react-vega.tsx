@@ -126,22 +126,22 @@ function getSingleView(props: SingleViewProps) {
       column: col !== NULL_FIELD ? {
         field: col.fid,
         type: getFieldType(col),
-        name: col.name
+        title: col.name
       } : undefined,
       color: color !== NULL_FIELD ? {
         field: color.fid,
         type: getFieldType(color),
-        color: color.name
+        title: color.name
       } : undefined,
       opacity: opacity !== NULL_FIELD ? {
         field: opacity.fid,
         type: getFieldType(opacity),
-        name: opacity.name
+        title: opacity.name
       } : undefined,
       size: size !== NULL_FIELD ? {
         field: size.fid,
         type: getFieldType(size),
-        name: size.name
+        title: size.name
       } : undefined
     }
   };
@@ -233,12 +233,16 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       spec.encoding = singleView.encoding;
       if (viewPlaceholders.length > 0 && viewPlaceholders[0].current) {
         embed(viewPlaceholders[0].current, spec, { mode: 'vega-lite', actions: false }).then(res => {
-          res.view.addEventListener('click', (e) => {
-            click$.next(e);
-          })
-          res.view.addSignalListener(SELECTION_NAME, (name: any, values: any) => {
-            selection$.next(values);
-          });
+          try {
+            res.view.addEventListener('click', (e) => {
+              click$.next(e);
+            })
+            res.view.addSignalListener(SELECTION_NAME, (name: any, values: any) => {
+              selection$.next(values);
+            }); 
+          } catch (error) {
+            console.warn(error)
+          }
         });
       }
     } else {
@@ -262,12 +266,16 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
           const ans = { ...spec, ...singleView }
           if (node) {
             embed(node, ans, { mode: 'vega-lite', actions: false }).then(res => {
-              res.view.addEventListener('click', (e) => {
-                click$.next(e);
-              })
-              res.view.addSignalListener(SELECTION_NAME, (name: any, values: any) => {
-                selection$.next(values);
-              });
+              try {
+                res.view.addEventListener('click', (e) => {
+                  click$.next(e);
+                })
+                res.view.addSignalListener(SELECTION_NAME, (name: any, values: any) => {
+                  selection$.next(values);
+                }); 
+              } catch (error) {
+                console.warn(error);
+              }
             })
           }
         }

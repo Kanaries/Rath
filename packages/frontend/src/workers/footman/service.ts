@@ -15,8 +15,8 @@ export function serviceHandler(reqProps: IFootmanProps) {
         if (task === 'featureSelection') return featureSelection(dataSource, fields, props);
         if (task === 'comparison') return featureForComparison(dataSource, fields, props);
         if (task === 'filterSelection') return filterSelection(dataSource, fields, props);
-    } catch (error) {
-        throw new Error(`[footman][${task}]${error}`)   
+    } catch (error: any) {
+        throw new Error(`[footman][${task}]${error}\n${error.stack}`)   
     }
 }
 

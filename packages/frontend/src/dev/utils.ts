@@ -239,3 +239,115 @@ export function incSim (T: string[], pointsX: [number, number][], pointsY: [numb
     }
     return S - condS;
 }
+
+// type ITensor = Array<ITensor | number>;
+
+// function initTensor (order: number, size = BIN_SIZE): ITensor {
+//     if (order === 1) {
+//         return new Array(size).fill(0);
+//     }
+//     const tensor: ITensor = [];
+//     for (let i = 0; i < size; i++) {
+//         tensor.push(initTensor(order - 1, size));
+//     }
+//     return tensor;
+// }
+function initRanges (vals: number[][], order: number): [number, number][] {
+    const ranges: [number, number][] = [];
+    for (let od = 0; od < order; od++) {
+        ranges.push([
+            Math.min(...vals.map(v => v[od])),
+            Math.max(...vals.map(v => v[od])),
+        ])
+    }
+    return ranges;
+}
+
+// function TensorCellAdd (tensor: ITensor, loc: number[], addVal: number) {
+
+// }
+// function highOrderBinShareRange(vals: number[][], ranges: [number, number][]): number[][] {
+//     let order = ranges.length;
+//     const tensor: ITensor = initTensor(order);
+//     const steps = ranges.map(r => (r[1] - r[0]) / BIN_SIZE);
+//     for (let i = 0; i < vals.length; i++) {
+//         for (let j = 0; j < vals[i].length; j++) {
+//             // tensor
+//         }
+//     }
+//     return []
+// }
+
+// export function highOrderGeneralMic (T: string[], measures: number[][]) {
+//     if (measures.length === 0) return 0;
+//     const measureNumber = measures[0].length;
+//     const measureBinSize = BIN_SIZE ** measureNumber;
+// }
+const BIN_SIZE_FOR_MAT = BIN_SIZE / 2;
+export function matrixBinShareRange (values: [number, number][], ranges: [number, number][]) {
+    const binMat: number[][] = new Array(BIN_SIZE_FOR_MAT + 1).fill(0).map(() => new Array(BIN_SIZE_FOR_MAT + 1).fill(0));
+    const stepX = (ranges[0][1] - ranges[0][0]) / BIN_SIZE_FOR_MAT;
+    const stepY = (ranges[1][1] - ranges[1][0]) / BIN_SIZE_FOR_MAT;
+    for (let i = 0; i < values.length; i++) {
+        const indX = Math.floor((values[i][0] - ranges[0][0]) / stepX);
+        const indY = Math.floor((values[i][1] - ranges[1][0]) / stepY);
+        binMat[indY][indX]++;
+    }
+    for (let i = 0; i < BIN_SIZE_FOR_MAT + 1; i++) {
+        binMat[i][BIN_SIZE_FOR_MAT - 1] += binMat[i][BIN_SIZE_FOR_MAT]
+    }
+    for (let i = 0; i < BIN_SIZE_FOR_MAT; i++) {
+        binMat[BIN_SIZE_FOR_MAT - 1][i] += binMat[BIN_SIZE_FOR_MAT][i];
+    }
+    return binMat.slice(0, BIN_SIZE_FOR_MAT).map(row => row.slice(0, BIN_SIZE_FOR_MAT));
+}
+
+export function generalMatMic (T: string[], X: [number, number][]) {
+    let condH = 0;
+    const ranges: [number, number][] = initRanges(X, 2);
+
+    let H = entropy(rangeNormilize(matrixBinShareRange(X, ranges).flatMap(v => v).filter(v => v > 0)));
+    const uniqueValueSet = new Set(T);
+    const uniqueValues = [...uniqueValueSet];
+
+    const dists: Array<{freq: number; bins: number[]}> = [];
+
+    for (let i = 0; i < uniqueValues.length; i++) {
+        const conditionalX = X.filter((x, ti) => T[ti] === uniqueValues[i]);
+        // const bins = binShareRange(conditionalX, _min, _max)
+        const bins = matrixBinShareRange(conditionalX, ranges).flatMap(v => v);
+        dists.push({
+            freq: conditionalX.length,
+            bins
+        })
+    }
+
+    dists.sort((a, b) => b.freq - a.freq)
+    const noise: {freq: number; bins: number[]} = {
+        freq: 0,
+        bins: new Array(BIN_SIZE_FOR_MAT * BIN_SIZE_FOR_MAT).fill(0)
+    };
+
+    for (let i = 0; i < dists.length; i++) {
+        const { bins, freq } = dists[i]
+        if (i < BIN_SIZE - 1) {
+            const subEnt = entropy(rangeNormilize(bins.filter(v => v > 0)))
+            const px = freq / X.length;
+            condH += px * subEnt;
+        } else {
+            noise.freq += freq
+            for (let j = 0; j < BIN_SIZE_FOR_MAT * BIN_SIZE_FOR_MAT; j++) {
+                noise.bins[j] += bins[j];
+            }
+        }
+    }
+    if (noise.freq > 0) {
+        const { bins, freq } = noise
+        const subEnt = entropy(rangeNormilize(bins.filter(v => v > 0)))
+        const px = freq / X.length;
+        condH += px * subEnt;
+    }
+
+
+    return (H - condH) / Math.log2(uniqueValues.length);
+}

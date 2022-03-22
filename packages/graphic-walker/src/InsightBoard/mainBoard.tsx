@@ -75,6 +75,16 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
         currentSpace,
         filters
       }).then(({ visSpaces, explainations, valueExp }) => {
+        console.log({
+          porps: {
+            dimensions,
+            measures,
+            dataSource,
+            currentSpace,
+            filters
+          },
+          res: { visSpaces, explainations, valueExp }
+        })
         setRecSpaces(explainations);
         setVisSpaces(visSpaces);
         setValueExp(valueExp);
@@ -147,12 +157,12 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
 
   return (
       <div style={{ maxHeight: '720px', minHeight: '200px', overflowY: 'auto', maxWidth: '880px' }}>
-          <p className="text-xs">
+          <div className="text-xs">
               {FilterDesc}
-          </p>
-          <p className="text-xs mt-2 mb-2">
+          </div>
+          <div className="text-xs mt-2 mb-2">
           {valueDesc}
-          </p>
+          </div>
           {loading && (
               <div className="animate-spin inline-block mr-2 ml-2 w-16 h-16 rounded-full border-t-2 border-l-2 border-blue-500"></div>
           )}

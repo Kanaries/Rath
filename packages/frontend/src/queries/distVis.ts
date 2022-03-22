@@ -95,7 +95,7 @@ function autoMark (fields: IFieldMeta[]) {
     } else  if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
         return 'point'
     } else if (isSetEqual(semantics, ['quantitative', 'quantitative'])) {
-        return 'point'
+        return 'circle'
     } else if (isSetEqual(semantics, ['temporal', 'quantitative'])) {
         return 'line'
     }
@@ -171,7 +171,8 @@ export function distVis(props: BaseVisProps) {
         //   },
         data: { name: 'dataSource' },
         mark: {
-            type: markType
+            type: markType,
+            opacity: markType === 'circle' ? 0.56 : 0.88
         },
         encoding: enc
     };

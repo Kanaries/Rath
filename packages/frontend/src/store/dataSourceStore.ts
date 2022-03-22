@@ -197,7 +197,11 @@ export class DataSourceStore {
                 if (field.analyticType === 'dimension') {
                     if (field.semanticType === 'temporal' || field.semanticType === 'nominal') {
                         record[field.fid] = String(row[field.fid])
-                    } else {
+                    } 
+                    // else if (field.semanticType === 'ordinal' && !isNaN(Number(row[field.fid]))) {
+                    //     record[field.fid] = Number(row[field.fid])
+                    // }
+                    else {
                         record[field.fid] = row[field.fid]
                     }
                 } else {

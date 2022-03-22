@@ -11,7 +11,7 @@ const DataTypeIcon: React.FC<{dataType: IMutField['semanticType']; analyticType:
         case 'ordinal':
             return <HashtagIcon className={iconClassName} />
         case 'temporal':
-            return <CalendarIcon />
+            return <CalendarIcon className={iconClassName} />
         default:
             return <DocumentTextIcon className={iconClassName} />
     }
