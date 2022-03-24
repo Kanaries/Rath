@@ -1,7 +1,6 @@
 import { ISemanticType } from "visual-insights";
 import { Specification } from "visual-insights/build/esm/commonTypes";
-import { DataSource } from "../global";
-import { IFieldMeta } from "../interfaces";
+import { IFieldMeta, IRow } from "../interfaces";
 export const geomTypeMap: { [key: string]: any } = {
     interval: "bar",
     line: "line",
@@ -11,7 +10,7 @@ export const geomTypeMap: { [key: string]: any } = {
 };
 interface BaseVisProps {
     query: Specification;
-    dataSource: DataSource;
+    dataSource: IRow[];
     dimensions: string[];
     measures: string[];
     aggregatedMeasures: Array<{ op: string; field: string; as: string }>;

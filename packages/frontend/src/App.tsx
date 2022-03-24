@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import intl from 'react-intl-universal';
 import { useGlobalStore, StoreWrapper } from './store/index'
 import { observer } from "mobx-react-lite";
 import "./App.css";
@@ -9,6 +8,7 @@ import NoteBook from "./pages/notebook/index";
 import VisualInterface from './pages/visualInterface';
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
+import PatternPage from './pages/pattern/index';
 import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
 import LTSPage from './pages/lts';
@@ -17,6 +17,8 @@ import AppNav from "./components/appNav";
 import { destroyRathWorker, initRathWorker } from "./service";
 import { PIVOT_KEYS } from "./constants";
 import CrInfo from "./components/crInfo";
+// import { loadTheme } from "office-ui-fabric-react";
+// import { RATH_DARK_PALETTE, RATH_DARK_THEME } from "./theme";
 
 
 // FIXME: 这两代码好像没什么用
@@ -26,28 +28,6 @@ require('intl/locale-data/jsonp/zh.js')
 function App() {
   const { langStore, commonStore } = useGlobalStore()
   const { appKey } = commonStore;
-
-  let pivotKeys: string[] = [
-    PIVOT_KEYS.dataSource,
-    PIVOT_KEYS.lts,
-    PIVOT_KEYS.editor,
-    PIVOT_KEYS.dashBoard,
-    PIVOT_KEYS.noteBook,
-    PIVOT_KEYS.gallery,
-    PIVOT_KEYS.explainer,
-    PIVOT_KEYS.support
-  ]
-
-  let pivotList = pivotKeys.map((page, index) => {
-    return { title: page, itemKey: page }
-  })
-
-  if (langStore.loaded && langStore.lang) {
-    pivotList = pivotKeys.map(p => intl.get(`menu.${p}`))
-      .map((page, index) => {
-        return { title: page, itemKey: pivotKeys[index] }
-      })
-  }
 
   useEffect(() => {
     initRathWorker(commonStore.computationEngine);
@@ -125,6 +105,7 @@ function App() {
         {appKey === PIVOT_KEYS.editor && <VisualInterface />}
         {appKey === PIVOT_KEYS.support && <SupportPage />}
         {appKey === PIVOT_KEYS.lts && <LTSPage />}
+        {appKey === PIVOT_KEYS.pattern && <PatternPage />}
         <CrInfo />
         </div>
       </div>
@@ -133,6 +114,8 @@ function App() {
 }
 
 const OBApp = observer(App);
+
+// loadTheme(RATH_DARK_THEME);
 
 export default function WrappedApp() {
   return (

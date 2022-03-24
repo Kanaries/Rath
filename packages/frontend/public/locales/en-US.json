@@ -14,6 +14,7 @@
         "editor": "Visual Editor",
         "support": "Support",
         "lts": "Explore",
+        "pattern": "Build Knowledge(beta)",
         "devCollection": "Debug"
     },
     "preference": {
@@ -36,7 +37,9 @@
         "cancel": "Cancel",
         "analysis": {
             "start": "Insight Analysis",
-            "checkResult": "Check Existed Results"
+            "checkResult": "Check Existed Results",
+            "pattern": "Build Knowledge(beta)",
+            "manual": "Manual Explore"
         },
         "importStorage": {
             "title": "Import History Storage",
@@ -69,6 +72,26 @@
         "extractInsightOld": "Insight Analysis(Debug)",
         "cleanMethod": "Clean Method",
         "useField": "use field",
+        "viewMode": "View Mode",
+        "metaView": "Meta View",
+        "dataView": "Table View",
+        "advice": {
+            "lackData": "Lack of Data",
+            "lackDimension": "There should includes dimensions in the datasource.",
+            "lackMeasure": "There should includes measures in the datasource",
+            "smallSample": "The sample size is not big enough, which may influence the reliability of recommandation.",
+            "forceAnalysis": "Force Analysis"
+        },
+        "meta": {
+            "uniqueValue": "Unique Value",
+            "analyticType": "analytic type",
+            "semanticType": "semantic Type",
+            "disable": {
+                "title": "Disable Column",
+                "on": "able",
+                "off": "disable"
+            }
+        },
         "importData": {
             "buttonName": "Import Data",
             "type": {
@@ -99,7 +122,7 @@
             "simpleClean": "simple cleaning",
             "none": "none(use original data)"
         },
-        "tip": "Remember to adjust the fields' types and cleaning strategy before extracting insights.",
+        "tip": "Remember to adjust the fields' types and cleaning strategy before analysis.",
         "recordCount": "Number of records {count}",
         "upload": {
             "title": "Upload Your own dataset",
@@ -113,7 +136,8 @@
             "title": "Explore Mode",
             "firstTime": "Meet the data first time",
             "familiar": "Familiar with the data",
-            "comprehensive": "Comprehensive"
+            "comprehensive": "Comprehensive",
+            "manual": "Manual(with specific purpose)"
         }
     },
     "meta": {

@@ -1,8 +1,9 @@
 import React from 'react';
 import { DetailsList, SelectionMode } from 'office-ui-fabric-react';
-import { DataSource, BIField } from '../global';
+import { BIField } from '../global';
+import { IRow } from '../interfaces';
 export interface DataTableProps {
-  dataSource: DataSource,
+  dataSource: IRow[],
   fields: BIField[]
 }
 const DataTable: React.FC<DataTableProps> = (props) => {

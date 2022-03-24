@@ -1,11 +1,12 @@
 import React, { useRef, useEffect } from 'react';
 import embed from 'vega-embed';
-import { FieldType, DataSource } from '../../global';
+import { ISemanticType } from 'visual-insights';
+import { IRow } from '../../interfaces';
 export interface DistributionChartProps {
-  fieldType: FieldType;
+  fieldType: ISemanticType;
   x: string;
   y: string;
-  dataSource: DataSource
+  dataSource: IRow[]
 }
 
 const DistributionChart: React.FC<DistributionChartProps> = (props) => {

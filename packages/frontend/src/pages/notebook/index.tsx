@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import intl from 'react-intl-universal';
 import {  Field } from '../../global';
 import FieldAnalysisBoard from './fieldAnalysis';

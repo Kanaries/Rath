@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { DraggableFieldState, Field, IDraggableStateKey } from '../interfaces';
+import { DraggableFieldState, IDraggableStateKey } from '../interfaces';
 import {
     DragDropContext,
     DropResult,
@@ -7,6 +7,7 @@ import {
     DraggableLocation,
 } from "react-beautiful-dnd";
 import { useGlobalStore } from '../store';
+window['__react-beautiful-dnd-disable-dev-warnings'] = true;
 
 
 export const FieldsContextWrapper: React.FC = props => {

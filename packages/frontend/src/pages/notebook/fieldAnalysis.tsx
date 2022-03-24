@@ -4,12 +4,12 @@ import { Icon, HoverCard, IExpandingCardProps } from 'office-ui-fabric-react';
 import chroma from 'chroma-js';
 import { FieldSummary } from '../../service';
 import DistributionChart from './distributionChart';
-import { FieldType, Record } from '../../global';
 import { BaseTable, ArtColumn } from 'ali-react-table';
 import styled from 'styled-components';
 
 import './fieldAnalysis.css';
 import { IRow } from '../../interfaces';
+import { ISemanticType } from 'visual-insights';
 
 // todo: distribution info
 
@@ -85,18 +85,18 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
     return [0, Math.max(...originEntropy)];
   }, [originSummary])
 
-  const onRenderCompactCard = useCallback((item: Record) => {
+  const onRenderCompactCard = useCallback((item: IRow) => {
       return (
           <div className="field-hover-card">
               <h2>{item.fieldName}</h2>
               <div>Field entropy is {Number(item.entropy).toFixed(2)}</div>
               <div className="chart-vertical-margin-container">
-                  <DistributionChart x="memberName" y="count" fieldType={item.type as FieldType} dataSource={item.distribution} />
+                  <DistributionChart x="memberName" y="count" fieldType={item.type as ISemanticType} dataSource={item.distribution} />
               </div>
           </div>
       );
   }, []);
-  const onRenderExpandedCard = useCallback((item: Record) => {
+  const onRenderExpandedCard = useCallback((item: IRow) => {
       const name = item.fieldName;
       const target = groupedSummary.find((s) => s.fieldName === name + "(group)");
       return (
@@ -109,7 +109,7 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
                           <DistributionChart
                               x="memberName"
                               y="count"
-                              fieldType={target.type as FieldType}
+                              fieldType={target.type as ISemanticType}
                               dataSource={target.distribution}
                           />
                       </div>
@@ -126,7 +126,7 @@ const FieldAnalsis: React.FC<FieldAnalsisProps> = (props) => {
         const nextCol: ArtColumn = {
             ...col,
             name: intl.get(`noteBook.univariate.columns.${col.code}`),
-            render(value: any, record: Record, rowIndex?: number) {
+            render(value: any, record: IRow, rowIndex?: number) {
                 const name = record.fieldName;
                 const target = groupedSummary.find((s) => s.fieldName === name + "(group)");
                 const expandingCardProps: IExpandingCardProps = {

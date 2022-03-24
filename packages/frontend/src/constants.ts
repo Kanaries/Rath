@@ -12,7 +12,8 @@ export const PIVOT_KEYS = {
     explainer: 'explainer',
     editor: 'editor',
     support: 'support',
-    lts: 'lts'
+    lts: 'lts',
+    pattern: 'pattern'
   } as const;
 
 export const COMPUTATION_ENGINE = {
@@ -23,7 +24,8 @@ export const COMPUTATION_ENGINE = {
 export const EXPLORE_MODE = {
   first: 'first',
   familiar: 'familiar',
-  comprehensive: 'comprehensive'
+  comprehensive: 'comprehensive',
+  manual: 'manual'
 }
 
 export const DEMO_DATA_REQUEST_TIMEOUT = 1000 * 10;

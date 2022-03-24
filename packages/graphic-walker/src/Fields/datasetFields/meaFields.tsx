@@ -23,11 +23,11 @@ const MeaFields: React.FC<Props> = props => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                             >
-                                <DataTypeIcon dataType="number" /> {f.name}&nbsp;
+                                <DataTypeIcon dataType={f.semanticType} analyticType={f.analyticType} /> {f.name}&nbsp;
                             </div>
                             {
                                 <div className={`pt-0.5 pb-0.5 pl-2 pr-2 m-1 text-xs hover:bg-blue-100 rounded-full border-blue-400 border truncate ${snapshot.isDragging ? '' : 'hidden'}`}>
-                                    <DataTypeIcon dataType="number" /> {f.name}&nbsp;
+                                    <DataTypeIcon dataType={f.semanticType} analyticType={f.analyticType} /> {f.name}&nbsp;
                                 </div>
                             }
                         </>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { Record, Field, Filters, IMeasure } from '../interfaces';
+import { Record, IField, Filters, IMeasure } from '../interfaces';
 import { Insight, Utils, UnivariateSummary } from 'visual-insights';
 import { baseVis, IReasonType } from './std2vegaSpec';
 import embed from 'vega-embed';
@@ -25,10 +25,10 @@ interface SubSpace {
 
 interface InsightMainBoardProps {
   dataSource: Record[];
-  fields: Field[];
+  fields: IField[];
   filters?: Filters;
-  viewDs: Field[];
-  viewMs: Field[];
+  viewDs: IField[];
+  viewMs: IField[];
 }
 const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
   const { dataSource, fields, viewDs, viewMs, filters } = props;
@@ -41,14 +41,14 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
 
   const dimsWithTypes = useMemo(() => {
     const dimensions = fields
-      .filter((f) => f.type === 'D')
-      .map((f) => f.id)
+      .filter((f) => f.analyticType === 'dimension')
+      .map((f) => f.fid)
       .filter((f) => !Utils.isFieldUnique(dataSource, f));
     return UnivariateSummary.getAllFieldTypes(dataSource, dimensions);
   }, [fields, dataSource])
 
   const measWithTypes = useMemo(() => {
-    const measures = fields.filter((f) => f.type === 'M').map((f) => f.id);
+    const measures = fields.filter((f) => f.analyticType === 'measure').map((f) => f.fid);
     return measures.map((m) => ({
       name: m,
       type: 'quantitative',
@@ -57,12 +57,12 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
 
   useEffect(() => {
     if (dimsWithTypes.length > 0 && measWithTypes.length > 0 && dataSource.length > 0) {
-      const measures = fields.filter((f) => f.type === 'M').map((f) => f.id);
+      const measures = fields.filter((f) => f.analyticType === 'measure').map((f) => f.fid);
       const dimensions = dimsWithTypes.map(d => d.name);
       const currentSpace: SubSpace = {
-          dimensions: viewDs.map((f) => f.id),
+          dimensions: viewDs.map((f) => f.fid),
           measures: viewMs.map((f) => ({
-            key: f.id,
+            key: f.fid,
             op: f.aggName as any
           })),
       };
@@ -75,6 +75,16 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
         currentSpace,
         filters
       }).then(({ visSpaces, explainations, valueExp }) => {
+        console.log({
+          porps: {
+            dimensions,
+            measures,
+            dataSource,
+            currentSpace,
+            filters
+          },
+          res: { visSpaces, explainations, valueExp }
+        })
         setRecSpaces(explainations);
         setVisSpaces(visSpaces);
         setValueExp(valueExp);
@@ -120,30 +130,39 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
     }
   }, [visIndex, recSpaces, visSpaces, fieldsWithType, dataSource])
 
-  const FilterDesc = useMemo<string>(() => {
+  const FilterDesc = useMemo<React.ReactElement[]>(() => {
     if (filters) {
       const dimValues = Object.keys(filters)
       .filter(k => filters[k].length > 0)
-        .map((k) => {
-          return `${k}=${filters[k]}`;
+        .map((k, ki) => {
+          return <div key={`dim-${ki}`}>
+            <div className="inline bg-gray-400 p-1 rounded underline text-white">{k}</div>
+            <div className="inline text-lg ml-1 mr-1">=</div>
+            <div className="inline bg-blue-600 p-1 rounded text-white">{filters[k]}</div>
+          </div>
         });
-      return `选中对象${dimValues.join(', ')}的数据`; 
+     return dimValues
     }
-    return ''
+    return []
   }, [filters])
 
-  const valueDesc = useMemo<string>(() => {
-    const meaStatus = valueExp.map(
-        (mea) => `${mea.key}(${mea.op})的取值${mea.score === 1 ? '大于' : '小于'}预期`
+  const valueDesc = useMemo<React.ReactElement[]>(() => {
+    const meaStatus = valueExp.map((mea, mi) => 
+      <div key={`mea-${mi}`}>
+        <span className="bg-gray-400 p-1 rounded underline text-white">{mea.key}({mea.op})</span>的取值<span className="bg-red-500 p-1 rounded text-white">{mea.score === 1 ? '大于' : '小于'}预期 </span>
+      </div>
     );
-    return meaStatus.join(', ');
+    return meaStatus
   }, [valueExp])
 
   return (
       <div style={{ maxHeight: '720px', minHeight: '200px', overflowY: 'auto', maxWidth: '880px' }}>
-          <p>
-              {FilterDesc}, {valueDesc}
-          </p>
+          <div className="text-xs">
+              {FilterDesc}
+          </div>
+          <div className="text-xs mt-2 mb-2">
+          {valueDesc}
+          </div>
           {loading && (
               <div className="animate-spin inline-block mr-2 ml-2 w-16 h-16 rounded-full border-t-2 border-l-2 border-blue-500"></div>
           )}

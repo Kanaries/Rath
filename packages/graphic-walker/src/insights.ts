@@ -36,7 +36,12 @@ export class DataExplainer {
         // const keys = Object.keys(dataSource[0])
     }
     public setFields(fields: IMutField[]) {
-        this.engine.setFields(fields);
+        this.engine.setFields(fields.map(f => ({
+            ...f,
+            // @ts-ignore
+            key: f.key || f.fid
+        })));
+        // console.log('set fields', fields, fields.map(f => f.fid))
         this.engine.univarSelection();
     }
     public preAnalysis() {
@@ -67,7 +72,7 @@ export class DataExplainer {
         // 讨论：知道selection，但是分析的维度是什么？
         this.explainConditionalValue(predicates, dimensions, measures);
         const selectAll = dimensions.length === 0 || predicates.length === 0;
-        console.log({ selectAll })
+
         const dimSelectionSpaces = selectAll ? [] : this.explainBySelection(
             predicates,
             dimensions,
@@ -142,13 +147,12 @@ export class DataExplainer {
         const knn = this.getGeneralizeKNN('dimension', dimensions, K_Neighbor, 0);
         for (let extendDim of knn) {
             const result = this.explainValue(predicates, [...dimensions, extendDim], measures);
-            console.log(extendDim, measures, result)
         }
     }
     public explainValue(predicates: IPredicate[], dimensions: string[], measures: IMeasure[]): number[] {
         const measureNames = measures.map(m => m.key);
         const measureOps = measures.map(m => m.op);
-        const data = this.engine.cube.getCuboid(dimensions).getState(measureNames, measureOps);
+        const data = this.engine.cube.getCuboid(dimensions).getAggregatedRows(measureNames, measureOps);
         const selection = filterByPredicates(data, predicates);
         const cmps: number[] = [];
         for (let mea of measureNames) {
@@ -177,7 +181,7 @@ export class DataExplainer {
         const parentCuboid = this.engine.cube.getCuboid(dimensions);
         const measureNames = measures.map(m => m.key);
         const ops = measures.map(m => m.op);
-        const parentData = filterByPredicates(parentCuboid.getState(measureNames, ops), predicates);
+        const parentData = filterByPredicates(parentCuboid.getAggregatedRows(measureNames, ops), predicates);
         // console.log(parentData)
         const knn = this.getGeneralizeKNN('dimension', dimensions, K_Neighbor, 0);
 
@@ -185,7 +189,7 @@ export class DataExplainer {
         const outlierList: Array<{key: string; score: number; dimensions: string[]; measures: IMeasure[]}> = [];
         for (let extendDim of knn) {
             const cuboid = this.engine.cube.getCuboid([...dimensions, extendDim]);
-            const data = filterByPredicates(cuboid.getState(measureNames, ops), predicates);
+            const data = filterByPredicates(cuboid.getAggregatedRows(measureNames, ops), predicates);
             let groups: Map<any, Record[]> = new Map();
             for (let record of data) {
                 if (!groups.has(record[extendDim])) {
@@ -215,8 +219,8 @@ export class DataExplainer {
         for (let extendDim of knn) {
             const parentCuboid = this.engine.cube.getCuboid([extendDim])
             const cuboid = this.engine.cube.getCuboid([...dimensions, extendDim])
-            const overallData = parentCuboid.getState(measureNames, ops);
-            const subData = filterByPredicates(cuboid.getState(measureNames, ops), predicates);
+            const overallData = parentCuboid.getAggregatedRows(measureNames, ops);
+            const subData = filterByPredicates(cuboid.getAggregatedRows(measureNames, ops), predicates);
 
             let outlierNormalization = normalizeWithParent(subData, overallData, measureNames, false);
 
@@ -251,7 +255,7 @@ export class DataExplainer {
         for (let op of this.defaultAggs) {
             const extendMeasureOps = knn.map(() => op);
             const normalizedState = normalizeByMeasures(
-                cuboid.getState(allMeasureNames, [...ops, ...extendMeasureOps]),
+                cuboid.getAggregatedRows(allMeasureNames, [...ops, ...extendMeasureOps]),
                 allMeasureNames
             );
             for (let extendMea of allMeasureNames) {
@@ -271,7 +275,7 @@ export class DataExplainer {
                 if (intMeasures.length === 0) continue;
                 if (originMeasure) {
                     const norStateWithNewOp = normalizeByMeasures(
-                        cuboid.getState([extendMea], [op]),
+                        cuboid.getAggregatedRows([extendMea], [op]),
                         [extendMea]
                     )
                     const mergedDataSource = normalizedState.map((record, rIndex) => {
@@ -400,7 +404,7 @@ export class DataExplainer {
             const allMeasures = [...space.measures, ...space.extendMs];
             return {
                 schema: engine.specification(visSpace).schema,
-                dataView: engine.cube.getCuboid([...space.dimensions, ...space.extendDs]).getState(allMeasures.map(m => m.key), allMeasures.map(m => m.op))
+                dataView: engine.cube.getCuboid([...space.dimensions, ...space.extendDs]).getAggregatedRows(allMeasures.map(m => m.key), allMeasures.map(m => m.op))
             };
         })
     }

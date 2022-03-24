@@ -2,11 +2,9 @@ import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import DistributionMiniChart from './distributionMiniChart';
-import { FieldSummary } from '../../../service';
-import { DropdownSelect } from '@tableau/tableau-ui'
-import { BIFieldType, FieldType } from '../../../global';
+import DropdownSelect from '../../../components/dropDownSelect'
 import { IFieldMeta, IRawField } from '../../../interfaces';
-import { ISemanticType } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
+import { IAnalyticType, ISemanticType } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
 import { Callout, IconButton, TextField } from 'office-ui-fabric-react';
 import { useId } from '@uifabric/react-hooks';
 
@@ -50,17 +48,17 @@ interface HeaderCellProps {
 
 interface IOption<T = string> { key: T; text: string };
 
-const DataTypeOptions: IOption<FieldType>[] = [
+const DataTypeOptions: IOption<ISemanticType>[] = [
     { key: 'nominal', text: 'nominal' },
     { key: 'ordinal', text: 'ordinal' },
     { key: 'quantitative', text: 'quantitative' },
     { key: 'temporal', text: 'temporal' }
 ]
 
-function useBIFieldTypeOptions (): IOption<BIFieldType>[] {
+function useBIFieldTypeOptions (): IOption<IAnalyticType>[] {
     const dimensionLabel = intl.get('meta.dimension');
     const measureLabel = intl.get('meta.measure');
-    const options = useMemo<IOption<BIFieldType>[]>(() => {
+    const options = useMemo<IOption<IAnalyticType>[]>(() => {
         return [
             { key: 'dimension', text: dimensionLabel },
             { key: 'measure', text: measureLabel }
@@ -101,7 +99,7 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                 </Callout>
             }
             {meta && (
-                <DropdownSelect aria-readonly kind="text" value={meta.semanticType} onChange={e => {
+                <DropdownSelect aria-readonly value={meta.semanticType} onChange={e => {
                     if (onChange) {
                         onChange(code, 'semanticType', e.target.value as ISemanticType)
                     }
@@ -114,10 +112,10 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                 </DropdownSelect>
             )}
             {
-                <DropdownSelect kind="text" value={meta?.analyticType} onChange={(e) => {
+                <DropdownSelect value={meta?.analyticType} onChange={(e) => {
                     if (onChange) {
                         // FIXME: 弱约束问题
-                        onChange(code, 'analyticType', e.target.value as BIFieldType);
+                        onChange(code, 'analyticType', e.target.value as IAnalyticType);
                     }
                 }}>
                     {

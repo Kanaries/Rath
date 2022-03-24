@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { PrimaryButton, Panel, PanelType, Toggle } from 'office-ui-fabric-react';
 import intl from 'react-intl-universal';
-import { BIField, BIFieldType } from '../global';
+import { IAnalyticType } from 'visual-insights';
+import { BIField } from '../global';
 
 interface FieldPanelProps {
   show: boolean;
@@ -21,7 +22,7 @@ const FieldPanel: React.FC<FieldPanelProps> = (props) => {
     setFields(props.fields)
   }, [props.fields])
   
-  function updateFieldType(field: BIField, type: BIFieldType) {
+  function updateFieldType(field: BIField, type: IAnalyticType) {
     setFields(fields => {
       return fields.map(f => {
         if (field.name === f.name) {

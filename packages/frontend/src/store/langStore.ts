@@ -17,6 +17,7 @@ export class LangStore {
                     "Content-Type": "application/json",
                 },
             });
+            localStorage.setItem('lang', lang);
             const result = await res.json();
             await intl.init({
                 currentLocale: lang,
@@ -36,6 +37,7 @@ export class LangStore {
         let currentLocale = intl.determineLocale({
             urlLocaleKey: "lang",
             cookieLocaleKey: "lang",
+            localStorageLocaleKey: "lang"
         });
         if (!SUPPORT_LANG.find((f) => f.value === currentLocale)) {
             currentLocale = SUPPORT_LANG[0].value;

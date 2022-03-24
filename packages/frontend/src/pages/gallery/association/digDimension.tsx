@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { FieldSummary, ViewSpace } from '../../../service';
-import { Field, DataSource } from '../../../global';
+import { Field } from '../../../global';
 import { specification } from 'visual-insights';
 import { PreferencePanelConfig } from '../../../components/preference';
+import { IRow } from '../../../interfaces';
 // import { FieldSummary } from '\';
 const similarityThrehold = 0.2;
 const topKRelatedSpace = 5;
@@ -35,7 +36,7 @@ export interface DigDimensionProps {
   viewSpaces: ViewSpace[];
   interestedViewSpace: ViewSpace;
   fieldScores: FieldSummary[];
-  dataSource: DataSource;
+  dataSource: IRow[];
   visualConfig: PreferencePanelConfig
 }
 

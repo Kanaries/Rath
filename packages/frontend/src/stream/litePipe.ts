@@ -41,7 +41,7 @@ function generateFieldMetaList(fields: BIField[], summary: FieldSummary[]): IFie
     for (let i = 0; i < fields.length; i++) {
         const meta: IFieldMeta = {
             fid: fields[i].name,
-            features: { entropy: Infinity, maxEntropy: Infinity },
+            features: { entropy: Infinity, maxEntropy: Infinity, unique: 0 },
             semanticType: 'nominal',
             analyticType: fields[i].type,
             distribution: []
@@ -58,6 +58,7 @@ function generateFieldMetaList(fields: BIField[], summary: FieldSummary[]): IFie
             meta.features.maxEntropy = summary[matchIndex].entropy;
             meta.semanticType = summary[matchIndex].type;
             meta.distribution = summary[matchIndex].distribution;
+            meta.features.unique = summary[matchIndex].distribution.length
             metas.push(meta);
         }
     }
@@ -105,7 +106,7 @@ export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: O
         op.withLatestFrom(dataSource$, fields$),
         op.map(([_start, dataSource, fields]) => {
             const fieldIds = fields.map(f => f.fid);
-            const { dimSet, meaSet } = createAnalyticFieldSet(fields);
+            const { dimSet } = createAnalyticFieldSet(fields);
             return from(getFieldsSummaryService(dataSource, fieldIds, false)).pipe(
                 // field with semantic type info
                 op.map(summary => ({
@@ -154,7 +155,7 @@ export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: O
     const cookedDataset$ = univar$.pipe(
         // op.withLatestFrom(dataSource$, fields$, aggOperator$),
         op.map((univarResult) => {
-            const { transedData, transedMetas, originMetas } = univarResult;
+            const { transedMetas } = univarResult;
             const orderedDimMetas = transedMetas.filter(m => m.analyticType === 'dimension');
             const orderedMeaMetas = transedMetas.filter(m => m.analyticType === 'measure');
             orderedDimMetas.sort((a, b) => a.features.entropy - b.features.entropy);
@@ -170,7 +171,7 @@ export function getDataEventStreams (dataSource$: Observable<IRow[]>, fields$: O
     
     const fullDataSubspaces$ = combineLatest([cookedDataset$, aggOperator$, TOP_K_DIM_PERCENT$]).pipe(
         op.map(([cookedDataset, operator, TOP_K_DIM_PERCENT]) => {
-            const { dimMetas, meaMetas, transedData, transedMetas } = cookedDataset
+            const { dimMetas, meaMetas, transedData } = cookedDataset
             const selectedDimIds = dimMetas.slice(0, Math.round(dimMetas.length * TOP_K_DIM_PERCENT))
                 .map(dim => dim.fid);
             const meaIds = meaMetas.map(m => m.fid);

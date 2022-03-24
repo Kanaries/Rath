@@ -59,9 +59,9 @@ const TYPE_LIST = [
         label: '度量'
     }
 ];
-function getCellType(field: IMutField): 'number' | 'text' {
-    return field.dataType === 'number' || field.dataType === 'integer' ? 'number' : 'text';
-}
+// function getCellType(field: IMutField): 'number' | 'text' {
+//     return field.dataType === 'number' || field.dataType === 'integer' ? 'number' : 'text';
+// }
 function getHeaderType(field: IMutField): 'number' | 'text' {
     return field.analyticType === 'dimension'? 'text' : 'number';
 }
@@ -77,13 +77,13 @@ const Table: React.FC<TableProps> = props => {
                 <thead>
                     <tr>
                         {tmpDSRawFields.map((field, fIndex) => (
-                            <th key={field.key} className={getHeaderType(field)}>
-                                <DataTypeIcon dataType={field.dataType} /> <b>{field.key}</b>
+                            <th key={field.fid} className={getHeaderType(field)}>
+                                {/* <DataTypeIcon dataType={field.dataType} /> <b>{field.key}</b> */}
                                 <div>
                                     <select
                                         className="border-b border-gray-300 hover:bg-gray-100 hover:border-gray-600"
                                         value={field.analyticType} onChange={(e) => {
-                                        commonStore.updateTempFieldAnalyticType(field.key, e.target.value as IMutField['analyticType'])
+                                        commonStore.updateTempFieldAnalyticType(field.fid, e.target.value as IMutField['analyticType'])
                                     }}>
                                         {
                                             TYPE_LIST.map(type => <option key={type.value} value={type.value}>{type.label}</option>)
@@ -100,10 +100,10 @@ const Table: React.FC<TableProps> = props => {
                         <tr key={index}>
                             {tmpDSRawFields.map((field) => (
                                 <td
-                                    key={field.key + index}
-                                    className={getCellType(field)}
+                                    key={field.fid + index}
+                                    // className={getCellType(field)}
                                 >
-                                    {record[field.key]}
+                                    {record[field.fid]}
                                 </td>
                             ))}
                         </tr>

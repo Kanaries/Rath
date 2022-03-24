@@ -3,7 +3,6 @@ import ReactMarkdown from 'react-markdown';
 import { FieldSummary, Subspace } from '../../service';
 
 import './index.css';
-import { Field } from '../../global';
 import { Specification } from '../../visBuilder/vegaBase';
 
 interface VisDescriptionProps {

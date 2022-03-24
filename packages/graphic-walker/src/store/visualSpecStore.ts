@@ -28,12 +28,31 @@ export const MetaFieldKeys: Array<keyof DraggableFieldState> = [
     'fields'
 ]
 
+const CHANNEL_LIMIT = {
+    rows: Infinity,
+    columns: Infinity,
+    color: 1,
+    opacity: 1,
+    size: 1,
+}
+
+function getChannelSizeLimit (channel: string): number {
+    if (typeof CHANNEL_LIMIT[channel] === 'undefined') return 0;
+    return CHANNEL_LIMIT[channel];
+}
+
+
+
 function geomAdapter (geom: string) {
     switch (geom) {
         case 'interval':
             return 'bar';
         case 'line':
             return 'line';
+        case 'boxplot':
+            return 'boxplot';
+        case 'area':
+            return 'area';
         case 'point':
             return 'point';
         case 'heatmap':
@@ -65,32 +84,44 @@ export class VizSpecStore {
             size: []
         }
         makeAutoObservable(this);
+        // FIXME!!!!!
         this.reactions.push(reaction(() => commonStore.currentDataset, (dataset) => {
             this.initState();
             this.draggableFieldState.fields = dataset.rawFields.map((f) => ({
                 dragId: uuidv4(),
-                id: f.key,
-                name: f.key,
-                type: f.analyticType === 'dimension' ? 'D' : 'M',
+                fid: f.fid,
+                name: f.name || f.fid,
                 aggName: f.analyticType === 'measure' ? 'sum' : undefined,
+                analyticType: f.analyticType,
+                semanticType: f.semanticType
             }))
             this.draggableFieldState.dimensions = dataset.rawFields
                 .filter(f => f.analyticType === 'dimension')
                 .map((f) => ({
                     dragId: uuidv4(),
-                    id: f.key,
-                    name: f.key,
-                    type: 'D'
+                    fid: f.fid,
+                    name: f.name || f.fid,
+                    semanticType: f.semanticType,
+                    analyticType: f.analyticType,
             }))
             this.draggableFieldState.measures = dataset.rawFields
                 .filter(f => f.analyticType === 'measure')
                 .map((f) => ({
                     dragId: uuidv4(),
-                    id: f.key,
-                    name: f.key,
-                    type: 'M',
+                    fid: f.fid,
+                    name: f.name || f.fid,
+                    analyticType: f.analyticType,
+                    semanticType: f.semanticType,
                     aggName: 'sum'
             }))
+            this.draggableFieldState.measures.push({
+                dragId: uuidv4(),
+                fid: '',
+                name: '记录数',
+                analyticType: 'measure',
+                semanticType: 'quantitative',
+                aggName: 'count'
+            })
         }))
     }
     /**
@@ -103,7 +134,7 @@ export class VizSpecStore {
         (Object.keys(state) as (keyof DraggableFieldState)[])
             .filter(dkey => !MetaFieldKeys.includes(dkey))
             .forEach(dkey => {
-                fields.push(...draggableFieldState[dkey].filter(f => f.type === 'D'))
+                fields.push(...state[dkey].filter(f => f.analyticType === 'dimension'))
             })
         return fields;
     }
@@ -115,9 +146,9 @@ export class VizSpecStore {
         const state = toJS(draggableFieldState);
         const fields: IViewField[] = [];
         (Object.keys(state) as (keyof DraggableFieldState)[])
-            .filter(dkey => MetaFieldKeys.includes(dkey))
+            .filter(dkey => !MetaFieldKeys.includes(dkey))
             .forEach(dkey => {
-                fields.push(...draggableFieldState[dkey].filter(f => f.type === 'M'))
+                fields.push(...state[dkey].filter(f => f.analyticType === 'measure'))
             })
         return fields;
     }
@@ -160,7 +191,10 @@ export class VizSpecStore {
             [movingField] = this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
         }
         if (MetaFieldKeys.includes(destinationKey))return;
-        this.draggableFieldState[destinationKey].splice(destinationIndex, 0, movingField)
+        const limitSize = getChannelSizeLimit(destinationKey);
+        const fixedDestinationIndex = Math.min(destinationIndex, limitSize - 1);
+        const overflowSize = Math.max(0, this.draggableFieldState[destinationKey].length + 1 - limitSize);
+        this.draggableFieldState[destinationKey].splice(fixedDestinationIndex, overflowSize, movingField)
     }
     public removeField(sourceKey: keyof DraggableFieldState, sourceIndex: number) {
         if (MetaFieldKeys.includes(sourceKey))return;
@@ -190,21 +224,21 @@ export class VizSpecStore {
         if (spec.facets && spec.facets.length > 0) {
             const facets = (spec.facets || []).concat(spec.highFacets || []);
             for (let facet of facets) {
-                this.appendField('rows', fields.find(f => f.id === facet));
+                this.appendField('rows', fields.find(f => f.fid === facet));
             }
         }
         if (spec.position && spec.position.length > 1) {
-            this.appendField('rows', fields.find(f => f.id === spec.position![1]));
-            this.appendField('columns', fields.find(f => f.id === spec.position![0]));
+            this.appendField('rows', fields.find(f => f.fid === spec.position![1]));
+            this.appendField('columns', fields.find(f => f.fid === spec.position![0]));
         }
         if (spec.color && spec.color.length > 0) {
-            this.appendField('color', fields.find(f => f.id === spec.color![0]));
+            this.appendField('color', fields.find(f => f.fid === spec.color![0]));
         }
         if (spec.size && spec.size.length > 0) {
-            this.appendField('size', fields.find(f => f.id === spec.size![0]));
+            this.appendField('size', fields.find(f => f.fid === spec.size![0]));
         }
         if (spec.opacity && spec.opacity.length > 0) {
-            this.appendField('opacity', fields.find(f => f.id === spec.opacity![0]));
+            this.appendField('opacity', fields.find(f => f.fid === spec.opacity![0]));
         }
 
     }

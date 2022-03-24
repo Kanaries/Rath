@@ -1,11 +1,11 @@
 import { RATH_INDEX_COLUMN_KEY, STORAGE_FILE_SUFFIX } from "../../constants";
 // import { BIField, Record } from "../../global";
-import { FileLoader, inferAnalyticType, inferSemanticType, isASCII } from "../../utils";
+import { FileLoader } from "../../utils";
 import { Cleaner, Sampling } from 'visual-insights';
 import { FileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
-import { IRawField, IRow } from "../../interfaces";
+import { IMuteFieldBase, IRow } from "../../interfaces";
 import { IRathStorage, RathStorageParse } from "../../utils/storage";
 import { formatTimeField } from "../../utils/transform";
 // import { isFieldTime } from "visual-insights/build/esm/utils";
@@ -38,52 +38,47 @@ export const useSampleOptions = function () {
  * @param data 
  */
 export function setIndexKey(data: IRow[]): IRow[] {
-    data.forEach((record, i) => {
-        record[RATH_INDEX_COLUMN_KEY] = i;
+    data.forEach((record, i, arr) => {
+        arr[i][RATH_INDEX_COLUMN_KEY] = i;
     })
     return data;
-}
-
-/**
- * 针对vega中对Unicode字段的相关bug做的调整（非ascii字符会被删除掉，会导致字段名不唯一的bug问题）
- * @param fields 
- * @param dataSource 
- * @returns 
- */
-export function fixUnicodeFields(fields: IRawField[], dataSource: IRow[]): {
-    fields: IRawField[],
-    dataSource: IRow[]
-} {
-    const newFields: IRawField[] = fields.map((f, i) => {
-        const nF = { ...f };
-        if (!isASCII(nF.fid)) {
-            nF.fid = `${f.fid}(Rath_Field_${i})`
-        }
-        return nF
-    })
-    const newDataSource: IRow[] = dataSource.map(row => {
-        const newRow: IRow = {};
-        for (let i = 0; i < newFields.length; i++) {
-            newRow[newFields[i].fid] = row[fields[i].fid] 
-        }
-        return newRow
-    })
-    return {
-        fields: newFields,
-        dataSource: newDataSource
-    }
 }
 
 const onDataLoading = (value: number) => {
     console.log('data loading', Math.round(value * 100) + '%')
 }
+/**
+ * 调整字段key，避免一些非法符号的影响。
+ * 这个可以
+ * @param colKeys 
+ */
+function formatColKeys(colKeys: string[]): string[] {
+    return colKeys.map((col, colIndex) => {
+        return `col_${colIndex}_${Math.round(Math.random() * 100)}`
+    })
+}
 
-export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSize: number = 500) {
+function formatColKeysInRow(originalKeys: string[], newKeys: string[], data: IRow[]): IRow[] {
+    const newData: IRow[] = [];
+    for (let i = 0; i < data.length; i++) {
+        const newRow: IRow = {};
+        for (let j = 0; j < newKeys.length; j++) {
+            newRow[newKeys[j]] = data[i][originalKeys[j]];
+        }
+        newData.push(newRow)
+    }
+    return newData
+}
+
+export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSize: number = 500): Promise<{
+    fields: IMuteFieldBase[];
+    dataSource: IRow[]
+}> {
 
     /**
      * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
      */
-    let tmpFields: IRawField[] = []
+    let tmpFields: IMuteFieldBase[] = []
     let rawData: IRow[] = []
 
     if (file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
@@ -112,27 +107,38 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
         throw new Error(`unsupported file type=${file.type} `)
     }
     rawData = Cleaner.dropNullColumn(rawData, Object.keys(rawData[0])).dataSource
-    rawData = setIndexKey(rawData);
     // FIXME: 第一条数据取meta的危险性
-    let fids = Object.keys(rawData[0])
-    tmpFields = fids.map((fid, index) => {
-        if (fid === RATH_INDEX_COLUMN_KEY) return {
-            fid,
-            analyticType: 'dimension',
-            semanticType: 'nominal',
-            disable: false
-        }
+    let names = Object.keys(rawData[0])
+    const fids = formatColKeys(names);
+    rawData = formatColKeysInRow(names, fids, rawData)
+
+    rawData = setIndexKey(rawData);
+    tmpFields = names.map((name, index) => {
         return {
-            fid,
-            analyticType: inferAnalyticType(rawData, fid),
-            semanticType: inferSemanticType(rawData, fid),
-            disable: false
+            fid: fids[index],
+            name,
+            analyticType: '?', //inferAnalyticType(rawData, fid),
+            semanticType: '?', //inferSemanticType(rawData, fid),
+            disable: '?'
         }
+    })
+    tmpFields.push({
+        fid: RATH_INDEX_COLUMN_KEY,
+        name: 'Rath Row ID',
+        analyticType: 'dimension',
+        semanticType: 'ordinal',
+        disable: false
     })
     const timeFieldKeys = tmpFields.filter(f => f.semanticType === 'temporal').map(f => f.fid);
     formatTimeField(rawData, timeFieldKeys);
-    const fixedDataSet = fixUnicodeFields(tmpFields, rawData);
-    return fixedDataSet;
+    console.log({
+        fields: tmpFields,
+        dataSource: rawData
+    })
+    return {
+        fields: tmpFields,
+        dataSource: rawData
+    }
 }
 
 export async function loadRathStorageFile (file: File): Promise<IRathStorage> {

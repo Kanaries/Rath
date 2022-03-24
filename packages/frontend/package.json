@@ -14,7 +14,6 @@
     "@kanaries/graphic-walker": "0.1.0",
     "@kanaries/web-data-loader": "0.1.0",
     "@material-ui/core": "^5.0.0-beta.5",
-    "@tableau/tableau-ui": "^3.0.0",
     "@uifabric/icons": "^7.5.17",
     "@uifabric/react-hooks": "^7.13.9",
     "ali-react-table": "^2.3.1",
@@ -45,7 +44,7 @@
     "vega": "^5.19.1",
     "vega-embed": "^6.15.1",
     "vega-lite": "^4.17.0",
-    "visual-insights": "0.7.12",
+    "visual-insights": "0.7.15",
     "web-vitals": "^0.2.4",
     "worker-loader": "^3.0.7"
   },
@@ -65,7 +64,7 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
+    "build": "GENERATE_SOURCEMAP=false react-app-rewired build",
     "build2": "react-app-rewired --max_old_space_size=4096 build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",

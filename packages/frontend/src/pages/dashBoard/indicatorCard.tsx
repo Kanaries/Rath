@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import styled from "styled-components";
-import { Aggregator, DataSource } from "../../global";
+import { Aggregator } from "../../global";
 import datalib from "datalib";
+import { IRow } from "../../interfaces";
 
 function numberWithCommas(x: number): string {
   let parts = x.toString().split(".");
@@ -34,7 +35,7 @@ const Card = styled.div`
   }
 `;
 interface IndicatorProps {
-  dataSource: DataSource;
+  dataSource: IRow[];
   measures: string[];
   operator?: Aggregator;
 }

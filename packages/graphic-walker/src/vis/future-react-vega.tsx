@@ -3,28 +3,29 @@
  * https://github.com/vega/vega-lite/issues/4680
  */
 import React, { useEffect, useRef } from 'react';
-import { Field, IViewField, Record } from '../interfaces';
+import { IField, IViewField, Record } from '../interfaces';
 import embed from 'vega-embed';
 import { Subject } from 'rxjs'
 import * as op from 'rxjs/operators';
 import { ScenegraphEvent } from 'vega';
 const SELECTION_NAME = 'geom';
 interface ReactVegaProps {
-    rows: Field[];
-    columns: Field[];
+    rows: IField[];
+    columns: IField[];
     dataSource: Record[];
     defaultAggregate?: boolean;
     geomType: string;
-    color?: Field;
-    opacity?: Field;
-    size?: Field;
+    color?: IField;
+    opacity?: IField;
+    size?: IField;
     onGeomClick?: (values: any, e: any) => void
 }
-const NULL_FIELD: Field = {
-    id: '',
+const NULL_FIELD: IField = {
+    fid: '',
     name: '',
-    aggName: 'sum',
-    type: 'D'
+    semanticType: 'quantitative',
+    analyticType: 'measure',
+    aggName: 'sum'
 }
 const click$ = new Subject<ScenegraphEvent>();
 const selection$ = new Subject<any>();
@@ -37,49 +38,49 @@ const geomClick$ = selection$.pipe(
         return false
     })
 );
-function getFieldType(field: Field): 'quantitative' | 'nominal' | 'ordinal' | 'temporal' {
-    if (field.type === 'M') return 'quantitative';
+function getFieldType(field: IField): 'quantitative' | 'nominal' | 'ordinal' | 'temporal' {
+    if (field.analyticType === 'measure') return 'quantitative';
     return 'nominal';
 }
 
-function getSingleView(xField: Field, yField: Field, color: Field, opacity: Field, size: Field, row: Field, col: Field, defaultAggregated: boolean, geomType: string) {
+function getSingleView(xField: IField, yField: IField, color: IField, opacity: IField, size: IField, row: IField, col: IField, defaultAggregated: boolean, geomType: string) {
     return {
         mark: geomType,
         encoding: {
             x: {
-                field: xField.id,
+                field: xField.fid,
                 type: getFieldType(xField),
                 aggregate:
-                    xField.type === 'M' &&
+                    xField.analyticType === 'measure' &&
                     defaultAggregated &&
                     (xField.aggName as any),
             },
             y: {
-                field: yField.id,
+                field: yField.fid,
                 type: getFieldType(yField),
                 aggregate:
-                    yField.type === 'M' &&
+                    yField.analyticType === 'measure' &&
                     defaultAggregated &&
                     (yField.aggName as any),
             },
             row: row !== NULL_FIELD ? {
-                field: row.id,
+                field: row.fid,
                 type: getFieldType(row),
             } : undefined,
             column: col !== NULL_FIELD ? {
-                field: col.id,
+                field: col.fid,
                 type: getFieldType(col),
             } : undefined,
             color: color !== NULL_FIELD ? {
-                field: color.id,
+                field: color.fid,
                 type: getFieldType(color)
             } : undefined,
             opacity: opacity !== NULL_FIELD ? {
-                field: opacity.id,
+                field: opacity.fid,
                 type: getFieldType(opacity)
             } : undefined,
             size: size !== NULL_FIELD ? {
-                field: size.id,
+                field: size.fid,
                 type: getFieldType(size)
             } : undefined
         }
@@ -110,10 +111,10 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     }, []);
     useEffect(() => {
         if (container.current) {
-            const rowDims = rows.filter(f => f.type === 'D');
-            const colDims = columns.filter(f => f.type === 'D');
-            const rowMeas = rows.filter(f => f.type === 'M');
-            const colMeas = columns.filter(f => f.type === 'M');
+            const rowDims = rows.filter(f => f.analyticType === 'dimension');
+            const colDims = columns.filter(f => f.analyticType === 'dimension');
+            const rowMeas = rows.filter(f => f.analyticType === 'measure');
+            const colMeas = columns.filter(f => f.analyticType === 'measure');
 
             const yField = rows.length > 0 ? rows[rows.length - 1] : NULL_FIELD;
             const xField = columns.length > 0 ? columns[columns.length - 1] : NULL_FIELD;
@@ -129,7 +130,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
             const rowRepeatField = rowRepeatFields.length > 0 ? rowRepeatFields[rowRepeatFields.length - 1] : NULL_FIELD;
             const colRepeatField = colRepeatFields.length > 0 ? colRepeatFields[colRepeatFields.length - 1] : NULL_FIELD;
 
-            const dimensions = [...rows, ...columns, color, opacity, size].filter(f => Boolean(f)).map(f => (f as Field).id)
+            const dimensions = [...rows, ...columns, color, opacity, size].filter(f => Boolean(f)).map(f => (f as IField).fid)
 
             const spec: any = {
                 data: {
@@ -158,7 +159,6 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
                 // spec.encoding = singleView.encoding;
             } else {
                 spec.concat = [];
-                console.log('latest', rowRepeatFields, colRepeatFields, rowDims, colDims.slice(-1))
                 for (let i = 0; i < rowRepeatFields.length; i++) {
                     for (let j = 0; j < colRepeatFields.length; j++) {
                         const singleView = getSingleView(

@@ -20,6 +20,12 @@ const VisualSettings: React.FC<VisualSettinsProps> = props => {
                 <label className="text-xs text-color-gray-700 ml-2">聚合度量</label>
             </div>
             <div className="item">
+                <input type="checkbox" checked={visualConfig.defaultStack} onChange={(e) => {
+                    vizStore.setVisualConfig('defaultStack', e.target.checked);
+                }} />
+                <label className="text-xs text-color-gray-700 ml-2">开启堆叠</label>
+            </div>
+            <div className="item">
                 <label>标记类型</label>
                 <select
                     className="border border-gray-500 rounded-sm text-xs pt-0.5 pb-0.5 pl-2 pr-2"

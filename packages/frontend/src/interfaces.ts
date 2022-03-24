@@ -1,6 +1,6 @@
 // define new interfaces here, global.ts is no longer maintained.
-import { IFieldSummary, IInsightSpace } from "visual-insights";
-import { Aggregator, BIField, BIFieldType, FieldType } from "./global";
+import { IAnalyticType, IFieldSummary, IInsightSpace, ISemanticType } from "visual-insights";
+import { Aggregator } from "./global";
 
 export interface IRow {
     [key: string]: any
@@ -13,18 +13,22 @@ export interface IRow {
 interface IFieldBase {
     fid: string;
     name?: string;
-    analyticType: BIFieldType;
-    semanticType: FieldType;
+    analyticType: IAnalyticType;
+    semanticType: ISemanticType;
 }
 export interface IRawField extends IFieldBase {
     disable?: boolean;
 }
 
+/**
+ * ImuteFieldBase 是未来替换IRawField的新interface，其扩展了'?'类型，方便告诉后续的类型推断机制来做。
+ */
 export interface IMuteFieldBase {
     fid: string;
     name?: string;
     analyticType: 'dimension' | 'measure' | '?';
     semanticType: 'nominal' | 'temporal' | 'ordinal' | 'quantitative' | '?';
+    disable?: boolean | '?';
 }
 
 export interface IFieldMeta extends IFieldBase {
@@ -34,17 +38,17 @@ export interface IFieldMeta extends IFieldBase {
     features: {
         entropy: number;
         maxEntropy: number;
+        unique: number;
         [key: string]: any
     };
     distribution: Array<{ memberName: string; count: number }>;
+    disable?: boolean;
 }
 
 export enum IComputeMode {
     server = 'server',
     worker = 'worker'
 }
-
-export type IAnalyticType = 'dimension' | 'measure';
 
 export interface PreferencePanelConfig {
     aggregator: Aggregator;
@@ -68,4 +72,14 @@ export interface ISyncEngine {
 export interface IDatasetBase {
     dataSource: IRow[];
     fields: IMuteFieldBase[];
+}
+
+export enum IDataPreviewMode {
+    meta = 'meta',
+    data = 'data'
+}
+
+export enum ITaskTestMode {
+    local = 'local',
+    server = 'server'
 }

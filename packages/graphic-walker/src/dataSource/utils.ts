@@ -39,7 +39,7 @@ export function transData(dataSource: Record[]): {
     return {
         dataSource: ans,
         fields: fields.map(f => ({
-            key: f.key,
+            fid: f.key,
             analyticType: f.analyticType,
             dataType: f.dataType,
             semanticType: f.semanticType

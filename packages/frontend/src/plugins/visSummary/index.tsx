@@ -4,7 +4,6 @@ import { FieldSummary, Subspace } from '../../service';
 import { DefaultButton, TeachingBubble, DirectionalHint } from 'office-ui-fabric-react';
 
 import './index.css';
-import { Field } from '../../global';
 import { Specification } from '../../visBuilder/vegaBase';
 
 

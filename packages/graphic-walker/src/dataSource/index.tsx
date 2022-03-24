@@ -2,7 +2,8 @@ import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { Container } from '../components/container';
 import Modal from '../components/modal';
-import DataSourcePanel from './pannel';
+// import DataSourcePanel from './pannel';
+import DataSelection from './dataSelection';
 import { useGlobalStore } from '../store';
 import { CheckCircleIcon, RefreshIcon } from '@heroicons/react/outline';
 
@@ -39,7 +40,8 @@ const DataSourceSegment: React.FC<DSSegmentProps> = props => {
                 title="创建数据源"
                 onClose={() => { commonStore.setShowDSPanel(false) }}
             >
-                <DataSourcePanel />
+                <DataSelection />
+                {/* <DataSourcePanel /> */}
             </Modal>
         )}
         { preWorkDone && <CheckCircleIcon className="text-green-500 w-5 inline-block ml-2" /> }

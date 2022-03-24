@@ -2,12 +2,13 @@ import { makeAutoObservable, observable, runInAction } from "mobx";
 import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from } from "rxjs";
 import * as op from 'rxjs/operators'
-import { ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
-import { BIFieldType } from "../global";
-import { IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
+import { IAnalyticType, ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
+import { RATH_INDEX_COLUMN_KEY } from "../constants";
+import { NextVICore } from "../dev";
+import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
 import { getFieldsSummaryService, inferMetaService } from "../service";
-import { Transform } from "../utils";
+import { findRathSafeColumnIndex, Transform } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
 
 interface IDataMessage {
@@ -51,6 +52,7 @@ export class DataSourceStore {
      */
     // public fieldMetas: IFieldMeta[] = [];
     public loading: boolean = false;
+    public dataPreviewMode: IDataPreviewMode = IDataPreviewMode.data;
     public showDataImportSelection: boolean = false;
     private fieldMetasRef: IStreamListener<IFieldMeta[]>;
     constructor() {
@@ -63,6 +65,7 @@ export class DataSourceStore {
         const fields$ = from(toStream(() => this.fields, true));
         const cleanedData$ = from(toStream(() => this.cleanedData, true))
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
+        // const fieldSemanticTypes
         const originFieldMetas$ =  combineLatest([fields$, cleanedData$]).pipe(
             op.map(([fields, cleanedData]) => {
                 const ableFiledIds = fields.map(f => f.fid);
@@ -125,11 +128,60 @@ export class DataSourceStore {
         return this.fields.filter((field) => field.analyticType === "dimension").map((field) => field.fid);
     }
 
+    public get dimFields () {
+        return this.fields.filter((field) => field.analyticType === "dimension")
+    }
+
     public get measures () {
         return this.fields.filter(field => field.analyticType === 'measure').map(field => field.fid)
     }
+
+    public get meaFields () {
+        return this.fields.filter(field => field.analyticType === 'measure')
+    }
     public get fieldNames (): string[] {
         return this.fields.map(f => `${f.name}`)
+    }
+
+    public get hasOriginalDimensionInData () {
+        if (this.dimensions.length === 0) return false;
+        if (this.dimensions.length === 1) {
+            return !Boolean(this.dimensions.find(f => f === RATH_INDEX_COLUMN_KEY))
+        }
+        return true;
+    }
+
+    public get staisfyAnalysisCondition (): boolean {
+        if (this.cleanedData.length === 0 || this.measures.length === 0 || this.dimensions.length === 0) {
+            return false;
+        }
+        if (!this.hasOriginalDimensionInData) {
+            return false;
+        }
+        return true;
+    }
+
+    // public get groupCounts () {
+    //     return this.fieldMetas.filter(f => f.analyticType === 'dimension')
+    //         .map(f => f.features.unique)
+    //         .reduce((t, v) => t * v, 1)
+    // }
+    // /**
+    //  * 防止groupCounts累乘的时候很快就超过int最大范围的情况
+    //  */
+    // public get groupCountsLog () {
+    //     return this.fieldMetas.filter(f => f.analyticType === 'dimension')
+    //         .map(f => f.features.maxEntropy)
+    //         .reduce((t, v) => t + v, 0)
+    // }
+    public get groupMeanLimitCountsLog () {
+        const valueCountsList = this.fieldMetas.filter(f => f.analyticType === 'dimension')
+            .map(f => f.features.unique);
+        const m = valueCountsList.reduce((t, v) => t + v, 0) / valueCountsList.length;
+        // 3: 有意义的下钻层数
+        // -1: 放款一个标准，到底层的时候允许是小样本
+        const size = Math.min(3 - 1, valueCountsList.length)
+        return size * Math.log2(m)
     }
 
     public get cleanedData () {
@@ -145,7 +197,11 @@ export class DataSourceStore {
                 if (field.analyticType === 'dimension') {
                     if (field.semanticType === 'temporal' || field.semanticType === 'nominal') {
                         record[field.fid] = String(row[field.fid])
-                    } else {
+                    } 
+                    // else if (field.semanticType === 'ordinal' && !isNaN(Number(row[field.fid]))) {
+                    //     record[field.fid] = Number(row[field.fid])
+                    // }
+                    else {
                         record[field.fid] = row[field.fid]
                     }
                 } else {
@@ -162,6 +218,10 @@ export class DataSourceStore {
         this.loading = loading;
     }
 
+    public setDataPreviewMode(mode: IDataPreviewMode) {
+        this.dataPreviewMode = mode;
+    }
+
     public setShowDataImportSelection (show: boolean) {
         this.showDataImportSelection = show;
     }
@@ -170,7 +230,7 @@ export class DataSourceStore {
         this.cleanMethod = method;
     }
 
-    public updateFieldAnalyticType (type: BIFieldType, fid: string) {
+    public updateFieldAnalyticType (type: IAnalyticType, fid: string) {
         const target = this.mutFields.find(f => f.fid === fid);
         if (target) {
             target.analyticType = type;
@@ -181,6 +241,8 @@ export class DataSourceStore {
         const target = this.mutFields.find(f => f.fid === fid);
         if (target) {
             target.semanticType = type;
+            // 触发fieldsMeta监控可以被执行
+            this.mutFields = [...this.mutFields];
         }
     }
     // public updateFieldInfo <K extends keyof IRawField> (fieldId: string, fieldPropKey: K, value: IRawField[K]) {
@@ -191,6 +253,8 @@ export class DataSourceStore {
             // @ts-ignore
             target[fieldPropKey] = value;
             // target.type = type;
+            // 触发fieldsMeta监控可以被执行
+            this.mutFields = [...this.mutFields];
         }
     }
 
@@ -221,6 +285,20 @@ export class DataSourceStore {
         }
     }
 
+    public exportDataAsDSService(): IDatasetBase {
+        const { cleanedData, fieldMetas } = this;
+        return {
+            dataSource: cleanedData,
+            fields: fieldMetas.map(f => ({
+                name: f.name,
+                analyticType: f.analyticType,
+                semanticType: f.semanticType,
+                disable: f.disable,
+                fid: f.fid
+            }))
+        }
+    }
+
     public importStore(state: IDataSourceStoreStorage) {
         this.rawData = state.rawData;
         this.mutFields = state.mutFields;
@@ -236,11 +314,24 @@ export class DataSourceStore {
         if (fields.length > 0 && dataSource.length > 0) {
             const metas = await inferMetaService({ dataSource, fields })
             runInAction(() => {
-                this.mutFields = metas;
                 this.rawData = dataSource;
                 this.loading = false;
                 this.showDataImportSelection = false;
+                // 如果除了安全维度，数据集本身就有维度
+                if (metas.filter(f => f.analyticType === 'dimension').length > 1) {
+                    const rathColIndex = findRathSafeColumnIndex(metas);
+                    if (rathColIndex > -1) {
+                        metas[rathColIndex].disable = true
+                    }
+                }
+                this.mutFields = metas;
             })
         }
+    }
+    public dev() {
+        const core = new NextVICore(this.cleanedData, this.fieldMetas);
+        // console.log(core.firstPattern())
+        // console.log(core.secondPattern())
+        console.log(core.featureSelectForSecondPattern())
     }
 }

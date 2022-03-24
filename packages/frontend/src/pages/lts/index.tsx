@@ -27,15 +27,18 @@ const InsightContainer = styled.div`
     display: flex;
     .insight-viz{
         flex-grow: 1;
-        flex-shrink: 2;
+        /* flex-basis: 400px; */
+        min-width: 500px;
+        /* flex-shrink: 2; */
         overflow: auto;
     }
     .insight-info{
         flex-grow: 2;
         flex-shrink: 1;
-        flex-basis: 500px;
+        flex-wrap: wrap;
         padding: 0em 1em;
         border-left: 1px solid #f5f5f5;
+        overflow: auto;
     }
 `
 
@@ -44,16 +47,17 @@ const LTSPage: React.FC = props => {
     const { computing, fieldMetas } = ltsPipeLineStore;
 
     const { pageIndex, visualConfig, spec, showSubinsights, insightSpaces } = exploreStore;
+    const { taskMode } = commonStore
     const [showCommonVis, setShowCommonVis] = useState<boolean>(true);
     const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
     const startAnalysis = useCallback(() => {
-        ltsPipeLineStore.startTask().then(() => {
+        ltsPipeLineStore.startTask(taskMode).then(() => {
             exploreStore.emitViewChangeTransaction(0)
         }).catch(err => {
             commonStore.showError('error', err)
         })
-    }, [ltsPipeLineStore, exploreStore, commonStore])
+    }, [ltsPipeLineStore, exploreStore, commonStore, taskMode])
 
     const downloadResults = useCallback(() => {
         exploreStore.downloadResults();
@@ -128,13 +132,13 @@ const LTSPage: React.FC = props => {
             <p className="state-description">{intl.get('lts.hintMain')}</p>
             {/* <Divider style={{ marginBottom: '1em', marginTop: '1em' }} /> */}
             <Dropdown style={{ maxWidth: '180px' }}
-                    selectedKey={exploreStore.orderBy}
-                    options={orderOptions}
-                    label={intl.get('lts.orderBy.title')}
-                    onChange={(e, item) => {
-                    item && exploreStore.setExploreOrder(item.key as string);
-                    }}
-                />
+                selectedKey={exploreStore.orderBy}
+                options={orderOptions}
+                label={intl.get('lts.orderBy.title')}
+                onChange={(e, item) => {
+                item && exploreStore.setExploreOrder(item.key as string);
+                }}
+            />
             <Stack style={{ marginRight: '1em' }} horizontal>
                 <Pagination style={{ marginBottom: '1em', marginTop: '1em' }} variant="outlined" shape="rounded" count={insightSpaces.length} page={pageIndex + 1} onChange={(e, v) => {
                     exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
@@ -144,21 +148,21 @@ const LTSPage: React.FC = props => {
             <InsightContainer>
                 <div className="insight-viz">
                 {insightSpaces.length > 0 && spec && <div>
-                            <VisErrorBoundary>
-                                <BaseChart
-                                    defaultAggregated={visualConfig.defaultAggregated}
-                                    defaultStack={visualConfig.defaultStack}
-                                    dimensions={insightSpaces[pageIndex].dimensions}
-                                    measures={insightSpaces[pageIndex].measures}
-                                    dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
-                                    schema={spec.schema}
-                                    fieldFeatures={fieldMetas}
-                                    aggregator={visualConfig.aggregator}
-                                    viewSize={320}
-                                    stepSize={32}
-                                />
-                            </VisErrorBoundary>
-                        </div>}
+                        <VisErrorBoundary>
+                            <BaseChart
+                                defaultAggregated={visualConfig.defaultAggregated}
+                                defaultStack={visualConfig.defaultStack}
+                                dimensions={insightSpaces[pageIndex].dimensions}
+                                measures={insightSpaces[pageIndex].measures}
+                                dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
+                                schema={spec.schema}
+                                fieldFeatures={fieldMetas}
+                                aggregator={visualConfig.aggregator}
+                                viewSize={320}
+                                stepSize={32}
+                            />
+                        </VisErrorBoundary>
+                    </div>}
                 </div>
                 <div className="insight-info">
                     <VizOperation />

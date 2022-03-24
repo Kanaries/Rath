@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
-import { DataSource } from '../global';
+import { IRow } from 'visual-insights';
 import ReactVega from './react-vega';
 
 interface SimpleTickProps {
   x: string;
   y: string;
   threshold: number;
-  dataSource: DataSource
+  dataSource: IRow[]
 }
 const SimpleTick: React.FC<SimpleTickProps> = props => {
   const { x, y, threshold, dataSource = [] } = props;

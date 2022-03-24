@@ -8,6 +8,7 @@ import 'office-ui-fabric-core/dist/css/fabric.css'
 import './index.css';
 import App from './App';
 import { initializeIcons } from '@uifabric/icons'
+
 initializeIcons()
 
 ReactDOM.render(

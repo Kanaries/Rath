@@ -9,11 +9,12 @@
         "dataSource": "数据源",
         "noteBook": "交互式算法可视化",
         "explore": "探索分析(旧)",
-        "dashBoard": "报表",
+        "dashBoard": "报表推荐",
         "explainer": "数据解读",
         "editor": "自助分析",
         "support": "帮助",
         "lts": "探索分析",
+        "pattern": "建立认知(beta)",
         "devCollection": "调试模式"
     },
     "preference": {
@@ -36,7 +37,9 @@
         "cancel": "取消",
         "analysis": {
             "start": "开始分析",
-            "checkResult": "查看已有结果"
+            "checkResult": "查看已有结果",
+            "pattern": "建立认知(beta)",
+            "manual": "自助分析"
         },
         "importStorage": {
             "title": "导入历史分析",
@@ -69,8 +72,29 @@
         "extractInsightOld": "开始分析(调试模式)",
         "cleanMethod": "清洗方法",
         "useField": "允许使用",
+        "viewMode": "视图模式",
+        "metaView": "元数据视图",
+        "dataView": "数据视图",
+        "advice": {
+            "lackData": "缺少有效数据",
+            "lackDimension": "数据集中缺少维度，无法进行完整的分析任务。",
+            "lackMeasure": "数据集中缺少度量，无法进行完整的分析任务。",
+            "smallSample": "数据集中样本数量低于预期，可能会对推荐结果的一般性造成影响。（小样本问题）",
+            "forceAnalysis": "强制分析"
+        },
+        "meta": {
+            "title": "元数据视图",
+            "uniqueValue": "唯一值数量",
+            "analyticType": "分析类型",
+            "semanticType": "数据类型",
+            "disable": {
+                "title": "是否使用该列",
+                "on": "使用",
+                "off": "禁用"
+            }
+        },
         "importData": {
-            "buttonName": "导入数据",
+            "buttonName": "选择数据",
             "type": {
                 "file": "文件",
                 "restful": "RESTFUL",
@@ -99,7 +123,7 @@
             "simpleClean": "简单的替换",
             "none": "无(使用原始数据)"
         },
-        "tip": "记得在提取洞察前先调整数据的清洗策略并配置字段的属性",
+        "tip": "记得在开始分析前先调整数据的清洗策略并配置字段的属性",
         "recordCount": "记录数 {count}",
         "upload": {
             "title": "上传你的数据集，根据需求调整以下配置",
@@ -113,7 +137,8 @@
             "title": "探索模式",
             "firstTime": "第一次接触该数据集",
             "familiar": "基本熟悉该数据集",
-            "comprehensive": "综合模式"
+            "comprehensive": "综合模式",
+            "manual": "手动（有明确分析目的）"
         }
     },
     "meta": {

@@ -48,10 +48,11 @@ const PreferencePanel: React.FC = () => {
             onRenderFooterContent={onRenderFooterContent}
         >
             <Label>Preference</Label>
+            
             <Stack verticalFill tokens={{ childrenGap: 50, padding: 6 }}>
                 <ComboBox
                     selectedKey={aggregator}
-                    label="Aggregator"
+                    label="aggregator"
                     allowFreeform={true}
                     autoComplete="on"
                     options={aggregationList}
