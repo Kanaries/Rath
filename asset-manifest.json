@@ -1,27 +1,28 @@
 {
   "files": {
-    "main.css": "./static/css/main.6201a4f4.chunk.css",
-    "main.js": "./static/js/main.0394d4f5.chunk.js",
+    "main.css": "./static/css/main.ae9c31d2.chunk.css",
+    "main.js": "./static/js/main.881b4fe6.chunk.js",
     "runtime-main.js": "./static/js/runtime-main.0f2630df.js",
     "static/css/2.5e09963b.chunk.css": "./static/css/2.5e09963b.chunk.css",
-    "static/js/2.0a20d054.chunk.js": "./static/js/2.0a20d054.chunk.js",
+    "static/js/2.ea9a110b.chunk.js": "./static/js/2.ea9a110b.chunk.js",
     "index.html": "./index.html",
-    "static/js/2.0a20d054.chunk.js.LICENSE.txt": "./static/js/2.0a20d054.chunk.js.LICENSE.txt",
-    "static/js/cluster.worker.f7135edd.worker.js": "./static/js/cluster.worker.f7135edd.worker.js",
-    "static/js/combineFields.worker.7afa8aa7.worker.js": "./static/js/combineFields.worker.7afa8aa7.worker.js",
-    "static/js/dashboard.worker.a4565958.worker.js": "./static/js/dashboard.worker.a4565958.worker.js",
+    "static/js/2.ea9a110b.chunk.js.LICENSE.txt": "./static/js/2.ea9a110b.chunk.js.LICENSE.txt",
+    "static/js/cluster.worker.486be94f.worker.js": "./static/js/cluster.worker.486be94f.worker.js",
+    "static/js/combineFields.worker.9e057d51.worker.js": "./static/js/combineFields.worker.9e057d51.worker.js",
+    "static/js/dashboard.worker.87653069.worker.js": "./static/js/dashboard.worker.87653069.worker.js",
     "static/js/dev.worker.b2a394bf.worker.js": "./static/js/dev.worker.b2a394bf.worker.js",
-    "static/js/fieldsSummary.worker.be9e019e.worker.js": "./static/js/fieldsSummary.worker.be9e019e.worker.js",
-    "static/js/groupFields.worker.4213d103.worker.js": "./static/js/groupFields.worker.4213d103.worker.js",
-    "static/js/index.worker.8b9e6448.worker.js": "./static/js/index.worker.8b9e6448.worker.js",
-    "static/js/main.0394d4f5.chunk.js.LICENSE.txt": "./static/js/main.0394d4f5.chunk.js.LICENSE.txt",
-    "static/js/metaInfer.worker.df3a1b1e.worker.js": "./static/js/metaInfer.worker.df3a1b1e.worker.js"
+    "static/js/fieldsSummary.worker.1223424e.worker.js": "./static/js/fieldsSummary.worker.1223424e.worker.js",
+    "static/js/groupFields.worker.4d3263ea.worker.js": "./static/js/groupFields.worker.4d3263ea.worker.js",
+    "static/js/index.worker.6b585810.worker.js": "./static/js/index.worker.6b585810.worker.js",
+    "static/js/index.worker.8267a0ba.worker.js": "./static/js/index.worker.8267a0ba.worker.js",
+    "static/js/main.881b4fe6.chunk.js.LICENSE.txt": "./static/js/main.881b4fe6.chunk.js.LICENSE.txt",
+    "static/js/metaInfer.worker.2316a308.worker.js": "./static/js/metaInfer.worker.2316a308.worker.js"
   },
   "entrypoints": [
     "static/js/runtime-main.0f2630df.js",
     "static/css/2.5e09963b.chunk.css",
-    "static/js/2.0a20d054.chunk.js",
-    "static/css/main.6201a4f4.chunk.css",
-    "static/js/main.0394d4f5.chunk.js"
+    "static/js/2.ea9a110b.chunk.js",
+    "static/css/main.ae9c31d2.chunk.css",
+    "static/js/main.881b4fe6.chunk.js"
   ]
 }
