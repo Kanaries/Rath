@@ -107,6 +107,13 @@ export class NextVICore {
                 // }))
             })    
         }
+        const dimensions = this.fields.filter(f => f.analyticType === 'dimension');
+        for (let dim of dimensions) {
+            this.patterns.push({
+                fields: [dim],
+                imp: dim.features.entropy
+            })
+        }
         this.patterns.sort((a, b) => a.imp - b.imp);
         return this.patterns;
     }

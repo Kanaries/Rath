@@ -30,6 +30,7 @@ const PatternPage: React.FC = props => {
     const [pined, setPined] = useState<IPattern | null>(null);
     const [renderAmount, setRenderAmount] = useState<number>(RENDER_BATCH_SIZE);
     const [mergeView, setMergeView] = useState<IPattern | null>(null);
+    console.log(cleanedData)
     useEffect(() => {
         // core.init(cleanedData, fieldMetas)
         footmanEngineService({
@@ -201,6 +202,9 @@ const PatternPage: React.FC = props => {
                         <div className="chart-container">
                             <ReactVega spec={spec} dataSource={applyFilter(cleanedData, views[i].filters)} />
                         </div>
+                        {/* <div>
+                            {JSON.stringify(views[i])}
+                        </div> */}
                     </div>)
                 }
             </AssoContainer>
