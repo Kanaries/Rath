@@ -42,17 +42,11 @@ import { IFieldMeta, IMuteFieldBase, IRawField, IRow } from './interfaces';
 import { ISemanticType } from 'visual-insights';
 import { IFootmanProps } from './workers/footman/service';
 
-let server = '//lobay.moe:8443';
-
-if (process.env.NODE_ENV !== 'production') {
-  console.log('using dev server');
-  server = '//localhost:8000';
-}
-
 interface SuccessResult<T> {
   success: true;
   data: T;
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface FailResult<T> {
   success: false;
   message: string;
@@ -134,7 +128,7 @@ export async function getFieldsSummaryService (dataSource: IRow[], fields: strin
   let fieldSummaryList: FieldSummary[] = [];
   if (useServer) {
     try {
-      const res = await fetch(server + '/api/service/fieldsSummary', {
+      const res = await fetch(getTestServerUrl() + '/api/service/fieldsSummary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -179,7 +173,7 @@ export async function getGroupFieldsService (dataSource: IRow[], fields: Field[]
   };
   if (useServer) {
     try {
-      const res = await fetch(server + '/api/service/groupFields', {
+      const res = await fetch(getTestServerUrl() + '/api/service/groupFields', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -221,7 +215,7 @@ export async function combineFieldsService (dataSource: IRow[], dimensions: stri
   let subspaceList: Subspace[] = [];
   if (useServer) {
     try {
-      const res = await fetch(server + '/api/service/combineFields', {
+      const res = await fetch(getTestServerUrl() + '/api/service/combineFields', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -272,7 +266,7 @@ export async function clusterMeasures (maxGroupNumber: number, combinedSpaces: V
   let viewSpaces: ViewSpace[] = [];
   if (useServer) {
     try {
-      const res = await fetch(server + '/api/service/clusterMeasures', {
+      const res = await fetch(getTestServerUrl() + '/api/service/clusterMeasures', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -346,7 +340,7 @@ export async function generateDashBoard (props: IDashBoardServiceProps): Promise
   let dashBoardList: DashBoard[] = [];
   if (useServer) {
     try {
-      const res =  await fetch(server + '/api/service/generateDashBoard', {
+      const res =  await fetch(getTestServerUrl() + '/api/service/generateDashBoard', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -492,5 +486,28 @@ export async function footmanEngineService<R = any> (props: IFootmanProps, mode:
   } catch (error) {
     console.error(error)
     throw error;
+  }
+}
+
+interface ExtendDataProps {
+  dataSource: IRow[];
+  fields: IRawField[];
+}
+export async function extendDataService (props: ExtendDataProps): Promise<ExtendDataProps> {
+  try {
+    const res = await fetch('http://localhost:8000/extension', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(props)
+    })
+    const result = await res.json();
+    if (result.success) {
+      return result.data as ExtendDataProps
+    }
+    throw new Error(result.message)
+  } catch (error) {
+    return props;
   }
 }

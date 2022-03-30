@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import intl from 'react-intl-universal'
-import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, Icon } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
@@ -247,6 +247,13 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
               }}
             />
             <IconButton title="Download Dataset" onClick={exportData} iconProps={{ iconName: 'download' }} />
+            <IconButton
+              title="Extend Data"
+              iconProps={{ iconName: 'AppIconDefaultAdd' }}
+              onClick={() => {
+                dataSourceStore.extendData();
+              }}
+            />
           </Stack>
         </div>
         <p style={{ fontSize: 12, fontWeight: 400, color: '#595959' }}>{intl.get('dataSource.tip')}</p>

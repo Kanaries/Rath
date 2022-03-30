@@ -227,7 +227,7 @@ export function incSim (T: string[], pointsX: [number, number][], pointsY: [numb
         groups.get(T[i])?.Y.push(pointsY[i])
     }
     let condS = 0;
-    for (let [gKey, pair] of groups.entries()) {
+    for (let [, pair] of groups.entries()) {
         let p = pair.X.length / pointsX.length;
         if (p === 0) continue;
         if (pair.X.length < BIN_SIZE ** 2) {

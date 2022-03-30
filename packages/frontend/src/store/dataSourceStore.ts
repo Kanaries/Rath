@@ -3,11 +3,11 @@ import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from } from "rxjs";
 import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
+import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { NextVICore } from "../dev";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
-import { getFieldsSummaryService, inferMetaService } from "../service";
+import { extendDataService, getFieldsSummaryService, inferMetaService } from "../service";
 import { findRathSafeColumnIndex, Transform } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
 
@@ -67,9 +67,13 @@ export class DataSourceStore {
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
         // const fieldSemanticTypes
         const originFieldMetas$ =  combineLatest([fields$, cleanedData$]).pipe(
-            op.map(([fields, cleanedData]) => {
+            // op.map(([fields, dataSource]) => {
+            //     return from(extendDataService({ fields, dataSource }))
+            // }),
+            // op.switchAll(),
+            op.map(([fields, dataSource]) => {
                 const ableFiledIds = fields.map(f => f.fid);
-                return from(getFieldsSummaryService(cleanedData, ableFiledIds)).pipe(
+                return from(getFieldsSummaryService(dataSource, ableFiledIds)).pipe(
                     op.map(summary => {
                         const analyticTypes = fields.map(f => f.analyticType);
                         const metas = fieldSummary2fieldMeta({
@@ -308,6 +312,33 @@ export class DataSourceStore {
         this.cleanMethod = state.cleanMethod;
         // FIXMe
         this.fieldMetasRef.current = state.fieldMetas
+    } 
+
+    public async extendData () {
+        try {
+            const { fields, cleanedData } = this;
+            const res = await extendDataService({
+                dataSource: cleanedData,
+                fields
+            })
+            const finalFields = await inferMetaService({
+                dataSource: res.dataSource,
+                fields: res.fields.filter(f => Boolean(f.pfid)).map(f => ({
+                    ...f,
+                    semanticType: '?'
+                }))
+            })
+            runInAction(() => {
+                this.rawData = res.dataSource;
+                this.mutFields = fields.concat(finalFields)
+            })
+        } catch (error) {
+            notify({
+                title: 'extend data err',
+                type: 'error',
+                content: `[extenddata]${error}`
+            })
+        }
     }
 
     public async loadDataWithInferMetas (dataSource: IRow[], fields: IMuteFieldBase[]) {
@@ -327,11 +358,5 @@ export class DataSourceStore {
                 this.mutFields = metas;
             })
         }
-    }
-    public dev() {
-        const core = new NextVICore(this.cleanedData, this.fieldMetas);
-        // console.log(core.firstPattern())
-        // console.log(core.secondPattern())
-        console.log(core.featureSelectForSecondPattern())
     }
 }

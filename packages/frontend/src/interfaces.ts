@@ -18,6 +18,7 @@ interface IFieldBase {
 }
 export interface IRawField extends IFieldBase {
     disable?: boolean;
+    pfid?: string | null;
 }
 
 /**

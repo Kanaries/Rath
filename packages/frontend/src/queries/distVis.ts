@@ -235,31 +235,31 @@ function markFixEncoding (markType: string, usedChannels: Set<string>) {
     }
 }
 
-function autoAgg (props: {encoding: any; fields: IFieldMeta[]; markType: string; op?: string; statFields?: IFieldMeta[]}) {
-    const {
-        encoding,
-        fields,
-        markType,
-        op = 'mean',
-        statFields = []
-    } = props
-    if (fields.length > 1) {
-        if (markType === 'bar' || markType === 'line') {
-            if (encoding.x && encoding.x.type === 'quantitative') {
-                encoding.x.aggregate = op;
-                if (encoding.x.title) {
-                    encoding.x.title = `${op}(${encoding.x.title})`
-                }
-            }
-            if (encoding.y && encoding.y.type === 'quantitative') {
-                encoding.y.aggregate = op;
-                if (encoding.y.title) {
-                    encoding.y.title = `${op}[${encoding.y.title}]`
-                }
-            }
-        }
-    }
-}
+// function autoAgg (props: {encoding: any; fields: IFieldMeta[]; markType: string; op?: string; statFields?: IFieldMeta[]}) {
+//     const {
+//         encoding,
+//         fields,
+//         markType,
+//         op = 'mean',
+//         statFields = []
+//     } = props
+//     if (fields.length > 1) {
+//         if (markType === 'bar' || markType === 'line') {
+//             if (encoding.x && encoding.x.type === 'quantitative') {
+//                 encoding.x.aggregate = op;
+//                 if (encoding.x.title) {
+//                     encoding.x.title = `${op}(${encoding.x.title})`
+//                 }
+//             }
+//             if (encoding.y && encoding.y.type === 'quantitative') {
+//                 encoding.y.aggregate = op;
+//                 if (encoding.y.title) {
+//                     encoding.y.title = `${op}[${encoding.y.title}]`
+//                 }
+//             }
+//         }
+//     }
+// }
 
 interface IFieldEncode {
     field?: string;

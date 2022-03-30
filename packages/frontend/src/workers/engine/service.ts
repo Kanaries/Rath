@@ -264,7 +264,7 @@ export async function router (e: { data: MessageProps }, onSuccess: (res?: any) 
             default:
                 throw new Error(`Unknow task: "${req.task}".`)
         }
-    } catch (error) {
-        onFailed(`[${req.task}]${error}`)
+    } catch (error: any) {
+        onFailed(`[${req.task}]${error}\n${error.stack}`)
     }
 }
