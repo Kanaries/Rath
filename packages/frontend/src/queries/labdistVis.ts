@@ -1,8 +1,9 @@
 /**
  * distVis 是分布式可视化的推荐，是比较新的模块，目前暂时用于dev模块，即voyager模式下的测试。
  */
+import { entropy, getCombination } from "visual-insights/build/esm/statistics";
 import { IPattern } from "../dev";
-import { pureGeneralConditionH, pureGeneralMic } from "../dev/utils";
+import { bin, binMap, generalMatMic, generalMic, initRanges, matrixBinShareRange, mic, pureGeneralConditionH, pureGeneralMic, rangeNormilize } from "../dev/utils";
 import { IFieldMeta, IRow } from "../interfaces";
 import { deepcopy } from "../utils";
 export const geomTypeMap: { [key: string]: any } = {
@@ -17,7 +18,7 @@ const channels = {
     quantitative: ['y', 'x', 'size', 'opacity', 'color'],
     ordinal: ['y', 'x', 'opacity', 'color', 'size', 'shape'],
     nominal: ['y', 'x', 'color', 'row', 'column', 'opacity', 'size', 'shape'],
-    temporal: ['y', 'x', 'color', 'opacity', 'shape']
+    temporal: ['y', 'x', 'size', 'color', 'opacity', 'shape']
 } as const;
 // const channels = {
 //     quantitative: ['y' , 'x', 'size', 'color', 'opacity'],
@@ -65,6 +66,7 @@ function encode(props: EncodeProps) {
     orderFields.sort((a, b) => b.features.entropy - a.features.entropy);
     statFields.sort((a, b) => b.features.entropy - a.features.entropy);
     const totalFields = [...statFields, ...orderFields].sort((a, b) => b.features.entropy - a.features.entropy);
+    // const totalFields = [...statFields, ...orderFields].sort((a, b) => a.features.entropy - b.features.entropy);
     console.log(totalFields)
     // orderFields.unshift(...statFields);
     for (let i = 0; i < totalFields.length; i++) {
@@ -234,7 +236,7 @@ function autoMark(fields: IFieldMeta[], statFields: IFieldMeta[] = [], originFie
         if (isSetEqual(semantics, ['nominal', 'nominal'])) {
             return 'text'
         } else if (isSetEqual(semantics, ['nominal', 'quantitative'])) {
-            return 'bar'
+            return 'tick'
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
             return 'point'
         } else if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
@@ -355,15 +357,49 @@ export function labDistVis(props: BaseVisProps) {
     const fields = deepcopy(pattern.fields) as IFieldMeta[];
     const measures = fields.filter(f => f.analyticType === 'measure');
     const dimensions = fields.filter(f => f.analyticType === 'dimension');
-    const TT = dataSource.map(r => dimensions.map(d => `${d.fid}_${r[d.fid]}`).join(','));
+    // const TT = dataSource.map(r => dimensions.map(d => `${d.fid}_${r[d.fid]}`).join(','));
+    // for (let i = 0; i < measures.length; i++) {
+    //     const values = dataSource.map(r => r[measures[i].fid]);
+    //     // const ent = pureGeneralConditionH(TT, values);
+    //     measures[i].features.entropy = entropy(rangeNormilize(bin(values).filter(v => v > 0)))
+    //     // measures[i].features.entropy = measures[i].features.entropy - ent;
+    // }
     for (let i = 0; i < measures.length; i++) {
-        const values = dataSource.map(r => r[measures[i].fid]);
-        const ent = pureGeneralConditionH(TT, values);
-        measures[i].features.entropy = ent;
+        let score = 0;
+        const values1 = dataSource.map(r => r[measures[i].fid]);
+        const T = binMap(values1);
+        if (measures.length > 1) {
+            for (let j = 0; j < measures.length; j++) {
+                if (j === i) continue;
+                const values2 = dataSource.map(r => r[measures[j].fid]);
+                score += mic(T, values2);
+                // const X: [number, number][] = values2.map((v, vi) => [v, values1[vi]]);
+                // const ranges = initRanges(X, 2);
+                // score += entropy(rangeNormilize(matrixBinShareRange(X, ranges).flatMap(v => v).filter(v => v > 0)));
+            }
+            score /= (measures.length - 1)
+        } else {
+            score = Math.log2(16) - entropy(rangeNormilize(bin(values1).filter(v => v > 0)))
+        }
+        measures[i].features.entropy = score;
     }
     for (let i = 0; i < dimensions.length; i++) {
         const T = dataSource.map(r => r[dimensions[i].fid]);
         let totalEntLoss = 0;
+        // if (measures.length === 1) {
+        //     const values = dataSource.map(r => r[measures[0].fid]);
+        //     const entLoss = generalMic(T, values) // pureGeneralMic(T, values);
+        //     totalEntLoss += entLoss;
+        // } else {
+        //     const meaIds = measures.map(m => m.fid);
+        //     const projections = getCombination(meaIds, 2, 2);
+        //     for (let pro of projections) {
+        //         const meaProValues: [number, number][] = dataSource.map(row => [row[pro[0]], row[pro[1]]])
+        //         const score = generalMatMic(T, meaProValues);
+        //         totalEntLoss += score;
+        //     }
+        //     totalEntLoss /= projections.length
+        // }
         for (let j = 0; j < measures.length; j++) {
             const values = dataSource.map(r => r[measures[j].fid]);
             const entLoss = pureGeneralMic(T, values);
@@ -412,6 +448,11 @@ export function labDistVis(props: BaseVisProps) {
         //     }
         //   },
         data: { name: 'dataSource' },
+        // "params": [{
+        //     "name": "grid",
+        //     "select": "interval",
+        //     "bind": "scales"
+        //   }],
         mark: {
             type: markType,
             opacity: markType === 'circle' ? 0.56 : 0.88

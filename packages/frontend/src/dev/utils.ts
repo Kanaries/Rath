@@ -338,7 +338,7 @@ export function incSim (T: string[], pointsX: [number, number][], pointsY: [numb
 //     }
 //     return tensor;
 // }
-function initRanges (vals: number[][], order: number): [number, number][] {
+export function initRanges (vals: number[][], order: number): [number, number][] {
     const ranges: [number, number][] = [];
     for (let od = 0; od < order; od++) {
         ranges.push([
@@ -370,6 +370,7 @@ function initRanges (vals: number[][], order: number): [number, number][] {
 //     const measureBinSize = BIN_SIZE ** measureNumber;
 // }
 const BIN_SIZE_FOR_MAT = BIN_SIZE / 2;
+// const BIN_SIZE_FOR_MAT = BIN_SIZE;
 export function matrixBinShareRange (values: [number, number][], ranges: [number, number][]) {
     const binMat: number[][] = new Array(BIN_SIZE_FOR_MAT + 1).fill(0).map(() => new Array(BIN_SIZE_FOR_MAT + 1).fill(0));
     const stepX = (ranges[0][1] - ranges[0][0]) / BIN_SIZE_FOR_MAT;
