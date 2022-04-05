@@ -1,11 +1,28 @@
 import { useState, FC } from 'react'
+import { observer } from 'mobx-react-lite'
+import { Pivot, PivotItem } from '@fluentui/react'
+import { IPageKey } from './interfaces'
+import { useGlobalStore } from './store'
+import CreateDatasetPage from './pages/createDataset'
+
 import './App.css'
 
 const App: FC = () => {
     const [count, setCount] = useState(0)
+    const { dataSourceStore } = useGlobalStore();
+    const { pageKey } = dataSourceStore
 
     return (
         <div className="App">
+            <Pivot onLinkClick={(item) => {
+                item && item.props.itemKey && dataSourceStore.setPageKey(item.props.itemKey as IPageKey)
+            }}>
+                <PivotItem headerText="Create" itemKey={IPageKey.CREATE} />
+                <PivotItem headerText="List" itemKey={IPageKey.LIST} />
+            </Pivot>
+            {
+                pageKey === IPageKey.CREATE && <CreateDatasetPage />
+            }
             <header className="App-header">
                 <p>Hello Vite + React!</p>
                 <p>
@@ -40,4 +57,4 @@ const App: FC = () => {
     )
 }
 
-export default App
+export default observer(App)

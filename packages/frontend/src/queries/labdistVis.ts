@@ -2,7 +2,9 @@
  * distVis 是分布式可视化的推荐，是比较新的模块，目前暂时用于dev模块，即voyager模式下的测试。
  */
 import { IPattern } from "../dev";
-import { IFieldMeta } from "../interfaces";
+import { pureGeneralConditionH, pureGeneralMic } from "../dev/utils";
+import { IFieldMeta, IRow } from "../interfaces";
+import { deepcopy } from "../utils";
 export const geomTypeMap: { [key: string]: any } = {
     interval: "boxplot",
     line: "line",
@@ -12,16 +14,16 @@ export const geomTypeMap: { [key: string]: any } = {
 };
 
 const channels = {
-    quantitative: ['y' , 'x', 'size', 'opacity', 'color'],
+    quantitative: ['y', 'x', 'size', 'opacity', 'color'],
     ordinal: ['y', 'x', 'opacity', 'color', 'size', 'shape'],
     nominal: ['y', 'x', 'color', 'row', 'column', 'opacity', 'size', 'shape'],
-    temporal: ['y', 'x', 'opacity', 'color', 'shape']
+    temporal: ['y', 'x', 'color', 'opacity', 'shape']
 } as const;
 // const channels = {
 //     quantitative: ['y' , 'x', 'size', 'color', 'opacity'],
 //     ordinal: ['y', 'x', 'color', 'size', 'shape'],
 //     nominal: ['y', 'x', 'color', 'row', 'column', 'size', 'shape'],
-//     temporal: ['y', 'x', 'opacity', 'color', 'shape']
+//     temporal: ['y', 'x', 'color', 'shape']
 // } as const;
 
 const highOrderChannels = {
@@ -30,10 +32,10 @@ const highOrderChannels = {
 } as const;
 
 interface BaseVisProps {
-    // dataSource: DataSource;
+    dataSource: IRow[];
     pattern: IPattern
 }
-function humanHabbit (encoding: any) {
+function humanHabbit(encoding: any) {
     if (encoding.x && encoding.x.type !== 'temporal') {
         if (encoding.y && encoding.y.type === 'temporal') {
             const t = encoding.x;
@@ -43,13 +45,13 @@ function humanHabbit (encoding: any) {
     }
 }
 
-interface EncodeProps{
+interface EncodeProps {
     fields: IFieldMeta[];
     usedChannels?: Set<string>;
     statFields?: IFieldMeta[];
     statEncodes?: IFieldEncode[]
 }
-function encode (props: EncodeProps) {
+function encode(props: EncodeProps) {
     const {
         fields,
         usedChannels = new Set(),
@@ -63,6 +65,7 @@ function encode (props: EncodeProps) {
     orderFields.sort((a, b) => b.features.entropy - a.features.entropy);
     statFields.sort((a, b) => b.features.entropy - a.features.entropy);
     const totalFields = [...statFields, ...orderFields].sort((a, b) => b.features.entropy - a.features.entropy);
+    console.log(totalFields)
     // orderFields.unshift(...statFields);
     for (let i = 0; i < totalFields.length; i++) {
         const chs = channels[totalFields[i].semanticType];
@@ -75,12 +78,12 @@ function encode (props: EncodeProps) {
                 if (!usedChannels.has(chs[j])) {
                     encoding[chs[j]] = statEncodes[statIndex]
                     usedChannels.add(chs[j])
+                    encoded = true;
                     // if (statFields[statIndex].semanticType === 'quantitative') {
-                    //     if (statFields[statIndex].features.entropy / Math.log2(16) < 0.2) {
+                    //     if (statFields[statIndex].features.entropy / Math.log2(16) > 0.8) {
                     //         encoding[chs[j]].scale = { type: 'sqrt' }
                     //     }
                     // }
-                    encoded = true;
                     break;
                 }
             }
@@ -101,6 +104,16 @@ function encode (props: EncodeProps) {
                         type: orderFields[orderIndex].semanticType,
                         title: orderFields[orderIndex].name || orderFields[orderIndex].fid
                     }
+                    if (orderFields[orderIndex].semanticType === 'temporal' && chs[j] === 'color') {
+                        encoding[chs[j]].scale = {
+                            scheme: 'viridis'
+                        }
+                    }
+                    // if (orderFields[orderIndex].semanticType === 'quantitative') {
+                    //     if (orderFields[orderIndex].features.entropy / Math.log2(16) > 0.8) {
+                    //         encoding[chs[j]].scale = { type: 'sqrt' }
+                    //     }
+                    // }
                     usedChannels.add(chs[j])
                     encoded = true;
                     break;
@@ -169,7 +182,7 @@ function encode (props: EncodeProps) {
     return encoding
 }
 
-function isSetEqual (a1: any[], a2: any[]) {
+function isSetEqual(a1: any[], a2: any[]) {
     const s1 = new Set(a1);
     const s2 = new Set(a2);
     if (s1.size !== s2.size) return false;
@@ -179,7 +192,7 @@ function isSetEqual (a1: any[], a2: any[]) {
     return true;
 }
 
-function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], originFields: IFieldMeta[] = [], statEncodes: IFieldEncode[] = []) {
+function autoMark(fields: IFieldMeta[], statFields: IFieldMeta[] = [], originFields: IFieldMeta[] = [], statEncodes: IFieldEncode[] = []) {
     // const orderFields = [...fields];
     // const orderStatFields = [...statFields];
     // orderFields.sort((a, b) => b.features.entropy - a.features.entropy);
@@ -208,9 +221,9 @@ function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], originFie
             return 'bar'
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
             return 'point'
-        } else  if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
+        } else if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
             return 'point'
-        } else  if (isSetEqual(semantics, ['nominal', 'temporal'])) {
+        } else if (isSetEqual(semantics, ['nominal', 'temporal'])) {
             return 'point'
         } else if (isSetEqual(semantics, ['quantitative', 'quantitative'])) {
             return 'circle'
@@ -221,10 +234,10 @@ function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], originFie
         if (isSetEqual(semantics, ['nominal', 'nominal'])) {
             return 'text'
         } else if (isSetEqual(semantics, ['nominal', 'quantitative'])) {
-            return 'tick'
+            return 'bar'
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
             return 'point'
-        } else  if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
+        } else if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
             return 'point'
         } else if (isSetEqual(semantics, ['quantitative', 'quantitative'])) {
             return 'circle'
@@ -233,7 +246,7 @@ function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], originFie
     return 'point'
 }
 
-function markFixEncoding (markType: string, usedChannels: Set<string>) {
+function markFixEncoding(markType: string, usedChannels: Set<string>) {
     if (markType === 'bar') {
         usedChannels.add('size');
         usedChannels.add('shape');
@@ -275,7 +288,7 @@ interface IFieldEncode {
 }
 
 // FIXME: 统一aggregate逻辑。
-function autoStat (fields: IFieldMeta[]): {
+function autoStat(fields: IFieldMeta[]): {
     statFields: IFieldMeta[];
     distFields: IFieldMeta[];
     statEncodes: IFieldEncode[];
@@ -337,9 +350,30 @@ function autoStat (fields: IFieldMeta[]): {
     return { statFields, distFields, statEncodes }
 }
 
-export function distVis(props: BaseVisProps) {
-    const { pattern } = props;
-    const { fields } = pattern;
+export function labDistVis(props: BaseVisProps) {
+    const { pattern, dataSource } = props;
+    const fields = deepcopy(pattern.fields) as IFieldMeta[];
+    const measures = fields.filter(f => f.analyticType === 'measure');
+    const dimensions = fields.filter(f => f.analyticType === 'dimension');
+    const TT = dataSource.map(r => dimensions.map(d => `${d.fid}_${r[d.fid]}`).join(','));
+    for (let i = 0; i < measures.length; i++) {
+        const values = dataSource.map(r => r[measures[i].fid]);
+        const ent = pureGeneralConditionH(TT, values);
+        measures[i].features.entropy = ent;
+    }
+    for (let i = 0; i < dimensions.length; i++) {
+        const T = dataSource.map(r => r[dimensions[i].fid]);
+        let totalEntLoss = 0;
+        for (let j = 0; j < measures.length; j++) {
+            const values = dataSource.map(r => r[measures[j].fid]);
+            const entLoss = pureGeneralMic(T, values);
+            totalEntLoss += entLoss;
+        }
+        totalEntLoss /= measures.length;
+        //@ts-ignore
+        dimensions[i].features.originEntropy = dimensions[i].features.entropy
+        dimensions[i].features.entropy = totalEntLoss;
+    }
     const usedChannels: Set<string> = new Set();
     const { statFields, distFields, statEncodes } = autoStat(fields);
     let markType = autoMark(fields, statFields, distFields, statEncodes)

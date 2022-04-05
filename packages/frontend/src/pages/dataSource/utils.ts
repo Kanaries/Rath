@@ -107,6 +107,9 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
         throw new Error(`unsupported file type=${file.type} `)
     }
     rawData = Cleaner.dropNullColumn(rawData, Object.keys(rawData[0])).dataSource
+    if (rawData.length > 0 && Object.keys(rawData[rawData.length - 1]).length === 0) {
+        rawData.pop();
+    }
     // FIXME: 第一条数据取meta的危险性
     let names = Object.keys(rawData[0])
     const fids = formatColKeys(names);

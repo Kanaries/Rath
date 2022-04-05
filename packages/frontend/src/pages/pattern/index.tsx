@@ -9,6 +9,8 @@ import { AssoContainer, MainViewContainer } from './components';
 import ViewField from '../lts/vizOperation/viewField';
 import { IFieldMeta, IRow } from '../../interfaces';
 import { footmanEngineService } from '../../service';
+import { labDistVis } from '../../queries/labdistVis';
+import ReactJson from 'react-json-view';
 
 
 const BUTTON_STYLE = { marginRight: '1em' }
@@ -202,8 +204,14 @@ const PatternPage: React.FC = props => {
                         <div className="chart-container">
                             <ReactVega spec={spec} dataSource={applyFilter(cleanedData, views[i].filters)} />
                         </div>
+                        <div className="chart-container">
+                            <ReactVega spec={labDistVis({
+                                dataSource: cleanedData,
+                                pattern: views[i]
+                            })} dataSource={applyFilter(cleanedData, views[i].filters)} />
+                        </div>
                         {/* <div>
-                            {JSON.stringify(views[i])}
+                            <ReactJson src={views[i]} />
                         </div> */}
                     </div>)
                 }
