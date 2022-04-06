@@ -234,15 +234,17 @@ function autoMark(fields: IFieldMeta[], statFields: IFieldMeta[] = [], originFie
         }
     } else {
         if (isSetEqual(semantics, ['nominal', 'nominal'])) {
-            return 'text'
+            return 'square'
         } else if (isSetEqual(semantics, ['nominal', 'quantitative'])) {
             return 'tick'
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
             return 'point'
         } else if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
-            return 'point'
+            return 'tick'
         } else if (isSetEqual(semantics, ['quantitative', 'quantitative'])) {
             return 'circle'
+        } else if (isSetEqual(semantics, ['nominal', 'temporal'])) {
+            return 'point'
         }
     }
     return 'point'

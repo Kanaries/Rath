@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { DraggableProvided } from 'react-beautiful-dnd';
-import { IDraggableStateKey, IViewField } from '../../interfaces';
+import { IDraggableStateKey } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { Pill } from '../components';
 import { AGGREGATOR_LIST } from '../fieldsContext';

@@ -10,7 +10,7 @@
   "files": [
     "dist"
   ],
-  "license": "GPL",
+  "license": "AGPL",
   "main": "./dist/graphic-walker.umd.js",
   "module": "./dist/graphic-walker.es.js",
   "exports": {
