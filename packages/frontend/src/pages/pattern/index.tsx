@@ -9,9 +9,9 @@ import { AssoContainer, MainViewContainer } from './components';
 import ViewField from '../lts/vizOperation/viewField';
 import { IFieldMeta, IRow } from '../../interfaces';
 import { footmanEngineService } from '../../service';
+import Settings from './settings';
 import { labDistVis } from '../../queries/labdistVis';
-import ReactJson from 'react-json-view';
-
+import { notify } from '../../components/error';
 
 const BUTTON_STYLE = { marginRight: '1em' }
 
@@ -24,15 +24,14 @@ function applyFilter (dataSource: IRow[], filters?: IFilter[]): IRow[] {
 
 const RENDER_BATCH_SIZE = 5;
 
-// const core = new NextVICore([], []);
 const PatternPage: React.FC = props => {
-    const { dataSourceStore } = useGlobalStore();
+    const { dataSourceStore, discoveryMainStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [views, setViews] = useState<IPattern[]>([])
     const [pined, setPined] = useState<IPattern | null>(null);
     const [renderAmount, setRenderAmount] = useState<number>(RENDER_BATCH_SIZE);
     const [mergeView, setMergeView] = useState<IPattern | null>(null);
-    console.log(cleanedData)
+
     useEffect(() => {
         // core.init(cleanedData, fieldMetas)
         footmanEngineService({
@@ -89,7 +88,13 @@ const PatternPage: React.FC = props => {
                     },
                 ])
             }
-        }).catch(console.error)
+        }).catch(err => {
+            notify({
+                title: 'comparsion error',
+                type: 'error',
+                content: `${err}`
+            })
+        })
     }, [pined, mergeView, cleanedData, fieldMetas])
 
     const advicePureFeature = useCallback(() => {
@@ -139,8 +144,20 @@ const PatternPage: React.FC = props => {
         }
     }, [pined, assViews])
 
+    const vizRecSys = discoveryMainStore.settings.vizAlgo;
+
     return <div className="content-container">
+        <Settings />
         <div className="card">
+            <IconButton
+                style={{ float: 'right' }}
+                iconProps={{ iconName: 'Settings' }}
+                ariaLabel="settings"
+                title="settings"
+                onClick={() => {
+                    discoveryMainStore.setShowSettings(true);
+                }}
+            />
             <MainViewContainer>
                 <h2>Main View</h2>
                 <div className="vis-container">
@@ -159,10 +176,15 @@ const PatternPage: React.FC = props => {
                         </div>
                     </div>}
                     {mergeView !== null && <div>
-                        <ReactVega spec={distVis({ pattern: mergeView })} dataSource={cleanedData} />
-                        {/* <hr />
-                        <div className="fields-container">
-                        </div> */}
+                        {
+                            vizRecSys === 'lite' && <ReactVega spec={distVis({ pattern: mergeView })} dataSource={cleanedData} />
+                        }
+                        {
+                            vizRecSys === 'strict' && <ReactVega spec={labDistVis({
+                                pattern: mergeView,
+                                dataSource: cleanedData
+                            })} dataSource={cleanedData} />
+                        }
                     </div>}
                 </div>
                 <div className="action-buttons">
@@ -202,17 +224,16 @@ const PatternPage: React.FC = props => {
                             }} />
                         </Stack>
                         <div className="chart-container">
-                            <ReactVega spec={spec} dataSource={applyFilter(cleanedData, views[i].filters)} />
+                            {
+                                vizRecSys === 'lite' && <ReactVega spec={spec} dataSource={applyFilter(cleanedData, views[i].filters)} />
+                            }
+                            {
+                                vizRecSys === 'strict' && <ReactVega spec={labDistVis({
+                                    dataSource: cleanedData,
+                                    pattern: views[i]
+                                })} dataSource={applyFilter(cleanedData, views[i].filters)} />
+                            }
                         </div>
-                        <div className="chart-container">
-                            <ReactVega spec={labDistVis({
-                                dataSource: cleanedData,
-                                pattern: views[i]
-                            })} dataSource={applyFilter(cleanedData, views[i].filters)} />
-                        </div>
-                        {/* <div>
-                            <ReactJson src={views[i]} />
-                        </div> */}
                     </div>)
                 }
             </AssoContainer>
