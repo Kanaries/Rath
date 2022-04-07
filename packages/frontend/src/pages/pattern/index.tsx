@@ -12,6 +12,7 @@ import { footmanEngineService } from '../../service';
 import Settings from './settings';
 import { labDistVis } from '../../queries/labdistVis';
 import { notify } from '../../components/error';
+import intl from 'react-intl-universal';
 
 const BUTTON_STYLE = { marginRight: '1em' }
 
@@ -159,7 +160,7 @@ const PatternPage: React.FC = props => {
                 }}
             />
             <MainViewContainer>
-                <h2>Main View</h2>
+                <h2>{intl.get('discovery.main.mainView')}</h2>
                 <div className="vis-container">
                     {pined !== null && <div>
                         <ReactVega spec={distVis({ pattern: pined })} dataSource={cleanedData} />
@@ -190,22 +191,22 @@ const PatternPage: React.FC = props => {
                 <div className="action-buttons">
                     <DefaultButton style={BUTTON_STYLE}
                         disabled={pined === null}
-                        text="related patterns" onClick={() => {
+                        text={intl.get('discovery.main.relatePatterns')} onClick={() => {
                             if (pined) {
                                 assViews(pined)
                             }
                         }}
                     />
-                    <PrimaryButton style={BUTTON_STYLE} text="related features"
+                    <PrimaryButton style={BUTTON_STYLE} text={intl.get('discovery.main.relateFeatures')}
                         iconProps={{ iconName: 'AddLink'}}
                         disabled={pined === null}
                         onClick={advicePureFeature}
                     />
-                   <PrimaryButton style={BUTTON_STYLE} text="explain diff"
+                   <PrimaryButton style={BUTTON_STYLE} text={intl.get('discovery.main.explainDiff')}
                         disabled={pined === null || mergeView === null}
                         onClick={adviceCompareFeature}
                     />
-                    <DefaultButton style={BUTTON_STYLE} text="point interests"
+                    <DefaultButton style={BUTTON_STYLE} text={intl.get('discovery.main.pointInterests')}
                         disabled={pined === null}
                         onClick={recommandFilter}
                     />
@@ -216,12 +217,18 @@ const PatternPage: React.FC = props => {
                 {
                     specs.slice(0, renderAmount).map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
                         <Stack horizontal>
-                            <IconButton iconProps={{ iconName: 'Pinned' }} onClick={() => {
-                                setPined(views[i])
-                            }} />
-                            <IconButton iconProps={{ iconName: 'Compare' }} onClick={() => {
-                                setMergeView(views[i])
-                            }} />
+                            <IconButton iconProps={{ iconName: 'Pinned' }}
+                                title={intl.get('discovery.main.pin')}
+                                onClick={() => {
+                                    setPined(views[i])
+                                }}
+                            />
+                            <IconButton iconProps={{ iconName: 'Compare' }}
+                                title={intl.get('discovery.main.compare')}
+                                onClick={() => {
+                                    setMergeView(views[i])
+                                }}
+                            />
                         </Stack>
                         <div className="chart-container">
                             {
@@ -237,9 +244,13 @@ const PatternPage: React.FC = props => {
                     </div>)
                 }
             </AssoContainer>
-            <DefaultButton disabled={renderAmount >= specs.length} text="load more" onClick={() => {
-                setRenderAmount(a => a + RENDER_BATCH_SIZE)
-            }} />
+            <DefaultButton disabled={renderAmount >= specs.length}
+                style={{ marginTop: '5px' }}
+                text={intl.get('discovery.main.loadMore')}
+                onClick={() => {
+                    setRenderAmount(a => a + RENDER_BATCH_SIZE)
+                }}
+            />
         </div>
     </div>
 }

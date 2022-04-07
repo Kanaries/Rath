@@ -2,10 +2,11 @@ import { observer } from 'mobx-react-lite';
 import { ChoiceGroup, IChoiceGroupOption, Panel } from 'office-ui-fabric-react';
 import React from 'react';
 import { useGlobalStore } from '../../store';
+import intl from 'react-intl-universal';
 
 const options: IChoiceGroupOption[] = [
-    { text: 'lite', key: 'lite' },
-    { text: 'strict', key: 'strict' }
+    { text: intl.get('discovery.main.vizsys.lite'), key: 'lite' },
+    { text: intl.get('discovery.main.vizsys.strict'), key: 'strict' }
 ]
 
 const PatternSetting: React.FC = props => {
@@ -21,7 +22,7 @@ const PatternSetting: React.FC = props => {
         >
         <hr />
         <ChoiceGroup
-            label="viz recommand system"
+            label={intl.get('discovery.main.vizsys.title')}
             onChange={(e, op) => {
                 op && discoveryMainStore.updateSettings('vizAlgo', op.key)
             }}

@@ -253,5 +253,22 @@
             "field_num": "Field Number",
             "cardinality": "Cardinality"
         }
+    },
+    "discovery": {
+        "main": {
+            "mainView": "Main View",
+            "relatePatterns": "relate patterns(default)",
+            "relateFeatures": "relate features",
+            "explainDiff": "explain diff",
+            "pointInterests": "split",
+            "pin": "pin",
+            "compare": "compare",
+            "vizsys": {
+                "title": "visualization recommand system",
+                "lite": "Lite mode(fast)",
+                "strict": "Strict mode"
+            },
+            "loadMore": "load more"
+        }
     }
 }
