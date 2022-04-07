@@ -254,5 +254,22 @@
             "field_num": "字段数",
             "cardinality": "字段总基数"
         }
+    },
+    "discovery": {
+        "main": {
+            "mainView": "主视图",
+            "relatePatterns": "关联规律(默认)",
+            "relateFeatures": "特征推荐",
+            "explainDiff": "差异性分析",
+            "pointInterests": "拆分",
+            "pin": "选为主视图",
+            "compare": "选为比对视图",
+            "vizsys": {
+                "title": "可视化推荐系统",
+                "lite": "轻量模式(近似算法、更快)",
+                "strict": "严格模式(效果更好)"
+            },
+            "loadMore": "加载更多"
+        }
     }
 }
