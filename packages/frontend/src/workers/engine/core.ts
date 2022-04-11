@@ -219,6 +219,8 @@ export class RathEngine extends VIEngine {
         }
     }
     public async exploreViews(viewSpaces: ViewSpace[] = this.subSpaces): Promise<IInsightSpace[]> {
+        // console.log(JSON.stringify(this.dimensions), JSON.stringify(this.dataGraph.DG), JSON.stringify(this.dataGraph.DClusters), JSON.stringify(this.dataGraph.dimensions))
+        // console.log(this.dataGraph.dimensions.map(d => this.fields.find(f => f.key === d)!.name))
         const context = this;
         const DEFAULT_BIN_NUM = 16;
         const { measures: globalMeasures, fieldDictonary } = context

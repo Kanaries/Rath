@@ -5,6 +5,7 @@ import intl from "react-intl-universal";
 import { loadDataFile, SampleKey, useSampleOptions } from "../utils";
 import { dataBackup, logDataImport } from "../../../loggers/dataImport";
 import { IMuteFieldBase, IRow } from "../../../interfaces";
+import { setDataStorage } from "../../../utils/storage";
 
 interface FileDataProps {
     onClose: () => void;
@@ -33,6 +34,7 @@ const FileData: React.FC<FileDataProps> = (props) => {
                     size: dataSource.length
                 });
                 dataBackup(file);
+                setDataStorage(file.name, fields, dataSource)
                 onDataLoaded(fields, dataSource);
             } catch (error) {
                 onLoadingFailed(error)

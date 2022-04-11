@@ -1,9 +1,9 @@
 /**
  * distVis 是分布式可视化的推荐，是比较新的模块，目前暂时用于dev模块，即voyager模式下的测试。
  */
-import { entropy, getCombination } from "visual-insights/build/esm/statistics";
+import { entropy } from "visual-insights/build/esm/statistics";
 import { IPattern } from "../dev";
-import { bin, binMap, generalMatMic, generalMic, initRanges, matrixBinShareRange, mic, pureGeneralConditionH, pureGeneralMic, rangeNormilize } from "../dev/utils";
+import { bin, binMap, mic, pureGeneralMic, rangeNormilize } from "../dev/utils";
 import { IFieldMeta, IRow } from "../interfaces";
 import { deepcopy } from "../utils";
 export const geomTypeMap: { [key: string]: any } = {
@@ -67,7 +67,7 @@ function encode(props: EncodeProps) {
     statFields.sort((a, b) => b.features.entropy - a.features.entropy);
     const totalFields = [...statFields, ...orderFields].sort((a, b) => b.features.entropy - a.features.entropy);
     // const totalFields = [...statFields, ...orderFields].sort((a, b) => a.features.entropy - b.features.entropy);
-    console.log(totalFields)
+
     // orderFields.unshift(...statFields);
     for (let i = 0; i < totalFields.length; i++) {
         const chs = channels[totalFields[i].semanticType];
@@ -180,7 +180,6 @@ function encode(props: EncodeProps) {
     //         }
     //     }
     // }
-    console.log({ encoding })
     return encoding
 }
 

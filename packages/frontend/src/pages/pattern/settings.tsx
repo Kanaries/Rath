@@ -1,16 +1,17 @@
 import { observer } from 'mobx-react-lite';
 import { ChoiceGroup, IChoiceGroupOption, Panel } from 'office-ui-fabric-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useGlobalStore } from '../../store';
 import intl from 'react-intl-universal';
 
-const options: IChoiceGroupOption[] = [
-    { text: intl.get('discovery.main.vizsys.lite'), key: 'lite' },
-    { text: intl.get('discovery.main.vizsys.strict'), key: 'strict' }
-]
-
-const PatternSetting: React.FC = props => {
+const PatternSetting: React.FC = () => {
     const { discoveryMainStore } = useGlobalStore();
+    const options = useMemo<IChoiceGroupOption[]>(() => {
+        return [
+            { text: intl.get('discovery.main.vizsys.lite'), key: 'lite' },
+            { text: intl.get('discovery.main.vizsys.strict'), key: 'strict' }
+        ]
+    }, [])
     const { showSettings, settings } = discoveryMainStore;
     const { vizAlgo } = settings;
     return <Panel
