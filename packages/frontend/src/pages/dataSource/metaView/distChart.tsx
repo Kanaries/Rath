@@ -2,13 +2,13 @@ import React, { useRef, useEffect, useMemo, useState } from 'react';
 import embed, { vega, Result } from 'vega-embed';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { IRow } from '../../../interfaces';
+import { getRange } from '../../../utils';
 
 const DATA_NAME = 'dataSource';
 
 function fl2bins(data: IRow[], valueField: string, ctField: string) {
     const values: number[] = data.map(row => row[valueField]);
-    const _min = Math.min(...values);
-    const _max = Math.max(...values);
+    const [_min, _max] = getRange(values)
     const BIN_SIZE = 8;
     const bins: number[] = new Array(BIN_SIZE + 1).fill(0);
     const step = (_max - _min) / BIN_SIZE;

@@ -1,5 +1,6 @@
 import * as FileLoader from './fileParser';
 import * as Transform from './transform';
+import { getRange } from './stat';
 import deepcopy from './deepcopy';
 import { IRow } from '../interfaces';
 // TODO: Rath和VI中都有一套，弱约束关联，可能带来潜在的迭代负担或bug
@@ -107,5 +108,6 @@ export {
   isSetEqual,
   FileLoader,
   deepcopy,
-  Transform
+  Transform,
+  getRange
 }

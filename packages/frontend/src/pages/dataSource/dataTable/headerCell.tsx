@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
-import DistributionMiniChart from './distributionMiniChart';
+// import DistributionMiniChart from './distributionMiniChart';
+import DistributionChart from '../metaView/distChart';
 import DropdownSelect from '../../../components/dropDownSelect'
 import { IFieldMeta, IRawField } from '../../../interfaces';
 import { IAnalyticType, ISemanticType } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
@@ -132,7 +133,14 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
             {/* <Checkbox label="use" checked={!disable} onChange={(e, isChecked) => {
                 onChange && onChange(code, 'disable', !isChecked)
             }} /> */}
-            {meta && <DistributionMiniChart dataSource={meta ? meta.distribution : []} x="memberName" y="count" fieldType={meta?.semanticType || 'nominal'} />}
+            {/* {meta && <DistributionMiniChart dataSource={meta ? meta.distribution : []} x="memberName" y="count" fieldType={meta?.semanticType || 'nominal'} />} */}
+            {meta && <DistributionChart
+                dataSource={meta.distribution}
+                x="memberName"
+                y="count"
+                analyticType={meta.analyticType}
+                semanticType={meta.semanticType}
+            />}
             <div className={`bottom-bar ${getClassName(meta?.analyticType || 'dimension', disable)}`}></div>
         </HeaderCellContainer>
     );

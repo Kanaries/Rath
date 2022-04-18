@@ -1,4 +1,5 @@
 import { entropy } from "visual-insights/build/esm/statistics";
+import { getRange } from "../utils";
 
 export function firstWDis (p1: number[], p2: number[]) {
 
@@ -39,12 +40,7 @@ export function w2dis () {
 }
 const BIN_SIZE = 16;
 export function bin(nums: number[]): number[] {
-    let _max = -Infinity;
-    let _min = Infinity;
-    for (let i = 0; i < nums.length; i++) {
-        if (nums[i] > _max) _max = nums[i];
-        if (nums[i] < _min) _min = nums[i];
-    }
+    const [_min, _max] = getRange(nums)
     // let _max = Math.max(...nums);
     // let _min = Math.min(...nums);
     let step = (_max - _min) / BIN_SIZE;
@@ -71,8 +67,7 @@ export function binShareRange(nums: number[], _min: number, _max: number): numbe
 }
 
 export function binMap(nums: number[]): number[] {
-    let _max = Math.max(...nums);
-    let _min = Math.min(...nums);
+    const [_min, _max] = getRange(nums);
     let step = (_max - _min) / BIN_SIZE;
     let ans: number[] = [];
     for (let i = 0; i < nums.length; i++) {
@@ -112,8 +107,7 @@ export function rangeNormilize (fl: number[]): number[] {
 
 export function mic (T: number[], X: number[]) {
     let condH = 0;
-    const _min = Math.min(...X)
-    const _max = Math.max(...X)
+    const [_min, _max] = getRange(X)
     let H = entropy(rangeNormilize(binShareRange(X, _min, _max).filter(v => v > 0)));
     for (let i = 0; i < BIN_SIZE; i++) {
         const conditionalX = X.filter((x, ti) => T[ti] === i);
@@ -127,8 +121,7 @@ export function mic (T: number[], X: number[]) {
 
 export function generalMic (T: string[], X: number[]) {
     let condH = 0;
-    const _min = Math.min(...X)
-    const _max = Math.max(...X)
+    const [_min, _max] = getRange(X)
     let H = entropy(rangeNormilize(binShareRange(X, _min, _max).filter(v => v > 0)));
     const uniqueValueSet = new Set(T);
     const uniqueValues = [...uniqueValueSet];
@@ -182,8 +175,7 @@ export function generalMic (T: string[], X: number[]) {
 
 export function pureGeneralMic (T: string[], X: number[]) {
     let condH = 0;
-    const _min = Math.min(...X)
-    const _max = Math.max(...X)
+    const [_min, _max] = getRange(X)
     let H = entropy(rangeNormilize(binShareRange(X, _min, _max).filter(v => v > 0)));
     const uniqueValueSet = new Set(T);
     const uniqueValues = [...uniqueValueSet];
@@ -219,8 +211,7 @@ export function pureGeneralMic (T: string[], X: number[]) {
 
 export function pureGeneralConditionH (T: string[], X: number[]) {
     let condH = 0;
-    const _min = Math.min(...X)
-    const _max = Math.max(...X)
+    const [_min, _max] = getRange(X)
     let H = entropy(rangeNormilize(binShareRange(X, _min, _max).filter(v => v > 0)));
     const uniqueValueSet = new Set(T);
     const uniqueValues = [...uniqueValueSet];
