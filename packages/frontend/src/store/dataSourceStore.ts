@@ -66,7 +66,10 @@ export class DataSourceStore {
         const cleanedData$ = from(toStream(() => this.cleanedData, true))
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
         // const fieldSemanticTypes
-        const originFieldMetas$ =  combineLatest([fields$, cleanedData$]).pipe(
+        const originFieldMetas$ = fields$.pipe(
+            op.withLatestFrom(cleanedData$),
+        // )
+        // const originFieldMetas$ =  combineLatest([fields$, cleanedData$]).pipe(
             // op.map(([fields, dataSource]) => {
             //     return from(extendDataService({ fields, dataSource }))
             // }),

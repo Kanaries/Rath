@@ -39,8 +39,14 @@ export function w2dis () {
 }
 const BIN_SIZE = 16;
 export function bin(nums: number[]): number[] {
-    let _max = Math.max(...nums);
-    let _min = Math.min(...nums);
+    let _max = -Infinity;
+    let _min = Infinity;
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] > _max) _max = nums[i];
+        if (nums[i] < _min) _min = nums[i];
+    }
+    // let _max = Math.max(...nums);
+    // let _min = Math.min(...nums);
     let step = (_max - _min) / BIN_SIZE;
     // for (let i = 0; i < nums)
     let dist: number[] = new Array(BIN_SIZE + 1).fill(0);

@@ -149,11 +149,15 @@ export async function getFieldsSummaryService (dataSource: IRow[], fields: strin
     }
   } else {
     const worker = new fieldsSummaryWorker();
-    const result = await workerService<FieldSummary[], any>(worker, { dataSource, fields });
-    if (result.success === true) {
-      fieldSummaryList = result.data;
-    } else {
-      throw new Error('[fields summary failed]' + result.message)
+    try {
+      const result = await workerService<FieldSummary[], any>(worker, { dataSource, fields });
+      if (result.success === true) {
+        fieldSummaryList = result.data;
+      } else {
+        throw new Error('[fields summary failed]' + result.message)
+      }
+    } catch (error) {
+      console.error(error)
     }
     worker.terminate()
   }
