@@ -54,7 +54,7 @@ interface FailResult<T> {
 
 type Result<T> = SuccessResult<T> | FailResult<T>;
 
-function workerService<T, R> (worker: Worker, data: R): Promise<Result<T>> {
+export function workerService<T, R> (worker: Worker, data: R): Promise<Result<T>> {
   return new Promise<Result<T>>((resolve, reject) => {
     worker.postMessage(data);
     worker.onmessage = (e: MessageEvent) => {

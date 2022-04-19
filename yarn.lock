@@ -16168,6 +16168,16 @@ visual-insights@0.7.15:
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 
+visual-insights@0.7.17:
+  version "0.7.17"
+  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.7.17.tgz#9c9a5430939c28de6b1f5ab1558e3489e76de801"
+  integrity sha512-Sscs4yc85jmglnjgbhXdckTJwwG3GQZiFS4b7MlhB8xl2SxdMnP5yTmPsEGUIvtfkbZkpr9wUBPirUAn589ojw==
+  dependencies:
+    assert "^2.0.0"
+    axios "^0.22.0"
+    cube-core "^2.13.0"
+    simple-statistics "^7.1.0"
+
 vite@^2.4.4:
   version "2.5.0"
   resolved "https://registry.nlark.com/vite/download/vite-2.5.0.tgz?cache=0&sync_timestamp=1629090689000&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fvite%2Fdownload%2Fvite-2.5.0.tgz#111ba3679432d426e44566acf480005a7914cbd6"

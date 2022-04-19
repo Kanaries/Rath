@@ -165,7 +165,6 @@ function encode (props: EncodeProps) {
     //         }
     //     }
     // }
-    console.log({ encoding })
     return encoding
 }
 

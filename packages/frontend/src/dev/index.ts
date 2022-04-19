@@ -1,6 +1,7 @@
 import { IRow } from "visual-insights";
 import { entropy, getCombination } from "visual-insights/build/esm/statistics";
 import { IFieldMeta } from "../interfaces";
+import { getRange } from "../utils";
 import { bin, binMapShareRange, generalMatMic, generalMic, incSim, l1Dis2, mic, normalizeScatter, rangeNormilize } from "./utils";
 
 export interface IFilter {
@@ -137,8 +138,7 @@ export class NextVICore {
         for (let i = 0; i < measures.length; i++) {
             for (let j = 0 ; j < measures.length; j++) {
                 const TValues = this.dataSource.map(row => row[measures[i].fid]);
-                const T_min = Math.min(...TValues)
-                const T_max = Math.max(...TValues)
+                const [T_min, T_max] = getRange(TValues)
                 const T = binMapShareRange(TValues, T_min, T_max);
                 const X = this.dataSource.map(row => row[measures[j].fid]);
                 matrix[i][j] = mic(T, X);

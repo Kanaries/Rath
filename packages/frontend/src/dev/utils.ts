@@ -41,10 +41,7 @@ export function w2dis () {
 const BIN_SIZE = 16;
 export function bin(nums: number[]): number[] {
     const [_min, _max] = getRange(nums)
-    // let _max = Math.max(...nums);
-    // let _min = Math.min(...nums);
     let step = (_max - _min) / BIN_SIZE;
-    // for (let i = 0; i < nums)
     let dist: number[] = new Array(BIN_SIZE + 1).fill(0);
     for (let i = 0; i < nums.length; i++) {
         let numIndex = Math.floor((nums[i] - _min) / step)
@@ -338,10 +335,7 @@ export function incSim (T: string[], pointsX: [number, number][], pointsY: [numb
 export function initRanges (vals: number[][], order: number): [number, number][] {
     const ranges: [number, number][] = [];
     for (let od = 0; od < order; od++) {
-        ranges.push([
-            Math.min(...vals.map(v => v[od])),
-            Math.max(...vals.map(v => v[od])),
-        ])
+        ranges.push(getRange(vals.map(v => v[od])))
     }
     return ranges;
 }
