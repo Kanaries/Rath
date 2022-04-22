@@ -245,7 +245,7 @@
             "include": "强制包含"
         },
         "commonVis": {
-            "text": "常规可视化"
+            "text": "汇总统计信息"
         },
         "subinsights": "获取子洞察",
         "orderBy": {
