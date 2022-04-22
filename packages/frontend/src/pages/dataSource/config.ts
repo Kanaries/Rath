@@ -62,6 +62,7 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
 } : {
     // CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     CARS: "http://localhost:3000/datasets/ds-cars-service.json",
+    // CARS: "http://localhost:3000/datasets/dataset-service-edge.json",
     // STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
     STUDENTS: "http://localhost:3000/datasets/ds-students-service.json",
     BTC_GOLD: "http://localhost:3000/datasets/ds_btc_gold_service.json",

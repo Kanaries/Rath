@@ -498,20 +498,20 @@ interface ExtendDataProps {
   fields: IRawField[];
 }
 export async function extendDataService (props: ExtendDataProps): Promise<ExtendDataProps> {
-  try {
-    const res = await fetch('http://localhost:8000/extension', {
+    const res = await fetch('https://9fw5jekyz8.execute-api.ap-northeast-1.amazonaws.com/default/extension', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(props)
     })
+    if (res.status !== 200) {
+      throw new Error(`[Extension API Errpr]status code = ${res.status}; ${res.statusText}`)
+    }
     const result = await res.json();
     if (result.success) {
       return result.data as ExtendDataProps
+    } else {
+      throw new Error(result.message)
     }
-    throw new Error(result.message)
-  } catch (error) {
-    return props;
-  }
 }

@@ -138,6 +138,16 @@ const PatternPage: React.FC = props => {
 
     }, [cleanedData, fieldMetas, pined])
 
+    const removePinedFilter = useCallback((filterField: IFieldMeta) => {
+        setPined(p => {
+            if (!p?.filters) return p;
+            return {
+                ...p,
+                filters: p.filters.filter(f => f.field.fid !== filterField.fid)
+            }
+        })
+    }, [])
+
     useEffect(() => {
         if (pined) {
             assViews(pined)
@@ -163,7 +173,7 @@ const PatternPage: React.FC = props => {
                 <h2>{intl.get('discovery.main.mainView')}</h2>
                 <div className="vis-container">
                     {pined !== null && <div>
-                        <ReactVega spec={distVis({ pattern: pined })} dataSource={cleanedData} />
+                        <ReactVega spec={distVis({ pattern: pined })} dataSource={applyFilter(cleanedData, pined.filters)} />
                         <hr />
                         <div className="fields-container">
                         {
@@ -175,16 +185,28 @@ const PatternPage: React.FC = props => {
                             />)
                         }
                         </div>
+                        <div className="fields-container">
+                        {
+                            pined.filters && pined.filters.map(f => <ViewField
+                                key={f.field.fid}
+                                type={f.field.analyticType}
+                                text={`${f.field.name || f.field.fid} | ${f.values.join(',')}`}
+                                onRemove={() => {
+                                    removePinedFilter(f.field)
+                                }}
+                            />)
+                        }
+                        </div>
                     </div>}
                     {mergeView !== null && <div>
                         {
-                            vizRecSys === 'lite' && <ReactVega spec={distVis({ pattern: mergeView })} dataSource={cleanedData} />
+                            vizRecSys === 'lite' && <ReactVega spec={distVis({ pattern: mergeView })} dataSource={applyFilter(cleanedData, mergeView.filters)} />
                         }
                         {
                             vizRecSys === 'strict' && <ReactVega spec={labDistVis({
                                 pattern: mergeView,
                                 dataSource: cleanedData
-                            })} dataSource={cleanedData} />
+                            })} dataSource={applyFilter(cleanedData, mergeView.filters)} />
                         }
                     </div>}
                 </div>
@@ -241,6 +263,12 @@ const PatternPage: React.FC = props => {
                                 })} dataSource={applyFilter(cleanedData, views[i].filters)} />
                             }
                         </div>
+                        {
+                            views[i].filters && <div>
+                                <h4>filters</h4>
+                                {views[i].filters!.map(f => `${f.field.name || f.field.fid} = ${f.values.join(',')}`).join('\n')}
+                            </div>
+                        }
                     </div>)
                 }
             </AssoContainer>

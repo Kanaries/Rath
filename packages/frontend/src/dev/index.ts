@@ -118,14 +118,24 @@ export class NextVICore {
         this.patterns.sort((a, b) => a.imp - b.imp);
         return this.patterns;
     }
-    public createHighOrderPatterns (fieldsInView: IFieldMeta[]) {
+    public createHighOrderPatterns (pattern: IPattern) {
+        const fieldsInView = pattern.fields;
+        const viewData = applyFilter(this.dataSource, pattern.filters);
         const measures = this.fields.filter(f => f.analyticType === 'measure');
         const patterns: IPattern[] = [];
         for (let i = 0; i < measures.length; i++) {
             if (!fieldsInView.find(f => f.fid === measures[i].fid)) {
+                let score = 0;
+                const T = viewData.map(r => r[measures[i].fid]);
+                for (let j = 0; j < fieldsInView.length; j++) {
+                    const X = viewData.map(r => r[measures[j].fid]);
+                    score += mic(T, X)
+                }
+                score /= fieldsInView.length;
                 patterns.push({
                     fields: [...fieldsInView, measures[i]],
-                    imp: 0
+                    filters: pattern.filters,
+                    imp: score
                 })
             }
         }
@@ -195,11 +205,11 @@ export class NextVICore {
             }
         }
         if (bestDIndex > -1) {
-            console.log(
-                patt1.map(f => f.fid), 
-                patt2.map(f => f.fid), 
-                dimensions[bestDIndex].fid, 
-                bestDScore);
+            // console.log(
+            //     patt1.map(f => f.fid), 
+            //     patt2.map(f => f.fid), 
+            //     dimensions[bestDIndex].fid, 
+            //     bestDScore);
             return {
                 features: [dimensions[bestDIndex]],
                 score: bestDScore

@@ -14,7 +14,7 @@ export const AssoContainer = styled.div`
         margin: 4px;
         padding: 10px;
         .chart-container{
-            min-height: 320px;
+            min-height: 300px;
         }
     }
 `
@@ -25,7 +25,7 @@ export const MainViewContainer = styled.div`
         margin: 6px 0px;
         .fields-container{
             display: flex;
-            padding: 2em 0em;
+            padding: 1em 0em;
         }
     }
     .action-buttons{

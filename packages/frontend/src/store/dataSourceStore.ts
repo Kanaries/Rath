@@ -337,9 +337,9 @@ export class DataSourceStore {
             })
         } catch (error) {
             notify({
-                title: 'extend data err',
+                title: 'Extension API Error',
                 type: 'error',
-                content: `[extenddata]${error}`
+                content: `[extension]${error}`
             })
         }
     }
