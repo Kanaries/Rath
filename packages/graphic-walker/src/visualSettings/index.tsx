@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { Container } from '../components/container';
 import { LiteForm } from '../components/liteForm';
-import { GEMO_TYPES } from '../config';
+import { CHART_LAYOUT_TYPE, GEMO_TYPES } from '../config';
 import { useGlobalStore } from '../store';
 
 interface VisualSettinsProps {
@@ -35,6 +35,23 @@ const VisualSettings: React.FC<VisualSettinsProps> = props => {
                     }}
                 >
                     {GEMO_TYPES.map((g) => (
+                        <option key={g.value} value={g.value}>
+                            {g.label}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="item">
+                <label>布局</label>
+                <select
+                    className="border border-gray-500 rounded-sm text-xs pt-0.5 pb-0.5 pl-2 pr-2"
+                    value={visualConfig.size.mode}
+                    onChange={(e) => {
+                        // vizStore.setVisualConfig('geoms', [e.target.value]);
+                        vizStore.setChartLayout(e.target.value as any)
+                    }}
+                >
+                    {CHART_LAYOUT_TYPE.map((g) => (
                         <option key={g.value} value={g.value}>
                             {g.label}
                         </option>

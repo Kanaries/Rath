@@ -2,7 +2,7 @@ import { IReactionDisposer, makeAutoObservable, reaction, toJS } from "mobx";
 import { IViewField } from "../interfaces";
 import { CommonStore } from "./commonStore";
 import { v4 as uuidv4 } from 'uuid';
-import { IField, Specification } from "visual-insights";
+import { Specification } from "visual-insights";
 import { GEMO_TYPES } from "../config";
 import { makeBinField } from "../utils/normalization";
 
@@ -12,6 +12,11 @@ interface VisualConfig {
     defaultStack: boolean;
     showActions: boolean;
     interactiveScale: boolean;
+    size: {
+        mode: 'auto' | 'fixed';
+        width: number;
+        height: number;
+    }
 }
 
 export interface DraggableFieldState {
@@ -78,7 +83,12 @@ export class VizSpecStore {
         geoms: [GEMO_TYPES[0].value],
         defaultStack: true,
         showActions: false,
-        interactiveScale: false
+        interactiveScale: false,
+        size: {
+            mode: 'auto',
+            width: 320,
+            height: 200
+        }
     }
     constructor (commonStore: CommonStore) {
         this.commonStore = commonStore;
@@ -182,6 +192,13 @@ export class VizSpecStore {
     }
     public setVisualConfig (configKey: keyof VisualConfig, value: any) {
         this.visualConfig[configKey] = value;
+    }
+    public setChartLayout(mode: VisualConfig['size']['mode'], width?: number, height?: number) {
+        this.visualConfig.size.mode = mode;
+        if (typeof width !== 'undefined' && typeof height !== 'undefined') {
+            this.visualConfig.size.width = width;
+            this.visualConfig.size.height = height;
+        }
     }
     public reorderField(stateKey: keyof DraggableFieldState, sourceIndex: number, destinationIndex: number) {
         if (MetaFieldKeys.includes(stateKey)) return;

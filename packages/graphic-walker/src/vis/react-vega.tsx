@@ -20,6 +20,9 @@ interface ReactVegaProps {
   opacity?: IField;
   size?: IField;
   showActions: boolean;
+  layoutMode: string;
+  width: number;
+  height: number;
   onGeomClick?: (values: any, e: any) => void
 }
 const NULL_FIELD: IField = {
@@ -148,7 +151,10 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     size,
     onGeomClick,
     showActions,
-    interactiveScale
+    interactiveScale,
+    layoutMode,
+    width,
+    height
   } = props;
   // const container = useRef<HTMLDivElement>(null);
   // const containers = useRef<(HTMLDivElement | null)[]>([]);
@@ -213,6 +219,11 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       })
     }
     if (rowRepeatFields.length <= 1 && colRepeatFields.length <= 1) {
+      if (layoutMode === 'fixed') {
+        spec.width = width;
+        spec.height = height;
+        spec.autosize = 'fit'
+      }
       const singleView = getSingleView({
         x: xField,
         y: yField,
@@ -227,6 +238,10 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
         defaultStack,
         geomType
       });
+      // if (layoutMode === 'fixed') {
+      //   spec.width = 800;
+      //   spec.height = 600;
+      // }
       spec.mark = singleView.mark;
       spec.encoding = singleView.encoding;
       if (viewPlaceholders.length > 0 && viewPlaceholders[0].current) {
@@ -244,6 +259,11 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
         });
       }
     } else {
+      if (layoutMode === 'fixed') {
+        spec.width = Math.floor(width / colRepeatFields.length) - 5;
+        spec.height = Math.floor(height / rowRepeatFields.length) - 5;
+        spec.autosize = 'fit'
+      }
       for (let i = 0; i < rowRepeatFields.length; i++) {
         for (let j = 0; j < colRepeatFields.length; j++) {
           const singleView = getSingleView({
@@ -297,8 +317,16 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     colRepeatFields,
     defaultStack,
     showActions,
-    interactiveScale
+    interactiveScale,
+    layoutMode,
+    width,
+    height
   ]);
+  useEffect(() => {
+    if (layoutMode === 'fixed') {
+      
+    }
+  }, [layoutMode])
   return <div>
     {/* <div ref={container}></div> */}
     {

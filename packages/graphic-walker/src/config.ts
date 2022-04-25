@@ -33,6 +33,17 @@ export const GEMO_TYPES = [
     }
 ];
 
+export const CHART_LAYOUT_TYPE = [
+    {
+        value: 'auto',
+        label: '自动'
+    },
+    {
+        value: 'fixed',
+        label: '固定'
+    }
+]
+
 export const COLORS = {
     // tableau style
     // dimension: 'rgb(73, 150, 178)',
