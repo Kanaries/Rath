@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { IField, Record } from '../interfaces';
+import { IField, IRow } from '../interfaces';
 import embed from 'vega-embed';
 import { Subject } from 'rxjs'
 import * as op from 'rxjs/operators';
@@ -11,7 +11,7 @@ const SELECTION_NAME = 'geom';
 interface ReactVegaProps {
   rows: IField[];
   columns: IField[];
-  dataSource: Record[];
+  dataSource: IRow[];
   defaultAggregate?: boolean;
   defaultStack?: boolean;
   interactiveScale: boolean;
@@ -52,13 +52,13 @@ interface SingleViewProps {
   xOffset: IField;
   yOffset: IField;
   row: IField;
-  col: IField;
+  column: IField;
   defaultAggregated: boolean;
   defaultStack: boolean;
   geomType: string;
 }
 
-function channelEncode(props: Pick<SingleViewProps, 'col' | 'opacity' | 'color' | 'row' | 'size' | 'x' | 'y' | 'xOffset' | 'yOffset'>) {
+function channelEncode(props: Pick<SingleViewProps, 'column' | 'opacity' | 'color' | 'row' | 'size' | 'x' | 'y' | 'xOffset' | 'yOffset'>) {
   const encoding: {[key: string]: any} = {}
   Object.keys(props).forEach(c => {
     if (props[c] !== NULL_FIELD) {
@@ -102,14 +102,14 @@ function getSingleView(props: SingleViewProps) {
     opacity,
     size,
     row,
-    col,
+    column,
     xOffset,
     yOffset,
     defaultAggregated,
     defaultStack,
     geomType
   } = props
-  const fields: IField[] = [x, y, color, opacity, size, row, col, xOffset, yOffset]
+  const fields: IField[] = [x, y, color, opacity, size, row, column, xOffset, yOffset]
   let markType = geomType;
   if (geomType === 'auto') {
     const types: ISemanticType[] = [];
@@ -118,7 +118,7 @@ function getSingleView(props: SingleViewProps) {
     markType = autoMark(types);
   }
 
-  let encoding = channelEncode({ x, y, color, opacity, size, row, col, xOffset, yOffset })
+  let encoding = channelEncode({ x, y, color, opacity, size, row, column, xOffset, yOffset })
   if (defaultAggregated) {
     channelAggregate(encoding, fields);
   }
@@ -197,12 +197,6 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       data: {
         values: dataSource,
       },
-      // selection: {
-      //   [SELECTION_NAME]: {
-      //     type: 'single',
-      //     fields: allFieldIds
-      //   }
-      // },
       params: [{
         name: SELECTION_NAME,
         select: {
@@ -226,7 +220,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
         opacity: opacity ? opacity : NULL_FIELD,
         size: size ? size : NULL_FIELD,
         row: rowFacetField,
-        col: colFacetField,
+        column: colFacetField,
         xOffset: NULL_FIELD,
         yOffset: NULL_FIELD,
         defaultAggregated: defaultAggregate,
@@ -259,7 +253,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
             opacity: opacity ? opacity : NULL_FIELD,
             size: size ? size : NULL_FIELD,
             row: rowFacetField,
-            col: colFacetField,
+            column: colFacetField,
             xOffset: NULL_FIELD,
             yOffset: NULL_FIELD,
             defaultAggregated: defaultAggregate,
