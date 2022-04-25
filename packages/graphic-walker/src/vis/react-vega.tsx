@@ -203,13 +203,20 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       //     fields: allFieldIds
       //   }
       // },
+      params: [{
+        name: SELECTION_NAME,
+        select: {
+          type: 'point',
+          fields: allFieldIds
+        }
+      }]
     };
     if (interactiveScale) {
-      spec.params = [{
+      spec.params.push({
         name: "grid",
         select: "interval",
         bind: "scales"
-      }]
+      })
     }
     if (rowRepeatFields.length <= 1 && colRepeatFields.length <= 1) {
       const singleView = getSingleView({

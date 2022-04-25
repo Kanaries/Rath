@@ -36,7 +36,7 @@ const DatasetFields: React.FC = props => {
 
     return <NestContainer className="flex flex-col" style={{ height: '680px' }}>
         <h4 className="text-xs mb-2 flex-grow-0">字段列表</h4>
-        <div className="flex-grow pd-1 overflow-y-auto" style={{ flexBasis: '200px'}}>
+        <div className="pd-1 overflow-y-auto" style={{ maxHeight: '380px'}}>
             <Droppable droppableId="dimensions" direction="vertical">
                 {
                     (provided, snapshot) => <DimFields provided={provided} />

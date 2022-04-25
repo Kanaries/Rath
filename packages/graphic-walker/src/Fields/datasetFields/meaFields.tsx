@@ -27,7 +27,7 @@ const MeaFields: React.FC<Props> = props => {
                             >
                                 <DataTypeIcon dataType={f.semanticType} analyticType={f.analyticType} /> {f.name}&nbsp;
                                 {
-                                    f.fid && <select className="float-right" value="" onChange={e => {
+                                    f.fid && !snapshot.isDragging && <select className="float-right" value="" onChange={e => {
                                         if (e.target.value === 'bin') {
                                             vizStore.createBinField('measures', index)
                                         }
