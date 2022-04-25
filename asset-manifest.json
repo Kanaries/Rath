@@ -1,29 +1,29 @@
 {
   "files": {
-    "main.css": "./static/css/main.c18b2ff8.chunk.css",
-    "main.js": "./static/js/main.3e3bf683.chunk.js",
+    "main.css": "./static/css/main.89bb6693.chunk.css",
+    "main.js": "./static/js/main.c9a53f9e.chunk.js",
     "runtime-main.js": "./static/js/runtime-main.0f2630df.js",
     "static/css/2.5e09963b.chunk.css": "./static/css/2.5e09963b.chunk.css",
-    "static/js/2.cfb7d99e.chunk.js": "./static/js/2.cfb7d99e.chunk.js",
+    "static/js/2.a36bae89.chunk.js": "./static/js/2.a36bae89.chunk.js",
     "index.html": "./index.html",
-    "static/js/2.cfb7d99e.chunk.js.LICENSE.txt": "./static/js/2.cfb7d99e.chunk.js.LICENSE.txt",
-    "static/js/cluster.worker.10a104b8.worker.js": "./static/js/cluster.worker.10a104b8.worker.js",
-    "static/js/combineFields.worker.3b1c5fb4.worker.js": "./static/js/combineFields.worker.3b1c5fb4.worker.js",
-    "static/js/dashboard.worker.8f734a04.worker.js": "./static/js/dashboard.worker.8f734a04.worker.js",
+    "static/js/2.a36bae89.chunk.js.LICENSE.txt": "./static/js/2.a36bae89.chunk.js.LICENSE.txt",
+    "static/js/cluster.worker.366d1e33.worker.js": "./static/js/cluster.worker.366d1e33.worker.js",
+    "static/js/combineFields.worker.d092dcf0.worker.js": "./static/js/combineFields.worker.d092dcf0.worker.js",
+    "static/js/dashboard.worker.42c43649.worker.js": "./static/js/dashboard.worker.42c43649.worker.js",
     "static/js/dev.worker.571374ca.worker.js": "./static/js/dev.worker.571374ca.worker.js",
-    "static/js/fieldsSummary.worker.29caffa9.worker.js": "./static/js/fieldsSummary.worker.29caffa9.worker.js",
-    "static/js/groupFields.worker.397d7285.worker.js": "./static/js/groupFields.worker.397d7285.worker.js",
-    "static/js/index.worker.224a4395.worker.js": "./static/js/index.worker.224a4395.worker.js",
-    "static/js/index.worker.7cb8ab84.worker.js": "./static/js/index.worker.7cb8ab84.worker.js",
-    "static/js/main.3e3bf683.chunk.js.LICENSE.txt": "./static/js/main.3e3bf683.chunk.js.LICENSE.txt",
-    "static/js/metaInfer.worker.e50423bb.worker.js": "./static/js/metaInfer.worker.e50423bb.worker.js",
-    "static/js/transFileData.worker.bb9080df.worker.js": "./static/js/transFileData.worker.bb9080df.worker.js"
+    "static/js/fieldsSummary.worker.ac1004f7.worker.js": "./static/js/fieldsSummary.worker.ac1004f7.worker.js",
+    "static/js/groupFields.worker.1161f830.worker.js": "./static/js/groupFields.worker.1161f830.worker.js",
+    "static/js/index.worker.54baf2fe.worker.js": "./static/js/index.worker.54baf2fe.worker.js",
+    "static/js/index.worker.91dfcd03.worker.js": "./static/js/index.worker.91dfcd03.worker.js",
+    "static/js/main.c9a53f9e.chunk.js.LICENSE.txt": "./static/js/main.c9a53f9e.chunk.js.LICENSE.txt",
+    "static/js/metaInfer.worker.4834512a.worker.js": "./static/js/metaInfer.worker.4834512a.worker.js",
+    "static/js/transFileData.worker.f1996311.worker.js": "./static/js/transFileData.worker.f1996311.worker.js"
   },
   "entrypoints": [
     "static/js/runtime-main.0f2630df.js",
     "static/css/2.5e09963b.chunk.css",
-    "static/js/2.cfb7d99e.chunk.js",
-    "static/css/main.c18b2ff8.chunk.css",
-    "static/js/main.3e3bf683.chunk.js"
+    "static/js/2.a36bae89.chunk.js",
+    "static/css/main.89bb6693.chunk.css",
+    "static/js/main.c9a53f9e.chunk.js"
   ]
 }
