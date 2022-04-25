@@ -2,14 +2,16 @@ import { IReactionDisposer, makeAutoObservable, reaction, toJS } from "mobx";
 import { IViewField } from "../interfaces";
 import { CommonStore } from "./commonStore";
 import { v4 as uuidv4 } from 'uuid';
-import { Specification } from "visual-insights";
+import { IField, Specification } from "visual-insights";
 import { GEMO_TYPES } from "../config";
+import { makeBinField } from "../utils/normalization";
 
 interface VisualConfig {
     defaultAggregated: boolean;
     geoms: string[];        
     defaultStack: boolean;
     showActions: boolean;
+    interactiveScale: boolean;
 }
 
 export interface DraggableFieldState {
@@ -58,6 +60,8 @@ function geomAdapter (geom: string) {
             return 'point';
         case 'heatmap':
             return 'circle'
+        case 'rect':
+            return 'rect'
         case 'tick':
         default:
             return 'tick'
@@ -66,15 +70,18 @@ function geomAdapter (geom: string) {
 
 export class VizSpecStore {
     // public fields: IViewField[] = [];
+    private commonStore: CommonStore;
     public draggableFieldState: DraggableFieldState;
     private reactions: IReactionDisposer[] = []
     public visualConfig: VisualConfig ={
         defaultAggregated: true,
         geoms: [GEMO_TYPES[0].value],
         defaultStack: true,
-        showActions: false
+        showActions: false,
+        interactiveScale: false
     }
     constructor (commonStore: CommonStore) {
+        this.commonStore = commonStore;
         this.draggableFieldState = {
             dimensions: [],
             measures: [],
@@ -185,6 +192,7 @@ export class VizSpecStore {
     }
     public moveField(sourceKey: keyof DraggableFieldState, sourceIndex: number, destinationKey: keyof DraggableFieldState, destinationIndex: number) {
         let movingField: IViewField;
+        // 来源是不是metafield，是->clone；不是->直接删掉
         if (MetaFieldKeys.includes(sourceKey)) {
             // use toJS for cloning
             movingField = toJS(this.draggableFieldState[sourceKey][sourceIndex])
@@ -192,7 +200,12 @@ export class VizSpecStore {
         } else {
             [movingField] = this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
         }
-        if (MetaFieldKeys.includes(destinationKey))return;
+        // 目的地是metafields的情况，只有在来源也是metafields时，会执行字段类型转化操作
+        if (MetaFieldKeys.includes(destinationKey)) {
+            if (!MetaFieldKeys.includes(sourceKey))return;
+            this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
+            movingField.analyticType = destinationKey === 'dimensions' ? 'dimension' : 'measure';
+        }
         const limitSize = getChannelSizeLimit(destinationKey);
         const fixedDestinationIndex = Math.min(destinationIndex, limitSize - 1);
         const overflowSize = Math.max(0, this.draggableFieldState[destinationKey].length + 1 - limitSize);
@@ -201,6 +214,18 @@ export class VizSpecStore {
     public removeField(sourceKey: keyof DraggableFieldState, sourceIndex: number) {
         if (MetaFieldKeys.includes(sourceKey))return;
         this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
+    }
+    public createBinField(stateKey: keyof DraggableFieldState, index: number) {
+        const originField = this.draggableFieldState[stateKey][index]
+        const binField: IViewField = {
+            fid: uuidv4(),
+            dragId: uuidv4(),
+            name: `bin(${originField.name})`,
+            semanticType: 'ordinal',
+            analyticType: 'dimension',
+        };
+        this.draggableFieldState.dimensions.push(binField);
+        this.commonStore.currentDataset.dataSource = makeBinField(this.commonStore.currentDataset.dataSource, originField.fid, binField.fid)
     }
     public setFieldAggregator (stateKey: keyof DraggableFieldState, index: number, aggName: string) {
         const fields = this.draggableFieldState[stateKey]

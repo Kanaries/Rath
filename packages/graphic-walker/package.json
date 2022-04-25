@@ -34,7 +34,7 @@
     "styled-components": "^5.3.0",
     "tailwindcss": "^2.2.15",
     "uuid": "^8.3.2",
-    "vega": "^5.22.0",
+    "vega": "^5.22.1",
     "vega-embed": "^6.20.8",
     "vega-lite": "^5.2.0",
     "visual-insights": "0.7.15"

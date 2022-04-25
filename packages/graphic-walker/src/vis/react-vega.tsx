@@ -14,6 +14,7 @@ interface ReactVegaProps {
   dataSource: Record[];
   defaultAggregate?: boolean;
   defaultStack?: boolean;
+  interactiveScale: boolean;
   geomType: string;
   color?: IField;
   opacity?: IField;
@@ -42,10 +43,9 @@ const geomClick$ = selection$.pipe(
 function getFieldType(field: IField): 'quantitative' | 'nominal' | 'ordinal' | 'temporal' {
   return field.semanticType
 }
-
 interface SingleViewProps {
-  xField: IField;
-  yField: IField;
+  x: IField;
+  y: IField;
   color: IField;
   opacity: IField;
   size: IField;
@@ -57,94 +57,81 @@ interface SingleViewProps {
   defaultStack: boolean;
   geomType: string;
 }
+
+function channelEncode(props: Pick<SingleViewProps, 'col' | 'opacity' | 'color' | 'row' | 'size' | 'x' | 'y' | 'xOffset' | 'yOffset'>) {
+  const encoding: {[key: string]: any} = {}
+  Object.keys(props).forEach(c => {
+    if (props[c] !== NULL_FIELD) {
+      encoding[c] = {
+        field: props[c].fid,
+        title: props[c].name,
+        type: props[c].semanticType
+      }
+    }
+  })
+  return encoding
+}
+function channelAggregate(encoding: {[key: string]: any}, fields: IField[]) {
+  Object.values(encoding).forEach(c => {
+    const targetField = fields.find(f => f.fid === c.field);
+    if (targetField && targetField.analyticType === 'measure') {
+      c.title = `${targetField.aggName}(${targetField.name})`;
+      c.aggregate = targetField.aggName;
+    }
+  })
+}
+function channelStack(encoding: {[key: string]: any}) {
+  if (encoding.x && encoding.x.type === 'quantitative') {
+    encoding.x.stack = null
+  }
+  if (encoding.y && encoding.y.type === 'quantitative') {
+    encoding.y.stack = null
+  }
+}
+// TODO: xOffset等通道的特性不太稳定，建议后续vega相关特性稳定后，再使用。
+// 1. 场景太细，仅仅对对应的坐标轴是nominal(可能由ordinal)时，才可用
+// 2. 部分geom type会出现bug，如line，会出现组间的错误连接
+// "vega": "^5.22.0",
+// "vega-embed": "^6.20.8",
+// "vega-lite": "^5.2.0",
 function getSingleView(props: SingleViewProps) {
   const {
-    xField,
-    yField,
+    x,
+    y,
     color,
     opacity,
     size,
     row,
     col,
-    // xOffset,
-    // yOffset,
+    xOffset,
+    yOffset,
     defaultAggregated,
     defaultStack,
     geomType
   } = props
-  const xFieldAgg = (xField.analyticType === 'measure' && defaultAggregated && (xField.aggName as any));
-  const yFieldAgg = (yField.analyticType === 'measure' && defaultAggregated && (yField.aggName as any)) ;
+  const fields: IField[] = [x, y, color, opacity, size, row, col, xOffset, yOffset]
   let markType = geomType;
   if (geomType === 'auto') {
     const types: ISemanticType[] = [];
-    if (xField !== NULL_FIELD) types.push(xField.semanticType)//types.push(getFieldType(xField));
-    if (yField !== NULL_FIELD) types.push(yField.semanticType)//types.push(getFieldType(yField));
+    if (x !== NULL_FIELD) types.push(x.semanticType)//types.push(getFieldType(x));
+    if (y !== NULL_FIELD) types.push(y.semanticType)//types.push(getFieldType(yField));
     markType = autoMark(types);
   }
 
+  let encoding = channelEncode({ x, y, color, opacity, size, row, col, xOffset, yOffset })
+  if (defaultAggregated) {
+    channelAggregate(encoding, fields);
+  }
+  if (!defaultStack) {
+    channelStack(encoding);
+  }
   const spec = {
     mark: {
       type: markType,
       opacity: 0.96,
       tooltip: true
     },
-    encoding: {
-      x: {
-        field: xField.fid,
-        type: getFieldType(xField),
-        aggregate: xFieldAgg,
-        stack: defaultStack,
-        title: xFieldAgg ? `${xField.aggName}(${xField.name})` : xField.name
-      },
-      y: {
-        field: yField.fid,
-        type: getFieldType(yField),
-        aggregate: yFieldAgg,
-        stack: defaultStack,
-        title: yFieldAgg ? `${yField.aggName}(${yField.name})` : yField.name
-      },
-      row: row !== NULL_FIELD ? {
-        field: row.fid,
-        type: getFieldType(row),
-        title: row.name
-      } : undefined,
-      // TODO: xOffset等通道的特性不太稳定，建议后续vega相关特性稳定后，再使用。
-      // 1. 场景太细，仅仅对对应的坐标轴是nominal(可能由ordinal)时，才可用
-      // 2. 部分geom type会出现bug，如line，会出现组间的错误连接
-      // "vega": "^5.22.0",
-      // "vega-embed": "^6.20.8",
-      // "vega-lite": "^5.2.0",
-      // ```ts
-      // xOffset: xOffset !== NULL_FIELD ? {
-      //   field: xOffset.fid,
-      //   type: getFieldType(xOffset),
-      // } : undefined,
-      // yOffset: yOffset !== NULL_FIELD ? {
-      //   field: yOffset.fid,
-      //   type: getFieldType(yOffset),
-      // } : undefined,
-      // ```
-      column: col !== NULL_FIELD ? {
-        field: col.fid,
-        type: getFieldType(col),
-        title: col.name
-      } : undefined,
-      color: color !== NULL_FIELD ? {
-        field: color.fid,
-        type: getFieldType(color),
-        title: color.name
-      } : undefined,
-      opacity: opacity !== NULL_FIELD ? {
-        field: opacity.fid,
-        type: getFieldType(opacity),
-        title: opacity.name
-      } : undefined,
-      size: size !== NULL_FIELD ? {
-        field: size.fid,
-        type: getFieldType(size),
-        title: size.name
-      } : undefined
-    }
+    encoding
   };
   return spec;
 }
@@ -160,7 +147,8 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     opacity,
     size,
     onGeomClick,
-    showActions
+    showActions,
+    interactiveScale
   } = props;
   // const container = useRef<HTMLDivElement>(null);
   // const containers = useRef<(HTMLDivElement | null)[]>([]);
@@ -209,17 +197,24 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       data: {
         values: dataSource,
       },
-      selection: {
-        [SELECTION_NAME]: {
-          type: 'single',
-          fields: allFieldIds
-        }
-      }
+      // selection: {
+      //   [SELECTION_NAME]: {
+      //     type: 'single',
+      //     fields: allFieldIds
+      //   }
+      // },
     };
+    if (interactiveScale) {
+      spec.params = [{
+        name: "grid",
+        select: "interval",
+        bind: "scales"
+      }]
+    }
     if (rowRepeatFields.length <= 1 && colRepeatFields.length <= 1) {
       const singleView = getSingleView({
-        xField,
-        yField,
+        x: xField,
+        y: yField,
         color: color ? color : NULL_FIELD,
         opacity: opacity ? opacity : NULL_FIELD,
         size: size ? size : NULL_FIELD,
@@ -234,7 +229,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       spec.mark = singleView.mark;
       spec.encoding = singleView.encoding;
       if (viewPlaceholders.length > 0 && viewPlaceholders[0].current) {
-        embed(viewPlaceholders[0].current, spec, { mode: 'vega-lite', actions: false }).then(res => {
+        embed(viewPlaceholders[0].current, spec, { mode: 'vega-lite', actions: showActions }).then(res => {
           try {
             res.view.addEventListener('click', (e) => {
               click$.next(e);
@@ -251,8 +246,8 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       for (let i = 0; i < rowRepeatFields.length; i++) {
         for (let j = 0; j < colRepeatFields.length; j++) {
           const singleView = getSingleView({
-            xField: colRepeatFields[j] || NULL_FIELD,
-            yField: rowRepeatFields[i] || NULL_FIELD,
+            x: colRepeatFields[j] || NULL_FIELD,
+            y: rowRepeatFields[i] || NULL_FIELD,
             color: color ? color : NULL_FIELD,
             opacity: opacity ? opacity : NULL_FIELD,
             size: size ? size : NULL_FIELD,
@@ -300,7 +295,8 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     rowRepeatFields,
     colRepeatFields,
     defaultStack,
-    showActions
+    showActions,
+    interactiveScale
   ]);
   return <div>
     {/* <div ref={container}></div> */}

@@ -1,4 +1,4 @@
-import { Record } from '../interfaces';
+import { IRow, Record } from '../interfaces';
 
 export function normalizeWithParent(
     data: Record[],
@@ -128,4 +128,23 @@ export function getDistributionDifference(dataSource: Record[], dimensions: stri
         score += Math.max(record[measure1], record[measure2]) / Math.min(record[measure1], record[measure2]);
     }
     return score;
+}
+
+export function makeBinField (dataSource: IRow[], fid: string, binFid: string, binSize: number | undefined = 10) {
+    let _min = Infinity;
+    let _max = -Infinity;
+    for (let i = 0; i < dataSource.length; i++) {
+        let val = dataSource[i][fid];
+        if (val > _max) _max = val;
+        if (val < _min) _min = val;
+    }
+    const step = (_max - _min) / binSize;
+    return dataSource.map(r => {
+        let bIndex = Math.floor((r[fid] - _min) / step);
+        if (bIndex === binSize) bIndex = binSize - 1;
+        return {
+            ...r,
+            [binFid]: bIndex * step + _min
+        }
+    })
 }

@@ -42,10 +42,16 @@ const VisualSettings: React.FC<VisualSettinsProps> = props => {
                 </select>
             </div>
             <div className="item">
+                <input type="checkbox" checked={visualConfig.interactiveScale} onChange={(e) => {
+                    vizStore.setVisualConfig('interactiveScale', e.target.checked);
+                }} />
+                <label className="text-xs text-color-gray-700 ml-2">坐标系缩放</label>
+            </div>
+            <div className="item">
                 <input type="checkbox" checked={visualConfig.showActions} onChange={(e) => {
                     vizStore.setVisualConfig('showActions', e.target.checked);
                 }} />
-                <label className="text-xs text-color-gray-700 ml-2">开启图表操作按钮</label>
+                <label className="text-xs text-color-gray-700 ml-2">图表调试</label>
             </div>
         </LiteForm>
     </Container>

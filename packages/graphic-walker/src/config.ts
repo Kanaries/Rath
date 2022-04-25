@@ -5,7 +5,7 @@ export const GEMO_TYPES = [
     },
     {
         value: 'bar',
-        label: '矩形',
+        label: '条形图',
     },
     {
         value: 'line',
@@ -22,6 +22,10 @@ export const GEMO_TYPES = [
     {
         value: 'tick',
         label: '标记',
+    },
+    {
+        value: 'rect',
+        label: '矩形',
     },
     {
         value: 'boxplot',
