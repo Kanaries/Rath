@@ -1,7 +1,9 @@
+import { ArrowsExpandIcon } from '@heroicons/react/outline';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { Container } from '../components/container';
 import { LiteForm } from '../components/liteForm';
+import SizeSetting from '../components/sizeSetting';
 import { CHART_LAYOUT_TYPE, GEMO_TYPES } from '../config';
 import { useGlobalStore } from '../store';
 
@@ -57,6 +59,25 @@ const VisualSettings: React.FC<VisualSettinsProps> = props => {
                         </option>
                     ))}
                 </select>
+            </div>
+            <div className="item hover:bg-yellow-100">
+                <SizeSetting
+                    width={visualConfig.size.width}
+                    height={visualConfig.size.height}
+                    onHeightChange={(v) => {
+                        vizStore.setChartLayout({
+                            mode: "fixed",
+                            height: v
+                        })
+                    }}
+                    onWidthChange={(v) => {
+                        vizStore.setChartLayout({
+                            mode: "fixed",
+                            width: v
+                        })
+                    }}
+                />
+                <label className="text-xs text-color-gray-700 ml-2">布局尺寸</label>
             </div>
             <div className="item">
                 <input type="checkbox" checked={visualConfig.interactiveScale} onChange={(e) => {

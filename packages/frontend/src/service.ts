@@ -506,7 +506,7 @@ export async function extendDataService (props: ExtendDataProps): Promise<Extend
       body: JSON.stringify(props)
     })
     if (res.status !== 200) {
-      throw new Error(`[Extension API Errpr]status code = ${res.status}; ${res.statusText}`)
+      throw new Error(`[Extension API Error]status code = ${res.status}; ${res.statusText}`)
     }
     const result = await res.json();
     if (result.success) {

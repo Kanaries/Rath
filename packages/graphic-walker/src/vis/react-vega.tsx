@@ -220,9 +220,11 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     }
     if (rowRepeatFields.length <= 1 && colRepeatFields.length <= 1) {
       if (layoutMode === 'fixed') {
+        if (rowFacetField === NULL_FIELD && colFacetField === NULL_FIELD) {
+          spec.autosize = 'fit'
+        }
         spec.width = width;
         spec.height = height;
-        spec.autosize = 'fit'
       }
       const singleView = getSingleView({
         x: xField,
@@ -245,6 +247,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       spec.mark = singleView.mark;
       spec.encoding = singleView.encoding;
       if (viewPlaceholders.length > 0 && viewPlaceholders[0].current) {
+        console.log(spec)
         embed(viewPlaceholders[0].current, spec, { mode: 'vega-lite', actions: showActions }).then(res => {
           try {
             res.view.addEventListener('click', (e) => {
@@ -282,6 +285,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
           });
           const node = i * colRepeatFields.length + j < viewPlaceholders.length ? viewPlaceholders[i * colRepeatFields.length + j].current : null
           const ans = { ...spec, ...singleView }
+          console.log(ans)
           if (node) {
             embed(node, ans, { mode: 'vega-lite', actions: showActions }).then(res => {
               try {

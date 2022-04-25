@@ -193,12 +193,15 @@ export class VizSpecStore {
     public setVisualConfig (configKey: keyof VisualConfig, value: any) {
         this.visualConfig[configKey] = value;
     }
-    public setChartLayout(mode: VisualConfig['size']['mode'], width?: number, height?: number) {
+    public setChartLayout(props: {mode: VisualConfig['size']['mode'], width?: number, height?: number }) {
+        const {
+            mode,
+            width = this.visualConfig.size.width,
+            height = this.visualConfig.size.height
+        } = props
         this.visualConfig.size.mode = mode;
-        if (typeof width !== 'undefined' && typeof height !== 'undefined') {
-            this.visualConfig.size.width = width;
-            this.visualConfig.size.height = height;
-        }
+        this.visualConfig.size.width = width;
+        this.visualConfig.size.height = height;
     }
     public reorderField(stateKey: keyof DraggableFieldState, sourceIndex: number, destinationIndex: number) {
         if (MetaFieldKeys.includes(stateKey)) return;

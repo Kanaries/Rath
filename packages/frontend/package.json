@@ -41,9 +41,9 @@
     "rxjs": "6.x",
     "styled-components": "^5.2.1",
     "symbol-observable": "^4.0.0",
-    "vega": "^5.19.1",
-    "vega-embed": "^6.15.1",
-    "vega-lite": "^4.17.0",
+    "vega": "^5.22.1",
+    "vega-embed": "^6.20.8",
+    "vega-lite": "^5.2.0",
     "visual-insights": "0.7.17",
     "web-vitals": "^0.2.4",
     "worker-loader": "^3.0.7"

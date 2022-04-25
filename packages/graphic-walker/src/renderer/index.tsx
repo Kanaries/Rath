@@ -18,21 +18,31 @@ const ReactiveRenderer: React.FC = props => {
     const opacity = toJS(draggableFieldState.opacity)
     const sizeChannel = toJS(draggableFieldState.size)
 
+    const rowLeftFacetFields = rows.slice(0, -1).filter(f => f.analyticType === 'dimension');
+    const colLeftFacetFields = columns.slice(0, -1).filter(f => f.analyticType === 'dimension');
+
+    const hasFacet = rowLeftFacetFields.length > 0 || colLeftFacetFields.length > 0;
+    
     const onGeomClick = useCallback((values: any, e: any) => {
         runInAction(() => {
             commonStore.showEmbededMenu([e.pageX, e.pageY])
             commonStore.setFilters(values);
         })
     }, [])
-
-    return <Resizable className={size.mode === 'fixed' ? "border-blue-400 border-2" : ""}
+    console.log(size.width, size.height)
+    return <Resizable className={(size.mode === 'fixed' && !hasFacet) ? "border-blue-400 border-2 overflow-hidden" : ""}
+    style={{ padding: '12px' }}
     onResizeStop={(e, direction, ref, d) => {
-        vizStore.setChartLayout('fixed', size.width + d.width, size.height + d.height)
+        vizStore.setChartLayout({
+            mode: 'fixed',
+            width: size.width + d.width,
+            height: size.height + d.height
+        })
     }}
-    defaultSize={{
-        width: size.width,
-        height: size.height,
-      }}>
+    size={{
+        width: size.width + 'px',
+        height: size.height + 'px',
+    }}>
         <ReactVega
         layoutMode={size.mode}
         interactiveScale={interactiveScale}
@@ -47,8 +57,8 @@ const ReactiveRenderer: React.FC = props => {
         size={sizeChannel[0]}
         onGeomClick={onGeomClick}
         showActions={showActions}
-        width={size.width - 20}
-        height={size.height - 20}
+        width={size.width - 12 * 4}
+        height={size.height - 12 * 4}
     />
     </Resizable>
 }
