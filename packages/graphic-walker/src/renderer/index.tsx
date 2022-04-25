@@ -34,6 +34,7 @@ const ReactiveRenderer: React.FC = props => {
         opacity={opacity[0]}
         size={size[0]}
         onGeomClick={onGeomClick}
+        showActions={visualConfig.showActions}
     />
 }
 

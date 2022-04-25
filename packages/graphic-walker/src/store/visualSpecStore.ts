@@ -9,6 +9,7 @@ interface VisualConfig {
     defaultAggregated: boolean;
     geoms: string[];        
     defaultStack: boolean;
+    showActions: boolean;
 }
 
 export interface DraggableFieldState {
@@ -70,7 +71,8 @@ export class VizSpecStore {
     public visualConfig: VisualConfig ={
         defaultAggregated: true,
         geoms: [GEMO_TYPES[0].value],
-        defaultStack: true
+        defaultStack: true,
+        showActions: false
     }
     constructor (commonStore: CommonStore) {
         this.draggableFieldState = {

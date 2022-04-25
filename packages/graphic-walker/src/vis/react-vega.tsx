@@ -18,6 +18,7 @@ interface ReactVegaProps {
   color?: IField;
   opacity?: IField;
   size?: IField;
+  showActions: boolean;
   onGeomClick?: (values: any, e: any) => void
 }
 const NULL_FIELD: IField = {
@@ -55,7 +56,6 @@ interface SingleViewProps {
   defaultAggregated: boolean;
   defaultStack: boolean;
   geomType: string;
-
 }
 function getSingleView(props: SingleViewProps) {
   const {
@@ -85,7 +85,8 @@ function getSingleView(props: SingleViewProps) {
   const spec = {
     mark: {
       type: markType,
-      opacity: 0.96
+      opacity: 0.96,
+      tooltip: true
     },
     encoding: {
       x: {
@@ -158,7 +159,8 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     color,
     opacity,
     size,
-    onGeomClick
+    onGeomClick,
+    showActions
   } = props;
   // const container = useRef<HTMLDivElement>(null);
   // const containers = useRef<(HTMLDivElement | null)[]>([]);
@@ -265,7 +267,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
           const node = i * colRepeatFields.length + j < viewPlaceholders.length ? viewPlaceholders[i * colRepeatFields.length + j].current : null
           const ans = { ...spec, ...singleView }
           if (node) {
-            embed(node, ans, { mode: 'vega-lite', actions: false }).then(res => {
+            embed(node, ans, { mode: 'vega-lite', actions: showActions }).then(res => {
               try {
                 res.view.addEventListener('click', (e) => {
                   click$.next(e);
@@ -297,7 +299,8 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     colFacetFields,
     rowRepeatFields,
     colRepeatFields,
-    defaultStack
+    defaultStack,
+    showActions
   ]);
   return <div>
     {/* <div ref={container}></div> */}

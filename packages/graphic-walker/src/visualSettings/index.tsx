@@ -41,6 +41,12 @@ const VisualSettings: React.FC<VisualSettinsProps> = props => {
                     ))}
                 </select>
             </div>
+            <div className="item">
+                <input type="checkbox" checked={visualConfig.showActions} onChange={(e) => {
+                    vizStore.setVisualConfig('showActions', e.target.checked);
+                }} />
+                <label className="text-xs text-color-gray-700 ml-2">开启图表操作按钮</label>
+            </div>
         </LiteForm>
     </Container>
 }

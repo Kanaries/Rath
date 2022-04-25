@@ -5,7 +5,11 @@ import typescript from '@rollup/plugin-typescript'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    port: 2002
+  },
   plugins: [
+    // @ts-ignore
     reactRefresh(),
     // @ts-ignore
     {
