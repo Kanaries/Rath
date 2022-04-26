@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { Label, ChoiceGroup, IChoiceGroupOption, SpinButton, DefaultButton } from "office-ui-fabric-react";
+import React, { useState, useRef, useMemo } from "react";
+import { ChoiceGroup, IChoiceGroupOption, SpinButton, DefaultButton, Dropdown, IDropdownOption } from "office-ui-fabric-react";
 import { useId } from "@uifabric/react-hooks";
 import intl from "react-intl-universal";
 import { loadDataFile, SampleKey, useSampleOptions } from "../utils";
@@ -20,13 +20,39 @@ const FileData: React.FC<FileDataProps> = (props) => {
     const [sampleMethod, setSampleMethod] = useState<SampleKey>(SampleKey.none);
     const [sampleSize, setSampleSize] = useState<number>(500);
     const fileEle = useRef<HTMLInputElement>(null);
+    const [chartset, setcharSet] = useState<string>('utf-8');
+
+    const charsetOptions = useMemo<IDropdownOption[]>(() => {
+        return [
+            {
+                text: 'UTF-8',
+                key: 'utf-8'
+            },
+            {
+                text: 'GB2312',
+                key: 'gb2312'
+            },
+            {
+                text: 'us-ascii',
+                key: 'us-ascii'
+            },
+            {
+                text: 'big5',
+                key: 'big5'
+            },
+            {
+                text: 'GB18030',
+                key: 'GB18030'
+            }
+        ]
+    }, [])
 
     async function fileUploadHanlder() {
         if (fileEle.current !== null && fileEle.current.files !== null) {
             const file = fileEle.current.files[0];
             onStartLoading();
             try {
-                const { fields, dataSource } = await loadDataFile(file, sampleMethod, sampleSize);
+                const { fields, dataSource } = await loadDataFile(file, sampleMethod, sampleSize, chartset);
                 logDataImport({
                     dataType: 'File',
                     fields,
@@ -48,11 +74,19 @@ const FileData: React.FC<FileDataProps> = (props) => {
             <div className="vi-callout-content">
                 <p className="vi-callout-subTex">{intl.get("dataSource.upload.fileTypes")}</p>
             </div>
+            <div style={{ margin: '1em 0em' }}>
+                <Dropdown label={intl.get('dataSource.charset')}
+                    style={{ maxWidth: '120px' }}
+                    options={charsetOptions}
+                    selectedKey={chartset}
+                    onChange={(e, item) => {
+                        item && setcharSet(item.key as string)
+                    }}
+                />
+            </div>
             <div>
-                <Label id={labelId} required={true}>
-                    {intl.get("dataSource.upload.sampling")}
-                </Label>
                 <ChoiceGroup
+                    label={intl.get("dataSource.upload.sampling")}
                     options={sampleOptions}
                     selectedKey={sampleMethod}
                     onChange={(ev: any, option: IChoiceGroupOption | undefined) => {

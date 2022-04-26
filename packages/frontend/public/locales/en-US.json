@@ -75,6 +75,7 @@
         "viewMode": "View Mode",
         "metaView": "Meta View",
         "dataView": "Table View",
+        "charset": "character encoding",
         "advice": {
             "lackData": "Lack of Data",
             "lackDimension": "There should includes dimensions in the datasource.",
@@ -126,7 +127,7 @@
         "recordCount": "Number of records {count}",
         "upload": {
             "title": "Upload Your own dataset",
-            "fileTypes": ".csv, .json are supportted.",
+            "fileTypes": "csv, json are supportted.",
             "uniqueIdIssue": "Add unique ids for fields",
             "sampling": "Sampling",
             "percentSize": "sample size(percent)",

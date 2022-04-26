@@ -75,6 +75,7 @@
         "viewMode": "视图模式",
         "metaView": "元数据视图",
         "dataView": "数据视图",
+        "charset": "字符集编码",
         "advice": {
             "lackData": "缺少有效数据",
             "lackDimension": "数据集中缺少维度，无法进行完整的分析任务。",
@@ -127,7 +128,7 @@
         "recordCount": "记录数 {count}",
         "upload": {
             "title": "上传你的数据集，根据需求调整以下配置",
-            "fileTypes": "支持.csv, .json文件",
+            "fileTypes": "支持csv, json文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
             "sampling": "数据采样",
             "percentSize": "样本大小(%)",

@@ -2219,7 +2219,7 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@kanaries/web-data-loader@0.1.2":
+"@kanaries/web-data-loader@^0.1.2":
   version "0.1.2"
   resolved "https://registry.npmmirror.com/@kanaries/web-data-loader/-/web-data-loader-0.1.2.tgz#437f9ddf5c38ba40ad6022d40c382224019fba83"
   integrity sha512-1g8J98oee4gbTfuxoS7a1nNq1x8RnDWwKT3QIL5IdM37mf8OB10Bmd+7/1ROc7pEdFGdG38wqFr/ov4am1R3Pw==

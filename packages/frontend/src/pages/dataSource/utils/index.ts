@@ -62,7 +62,7 @@ async function transformFileDataService (rawData: IRow[]): Promise<{
     }
 }
 
-export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSize: number = 500): Promise<{
+export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSize: number = 500, encoding: string = 'utf-8'): Promise<{
     fields: IMuteFieldBase[];
     dataSource: IRow[]
 }> {
@@ -77,6 +77,7 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
         if (sampleMethod === SampleKey.reservoir) {
             rawData = (await FileReader.csvReader({
               file,
+              encoding,
               config: {
                 type: 'reservoirSampling',
                 size: sampleSize,
@@ -86,6 +87,7 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
         } else {
             rawData = (await FileReader.csvReader({
               file,
+              encoding,
               onLoading: onDataLoading
             })) as IRow[]
         }
