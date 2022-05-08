@@ -1,4 +1,3 @@
-import { ArrowsExpandIcon } from '@heroicons/react/outline';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { Container } from '../components/container';
@@ -50,7 +49,9 @@ const VisualSettings: React.FC<VisualSettinsProps> = props => {
                     value={visualConfig.size.mode}
                     onChange={(e) => {
                         // vizStore.setVisualConfig('geoms', [e.target.value]);
-                        vizStore.setChartLayout(e.target.value as any)
+                        vizStore.setChartLayout({
+                            mode: e.target.value as any
+                        })
                     }}
                 >
                     {CHART_LAYOUT_TYPE.map((g) => (

@@ -29,7 +29,6 @@ const ReactiveRenderer: React.FC = props => {
             commonStore.setFilters(values);
         })
     }, [])
-    console.log(size.width, size.height)
     return <Resizable className={(size.mode === 'fixed' && !hasFacet) ? "border-blue-400 border-2 overflow-hidden" : ""}
     style={{ padding: '12px' }}
     onResizeStop={(e, direction, ref, d) => {

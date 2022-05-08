@@ -195,7 +195,7 @@ export class VizSpecStore {
     }
     public setChartLayout(props: {mode: VisualConfig['size']['mode'], width?: number, height?: number }) {
         const {
-            mode,
+            mode = this.visualConfig.size.mode,
             width = this.visualConfig.size.width,
             height = this.visualConfig.size.height
         } = props
