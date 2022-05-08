@@ -10,11 +10,14 @@ export interface IRow {
 //     disable: boolean;
 // }
 
+export type IGeoRole = 'longitude' | 'latitude' | 'none';
+
 interface IFieldBase {
     fid: string;
     name?: string;
     analyticType: IAnalyticType;
     semanticType: ISemanticType;
+    geoRole: IGeoRole;
 }
 export interface IRawField extends IFieldBase {
     disable?: boolean;
@@ -30,6 +33,7 @@ export interface IMuteFieldBase {
     analyticType: 'dimension' | 'measure' | '?';
     semanticType: 'nominal' | 'temporal' | 'ordinal' | 'quantitative' | '?';
     disable?: boolean | '?';
+    geoRole: IGeoRole | '?';
 }
 
 export interface IFieldMeta extends IFieldBase {

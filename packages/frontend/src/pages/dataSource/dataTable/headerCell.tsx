@@ -73,6 +73,7 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
     const [showNameEditor, setShowNameEditor] = useState<boolean>(false);
     const optionsOfBIFieldType = useBIFieldTypeOptions();
     const buttonId = useId('edit-button');
+    console.log(meta)
     return (
         <HeaderCellContainer>
             <h3 className="header">
@@ -83,6 +84,10 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                         setShowNameEditor(true)
                     }}
                 />
+                {meta && meta.geoRole !== 'none' && 'lalal'}
+                {
+                    meta && meta.geoRole !== 'none' && <IconButton iconProps={{ iconName: 'globe', style: { fontSize: '12px' } }} />
+                }
             </h3>
             {
                 showNameEditor && <Callout

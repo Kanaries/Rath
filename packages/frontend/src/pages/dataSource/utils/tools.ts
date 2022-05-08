@@ -69,7 +69,8 @@ export function transFileData (rawData: IRow[]) {
             name,
             analyticType: '?', //inferAnalyticType(rawData, fid),
             semanticType: '?', //inferSemanticType(rawData, fid),
-            disable: '?'
+            disable: '?',
+            geoRole: '?'
         }
     })
     tmpFields.push({
@@ -77,7 +78,8 @@ export function transFileData (rawData: IRow[]) {
         name: 'Rath Row ID',
         analyticType: 'dimension',
         semanticType: 'ordinal',
-        disable: false
+        disable: false,
+        geoRole: 'none'
     })
     trimValues(rawData, fids)
     const timeFieldKeys = tmpFields.filter(f => f.semanticType === 'temporal').map(f => f.fid);

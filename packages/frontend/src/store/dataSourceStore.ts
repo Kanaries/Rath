@@ -1,4 +1,4 @@
-import { makeAutoObservable, observable, runInAction } from "mobx";
+import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
 import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from } from "rxjs";
 import * as op from 'rxjs/operators'
@@ -79,9 +79,11 @@ export class DataSourceStore {
                 return from(getFieldsSummaryService(dataSource, ableFiledIds)).pipe(
                     op.map(summary => {
                         const analyticTypes = fields.map(f => f.analyticType);
+                        const geoRoles = fields.map(f => f.geoRole);
                         const metas = fieldSummary2fieldMeta({
                             summary,
                             analyticTypes,
+                            geoRoles,
                             semanticTypes: fields.map(f => f.semanticType)
                         });
                         // console.log('metas1', metas, fields)
@@ -297,11 +299,7 @@ export class DataSourceStore {
         return {
             dataSource: cleanedData,
             fields: fieldMetas.map(f => ({
-                name: f.name,
-                analyticType: f.analyticType,
-                semanticType: f.semanticType,
-                disable: f.disable,
-                fid: f.fid
+                ...f
             }))
         }
     }

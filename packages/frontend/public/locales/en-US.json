@@ -95,6 +95,7 @@
         },
         "importData": {
             "buttonName": "Import Data",
+            "load": "Load Data",
             "type": {
                 "file": "File",
                 "restful": "RESTFUL",

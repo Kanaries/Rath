@@ -102,6 +102,7 @@
                 "mysql": "MySQL",
                 "demo": "示例数据"
             },
+            "load": "加载数据",
             "demo": {
                 "available": "可选数据集"
             },

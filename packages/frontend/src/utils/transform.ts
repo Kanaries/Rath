@@ -4,7 +4,7 @@ import { IRow } from "visual-insights"
 import { IAnalyticType, ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces"
 import { inferAnalyticTypeFromSemanticType } from "."
 import { Field } from "../global"
-import { IFieldMeta } from "../interfaces"
+import { IFieldMeta, IGeoRole } from "../interfaces"
 import { FieldSummary } from "../service"
 
 dayjs.extend(customParseFormat);
@@ -29,9 +29,10 @@ export function fieldMeta2fieldSummary(metas: IFieldMeta[]): FieldSummary[] {
 export function fieldSummary2fieldMeta(props: {
     summary: FieldSummary[];
     analyticTypes?: IAnalyticType[];
-    semanticTypes?: (ISemanticType | '?')[]
+    semanticTypes?: (ISemanticType | '?')[];
+    geoRoles?: IGeoRole[];
 }): IFieldMeta[] {
-    const { summary, analyticTypes, semanticTypes } = props;
+    const { summary, analyticTypes, semanticTypes, geoRoles } = props;
     if (typeof analyticTypes === 'undefined') {
         console.warn('You are using analytic types infered from semantic type, it may not be safe.')
     }
@@ -40,8 +41,13 @@ export function fieldSummary2fieldMeta(props: {
         if (semanticTypes && semanticTypes[i] !== '?') {
             sType = semanticTypes[i] as ISemanticType;
         }
+        let geoRole: IGeoRole = 'none';
+        if (geoRoles && geoRoles[i]) {
+            geoRole = geoRoles[i]
+        }
         return {
             fid: s.fieldName,
+            geoRole: geoRole,
             features: {
                 maxEntropy: s.maxEntropy,
                 entropy: s.entropy,

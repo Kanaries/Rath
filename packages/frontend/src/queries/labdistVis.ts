@@ -305,6 +305,7 @@ function autoStat(fields: IFieldMeta[]): {
             fid: '__tmp_stat_id_unique',
             semanticType: 'quantitative',
             analyticType: 'measure',
+            geoRole: 'none',
             features: {
                 entropy: Infinity,
                 maxEntropy: Infinity,
