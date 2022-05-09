@@ -173,7 +173,17 @@ const PatternPage: React.FC = props => {
                 <h2>{intl.get('discovery.main.mainView')}</h2>
                 <div className="vis-container">
                     {pined !== null && <div>
-                        <ReactVega spec={distVis({ pattern: pined })} dataSource={applyFilter(cleanedData, pined.filters)} />
+                        {
+                            vizRecSys === 'lite' && <ReactVega spec={distVis({ pattern: pined })} dataSource={applyFilter(cleanedData, pined.filters)} />
+                        }
+                        {
+                            vizRecSys === 'strict' && <ReactVega 
+                                spec={labDistVis({
+                                    pattern: pined,
+                                    dataSource: cleanedData
+                                })}
+                                dataSource={applyFilter(cleanedData, pined.filters)} />
+                        }
                         <hr />
                         <div className="fields-container">
                         {
