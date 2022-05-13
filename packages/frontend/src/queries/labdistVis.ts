@@ -193,6 +193,55 @@ function isSetEqual(a1: any[], a2: any[]) {
     return true;
 }
 
+/**
+ * 临时方法，暂时需要在encoding去定之后再去调用
+ * @param fields 
+ */
+function autoCoord(fields: IFieldMeta[], spec: {[key: string]: any}, dataSource: IRow[]) {
+    const latField = fields.find(f => f.geoRole === 'latitude');
+    const lonField = fields.find(f => f.geoRole === 'longitude');
+    const hasGeo = Boolean(latField && lonField);
+    if (hasGeo && spec.encoding) {
+        const latChannelKey = Object.keys(spec.encoding).find((c: string) => spec.encoding[c].field === latField!.fid)
+        const lonChannelKey = Object.keys(spec.encoding).find((c: string) => spec.encoding[c].field === lonField!.fid)
+        if (!isSetEqual(['x', 'y'], [latChannelKey, lonChannelKey]))return;
+        latChannelKey && (spec.encoding.latitude = spec.encoding[latChannelKey!]) && (spec.encoding[latChannelKey!] = undefined)
+        lonChannelKey && (spec.encoding.longitude = spec.encoding[lonChannelKey!]) && (spec.encoding[lonChannelKey!] = undefined)
+        // spec.params = [{
+        //     name: "grid",
+        //     select: "interval",
+        //     bind: "scales"
+        // }]
+        spec.layer = [
+            {
+                "data": {
+                // "url": "https://vega.github.io/vega-lite/data/world-110m.json",
+                    url: "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/china/china-provinces.json",
+                    "format": {"type": "topojson", "feature": "CHN_adm1"}
+                },
+                projection: {
+                    type: 'naturalEarth1'
+                },
+                "mark": {"type": "geoshape", "fill": "lightgray", "stroke": "gray"}
+            },
+            {
+                data: { ...spec.data },
+                mark: spec.mark,
+                projection: {
+                    type: 'naturalEarth1'
+                },
+                encoding: {
+                    ...spec.encoding
+                }
+            }
+        ]
+        spec.width = 660
+        // delete spec.data
+        delete spec.mark
+        delete spec.encoding
+    }
+}
+
 function autoMark(fields: IFieldMeta[], statFields: IFieldMeta[] = [], originFields: IFieldMeta[] = [], statEncodes: IFieldEncode[] = []) {
     // const orderFields = [...fields];
     // const orderStatFields = [...statFields];
@@ -461,6 +510,7 @@ export function labDistVis(props: BaseVisProps) {
         },
         encoding: enc
     };
+    autoCoord(fields, basicSpec, dataSource)
     // if (filters && filters.length > 1) {
     //     basicSpec.transform = filters.slice(1).map(f => ({
     //         filter: `datum.${f.field.fid} == '${f.values[0]}'`

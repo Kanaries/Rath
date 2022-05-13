@@ -39,9 +39,13 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     }
   }, [view, signalHandler])
   useEffect(() => {
-    view && view.change('dataSource', vega.changeset().remove(() => true).insert(dataSource))
-    view && view.resize();
-    view && view.runAsync();
+    try {
+      view && view.change('dataSource', vega.changeset().remove(() => true).insert(dataSource))
+      view && view.resize();
+      view && view.runAsync(); 
+    } catch (error) {
+      console.error(error)
+    }
   }, [view, dataSource])
   return <div ref={container} />
 }

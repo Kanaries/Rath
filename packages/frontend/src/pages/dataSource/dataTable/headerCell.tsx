@@ -73,7 +73,6 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
     const [showNameEditor, setShowNameEditor] = useState<boolean>(false);
     const optionsOfBIFieldType = useBIFieldTypeOptions();
     const buttonId = useId('edit-button');
-    console.log(meta)
     return (
         <HeaderCellContainer>
             <h3 className="header">

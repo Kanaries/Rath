@@ -45,7 +45,6 @@ export function inferMeta (props: { dataSource: IRow[]; fields: IMuteFieldBase[]
         let semanticType: ISemanticType = field.semanticType === '?' ? inferSemanticType(dataSource, field.fid) : field.semanticType;
         let geoRole = field.geoRole === '?' ? inferGeoRole(dataSource, field.fid, semanticType, field.name || '') : field.geoRole;
         let analyticType: IAnalyticType = 'dimension';
-        console.log(geoRole, field.name)
         if (geoRole === 'none') {
             analyticType = field.analyticType === '?' ? inferAnalyticType(dataSource, field.fid) : field.analyticType;
         }

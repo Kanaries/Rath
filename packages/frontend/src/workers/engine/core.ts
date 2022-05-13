@@ -157,13 +157,13 @@ class CustomDataGraph extends DataGraph {
     // }
     public clusterMGraph(dataSource: Record[], CORRELATION_THRESHOLD?: number) {
         const { measures, MEASURE_CORRELATION_THRESHOLD } = this;
-        console.log(JSON.stringify(this.MG))
+        // console.log(JSON.stringify(this.MG))
         this.MClusters = getMeaSetsBasedOnClusterGroups(
             this.MG,
             measures,
             CORRELATION_THRESHOLD || MEASURE_CORRELATION_THRESHOLD
         );
-        console.log(this.MClusters)
+        // console.log(this.MClusters)
         return this.MClusters;
     }
     computeMGraph(dataSource: Record[], cc?: CorrelationCoefficient): number[][] {
@@ -185,18 +185,18 @@ class CustomDataGraph extends DataGraph {
                 this.MG[i][maxIndex] = 1;
             }
         }
-        console.log(JSON.stringify(this.MG))
+        // console.log(JSON.stringify(this.MG))
         return this.MG;
     }
     public clusterDGraph(dataSource: Record[], CORRELATION_THRESHOLD?: number) {
         const { dimensions, DIMENSION_CORRELATION_THRESHOLD } = this;
-        console.log(JSON.stringify(this.DG))
+        // console.log(JSON.stringify(this.DG))
         this.DClusters = getDimClusterGroups(
             this.DG,
             dimensions,
             CORRELATION_THRESHOLD || DIMENSION_CORRELATION_THRESHOLD
         );
-        console.log(this.DClusters)
+        // console.log(this.DClusters)
         return this.DClusters;
     }
     computeDGraph(dataSource: Record[], cc?: CorrelationCoefficient): number[][] {
@@ -218,7 +218,7 @@ class CustomDataGraph extends DataGraph {
                 this.DG[i][maxIndex] = 1;
             }
         }
-        console.log(JSON.stringify(this.DG))
+        // console.log(JSON.stringify(this.DG))
         return this.DG;
     }
 }
@@ -428,8 +428,8 @@ export class RathEngine extends VIEngine {
         }
     }
     public async exploreViews(viewSpaces: ViewSpace[] = this.subSpaces): Promise<IInsightSpace[]> {
-        console.log(JSON.stringify(this.dimensions), JSON.stringify(this.dataGraph.DG), JSON.stringify(this.dataGraph.DClusters), JSON.stringify(this.dataGraph.dimensions))
-        console.log(this.dataGraph.dimensions.map(d => this.fields.find(f => f.key === d)!.name))
+        // console.log(JSON.stringify(this.dimensions), JSON.stringify(this.dataGraph.DG), JSON.stringify(this.dataGraph.DClusters), JSON.stringify(this.dataGraph.dimensions))
+        // console.log(this.dataGraph.dimensions.map(d => this.fields.find(f => f.key === d)!.name))
         const context = this;
         const DEFAULT_BIN_NUM = 16;
         const { measures: globalMeasures, fieldDictonary } = context

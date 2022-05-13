@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { IField, IRow } from '../interfaces';
+import { IViewField, IRow } from '../interfaces';
 import embed from 'vega-embed';
 import { Subject } from 'rxjs'
 import * as op from 'rxjs/operators';
@@ -9,23 +9,24 @@ import { ISemanticType } from 'visual-insights';
 
 const SELECTION_NAME = 'geom';
 interface ReactVegaProps {
-  rows: IField[];
-  columns: IField[];
+  rows: IViewField[];
+  columns: IViewField[];
   dataSource: IRow[];
   defaultAggregate?: boolean;
   defaultStack?: boolean;
   interactiveScale: boolean;
   geomType: string;
-  color?: IField;
-  opacity?: IField;
-  size?: IField;
+  color?: IViewField;
+  opacity?: IViewField;
+  size?: IViewField;
   showActions: boolean;
   layoutMode: string;
   width: number;
   height: number;
   onGeomClick?: (values: any, e: any) => void
 }
-const NULL_FIELD: IField = {
+const NULL_FIELD: IViewField = {
+  dragId: '',
   fid: '',
   name: '',
   semanticType: 'quantitative',
@@ -43,19 +44,19 @@ const geomClick$ = selection$.pipe(
     return false
   })
 );
-function getFieldType(field: IField): 'quantitative' | 'nominal' | 'ordinal' | 'temporal' {
+function getFieldType(field: IViewField): 'quantitative' | 'nominal' | 'ordinal' | 'temporal' {
   return field.semanticType
 }
 interface SingleViewProps {
-  x: IField;
-  y: IField;
-  color: IField;
-  opacity: IField;
-  size: IField;
-  xOffset: IField;
-  yOffset: IField;
-  row: IField;
-  column: IField;
+  x: IViewField;
+  y: IViewField;
+  color: IViewField;
+  opacity: IViewField;
+  size: IViewField;
+  xOffset: IViewField;
+  yOffset: IViewField;
+  row: IViewField;
+  column: IViewField;
   defaultAggregated: boolean;
   defaultStack: boolean;
   geomType: string;
@@ -72,9 +73,25 @@ function channelEncode(props: Pick<SingleViewProps, 'column' | 'opacity' | 'colo
       }
     }
   })
+  // FIXME: 临时处理逻辑，只处理xy排序
+  if (encoding.x && encoding.y) {
+    if ((props.x.sort && props.x.sort) || (props.y && props.y.sort)) {
+      if (props.x.sort !== 'none' && (props.y.sort === 'none' || !Boolean(props.y.sort)))  {
+        encoding.x.sort = {
+          encoding: 'y',
+          order: props.x.sort
+        }
+      } else if (props.y.sort && props.y.sort !== 'none' && (props.x.sort === 'none' || !Boolean(props.x.sort)))  {
+        encoding.y.sort = {
+          encoding: 'x',
+          order: props.y.sort
+        }
+      }
+    }
+  }
   return encoding
 }
-function channelAggregate(encoding: {[key: string]: any}, fields: IField[]) {
+function channelAggregate(encoding: {[key: string]: any}, fields: IViewField[]) {
   Object.values(encoding).forEach(c => {
     const targetField = fields.find(f => f.fid === c.field);
     if (targetField && targetField.analyticType === 'measure') {
@@ -112,7 +129,7 @@ function getSingleView(props: SingleViewProps) {
     defaultStack,
     geomType
   } = props
-  const fields: IField[] = [x, y, color, opacity, size, row, column, xOffset, yOffset]
+  const fields: IViewField[] = [x, y, color, opacity, size, row, column, xOffset, yOffset]
   let markType = geomType;
   if (geomType === 'auto') {
     const types: ISemanticType[] = [];
@@ -177,7 +194,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
   const colFacetFields = useMemo(() => colDims.slice(0, -1), [colDims]);
   const rowRepeatFields = useMemo(() => rowMeas.length === 0 ? rowDims.slice(-1) : rowMeas, [rowDims, rowMeas]);//rowMeas.slice(0, -1);
   const colRepeatFields = useMemo(() => colMeas.length === 0 ? colDims.slice(-1) : colMeas, [rowDims, rowMeas]);//colMeas.slice(0, -1);
-  const allFieldIds = useMemo(() => [...rows, ...columns, color, opacity, size].filter(f => Boolean(f)).map(f => (f as IField).fid), [rows, columns, color, opacity, size]);
+  const allFieldIds = useMemo(() => [...rows, ...columns, color, opacity, size].filter(f => Boolean(f)).map(f => (f as IViewField).fid), [rows, columns, color, opacity, size]);
 
 
   useEffect(() => {
@@ -247,7 +264,6 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       spec.mark = singleView.mark;
       spec.encoding = singleView.encoding;
       if (viewPlaceholders.length > 0 && viewPlaceholders[0].current) {
-        console.log(spec)
         embed(viewPlaceholders[0].current, spec, { mode: 'vega-lite', actions: showActions }).then(res => {
           try {
             res.view.addEventListener('click', (e) => {
@@ -285,7 +301,6 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
           });
           const node = i * colRepeatFields.length + j < viewPlaceholders.length ? viewPlaceholders[i * colRepeatFields.length + j].current : null
           const ans = { ...spec, ...singleView }
-          console.log(ans)
           if (node) {
             embed(node, ans, { mode: 'vega-lite', actions: showActions }).then(res => {
               try {

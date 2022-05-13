@@ -1,3 +1,4 @@
+import { SortAscendingIcon, SortDescendingIcon } from '@heroicons/react/outline';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { Container } from '../components/container';
@@ -11,7 +12,7 @@ interface VisualSettinsProps {
 }
 const VisualSettings: React.FC<VisualSettinsProps> = props => {
     const { vizStore } = useGlobalStore();
-    const { visualConfig } = vizStore;
+    const { visualConfig, sortCondition } = vizStore;
     return <Container>
         <LiteForm style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
             <div className="item">
@@ -91,6 +92,15 @@ const VisualSettings: React.FC<VisualSettinsProps> = props => {
                     vizStore.setVisualConfig('showActions', e.target.checked);
                 }} />
                 <label className="text-xs text-color-gray-700 ml-2">图表调试</label>
+            </div>
+            <div className="item">
+                <label className="text-xs text-color-gray-700 mr-2">排序</label>
+                <SortAscendingIcon className={`w-4 inline-block mr-1 ${!sortCondition ? 'text-gray-300 cursor-not-allowed' : 'cursor-pointer'}`} onClick={() => {
+                    vizStore.applyDefaultSort('ascending')
+                }} />
+                <SortDescendingIcon className={`w-4 inline-block mr-1 ${!sortCondition ? 'text-gray-300 cursor-not-allowed' : 'cursor-pointer'}`} onClick={() => {
+                    vizStore.applyDefaultSort('descending');
+                }} />
             </div>
         </LiteForm>
     </Container>

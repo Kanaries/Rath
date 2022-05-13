@@ -8,10 +8,11 @@ import { makeBinField } from "../utils/normalization";
 
 interface VisualConfig {
     defaultAggregated: boolean;
-    geoms: string[];        
+    geoms:  string[];        
     defaultStack: boolean;
     showActions: boolean;
     interactiveScale: boolean;
+    sorted: 'none' | 'ascending' | 'descending';
     size: {
         mode: 'auto' | 'fixed';
         width: number;
@@ -84,6 +85,7 @@ export class VizSpecStore {
         defaultStack: true,
         showActions: false,
         interactiveScale: false,
+        sorted: 'none',
         size: {
             mode: 'auto',
             width: 320,
@@ -191,7 +193,18 @@ export class VizSpecStore {
         }
     }
     public setVisualConfig (configKey: keyof VisualConfig, value: any) {
-        this.visualConfig[configKey] = value;
+        // this.visualConfig[configKey] = //value;
+        if (configKey === 'defaultAggregated' || configKey === 'defaultStack' || configKey === 'showActions' || configKey === 'interactiveScale') {
+            this.visualConfig[configKey] = Boolean(value);
+        } else if (configKey === 'geoms' && value instanceof Array) {
+            this.visualConfig[configKey] = value;
+        } else if (configKey === 'size' && value instanceof Object) {
+            this.visualConfig[configKey] = value;
+        } else if (configKey === 'sorted') {
+            this.visualConfig[configKey] = value;
+        } else {
+            console.error('unknow key' + configKey)
+        }
     }
     public setChartLayout(props: {mode: VisualConfig['size']['mode'], width?: number, height?: number }) {
         const {
@@ -251,6 +264,35 @@ export class VizSpecStore {
         const fields = this.draggableFieldState[stateKey]
         if (fields[index]) {
             fields[index].aggName = aggName;
+        }
+    }
+    public get sortCondition () {
+        const { rows, columns } = this.draggableFieldState;
+        const yField = rows.length > 0 ? rows[rows.length - 1] : null;
+        const xField = columns.length > 0 ? columns[columns.length - 1] : null;
+        if (xField !== null && xField.analyticType === 'dimension' && yField !== null && yField.analyticType === 'measure') {
+            return true
+        }
+        if (xField !== null && xField.analyticType === 'measure' && yField !== null && yField.analyticType === 'dimension') {
+            return true
+        }
+        return false;
+    }
+    public setFieldSort (stateKey: keyof DraggableFieldState, index: number, sortType: 'none' | 'ascending' | 'descending') {
+        this.draggableFieldState[stateKey][index].sort = sortType;
+    }
+    public applyDefaultSort(sortType: 'none' | 'ascending' | 'descending' = 'ascending') {
+        const { rows, columns } = this.draggableFieldState;
+        const yField = rows.length > 0 ? rows[rows.length - 1] : null;
+        const xField = columns.length > 0 ? columns[columns.length - 1] : null;
+
+        if (xField !== null && xField.analyticType === 'dimension' && yField !== null && yField.analyticType === 'measure') {
+            xField.sort = sortType
+            return
+        }
+        if (xField !== null && xField.analyticType === 'measure' && yField !== null && yField.analyticType === 'dimension') {
+            yField.sort = sortType
+            return
         }
     }
     public appendField (destinationKey: keyof DraggableFieldState, field: IViewField | undefined) {

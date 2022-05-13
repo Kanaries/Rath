@@ -1,4 +1,4 @@
-import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
+import { makeAutoObservable, observable, runInAction } from "mobx";
 import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from } from "rxjs";
 import * as op from 'rxjs/operators'
@@ -213,7 +213,8 @@ export class DataSourceStore {
                     else {
                         record[field.fid] = row[field.fid]
                     }
-                } else {
+                }
+                if (field.semanticType === 'quantitative') {
                     record[field.fid] = Transform.transNumber(row[field.fid]);
                 }
             });
