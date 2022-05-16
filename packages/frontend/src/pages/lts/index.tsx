@@ -37,14 +37,15 @@ const InsightContainer = styled.div`
     .flex-container{
         display: flex;
         .insight-viz{
-            flex-grow: 1;
+            flex-grow: 0;
+            flex-shrink: 0;
             /* flex-basis: 400px; */
-            min-width: 500px;
+            /* min-width: 500px; */
             /* flex-shrink: 2; */
             overflow: auto;
         }
         .insight-info{
-            flex-grow: 2;
+            flex-grow: 1;
             flex-shrink: 1;
             flex-wrap: wrap;
             padding: 0em 1em;
@@ -178,6 +179,9 @@ const LTSPage: React.FC = props => {
                                     stepSize={32}
                                     zoom={visualConfig.zoom}
                                     debug={visualConfig.debug}
+                                    sizeMode={visualConfig.resize === 'none' ? 'auto' : 'control'}
+                                    width={visualConfig.resizeConfig.width}
+                                    height={visualConfig.resizeConfig.height}
                                 />
                             </VisErrorBoundary>
                         </div>}

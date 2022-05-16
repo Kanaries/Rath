@@ -25,6 +25,7 @@ const VizOperation: React.FC = props => {
             <ConstraintsPanel />
             {
                 forkViewSpec && <BaseChart
+                    sizeMode='auto'
                     defaultAggregated={visualConfig.defaultAggregated}
                     defaultStack={visualConfig.defaultStack}
                     dimensions={forkView.dimensions}

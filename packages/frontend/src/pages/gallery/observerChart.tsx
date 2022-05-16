@@ -29,6 +29,7 @@ const ObserverChart: React.FC = () => {
 
     return (
         <BaseChart
+            sizeMode="auto"
             aggregator={aggregator}
             defaultAggregated={defaultAggregated}
             defaultStack={defaultStack}

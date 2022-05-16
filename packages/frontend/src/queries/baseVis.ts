@@ -1,6 +1,7 @@
 import { ISemanticType } from "visual-insights";
 import { Specification } from "visual-insights/build/esm/commonTypes";
 import { IFieldMeta, IRow } from "../interfaces";
+import { applySizeConfig } from "./base/utils";
 export const geomTypeMap: { [key: string]: any } = {
   interval: "tick",
   // interval: 'boxplot',
@@ -22,6 +23,9 @@ interface BaseVisProps {
   stepSize?: number;
   viewSize?: number;
   zoom: boolean;
+  sizeMode?: 'auto' | 'control';
+  width?: number,
+  height?: number
 }
 
 export function baseVis(props: BaseVisProps) {
@@ -35,8 +39,10 @@ export function baseVis(props: BaseVisProps) {
     defaultAggregated,
     defaultStack,
     stepSize,
-    viewSize,
-    zoom
+    // viewSize,
+    width, height,
+    zoom,
+    sizeMode = 'auto'
   } = props;
   const {
     position = [],
@@ -110,19 +116,6 @@ export function baseVis(props: BaseVisProps) {
     encoding: {}
   };
 
-  if (typeof stepSize === 'number' && typeof viewSize === 'number') {
-    const xFieldType = getFieldSemanticType(fieldMap['x']);
-    const yFieldType = getFieldSemanticType(fieldMap['y']);
-    if (fieldMap['x']) {
-      spec.width = (xFieldType === 'quantitative' || xFieldType === 'temporal') ? viewSize : { step: stepSize };
-      basicSpec.width = spec.width;
-    }
-    if (fieldMap['y']) {
-      spec.height = (yFieldType === 'quantitative' || xFieldType === 'temporal') ? viewSize : { step: stepSize };
-      basicSpec.height = spec.height
-    }
-  }
-
   for (let channel in fieldMap) {
     if (fieldMap[channel]) {
       basicSpec.encoding[channel] = {
@@ -139,6 +132,12 @@ export function baseVis(props: BaseVisProps) {
       }
     }
   }
+  applySizeConfig(basicSpec, {
+    mode: sizeMode,
+    width,
+    height,
+    stepSize
+  })
   if (position.length === 1) {
     if (basicSpec.encoding.x) {
       basicSpec.encoding.x.bin = true;

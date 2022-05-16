@@ -45,6 +45,7 @@ const AssociationCharts: React.FC<AssociationProps> = props => {
                         >
                             <VisErrorBoundary>
                                 <BaseChart
+                                    sizeMode="auto"
                                     aggregator={visualConfig.aggregator}
                                     defaultAggregated={false}
                                     defaultStack={visualConfig.defaultStack}
