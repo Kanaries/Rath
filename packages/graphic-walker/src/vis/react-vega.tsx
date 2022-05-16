@@ -6,6 +6,13 @@ import * as op from 'rxjs/operators';
 import { ScenegraphEvent } from 'vega';
 import { autoMark } from '../utils/autoMark';
 import { ISemanticType } from 'visual-insights';
+import styled from 'styled-components';
+
+const CanvaContainer = styled.div<{rowSize: number; colSize: number;}>`
+  display: grid;
+  grid-template-columns: repeat(${props => props.colSize}, 1fr);
+  grid-template-rows: repeat(${props => props.rowSize}, 1fr);
+`
 
 const SELECTION_NAME = 'geom';
 interface ReactVegaProps {
@@ -341,17 +348,13 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     width,
     height
   ]);
-  useEffect(() => {
-    if (layoutMode === 'fixed') {
-      
-    }
-  }, [layoutMode])
-  return <div>
+
+  return <CanvaContainer rowSize={Math.max(rowRepeatFields.length, 1)} colSize={Math.max(colRepeatFields.length, 1)}>
     {/* <div ref={container}></div> */}
     {
       viewPlaceholders.map((view, i) => <div key={i} ref={view}></div>)
     }
-  </div>
+  </CanvaContainer>
 }
 
 export default ReactVega;
