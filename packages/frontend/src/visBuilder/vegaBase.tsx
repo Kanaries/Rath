@@ -36,7 +36,9 @@ export interface BaseChartProps {
   schema: Specification;
   viewSize?: number;
   stepSize?: number;
-  mode?: 'dist' | 'common'
+  mode?: 'dist' | 'common',
+  zoom?: boolean;
+  debug?: boolean;
 }
 
 const BaseChart: React.FC<BaseChartProps> = (props) => {
@@ -51,7 +53,9 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
     fieldFeatures = [],
     viewSize,
     stepSize,
-    mode = 'dist'
+    mode = 'dist',
+    zoom = false,
+    debug = false
   } = props;
 
   const container = useRef<HTMLDivElement>(null);
@@ -89,19 +93,21 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
           defaultAggregated,
           defaultStack,
           viewSize,
-          stepSize
+          stepSize,
+          zoom
         }
         let spec = mode === 'dist' ? baseVis(params) : commonVis(params);
         globalRef.baseVisSpec = spec;
         embed(container.current, spec, {
           mode: 'vega-lite',
-          editorUrl: EDITOR_URL
+          editorUrl: EDITOR_URL,
+          actions: debug
         }).catch(err => {
           console.error('[VIS ERROR]', err)
         })
       }
     }
-  }, [schema, table, dimensions, measures, aggregatedMeasures, fieldFeatures, defaultAggregated, defaultStack, viewSize, stepSize, mode])
+  }, [schema, table, dimensions, measures, aggregatedMeasures, fieldFeatures, defaultAggregated, defaultStack, viewSize, stepSize, mode, zoom, debug])
   return <div ref={container}></div>
 }
 

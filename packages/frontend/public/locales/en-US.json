@@ -254,6 +254,15 @@
             "default": "Default",
             "field_num": "Field Number",
             "cardinality": "Cardinality"
+        },
+        "operation": {
+            "debug": "debug",
+            "zoom": "interactive",
+            "resize": "resize mode",
+            "resizeMode": {
+                "resizable": "resizable",
+                "none": "none"
+            }
         }
     },
     "discovery": {

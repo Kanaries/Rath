@@ -20,7 +20,8 @@ interface BaseVisProps {
   defaultAggregated?: boolean;
   defaultStack?: boolean;
   stepSize?: number;
-  viewSize?: number
+  viewSize?: number;
+  zoom: boolean;
 }
 
 export function baseVis(props: BaseVisProps) {
@@ -34,7 +35,8 @@ export function baseVis(props: BaseVisProps) {
     defaultAggregated,
     defaultStack,
     stepSize,
-    viewSize
+    viewSize,
+    zoom
   } = props;
   const {
     position = [],
@@ -196,6 +198,12 @@ export function baseVis(props: BaseVisProps) {
       };
     // }
   }
-  
+  if (zoom) {
+    spec.params = [{
+      name: 'grid',
+      select: 'interval',
+      bind: 'scales'
+    }]
+  }
   return spec;
 }

@@ -59,6 +59,13 @@ export interface PreferencePanelConfig {
     aggregator: Aggregator;
     defaultAggregated: boolean;
     defaultStack: boolean;
+    zoom: boolean;
+    resize: 'none' | 'resizable';
+    debug: boolean;
+    resizeConfig: {
+        width: number;
+        height: number;
+    },
     visMode: 'common' | 'dist'
 }
 export interface IDBFieldMeta {

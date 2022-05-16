@@ -255,6 +255,15 @@
             "default": "默认",
             "field_num": "字段数",
             "cardinality": "字段总基数"
+        },
+        "operation": {
+            "debug": "开启调试",
+            "zoom": "允许交互",
+            "resize": "自定义尺寸",
+            "resizeMode": {
+                "resizable": "可控尺寸",
+                "none": "自适应"
+            }
         }
     },
     "discovery": {
