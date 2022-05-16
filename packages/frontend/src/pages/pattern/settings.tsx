@@ -3,6 +3,7 @@ import { ChoiceGroup, IChoiceGroupOption, Panel } from 'office-ui-fabric-react';
 import React, { useMemo } from 'react';
 import { useGlobalStore } from '../../store';
 import intl from 'react-intl-universal';
+import OperationBar from './operationBar';
 
 const PatternSetting: React.FC = () => {
     const { discoveryMainStore } = useGlobalStore();
@@ -30,6 +31,8 @@ const PatternSetting: React.FC = () => {
             selectedKey={vizAlgo}
             options={options}
         />
+        <hr />
+        <OperationBar />
     </Panel>
 }
 

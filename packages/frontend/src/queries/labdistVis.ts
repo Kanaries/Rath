@@ -4,8 +4,9 @@
 import { entropy } from "visual-insights/build/esm/statistics";
 import { IPattern } from "../dev";
 import { bin, binMap, mic, pureGeneralMic, rangeNormilize } from "../dev/utils";
-import { IFieldMeta, IRow } from "../interfaces";
+import { IFieldMeta, IResizeMode, IRow } from "../interfaces";
 import { deepcopy } from "../utils";
+import { applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
 export const geomTypeMap: { [key: string]: any } = {
     interval: "boxplot",
     line: "line",
@@ -34,7 +35,11 @@ const highOrderChannels = {
 
 interface BaseVisProps {
     dataSource: IRow[];
-    pattern: IPattern
+    pattern: IPattern;
+    interactive?: boolean;
+    resizeMode?: IResizeMode;
+    width?: number;
+    height?: number;
 }
 function humanHabbit(encoding: any) {
     if (encoding.x && encoding.x.type !== 'temporal') {
@@ -404,7 +409,7 @@ function autoStat(fields: IFieldMeta[]): {
 }
 
 export function labDistVis(props: BaseVisProps) {
-    const { pattern, dataSource } = props;
+    const { pattern, dataSource, width, height, interactive, resizeMode = IResizeMode.auto } = props;
     const fields = deepcopy(pattern.fields) as IFieldMeta[];
     const measures = fields.filter(f => f.analyticType === 'measure');
     const dimensions = fields.filter(f => f.analyticType === 'dimension');
@@ -511,6 +516,14 @@ export function labDistVis(props: BaseVisProps) {
         encoding: enc
     };
     autoCoord(fields, basicSpec, dataSource)
+    applySizeConfig2DistViz(basicSpec, {
+        mode: resizeMode,
+        width,
+        height
+    })
+    if (interactive) {
+        applyInteractiveParams2DistViz(basicSpec);
+    }
     // if (filters && filters.length > 1) {
     //     basicSpec.transform = filters.slice(1).map(f => ({
     //         filter: `datum.${f.field.fid} == '${f.values[0]}'`

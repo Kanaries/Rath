@@ -2,7 +2,8 @@
  * distVis 是分布式可视化的推荐，是比较新的模块，目前暂时用于dev模块，即voyager模式下的测试。
  */
 import { IPattern } from "../dev";
-import { IFieldMeta } from "../interfaces";
+import { IFieldMeta, IResizeMode } from "../interfaces";
+import { applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
 export const geomTypeMap: { [key: string]: any } = {
     interval: "boxplot",
     line: "line",
@@ -31,7 +32,11 @@ const highOrderChannels = {
 
 interface BaseVisProps {
     // dataSource: DataSource;
-    pattern: IPattern
+    pattern: IPattern;
+    interactive?: boolean;
+    resizeMode?: IResizeMode;
+    width?: number;
+    height?: number;
 }
 function humanHabbit (encoding: any) {
     if (encoding.x && encoding.x.type !== 'temporal') {
@@ -338,7 +343,7 @@ function autoStat (fields: IFieldMeta[]): {
 }
 
 export function distVis(props: BaseVisProps) {
-    const { pattern } = props;
+    const { pattern, resizeMode = IResizeMode.auto, width, height, interactive } = props;
     const { fields } = pattern;
     const usedChannels: Set<string> = new Set();
     const { statFields, distFields, statEncodes } = autoStat(fields);
@@ -384,6 +389,14 @@ export function distVis(props: BaseVisProps) {
         },
         encoding: enc
     };
+    applySizeConfig2DistViz(basicSpec, {
+        mode: resizeMode,
+        width,
+        height
+    })
+    if (interactive) {
+        applyInteractiveParams2DistViz(basicSpec);
+    }
     // if (filters && filters.length > 1) {
     //     basicSpec.transform = filters.slice(1).map(f => ({
     //         filter: `datum.${f.field.fid} == '${f.values[0]}'`

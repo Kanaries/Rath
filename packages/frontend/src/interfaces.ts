@@ -95,3 +95,8 @@ export enum ITaskTestMode {
     local = 'local',
     server = 'server'
 }
+
+export enum IResizeMode {
+    auto = 'auto',
+    control = 'control'
+}

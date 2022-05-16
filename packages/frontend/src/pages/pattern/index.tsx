@@ -32,6 +32,7 @@ const PatternPage: React.FC = props => {
     const [pined, setPined] = useState<IPattern | null>(null);
     const [renderAmount, setRenderAmount] = useState<number>(RENDER_BATCH_SIZE);
     const [mergeView, setMergeView] = useState<IPattern | null>(null);
+    const { mainVizSetting } = discoveryMainStore;
 
     useEffect(() => {
         // core.init(cleanedData, fieldMetas)
@@ -174,10 +175,21 @@ const PatternPage: React.FC = props => {
                 <div className="vis-container">
                     {pined !== null && <div>
                         {
-                            vizRecSys === 'lite' && <ReactVega spec={distVis({ pattern: pined })} dataSource={applyFilter(cleanedData, pined.filters)} />
+                            vizRecSys === 'lite' && <ReactVega
+                                actions={mainVizSetting.debug}
+                                spec={distVis({
+                                    resizeMode: mainVizSetting.resize.mode,
+                                    width: mainVizSetting.resize.width,
+                                    height: mainVizSetting.resize.height,
+                                    pattern: pined,
+                                    interactive: mainVizSetting.interactive
+                                })}
+                                dataSource={applyFilter(cleanedData, pined.filters)}
+                            />
                         }
                         {
-                            vizRecSys === 'strict' && <ReactVega 
+                            vizRecSys === 'strict' && <ReactVega
+                                actions={mainVizSetting.debug}
                                 spec={labDistVis({
                                     pattern: pined,
                                     dataSource: cleanedData
@@ -210,13 +222,26 @@ const PatternPage: React.FC = props => {
                     </div>}
                     {mergeView !== null && <div>
                         {
-                            vizRecSys === 'lite' && <ReactVega spec={distVis({ pattern: mergeView })} dataSource={applyFilter(cleanedData, mergeView.filters)} />
+                            vizRecSys === 'lite' && <ReactVega
+                                actions={mainVizSetting.debug}
+                                spec={distVis({
+                                    pattern: mergeView,
+                                    resizeMode: mainVizSetting.resize.mode,
+                                    width: mainVizSetting.resize.width,
+                                    height: mainVizSetting.resize.height,
+                                })}
+                                dataSource={applyFilter(cleanedData, mergeView.filters)}
+                            />
                         }
                         {
-                            vizRecSys === 'strict' && <ReactVega spec={labDistVis({
-                                pattern: mergeView,
-                                dataSource: cleanedData
-                            })} dataSource={applyFilter(cleanedData, mergeView.filters)} />
+                            vizRecSys === 'strict' && <ReactVega
+                                actions={mainVizSetting.debug}
+                                spec={labDistVis({
+                                    pattern: mergeView,
+                                    dataSource: cleanedData
+                                })}
+                                dataSource={applyFilter(cleanedData, mergeView.filters)}
+                            />
                         }
                     </div>}
                 </div>
@@ -264,13 +289,21 @@ const PatternPage: React.FC = props => {
                         </Stack>
                         <div className="chart-container">
                             {
-                                vizRecSys === 'lite' && <ReactVega spec={spec} dataSource={applyFilter(cleanedData, views[i].filters)} />
+                                vizRecSys === 'lite' && <ReactVega
+                                    actions={mainVizSetting.debug}
+                                    spec={spec}
+                                    dataSource={applyFilter(cleanedData, views[i].filters)}
+                                />
                             }
                             {
-                                vizRecSys === 'strict' && <ReactVega spec={labDistVis({
-                                    dataSource: cleanedData,
-                                    pattern: views[i]
-                                })} dataSource={applyFilter(cleanedData, views[i].filters)} />
+                                vizRecSys === 'strict' && <ReactVega
+                                    actions={mainVizSetting.debug}
+                                    spec={labDistVis({
+                                        dataSource: cleanedData,
+                                        pattern: views[i]
+                                    })}
+                                    dataSource={applyFilter(cleanedData, views[i].filters)}
+                                />
                             }
                         </div>
                         {
