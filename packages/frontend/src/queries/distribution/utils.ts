@@ -12,6 +12,9 @@ export function applySizeConfig2DistViz(spec: any, cnf: IDistVizSizeConfig): any
     if (mode === 'control') {
         spec.width = width
         spec.height = height;
+        if (!spec.encoding.row && !spec.encoding.column) {
+            spec.autosize = 'fit';
+        }
     }
     return spec;
 }

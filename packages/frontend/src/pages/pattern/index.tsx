@@ -4,15 +4,16 @@ import { IFilter, IPattern } from '../../dev';
 import { useGlobalStore } from '../../store';
 import { distVis } from '../../queries/distVis'
 import ReactVega from '../../components/react-vega';
-import { DefaultButton, Stack, IconButton, PrimaryButton } from 'office-ui-fabric-react';
+import { DefaultButton, Stack, IconButton, PrimaryButton, ActionButton } from 'office-ui-fabric-react';
 import { AssoContainer, MainViewContainer } from './components';
 import ViewField from '../lts/vizOperation/viewField';
-import { IFieldMeta, IRow } from '../../interfaces';
+import { IFieldMeta, IResizeMode, IRow } from '../../interfaces';
 import { footmanEngineService } from '../../service';
 import Settings from './settings';
 import { labDistVis } from '../../queries/labdistVis';
 import { notify } from '../../components/error';
 import intl from 'react-intl-universal';
+import MainCanvas from './mainCanvas';
 
 const BUTTON_STYLE = { marginRight: '1em' }
 
@@ -157,19 +158,16 @@ const PatternPage: React.FC = props => {
     }, [pined, assViews])
 
     const vizRecSys = discoveryMainStore.settings.vizAlgo;
-    const mainViewData = useMemo<IRow[]>(() => {
-        if (pined) return applyFilter(cleanedData, pined.filters)
-        return []
-    }, [cleanedData, pined])
 
     return <div className="content-container">
         <Settings />
         <div className="card">
-            <IconButton
+            <ActionButton
                 style={{ float: 'right' }}
                 iconProps={{ iconName: 'Settings' }}
                 ariaLabel="settings"
                 title="settings"
+                text="settings"
                 onClick={() => {
                     discoveryMainStore.setShowSettings(true);
                 }}
@@ -177,53 +175,12 @@ const PatternPage: React.FC = props => {
             <MainViewContainer>
                 <h2>{intl.get('discovery.main.mainView')}</h2>
                 <div className="vis-container">
-                    {pined !== null && <div>
+                    <div>
                         {
-                            vizRecSys === 'lite' && <ReactVega
-                                actions={mainVizSetting.debug}
-                                spec={distVis({
-                                    resizeMode: mainVizSetting.resize.mode,
-                                    width: mainVizSetting.resize.width,
-                                    height: mainVizSetting.resize.height,
-                                    pattern: pined,
-                                    interactive: mainVizSetting.interactive
-                                })}
-                                dataSource={mainViewData}
-                            />
+                            pined !== null && <MainCanvas pined={pined} />
                         }
-                        {
-                            vizRecSys === 'strict' && <ReactVega
-                                actions={mainVizSetting.debug}
-                                spec={labDistVis({
-                                    pattern: pined,
-                                    dataSource: cleanedData
-                                })}
-                                dataSource={mainViewData} />
-                        }
-                        <hr />
-                        <div className="fields-container">
-                        {
-                            pined.fields.map((f: IFieldMeta) => <ViewField
-                                key={f.fid}
-                                type={f.analyticType}
-                                text={f.name || f.fid}
-                                onRemove={() => { removeFromPined(f.fid) }}
-                            />)
-                        }
-                        </div>
-                        <div className="fields-container">
-                        {
-                            pined.filters && pined.filters.map(f => <ViewField
-                                key={f.field.fid}
-                                type={f.field.analyticType}
-                                text={`${f.field.name || f.field.fid} | ${f.values.join(',')}`}
-                                onRemove={() => {
-                                    removePinedFilter(f.field)
-                                }}
-                            />)
-                        }
-                        </div>
-                    </div>}
+                    </div>
+                    
                     {mergeView !== null && <div>
                         {
                             vizRecSys === 'lite' && <ReactVega
@@ -248,6 +205,29 @@ const PatternPage: React.FC = props => {
                             />
                         }
                     </div>}
+
+                </div>
+                <div className="fields-container">
+                {
+                    pined && pined.fields.map((f: IFieldMeta) => <ViewField
+                        key={f.fid}
+                        type={f.analyticType}
+                        text={f.name || f.fid}
+                        onRemove={() => { removeFromPined(f.fid) }}
+                    />)
+                }
+                </div>
+                <div className="fields-container">
+                {
+                    pined &&  pined.filters && pined.filters.map(f => <ViewField
+                        key={f.field.fid}
+                        type={f.field.analyticType}
+                        text={`${f.field.name || f.field.fid} | ${f.values.join(',')}`}
+                        onRemove={() => {
+                            removePinedFilter(f.field)
+                        }}
+                    />)
+                }
                 </div>
                 <div className="action-buttons">
                     <DefaultButton style={BUTTON_STYLE}
@@ -288,6 +268,9 @@ const PatternPage: React.FC = props => {
                                 title={intl.get('discovery.main.compare')}
                                 onClick={() => {
                                     setMergeView(views[i])
+                                    discoveryMainStore.updateMainVizSettings(s => {
+                                        s.resize.mode = IResizeMode.auto
+                                    })
                                 }}
                             />
                         </Stack>
