@@ -157,6 +157,10 @@ const PatternPage: React.FC = props => {
     }, [pined, assViews])
 
     const vizRecSys = discoveryMainStore.settings.vizAlgo;
+    const mainViewData = useMemo<IRow[]>(() => {
+        if (pined) return applyFilter(cleanedData, pined.filters)
+        return []
+    }, [cleanedData, pined])
 
     return <div className="content-container">
         <Settings />
@@ -184,7 +188,7 @@ const PatternPage: React.FC = props => {
                                     pattern: pined,
                                     interactive: mainVizSetting.interactive
                                 })}
-                                dataSource={applyFilter(cleanedData, pined.filters)}
+                                dataSource={mainViewData}
                             />
                         }
                         {
@@ -194,7 +198,7 @@ const PatternPage: React.FC = props => {
                                     pattern: pined,
                                     dataSource: cleanedData
                                 })}
-                                dataSource={applyFilter(cleanedData, pined.filters)} />
+                                dataSource={mainViewData} />
                         }
                         <hr />
                         <div className="fields-container">
