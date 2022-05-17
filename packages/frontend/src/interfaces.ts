@@ -60,7 +60,7 @@ export interface PreferencePanelConfig {
     defaultAggregated: boolean;
     defaultStack: boolean;
     zoom: boolean;
-    resize: 'none' | 'resizable';
+    resize: IResizeMode;
     debug: boolean;
     resizeConfig: {
         width: number;

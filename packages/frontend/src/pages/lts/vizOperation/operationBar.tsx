@@ -4,6 +4,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { PIVOT_KEYS } from '../../../constants';
 import { useGlobalStore } from '../../../store';
 import intl from 'react-intl-universal';
+import { IResizeMode } from '../../../interfaces';
 
 interface OperationBarProps {}
 const OperationBar: React.FC<OperationBarProps> = props => {
@@ -17,11 +18,11 @@ const OperationBar: React.FC<OperationBarProps> = props => {
         return [
             {
                 text: intl.get('lts.operation.resizeMode.none'),
-                key: 'none'
+                key: IResizeMode.auto
             },
             {
                 text: intl.get('lts.operation.resizeMode.resizable'),
-                key: 'resizable'
+                key: IResizeMode.control
             }
         ]
     }, [])
@@ -127,7 +128,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
                     />
                 </Stack.Item>
                 {
-                    visualConfig.resize === 'resizable' && <Stack.Item>
+                    visualConfig.resize === IResizeMode.control && <Stack.Item>
                         <SpinButton label="width"
                             labelPosition={Position.top}
                             value={visualConfig.resizeConfig.width.toString()}
@@ -154,7 +155,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
                     </Stack.Item>
                 }
                 {
-                    visualConfig.resize === 'resizable' && <Stack.Item>
+                    visualConfig.resize === IResizeMode.control && <Stack.Item>
                         <SpinButton label="height"
                             labelPosition={Position.top}
                             value={visualConfig.resizeConfig.height.toString()}

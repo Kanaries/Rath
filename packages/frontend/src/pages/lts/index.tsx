@@ -17,6 +17,8 @@ import SubinsightSegment from './subinsights';
 import { EXPLORE_VIEW_ORDER } from '../../store/exploreStore';
 import OperationBar from './vizOperation/operationBar';
 import FieldContainer from './vizOperation/fieldContainer';
+import { IResizeMode } from '../../interfaces';
+import ResizeContainer from './resizeContainer';
 // import ReactVega from '../../components/react-vega';
 // import { labDistVis } from '../../queries/labdistVis';
 // import { IFieldMeta } from '../../interfaces';
@@ -37,6 +39,7 @@ const InsightContainer = styled.div`
     .flex-container{
         display: flex;
         .insight-viz{
+            padding: 2em;
             flex-grow: 0;
             flex-shrink: 0;
             /* flex-basis: 400px; */
@@ -164,7 +167,7 @@ const LTSPage: React.FC = props => {
                 </div>
                 <div className="flex-container">
                     <div className="insight-viz">
-                    {insightSpaces.length > 0 && spec && <div>
+                    {insightSpaces.length > 0 && spec && <ResizeContainer enableResize={visualConfig.resize === IResizeMode.control && !(spec.schema.facets)}>
                             <VisErrorBoundary>
                                 <BaseChart
                                     defaultAggregated={visualConfig.defaultAggregated}
@@ -175,16 +178,16 @@ const LTSPage: React.FC = props => {
                                     schema={spec.schema}
                                     fieldFeatures={fieldMetas}
                                     aggregator={visualConfig.aggregator}
-                                    viewSize={visualConfig.resize === 'none' ? 320 : visualConfig.resizeConfig.width}
+                                    viewSize={visualConfig.resize === IResizeMode.auto ? 320 : visualConfig.resizeConfig.width}
                                     stepSize={32}
                                     zoom={visualConfig.zoom}
                                     debug={visualConfig.debug}
-                                    sizeMode={visualConfig.resize === 'none' ? 'auto' : 'control'}
+                                    sizeMode={visualConfig.resize}
                                     width={visualConfig.resizeConfig.width}
                                     height={visualConfig.resizeConfig.height}
                                 />
                             </VisErrorBoundary>
-                        </div>}
+                        </ResizeContainer>}
                         {/*  {
                             insightSpaces.length > 0 && <ReactVega spec={labDistVis({
                                 pattern: { imp: 0, fields: [...insightSpaces[pageIndex].dimensions, ...insightSpaces[pageIndex].measures].map(f => fieldMetas.find(m => m.fid === f)).filter(a => Boolean(a)) as IFieldMeta[] },

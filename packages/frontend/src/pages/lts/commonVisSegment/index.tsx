@@ -39,7 +39,6 @@ const CommonVisSegment: React.FC<CVSProps> = props => {
             dimensions.length > 0 && (['sum', 'mean', 'count'] as const).map(a => <div key={a}>
                 <div>{a}</div>
                 <BaseChart
-                    sizeMode="auto"
                     defaultAggregated={defaultAggregated}
                     defaultStack={defaultStack}
                     dimensions={dimensions}

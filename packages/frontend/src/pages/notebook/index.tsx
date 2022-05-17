@@ -167,7 +167,6 @@ const NoteBook: React.FC = (props) => {
       />
       <div className="notebook content center container">
         <VegaBase
-          sizeMode="auto"
           defaultAggregated={isAggregated}
           defaultStack={true}
           aggregator={'sum'}

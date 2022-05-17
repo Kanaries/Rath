@@ -1,6 +1,6 @@
 import { ISemanticType } from "visual-insights";
 import { Specification } from "visual-insights/build/esm/commonTypes";
-import { IFieldMeta, IRow } from "../interfaces";
+import { IFieldMeta, IResizeMode, IRow } from "../interfaces";
 import { applySizeConfig } from "./base/utils";
 export const geomTypeMap: { [key: string]: any } = {
   interval: "tick",
@@ -23,7 +23,7 @@ interface BaseVisProps {
   stepSize?: number;
   viewSize?: number;
   zoom: boolean;
-  sizeMode?: 'auto' | 'control';
+  sizeMode?: IResizeMode;
   width?: number,
   height?: number
 }
@@ -42,7 +42,7 @@ export function baseVis(props: BaseVisProps) {
     // viewSize,
     width, height,
     zoom,
-    sizeMode = 'auto'
+    sizeMode = IResizeMode.auto
   } = props;
   const {
     position = [],
@@ -136,7 +136,8 @@ export function baseVis(props: BaseVisProps) {
     mode: sizeMode,
     width,
     height,
-    stepSize
+    stepSize,
+    hasFacets: facets.length > 0
   })
   if (position.length === 1) {
     if (basicSpec.encoding.x) {
@@ -174,6 +175,7 @@ export function baseVis(props: BaseVisProps) {
     }
     spec = {
       ...spec,
+      autosize: basicSpec.autosize,
       layer: [
         lineLayer,
         {

@@ -47,7 +47,6 @@ const Association: React.FC<AssociationProps> = props => {
                 style={{ overflow: 'auto' }}
               >
                 <BaseChart
-                  sizeMode="auto"
                   aggregator={visualConfig.aggregator}
                   defaultAggregated={view.schema.geomType && view.schema.geomType.includes("point") ? false : true}
                   defaultStack={visualConfig.defaultStack}

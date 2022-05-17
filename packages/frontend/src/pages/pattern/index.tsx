@@ -42,7 +42,6 @@ const PatternPage: React.FC = props => {
             fields: fieldMetas,
             task: 'univar',
         }, 'local').then(res => {
-            console.log(res)
             setViews(res);
         }).catch(console.error)
         // const patterns = core.searchPatterns();

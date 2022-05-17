@@ -125,7 +125,6 @@ const SearchPage: React.FC = props => {
         {specList.map((spec, index) => (
           <VisCard key={`result-${index}`}>
             <BaseChart
-              sizeMode="auto"
               aggregator={"sum"}
               defaultAggregated={true}
               defaultStack={true}

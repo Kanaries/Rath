@@ -1,17 +1,21 @@
+import { IResizeMode } from "../../interfaces";
+
 export interface ISizeConfig {
-    mode: 'auto' | 'control';
+    mode: IResizeMode;
     width?: number;
     height?: number;
     stepSize?: number;
+    hasFacets: boolean;
 }
 export function applySizeConfig(spec: any, cnf: ISizeConfig): any {
     const {
         mode,
         width,
         height,
-        stepSize
+        stepSize,
+        hasFacets
     } = cnf;
-    if (mode === 'auto' && typeof stepSize === 'number') {
+    if (mode === IResizeMode.auto && typeof stepSize === 'number') {
         if (typeof width === 'number' && spec.encoding && spec.encoding.x && spec.encoding.y) {
             const xFieldType = spec.encoding.x.type;
             spec.width = (xFieldType === 'quantitative' || xFieldType === 'temporal') ? width : { step: stepSize };
@@ -24,6 +28,9 @@ export function applySizeConfig(spec: any, cnf: ISizeConfig): any {
     } else {
         spec.width = width
         spec.height = height;
+        if (!hasFacets) {
+            spec.autosize = 'fit'
+        }
     }
     return spec;
 }

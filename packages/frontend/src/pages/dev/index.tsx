@@ -261,7 +261,6 @@ const DevPage: React.FC = props => {
           {viewSpaceList.length > 0 && dataView !== null && (
             <div>
               <BaseChart
-                sizeMode='auto'
                 aggregator={visualConfig.aggregator}
                 defaultAggregated={visualConfig.defaultAggregated}
                 defaultStack={visualConfig.defaultStack}

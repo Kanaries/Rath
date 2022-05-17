@@ -3,7 +3,7 @@ import { Specification, IInsightSpace } from 'visual-insights';
 import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
 import { STORAGE_FILE_SUFFIX } from '../constants';
 import { Aggregator } from '../global';
-import { IRow, ITaskTestMode, PreferencePanelConfig } from '../interfaces';
+import { IResizeMode, IRow, ITaskTestMode, PreferencePanelConfig } from '../interfaces';
 import { rathEngineService } from '../service';
 import { isSetEqual } from '../utils';
 import { RathStorageDump } from '../utils/storage';
@@ -60,7 +60,7 @@ export class ExploreStore {
             visMode: 'dist',
             zoom: false,
             debug: false,
-            resize: 'none',
+            resize: IResizeMode.auto,
             resizeConfig: {
                 width: 320,
                 height: 320
@@ -197,7 +197,7 @@ export class ExploreStore {
         }
     }
     public initVisualConfigResize () {
-        this.visualConfig.resize = 'none';
+        this.visualConfig.resize = IResizeMode.auto;
         this.visualConfig.resizeConfig.width = 320;
         this.visualConfig.resizeConfig.height = 320;
     }

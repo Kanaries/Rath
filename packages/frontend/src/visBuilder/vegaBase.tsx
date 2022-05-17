@@ -4,7 +4,7 @@ import embed from 'vega-embed';
 import { globalRef } from '../global'
 import { baseVis, commonVis } from '../queries/index';
 import { EDITOR_URL } from '../constants';
-import { IFieldMeta, IRow } from '../interfaces';
+import { IFieldMeta, IResizeMode, IRow } from '../interfaces';
 
 // import { simpleAggregate } from 'visual-insights/build/esm/statistics';
 export const geomTypeMap: {[key: string]: any} = {
@@ -37,7 +37,7 @@ export interface BaseChartProps {
   viewSize?: number;
   stepSize?: number;
   mode?: 'dist' | 'common';
-  sizeMode: 'auto' | 'control';
+  sizeMode?: IResizeMode;
   zoom?: boolean;
   debug?: boolean;
   width?: number;
@@ -61,7 +61,7 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
     debug = false,
     width,
     height,
-    sizeMode
+    sizeMode = IResizeMode.auto
   } = props;
 
   const container = useRef<HTMLDivElement>(null);
