@@ -4,7 +4,7 @@ import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
 import { IInsightSpace, Specification } from "visual-insights";
 import { PreferencePanelConfig } from "../../../components/preference";
 import { IFieldMeta, IRow } from "../../../interfaces";
-import { IconButton } from "office-ui-fabric-react";
+import { CommandButton, IconButton } from "office-ui-fabric-react";
 import intl from 'react-intl-universal';
 export interface IVizSpace extends IInsightSpace {
     schema: Specification;
@@ -39,10 +39,21 @@ const AssociationCharts: React.FC<AssociationProps> = props => {
                             style={{
                                 // border: "solid 1px #bfbfbf",
                                 backgroundColor:'#fff',
-                                margin: "1em",
-                                padding: "1em"
+                                margin: "6px",
+                                padding: "10px",
+                                flexGrow: 1
                             }}
                         >
+                            <div>
+                                <CommandButton
+                                    iconProps={{ iconName: 'Lightbulb' }}
+                                    text={intl.get('explore.digIn')}
+                                    ariaLabel={intl.get('explore.digIn')}
+                                    onClick={() => {
+                                        onSelectView(view);
+                                    }}
+                                />
+                            </div>
                             <VisErrorBoundary>
                                 <BaseChart
                                     aggregator={visualConfig.aggregator}
@@ -56,14 +67,6 @@ const AssociationCharts: React.FC<AssociationProps> = props => {
                                     fieldFeatures={fieldMetas}
                                 />
                             </VisErrorBoundary>
-                            <IconButton
-                                iconProps={{ iconName: 'Lightbulb' }}
-                                title={intl.get('explore.digIn')}
-                                ariaLabel={intl.get('explore.digIn')}
-                                onClick={() => {
-                                    onSelectView(view);
-                                }}
-                            />
                         </div>
                     );
                 })}

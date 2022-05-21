@@ -131,7 +131,7 @@ h2, h3 {
   /* position: fixed;
   left: 0px;
   bottom: 0px; */
-  flex-basis: 260px;
+  flex-basis: 220px;
   flex-grow: 0;
   flex-shrink: 0;
   background-color: #fff;

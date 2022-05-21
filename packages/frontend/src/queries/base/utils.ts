@@ -25,7 +25,7 @@ export function applySizeConfig(spec: any, cnf: ISizeConfig): any {
             const yFieldType = spec.encoding.y.type;
             spec.height = (yFieldType === 'quantitative' || yFieldType === 'temporal') ? height : { step: stepSize };
         }
-    } else {
+    } else if (mode !== IResizeMode.auto) {
         spec.width = width
         spec.height = height;
         if (!hasFacets) {
