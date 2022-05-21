@@ -168,7 +168,9 @@ export function baseVis(props: BaseVisProps) {
   if (geomType[0] === 'line') {
     const lineLayer = { ...basicSpec };
     for (let channel in fieldMap) {
-      if (getFieldSemanticType(fieldMap[channel]) === 'quantitative') {
+      const meta = getFieldMeta(fieldMap[channel]);
+
+      if (meta?.semanticType === 'quantitative' && meta.analyticType === 'measure') {
         // Discuss: should aggregator be controlled by top layer?
         lineLayer.encoding[channel]['aggregate'] = 'mean'
       }
