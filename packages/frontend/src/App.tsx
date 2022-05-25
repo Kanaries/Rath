@@ -17,6 +17,7 @@ import AppNav from "./components/appNav";
 import { destroyRathWorker, initRathWorker } from "./service";
 import { PIVOT_KEYS } from "./constants";
 import CrInfo from "./components/crInfo";
+import { Spinner, SpinnerSize } from "office-ui-fabric-react";
 // import { loadTheme } from "office-ui-fabric-react";
 // import { RATH_DARK_PALETTE, RATH_DARK_THEME } from "./theme";
 
@@ -31,13 +32,25 @@ function App() {
 
   useEffect(() => {
     initRathWorker(commonStore.computationEngine);
+    // notify({
+    //   title: 'test',
+    //   type: 'info',
+    //   content: 'thisn asiudfhius diuahsi iudh fiuasdf'
+    // })
+    // notify({
+    //   title: 'test',
+    //   type: 'info',
+    //   content: 'thisn asiudfhius diuahsi iudh fiuasdf'
+    // })
     return () => {
       destroyRathWorker();
     }
   }, [commonStore])
 
   if (!langStore.loaded) {
-    return <div></div>
+    return <div style={{ marginTop: '6em' }}>
+      <Spinner label="Initializing Rath..." size={SpinnerSize.large} />
+    </div>
   }
 
   return (

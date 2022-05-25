@@ -49,6 +49,7 @@ export interface IField {
 
 export interface IViewField extends IField {
     dragId: string;
+    sort?: 'none' | 'ascending' | 'descending';
 }
 
 export interface Measure extends IField {

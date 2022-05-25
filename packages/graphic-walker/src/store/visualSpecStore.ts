@@ -4,11 +4,20 @@ import { CommonStore } from "./commonStore";
 import { v4 as uuidv4 } from 'uuid';
 import { Specification } from "visual-insights";
 import { GEMO_TYPES } from "../config";
+import { makeBinField } from "../utils/normalization";
 
 interface VisualConfig {
     defaultAggregated: boolean;
-    geoms: string[];        
+    geoms:  string[];        
     defaultStack: boolean;
+    showActions: boolean;
+    interactiveScale: boolean;
+    sorted: 'none' | 'ascending' | 'descending';
+    size: {
+        mode: 'auto' | 'fixed';
+        width: number;
+        height: number;
+    }
 }
 
 export interface DraggableFieldState {
@@ -57,6 +66,8 @@ function geomAdapter (geom: string) {
             return 'point';
         case 'heatmap':
             return 'circle'
+        case 'rect':
+            return 'rect'
         case 'tick':
         default:
             return 'tick'
@@ -65,14 +76,24 @@ function geomAdapter (geom: string) {
 
 export class VizSpecStore {
     // public fields: IViewField[] = [];
+    private commonStore: CommonStore;
     public draggableFieldState: DraggableFieldState;
     private reactions: IReactionDisposer[] = []
     public visualConfig: VisualConfig ={
         defaultAggregated: true,
         geoms: [GEMO_TYPES[0].value],
-        defaultStack: true
+        defaultStack: true,
+        showActions: false,
+        interactiveScale: false,
+        sorted: 'none',
+        size: {
+            mode: 'auto',
+            width: 320,
+            height: 200
+        }
     }
     constructor (commonStore: CommonStore) {
+        this.commonStore = commonStore;
         this.draggableFieldState = {
             dimensions: [],
             measures: [],
@@ -172,7 +193,28 @@ export class VizSpecStore {
         }
     }
     public setVisualConfig (configKey: keyof VisualConfig, value: any) {
-        this.visualConfig[configKey] = value;
+        // this.visualConfig[configKey] = //value;
+        if (configKey === 'defaultAggregated' || configKey === 'defaultStack' || configKey === 'showActions' || configKey === 'interactiveScale') {
+            this.visualConfig[configKey] = Boolean(value);
+        } else if (configKey === 'geoms' && value instanceof Array) {
+            this.visualConfig[configKey] = value;
+        } else if (configKey === 'size' && value instanceof Object) {
+            this.visualConfig[configKey] = value;
+        } else if (configKey === 'sorted') {
+            this.visualConfig[configKey] = value;
+        } else {
+            console.error('unknow key' + configKey)
+        }
+    }
+    public setChartLayout(props: {mode: VisualConfig['size']['mode'], width?: number, height?: number }) {
+        const {
+            mode = this.visualConfig.size.mode,
+            width = this.visualConfig.size.width,
+            height = this.visualConfig.size.height
+        } = props
+        this.visualConfig.size.mode = mode;
+        this.visualConfig.size.width = width;
+        this.visualConfig.size.height = height;
     }
     public reorderField(stateKey: keyof DraggableFieldState, sourceIndex: number, destinationIndex: number) {
         if (MetaFieldKeys.includes(stateKey)) return;
@@ -183,6 +225,7 @@ export class VizSpecStore {
     }
     public moveField(sourceKey: keyof DraggableFieldState, sourceIndex: number, destinationKey: keyof DraggableFieldState, destinationIndex: number) {
         let movingField: IViewField;
+        // 来源是不是metafield，是->clone；不是->直接删掉
         if (MetaFieldKeys.includes(sourceKey)) {
             // use toJS for cloning
             movingField = toJS(this.draggableFieldState[sourceKey][sourceIndex])
@@ -190,7 +233,12 @@ export class VizSpecStore {
         } else {
             [movingField] = this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
         }
-        if (MetaFieldKeys.includes(destinationKey))return;
+        // 目的地是metafields的情况，只有在来源也是metafields时，会执行字段类型转化操作
+        if (MetaFieldKeys.includes(destinationKey)) {
+            if (!MetaFieldKeys.includes(sourceKey))return;
+            this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
+            movingField.analyticType = destinationKey === 'dimensions' ? 'dimension' : 'measure';
+        }
         const limitSize = getChannelSizeLimit(destinationKey);
         const fixedDestinationIndex = Math.min(destinationIndex, limitSize - 1);
         const overflowSize = Math.max(0, this.draggableFieldState[destinationKey].length + 1 - limitSize);
@@ -200,10 +248,51 @@ export class VizSpecStore {
         if (MetaFieldKeys.includes(sourceKey))return;
         this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
     }
+    public createBinField(stateKey: keyof DraggableFieldState, index: number) {
+        const originField = this.draggableFieldState[stateKey][index]
+        const binField: IViewField = {
+            fid: uuidv4(),
+            dragId: uuidv4(),
+            name: `bin(${originField.name})`,
+            semanticType: 'ordinal',
+            analyticType: 'dimension',
+        };
+        this.draggableFieldState.dimensions.push(binField);
+        this.commonStore.currentDataset.dataSource = makeBinField(this.commonStore.currentDataset.dataSource, originField.fid, binField.fid)
+    }
     public setFieldAggregator (stateKey: keyof DraggableFieldState, index: number, aggName: string) {
         const fields = this.draggableFieldState[stateKey]
         if (fields[index]) {
             fields[index].aggName = aggName;
+        }
+    }
+    public get sortCondition () {
+        const { rows, columns } = this.draggableFieldState;
+        const yField = rows.length > 0 ? rows[rows.length - 1] : null;
+        const xField = columns.length > 0 ? columns[columns.length - 1] : null;
+        if (xField !== null && xField.analyticType === 'dimension' && yField !== null && yField.analyticType === 'measure') {
+            return true
+        }
+        if (xField !== null && xField.analyticType === 'measure' && yField !== null && yField.analyticType === 'dimension') {
+            return true
+        }
+        return false;
+    }
+    public setFieldSort (stateKey: keyof DraggableFieldState, index: number, sortType: 'none' | 'ascending' | 'descending') {
+        this.draggableFieldState[stateKey][index].sort = sortType;
+    }
+    public applyDefaultSort(sortType: 'none' | 'ascending' | 'descending' = 'ascending') {
+        const { rows, columns } = this.draggableFieldState;
+        const yField = rows.length > 0 ? rows[rows.length - 1] : null;
+        const xField = columns.length > 0 ? columns[columns.length - 1] : null;
+
+        if (xField !== null && xField.analyticType === 'dimension' && yField !== null && yField.analyticType === 'measure') {
+            xField.sort = sortType
+            return
+        }
+        if (xField !== null && xField.analyticType === 'measure' && yField !== null && yField.analyticType === 'dimension') {
+            yField.sort = sortType
+            return
         }
     }
     public appendField (destinationKey: keyof DraggableFieldState, field: IViewField | undefined) {

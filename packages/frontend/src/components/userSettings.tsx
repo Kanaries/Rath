@@ -39,7 +39,8 @@ const UserSettings: React.FC = () => {
         border
         value={langStore.lang}
         onChange={(e) => {
-          langStore.useLocales(e.target.value)
+          langStore.changeLocalesAndReload(e.target.value);
+          // langStore.useLocales(e.target.value)
         }}
       >
         {

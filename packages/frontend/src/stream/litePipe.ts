@@ -44,7 +44,8 @@ function generateFieldMetaList(fields: BIField[], summary: FieldSummary[]): IFie
             features: { entropy: Infinity, maxEntropy: Infinity, unique: 0 },
             semanticType: 'nominal',
             analyticType: fields[i].type,
-            distribution: []
+            distribution: [],
+            geoRole: 'none'
         }
         let matchIndex = -1;
         // index相同的数组，快速合并

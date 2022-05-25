@@ -124,6 +124,7 @@ export class ClickHouseStore {
                         fid: f.fid,
                         name: f.fid,
                         dataType,
+                        geoRole: 'none',
                         disable: false,
                         semanticType: inferSemanticTypeFromDataType(dataType),
                         analyticType: inferAnalyticTypeFromDataType(dataType)

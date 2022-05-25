@@ -1,5 +1,7 @@
 /* eslint no-restricted-globals: 0 */
 import { UnivariateSummary } from 'visual-insights';
+import { entropy } from 'visual-insights/build/esm/statistics';
+import { bin, rangeNormilize } from '../dev/utils';
 import { timer } from './timer';
 
 const { getAllFieldsDistribution, getAllFieldTypes, getAllFieldsEntropy } = UnivariateSummary;
@@ -26,6 +28,13 @@ const fieldSummary = (e) => {
     });
     // const fieldTypeList = getAllFieldTypes(dataSource, fieldNames);
     const fieldEntropyList = getAllFieldsEntropy(dataSource, fieldNames);
+    for (let i = 0; i < fieldEntropyList.length; i++) {
+      if (fieldTypeList[i].type === 'quantitative') {
+        const bins = bin(dataSource.map(r => r[fieldEntropyList[i].fieldName]));
+        fieldEntropyList[i].entropy = entropy(rangeNormilize(bins.filter(b => b > 0)));
+        fieldEntropyList[i].maxEntropy = Math.log2(16)
+      }
+    }
     self.postMessage({
       success: true,
       data: fieldDistributionList.map((field, index) => {

@@ -1,5 +1,5 @@
 import { IAnalyticType, IRow, ISemanticType } from "visual-insights";
-import { IMuteFieldBase, IRawField } from "../../interfaces";
+import { IGeoRole, IMuteFieldBase, IRawField } from "../../interfaces";
 import { inferAnalyticType, inferSemanticType } from "../../utils";
 
 export function emptyCount (dataSource: IRow[], colKey: string): number {
@@ -30,12 +30,24 @@ function inferDisable (dataSource: IRow[], colKey: string) {
     return false;
 }
 
+function inferGeoRole(dataSource: IRow[], colKey: string, semanticType: ISemanticType, colName: string): IGeoRole {
+    if (semanticType === 'quantitative') {
+        if (['longitude', 'lon', '经度'].includes(colName)) return 'longitude';
+        if (['latitude', 'lat', '纬度'].includes(colName)) return 'latitude';
+    }
+    return 'none'
+}
+
 export function inferMeta (props: { dataSource: IRow[]; fields: IMuteFieldBase[] }) {
     const { dataSource, fields } = props;
     const finalFieldMetas: IRawField[] = [];
     for (let field of fields) {
         let semanticType: ISemanticType = field.semanticType === '?' ? inferSemanticType(dataSource, field.fid) : field.semanticType;
-        let analyticType: IAnalyticType = field.analyticType === '?' ? inferAnalyticType(dataSource, field.fid) : field.analyticType;
+        let geoRole = field.geoRole === '?' ? inferGeoRole(dataSource, field.fid, semanticType, field.name || '') : field.geoRole;
+        let analyticType: IAnalyticType = 'dimension';
+        if (geoRole === 'none') {
+            analyticType = field.analyticType === '?' ? inferAnalyticType(dataSource, field.fid) : field.analyticType;
+        }
         const disable: boolean = field.disable === '?' ? inferDisable(dataSource, field.fid) : Boolean(field.disable);
         // TODO: 临时处理逻辑。后续可视化部分扩展好了，这部分要消除掉。（使用dist图表就可以解决）
         if (analyticType === 'measure' && semanticType === 'ordinal') {
@@ -46,7 +58,8 @@ export function inferMeta (props: { dataSource: IRow[]; fields: IMuteFieldBase[]
             name: field.name ? field.name : field.fid,
             analyticType,
             semanticType,
-            disable
+            disable,
+            geoRole
         })
     }
     return finalFieldMetas

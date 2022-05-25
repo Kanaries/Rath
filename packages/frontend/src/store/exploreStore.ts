@@ -3,7 +3,7 @@ import { Specification, IInsightSpace } from 'visual-insights';
 import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
 import { STORAGE_FILE_SUFFIX } from '../constants';
 import { Aggregator } from '../global';
-import { IRow, ITaskTestMode, PreferencePanelConfig } from '../interfaces';
+import { IResizeMode, IRow, ITaskTestMode, PreferencePanelConfig } from '../interfaces';
 import { rathEngineService } from '../service';
 import { isSetEqual } from '../utils';
 import { RathStorageDump } from '../utils/storage';
@@ -57,7 +57,14 @@ export class ExploreStore {
             aggregator: "sum",
             defaultAggregated: false,
             defaultStack: true,
-            visMode: 'dist'
+            visMode: 'dist',
+            zoom: false,
+            debug: false,
+            resize: IResizeMode.auto,
+            resizeConfig: {
+                width: 320,
+                height: 320
+            }
         };
         this.globalConstraints = {
             dimensions: [],
@@ -189,6 +196,11 @@ export class ExploreStore {
             return []
         }
     }
+    public initVisualConfigResize () {
+        this.visualConfig.resize = IResizeMode.auto;
+        this.visualConfig.resizeConfig.width = 320;
+        this.visualConfig.resizeConfig.height = 320;
+    }
     public async goToLastView () {
         const { pageIndex, insightSpaces } = this;
         this.emitViewChangeTransaction((pageIndex - 1 + insightSpaces.length) % insightSpaces.length)
@@ -219,6 +231,7 @@ export class ExploreStore {
                     // 这里不是啰嗦的写法！！forView 和 view 独立，不要直接赋值了，浅拷贝也不行。
                     this.forkView = { dimensions: iSpace.dimensions, measures: iSpace.measures, ops: iSpace.measures.map(() => 'sum')}
                     this.view = { dimensions: iSpace.dimensions, measures: iSpace.measures, ops: iSpace.measures.map(() => 'sum')}
+                    this.initVisualConfigResize();
                 })
             }
         }

@@ -4,7 +4,7 @@ import embed from 'vega-embed';
 import { globalRef } from '../global'
 import { baseVis, commonVis } from '../queries/index';
 import { EDITOR_URL } from '../constants';
-import { IFieldMeta, IRow } from '../interfaces';
+import { IFieldMeta, IResizeMode, IRow } from '../interfaces';
 
 // import { simpleAggregate } from 'visual-insights/build/esm/statistics';
 export const geomTypeMap: {[key: string]: any} = {
@@ -36,7 +36,12 @@ export interface BaseChartProps {
   schema: Specification;
   viewSize?: number;
   stepSize?: number;
-  mode?: 'dist' | 'common'
+  mode?: 'dist' | 'common';
+  sizeMode?: IResizeMode;
+  zoom?: boolean;
+  debug?: boolean;
+  width?: number;
+  height?: number;
 }
 
 const BaseChart: React.FC<BaseChartProps> = (props) => {
@@ -51,7 +56,12 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
     fieldFeatures = [],
     viewSize,
     stepSize,
-    mode = 'dist'
+    mode = 'dist',
+    zoom = false,
+    debug = false,
+    width,
+    height,
+    sizeMode = IResizeMode.auto
   } = props;
 
   const container = useRef<HTMLDivElement>(null);
@@ -89,19 +99,39 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
           defaultAggregated,
           defaultStack,
           viewSize,
-          stepSize
+          stepSize,
+          zoom,
+          sizeMode,
+          width,
+          height
         }
         let spec = mode === 'dist' ? baseVis(params) : commonVis(params);
         globalRef.baseVisSpec = spec;
         embed(container.current, spec, {
           mode: 'vega-lite',
-          editorUrl: EDITOR_URL
+          editorUrl: EDITOR_URL,
+          actions: debug
         }).catch(err => {
           console.error('[VIS ERROR]', err)
         })
       }
     }
-  }, [schema, table, dimensions, measures, aggregatedMeasures, fieldFeatures, defaultAggregated, defaultStack, viewSize, stepSize, mode])
+  }, [schema,
+    table,
+    dimensions,
+    measures,
+    aggregatedMeasures,
+    fieldFeatures,
+    defaultAggregated,
+    defaultStack,
+    viewSize,
+    stepSize,
+    mode,
+    zoom,
+    debug,
+    sizeMode,
+    width,
+    height])
   return <div ref={container}></div>
 }
 

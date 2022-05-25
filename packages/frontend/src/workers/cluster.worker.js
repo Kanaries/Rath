@@ -16,7 +16,10 @@ const cluster = (e) => {
     const { spaces, maxGroupNumber } = e.data;
     let result = [];
     for (let space of spaces) {
-      const { edgesInMST, groups } = Cluster.kruskalWithFullMST(space.matrix, maxGroupNumber, PearsonThreshold);
+      const {
+        /* edgesInMST,*/
+        groups
+      } = Cluster.kruskalWithFullMST(space.matrix, maxGroupNumber, PearsonThreshold);
       let measureGroups = new Map();
       for (let i = 0; i < groups.length; i++) {
         if (!measureGroups.has(groups[i])) {

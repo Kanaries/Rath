@@ -1,16 +1,18 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { SUPPORT_LANG } from "../locales";
 import intl from 'react-intl-universal';
+import { notify } from "../components/error";
 
 export class LangStore {
     public lang: string = SUPPORT_LANG[0].value;
-    public loaded: boolean = false;
+    public loaded: boolean = true;
     constructor () {
         makeAutoObservable(this)
         this.initLocales();
     }
     public async useLocales (lang: string) {
         try {
+            this.loaded = false;
             const res = await fetch(`locales/${lang}.json`, {
                 method: "GET",
                 headers: {
@@ -30,8 +32,21 @@ export class LangStore {
                 this.loaded = true;
             })
         } catch (error) {
-            console.error(error);
+            notify({
+                title: 'Language Init Error',
+                type: 'error',
+                content: `[lang i18n error] ${error}`
+            })
         }
+    }
+    public setLocale (lang: string) {
+        this.lang = lang;
+        localStorage.setItem('lang', lang);
+    }
+    public async changeLocalesAndReload (lang: string) {
+        // this.useLocales(lang);
+        this.setLocale(lang);
+        window.location.reload();
     }
     public async initLocales () {
         let currentLocale = intl.determineLocale({

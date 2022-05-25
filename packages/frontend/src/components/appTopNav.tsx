@@ -10,7 +10,7 @@ import { useGlobalStore } from '../store';
 
 interface AppTopNavProps { }
 const AppTopNav: React.FC<AppTopNavProps> = props => {
-    const { langStore, commonStore } = useGlobalStore()
+    const { commonStore } = useGlobalStore()
 
     const { appKey } = commonStore;
 
@@ -29,12 +29,10 @@ const AppTopNav: React.FC<AppTopNavProps> = props => {
         return { title: page, itemKey: page }
     })
 
-    if (langStore.loaded && langStore.lang) {
-        pivotList = pivotKeys.map(p => intl.get(`menu.${p}`))
-            .map((page, index) => {
-                return { title: page, itemKey: pivotKeys[index] }
-            })
-    }
+    pivotList = pivotKeys.map(p => intl.get(`menu.${p}`))
+        .map((page, index) => {
+            return { title: page, itemKey: pivotKeys[index] }
+        })
     return <div>
         <div className="header-bar">
             <div className="ms-Grid-row" dir="ltr">

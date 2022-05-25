@@ -18,6 +18,7 @@ const NavContainer = styled.div`
         bottom: 12px;
         padding: 1em;
     }
+    padding-left: 10px;
 `
 
 const LogoBar = styled.div`
@@ -40,7 +41,7 @@ const AppNav: React.FC<AppNavProps> = props => {
         return pivotKeys.map(p => {
             return {
                 url: `#${p}`,
-                key: intl.get(`menu.${p}`),
+                key: p,
                 name: intl.get(`menu.${p}`),
                 forceAnchor: true,
                 onClick (e: any) {
@@ -57,8 +58,7 @@ const AppNav: React.FC<AppNavProps> = props => {
                 ...getLinks([PIVOT_KEYS.dataSource,
                     PIVOT_KEYS.lts,
                     PIVOT_KEYS.editor,
-                    PIVOT_KEYS.dashBoard,
-                    PIVOT_KEYS.pattern
+                    PIVOT_KEYS.pattern,
                 ]),
                 {
                     url: '#dev-mode',
@@ -70,7 +70,8 @@ const AppNav: React.FC<AppNavProps> = props => {
                     links: getLinks([
                         PIVOT_KEYS.noteBook,
                         PIVOT_KEYS.gallery,
-                        PIVOT_KEYS.explainer
+                        PIVOT_KEYS.explainer,
+                        PIVOT_KEYS.dashBoard,
                     ])
                 },
                 {

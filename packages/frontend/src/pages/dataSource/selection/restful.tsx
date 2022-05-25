@@ -31,8 +31,8 @@ const EXAMPLE_DATA: IDatasetBase = {
         {x: 2, y: 20}
     ],
     fields: [
-        { fid: 'x', name: 'FieldX', analyticType: 'dimension', semanticType: 'ordinal' },
-        { fid: 'y', name: 'FieldY', analyticType: 'measure', semanticType: 'quantitative' },
+        { fid: 'x', name: 'FieldX', analyticType: 'dimension', semanticType: 'ordinal', geoRole: 'none' },
+        { fid: 'y', name: 'FieldY', analyticType: 'measure', semanticType: 'quantitative', geoRole: 'none' },
     ]
 }
 const Cont = styled.div`

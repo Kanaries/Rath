@@ -14,6 +14,15 @@ interface DemoDataProps {
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 
+function valueFix (ds: IDatasetBase): IDatasetBase {
+    for (let field of ds.fields) {
+        if (typeof field.analyticType !== 'string') field.analyticType = 'dimension';
+        if (typeof field.semanticType !== 'string') field.semanticType = 'nominal';
+        if (typeof field.geoRole !== 'string') field.geoRole = 'none';
+    }
+    return ds;
+}
+
 function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<IDatasetBase> {
     return new Promise<IDatasetBase>((resolve, reject) => {
         const assetUrl = DemoDataAssets[dsKey];
@@ -24,7 +33,7 @@ function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<IDatasetBase> {
         fetch(assetUrl).then(res => res.json())
             .then(res => {
                 if (!isTimeout) {
-                    resolve(res)
+                    resolve(valueFix(res as IDatasetBase))
                 } else {
                     reject('Demo Data Request Timeout.')
                 }
@@ -82,7 +91,7 @@ const DemoData: React.FC<DemoDataProps> = props => {
                 }}
             />
             <div className="vi-callout-actions">
-                <DefaultButton text="load" onClick={loadData} />
+                <DefaultButton text={intl.get('dataSource.importData.load')} onClick={loadData} />
             </div>
         </div>
     );

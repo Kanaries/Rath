@@ -26,7 +26,7 @@ const pivotKeyList = [
 ];
 
 const Gallery: React.FC = props => {
-  const { galleryStore, langStore } = useGlobalStore();
+  const { galleryStore } = useGlobalStore();
   const {
     currentPage,
     showAssociation,
@@ -39,7 +39,7 @@ const Gallery: React.FC = props => {
     return pivotKeyList.map((page, index) => {
       return { title: intl.get(`explore.${page}`), itemKey: 'pivot-' + index }
     })
-  }, [langStore.lang])
+  }, [])
 
   const [pivotIndex, setPivotIndex] = useState(pivotList[0].itemKey);
 

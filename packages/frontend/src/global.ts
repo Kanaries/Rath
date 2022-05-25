@@ -20,7 +20,8 @@ export enum IDataSourceType {
   RESTFUL = 'restful',
   MYSQL = 'mysql',
   DEMO = 'demo',
-  CLICKHOUSE = 'clickhouse'
+  CLICKHOUSE = 'clickhouse',
+  LOCAL = 'local'
 }
 
 export const globalRef: {

@@ -131,7 +131,7 @@ h2, h3 {
   /* position: fixed;
   left: 0px;
   bottom: 0px; */
-  flex-basis: 260px;
+  flex-basis: 220px;
   flex-grow: 0;
   flex-shrink: 0;
   background-color: #fff;
@@ -149,7 +149,7 @@ h2, h3 {
   bottom: 4px;
   font-size: 12px;
   left: 50%;
-  color: #1f1f1f;
+  color: #3e3e3e;
   transform: translateX(-50%);
 }
 .kanaries-copy-right-footer>a{

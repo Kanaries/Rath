@@ -10,6 +10,7 @@ import DemoData from './demo';
 import RestfulData from './restful';
 import ClickHouseData from './clickhouse';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
+import Local from './local';
 
 interface SelectionProps {
     show: boolean;
@@ -50,6 +51,7 @@ const Selection: React.FC<SelectionProps> = props => {
                 {dataSourceType === IDataSourceType.DEMO && <DemoData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
                 {dataSourceType === IDataSourceType.CLICKHOUSE && <ClickHouseData onClose={onClose} onDataLoaded={onDataLoaded} />}
                 {dataSourceType === IDataSourceType.RESTFUL && <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
+                {dataSourceType === IDataSourceType.LOCAL && <Local onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
             </div>
         </Modal>
     );

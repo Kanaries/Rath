@@ -9,6 +9,7 @@ import { DashBoardStore } from './dashboard';
 import { LTSPipeLine } from './pipeLineStore/lts';
 import { ExploreStore } from './exploreStore';
 import { ClickHouseStore } from './clickhouseStore';
+import { DiscoveryMainStore } from './discovery/mainStore';
 
 export interface StoreCollection {
     langStore: LangStore;
@@ -21,6 +22,7 @@ export interface StoreCollection {
     exploreStore: ExploreStore;
     commonStore: CommonStore;
     clickHouseStore: ClickHouseStore;
+    discoveryMainStore: DiscoveryMainStore;
 }
 
 const langStore = new LangStore();
@@ -33,6 +35,7 @@ const galleryStore = new GalleryStore(litePipeStore);
 const noteBookStore = new NoteBookStore(litePipeStore);
 const dashBoardStore = new DashBoardStore(litePipeStore);
 const exploreStore = new ExploreStore(ltsPipeLineStore);
+const discoveryMainStore = new DiscoveryMainStore();
 
 
 const storeCol: StoreCollection = {
@@ -45,7 +48,8 @@ const storeCol: StoreCollection = {
     dashBoardStore,
     ltsPipeLineStore,
     exploreStore,
-    clickHouseStore
+    clickHouseStore,
+    discoveryMainStore
 }
 
 const StoreContext = React.createContext<StoreCollection>(null!);

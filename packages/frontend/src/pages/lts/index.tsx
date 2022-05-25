@@ -15,6 +15,13 @@ import SaveModal from './save';
 import CommonVisSegment from './commonVisSegment';
 import SubinsightSegment from './subinsights';
 import { EXPLORE_VIEW_ORDER } from '../../store/exploreStore';
+import OperationBar from './vizOperation/operationBar';
+import FieldContainer from './vizOperation/fieldContainer';
+import { IResizeMode } from '../../interfaces';
+import ResizeContainer from './resizeContainer';
+// import ReactVega from '../../components/react-vega';
+// import { labDistVis } from '../../queries/labdistVis';
+// import { IFieldMeta } from '../../interfaces';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -24,21 +31,30 @@ const MainHeader = styled.div`
 `
 
 const InsightContainer = styled.div`
-    display: flex;
-    .insight-viz{
-        flex-grow: 1;
-        /* flex-basis: 400px; */
-        min-width: 500px;
-        /* flex-shrink: 2; */
-        overflow: auto;
+    .ope-container{
+        margin: 1em 0em;
+        padding-bottom: 1em;
+        border-bottom: 1px solid #f5f5f5;
     }
-    .insight-info{
-        flex-grow: 2;
-        flex-shrink: 1;
-        flex-wrap: wrap;
-        padding: 0em 1em;
-        border-left: 1px solid #f5f5f5;
-        overflow: auto;
+    .flex-container{
+        display: flex;
+        .insight-viz{
+            padding: 2em;
+            flex-grow: 0;
+            flex-shrink: 0;
+            /* flex-basis: 400px; */
+            /* min-width: 500px; */
+            /* flex-shrink: 2; */
+            overflow: auto;
+        }
+        .insight-info{
+            flex-grow: 1;
+            flex-shrink: 1;
+            flex-wrap: wrap;
+            padding: 0em 1em;
+            border-left: 1px solid #f5f5f5;
+            overflow: auto;
+        }
     }
 `
 
@@ -146,27 +162,47 @@ const LTSPage: React.FC = props => {
             </Stack>
             <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
             <InsightContainer>
-                <div className="insight-viz">
-                {insightSpaces.length > 0 && spec && <div>
-                        <VisErrorBoundary>
-                            <BaseChart
-                                defaultAggregated={visualConfig.defaultAggregated}
-                                defaultStack={visualConfig.defaultStack}
-                                dimensions={insightSpaces[pageIndex].dimensions}
-                                measures={insightSpaces[pageIndex].measures}
-                                dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
-                                schema={spec.schema}
-                                fieldFeatures={fieldMetas}
-                                aggregator={visualConfig.aggregator}
-                                viewSize={320}
-                                stepSize={32}
-                            />
-                        </VisErrorBoundary>
-                    </div>}
+                <div className="ope-container">
+                    <OperationBar />
                 </div>
-                <div className="insight-info">
-                    <VizOperation />
+                <div className="flex-container">
+                    <div className="insight-viz">
+                    {insightSpaces.length > 0 && spec && <ResizeContainer enableResize={visualConfig.resize === IResizeMode.control && !(spec.schema.facets)}>
+                            <VisErrorBoundary>
+                                <BaseChart
+                                    defaultAggregated={visualConfig.defaultAggregated}
+                                    defaultStack={visualConfig.defaultStack}
+                                    dimensions={insightSpaces[pageIndex].dimensions}
+                                    measures={insightSpaces[pageIndex].measures}
+                                    dataSource={visualConfig.defaultAggregated ? spec.dataView : ltsPipeLineStore.dataSource}
+                                    schema={spec.schema}
+                                    fieldFeatures={fieldMetas}
+                                    aggregator={visualConfig.aggregator}
+                                    viewSize={visualConfig.resize === IResizeMode.auto ? 320 : visualConfig.resizeConfig.width}
+                                    stepSize={32}
+                                    zoom={visualConfig.zoom}
+                                    debug={visualConfig.debug}
+                                    sizeMode={visualConfig.resize}
+                                    width={visualConfig.resizeConfig.width}
+                                    height={visualConfig.resizeConfig.height}
+                                />
+                            </VisErrorBoundary>
+                        </ResizeContainer>}
+                        {/*  {
+                            insightSpaces.length > 0 && <ReactVega spec={labDistVis({
+                                pattern: { imp: 0, fields: [...insightSpaces[pageIndex].dimensions, ...insightSpaces[pageIndex].measures].map(f => fieldMetas.find(m => m.fid === f)).filter(a => Boolean(a)) as IFieldMeta[] },
+                                dataSource: ltsPipeLineStore.dataSource
+                            })} dataSource={ltsPipeLineStore.dataSource}  />
+                        } */}
+                    </div>
+                    <div className="insight-info">
+                        <VizOperation />
+                    </div>
                 </div>
+                <div>
+                    <FieldContainer />
+                </div>
+                
             </InsightContainer>
             <div>
                 <Stack horizontal>

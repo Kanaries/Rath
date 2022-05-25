@@ -5,7 +5,7 @@ export const GEMO_TYPES = [
     },
     {
         value: 'bar',
-        label: '矩形',
+        label: '条形图',
     },
     {
         value: 'line',
@@ -24,10 +24,25 @@ export const GEMO_TYPES = [
         label: '标记',
     },
     {
+        value: 'rect',
+        label: '矩形',
+    },
+    {
         value: 'boxplot',
         label: '统计箱'
     }
 ];
+
+export const CHART_LAYOUT_TYPE = [
+    {
+        value: 'auto',
+        label: '自动'
+    },
+    {
+        value: 'fixed',
+        label: '固定'
+    }
+]
 
 export const COLORS = {
     // tableau style

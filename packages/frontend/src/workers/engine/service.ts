@@ -67,6 +67,7 @@ async function startPipeLine (props: StartPipeLineProps) {
         times.push(performance.now())
         prints.push({ task: 'init&univar', value: times[times.length - 1] - times[times.length - 2] })
         engine.buildGraph();
+        engine.dataGraph.DIMENSION_CORRELATION_THRESHOLD = 0.5
         times.push(performance.now())
         prints.push({ task: 'co-graph', value: times[times.length - 1] - times[times.length - 2] })
         engine.clusterFields();
@@ -264,7 +265,7 @@ export async function router (e: { data: MessageProps }, onSuccess: (res?: any) 
             default:
                 throw new Error(`Unknow task: "${req.task}".`)
         }
-    } catch (error) {
-        onFailed(`[${req.task}]${error}`)
+    } catch (error: any) {
+        onFailed(`[${req.task}]${error}\n${error.stack}`)
     }
 }

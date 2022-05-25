@@ -1,7 +1,8 @@
+import { SortAscendingIcon, SortDescendingIcon } from '@heroicons/react/outline';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { DraggableProvided } from 'react-beautiful-dnd';
-import { IDraggableStateKey, IViewField } from '../../interfaces';
+import { IDraggableStateKey } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { Pill } from '../components';
 import { AGGREGATOR_LIST } from '../fieldsContext';
@@ -35,6 +36,8 @@ const OBPill: React.FC<PillProps> = props => {
                 }
             </select>
         )}
+        {field.analyticType === 'dimension' && field.sort === 'ascending' && <SortAscendingIcon className='float-right w-3' />}
+        {field.analyticType === 'dimension' && field.sort === 'descending' && <SortDescendingIcon className='float-right w-3' />}
     </Pill>
 }
 

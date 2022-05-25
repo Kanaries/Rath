@@ -7,7 +7,8 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
     const mysqlText = intl.get(`dataSource.importData.type.${IDataSourceType.MYSQL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
-    const clickHouseText = 'ClickHouse';
+    const clickHouseText = 'clickhouse';
+    const localText = 'History'
 
     const options = useMemo<Array<{ key: IDataSourceType; text: string }>>(() => {
         return [
@@ -15,6 +16,12 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 key: IDataSourceType.FILE,
                 text: fileText,
                 iconProps: { iconName: "ExcelDocument" },
+            },
+            {
+                key: IDataSourceType.LOCAL,
+                text: localText,
+                iconProps: { iconName: "FabricUserFolder" },
+                disabled: false,
             },
             {
                 key: IDataSourceType.DEMO,
@@ -55,6 +62,7 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
 } : {
     // CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     CARS: "http://localhost:3000/datasets/ds-cars-service.json",
+    // CARS: "http://localhost:3000/datasets/dataset-service-edge.json",
     // STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
     STUDENTS: "http://localhost:3000/datasets/ds-students-service.json",
     BTC_GOLD: "http://localhost:3000/datasets/ds_btc_gold_service.json",

@@ -63,13 +63,14 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
         vconcat: [
           {
             mark: 'rect',
-            selection: {
-              dim: {
-                type: 'single',
+            params: [{
+              name: 'dim',
+              select: {
+                type: 'interval',
                 on: 'click',
                 encodings: ['y']
               }
-            },
+            }],
             encoding: {
               x: { field: 'measureName', type: 'nominal' },
               y: {
@@ -79,7 +80,7 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
               },
               color: { field: 'measureValue', type: 'quantitative', aggregate: 'mean', scale: { reverse: true } },
               opacity: {
-                condition: {selection: 'dim', value: 1},
+                condition: {param: 'dim', value: 1},
                 value: 0.72
               },
             }

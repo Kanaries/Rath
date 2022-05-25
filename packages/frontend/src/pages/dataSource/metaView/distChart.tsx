@@ -2,13 +2,13 @@ import React, { useRef, useEffect, useMemo, useState } from 'react';
 import embed, { vega, Result } from 'vega-embed';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { IRow } from '../../../interfaces';
+import { getRange } from '../../../utils';
 
 const DATA_NAME = 'dataSource';
 
 function fl2bins(data: IRow[], valueField: string, ctField: string) {
-    const values: number[] = data.map(row => row[valueField]);
-    const _min = Math.min(...values);
-    const _max = Math.max(...values);
+    const values: number[] = data.map(row => Number(row[valueField]));
+    const [_min, _max] = getRange(values)
     const BIN_SIZE = 8;
     const bins: number[] = new Array(BIN_SIZE + 1).fill(0);
     const step = (_max - _min) / BIN_SIZE;
@@ -19,7 +19,7 @@ function fl2bins(data: IRow[], valueField: string, ctField: string) {
     bins[BIN_SIZE - 1] += bins[BIN_SIZE]
     bins.pop();
     return bins.map((b, i) => ({
-        [valueField]: `${Math.round(_min + i * step)}[${i + 1}]`,
+        [valueField]: `[${i + 1}]${Math.round(_min + i * step)}`,
         [ctField]: b
     }))
 }
@@ -98,7 +98,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                         title: null,
                         axis: {
                             // "labelAngle": 0,
-                            labelLimit: 56,
+                            labelLimit: 52,
                             "labelOverlap": "parity",
                             ticks: false
                         },
@@ -116,9 +116,13 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     }, [x, y, sortBy, semanticType])
     useEffect(() => {
         if (view) {
-            view.change('dataSource', vega.changeset().remove(() => true).insert(values));
-            view.resize();
-            view.runAsync();
+            try {
+                view.change('dataSource', vega.changeset().remove(() => true).insert(values));
+                view.resize();
+                view.runAsync();   
+            } catch (error) {
+                console.error(error)
+            }
         }
     }, [values, view])
     return <div ref={chart}></div>

@@ -5,7 +5,7 @@
 import React from 'react';
 
 const CrInfo: React.FC = () => {
-    return <div className="kanaries-copy-right-footer">Powered by <a href="https://github.com/Kanaries/Rath">Kanaries Rath</a>.</div>
+    return <div className="kanaries-copy-right-footer">Powered by <a href="https://kanaries.cn">Kanaries Rath</a>.</div>
 }
 
 export default CrInfo;
