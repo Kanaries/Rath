@@ -1,4 +1,4 @@
-import { Cluster, IInsightSpace, Insight, Record } from 'visual-insights'
+import { Cluster, IInsightSpace, Insight } from 'visual-insights'
 import { DataGraph } from 'visual-insights/build/esm/insights/InsightFlow/dataGraph';
 import { ViewSpace } from 'visual-insights/build/esm/insights/InsightFlow/engine';
 import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
@@ -144,7 +144,7 @@ function getDimClusterGroups(
     return groups;
 }
 class CustomDataGraph extends DataGraph {
-    // clusterMGraph(dataSource: Record[], CORRELATION_THRESHOLD?: number): string[][] {
+    // clusterMGraph(dataSource: IRow[], CORRELATION_THRESHOLD?: number): string[][] {
     //     const mat = this.MG;
     //     const measures = this.measures
     //     const groups = linkEdge(mat, CORRELATION_THRESHOLD || this.MEASURE_CORRELATION_THRESHOLD)
@@ -155,7 +155,7 @@ class CustomDataGraph extends DataGraph {
     //     }
     //     return ans;
     // }
-    public clusterMGraph(dataSource: Record[], CORRELATION_THRESHOLD?: number) {
+    public clusterMGraph(dataSource: IRow[], CORRELATION_THRESHOLD?: number) {
         const { measures, MEASURE_CORRELATION_THRESHOLD } = this;
         // console.log(JSON.stringify(this.MG))
         this.MClusters = getMeaSetsBasedOnClusterGroups(
@@ -166,7 +166,7 @@ class CustomDataGraph extends DataGraph {
         // console.log(this.MClusters)
         return this.MClusters;
     }
-    computeMGraph(dataSource: Record[], cc?: CorrelationCoefficient): number[][] {
+    computeMGraph(dataSource: IRow[], cc?: CorrelationCoefficient): number[][] {
         super.computeMGraph(dataSource, cc);
         for (let i = 0; i < this.MG.length; i++) {
             let maxIndex = 0;
@@ -188,7 +188,7 @@ class CustomDataGraph extends DataGraph {
         // console.log(JSON.stringify(this.MG))
         return this.MG;
     }
-    public clusterDGraph(dataSource: Record[], CORRELATION_THRESHOLD?: number) {
+    public clusterDGraph(dataSource: IRow[], CORRELATION_THRESHOLD?: number) {
         const { dimensions, DIMENSION_CORRELATION_THRESHOLD } = this;
         // console.log(JSON.stringify(this.DG))
         this.DClusters = getDimClusterGroups(
@@ -199,7 +199,7 @@ class CustomDataGraph extends DataGraph {
         // console.log(this.DClusters)
         return this.DClusters;
     }
-    computeDGraph(dataSource: Record[], cc?: CorrelationCoefficient): number[][] {
+    computeDGraph(dataSource: IRow[], cc?: CorrelationCoefficient): number[][] {
         super.computeDGraph(dataSource, cc);
         for (let i = 0; i < this.DG.length; i++) {
             let maxIndex = 0;
@@ -351,9 +351,11 @@ export class RathEngine extends VIEngine {
         const assSpacesT2: IVizSpace[] = [];
         for (let i = 0; i < insightSpaces.length; i++) {
             // if (i === spaceIndex) continue;
-            if (!intersect(insightSpaces[i].dimensions, space.dimensions)) continue;
+            if (space.dimensions.length > 0 && !intersect(insightSpaces[i].dimensions, space.dimensions)) continue;
             if (isSetEqual(insightSpaces[i].measures, space.measures)) continue;
-            if (!isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
+            if (space.dimensions.length > 0 && !isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
+            if (space.dimensions.length === 0 && !intersect(insightSpaces[i].measures, space.measures)) continue;
+            if (space.dimensions.length === 0 && insightSpaces[i].dimensions.length !== 0) continue;
             let t1_score = 0;
             const iteMeaIndices = insightSpaces[i].measures.map(f => measures.findIndex(m => f === m));
             if (dataGraph !== null) {
