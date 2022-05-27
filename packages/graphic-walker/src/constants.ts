@@ -1,0 +1,1 @@
+export const COUNT_FIELD_ID = 'gw_count_fid';
