@@ -1,4 +1,5 @@
-import { IFieldSummary, IInsightSpace } from "visual-insights";
+import { ICubeStorageManageMode, IFieldSummary, IInsightSpace } from "visual-insights";
+import { Cube } from "visual-insights/build/esm/cube";
 import { ViewSpace } from "visual-insights/build/esm/insights/InsightFlow/engine";
 import { StatFuncName } from "visual-insights/build/esm/statistics";
 import { IFieldMeta, IRow, ISyncEngine } from "../../interfaces";
@@ -40,6 +41,7 @@ function destroyEngine () {
 
 type StartPipeLineProps = {
     mode: 'webworker';
+    cubeStorageManageMode: ICubeStorageManageMode;
     dataSource: IRow[];
     fieldMetas: IFieldMeta[];
 } | {
@@ -73,7 +75,14 @@ async function startPipeLine (props: StartPipeLineProps) {
         engine.clusterFields();
         times.push(performance.now())
         prints.push({ task: 'clusters', value: times[times.length - 1] - times[times.length - 2] })
-        engine.buildCube();
+        const cube = new Cube({
+            dimensions: engine.dimensions,
+            measures: engine.measures,
+            cubeStorageManageMode: props.cubeStorageManageMode,
+            dataSource: engine.dataSource
+        })
+        cube.storage.env = 'browser';
+        await engine.buildCube(cube);
         times.push(performance.now())
         prints.push({ task: 'cube', value: times[times.length - 1] - times[times.length - 2] })
         engine.buildSubspaces();
@@ -109,9 +118,9 @@ async function startPipeLine (props: StartPipeLineProps) {
         throw new Error(`Engine mode is not support: ${props.mode}`)
     }
     return {
-        insightSpaces,
+        insightSpaces: insightSpaces.slice(0, 10000),
         fields: viewFields,
-        dataSource: viewSampleData,
+        dataSource: viewSampleData.slice(0, 5000),
         performance: prints
     };
 }
@@ -144,14 +153,14 @@ async function associate (props: { dimensions: string[]; measures: string[] }) {
     }
 }
 
-function aggregate (props: { dimensions: string[]; measures: string[]; aggregators: StatFuncName[] }): IRow[] {
+async function aggregate (props: { dimensions: string[]; measures: string[]; aggregators: StatFuncName[] }): Promise<IRow[]> {
     if (EngineRef.mode === 'webworker' && EngineRef.mode === 'webworker') {
         const engine = EngineRef.current;
         if (engine === null) throw new Error('Engine is not created.');
         const { dimensions, measures, aggregators } = props;
         const cube = engine.cube;
-        const cuboid = cube.getCuboid(dimensions);
-        const aggData = cuboid.getAggregatedRows(measures, aggregators);
+        const cuboid = await cube.getCuboid(dimensions);
+        const aggData = await cuboid.getAggregatedRows(measures, aggregators);
         return aggData;
     } else if (EngineRef.mode === 'clickhouse' && EngineRef.mode === 'clickhouse') {
         const engine = EngineRef.current;
@@ -219,7 +228,7 @@ export async function router (e: { data: MessageProps }, onSuccess: (res?: any) 
     try {
         switch (req.task) {
             case 'cube':
-                const aggData = aggregate(req.props);
+                const aggData = await aggregate(req.props);
                 onSuccess(aggData);
                 break;
             case 'init':

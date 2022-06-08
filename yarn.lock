@@ -6337,6 +6337,11 @@ destroy@^1.0.4, destroy@~1.0.4:
   resolved "https://registry.nlark.com/destroy/download/destroy-1.0.4.tgz#978857442c44749e4206613e37946205826abd80"
   integrity sha1-l4hXRCxEdJ5CBmE+N5RiBYJqvYA=
 
+detect-browser@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.npmmirror.com/detect-browser/-/detect-browser-5.3.0.tgz#9705ef2bddf46072d0f7265a1fe300e36fe7ceca"
+  integrity sha512-53rsFbGdwMwlF7qvCt0ypLM5V5/Mbl0szB7GPN8y9NCcbknYOeVVXdrXEq+90IwAfrrzt6Hd+u2E2ntakICU8w==
+
 detect-newline@^3.0.0:
   version "3.1.0"
   resolved "https://registry.nlark.com/detect-newline/download/detect-newline-3.1.0.tgz#576f5dfc63ae1a192ff192d8ad3af6308991b651"
@@ -15936,14 +15941,16 @@ visual-insights@0.7.15:
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 
-visual-insights@0.7.17:
-  version "0.7.17"
-  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.7.17.tgz#9c9a5430939c28de6b1f5ab1558e3489e76de801"
-  integrity sha512-Sscs4yc85jmglnjgbhXdckTJwwG3GQZiFS4b7MlhB8xl2SxdMnP5yTmPsEGUIvtfkbZkpr9wUBPirUAn589ojw==
+visual-insights@0.8.7:
+  version "0.8.7"
+  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.8.7.tgz#c1b5cd7a8866ff59898fb576013870061aa4f6df"
+  integrity sha512-UrTCfFONkAojViOQuEiDXeviuaUsJf8TrFzMfDmXZ/+ej3Pq/SiIZtdLXMGrQaSK9aIos9RVoBHJ5SSGDgbEww==
   dependencies:
     assert "^2.0.0"
     axios "^0.22.0"
     cube-core "^2.13.0"
+    detect-browser "^5.3.0"
+    localforage "^1.10.0"
     simple-statistics "^7.1.0"
 
 vite@^2.4.4:

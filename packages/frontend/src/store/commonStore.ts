@@ -12,6 +12,7 @@ export class CommonStore {
     public taskMode: ITaskTestMode = ITaskTestMode.local;
     public messages: Array<{type: ErrorType, content: string}> = []; //[{type:'error', content: 'This is a test.'}];
     public showStorageModal: boolean = false;
+    public showAnalysisConfig: boolean = false;
     constructor() {
         const taskMode = localStorage.getItem(TASK_TEST_MODE_COOKIE_KEY) || ITaskTestMode.local;
         this.taskMode = taskMode as ITaskTestMode;
@@ -29,6 +30,9 @@ export class CommonStore {
     public setTaskTestMode (mode: ITaskTestMode) {
         this.taskMode = mode;
         localStorage.setItem(TASK_TEST_MODE_COOKIE_KEY, mode)
+    }
+    public setShowAnalysisConfig (show: boolean) {
+        this.showAnalysisConfig = show;
     }
     public removeError (errIndex: number) {
         this.messages.splice(errIndex, 1);

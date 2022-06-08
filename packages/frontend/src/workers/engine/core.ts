@@ -155,72 +155,98 @@ class CustomDataGraph extends DataGraph {
     //     }
     //     return ans;
     // }
-    public clusterMGraph(dataSource: IRow[], CORRELATION_THRESHOLD?: number) {
-        const { measures, MEASURE_CORRELATION_THRESHOLD } = this;
-        // console.log(JSON.stringify(this.MG))
-        this.MClusters = getMeaSetsBasedOnClusterGroups(
-            this.MG,
-            measures,
-            CORRELATION_THRESHOLD || MEASURE_CORRELATION_THRESHOLD
-        );
-        // console.log(this.MClusters)
-        return this.MClusters;
-    }
-    computeMGraph(dataSource: IRow[], cc?: CorrelationCoefficient): number[][] {
-        super.computeMGraph(dataSource, cc);
-        for (let i = 0; i < this.MG.length; i++) {
-            let maxIndex = 0;
-            let maxVal = 0;
-            for (let j = 0; j < this.MG.length; j++) {
-                if (i === j) continue;
-                if (this.MG[i][j] > maxVal) {
-                    maxVal = Math.abs(this.MG[i][j]);
-                    maxIndex = j;
-                }
-            }
-            for (let j = 0; j < this.MG.length; j++) {
-                this.MG[i][j] = 0;
-            }
-            if (maxVal > this.MEASURE_CORRELATION_THRESHOLD) {
-                this.MG[i][maxIndex] = 1;
-            }
-        }
-        // console.log(JSON.stringify(this.MG))
-        return this.MG;
-    }
+    // public clusterMGraph(dataSource: IRow[], CORRELATION_THRESHOLD?: number) {
+    //     const { measures, MEASURE_CORRELATION_THRESHOLD } = this;
+    //     // console.log(JSON.stringify(this.MG))
+    //     this.MClusters = getMeaSetsBasedOnClusterGroups(
+    //         this.MG,
+    //         measures,
+    //         CORRELATION_THRESHOLD || MEASURE_CORRELATION_THRESHOLD
+    //     );
+    //     // console.log(this.MClusters)
+    //     return this.MClusters;
+    // }
+    // computeMGraph(dataSource: IRow[], cc?: CorrelationCoefficient): number[][] {
+    //     super.computeMGraph(dataSource, cc);
+    //     for (let i = 0; i < this.MG.length; i++) {
+    //         let maxIndex = 0;
+    //         let maxVal = 0;
+    //         for (let j = 0; j < this.MG.length; j++) {
+    //             if (i === j) continue;
+    //             if (this.MG[i][j] > maxVal) {
+    //                 maxVal = Math.abs(this.MG[i][j]);
+    //                 maxIndex = j;
+    //             }
+    //         }
+    //         for (let j = 0; j < this.MG.length; j++) {
+    //             this.MG[i][j] = 0;
+    //         }
+    //         if (maxVal > this.MEASURE_CORRELATION_THRESHOLD) {
+    //             this.MG[i][maxIndex] = 1;
+    //         }
+    //     }
+    //     // console.log(JSON.stringify(this.MG))
+    //     return this.MG;
+    // }
     public clusterDGraph(dataSource: IRow[], CORRELATION_THRESHOLD?: number) {
         const { dimensions, DIMENSION_CORRELATION_THRESHOLD } = this;
         // console.log(JSON.stringify(this.DG))
-        this.DClusters = getDimClusterGroups(
-            this.DG,
-            dimensions,
-            CORRELATION_THRESHOLD || DIMENSION_CORRELATION_THRESHOLD
-        );
-        // console.log(this.DClusters)
-        return this.DClusters;
-    }
-    computeDGraph(dataSource: IRow[], cc?: CorrelationCoefficient): number[][] {
-        super.computeDGraph(dataSource, cc);
-        for (let i = 0; i < this.DG.length; i++) {
-            let maxIndex = 0;
-            let maxVal = 0;
-            for (let j = 0; j < this.DG.length; j++) {
-                if (i === j) continue;
-                if (this.DG[i][j] > maxVal) {
-                    maxVal = Math.abs(this.DG[i][j]);
-                    maxIndex = j;
+        // this.DClusters = getDimClusterGroups(
+        //     this.DG,
+        //     dimensions,
+        //     CORRELATION_THRESHOLD || DIMENSION_CORRELATION_THRESHOLD
+        // );
+        const threshold = CORRELATION_THRESHOLD || DIMENSION_CORRELATION_THRESHOLD;
+        const DG = this.DG;
+        const clusters: string[][] = [];
+        for (let i = 0; i < dimensions.length; i++) {
+            const groups: string[] = []
+            for (let j = 0; j < dimensions.length; j++) {
+                if (DG[i][j] >= threshold) {
+                    groups.push(dimensions[j]);
                 }
             }
-            for (let j = 0; j < this.DG.length; j++) {
-                this.DG[i][j] = 0;
+            clusters.push(groups)
+        }
+        let uniqueClusters: string[][] = [];
+        for (let i = 0; i < clusters.length; i++) {
+            let unique = true
+            for (let j = i + 1; j < clusters.length; j++) {
+                if (isSetEqual(clusters[i], clusters[j])) {
+                    unique = false;
+                    break;
+                }
             }
-            if (maxVal > this.DIMENSION_CORRELATION_THRESHOLD) {
-                this.DG[i][maxIndex] = 1;
+            if (unique) {
+                uniqueClusters.push(clusters[i])
             }
         }
-        // console.log(JSON.stringify(this.DG))
-        return this.DG;
+        // console.log(uniqueClusters, dimensions)
+        this.DClusters = uniqueClusters
+        return uniqueClusters//this.DClusters;
     }
+    // computeDGraph(dataSource: IRow[], cc?: CorrelationCoefficient): number[][] {
+    //     super.computeDGraph(dataSource, cc);
+    //     for (let i = 0; i < this.DG.length; i++) {
+    //         let maxIndex = 0;
+    //         let maxVal = 0;
+    //         for (let j = 0; j < this.DG.length; j++) {
+    //             if (i === j) continue;
+    //             if (this.DG[i][j] > maxVal) {
+    //                 maxVal = Math.abs(this.DG[i][j]);
+    //                 maxIndex = j;
+    //             }
+    //         }
+    //         for (let j = 0; j < this.DG.length; j++) {
+    //             this.DG[i][j] = 0;
+    //         }
+    //         if (maxVal > this.DIMENSION_CORRELATION_THRESHOLD) {
+    //             this.DG[i][maxIndex] = 1;
+    //         }
+    //     }
+    //     // console.log(JSON.stringify(this.DG))
+    //     return this.DG;
+    // }
 }
 export class RathEngine extends VIEngine {
     public constructor() {
@@ -236,23 +262,30 @@ export class RathEngine extends VIEngine {
         // vie.workerCollection.enable(DefaultIWorker.trend, false);
     }
     public async createInsightSpaces(viewSpaces: ViewSpace[] = this.subSpaces): Promise<IInsightSpace[]> {
-        const ansSpaces = await this.exploreViews(viewSpaces);
+        const uniqueSet: Set<string> = new Set()
+        let uniqueViews = viewSpaces.filter(s => {
+            const k = s.dimensions.join('-') + '||' + s.measures.join('-');
+            if (uniqueSet.has(k)) return false;
+            uniqueSet.add(k)
+            return true
+        })
+        const ansSpaces = await this.exploreViews(uniqueViews);
         this.insightSpaces = ansSpaces;
         return ansSpaces
     }
-    // public buildGraph(): this {
-    //     this.dataGraph = new CustomDataGraph(this.dimensions, this.measures);
-    //     this.dataGraph.computeDGraph(this.dataSource);
-    //     this.dataGraph.computeMGraph(this.dataSource);
-    //     return this;
-    // }
+    public buildGraph(): this {
+        this.dataGraph = new CustomDataGraph(this.dimensions, this.measures);
+        this.dataGraph.computeDGraph(this.dataSource);
+        this.dataGraph.computeMGraph(this.dataSource);
+        return this;
+    }
     public async scanDetail(viewSpace: ViewSpace) {
         const context = this;
         // @ts-ignore TODO: FIX this in visual insights
         const { cube, fieldDictonary } = context;
         const { dimensions, measures } = viewSpace;
-        const cuboid = cube.getCuboid(viewSpace.dimensions);
-        const aggData = cuboid.getAggregatedRows(measures, measures.map(() => 'sum'));
+        const cuboid = await cube.getCuboid(viewSpace.dimensions);
+        const aggData = await cuboid.getAggregatedRows(measures, measures.map(() => 'sum'));
         const insightSpaces: IInsightSpace[] = []
         const taskPool: Promise<void>[] = [];
         this.workerCollection.each((iWorker, name) => {
@@ -272,9 +305,10 @@ export class RathEngine extends VIEngine {
         // const globalMeasures = this.measures;
         let ansSet: any[] = []
         if (viewSpace.dimensions.length > 0) {
-            const cuboid = this.cube.getCuboid(viewSpace.dimensions);
-            const globalDist = this.cube.getCuboid([]).getAggregatedRows(viewSpace.measures, viewSpace.measures.map(() => 'dist'));
-            const localDist = cuboid.getAggregatedRows(viewSpace.measures, viewSpace.measures.map(() => 'dist'))
+            const viewCuboid = await this.cube.getCuboid(viewSpace.dimensions);
+            const globalCuboid = await this.cube.getCuboid([]);
+            const globalDist = await globalCuboid.getAggregatedRows(viewSpace.measures, viewSpace.measures.map(() => 'dist'));
+            const localDist = await viewCuboid.getAggregatedRows(viewSpace.measures, viewSpace.measures.map(() => 'dist'))
             if (globalDist.length === 0) return ansSet;
             const globalDistMapByMeasure: Map<string, number[]> = new Map();
             for (let mea of viewSpace.measures) {
@@ -371,7 +405,7 @@ export class RathEngine extends VIEngine {
                 .filter(f => f !== undefined)
                 .map(f => Number(f?.features.unique))
                 .reduce((t, v) => t * v, 1)
-                const spec = this.specification(insightSpaces[i])
+                const spec = await this.specification(insightSpaces[i])
                 if (spec) {
                     // assSpacesT1.push({
                     //     schema: spec.schema,
@@ -409,7 +443,7 @@ export class RathEngine extends VIEngine {
                 .map(f => Number(f?.features.unique))
                 // .reduce((t, v) => t * v, 1)
                 .reduce((t, v) => t + v, 0)
-                const spec = this.specification(insightSpaces[i])
+                const spec = await this.specification(insightSpaces[i])
                 if (spec) {
                     assSpacesT2.push({
                         ...insightSpaces[i],
@@ -436,7 +470,8 @@ export class RathEngine extends VIEngine {
         const DEFAULT_BIN_NUM = 16;
         const { measures: globalMeasures, fieldDictonary } = context
         let ansSpace: IInsightSpace[] = [];
-        const globalDist = context.cube.getCuboid([]).getAggregatedRows(globalMeasures, globalMeasures.map(() => 'dist'));
+        const globalCuboid = await context.cube.getCuboid([]);
+        const globalDist = await globalCuboid.getAggregatedRows(globalMeasures, globalMeasures.map(() => 'dist'));
         for (let measures of context.dataGraph.MClusters) {
             // const ent = 
             let totalEntLoss = 0;
@@ -460,7 +495,10 @@ export class RathEngine extends VIEngine {
         for (let space of viewSpaces) {
             const { dimensions, measures } = space;
             let dropSpace = false;
-            const localDist = context.cube.getCuboid(dimensions).getAggregatedRows(measures, measures.map(() => 'dist'));
+            const localCuboid = await context.cube.getCuboid(dimensions);
+            await localCuboid.loadStateInCache();
+            const localDist = await localCuboid.getAggregatedRows(measures, measures.map(() => 'dist'));
+            localCuboid.clearState();
             let totalEntLoss = 0;
             for (let mea of measures) {
                 let ent = 0;

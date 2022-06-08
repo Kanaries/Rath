@@ -92,7 +92,6 @@ const LTSPage: React.FC = props => {
         text: intl.get(`lts.orderBy.${or}`),
         key: or
     }))
-    // console.log('explore order insight spaces', exploreStore.insightSpaces)
     return <div className="content-container">
         <VizPreference />
         <SaveModal />

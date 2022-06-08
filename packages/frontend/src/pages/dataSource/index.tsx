@@ -13,6 +13,7 @@ import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
 import { IDataPreviewMode, IMuteFieldBase, IRow } from "../../interfaces";
 import { Card } from "../../components/card";
 import Advice from "./advice";
+import AnalysisSettings from './settings'
 
 const MARGIN_LEFT = { marginLeft: "1em" }
 
@@ -175,6 +176,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     <div className="content-container">
       <Card>
         <ImportStorage />
+        <AnalysisSettings />
         <Stack horizontal>
           <PrimaryButton
             split
@@ -201,6 +203,16 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             title={intl.get('dataSource.extractInsightOld')}
             ariaLabel={intl.get('dataSource.extractInsightOld')}
             onClick={onOrignEngineStart}
+          />
+
+          <IconButton
+            style={MARGIN_LEFT}
+            iconProps={{ iconName: 'Settings' }}
+            title={intl.get('dataSource.extractInsightOld')}
+            ariaLabel={intl.get('dataSource.extractInsightOld')}
+            onClick={() => {
+              commonStore.setShowAnalysisConfig(true)
+            }}
           />
 
           <Selection show={showDataImportSelection}
