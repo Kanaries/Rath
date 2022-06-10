@@ -31,6 +31,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         } else {
           values = dataSource
         }
+        values = values.slice(0, 100)
         let sortBy: string | undefined | any = undefined;
         if (fieldType === 'nominal') {
           sortBy = '-y'

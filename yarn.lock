@@ -15941,10 +15941,10 @@ visual-insights@0.7.15:
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 
-visual-insights@0.8.7:
-  version "0.8.7"
-  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.8.7.tgz#c1b5cd7a8866ff59898fb576013870061aa4f6df"
-  integrity sha512-UrTCfFONkAojViOQuEiDXeviuaUsJf8TrFzMfDmXZ/+ej3Pq/SiIZtdLXMGrQaSK9aIos9RVoBHJ5SSGDgbEww==
+visual-insights@0.8.8:
+  version "0.8.8"
+  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.8.8.tgz#9918bce21e2bb16256fb97f96e05afd581433aad"
+  integrity sha512-DyFefGET2jOiSYPTGWqByobClDYvjjjbF0USZgxIfvpqI6Qm5hVS6LvZZuRE6LMOYiFtzaUs+eUfVMweCd/dVQ==
   dependencies:
     assert "^2.0.0"
     axios "^0.22.0"

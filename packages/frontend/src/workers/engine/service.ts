@@ -120,7 +120,7 @@ async function startPipeLine (props: StartPipeLineProps) {
     return {
         insightSpaces: insightSpaces.slice(0, 10000),
         fields: viewFields,
-        dataSource: viewSampleData.slice(0, 5000),
+        dataSource: viewSampleData,
         performance: prints
     };
 }
