@@ -3,7 +3,8 @@
         "dimension": "dimension",
         "measure": "measure",
         "name": "Name",
-        "home": "Home"
+        "home": "Home",
+        "settings": "Settings"
     },
     "menu": {
         "dataSource": "DataSource",
