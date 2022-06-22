@@ -4,8 +4,8 @@ import { IFilter, IPattern } from '../../dev';
 import { useGlobalStore } from '../../store';
 import { distVis } from '../../queries/distVis'
 import ReactVega from '../../components/react-vega';
-import { DefaultButton, Stack, IconButton, PrimaryButton, ActionButton } from 'office-ui-fabric-react';
-import { AssoContainer, MainViewContainer } from './components';
+import { DefaultButton, Stack, PrimaryButton, ActionButton, CommandButton, Spinner } from 'office-ui-fabric-react';
+import { AssoContainer, LoadingLayer, MainViewContainer } from './components';
 import ViewField from '../lts/vizOperation/viewField';
 import { IFieldMeta, IResizeMode, IRow } from '../../interfaces';
 import { footmanEngineService } from '../../service';
@@ -31,6 +31,7 @@ const PatternPage: React.FC = props => {
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [views, setViews] = useState<IPattern[]>([])
     const [pined, setPined] = useState<IPattern | null>(null);
+    const [computing, setComputing] = useState<boolean>(false);
     const [renderAmount, setRenderAmount] = useState<number>(RENDER_BATCH_SIZE);
     const [mergeView, setMergeView] = useState<IPattern | null>(null);
     const { mainVizSetting } = discoveryMainStore;
@@ -53,6 +54,7 @@ const PatternPage: React.FC = props => {
     }, [views])
 
     const assViews = useCallback((view: IPattern) => {
+        setComputing(true)
         footmanEngineService({
             dataSource: cleanedData,
             fields: fieldMetas,
@@ -60,8 +62,12 @@ const PatternPage: React.FC = props => {
             props: view
         }).then(res => {
             setViews(res);
+            setComputing(false)
             setRenderAmount(RENDER_BATCH_SIZE)
-        }).catch(console.error);
+        }).catch(err => {
+            console.error(err)
+            setComputing(false)
+        });
     }, [fieldMetas, cleanedData])
 
     const adviceCompareFeature = useCallback(() => {
@@ -161,12 +167,13 @@ const PatternPage: React.FC = props => {
     return <div className="content-container">
         <Settings />
         <div className="card">
+            computing { computing && 'yes' }
             <ActionButton
                 style={{ float: 'right' }}
                 iconProps={{ iconName: 'Settings' }}
-                ariaLabel="settings"
-                title="settings"
-                text="settings"
+                ariaLabel={intl.get('common.settings')}
+                title={intl.get('common.settings')}
+                text={intl.get('common.settings')}
                 onClick={() => {
                     discoveryMainStore.setShowSettings(true);
                 }}
@@ -198,7 +205,9 @@ const PatternPage: React.FC = props => {
                                 actions={mainVizSetting.debug}
                                 spec={labDistVis({
                                     pattern: mergeView,
-                                    dataSource: cleanedData
+                                    dataSource: cleanedData,
+                                    width: mainVizSetting.resize.width,
+                                    height: mainVizSetting.resize.height,
                                 })}
                                 dataSource={applyFilter(cleanedData, mergeView.filters)}
                             />
@@ -231,6 +240,7 @@ const PatternPage: React.FC = props => {
                 <div className="action-buttons">
                     <DefaultButton style={BUTTON_STYLE}
                         disabled={pined === null}
+                        iconProps={{ iconName: 'ScatterChart' }}
                         text={intl.get('discovery.main.relatePatterns')} onClick={() => {
                             if (pined) {
                                 assViews(pined)
@@ -243,10 +253,12 @@ const PatternPage: React.FC = props => {
                         onClick={advicePureFeature}
                     />
                    <PrimaryButton style={BUTTON_STYLE} text={intl.get('discovery.main.explainDiff')}
+                        iconProps={{ iconName: 'Compare' }}
                         disabled={pined === null || mergeView === null}
                         onClick={adviceCompareFeature}
                     />
                     <DefaultButton style={BUTTON_STYLE} text={intl.get('discovery.main.pointInterests')}
+                        iconProps={{ iconName: 'SplitObject' }}
                         disabled={pined === null}
                         onClick={recommandFilter}
                     />
@@ -256,8 +268,30 @@ const PatternPage: React.FC = props => {
             <AssoContainer>
                 {
                     specs.slice(0, renderAmount).map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                        {
+                            computing && <LoadingLayer>
+                                <Spinner label="loading" />
+                            </LoadingLayer>
+                        }
                         <Stack horizontal>
-                            <IconButton iconProps={{ iconName: 'Pinned' }}
+                            <CommandButton
+                                iconProps={{ iconName: 'Pinned' }}
+                                text={intl.get('discovery.main.pin')}
+                                onClick={() => {
+                                    setPined(views[i])
+                                }}
+                            />
+                            <CommandButton
+                                iconProps={{ iconName: 'Compare' }}
+                                text={intl.get('discovery.main.compare')}
+                                onClick={() => {
+                                    setMergeView(views[i])
+                                    discoveryMainStore.updateMainVizSettings(s => {
+                                        s.resize.mode = IResizeMode.auto
+                                    })
+                                }}
+                            />
+                            {/* <IconButton iconProps={{ iconName: 'Pinned' }}
                                 title={intl.get('discovery.main.pin')}
                                 onClick={() => {
                                     setPined(views[i])
@@ -271,7 +305,7 @@ const PatternPage: React.FC = props => {
                                         s.resize.mode = IResizeMode.auto
                                     })
                                 }}
-                            />
+                            /> */}
                         </Stack>
                         <div className="chart-container">
                             {

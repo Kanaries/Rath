@@ -2,7 +2,7 @@ import { Cluster, IInsightSpace, Insight } from 'visual-insights'
 import { DataGraph } from 'visual-insights/build/esm/insights/InsightFlow/dataGraph';
 import { ViewSpace } from 'visual-insights/build/esm/insights/InsightFlow/engine';
 import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
-import { CorrelationCoefficient } from 'visual-insights/build/esm/statistics';
+// import { CorrelationCoefficient } from 'visual-insights/build/esm/statistics';
 import { IRow } from '../../interfaces';
 // import { entropy } from 'visual-insights/build/esm/statistics';
 import { IVizSpace } from '../../store/exploreStore';

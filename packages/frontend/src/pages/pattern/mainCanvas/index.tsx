@@ -37,7 +37,10 @@ const MainCanvas: React.FC<MainCanvasProps> = props => {
             })
         } else {
             return labDistVis({
+                resizeMode: mode,
                 pattern: pined,
+                width,
+                height,
                 dataSource: cleanedData
             })
         }

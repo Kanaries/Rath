@@ -156,7 +156,7 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
   }, [valueExp])
 
   return (
-      <div style={{ maxHeight: '720px', minHeight: '200px', overflowY: 'auto', maxWidth: '880px' }}>
+      <div style={{ maxHeight: '80vh', minHeight: '200px', overflowY: 'auto', maxWidth: '880px' }}>
           <div className="text-xs">
               {FilterDesc}
           </div>

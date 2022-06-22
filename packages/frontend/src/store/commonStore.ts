@@ -13,6 +13,7 @@ export class CommonStore {
     public messages: Array<{type: ErrorType, content: string}> = []; //[{type:'error', content: 'This is a test.'}];
     public showStorageModal: boolean = false;
     public showAnalysisConfig: boolean = false;
+    public navMode: 'text' | 'icon' = 'text';
     constructor() {
         const taskMode = localStorage.getItem(TASK_TEST_MODE_COOKIE_KEY) || ITaskTestMode.local;
         this.taskMode = taskMode as ITaskTestMode;
@@ -26,6 +27,9 @@ export class CommonStore {
             type,
             content
         })
+    }
+    public setNavMode (mode: 'text' | 'icon') {
+        this.navMode = mode;
     }
     public setTaskTestMode (mode: ITaskTestMode) {
         this.taskMode = mode;

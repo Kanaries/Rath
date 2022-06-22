@@ -81,12 +81,12 @@ const LTSPage: React.FC = props => {
 
     const dataIsEmpty = ltsPipeLineStore.dataSource.length === 0;
 
-    const getSubinsights = useCallback((dimensions: string[], measures: string[]) => {
-        exploreStore.getSubInsights(dimensions, measures).then(res => {
-            setSubinsightsData(res)
-            exploreStore.setShowSubinsights(true)
-        })
-    }, [exploreStore])
+    // const getSubinsights = useCallback((dimensions: string[], measures: string[]) => {
+    //     exploreStore.getSubInsights(dimensions, measures).then(res => {
+    //         setSubinsightsData(res)
+    //         exploreStore.setShowSubinsights(true)
+    //     })
+    // }, [exploreStore])
 
     const orderOptions: IDropdownOption[] = Object.values(EXPLORE_VIEW_ORDER).map(or => ({
         text: intl.get(`lts.orderBy.${or}`),
@@ -211,7 +211,7 @@ const LTSPage: React.FC = props => {
                         onChange={(e, checked) => {
                         setShowCommonVis(Boolean(checked))
                     }} />
-                    <DefaultButton
+                    {/* <DefaultButton
                         text={intl.get('lts.subinsights')}
                         style={MARGIN_LEFT}
                         onClick={() => {
@@ -219,7 +219,7 @@ const LTSPage: React.FC = props => {
                                 toJS(insightSpaces[pageIndex].dimensions),
                                 toJS(insightSpaces[pageIndex].measures))
                         }}
-                    />
+                    /> */}
                 </Stack>
                 {
                     insightSpaces.length > 0 && showCommonVis && spec && <CommonVisSegment

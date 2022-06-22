@@ -70,18 +70,20 @@ const App: React.FC<EditorProps> = props => {
 			<DataSourceSegment preWorkDone={insightReady} />
 			<VisualSettings />
 			<Container>
-				<div className="grid grid-cols-6">
-					<div className="col-span-1">
+				<div className="grid grid-cols-12 xl:grid-cols-6">
+					<div className="col-span-3 xl:col-span-1">
 						<DatasetFields />
 					</div>
-					<div className="col-span-1">
+					<div className="col-span-2 xl:col-span-1">
 						<AestheticFields />
 					</div>
-					<div className="col-span-4">
+					<div className="col-span-7 xl:col-span-4">
 						<div>
 							<PosFields />
 						</div>
-						<NestContainer style={{ minHeight: '600px', overflow: 'auto' }}>
+						<NestContainer style={{ minHeight: '600px', overflow: 'auto' }} onMouseLeave={() => {
+							vizEmbededMenu.show && commonStore.closeEmbededMenu();
+						}}>
 							{datasets.length > 0 && <ReactiveRenderer />}
 							<InsightBoard />
 							{vizEmbededMenu.show && (

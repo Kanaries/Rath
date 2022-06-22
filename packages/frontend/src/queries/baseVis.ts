@@ -4,6 +4,8 @@ import { IFieldMeta, IResizeMode, IRow } from "../interfaces";
 import { applySizeConfig } from "./base/utils";
 export const geomTypeMap: { [key: string]: any } = {
   interval: "tick",
+  tick: 'tick',
+  boxplot: 'boxplot',
   // interval: 'boxplot',
   line: "line",
   point: "point",
@@ -26,6 +28,21 @@ interface BaseVisProps {
   sizeMode?: IResizeMode;
   width?: number,
   height?: number
+}
+
+// FIXME： 这里没有考虑repeat的情况
+function adjustGeomType (geomType: string, dataSource: IRow[], measures: string[]): string {
+  if (geomType === 'interval') {
+    for (let mea of measures) {
+      const valueSet: Set<any> = new Set();
+      for (let i = 0; i < dataSource.length; i++) {
+        valueSet.add(dataSource[i][mea]);
+        if (valueSet.size > 16) return 'boxplot'
+      }
+    }
+    return 'point'
+  }
+  return geomType;
 }
 
 export function baseVis(props: BaseVisProps) {
@@ -90,11 +107,12 @@ export function baseVis(props: BaseVisProps) {
     row: facets[0],
     column: facets[1]
   };
-  if (geomType[0] && geomType[0] === 'line') {
+  let gt = adjustGeomType(geomType[0], dataSource, measures);
+  if (gt === 'line') {
     const discreteChannels = Object.values(query).flatMap(c => c).filter(c => getFieldSemanticType(c) !== 'quantitative');
     const crossValues = discreteChannels.map(c => getFieldMeta(c)).filter(c => c !== undefined).map(c => c!.features.unique).reduce((t, v) => t * v, 1)
     if (dataSource.length < crossValues) {
-      geomType[0] = 'area';
+      gt = 'area';
     }
   }
   let spec: any = {
@@ -103,9 +121,10 @@ export function baseVis(props: BaseVisProps) {
       values: dataSource
     }
   };
-  const markType =  geomType[0] && geomTypeMap[geomType[0]]
-  ? geomTypeMap[geomType[0]]
-  : geomType[0]
+  let markType =  gt && geomTypeMap[gt]
+  ? geomTypeMap[gt]
+  : gt;
+  
   let basicSpec: any = {
     // width: chartWidth,
     mark: {
@@ -165,7 +184,7 @@ export function baseVis(props: BaseVisProps) {
       basicSpec.encoding.column = basicSpec.encoding.color
     }
   }
-  if (geomType[0] === 'line') {
+  if (gt === 'line') {
     const lineLayer = { ...basicSpec };
     for (let channel in fieldMap) {
       const meta = getFieldMeta(fieldMap[channel]);

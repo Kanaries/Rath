@@ -7,7 +7,8 @@ import {
   Toggle,
   DirectionalHint,
   IDropdownOption,
-  Dropdown
+  Dropdown,
+  IconButton
 } from 'office-ui-fabric-react'
 import DropdownSelect from "./dropDownSelect";
 import { observer } from 'mobx-react-lite'
@@ -27,15 +28,17 @@ const TASK_MODE_LIST: IDropdownOption[] = [
 const Container = styled.div`
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 `
 const UserSettings: React.FC = () => {
   const target = useRef<HTMLDivElement>(null);
   const [show, setShow] = useState<boolean>(false);
   const { langStore, pipeLineStore, commonStore } = useGlobalStore();
-
+  const { navMode } = commonStore
   return (
     <Container>
-      <DropdownSelect
+      {
+        navMode === 'text' && <DropdownSelect
         border
         value={langStore.lang}
         onChange={(e) => {
@@ -47,14 +50,32 @@ const UserSettings: React.FC = () => {
           langOptions.map(lang => <option key={lang.key} value={lang.key}>{lang.text}</option>)
         }
       </DropdownSelect>
+      }
+      {/* <DropdownSelect
+        border
+        value={langStore.lang}
+        onChange={(e) => {
+          langStore.changeLocalesAndReload(e.target.value);
+          // langStore.useLocales(e.target.value)
+        }}
+      >
+        {
+          langOptions.map(lang => <option key={lang.key} value={lang.key}>{lang.text}</option>)
+        }
+      </DropdownSelect> */}
       <div ref={target}>
         <ActionButton
-          text={intl.get('preference.title')}
+          text={commonStore.navMode === 'text' ? intl.get('preference.title') : ''}
           iconProps={{ iconName: 'PlayerSettings' }}
           onClick={() => {
             setShow(true)
           }}
         ></ActionButton>
+      </div>
+      <div>
+        <IconButton iconProps={{ iconName: 'CollapseMenu' }} onClick={() => {
+          commonStore.setNavMode(navMode === 'icon' ? 'text' : 'icon')
+        }} />
       </div>
 
       {show && (

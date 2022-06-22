@@ -139,6 +139,7 @@ export class NextVICore {
                 })
             }
         }
+        patterns.sort((a, b) => b.imp - a.imp)
         return patterns;
     }
     public firstPattern () {

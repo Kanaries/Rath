@@ -7,8 +7,10 @@ const COLORS = {
     // tableau style
     // dimension: 'rgb(73, 150, 178)',
     // measure: 'rgb(0, 177, 128)',
-    dimension: 'rgb(86, 170, 208)',
-    measure: 'rgb(232, 149, 72)'
+    // dimension: 'rgb(86, 170, 208)',
+    // measure: 'rgb(232, 149, 72)',
+    dimension: '#00b7c3',
+    measure: '#00ad56'
 }
 
 export const Pill = styled.div<{colType: IFieldMeta['analyticType']}>`
@@ -20,7 +22,8 @@ export const Pill = styled.div<{colType: IFieldMeta['analyticType']}>`
   -webkit-user-select: none;
   align-items: center;
   border-color: transparent;
-  border-radius: 10px;
+  /* border-radius: 10px; */
+  border-radius: 3px;
   border-style: solid;
   border-width: 1px;
   box-sizing: border-box;
