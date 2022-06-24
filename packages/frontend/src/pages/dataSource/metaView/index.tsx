@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { useGlobalStore } from '../../../store';
 import MetaList from './metaList';
 import { IFieldMeta } from '../../../interfaces';
-import { DefaultButton } from 'office-ui-fabric-react';
+// import { DefaultButton } from 'office-ui-fabric-react';
 
 
 const MetaView: React.FC = props => {
@@ -25,9 +25,9 @@ const MetaView: React.FC = props => {
     })
     // 这里加入一个快捷操作，只使用主体数据
     return <div>
-        <DefaultButton text="tets" onClick={() => {
+        {/* <DefaultButton text="tets" onClick={() => {
             dataSourceStore.addFilter()
-        }} />
+        }} /> */}
         <MetaList metas={expandMetas} onChange={updateFieldInfo} />
     </div>
 }

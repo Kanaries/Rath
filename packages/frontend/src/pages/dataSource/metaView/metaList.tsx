@@ -5,7 +5,7 @@ import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { IFieldMeta, IRawField, IRow } from '../../../interfaces';
 import DistributionChart from './distChart';
 import intl from 'react-intl-universal'
-import FieldFilter from '../../../components/fieldFilter';
+import FieldFilter from '../../../components/fieldFilter/index';
 
 const MetaContainer = styled.div`
     overflow: auto;

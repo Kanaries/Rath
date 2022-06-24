@@ -198,11 +198,13 @@ export class DataSourceStore {
         const { rawData, filters } = this;
         const ans: IRow[] = [];
         if (filters.length === 0) return rawData;
+        const effectFilters = filters.filter(f => !f.disable);
         for (let i = 0; i < rawData.length; i++) {
             const row = rawData[i];
-            let keep = filters.every(f => {
+            let keep = effectFilters.every(f => {
                 if (f.type === 'range') return f.range[0] <= row[f.fid] && row[f.fid] <= f.range[1];
                 if (f.type === 'set') return f.values.includes(row[f.fid]);
+                return false;
             })
             if (keep) ans.push(row);
         }
