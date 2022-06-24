@@ -118,7 +118,7 @@ export function getQuantiles(values: number[], percents: number[]) {
     const percentIndices = percents.map(p => p * values.length)
     const qts: number[] = [];
     for (let pi of percentIndices) {
-        let floor_pi = Math.floor(pi);
+        let floor_pi = Math.min(Math.floor(pi), sortedValues.length - 1);
         if (pi > Math.floor(pi)) {
             qts.push(sortedValues[floor_pi])
         } else {

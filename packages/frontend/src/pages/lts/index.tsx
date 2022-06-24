@@ -38,6 +38,7 @@ const InsightContainer = styled.div`
     }
     .flex-container{
         display: flex;
+        overflow-x: auto;
         .insight-viz{
             padding: 2em;
             flex-grow: 0;

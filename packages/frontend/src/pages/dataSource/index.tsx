@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import intl from 'react-intl-universal'
-import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton } from 'office-ui-fabric-react';
+import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, CommandButton } from 'office-ui-fabric-react';
 // import DataTable from '../../components/table';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
@@ -14,6 +14,7 @@ import { IDataPreviewMode, IMuteFieldBase, IRow } from "../../interfaces";
 import { Card } from "../../components/card";
 import Advice from "./advice";
 import AnalysisSettings from './settings'
+import FastSelection from "./fastSelection";
 
 const MARGIN_LEFT = { marginLeft: "1em" }
 
@@ -27,6 +28,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     cleanedData,
     cleanMethod,
     rawData,
+    filteredData,
     loading,
     showDataImportSelection,
     dataPreviewMode,
@@ -177,6 +179,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
       <Card>
         <ImportStorage />
         <AnalysisSettings />
+        <FastSelection />
         <Stack horizontal>
           <PrimaryButton
             split
@@ -271,7 +274,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         <p style={{ fontSize: 12, fontWeight: 400, color: '#595959' }}>{intl.get('dataSource.tip')}</p>
         <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
           {intl.get('dataSource.recordCount', { count: cleanedData.length })} <br />
-          Origin: ({rawData.length}) rows / Clean: ({cleanedData.length}) rows
+          Origin: ({rawData.length}) rows / Selected: ({ filteredData.length }) / Clean: ({cleanedData.length}) rows
         </i>
         <Toggle checked={dataPreviewMode === IDataPreviewMode.meta}
           label={intl.get('dataSource.viewMode')}
@@ -279,6 +282,14 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           offText={intl.get('dataSource.dataView')}
           onChange={(ev, checked) => {
             dataSourceStore.setDataPreviewMode(checked ? IDataPreviewMode.meta : IDataPreviewMode.data)
+          }}
+        />
+        <CommandButton
+          disabled={rawData.length === 0}
+          text="Fast Selection"
+          iconProps={{ iconName: 'filter' }}
+          onClick={() => {
+            dataSourceStore.setShowFastSelection(true)
           }}
         />
         {/* <ActionButton iconProps={{ iconName: 'download' }}>download data</ActionButton> */}
