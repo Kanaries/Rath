@@ -7,24 +7,20 @@
 ![](https://img.shields.io/github/stars/kanaries/rath?color=%23ff85c0)
 
 
-<img src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png" alt="logo" width="180px" style="" />
+<img src="https://kanaries.cn/assets/kanaries-logo.png" alt="logo" width="180px" style="" />
 
-RATH is an automated data exploration tool, which can help you automated discovery patterns & insights, generate charts and dashboards from muti-dimensional data. It uses AI enhanced engine to automate the working flow in data analysis.
+RATH is an OpenSource automated data exploration tool, which can help you automated discovery patterns & insights, generate charts and dashboards from muti-dimensional data. It uses AI enhanced engine to automate the working flow in data analysis.
 
-+ Try Latest version !! [demo(latest)](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
-+ Try Stable version [demo(stable)](https://kanaries.github.io/Rath/)
-+ [Youtube Video Demo](https://www.youtube.com/watch?v=o3_PH1Cbql4)
-+ [Bilibili Video Demo](https://www.bilibili.com/video/av82089992/)
++ Try Latest version !! [Try it(latest)](https://kanaries.github.io/Rath/)
++ Try Stable version [Try it(stable)](https://kanaries.net/)
 
 ## Introduction
 
-Rath helps you extract insights from datasource automatically and generate interactive visualizations with interesting findings. Rath can auto generate high dimensional visualization contains complex patterns while most other auto-EDA tools only providing simple low dimensional charts with basic statistics pattern. Its means you can use Rath to explore the data to a deep level and find more insights.
+Rath is an auto EDA tool (or Augmented Analytic BI), which automate explore your dataset and discovery interesting patterns, relations, recommanding expressiveness and effectiveness visualizations.
 
-Rath design an algorithm recommending visualization with lowest perception error by human eyes, which means you can read the info in visualization much accurate[1]. The origin idea is mentioned in APT, 1987 by Mackinlay[2]. It suggests using visual channel with lower perception error to encode more important fields. However, 'the importance of field' usually is hard to measure. Works like data voyager (compassQL)[3] suppose the fields chosen earlier by user are more important, which means it cannot be used in an automated process where exists no chosen order.
+Rath provides different level of automation for different scenarios and users. For instance, 'Explore' module provides fully automation. Connect your data, and click 'analysis', Rath will do all the exploration and analysis work for you. Rath will find some insights and patterns in data and generate charts/dashboards for you. 'Discovery/knowledge build' module is an semi-automation analysis system which can be controlled to focus on your thoughts more. 'Graphic Walker' module is a manual data analysis and visualization tool for whom with specific analysis purpose.
 
-Rath compute how much extra view entropy(similar thoughts like entropy, but not exactly the same) a field will bring to a visualization, and use lower perception error visual channel to encode field bring more entropy to the visualization view.
-
-Rath can also automate generate best interactive logic of visualizations in a dashboard. It builds a relation graph of visualization set and choose a sub graph which has max sum of edge score(represent relation). It make the `selection-filter` interaction represents more meaningful correlation or dependency between fields in different visualization.
+Rath can auto generate high dimensional visualization contains complex patterns while most other auto-EDA tools only providing simple low dimensional charts with basic statistics pattern. Its means you can use Rath to explore the data to a deep level and find more insights.
 
 Here are main parts in Rath,
 
@@ -33,15 +29,27 @@ DataSource board is for data uploading, sampling(currently support stream data, 
 
 ![dataSource-en.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/kanaries/Rath-Demos/dataSource-en.png)
 
-### Gallery / Explore
-Rath automate scan your datasource and find interesting deep patterns which will be displayed in Gallery / Explore segment.
- In Gallery, you can find interesting visualization and use association feature to find more related visualization. You can also search specific info in gallery. There are some settings here to adjust some of the visual elements in the chart.
+![dataSource-filter-en.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/datasource-2.png)
 
-![gallery.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/kanaries/Rath-Demos/explore-en.png)
+### Gallery / Explore
+
+Rath automate explore your dataset and discovery interesting patterns, relations, recommanding expressiveness and effectiveness visualizations.
+![gallery.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/rath-auto-explore.png)
+
+If some of the recommadations catch your interests, you can click associate button and Rath will assocaite more related insights for you.
+
+![gallery-asso](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/rath-associate.png)
+
+If you have some very specific target, you can switch to a manual EDA tool inside Rath called Graphic Walker.
 
 ### Graphic Walker
-Graphic Walker is a lite tableau style visual analysis interface. It is used for cases when users have specific analytic target or user want to analysis further result based on the recommended results by Rath's auto insights.
-![graphic-walker.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/kanaries/Rath-Demos/graphic-walker-en.png)
+Graphic Walker is a lite tableau/polaris style visual analysis app, which is also based on wilkinson's Grammer of Graphics. It is used for cases when users have specific analytic target or user want to analysis further result based on the recommended results by Rath's auto insights.
+
+![graphic-walker.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/graphic-walker.png)
+
+We use similar visualization specification rules in polaris, which is frendly to users who are familiar with tableau.
+
+![graphic-waler.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/graphic-walker-2.png)
 
 Graphic Walker is an independent embedding module. You can use it independently in your own app. See more details in `packages/graphic-walker/README.md`
 
@@ -51,6 +59,12 @@ yarn add @kanaries/graphic-walker
 
 npm i --save @kanaries/graphic-walker
 ```
+
+### Discovery
+Discovery or knowledge build module is a semi-automated data exploration system. It automate step by step and try to understand what the users are thinking in real time. Users can tell Rath Discovery what thery are more interested in and Rath will focus more on the subset user care about.
+
+![discovery](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/discovery-1.png)
+
 
 ### Dashboard
 Generate interactive dashboards for your. Rath will figure out sets of visualizations of which contents are connected to each other and can be used to analysis a specific problem.
@@ -77,9 +91,9 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 
 ## Usage
 
-### Try online demo
-+ on Github Pages(Stable version) [demo](https://kanaries.github.io/Rath/)
-+ on Alibaba Cloud OSS(Latest version) [demo](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
+### Try it
++ on Github Pages(Stable version) [App](https://kanaries.github.io/Rath/)
++ on Kanaries Website [App](https://kanaries.net/)
 
 ### Download Desktop Version
 - [MacOS](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0.dmg)
@@ -87,38 +101,11 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 
 ### deploy
 
-Rath now runs all the computation tasks on webworker. If you are interested in a server version, check the older version or contact us.
+Rath now runs all the computation tasks on webworker. For some large dataset, Rath will use indexdb to avoid too much memory cost of browser. For larger dataset(>100MB), Rath can put some of its computation to computation engine support SQL query(such as clickhouse). If you are interested in a server version, check the older version or contact us.
 
-(dev)
-```bash
-yarn install
-# under project root dir
-yarn workspace graphic-walker build
-
-yarn workspace frontend start
-
-# localhost:3000
-```
-
-production mode
-```bash
-yarn install
-
-yarn workspace graphic-walker build
-
-yarn workspace frontend build
-
-# server:8000
-```
-
-only use the algorithm package. (`/packages/visual-insights`) ![](https://img.shields.io/npm/v/visual-insights?color=blue)
-```bash
-npm i visual-insights --save
-```
 
 ## Documentation
 + [Tutorial: Using Rath to find deep insight in your data](https://www.yuque.com/docs/share/3f32e044-3530-4ebe-9b01-287bfbdb7ce0?#)
-+ visual insight api: [visual-insights](https://github.com/Kanaries/visual-insights/blob/master/README.md)
 + doc for reuseable hooks: todos
 
 ## Reference
