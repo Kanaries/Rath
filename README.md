@@ -2,16 +2,14 @@
 
 # Rath
 
-![](https://travis-ci.org/ObservedObserver/visual-insights.svg?branch=master)
-![](https://img.shields.io/github/license/ObservedObserver/showme)
+![](https://travis-ci.org/kanaries/rath.svg?branch=master)
+![](https://img.shields.io/badge/license-AGPL-brightgreen)
+![](https://img.shields.io/github/stars/kanaries/rath?color=%23ff85c0)
 
 
 <img src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/kanaries-light-bg.png" alt="logo" width="180px" style="" />
 
-Augmented Analytics tool. Help you automate explore data and recommend visualization based on human visual perception.
-
-
-Rath can recommend high-dimensional visualization which contains deep and complex patterns.
+RATH is an automated data exploration tool, which can help you automated discovery patterns & insights, generate charts and dashboards from muti-dimensional data. It uses AI enhanced engine to automate the working flow in data analysis.
 
 + Try Latest version !! [demo(latest)](https://ch-rath.oss-ap-northeast-1.aliyuncs.com/)
 + Try Stable version [demo(stable)](https://kanaries.github.io/Rath/)
