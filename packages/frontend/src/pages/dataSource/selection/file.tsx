@@ -37,13 +37,17 @@ const FileData: React.FC<FileDataProps> = (props) => {
                 key: 'us-ascii'
             },
             {
-                text: 'big5',
+                text: 'Big5',
                 key: 'big5'
+            },
+            {
+                text: 'Big5-HKSCS',
+                key: 'Big5-HKSCS'
             },
             {
                 text: 'GB18030',
                 key: 'GB18030'
-            }
+            },
         ]
     }, [])
 

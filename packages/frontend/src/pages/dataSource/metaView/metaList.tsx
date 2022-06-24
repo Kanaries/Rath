@@ -1,10 +1,11 @@
-import { ChoiceGroup, IChoiceGroupOption, Separator, Toggle } from 'office-ui-fabric-react';
+import { ChoiceGroup, DefaultButton, IChoiceGroupOption, Separator, Toggle } from 'office-ui-fabric-react';
 import React from 'react';
 import styled from 'styled-components';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { IFieldMeta, IRawField, IRow } from '../../../interfaces';
 import DistributionChart from './distChart';
 import intl from 'react-intl-universal'
+import FieldFilter from '../../../components/fieldFilter';
 
 const MetaContainer = styled.div`
     overflow: auto;
@@ -146,6 +147,9 @@ const MetaItem: React.FC<MetaItemProps> = props => {
                         onChange && onChange(colKey, 'disable', !checked)
                     }}
                 />
+            </div>
+            <div className="operation-column">
+                <FieldFilter fid={colKey} />
             </div>
         </div>
     </MetaItemContainer>

@@ -100,3 +100,15 @@ export enum IResizeMode {
     auto = 'auto',
     control = 'control'
 }
+
+export type IFilter = {
+    fid: string;
+    disable?: boolean;
+    type: 'set';
+    values: any[]
+} | {
+    fid: string;
+    disable?: boolean;
+    type: 'range';
+    range: [number, number]
+}
