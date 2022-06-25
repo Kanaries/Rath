@@ -63,10 +63,16 @@ const LTSPage: React.FC = props => {
     const { ltsPipeLineStore, exploreStore, commonStore } = useGlobalStore();
     const { computing, fieldMetas } = ltsPipeLineStore;
 
-    const { pageIndex, visualConfig, spec, showSubinsights, insightSpaces } = exploreStore;
+    const {
+        pageIndex,
+        visualConfig,
+        spec,
+        // showSubinsights,
+        insightSpaces
+    } = exploreStore;
     const { taskMode } = commonStore
     const [showCommonVis, setShowCommonVis] = useState<boolean>(true);
-    const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
+    // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
     const startAnalysis = useCallback(() => {
         ltsPipeLineStore.startTask(taskMode).then(() => {
@@ -96,7 +102,7 @@ const LTSPage: React.FC = props => {
     return <div className="content-container">
         <VizPreference />
         <SaveModal />
-        <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { exploreStore.setShowSubinsights(false) }} />
+        {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { exploreStore.setShowSubinsights(false) }} /> */}
         <div className="card">
             <CommandBarButton
                 style={{ float: 'right' }}

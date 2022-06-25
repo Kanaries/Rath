@@ -1,4 +1,5 @@
 import { Cluster, IInsightSpace, Insight } from 'visual-insights'
+import { Cube } from 'visual-insights/build/esm/cube';
 import { DataGraph } from 'visual-insights/build/esm/insights/InsightFlow/dataGraph';
 import { ViewSpace } from 'visual-insights/build/esm/insights/InsightFlow/engine';
 import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
@@ -221,7 +222,6 @@ class CustomDataGraph extends DataGraph {
                 uniqueClusters.push(clusters[i])
             }
         }
-        // console.log(uniqueClusters, dimensions)
         this.DClusters = uniqueClusters
         return uniqueClusters//this.DClusters;
     }
@@ -260,6 +260,22 @@ export class RathEngine extends VIEngine {
         // vie.workerCollection.register('identity', identityWorker);
         // vie.workerCollection.enable(DefaultIWorker.outlier, false);
         // vie.workerCollection.enable(DefaultIWorker.trend, false);
+    }
+    public async buildCube(injectCube?: Cube) {
+        const { measures, dataSource, dataGraph, dimensions, aggregators } = this;
+        let cube: Cube = injectCube || new Cube({
+            dimensions,
+            measures,
+            dataSource,
+            ops: aggregators
+        });
+        if (typeof injectCube === 'undefined') {
+            cube.storage.env = this.env;
+        }
+        await cube.buildBaseCuboid();
+        await Promise.all(dataGraph.DClusters.map((group) => cube.buildCuboidOnCluster(group)))
+        this.cube = cube;
+        return this;
     }
     public async createInsightSpaces(viewSpaces: ViewSpace[] = this.subSpaces): Promise<IInsightSpace[]> {
         const uniqueSet: Set<string> = new Set()
