@@ -167,7 +167,7 @@ const PatternPage: React.FC = props => {
     return <div className="content-container">
         <Settings />
         <div className="card">
-            computing { computing && 'yes' }
+            { computing && 'yes' }
             <ActionButton
                 style={{ float: 'right' }}
                 iconProps={{ iconName: 'Settings' }}
