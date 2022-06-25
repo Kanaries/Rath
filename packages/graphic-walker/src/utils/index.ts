@@ -1,4 +1,5 @@
-import { Record, Filters } from '../interfaces';
+import { COUNT_FIELD_ID } from '../constants';
+import { Record, Filters, IMutField, IRow } from '../interfaces';
 interface NRReturns {
     normalizedData: Record[];
     maxMeasures: Record;
@@ -244,4 +245,24 @@ export function applyFilters(dataSource: Record[], filters: Filters): Record[] {
         }
         return keep;
     });
+}
+
+export function extendCountField (dataSource: IRow[], fields: IMutField[]): {
+    dataSource: IRow[];
+    fields: IMutField[];
+} {
+    const nextData = dataSource.map(r => ({
+        ...r,
+        [COUNT_FIELD_ID]: 1
+    }))
+    const nextFields = fields.concat({
+        fid: COUNT_FIELD_ID,
+        name: '记录数',
+        analyticType: 'measure',
+        semanticType: 'quantitative'
+    })
+    return {
+        dataSource: nextData,
+        fields: nextFields
+    }
 }

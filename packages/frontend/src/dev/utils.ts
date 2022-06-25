@@ -42,6 +42,7 @@ const BIN_SIZE = 16;
 export function bin(nums: number[]): number[] {
     const [_min, _max] = getRange(nums)
     let step = (_max - _min) / BIN_SIZE;
+    if (step === 0) return new Array(BIN_SIZE).fill(nums.length / BIN_SIZE)
     let dist: number[] = new Array(BIN_SIZE + 1).fill(0);
     for (let i = 0; i < nums.length; i++) {
         let numIndex = Math.floor((nums[i] - _min) / step)
@@ -53,7 +54,7 @@ export function bin(nums: number[]): number[] {
 
 export function binShareRange(nums: number[], _min: number, _max: number): number[] {
     let step = (_max - _min) / BIN_SIZE;
-    // for (let i = 0; i < nums)
+    if (step === 0) return new Array(BIN_SIZE).fill(nums.length / BIN_SIZE)
     let dist: number[] = new Array(BIN_SIZE + 1).fill(0);
     for (let i = 0; i < nums.length; i++) {
         let numIndex = Math.floor((nums[i] - _min) / step)
@@ -66,6 +67,7 @@ export function binShareRange(nums: number[], _min: number, _max: number): numbe
 export function binMap(nums: number[]): number[] {
     const [_min, _max] = getRange(nums);
     let step = (_max - _min) / BIN_SIZE;
+    if (step === 0) return nums.map(n => Math.round(Math.random() * (nums.length - 1)))
     let ans: number[] = [];
     for (let i = 0; i < nums.length; i++) {
         let numIndex = Math.floor((nums[i] - _min) / step)
@@ -79,6 +81,7 @@ export function binMap(nums: number[]): number[] {
 
 export function binMapShareRange(nums: number[], _min: number, _max: number): number[] {
     let step = (_max - _min) / BIN_SIZE;
+    if (step === 0) return nums.map(n => Math.round(Math.random() * (nums.length - 1)))
     let ans: number[] = [];
     for (let i = 0; i < nums.length; i++) {
         let numIndex = Math.floor((nums[i] - _min) / step)

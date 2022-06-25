@@ -5,10 +5,11 @@ import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow } from "../interfaces";
+import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter } from "../interfaces";
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
+import { getQuantiles } from "../pages/dataSource/utils";
 import { extendDataService, getFieldsSummaryService, inferMetaService } from "../service";
-import { findRathSafeColumnIndex, Transform } from "../utils";
+import { findRathSafeColumnIndex, getRange, Transform } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
 
 interface IDataMessage {
@@ -41,6 +42,7 @@ export class DataSourceStore {
      * This is defined by user's purpose or domain knowledge.
      */
     public mutFields: IRawField[] = [];
+    public filters: IFilter[] = [];
     
     // public fields: BIField[] = [];
     public cookedDataSource: IRow[] = [];
@@ -54,6 +56,7 @@ export class DataSourceStore {
     public loading: boolean = false;
     public dataPreviewMode: IDataPreviewMode = IDataPreviewMode.data;
     public showDataImportSelection: boolean = false;
+    public showFastSelectionModal: boolean = false;
     private fieldMetasRef: IStreamListener<IFieldMeta[]>;
     constructor() {
         makeAutoObservable(this, {
@@ -193,9 +196,26 @@ export class DataSourceStore {
         return size * Math.log2(m)
     }
 
+    public get filteredData () {
+        const { rawData, filters } = this;
+        const ans: IRow[] = [];
+        if (filters.length === 0) return rawData;
+        const effectFilters = filters.filter(f => !f.disable);
+        for (let i = 0; i < rawData.length; i++) {
+            const row = rawData[i];
+            let keep = effectFilters.every(f => {
+                if (f.type === 'range') return f.range[0] <= row[f.fid] && row[f.fid] <= f.range[1];
+                if (f.type === 'set') return f.values.includes(row[f.fid]);
+                return false;
+            })
+            if (keep) ans.push(row);
+        }
+        return ans
+    }
+
     public get cleanedData () {
-        const { rawData, dimensions, measures, cleanMethod } = this;
-        const dataSource = rawData.map((row) => {
+        const { filteredData, dimensions, measures, cleanMethod } = this;
+        const dataSource = filteredData.map((row) => {
             let record: IRow = {};
             this.fields.forEach((field) => {
                 // if (field.type === 'dimension') {
@@ -222,6 +242,55 @@ export class DataSourceStore {
         });
 
         return cleanData(dataSource, dimensions, measures, cleanMethod)
+    }
+
+    public addFilter () {
+        const sampleField = this.fieldMetas.find(f => f.semanticType === 'quantitative');
+        this.filters = []
+        if (sampleField) {
+            this.filters.push({
+                fid: sampleField.fid,
+                disable: false,
+                type: 'range',
+                range: [0, Math.random() * 10]
+            })
+        }
+    }
+
+    public setFilter (filter: IFilter) {
+        const filterIndex = this.filters.findIndex(f => f.fid === filter.fid);
+        if (filterIndex > -1) {
+            this.filters.splice(filterIndex, 1, { ...filter });
+        } else {
+            this.filters.push({
+                ...filter
+            })
+        }
+        console.log(this.filters)
+    }
+    public createBatchFilterByQts (fieldIdList: string[], qts: [number, number][]) {
+        const { rawData } = this;
+
+        for (let i = 0; i < fieldIdList.length; i++) {
+            // let domain = getRange();
+            let range = getQuantiles(rawData.map(r => Number(r[fieldIdList[i]])), qts[i]) as [number, number]; 
+            // if (this.filters.find())
+            const filterIndex = this.filters.findIndex(f => f.fid === fieldIdList[i])
+            const newFilter: IFilter = {
+                fid: fieldIdList[i],
+                type: 'range',
+                range
+            }
+            if (filterIndex > -1) {
+                this.filters.splice(filterIndex, 1, newFilter)
+            } else {
+                this.filters.push(newFilter)
+            }
+        }
+    }
+
+    public setShowFastSelection (show: boolean) {
+        this.showFastSelectionModal = show;
     }
 
     public setLoading (loading: boolean) {

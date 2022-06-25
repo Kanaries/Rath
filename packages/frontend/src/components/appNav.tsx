@@ -31,26 +31,45 @@ const LogoBar = styled.div`
     }
 `
 
+const IconMap = {
+    [PIVOT_KEYS.lts]: 'Robot',
+    [PIVOT_KEYS.pattern]: 'Manufacturing',
+    [PIVOT_KEYS.editor]: 'LineChart',
+    [PIVOT_KEYS.support]: 'Telemarketer',
+    [PIVOT_KEYS.dataSource]: 'DataManagementSettings',
+    [PIVOT_KEYS.noteBook]: 'Game',
+    [PIVOT_KEYS.dashBoard]: 'ViewDashboard',
+    [PIVOT_KEYS.gallery]: 'ReadingMode',
+    [PIVOT_KEYS.explainer]: 'SiteScan'
+} as {
+    [key: string]: string
+}
+
+function getIcon (k: string): string {
+    return IconMap[k] || 'Settings'
+}
+
 interface AppNavProps {}
 const AppNav: React.FC<AppNavProps> = props => {
     const { commonStore } = useGlobalStore()
 
-    const { appKey } = commonStore;
+    const { appKey, navMode } = commonStore;
 
     const getLinks = useCallback((pivotKeys: string[]) => {
         return pivotKeys.map(p => {
             return {
                 url: `#${p}`,
                 key: p,
-                name: intl.get(`menu.${p}`),
+                name: navMode === 'text' ? intl.get(`menu.${p}`) : '',
                 forceAnchor: true,
+                iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
                 onClick (e: any) {
                     e.preventDefault();
                     commonStore.setAppKey(p)
                 }
             }
         })
-    }, [commonStore])
+    }, [commonStore, navMode])
 
     const groups: INavLinkGroup[] = [
         {
@@ -63,7 +82,7 @@ const AppNav: React.FC<AppNavProps> = props => {
                 {
                     url: '#dev-mode',
                     key: intl.get('menu.devCollection'),
-                    name: intl.get('menu.devCollection'),
+                    name: navMode === 'text' ? intl.get('menu.devCollection') : '',
                     isExpanded: false,
                     forceAnchor: true,
                     onClick (e: any) { e.preventDefault() },
@@ -76,7 +95,8 @@ const AppNav: React.FC<AppNavProps> = props => {
                 },
                 {
                     url: '/',
-                    name: intl.get('common.home')
+                    name: navMode === 'text' ? intl.get('common.home') : '',
+                    iconProps: navMode === 'icon' ? {iconName: 'Home'} : undefined
                 },
                 ...getLinks([PIVOT_KEYS.support]),
                 // ...pivotList.map(item => {
@@ -106,7 +126,7 @@ const AppNav: React.FC<AppNavProps> = props => {
                     alt="rath"
                 />
             </a>
-            <h1>RATH</h1>
+            {navMode === 'text' && <h1>RATH</h1>}
         </LogoBar>
         <Nav
             selectedKey={appKey}

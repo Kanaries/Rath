@@ -2,6 +2,7 @@ import { SortAscendingIcon, SortDescendingIcon } from '@heroicons/react/outline'
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { DraggableProvided } from 'react-beautiful-dnd';
+import { COUNT_FIELD_ID } from '../../constants';
 import { IDraggableStateKey } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { Pill } from '../components';
@@ -25,7 +26,7 @@ const OBPill: React.FC<PillProps> = props => {
         {...provided.dragHandleProps}
     >
         {field.name}&nbsp;
-        {field.analyticType === 'measure' && visualConfig.defaultAggregated && (
+        {field.analyticType === 'measure' && field.fid !== COUNT_FIELD_ID && visualConfig.defaultAggregated && (
             <select
                 className="bg-transparent text-gray-700 float-right focus:outline-none focus:border-gray-500"
                 value={field.aggName || ''}

@@ -1,5 +1,5 @@
 import { makeAutoObservable, observable, runInAction } from "mobx";
-import { Sampling, Specification } from "visual-insights";
+import { ICubeStorageManageMode, Sampling, Specification } from "visual-insights";
 import { IFieldSummary, IInsightSpace } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 
 import { IRow, ISyncEngine, ITaskTestMode } from "../../interfaces";
@@ -23,6 +23,7 @@ export class LTSPipeLine {
     public dataSource: IRow[] = [];
     public samplingDataSource: IRow[] = [];
     public computing: boolean = false;
+    public cubeStorageManageMode: ICubeStorageManageMode = ICubeStorageManageMode.LocalMix;
     constructor (dataSourceStore: DataSourceStore, commonStore: CommonStore, clickHouseStore: ClickHouseStore) {
         makeAutoObservable(this, {
             insightSpaces: observable.ref,
@@ -51,7 +52,9 @@ export class LTSPipeLine {
     public get fieldMetas () {
         return this.dataSourceStore.fieldMetas;
     }
-
+    public setCubeStorageManageMode (mode: ICubeStorageManageMode) {
+        this.cubeStorageManageMode = mode;
+    }
     public async startTask (taskMode: ITaskTestMode = ITaskTestMode.local) {
         const { cleanedData, fieldMetas } = this.dataSourceStore;
         this.computing = true;
@@ -63,6 +66,7 @@ export class LTSPipeLine {
                     props: {
                         mode: this.commonStore.computationEngine,
                         dataSource: cleanedData,
+                        cubeStorageManageMode: this.cubeStorageManageMode,
                         fieldMetas,
                         viewName: `${this.clickHouseStore.currentDB}.${this.clickHouseStore.currentView}`
                     }

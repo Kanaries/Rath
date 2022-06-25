@@ -4,7 +4,7 @@ import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
 import { IInsightSpace, Specification } from "visual-insights";
 import { PreferencePanelConfig } from "../../../components/preference";
 import { IFieldMeta, IRow } from "../../../interfaces";
-import { CommandButton, IconButton } from "office-ui-fabric-react";
+import { CommandButton } from "office-ui-fabric-react";
 import intl from 'react-intl-universal';
 export interface IVizSpace extends IInsightSpace {
     schema: Specification;

@@ -22,7 +22,7 @@ const MetaView: React.FC = props => {
             features: meta ? meta.features: { entropy: 0, maxEntropy: 0, unique: dist.length }
         }
     })
-
+    // 这里加入一个快捷操作，只使用主体数据
     return <div>
         <MetaList metas={expandMetas} onChange={updateFieldInfo} />
     </div>

@@ -17,7 +17,7 @@ const PatternSetting: React.FC = () => {
     const { vizAlgo } = settings;
     return <Panel
         isOpen={showSettings}
-        headerText="Settings"
+        headerText={intl.get('common.settings')}
         onDismiss={() => {
             discoveryMainStore.setShowSettings(false);
         }}

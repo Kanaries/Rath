@@ -28,7 +28,7 @@ require('intl/locale-data/jsonp/zh.js')
 
 function App() {
   const { langStore, commonStore } = useGlobalStore()
-  const { appKey } = commonStore;
+  const { appKey, navMode } = commonStore;
 
   useEffect(() => {
     initRathWorker(commonStore.computationEngine);
@@ -93,7 +93,7 @@ function App() {
         </div>
       </div> */}
       <div className="main-app-container">
-        <div className="main-app-nav">
+        <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '20px' }}>
           <AppNav />
         </div>
         <div className="main-app-content">

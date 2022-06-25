@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Specification } from "visual-insights";
 import { GEMO_TYPES } from "../config";
 import { makeBinField } from "../utils/normalization";
+import { COUNT_FIELD_ID } from "../constants";
 
 interface VisualConfig {
     defaultAggregated: boolean;
@@ -135,14 +136,14 @@ export class VizSpecStore {
                     semanticType: f.semanticType,
                     aggName: 'sum'
             }))
-            this.draggableFieldState.measures.push({
-                dragId: uuidv4(),
-                fid: '',
-                name: '记录数',
-                analyticType: 'measure',
-                semanticType: 'quantitative',
-                aggName: 'count'
-            })
+            // this.draggableFieldState.measures.push({
+            //     dragId: uuidv4(),
+            //     fid: COUNT_FIELD_ID,
+            //     name: '记录数',
+            //     analyticType: 'measure',
+            //     semanticType: 'quantitative',
+            //     aggName: 'count'
+            // })
         }))
     }
     /**

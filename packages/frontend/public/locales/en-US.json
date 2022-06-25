@@ -3,7 +3,8 @@
         "dimension": "dimension",
         "measure": "measure",
         "name": "Name",
-        "home": "Home"
+        "home": "Home",
+        "settings": "Settings"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -12,6 +13,7 @@
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
         "editor": "Visual Editor",
+        "vizPipe": "interactive Pipeline",
         "support": "Support",
         "lts": "Explore",
         "pattern": "Build Knowledge(beta)",

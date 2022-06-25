@@ -7,6 +7,7 @@ import { ScenegraphEvent } from 'vega';
 import { autoMark } from '../utils/autoMark';
 import { ISemanticType } from 'visual-insights';
 import styled from 'styled-components';
+import { COUNT_FIELD_ID } from '../constants';
 
 const CanvaContainer = styled.div<{rowSize: number; colSize: number;}>`
   display: grid;
@@ -101,7 +102,11 @@ function channelEncode(props: Pick<SingleViewProps, 'column' | 'opacity' | 'colo
 function channelAggregate(encoding: {[key: string]: any}, fields: IViewField[]) {
   Object.values(encoding).forEach(c => {
     const targetField = fields.find(f => f.fid === c.field);
-    if (targetField && targetField.analyticType === 'measure') {
+    if (targetField && targetField.fid === COUNT_FIELD_ID) {
+      c.field = undefined;
+      c.aggregate = 'count';
+      c.title = 'Count'
+    } else if (targetField && targetField.analyticType === 'measure') {
       c.title = `${targetField.aggName}(${targetField.name})`;
       c.aggregate = targetField.aggName;
     }

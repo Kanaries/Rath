@@ -3,7 +3,8 @@
         "dimension": "维度",
         "measure": "度量",
         "name": "名称",
-        "home": "主页"
+        "home": "主页",
+        "settings": "设置"
     },
     "menu": {
         "dataSource": "数据源",
@@ -273,8 +274,8 @@
             "relateFeatures": "特征推荐",
             "explainDiff": "差异性分析",
             "pointInterests": "拆分",
-            "pin": "选为主视图",
-            "compare": "选为比对视图",
+            "pin": "深入分析",
+            "compare": "比对分析",
             "vizsys": {
                 "title": "可视化推荐系统",
                 "lite": "轻量模式(近似算法、更快)",

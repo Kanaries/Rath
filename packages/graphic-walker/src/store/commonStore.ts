@@ -1,6 +1,7 @@
 import { DataSet, Filters, IDataSet, IDataSetInfo, IDataSource, IMutField, Record } from '../interfaces';
-import { makeAutoObservable, observable } from 'mobx';
+import { makeAutoObservable, observable, toJS } from 'mobx';
 import { transData } from '../dataSource/utils';
+import { extendCountField } from '../utils';
 
 interface VisualConfig {
     defaultAggregated: boolean;
@@ -34,9 +35,12 @@ export class CommonStore {
         if (this.datasets.length > 0) {
             const dataSourceId = this.datasets[datasetIndex].dsId;
             const dataSource = this.dataSources.find(d => d.id === dataSourceId);
+            const rawFields = toJS(this.datasets[datasetIndex].rawFields)
+            const base = extendCountField((dataSource ? dataSource.data : []), rawFields)
             return {
                 ...this.datasets[datasetIndex],
-                dataSource: dataSource ? dataSource.data : []
+                dataSource: base.dataSource,
+                rawFields: base.fields
             }
         }
         return {

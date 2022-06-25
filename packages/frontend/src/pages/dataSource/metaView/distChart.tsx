@@ -62,6 +62,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         } else {
             adjustData = dataSource
         }
+        adjustData = adjustData.slice(0, 100)
         return adjustData
     }, [dataSource, x, y, semanticType])
 
