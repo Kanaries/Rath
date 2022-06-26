@@ -98,17 +98,9 @@ export function checkMajorFactor(data: Record[], childrenData: Map<any, Record[]
                     let targetValue = (typeof target![mea] === 'number' && !isNaN(target![mea])) ? target![mea] : 0;
                     targetValue = (targetValue) / totalMeasures[mea]
                     sum += Math.abs(record[mea] - targetValue)
-                    // console.log(
-                    //   'target',
-                    //   target,
-                    //   mea,
-                    //   record[mea],
-                    //   targetValue
-                    // );
                 })
             } else {
                 measures.forEach(mea => {
-                    // console.log('empty', target, mea, record[mea]);
                     sum += Math.abs(record[mea]);
                 })
             }
@@ -135,22 +127,13 @@ export function checkChildOutlier(data: Record[], childrenData: Map<any, Record[
             let target = normalizedChildData.find(childRecord => {
                 return dimensions.every(dim => record[dim] === childRecord[dim])
             })
-            // console.log(normalizedChildData)
             if (target) {
                 measures.forEach(mea => {
                     let targetValue = (typeof target![mea] === 'number' && !isNaN(target![mea])) ? target![mea] : 0;
                     sum += Math.abs(record[mea] - targetValue)
-                    // console.log(
-                    //   'target',
-                    //   target,
-                    //   mea,
-                    //   record[mea],
-                    //   targetValue
-                    // );
                 })
             } else {
                 measures.forEach(mea => {
-                    // console.log('empty', target, mea, record[mea]);
                     sum += Math.abs(record[mea]);
                 })
             }
@@ -227,7 +210,6 @@ export function filterByPredicates(data: Record[], predicates: IPredicate[]): Re
         }
       });
     });
-    // console.log('filter', data, filterData)
     return filterData;
 }
 

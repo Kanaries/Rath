@@ -24,7 +24,6 @@ export function transData(dataSource: Record[]): {
     // 这里我们使用了一种非原API设计时期待的用法，即强制指定单变量选择时要全选字段。但我们无法阻止对变量的转换。
     vie.univarSelection('percent', 1);
     const fields = vie.fields;
-    // console.log(fields)
     for (let record of dataSource) {
         const newRecord: Record = {};
         for (let field of fields) {

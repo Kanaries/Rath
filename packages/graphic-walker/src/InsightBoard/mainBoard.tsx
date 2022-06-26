@@ -75,16 +75,6 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
         currentSpace,
         filters
       }).then(({ visSpaces, explainations, valueExp }) => {
-        console.log({
-          porps: {
-            dimensions,
-            measures,
-            dataSource,
-            currentSpace,
-            filters
-          },
-          res: { visSpaces, explainations, valueExp }
-        })
         setRecSpaces(explainations);
         setVisSpaces(visSpaces);
         setValueExp(valueExp);

@@ -1,11 +1,10 @@
 import { IReactionDisposer, makeAutoObservable, reaction, toJS } from "mobx";
-import { IViewField } from "../interfaces";
+import { DraggableFieldState, IViewField } from "../interfaces";
 import { CommonStore } from "./commonStore";
 import { v4 as uuidv4 } from 'uuid';
 import { Specification } from "visual-insights";
 import { GEMO_TYPES } from "../config";
-import { makeBinField } from "../utils/normalization";
-import { COUNT_FIELD_ID } from "../constants";
+import { makeBinField, makeLogField } from "../utils/normalization";
 
 interface VisualConfig {
     defaultAggregated: boolean;
@@ -21,16 +20,6 @@ interface VisualConfig {
     }
 }
 
-export interface DraggableFieldState {
-    fields: IViewField[];
-    dimensions: IViewField[];
-    measures: IViewField[];
-    rows: IViewField[];
-    columns: IViewField[];
-    color: IViewField[];
-    opacity: IViewField[];
-    size: IViewField[];
-}
 
 export const MetaFieldKeys: Array<keyof DraggableFieldState> = [
     'dimensions',
@@ -44,10 +33,13 @@ const CHANNEL_LIMIT = {
     color: 1,
     opacity: 1,
     size: 1,
+    shape: 1,
+    theta: 1,
+    radius: 1
 }
 
 function getChannelSizeLimit (channel: string): number {
-    if (typeof CHANNEL_LIMIT[channel] === 'undefined') return 0;
+    if (typeof CHANNEL_LIMIT[channel] === 'undefined') return Infinity;
     return CHANNEL_LIMIT[channel];
 }
 
@@ -65,6 +57,10 @@ function geomAdapter (geom: string) {
             return 'area';
         case 'point':
             return 'point';
+        case 'arc':
+            return 'arc';
+        case 'circle':
+            return 'circle';
         case 'heatmap':
             return 'circle'
         case 'rect':
@@ -103,7 +99,10 @@ export class VizSpecStore {
             columns: [],
             color: [],
             opacity: [],
-            size: []
+            size: [],
+            shape: [],
+            radius: [],
+            theta: []
         }
         makeAutoObservable(this);
         // FIXME!!!!!
@@ -183,7 +182,10 @@ export class VizSpecStore {
             columns: [],
             color: [],
             opacity: [],
-            size: []
+            size: [],
+            shape: [],
+            radius: [],
+            theta: []
         }
     }
     public clearState () {
@@ -205,6 +207,11 @@ export class VizSpecStore {
             this.visualConfig[configKey] = value;
         } else {
             console.error('unknow key' + configKey)
+        }
+    }
+    public transformCoord (coord: 'cartesian' | 'polar') {
+        if (coord === 'polar') {
+            
         }
     }
     public setChartLayout(props: {mode: VisualConfig['size']['mode'], width?: number, height?: number }) {
@@ -260,6 +267,18 @@ export class VizSpecStore {
         };
         this.draggableFieldState.dimensions.push(binField);
         this.commonStore.currentDataset.dataSource = makeBinField(this.commonStore.currentDataset.dataSource, originField.fid, binField.fid)
+    }
+    public createLogField(stateKey: keyof DraggableFieldState, index: number) {
+        const originField = this.draggableFieldState[stateKey][index];
+        const logField: IViewField = {
+            fid: uuidv4(),
+            dragId: uuidv4(),
+            name: `log10(${originField.name})`,
+            semanticType: 'quantitative',
+            analyticType: originField.analyticType
+        }
+        this.draggableFieldState[stateKey].push(logField);
+        this.commonStore.currentDataset.dataSource = makeLogField(this.commonStore.currentDataset.dataSource, originField.fid, logField.fid)
     }
     public setFieldAggregator (stateKey: keyof DraggableFieldState, index: number, aggName: string) {
         const fields = this.draggableFieldState[stateKey]

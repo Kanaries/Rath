@@ -20,7 +20,6 @@ const OBPill: React.FC<PillProps> = props => {
     const field = vizStore.draggableFieldState[dkey.id][fIndex];
     return <Pill
         ref={provided.innerRef}
-        // type={f.type}
         colType={field.analyticType === 'dimension' ? 'discrete' : 'continuous'}
         {...provided.draggableProps}
         {...provided.dragHandleProps}

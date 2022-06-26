@@ -10,20 +10,21 @@ const COLORS = {
     // dimension: 'rgb(86, 170, 208)',
     // measure: 'rgb(232, 149, 72)',
     dimension: '#00b7c3',
-    measure: '#00ad56'
+    measure: '#00ad56',
+    black: '#000',
+    white: '#fff'
 }
 
 export const Pill = styled.div<{colType: IFieldMeta['analyticType']}>`
-  background-color: ${props => props.colType === 'measure' ? COLORS.measure : COLORS.dimension};
-  color: #fff;
-  -moz-user-select: none;
+  background-color: ${props => props.colType === 'measure' ? COLORS.white : COLORS.black};
+  border-color: ${props => props.colType === 'measure' ? COLORS.black : COLORS.white};
+  color: ${props => props.colType === 'measure' ? COLORS.black : COLORS.white};
   -ms-user-select: none;
   -webkit-align-items: center;
   -webkit-user-select: none;
   align-items: center;
-  border-color: transparent;
   /* border-radius: 10px; */
-  border-radius: 3px;
+  border-radius: 10px;
   border-style: solid;
   border-width: 1px;
   box-sizing: border-box;

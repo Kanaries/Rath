@@ -9,7 +9,6 @@ export const AestheticSegment = styled.div`
 
   .aes-header{
     border-bottom: 1px solid #dfe3e8;
-    background-color: #f5f5f5;
     padding: 0.6em;
     h4 {
       font-weight: 400;
@@ -62,7 +61,6 @@ export const FieldListSegment = styled.div`
     /* flex-basis: 100px; */
     width: 100px;
     border-right: 1px solid #dfe3e8;
-    background-color: #f5f5f5;
     flex-shrink: 0;
     h4 {
       margin: 0.6em;
@@ -79,14 +77,14 @@ export const FieldListSegment = styled.div`
 `;
 
 export const Pill = styled.div<{colType: 'discrete' | 'continuous'}>`
-  background-color: ${props => props.colType === 'continuous' ? COLORS.measure : COLORS.dimension};
-  color: #fff;
+  background-color: ${props => props.colType === 'continuous' ? COLORS.white : COLORS.black};
+  border-color: ${props => props.colType === 'continuous' ? COLORS.black : COLORS.white};
+  color: ${props => props.colType === 'continuous' ? COLORS.black : COLORS.white};
   -moz-user-select: none;
   -ms-user-select: none;
   -webkit-align-items: center;
   -webkit-user-select: none;
   align-items: center;
-  border-color: transparent;
   border-radius: 10px;
   border-style: solid;
   border-width: 1px;
@@ -100,5 +98,11 @@ export const Pill = styled.div<{colType: 'discrete' | 'continuous'}>`
   overflow-y: hidden;
   padding: 0 10px;
   user-select: none;
+  /* --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow-color: rgb(6 182 212/0.5);
+  --tw-shadow: var(--tw-shadow-colored);
+  --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color),0 4px 6px -4px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow); */
 `
 
