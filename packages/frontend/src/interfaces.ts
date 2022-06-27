@@ -66,7 +66,8 @@ export interface PreferencePanelConfig {
         width: number;
         height: number;
     },
-    visMode: 'common' | 'dist'
+    visMode: 'common' | 'dist';
+    nlg: boolean;
 }
 export interface IDBFieldMeta {
     fid: string;

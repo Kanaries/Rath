@@ -11,7 +11,8 @@ interface IMainVizSetting {
         mode: IResizeMode;
         width: number;
         height: number;
-    }
+    };
+    nlg: boolean;
 }
 export class DiscoveryMainStore {
     public settings: ISetting;
@@ -25,7 +26,8 @@ export class DiscoveryMainStore {
                 mode: IResizeMode.auto,
                 width: 320,
                 height: 320,
-            }
+            },
+            nlg: false
         }
         this.settings = {
             vizAlgo: 'lite'

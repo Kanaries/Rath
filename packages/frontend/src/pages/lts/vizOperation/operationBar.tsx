@@ -117,6 +117,16 @@ const OperationBar: React.FC<OperationBarProps> = props => {
                     }} />
                 </Stack.Item>
                 <Stack.Item>
+                    <Toggle label="NLG"
+                        checked={visualConfig.nlg}
+                        onChange={(e, checked) => {
+                            exploreStore.setVisualConig((cnf => {
+                                cnf.nlg = Boolean(checked)
+                            }))
+                        }}
+                    />
+                </Stack.Item>
+                <Stack.Item>
                     <Dropdown selectedKey={visualConfig.resize}
                         label={intl.get('lts.operation.resize')}
                         options={resizeModeList}

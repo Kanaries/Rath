@@ -43,6 +43,10 @@ const OperationBar: React.FC = props => {
                     discoveryMainStore.updateMainVizSettings(s => {
                         s.debug = value
                     })
+                } else if (key === 'nlg') {
+                    discoveryMainStore.updateMainVizSettings(s => {
+                        s.nlg = value
+                    })
                 }
             }}
         />

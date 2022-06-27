@@ -151,6 +151,34 @@ export function baseVis(props: BaseVisProps) {
       }
     }
   }
+  // if (geomType[0] === 'interval') {
+  //   const valueAxis = [fieldMap.x, fieldMap.y].filter(f => getFieldSemanticType(f) === 'quantitative');
+  //   const catAxis = [fieldMap.x, fieldMap.y].filter(f => getFieldSemanticType(f) !== 'quantitative');
+  //   if (valueAxis.length > 0 && catAxis.length > 0) {
+  //     spec.transform = []
+  //     spec.transform.push(
+  //       {
+  //         "aggregate": [{"op": "mean", "field": valueAxis[0], "as": `aggregate_${valueAxis[0]}`}],
+  //         "groupby": catAxis
+  //       },
+  //       {
+  //         "window": [{"op": "row_number", "as": "rank"}],
+  //         "sort": [{ "field": `aggregate_${valueAxis[0]}`, "order": "descending" }]
+  //       },
+  //       {
+  //         "calculate": `datum.rank < 10 ? datum['${catAxis[0]}'] : 'All Others'`, "as": "ranked_director"
+  //       }
+  //     )
+  //     for (let c in basicSpec.encoding) {
+  //       if (fieldMap[c] === valueAxis[0]) {
+  //         basicSpec.encoding[c].field = `aggregate_${valueAxis[0]}`
+  //       }
+  //       if (fieldMap[c] === catAxis[0]) {
+  //         basicSpec.encoding[c].field = 'ranked_director'
+  //       }
+  //     }
+  //   }
+  // }
   applySizeConfig(basicSpec, {
     mode: sizeMode,
     width,

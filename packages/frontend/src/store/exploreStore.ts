@@ -64,7 +64,8 @@ export class ExploreStore {
             resizeConfig: {
                 width: 320,
                 height: 320
-            }
+            },
+            nlg: false
         };
         this.globalConstraints = {
             dimensions: [],

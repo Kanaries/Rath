@@ -19,6 +19,7 @@ import OperationBar from './vizOperation/operationBar';
 import FieldContainer from './vizOperation/fieldContainer';
 import { IResizeMode } from '../../interfaces';
 import ResizeContainer from './resizeContainer';
+import Narrative from './narrative';
 // import ReactVega from '../../components/react-vega';
 // import { labDistVis } from '../../queries/labdistVis';
 // import { IFieldMeta } from '../../interfaces';
@@ -203,6 +204,7 @@ const LTSPage: React.FC = props => {
                     </div>
                     <div className="insight-info">
                         <VizOperation />
+                        { visualConfig.nlg && <Narrative /> }
                     </div>
                 </div>
                 <div>
