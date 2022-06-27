@@ -13,6 +13,7 @@
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
         "editor": "Visual Editor",
+        "vizPipe": "interactive Pipeline",
         "support": "Support",
         "lts": "Explore",
         "pattern": "Build Knowledge(beta)",
