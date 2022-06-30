@@ -6,6 +6,7 @@ module.exports = function override(config, env) {
       loader: 'worker-loader',
       options: {
         inline: 'fallback',
+        filename: '[path].[name].[contenthash].worker.js'
       },
     },
   })
