@@ -3,7 +3,7 @@ import { ICubeStorageManageMode, Sampling, Specification } from "visual-insights
 import { IFieldSummary, IInsightSpace } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 
 import { IRow, ISyncEngine, ITaskTestMode } from "../../interfaces";
-import { IVizSpace } from "../../pages/lts/association/assCharts";
+import { IVizSpace } from "../../pages/megaAutomation/association/assCharts";
 import { initRathWorker, rathEngineServerService, rathEngineService } from "../../service";
 import { IRathStorage } from "../../utils/storage";
 import { ClickHouseStore } from "../clickhouseStore";

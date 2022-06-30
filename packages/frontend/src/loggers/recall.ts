@@ -17,7 +17,6 @@ export async function recallLogger (props: RecallProps) {
                 },
                 body: JSON.stringify(props)
             });
-            // const result = await res.json();
         } catch (error) {
             console.error(error);
         }

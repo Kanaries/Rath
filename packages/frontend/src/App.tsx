@@ -5,13 +5,13 @@ import "./App.css";
 
 import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
-import VisualInterface from './pages/visualInterface';
+import VisualInterface from './pages/manualControl';
 import DataSourceBoard from "./pages/dataSource/index";
 import DashBoardPage from './pages/dashBoard/index';
-import PatternPage from './pages/pattern/index';
+import PatternPage from './pages/semiAutomation/index';
 import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
-import LTSPage from './pages/lts';
+import LTSPage from './pages/megaAutomation';
 import MessageSegment from "./components/messageSegment";
 import AppNav from "./components/appNav";
 import { destroyRathWorker, initRathWorker } from "./service";

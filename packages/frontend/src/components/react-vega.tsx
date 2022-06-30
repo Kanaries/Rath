@@ -17,6 +17,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
   const container = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<Result['view']>()
   useEffect(() => {
+    const viewRef: { view: any } = { view: null }
     if (container.current) {
       embed(container.current, spec, {
         editorUrl: EDITOR_URL,
@@ -24,6 +25,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       }).then(res => {
         setView(res.view);
         const view = res.view;
+        viewRef.view = view;
         try {
           view && view.change('dataSource', vega.changeset().remove(() => true).insert(dataSource))
           view && view.resize();
@@ -32,6 +34,11 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
           console.error(error)
         }
       })
+    }
+    return () => {
+      if (viewRef.view) {
+        viewRef.view.finalize();
+      }
     }
   }, [spec, actions, dataSource])
   useEffect(() => {

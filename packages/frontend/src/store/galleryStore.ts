@@ -138,8 +138,6 @@ export class GalleryStore {
                     dimensions,
                     measures
                 );
-
-                // this.scatterAdjust(schema);
                 return {
                     schema,
                     fieldFeatures: fieldsInView,

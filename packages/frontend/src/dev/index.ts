@@ -2,7 +2,7 @@ import { IRow } from "visual-insights";
 import { entropy, getCombination } from "visual-insights/build/esm/statistics";
 import { IFieldMeta } from "../interfaces";
 import { getRange } from "../utils";
-import { bin, binMapShareRange, generalMatMic, generalMic, incSim, l1Dis2, mic, normalizeScatter, rangeNormilize } from "./utils";
+import { bin, binMapShareRange, binShareRange, generalMatMic, generalMic, incSim, l1Dis2, mic, normalizeScatter, rangeNormilize } from "./utils";
 
 export interface IFilter {
     field: IFieldMeta;
@@ -50,7 +50,7 @@ export class NextVICore {
             let ansDimKey = '';
             let dimvs: any[] = [];
             let bestScore = 0;
-            viewDimNotInFilters.forEach(dim => {
+            for (let dim of viewDimNotInFilters) {
                 const dimValues = this.dataSource.map(row => row[dim.fid]);
                 let meanScore =  0;
                 viewMeasures.forEach(mea => {
@@ -64,28 +64,56 @@ export class NextVICore {
                     ansDimKey = dim.fid;
                     dimvs = dimValues;
                 }
-            })
+            }
             if (ansDimKey!== '') {
                 const dimUniques = new Set(dimvs);
-                // ansDim.
                 for (let v of dimUniques.values()) {
                     let ansFilters: IFilter[] = [];
-                    if (view.filters){ 
+                    const viewFieldsInFilter: IFieldMeta[] = []; // = view.fields.find(f => f.fid === ansDimKey)!;
+                    const viewFieldsNotInFilter: IFieldMeta[] = [];
+                    for (let field of view.fields) {
+                        if (field.fid === ansDimKey) viewFieldsInFilter.push(field);
+                        else {
+                            viewFieldsNotInFilter.push(field)
+                        }
+                    }
+                    if (viewFieldsInFilter.length === 0) continue;
+                    if (view.filters) {
                         ansFilters.push(...view.filters)
                     }
+                    // const groups = new Map();
+                    let score = 0;
+                    for (let mea of viewMeasures) {
+                        // const meaRange = getRange(this.dataSource.map(row => row[mea.fid]))
+                        const values = this.dataSource.map(row => row[mea.fid]);
+                        const meaRange = getRange(values)
+                        const globalDist = rangeNormilize(binShareRange(values, meaRange[0], meaRange[1]));
+                        const subMeaValues: number[] = this.dataSource.filter(row => row[ansDimKey] === v).map(row => row[mea.fid]);
+                        const subDist = rangeNormilize(binMapShareRange(subMeaValues, meaRange[0], meaRange[1]));
+                        let kl = 0;
+                        for (let i = 0; i < globalDist.length; i++) {
+                            if (globalDist[i] > 0 && subDist[i] > 0) {
+                                kl += globalDist[i] * Math.log2(globalDist[i] / subDist[i])
+                            }
+                        }
+                        // score = Math.max(kl, score)
+                        score += kl * (subMeaValues.length / values.length);
+                    }
+                    score /= viewMeasures.length;
+
                     ansFilters.push({
-                        field: view.fields.find(f => f.fid === ansDimKey)!,
+                        field: viewFieldsInFilter[0],
                         values: [v]
                     })
                     ans.push({
-                        imp: 0,
-                        fields: view.fields.filter(f => f.fid !== ansDimKey),
+                        imp: score,
+                        fields: viewFieldsNotInFilter,
                         filters: ansFilters
                     })
                 }
             }
-            // for (let )
         }
+        ans.sort((a, b) => b.imp - a.imp)
         return ans;
     }
     public searchPatterns () {
@@ -128,8 +156,10 @@ export class NextVICore {
                 let score = 0;
                 const T = viewData.map(r => r[measures[i].fid]);
                 for (let j = 0; j < fieldsInView.length; j++) {
-                    const X = viewData.map(r => r[measures[j].fid]);
-                    score += mic(T, X)
+                    if (fieldsInView[j].analyticType === 'measure') {
+                        const X = viewData.map(r => r[fieldsInView[j].fid]);
+                        score += mic(T, X)
+                    }
                 }
                 score /= fieldsInView.length;
                 patterns.push({
@@ -144,7 +174,6 @@ export class NextVICore {
     }
     public firstPattern () {
         const measures = this.fields.filter(f => f.analyticType === 'measure');
-        // console.log(measures.map(f => f.fid))
         const matrix: number[][] = new Array(measures.length).fill(0).map(() => new Array(measures.length).fill(0));
         for (let i = 0; i < measures.length; i++) {
             for (let j = 0 ; j < measures.length; j++) {
@@ -180,7 +209,6 @@ export class NextVICore {
         for (let i = 0; i < patternNum; i++) {
             for (let j = i + 1; j < patternNum; j++) {
                 matrix[i][j] = matrix[j][i] = l1Dis2(normizedScatters[i], normizedScatters[j])
-                // console.log(matrix[i][j], patterns[i], patterns[j])
             }
         }
         return matrix

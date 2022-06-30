@@ -6,7 +6,7 @@ import { distVis } from '../../queries/distVis'
 import ReactVega from '../../components/react-vega';
 import { DefaultButton, Stack, PrimaryButton, ActionButton, CommandButton, Spinner } from 'office-ui-fabric-react';
 import { AssoContainer, LoadingLayer, MainViewContainer } from './components';
-import ViewField from '../lts/vizOperation/viewField';
+import ViewField from '../megaAutomation/vizOperation/viewField';
 import { IFieldMeta, IResizeMode, IRow } from '../../interfaces';
 import { footmanEngineService } from '../../service';
 import Settings from './settings';
