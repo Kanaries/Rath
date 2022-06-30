@@ -42,10 +42,9 @@ const Narrative: React.FC = props => {
     const fieldsInViz = useMemo(() => {
         return insightSpaces[pageIndex] ? [...insightSpaces[pageIndex].dimensions, ...insightSpaces[pageIndex].measures].map(fid => fms.find(fm => fm.fid === fid)) : []
     }, [insightSpaces, pageIndex, fms]);
-    const [viewInfo, setViewInfo] = useState<any[]>()
+    const [viewInfo, setViewInfo] = useState<any[]>([])
     useEffect(() => {
-        if (true) {
-            fetch('http://localhost:8000/insight', {
+        fetch('http://localhost:8000/insight', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -55,26 +54,18 @@ const Narrative: React.FC = props => {
                     fields: fieldsInViz,
                     aggrType: 'sum'
                 })
-            }).then(res => res.json())
+            })
+            .then(res => res.json())
             .then(res => {
                 if (res.success) {
-                    const ans: { [key: string]: any } = {};
-                    const data = res.data;
-                    // if (data) {
-                    //     Object.keys(data).forEach(k => {
-                    //         if (data[k].score > 0) {
-                    //             ans[k] = data[k]
-                    //         }
-                    //     })
-                    // }
                     setViewInfo(res.data)
+                } else {
+                    throw new Error(res.message)
                 }
             }).catch(err => {
                 console.error(err);
                 setViewInfo([])
             })
-        }
-        
     }, [pageIndex, dataSource, fieldsInViz])
     const explains = useMemo<any[]>(() => {
         if (!viewInfo || viewInfo.length === 0) return []

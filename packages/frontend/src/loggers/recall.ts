@@ -10,14 +10,14 @@ interface RecallProps {
 export async function recallLogger (props: RecallProps) {
     if (process.env.NODE_ENV === 'production') {
         try {
-            const res = await fetch(FUNCTION_URL.general, {
+            await fetch(FUNCTION_URL.general, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(props)
             });
-            const result = await res.json();
+            // const result = await res.json();
         } catch (error) {
             console.error(error);
         }

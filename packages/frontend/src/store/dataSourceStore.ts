@@ -9,7 +9,7 @@ import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, 
 import { cleanData, CleanMethod } from "../pages/dataSource/clean";
 import { getQuantiles } from "../pages/dataSource/utils";
 import { extendDataService, getFieldsSummaryService, inferMetaService } from "../service";
-import { findRathSafeColumnIndex, getRange, Transform } from "../utils";
+import { findRathSafeColumnIndex, Transform } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
 
 interface IDataMessage {

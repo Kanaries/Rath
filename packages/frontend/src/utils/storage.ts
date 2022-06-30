@@ -3,7 +3,7 @@ import { RESULT_STORAGE_SPLITOR } from '../constants';
 import { IMuteFieldBase, IRow } from '../interfaces';
 
 export const STORAGE_INSTANCE = 'rath_storage_instance'
-const DATA_STORAGE_INSTANCE = 'rath_data_storage';
+
 const STORAGES = {
     DATASOURCE: 'datasource',
     WORKSPACE: 'workspace',
@@ -43,15 +43,8 @@ export async function getStorageListInLocal (): Promise<IDBMeta[]> {
         storeName: STORAGES.META
     });
     const keys = await metas.keys();
-    // const _key = keys[0];
-    // const res = await 
-    // console.log(_key)
     const values = await Promise.all(keys.map(itemKey => metas.getItem(itemKey))) as IDBMeta[];
     return values.filter(v => v.type === 'workspace' || v.type === undefined);
-    // const storages = localforage.createInstance({
-    //     name: STORAGE_INSTANCE,
-    //     storeName: STORAGES.WORKSPACE
-    // });
 }
 
 export async function getStorageByIdInLocal (id: string): Promise<string> {

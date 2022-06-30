@@ -26,7 +26,7 @@ const PreferencePanel: React.FC = () => {
 
     const closeVisualPannel = useCallback(() => {
         exploreStore.setShowPreferencePannel(false);
-    }, [])
+    }, [exploreStore])
 
     const onRenderFooterContent = () => (
         <div>

@@ -212,7 +212,6 @@ export function pureGeneralMic (T: string[], X: number[]) {
 export function pureGeneralConditionH (T: string[], X: number[]) {
     let condH = 0;
     const [_min, _max] = getRange(X)
-    let H = entropy(rangeNormilize(binShareRange(X, _min, _max).filter(v => v > 0)));
     const uniqueValueSet = new Set(T);
     const uniqueValues = [...uniqueValueSet];
 

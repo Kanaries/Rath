@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
-import { runInAction, toJS } from 'mobx';
+import { runInAction } from 'mobx';
 import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton, IconButton, Toggle, Dropdown, IDropdownOption } from 'office-ui-fabric-react';
 
 import { useGlobalStore } from '../../store';
@@ -13,16 +13,12 @@ import VizPreference from '../../components/vizPreference';
 import VizOperation from './vizOperation';
 import SaveModal from './save';
 import CommonVisSegment from './commonVisSegment';
-import SubinsightSegment from './subinsights';
 import { EXPLORE_VIEW_ORDER } from '../../store/exploreStore';
 import OperationBar from './vizOperation/operationBar';
 import FieldContainer from './vizOperation/fieldContainer';
 import { IResizeMode } from '../../interfaces';
 import ResizeContainer from './resizeContainer';
 import Narrative from './narrative';
-// import ReactVega from '../../components/react-vega';
-// import { labDistVis } from '../../queries/labdistVis';
-// import { IFieldMeta } from '../../interfaces';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 

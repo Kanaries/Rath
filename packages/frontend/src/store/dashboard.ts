@@ -22,7 +22,6 @@ export class DashBoardStore {
         this.pipeLineStore = pipleLineStore;
     }
     public async generateDashBoard () {
-        // this.pipeLineStore = 
         this.loading = true;
         try {
             const dashBoardList = await generateDashBoard({
