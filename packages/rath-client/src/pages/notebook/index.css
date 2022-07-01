@@ -1,0 +1,15 @@
+.notebook.header{
+  font-weight: 500;
+  color: #323130;
+  line-height: 1;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.notebook.content.container{
+  margin-top: 16px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+.notebook.content.center.container{
+  text-align: center;
+}

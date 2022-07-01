@@ -72,7 +72,6 @@ export function compareDistribution (distribution1: Record[], distribution2: Rec
                     Math.max(targetRecord[mea], record[mea]) /
                         Math.min(targetRecord[mea], record[mea])
                 );
-                // console.log('score', score)
                 count++;
             }
         } else {
@@ -145,6 +144,15 @@ export function makeBinField (dataSource: IRow[], fid: string, binFid: string, b
         return {
             ...r,
             [binFid]: bIndex * step + _min
+        }
+    })
+}
+
+export function makeLogField (dataSource: IRow[], fid: string, logFid: string) {
+    return dataSource.map(r => {
+        return {
+            ...r,
+            [logFid]: (typeof r[fid] === 'number' && r[fid] > 0) ? Math.log10(r[fid]) : null
         }
     })
 }

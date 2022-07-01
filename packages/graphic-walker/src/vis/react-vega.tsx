@@ -27,6 +27,9 @@ interface ReactVegaProps {
   color?: IViewField;
   opacity?: IViewField;
   size?: IViewField;
+  shape?: IViewField;
+  theta?: IViewField;
+  radius?: IViewField;
   showActions: boolean;
   layoutMode: string;
   width: number;
@@ -61,18 +64,31 @@ interface SingleViewProps {
   color: IViewField;
   opacity: IViewField;
   size: IViewField;
+  shape: IViewField,
   xOffset: IViewField;
   yOffset: IViewField;
   row: IViewField;
   column: IViewField;
+  theta: IViewField;
+  radius: IViewField;
   defaultAggregated: boolean;
   defaultStack: boolean;
   geomType: string;
 }
 
-function channelEncode(props: Pick<SingleViewProps, 'column' | 'opacity' | 'color' | 'row' | 'size' | 'x' | 'y' | 'xOffset' | 'yOffset'>) {
+function availableChannels (geomType: string): Set<string> {
+  if (geomType === 'arc') {
+    return new Set(['opacity', 'color', 'size', 'theta', 'radius'])
+  }
+  return new Set(['column', 'opacity', 'color', 'row', 'size', 'x', 'y', 'xOffset', 'yOffset', 'shape'])
+}
+interface EncodeProps extends Pick<SingleViewProps, 'column' | 'opacity' | 'color' | 'row' | 'size' | 'x' | 'y' | 'xOffset' | 'yOffset' | 'shape' | 'theta' | 'radius'> {
+  geomType: string;
+}
+function channelEncode(props: EncodeProps) {
+  const avcs = availableChannels(props.geomType)
   const encoding: {[key: string]: any} = {}
-  Object.keys(props).forEach(c => {
+  Object.keys(props).filter(c => avcs.has(c)).forEach(c => {
     if (props[c] !== NULL_FIELD) {
       encoding[c] = {
         field: props[c].fid,
@@ -133,6 +149,9 @@ function getSingleView(props: SingleViewProps) {
     color,
     opacity,
     size,
+    shape,
+    theta,
+    radius,
     row,
     column,
     xOffset,
@@ -141,7 +160,7 @@ function getSingleView(props: SingleViewProps) {
     defaultStack,
     geomType
   } = props
-  const fields: IViewField[] = [x, y, color, opacity, size, row, column, xOffset, yOffset]
+  const fields: IViewField[] = [x, y, color, opacity, size, shape, row, column, xOffset, yOffset, theta, radius]
   let markType = geomType;
   if (geomType === 'auto') {
     const types: ISemanticType[] = [];
@@ -150,7 +169,7 @@ function getSingleView(props: SingleViewProps) {
     markType = autoMark(types);
   }
 
-  let encoding = channelEncode({ x, y, color, opacity, size, row, column, xOffset, yOffset })
+  let encoding = channelEncode({ geomType: markType, x, y, color, opacity, size, shape, row, column, xOffset, yOffset, theta, radius })
   if (defaultAggregated) {
     channelAggregate(encoding, fields);
   }
@@ -178,6 +197,9 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     color,
     opacity,
     size,
+    theta,
+    radius,
+    shape,
     onGeomClick,
     showActions,
     interactiveScale,
@@ -261,6 +283,9 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
         color: color ? color : NULL_FIELD,
         opacity: opacity ? opacity : NULL_FIELD,
         size: size ? size : NULL_FIELD,
+        shape: shape ? shape : NULL_FIELD,
+        theta: theta ? theta : NULL_FIELD,
+        radius: radius ? radius : NULL_FIELD,
         row: rowFacetField,
         column: colFacetField,
         xOffset: NULL_FIELD,
@@ -303,6 +328,9 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
             color: color ? color : NULL_FIELD,
             opacity: opacity ? opacity : NULL_FIELD,
             size: size ? size : NULL_FIELD,
+            shape: shape ? shape : NULL_FIELD,
+            theta: theta ? theta : NULL_FIELD,
+            radius: radius ? radius : NULL_FIELD,
             row: rowFacetField,
             column: colFacetField,
             xOffset: NULL_FIELD,
@@ -341,6 +369,8 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     color,
     opacity,
     size,
+    shape,
+    theta, radius,
     viewPlaceholders,
     rowFacetFields,
     colFacetFields,

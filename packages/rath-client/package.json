@@ -1,0 +1,92 @@
+{
+  "name": "rath-client",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "./",
+  "prettier": {
+    "tabWidth": 4,
+    "printWidth": 140,
+    "singleQuote": true
+  },
+  "dependencies": {
+    "@emotion/react": "^11.4.1",
+    "@emotion/styled": "^11.3.0",
+    "@kanaries/graphic-walker": "0.1.0",
+    "@kanaries/web-data-loader": "^0.1.3",
+    "@material-ui/core": "^5.0.0-beta.5",
+    "@uifabric/icons": "^7.5.17",
+    "@uifabric/react-hooks": "^7.13.9",
+    "ali-react-table": "^2.3.1",
+    "chroma-js": "^2.0.6",
+    "cube-core": "^2.13.0",
+    "datalib": "^1.9.2",
+    "dayjs": "^1.10.7",
+    "fuse.js": "^3.4.6",
+    "immer": "^9.0.6",
+    "localforage": "^1.10.0",
+    "mobx": "^6.3.2",
+    "mobx-react-lite": "^3.2.0",
+    "mobx-utils": "^6.0.4",
+    "mocha": "^6.2.0",
+    "office-ui-fabric-core": "^11.0.1",
+    "office-ui-fabric-react": "^7.185.7",
+    "re-resizable": "^6.9.9",
+    "react": "^17.0.1",
+    "react-app-rewired": "^2.1.5",
+    "react-beautiful-dnd": "^13.0.0",
+    "react-dom": "^17.0.1",
+    "react-intl-universal": "^2.4.2",
+    "react-json-view": "^1.19.1",
+    "react-markdown": "^5.0.3",
+    "react-scripts": "4.0.1",
+    "rxjs": "6.x",
+    "styled-components": "^5.2.1",
+    "symbol-observable": "^4.0.0",
+    "vega": "^5.22.1",
+    "vega-embed": "^6.20.8",
+    "vega-lite": "^5.2.0",
+    "visual-insights": "0.8.10",
+    "web-vitals": "^0.2.4",
+    "worker-loader": "^3.0.7"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.11.8",
+    "@testing-library/react": "^11.2.3",
+    "@testing-library/user-event": "^12.6.0",
+    "@types/chroma-js": "^1.4.3",
+    "@types/jest": "^26.0.20",
+    "@types/node": "^12.19.12",
+    "@types/react": "^17.0.2",
+    "@types/react-beautiful-dnd": "^13.0.0",
+    "@types/react-dom": "^17.0.1",
+    "@types/styled-components": "^5.1.7",
+    "source-map-explorer": "^2.5.2",
+    "typescript": "^4.1.3"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "GENERATE_SOURCEMAP=false react-app-rewired build",
+    "build2": "react-app-rewired --max_old_space_size=4096 build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject",
+    "analyze": "source-map-explorer 'build/static/js/*.js'"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

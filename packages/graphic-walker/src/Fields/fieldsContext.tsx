@@ -46,6 +46,9 @@ export const DRAGGABLE_STATE_KEYS: Array<IDraggableStateKey> = [
     { id: 'color', name: '颜色', mode: 1 },
     { id: 'opacity', name: '透明度', mode: 1 },
     { id: 'size', name: '大小', mode: 1 },
+    { id: 'shape', name: '形状', mode: 1},
+    { id: 'theta', name: '角度', mode: 1 },
+    { id: 'radius', name: '半径', mode: 1 }
 ];
 
 export const AGGREGATOR_LIST = [

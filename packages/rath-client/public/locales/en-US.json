@@ -1,0 +1,287 @@
+{
+    "common": {
+        "dimension": "dimension",
+        "measure": "measure",
+        "name": "Name",
+        "home": "Home",
+        "settings": "Settings"
+    },
+    "menu": {
+        "dataSource": "DataSource",
+        "noteBook": "Interactive Pipeline Visualization",
+        "explore": "Explore(alpha version)",
+        "dashBoard": "DashBoard",
+        "explainer": "Explainer",
+        "editor": "Visual Editor",
+        "vizPipe": "interactive Pipeline",
+        "support": "Support",
+        "lts": "Explore",
+        "pattern": "Build Knowledge(beta)",
+        "devCollection": "Debug"
+    },
+    "preference": {
+        "title": "preference"
+    },
+    "support": {
+        "title": "How to Get Support",
+        "link": "https://www.yuque.com/docs/share/65511730-af74-46eb-86fe-356c4f52402b?# 《Get Support》"
+    },
+    "config": {
+        "computationEngine": {
+            "title": "Computation Engine",
+            "clickhouse": "ClickHouse",
+            "webworker": "Browser(Web Worker)",
+            "notCompatible": "Not compatible with datasource"
+        }
+    },
+    "function": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "analysis": {
+            "start": "Insight Analysis",
+            "checkResult": "Check Existed Results",
+            "pattern": "Build Knowledge(beta)",
+            "manual": "Manual Explore"
+        },
+        "importStorage": {
+            "title": "Import History Storage",
+            "desc": "Import a Rath storage file, which was exported from Rath, containing analysis history records in Rath.",
+            "type": {
+                "file": "File",
+                "indexdb": "Local Storage"
+            },
+            "storageColumns": {
+                "name": "Name",
+                "createTime": "Create Time",
+                "size": "Size",
+                "operation": "Operation"
+            }
+        },
+        "exportStorage": {
+            "title": "Export Rath Storage",
+            "type": {
+                "file": "File",
+                "indexdb": "Index DB"
+            }
+        },
+        "save": {
+            "title": "Save"
+        },
+        "upload": "Upload"
+    },
+    "dataSource": {
+        "extractInsight": "Insight Analysis",
+        "extractInsightOld": "Insight Analysis(Debug)",
+        "cleanMethod": "Clean Method",
+        "useField": "use field",
+        "viewMode": "View Mode",
+        "metaView": "Meta View",
+        "dataView": "Table View",
+        "charset": "character encoding",
+        "advice": {
+            "lackData": "Lack of Data",
+            "lackDimension": "There should includes dimensions in the datasource.",
+            "lackMeasure": "There should includes measures in the datasource",
+            "smallSample": "The sample size is not big enough, which may influence the reliability of recommandation.",
+            "forceAnalysis": "Force Analysis"
+        },
+        "meta": {
+            "uniqueValue": "Unique Value",
+            "analyticType": "analytic type",
+            "semanticType": "semantic Type",
+            "disable": {
+                "title": "Disable Column",
+                "on": "able",
+                "off": "disable"
+            }
+        },
+        "importData": {
+            "buttonName": "Import Data",
+            "load": "Load Data",
+            "type": {
+                "file": "File",
+                "restful": "RESTFUL",
+                "mysql": "MySQL",
+                "demo": "Demo"
+            },
+            "demo": {
+                "available": "Available Datasets"
+            },
+            "restful": {
+                "requestData": "Request Data",
+                "exampleDataStruct": "Example Data Structure"
+            }
+        },
+        "table": {
+            "edit": "Edit Field Name",
+            "fieldName": "field name"
+        },
+        "sampling": {
+            "none": "none",
+            "reservoir": "fixed sample size"
+        },
+        "methods": {
+            "dropNull": "drop null records",
+            "useMode": "replace null with mode",
+            "simpleClean": "simple cleaning",
+            "none": "none(use original data)"
+        },
+        "tip": "Remember to adjust the fields' types and cleaning strategy before analysis.",
+        "recordCount": "Number of records {count}",
+        "upload": {
+            "title": "Upload Your own dataset",
+            "fileTypes": "csv, json are supportted.",
+            "uniqueIdIssue": "Add unique ids for fields",
+            "sampling": "Sampling",
+            "percentSize": "sample size(percent)",
+            "upload": "Upload"
+        },
+        "exploreMode": {
+            "title": "Explore Mode",
+            "firstTime": "Meet the data first time",
+            "familiar": "Familiar with the data",
+            "comprehensive": "Comprehensive",
+            "manual": "Manual(with specific purpose)"
+        }
+    },
+    "meta": {
+        "title": "Meta Config",
+        "save": "Save",
+        "dimension": "dimension",
+        "measure": "measure"
+    },
+    "noteBook": {
+        "autoParams": {
+            "title": "Auto Recommand Parameters",
+            "auto": "Auto",
+            "manual": "Manual"
+        },
+        "univariate": {
+            "title": "Univariate Summary",
+            "desc": "Hover your mouse over the fields and see the distails and entropy reducing strategy.",
+            "columns": {
+                "fieldName": "field name",
+                "type": "type",
+                "entropy": "impurity",
+                "maxEntropy": "impurity(max)"
+            }
+        },
+        "subspace": {
+            "title": "Subspace Searching",
+            "desc": "Try to choose one row(combination of dimensions) of the subspace and see the changes of the processes below.",
+            "topKDimension": "top k percent dimension used",
+            "topKSubspace": "top ( {k} / {total} ) number of subspaces used"
+        },
+        "clustering": {
+            "title": "Measurement Clustering",
+            "desc": "Try to choose one group to visualize them.",
+            "maxGroupNum": "Max Group Number"
+        },
+        "vis": {
+            "title": "Visualization",
+            "desc": "If there is no result here, try to click one group of measures in ***Clustering*** process above.",
+            "aggMea": "aggregate measures"
+        }
+    },
+    "explore": {
+        "title": "Visual Insights",
+        "preference": "Preference",
+        "rankList": "Rank List",
+        "search": "Search",
+        "digIn": "Dig In",
+        "desc": "Details of the recommendation process can be seen in  <b>NoteBook</b> Board. You can adjust some of the parameters and operators and see how it influence recommendation results.",
+        "tip": "Try to use the setting button beside the \"visual insight\" title to adjust the visualization settings to get a view you prefer better.",
+        "currentPage": "Current Page",
+        "last": "Last",
+        "next": "Next",
+        "summary": "Summary",
+        "related": {
+            "title": "Related Views"
+        },
+        "like": "like"
+    },
+    "dashBoard": {
+        "generateButton": "Generate Dashboard",
+        "last": "Last",
+        "next": "Next",
+        "desc": "Double click the chart with selection to clear selection(filter).",
+        "pageNo": "current page no: {current} of {total}"
+    },
+    "explainer": {
+        "notReadyTip": "Dev Page now is testing for different types of insight worker. \n If you see this hint, it means you have not upload dataSource or not click the 'extract insights' button in dataSource page which will produce a cooked dataSource for dev page.",
+        "insightButton": "Get Insights",
+        "sigThreshold": "significance threshold",
+        "desc": "There are {num} of views of which insight significance is no less than {threshold} %",
+        "currentIndex": "Current Index",
+        "explainTemp": {
+            "viewDesc": "Dimensions are {dimensions}, and measures are {measures}.",
+            "sig": "There is a significance of {sig} % that there exists a {itype} in the graph."
+        },
+        "insightTypes": {
+            "default_outlier": "outlier",
+            "general": "general",
+            "default_group": "group distribution",
+            "default_trend": "trend"
+        }
+    },
+    "lts": {
+        "autoAnalysis": "Auto Analysis",
+        "computing": "computing",
+        "title": "Visual Insights",
+        "hintMain": "Here are some interesting patterns and insights found by Rath. If you are interested in some of them, try to use 'summary' to know more details about current view and use 'associate' to explore relative visualizations.",
+        "summary": "Summary",
+        "associate": "Associate",
+        "asso": {
+            "T1": "Associated Measures",
+            "T2": "Associated Dimensions",
+            "hint": "Associated Measures refers to keep the dimensions similar, find correlated measures. Associated Dimensions refers to keep the measures similar, find correlated dimensions."
+        },
+        "bring": "Customize Analysis",
+        "commandBar": {
+            "editing": "editing chart",
+            "associate": "associate views",
+            "constraints": "analysis constraints"
+        },
+        "constraints": {
+            "exclude": "exclude field",
+            "auto": "include if exists insights",
+            "include": "force include"
+        },
+        "commonVis": {
+            "text": "statistics"
+        },
+        "subinsights": "SubInsights",
+        "orderBy": {
+            "title": "Result Order By",
+            "default": "Default",
+            "field_num": "Field Number",
+            "cardinality": "Cardinality"
+        },
+        "operation": {
+            "debug": "debug",
+            "zoom": "interactive",
+            "resize": "resize mode",
+            "resizeMode": {
+                "resizable": "resizable",
+                "none": "none"
+            }
+        }
+    },
+    "discovery": {
+        "main": {
+            "mainView": "Main View",
+            "relatePatterns": "relate patterns(default)",
+            "relateFeatures": "relate features",
+            "explainDiff": "explain diff",
+            "pointInterests": "split",
+            "pin": "pin",
+            "compare": "compare",
+            "vizsys": {
+                "title": "visualization recommand system",
+                "lite": "Lite mode(fast)",
+                "strict": "Strict mode"
+            },
+            "loadMore": "load more"
+        }
+    }
+}

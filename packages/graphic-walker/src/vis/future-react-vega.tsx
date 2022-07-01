@@ -176,7 +176,6 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
                     }
                 }
             }
-            console.log(spec)
             embed(container.current, spec, { mode: 'vega-lite', actions: false }).then(res => {
                 res.view.addEventListener('click', (e) => {
                     click$.next(e);

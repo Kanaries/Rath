@@ -96,12 +96,17 @@ export interface IDataSource {
     data: IRow[]
 }
 export interface DraggableFieldState {
-    fields: IField[];
-    rows: IField[];
-    columns: IField[];
-    color: IField[];
-    opacity: IField[];
-    size: IField[];
+    fields: IViewField[];
+    dimensions: IViewField[];
+    measures: IViewField[];
+    rows: IViewField[];
+    columns: IViewField[];
+    color: IViewField[];
+    opacity: IViewField[];
+    size: IViewField[];
+    shape: IViewField[];
+    theta: IViewField[];
+    radius: IViewField[];
 }
 
 export interface IDraggableStateKey {

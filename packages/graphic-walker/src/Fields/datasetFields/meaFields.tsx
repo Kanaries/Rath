@@ -30,10 +30,13 @@ const MeaFields: React.FC<Props> = props => {
                                     f.fid && !snapshot.isDragging && <select className="float-right" value="" onChange={e => {
                                         if (e.target.value === 'bin') {
                                             vizStore.createBinField('measures', index)
+                                        } else if (e.target.value === 'log10') {
+                                            vizStore.createLogField('measures', index)
                                         }
                                     }}>
                                         <option value=""></option>
                                         <option value="bin">bin</option>
+                                        <option value="log10">log10</option>
                                     </select>
                                 }
                             </FieldPill>

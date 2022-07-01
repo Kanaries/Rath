@@ -16,6 +16,9 @@ const ReactiveRenderer: React.FC = props => {
     const columns = toJS(draggableFieldState.columns)
     const color = toJS(draggableFieldState.color)
     const opacity = toJS(draggableFieldState.opacity)
+    const shape = toJS(draggableFieldState.shape)
+    const theta = toJS(draggableFieldState.theta)
+    const radius = toJS(draggableFieldState.radius)
     const sizeChannel = toJS(draggableFieldState.size)
 
     const rowLeftFacetFields = rows.slice(0, -1).filter(f => f.analyticType === 'dimension');
@@ -52,6 +55,9 @@ const ReactiveRenderer: React.FC = props => {
         rows={rows}
         columns={columns}
         color={color[0]}
+        theta={theta[0]}
+        radius={radius[0]}
+        shape={shape[0]}
         opacity={opacity[0]}
         size={sizeChannel[0]}
         onGeomClick={onGeomClick}

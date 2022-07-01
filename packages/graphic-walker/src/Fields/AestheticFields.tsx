@@ -7,7 +7,7 @@ import { AestheticFieldContainer } from './components'
 
 import OBFieldContainer from './obComponents/obFContainer';
 
-const aestheticFields = DRAGGABLE_STATE_KEYS.filter(f => ['color', 'opacity', 'size'].includes(f.id));
+const aestheticFields = DRAGGABLE_STATE_KEYS.filter(f => ['color', 'opacity', 'size', 'shape'].includes(f.id));
 
 const AestheticFields: React.FC = props => {
     return <div>
