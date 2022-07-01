@@ -7,6 +7,7 @@ phases:
     commands:
       - echo Install deps
       - n 16
+      - npm install --global yarn
       - yarn install
   build:
     commands:
