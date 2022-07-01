@@ -12,7 +12,7 @@ phases:
       - echo Building...
       - yarn workspace @kanaries/graphic-walker build
       - yarn workspace rath-client build2
-  artifacts:
-    files:
-      - 'packages/rath-client/build/*'
-    name: 'rath-on-aws'
+artifacts:
+  files:
+    - 'packages/rath-client/build/*'
+  name: 'rath/$AWS_REGION-$(date +%Y-%m-%d)'
