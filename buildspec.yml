@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      node: 16.x
+      nodejs: 16.x
     commands:
       - echo Install deps
       - yarn install
