@@ -1,0 +1,18 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      node: 16.x
+    commands:
+      - echo Install deps
+      - yarn install
+  build:
+    commands:
+      - echo Building...
+      - yarn workspace @kanaries/graphic-walker build
+      - yarn workspace rath-client build2
+  artifacts:
+    files:
+      - 'packages/rath-client/build/*'
+    name: 'rath-on-aws'
