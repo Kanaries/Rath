@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { BIField } from '../../global';
 import { Transform } from '../../utils/index'
-import {  cleanData,  CleanMethod } from './clean';
 import { deepcopy } from '../../utils/index';
-import { IRow } from '../../interfaces';
+import { CleanMethod, IRow } from '../../interfaces';
+import { cleanData } from '../../utils/clean';
 
 
 export function useDataSource (rawData: IRow[], fields: BIField[], cleanMethod: CleanMethod): [IRow[], IRow[]] {

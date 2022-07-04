@@ -1,15 +1,14 @@
-import { makeAutoObservable, observable, runInAction } from "mobx";
+import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
 import { fromStream, IStreamListener, toStream } from "mobx-utils";
-import { combineLatest, from } from "rxjs";
+import { combineLatest, from, Subscription } from "rxjs";
 import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter } from "../interfaces";
-import { cleanData, CleanMethod } from "../pages/dataSource/clean";
+import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag } from "../interfaces";
 import { getQuantiles } from "../pages/dataSource/utils";
-import { extendDataService, getFieldsSummaryService, inferMetaService } from "../service";
-import { findRathSafeColumnIndex, Transform } from "../utils";
+import { cleanDataService, extendDataService, filterDataService, getFieldsSummaryService, inferMetaService } from "../service";
+import { findRathSafeColumnIndex } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
 
 interface IDataMessage {
@@ -58,6 +57,11 @@ export class DataSourceStore {
     public showDataImportSelection: boolean = false;
     public showFastSelectionModal: boolean = false;
     private fieldMetasRef: IStreamListener<IFieldMeta[]>;
+    private cleanedDataRef: IStreamListener<IRow[]>;
+    private filteredDataRef: IStreamListener<IRow[]>;
+    public loadingDataProgress: number = 0;
+    public dataPrepProgressTag: IDataPrepProgressTag = IDataPrepProgressTag.none;
+    private subscriptions: Subscription[] = [];
     constructor() {
         makeAutoObservable(this, {
             rawData: observable.ref,
@@ -65,19 +69,37 @@ export class DataSourceStore {
             cookedMeasures: observable.ref
             // subscriptions: false
         });
-        const fields$ = from(toStream(() => this.fields, true));
-        const cleanedData$ = from(toStream(() => this.cleanedData, true))
+        const fields$ = from(toStream(() => this.fields, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
-        // const fieldSemanticTypes
-        const originFieldMetas$ = fields$.pipe(
-            op.withLatestFrom(cleanedData$),
-        // )
-        // const originFieldMetas$ =  combineLatest([fields$, cleanedData$]).pipe(
-            // op.map(([fields, dataSource]) => {
-            //     return from(extendDataService({ fields, dataSource }))
-            // }),
-            // op.switchAll(),
-            op.map(([fields, dataSource]) => {
+        const rawData$ = from(toStream(() => this.rawData, false));
+        const filters$ = from(toStream(() => this.filters, true))
+        // const filteredData$ = from(toStream(() => this.filteredData, true));
+        const filteredData$ = combineLatest([rawData$, filters$]).pipe(
+            op.map(([dataSource, filters]) => {
+                return from(filterDataService({
+                    dataSource,
+                    filters: toJS(filters)
+                }))
+            }),
+            op.switchAll(),
+            op.share()
+        )
+        const cleanMethod$ = from(toStream(() => this.cleanMethod, true));
+        const cleanedData$ = combineLatest([filteredData$, cleanMethod$, fields$]).pipe(
+            op.map(([data, method, fields]) => {
+                return from(cleanDataService({
+                    dataSource: data,
+                    fields: fields.map(f => toJS(f)),
+                    method: method
+                }))
+            }),
+            op.switchAll(),
+            op.share()
+        )
+
+        const originFieldMetas$ = cleanedData$.pipe(
+            op.withLatestFrom(fields$),
+            op.map(([dataSource, fields]) => {
                 const ableFiledIds = fields.map(f => f.fid);
                 return from(getFieldsSummaryService(dataSource, ableFiledIds)).pipe(
                     op.map(summary => {
@@ -89,14 +111,6 @@ export class DataSourceStore {
                             geoRoles,
                             semanticTypes: fields.map(f => f.semanticType)
                         });
-                        // console.log('metas1', metas, fields)
-                        // metas.forEach(m => {
-                        //     const f = fields.find(f => f.fid === m.fid);
-                        //     if (f) {
-                        //         m.name = f.name
-                        //     }
-                        // })
-                        // console.log('metas2', metas, fields)
                         return metas
                     })
                 )
@@ -116,7 +130,9 @@ export class DataSourceStore {
             }),
             op.share()
         )
+        this.filteredDataRef = fromStream(filteredData$, [])
         this.fieldMetasRef = fromStream(fieldMetas$, [])
+        this.cleanedDataRef = fromStream(cleanedData$, []);
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
             if (ev.source && msg.type === 'init_data') {
@@ -127,6 +143,15 @@ export class DataSourceStore {
                 this.setShowDataImportSelection(false);
             }
         })
+        this.subscriptions.push(rawData$.subscribe(() => {
+            this.dataPrepProgressTag = IDataPrepProgressTag.filter;
+        }))
+        this.subscriptions.push(filteredData$.subscribe(() => {
+            this.dataPrepProgressTag = IDataPrepProgressTag.clean
+        }))
+        this.subscriptions.push(cleanedData$.subscribe(() => {
+            this.dataPrepProgressTag = IDataPrepProgressTag.none;
+        }))
     }
 
     public get fields () {
@@ -153,6 +178,9 @@ export class DataSourceStore {
     }
     public get fieldNames (): string[] {
         return this.fields.map(f => `${f.name}`)
+    }
+    public get fieldSemanticTypes () {
+        return this.fields.map(f => f.semanticType);
     }
 
     public get hasOriginalDimensionInData () {
@@ -197,51 +225,25 @@ export class DataSourceStore {
     }
 
     public get filteredData () {
-        const { rawData, filters } = this;
-        const ans: IRow[] = [];
-        if (filters.length === 0) return rawData;
-        const effectFilters = filters.filter(f => !f.disable);
-        for (let i = 0; i < rawData.length; i++) {
-            const row = rawData[i];
-            let keep = effectFilters.every(f => {
-                if (f.type === 'range') return f.range[0] <= row[f.fid] && row[f.fid] <= f.range[1];
-                if (f.type === 'set') return f.values.includes(row[f.fid]);
-                return false;
-            })
-            if (keep) ans.push(row);
-        }
-        return ans
+        return this.filteredDataRef.current
+        // const { rawData, filters } = this;
+        // const ans: IRow[] = [];
+        // if (filters.length === 0) return rawData;
+        // const effectFilters = filters.filter(f => !f.disable);
+        // for (let i = 0; i < rawData.length; i++) {
+        //     const row = rawData[i];
+        //     let keep = effectFilters.every(f => {
+        //         if (f.type === 'range') return f.range[0] <= row[f.fid] && row[f.fid] <= f.range[1];
+        //         if (f.type === 'set') return f.values.includes(row[f.fid]);
+        //         return false;
+        //     })
+        //     if (keep) ans.push(row);
+        // }
+        // return ans
     }
 
     public get cleanedData () {
-        const { filteredData, dimensions, measures, cleanMethod } = this;
-        const dataSource = filteredData.map((row) => {
-            let record: IRow = {};
-            this.fields.forEach((field) => {
-                // if (field.type === 'dimension') {
-                //     record[field.name] = `${row[field.name]}`
-                // } else {
-                //     record[field.name] = Transform.transNumber(row[field.name]);
-                // }
-                if (field.analyticType === 'dimension') {
-                    if (field.semanticType === 'temporal' || field.semanticType === 'nominal') {
-                        record[field.fid] = String(row[field.fid])
-                    } 
-                    // else if (field.semanticType === 'ordinal' && !isNaN(Number(row[field.fid]))) {
-                    //     record[field.fid] = Number(row[field.fid])
-                    // }
-                    else {
-                        record[field.fid] = row[field.fid]
-                    }
-                }
-                if (field.semanticType === 'quantitative') {
-                    record[field.fid] = Transform.transNumber(row[field.fid]);
-                }
-            });
-            return record;
-        });
-
-        return cleanData(dataSource, dimensions, measures, cleanMethod)
+        return this.cleanedDataRef.current
     }
 
     public addFilter () {
@@ -266,7 +268,7 @@ export class DataSourceStore {
                 ...filter
             })
         }
-        console.log(this.filters)
+        this.filters = [...this.filters]
     }
     public createBatchFilterByQts (fieldIdList: string[], qts: [number, number][]) {
         const { rawData } = this;
@@ -287,6 +289,12 @@ export class DataSourceStore {
                 this.filters.push(newFilter)
             }
         }
+        this.filters = [...this.filters]
+    }
+
+    public setLoadingDataProgress (p: number) {
+        this.loadingDataProgress = p;
+        if (this.dataPrepProgressTag === IDataPrepProgressTag.none && p < 1) this.dataPrepProgressTag = IDataPrepProgressTag.upload;
     }
 
     public setShowFastSelection (show: boolean) {

@@ -48,6 +48,22 @@ function trimValues(data: IRow[], fids: string[]) {
     return data;
 }
 
+/**
+ * 
+ * @param rawData 
+ * @param size 从原始数据中随机取出若干行，求并集
+ */
+function getCommonKeysInRows (rawData: IRow[], size: number): string[] {
+    const keyUnionSet: Set<string> = new Set();
+    for (let i = 0; i < size; i++) {
+        const index = Math.floor(Math.random() * rawData.length) % rawData.length
+        Object.keys(rawData[index]).forEach(k => {
+            keyUnionSet.add(k)
+        })
+    }
+    return [...keyUnionSet.keys()]
+}
+
 export function transFileData (rawData: IRow[]) {
     /**
      * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
@@ -57,8 +73,7 @@ export function transFileData (rawData: IRow[]) {
     if (rawData.length > 0 && Object.keys(rawData[rawData.length - 1]).length === 0) {
         rawData.pop();
     }
-    // FIXME: 第一条数据取meta的危险性
-    let names = Object.keys(rawData[0])
+    let names = getCommonKeysInRows(rawData, Math.min(100, rawData.length))
     const fids = formatColKeys(names);
     rawData = formatColKeysInRow(names, fids, rawData)
 

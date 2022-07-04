@@ -4,6 +4,7 @@ import React from 'react';
 import { useGlobalStore } from '../../../store';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { IDataPrepProgressTag } from '../../../interfaces';
 
 const AdviceContainer = styled.div`
     .row{
@@ -20,11 +21,11 @@ interface AdviceProps {
 const Advice: React.FC<AdviceProps> = props => {
     const { onForceAnalysis } = props;
     const { dataSourceStore } = useGlobalStore();
-    const { measures, cleanedData, hasOriginalDimensionInData, groupMeanLimitCountsLog } = dataSourceStore;
+    const { measures, cleanedData, hasOriginalDimensionInData, groupMeanLimitCountsLog, dataPrepProgressTag } = dataSourceStore;
 
     return <AdviceContainer>
         {
-            cleanedData.length === 0 && <MessageBar className="row">
+            dataPrepProgressTag === IDataPrepProgressTag.none && cleanedData.length === 0 && <MessageBar className="row">
                     {intl.get('dataSource.advice.lackData')}
                 </MessageBar>
         }

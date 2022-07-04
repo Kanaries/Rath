@@ -159,6 +159,7 @@ async function aggregate (props: { dimensions: string[]; measures: string[]; agg
         if (engine === null) throw new Error('Engine is not created.');
         const { dimensions, measures, aggregators } = props;
         const cube = engine.cube;
+        if (cube === null) throw new Error('Cube is not init.')
         const cuboid = await cube.getCuboid(dimensions);
         const aggData = await cuboid.getAggregatedRows(measures, aggregators);
         return aggData;

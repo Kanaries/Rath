@@ -4,7 +4,7 @@ import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
 import { runInAction } from 'mobx';
-import { DefaultButton, PrimaryButton, Stack, ProgressIndicator, CommandBarButton, IconButton, Toggle, Dropdown, IDropdownOption } from 'office-ui-fabric-react';
+import { DefaultButton, Stack, ProgressIndicator, CommandBarButton, IconButton, Toggle, Dropdown, IDropdownOption } from 'office-ui-fabric-react';
 
 import { useGlobalStore } from '../../store';
 import BaseChart from '../../visBuilder/vegaBase';
@@ -56,8 +56,8 @@ const InsightContainer = styled.div`
     }
 `
 
-const LTSPage: React.FC = props => {
-    const { ltsPipeLineStore, exploreStore, commonStore } = useGlobalStore();
+const LTSPage: React.FC = () => {
+    const { ltsPipeLineStore, exploreStore } = useGlobalStore();
     const { computing, fieldMetas } = ltsPipeLineStore;
 
     const {
@@ -67,17 +67,9 @@ const LTSPage: React.FC = props => {
         // showSubinsights,
         insightSpaces
     } = exploreStore;
-    const { taskMode } = commonStore
     const [showCommonVis, setShowCommonVis] = useState<boolean>(true);
     // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
-    const startAnalysis = useCallback(() => {
-        ltsPipeLineStore.startTask(taskMode).then(() => {
-            exploreStore.emitViewChangeTransaction(0)
-        }).catch(err => {
-            commonStore.showError('error', err)
-        })
-    }, [ltsPipeLineStore, exploreStore, commonStore, taskMode])
 
     const downloadResults = useCallback(() => {
         exploreStore.downloadResults();
@@ -111,24 +103,7 @@ const LTSPage: React.FC = props => {
                 }}
             />
             <Stack horizontal>
-                {
-                    insightSpaces.length > 0 && <DefaultButton
-                        text={intl.get('lts.autoAnalysis')}
-                        iconProps={{ iconName: 'Financial' }}
-                        disabled={dataIsEmpty}
-                        onClick={startAnalysis}
-                    />
-                }
-                {
-                    insightSpaces.length === 0 && <PrimaryButton
-                        text={intl.get('lts.autoAnalysis')}
-                        iconProps={{ iconName: 'Financial' }}
-                        disabled={dataIsEmpty}
-                        onClick={startAnalysis}
-                    />
-                }
                 <DefaultButton
-                    style={MARGIN_LEFT}
                     text={intl.get('function.save.title')}
                     iconProps={{ iconName: 'clouddownload' }}
                     disabled={dataIsEmpty}
@@ -149,19 +124,29 @@ const LTSPage: React.FC = props => {
             </div>
             <MainHeader>{intl.get('lts.title')}</MainHeader>
             <p className="state-description">{intl.get('lts.hintMain')}</p>
-            {/* <Divider style={{ marginBottom: '1em', marginTop: '1em' }} /> */}
-            <Dropdown style={{ maxWidth: '180px' }}
-                selectedKey={exploreStore.orderBy}
-                options={orderOptions}
-                label={intl.get('lts.orderBy.title')}
-                onChange={(e, item) => {
-                item && exploreStore.setExploreOrder(item.key as string);
-                }}
-            />
             <Stack style={{ marginRight: '1em' }} horizontal>
-                <Pagination style={{ marginBottom: '1em', marginTop: '1em' }} variant="outlined" shape="rounded" count={insightSpaces.length} page={pageIndex + 1} onChange={(e, v) => {
-                    exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
-                }} />
+                <Stack.Item align="end">
+                    <Dropdown style={{ minWidth: '120px' }}
+                        selectedKey={exploreStore.orderBy}
+                        options={orderOptions}
+                        label={intl.get('lts.orderBy.title')}
+                        onChange={(e, item) => {
+                        item && exploreStore.setExploreOrder(item.key as string);
+                        }}
+                    />
+                </Stack.Item>
+                <Stack.Item align="end">
+                    <Pagination style={{ marginTop: '1em', marginLeft: '1em' }}
+                        variant="outlined"
+                        shape="rounded"
+                        count={insightSpaces.length}
+                        page={pageIndex + 1}
+                        onChange={(e, v) => {
+                            exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
+                        }}
+                    />
+                </Stack.Item>
+                
             </Stack>
             <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
             <InsightContainer>

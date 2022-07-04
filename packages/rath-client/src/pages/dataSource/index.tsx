@@ -1,20 +1,20 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import intl from 'react-intl-universal'
-import { ComboBox, PrimaryButton, Stack, DefaultButton, Dropdown, IDropdownOption, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, CommandButton } from 'office-ui-fabric-react';
-// import DataTable from '../../components/table';
+import { PrimaryButton, Stack, DefaultButton, Dropdown, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, CommandButton, ProgressIndicator } from 'office-ui-fabric-react';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
-import { CleanMethod, useCleanMethodList } from './clean';
+import { useCleanMethodList } from '../../hooks';
 import Selection from './selection/index';
 import ImportStorage from "./importStorage";
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
-import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
-import { IDataPreviewMode, IMuteFieldBase, IRow } from "../../interfaces";
+import { EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
+import { CleanMethod, IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from "../../interfaces";
 import { Card } from "../../components/card";
 import Advice from "./advice";
 import AnalysisSettings from './settings'
 import FastSelection from "./fastSelection";
+import { makeRenderLabelHandler } from "../../components/labelTooltip";
 
 const MARGIN_LEFT = { marginLeft: "1em" }
 
@@ -32,7 +32,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     loading,
     showDataImportSelection,
     dataPreviewMode,
-    staisfyAnalysisCondition
+    staisfyAnalysisCondition,
+    dataPrepProgressTag
   } = dataSourceStore;
 
   const { exploreMode, taskMode } = commonStore;
@@ -100,16 +101,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     commonStore.showError('error', `[Data Loading Error]${err}`)
   }, [dataSourceStore, commonStore])
 
-  const engineOptions: IDropdownOption[] = [
-    { text: intl.get(`config.computationEngine.${COMPUTATION_ENGINE.clickhouse}`), key: COMPUTATION_ENGINE.clickhouse },
-    { text: intl.get(`config.computationEngine.${COMPUTATION_ENGINE.webworker}`), key: COMPUTATION_ENGINE.webworker }
-  ]
-  const exploreOptions: IDropdownOption[] = [
-    { text: intl.get('dataSource.exploreMode.firstTime'), key: EXPLORE_MODE.first },
-    { text: intl.get('dataSource.exploreMode.comprehensive'), key: EXPLORE_MODE.comprehensive },
-    { text: intl.get('dataSource.exploreMode.familiar'), key: EXPLORE_MODE.familiar, disabled: true },
-    { text: intl.get('dataSource.exploreMode.manual'), key: EXPLORE_MODE.manual }
-  ]
   const analysisOptions: IContextualMenuProps = useMemo(() => {
     return {
       items: [
@@ -168,11 +159,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
   }, [dataSourceStore])
 
-  // useEffect(() => {
-  //   console.log('meta update')
-  //   dataSourceStore.getFieldsMetas();
-  // }, [fields, cleanedData])
-
+  const onDataLoading = useCallback((p: number) => {
+    dataSourceStore.setLoadingDataProgress(Math.floor(p * 100) / 100)
+  }, [dataSourceStore])
 
   return (
     <div className="content-container">
@@ -219,6 +208,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           />
 
           <Selection show={showDataImportSelection}
+            onDataLoading={onDataLoading}
             loading={loading}
             onClose={onSelectPannelClose}
             onDataLoaded={onSelectDataLoaded}
@@ -227,69 +217,55 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           />
         </Stack>
         { rawData.length > 0 && <Advice onForceAnalysis={() => { startMode.onClick && startMode.onClick() }} /> }
-        <div style={{ margin: '1em 0px' }}>
-          <Stack horizontal>
-            <Dropdown style={{ minWidth: '180px', marginRight: '1em' }}
-              // disabled
-              selectedKey={commonStore.exploreMode}
-              options={exploreOptions}
-              label={intl.get('dataSource.exploreMode.title')}
-              onChange={(e, item) => {
-                item && commonStore.setExploreMode(item.key as string);
-              }}
+        { dataPrepProgressTag !== IDataPrepProgressTag.none && <ProgressIndicator label={dataPrepProgressTag} />}
+        <Stack horizontal verticalAlign="end" style={{ margin: '1em 0px' }}>
+          <Dropdown
+            styles={{ root: { minWidth: '180px' } }}
+            selectedKey={cleanMethod}
+            label={intl.get('dataSource.cleanMethod')}
+            options={cleanMethodListLang}
+            onChange={(e, option) => {
+              option && dataSourceStore.setCleanMethod(option.key as CleanMethod)
+            }}
+            onRenderLabel={makeRenderLabelHandler(intl.get('dataSource.tip'))}
+          />
+        </Stack>
+        <Stack horizontal  style={{ margin: '1em 0px' }}>
+          <CommandButton
+            disabled={rawData.length === 0}
+            text={intl.get('dataSource.fastSelection.title')}
+            iconProps={{ iconName: 'filter' }}
+            onClick={() => {
+              dataSourceStore.setShowFastSelection(true)
+            }}
+          />
+          <CommandButton
+              text={intl.get('dataSource.downloadData.title')}
+              disabled={rawData.length === 0}
+              onClick={exportData}
+              iconProps={{ iconName: 'download' }}
             />
-            <Dropdown style={{ minWidth: '180px', marginRight: '1em' }}
-              selectedKey={commonStore.computationEngine}
-              options={engineOptions}
-              label={intl.get('config.computationEngine.title')}
-              onChange={(e, item) => {
-                item && commonStore.setComputationEngine(item.key as string);
-              }}
-            />
-          </Stack>
-        </div>
-        <div style={{ margin: '1em 0px' }}>
-          <Stack horizontal verticalAlign="end">
-            <ComboBox
-              styles={{ root: { maxWidth: '180px' } }}
-              selectedKey={cleanMethod}
-              label={intl.get('dataSource.cleanMethod')}
-              allowFreeform={true}
-              autoComplete="on"
-              options={cleanMethodListLang}
-              onChange={(e, option) => {
-                option && dataSourceStore.setCleanMethod(option.key as CleanMethod)
-              }}
-            />
-            <IconButton title="Download Dataset" onClick={exportData} iconProps={{ iconName: 'download' }} />
-            <IconButton
-              title="Extend Data"
+            <CommandButton
+              text={intl.get('dataSource.extend.title')}
+              disabled
+              // disabled={rawData.length === 0}
               iconProps={{ iconName: 'AppIconDefaultAdd' }}
               onClick={() => {
                 dataSourceStore.extendData();
               }}
             />
-          </Stack>
-        </div>
-        <p style={{ fontSize: 12, fontWeight: 400, color: '#595959' }}>{intl.get('dataSource.tip')}</p>
+        </Stack>
         <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
           {intl.get('dataSource.recordCount', { count: cleanedData.length })} <br />
           Origin: ({rawData.length}) rows / Selected: ({ filteredData.length }) / Clean: ({cleanedData.length}) rows
         </i>
         <Toggle checked={dataPreviewMode === IDataPreviewMode.meta}
+          disabled={rawData.length === 0}
           label={intl.get('dataSource.viewMode')}
           onText={intl.get('dataSource.metaView')}
           offText={intl.get('dataSource.dataView')}
           onChange={(ev, checked) => {
             dataSourceStore.setDataPreviewMode(checked ? IDataPreviewMode.meta : IDataPreviewMode.data)
-          }}
-        />
-        <CommandButton
-          disabled={rawData.length === 0}
-          text="Fast Selection"
-          iconProps={{ iconName: 'filter' }}
-          onClick={() => {
-            dataSourceStore.setShowFastSelection(true)
           }}
         />
         {/* <ActionButton iconProps={{ iconName: 'download' }}>download data</ActionButton> */}

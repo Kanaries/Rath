@@ -22,6 +22,7 @@
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@heroicons/react": "^1.0.4",
+    "@kanaries/web-data-loader": "0.1.5",
     "autoprefixer": "^10.3.5",
     "mobx": "^6.3.3",
     "mobx-react-lite": "^3.2.1",

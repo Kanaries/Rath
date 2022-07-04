@@ -35,10 +35,18 @@ import InferMetaWorker from './workers/metaInfer.worker?worker';
 // @ts-ignore
 // eslint-disable-next-line
 import FootmanWorker from './workers/footman/index.worker?worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import CleanWorker from './workers/clean.worker?worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import FilterWorker from './workers/filterData.worker?worker';
 import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
 import { MessageProps } from './workers/engine/service';
 
-import { IFieldMeta, IMuteFieldBase, IRawField, IRow } from './interfaces';
+import { CleanMethod, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from './interfaces';
 import { ISemanticType } from 'visual-insights';
 import { IFootmanProps } from './workers/footman/service';
 
@@ -414,6 +422,50 @@ export async function inferMetaService(props: InferMetaServiceProps): Promise<IR
     console.error(error)
   }
   return metas;
+}
+
+export interface CleanServiceProps {
+  dataSource: IRow[];
+  fields: IMuteFieldBase[];
+  method: CleanMethod;
+}
+export async function cleanDataService(props: CleanServiceProps): Promise<IRow[]> {
+  let data: IRow[] = [];
+  try {
+    const worker = new CleanWorker();
+    const result = await workerService<IRow[], CleanServiceProps>(worker, props);
+    if (result.success) {
+      data = result.data
+    } else {
+      throw new Error('[clean data worker]' + result.message);
+    }
+    worker.terminate();
+  } catch (error) {
+    console.error(error)
+  }
+  return data;
+}
+
+export interface FilterServiceProps {
+  dataSource: IRow[];
+  filters: IFilter[];
+}
+export async function filterDataService(props: FilterServiceProps): Promise<IRow[]> {
+  if (props.filters.length === 0) return props.dataSource
+  let data: IRow[] = [];
+  try {
+    const worker = new FilterWorker();
+    const result = await workerService<IRow[], FilterServiceProps>(worker, props);
+    if (result.success) {
+      data = result.data
+    } else {
+      throw new Error('[filter worker]' + result.message);
+    }
+    worker.terminate();
+  } catch (error) {
+    console.error(error)
+  }
+  return data;
 }
 
 export interface MessageServerProps extends MessageProps {

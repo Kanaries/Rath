@@ -1,5 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import produce, { Draft } from 'immer';
+import { CleanMethod } from '../interfaces';
+import intl from "react-intl-universal";
 /**
  * @param S type of the composed state
  */
@@ -26,4 +28,22 @@ export function useComposeState<S>(initState: S): [S, (stateUpdater: StateUpdate
     })
   }, [setState])
   return [state, updateState]
+}
+
+export const cleanMethodList: Array<{ key: CleanMethod; text: string }> = [
+  { key: 'dropNull', text: 'drop null records' },
+  { key: 'useMode', text: 'replace null with mode' },
+  { key: 'simpleClean', text: 'simple cleaning' },
+  { key: 'none', text: 'none' }
+]
+
+export const useCleanMethodList = function (): typeof cleanMethodList {
+  return useMemo(() => {
+    return cleanMethodList.map((m) => {
+        return {
+            key: m.key,
+            text: intl.get(`dataSource.methods.${m.key}`),
+        };
+    });
+  }, [])
 }

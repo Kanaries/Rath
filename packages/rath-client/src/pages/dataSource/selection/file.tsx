@@ -12,9 +12,10 @@ interface FileDataProps {
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
+    onDataLoading: (p: number) => void;
 }
 const FileData: React.FC<FileDataProps> = (props) => {
-    const { onClose, onDataLoaded, onStartLoading, onLoadingFailed } = props;
+    const { onClose, onDataLoaded, onStartLoading, onLoadingFailed, onDataLoading } = props;
     const sampleOptions = useSampleOptions();
     const labelId = useId("labelElement");
     const [sampleMethod, setSampleMethod] = useState<SampleKey>(SampleKey.none);
@@ -56,7 +57,13 @@ const FileData: React.FC<FileDataProps> = (props) => {
             const file = fileEle.current.files[0];
             onStartLoading();
             try {
-                const { fields, dataSource } = await loadDataFile(file, sampleMethod, sampleSize, chartset);
+                const { fields, dataSource } = await loadDataFile({
+                    file,
+                    sampleMethod,
+                    sampleSize,
+                    encoding: chartset,
+                    onLoading: onDataLoading
+                });
                 logDataImport({
                     dataType: 'File',
                     fields,
