@@ -4,7 +4,8 @@
         "measure": "measure",
         "name": "Name",
         "home": "Home",
-        "settings": "Settings"
+        "settings": "Settings",
+        "history": "History"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -12,11 +13,11 @@
         "explore": "Explore(alpha version)",
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
-        "editor": "Visual Editor",
+        "editor": "Manual Exploration",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
-        "lts": "Explore",
-        "pattern": "Build Knowledge(beta)",
+        "lts": "Mega-auto Exploration",
+        "pattern": "Semi-auto Exploration",
         "devCollection": "Debug"
     },
     "preference": {
@@ -29,9 +30,15 @@
     "config": {
         "computationEngine": {
             "title": "Computation Engine",
+            "desc": "Define where the analysis task run. If your dataset is small (< 100MB), web worker mode is recommanded. Otherwise try clickhosue mode.",
             "clickhouse": "ClickHouse",
             "webworker": "Browser(Web Worker)",
             "notCompatible": "Not compatible with datasource"
+        },
+        "analysisConfig": "Analysis Settings",
+        "cubeStorageManageMode": {
+            "title": "Cube Storage Manage Mode",
+            "desc": "How Cube store its cuboids."
         }
     },
     "function": {
@@ -133,7 +140,7 @@
             "fileTypes": "csv, json are supportted.",
             "uniqueIdIssue": "Add unique ids for fields",
             "sampling": "Sampling",
-            "percentSize": "sample size(percent)",
+            "percentSize": "sample size(rows)",
             "upload": "Upload"
         },
         "exploreMode": {
@@ -142,6 +149,15 @@
             "familiar": "Familiar with the data",
             "comprehensive": "Comprehensive",
             "manual": "Manual(with specific purpose)"
+        },
+        "fastSelection": {
+            "title": "Fast Selection"
+        },
+        "downloadData": {
+            "title": "Download Data"
+        },
+        "extend": {
+            "title": "Extend Features"
         }
     },
     "meta": {
