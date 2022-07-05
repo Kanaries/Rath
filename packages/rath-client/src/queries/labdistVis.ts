@@ -6,6 +6,7 @@ import { IPattern } from "../dev";
 import { bin, binMap, mic, pureGeneralMic, rangeNormilize } from "../dev/utils";
 import { IFieldMeta, IResizeMode, IRow } from "../interfaces";
 import { deepcopy } from "../utils";
+import { encodingDecorate } from "./base/utils";
 import { applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
 export const geomTypeMap: { [key: string]: any } = {
     interval: "boxplot",
@@ -339,7 +340,7 @@ function markFixEncoding(markType: string, usedChannels: Set<string>) {
 interface IFieldEncode {
     field?: string;
     title?: string;
-    semanticType?: string;
+    type?: string;
     aggregate?: string;
     bin?: boolean;
 }
@@ -375,7 +376,7 @@ function autoStat(fields: IFieldMeta[]): {
             statEncodes.push({
                 field: f.fid,
                 title: f.name || f.fid,
-                semanticType: f.semanticType,
+                type: f.semanticType,
                 bin: true
             })
         })
@@ -388,7 +389,7 @@ function autoStat(fields: IFieldMeta[]): {
                 statFields.push({ ...f })
                 statEncodes.push({
                     field: f.fid,
-                    semanticType: f.semanticType,
+                    type: f.semanticType,
                     title: `mean(${f.name || f.fid})`,
                     aggregate: 'mean'
                 })
@@ -398,7 +399,7 @@ function autoStat(fields: IFieldMeta[]): {
                 statEncodes.push({
                     field: f.fid,
                     title: f.name || f.fid,
-                    semanticType: f.semanticType,
+                    type: f.semanticType,
                     bin: true
                 })
             })
@@ -494,6 +495,10 @@ export function labDistVis(props: BaseVisProps) {
     //     statFields
     // })
     humanHabbit(enc);
+    // const shouldFixVisSize = encodingDecorate(enc, fields);
+    if (resizeMode === IResizeMode.control) {
+        encodingDecorate(enc, fields, statFields);
+    }
 
     let basicSpec: any = {
         // "config": {

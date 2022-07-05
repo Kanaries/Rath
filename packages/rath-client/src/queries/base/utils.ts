@@ -1,4 +1,4 @@
-import { IResizeMode } from "../../interfaces";
+import { IFieldMeta, IResizeMode } from "../../interfaces";
 
 export interface ISizeConfig {
     mode: IResizeMode;
@@ -28,9 +28,42 @@ export function applySizeConfig(spec: any, cnf: ISizeConfig): any {
     } else if (mode !== IResizeMode.auto) {
         spec.width = width
         spec.height = height;
+        if (spec.encoding && spec.encoding.x) {
+            spec.encoding.x.axis = { labelOverlap: true }
+        }
+        if (spec.encoding && spec.encoding.y) {
+            spec.encoding.y.axis = { labelOverlap: true }
+        }
         if (!hasFacets) {
             spec.autosize = 'fit'
         }
     }
     return spec;
+}
+
+export function encodingDecorate (encoding: any, fields: IFieldMeta[], statFields: IFieldMeta[]): boolean {
+    const allFields = fields.concat(statFields)
+    if (encoding.x && encoding.x.type === 'nominal') {
+        if (encoding.y && encoding.y.type === 'quantitative') {
+            const nominalField = allFields.find(f => f.fid === encoding.x.field);
+            if (nominalField && nominalField.features.unique > 2) {
+                encoding.x.axis = {
+                    labelOverlap: true
+                }
+            }
+            return true
+        }
+    }
+    if (encoding.y && encoding.y.type === 'nominal') {
+        if (encoding.x && encoding.x.type === 'quantitative') {
+            const nominalField = allFields.find(f => f.fid === encoding.y.field);
+            if (nominalField && nominalField.features.unique > 2) {
+                encoding.y.axis = {
+                    labelOverlap: true
+                }
+            }
+        }
+        return true
+    }
+    return false;
 }

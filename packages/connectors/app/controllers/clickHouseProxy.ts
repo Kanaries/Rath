@@ -4,6 +4,7 @@ import { useGlobalStore } from "../store";
 import { sendFailResponse, sendPureResponse, sendSuccessResponse } from "../utils";
 import { CHQuery, getFieldMetas } from "../services/chmeta";
 import { parseTable } from "../services/chparser";
+// import fs from 'fs'
 
 interface CHProxyProps {
     [key: string]: string
@@ -19,6 +20,7 @@ export async function CHGeneralProxy (ctx: Context) {
         for (let [pk, pv] of url.searchParams.entries()) {
             paramsObj[pk] = pv;
         }
+        // fs.appendFileSync('./log.sql', `${paramsObj.query}\n`)
         const res = await axios(`${config.clickhouse.protocol}://${config.clickhouse.host}:${config.clickhouse.port}`, {
             method: ctx.request.method as 'post' | 'get',
             params: paramsObj

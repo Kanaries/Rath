@@ -37,7 +37,9 @@ function adjustGeomType (geomType: string, dataSource: IRow[], measures: string[
       const valueSet: Set<any> = new Set();
       for (let i = 0; i < dataSource.length; i++) {
         valueSet.add(dataSource[i][mea]);
-        if (valueSet.size > 16) return 'boxplot'
+        // 2022.07.05 vega-lite sort + boxplot有bug，是按照视图上出现的geom的数量排序，而不是值的数量排序。所以暂时替换为tick
+        // if (valueSet.size > 16) return 'boxplot'
+        if (valueSet.size > 16) return 'tick'
       }
     }
     return 'point'
@@ -148,6 +150,20 @@ export function baseVis(props: BaseVisProps) {
         !defaultStack
       ) {
         basicSpec.encoding[channel].stack = null;
+      }
+    }
+  }
+  for (let channel in fieldMap) {
+    if (["x", "y"].includes(channel)) {
+      const targetFieldMeta = getFieldMeta(fieldMap[channel]);
+      const otherAxisChannel = (channel === 'x' ? 'y' : 'x');
+      const otherAxisFieldMeta = getFieldMeta(fieldMap[otherAxisChannel])
+      if (targetFieldMeta && otherAxisChannel && targetFieldMeta.semanticType === 'nominal' &&  targetFieldMeta.features.unique > 2 && otherAxisFieldMeta?.semanticType === 'quantitative') {
+        basicSpec.encoding[channel].sort = {
+          field: otherAxisFieldMeta.fid,
+          op: "count",
+          order: "descending"
+        }
       }
     }
   }

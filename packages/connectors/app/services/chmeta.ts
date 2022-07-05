@@ -1,8 +1,10 @@
 import axios from "axios";
 import { IDBFieldMeta } from "../interfaces";
 import { useGlobalStore } from "../store";
+// import fs from 'fs'
 export async function CHQuery (sql: string): Promise<string> {
     const config = useGlobalStore().getConfig();
+    // fs.appendFileSync('./log.sql', sql)
     const res = await axios(`${config.clickhouse.protocol}://${config.clickhouse.host}:${config.clickhouse.port}?query=${sql}`);
     return res.data;
 }

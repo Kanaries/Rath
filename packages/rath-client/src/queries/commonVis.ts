@@ -64,7 +64,10 @@ export function commonVis(props: BaseVisProps) {
           return targetField.name ? targetField.name : targetField.fid
         }
         return '_'
-      }
+    }
+    function getFieldMeta (fieldId: string): IFieldMeta | undefined {
+        return fieldFeatures.find(f => f.fid === fieldId);
+    }
 
     const fieldMap: any = {
         x: position[0],
@@ -118,6 +121,20 @@ export function commonVis(props: BaseVisProps) {
             }
         }
     }
+    for (let channel in fieldMap) {
+        if (["x", "y"].includes(channel)) {
+          const targetFieldMeta = getFieldMeta(fieldMap[channel]);
+          const otherAxisChannel = (channel === 'x' ? 'y' : 'x');
+          const otherAxisFieldMeta = getFieldMeta(fieldMap[otherAxisChannel])
+          if (targetFieldMeta && otherAxisChannel && targetFieldMeta.semanticType === 'nominal' &&  targetFieldMeta.features.unique > 2 && otherAxisFieldMeta?.semanticType === 'quantitative') {
+            basicSpec.encoding[channel].sort = {
+              field: otherAxisFieldMeta.fid,
+              op: "sum",
+              order: "descending"
+            }
+          }
+        }
+      }
     if (!defaultStack && opacity.length === 0) {
         basicSpec.encoding.opacity = { value: 0.7 };
     }
