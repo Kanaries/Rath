@@ -1,31 +1,31 @@
 {
   "files": {
     "main.css": "./static/css/main.14696c86.chunk.css",
-    "main.js": "./static/js/main.7fbf4147.chunk.js",
+    "main.js": "./static/js/main.2f21bff1.chunk.js",
     "runtime-main.js": "./static/js/runtime-main.0f2630df.js",
     "static/css/2.dac455df.chunk.css": "./static/css/2.dac455df.chunk.css",
     "static/js/2.02487f52.chunk.js": "./static/js/2.02487f52.chunk.js",
-    "[path].clean.worker.377aa4fbfad571bee8f1.worker.js": "./[path].clean.worker.377aa4fbfad571bee8f1.worker.js",
-    "[path].cluster.worker.eccf113b4ed1a663bb0c.worker.js": "./[path].cluster.worker.eccf113b4ed1a663bb0c.worker.js",
-    "[path].combineFields.worker.e1533764ac3a9adfc8df.worker.js": "./[path].combineFields.worker.e1533764ac3a9adfc8df.worker.js",
-    "[path].dashboard.worker.7b9afd1de11a5f1d3854.worker.js": "./[path].dashboard.worker.7b9afd1de11a5f1d3854.worker.js",
-    "[path].dev.worker.affd305f4208418377b9.worker.js": "./[path].dev.worker.affd305f4208418377b9.worker.js",
-    "[path].fieldsSummary.worker.d10ab6a80e84f3a6c057.worker.js": "./[path].fieldsSummary.worker.d10ab6a80e84f3a6c057.worker.js",
-    "[path].filterData.worker.2d932e1d24ecb3f9c746.worker.js": "./[path].filterData.worker.2d932e1d24ecb3f9c746.worker.js",
-    "[path].groupFields.worker.32cc12c0e01a4ecf415e.worker.js": "./[path].groupFields.worker.32cc12c0e01a4ecf415e.worker.js",
-    "[path].index.worker.218e0179971bee2113c6.worker.js": "./[path].index.worker.218e0179971bee2113c6.worker.js",
-    "[path].index.worker.3518fd764a60976754a0.worker.js": "./[path].index.worker.3518fd764a60976754a0.worker.js",
-    "[path].metaInfer.worker.18302b983f73ddf7ceb9.worker.js": "./[path].metaInfer.worker.18302b983f73ddf7ceb9.worker.js",
-    "[path].transFileData.worker.135116ede62fd281214c.worker.js": "./[path].transFileData.worker.135116ede62fd281214c.worker.js",
+    "135116ede62fd281214c.worker.js": "./135116ede62fd281214c.worker.js",
+    "18302b983f73ddf7ceb9.worker.js": "./18302b983f73ddf7ceb9.worker.js",
+    "218e0179971bee2113c6.worker.js": "./218e0179971bee2113c6.worker.js",
+    "2d932e1d24ecb3f9c746.worker.js": "./2d932e1d24ecb3f9c746.worker.js",
+    "32cc12c0e01a4ecf415e.worker.js": "./32cc12c0e01a4ecf415e.worker.js",
+    "3518fd764a60976754a0.worker.js": "./3518fd764a60976754a0.worker.js",
+    "377aa4fbfad571bee8f1.worker.js": "./377aa4fbfad571bee8f1.worker.js",
+    "7b9afd1de11a5f1d3854.worker.js": "./7b9afd1de11a5f1d3854.worker.js",
+    "affd305f4208418377b9.worker.js": "./affd305f4208418377b9.worker.js",
+    "d10ab6a80e84f3a6c057.worker.js": "./d10ab6a80e84f3a6c057.worker.js",
+    "e1533764ac3a9adfc8df.worker.js": "./e1533764ac3a9adfc8df.worker.js",
+    "eccf113b4ed1a663bb0c.worker.js": "./eccf113b4ed1a663bb0c.worker.js",
     "index.html": "./index.html",
     "static/js/2.02487f52.chunk.js.LICENSE.txt": "./static/js/2.02487f52.chunk.js.LICENSE.txt",
-    "static/js/main.7fbf4147.chunk.js.LICENSE.txt": "./static/js/main.7fbf4147.chunk.js.LICENSE.txt"
+    "static/js/main.2f21bff1.chunk.js.LICENSE.txt": "./static/js/main.2f21bff1.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.0f2630df.js",
     "static/css/2.dac455df.chunk.css",
     "static/js/2.02487f52.chunk.js",
     "static/css/main.14696c86.chunk.css",
-    "static/js/main.7fbf4147.chunk.js"
+    "static/js/main.2f21bff1.chunk.js"
   ]
 }
