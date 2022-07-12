@@ -8,7 +8,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
     const mysqlText = intl.get(`dataSource.importData.type.${IDataSourceType.MYSQL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
     const clickHouseText = 'clickhouse';
-    const localText = 'History'
+    const localText = intl.get('common.history')
 
     const options = useMemo<Array<{ key: IDataSourceType; text: string }>>(() => {
         return [
@@ -46,7 +46,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 disabled: false,
             }
         ];
-    }, [fileText, restfulText, mysqlText, demoText]);
+    }, [fileText, restfulText, mysqlText, demoText, localText]);
     return options;
 };
 

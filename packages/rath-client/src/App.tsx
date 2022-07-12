@@ -18,6 +18,7 @@ import { destroyRathWorker, initRathWorker } from "./service";
 import { PIVOT_KEYS } from "./constants";
 import CrInfo from "./components/crInfo";
 import { Spinner, SpinnerSize } from "office-ui-fabric-react";
+// import VegaVis from "./renderer/vegaVis";
 // import { loadTheme } from "office-ui-fabric-react";
 // import { RATH_DARK_PALETTE, RATH_DARK_THEME } from "./theme";
 
@@ -93,6 +94,7 @@ function App() {
         </div>
       </div> */}
       <div className="main-app-container">
+        {/* <VegaVis /> */}
         <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '20px' }}>
           <AppNav />
         </div>

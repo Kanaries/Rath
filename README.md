@@ -1,5 +1,3 @@
-<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> English | [简体中文](./README.zh-CN.md)
-
 # Rath
 
 ![](https://travis-ci.org/kanaries/rath.svg?branch=master)
@@ -107,15 +105,6 @@ Rath now runs all the computation tasks on webworker. For some large dataset, Ra
 ## Documentation
 + [Tutorial: Using Rath to find deep insight in your data](https://www.yuque.com/docs/share/3f32e044-3530-4ebe-9b01-287bfbdb7ce0?#)
 + doc for reuseable hooks: todos
-
-## Reference
-
-Rath is insipired by several excellent works below:
-+ [1] Cleveland, W., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. Journal of the American Statistical Association, 79(387), 531-554. doi:10.2307/2288400
-+ [2] Mackinlay, Jock D. Automatic design of graphical presentations. Stanford Univ., CA (USA), 1987.
-+ [3] Wongsuphasawat, Kanit, et al. "Voyager 2: Augmenting visual analysis with partial view specifications." Proceedings of the 2017 CHI Conference on Human Factors in Computing Systems. ACM, 2017.
-+ [4] B. Tang et al, "Extracting top-K insights from multi-dimensional data," in 2017, . DOI: 10.1145/3035918.3035922.
-+ [5] Vega-Lite: A Grammar of Interactive Graphics. Arvind Satyanarayan, Dominik Moritz, Kanit Wongsuphasawat, Jeffrey Heer. IEEE Trans. Visualization & Comp. Graphics (Proc. InfoVis), 2017
 
 ## LICENSE (AGPL)
 Rath is an automated data analysis and visualization tool (auto-EDA).

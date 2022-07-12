@@ -1,5 +1,4 @@
 import { STORAGE_FILE_SUFFIX } from "../../../constants";
-// import { BIField, Record } from "../../global";
 import { FileLoader } from "../../../utils";
 import { Sampling } from 'visual-insights';
 import { FileReader } from '@kanaries/web-data-loader'
@@ -38,10 +37,6 @@ export const useSampleOptions = function () {
     return options;
 }
 
-const onDataLoading = (value: number) => {
-    console.log('data loading', Math.round(value * 100) + '%')
-}
-
 async function transformFileDataService (rawData: IRow[]): Promise<{
     fields: IMuteFieldBase[];
     dataSource: IRow[]
@@ -62,11 +57,24 @@ async function transformFileDataService (rawData: IRow[]): Promise<{
     }
 }
 
-export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSize: number = 500, encoding: string = 'utf-8'): Promise<{
+interface LoadDataFileProps {
+    file: File;
+    sampleMethod: SampleKey;
+    sampleSize?: number;
+    encoding?: string;
+    onLoading?: (progress: number) => void;
+}
+export async function loadDataFile(props: LoadDataFileProps): Promise<{
     fields: IMuteFieldBase[];
     dataSource: IRow[]
 }> {
-
+    const {
+        file,
+        sampleMethod,
+        sampleSize = 500,
+        encoding = 'utf-8',
+        onLoading
+    } = props;
     /**
      * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
      */
@@ -82,13 +90,13 @@ export async function loadDataFile(file: File, sampleMethod: SampleKey, sampleSi
                 type: 'reservoirSampling',
                 size: sampleSize,
               },
-              onLoading: onDataLoading
+              onLoading
             })) as IRow[]
         } else {
             rawData = (await FileReader.csvReader({
               file,
               encoding,
-              onLoading: onDataLoading
+              onLoading
             })) as IRow[]
         }
     } else if (file.type === 'application/json') {

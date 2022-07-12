@@ -2237,10 +2237,18 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@kanaries/web-data-loader@^0.1.3":
-  version "0.1.4"
-  resolved "https://registry.npmmirror.com/@kanaries/web-data-loader/-/web-data-loader-0.1.4.tgz#c632dcd52f1af638bf333ad9bd1c77f2ca911c4f"
-  integrity sha512-zECi6K2CvL7sIZWB3ZJPIdyDNtvN90dL6rTia5lwiXmpx/kUohNKBvgdkm7VVQXCwAM53Hl3izOabVsEp3MMGg==
+"@kanaries/web-data-loader@0.1.5":
+  version "0.1.5"
+  resolved "https://registry.npmmirror.com/@kanaries/web-data-loader/-/web-data-loader-0.1.5.tgz#10d8d677492919b0838b9429d28cbf2b7d726100"
+  integrity sha512-WVXBjhAgwCOItulV7oz2DOkX294bmgc2GDunxwtgK9cn4dUKg16EV1djkdpJy4r4VGQNXj89gPYECuHdMq4dkw==
+  dependencies:
+    "@types/papaparse" "^5.0.3"
+    papaparse "^5.1.1"
+
+"@kanaries/web-data-loader@0.1.7":
+  version "0.1.7"
+  resolved "https://registry.npmmirror.com/@kanaries/web-data-loader/-/web-data-loader-0.1.7.tgz#ce322bc4028f00a433a655fe631a148c51c875bc"
+  integrity sha512-i+JadnZC0XZcOk72tvV1/ko2TKn9p8ogJ6TdGYJOn5sK6cToE3R9Kz1LJdbw50M7uNUQK+vEAHWi1MOguqlJKw==
   dependencies:
     "@types/papaparse" "^5.0.3"
     papaparse "^5.1.1"
@@ -15106,11 +15114,6 @@ typedarray@^0.0.6:
   resolved "https://registry.nlark.com/typedarray/download/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^4.1.3:
-  version "4.3.4"
-  resolved "https://registry.nlark.com/typescript/download/typescript-4.3.4.tgz?cache=0&sync_timestamp=1625037488160&other_urls=https%3A%2F%2Fregistry.nlark.com%2Ftypescript%2Fdownload%2Ftypescript-4.3.4.tgz#3f85b986945bcf31071decdd96cf8bfa65f9dcbc"
-  integrity sha1-P4W5hpRbzzEHHezdls+L+mX53Lw=
-
 typescript@^4.3.2:
   version "4.3.5"
   resolved "https://registry.nlark.com/typescript/download/typescript-4.3.5.tgz?cache=0&sync_timestamp=1629530349115&other_urls=https%3A%2F%2Fregistry.nlark.com%2Ftypescript%2Fdownload%2Ftypescript-4.3.5.tgz#4d1c37cc16e893973c45a06886b7113234f119f4"
@@ -15125,6 +15128,11 @@ typescript@^4.5.4:
   version "4.6.3"
   resolved "https://registry.npmmirror.com/typescript/-/typescript-4.6.3.tgz#eefeafa6afdd31d725584c67a0eaba80f6fc6c6c"
   integrity sha512-yNIatDa5iaofVozS/uQJEl3JRWLKKGJKh6Yaiv0GLGSuhpFJe7P3SbHZ8/yjAHRQwKRoA6YZqlfjXWmVzoVSMw==
+
+typescript@^4.8.0-dev.20220630:
+  version "4.8.0-dev.20220630"
+  resolved "https://registry.npmmirror.com/typescript/-/typescript-4.8.0-dev.20220630.tgz#7ed7c5c95d76f8236271d864fbbc93115ae0d436"
+  integrity sha512-wyFZIoUdTqDrKU3XfDx+pylAEIhlmpbsbicFXuvggpKeSWiPeUrMiSRqeXBnAjXiD6kn2Anmw+c3eyX3A2WdUw==
 
 ua-parser-js@^0.7.18:
   version "0.7.28"
@@ -15941,10 +15949,10 @@ visual-insights@0.7.15:
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 
-visual-insights@0.8.10:
-  version "0.8.10"
-  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.8.10.tgz#ba825199f4331d3de4d2377053196479d137ecb2"
-  integrity sha512-UQHMzjLvwTKffaqHR1EbjJDOkQ1NJovOzzqgOQdkzaFUu2+qf4g1rb+d9jQNgDgr6JGQL6RilyJEuMUxY/HgoA==
+visual-insights@0.8.11:
+  version "0.8.11"
+  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.8.11.tgz#204408b7be25d52bd68e3ff13d15e7b234957416"
+  integrity sha512-yMGkBJzcEIeiWKmD1uiJ4TJMXXBRMz+iIgyTBtDvDIMrAlakRF90gZzjuRidjq95FX+wfliDHkbkHkomyLdCgA==
   dependencies:
     assert "^2.0.0"
     axios "^0.22.0"

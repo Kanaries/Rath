@@ -3,6 +3,7 @@
  */
 import { IPattern } from "../dev";
 import { IFieldMeta, IResizeMode } from "../interfaces";
+import { encodingDecorate } from "./base/utils";
 import { applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
 export const geomTypeMap: { [key: string]: any } = {
     interval: "boxplot",
@@ -273,7 +274,7 @@ function markFixEncoding (markType: string, usedChannels: Set<string>) {
 interface IFieldEncode {
     field?: string;
     title?: string;
-    semanticType?: string;
+    type?: string;
     aggregate?: string;
     bin?: boolean;
 }
@@ -309,7 +310,7 @@ function autoStat (fields: IFieldMeta[]): {
             statEncodes.push({
                 field: f.fid,
                 title: f.name || f.fid,
-                semanticType: f.semanticType,
+                type: f.semanticType,
                 bin: true
             })
         })
@@ -322,7 +323,7 @@ function autoStat (fields: IFieldMeta[]): {
                 statFields.push({ ...f })
                 statEncodes.push({
                     field: f.fid,
-                    semanticType: f.semanticType,
+                    type: f.semanticType,
                     title: `mean(${f.name || f.fid})`,
                     aggregate: 'mean'
                 })
@@ -332,7 +333,7 @@ function autoStat (fields: IFieldMeta[]): {
                 statEncodes.push({
                     field: f.fid,
                     title: f.name || f.fid,
-                    semanticType: f.semanticType,
+                    type: f.semanticType,
                     bin: true
                 })
             })
@@ -373,6 +374,10 @@ export function distVis(props: BaseVisProps) {
     //     statFields
     // })
     humanHabbit(enc);
+
+    if (resizeMode === IResizeMode.control) {
+        encodingDecorate(enc, fields, statFields);
+    }
 
     let basicSpec: any = {
         // "config": {

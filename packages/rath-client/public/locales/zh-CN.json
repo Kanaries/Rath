@@ -4,7 +4,8 @@
         "measure": "度量",
         "name": "名称",
         "home": "主页",
-        "settings": "设置"
+        "settings": "设置",
+        "history": "历史记录"
     },
     "menu": {
         "dataSource": "数据源",
@@ -14,8 +15,8 @@
         "explainer": "数据解读",
         "editor": "自助分析",
         "support": "帮助",
-        "lts": "探索分析",
-        "pattern": "建立认知(beta)",
+        "lts": "全自动分析",
+        "pattern": "半自动探索",
         "devCollection": "调试模式"
     },
     "preference": {
@@ -28,9 +29,15 @@
     "config": {
         "computationEngine": {
             "title": "计算引擎",
+            "desc": "自定义你的计算任务会在哪里运行，如果你的数据集较小（通常是指100MB以内的csv），推荐使用webworker模式在本地进行计算。否则则建议尝试clickhouse模式。\n但需要连接你自己的clickhouse服务或使用kanaries提供的扩展服务。",
             "clickhouse": "ClickHouse",
             "webworker": "浏览器(Web Worker)",
             "notCompatible": "与数据源暂不兼容"
+        },
+        "analysisConfig": "数据分析设置",
+        "cubeStorageManageMode": {
+            "title": "Cube存储管理模式",
+            "desc": "定义Cube计算中间结果的存储模式。通常建议使用mix模式，这样Rath会自动帮你进行精细的控制。对于数据量不大的数据集，你可以使用内存模式来获得更快的性能。 但对于一些极端情况，如数据量非常巨大，导致内存吃紧的情况，则可以选择硬盘模式保证程序的安全运行。"
         }
     },
     "function": {
@@ -133,7 +140,7 @@
             "fileTypes": "支持csv, json文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
             "sampling": "数据采样",
-            "percentSize": "样本大小(%)",
+            "percentSize": "样本大小(行)",
             "upload": "上传文件"
         },
         "exploreMode": {
@@ -142,6 +149,15 @@
             "familiar": "基本熟悉该数据集",
             "comprehensive": "综合模式",
             "manual": "手动（有明确分析目的）"
+        },
+        "fastSelection": {
+            "title": "快速筛选/清洗"
+        },
+        "downloadData": {
+            "title": "下载数据"
+        },
+        "extend": {
+            "title": "扩展维度"
         }
     },
     "meta": {

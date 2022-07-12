@@ -113,3 +113,12 @@ export type IFilter = {
     type: 'range';
     range: [number, number]
 }
+
+export type CleanMethod = 'dropNull' | 'useMode' | 'simpleClean' | 'none';
+
+export enum IDataPrepProgressTag {
+    none = 'none',
+    upload = 'upload',
+    filter = 'filter',
+    clean = 'clean'
+}

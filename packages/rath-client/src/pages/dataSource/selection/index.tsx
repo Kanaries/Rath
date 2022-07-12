@@ -11,6 +11,7 @@ import RestfulData from './restful';
 import ClickHouseData from './clickhouse';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import Local from './local';
+import DataLoadingStatus from '../dataLoadingStatus';
 
 interface SelectionProps {
     show: boolean;
@@ -19,9 +20,10 @@ interface SelectionProps {
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
+    onDataLoading: (p: number) => void;
 }
 const Selection: React.FC<SelectionProps> = props => {
-    const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed } = props;
+    const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed, onDataLoading } = props;
 
     const [dataSourceType, setDataSourceType] = useState<IDataSourceType>(IDataSourceType.DEMO);
     const dsTypeOptions = useDataSourceTypeOptions();
@@ -46,8 +48,9 @@ const Selection: React.FC<SelectionProps> = props => {
                     }}
                     ariaLabelledBy={dsTypeLabelId}
                 />
-                {loading && <ProgressIndicator description="loading" />}
-                {dataSourceType === IDataSourceType.FILE && <FileData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
+                {loading && dataSourceType !== IDataSourceType.FILE && <ProgressIndicator description="loading" />}
+                {loading && dataSourceType === IDataSourceType.FILE && <DataLoadingStatus />}
+                {dataSourceType === IDataSourceType.FILE && <FileData onDataLoading={onDataLoading} onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
                 {dataSourceType === IDataSourceType.DEMO && <DemoData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
                 {dataSourceType === IDataSourceType.CLICKHOUSE && <ClickHouseData onClose={onClose} onDataLoaded={onDataLoaded} />}
                 {dataSourceType === IDataSourceType.RESTFUL && <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
