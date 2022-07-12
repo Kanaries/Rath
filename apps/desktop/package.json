@@ -1,6 +1,6 @@
 {
   "name": "desktop",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Rath Desktop",
   "main": "main.js",
   "homepage": "./",
@@ -52,7 +52,7 @@
       ]
     },
     "mac": {
-      "icon": "icons/icon.ico"
+      "icon": "icons/pic-512.png"
     },
     "win": {
       "icon": "icons/icon.ico",
