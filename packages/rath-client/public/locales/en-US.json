@@ -297,7 +297,12 @@
                 "lite": "Lite mode(fast)",
                 "strict": "Strict mode"
             },
-            "loadMore": "load more"
+            "loadMore": "load more",
+            "associate": {
+                "patterns": "Associated Patterns",
+                "features": "Associated Features",
+                "filters": "Associated Subsets"
+            }
         }
     }
 }

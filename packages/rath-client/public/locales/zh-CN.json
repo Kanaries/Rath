@@ -297,7 +297,12 @@
                 "lite": "轻量模式(近似算法、更快)",
                 "strict": "严格模式(效果更好)"
             },
-            "loadMore": "加载更多"
+            "loadMore": "加载更多",
+            "associate": {
+                "patterns": "关联规律",
+                "features": "关联维度",
+                "filters": "关联子集"
+            }
         }
     }
 }

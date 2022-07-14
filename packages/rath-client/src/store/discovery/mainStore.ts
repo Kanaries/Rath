@@ -1,24 +1,36 @@
-import { makeAutoObservable, runInAction } from "mobx";
-import { IResizeMode } from "../../interfaces";
+import produce from "immer";
+import { makeAutoObservable, observable, runInAction } from "mobx";
+import { IPattern } from "../../dev";
+import { IFieldMeta, IResizeMode } from "../../interfaces";
+import { distVis } from "../../queries/distVis";
+import { labDistVis } from "../../queries/labdistVis";
+import { footmanEngineService } from "../../service";
+import { DataSourceStore } from "../dataSourceStore";
+import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoViews } from "./localTypes";
 
-interface ISetting {
-    vizAlgo: 'lite' | 'strict'
-}
-interface IMainVizSetting {
-    interactive: boolean;
-    debug: boolean;
-    resize: {
-        mode: IResizeMode;
-        width: number;
-        height: number;
-    };
-    nlg: boolean;
-}
+const RENDER_BATCH_SIZE = 5;
+
 export class DiscoveryMainStore {
     public settings: ISetting;
     public showSettings: boolean = false;
     public mainVizSetting: IMainVizSetting;
-    constructor () {
+    public pattViews: IAssoViews;
+    public featViews: IAssoViews;
+    public filterViews: IAssoViews;
+    private dataSourceStore: DataSourceStore;
+    public computing: boolean = false;
+    public mainView: IPattern | null = null;
+    public compareView: IPattern | null = null;
+    public showMiniFloatView: boolean = false;
+    public autoAsso: {
+        [key in IRenderViewKey]: boolean;
+    } = {
+        pattViews: true,
+        featViews: true,
+        filterViews: true
+    }
+    constructor (dataSourceStore: DataSourceStore) {
+        this.dataSourceStore = dataSourceStore;
         this.mainVizSetting = {
             interactive: false,
             debug: false,
@@ -32,7 +44,17 @@ export class DiscoveryMainStore {
         this.settings = {
             vizAlgo: 'lite'
         }
-        makeAutoObservable(this);
+        this.pattViews = makeInitAssoViews(RENDER_BATCH_SIZE);
+        this.featViews = makeInitAssoViews(RENDER_BATCH_SIZE);
+        this.filterViews = makeInitAssoViews(RENDER_BATCH_SIZE);
+
+        makeAutoObservable(this, {
+            pattViews: observable.shallow,
+            featViews: observable.shallow,
+            filterViews: observable.shallow,
+            mainView: observable.ref,
+            compareView: observable.ref
+        });
     }
     public setShowSettings (show: boolean) {
         this.showSettings = show;
@@ -40,9 +62,222 @@ export class DiscoveryMainStore {
     public updateSettings (skey: keyof ISetting, value: any) {
         this.settings[skey] = value;
     }
+    public updateAutoAssoConfig (akey: IRenderViewKey, value: boolean) {
+        this.autoAsso[akey] = value;
+    }
     public updateMainVizSettings (updater: (s: IMainVizSetting) => void) {
         runInAction(() => {
             updater(this.mainVizSetting);
         })
+    }
+    public setShowMiniFloatView (show: boolean) {
+        this.showMiniFloatView = show;
+    }
+    public get dataSource () {
+        return this.dataSourceStore.cleanedData;
+    }
+    public get fieldMetas () {
+        return this.dataSourceStore.fieldMetas;
+    }
+    public get pattSpecList () {
+        // TODO: 这里的设计并不会带来性能上的优化，过去只会被计算一次的整体，现在反而要算的更多。
+        // 仅仅对于联想视图比较多的场景会有优化。
+        const { amount, views } = this.pattViews;
+        const renderedViews = views.slice(0, amount);
+        if (this.settings.vizAlgo === 'lite') {
+            return renderedViews.map(v => distVis({
+                pattern: v
+            }))
+        } else {
+            return renderedViews.map(v => labDistVis({
+                pattern: v,
+                dataSource: this.dataSource
+            }))
+        }
+    }
+    public get featSpecList () {
+        // TODO: 这里的设计并不会带来性能上的优化，过去只会被计算一次的整体，现在反而要算的更多。
+        // 仅仅对于联想视图比较多的场景会有优化。
+        const { amount, views } = this.featViews;
+        const renderedViews = views.slice(0, amount);
+        if (this.settings.vizAlgo === 'lite') {
+            return renderedViews.map(v => distVis({
+                pattern: v
+            }))
+        } else {
+            return renderedViews.map(v => labDistVis({
+                pattern: v,
+                dataSource: this.dataSource
+            }))
+        }
+    }
+    public get filterSpecList () {
+        // TODO: 这里的设计并不会带来性能上的优化，过去只会被计算一次的整体，现在反而要算的更多。
+        // 仅仅对于联想视图比较多的场景会有优化。
+        const { amount, views } = this.filterViews;
+        const renderedViews = views.slice(0, amount);
+        if (this.settings.vizAlgo === 'lite') {
+            return renderedViews.map(v => distVis({
+                pattern: v
+            }))
+        } else {
+            return renderedViews.map(v => labDistVis({
+                pattern: v,
+                dataSource: this.dataSource
+            }))
+        }
+    }
+
+    public changeRenderAmount (stateKey: IRenderViewKey, size: number) {
+        this[stateKey].amount = size;
+    }
+    // 为一个关联模块的渲染数量增加一个系统默认值
+    public increaseRenderAmount (stateKey: IRenderViewKey) {
+        const safeSize = Math.min(this[stateKey].amount + RENDER_BATCH_SIZE, this[stateKey].views.length)
+        this.changeRenderAmount(stateKey, safeSize)
+    }
+    public async featAssociate () {
+        this.computing = true;
+        const { fieldMetas, dataSource, mainView } = this;
+        try {
+            const res = await footmanEngineService<IPattern[]>({
+                dataSource,
+                fields: fieldMetas,
+                task: 'featureSelection',
+                props: mainView
+            }, 'local')
+            runInAction(() => {
+                this.featViews.views = res;
+                this.featViews.amount = RENDER_BATCH_SIZE;
+                this.computing = false;
+            })
+        } catch (error) {
+            console.error(error);
+            this.computing = false;
+        }
+    }
+    public async pattAssociate () {
+        this.computing = true;
+        const { fieldMetas, dataSource, mainView } = this;
+        try {
+            const res = await footmanEngineService<IPattern[]>({
+                dataSource,
+                fields: fieldMetas,
+                task: 'patterns',
+                props: mainView
+            }, 'local')
+            runInAction(() => {
+                this.pattViews.views = res;
+                this.pattViews.amount = RENDER_BATCH_SIZE;
+                this.computing = false;
+            })
+        } catch (error) {
+            console.error(error);
+            this.computing = false;
+        }
+    }
+    public async initAssociate () {
+        this.computing = false;
+        const { dataSource, fieldMetas } = this;
+        try {
+            const res = await footmanEngineService<IPattern[]>({
+                dataSource,
+                fields: fieldMetas,
+                task: 'univar'
+            }, 'local')
+            runInAction(() => {
+                this.computing = false;
+                this.pattViews.views = res;
+                this.pattViews.amount = RENDER_BATCH_SIZE;
+            })
+        } catch (error) {
+            console.error(error);
+            this.computing = false;
+        }
+    }
+    public async filterAssociate () {
+        if (this.mainView === null) return;
+        this.computing = true;
+        const { fieldMetas, dataSource, mainView } = this;
+        try {
+            const res = await footmanEngineService<IPattern[]>({
+                dataSource,
+                fields: fieldMetas,
+                task: 'filterSelection',
+                props: mainView
+            }, 'local')
+            runInAction(() => {
+                this.filterViews.views = res;
+                this.filterViews.amount = RENDER_BATCH_SIZE;
+                this.computing = false;
+            })
+        } catch (error) {
+            console.error(error);
+            this.computing = false;
+        }
+    }
+    public removeMainViewFilter (filterFieldId: string) {
+        if (!this.mainView?.filters) return;
+        this.mainView = produce(this.mainView, draft => {
+            draft.filters = draft.filters!.filter(f => f.field.fid !== filterFieldId)
+        })
+    }
+    public removeMainViewField (fieldId: string) {
+        if (this.mainView === null) return;
+        const targetFieldIndex = this.mainView.fields.findIndex(f => f.fid === fieldId);
+        this.mainView = produce(this.mainView, draft => {
+            draft.fields.splice(targetFieldIndex, 1)
+        })
+        console.log(this.mainView)
+    }
+    public clearViews () {
+        this.featViews = makeInitAssoViews();
+        this.pattViews = makeInitAssoViews();
+        this.filterViews = makeInitAssoViews();
+    }
+    public initRenderSize () {
+        this.featViews.amount = RENDER_BATCH_SIZE;
+        this.pattViews.amount = RENDER_BATCH_SIZE;
+        this.filterViews.amount = RENDER_BATCH_SIZE;
+    }
+    public updateMainView (view: IPattern) {
+        this.mainView = view;
+        this.initAssociate()
+    }
+    public updateCompareView (view: IPattern) {
+        this.compareView = view;
+        this.mainVizSetting.resize.mode = IResizeMode.auto;
+    }
+    public async explainViewDiff (view1: IPattern, view2: IPattern) {
+        if (this.mainView === null) return;
+        this.computing = true;
+        const { fieldMetas, dataSource } = this;
+        try {
+            const res = await footmanEngineService<{ features: IFieldMeta[] }>({
+                dataSource,
+                fields: fieldMetas,
+                task: 'filterSelection',
+                props: [view1, view2]
+            }, 'local')
+            runInAction(() => {
+                if (this.mainView) {
+                    this.clearViews();
+                    this.featViews.views = [
+                        {
+                            ...this.mainView,
+                            fields: [...this.mainView!.fields, ...res.features]
+                        },
+                        {
+                            ...this.mainView,
+                            fields: [...this.mainView!.fields, ...res.features]
+                        }
+                    ]
+                }
+                this.computing = false;
+            })
+        } catch (error) {
+            console.error(error);
+            this.computing = false;
+        }
     }
 }

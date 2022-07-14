@@ -101,6 +101,18 @@ export function findRathSafeColumnIndex<T extends IGeneralColumn> (fields: T[]):
   return fields.findIndex(f => f.fid === RATH_INDEX_COLUMN_KEY);
 }
 
+export function throttle<F extends Function> (func: F, delay: number) {
+  let timer: number | null = null;
+  return function () {
+    if (timer === null) {
+      timer = window.setTimeout(() => {
+        func();
+        timer = null;
+      }, delay);
+    }
+  }
+}
+
 export {
   isASCII,
   inferAnalyticType,
