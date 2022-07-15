@@ -5,7 +5,9 @@
         "name": "Name",
         "home": "Home",
         "settings": "Settings",
-        "history": "History"
+        "history": "History",
+        "hide": "Hide",
+        "expand": "Expand"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -286,8 +288,8 @@
     "discovery": {
         "main": {
             "mainView": "Main View",
-            "relatePatterns": "relate patterns(default)",
-            "relateFeatures": "relate features",
+            "relatePatterns": "associate patterns",
+            "relateFeatures": "associate features",
             "explainDiff": "explain diff",
             "pointInterests": "split",
             "pin": "pin",
@@ -304,5 +306,8 @@
                 "filters": "Associated Subsets"
             }
         }
+    },
+    "desc": {
+        "dataViewInfo": "Pattern in {measures} by {dimensions} where {filters}."
     }
 }

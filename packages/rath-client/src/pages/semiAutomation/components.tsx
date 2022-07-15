@@ -16,7 +16,10 @@ export const AssoContainer = styled.div`
         padding: 10px;
         position: relative;
         .chart-container{
-            min-height: 300px;    
+            min-height: 280px;    
+        }
+        .chart-desc{
+            font-size: 12px;
         }
     }
 `
@@ -40,7 +43,7 @@ export const MainViewContainer = styled.div`
     }
     .fields-container{
         display: flex;
-        padding: 1em 0em;
+        padding: 1em 0em 0em 0em;
     }
     .action-buttons{
         margin: 6px 0px;

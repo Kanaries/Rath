@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite';
 import { CommandBarButton, IconButton } from 'office-ui-fabric-react';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
+import intl from 'react-intl-universal'
 
 import ReactVega from '../../../components/react-vega';
 import { IPattern } from '../../../dev';
@@ -52,7 +53,7 @@ const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = props => {
             {
                 !hide && <CommandBarButton
                     iconProps={{ iconName: 'BackToWindow' }}
-                    text="hide"
+                    text={intl.get('common.hide')}
                     onClick={() => {
                         setHide(v => !v)
                     }}
@@ -61,6 +62,7 @@ const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = props => {
             {
                 hide && <IconButton
                     iconProps={{ iconName: 'ChevronLeft' }}
+                    title={intl.get('common.expand')}
                     onClick={() => {
                         setHide(v => !v)
                     }}

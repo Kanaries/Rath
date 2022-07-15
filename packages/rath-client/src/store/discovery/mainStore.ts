@@ -42,7 +42,7 @@ export class DiscoveryMainStore {
             nlg: false
         }
         this.settings = {
-            vizAlgo: 'lite'
+            vizAlgo: 'strict'
         }
         this.pattViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.featViews = makeInitAssoViews(RENDER_BATCH_SIZE);
@@ -179,6 +179,7 @@ export class DiscoveryMainStore {
     public async initAssociate () {
         this.computing = false;
         const { dataSource, fieldMetas } = this;
+        console.log('init')
         try {
             const res = await footmanEngineService<IPattern[]>({
                 dataSource,
@@ -242,7 +243,8 @@ export class DiscoveryMainStore {
     }
     public updateMainView (view: IPattern) {
         this.mainView = view;
-        this.initAssociate()
+        // this.initAssociate()
+        this.clearViews();
     }
     public updateCompareView (view: IPattern) {
         this.compareView = view;

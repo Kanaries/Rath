@@ -10,13 +10,23 @@ import { applyFilter } from '../utils';
 
 const FilterSegment: React.FC = () => {
     const { discoveryMainStore } = useGlobalStore();
-    const { filterSpecList, computing, filterViews, mainVizSetting, dataSource } = discoveryMainStore;
+    const { filterSpecList, computing, filterViews, mainVizSetting, dataSource, autoAsso, mainView } = discoveryMainStore;
     const loadMore = useCallback(() => {
         discoveryMainStore.increaseRenderAmount('featViews');
     }, [discoveryMainStore])
-    if (filterViews.views.length === 0) return <div />
-    return <div className="card">
-        <h1>{intl.get('discovery.main.associate.filters')}</h1>
+    const recommandFilter = useCallback(() => {
+        discoveryMainStore.filterAssociate();
+    }, [discoveryMainStore])
+    if (filterViews.views.length === 0 && autoAsso.filterViews) return <div />
+    return <div className="pure-card">
+        <h1 className="ms-fontSize-18">{intl.get('discovery.main.associate.filters')}</h1>
+        {
+            !autoAsso.filterViews && <DefaultButton text={intl.get('discovery.main.pointInterests')}
+                iconProps={{ iconName: 'SplitObject' }}
+                disabled={mainView === null}
+                onClick={recommandFilter}
+            />
+        }
         <AssoContainer>
             {
              filterSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
@@ -48,12 +58,11 @@ const FilterSegment: React.FC = () => {
                             dataSource={applyFilter(dataSource, filterViews.views[i].filters)}
                         />
                     </div>
-                    {
-                        filterViews.views[i].filters && <div>
-                            <h4>filters</h4>
-                            {filterViews.views[i].filters!.map(f => `${f.field.name || f.field.fid} = ${f.values.join(',')}`).join('\n')}
-                        </div>
-                    }
+                    <div className="chart-desc">
+                        { filterViews.views[i].fields?.filter(f => f.analyticType === 'dimension').map(f => f.name || f.fid).join(', ') } <br />
+                        { filterViews.views[i].fields?.filter(f => f.analyticType === 'measure').map(f => f.name || f.fid).join(', ') } <br />
+                        { filterViews.views[i].filters?.map(f => `${f.field.name || f.field.fid} = ${f.values.join(',')}`).join('\n') }
+                    </div>
                 </div>)
             }
         </AssoContainer>
