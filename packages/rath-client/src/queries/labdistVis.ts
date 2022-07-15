@@ -17,7 +17,7 @@ export const geomTypeMap: { [key: string]: any } = {
 };
 
 const channels = {
-    quantitative: ['y', 'x', 'size', 'opacity', 'color'],
+    quantitative: ['y', 'x', 'size', 'color', 'opacity'],
     ordinal: ['y', 'x', 'opacity', 'color', 'size', 'shape'],
     nominal: ['y', 'x', 'color', 'row', 'column', 'opacity', 'size', 'shape'],
     temporal: ['y', 'x', 'size', 'color', 'opacity', 'shape']
