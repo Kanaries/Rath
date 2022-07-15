@@ -78,7 +78,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
 
     useEffect(() => {
         if (chart.current) {
-            embed(chart.current, {
+            const resultPromise = embed(chart.current, {
                 background: 'rgba(0,0,0,0)',
                 data: {
                     name: DATA_NAME
@@ -112,7 +112,15 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 actions: false
             }).then(res => {
                 setView(res.view);
+                return res
             })
+            return () => {
+                resultPromise.then(res => {
+                  if (res) {
+                    res.finalize()
+                  }
+                }).catch(console.error)
+            }
         }
     }, [x, y, sortBy, semanticType])
     useEffect(() => {

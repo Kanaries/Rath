@@ -38,7 +38,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         } else if (fieldType === 'ordinal' && hasIndex) {
           sortBy = { field: 'index' }
         }
-        embed(chart.current, {
+        const resultPromise = embed(chart.current, {
           background: 'rgba(0,0,0,0)',
           data: {
             values
@@ -62,6 +62,13 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         }, {
           actions: false
         })
+        return () => {
+          resultPromise.then(res => {
+            if (res) {
+              res.finalize()
+            }
+          }).catch(console.error)
+        }
       }
     }, [x, y, dataSource, fieldType])
   return <div ref={chart}></div>

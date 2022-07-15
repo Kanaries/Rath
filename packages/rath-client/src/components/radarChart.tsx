@@ -47,7 +47,7 @@ const RadarChart: React.FC<RadarChartProps> = props => {
   }, [keyField, valueField, dataSource, threshold])
   useEffect(() => {
     if (container.current) {
-      embed(container.current, {
+      const resultPromise = embed(container.current, {
         width: 280,
         height: 280,
         padding: 50,
@@ -227,6 +227,13 @@ const RadarChart: React.FC<RadarChartProps> = props => {
       } as any, {
         actions: false
       });
+      return () => {
+        resultPromise.then(res => {
+          if (res) {
+            res.finalize()
+          }
+        }).catch(console.error)
+      }
     }
   }, [viewData]);
   return <div ref={container}></div>

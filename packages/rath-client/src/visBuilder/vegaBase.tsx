@@ -107,13 +107,20 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
         }
         let spec = mode === 'dist' ? baseVis(params) : commonVis(params);
         globalRef.baseVisSpec = spec;
-        embed(container.current, spec, {
+        const resultPromise = embed(container.current, spec, {
           mode: 'vega-lite',
           editorUrl: EDITOR_URL,
           actions: debug
         }).catch(err => {
           console.error('[VIS ERROR]', err)
         })
+        return () => {
+          resultPromise.then(res => {
+            if (res) {
+              res.finalize()
+            }
+          }).catch(console.error)
+        }
       }
     }
   }, [schema,
