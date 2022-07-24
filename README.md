@@ -1,6 +1,6 @@
 # Rath
 
-![](https://travis-ci.org/kanaries/rath.svg?branch=master)
+![](https://img.shields.io/twitter/follow/kanaries_data?style=social)
 ![](https://img.shields.io/badge/license-AGPL-brightgreen)
 ![](https://img.shields.io/github/stars/kanaries/rath?color=%23ff85c0)
 
