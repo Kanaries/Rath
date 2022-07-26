@@ -5,7 +5,9 @@
         "name": "名称",
         "home": "主页",
         "settings": "设置",
-        "history": "历史记录"
+        "history": "历史记录",
+        "hide": "隐藏",
+        "expand": "展开"
     },
     "menu": {
         "dataSource": "数据源",
@@ -286,8 +288,8 @@
     "discovery": {
         "main": {
             "mainView": "主视图",
-            "relatePatterns": "关联规律(默认)",
-            "relateFeatures": "特征推荐",
+            "relatePatterns": "关联规律",
+            "relateFeatures": "关联特征",
             "explainDiff": "差异性分析",
             "pointInterests": "拆分",
             "pin": "深入分析",
@@ -297,7 +299,15 @@
                 "lite": "轻量模式(近似算法、更快)",
                 "strict": "严格模式(效果更好)"
             },
-            "loadMore": "加载更多"
+            "loadMore": "加载更多",
+            "associate": {
+                "patterns": "关联规律",
+                "features": "关联维度",
+                "filters": "关联子集"
+            }
         }
+    },
+    "desc": {
+        "dataViewInfo": "在 {dimensions} 中 {measures} 的表现， 限制条件 {filters}."
     }
 }
