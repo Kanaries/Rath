@@ -1,12 +1,8 @@
-// @ts-ignore
-import * as vi from 'visual-insights/lib/esm/index'
 import { getRange } from "../utils";
 
 function entropy (p: number[]) {
     return 0
 }
-
-console.log(vi, vi.Statistics)
 
 export function firstWDis (p1: number[], p2: number[]) {
 

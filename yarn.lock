@@ -2237,6 +2237,13 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@kanaries/adapters@1.0.3":
+  version "1.0.3"
+  resolved "https://registry.npmmirror.com/@kanaries/adapters/-/adapters-1.0.3.tgz#67704fd94eca59d05edea5f098c8cb867b026dc5"
+  integrity sha512-OlrMGI/w6U5TE9hBH0hH0/fqG/OS0y0OyE1Nvq/vqZXskfLyxmxrRQsSnUvhOe2JgsGi/EtSB4iSh7+rZaF0TA==
+  dependencies:
+    localforage "^1.10.0"
+
 "@kanaries/web-data-loader@0.1.5":
   version "0.1.5"
   resolved "https://registry.npmmirror.com/@kanaries/web-data-loader/-/web-data-loader-0.1.5.tgz#10d8d677492919b0838b9429d28cbf2b7d726100"
@@ -4896,20 +4903,10 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001125, caniuse-lite@^1.0.30001219:
-  version "1.0.30001241"
-  resolved "https://registry.nlark.com/caniuse-lite/download/caniuse-lite-1.0.30001241.tgz#cd3fae47eb3d7691692b406568d7a3e5b23c7598"
-  integrity sha1-zT+uR+s9dpFpK0BlaNej5bI8dZg=
-
-caniuse-lite@^1.0.30001259:
-  version "1.0.30001259"
-  resolved "https://registry.nlark.com/caniuse-lite/download/caniuse-lite-1.0.30001259.tgz?cache=0&sync_timestamp=1632203439345&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fcaniuse-lite%2Fdownload%2Fcaniuse-lite-1.0.30001259.tgz#ae21691d3da9c4be6144403ac40f71d9f6efd790"
-  integrity sha1-riFpHT2pxL5hREA6xA9x2fbv15A=
-
-caniuse-lite@^1.0.30001317:
-  version "1.0.30001322"
-  resolved "https://registry.npmmirror.com/caniuse-lite/-/caniuse-lite-1.0.30001322.tgz#2e4c09d11e1e8f852767dab287069a8d0c29d623"
-  integrity sha512-neRmrmIrCGuMnxGSoh+x7zYtQFFgnSY2jaomjU56sCkTA6JINqQrxutF459JpWcWRajvoyn95sOXq4Pqrnyjew==
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001125, caniuse-lite@^1.0.30001219, caniuse-lite@^1.0.30001259, caniuse-lite@^1.0.30001317:
+  version "1.0.30001370"
+  resolved "https://registry.npmmirror.com/caniuse-lite/-/caniuse-lite-1.0.30001370.tgz"
+  integrity sha512-3PDmaP56wz/qz7G508xzjx8C+MC2qEm4SYhSEzC9IBROo+dGXFWRuaXkWti0A9tuI00g+toiriVqxtWMgl350g==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -15013,6 +15010,11 @@ tslib@^2.1.0, tslib@^2.3.1, tslib@~2.3.1:
   resolved "https://registry.npmmirror.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
   integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
 
+tslib@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.npmmirror.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
+  integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
+
 tslib@~2.1.0:
   version "2.1.0"
   resolved "https://registry.nlark.com/tslib/download/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
@@ -15946,6 +15948,17 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
+visual-insights@0.11.2:
+  version "0.11.2"
+  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.11.2.tgz#c10f29aeeeca3e35c116b8af2c3ae8e4e4531088"
+  integrity sha512-MFQfIPLDVvCTQ+Mw7aUw5ZOl8sRe5kK4yPsGDH3bsVFwG4KIwYXpTu0tNehwkZC5JG27wAQ7yXM2nBT6HbjzIA==
+  dependencies:
+    "@kanaries/adapters" "1.0.3"
+    axios "^0.22.0"
+    detect-browser "^5.3.0"
+    localforage "^1.10.0"
+    tslib "^2.4.0"
+
 visual-insights@0.7.15:
   version "0.7.15"
   resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.7.15.tgz#04806c8c78739f7bb8a7ee60bb56ee8ddc7668a7"
@@ -15955,15 +15968,6 @@ visual-insights@0.7.15:
     axios "^0.22.0"
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
-
-visual-insights@0.9.11:
-  version "0.9.11"
-  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.9.11.tgz#6b7548bb2f30105c85c60cb7a616d28e6b1bb9a2"
-  integrity sha512-5FUIAca8WavRMSLWjVdlN+OL7zGOdHjVPQQKmdf6a6bYd0ttLqXxehR4L8hXeLlz0zq3O6ZMJwEN7+b+OaNTAw==
-  dependencies:
-    axios "^0.22.0"
-    detect-browser "^5.3.0"
-    localforage "^1.10.0"
 
 vite@^2.4.4:
   version "2.5.0"

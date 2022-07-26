@@ -144,13 +144,19 @@ export class DataSourceStore {
             }
         })
         this.subscriptions.push(rawData$.subscribe(() => {
-            this.dataPrepProgressTag = IDataPrepProgressTag.filter;
+            runInAction(() => {
+                this.dataPrepProgressTag = IDataPrepProgressTag.filter;
+            })
         }))
         this.subscriptions.push(filteredData$.subscribe(() => {
-            this.dataPrepProgressTag = IDataPrepProgressTag.clean
+            runInAction(() => {
+                this.dataPrepProgressTag = IDataPrepProgressTag.clean
+            })
         }))
         this.subscriptions.push(cleanedData$.subscribe(() => {
-            this.dataPrepProgressTag = IDataPrepProgressTag.none;
+            runInAction(() => {
+                this.dataPrepProgressTag = IDataPrepProgressTag.none;
+            })
         }))
     }
 

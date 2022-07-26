@@ -1,5 +1,5 @@
-const path = require('path');
-const { override, babelInclude } = require('customize-cra')
+// const path = require('path');
+// const { override, babelInclude } = require('customize-cra')
 
 // const mid_override = override(
 //   babelInclude([
@@ -8,7 +8,7 @@ const { override, babelInclude } = require('customize-cra')
 //   ])
 // )
 
-module.exports = function final_override(config, env) {
+module.exports = function override(config, env) {
   // do stuff with the webpack config...
   config.module.rules.push({
     test: /\.worker\.js$/,
@@ -21,8 +21,8 @@ module.exports = function final_override(config, env) {
     },
   })
   config.output.globalObject = 'self'
-  config.module = config.module || {};
-  config.module.unknownContextCritical = false
+  // config.module = config.module || {};
+  // config.module.unknownContextCritical = false
   return config
   // return mid_override(config)
 };
