@@ -12,7 +12,7 @@ const PattSegment: React.FC = () => {
     const { discoveryMainStore } = useGlobalStore();
     const { pattSpecList, computing, pattViews, mainVizSetting, dataSource, autoAsso, mainView } = discoveryMainStore;
     const loadMore = useCallback(() => {
-        discoveryMainStore.increaseRenderAmount('featViews');
+        discoveryMainStore.increaseRenderAmount('pattViews');
     }, [discoveryMainStore])
     const assViews = useCallback(() => {
         discoveryMainStore.pattAssociate();

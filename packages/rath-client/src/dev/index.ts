@@ -1,8 +1,9 @@
-import { IRow } from "visual-insights";
-import { entropy, getCombination } from "visual-insights/build/esm/statistics";
+import { IRow, Statistics } from "visual-insights";
 import { IFieldMeta } from "../interfaces";
 import { getRange } from "../utils";
 import { bin, binMapShareRange, binShareRange, generalMatMic, generalMic, incSim, l1Dis2, mic, normalizeScatter, rangeNormilize } from "./utils";
+
+const { entropy, getCombination } = Statistics;
 
 export interface IFilter {
     field: IFieldMeta;

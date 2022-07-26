@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
-import { InsightSpace, DefaultIWorker } from 'visual-insights/build/esm/insights/dev';
+import { InsightSpace, DefaultIWorker } from 'visual-insights';
 import { specification } from "visual-insights";
 import { getInsightViewSpace } from '../../service';
 import { PrimaryButton, SpinButton, Slider, ProgressIndicator } from "office-ui-fabric-react";

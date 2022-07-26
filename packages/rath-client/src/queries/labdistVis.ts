@@ -1,7 +1,7 @@
 /**
  * distVis 是分布式可视化的推荐，是比较新的模块，目前暂时用于dev模块，即voyager模式下的测试。
  */
-import { entropy } from "visual-insights/build/esm/statistics";
+import { Statistics } from 'visual-insights'
 import { IPattern } from "../dev";
 import { bin, binMap, mic, pureGeneralMic, rangeNormilize } from "../dev/utils";
 import { IFieldMeta, IResizeMode, IRow } from "../interfaces";
@@ -436,7 +436,7 @@ export function labDistVis(props: BaseVisProps) {
             }
             score /= (measures.length - 1)
         } else {
-            score = Math.log2(16) - entropy(rangeNormilize(bin(values1).filter(v => v > 0)))
+            score = Math.log2(16) - Statistics.entropy(rangeNormilize(bin(values1).filter(v => v > 0)))
         }
         measures[i].features.entropy = score;
     }

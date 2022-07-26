@@ -2,7 +2,7 @@ import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
 import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from, Subscription } from "rxjs";
 import * as op from 'rxjs/operators'
-import { IAnalyticType, ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
+import { IAnalyticType, ISemanticType } from "visual-insights";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag } from "../interfaces";

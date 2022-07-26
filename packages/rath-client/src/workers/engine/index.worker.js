@@ -13,6 +13,11 @@ function main (e) {
             success: false,
             message: `[worker]${message}`
         })
+    }).catch(err => {
+        self.postMessage({
+            success: false,
+            message: `[worker]${err}\n${err.stack}`
+        })
     })
 }
 

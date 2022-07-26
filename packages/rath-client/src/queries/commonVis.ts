@@ -1,5 +1,5 @@
 import { ISemanticType } from "visual-insights";
-import { Specification } from "visual-insights/build/esm/commonTypes";
+import { Specification } from "visual-insights";
 import { IFieldMeta, IRow } from "../interfaces";
 export const geomTypeMap: { [key: string]: any } = {
     interval: "bar",

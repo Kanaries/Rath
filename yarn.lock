@@ -5875,6 +5875,13 @@ cube-core@^2.13.0:
   resolved "https://registry.npm.taobao.org/cube-core/download/cube-core-2.13.0.tgz#d64abcfccf0765879f226e892cc32b934c3580c6"
   integrity sha1-1kq8/M8HZYefIm6JLMMrk0w1gMY=
 
+customize-cra@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmmirror.com/customize-cra/-/customize-cra-1.0.0.tgz#73286563631aa08127ad4d30a2e3c89cf4e93c8d"
+  integrity sha512-DbtaLuy59224U+xCiukkxSq8clq++MOtJ1Et7LED1fLszWe88EoblEYFBJ895sB1mC6B4uu3xPT/IjClELhMbA==
+  dependencies:
+    lodash.flow "^3.5.0"
+
 cyclist@^1.0.1:
   version "1.0.1"
   resolved "https://registry.nlark.com/cyclist/download/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
@@ -10269,7 +10276,7 @@ lodash.debounce@^4.0.8:
   resolved "https://registry.nlark.com/lodash.debounce/download/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
   integrity sha1-gteb/zCmfEAF/9XiUVMArZyk168=
 
-lodash.flow@^3.3.0:
+lodash.flow@^3.3.0, lodash.flow@^3.5.0:
   version "3.5.0"
   resolved "https://registry.npm.taobao.org/lodash.flow/download/lodash.flow-3.5.0.tgz#87bf40292b8cf83e4e8ce1a3ae4209e20071675a"
   integrity sha1-h79AKSuM+D5OjOGjrkIJ4gBxZ1o=
@@ -15129,10 +15136,10 @@ typescript@^4.5.4:
   resolved "https://registry.npmmirror.com/typescript/-/typescript-4.6.3.tgz#eefeafa6afdd31d725584c67a0eaba80f6fc6c6c"
   integrity sha512-yNIatDa5iaofVozS/uQJEl3JRWLKKGJKh6Yaiv0GLGSuhpFJe7P3SbHZ8/yjAHRQwKRoA6YZqlfjXWmVzoVSMw==
 
-typescript@^4.8.0-dev.20220630:
-  version "4.8.0-dev.20220630"
-  resolved "https://registry.npmmirror.com/typescript/-/typescript-4.8.0-dev.20220630.tgz#7ed7c5c95d76f8236271d864fbbc93115ae0d436"
-  integrity sha512-wyFZIoUdTqDrKU3XfDx+pylAEIhlmpbsbicFXuvggpKeSWiPeUrMiSRqeXBnAjXiD6kn2Anmw+c3eyX3A2WdUw==
+typescript@^4.7.4:
+  version "4.7.4"
+  resolved "https://registry.npmmirror.com/typescript/-/typescript-4.7.4.tgz#1a88596d1cf47d59507a1bcdfb5b9dfe4d488235"
+  integrity sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==
 
 ua-parser-js@^0.7.18:
   version "0.7.28"
@@ -15949,17 +15956,14 @@ visual-insights@0.7.15:
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 
-visual-insights@0.8.11:
-  version "0.8.11"
-  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.8.11.tgz#204408b7be25d52bd68e3ff13d15e7b234957416"
-  integrity sha512-yMGkBJzcEIeiWKmD1uiJ4TJMXXBRMz+iIgyTBtDvDIMrAlakRF90gZzjuRidjq95FX+wfliDHkbkHkomyLdCgA==
+visual-insights@0.9.11:
+  version "0.9.11"
+  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.9.11.tgz#6b7548bb2f30105c85c60cb7a616d28e6b1bb9a2"
+  integrity sha512-5FUIAca8WavRMSLWjVdlN+OL7zGOdHjVPQQKmdf6a6bYd0ttLqXxehR4L8hXeLlz0zq3O6ZMJwEN7+b+OaNTAw==
   dependencies:
-    assert "^2.0.0"
     axios "^0.22.0"
-    cube-core "^2.13.0"
     detect-browser "^5.3.0"
     localforage "^1.10.0"
-    simple-statistics "^7.1.0"
 
 vite@^2.4.4:
   version "2.5.0"

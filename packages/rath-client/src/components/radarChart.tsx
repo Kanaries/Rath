@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import embed from 'vega-embed';
 import { scheme } from 'vega';
-import { DefaultIWorker } from "visual-insights/build/esm/insights/dev";
+import { DefaultIWorker } from "visual-insights";
 
 scheme('threshold', ['#1890ff', '#ffccc7']);
 

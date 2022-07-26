@@ -1,14 +1,11 @@
-import { IInsightSpace, Insight } from 'visual-insights'
-import { Cube } from 'visual-insights/build/esm/cube';
-import { DataGraph } from 'visual-insights/build/esm/insights/InsightFlow/dataGraph';
-import { ViewSpace } from 'visual-insights/build/esm/insights/InsightFlow/engine';
-import { KNNClusterWorker } from 'visual-insights/build/esm/insights/workers/KNNCluster';
+import { IInsightSpace, InsightFlow, Cube, ViewSpace,  } from 'visual-insights'
 import { IRow } from '../../interfaces';
 import { IVizSpace } from '../../store/exploreStore';
 import { isSetEqual } from '../../utils';
 import { intersect } from './utils';
 
-const VIEngine = Insight.VIEngine;
+const { VIEngine, DataGraph } = InsightFlow
+
 export function entropyAcc (fl: number[]) {
     let total = 0;
     for (let i = 0; i < fl.length; i++) {
@@ -25,42 +22,42 @@ export function entropyAcc (fl: number[]) {
 
 class CustomDataGraph extends DataGraph {
 
-    public clusterDGraph(dataSource: IRow[], CORRELATION_THRESHOLD?: number) {
-        const { dimensions, DIMENSION_CORRELATION_THRESHOLD } = this;
-        // console.log(JSON.stringify(this.DG))
-        // this.DClusters = getDimClusterGroups(
-        //     this.DG,
-        //     dimensions,
-        //     CORRELATION_THRESHOLD || DIMENSION_CORRELATION_THRESHOLD
-        // );
-        const threshold = CORRELATION_THRESHOLD || DIMENSION_CORRELATION_THRESHOLD;
-        const DG = this.DG;
-        const clusters: string[][] = [];
-        for (let i = 0; i < dimensions.length; i++) {
-            const groups: string[] = []
-            for (let j = 0; j < dimensions.length; j++) {
-                if (DG[i][j] >= threshold) {
-                    groups.push(dimensions[j]);
-                }
-            }
-            clusters.push(groups)
-        }
-        let uniqueClusters: string[][] = [];
-        for (let i = 0; i < clusters.length; i++) {
-            let unique = true
-            for (let j = i + 1; j < clusters.length; j++) {
-                if (isSetEqual(clusters[i], clusters[j])) {
-                    unique = false;
-                    break;
-                }
-            }
-            if (unique) {
-                uniqueClusters.push(clusters[i])
-            }
-        }
-        this.DClusters = uniqueClusters
-        return uniqueClusters//this.DClusters;
-    }
+    // public clusterDGraph(dataSource: IRow[], CORRELATION_THRESHOLD?: number) {
+    //     const { dimensions, DIMENSION_CORRELATION_THRESHOLD } = this;
+    //     // console.log(JSON.stringify(this.DG))
+    //     // this.DClusters = getDimClusterGroups(
+    //     //     this.DG,
+    //     //     dimensions,
+    //     //     CORRELATION_THRESHOLD || DIMENSION_CORRELATION_THRESHOLD
+    //     // );
+    //     const threshold = CORRELATION_THRESHOLD || DIMENSION_CORRELATION_THRESHOLD;
+    //     const DG = this.DG;
+    //     const clusters: string[][] = [];
+    //     for (let i = 0; i < dimensions.length; i++) {
+    //         const groups: string[] = []
+    //         for (let j = 0; j < dimensions.length; j++) {
+    //             if (DG[i][j] >= threshold) {
+    //                 groups.push(dimensions[j]);
+    //             }
+    //         }
+    //         clusters.push(groups)
+    //     }
+    //     let uniqueClusters: string[][] = [];
+    //     for (let i = 0; i < clusters.length; i++) {
+    //         let unique = true
+    //         for (let j = i + 1; j < clusters.length; j++) {
+    //             if (isSetEqual(clusters[i], clusters[j])) {
+    //                 unique = false;
+    //                 break;
+    //             }
+    //         }
+    //         if (unique) {
+    //             uniqueClusters.push(clusters[i])
+    //         }
+    //     }
+    //     this.DClusters = uniqueClusters
+    //     return uniqueClusters//this.DClusters;
+    // }
     public clusterMGraph(dataSource: IRow[], CORRELATION_THRESHOLD?: number) {
         const { measures, MEASURE_CORRELATION_THRESHOLD } = this;
         // console.log(JSON.stringify(this.MG))
@@ -123,8 +120,8 @@ class CustomDataGraph extends DataGraph {
 export class RathEngine extends VIEngine {
     public constructor() {
         super();
-        this.workerCollection.register('clusters', KNNClusterWorker);
-        this.workerCollection.enable('clusters', true);
+        // this.workerCollection.register('clusters', KNNClusterWorker);
+        // this.workerCollection.enable('clusters', true);
         // this.DIMENSION_NUM_IN_VIEW = {
         //     MIN: 0,
         //     MAX: 3
@@ -141,9 +138,6 @@ export class RathEngine extends VIEngine {
             dataSource,
             ops: aggregators
         });
-        if (typeof injectCube === 'undefined') {
-            cube.storage.env = this.env;
-        }
         await cube.buildBaseCuboid();
         await Promise.all(dataGraph.DClusters.map((group) => cube.buildCuboidOnCluster(group)))
         this.cube = cube;

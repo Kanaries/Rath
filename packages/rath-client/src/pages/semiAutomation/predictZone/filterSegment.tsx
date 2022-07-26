@@ -12,7 +12,7 @@ const FilterSegment: React.FC = () => {
     const { discoveryMainStore } = useGlobalStore();
     const { filterSpecList, computing, filterViews, mainVizSetting, dataSource, autoAsso, mainView } = discoveryMainStore;
     const loadMore = useCallback(() => {
-        discoveryMainStore.increaseRenderAmount('featViews');
+        discoveryMainStore.increaseRenderAmount('filterViews');
     }, [discoveryMainStore])
     const recommandFilter = useCallback(() => {
         discoveryMainStore.filterAssociate();

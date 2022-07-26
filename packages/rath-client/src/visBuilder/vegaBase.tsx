@@ -6,7 +6,6 @@ import { baseVis, commonVis } from '../queries/index';
 import { EDITOR_URL } from '../constants';
 import { IFieldMeta, IResizeMode, IRow } from '../interfaces';
 
-// import { simpleAggregate } from 'visual-insights/build/esm/statistics';
 export const geomTypeMap: {[key: string]: any} = {
   interval: 'bar',
   line: 'line',

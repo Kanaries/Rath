@@ -1,6 +1,6 @@
 import { computed, makeAutoObservable, observable, runInAction, toJS } from 'mobx';
 import { Specification, IInsightSpace } from 'visual-insights';
-import { ISpec } from 'visual-insights/build/esm/insights/InsightFlow/specification/encoding';
+import { ISpec } from 'visual-insights';
 import { STORAGE_FILE_SUFFIX } from '../constants';
 import { Aggregator } from '../global';
 import { IResizeMode, IRow, ITaskTestMode, PreferencePanelConfig } from '../interfaces';
@@ -8,6 +8,7 @@ import { rathEngineService } from '../service';
 import { isSetEqual } from '../utils';
 import { RathStorageDump } from '../utils/storage';
 import { LTSPipeLine } from './pipeLineStore/lts';
+
 
 export interface IVizSpace extends IInsightSpace {
     schema: Specification;
