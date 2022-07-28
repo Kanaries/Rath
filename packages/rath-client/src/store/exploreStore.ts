@@ -44,6 +44,7 @@ export class ExploreStore {
     public forkView: IExploreView | null = null;
     public view: IExploreView | null = null;
     public orderBy: string = EXPLORE_VIEW_ORDER.DEFAULT;
+    public nlgThreshold: number = 0.2;
     public forkViewSpec: {
         schema: Specification;
         dataView: IRow[];
@@ -125,6 +126,9 @@ export class ExploreStore {
     }
     public get samplingDataSource () {
         return this.ltsPipeLineStore.samplingDataSource;
+    }
+    public setNlgThreshold (num: number) {
+        this.nlgThreshold = num;
     }
     public setVisualConig (updater: (config: PreferencePanelConfig) => void) {
         runInAction(() => {

@@ -1,8 +1,10 @@
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useGlobalStore } from '../../../store';
 import styled from 'styled-components';
+import { Spinner } from 'office-ui-fabric-react';
+import { getTestServerAPI } from '../../../service';
 
 const InsightDesc = styled.div`
     margin: 4px 12px 0px 12px;
@@ -36,15 +38,24 @@ const InsightDesc = styled.div`
 `
 
 const Narrative: React.FC = props => {
-    const { exploreStore } = useGlobalStore();
-    const { pageIndex, insightSpaces, dataSource, fieldMetas } = exploreStore;
+    const { exploreStore, langStore } = useGlobalStore();
+    const { pageIndex, insightSpaces, dataSource, fieldMetas, nlgThreshold } = exploreStore;
+    const [explainLoading, setExplainLoading] = useState(false);
+    const requestId = useRef<number>(0);
     const fms = toJS(fieldMetas);
     const fieldsInViz = useMemo(() => {
         return insightSpaces[pageIndex] ? [...insightSpaces[pageIndex].dimensions, ...insightSpaces[pageIndex].measures].map(fid => fms.find(fm => fm.fid === fid)) : []
     }, [insightSpaces, pageIndex, fms]);
     const [viewInfo, setViewInfo] = useState<any[]>([])
     useEffect(() => {
-        fetch('http://localhost:8000/insight', {
+        setViewInfo([])
+        setExplainLoading(false);
+    }, [pageIndex])
+    useEffect(() => {
+        setExplainLoading(true)
+        requestId.current++;
+        let rid = requestId.current;
+        fetch(getTestServerAPI('insight'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -52,21 +63,25 @@ const Narrative: React.FC = props => {
                 body: JSON.stringify({
                     dataSource,
                     fields: fieldsInViz,
-                    aggrType: 'sum'
+                    aggrType: 'sum',
+                    langType: langStore.lang
                 })
             })
             .then(res => res.json())
             .then(res => {
                 if (res.success) {
-                    setViewInfo(res.data)
+                    console.log(rid, requestId.current)
+                    rid === requestId.current && setViewInfo(res.data)
                 } else {
                     throw new Error(res.message)
                 }
             }).catch(err => {
                 console.error(err);
                 setViewInfo([])
+            }).finally(() => {
+                setExplainLoading(false)
             })
-    }, [pageIndex, dataSource, fieldsInViz])
+    }, [pageIndex, dataSource, fieldsInViz, langStore.lang])
     const explains = useMemo<any[]>(() => {
         if (!viewInfo || viewInfo.length === 0) return []
         return Object.keys(viewInfo[0]).filter((k: string) => viewInfo[0][k].score > 0).map((k: string) => ({
@@ -77,7 +92,7 @@ const Narrative: React.FC = props => {
     }, [viewInfo])
     return <div>
         {
-            explains.map(ex => <InsightDesc key={ex.type}>
+            !explainLoading && explains.filter(ex => ex.score > nlgThreshold).map(ex => <InsightDesc key={ex.type}>
                 <div className="insight-header">
                     <div className="type-title">{ex.type}</div>
                     <div className="type-score">{(ex.score * 100).toFixed(1)} %</div>
@@ -85,6 +100,11 @@ const Narrative: React.FC = props => {
                 {/* <div className="type-label">{ex.type}</div> */}
                 <p>{ex.explain}</p>
             </InsightDesc>)
+        }
+        {
+            explainLoading && <div>
+                <Spinner label="explain loading..." />
+            </div>
         }
         {/* <ReactJson src={viewInfo} /> */}
         {/* {JSON.stringify(viewInfo)} */}

@@ -61,16 +61,16 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
     KELPER: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-kelper-service.json',
 } : {
     // CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
-    CARS: "http://localhost:3000/datasets/ds-cars-service.json",
-    // CARS: "http://localhost:3000/datasets/dataset-service-edge.json",
+    CARS: "/datasets/ds-cars-service.json",
+    // CARS: "/datasets/dataset-service-edge.json",
     // STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
-    STUDENTS: "http://localhost:3000/datasets/ds-students-service.json",
-    BTC_GOLD: "http://localhost:3000/datasets/ds_btc_gold_service.json",
-    BIKE_SHARING: 'http://localhost:3000/datasets/ds-bikesharing-service.json',
-    CAR_SALES: 'http://localhost:3000/datasets/ds-carsales-service.json',
-    COLLAGE: 'http://localhost:3000/datasets/ds-collage-service.json',
-    TITANIC: 'http://localhost:3000/datasets/ds-titanic-service.json',
-    KELPER: 'http://localhost:3000/datasets/ds-kelper-service.json',
+    STUDENTS: "/datasets/ds-students-service.json",
+    BTC_GOLD: "/datasets/ds_btc_gold_service.json",
+    BIKE_SHARING: '/datasets/ds-bikesharing-service.json',
+    CAR_SALES: '/datasets/ds-carsales-service.json',
+    COLLAGE: '/datasets/ds-collage-service.json',
+    TITANIC: '/datasets/ds-titanic-service.json',
+    KELPER: '/datasets/ds-kelper-service.json',
 } as const;
 
 export type IDemoDataKey = keyof typeof DemoDataAssets;

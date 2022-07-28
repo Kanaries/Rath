@@ -480,6 +480,13 @@ function getTestServerUrl (): URL | null {
   }
   return null;
 }
+
+export function getTestServerAPI (api: string): string {
+  const url = new URL(window.location.href).searchParams.get('server') || 'http://localhost:8000';
+  let surl = new URL(url);
+  surl.pathname = api;
+  return surl.href;
+}
 export async function rathEngineServerService (props: MessageServerProps) {
   try {
     const testServer = getTestServerUrl();
