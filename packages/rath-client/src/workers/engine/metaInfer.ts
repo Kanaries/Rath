@@ -1,6 +1,6 @@
 import { IAnalyticType, IRow, ISemanticType } from "visual-insights";
 import { IGeoRole, IMuteFieldBase, IRawField } from "../../interfaces";
-import { inferAnalyticType, inferSemanticType } from "../../utils";
+import { inferAnalyticType, inferAnalyticTypeFromSemanticType, inferSemanticType } from "../../utils";
 
 export function emptyCount (dataSource: IRow[], colKey: string): number {
     // const counter: Map<string, number> = new Map();
@@ -27,6 +27,15 @@ function inferDisable (dataSource: IRow[], colKey: string) {
         }
     }
     if (valueSet.size === 1) return true;
+    if (valueSet.size > 50 && valueSet.size === dataSource.length) {
+        for (let v of valueSet) {
+            if (typeof v !== 'string' && !Number.isInteger(v)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     return false;
 }
 
@@ -46,7 +55,7 @@ export function inferMeta (props: { dataSource: IRow[]; fields: IMuteFieldBase[]
         let geoRole = field.geoRole === '?' ? inferGeoRole(dataSource, field.fid, semanticType, field.name || '') : field.geoRole;
         let analyticType: IAnalyticType = 'dimension';
         if (geoRole === 'none') {
-            analyticType = field.analyticType === '?' ? inferAnalyticType(dataSource, field.fid) : field.analyticType;
+            analyticType = field.analyticType === '?' ? inferAnalyticTypeFromSemanticType(semanticType) : field.analyticType;
         }
         const disable: boolean = field.disable === '?' ? inferDisable(dataSource, field.fid) : Boolean(field.disable);
         // TODO: 临时处理逻辑。后续可视化部分扩展好了，这部分要消除掉。（使用dist图表就可以解决）
