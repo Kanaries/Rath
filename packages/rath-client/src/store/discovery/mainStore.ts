@@ -179,7 +179,6 @@ export class DiscoveryMainStore {
     public async initAssociate () {
         this.computing = false;
         const { dataSource, fieldMetas } = this;
-        console.log('init')
         try {
             const res = await footmanEngineService<IPattern[]>({
                 dataSource,
@@ -229,7 +228,6 @@ export class DiscoveryMainStore {
         this.mainView = produce(this.mainView, draft => {
             draft.fields.splice(targetFieldIndex, 1)
         })
-        console.log(this.mainView)
     }
     public clearViews () {
         this.featViews = makeInitAssoViews();

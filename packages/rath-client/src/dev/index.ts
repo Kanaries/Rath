@@ -45,6 +45,8 @@ export class NextVICore {
         let viewDimNotInFilters: IFieldMeta[] = [...viewDimensions];
         if (typeof view.filters !== 'undefined') {
             viewDimNotInFilters = viewDimensions.filter(vd => !view.filters!.find(vf => vf.field.fid === vd.fid));
+        } else {
+            viewDimNotInFilters = [...viewDimensions]
         }
         const ans: IPattern[] = [];
         if (viewDimNotInFilters.length > 0) {

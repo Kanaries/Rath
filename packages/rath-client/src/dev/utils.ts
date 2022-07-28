@@ -1,8 +1,7 @@
+import { Statistics } from 'visual-insights'
 import { getRange } from "../utils";
 
-function entropy (p: number[]) {
-    return 0
-}
+const { entropy } = Statistics;
 
 export function firstWDis (p1: number[], p2: number[]) {
 
