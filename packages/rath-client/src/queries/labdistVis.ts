@@ -478,6 +478,19 @@ export function labDistVis(props: BaseVisProps) {
         fields: distFields, usedChannels, statFields,
         statEncodes
     })
+    if (markType === 'bar' && statEncodes.length > 0) {
+        if (enc && enc.x && enc.y) {
+            if (enc.x.field && enc.y.field) {
+                const sortEncodeField = (enc.y.type === 'quantitative' ? enc.x : enc.y);
+                const sortBasedEncodeField = (enc.y.type === 'quantitative' ? enc.y : enc.x);
+                sortEncodeField.sort = {
+                    field: sortBasedEncodeField.field,
+                    op: sortBasedEncodeField.aggregate || 'count',
+                    order: 'descending'
+                }
+            }
+        }
+    }
     // if (filters && filters.length > 0) {
     //     const field = filters[0].field;
     //     enc.color = {
