@@ -1,8 +1,10 @@
+
 import { IInsightSpace, InsightFlow, Cube, ViewSpace,  } from 'visual-insights'
 import { IRow } from '../../interfaces';
 import { IVizSpace } from '../../store/exploreStore';
 import { isSetEqual } from '../../utils';
-import { intersect } from './utils';
+// import { setStateInStorage } from '../../utils/storage';
+import { intersect, setStateInStorage } from './utils';
 
 const { VIEngine, DataGraph } = InsightFlow
 
@@ -18,7 +20,6 @@ export function entropyAcc (fl: number[]) {
     }
     return -ent;
 }
-
 
 class CustomDataGraph extends DataGraph {
 
@@ -393,9 +394,11 @@ export class RathEngine extends VIEngine {
                 impurity: totalEntLoss
             })
         }
-        // let ii = 0;
+        let ii = 0;
         for (let space of viewSpaces) {
-            // console.log(ii++, viewSpaces.length, ii / viewSpaces.length)
+            ii++;
+            // FIXME: throtte
+            ii % 10 === 0 && setStateInStorage('explore_progress', ii / viewSpaces.length)
             const { dimensions, measures } = space;
             let dropSpace = false;
             const localCuboid = await context.cube.getCuboid(dimensions);
