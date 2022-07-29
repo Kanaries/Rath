@@ -20,6 +20,7 @@ export type IRenderViewKey = 'pattViews' | 'featViews' | 'filterViews';
 export interface IAssoViews {
     views: IPattern[];
     amount: number;
+    computing: boolean;
 }
 
 export const RENDER_BATCH_SIZE = 5;
@@ -27,6 +28,7 @@ export const RENDER_BATCH_SIZE = 5;
 export function makeInitAssoViews(initRenderAmount: number = 5): IAssoViews {
     return {
         views: [],
-        amount: initRenderAmount
+        amount: initRenderAmount,
+        computing: false
     }
 }

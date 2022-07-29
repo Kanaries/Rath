@@ -10,7 +10,7 @@ import { applyFilter } from '../utils';
 
 const FeatSegment: React.FC = () => {
     const { discoveryMainStore } = useGlobalStore();
-    const { featSpecList, computing, featViews, mainVizSetting, dataSource, autoAsso, mainView } = discoveryMainStore;
+    const { featSpecList, featViews, mainVizSetting, dataSource, autoAsso, hasMainView } = discoveryMainStore;
     const loadMore = useCallback(() => {
         discoveryMainStore.increaseRenderAmount('featViews');
     }, [discoveryMainStore])
@@ -24,7 +24,7 @@ const FeatSegment: React.FC = () => {
             !autoAsso.featViews && <PrimaryButton
                 text={intl.get('discovery.main.relateFeatures')}
                 iconProps={{ iconName: 'AddLink'}}
-                disabled={mainView === null}
+                disabled={!hasMainView}
                 onClick={advicePureFeature}
             />
         }
@@ -32,7 +32,7 @@ const FeatSegment: React.FC = () => {
             {
                 featSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
                     {
-                        computing && <LoadingLayer>
+                        featViews.computing && <LoadingLayer>
                             <Spinner label="loading" />
                         </LoadingLayer>
                     }

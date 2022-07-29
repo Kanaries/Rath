@@ -10,7 +10,7 @@ import { applyFilter } from '../utils';
 
 const PattSegment: React.FC = () => {
     const { discoveryMainStore } = useGlobalStore();
-    const { pattSpecList, computing, pattViews, mainVizSetting, dataSource, autoAsso, mainView } = discoveryMainStore;
+    const { pattSpecList, pattViews, mainVizSetting, dataSource, autoAsso, hasMainView } = discoveryMainStore;
     const loadMore = useCallback(() => {
         discoveryMainStore.increaseRenderAmount('pattViews');
     }, [discoveryMainStore])
@@ -22,7 +22,7 @@ const PattSegment: React.FC = () => {
         <h1 className="ms-fontSize-18">{intl.get('discovery.main.associate.patterns')}</h1>
         {
             !autoAsso.pattViews && <DefaultButton
-                disabled={mainView === null}
+                disabled={!hasMainView}
                 iconProps={{ iconName: 'ScatterChart' }}
                 text={intl.get('discovery.main.relatePatterns')} onClick={assViews}
             />
@@ -31,7 +31,7 @@ const PattSegment: React.FC = () => {
             {
                 pattSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
                     {
-                        computing && <LoadingLayer>
+                        pattViews.computing && <LoadingLayer>
                             <Spinner label="loading" />
                         </LoadingLayer>
                     }

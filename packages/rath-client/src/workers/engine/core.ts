@@ -393,7 +393,9 @@ export class RathEngine extends VIEngine {
                 impurity: totalEntLoss
             })
         }
+        // let ii = 0;
         for (let space of viewSpaces) {
+            // console.log(ii++, viewSpaces.length, ii / viewSpaces.length)
             const { dimensions, measures } = space;
             let dropSpace = false;
             const localCuboid = await context.cube.getCuboid(dimensions);

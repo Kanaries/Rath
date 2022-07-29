@@ -10,7 +10,7 @@ import { applyFilter } from '../utils';
 
 const FilterSegment: React.FC = () => {
     const { discoveryMainStore } = useGlobalStore();
-    const { filterSpecList, computing, filterViews, mainVizSetting, dataSource, autoAsso, mainView } = discoveryMainStore;
+    const { filterSpecList, filterViews, mainVizSetting, dataSource, autoAsso, hasMainView } = discoveryMainStore;
     const loadMore = useCallback(() => {
         discoveryMainStore.increaseRenderAmount('filterViews');
     }, [discoveryMainStore])
@@ -23,7 +23,7 @@ const FilterSegment: React.FC = () => {
         {
             !autoAsso.filterViews && <DefaultButton text={intl.get('discovery.main.pointInterests')}
                 iconProps={{ iconName: 'SplitObject' }}
-                disabled={mainView === null}
+                disabled={!hasMainView}
                 onClick={recommandFilter}
             />
         }
@@ -31,7 +31,7 @@ const FilterSegment: React.FC = () => {
             {
              filterSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
                     {
-                        computing && <LoadingLayer>
+                        filterViews.computing && <LoadingLayer>
                             <Spinner label="loading" />
                         </LoadingLayer>
                     }

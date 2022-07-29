@@ -1,5 +1,5 @@
 import produce from "immer";
-import { makeAutoObservable, observable, runInAction } from "mobx";
+import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { IPattern } from "../../dev";
 import { IFieldMeta, IResizeMode } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
@@ -18,7 +18,6 @@ export class DiscoveryMainStore {
     public featViews: IAssoViews;
     public filterViews: IAssoViews;
     private dataSourceStore: DataSourceStore;
-    public computing: boolean = false;
     public mainView: IPattern | null = null;
     public compareView: IPattern | null = null;
     public showMiniFloatView: boolean = false;
@@ -29,6 +28,7 @@ export class DiscoveryMainStore {
         featViews: true,
         filterViews: true
     }
+    private reactions: any[] = [];
     constructor (dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore;
         this.mainVizSetting = {
@@ -47,6 +47,26 @@ export class DiscoveryMainStore {
         this.pattViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.featViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.filterViews = makeInitAssoViews(RENDER_BATCH_SIZE);
+        this.reactions.push(reaction(() => {
+            return {
+                mainView: this.mainView,
+                dataSource: this.dataSource,
+                fieldMetas: this.fieldMetas,
+                autoFeat: this.autoAsso.featViews,
+                autoPatt: this.autoAsso.pattViews,
+                autoFilter: this.autoAsso.filterViews
+            }
+        }, (props) => {
+            const { mainView, autoFeat, autoFilter, autoPatt } = props;
+            if (mainView) {
+                autoPatt && this.pattAssociate();
+                !autoPatt && this.initRenderViews('pattViews')
+                autoFeat && this.featAssociate();
+                !autoPatt && this.initRenderViews('featViews');
+                autoFilter && this.filterAssociate();
+                !autoFilter && this.initRenderViews('filterViews');
+            }
+        }))
 
         makeAutoObservable(this, {
             pattViews: observable.shallow,
@@ -62,6 +82,9 @@ export class DiscoveryMainStore {
     public updateSettings (skey: keyof ISetting, value: any) {
         this.settings[skey] = value;
     }
+    public initRenderViews (akey: IRenderViewKey) {
+        this[akey] = makeInitAssoViews();
+    }
     public updateAutoAssoConfig (akey: IRenderViewKey, value: boolean) {
         this.autoAsso[akey] = value;
     }
@@ -72,6 +95,9 @@ export class DiscoveryMainStore {
     }
     public setShowMiniFloatView (show: boolean) {
         this.showMiniFloatView = show;
+    }
+    public hasMainView () {
+        return this.mainView !== null
     }
     public get dataSource () {
         return this.dataSourceStore.cleanedData;
@@ -137,7 +163,7 @@ export class DiscoveryMainStore {
         this.changeRenderAmount(stateKey, safeSize)
     }
     public async featAssociate () {
-        this.computing = true;
+        this.featViews.computing = true
         const { fieldMetas, dataSource, mainView } = this;
         try {
             const res = await footmanEngineService<IPattern[]>({
@@ -149,15 +175,15 @@ export class DiscoveryMainStore {
             runInAction(() => {
                 this.featViews.views = res;
                 this.featViews.amount = RENDER_BATCH_SIZE;
-                this.computing = false;
+                this.featViews.computing = false;
             })
         } catch (error) {
             console.error(error);
-            this.computing = false;
+            this.featViews.computing = false;
         }
     }
     public async pattAssociate () {
-        this.computing = true;
+        this.pattViews.computing = true
         const { fieldMetas, dataSource, mainView } = this;
         try {
             const res = await footmanEngineService<IPattern[]>({
@@ -169,15 +195,15 @@ export class DiscoveryMainStore {
             runInAction(() => {
                 this.pattViews.views = res;
                 this.pattViews.amount = RENDER_BATCH_SIZE;
-                this.computing = false;
+                this.pattViews.computing = false;
             })
         } catch (error) {
             console.error(error);
-            this.computing = false;
+            this.pattViews.computing = false;
         }
     }
     public async initAssociate () {
-        this.computing = false;
+        this.pattViews.computing = true;
         const { dataSource, fieldMetas } = this;
         try {
             const res = await footmanEngineService<IPattern[]>({
@@ -186,18 +212,18 @@ export class DiscoveryMainStore {
                 task: 'univar'
             }, 'local')
             runInAction(() => {
-                this.computing = false;
+                this.pattViews.computing = false;
                 this.pattViews.views = res;
                 this.pattViews.amount = RENDER_BATCH_SIZE;
             })
         } catch (error) {
             console.error(error);
-            this.computing = false;
+            this.pattViews.computing = false;
         }
     }
     public async filterAssociate () {
         if (this.mainView === null) return;
-        this.computing = true;
+        this.filterViews.computing = true;
         const { fieldMetas, dataSource, mainView } = this;
         try {
             const res = await footmanEngineService<IPattern[]>({
@@ -209,11 +235,11 @@ export class DiscoveryMainStore {
             runInAction(() => {
                 this.filterViews.views = res;
                 this.filterViews.amount = RENDER_BATCH_SIZE;
-                this.computing = false;
+                this.filterViews.computing = false;
             })
         } catch (error) {
             console.error(error);
-            this.computing = false;
+            this.filterViews.computing = false;
         }
     }
     public removeMainViewFilter (filterFieldId: string) {
@@ -242,7 +268,7 @@ export class DiscoveryMainStore {
     public updateMainView (view: IPattern) {
         this.mainView = view;
         // this.initAssociate()
-        this.clearViews();
+        // this.clearViews();
     }
     public updateCompareView (view: IPattern) {
         this.compareView = view;
@@ -250,7 +276,7 @@ export class DiscoveryMainStore {
     }
     public async explainViewDiff (view1: IPattern, view2: IPattern) {
         if (this.mainView === null) return;
-        this.computing = true;
+        this.featViews.computing = true
         const { fieldMetas, dataSource } = this;
         try {
             const res = await footmanEngineService<{ features: IFieldMeta[] }>({
@@ -273,11 +299,11 @@ export class DiscoveryMainStore {
                         }
                     ]
                 }
-                this.computing = false;
+                this.featViews.computing = false;
             })
         } catch (error) {
             console.error(error);
-            this.computing = false;
+            this.featViews.computing = false
         }
     }
 }
