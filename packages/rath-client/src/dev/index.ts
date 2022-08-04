@@ -217,31 +217,33 @@ export class NextVICore {
         return matrix
     }
 
-    public fewatureSelectionForSecondPatternWithSpecifiedViews (patt1: [IFieldMeta, IFieldMeta], patt2: [IFieldMeta, IFieldMeta]): {
+    public fewatureSelectionForSecondPatternWithSpecifiedViews (patt1: IPattern, patt2: IPattern): {
         features: IFieldMeta[];
         score: number;
     } | null {
         const { dataSource } = this;
+        const view1Meas = patt1.fields.filter(f => f.analyticType === 'measure');
+        const view2Meas = patt2.fields.filter(f => f.analyticType === 'measure');
+        const dataView1 = applyFilter(dataSource, patt1.filters);
+        const dataView2 = applyFilter(dataSource, patt2.filters);
+        if (patt1.fields.length !== 2 || patt2.fields.length !== 2) throw new Error('View size Not supported yet!')
         const dimensions = this.fields.filter(f => f.analyticType === 'dimension');
-        // const measures = this.fields.filter(f => f.analyticType === 'measure');
-        let patt1Points = dataSource.map(row => [row[patt1[0].fid], row[patt1[1].fid]]) as [number, number][];
-        let patt2Points = dataSource.map(row => [row[patt2[0].fid], row[patt2[1].fid]]) as [number, number][];
+        let patt1Dist: [number, number][] = dataView1.map(row => view1Meas.map(m => row[m.fid])) as [number, number][];
+        let patt2Dist: [number, number][] = dataView2.map(row => view2Meas.map(m => row[m.fid])) as [number, number][];
+
         let bestDScore = 0;
         let bestDIndex = -1;
         for (let k = 0; k < dimensions.length; k++) {
-            const t = dataSource.map(row => row[dimensions[k].fid])
-            const dimScore = incSim(t, patt1Points, patt2Points)
+            const T1 = dataView1.map(row => row[dimensions[k].fid])
+            const T2 = dataView2.map(row => row[dimensions[k].fid]);
+            const dimScore = incSim(T1, patt1Dist, T2, patt2Dist, dataSource.length)
+            console.log(dimensions[k].fid, dimScore)
             if (dimScore > bestDScore) {
                 bestDScore = dimScore;
                 bestDIndex = k;
             }
         }
         if (bestDIndex > -1) {
-            // console.log(
-            //     patt1.map(f => f.fid), 
-            //     patt2.map(f => f.fid), 
-            //     dimensions[bestDIndex].fid, 
-            //     bestDScore);
             return {
                 features: [dimensions[bestDIndex]],
                 score: bestDScore
@@ -299,41 +301,5 @@ export class NextVICore {
         // })
         ans.sort((a, b) => b.imp - a.imp)
         return ans;
-    }
-
-    public featureSelectForSecondPattern () {
-        const { dataSource } = this;
-        const dimensions = this.fields.filter(f => f.analyticType === 'dimension');
-        const measures = this.fields.filter(f => f.analyticType === 'measure');
-        const patterns: [IFieldMeta, IFieldMeta][] = [];
-        for (let i = 0; i < measures.length; i++) {
-            for (let j = i + 1; j < measures.length; j++) {
-                patterns.push([measures[i], measures[j]])
-            }
-        }
-        const patternNum = patterns.length;
-        for (let i = 0; i < patternNum; i++) {
-            for (let j = i + 1; j < patternNum; j++) {
-                let pattX = dataSource.map(row => [row[patterns[i][0].fid], row[patterns[i][1].fid]]) as [number, number][];
-                let pattY = dataSource.map(row => [row[patterns[j][0].fid], row[patterns[j][1].fid]]) as [number, number][];
-                let bestDScore = 0;
-                let bestDIndex = -1;
-                for (let k = 0; k < dimensions.length; k++) {
-                    const t = dataSource.map(row => row[dimensions[k].fid])
-                    const dimScore = incSim(t, pattX, pattY)
-                    if (dimScore > bestDScore) {
-                        bestDScore = dimScore;
-                        bestDIndex = k;
-                    }
-                }
-                if (bestDIndex > -1) {
-                    console.log(
-                        patterns[i].map(f => f.fid), 
-                        patterns[j].map(f => f.fid), 
-                        dimensions[bestDIndex].fid, 
-                        bestDScore);
-                }
-            }
-        }
     }
 }

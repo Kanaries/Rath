@@ -16,7 +16,7 @@ const FloatContainer = styled.div<{hide: boolean}>`
     position: fixed;
     right: 1px;
     top: 30%;
-    z-index: 99;
+    z-index: 999;
     padding: ${props => props.hide ? '5px' : '1em'};
     background-color: #fff;
     box-shadow: 0 10px 8px rgba(0, 0, 0, 0.05), 0 4px 3px rgba(0, 0, 0, 0.01);

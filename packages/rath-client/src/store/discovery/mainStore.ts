@@ -282,25 +282,29 @@ export class DiscoveryMainStore {
             const res = await footmanEngineService<{ features: IFieldMeta[] }>({
                 dataSource,
                 fields: fieldMetas,
-                task: 'filterSelection',
+                task: 'comparison',
                 props: [view1, view2]
             }, 'local')
-            runInAction(() => {
-                if (this.mainView) {
-                    this.clearViews();
-                    this.featViews.views = [
-                        {
-                            ...this.mainView,
-                            fields: [...this.mainView!.fields, ...res.features]
-                        },
-                        {
-                            ...this.mainView,
-                            fields: [...this.mainView!.fields, ...res.features]
-                        }
-                    ]
-                }
-                this.featViews.computing = false;
-            })
+            if (res === null) {
+                this.clearViews();
+            } else {
+                runInAction(() => {
+                    if (this.mainView) {
+                        this.clearViews();
+                        this.featViews.views = [
+                            {
+                                ...this.mainView,
+                                fields: [...this.mainView!.fields, ...res.features]
+                            },
+                            {
+                                ...this.mainView,
+                                fields: [...this.mainView!.fields, ...res.features]
+                            }
+                        ]
+                    }
+                    this.featViews.computing = false;
+                })
+            }
         } catch (error) {
             console.error(error);
             this.featViews.computing = false

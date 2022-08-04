@@ -1,6 +1,6 @@
 import { ProgressIndicator } from 'office-ui-fabric-react';
 import React, { useEffect, useState } from 'react';
-import { getStateInStorage } from '../../workers/engine/utils';
+import { getStateInStorage, setStateInStorage } from '../../workers/engine/utils';
 import intl from 'react-intl-universal';
 
 interface CPProps {
@@ -10,6 +10,10 @@ const ComputationProgress: React.FC<CPProps> = props => {
     const { computing } = props;
 
     const [pn, setPn] = useState<number>(0);
+
+    useEffect(() => {
+        setStateInStorage('explore_progress', 0)
+    }, [])
 
     useEffect(() => {
         let int = -1;

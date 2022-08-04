@@ -288,39 +288,61 @@ export function normalizeScatter (points: [number, number][]) {
             pbMatrix[i][j] = matrix[i][j] / points.length;
         }
     }
-    // console.log(pbMatrix)
     return pbMatrix
 }
 
-interface IPatternPair {
-    X: [number, number][];
-    Y: [number, number][];
-}
-export function incSim (T: string[], pointsX: [number, number][], pointsY: [number, number][]) {
+export function incSim (TX: string[], pointsX: [number, number][], TY: string[], pointsY: [number, number][], TSize: number) {
     const S = l2Dis2(normalizeScatter(pointsX), normalizeScatter(pointsY));
-    let groups: Map<string, IPatternPair> = new Map()
-    for (let i = 0; i < T.length; i++) {
-        if (!groups.has(T[i])) {
-            const pair: IPatternPair = {
-                X: [],
-                Y: []
-            };
-            groups.set(T[i], pair)
+    let groupsX: Map<string, [number, number][]> = new Map();
+    let groupsY: Map<string, [number, number][]> = new Map();
+    for (let i = 0; i < TX.length; i++) {
+        if (!groupsX.has(TX[i])) {
+            groupsX.set(TX[i], [])
         }
-        groups.get(T[i])?.X.push(pointsX[i])
-        groups.get(T[i])?.Y.push(pointsY[i])
+        groupsX.get(TX[i])!.push(pointsX[i])
     }
+    for (let i = 0; i < TY.length; i++) {
+        if (!groupsY.has(TY[i])) {
+            groupsY.set(TY[i], [])
+        }
+        groupsY.get(TY[i])!.push(pointsY[i])
+    }
+
     let condS = 0;
-    for (let [, pair] of groups.entries()) {
-        let p = pair.X.length / pointsX.length;
+    for (let [t, vecX] of groupsX.entries()) {
+        let p = vecX.length / TSize;
         if (p === 0) continue;
-        if (pair.X.length < BIN_SIZE ** 2) {
+        if (vecX.length < BIN_SIZE ** 2) {
             condS += p;
             continue;
         }
-        // let p = 1 / groups.size
-        condS += (p * l2Dis2(normalizeScatter(pair.X), normalizeScatter(pair.Y)));
+        if (!groupsY.has(t)) {
+            condS += p;
+            continue;
+        }
+        const vecY = groupsY.get(t)!;
+        condS += (p * l2Dis2(normalizeScatter(vecX), normalizeScatter(vecY)))
     }
+    for (let [t, vecY] of groupsY.entries()) {
+        let p = vecY.length / TSize;
+        if (p === 0) continue;
+        if (!groupsX.has(t)) {
+            condS += p;
+            continue;
+        }
+    }
+    // for (let [, pair] of groups.entries()) {
+    //     let p = pair.X.length / pointsX.length;
+    //     if (p === 0) continue;
+    //     if (pair.X.length < BIN_SIZE ** 2) {
+    //         condS += p;
+    //         continue;
+    //     }
+    //     if ()
+    //     // let p = 1 / groups.size
+    //     console.log(pair.X, pair.Y)
+    //     condS += (p * l2Dis2(normalizeScatter(pair.X), normalizeScatter(pair.Y)));
+    // }
     return S - condS;
 }
 
