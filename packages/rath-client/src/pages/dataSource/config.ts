@@ -33,17 +33,23 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 text: restfulText,
                 iconProps: { iconName: "Cloud" },
             },
-            {
-                key: IDataSourceType.MYSQL,
-                text: mysqlText,
-                iconProps: { iconName: "LinkedDatabase" },
-                disabled: true,
-            },
+            // {
+            //     key: IDataSourceType.MYSQL,
+            //     text: mysqlText,
+            //     iconProps: { iconName: "LinkedDatabase" },
+            //     disabled: true,
+            // },
             {
                 key: IDataSourceType.CLICKHOUSE,
                 text: clickHouseText,
                 iconProps: { iconName: "TripleColumn" },
                 disabled: false,
+            },
+            {
+                key: IDataSourceType.AIRTABLE,
+                text: 'AirTable',
+                iconProps: { iconName: 'Table' },
+                disabled: false
             }
         ];
     }, [fileText, restfulText, mysqlText, demoText, localText]);

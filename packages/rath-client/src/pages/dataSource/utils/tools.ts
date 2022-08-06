@@ -21,7 +21,7 @@ import { formatTimeField } from "../../../utils/transform";
  */
 function formatColKeys(colKeys: string[]): string[] {
     return colKeys.map((col, colIndex) => {
-        return `col_${colIndex}`
+        return `c_${colIndex}`
     })
 }
 

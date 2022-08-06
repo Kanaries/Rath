@@ -37,7 +37,7 @@ export const useSampleOptions = function () {
     return options;
 }
 
-async function transformFileDataService (rawData: IRow[]): Promise<{
+export async function transformRawDataService (rawData: IRow[]): Promise<{
     fields: IMuteFieldBase[];
     dataSource: IRow[]
 }> {
@@ -107,7 +107,7 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
     } else {
         throw new Error(`unsupported file type=${file.type} `)
     }
-    const dataset = await transformFileDataService(rawData);
+    const dataset = await transformRawDataService(rawData);
     return dataset
 }
 
