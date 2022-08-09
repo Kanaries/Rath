@@ -1,4 +1,4 @@
-import { IPattern } from "../../dev";
+import { IPattern } from '@kanaries/loa';
 import { IResizeMode } from "../../interfaces";
 
 export interface ISetting {

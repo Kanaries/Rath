@@ -1,4 +1,4 @@
-import { IFilter } from "../../dev";
+import { IFilter } from "@kanaries/loa";
 import { IRow } from "../../interfaces";
 
 // export function applyFilter (dataSource: IRow[], filters?: IFilter[]): IRow[] {

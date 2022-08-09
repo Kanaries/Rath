@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import intl from 'react-intl-universal'
 
 import ReactVega from '../../../components/react-vega';
-import { IPattern } from '../../../dev';
+import { IPattern } from '@kanaries/loa';
 import { IRow } from '../../../interfaces';
 import { distVis } from '../../../queries/distVis';
 import { labDistVis } from '../../../queries/labdistVis';

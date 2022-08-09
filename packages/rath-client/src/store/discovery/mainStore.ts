@@ -1,6 +1,6 @@
 import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
-import { IPattern } from "../../dev";
+import { IPattern } from "@kanaries/loa";
 import { IFieldMeta, IResizeMode } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
 import { labDistVis } from "../../queries/labdistVis";

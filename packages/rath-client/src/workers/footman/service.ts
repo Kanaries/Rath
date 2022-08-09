@@ -1,4 +1,4 @@
-import { IPattern, NextVICore } from "../../dev";
+import { NextVICore, IPattern } from '@kanaries/loa'
 import { IFieldMeta, IRow } from "../../interfaces";
 
 export interface IFootmanProps {

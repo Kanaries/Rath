@@ -2244,6 +2244,11 @@
   dependencies:
     localforage "^1.10.0"
 
+"@kanaries/loa@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.npmmirror.com/@kanaries/loa/-/loa-0.0.2.tgz#7f288fe6dc978fb09ced66849093e2ccfe2ae7bd"
+  integrity sha512-7Q5UMcA1fVyrjSm6fTSesw/fXTt3PEbxHhoWYsMrE64rVOhCoLxxRcJ8+xLAH7wVwUVRQN2VNokb3E5Jck9X5Q==
+
 "@kanaries/web-data-loader@0.1.5":
   version "0.1.5"
   resolved "https://registry.npmmirror.com/@kanaries/web-data-loader/-/web-data-loader-0.1.5.tgz#10d8d677492919b0838b9429d28cbf2b7d726100"

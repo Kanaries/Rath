@@ -1,7 +1,7 @@
 /* eslint no-restricted-globals: 0 */
 import { UnivariateSummary } from 'visual-insights';
 import { Statistics } from 'visual-insights';
-import { bin, rangeNormilize } from '../dev/utils';
+import { bin, rangeNormilize } from '@kanaries/loa';
 import { timer } from './timer';
 
 const { getAllFieldsDistribution, getAllFieldTypes, getAllFieldsEntropy } = UnivariateSummary;

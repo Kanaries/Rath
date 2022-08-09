@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import React, { useMemo } from 'react';
 import ReactVega from '../../../components/react-vega';
-import { IPattern } from '../../../dev';
+import { IPattern } from '@kanaries/loa';
 import { IResizeMode, IRow } from '../../../interfaces';
 import { distVis } from '../../../queries/distVis';
 import { labDistVis } from '../../../queries/labdistVis';
