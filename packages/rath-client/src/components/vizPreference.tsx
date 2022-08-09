@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { observer } from 'mobx-react-lite';
-import { PrimaryButton, Stack, Checkbox, Panel, PanelType, ComboBox, Label } from "office-ui-fabric-react";
+import { PrimaryButton, Stack, Checkbox, Panel, PanelType, ComboBox, Label, Slider } from "office-ui-fabric-react";
 import { Aggregator } from "../global";
 import { useGlobalStore } from "../store";
 const checkboxStyles = () => {
@@ -85,6 +85,20 @@ const PreferencePanel: React.FC = () => {
                     }}
                 />
             </Stack>
+            <Slider
+                disabled={!exploreStore.visualConfig.nlg}
+                value={exploreStore.nlgThreshold}
+                label="NLG Threshold(beta)"
+                min={0}
+                max={1}
+                step={0.01}
+                valueFormat={(value: number) => `${Math.round(value * 100)}%`}
+                showValue={true}
+                onChange={(value: number) => {
+                    exploreStore.setNlgThreshold(value);
+                    
+                }}
+                />
         </Panel>
     );
 };

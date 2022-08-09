@@ -32,12 +32,14 @@
       "*/webpack-cli",
       "**/vega",
       "**/vega-lite",
-      "**/vega-embed"
+      "**/vega-embed",
+      "**/visual-insights"
     ]
   },
   "homepage": "https://github.com/ObservedObserver/showme#readme",
   "devDependencies": {
     "concurrently": "^4.1.2",
     "yarn": "^1.19.0"
-  }
+  },
+  "dependencies": {}
 }

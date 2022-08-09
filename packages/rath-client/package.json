@@ -5,17 +5,19 @@
   "homepage": "./",
   "prettier": {
     "tabWidth": 4,
-    "printWidth": 140,
+    "printWidth": 120,
     "singleQuote": true
   },
   "dependencies": {
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@kanaries/graphic-walker": "0.1.0",
+    "@kanaries/loa": "^0.0.2",
     "@kanaries/web-data-loader": "0.1.7",
     "@material-ui/core": "^5.0.0-beta.5",
     "@uifabric/icons": "^7.5.17",
     "@uifabric/react-hooks": "^7.13.9",
+    "airtable": "^0.11.4",
     "ali-react-table": "^2.3.1",
     "chroma-js": "^2.0.6",
     "cube-core": "^2.13.0",
@@ -45,7 +47,7 @@
     "vega": "^5.22.1",
     "vega-embed": "^6.20.8",
     "vega-lite": "^5.2.0",
-    "visual-insights": "0.8.11",
+    "visual-insights": "0.11.2",
     "web-vitals": "^0.2.4",
     "worker-loader": "^3.0.7"
   },
@@ -60,8 +62,10 @@
     "@types/react-beautiful-dnd": "^13.0.0",
     "@types/react-dom": "^17.0.1",
     "@types/styled-components": "^5.1.7",
+    "customize-cra": "^1.0.0",
+    "prettier": "2.7.1",
     "source-map-explorer": "^2.5.2",
-    "typescript": "^4.8.0-dev.20220630"
+    "typescript": "^4.7.4"
   },
   "scripts": {
     "start": "react-app-rewired start",

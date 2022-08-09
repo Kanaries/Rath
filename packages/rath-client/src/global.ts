@@ -21,7 +21,8 @@ export enum IDataSourceType {
   MYSQL = 'mysql',
   DEMO = 'demo',
   CLICKHOUSE = 'clickhouse',
-  LOCAL = 'local'
+  LOCAL = 'local',
+  AIRTABLE = 'airtable'
 }
 
 export const globalRef: {

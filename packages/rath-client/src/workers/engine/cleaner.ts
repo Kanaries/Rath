@@ -28,10 +28,10 @@ function transformDataTypes (dataSource: IRow[], fields: IRawField[]): IRow[] {
     });
   }
   
-  export function cleanAndTransformData (dataSource: IRow[], fields: IRawField[], method: CleanMethod): IRow[] {
+export function cleanAndTransformData (dataSource: IRow[], fields: IRawField[], method: CleanMethod): IRow[] {
     const dimensions = fields.filter(f => f.analyticType === 'dimension').map(f => f.fid);
     const measures = fields.filter(f => f.analyticType === 'measure').map(f => f.fid);
     const t = transformDataTypes(dataSource, fields)
     const c = cleanData(t, dimensions, measures, method)
     return c
-  }
+}

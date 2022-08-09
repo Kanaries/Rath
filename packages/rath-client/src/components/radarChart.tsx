@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import embed from 'vega-embed';
 import { scheme } from 'vega';
-import { DefaultIWorker } from "visual-insights/build/esm/insights/dev";
+import { DefaultIWorker } from "visual-insights";
 
 scheme('threshold', ['#1890ff', '#ffccc7']);
 
@@ -47,7 +47,7 @@ const RadarChart: React.FC<RadarChartProps> = props => {
   }, [keyField, valueField, dataSource, threshold])
   useEffect(() => {
     if (container.current) {
-      embed(container.current, {
+      const resultPromise = embed(container.current, {
         width: 280,
         height: 280,
         padding: 50,
@@ -227,6 +227,13 @@ const RadarChart: React.FC<RadarChartProps> = props => {
       } as any, {
         actions: false
       });
+      return () => {
+        resultPromise.then(res => {
+          if (res) {
+            res.finalize()
+          }
+        }).catch(console.error)
+      }
     }
   }, [viewData]);
   return <div ref={container}></div>

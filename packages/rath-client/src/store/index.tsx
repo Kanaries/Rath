@@ -35,7 +35,7 @@ const galleryStore = new GalleryStore(litePipeStore);
 const noteBookStore = new NoteBookStore(litePipeStore);
 const dashBoardStore = new DashBoardStore(litePipeStore);
 const exploreStore = new ExploreStore(ltsPipeLineStore);
-const discoveryMainStore = new DiscoveryMainStore();
+const discoveryMainStore = new DiscoveryMainStore(dataSourceStore);
 
 
 const storeCol: StoreCollection = {

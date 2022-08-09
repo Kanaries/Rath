@@ -5,7 +5,7 @@ import intl from 'react-intl-universal';
 import DistributionChart from '../metaView/distChart';
 import DropdownSelect from '../../../components/dropDownSelect'
 import { IFieldMeta, IRawField } from '../../../interfaces';
-import { IAnalyticType, ISemanticType } from 'visual-insights/build/esm/insights/InsightFlow/interfaces';
+import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { Callout, IconButton, TextField } from 'office-ui-fabric-react';
 import { useId } from '@uifabric/react-hooks';
 

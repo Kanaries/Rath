@@ -1,7 +1,6 @@
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
-import { IRow } from "visual-insights"
-import { IAnalyticType, ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces"
+import { IRow, IAnalyticType, ISemanticType } from "visual-insights"
 import { inferAnalyticTypeFromSemanticType } from "."
 import { Field } from "../global"
 import { IFieldMeta, IGeoRole } from "../interfaces"

@@ -1,4 +1,4 @@
-import { FieldType } from 'visual-insights/build/esm/commonTypes'
+import { FieldType } from 'visual-insights'
 import { featureVis } from './featureVis'
 import { targetVis } from './targetVis';
 import { baseVis } from './baseVis';

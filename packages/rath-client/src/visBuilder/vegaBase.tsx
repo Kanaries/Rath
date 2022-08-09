@@ -6,7 +6,6 @@ import { baseVis, commonVis } from '../queries/index';
 import { EDITOR_URL } from '../constants';
 import { IFieldMeta, IResizeMode, IRow } from '../interfaces';
 
-// import { simpleAggregate } from 'visual-insights/build/esm/statistics';
 export const geomTypeMap: {[key: string]: any} = {
   interval: 'bar',
   line: 'line',
@@ -107,13 +106,20 @@ const BaseChart: React.FC<BaseChartProps> = (props) => {
         }
         let spec = mode === 'dist' ? baseVis(params) : commonVis(params);
         globalRef.baseVisSpec = spec;
-        embed(container.current, spec, {
+        const resultPromise = embed(container.current, spec, {
           mode: 'vega-lite',
           editorUrl: EDITOR_URL,
           actions: debug
         }).catch(err => {
           console.error('[VIS ERROR]', err)
         })
+        return () => {
+          resultPromise.then(res => {
+            if (res) {
+              res.finalize()
+            }
+          }).catch(console.error)
+        }
       }
     }
   }, [schema,

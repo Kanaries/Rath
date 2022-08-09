@@ -1,3 +1,13 @@
+// const path = require('path');
+// const { override, babelInclude } = require('customize-cra')
+
+// const mid_override = override(
+//   babelInclude([
+//     path.resolve('src'),
+//     path.resolve(__dirname, '../../node_modules/visual-insights')
+//   ])
+// )
+
 module.exports = function override(config, env) {
   // do stuff with the webpack config...
   config.module.rules.push({
@@ -11,5 +21,8 @@ module.exports = function override(config, env) {
     },
   })
   config.output.globalObject = 'self'
-  return config;
+  // config.module = config.module || {};
+  // config.module.unknownContextCritical = false
+  return config
+  // return mid_override(config)
 };

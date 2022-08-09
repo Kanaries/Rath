@@ -1,6 +1,5 @@
 import { makeAutoObservable, observable, runInAction } from "mobx";
-import { ICubeStorageManageMode, Sampling, Specification } from "visual-insights";
-import { IFieldSummary, IInsightSpace } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
+import { ICubeStorageManageMode, Sampling, Specification, IFieldSummary, IInsightSpace } from "visual-insights";
 
 import { IRow, ISyncEngine, ITaskTestMode } from "../../interfaces";
 import { IVizSpace } from "../../pages/megaAutomation/association/assCharts";

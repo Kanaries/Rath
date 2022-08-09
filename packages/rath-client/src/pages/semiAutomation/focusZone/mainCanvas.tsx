@@ -14,17 +14,16 @@ interface MainCanvasProps{
 }
 const MainCanvas: React.FC<MainCanvasProps> = props => {
     const { pined } = props;
-    const { discoveryMainStore, dataSourceStore } = useGlobalStore()
-    const { settings, mainVizSetting } = discoveryMainStore;
+    const { discoveryMainStore } = useGlobalStore()
+    const { settings, mainVizSetting, dataSource } = discoveryMainStore;
     const { vizAlgo } = settings;
-    const { cleanedData } = dataSourceStore;
 
     const { resize, debug, interactive } = mainVizSetting
     const { width, height, mode } = resize;
     const mainViewData = useMemo<IRow[]>(() => {
-        if (pined) return applyFilter(cleanedData, pined.filters)
+        if (pined) return applyFilter(dataSource, pined.filters)
         return []
-    }, [cleanedData, pined])
+    }, [dataSource, pined])
 
     const spec = useMemo(() => {
         if (vizAlgo === 'lite') {
@@ -41,10 +40,10 @@ const MainCanvas: React.FC<MainCanvasProps> = props => {
                 pattern: pined,
                 width,
                 height,
-                dataSource: cleanedData
+                dataSource
             })
         }
-    }, [mode, height, width, interactive, pined, vizAlgo, cleanedData])
+    }, [mode, height, width, interactive, pined, vizAlgo, dataSource])
 
     const enableResize = (mode === IResizeMode.control && spec.encoding && !spec.encoding.column && !spec.encoding.row)
 

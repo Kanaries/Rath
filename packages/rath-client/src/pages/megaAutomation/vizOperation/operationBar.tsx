@@ -117,7 +117,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
                     }} />
                 </Stack.Item>
                 <Stack.Item>
-                    <Toggle label="NLG"
+                    <Toggle label="NLG(beta)"
                         checked={visualConfig.nlg}
                         onChange={(e, checked) => {
                             exploreStore.setVisualConig((cnf => {

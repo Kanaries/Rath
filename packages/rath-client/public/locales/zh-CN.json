@@ -5,7 +5,9 @@
         "name": "名称",
         "home": "主页",
         "settings": "设置",
-        "history": "历史记录"
+        "history": "历史记录",
+        "hide": "隐藏",
+        "expand": "展开"
     },
     "menu": {
         "dataSource": "数据源",
@@ -136,7 +138,7 @@
         "tip": "记得在开始分析前先调整数据的清洗策略并配置字段的属性",
         "recordCount": "记录数 {count}",
         "upload": {
-            "title": "上传你的数据集，根据需求调整以下配置",
+            "title": "连接你的数据集，根据需求调整以下配置",
             "fileTypes": "支持csv, json文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
             "sampling": "数据采样",
@@ -224,7 +226,7 @@
         "pageNo": "报表序号: 当前 {current} 总 {total}"
     },
     "explainer": {
-        "notReadyTip": "如果你看到这段文字，说明你还没有在数据页面上传你的数据或者还没有点击数据集页面的获取洞察按钮(它会产生一个当前页面需要使用的计算结果)",
+        "notReadyTip": "如果你看到这段文字，说明你还没有在数据页面连接你的数据或者还没有点击数据集页面的获取洞察按钮(它会产生一个当前页面需要使用的计算结果)",
         "insightButton": "获取洞察",
         "sigThreshold": "显著性阈值",
         "desc": "总共有 {num} 个视图中的洞察显著性不低于 {threshold} %",
@@ -286,8 +288,8 @@
     "discovery": {
         "main": {
             "mainView": "主视图",
-            "relatePatterns": "关联规律(默认)",
-            "relateFeatures": "特征推荐",
+            "relatePatterns": "关联规律",
+            "relateFeatures": "关联特征",
             "explainDiff": "差异性分析",
             "pointInterests": "拆分",
             "pin": "深入分析",
@@ -297,7 +299,15 @@
                 "lite": "轻量模式(近似算法、更快)",
                 "strict": "严格模式(效果更好)"
             },
-            "loadMore": "加载更多"
+            "loadMore": "加载更多",
+            "associate": {
+                "patterns": "关联规律",
+                "features": "关联维度",
+                "filters": "关联子集"
+            }
         }
+    },
+    "desc": {
+        "dataViewInfo": "在 {dimensions} 中 {measures} 的表现， 限制条件 {filters}."
     }
 }

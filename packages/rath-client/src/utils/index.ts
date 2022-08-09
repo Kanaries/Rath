@@ -38,8 +38,21 @@ function inferAnalyticTypeFromSemanticType (semanticType: ISemanticType): IAnaly
  * @param fid 字段id
  * @returns semantic type 列表
  */
- export function inferSemanticType (data: IRow[], fid: string) {
-  return UnivariateSummary.getFieldType(data, fid);
+ export function inferSemanticType (data: IRow[], fid: string): ISemanticType {
+  let st = UnivariateSummary.getFieldType(data, fid);
+  if (st === 'ordinal') {
+    const valueSet: Set<number> = new Set();
+    let _max = -Infinity;
+    let _min = Infinity;
+    for (let v of valueSet) {
+      _max = Math.max(_max, v)
+      _min = Math.max(_min, v)
+    }
+    if (_max - _min + 1 !== valueSet.size) {
+      st = 'quantitative'
+    }
+  }
+  return st;
 }
 
 function isSetEqual (A: string[], B: string[]) {
@@ -99,6 +112,18 @@ interface IGeneralColumn {
 }
 export function findRathSafeColumnIndex<T extends IGeneralColumn> (fields: T[]): number {
   return fields.findIndex(f => f.fid === RATH_INDEX_COLUMN_KEY);
+}
+
+export function throttle<F extends Function> (func: F, delay: number) {
+  let timer: number | null = null;
+  return function () {
+    if (timer === null) {
+      timer = window.setTimeout(() => {
+        func();
+        timer = null;
+      }, delay);
+    }
+  }
 }
 
 export {

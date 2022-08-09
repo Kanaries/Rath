@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { ChoiceGroup, IChoiceGroupOption, Panel } from 'office-ui-fabric-react';
+import { ChoiceGroup, IChoiceGroupOption, Label, Panel, Toggle } from 'office-ui-fabric-react';
 import React, { useMemo } from 'react';
 import { useGlobalStore } from '../../store';
 import intl from 'react-intl-universal';
@@ -13,7 +13,7 @@ const PatternSetting: React.FC = () => {
             { text: intl.get('discovery.main.vizsys.strict'), key: 'strict' }
         ]
     }, [])
-    const { showSettings, settings } = discoveryMainStore;
+    const { showSettings, settings, autoAsso } = discoveryMainStore;
     const { vizAlgo } = settings;
     return <Panel
         isOpen={showSettings}
@@ -31,6 +31,17 @@ const PatternSetting: React.FC = () => {
             selectedKey={vizAlgo}
             options={options}
         />
+        <hr style={{ marginTop: '1em'}} />
+        <Label>Auto Prediction</Label>
+        <Toggle checked={autoAsso.featViews} onText="Auto" offText="Manual" label="Feat" onChange={(e, checked) => {
+            discoveryMainStore.updateAutoAssoConfig('featViews', Boolean(checked))
+        }} />
+        <Toggle checked={autoAsso.pattViews} onText="Auto" offText="Manual" label="Patt" onChange={(e, checked) => {
+            discoveryMainStore.updateAutoAssoConfig('pattViews', Boolean(checked))
+        }} />
+        <Toggle checked={autoAsso.filterViews} onText="Auto" offText="Manual" label="Subspace" onChange={(e, checked) => {
+            discoveryMainStore.updateAutoAssoConfig('filterViews', Boolean(checked))
+        }} />
         <hr />
         <OperationBar />
     </Panel>

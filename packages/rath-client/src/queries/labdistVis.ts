@@ -1,9 +1,9 @@
 /**
  * distVis 是分布式可视化的推荐，是比较新的模块，目前暂时用于dev模块，即voyager模式下的测试。
  */
-import { entropy } from "visual-insights/build/esm/statistics";
-import { IPattern } from "../dev";
-import { bin, binMap, mic, pureGeneralMic, rangeNormilize } from "../dev/utils";
+import { Statistics } from 'visual-insights'
+import { IPattern } from '@kanaries/loa';
+import { bin, binMap, mic, pureGeneralMic, rangeNormilize } from '@kanaries/loa';
 import { IFieldMeta, IResizeMode, IRow } from "../interfaces";
 import { deepcopy } from "../utils";
 import { encodingDecorate } from "./base/utils";
@@ -17,7 +17,7 @@ export const geomTypeMap: { [key: string]: any } = {
 };
 
 const channels = {
-    quantitative: ['y', 'x', 'size', 'opacity', 'color'],
+    quantitative: ['y', 'x', 'size', 'color', 'opacity'],
     ordinal: ['y', 'x', 'opacity', 'color', 'size', 'shape'],
     nominal: ['y', 'x', 'color', 'row', 'column', 'opacity', 'size', 'shape'],
     temporal: ['y', 'x', 'size', 'color', 'opacity', 'shape']
@@ -311,32 +311,6 @@ function markFixEncoding(markType: string, usedChannels: Set<string>) {
     }
 }
 
-// function autoAgg (props: {encoding: any; fields: IFieldMeta[]; markType: string; op?: string; statFields?: IFieldMeta[]}) {
-//     const {
-//         encoding,
-//         fields,
-//         markType,
-//         op = 'mean',
-//         statFields = []
-//     } = props
-//     if (fields.length > 1) {
-//         if (markType === 'bar' || markType === 'line') {
-//             if (encoding.x && encoding.x.type === 'quantitative') {
-//                 encoding.x.aggregate = op;
-//                 if (encoding.x.title) {
-//                     encoding.x.title = `${op}(${encoding.x.title})`
-//                 }
-//             }
-//             if (encoding.y && encoding.y.type === 'quantitative') {
-//                 encoding.y.aggregate = op;
-//                 if (encoding.y.title) {
-//                     encoding.y.title = `${op}[${encoding.y.title}]`
-//                 }
-//             }
-//         }
-//     }
-// }
-
 interface IFieldEncode {
     field?: string;
     title?: string;
@@ -436,7 +410,7 @@ export function labDistVis(props: BaseVisProps) {
             }
             score /= (measures.length - 1)
         } else {
-            score = Math.log2(16) - entropy(rangeNormilize(bin(values1).filter(v => v > 0)))
+            score = Math.log2(16) - Statistics.entropy(rangeNormilize(bin(values1).filter(v => v > 0)))
         }
         measures[i].features.entropy = score;
     }
@@ -478,6 +452,19 @@ export function labDistVis(props: BaseVisProps) {
         fields: distFields, usedChannels, statFields,
         statEncodes
     })
+    if (markType === 'bar' && statEncodes.length > 0) {
+        if (enc && enc.x && enc.y) {
+            if (enc.x.field && enc.y.field) {
+                const sortEncodeField = (enc.y.type === 'quantitative' ? enc.x : enc.y);
+                const sortBasedEncodeField = (enc.y.type === 'quantitative' ? enc.y : enc.x);
+                sortEncodeField.sort = {
+                    field: sortBasedEncodeField.field,
+                    op: sortBasedEncodeField.aggregate || 'count',
+                    order: 'descending'
+                }
+            }
+        }
+    }
     // if (filters && filters.length > 0) {
     //     const field = filters[0].field;
     //     enc.color = {

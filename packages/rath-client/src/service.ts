@@ -43,7 +43,7 @@ import CleanWorker from './workers/clean.worker?worker';
 // @ts-ignore
 // eslint-disable-next-line
 import FilterWorker from './workers/filterData.worker?worker';
-import { InsightSpace } from 'visual-insights/build/esm/insights/dev';
+import { InsightSpace } from 'visual-insights';
 import { MessageProps } from './workers/engine/service';
 
 import { CleanMethod, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from './interfaces';
@@ -479,6 +479,13 @@ function getTestServerUrl (): URL | null {
     return new URL(url);
   }
   return null;
+}
+
+export function getTestServerAPI (api: string): string {
+  const url = new URL(window.location.href).searchParams.get('server') || 'http://localhost:8000';
+  let surl = new URL(url);
+  surl.pathname = api;
+  return surl.href;
 }
 export async function rathEngineServerService (props: MessageServerProps) {
   try {

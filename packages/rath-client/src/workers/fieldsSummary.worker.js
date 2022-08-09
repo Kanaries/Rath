@@ -1,7 +1,7 @@
 /* eslint no-restricted-globals: 0 */
 import { UnivariateSummary } from 'visual-insights';
-import { entropy } from 'visual-insights/build/esm/statistics';
-import { bin, rangeNormilize } from '../dev/utils';
+import { Statistics } from 'visual-insights';
+import { bin, rangeNormilize } from '@kanaries/loa';
 import { timer } from './timer';
 
 const { getAllFieldsDistribution, getAllFieldTypes, getAllFieldsEntropy } = UnivariateSummary;
@@ -31,7 +31,7 @@ const fieldSummary = (e) => {
     for (let i = 0; i < fieldEntropyList.length; i++) {
       if (fieldTypeList[i].type === 'quantitative') {
         const bins = bin(dataSource.map(r => r[fieldEntropyList[i].fieldName]));
-        fieldEntropyList[i].entropy = entropy(rangeNormilize(bins.filter(b => b > 0)));
+        fieldEntropyList[i].entropy = Statistics.entropy(rangeNormilize(bins.filter(b => b > 0)));
         fieldEntropyList[i].maxEntropy = Math.log2(16)
       }
     }

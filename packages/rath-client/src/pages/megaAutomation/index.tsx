@@ -4,7 +4,7 @@ import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
 import { runInAction } from 'mobx';
-import { DefaultButton, Stack, ProgressIndicator, CommandBarButton, IconButton, Toggle, Dropdown, IDropdownOption } from 'office-ui-fabric-react';
+import { DefaultButton, Stack, CommandBarButton, IconButton, Toggle, Dropdown, IDropdownOption } from 'office-ui-fabric-react';
 
 import { useGlobalStore } from '../../store';
 import BaseChart from '../../visBuilder/vegaBase';
@@ -19,6 +19,7 @@ import FieldContainer from './vizOperation/fieldContainer';
 import { IResizeMode } from '../../interfaces';
 import ResizeContainer from './resizeContainer';
 import Narrative from './narrative';
+import ComputationProgress from './computationProgress';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -119,9 +120,7 @@ const LTSPage: React.FC = () => {
                     onClick={downloadResults}
                 />
             </Stack>
-            <div className="h-4">
-            { computing && <ProgressIndicator description={intl.get('lts.computing')} />}
-            </div>
+            <ComputationProgress computing={computing} />
             <MainHeader>{intl.get('lts.title')}</MainHeader>
             <p className="state-description">{intl.get('lts.hintMain')}</p>
             <Stack style={{ marginRight: '1em' }} horizontal>

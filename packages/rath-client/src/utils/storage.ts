@@ -7,7 +7,8 @@ export const STORAGE_INSTANCE = 'rath_storage_instance'
 const STORAGES = {
     DATASOURCE: 'datasource',
     WORKSPACE: 'workspace',
-    META: 'meta'
+    META: 'meta',
+    STATE: 'state'
 }
 
 export interface IDBMeta {
@@ -145,3 +146,20 @@ export async function setDataStorage(name: string, fields: IMuteFieldBase[], dat
     });
     storages.setItem(name, dataString);
 }
+
+// export async function setStateInStorage(key: string, value: any) {
+//     // const state = localforage.createInstance({
+//     //     name: STORAGE_INSTANCE,
+//     //     storeName: STORAGES.STATE
+//     // });
+//     // await state.setItem(key, value)
+// }
+
+// export async function getStateInStorage(key: string) {
+//     const state = localforage.createInstance({
+//         name: STORAGE_INSTANCE,
+//         storeName: STORAGES.STATE
+//     });
+//     const val = await state.getItem(key)
+//     return val;
+// }

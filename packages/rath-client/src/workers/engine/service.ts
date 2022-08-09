@@ -1,12 +1,11 @@
-import { ICubeStorageManageMode, IFieldSummary, IInsightSpace } from "visual-insights";
-import { Cube } from "visual-insights/build/esm/cube";
-import { ViewSpace } from "visual-insights/build/esm/insights/InsightFlow/engine";
-import { StatFuncName } from "visual-insights/build/esm/statistics";
+import { ICubeStorageManageMode, IFieldSummary, IInsightSpace, Cube, ViewSpace, StatFuncName } from "visual-insights";
+
 import { IFieldMeta, IRow, ISyncEngine } from "../../interfaces";
 import { IRathStorage } from "../../utils/storage";
 import { RathCHEngine } from "./clickhouse";
 // import { isSetEqual } from "../../utils/index";
 import { RathEngine } from "./core";
+
 
 const EngineRef: { current: RathEngine | null, mode: 'webworker' } | { current: RathCHEngine | null, mode: 'clickhouse' } = {
     mode: 'webworker',
@@ -81,7 +80,6 @@ async function startPipeLine (props: StartPipeLineProps) {
             cubeStorageManageMode: props.cubeStorageManageMode,
             dataSource: engine.dataSource
         })
-        cube.storage.env = 'browser';
         await engine.buildCube(cube);
         times.push(performance.now())
         prints.push({ task: 'cube', value: times[times.length - 1] - times[times.length - 2] })

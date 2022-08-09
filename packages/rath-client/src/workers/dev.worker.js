@@ -1,5 +1,5 @@
 /* eslint no-restricted-globals: 0 */
-import { getVisSpaces } from 'visual-insights/build/esm/insights/dev';
+import { getVisSpaces } from 'visual-insights';
 import { timer } from './timer';
 
 const generateDashBoard = async (e) => {

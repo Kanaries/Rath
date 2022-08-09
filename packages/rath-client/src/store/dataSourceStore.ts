@@ -2,7 +2,7 @@ import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
 import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from, Subscription } from "rxjs";
 import * as op from 'rxjs/operators'
-import { IAnalyticType, ISemanticType } from "visual-insights/build/esm/insights/InsightFlow/interfaces";
+import { IAnalyticType, ISemanticType } from "visual-insights";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag } from "../interfaces";
@@ -144,13 +144,19 @@ export class DataSourceStore {
             }
         })
         this.subscriptions.push(rawData$.subscribe(() => {
-            this.dataPrepProgressTag = IDataPrepProgressTag.filter;
+            runInAction(() => {
+                this.dataPrepProgressTag = IDataPrepProgressTag.filter;
+            })
         }))
         this.subscriptions.push(filteredData$.subscribe(() => {
-            this.dataPrepProgressTag = IDataPrepProgressTag.clean
+            runInAction(() => {
+                this.dataPrepProgressTag = IDataPrepProgressTag.clean
+            })
         }))
         this.subscriptions.push(cleanedData$.subscribe(() => {
-            this.dataPrepProgressTag = IDataPrepProgressTag.none;
+            runInAction(() => {
+                this.dataPrepProgressTag = IDataPrepProgressTag.none;
+            })
         }))
     }
 

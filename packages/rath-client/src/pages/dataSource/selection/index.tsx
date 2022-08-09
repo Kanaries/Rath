@@ -12,6 +12,7 @@ import ClickHouseData from './clickhouse';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import Local from './local';
 import DataLoadingStatus from '../dataLoadingStatus';
+import AirTableSource from './airtable';
 
 interface SelectionProps {
     show: boolean;
@@ -55,6 +56,7 @@ const Selection: React.FC<SelectionProps> = props => {
                 {dataSourceType === IDataSourceType.CLICKHOUSE && <ClickHouseData onClose={onClose} onDataLoaded={onDataLoaded} />}
                 {dataSourceType === IDataSourceType.RESTFUL && <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
                 {dataSourceType === IDataSourceType.LOCAL && <Local onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
+                {dataSourceType === IDataSourceType.AIRTABLE && <AirTableSource onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
             </div>
         </Modal>
     );
