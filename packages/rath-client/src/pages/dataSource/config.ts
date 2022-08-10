@@ -5,7 +5,7 @@ import { useMemo } from "react";
 export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceType; text: string }> {
     const fileText = intl.get(`dataSource.importData.type.${IDataSourceType.FILE}`);
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
-    const mysqlText = intl.get(`dataSource.importData.type.${IDataSourceType.MYSQL}`);
+    // const mysqlText = intl.get(`dataSource.importData.type.${IDataSourceType.MYSQL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
     const clickHouseText = 'clickhouse';
     const localText = intl.get('common.history')
@@ -52,7 +52,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 disabled: false
             }
         ];
-    }, [fileText, restfulText, mysqlText, demoText, localText]);
+    }, [fileText, restfulText, demoText, localText]);
     return options;
 };
 

@@ -5,6 +5,7 @@ import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, ProgressIndica
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { logDataImport } from '../../../loggers/dataImport';
+import { notify } from '../../../components/error';
 
 const StackTokens = {
     childrenGap: 20
@@ -21,18 +22,11 @@ interface CHDataProps {
 
 const ClickHouseData: React.FC<CHDataProps> = props => {
     const { onDataLoaded, onClose } = props;
-    const { clickHouseStore, commonStore } = useGlobalStore();
+    const { clickHouseStore } = useGlobalStore();
 
     const { databases, viewNames, currentDB, currentView, loadingDBs, loadingViews, connectStatus, config, proxyConfig } = clickHouseStore;
     const { protocol, user, password, host, port } = config;
     const { protocol: proxyProtocol, host: proxyHost, port: proxyPort } = proxyConfig
-
-    // useEffect(() => {
-    //     clickHouseStore.loadDBList()
-    //         .catch((err) => {
-    //             commonStore.showError('error', err.toString());
-    //         })
-    // }, [clickHouseStore, commonStore])
 
     const dbOptions: IDropdownOption[] = databases.map(db => ({
         key: db,
@@ -57,23 +51,35 @@ const ClickHouseData: React.FC<CHDataProps> = props => {
                 onClose();
             })
             .catch((err) => {
-                commonStore.showError('error', err.toString());
+                notify({
+                    title: 'Clickhouse Sample Data Load Error',
+                    type: 'error',
+                    content: `${err}\n Fail to load sample data from clickhouse.`
+                })
             })
-    }, [clickHouseStore, onDataLoaded, onClose, commonStore])
+    }, [clickHouseStore, onDataLoaded, onClose])
 
     useEffect(() => {
         clickHouseStore.getDefaultConfig()
         .catch((err) => {
-            commonStore.showError('error', err.toString());
+            notify({
+                title: 'Clickhouse Config Init Error',
+                type: 'error',
+                content: `${err}\n It may be casued by a failure of start of clickhouse connector.`
+            })
         })
         .finally(() => {
             clickHouseStore.testConnection().then(() => {
                 return clickHouseStore.loadDBList();
             }).catch((err) => {
-                commonStore.showError('error', err.toString());
+                notify({
+                    title: 'Clickhouse Connection Error',
+                    type: 'error',
+                    content: `Fail to Connect Clickhouse. \n ${err}`
+                })
             })
         })
-    }, [clickHouseStore, commonStore])
+    }, [clickHouseStore])
 
     // useEffect(() => {
     //     fetch('https://localhost:2333/api/config/connection').then(res => res.json()).then(console.log)

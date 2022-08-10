@@ -10,7 +10,6 @@ interface MessageProps extends IErrorInfo {
 const Cont = styled.div`
     box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d;
     min-width: 360px;
-    z-index: 999;
     background-color: #ffffff;
     @keyframes cont-show{
         from {
@@ -42,6 +41,10 @@ const Cont = styled.div`
     .text-2xl{
         font-size: 1.5em;
     }
+    .allow-break-line{
+        white-space: pre-line;
+        font-size: 12px;
+    }
 `
 
 const MessageCard: React.FC<MessageProps> = props => {
@@ -70,7 +73,7 @@ const MessageCard: React.FC<MessageProps> = props => {
         </div> */}
         <div className="col-span-5">
             <h1 className="text-base">{title}</h1>
-            <div className="text-sm mt-1 text-gray-600">{content}</div>
+            <div className="text-sm mt-1 text-gray-600 allow-break-line">{content}</div>
         </div>
     </Cont>
 }
