@@ -70,7 +70,6 @@ const Narrative: React.FC = props => {
             .then(res => res.json())
             .then(res => {
                 if (res.success) {
-                    console.log(rid, requestId.current)
                     rid === requestId.current && setViewInfo(res.data)
                 } else {
                     throw new Error(res.message)

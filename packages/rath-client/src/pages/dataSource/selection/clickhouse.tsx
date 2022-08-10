@@ -4,6 +4,7 @@ import ConnectionStatus from '../../../components/connectionStatus';
 import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, ProgressIndicator, Stack, TextField } from 'office-ui-fabric-react';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
+import { logDataImport } from '../../../loggers/dataImport';
 
 const StackTokens = {
     childrenGap: 20
@@ -22,15 +23,16 @@ const ClickHouseData: React.FC<CHDataProps> = props => {
     const { onDataLoaded, onClose } = props;
     const { clickHouseStore, commonStore } = useGlobalStore();
 
-    const { databases, viewNames, currentDB, currentView, loadingDBs, loadingViews, connectStatus, config } = clickHouseStore;
+    const { databases, viewNames, currentDB, currentView, loadingDBs, loadingViews, connectStatus, config, proxyConfig } = clickHouseStore;
     const { protocol, user, password, host, port } = config;
+    const { protocol: proxyProtocol, host: proxyHost, port: proxyPort } = proxyConfig
 
-    useEffect(() => {
-        clickHouseStore.loadDBList()
-            .catch((err) => {
-                commonStore.showError('error', err.toString());
-            })
-    }, [clickHouseStore, commonStore])
+    // useEffect(() => {
+    //     clickHouseStore.loadDBList()
+    //         .catch((err) => {
+    //             commonStore.showError('error', err.toString());
+    //         })
+    // }, [clickHouseStore, commonStore])
 
     const dbOptions: IDropdownOption[] = databases.map(db => ({
         key: db,
@@ -45,14 +47,37 @@ const ClickHouseData: React.FC<CHDataProps> = props => {
     const loadData = useCallback(() => {
         clickHouseStore.loadSampleData()
             .then(({ fieldMetas, data}) => {
+                logDataImport({
+                    dataType: 'AirTable',
+                    fields: fieldMetas,
+                    dataSource: data.slice(0, 10),
+                    size: data.length
+                });
                 onDataLoaded(fieldMetas, data);
                 onClose();
             })
-    }, [clickHouseStore, onDataLoaded, onClose])
+            .catch((err) => {
+                commonStore.showError('error', err.toString());
+            })
+    }, [clickHouseStore, onDataLoaded, onClose, commonStore])
 
     useEffect(() => {
-        clickHouseStore.testConnection();
-    }, [clickHouseStore])
+        clickHouseStore.getDefaultConfig()
+        .catch((err) => {
+            commonStore.showError('error', err.toString());
+        })
+        .finally(() => {
+            clickHouseStore.testConnection().then(() => {
+                return clickHouseStore.loadDBList();
+            }).catch((err) => {
+                commonStore.showError('error', err.toString());
+            })
+        })
+    }, [clickHouseStore, commonStore])
+
+    // useEffect(() => {
+    //     fetch('https://localhost:2333/api/config/connection').then(res => res.json()).then(console.log)
+    // }, [])
 
     return <div>
         <Stack horizontal tokens={StackTokens}>
@@ -61,26 +86,32 @@ const ClickHouseData: React.FC<CHDataProps> = props => {
                 selectedKey={protocol}
                 disabled
             /> */}
-            <TextField prefix={`${protocol}://`} label="proxy host" value={host}
-                onChange={(e, v) => { clickHouseStore.setConfig('host', v); }}
+            <TextField prefix={`${proxyProtocol}://`} label="Proxy Host" value={proxyHost}
+                onChange={(e, v) => { clickHouseStore.setProxyConfig('host', v); }}
             />
-            <TextField label="port" value={port}
-                onChange={(e, v) => { clickHouseStore.setConfig('port', v); }}
+            <TextField label="Port" value={proxyPort}
+                onChange={(e, v) => { clickHouseStore.setProxyConfig('port', v); }}
             />
         </Stack>
         <Stack horizontal tokens={StackTokens}>
-            <TextField label="user" value={user}
+            <TextField prefix={`${protocol}://`} label="Host" value={host}
+                onChange={(e, v) => { clickHouseStore.setConfig('host', v); }}
+            />
+            <TextField label="Port" value={port}
+                onChange={(e, v) => { clickHouseStore.setConfig('port', v); }}
+            />
+            <TextField label="User" value={user}
                 onChange={(e, v) => { clickHouseStore.setConfig('user', v); }}
             />
-            <TextField label="password" type="password" value={password} placeholder="Empty(Default)"
+            <TextField label="Password" type="password" value={password} placeholder="Empty(Default)"
                 onChange={(e, v) => { clickHouseStore.setConfig('password', v); }}
             />
         </Stack>
         <div style={{ marginTop: '1em'}}>
-            <DefaultButton text="Connect"
+            <DefaultButton text="Test Connection & update config"
                 onClick={() => { clickHouseStore.testConnection(); }}
             />
-            <PrimaryButton text="Update DB List" style={{ marginLeft: '1em' }}
+            <DefaultButton text="Fetch DB List" style={{ marginLeft: '1em' }}
                 onClick={() => {clickHouseStore.loadDBList(); }}
             />
         </div>

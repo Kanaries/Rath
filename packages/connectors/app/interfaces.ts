@@ -11,7 +11,9 @@ export interface IAPP_CONFIG {
     clickhouse: {
         protocol: string;
         host: string;
-        port: number
+        port: number;
+        user: string;
+        password: string;
     }
 }
 

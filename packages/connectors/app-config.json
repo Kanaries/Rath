@@ -1,8 +1,1 @@
-{
-    "port": 2333,
-    "clickhouse": {
-        "protocol": "http",
-        "host": "localhost",
-        "port": 8123
-    }
-}
+{"port":2333,"clickhouse":{"user":"default","password":"","protocol":"http","host":"localhost","port":"8123"}}

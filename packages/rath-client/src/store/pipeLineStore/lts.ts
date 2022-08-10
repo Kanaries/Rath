@@ -202,7 +202,6 @@ export class LTSPipeLine {
                 t2.sort((a, b) => b.score - a.score)
                 const assSpacesT1: IVizSpace[] = [];
                 const assSpacesT2: IVizSpace[] = [];
-                console.log(fieldMetas)
                 for (let  i = 0; i < t1.length; i++) {
                     const view = await this.specify({
                         dimensions: t1[i].dimensions,
