@@ -30,10 +30,10 @@ export const EXPLORE_MODE = {
 
 export const DEMO_DATA_REQUEST_TIMEOUT = 1000 * 10;
 
-export const ENGINE_CONNECTION_STAGES: Array<{ stage: number; name: IECStatus }> = [
-  { stage: 0, name: 'none' },
-  { stage: 1, name: 'proxy' },
-  { stage: 2, name: 'engine' }
+export const ENGINE_CONNECTION_STAGES: Array<{ stage: number; name: IECStatus; description?: string }> = [
+  { stage: 0, name: 'client', description: 'client module importetd.' },
+  { stage: 1, name: 'proxy', description: 'database proxy connector lanuched.' },
+  { stage: 2, name: 'engine', description: 'clickhouse connected.' }
 ];
 
 export const RESULT_STORAGE_SPLITOR = '\n===RATH_STORAGE_SPLITOR===\n'

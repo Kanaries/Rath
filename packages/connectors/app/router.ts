@@ -7,7 +7,7 @@ import {
     CHTableDescProxy,
     CHTableListProxy
 } from './controllers/clickHouseProxy';
-import { connectionTest } from './controllers/connection';
+import { connectionTest, setConnectionConfig, getConnectionConfig } from './controllers/connection';
 import { indexPage } from './controllers/index';
 const router = new Router();
 
@@ -16,6 +16,9 @@ router.options('/connect', connectionTest);
 router.post('/connect', connectionTest);
 router.get('/api/ch/general', CHGeneralProxy);
 router.post('/api/ch/general', CHGeneralProxy);
+router.post('/api/config/connection', setConnectionConfig);
+router.get('/api/config/connection', getConnectionConfig);
+router.options('/api/config/connection', getConnectionConfig)
 
 router.get('/api/ch/dbs', CHDBListProxy);
 router.get('/api/ch/sampleData', CHSampleData);

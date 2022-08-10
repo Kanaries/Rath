@@ -28,7 +28,7 @@ export async function CHGeneralProxy (ctx: Context) {
         sendPureResponse(ctx, res.data);
     } catch (error) {
         console.error(error);
-        sendFailResponse(ctx, error)
+        sendFailResponse(ctx, `${error}`)
     }
 }
 
@@ -39,7 +39,7 @@ export async function CHDBListProxy (ctx: Context) {
         sendSuccessResponse(ctx, list)
     } catch (error) {
         console.error(error);
-        sendFailResponse(ctx, error);
+        sendFailResponse(ctx, `${error}`);
     }
 }
 
@@ -52,7 +52,7 @@ export async function CHTableListProxy (ctx: Context) {
         sendSuccessResponse(ctx, list)
     } catch (error) {
         console.error(error);
-        sendFailResponse(ctx, error);
+        sendFailResponse(ctx, `${error}`);
     }
 }
 
@@ -68,7 +68,7 @@ export async function CHTableDescProxy (ctx: Context) {
         }
     } catch (error) {
         console.error(error);
-        sendFailResponse(ctx, error);
+        sendFailResponse(ctx, `${error}`);
     }
 }
 
@@ -91,7 +91,7 @@ export async function CHSampleData (ctx: Context) {
         }
     } catch (error) {
         console.error(error);
-        sendFailResponse(ctx, error);
+        sendFailResponse(ctx, `${error}`);
     }
 }
 

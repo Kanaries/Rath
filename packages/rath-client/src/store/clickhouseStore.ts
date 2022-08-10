@@ -1,6 +1,12 @@
 import { makeAutoObservable, observable, runInAction } from "mobx";
 import { IECStatus, IDBFieldMeta, IRawField, IRow } from "../interfaces";
 import { dbDataType2DataType, inferAnalyticTypeFromDataType, inferSemanticTypeFromDataType } from "../utils";
+
+interface IProxyConfig {
+    host: string;
+    protocol: string;
+    port: string;
+}
 interface CHConfig {
     user: string;
     password: string;
@@ -16,8 +22,13 @@ export class ClickHouseStore {
         host: 'localhost',
         port: '2333'
     }
+    public proxyConfig: IProxyConfig = {
+        host: 'localhost',
+        protocol: 'https',
+        port: '2333',
+    }
     public chConnected: boolean = false;
-    public connectStatus: IECStatus = 'none';
+    public connectStatus: IECStatus = 'client';
     public databases: string[] = [];
     public viewNames: string[] = [];
     public currentDB: string | null = null;
@@ -36,20 +47,43 @@ export class ClickHouseStore {
     public setConfig (_key: keyof CHConfig, value: any) {
         this.config[_key] = value;
     }
+    public setProxyConfig(_key: keyof IProxyConfig, value: any) {
+        this.proxyConfig[_key] = value;
+    }
     private getProxyURL() {
-        const { config } = this;
-        return `${this.config.protocol}://${config.host}:${config.port}`;
+        const { proxyConfig } = this;
+        return `${proxyConfig.protocol}://${proxyConfig.host}:${proxyConfig.port}`;
+    }
+    public async getDefaultConfig () {
+        try {
+            const res = await fetch(`${this.getProxyURL()}/api/config/connection`);
+            const result = await res.json();
+            if (result.success) {
+                runInAction(() => {
+                    const ckc = result.data.clickhouse;
+                    this.config.host = ckc.host;
+                    this.config.port = `${ckc.port}`;
+                    this.config.protocol = ckc.protocol;
+                    this.config.password = ckc.password;
+                    this.config.user = ckc.user;
+                })
+            } else {
+                throw new Error(result.message)
+            }
+        } catch (error) {
+            throw new Error(`[getconfig]${error}`);
+        }
     }
     public async testConnection () {
         try {
+            const { user, password, host, port, protocol } = this.config;
             const res = await fetch(`${this.getProxyURL()}/connect`, {
                 method: 'post',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    user: this.config.user,
-                    password: this.config.password
+                    user, password, host, port, protocol
                 })
             })
             const result = await res.json();
@@ -64,7 +98,7 @@ export class ClickHouseStore {
             }
         } catch (error) {
             runInAction(() => {
-                this.connectStatus = 'none'
+                this.connectStatus = 'client'
             })
         }
     }
@@ -83,6 +117,7 @@ export class ClickHouseStore {
             }
         } catch (error: any) {
             runInAction(() => {
+                this.databases = []
                 this.loadingDBs = false;
             })
             throw new Error(`[ClickHouse] Load DB List: ${error.toString()}`);

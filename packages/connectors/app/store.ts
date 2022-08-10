@@ -1,4 +1,6 @@
 import { IAPP_CONFIG } from "./interfaces";
+import path from 'path';
+import fs from 'fs/promises';
 
 export class GlobalStore {
     private config: IAPP_CONFIG | null;
@@ -11,6 +13,18 @@ export class GlobalStore {
         } else {
             return this.config;
         }
+    }
+    public async syncConfig (): Promise<IAPP_CONFIG>  {
+        const filePath = path.resolve(__dirname, '../app-config.json');
+        const dataBuffer = await fs.readFile(filePath);
+        const data = JSON.parse(dataBuffer.toString()) as IAPP_CONFIG;
+        this.config = data;
+        return data;
+    }
+    public async setConfig (config: IAPP_CONFIG) {
+        const filePath = path.resolve(__dirname, '../app-config.json');
+        await fs.writeFile(filePath, JSON.stringify(config));
+        this.config = config
     }
 }
 

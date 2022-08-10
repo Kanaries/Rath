@@ -74,7 +74,7 @@ export interface IDBFieldMeta {
     dataType: string;
 }
 
-export type IECStatus = 'none' | 'proxy' | 'engine';
+export type IECStatus = 'client' | 'proxy' | 'engine';
 
 export interface ISyncEngine {
     fields: IFieldSummary[];
