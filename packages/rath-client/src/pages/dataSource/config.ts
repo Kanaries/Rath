@@ -65,6 +65,7 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
     COLLAGE: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-collage-service.json',
     TITANIC: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-titanic-service.json',
     KELPER: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-kelper-service.json',
+    BIKE_SHARING_DC: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/bike_dc-dataset-service.json'
 } : {
     // CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     CARS: "/datasets/ds-cars-service.json",
@@ -77,6 +78,7 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
     COLLAGE: '/datasets/ds-collage-service.json',
     TITANIC: '/datasets/ds-titanic-service.json',
     KELPER: '/datasets/ds-kelper-service.json',
+    BIKE_SHARING_DC: '/datasets/bike_dc-dataset-service.json'
 } as const;
 
 export type IDemoDataKey = keyof typeof DemoDataAssets;
@@ -91,6 +93,10 @@ export const useDemoDataOptions = function (): Array<{key: IDemoDataKey; text: s
             {
                 key: "STUDENTS",
                 text: "Students' Performance"
+            },
+            {
+                key: 'BIKE_SHARING_DC',
+                text: 'Bike Sharing in Washington D.C.'
             },
             {
                 key: "BIKE_SHARING",
