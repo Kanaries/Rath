@@ -1,4 +1,5 @@
 import { makeAutoObservable, observable, runInAction } from "mobx";
+import { notify } from "../components/error";
 import { IECStatus, IDBFieldMeta, IRawField, IRow } from "../interfaces";
 import { dbDataType2DataType, inferAnalyticTypeFromDataType, inferSemanticTypeFromDataType } from "../utils";
 
@@ -100,6 +101,11 @@ export class ClickHouseStore {
             runInAction(() => {
                 this.connectStatus = 'client'
             })
+            notify({
+                title: 'CK connection fail',
+                type: 'error',
+                content: `clickhouse connection fail.\n${error}`
+            })
         }
     }
     public async loadDBList() {
@@ -140,7 +146,11 @@ export class ClickHouseStore {
             runInAction(() => {
                 this.loadingViews = false;
             })
-            console.error(error)
+            notify({
+                title: 'CK Load Views Error',
+                type: 'error',
+                content: `clickhouse load views error.\n${error}`
+            })
         }
     }
     /**
@@ -148,40 +158,32 @@ export class ClickHouseStore {
      * @returns 
      */
     public async loadSampleData (): Promise<{ fieldMetas: IRawField[], data: IRow[] }> {
-        try {
-            const res = await fetch(`${this.getProxyURL()}/api/ch/sampleData?dbName=${this.currentDB}&table=${this.currentView}`);
-            const result = await res.json();
-            if (result.success) {
-                const { data, metas } = result.data as { data: IRow[], metas: IDBFieldMeta[]};
-                const fieldMetas: IRawField[] = metas.map(f => {
-                    const dataType = dbDataType2DataType(f.dataType);
-                    return {
-                        fid: f.fid,
-                        name: f.fid,
-                        dataType,
-                        geoRole: 'none',
-                        disable: false,
-                        semanticType: inferSemanticTypeFromDataType(dataType),
-                        analyticType: inferAnalyticTypeFromDataType(dataType)
-                    }
-                });
-                runInAction(() => {
-                    this.fieldMetas = fieldMetas
-                    this.sampleData = data
-                })
+        const res = await fetch(`${this.getProxyURL()}/api/ch/sampleData?dbName=${this.currentDB}&table=${this.currentView}`);
+        const result = await res.json();
+        if (result.success) {
+            const { data, metas } = result.data as { data: IRow[], metas: IDBFieldMeta[]};
+            const fieldMetas: IRawField[] = metas.map(f => {
+                const dataType = dbDataType2DataType(f.dataType);
                 return {
-                    fieldMetas,
-                    data
+                    fid: f.fid,
+                    name: f.fid,
+                    dataType,
+                    geoRole: 'none',
+                    disable: false,
+                    semanticType: inferSemanticTypeFromDataType(dataType),
+                    analyticType: inferAnalyticTypeFromDataType(dataType)
                 }
-            } else {
-                throw new Error(result.message)
+            });
+            runInAction(() => {
+                this.fieldMetas = fieldMetas
+                this.sampleData = data
+            })
+            return {
+                fieldMetas,
+                data
             }
-        } catch (error) {
-            console.error(error)
-        }
-        return {
-            fieldMetas: [],
-            data: []
+        } else {
+            throw new Error(result.message)
         }
     }
     public async chooseDB (dbName: string) {
