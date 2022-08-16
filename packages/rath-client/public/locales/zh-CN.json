@@ -19,7 +19,8 @@
         "support": "帮助",
         "lts": "全自动分析",
         "pattern": "半自动探索",
-        "devCollection": "调试模式"
+        "devCollection": "调试模式",
+        "progressiveDashBoard": "Dashboard Designer"
     },
     "preference": {
         "title": "个人偏好"

@@ -22,6 +22,7 @@ export class LTSPipeLine {
     public dataSource: IRow[] = [];
     public samplingDataSource: IRow[] = [];
     public computing: boolean = false;
+    public rendering: boolean = false;
     public cubeStorageManageMode: ICubeStorageManageMode = ICubeStorageManageMode.LocalMix;
     constructor (dataSourceStore: DataSourceStore, commonStore: CommonStore, clickHouseStore: ClickHouseStore) {
         makeAutoObservable(this, {
@@ -126,20 +127,20 @@ export class LTSPipeLine {
     }
     public async specify (space: IInsightSpace): Promise<{ schema: Specification, dataView: IRow[] } | undefined> {
         if (space) {
-            this.computing = true;
+            this.rendering = true;
             try {
                 const res = await rathEngineService({
                     task: 'specification',
                     props: space
                 })
                 runInAction(() => {
-                    this.computing = false;
+                    this.rendering = false;
                 })
                 return res;
             } catch (error) {
                 console.error(error);
                 runInAction(() => {
-                    this.computing = false;
+                    this.rendering = false;
                 })
                 // throw error;
             }
