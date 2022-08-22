@@ -12,12 +12,24 @@ export interface IRow {
 
 export type IGeoRole = 'longitude' | 'latitude' | 'none';
 
+/** Detailed information of a extended field.  */
+interface IFieldExtInfoBase {
+    /** Field id of fields that this field infered from.  */
+    extFrom: string[]; 
+    /** The identifier of the data-extension operation. */
+    extOpt: string;
+    /** Additional information of the specified extension operation */
+    extInfo: any;
+}
+
 interface IFieldBase {
     fid: string;
     name?: string;
     analyticType: IAnalyticType;
     semanticType: ISemanticType;
     geoRole: IGeoRole;
+    /** detailed information of field extension operations. defined only if this field is extended */
+    extInfo?: IFieldExtInfoBase;
 }
 export interface IRawField extends IFieldBase {
     disable?: boolean;
@@ -34,6 +46,8 @@ export interface IMuteFieldBase {
     semanticType: 'nominal' | 'temporal' | 'ordinal' | 'quantitative' | '?';
     disable?: boolean | '?';
     geoRole: IGeoRole | '?';
+    /** detailed information of field extension operations. Non-null if this field is extended */
+    extInfo?: IFieldExtInfoBase;
 }
 
 export interface IFieldMeta extends IFieldBase {
