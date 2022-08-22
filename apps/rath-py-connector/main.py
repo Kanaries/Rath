@@ -6,12 +6,7 @@ from flask_cors import CORS
 from sqlalchemy import create_engine, MetaData, inspect
 from sqlalchemy import types
 from models.connection import Connection
-# from sqlalchemy.orm import scoped_session, sessionmaker
-# from sqlalchemy.ext.declarative import declarative_base
 
-from clickhouse_sqlalchemy import (
-    Table, make_session, get_declarative_base, make_session, types, engines
-)
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -84,6 +79,22 @@ def get_connection_list():
     print(dict(connection_list[0]))
     return ""
 
+@app.route("/api/connection/create", methods=['POST'])
+def create_connection():
+    props = json.loads(request.data)
+    print(props)
+    newCon = Connection(props["name"], props["uri"], props["source_type"])
+    db_session.add(newCon)
+    db_session.commit()
+    connection_list = Connection.query.all()
+    print(help(connection_list))
+    print(list(map(lambda x: dict(x), connection_list)))
+    res = list(map(lambda x: dict(x), connection_list))
+    return {
+        "success": True,
+        "data": res
+    }
+
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
@@ -101,8 +112,8 @@ def shutdown_session(exception=None):
 if __name__ == '__main__':
     # init_db()
     init_db()
-    connection_list = Connection.query.all()
-    print(connection_list)
+    # connection_list = Connection.query.all()
+    # print(connection_list)
     # from database import db_session
     # from models.connection import Connection
     # u = Connection('admin', '')
