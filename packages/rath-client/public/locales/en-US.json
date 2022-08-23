@@ -167,6 +167,9 @@
         },
         "extend": {
             "title": "Extend Features"
+        },
+        "expandDateTime": {
+            "title": "Expand DateTime Fields"
         }
     },
     "meta": {
