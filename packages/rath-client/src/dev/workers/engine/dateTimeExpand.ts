@@ -172,7 +172,7 @@ export function dateTimeExpand(props: { dataSource: IRow[]; fields: IMuteFieldBa
             let dateTime = dataSource.map(item => item[field.fid])
             let moment: DateTimeInfoArray = parseDateTimeArray(dateTime)
             Object.keys(moment).forEach(key => {
-                let extField: IMuteFieldBase[] = [{
+                let extField: IMuteFieldBase = {
                     fid: `${field.fid}_${key}`,
                     name: `${field.name}.${dateTimeDict.get(key)}`,
                     analyticType: 'dimension',
@@ -183,24 +183,11 @@ export function dateTimeExpand(props: { dataSource: IRow[]; fields: IMuteFieldBa
                         extOpt: 'dateTimeExpand',
                         extInfo: `${key}.value`
                     }
-                },
-                {
-                    fid: `${field.fid}_${key}_known`,
-                    name: `${field.name}.${dateTimeDict.get(key)}.known`,
-                    analyticType: 'dimension',
-                    semanticType: 'nominal',
-                    geoRole: 'none',
-                    extInfo: {
-                        extFrom: [field.fid],
-                        extOpt: 'dateTimeExpand',
-                        extInfo: `${key}.known`
-                    }
-                }]
-                extFields.push(...extField)
+                }
+                extFields.push(extField)
                 let infoArray = moment[key as InfoArrayType] as Knowable<any>[]
                 for (let i = 0; i < dataSource.length; ++i) {
-                    dataSource[i][extField[0].fid] = infoArray[i].value
-                    dataSource[i][extField[1].fid] = infoArray[i].known ? 1 : 0
+                    dataSource[i][extField.fid] = infoArray[i].value
                 }
             })
         }
