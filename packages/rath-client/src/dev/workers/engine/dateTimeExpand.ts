@@ -60,50 +60,55 @@ function Date2Info(date: Date): DateTimeInfo {
     }
 }
 function parseDateTime(dateTime: string): DateTimeInfo {
-    if (dateTime === null) return {} as DateTimeInfo
-    if (dateTime === undefined) {
-        let date = new Date()
-        return Date2Info(date)
-    }
-    if (!/Z$/i.test(dateTime)) {
-        const match = dateTime.match(REGEX_PARSE)
-        if (match) {
-            let $y, $M, $D, $H, $m, $s, $ms
-            if (match[1]) $y = parseInt(match[1])
-            else throw new Error("[parseDateTime]: Missing 'Year' in dateTime string")
-            if (match[2]) $M = parseInt(match[2])
-            else $M = undefined
-            if (match[3]) $D = parseInt(match[3])
-            else $D = undefined
-            if (match[4]) $H = parseInt(match[4])
-            else $H = undefined
-            if (match[5]) $m = parseInt(match[5])
-            else $m = undefined
-            if (match[6]) $s = parseInt(match[6])
-            else $s = undefined
-            if (match[7]) $ms = parseInt(match[7].substring(0, 3))
-            else $ms = undefined
-            let dateTime = new Date(Date.UTC($y, ($M || 1) - 1, $D || 1, $H || 0, $m || 0, $s || 0, $ms || 0))
-            let utime = dateTime.getTime(), $W;
-            if (match[1] && match[2] && match[3]) {
-                $W = dateTime.getUTCDay()
-            }
-            return {
-                utime: new Knowable(Number, utime),
-                $y: new Knowable(Number, $y),
-                $M: new Knowable(Number, $M),
-                $D: new Knowable(Number, $D),
-                $W: new Knowable(Number, $W),
-                $H: new Knowable(Number, $H),
-                $m: new Knowable(Number, $m),
-                $s: new Knowable(Number, $s),
-                $ms: new Knowable(Number, $ms),
-                $L: new Knowable(String, undefined)
-            } as DateTimeInfo
+    try{
+        if (dateTime === null) return UnknownDateTimeInfo;
+        if (dateTime === undefined) {
+            let date = new Date()
+            return Date2Info(date)
         }
+        if (!/Z$/i.test(dateTime)) {
+            const match = dateTime.match(REGEX_PARSE)
+            if (match) {
+                let $y, $M, $D, $H, $m, $s, $ms
+                if (match[1]) $y = parseInt(match[1])
+                else throw new Error("[parseDateTime]: Missing 'Year' in dateTime string")
+                if (match[2]) $M = parseInt(match[2])
+                else $M = undefined
+                if (match[3]) $D = parseInt(match[3])
+                else $D = undefined
+                if (match[4]) $H = parseInt(match[4])
+                else $H = undefined
+                if (match[5]) $m = parseInt(match[5])
+                else $m = undefined
+                if (match[6]) $s = parseInt(match[6])
+                else $s = undefined
+                if (match[7]) $ms = parseInt(match[7].substring(0, 3))
+                else $ms = undefined
+                let dateTime = new Date(Date.UTC($y, ($M || 1) - 1, $D || 1, $H || 0, $m || 0, $s || 0, $ms || 0))
+                let utime = dateTime.getTime(), $W;
+                if (match[1] && match[2] && match[3]) {
+                    $W = dateTime.getUTCDay()
+                }
+                return {
+                    utime: new Knowable(Number, utime),
+                    $y: new Knowable(Number, $y),
+                    $M: new Knowable(Number, $M),
+                    $D: new Knowable(Number, $D),
+                    $W: new Knowable(Number, $W),
+                    $H: new Knowable(Number, $H),
+                    $m: new Knowable(Number, $m),
+                    $s: new Knowable(Number, $s),
+                    $ms: new Knowable(Number, $ms),
+                    $L: new Knowable(String, undefined)
+                } as DateTimeInfo
+            }
+        }
+        // Polyfill
+        return Date2Info(new Date(dateTime))
     }
-    // Polyfill
-    return Date2Info(new Date(dateTime))
+    catch(error) {
+        return UnknownDateTimeInfo
+    }
 }
 
 interface DateTimeInfoArray {
