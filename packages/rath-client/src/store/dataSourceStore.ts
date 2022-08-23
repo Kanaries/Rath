@@ -453,7 +453,7 @@ export class DataSourceStore {
      * @depends this.fields, this.cleanedDate
      * @effects this.rawData, this.mutFields
      */
-    public async expandDateTime () {
+    public async expandDateTime() {
         try {
             let { fields, cleanedData } = this;
             fields = fields.map(f => toJS(f))
