@@ -254,6 +254,14 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 dataSourceStore.extendData();
               }}
             />
+            <CommandButton
+              text={intl.get('dataSource.expandDateTime.title')}
+              disabled={rawData.length === 0}
+              onClick={() => {
+                dataSourceStore.expandDateTime();
+              }}
+              iconProps={{ iconName: 'CalendarMirrored' }}
+            />
         </Stack>
         <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
           {intl.get('dataSource.recordCount', { count: cleanedData.length })} <br />
