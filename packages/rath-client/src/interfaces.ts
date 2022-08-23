@@ -15,7 +15,7 @@ export type IGeoRole = 'longitude' | 'latitude' | 'none';
 /** Detailed information of a extended field.  */
 interface IFieldExtInfoBase {
     /** Field id of fields that this field infered from.  */
-    extFrom: string[]; 
+    extFrom: string[];
     /** The identifier of the data-extension operation. */
     extOpt: string;
     /** Additional information of the specified extension operation */

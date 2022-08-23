@@ -1,11 +1,10 @@
-import { IAnalyticType, IRow, ISemanticType } from "visual-insights";
-import { IGeoRole, IMuteFieldBase, IRawField } from "rath-client/src/interfaces";
-import { field } from "vega";
+import { IRow } from "visual-insights";
+import { IMuteFieldBase } from "rath-client/src/interfaces";
 
 class Knowable<T> {
     value: T;
     known: boolean;
-    constructor(type: { new(): T; }, val: T|undefined = undefined) {
+    constructor(type: { new(): T; }, val: T | undefined = undefined) {
         if (val === undefined) {
             this.value = new type();
             this.known = false
@@ -22,14 +21,14 @@ class Knowable<T> {
 }
 interface DateTimeInfo {
     utime: Knowable<Number>; // unix timestamp
-    $y:  Knowable<Number>; // Year
-    $M:  Knowable<Number>; // Month - starts from 1
-    $D:  Knowable<Number>; // Day - starts from 1
-    $L:  Knowable<String>; // Locale
-    $W:  Knowable<Number>; // Week
-    $H:  Knowable<Number>; // Hour
-    $m:  Knowable<Number>; // minute
-    $s:  Knowable<Number>; // second
+    $y: Knowable<Number>; // Year
+    $M: Knowable<Number>; // Month - starts from 1
+    $D: Knowable<Number>; // Day - starts from 1
+    $L: Knowable<String>; // Locale
+    $W: Knowable<Number>; // Week
+    $H: Knowable<Number>; // Hour
+    $m: Knowable<Number>; // minute
+    $s: Knowable<Number>; // second
     $ms: Knowable<Number>; // milliseconds
 }
 const dateTimeDict = new Map<string, string>([
@@ -48,16 +47,16 @@ const dateTimeDict = new Map<string, string>([
 const REGEX_PARSE = /^(\d{2,4})[-/](\d{1,2})?[-/]?(\d{0,2})[Tt\s]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/
 function Date2Info(date: Date): DateTimeInfo {
     return {
-        utime: new Knowable(Number, date.getTime()      ),
-        $y:  new Knowable(Number, date.getUTCFullYear()    ),
-        $M:  new Knowable(Number, date.getUTCMonth()+1     ),
-        $D:  new Knowable(Number, date.getUTCDate()        ),
-        $W:  new Knowable(Number, date.getUTCDay()         ),
-        $H:  new Knowable(Number, date.getUTCHours()       ),
-        $m:  new Knowable(Number, date.getUTCMinutes()     ),
-        $s:  new Knowable(Number, date.getUTCSeconds()     ),
+        utime: new Knowable(Number, date.getTime()),
+        $y: new Knowable(Number, date.getUTCFullYear()),
+        $M: new Knowable(Number, date.getUTCMonth() + 1),
+        $D: new Knowable(Number, date.getUTCDate()),
+        $W: new Knowable(Number, date.getUTCDay()),
+        $H: new Knowable(Number, date.getUTCHours()),
+        $m: new Knowable(Number, date.getUTCMinutes()),
+        $s: new Knowable(Number, date.getUTCSeconds()),
         $ms: new Knowable(Number, date.getUTCMilliseconds()),
-        $L:  new Knowable(String)
+        $L: new Knowable(String)
     }
 }
 function parseDateTime(dateTime: string): DateTimeInfo {
@@ -91,15 +90,15 @@ function parseDateTime(dateTime: string): DateTimeInfo {
             }
             return {
                 utime: new Knowable(Number, utime),
-                $y:  new Knowable(Number, $y),
-                $M:  new Knowable(Number, $M),
-                $D:  new Knowable(Number, $D),
-                $W:  new Knowable(Number, $W),
-                $H:  new Knowable(Number, $H),
-                $m:  new Knowable(Number, $m),
-                $s:  new Knowable(Number, $s),
+                $y: new Knowable(Number, $y),
+                $M: new Knowable(Number, $M),
+                $D: new Knowable(Number, $D),
+                $W: new Knowable(Number, $W),
+                $H: new Knowable(Number, $H),
+                $m: new Knowable(Number, $m),
+                $s: new Knowable(Number, $s),
                 $ms: new Knowable(Number, $ms),
-                $L:  new Knowable(String, undefined)
+                $L: new Knowable(String, undefined)
             } as DateTimeInfo
         }
     }
@@ -109,15 +108,15 @@ function parseDateTime(dateTime: string): DateTimeInfo {
 
 interface DateTimeInfoArray {
     utime: Knowable<any>[]; // unix timestamp
-    $y:   Knowable<any>[]; // Year
-    $M?:  Knowable<any>[]; // Month - starts from 0
-    $D?:  Knowable<any>[]; // Day - starts from 1
-    $W?:  Knowable<any>[]; // Week
-    $H?:  Knowable<any>[]; // Hour
-    $m?:  Knowable<any>[]; // minute
-    $s?:  Knowable<any>[]; // second
+    $y: Knowable<any>[]; // Year
+    $M?: Knowable<any>[]; // Month - starts from 0
+    $D?: Knowable<any>[]; // Day - starts from 1
+    $W?: Knowable<any>[]; // Week
+    $H?: Knowable<any>[]; // Hour
+    $m?: Knowable<any>[]; // minute
+    $s?: Knowable<any>[]; // second
     $ms?: Knowable<any>[]; // milliseconds
-    $L?:  Knowable<any>[]; // Locale
+    $L?: Knowable<any>[]; // Locale
 }
 const UnknownDateTimeInfo: DateTimeInfo = {
     utime: new Knowable<Number>(Number),
@@ -140,7 +139,7 @@ function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
         utime: new Array<Knowable<any>>(dateTime.length),
         $y: new Array<Knowable<any>>(dateTime.length)
     } as DateTimeInfoArray
-    for (let i = 0;i < dateTime.length; ++i) {
+    for (let i = 0; i < dateTime.length; ++i) {
         let info = parseDateTime(dateTime[i])
         Object.keys(info).forEach(key => {
             let infoKey = key as InfoType, infoArrayKey = key as InfoArrayType
@@ -152,9 +151,9 @@ function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
                     infoArray[infoArrayKey] = array
                 }
                 else {
-                    (infoArray[infoArrayKey] as Knowable<any>[]).fill(info[infoKey], i, i+1)
+                    (infoArray[infoArrayKey] as Knowable<any>[]).fill(info[infoKey], i, i + 1)
                 }
-            } 
+            }
         })
     }
     return infoArray
