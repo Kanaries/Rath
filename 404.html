@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+  body{
+    margin: 0px;
+    padding: 0px;
+    background-color: #fafafa;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+  'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+  'Segoe UI Emoji', 'Segoe UI Symbol';
+  }
+  .content-container{
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    padding: 16px;
+    width: 720px;
+    height: 460px;
+    color: #262626;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    transition: 0.3s;
+    border-radius: 4px;
+    display: flex;
+  }
+  .image-container{
+    flex-basis: 200px;
+    flex-grow: 1;
+  }
+  .text-container{
+    flex-grow: 2;
+    padding: 12px;
+  }
+  .title {
+    font-weight: 200;
+  }
+  .rotate-image{
+    animation: rotate 2s;
+    animation-iteration-count: infinite;
+  }
+  @keyframes rotate {
+    from {
+      transform: rotate(0);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  </style>
+</head>
+<body>
+  <div class="content-container">
+    <div class="image-container">
+      <img class="rotate-image" src="https://ch-rath.oss-ap-northeast-1.aliyuncs.com/assets/rath.png" alt="">
+    </div>
+    <div class="text-container">
+      <h1 class="title">404! It seems you lost yourself.</h1>
+      <p> <i>Tell me, why do you prefer a pie chart ? </i> </p>
+      <p>\[ e^{i\pi} + 1 = 0 \]</p>
+    </div>
+  </div>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>
