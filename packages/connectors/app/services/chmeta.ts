@@ -5,7 +5,13 @@ import { useGlobalStore } from "../store";
 export async function CHQuery (sql: string): Promise<string> {
     const config = useGlobalStore().getConfig();
     // fs.appendFileSync('./log.sql', sql)
-    const res = await axios(`${config.clickhouse.protocol}://${config.clickhouse.host}:${config.clickhouse.port}?query=${sql}`);
+    const res = await axios(`${config.clickhouse.protocol}://${config.clickhouse.host}:${config.clickhouse.port}?query=${sql}`, {
+        params: {
+            query: sql,
+            user: config.clickhouse.user,
+            password: config.clickhouse.password
+        }
+    });
     return res.data;
 }
 
