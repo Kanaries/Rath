@@ -2,12 +2,12 @@ import { IPattern, NextVICore } from "../../dev";
 import { IFieldMeta, IRow } from "../../interfaces";
 
 export interface IFootmanProps {
-    task: 'univar' | 'patterns' | 'featureSelection' | 'comparison' | 'filterSelection';
+    task: 'univar' | 'patterns' | 'featureSelection' | 'comparison' | 'filterSelection' | 'render';
     props?: any;
     dataSource: IRow[];
     fields: IFieldMeta[];
 }
-export function serviceHandler(reqProps: IFootmanProps) {
+export async function serviceHandler(reqProps: IFootmanProps) {
     const { task, props, dataSource, fields } = reqProps
     try {
         if (task === 'univar') return univarService(dataSource, fields, props);
@@ -15,6 +15,7 @@ export function serviceHandler(reqProps: IFootmanProps) {
         if (task === 'featureSelection') return featureSelection(dataSource, fields, props);
         if (task === 'comparison') return featureForComparison(dataSource, fields, props);
         if (task === 'filterSelection') return filterSelection(dataSource, fields, props);
+        if (task === 'render') return renderVis(dataSource, fields, props);
     } catch (error: any) {
         throw new Error(`[footman][${task}]${error}\n${error.stack}`)   
     }
@@ -49,4 +50,10 @@ function filterSelection (dataSource: IRow[], fields: IFieldMeta[], props: IPatt
     const core = new NextVICore(dataSource, fields);
     const ans = core.recommandFilter(props);
     return ans;
+}
+
+async function renderVis (dataSource: IRow[], fields: IFieldMeta[], props: IPattern[]) {
+    const core = new NextVICore(dataSource, fields);
+    const images = await core.renderViews2Images(props, dataSource);
+    return images;
 }

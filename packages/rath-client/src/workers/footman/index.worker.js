@@ -3,18 +3,17 @@
 import { serviceHandler } from './service';
 
 function main (e) {
-    try {
-        const res = serviceHandler(e.data);
+    serviceHandler(e.data).then(res => {
         self.postMessage({
             success: true,
             data: res
         })
-    } catch (error) {
+    }).catch(error => {
         self.postMessage({
             success: false,
             message: `[worker]${error}`
-        })        
-    }
+        }) 
+    })
 }
 
 self.addEventListener('message', main, false);

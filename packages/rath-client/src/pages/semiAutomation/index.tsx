@@ -14,6 +14,7 @@ import { labDistVis } from '../../queries/labdistVis';
 import { notify } from '../../components/error';
 import intl from 'react-intl-universal';
 import MainCanvas from './mainCanvas';
+import produce from 'immer';
 
 const BUTTON_STYLE = { marginRight: '1em' }
 
@@ -30,6 +31,16 @@ const PatternPage: React.FC = props => {
     const { dataSourceStore, discoveryMainStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [views, setViews] = useState<IPattern[]>([])
+    const [images, setImages] = useState<string[]>([]);
+    const [assoViews, setAssoViews] = useState<{
+        patterns: IPattern[];
+        features: IPattern[];
+        filters: IPattern[];
+    }>({
+        patterns: [],
+        features: [],
+        filters: []
+    });
     const [pined, setPined] = useState<IPattern | null>(null);
     const [computing, setComputing] = useState<boolean>(false);
     const [renderAmount, setRenderAmount] = useState<number>(RENDER_BATCH_SIZE);
@@ -44,6 +55,12 @@ const PatternPage: React.FC = props => {
             task: 'univar',
         }, 'local').then(res => {
             setViews(res);
+            // setAssoViews(views => {
+            //     const nextViews = produce(views, draft => {
+            //         draft.patterns = res;
+            //     })
+            //     return nextViews;
+            // })
         }).catch(console.error)
         // const patterns = core.searchPatterns();
         // setViews(patterns);
@@ -52,6 +69,22 @@ const PatternPage: React.FC = props => {
     const specs = useMemo(() => {
         return views.map(view => distVis({ pattern: view }))
     }, [views])
+
+    useEffect(() => {
+        footmanEngineService({
+            dataSource: cleanedData,
+            fields: fieldMetas,
+            task: 'render',
+            props: views
+        }, 'local').then(res => {
+            // setAssoViews()
+            setImages(res);
+        }).catch(console.error);
+    }, [views, cleanedData, fieldMetas])
+
+    console.log('pattern render')
+
+    // const 
 
     const assViews = useCallback((view: IPattern) => {
         setComputing(true)
@@ -161,6 +194,8 @@ const PatternPage: React.FC = props => {
             setRenderAmount(RENDER_BATCH_SIZE)
         }
     }, [pined, assViews])
+
+    // const 
 
     const vizRecSys = discoveryMainStore.settings.vizAlgo;
 
@@ -333,6 +368,9 @@ const PatternPage: React.FC = props => {
                             </div>
                         }
                     </div>)
+                }
+                {
+                    images.map((img, i) => <img key={i} alt="none" src={img} />)
                 }
             </AssoContainer>
             <DefaultButton disabled={renderAmount >= specs.length}

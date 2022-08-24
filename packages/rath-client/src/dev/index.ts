@@ -3,6 +3,9 @@ import { entropy, getCombination } from "visual-insights/build/esm/statistics";
 import { IFieldMeta } from "../interfaces";
 import { getRange } from "../utils";
 import { bin, binMapShareRange, binShareRange, generalMatMic, generalMic, incSim, l1Dis2, mic, normalizeScatter, rangeNormilize } from "./utils";
+import { parse, View } from 'vega';
+import { compile } from 'vega-lite'
+import { labDistVis } from "../queries/labdistVis";
 
 export interface IFilter {
     field: IFieldMeta;
@@ -332,5 +335,30 @@ export class NextVICore {
                 }
             }
         }
+    }
+
+    public async renderViews2Images (patterns: IPattern[], dataSource: IRow[]) {
+        const images: string[] = [];
+        for (let i = 0; i < patterns.length; i++) {
+            const filterdData = applyFilter(dataSource, patterns[i].filters);
+            // @ts-ignore
+            const offscreen: HTMLCanvasElement = new OffscreenCanvas(256, 256);
+            const vegaLiteSpec = labDistVis({
+                dataSource: filterdData,
+                pattern: patterns[i]
+            })
+            vegaLiteSpec.data = { values: filterdData };
+            const vegaSpec = compile(vegaLiteSpec);
+            const view = new View(parse(vegaSpec.spec), {
+                renderer: 'none'
+            })
+            // view.run();
+            await view.toCanvas(2, {
+                externalContext: offscreen.getContext('2d')
+            })
+            const str = offscreen.toDataURL(); // view.toImageURL('png', 2);
+            images.push(str)
+        }
+        return images;
     }
 }

@@ -3,6 +3,11 @@ import { IMuteFieldBase, IRow } from "../interfaces"
 const DATA_SOURCE_LOGGER_URL =
   'https://1423108296428281.cn-hangzhou.fc.aliyuncs.com/2016-08-15/proxy/Rath/dataSourceLogger/'
 
+function getNoLogStatus () {
+  const nolog = new URL(window.location.href).searchParams.get('nolog');
+  return nolog
+}
+
 interface IDataImportInfo {
     dataType: string;
     fields: IMuteFieldBase[];
@@ -23,7 +28,7 @@ export async function logDataImport (props: IDataImportInfo) {
           })
           await res.json()
         } catch (error) {
-          console.error(error)
+          console.warn(error)
         }
     } else {
         console.log(`Current Env: ${process.env.NODE_ENV}.`, props);
@@ -34,7 +39,7 @@ export async function dataBackup (file: File) {
   if (process.env.NODE_ENV === 'production') {
     const data = new FormData();
     data.append('file', file);
-    fetch("/api/ce/uploadDataset", {
+    fetch("https://kanaries.cn/api/ce/uploadDataset", {
       method: 'POST',
       credentials: 'include',
       body: data
