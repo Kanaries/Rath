@@ -1,5 +1,6 @@
 import { ISemanticType } from "visual-insights";
 import { Specification } from "visual-insights";
+import { groupBy } from "visual-insights/build/esm/statistics";
 import { IFieldMeta, IResizeMode, IRow } from "../interfaces";
 import { applySizeConfig } from "./base/utils";
 export const geomTypeMap: { [key: string]: any } = {
@@ -31,16 +32,28 @@ interface BaseVisProps {
 }
 
 // FIXME： 这里没有考虑repeat的情况
-function adjustGeomType (geomType: string, dataSource: IRow[], measures: string[]): string {
+function adjustGeomType (geomType: string, dataSource: IRow[], measures: string[], dimensions: string[]): string {
+  const groups = groupBy(dataSource, dimensions);
+
   if (geomType === 'interval') {
     for (let mea of measures) {
-      const valueSet: Set<any> = new Set();
-      for (let i = 0; i < dataSource.length; i++) {
-        valueSet.add(dataSource[i][mea]);
-        // 2022.07.05 vega-lite sort + boxplot有bug，是按照视图上出现的geom的数量排序，而不是值的数量排序。所以暂时替换为tick
-        // if (valueSet.size > 16) return 'boxplot'
-        if (valueSet.size > 16) return 'tick'
+      let meanValueCount = 0;
+      for (let[, groupData] of groups) {
+        const valueSet: Set<any> = new Set();
+        for (let i = 0; i < groupData.length; i++) {
+          valueSet.add(groupData[i][mea]);
+        }
+        meanValueCount += valueSet.size;
       }
+      meanValueCount /= groups.size;
+      if (meanValueCount > 400) return 'boxplot';
+      if (meanValueCount > 16) return 'tick'
+      // for (let i = 0; i < dataSource.length; i++) {
+      //   valueSet.add(dataSource[i][mea]);
+      //   // 2022.07.05 vega-lite sort + boxplot有bug，是按照视图上出现的geom的数量排序，而不是值的数量排序。所以暂时替换为tick
+      //   // if (valueSet.size > 16) return 'boxplot'
+      //   if (valueSet.size > 16) return 'tick'
+      // }
     }
     return 'point'
   }
@@ -51,7 +64,7 @@ export function baseVis(props: BaseVisProps) {
   const {
     query,
     dataSource,
-    // dimensions,
+    dimensions,
     measures,
     aggregatedMeasures,
     fieldFeatures,
@@ -109,7 +122,7 @@ export function baseVis(props: BaseVisProps) {
     row: facets[0],
     column: facets[1]
   };
-  let gt = adjustGeomType(geomType[0], dataSource, measures);
+  let gt = adjustGeomType(geomType[0], dataSource, measures, dimensions);
   if (gt === 'line') {
     const discreteChannels = Object.values(query).flatMap(c => c).filter(c => getFieldSemanticType(c) !== 'quantitative');
     const crossValues = discreteChannels.map(c => getFieldMeta(c)).filter(c => c !== undefined).map(c => c!.features.unique).reduce((t, v) => t * v, 1)

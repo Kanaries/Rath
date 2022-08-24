@@ -39,3 +39,6 @@ coverage
 *.pem
 
 packages/frontend/public/datasets/*
+
+*service.json
+*.db

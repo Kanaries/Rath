@@ -276,7 +276,7 @@ function autoMark(fields: IFieldMeta[], statFields: IFieldMeta[] = [], originFie
         } else if (isSetEqual(semantics, ['nominal', 'quantitative'])) {
             return 'bar'
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
-            return 'point'
+            return 'line'
         } else if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
             return 'point'
         } else if (isSetEqual(semantics, ['nominal', 'temporal'])) {

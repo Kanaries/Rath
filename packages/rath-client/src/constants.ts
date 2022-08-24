@@ -13,7 +13,8 @@ export const PIVOT_KEYS = {
     editor: 'editor',
     support: 'support',
     lts: 'lts',
-    pattern: 'pattern'
+    pattern: 'pattern',
+    progressiveDashBoard: 'progressiveDashBoard'
   } as const;
 
 export const COMPUTATION_ENGINE = {

@@ -9,6 +9,8 @@
 
 RATH is an OpenSource automated data exploration tool, which can help you automated discovery patterns & insights, generate charts and dashboards from muti-dimensional data. It uses AI enhanced engine to automate the working flow in data analysis.
 
+ It is not only an open source replacement of tableau but a version with more automation power, including auto insights discovery, predictive interaction, and visual recommendation.
+
 + Try Latest version !! [Try it(latest)](https://kanaries.github.io/Rath/)
 + Try Stable version [Try it(stable)](https://kanaries.net/)
 

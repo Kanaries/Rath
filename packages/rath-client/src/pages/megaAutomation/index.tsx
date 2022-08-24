@@ -4,7 +4,7 @@ import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
 import { runInAction } from 'mobx';
-import { DefaultButton, Stack, CommandBarButton, IconButton, Toggle, Dropdown, IDropdownOption } from 'office-ui-fabric-react';
+import { DefaultButton, Stack, CommandBarButton, IconButton, Toggle, Dropdown, IDropdownOption, Spinner } from 'office-ui-fabric-react';
 
 import { useGlobalStore } from '../../store';
 import BaseChart from '../../visBuilder/vegaBase';
@@ -19,6 +19,7 @@ import FieldContainer from './vizOperation/fieldContainer';
 import { IResizeMode } from '../../interfaces';
 import ResizeContainer from './resizeContainer';
 import Narrative from './narrative';
+import { LoadingLayer } from '../semiAutomation/components';
 import ComputationProgress from './computationProgress';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
@@ -38,6 +39,7 @@ const InsightContainer = styled.div`
         display: flex;
         overflow-x: auto;
         .insight-viz{
+            position: relative;
             padding: 2em;
             flex-grow: 0;
             flex-shrink: 0;
@@ -59,7 +61,7 @@ const InsightContainer = styled.div`
 
 const LTSPage: React.FC = () => {
     const { ltsPipeLineStore, exploreStore } = useGlobalStore();
-    const { computing, fieldMetas } = ltsPipeLineStore;
+    const { computing, fieldMetas, rendering } = ltsPipeLineStore;
 
     const {
         pageIndex,
@@ -154,6 +156,11 @@ const LTSPage: React.FC = () => {
                 </div>
                 <div className="flex-container">
                     <div className="insight-viz">
+                        {
+                            rendering && <LoadingLayer>
+                                <Spinner label='Rendering...' />
+                            </LoadingLayer>
+                        }
                     {insightSpaces.length > 0 && spec && <ResizeContainer enableResize={visualConfig.resize === IResizeMode.control && !(spec.schema.facets)}>
                             <VisErrorBoundary>
                                 <BaseChart

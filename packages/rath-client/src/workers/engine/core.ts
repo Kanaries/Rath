@@ -160,6 +160,9 @@ export class RathEngine extends VIEngine {
         this.dataGraph = new CustomDataGraph(this.dimensions, this.measures);
         this.dataGraph.computeDGraph(this.dataSource);
         this.dataGraph.computeMGraph(this.dataSource);
+        if (this.dimensions.length < 5) {
+            this.dataGraph.DIMENSION_CORRELATION_THRESHOLD = -100
+        }
         return this;
     }
     public async scanDetail(viewSpace: ViewSpace) {
@@ -309,7 +312,7 @@ export class RathEngine extends VIEngine {
         }
         for (let i = 0; i < insightSpaces.length; i++) {
             // if (i === spaceIndex) continue;
-            if (!intersect(insightSpaces[i].measures, space.measures)) continue;
+            if (!intersect(insightSpaces[i].measures, space.measures) && !intersect(insightSpaces[i].dimensions, space.dimensions)) continue;
             if (isSetEqual(insightSpaces[i].dimensions, space.dimensions)) continue;
             // if (!isSetEqual(insightSpaces[i].measures, space.measures)) continue;
             let t1_score = 0;
@@ -322,7 +325,7 @@ export class RathEngine extends VIEngine {
                 }
             }
             t1_score /= (dimIndices.length * iteDimIndices.length)
-            if (t1_score > 0.35) { // (1 + 0.3) / 2
+            if (t1_score > 0.15) { // (1 + 0.3) / 2
                 const card = insightSpaces[i].dimensions.map(d => this.fields.find(f => f.key === d))
                 .filter(f => f !== undefined)
                 .map(f => Number(f?.features.unique))

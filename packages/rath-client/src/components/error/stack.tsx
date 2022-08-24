@@ -9,7 +9,7 @@ const Cont = styled.div`
     display: flex;
     top: 1em;
     right: 1em;
-    z-idnex: 50;
+    z-index: 1000010;
     width: 360px;
     flex-wrap: wrap;
     > div{
