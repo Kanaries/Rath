@@ -1,7 +1,8 @@
 import { Computation, IDataViewMeta, IInsightSpace } from 'visual-insights';
 import { IVizSpace } from '../../store/exploreStore';
 import { isSetEqual } from '../../utils';
-import { intersect } from './utils';
+import { intersect, setStateInStorage } from './utils';
+
 export class RathCHEngine extends Computation.ClickHouseEngine {
     public async createInsightSpaces(dataViewMetas: IDataViewMeta[] = this.dataViewMetas): Promise<IInsightSpace[]> {
         return this.createInsightSpaces(dataViewMetas);
@@ -79,5 +80,28 @@ export class RathCHEngine extends Computation.ClickHouseEngine {
             assSpacesT1,
             assSpacesT2
         }
+    }
+    public async fastInsightRecommand(dataViewMetas: IDataViewMeta[] = this.dataViewMetas) {
+        let ansSpace: IInsightSpace[] = [];
+        let ii = 0;
+        for (let viewMeta of dataViewMetas) {
+            ii++;
+            // FIXME: throtte
+            ii % 10 === 0 && setStateInStorage('explore_progress', ii / dataViewMetas.length)
+            ii % 10 === 0 && console.log(ii, dataViewMetas.length)
+            const { dimensions, measures } = viewMeta;
+            // @ts-ignore
+            const imp = await this.getSpaceImpurity(this.dataViewName, dimensions, measures);
+            ansSpace.push({
+                dimensions,
+                measures,
+                impurity: imp,
+                score: imp,
+                significance: 1
+            })
+        }
+        ansSpace.sort((a, b) => Number(a.score) - Number(b.score));
+        this.insightSpaces = ansSpace;
+        return ansSpace;
     }
 }

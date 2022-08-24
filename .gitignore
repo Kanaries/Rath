@@ -41,3 +41,4 @@ coverage
 packages/frontend/public/datasets/*
 
 *service.json
+*.db

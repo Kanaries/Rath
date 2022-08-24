@@ -20,7 +20,8 @@
         "support": "Support",
         "lts": "Mega-auto Exploration",
         "pattern": "Semi-auto Exploration",
-        "devCollection": "Debug"
+        "devCollection": "Debug",
+        "progressiveDashBoard": "Dashboard Designer"
     },
     "preference": {
         "title": "preference"

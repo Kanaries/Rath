@@ -292,7 +292,7 @@ function autoMark(fields: IFieldMeta[], statFields: IFieldMeta[] = [], originFie
         } else if (isSetEqual(semantics, ['nominal', 'quantitative'])) {
             return 'tick'
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
-            return 'line'
+            return 'point'
         } else if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
             return 'tick'
         } else if (isSetEqual(semantics, ['quantitative', 'quantitative'])) {
