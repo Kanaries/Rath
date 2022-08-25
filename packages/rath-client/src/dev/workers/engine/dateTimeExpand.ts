@@ -1,7 +1,8 @@
 import { IRow } from "visual-insights";
 import { IMuteFieldBase } from "rath-client/src/interfaces";
+import { LexAnalyzer, LexAnalyzerItem, SynAnalyzerRule } from "./synAnalyzer"
 
-interface DateTimeInfo {
+interface IDateTimeInfo {
     utime?: number; // unix timestamp
     $y?: number; // Year
     $M?: number; // Month - starts from 1
@@ -12,6 +13,38 @@ interface DateTimeInfo {
     $m?: number; // minute
     $s?: number; // second
     $ms?: number; // milliseconds
+}
+class DateTimeInfo implements IDateTimeInfo {
+    utime?: number; // unix timestamp
+    $y?: number; // Year
+    $M?: number; // Month - starts from 1
+    $D?: number; // Day - starts from 1
+    $L?: string; // Locale
+    $W?: number; // Week
+    $H?: number; // Hour
+    $m?: number; // minute
+    $s?: number; // second
+    $ms?: number; // milliseconds
+    constructor(y?: string, M?: string, D?: string, H?: string, m?: string, s?: string, ms?: string, L?: string) {
+        if (y) this.$y = parseInt(y)
+        else throw new Error("[parseDateTime]: Missing 'Year' in dateTime string")
+        if (M) this.$M = parseInt(M)
+        if (D) this.$D = parseInt(D)
+        if (H) this.$H = parseInt(H)
+        if (m) this.$m = parseInt(m)
+        if (s) this.$s = parseInt(s)
+        if (ms) this.$ms = parseInt(ms)
+        this.$L = L
+        let dateTime = new Date(Date.UTC(this.$y, (this.$M || 1) - 1, this.$D || 1, this.$H || 0, this.$m || 0, this.$s || 0, this.$ms || 0))
+        this.utime = dateTime.getTime();
+        if (y && M && D) {
+            this.$W = dateTime.getUTCDay()
+        }
+    }
+}
+/** parameter locations of DateTimeInfo constructor */
+enum DateTimeParamPos {
+    year = 0, month, date, hour, min, sec, ms
 }
 const dateTimeDict = new Map<string, string>([
     ['utime', 'utime'],
@@ -25,8 +58,125 @@ const dateTimeDict = new Map<string, string>([
     ['$s', 'sec'],
     ['$ms', 'ms']
 ])
+export class DateTimeLexAnalyzer implements LexAnalyzer<DateTimeParamPos> {
+    static MONTH_NAME_LIST = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    static MONTH_ABBR_LIST = ['Jan', 'Feb', 'March', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
+    static MONTH_MAP = new Map<string, string>(
+        this.MONTH_NAME_LIST.map<[string, string]>((s, i) => [s, `${i + 1}`])
+        .concat(this.MONTH_ABBR_LIST.map((s, i) => [s, `${i + 1}`]))
+    )
+    static TODAY = new Date()
+    static CUR_YEAR = this.TODAY.getUTCFullYear()
+    symbols = {
+        YEAR:       Symbol.for('lex_year'),
+        YEAR2:      Symbol.for('lex_year2'),
+        MONTH:      Symbol.for('lex_month'),
+        MONTH_NAME: Symbol.for('lex_month_name'),
+        MONTH_ABBR: Symbol.for('lex_month_abbr'),
+        DATE:       Symbol.for('lex_date'),
+        HOUR:       Symbol.for('lex_hour'),
+        MIN:        Symbol.for('lex_min'),
+        SEC:        Symbol.for('lex_sec'),
+        MS:         Symbol.for('lex_ms')
+    }
+    items: {[x: symbol]: [LexAnalyzerItem, DateTimeParamPos]} = {
+        // [symbol]: [ LexAnalyzerItem, data index in DateTime constructor param list ]
+        [this.symbols.YEAR]: [
+            new LexAnalyzerItem('[1-2][0-9]{3}'), DateTimeParamPos.year
+        ],
+        [this.symbols.YEAR2]: [
+            new LexAnalyzerItem('[0-9]{2}', (p?: string) => p && ((parseInt("20" + p) <= DateTimeLexAnalyzer.CUR_YEAR) ? "20" + p : "19" + p)), DateTimeParamPos.year
+        ],
+        [this.symbols.MONTH]: [
+            new LexAnalyzerItem('0?[1-9]|1[0-2]'), DateTimeParamPos.month
+        ],
+        [this.symbols.MONTH_NAME]: [
+            new LexAnalyzerItem(DateTimeLexAnalyzer.MONTH_NAME_LIST.join('|'), (p?: string) => p && DateTimeLexAnalyzer.MONTH_MAP.get(p)), DateTimeParamPos.month
+        ],
+        [this.symbols.MONTH_ABBR]: [
+            new LexAnalyzerItem(DateTimeLexAnalyzer.MONTH_ABBR_LIST.join('|'), (p?: string) => p && DateTimeLexAnalyzer.MONTH_MAP.get(p)), DateTimeParamPos.month
+        ],
+        [this.symbols.DATE]: [
+            new LexAnalyzerItem('(?:0?[1-9])|(?:[1-2][0-9])|(?:3[0-1])'), DateTimeParamPos.date
+        ],
+        [this.symbols.HOUR]: [
+            new LexAnalyzerItem('[0-1]?[0-9]|(?:2[0-4])'), DateTimeParamPos.hour
+        ],
+        [this.symbols.MIN]: [
+            new LexAnalyzerItem('[-:][0-5]?[0-9]', (p?: string) => p?.slice(1)), DateTimeParamPos.min
+        ],
+        [this.symbols.SEC]: [
+            new LexAnalyzerItem('[-:][0-5]?[0-9]', (p?: string) => p?.slice(1)), DateTimeParamPos.sec
+        ],
+        [this.symbols.MS]: [
+            new LexAnalyzerItem('[\\.:-][0-9]{3}', (p?: string) => p && ((p[0] === '.') ? p + '000' : p).substring(1, 4)), DateTimeParamPos.ms
+        ]
+    }
+    trans(regRes: RegExpExecArray, type: symbol[]): [string | undefined, DateTimeParamPos][] {
+        if (regRes.length !== type.length + 1) throw new Error("[DateTimeLexAnalyzer.trans]: different length")
+        let res = new Array<[string | undefined, DateTimeParamPos]>(type.length)
+        for (let i = 0;i < type.length; ++i) {
+            res[i] = [ this.items[type[i]][0].trans(regRes[i+1]), this.items[type[i]][1] ]
+        }
+        return res
+    }
+}
+export class DateTimeSynAnalyzer {
+    lex = new DateTimeLexAnalyzer()
+    rules: Array<SynAnalyzerRule>
+    constructor() {
+        let s = this.lex.symbols
+        this.rules = [
+            new SynAnalyzerRule(this.lex,
+                [s.YEAR, s.MONTH, s.DATE, s.HOUR, s.MIN, s.SEC, s.MS],
+                (r: string[]) => `^(${r[0]})[-/]?(${r[1]})[-/]?(${r[2]})?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+            ), // YYYY-MM-DD [HH[:mm[:ss[.ms]]]]
+            new SynAnalyzerRule(this.lex,
+                [s.YEAR2, s.MONTH, s.DATE, s.HOUR, s.MIN, s.SEC, s.MS],
+                (r: string[]) => `^(${r[0]})[-/]?(${r[1]})[-/]?(${r[2]})?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+            ), // YY-MM-DD [HH[:mm[:ss[.ms]]]]
+            new SynAnalyzerRule(this.lex,
+                [s.MONTH, s.DATE, s.YEAR, s.HOUR, s.MIN, s.SEC, s.MS],
+                (r: string[]) => `^(${r[0]})[-/](${r[1]})[-/](${r[2]})?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+            ), // MM-DD-YYYY
+            new SynAnalyzerRule(this.lex,
+                [s.MONTH, s.DATE, s.YEAR2, s.HOUR, s.MIN, s.SEC, s.MS],
+                (r: string[]) => `^(${r[0]})[-/](${r[1]})[-/](${r[2]})(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+            ), // MM-DD-YY
+            new SynAnalyzerRule(this.lex,
+                [s.MONTH_NAME, s.DATE, s.YEAR, s.HOUR, s.MIN, s.SEC, s.MS],
+                (r: string[]) => `^(${r[0]})[A-Za-z\\.,\\s]*(${r[1]})[A-Za-z\\s\\.,]*(${r[2]})(?:[\\.,\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+            ), // Mo-DD-YYYY
+            new SynAnalyzerRule(this.lex,
+                [s.MONTH_NAME, s.DATE, s.YEAR2, s.HOUR, s.MIN, s.SEC, s.MS],
+                (r: string[]) => `^(${r[0]})[A-Za-z\\.,\\s]*(${r[1]})[A-Za-z\\s\\.,]*(${r[2]})(?:[\\.,\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+            ), // Mo-DD-YY
+            new SynAnalyzerRule(this.lex,
+                [s.MONTH_ABBR, s.DATE, s.YEAR, s.HOUR, s.MIN, s.SEC, s.MS],
+                (r: string[]) => `^(${r[0]})[A-Za-z\\.,\\s]*(${r[1]})[A-Za-z\\s\\.,]*(${r[2]})(?:[\\.,\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+            ), // Mo.-DD-YYYY
+            new SynAnalyzerRule(this.lex,
+                [s.MONTH_ABBR, s.DATE, s.YEAR2, s.HOUR, s.MIN, s.SEC, s.MS],
+                (r: string[]) => `^(${r[0]})[A-Za-z\\.,\\s]*(${r[1]})[A-Za-z\\s\\.,]*(${r[2]})(?:[\\.,\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+            ) // Mo.-DD-YY
+        ]
+    }
+}
 
-const REGEX_PARSE = /^(\d{2,4})[-/](\d{1,2})?[-/]?(\d{0,2})[Tt\s]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/
+let analyzer = new DateTimeSynAnalyzer()
+export function parseReg(value: string, reg_id: number): DateTimeInfo {
+    if (!(Number.isInteger(reg_id) && reg_id < analyzer.rules.length)) throw new Error("reg_id error")
+    let parse_res = analyzer.rules[reg_id].exec(value)
+    if (parse_res) {
+        let res = analyzer.lex.trans(parse_res, analyzer.rules[reg_id].symbols)
+        let infoArray = new Array<string | undefined>(7)
+        for (let i = 0; i < res.length; ++i) infoArray[res[i][1]] = res[i][0];
+        // console.log(analyzer.rules[reg_id].reg, reg_id, infoArray)
+        return new DateTimeInfo(...infoArray)
+    }
+    return {} as DateTimeInfo
+}
+
 function Date2Info(date: Date): DateTimeInfo {
     return {
         utime: date.getTime(),
@@ -41,49 +191,17 @@ function Date2Info(date: Date): DateTimeInfo {
         $L: ""
     }
 }
-function parseDateTime(dateTime: string): DateTimeInfo {
+
+function parseDateTime(dateTime: string, reg_id?: number): DateTimeInfo {
     try {
+        if (reg_id !== undefined) return parseReg(dateTime, reg_id)
         if (dateTime === null) return UnknownDateTimeInfo;
         if (dateTime === undefined) {
             let date = new Date()
             return Date2Info(date)
         }
-        if (!/Z$/i.test(dateTime)) {
-            const match = dateTime.match(REGEX_PARSE)
-            if (match) {
-                let $y, $M, $D, $W, $H, $m, $s, $ms
-                if (match[1]) $y = parseInt(match[1])
-                else throw new Error("[parseDateTime]: Missing 'Year' in dateTime string")
-                if (match[2]) $M = parseInt(match[2])
-                else $M = undefined
-                if (match[3]) $D = parseInt(match[3])
-                else $D = undefined
-                if (match[4]) $H = parseInt(match[4])
-                else $H = undefined
-                if (match[5]) $m = parseInt(match[5])
-                else $m = undefined
-                if (match[6]) $s = parseInt(match[6])
-                else $s = undefined
-                if (match[7]) $ms = parseInt(match[7].substring(0, 3))
-                else $ms = undefined
-                let dateTime = new Date(Date.UTC($y, ($M || 1) - 1, $D || 1, $H || 0, $m || 0, $s || 0, $ms || 0))
-                let utime = dateTime.getTime();
-                if (match[1] && match[2] && match[3]) {
-                    $W = dateTime.getUTCDay()
-                }
-                return {
-                    utime: utime,
-                    $y: $y,
-                    $M: $M,
-                    $D: $D,
-                    $W: $W,
-                    $H: $H,
-                    $m: $m,
-                    $s: $s,
-                    $ms: $ms
-                } as DateTimeInfo
-            }
-        }
+        // if (!/Z$/i.test(dateTime)) {
+        // }
         // Polyfill
         return Date2Info(new Date(dateTime))
     }
@@ -112,8 +230,16 @@ type InfoType = keyof DateTimeInfo
 function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
     // TODO: Polyfills: 中文格式等
     let infoArray = {} as DateTimeInfoArray
+    let reg_id: number | undefined, max_cnt = 0;
+    for (let i = 0; i < analyzer.rules.length; ++i) {
+        let cnt = dateTime.map<number>(d => analyzer.rules[i].test(d) ? 1 : 0).reduce((a, b) => a + b)
+        if (cnt > max_cnt) {
+            reg_id = i
+            max_cnt = cnt
+        }
+    }
     for (let i = 0; i < dateTime.length; ++i) {
-        let info = parseDateTime(dateTime[i])
+        let info = parseDateTime(dateTime[i], max_cnt > 0 ? reg_id : undefined)
         Object.keys(info).forEach(key => {
             let infoKey = key as InfoType, infoArrayKey = key as InfoArrayType
             if (info[infoKey] !== undefined && info[infoKey] !== "") {
@@ -132,9 +258,11 @@ export function dateTimeExpand(props: { dataSource: IRow[]; fields: IMuteFieldBa
     const { dataSource, fields } = props;
 
     let extFields: IMuteFieldBase[] = []
-    let fieldIds = new Set(fields.map(f => (f.extInfo && f.extInfo?.extInfo === "dateTimeExpand") ? f.fid : ''))
-    fields.forEach(field => {
+    let fieldIds = new Set(fields.map(f => (f.extInfo && f.extInfo?.extOpt === "dateTimeExpand") ? f.extInfo?.extFrom[0] : ''))
+    for (let i = 0;i < fields.length; ++i) {
+        const field = fields[i]
         extFields.push(field)
+        if (field.disable) continue
         if (field.semanticType === 'temporal' && !fieldIds.has(field.fid)) {
             let dateTime = dataSource.map(item => item[field.fid])
             let moment: DateTimeInfoArray = parseDateTimeArray(dateTime)
@@ -158,9 +286,39 @@ export function dateTimeExpand(props: { dataSource: IRow[]; fields: IMuteFieldBa
                 }
             })
         }
-    })
+    }
     return {
         dataSource: dataSource,
         fields: extFields
     }
+}
+
+export function dateTimeExpandTest(testCase: Array<string>) {
+    console.log(parseDateTimeArray(testCase))
+    for (let i = 0;i < analyzer.rules.length;++i) {
+        let cnt = 0
+        for (let s of testCase) {
+            let res = analyzer.rules[i].exec(s)
+            if (res) {
+                console.log(i, s, res);
+                cnt += 1;
+            }
+        }
+        console.log(i, cnt, analyzer.rules[i].reg)
+    }
+    console.log(parseDateTimeArray(testCase))
+}
+
+export function doTest() {
+    if (typeof window === 'object') {
+        (window as any).parseDateTimeArray = parseDateTimeArray;
+        (window as any).dateTimeExpandTest = dateTimeExpandTest
+    }
+    let testCases: Array<Array<string>> = [
+        ["1998-04-09"],
+        ["98-05-09", "02-04-09", "00-04-12"],
+        ["980409 12:12:13.98", "220409 12:12:13.98"],
+        ["Apr. 8th, 2014 13:13"]
+    ]
+    for (let c of testCases) dateTimeExpandTest(c)
 }
