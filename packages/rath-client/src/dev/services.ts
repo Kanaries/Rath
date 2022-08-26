@@ -6,25 +6,16 @@ import { workerService } from "rath-client/src/service";
 // eslint-disable-next-line
 import ExpandDateTimeWorker from './workers/dateTimeExpand.worker.js?worker';
 import { dateTimeExpand, doTest } from './workers/engine/dateTimeExpand'
+import { checkExpandEnv } from './workers/engine/checkExpandEnv'
 
 interface ExpandDateTimeProps {
   dataSource: IRow[];
   fields: IRawField[];
 }
-function checkExpandEnv(): string {
-  if (typeof window === 'object') {
-    const url = new URL(window.location.href).searchParams.get('expand');
-    if(url) return url
-    else return ''
-  }
-  if (process.env.EXPAND_ENV) return process.env.EXPAND_ENV
-  else return ''
-}
-const DebugEnv = checkExpandEnv();
-
+const ExpandEnv = checkExpandEnv();
 
 export async function expandDateTimeService (props: ExpandDateTimeProps): Promise<ExpandDateTimeProps> {
-  if (DebugEnv === 'debug') {
+  if (ExpandEnv === 'debug') {
     doTest()
     let res = dateTimeExpand(props) as ExpandDateTimeProps
     return res

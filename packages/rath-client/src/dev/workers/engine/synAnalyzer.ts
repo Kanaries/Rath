@@ -26,4 +26,7 @@ export class SynAnalyzerRule {
     }
     test(s: string): boolean { return this.reg.test(s) }
     exec(s: string): RegExpExecArray | null { return this.reg.exec(s) }
+    trans(regRes: RegExpExecArray): [string | undefined, any][] {
+        return this.lex.trans(regRes, this.symbols)
+    }
 }

@@ -1,6 +1,7 @@
 import { IRow } from "visual-insights";
 import { IMuteFieldBase } from "rath-client/src/interfaces";
 import { LexAnalyzer, LexAnalyzerItem, SynAnalyzerRule } from "./synAnalyzer"
+import { checkExpandEnv } from "./checkExpandEnv";
 
 interface IDateTimeInfo {
     utime?: number; // unix timestamp
@@ -109,7 +110,7 @@ export class DateTimeLexAnalyzer implements LexAnalyzer<DateTimeParamPos> {
             new LexAnalyzerItem('[-:][0-5]?[0-9]', (p?: string) => p?.slice(1)), DateTimeParamPos.sec
         ],
         [this.symbols.MS]: [
-            new LexAnalyzerItem('[\\.:-][0-9]{3}', (p?: string) => p && ((p[0] === '.') ? p + '000' : p).substring(1, 4)), DateTimeParamPos.ms
+            new LexAnalyzerItem('[\\.:-][0-9]{0,3}', (p?: string) => p && ((p[0] === '.') ? p + '000' : p).substring(1, 4)), DateTimeParamPos.ms
         ]
     }
     trans(regRes: RegExpExecArray, type: symbol[]): [string | undefined, DateTimeParamPos][] {
@@ -129,19 +130,19 @@ export class DateTimeSynAnalyzer {
         this.rules = [
             new SynAnalyzerRule(this.lex,
                 [s.YEAR, s.MONTH, s.DATE, s.HOUR, s.MIN, s.SEC, s.MS],
-                (r: string[]) => `^(${r[0]})[-/]?(${r[1]})[-/]?(${r[2]})?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+                (r: string[]) => `^(${r[0]})[-/\\s]?(${r[1]})[-/\\s]?(${r[2]})?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
             ), // YYYY-MM-DD [HH[:mm[:ss[.ms]]]]
             new SynAnalyzerRule(this.lex,
                 [s.YEAR2, s.MONTH, s.DATE, s.HOUR, s.MIN, s.SEC, s.MS],
-                (r: string[]) => `^(${r[0]})[-/]?(${r[1]})[-/]?(${r[2]})?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+                (r: string[]) => `^(${r[0]})[-/\\s]?(${r[1]})[-/\\s]?(${r[2]})?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
             ), // YY-MM-DD [HH[:mm[:ss[.ms]]]]
             new SynAnalyzerRule(this.lex,
                 [s.MONTH, s.DATE, s.YEAR, s.HOUR, s.MIN, s.SEC, s.MS],
-                (r: string[]) => `^(${r[0]})[-/](${r[1]})[-/](${r[2]})?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+                (r: string[]) => `^(${r[0]})[-/\\s]?(${r[1]})[-/\\s]?(${r[2]})?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
             ), // MM-DD-YYYY
             new SynAnalyzerRule(this.lex,
                 [s.MONTH, s.DATE, s.YEAR2, s.HOUR, s.MIN, s.SEC, s.MS],
-                (r: string[]) => `^(${r[0]})[-/](${r[1]})[-/](${r[2]})(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+                (r: string[]) => `^(${r[0]})[-/\\s]?(${r[1]})[-/\\s]?(${r[2]})(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
             ), // MM-DD-YY
             new SynAnalyzerRule(this.lex,
                 [s.MONTH_NAME, s.DATE, s.YEAR, s.HOUR, s.MIN, s.SEC, s.MS],
@@ -229,6 +230,7 @@ type InfoArrayType = keyof DateTimeInfoArray
 type InfoType = keyof DateTimeInfo
 function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
     // TODO: Polyfills: 中文格式等
+    // TODO: assume the same dateTime format or support different format in one column
     let infoArray = {} as DateTimeInfoArray
     let reg_id: number | undefined, max_cnt = 0;
     for (let i = 0; i < analyzer.rules.length; ++i) {
@@ -300,25 +302,28 @@ export function dateTimeExpandTest(testCase: Array<string>) {
         for (let s of testCase) {
             let res = analyzer.rules[i].exec(s)
             if (res) {
-                console.log(i, s, res);
+                console.log(i, s, analyzer.rules[i].trans(res));
                 cnt += 1;
             }
         }
         console.log(i, cnt, analyzer.rules[i].reg)
     }
-    console.log(parseDateTimeArray(testCase))
+}
+
+if (typeof window === 'object' && checkExpandEnv().toLowerCase() === 'debug') {
+    (window as any).parseDateTimeArray = parseDateTimeArray;
+    (window as any).dateTimeExpandTest = dateTimeExpandTest
 }
 
 export function doTest() {
-    if (typeof window === 'object') {
-        (window as any).parseDateTimeArray = parseDateTimeArray;
-        (window as any).dateTimeExpandTest = dateTimeExpandTest
-    }
     let testCases: Array<Array<string>> = [
         ["1998-04-09"],
+        ["19980409"],
         ["98-05-09", "02-04-09", "00-04-12"],
-        ["980409 12:12:13.98", "220409 12:12:13.98"],
-        ["Apr. 8th, 2014 13:13"]
+        ["980409 12:12:13.98", "220409 12:12:13.198"],
+        ["Apr. 8th, 2014 13:13"],
+        ["1998/4/9"],
+        ["040202", "040502", "040802", "042002", "043102"]
     ]
     for (let c of testCases) dateTimeExpandTest(c)
 }
