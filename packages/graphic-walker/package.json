@@ -19,6 +19,9 @@
       "require": "./dist/graphic-walker.umd.js"
     }
   },
+  "prettier": {
+    "tabWidth": 4
+  },
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@heroicons/react": "^1.0.4",

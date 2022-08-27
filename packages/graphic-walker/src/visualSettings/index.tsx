@@ -1,11 +1,17 @@
 import { SortAscendingIcon, SortDescendingIcon } from '@heroicons/react/outline';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { Container } from '../components/container';
 import { LiteForm } from '../components/liteForm';
 import SizeSetting from '../components/sizeSetting';
 import { CHART_LAYOUT_TYPE, GEMO_TYPES } from '../config';
 import { useGlobalStore } from '../store';
+import styled from 'styled-components'
+
+export const LiteContainer = styled.div`
+    border: 1px solid #d9d9d9;
+    padding: 1em;
+    background-color: #fff;
+`;
 
 interface VisualSettinsProps {
 
@@ -13,7 +19,7 @@ interface VisualSettinsProps {
 const VisualSettings: React.FC<VisualSettinsProps> = props => {
     const { vizStore } = useGlobalStore();
     const { visualConfig, sortCondition } = vizStore;
-    return <Container>
+    return <LiteContainer>
         <LiteForm style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
             <div className="item">
                 <input type="checkbox" checked={visualConfig.defaultAggregated} onChange={(e) => {
@@ -103,7 +109,7 @@ const VisualSettings: React.FC<VisualSettinsProps> = props => {
                 }} />
             </div>
         </LiteForm>
-    </Container>
+    </LiteContainer>
 }
 
 export default observer(VisualSettings);
