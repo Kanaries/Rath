@@ -1,15 +1,15 @@
-import { Record, IMutField } from '../interfaces';
+import { IRow, IMutField } from '../interfaces';
 import { Insight } from 'visual-insights';
 
-export function transData(dataSource: Record[]): {
-    dataSource: Record[];
+export function transData(dataSource: IRow[]): {
+    dataSource: IRow[];
     fields: IMutField[]
 } {
     if (dataSource.length === 0) return {
         dataSource: [],
         fields: []
     };
-    let ans: Record[] = [];
+    let ans: IRow[] = [];
     const keys = Object.keys(dataSource[0]);
     // TODO: 冗余设计，单变量统计被进行了多次重复计算。另外对于这种不完整的分析任务，不建议使用VIEngine。
     const vie = new Insight.VIEngine();
@@ -25,7 +25,7 @@ export function transData(dataSource: Record[]): {
     vie.univarSelection('percent', 1);
     const fields = vie.fields;
     for (let record of dataSource) {
-        const newRecord: Record = {};
+        const newRecord: IRow = {};
         for (let field of fields) {
             if (field.dataType === 'number' || field.dataType === 'integer') {
                 newRecord[field.key] = Number(record[field.key])
