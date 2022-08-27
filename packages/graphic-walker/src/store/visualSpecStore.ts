@@ -1,5 +1,5 @@
-import { IReactionDisposer, makeAutoObservable, reaction, toJS } from "mobx";
-import { DraggableFieldState, IViewField } from "../interfaces";
+import { IReactionDisposer, makeAutoObservable, observable, reaction, toJS } from "mobx";
+import { DataSet, DraggableFieldState, IDataSet, IViewField } from "../interfaces";
 import { CommonStore } from "./commonStore";
 import { v4 as uuidv4 } from 'uuid';
 import { Specification } from "visual-insights";
@@ -71,12 +71,24 @@ function geomAdapter (geom: string) {
     }
 }
 
-export class VizSpecStore {
-    // public fields: IViewField[] = [];
-    private commonStore: CommonStore;
-    public draggableFieldState: DraggableFieldState;
-    private reactions: IReactionDisposer[] = []
-    public visualConfig: VisualConfig ={
+function initEncoding(): DraggableFieldState {
+    return {
+        dimensions: [],
+        measures: [],
+        fields: [],
+        rows: [],
+        columns: [],
+        color: [],
+        opacity: [],
+        size: [],
+        shape: [],
+        radius: [],
+        theta: []
+    }
+}
+
+function initVisualConfig (): VisualConfig {
+    return {
         defaultAggregated: true,
         geoms: [GEMO_TYPES[0].value],
         defaultStack: true,
@@ -89,60 +101,39 @@ export class VizSpecStore {
             height: 200
         }
     }
+}
+
+interface IVisSpec {
+    name?: string;
+    visId: string;
+    encodings: DraggableFieldState;
+    config: VisualConfig;
+}
+export class VizSpecStore {
+    // public fields: IViewField[] = [];
+    private commonStore: CommonStore;
+    public draggableFieldState: DraggableFieldState;
+    private reactions: IReactionDisposer[] = []
+    public visualConfig: VisualConfig;
+    public visList: IVisSpec[] = [];
+    public visIndex: number = 0;
     constructor (commonStore: CommonStore) {
         this.commonStore = commonStore;
-        this.draggableFieldState = {
-            dimensions: [],
-            measures: [],
-            fields: [],
-            rows: [],
-            columns: [],
-            color: [],
-            opacity: [],
-            size: [],
-            shape: [],
-            radius: [],
-            theta: []
-        }
-        makeAutoObservable(this);
+        this.draggableFieldState = initEncoding();
+        this.visualConfig = initVisualConfig();
+        this.visList.push({
+            name: 'Chart 1',
+            visId: uuidv4(),
+            config: initVisualConfig(),
+            encodings: initEncoding()
+        })
+        makeAutoObservable(this, {
+            visList: observable.shallow
+        });
         // FIXME!!!!!
         this.reactions.push(reaction(() => commonStore.currentDataset, (dataset) => {
             this.initState();
-            this.draggableFieldState.fields = dataset.rawFields.map((f) => ({
-                dragId: uuidv4(),
-                fid: f.fid,
-                name: f.name || f.fid,
-                aggName: f.analyticType === 'measure' ? 'sum' : undefined,
-                analyticType: f.analyticType,
-                semanticType: f.semanticType
-            }))
-            this.draggableFieldState.dimensions = dataset.rawFields
-                .filter(f => f.analyticType === 'dimension')
-                .map((f) => ({
-                    dragId: uuidv4(),
-                    fid: f.fid,
-                    name: f.name || f.fid,
-                    semanticType: f.semanticType,
-                    analyticType: f.analyticType,
-            }))
-            this.draggableFieldState.measures = dataset.rawFields
-                .filter(f => f.analyticType === 'measure')
-                .map((f) => ({
-                    dragId: uuidv4(),
-                    fid: f.fid,
-                    name: f.name || f.fid,
-                    analyticType: f.analyticType,
-                    semanticType: f.semanticType,
-                    aggName: 'sum'
-            }))
-            // this.draggableFieldState.measures.push({
-            //     dragId: uuidv4(),
-            //     fid: COUNT_FIELD_ID,
-            //     name: '记录数',
-            //     analyticType: 'measure',
-            //     semanticType: 'quantitative',
-            //     aggName: 'count'
-            // })
+            this.initMetaState(dataset);
         }))
     }
     /**
@@ -173,20 +164,68 @@ export class VizSpecStore {
             })
         return fields;
     }
+    public addVisualization () {
+        this.visList.push({
+            name: 'new Vis' + this.visList.length + 1,
+            visId: uuidv4(),
+            config: initVisualConfig(),
+            encodings: initEncoding()
+        })
+        this.visIndex = this.visList.length - 1;
+        this.draggableFieldState = this.visList[this.visIndex].encodings;
+        this.visualConfig = this.visList[this.visIndex].config;
+    }
+    public selectVisualization (visIndex: number) {
+        this.visIndex = visIndex;
+        this.draggableFieldState = this.visList[visIndex].encodings;
+        this.visualConfig = this.visList[visIndex].config
+    }
+    /**
+     * FIXME: tmp
+     */
+    public saveVisChange () {
+        this.visList[this.visIndex].config = toJS(this.visualConfig);
+        this.visList[this.visIndex].encodings = toJS(this.draggableFieldState);
+    }
     public initState () {
-        this.draggableFieldState = {
-            dimensions: [],
-            measures: [],
-            fields: [],
-            rows: [],
-            columns: [],
-            color: [],
-            opacity: [],
-            size: [],
-            shape: [],
-            radius: [],
-            theta: []
-        }
+        this.draggableFieldState = initEncoding();
+    }
+    public initMetaState (dataset: DataSet) {
+        this.draggableFieldState.fields = dataset.rawFields.map((f) => ({
+            dragId: uuidv4(),
+            fid: f.fid,
+            name: f.name || f.fid,
+            aggName: f.analyticType === 'measure' ? 'sum' : undefined,
+            analyticType: f.analyticType,
+            semanticType: f.semanticType
+        }))
+        this.draggableFieldState.dimensions = dataset.rawFields
+            .filter(f => f.analyticType === 'dimension')
+            .map((f) => ({
+                dragId: uuidv4(),
+                fid: f.fid,
+                name: f.name || f.fid,
+                semanticType: f.semanticType,
+                analyticType: f.analyticType,
+        }))
+        this.draggableFieldState.measures = dataset.rawFields
+            .filter(f => f.analyticType === 'measure')
+            .map((f) => ({
+                dragId: uuidv4(),
+                fid: f.fid,
+                name: f.name || f.fid,
+                analyticType: f.analyticType,
+                semanticType: f.semanticType,
+                aggName: 'sum'
+        }))
+        // this.draggableFieldState.measures.push({
+            //     dragId: uuidv4(),
+            //     fid: COUNT_FIELD_ID,
+            //     name: '记录数',
+            //     analyticType: 'measure',
+            //     semanticType: 'quantitative',
+            //     aggName: 'count'
+            // })
     }
     public clearState () {
         for (let key in this.draggableFieldState) {

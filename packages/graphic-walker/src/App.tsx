@@ -17,6 +17,8 @@ import { toJS } from 'mobx';
 import "tailwindcss/tailwind.css"
 import './index.css'
 import { Specification } from 'visual-insights';
+import PureTabs from './components/tabs/pureTab';
+import VisNav from './segments/visNav';
 
 export interface EditorProps {
 	dataSource?: Record[];
@@ -68,8 +70,12 @@ const App: React.FC<EditorProps> = props => {
 	return (
 		<div className="App">
 			<DataSourceSegment preWorkDone={insightReady} />
+			<div className='px-2 mx-2'>
+				<VisNav />
+				{/* <PureTabs tabs={[{label: 'a', key: 'a'}, {label: 'b', key: 'b'}]} selectedKey='a' onSelected={() => {}} /> */}
+			</div>
+			<Container style={{ marginTop: '0em', borderTop: 'none' }}>
 			<VisualSettings />
-			<Container>
 				<div className="grid grid-cols-12 xl:grid-cols-6">
 					<div className="col-span-3 xl:col-span-1">
 						<DatasetFields />
