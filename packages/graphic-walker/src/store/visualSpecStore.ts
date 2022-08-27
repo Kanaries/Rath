@@ -166,7 +166,7 @@ export class VizSpecStore {
     }
     public addVisualization () {
         this.visList.push({
-            name: 'new Vis' + this.visList.length + 1,
+            name: 'Chart' + this.visList.length + 1,
             visId: uuidv4(),
             config: initVisualConfig(),
             encodings: initEncoding()
@@ -179,6 +179,12 @@ export class VizSpecStore {
         this.visIndex = visIndex;
         this.draggableFieldState = this.visList[visIndex].encodings;
         this.visualConfig = this.visList[visIndex].config
+    }
+    public setVisName (visIndex: number, name: string) {
+        this.visList[visIndex] = {
+            ...this.visList[visIndex],
+            name
+        }
     }
     /**
      * FIXME: tmp
