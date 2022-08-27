@@ -138,7 +138,7 @@ export class DateTimeSynAnalyzer {
         this.rules = [
             new SynAnalyzerRule(this.lex,
                 [s.YEAR, s.MONTH, s.DATE, s.HOUR, s.MIN, s.SEC, s.MS],
-                (r: string[]) => `^(${r[0]})[-/\\s](${r[1]})(?:[-/\\s](${r[2]}))?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+                (r: string[]) => `^(${r[0]})[-/\\s\\.,](${r[1]})(?:[-/\\s\\.](${r[2]}))?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
             ), // YYYY-MM-DD [HH[:mm[:ss[.ms]]]]
             new SynAnalyzerRule(this.lex,
                 [s.YEAR, s.MONTH2, s.DATE2, s.HOUR, s.MIN, s.SEC, s.MS],
@@ -146,7 +146,7 @@ export class DateTimeSynAnalyzer {
             ), // YYYYMMDD [HH[:mm[:ss[.ms]]]]
             new SynAnalyzerRule(this.lex,
                 [s.YEAR2, s.MONTH, s.DATE, s.HOUR, s.MIN, s.SEC, s.MS],
-                (r: string[]) => `^(${r[0]})[-/\\s](${r[1]})(?:[-/\\s](${r[2]}))?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+                (r: string[]) => `^(${r[0]})[-/\\s\\.,](${r[1]})(?:[-/\\s\\.](${r[2]}))?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
             ), // YY-MM-DD [HH[:mm[:ss[.ms]]]]
             new SynAnalyzerRule(this.lex,
                 [s.YEAR2, s.MONTH2, s.DATE2, s.HOUR, s.MIN, s.SEC, s.MS],
@@ -154,7 +154,7 @@ export class DateTimeSynAnalyzer {
             ), // YYMMDD [HH[:mm[:ss[.ms]]]]
             new SynAnalyzerRule(this.lex,
                 [s.MONTH, s.DATE, s.YEAR, s.HOUR, s.MIN, s.SEC, s.MS],
-                (r: string[]) => `^(${r[0]})[-/\\s](${r[1]})(?:[-/\\s](${r[2]}))?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+                (r: string[]) => `^(${r[0]})[-/\\s\\.](${r[1]})(?:[-/\\s,](${r[2]}))?(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
             ), // MM-DD-YYYY
             new SynAnalyzerRule(this.lex,
                 [s.MONTH2, s.DATE2, s.YEAR, s.HOUR, s.MIN, s.SEC, s.MS],
@@ -162,7 +162,7 @@ export class DateTimeSynAnalyzer {
             ), // MMDDYYYY
             new SynAnalyzerRule(this.lex,
                 [s.MONTH, s.DATE, s.YEAR2, s.HOUR, s.MIN, s.SEC, s.MS],
-                (r: string[]) => `^(${r[0]})[-/\\s](${r[1]})[-/\\s](${r[2]})(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
+                (r: string[]) => `^(${r[0]})[-/\\s\\.](${r[1]})[-/\\s\\,](${r[2]})(?:[Tt\\s]+(${r[3]}))?(${r[4]})?(${r[5]})?(${r[6]})?$`
             ), // MM-DD-YY
             new SynAnalyzerRule(this.lex,
                 [s.MONTH2, s.DATE2, s.YEAR2, s.HOUR, s.MIN, s.SEC, s.MS],
@@ -353,7 +353,9 @@ export function doTest() {
         ["1998/4/9"],
         ["040202", "040502", "040802", "042002", "043102"],
         ["2015-12-14", "2013-08-09", "2013-10-11", "2016-02-25"],
-        ["April-8-09"]
+        ["April-8-09"],
+        ["04.29,2004", "12.29, 2008"],
+        ["2008,08.24"]
     ]
     for (let c of testCases) dateTimeExpandTest(c)
 }
