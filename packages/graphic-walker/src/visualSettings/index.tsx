@@ -13,10 +13,7 @@ export const LiteContainer = styled.div`
     background-color: #fff;
 `;
 
-interface VisualSettinsProps {
-
-}
-const VisualSettings: React.FC<VisualSettinsProps> = props => {
+const VisualSettings: React.FC = () => {
     const { vizStore } = useGlobalStore();
     const { visualConfig, sortCondition } = vizStore;
     return <LiteContainer>

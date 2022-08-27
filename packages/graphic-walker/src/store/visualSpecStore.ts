@@ -1,12 +1,12 @@
 import { IReactionDisposer, makeAutoObservable, observable, reaction, toJS } from "mobx";
-import { DataSet, DraggableFieldState, IDataSet, IViewField } from "../interfaces";
+import { DataSet, DraggableFieldState, IViewField } from "../interfaces";
 import { CommonStore } from "./commonStore";
 import { v4 as uuidv4 } from 'uuid';
 import { Specification } from "visual-insights";
 import { GEMO_TYPES } from "../config";
 import { makeBinField, makeLogField } from "../utils/normalization";
 
-interface VisualConfig {
+interface IVisualConfig {
     defaultAggregated: boolean;
     geoms:  string[];        
     defaultStack: boolean;
@@ -87,7 +87,7 @@ function initEncoding(): DraggableFieldState {
     }
 }
 
-function initVisualConfig (): VisualConfig {
+function initVisualConfig (): IVisualConfig {
     return {
         defaultAggregated: true,
         geoms: [GEMO_TYPES[0].value],
@@ -107,14 +107,14 @@ interface IVisSpec {
     name?: string;
     visId: string;
     encodings: DraggableFieldState;
-    config: VisualConfig;
+    config: IVisualConfig;
 }
 export class VizSpecStore {
     // public fields: IViewField[] = [];
     private commonStore: CommonStore;
     public draggableFieldState: DraggableFieldState;
     private reactions: IReactionDisposer[] = []
-    public visualConfig: VisualConfig;
+    public visualConfig: IVisualConfig;
     public visList: IVisSpec[] = [];
     public visIndex: number = 0;
     constructor (commonStore: CommonStore) {
@@ -240,7 +240,7 @@ export class VizSpecStore {
             }
         }
     }
-    public setVisualConfig (configKey: keyof VisualConfig, value: any) {
+    public setVisualConfig (configKey: keyof IVisualConfig, value: any) {
         // this.visualConfig[configKey] = //value;
         if (configKey === 'defaultAggregated' || configKey === 'defaultStack' || configKey === 'showActions' || configKey === 'interactiveScale') {
             this.visualConfig[configKey] = Boolean(value);
@@ -259,7 +259,7 @@ export class VizSpecStore {
             
         }
     }
-    public setChartLayout(props: {mode: VisualConfig['size']['mode'], width?: number, height?: number }) {
+    public setChartLayout(props: {mode: IVisualConfig['size']['mode'], width?: number, height?: number }) {
         const {
             mode = this.visualConfig.size.mode,
             width = this.visualConfig.size.width,
