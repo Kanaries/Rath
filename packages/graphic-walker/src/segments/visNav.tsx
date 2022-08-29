@@ -15,7 +15,7 @@ const VisNav: React.FC = (props) => {
     }))
     tabs.push({
         key: ADD_KEY,
-        label: '+ New'
+        label: '+ 新建'
     })
 
     const visSelectionHandler = useCallback((tabKey: string, tabIndex: number) => {

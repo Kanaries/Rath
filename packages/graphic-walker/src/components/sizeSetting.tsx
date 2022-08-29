@@ -1,4 +1,4 @@
-import { ArrowsExpandIcon, XCircleIcon, XIcon } from "@heroicons/react/outline";
+import { ArrowsPointingOutIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import React from "react";
 import { useState } from "react";
 
@@ -13,7 +13,7 @@ const SizeSetting: React.FC<SizeSettingProps> = props => {
     const [show, setShow] = useState<boolean>(false);
 
     return <div className="leading-none cursor-pointer"> 
-        <ArrowsExpandIcon
+        <ArrowsPointingOutIcon
             onClick={() => {
                 setShow(v => !v)
             }}
@@ -22,7 +22,7 @@ const SizeSetting: React.FC<SizeSettingProps> = props => {
         {
             show && <div className="absolute z-auto bg-white p-4 border border-gray-200 shadow">
                 <div>
-                    <XIcon
+                    <XMarkIcon
                     className="text-gray-900 absolute right-2 top-2 w-4 cursor-pointer hover:bg-red-100"
                     onClick={(e) => {
                         setShow(false);

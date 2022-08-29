@@ -24,7 +24,7 @@
   },
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@heroicons/react": "^1.0.4",
+    "@heroicons/react": "^2.0.8",
     "@kanaries/web-data-loader": "0.1.5",
     "autoprefixer": "^10.3.5",
     "mobx": "^6.3.3",

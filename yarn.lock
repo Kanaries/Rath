@@ -2013,10 +2013,10 @@
   dependencies:
     "@hapi/hoek" "^8.3.0"
 
-"@heroicons/react@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.nlark.com/@heroicons/react/download/@heroicons/react-1.0.4.tgz#11847eb2ea5510419d7ada9ff150a33af0ad0863"
-  integrity sha1-EYR+supVEEGdetqf8VCjOvCtCGM=
+"@heroicons/react@^2.0.8":
+  version "2.0.8"
+  resolved "https://registry.npmmirror.com/@heroicons/react/-/react-2.0.8.tgz#b87618a14d3fb237aa465d1a158517f92eccf7b2"
+  integrity sha512-nJNOMjXQH0Ngk6Y7QllYBH5VLB3+HMJyGBVQPZYUXGalYmN9kgEcVIxMjOiVjwuzee0GvZzmMRB0VQRJPHe8eg==
 
 "@humanwhocodes/config-array@^0.9.2":
   version "0.9.5"
