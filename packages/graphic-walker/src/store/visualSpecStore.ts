@@ -122,7 +122,7 @@ export class VizSpecStore {
         this.draggableFieldState = initEncoding();
         this.visualConfig = initVisualConfig();
         this.visList.push({
-            name: 'Chart 1',
+            name: '图表 1',
             visId: uuidv4(),
             config: initVisualConfig(),
             encodings: initEncoding()
@@ -166,7 +166,7 @@ export class VizSpecStore {
     }
     public addVisualization () {
         this.visList.push({
-            name: 'Chart' + this.visList.length + 1,
+            name: '图表 ' + (this.visList.length + 1),
             visId: uuidv4(),
             config: initVisualConfig(),
             encodings: initEncoding()
@@ -300,6 +300,11 @@ export class VizSpecStore {
     public removeField(sourceKey: keyof DraggableFieldState, sourceIndex: number) {
         if (MetaFieldKeys.includes(sourceKey))return;
         this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
+    }
+    public transpose() {
+        const fieldsInCup = this.draggableFieldState.columns;
+        this.draggableFieldState.columns = this.draggableFieldState.rows;
+        this.draggableFieldState.rows = fieldsInCup;
     }
     public createBinField(stateKey: keyof DraggableFieldState, index: number) {
         const originField = this.draggableFieldState[stateKey][index]

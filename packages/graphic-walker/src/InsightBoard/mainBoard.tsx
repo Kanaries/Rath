@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { Record, IField, Filters, IMeasure } from '../interfaces';
-import { Insight, Utils, UnivariateSummary } from 'visual-insights';
-import { baseVis, IReasonType } from './std2vegaSpec';
 import embed from 'vega-embed';
+import { Insight, Utils, UnivariateSummary } from 'visual-insights';
+import ReactJson from 'react-json-view';
+import { IField, Filters, IMeasure, IRow } from '../interfaces';
+import { baseVis, IReasonType } from './std2vegaSpec';
 import { getExplaination, IVisSpace } from '../services';
 import RadioGroupButtons from './radioGroupButtons';
 import { IExplaination, IMeasureWithStat } from '../insights';
-import { mergeMeasures } from './utils';
-import ReactJson from 'react-json-view';
+import { formatFieldName, mergeMeasures } from './utils'
+
 
 const collection  = Insight.IntentionWorkerCollection.init();
 
@@ -24,7 +25,7 @@ interface SubSpace {
 }
 
 interface InsightMainBoardProps {
-  dataSource: Record[];
+  dataSource: IRow[];
   fields: IField[];
   filters?: Filters;
   viewDs: IField[];
@@ -83,10 +84,6 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
     }
   }, [fields, viewDs, viewMs, measWithTypes, filters, dimsWithTypes, measWithTypes, dataSource])
 
-  const fieldsWithType = useMemo(() => {
-    return [...dimsWithTypes, ...measWithTypes];
-  }, [dimsWithTypes, measWithTypes])
-
   useEffect(() => {
     const RecSpace = recSpaces[visIndex];
     const visSpec = visSpaces[visIndex];
@@ -109,7 +106,7 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
               field: m.key,
               as: m.key,
           })),
-          fieldsWithType as any,
+          fields,
           RecSpace.type as IReasonType,
           true,
           true
@@ -118,7 +115,7 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
         embed(container.current, _vegaSpec);
       }
     }
-  }, [visIndex, recSpaces, visSpaces, fieldsWithType, dataSource])
+  }, [visIndex, recSpaces, visSpaces, fields, dataSource])
 
   const FilterDesc = useMemo<React.ReactElement[]>(() => {
     if (filters) {
@@ -126,7 +123,7 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
       .filter(k => filters[k].length > 0)
         .map((k, ki) => {
           return <div key={`dim-${ki}`}>
-            <div className="inline bg-gray-400 p-1 rounded underline text-white">{k}</div>
+            <div className="inline bg-gray-400 p-1 rounded underline text-white">{formatFieldName(k, fields)}</div>
             <div className="inline text-lg ml-1 mr-1">=</div>
             <div className="inline bg-blue-600 p-1 rounded text-white">{filters[k]}</div>
           </div>
@@ -139,7 +136,7 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
   const valueDesc = useMemo<React.ReactElement[]>(() => {
     const meaStatus = valueExp.map((mea, mi) => 
       <div key={`mea-${mi}`}>
-        <span className="bg-gray-400 p-1 rounded underline text-white">{mea.key}({mea.op})</span>的取值<span className="bg-red-500 p-1 rounded text-white">{mea.score === 1 ? '大于' : '小于'}预期 </span>
+        <span className="bg-gray-400 p-1 rounded underline text-white">{formatFieldName(mea.key, fields)}({mea.op})</span>的取值<span className="bg-red-500 p-1 rounded text-white">{mea.score === 1 ? '大于' : '小于'}预期 </span>
       </div>
     );
     return meaStatus
@@ -157,7 +154,7 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
               <div className="animate-spin inline-block mr-2 ml-2 w-16 h-16 rounded-full border-t-2 border-l-2 border-blue-500"></div>
           )}
           <div style={{ display: 'flex' }}>
-              <div style={{ flexBasis: '200px', flexShrink: 0 }}>
+              <div style={{ flexBasis: '200px', flexShrink: 0, maxHeight: '800px', overflowY: 'auto' }}>
                   <RadioGroupButtons
                       choosenIndex={visIndex}
                       options={recSpaces.map((s, i) => ({
@@ -175,8 +172,8 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
                   <div ref={container}></div>
                   {recSpaces[visIndex] && (
                       <div>
-                          维度是{recSpaces[visIndex].dimensions.join(', ')}。<br />
-                          度量是{recSpaces[visIndex].measures.map((m) => m.key).join(', ')}。<br />
+                          维度是{recSpaces[visIndex].dimensions.map(f => formatFieldName(f, fields)).join(', ')}。<br />
+                          度量是{recSpaces[visIndex].measures.map((m) => m.key).map(f => formatFieldName(f, fields)).join(', ')}。<br />
                           此时具有
                           {recSpaces[visIndex].type
                               ? ReasonTypeNames[recSpaces[visIndex].type!]
@@ -189,7 +186,7 @@ const InsightMainBoard: React.FC<InsightMainBoardProps> = props => {
                                   recSpaces[visIndex].description.intMeasures
                                       .map(
                                           (mea: any) =>
-                                              `${mea.key}(${mea.op})}的取值${
+                                              `${formatFieldName(mea.key, fields)}(${mea.op})}的取值${
                                                   mea.score === 1 ? '大于' : '小于'
                                               }预期`
                                       )

@@ -1,4 +1,4 @@
-import { SortAscendingIcon, SortDescendingIcon } from '@heroicons/react/outline';
+import { BarsArrowDownIcon, BarsArrowUpIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { DraggableProvided } from 'react-beautiful-dnd';
@@ -36,8 +36,8 @@ const OBPill: React.FC<PillProps> = props => {
                 }
             </select>
         )}
-        {field.analyticType === 'dimension' && field.sort === 'ascending' && <SortAscendingIcon className='float-right w-3' />}
-        {field.analyticType === 'dimension' && field.sort === 'descending' && <SortDescendingIcon className='float-right w-3' />}
+        {field.analyticType === 'dimension' && field.sort === 'ascending' && <BarsArrowUpIcon className='float-right w-3' />}
+        {field.analyticType === 'dimension' && field.sort === 'descending' && <BarsArrowDownIcon className='float-right w-3' />}
     </Pill>
 }
 

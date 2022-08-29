@@ -1,6 +1,6 @@
 import React from 'react';
 import { IMutField } from "../interfaces";
-import { DocumentTextIcon, HashtagIcon, CalendarIcon } from '@heroicons/react/outline';
+import { DocumentTextIcon, HashtagIcon, CalendarIcon } from '@heroicons/react/24/outline';
 
 const DataTypeIcon: React.FC<{dataType: IMutField['semanticType']; analyticType: IMutField['analyticType']}> = props => {
     const { dataType, analyticType } = props;

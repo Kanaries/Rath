@@ -12,7 +12,7 @@ import DataSourceSegment from './dataSource/index';
 import { useGlobalStore } from './store';
 import { preAnalysis, destroyWorker } from './services'
 import { observer } from 'mobx-react-lite';
-import { LightBulbIcon } from '@heroicons/react/outline'
+import { LightBulbIcon } from '@heroicons/react/24/outline'
 import { toJS } from 'mobx';
 import "tailwindcss/tailwind.css"
 import './index.css'

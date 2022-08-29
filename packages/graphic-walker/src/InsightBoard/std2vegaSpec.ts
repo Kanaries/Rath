@@ -1,5 +1,5 @@
-import { Specification } from 'visual-insights';
-import { Record, SemanticType } from '../interfaces';
+import { ISemanticType, Specification } from 'visual-insights';
+import { IField, IRow } from '../interfaces';
 import { Utils } from 'visual-insights';
 import { IPredicate } from '../utils';
 export type IReasonType = 'selection_dim_distribution' | 'selection_mea_distribution' | 'children_major_factor' | 'children_outlier';
@@ -12,12 +12,12 @@ export const geomTypeMap: { [key: string]: any } = {
 };
 export function baseVis(
     query: Specification,
-    dataSource: Record[],
+    dataSource: IRow[],
     dimensions: string[],
     measures: string[],
     predicates: IPredicate[] | null,
     aggregatedMeasures: Array<{ op: string; field: string; as: string }>,
-    fieldFeatures: Array<{ name: string; type: SemanticType }>,
+    fields: IField[],
     type: IReasonType,
     defaultAggregated?: boolean,
     defaultStack?: boolean
@@ -42,9 +42,14 @@ export function baseVis(
         return fieldName;
     }
 
-    function getFieldType(field: string): SemanticType {
-        let targetField = fieldFeatures.find((f) => f.name === field);
-        return targetField ? targetField.type : 'nominal';
+    function getFieldSemanticType(fid: string): ISemanticType {
+        let targetField = fields.find((f) => f.fid === fid);
+        return targetField ? targetField.semanticType : 'nominal';
+    }
+
+    function getFieldLabel (fid: string): string {
+        let targetField = fields.find((f) => f.fid === fid);
+        return targetField ? targetField.name : fid;
     }
 
     // let chartWidth = 500; //container.current ? container.current.offsetWidth * 0.8 : 600;
@@ -88,7 +93,7 @@ export function baseVis(
     const aggMap: Map<string, string> = new Map();
     for (let channel in fieldMap) {
         if (fieldMap[channel]) {
-            if (getFieldType(fieldMap[channel]) === 'quantitative' && defaultAggregated) {
+            if (getFieldSemanticType(fieldMap[channel]) === 'quantitative' && defaultAggregated) {
                 const targetField = aggregatedMeasures.find((f) => f.field === fieldMap[channel]);
                 if (targetField) {
                     aggMap.set(targetField.field, `${targetField.op}_of_${targetField.field}`);
@@ -108,11 +113,12 @@ export function baseVis(
             const adjField = adjustField(fieldMap[channel]);
             basicSpec.encoding[channel] = {
                 field: aggMap.has(adjField) ? aggMap.get(adjField) : adjField,
-                type: getFieldType(fieldMap[channel]),
+                type: getFieldSemanticType(fieldMap[channel]),
+                title: getFieldLabel(fieldMap[channel])
             };
             if (
                 ['x', 'y'].includes(channel) &&
-                getFieldType(fieldMap[channel]) === 'quantitative' &&
+                getFieldSemanticType(fieldMap[channel]) === 'quantitative' &&
                 !defaultStack
             ) {
                 basicSpec.encoding[channel].stack = null;
@@ -135,6 +141,11 @@ export function baseVis(
     // basicSpecFilter.mark.color = '#f5222d';
     basicSpecFilter.mark.opacity = 0.8;
     basicSpecFilter.mark.size = 10;
+    Object.values(basicSpecFilter.encoding).forEach((ch: any) => {
+        if (typeof ch.title === 'string') {
+            ch.title = ch.title + '(target)'
+        }
+    })
     if (typeof basicSpecFilter.transform === 'undefined') {
         basicSpecFilter.transform = [];
     }

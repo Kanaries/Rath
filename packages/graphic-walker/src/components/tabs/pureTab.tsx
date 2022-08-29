@@ -1,4 +1,3 @@
-import { PlusIcon } from "@heroicons/react/outline";
 import React, { useCallback, useEffect, useState } from "react";
 
 function classNames(...classes: string[]) {
@@ -26,7 +25,7 @@ export default function PureTabs(props: PureTabsProps) {
         clearEditStatus
     }, [clearEditStatus])
     return (
-        <div className="border-b border-gray-200" onMouseLeave={clearEditStatus}>
+        <div className="border-b border-gray-200 overflow-x-auto" onMouseLeave={clearEditStatus}>
             <nav className="-mb-px flex border-gray-300 border-l" aria-label="Tabs">
                 {tabs.map((tab, tabIndex) => (
                     <span
