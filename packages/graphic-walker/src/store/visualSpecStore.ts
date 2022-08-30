@@ -386,9 +386,9 @@ export class VizSpecStore {
                 this.appendField('rows', fields.find(f => f.fid === facet));
             }
         }
-        if (spec.position && spec.position.length > 1) {
-            this.appendField('rows', fields.find(f => f.fid === spec.position![1]));
-            this.appendField('columns', fields.find(f => f.fid === spec.position![0]));
+        if (spec.position) {
+            if (spec.position.length > 0) this.appendField('columns', fields.find(f => f.fid === spec.position![0]));
+            if (spec.position.length > 1) this.appendField('rows', fields.find(f => f.fid === spec.position![1]));
         }
         if (spec.color && spec.color.length > 0) {
             this.appendField('color', fields.find(f => f.fid === spec.color![0]));

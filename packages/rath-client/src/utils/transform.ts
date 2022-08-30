@@ -1,9 +1,9 @@
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
-import { IRow, IAnalyticType, ISemanticType } from "visual-insights"
+import { IRow, IAnalyticType, ISemanticType, Specification } from "visual-insights"
 import { inferAnalyticTypeFromSemanticType } from "."
 import { Field } from "../global"
-import { IFieldMeta, IGeoRole } from "../interfaces"
+import { IFieldMeta, IGeoRole, IVegaSubset } from "../interfaces"
 import { FieldSummary } from "../service"
 
 dayjs.extend(customParseFormat);
@@ -106,4 +106,37 @@ export function formatTimeField (dataSource: IRow[], timeFields: string[]): IRow
         }
     }
     return dataSource;
+}
+
+/**
+ * 这是一个临时方案，因为我并不确定，自动化之后是直接使用vega spec还是自建spec，等确定之后，这里也需要改动。
+ */
+export function transVegaSubset2Schema (vegaSpec: IVegaSubset): Specification {
+    const schema: Specification = {}
+    if (typeof vegaSpec.mark === 'string') {
+        schema.geomType = [vegaSpec.mark]
+    } else {
+        schema.geomType = [vegaSpec.mark.type]
+    }
+    schema.position = []
+    if (vegaSpec.encoding.x) {
+        vegaSpec.encoding.x.field && schema.position.push(vegaSpec.encoding.x.field)
+    }
+    if (vegaSpec.encoding.y) {
+        vegaSpec.encoding.y.field && schema.position.push(vegaSpec.encoding.y.field)
+    }
+    schema.facets = []
+    if (vegaSpec.encoding.row) {
+        vegaSpec.encoding.row.field && schema.facets.push(vegaSpec.encoding.row.field)
+    }
+    if (vegaSpec.encoding.column) {
+        vegaSpec.encoding.column.field && schema.facets.push(vegaSpec.encoding.column.field)
+    }
+
+    (['color', 'opacity', 'shape', 'size'] as const).forEach(channel => {
+        if (vegaSpec.encoding[channel] && vegaSpec.encoding[channel]!.field) {
+            schema[channel] = [vegaSpec.encoding[channel]!.field]
+        }
+    })
+    return schema
 }
