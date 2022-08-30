@@ -4,7 +4,7 @@
 import { Statistics } from 'visual-insights'
 import { IPattern } from '@kanaries/loa';
 import { bin, binMap, mic, pureGeneralMic, rangeNormilize } from '@kanaries/loa';
-import { IFieldMeta, IResizeMode, IRow } from "../interfaces";
+import { IFieldMeta, IResizeMode, IRow, IVegaSubset } from "../interfaces";
 import { deepcopy } from "../utils";
 import { encodingDecorate } from "./base/utils";
 import { applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
@@ -383,7 +383,7 @@ function autoStat(fields: IFieldMeta[]): {
     return { statFields, distFields, statEncodes }
 }
 
-export function labDistVis(props: BaseVisProps) {
+export function labDistVis(props: BaseVisProps): IVegaSubset {
     const { pattern, dataSource, width, height, interactive, resizeMode = IResizeMode.auto } = props;
     const fields = deepcopy(pattern.fields) as IFieldMeta[];
     const measures = fields.filter(f => f.analyticType === 'measure');
@@ -487,7 +487,7 @@ export function labDistVis(props: BaseVisProps) {
         encodingDecorate(enc, fields, statFields);
     }
 
-    let basicSpec: any = {
+    let basicSpec: IVegaSubset = {
         // "config": {
         //     "range": {
         //       "category": {
@@ -502,7 +502,7 @@ export function labDistVis(props: BaseVisProps) {
         //     "bind": "scales"
         //   }],
         mark: {
-            type: markType,
+            type: markType as any,
             opacity: markType === 'circle' ? 0.56 : 0.88
         },
         encoding: enc

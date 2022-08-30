@@ -1,17 +1,17 @@
 import React, { useRef, useEffect, useState } from 'react';
 import embed, { vega, Result } from 'vega-embed';
-import { Spec } from 'vega';
 import { EDITOR_URL } from '../constants';
 // import { Result } from 'vega-embed';
 
 interface ReactVegaProps {
   dataSource: any[];
-  spec: Spec;
+  spec: any;
   actions?: boolean;
   signalHandler?: {
     [key: string]: (name: any, value: any) => void
   }
 }
+
 const ReactVega: React.FC<ReactVegaProps> = props => {
   const { spec, dataSource, signalHandler = {}, actions } = props
   const container = useRef<HTMLDivElement>(null);
@@ -19,6 +19,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
   useEffect(() => {
     const viewRef: { view: any } = { view: null }
     if (container.current) {
+      // @ts-ignore
       embed(container.current, spec, {
         editorUrl: EDITOR_URL,
         actions

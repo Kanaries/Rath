@@ -2,9 +2,9 @@
  * distVis 是分布式可视化的推荐，是比较新的模块，目前暂时用于dev模块，即voyager模式下的测试。
  */
 import { IPattern } from '@kanaries/loa';
-import { IFieldMeta, IResizeMode } from "../interfaces";
+import { IFieldMeta, IResizeMode, IVegaSubset } from "../interfaces";
 import { encodingDecorate } from "./base/utils";
-import { applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
+import { applyDefaultSort, applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
 export const geomTypeMap: { [key: string]: any } = {
     interval: "boxplot",
     line: "line",
@@ -14,8 +14,8 @@ export const geomTypeMap: { [key: string]: any } = {
 };
 
 const channels = {
-    quantitative: ['y' , 'x', 'size', 'opacity', 'color'],
-    ordinal: ['y', 'x', 'opacity', 'color', 'size', 'shape'],
+    quantitative: ['y' , 'x', 'size', 'color', 'opacity'],
+    ordinal: ['y', 'x', 'color', 'opacity', 'size', 'shape'],
     nominal: ['y', 'x', 'color', 'row', 'column', 'opacity', 'size', 'shape'],
     temporal: ['y', 'x', 'opacity', 'color', 'shape']
 } as const;
@@ -38,6 +38,7 @@ interface BaseVisProps {
     resizeMode?: IResizeMode;
     width?: number;
     height?: number;
+    stepSize?: number;
 }
 function humanHabbit (encoding: any) {
     if (encoding.x && encoding.x.type !== 'temporal') {
@@ -189,7 +190,8 @@ function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], originFie
     // const orderStatFields = [...statFields];
     // orderFields.sort((a, b) => b.features.entropy - a.features.entropy);
     // orderStatFields.sort((a, b) => b.features.entropy - a.features.entropy);
-    const semantics = [...statFields, ...originFields].sort((a, b) => b.features.entropy - a.features.entropy).slice(0, 2).map(f => f.semanticType)
+    const semanticFields = [...statFields, ...originFields].sort((a, b) => b.features.entropy - a.features.entropy).slice(0, 2);
+    const semantics = semanticFields.map(f => f.semanticType)
     // if (fields.length === 1) {
     //     return 'bar'
     // }
@@ -210,6 +212,13 @@ function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], originFie
         if (isSetEqual(semantics, ['nominal', 'nominal'])) {
             return 'text'
         } else if (isSetEqual(semantics, ['nominal', 'quantitative'])) {
+            const quanField = semanticFields.find(s => s.semanticType === 'quantitative')!;
+            const onlyNominalDimension = fields.filter(f => f.analyticType === 'dimension')
+                .filter(f => f.semanticType !== 'nominal').length === 0;
+            if (onlyNominalDimension) {
+                if (quanField.features.unique > 400) return 'boxplot';
+                if (quanField.features.unique > 16) return 'tick';
+            }
             return 'bar'
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
             return 'line'
@@ -316,17 +325,27 @@ function autoStat (fields: IFieldMeta[]): {
         })
     } else {
         const targets = fields.filter(f => f.analyticType === 'measure');
+        const onlyNominalDimension = fields.filter(f => f.analyticType === 'dimension')
+            .filter(f => f.semanticType !== 'nominal').length === 0;
         // 单目标的场景
         if (targets.length === 1) {
             // 连续型 度量做聚合，非连续型度量做分箱；
             targets.forEach(f => {
+                if (onlyNominalDimension && f.features.unique > 16) {
+                    statEncodes.push({
+                        field: f.fid,
+                        type: f.semanticType,
+                        title: `${f.name || f.fid}`,
+                    })
+                } else {
+                    statEncodes.push({
+                        field: f.fid,
+                        type: f.semanticType,
+                        title: `mean(${f.name || f.fid})`,
+                        aggregate: 'mean'
+                    })
+                }
                 statFields.push({ ...f })
-                statEncodes.push({
-                    field: f.fid,
-                    type: f.semanticType,
-                    title: `mean(${f.name || f.fid})`,
-                    aggregate: 'mean'
-                })
             })
             fields.filter(f => f.analyticType === 'dimension' && f.semanticType === 'quantitative').forEach(f => {
                 statFields.push({ ...f })
@@ -343,8 +362,8 @@ function autoStat (fields: IFieldMeta[]): {
     return { statFields, distFields, statEncodes }
 }
 
-export function distVis(props: BaseVisProps) {
-    const { pattern, resizeMode = IResizeMode.auto, width, height, interactive } = props;
+export function distVis(props: BaseVisProps): IVegaSubset {
+    const { pattern, resizeMode = IResizeMode.auto, width, height, interactive, stepSize } = props;
     const { fields } = pattern;
     const usedChannels: Set<string> = new Set();
     const { statFields, distFields, statEncodes } = autoStat(fields);
@@ -379,7 +398,7 @@ export function distVis(props: BaseVisProps) {
         encodingDecorate(enc, fields, statFields);
     }
 
-    let basicSpec: any = {
+    let basicSpec: IVegaSubset = {
         // "config": {
         //     "range": {
         //       "category": {
@@ -389,15 +408,17 @@ export function distVis(props: BaseVisProps) {
         //   },
         data: { name: 'dataSource' },
         mark: {
-            type: markType,
-            opacity: markType === 'circle' ? 0.56 : 0.88
+            type: markType as any,
+            opacity: markType === 'circle' ? 0.66 : 0.88
         },
         encoding: enc
     };
+    applyDefaultSort(basicSpec, fields);
     applySizeConfig2DistViz(basicSpec, {
         mode: resizeMode,
         width,
-        height
+        height,
+        stepSize
     })
     if (interactive) {
         applyInteractiveParams2DistViz(basicSpec);
