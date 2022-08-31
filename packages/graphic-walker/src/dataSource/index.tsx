@@ -5,7 +5,7 @@ import Modal from '../components/modal';
 // import DataSourcePanel from './pannel';
 import DataSelection from './dataSelection';
 import { useGlobalStore } from '../store';
-import { CheckCircleIcon, RefreshIcon } from '@heroicons/react/outline';
+import { CheckCircleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 interface DSSegmentProps {
     preWorkDone: boolean;
@@ -45,7 +45,7 @@ const DataSourceSegment: React.FC<DSSegmentProps> = props => {
             </Modal>
         )}
         { preWorkDone && <CheckCircleIcon className="text-green-500 w-5 inline-block ml-2" /> }
-        { !preWorkDone && <RefreshIcon className="text-yellow-500 w-5 inline-block ml-2" />}
+        { !preWorkDone && <ArrowPathIcon className="text-yellow-500 w-5 inline-block ml-2" />}
     </Container>
 }
 

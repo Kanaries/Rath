@@ -1,4 +1,5 @@
 import React from 'react';
+import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
 import ViewField from './viewField';
@@ -10,34 +11,31 @@ const PillsContainer = styled.div`
 `
 
 const FieldContainer: React.FC = props => {
-    const { dataSourceStore, exploreStore } = useGlobalStore();
-    const { forkView, visualConfig } = exploreStore;
-    const { dimFields, meaFields } = dataSourceStore;
+    const { exploreStore } = useGlobalStore();
+    const { mainViewPattern } = exploreStore;
     
-    if (forkView === null) {
+    if (mainViewPattern === null) {
         return <div></div>
     }
     return <div>
         <PillsContainer>
-            {forkView.dimensions.map(f => {
-                const field = dimFields.find(d => d.fid === f);
+            {mainViewPattern.fields.filter(f => f.analyticType === 'dimension').map(f => {
                 return <ViewField type="dimension"
-                    text={(field ? field.name : f) || f}
-                    key={f}
+                    text={f.name || f.fid}
+                    key={f.fid}
                     onRemove={() => {
-                        exploreStore.removeFieldFromForkView('dimensions', f)
+                        exploreStore.removeFieldInViewPattern(f.fid)
                     }}
                 />
             })}
         </PillsContainer>
         <PillsContainer>
-            {forkView.measures.map((f, fIndex) => {
-                const field = meaFields.find(d => d.fid === f);
+            {mainViewPattern.fields.filter(f => f.analyticType === 'measure').map((f, fIndex) => {
                 return <ViewField
-                    type="measure" text={`${(field ? field.name : f) || f}${visualConfig.defaultAggregated ? `(${forkView.ops[fIndex]})` : ''}`}
-                    key={f}
+                    type="measure" text={`${f.name || f.fid}`}
+                    key={f.fid}
                     onRemove={() => {
-                        exploreStore.removeFieldFromForkView('measures', f)
+                        exploreStore.removeFieldInViewPattern(f.fid)
                     }}
                 />
             })}
@@ -45,4 +43,4 @@ const FieldContainer: React.FC = props => {
     </div>
 }
 
-export default FieldContainer;
+export default observer(FieldContainer);

@@ -1,7 +1,9 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable, observable, runInAction } from 'mobx';
+import { Specification } from 'visual-insights';
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
-import { ITaskTestMode } from '../interfaces';
+import { ITaskTestMode, IVegaSubset } from '../interfaces';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../service';
+import { transVegaSubset2Schema } from '../utils/transform';
 
 export type ErrorType = 'error' | 'info' | 'success';
 const TASK_TEST_MODE_COOKIE_KEY = 'task_test_mode'
@@ -14,10 +16,14 @@ export class CommonStore {
     public showStorageModal: boolean = false;
     public showAnalysisConfig: boolean = false;
     public navMode: 'text' | 'icon' = 'text';
+    public graphicWalkerSpec: Specification;
     constructor() {
         const taskMode = localStorage.getItem(TASK_TEST_MODE_COOKIE_KEY) || ITaskTestMode.local;
         this.taskMode = taskMode as ITaskTestMode;
-        makeAutoObservable(this);
+        this.graphicWalkerSpec = {}
+        makeAutoObservable(this, {
+            graphicWalkerSpec: observable.ref
+        });
     }
     public setAppKey (key: string) {
         this.appKey = key
@@ -27,6 +33,12 @@ export class CommonStore {
             type,
             content
         })
+    }
+    public visualAnalysisInGraphicWalker (spec: IVegaSubset) {
+        console.log(spec)
+        this.graphicWalkerSpec = transVegaSubset2Schema(spec);
+        console.log(this.graphicWalkerSpec)
+        this.appKey = PIVOT_KEYS.editor;
     }
     public setNavMode (mode: 'text' | 'icon') {
         this.navMode = mode;

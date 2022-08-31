@@ -1,12 +1,14 @@
 import produce from "immer";
-import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
+import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { IPattern } from "@kanaries/loa";
-import { IFieldMeta, IResizeMode } from "../../interfaces";
+import { Specification } from "visual-insights";
+import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
 import { labDistVis } from "../../queries/labdistVis";
 import { footmanEngineService } from "../../service";
 import { DataSourceStore } from "../dataSourceStore";
 import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoViews } from "./localTypes";
+
 
 const RENDER_BATCH_SIZE = 5;
 
@@ -20,6 +22,7 @@ export class DiscoveryMainStore {
     private dataSourceStore: DataSourceStore;
     public mainView: IPattern | null = null;
     public compareView: IPattern | null = null;
+    public specForGraphicWalker: Specification = {};
     public showMiniFloatView: boolean = false;
     public autoAsso: {
         [key in IRenderViewKey]: boolean;
@@ -240,6 +243,52 @@ export class DiscoveryMainStore {
         } catch (error) {
             console.error(error);
             this.filterViews.computing = false;
+        }
+    }
+    public get mainViewSpec (): IVegaSubset | null {
+        const { mainVizSetting, mainView } = this;
+        if (mainView === null) return null
+        if (this.settings.vizAlgo === 'lite') {
+            return distVis({
+                resizeMode: mainVizSetting.resize.mode,
+                pattern: toJS(mainView),
+                width: mainVizSetting.resize.width,
+                height: mainVizSetting.resize.height,
+                interactive: mainVizSetting.interactive,
+                stepSize: 32
+            })
+        } else {
+            return labDistVis({
+                resizeMode: mainVizSetting.resize.mode,
+                pattern: toJS(mainView),
+                width: mainVizSetting.resize.width,
+                height: mainVizSetting.resize.height,
+                interactive: mainVizSetting.interactive,
+                dataSource: this.dataSource
+            })
+        }
+    }
+    public get compareViewSpec (): IVegaSubset | null {
+        const { mainVizSetting, compareView } = this;
+        if (compareView === null) return null
+        if (this.settings.vizAlgo === 'lite') {
+            return distVis({
+                resizeMode: mainVizSetting.resize.mode,
+                pattern: toJS(compareView),
+                width: mainVizSetting.resize.width,
+                height: mainVizSetting.resize.height,
+                interactive: mainVizSetting.interactive,
+                stepSize: 32
+            })
+        } else {
+            return labDistVis({
+                resizeMode: mainVizSetting.resize.mode,
+                pattern: toJS(compareView),
+                width: mainVizSetting.resize.width,
+                height: mainVizSetting.resize.height,
+                interactive: mainVizSetting.interactive,
+                dataSource: this.dataSource
+            })
         }
     }
     public removeMainViewFilter (filterFieldId: string) {

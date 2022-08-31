@@ -1,33 +1,39 @@
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { PrimaryButton } from 'office-ui-fabric-react';
-import React, { useCallback } from 'react';
+import intl from 'react-intl-universal';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
 import { MainViewContainer } from '../components';
 import MainCanvas from './mainCanvas';
-import intl from 'react-intl-universal';
 import MiniFloatCanvas from './miniFloatCanvas';
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' }
 
 const FocusZone: React.FC = props => {
-    const { discoveryMainStore } = useGlobalStore();
-    const { mainView, compareView, showMiniFloatView } = discoveryMainStore;
+    const { discoveryMainStore, commonStore } = useGlobalStore();
+    const { mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec } = discoveryMainStore;
 
     const explainDiff = useCallback(() => {
         if (mainView && compareView) {
             discoveryMainStore.explainViewDiff(mainView, compareView);
         }
     }, [mainView, compareView, discoveryMainStore])
+
+    const editChart = useCallback(() => {
+        if (mainViewSpec) {
+            commonStore.visualAnalysisInGraphicWalker(mainViewSpec);
+        }
+    }, [mainViewSpec,  commonStore])
     return <MainViewContainer>
         {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
         <div className="vis-container">
             <div>
-                {mainView && <MainCanvas pined={mainView} />}
+                {mainView && mainViewSpec && <MainCanvas view={mainView} spec={mainViewSpec} />}
             </div>
             <div>
-                {compareView && <MainCanvas pined={compareView} />}
+                {compareView && compareViewSpec && <MainCanvas view={compareView} spec={compareViewSpec} />}
             </div>
         </div>
         <hr style={{ marginTop: '1em' }} />
@@ -56,6 +62,13 @@ const FocusZone: React.FC = props => {
         }
         </div>
         <div className="action-buttons">
+            <PrimaryButton
+                style={BUTTON_STYLE}
+                text={intl.get('lts.commandBar.editing')}
+                iconProps={{ iconName: 'BarChartVerticalEdit'}}
+                disabled={mainView === null}
+                onClick={editChart}
+            />
             <PrimaryButton style={BUTTON_STYLE} text={intl.get('discovery.main.explainDiff')}
                 iconProps={{ iconName: 'Compare' }}
                 disabled={mainView === null || compareView === null}

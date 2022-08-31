@@ -1,4 +1,4 @@
-import { IMeasure } from "../interfaces";
+import { IField, IMeasure } from "../interfaces";
 /**
  * 合并两个measures数组，若出现相同的key，使用measures2中的op替换1中的op
  * @param measures1 
@@ -24,4 +24,9 @@ export function mergeMeasures(measures1: IMeasure[], measures2: IMeasure[]): IMe
         }
     }
     return merged;
+}
+
+export function formatFieldName(fid: string, fields: IField[]) {
+    const target = fields.find(f => f.fid === fid);
+    return target ? target.name : fid;
 }
