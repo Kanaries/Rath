@@ -3,47 +3,25 @@ import { Resizable } from 're-resizable';
 import React, { useMemo } from 'react';
 import ReactVega from '../../../components/react-vega';
 import { IPattern } from '@kanaries/loa';
-import { IResizeMode, IRow } from '../../../interfaces';
-import { distVis } from '../../../queries/distVis';
-import { labDistVis } from '../../../queries/labdistVis';
+import { IResizeMode, IRow, IVegaSubset } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { applyFilter } from '../utils';
 
 interface MainCanvasProps{
-    pined: IPattern;
+    view: IPattern;
+    spec: IVegaSubset;
 }
 const MainCanvas: React.FC<MainCanvasProps> = props => {
-    const { pined } = props;
+    const { view, spec } = props;
     const { discoveryMainStore } = useGlobalStore()
-    const { settings, mainVizSetting, dataSource } = discoveryMainStore;
-    const { vizAlgo } = settings;
+    const { mainVizSetting, dataSource } = discoveryMainStore;
 
-    const { resize, debug, interactive } = mainVizSetting
+    const { resize, debug } = mainVizSetting
     const { width, height, mode } = resize;
-    const mainViewData = useMemo<IRow[]>(() => {
-        if (pined) return applyFilter(dataSource, pined.filters)
+    const viewData = useMemo<IRow[]>(() => {
+        if (view) return applyFilter(dataSource, view.filters)
         return []
-    }, [dataSource, pined])
-
-    const spec = useMemo(() => {
-        if (vizAlgo === 'lite') {
-            return distVis({
-                resizeMode: mode,
-                width,
-                height,
-                pattern: pined,
-                interactive
-            })
-        } else {
-            return labDistVis({
-                resizeMode: mode,
-                pattern: pined,
-                width,
-                height,
-                dataSource
-            })
-        }
-    }, [mode, height, width, interactive, pined, vizAlgo, dataSource])
+    }, [dataSource, view])
 
     const enableResize = (mode === IResizeMode.control && spec.encoding && !spec.encoding.column && !spec.encoding.row)
 
@@ -62,14 +40,14 @@ const MainCanvas: React.FC<MainCanvasProps> = props => {
             <ReactVega
                 actions={debug}
                 spec={spec}
-                dataSource={mainViewData}
+                dataSource={viewData}
             />
         </Resizable>
     }
     return <ReactVega
         actions={debug}
         spec={spec}
-        dataSource={mainViewData}
+        dataSource={viewData}
     />
 }
 

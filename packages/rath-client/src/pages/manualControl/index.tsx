@@ -6,10 +6,10 @@ import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
 import '@kanaries/graphic-walker/dist/style.css';
 
 const VisualInterface: React.FC = props => {
-    const { dataSourceStore, exploreStore } = useGlobalStore();
+    const { dataSourceStore, commonStore } = useGlobalStore();
     // TODO: discuss use clean data from dataSourceStore or cooked data from dataPipeline?
     const { cleanedData, mutFields } = dataSourceStore;
-    const { specForGraphicWalker } = exploreStore;
+    const { graphicWalkerSpec } = commonStore
     const gwRawFields = useMemo<IMutField[]>(() => {
         return mutFields.map(f => {
             return {
@@ -21,7 +21,7 @@ const VisualInterface: React.FC = props => {
             }
         })
     }, [mutFields])
-    return <GraphicWalker dataSource={cleanedData} rawFields={gwRawFields} spec={specForGraphicWalker} />
+    return <GraphicWalker dataSource={cleanedData} rawFields={gwRawFields} spec={graphicWalkerSpec} />
 }
 
 export default observer(VisualInterface);

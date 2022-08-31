@@ -4,7 +4,7 @@ export const LiteForm = styled.div`
   display: flex;
   align-items: center;
   .item{
-    margin: 0em 1em;
+    margin: 0em 8px;
     display: flex;
     align-items: center;
     >label {

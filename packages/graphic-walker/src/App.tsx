@@ -3,20 +3,22 @@ import { Record, IMutField } from './interfaces';
 import VisualSettings from './visualSettings';
 import { Container, NestContainer } from './components/container';
 import ClickMenu from './components/clickMenu';
-import InsightBoard from './InsightBoard/index';
-import PosFields from './Fields/posFields';
-import AestheticFields from './Fields/AestheticFields';
-import DatasetFields from './Fields/datasetFields/index';
+import InsightBoard from './insightBoard/index';
+import PosFields from './fields/posFields';
+import AestheticFields from './fields/aestheticFields';
+import DatasetFields from './fields/datasetFields/index';
 import ReactiveRenderer from './renderer/index';
 import DataSourceSegment from './dataSource/index';
 import { useGlobalStore } from './store';
 import { preAnalysis, destroyWorker } from './services'
 import { observer } from 'mobx-react-lite';
-import { LightBulbIcon } from '@heroicons/react/outline'
+import { LightBulbIcon } from '@heroicons/react/24/outline'
 import { toJS } from 'mobx';
 import "tailwindcss/tailwind.css"
 import './index.css'
 import { Specification } from 'visual-insights';
+import PureTabs from './components/tabs/pureTab';
+import VisNav from './segments/visNav';
 
 export interface EditorProps {
 	dataSource?: Record[];
@@ -68,8 +70,12 @@ const App: React.FC<EditorProps> = props => {
 	return (
 		<div className="App">
 			<DataSourceSegment preWorkDone={insightReady} />
+			<div className='px-2 mx-2'>
+				<VisNav />
+				{/* <PureTabs tabs={[{label: 'a', key: 'a'}, {label: 'b', key: 'b'}]} selectedKey='a' onSelected={() => {}} /> */}
+			</div>
+			<Container style={{ marginTop: '0em', borderTop: 'none' }}>
 			<VisualSettings />
-			<Container>
 				<div className="grid grid-cols-12 xl:grid-cols-6">
 					<div className="col-span-3 xl:col-span-1">
 						<DatasetFields />

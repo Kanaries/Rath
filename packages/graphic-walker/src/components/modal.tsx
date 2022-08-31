@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { XCircleIcon } from '@heroicons/react/outline';
+import { XCircleIcon } from '@heroicons/react/24/outline';
 const Container = styled.div`
   width: 880px;
   max-height: 800px;

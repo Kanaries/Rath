@@ -1,47 +1,43 @@
-import React from "react";
-import BaseChart from "../../../visBuilder/vegaBase";
-import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
-import { IInsightSpace, Specification } from "visual-insights";
-import { PreferencePanelConfig } from "../../../components/preference";
-import { IFieldMeta, IRow } from "../../../interfaces";
-import { CommandButton } from "office-ui-fabric-react";
+import React from 'react';
+import { CommandButton } from 'office-ui-fabric-react';
 import intl from 'react-intl-universal';
+import { IInsightSpace, Specification } from 'visual-insights';
+import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
+import { PreferencePanelConfig } from '../../../components/preference';
+import { IFieldMeta, IRow } from '../../../interfaces';
+import ReactVega from '../../../components/react-vega';
+import { distVis } from '../../../queries/distVis';
 export interface IVizSpace extends IInsightSpace {
     schema: Specification;
-    dataView: IRow[]
+    dataView: IRow[];
 }
 
 interface AssociationProps {
     visualConfig: PreferencePanelConfig;
-    //   subspaceList: Subspace[];
     vizList: IVizSpace[];
     fieldMetas: IFieldMeta[];
     dataSource: IRow[];
-    onSelectView: (viz: IVizSpace) => void
+    onSelectView: (viz: IVizSpace) => void;
 }
-const AssociationCharts: React.FC<AssociationProps> = props => {
-    const { vizList, onSelectView, visualConfig, dataSource, fieldMetas } = props;
-    //   const { dataSource, fieldScores } = digDimensionProps;
-    //   const relatedCharts = useDigDimension(digDimensionProps);
+const AssociationCharts: React.FC<AssociationProps> = (props) => {
+    const { vizList, onSelectView, dataSource, fieldMetas } = props;
 
-    //className="ms-Grid"
     return (
-        <div style={{ border: "solid 1px #bfbfbf", marginTop: '2em', backgroundColor: '#e7e7e7' }}>
-
+        <div style={{ border: 'solid 1px #bfbfbf', marginTop: '2em', backgroundColor: '#e7e7e7' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', overflow: 'auto' }}>
                 {vizList.map((view, i) => {
-                    // 旧：业务图表用
-                    // const vizAggregate = view.schema.geomType && view.schema.geomType.includes("point") ? false : true;
+                    const fieldsInView = fieldMetas.filter(
+                        (m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid)
+                    );
                     return (
-                        <div key={`associate-row-${i}`}
-                            //   className="ms-Grid-row"
+                        <div
+                            key={`associate-row-${i}`}
                             dir="ltr"
                             style={{
-                                // border: "solid 1px #bfbfbf",
-                                backgroundColor:'#fff',
-                                margin: "6px",
-                                padding: "10px",
-                                flexGrow: 1
+                                backgroundColor: '#fff',
+                                margin: '6px',
+                                padding: '10px',
+                                flexGrow: 1,
                             }}
                         >
                             <div>
@@ -55,16 +51,11 @@ const AssociationCharts: React.FC<AssociationProps> = props => {
                                 />
                             </div>
                             <VisErrorBoundary>
-                                <BaseChart
-                                    aggregator={visualConfig.aggregator}
-                                    defaultAggregated={false}
-                                    defaultStack={visualConfig.defaultStack}
-                                    dimensions={view.dimensions}
-                                    measures={view.measures}
-                                    // dataSource={vizAggregate ? view.dataView : dataSource}
+                                <ReactVega
                                     dataSource={dataSource}
-                                    schema={view.schema}
-                                    fieldFeatures={fieldMetas}
+                                    spec={distVis({
+                                        pattern: { fields: fieldsInView, imp: 0 },
+                                    })}
                                 />
                             </VisErrorBoundary>
                         </div>

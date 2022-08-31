@@ -1,9 +1,9 @@
-import { computed, makeAutoObservable, observable, runInAction, toJS } from 'mobx';
-import { Specification, IInsightSpace } from 'visual-insights';
-import { ISpec } from 'visual-insights';
+import { IPattern } from '@kanaries/loa';
+import { computed, makeAutoObservable, observable, runInAction } from 'mobx';
+import { Specification, IInsightSpace, ISpec } from 'visual-insights';
 import { STORAGE_FILE_SUFFIX } from '../constants';
-import { Aggregator } from '../global';
-import { IResizeMode, IRow, ITaskTestMode, PreferencePanelConfig } from '../interfaces';
+import {  IResizeMode, IRow, ITaskTestMode, IVegaSubset, PreferencePanelConfig } from '../interfaces';
+import { distVis } from '../queries/distVis';
 import { rathEngineService } from '../service';
 import { isSetEqual } from '../utils';
 import { RathStorageDump } from '../utils/storage';
@@ -15,22 +15,21 @@ export interface IVizSpace extends IInsightSpace {
     dataView: IRow[]
 }
 
-interface IExploreView {
-    dimensions: string[];
-    measures: string[];
-    ops: Aggregator[]
-}
-
 export const EXPLORE_VIEW_ORDER = {
     DEFAULT: 'default',
     FIELD_NUM: 'field_num',
     CARDINALITY: 'cardinality'
 } as const;
 
+interface IConstranints {
+    fid: string;
+    name?: string;
+    state: number;
+}
+
 export class ExploreStore {
     public pageIndex: number = 0;
     private ltsPipeLineStore: LTSPipeLine;
-    public spec: { schema: ISpec; dataView: IRow[] } | undefined = undefined;
     public specForGraphicWalker: ISpec | undefined = undefined;
     public details: IInsightSpace[] = [];
     public assoListT1: IVizSpace[] = []
@@ -41,17 +40,13 @@ export class ExploreStore {
     public showSaveModal: boolean = false;
     public showSubinsights: boolean = false;
     public visualConfig: PreferencePanelConfig;
-    public forkView: IExploreView | null = null;
-    public view: IExploreView | null = null;
+    public mainViewSpec: IVegaSubset | null = null;
+    public mainViewPattern: IPattern | null = null;
     public orderBy: string = EXPLORE_VIEW_ORDER.DEFAULT;
     public nlgThreshold: number = 0.2;
-    public forkViewSpec: {
-        schema: Specification;
-        dataView: IRow[];
-    } | null = null;
     public globalConstraints: {
-        dimensions: Array<{fid: string; state: number}>;
-        measures: Array<{fid: string; state: number}>
+        dimensions: Array<IConstranints>;
+        measures: Array<IConstranints>
     }
     // public viewData: IRow[] = []
     constructor (ltsPipeLineStore: LTSPipeLine) {
@@ -74,12 +69,10 @@ export class ExploreStore {
             measures: []
         }
         makeAutoObservable(this, {
-            spec: observable.ref,
             specForGraphicWalker: observable.ref,
             details: observable.ref,
             assoListT1: observable.ref,
             assoListT2: observable.ref,
-            forkViewSpec: observable.ref,
             insightSpaces: computed
             // viewData: observable.ref
         });
@@ -155,30 +148,18 @@ export class ExploreStore {
     public setShowPreferencePannel(show: boolean) {
         this.showPreferencePannel = show;
     }
-    public async specifyForkView () {
-        if (this.forkView !== null) {
-            const spec = await this.ltsPipeLineStore.specify({
-                dimensions: toJS(this.forkView.dimensions),
-                measures: toJS(this.forkView.measures),
-                significance: 1
-            })
-            if (spec) {
-                runInAction(() => {
-                    this.forkViewSpec = spec
-                })
-            }
-        }
-    }
     public initConstraints () {
-        const fields = this.ltsPipeLineStore.fields;
+        const fields = this.ltsPipeLineStore.fieldMetas;
         this.globalConstraints.dimensions = fields.filter(f => f.analyticType === 'dimension')
             .map(f => ({
-                fid: f.key,
+                fid: f.fid,
+                name: f.name,
                 state: 0
             }));
         this.globalConstraints.measures = fields.filter(f => f.analyticType === 'measure')
             .map(f => ({
-                fid: f.key,
+                fid: f.fid,
+                name: f.name,
                 state: 0
             }));
     }
@@ -207,6 +188,41 @@ export class ExploreStore {
         this.visualConfig.resizeConfig.width = 320;
         this.visualConfig.resizeConfig.height = 320;
     }
+    public createMainViewPattern (iSpace: IInsightSpace) {
+        const viewFields = this.fieldMetas.filter(f => iSpace.dimensions.includes(f.fid) || iSpace.measures.includes(f.fid));
+        this.mainViewPattern = {
+            fields: viewFields,
+            imp: iSpace.score || 0
+        }
+        return this.mainViewPattern;
+    }
+    public createMainViewSpec (pattern: IPattern, mode: 'lite' | 'strict') {
+        const { visualConfig } = this;
+        this.mainViewSpec = distVis({
+            resizeMode: visualConfig.resize,
+            pattern,
+            width: visualConfig.resizeConfig.width,
+            height: visualConfig.resizeConfig.height,
+            interactive: visualConfig.zoom,
+            stepSize: 32
+        })
+    }
+    public addField2MainViewPattern (fid: string) {
+        const targetField = this.fieldMetas.find(f => f.fid === fid);
+        if (targetField && this.mainViewPattern) {
+            this.mainViewPattern.fields.push(targetField);
+            this.createMainViewSpec(this.mainViewPattern, 'lite')
+        }
+    }
+    public removeFieldInViewPattern (fid: string) {
+        if (this.mainViewPattern) {
+            const targetFieldIndex = this.mainViewPattern.fields.findIndex(f => f.fid === fid);
+            if (targetFieldIndex > -1) {
+                this.mainViewPattern.fields.splice(targetFieldIndex, 1)
+                this.createMainViewSpec(this.mainViewPattern, 'lite')
+            }
+        }
+    }
     public async goToLastView () {
         const { pageIndex, insightSpaces } = this;
         this.emitViewChangeTransaction((pageIndex - 1 + insightSpaces.length) % insightSpaces.length)
@@ -215,31 +231,21 @@ export class ExploreStore {
         const { pageIndex, insightSpaces } = this;
         this.emitViewChangeTransaction((pageIndex + 1) % insightSpaces.length)
     }
-    public async emitViewChangeTransaction(index: number) {
+    public emitViewChangeTransaction(index: number) {
         // pipleLineStore统一提供校验逻辑
         if (this.insightSpaces && this.insightSpaces.length > index) {
             const iSpace = this.insightSpaces[index];
-            const spec = await this.ltsPipeLineStore.specify(iSpace);
+            const patt = this.createMainViewPattern(iSpace);
+            this.createMainViewSpec(patt, 'lite');
+            this.pageIndex = index;
+            this.details = []
+            this.showAsso = false;
+            this.assoListT1 = [];
+            this.assoListT2 = [];
+            this.initVisualConfigResize();
+            // const spec = await this.ltsPipeLineStore.specify(iSpace);
             // const viewData = await this.getViewData(iSpace.dimensions, iSpace.measures);
-            if (spec) {
-                // default aggregate 推断逻辑，旧时，推荐为业务图表时使用。
-                // const agg = !spec.schema.geomType?.includes('point');
-                runInAction(() => {
-                    this.spec = spec;
-                    this.forkViewSpec = null;
-                    // this.viewData = viewData;
-                    // this.visualConfig.defaultAggregated = agg;
-                    this.pageIndex = index;
-                    this.details = []
-                    this.showAsso = false;
-                    this.assoListT1 = [];
-                    this.assoListT2 = []
-                    // 这里不是啰嗦的写法！！forView 和 view 独立，不要直接赋值了，浅拷贝也不行。
-                    this.forkView = { dimensions: iSpace.dimensions, measures: iSpace.measures, ops: iSpace.measures.map(() => 'sum')}
-                    this.view = { dimensions: iSpace.dimensions, measures: iSpace.measures, ops: iSpace.measures.map(() => 'sum')}
-                    this.initVisualConfigResize();
-                })
-            }
+
         }
     }
     public setAggState (aggState: boolean) {
@@ -253,24 +259,6 @@ export class ExploreStore {
     }
     public setShowSaveModal (show: boolean) {
         this.showSaveModal = show;
-    }
-    public async addFieldToForkView(analyticType: 'dimensions' | 'measures', fid: string) {
-        if (this.forkView !== null) {
-            if (!this.forkView[analyticType].includes(fid)) {
-                // 未来可以支持有重复字段的可视化视图
-                this.forkView[analyticType].push(fid);
-                this.specifyForkView();
-            }
-        }
-    }
-    public async removeFieldFromForkView(analyticType: 'dimensions' | 'measures', fid: string) {
-        if (this.forkView !== null) {
-            const index = this.forkView[analyticType].findIndex(f => f === fid);
-            if (index !== -1) {
-                this.forkView[analyticType].splice(index, 1)
-            }
-            this.specifyForkView();
-        }
     }
     public async scanDetails (spaceIndex: number) {
         const result = await this.ltsPipeLineStore.scanDetails(spaceIndex);
@@ -308,11 +296,6 @@ export class ExploreStore {
             this.assoListT2 = asso.assSpacesT2;
             this.showAsso = true;
         })
-    }
-    public bringToGrphicWalker () {
-        if (this.spec && this.spec.schema) {
-            this.specForGraphicWalker = this.spec.schema;
-        }
     }
     public async getSubInsights (dimensions: string[], measures: string[]) {
         try {
