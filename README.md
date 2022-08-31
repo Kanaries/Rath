@@ -3,6 +3,7 @@
 ![](https://img.shields.io/twitter/follow/kanaries_data?style=social)
 ![](https://img.shields.io/badge/license-AGPL-brightgreen)
 ![](https://img.shields.io/github/stars/kanaries/rath?color=%23ff85c0)
+![](https://img.shields.io/travis/kanaries/rath)
 
 
 <img src="https://kanaries.cn/assets/kanaries-logo.png" alt="logo" width="180px" style="" />
