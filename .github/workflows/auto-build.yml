@@ -1,0 +1,21 @@
+name: Rath Auto Build
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+    branches: [master, dev]
+jobs:
+  auto-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: yarn install
+      - run: yarn workspace @kanaries/graphic-walker build
+      - run: yarn workspace rath-client build
