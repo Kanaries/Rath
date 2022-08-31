@@ -166,10 +166,7 @@
             "title": "下载数据"
         },
         "extend": {
-            "title": "扩展维度"
-        },
-        "expandDateTime": {
-            "title": "扩展时间字段"
+            "title": "扩展信息"
         }
     },
     "meta": {
