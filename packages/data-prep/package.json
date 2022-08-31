@@ -29,6 +29,6 @@
     "eslint": "^8.12.0",
     "eslint-plugin-react": "^7.29.4",
     "typescript": "^4.5.4",
-    "vite": "^2.9.0"
+    "vite": "^2.9.13"
   }
 }
