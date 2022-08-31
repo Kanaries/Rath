@@ -1,4 +1,4 @@
-import { IRow } from "visual-insights";
+import { IRow, ISemanticType } from "visual-insights";
 import { IMuteFieldBase } from "rath-client/src/interfaces";
 import { LexAnalyzer, LexAnalyzerItem, SynAnalyzerRule } from "./synAnalyzer"
 import { checkExpandEnv } from "./checkExpandEnv";
@@ -286,6 +286,18 @@ export function dateTimeExpand(props: { dataSource: IRow[]; fields: IMuteFieldBa
 
     let extFields: IMuteFieldBase[] = []
     let fieldIds = new Set(fields.map(f => (f.extInfo && f.extInfo?.extOpt === "dateTimeExpand") ? f.extInfo?.extFrom[0] : ''))
+    let keySemanticType: { [k: string]: ISemanticType } = {
+        utime: 'temporal',
+        $y: 'ordinal',
+        $M: 'ordinal',
+        $D: 'ordinal',
+        $W: 'ordinal',
+        $H: 'ordinal',
+        $m: 'ordinal',
+        $s: 'ordinal',
+        $ms:'ordinal',
+        $L: 'nominal'
+    }
     for (let i = 0;i < fields.length; ++i) {
         const field = fields[i]
         extFields.push(field)
@@ -293,25 +305,32 @@ export function dateTimeExpand(props: { dataSource: IRow[]; fields: IMuteFieldBa
         if (field.semanticType === 'temporal' && !fieldIds.has(field.fid)) {
             let dateTime = dataSource.map(item => item[field.fid])
             let moment: DateTimeInfoArray = parseDateTimeArray(dateTime)
-            Object.keys(moment).forEach(key => {
+            if (moment.utime !== undefined) {
+                field.disable = true
+                if (moment.utime?.map<boolean>(t => typeof(t) === 'number').reduce((a, b) => a && b) === false) {
+                    throw new Error("[dateTimeExpand] Some 'utime' not number")
+                }
+            }
+            for (let key of Object.keys(moment)) if (moment[key as InfoArrayType] !== undefined) {
+                let momentInfo = moment[key as InfoArrayType] as any[]
                 let extField: IMuteFieldBase = {
                     fid: `${field.fid}_${key}`,
+                    disable: (new Set(momentInfo.filter((info, index, array) => !index || info !== array[index-1]))).size <= 1,
                     name: `${field.name}.${dateTimeDict.get(key)}`,
                     analyticType: 'dimension',
-                    semanticType: 'ordinal',
+                    semanticType: keySemanticType[key],
                     geoRole: 'none',
                     extInfo: {
                         extFrom: [field.fid],
                         extOpt: 'dateTimeExpand',
-                        extInfo: `${key}.value`
+                        extInfo: `${key}`
                     }
                 }
                 extFields.push(extField)
-                let infoArray = moment[key as InfoArrayType] as any[]
                 for (let i = 0; i < dataSource.length; ++i) {
-                    dataSource[i][extField.fid] = infoArray[i]
+                    dataSource[i][extField.fid] = momentInfo[i]
                 }
-            })
+            }
         }
     }
     return {
@@ -335,9 +354,9 @@ export function dateTimeExpandTest(testCase: Array<string>) {
     }
 }
 
-if (typeof window === 'object' && checkExpandEnv().toLowerCase() === 'debug') {
-    (window as any).parseDateTimeArray = parseDateTimeArray;
-    (window as any).dateTimeExpandTest = dateTimeExpandTest
+if (checkExpandEnv().toLowerCase() === 'debug') {
+    (global as any).parseDateTimeArray = parseDateTimeArray;
+    (global as any).dateTimeExpandTest = dateTimeExpandTest
 }
 
 export function doTest() {

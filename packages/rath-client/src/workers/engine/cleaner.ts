@@ -14,7 +14,8 @@ function transformDataTypes (dataSource: IRow[], fields: IRawField[]): IRow[] {
             // }
             record[field.fid] = row[field.fid]
             if (field.analyticType === 'dimension') {
-                if (field.semanticType === 'temporal' || field.semanticType === 'nominal') {
+                if ((field.semanticType === 'temporal' && field.extInfo?.extOpt !== "dateTimeExpand") ||
+                    field.semanticType === 'nominal') {
                     record[field.fid] = String(row[field.fid])
                 }
             }
