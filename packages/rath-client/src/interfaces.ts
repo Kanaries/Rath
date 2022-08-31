@@ -1,4 +1,5 @@
 // define new interfaces here, global.ts is no longer maintained.
+import { AnyMark } from "vega-lite/build/src/mark";
 import { IAnalyticType, IFieldSummary, IInsightSpace, ISemanticType } from "visual-insights";
 import { Aggregator } from "./global";
 
@@ -121,4 +122,29 @@ export enum IDataPrepProgressTag {
     upload = 'upload',
     filter = 'filter',
     clean = 'clean'
+}
+
+export interface IVegaChannel {
+    field: string;
+    title?: string;
+    type: ISemanticType;
+    aggregate?: string;
+    order?: any;
+    [key: string]: any;
+}
+
+// export type IVegaSubset = NormalizedFacetSpec & NormalizedUnitSpec;
+export interface IVegaSubset {
+    [key: string]: any;
+    mark: AnyMark;
+    encoding: {
+        x?: IVegaChannel;
+        y?: IVegaChannel;
+        color?: IVegaChannel;
+        opacity?: IVegaChannel;
+        row?: IVegaChannel;
+        column?: IVegaChannel;
+        size?: IVegaChannel;
+        shape?: IVegaChannel;
+    }
 }

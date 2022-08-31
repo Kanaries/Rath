@@ -204,7 +204,7 @@
     },
     "explore": {
         "title": "可视化洞察探索",
-        "preference": "可视化偏好设置",
+        "preference": "偏好设置",
         "rankList": "推荐列表",
         "search": "搜索",
         "digIn": "联想",
