@@ -13,7 +13,7 @@ const expandService = e => {
     } catch (error) {
         self.postMessage({
             success: false,
-            message: error.toString()
+            message: `[expandService]${error}\n${error.stack}`
         })
     }
 }
