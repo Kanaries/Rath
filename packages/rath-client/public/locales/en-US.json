@@ -160,10 +160,7 @@
             "title": "Download Data"
         },
         "extend": {
-            "title": "Extend Features"
-        },
-        "expandDateTime": {
-            "title": "Expand DateTime Fields"
+            "title": "Extend Information"
         }
     },
     "meta": {

@@ -247,20 +247,13 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             />
             <CommandButton
               text={intl.get('dataSource.extend.title')}
-              disabled
-              // disabled={rawData.length === 0}
+              disabled={rawData.length === 0}
               iconProps={{ iconName: 'AppIconDefaultAdd' }}
               onClick={() => {
-                dataSourceStore.extendData();
-              }}
-            />
-            <CommandButton
-              text={intl.get('dataSource.expandDateTime.title')}
-              disabled={rawData.length === 0}
-              onClick={() => {
+                // dataSourceStore.extendData();
+                // TODO: 更多的扩展方式
                 dataSourceStore.expandDateTime();
               }}
-              iconProps={{ iconName: 'CalendarMirrored' }}
             />
         </Stack>
         <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
