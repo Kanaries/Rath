@@ -60,9 +60,7 @@ export function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], or
         } else if (isSetEqual(semantics, ['quantitative', 'quantitative'])) {
             return 'area'
         } else if (isSetEqual(semantics, ['temporal', 'quantitative'])) {
-            const temporalField = semanticFields.find(s => s.semanticType === 'temporal')!;
-            if (temporalField.features.unique > 16) return 'line'
-            return 'bar'
+            return 'line'
         }
     } else {
         if (isSetEqual(semantics, ['nominal', 'nominal'])) {
