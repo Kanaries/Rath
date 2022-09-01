@@ -257,7 +257,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         </Stack>
         <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
           {intl.get('dataSource.recordCount', { count: cleanedData.length })} <br />
-          Origin: ({rawData.length}) rows / Selected: ({ filteredData.length }) / Clean: ({cleanedData.length}) rows
+          {intl.get('dataSource.rowsInViews', { origin: rawData.length, select: filteredData.length, clean: cleanedData.length })}
         </i>
         <Toggle checked={dataPreviewMode === IDataPreviewMode.meta}
           disabled={rawData.length === 0}

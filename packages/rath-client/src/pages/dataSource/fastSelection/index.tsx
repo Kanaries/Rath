@@ -1,6 +1,7 @@
-import { observer } from 'mobx-react-lite';
-import { DefaultButton, Modal, PrimaryButton, Slider, Stack, Toggle } from 'office-ui-fabric-react';
 import React, { useCallback, useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { DefaultButton, Label, Modal, PrimaryButton, Slider, Stack, Toggle } from 'office-ui-fabric-react';
+import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../../store';
 
 const FastSelection: React.FC = () => {
@@ -30,9 +31,9 @@ const FastSelection: React.FC = () => {
             dataSourceStore.setShowFastSelection(false);
         }}>
             <div style={{ padding: '2em' }}>
-            <h1>Fast Selection Config</h1>
-            <p>Filter based on quantiles to get the main part of your data.</p>
-            <Toggle label="sync mode" checked={syncMode}
+            <Label>{intl.get('dataSource.selection.title')}</Label>
+            <p>{intl.get('dataSource.selection.desc')}</p>
+            <Toggle label={intl.get('dataSource.selection.syncMode')} checked={syncMode}
                 onChange={(_, checked) => {
                     setSyncMode(Boolean(checked))
                 }}
@@ -53,14 +54,14 @@ const FastSelection: React.FC = () => {
                 />)
             }
             <Stack style={{ marginTop: '1em' }} horizontal>
-                <PrimaryButton text="Submit" onClick={() => {
+                <PrimaryButton text={intl.get('function.confirm')} onClick={() => {
                     dataSourceStore.createBatchFilterByQts(
                         meaFields.map(m => m.fid),
                         ranges
                     )
                     dataSourceStore.setShowFastSelection(false);
                 }} />
-                <DefaultButton style={{ marginLeft: '1em' }} text="Cancel" onClick={() => {
+                <DefaultButton style={{ marginLeft: '1em' }} text={intl.get('function.cancel')} onClick={() => {
                     dataSourceStore.setShowFastSelection(false);
                 }} />
             </Stack>

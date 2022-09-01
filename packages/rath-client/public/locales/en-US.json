@@ -133,11 +133,17 @@
         "methods": {
             "dropNull": "drop null records",
             "useMode": "replace null with mode",
-            "simpleClean": "simple cleaning",
+            "simpleClean": "use zero or null",
             "none": "none(use original data)"
         },
         "tip": "Remember to adjust the fields' types and cleaning strategy before analysis.",
         "recordCount": "Number of records {count}",
+        "rowsInViews": "Origin: {origin} rows / Select: ({select}) / Clean: ({clean}) rows",
+        "selection": {
+            "title": "Fast Selection Config",
+            "desc": "Filter based on quantiles to get the main part of your data.",
+            "syncMode": "sync mode"
+        },
         "upload": {
             "title": "Upload Your own dataset",
             "fileTypes": "csv, json are supportted.",
