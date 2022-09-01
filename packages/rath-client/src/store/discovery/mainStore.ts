@@ -68,6 +68,8 @@ export class DiscoveryMainStore {
                 !autoPatt && this.initRenderViews('featViews');
                 autoFilter && this.filterAssociate();
                 !autoFilter && this.initRenderViews('filterViews');
+            } else {
+                autoPatt && this.initAssociate();
             }
         }))
 
@@ -99,7 +101,7 @@ export class DiscoveryMainStore {
     public setShowMiniFloatView (show: boolean) {
         this.showMiniFloatView = show;
     }
-    public hasMainView () {
+    public get hasMainView () {
         return this.mainView !== null
     }
     public get dataSource () {

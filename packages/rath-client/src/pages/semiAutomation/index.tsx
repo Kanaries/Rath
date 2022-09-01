@@ -14,14 +14,13 @@ const PatternPage: React.FC = () => {
     const { discoveryMainStore } = useGlobalStore();
     const { 
         fieldMetas,
-        dataSource,
+        dataSource
     } = discoveryMainStore;
 
     useEffect(() => {
         if (dataSource.length > 1e5) {
             discoveryMainStore.updateSettings('vizAlgo', 'lite')
         }
-        discoveryMainStore.initAssociate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fieldMetas, dataSource])
 
