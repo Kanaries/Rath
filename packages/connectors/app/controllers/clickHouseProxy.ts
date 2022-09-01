@@ -20,10 +20,14 @@ export async function CHGeneralProxy (ctx: Context) {
         for (let [pk, pv] of url.searchParams.entries()) {
             paramsObj[pk] = pv;
         }
-        // fs.appendFileSync('./log.sql', `${paramsObj.query}\n`)
+        // console.log('query', paramsObj.query)
         const res = await axios(`${config.clickhouse.protocol}://${config.clickhouse.host}:${config.clickhouse.port}`, {
             method: ctx.request.method as 'post' | 'get',
-            params: paramsObj
+            params: {
+                ...paramsObj,
+                user: config.clickhouse.user,
+                password: config.clickhouse.password
+            }
         });
         sendPureResponse(ctx, res.data);
     } catch (error) {
