@@ -133,11 +133,17 @@
         "methods": {
             "dropNull": "删除空值记录",
             "useMode": "使用众数代替空",
-            "simpleClean": "简单的替换",
+            "simpleClean": "替换为0或null",
             "none": "无(使用原始数据)"
         },
         "tip": "记得在开始分析前先调整数据的清洗策略并配置字段的属性",
         "recordCount": "记录数 {count}",
+        "rowsInViews": "原始数据: {origin} 行 / 筛选后: {select} 行 / 清洗后: {clean} 行",
+        "selection": {
+            "title": "快速数据筛选",
+            "desc": "基于数据中的分位数进行快速筛选",
+            "syncMode": "分位数同步"
+        },
         "upload": {
             "title": "连接你的数据集，根据需求调整以下配置",
             "fileTypes": "支持csv, json文件",
