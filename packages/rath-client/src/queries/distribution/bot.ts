@@ -1,4 +1,5 @@
-import { ISemanticType } from "@kanaries/loa";
+import { IRow, ISemanticType } from "@kanaries/loa";
+import { groupBy } from "visual-insights/build/esm/statistics";
 import { IFieldMeta, IVegaSubset } from "../../interfaces";
 interface IFieldEncode {
     field?: string;
@@ -16,12 +17,13 @@ function isSetEqual (a1: any[], a2: any[]) {
     }
     return true;
 }
-export function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], originFields: IFieldMeta[] = [], statEncodes: IFieldEncode[] = []) {
+export function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], originFields: IFieldMeta[] = [], statEncodes: IFieldEncode[] = [], dataSource?: IRow[]) {
     // const orderFields = [...fields];
     // const orderStatFields = [...statFields];
     // orderFields.sort((a, b) => b.features.entropy - a.features.entropy);
     // orderStatFields.sort((a, b) => b.features.entropy - a.features.entropy);
-    const semanticFields = [...statFields, ...originFields].sort((a, b) => b.features.entropy - a.features.entropy).slice(0, 2);
+    const allFields = [...statFields, ...originFields].sort((a, b) => b.features.entropy - a.features.entropy);
+    const semanticFields = allFields.slice(0, 2);
     const semantics = semanticFields.map(f => f.semanticType)
     // if (fields.length === 1) {
     //     return 'bar'
@@ -52,7 +54,17 @@ export function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], or
             }
             return 'bar'
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
-            return 'bar'
+            if (dataSource) {
+                const dims = allFields.filter(f => f.analyticType === 'dimension');
+                const dsize = dims.reduce((c, t) => c * t.features.unique, 1);
+                const groups = groupBy(dataSource, allFields.filter(f => f.analyticType === 'dimension').map(f => f.fid));
+                if (groups.size < dsize) {
+                    return 'bar'
+                }
+                return 'line'
+            }
+
+            return 'line'
         } else  if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
             return 'point'
         } else  if (isSetEqual(semantics, ['nominal', 'temporal'])) {
@@ -236,6 +248,13 @@ export function encode(props: EncodeProps) {
 }
 
 export function humanHabbit (encoding: IVegaSubset['encoding']) {
+    if (encoding.x && encoding.x.type !== 'ordinal') {
+        if (encoding.y && encoding.y.type === 'ordinal') {
+            const t = encoding.x;
+            encoding.x = encoding.y;
+            encoding.y = t;
+        }
+    }
     if (encoding.x && encoding.x.type !== 'temporal') {
         if (encoding.y && encoding.y.type === 'temporal') {
             const t = encoding.x;
