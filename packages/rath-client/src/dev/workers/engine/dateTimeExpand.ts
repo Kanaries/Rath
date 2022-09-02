@@ -202,7 +202,7 @@ export function parseReg(value: string, reg_id: number): DateTimeInfo {
     return {} as DateTimeInfo
 }
 
-function Date2Info(date: Date): DateTimeInfo {
+function date2Info(date: Date): DateTimeInfo {
     return {
         utime: date.getTime(),
         $y: date.getUTCFullYear(),
@@ -223,12 +223,12 @@ function parseDateTime(dateTime: string, reg_id?: number): DateTimeInfo {
         if (dateTime === null) return UnknownDateTimeInfo;
         if (dateTime === undefined) {
             let date = new Date()
-            return Date2Info(date)
+            return date2Info(date)
         }
         // if (!/Z$/i.test(dateTime)) {
         // }
         // Polyfill
-        return Date2Info(new Date(dateTime))
+        return date2Info(new Date(dateTime))
     }
     catch(error) {
         console.warn(error)

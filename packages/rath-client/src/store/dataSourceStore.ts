@@ -466,6 +466,7 @@ export class DataSourceStore {
                 this.mutFields = res.fields
             })
         } catch (error) {
+            console.error(error)
             notify({
                 title: 'Expand DateTime API Error',
                 type: 'error',
