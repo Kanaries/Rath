@@ -4,6 +4,7 @@ import { Specification, IInsightSpace, ISpec } from 'visual-insights';
 import { STORAGE_FILE_SUFFIX } from '../constants';
 import {  IResizeMode, IRow, ITaskTestMode, IVegaSubset, PreferencePanelConfig } from '../interfaces';
 import { distVis } from '../queries/distVis';
+import { labDistVis } from '../queries/labdistVis';
 import { rathEngineService } from '../service';
 import { isSetEqual } from '../utils';
 import { RathStorageDump } from '../utils/storage';
@@ -44,6 +45,7 @@ export class ExploreStore {
     public mainViewPattern: IPattern | null = null;
     public orderBy: string = EXPLORE_VIEW_ORDER.DEFAULT;
     public nlgThreshold: number = 0.2;
+    public vizMode: 'lite' | 'strict' = 'lite';
     public globalConstraints: {
         dimensions: Array<IConstranints>;
         measures: Array<IConstranints>
@@ -123,6 +125,10 @@ export class ExploreStore {
     public setNlgThreshold (num: number) {
         this.nlgThreshold = num;
     }
+    public setVizMode (mode: 'lite' | 'strict') {
+        this.vizMode = mode;
+        this.refreshMainViewSpec();
+    }
     public setVisualConig (updater: (config: PreferencePanelConfig) => void) {
         runInAction(() => {
             updater(this.visualConfig)
@@ -196,22 +202,39 @@ export class ExploreStore {
         }
         return this.mainViewPattern;
     }
-    public createMainViewSpec (pattern: IPattern, mode: 'lite' | 'strict') {
-        const { visualConfig } = this;
-        this.mainViewSpec = distVis({
-            resizeMode: visualConfig.resize,
-            pattern,
-            width: visualConfig.resizeConfig.width,
-            height: visualConfig.resizeConfig.height,
-            interactive: visualConfig.zoom,
-            stepSize: 32
-        })
+    public createMainViewSpec (pattern: IPattern) {
+        const { visualConfig, vizMode } = this;
+        if (vizMode === 'lite') {
+            this.mainViewSpec = distVis({
+                resizeMode: visualConfig.resize,
+                pattern,
+                width: visualConfig.resizeConfig.width,
+                height: visualConfig.resizeConfig.height,
+                interactive: visualConfig.zoom,
+                stepSize: 32
+            })
+        } else if (vizMode === 'strict') {
+            this.mainViewSpec = labDistVis({
+                resizeMode: visualConfig.resize,
+                pattern,
+                width: visualConfig.resizeConfig.width,
+                height: visualConfig.resizeConfig.height,
+                interactive: visualConfig.zoom,
+                stepSize: 32,
+                dataSource: this.dataSource
+            })
+        }
+    }
+    public refreshMainViewSpec () {
+        if (this.mainViewPattern) {
+            this.createMainViewSpec(this.mainViewPattern)
+        }
     }
     public addField2MainViewPattern (fid: string) {
         const targetField = this.fieldMetas.find(f => f.fid === fid);
         if (targetField && this.mainViewPattern) {
             this.mainViewPattern.fields.push(targetField);
-            this.createMainViewSpec(this.mainViewPattern, 'lite')
+            this.createMainViewSpec(this.mainViewPattern)
         }
     }
     public removeFieldInViewPattern (fid: string) {
@@ -219,7 +242,7 @@ export class ExploreStore {
             const targetFieldIndex = this.mainViewPattern.fields.findIndex(f => f.fid === fid);
             if (targetFieldIndex > -1) {
                 this.mainViewPattern.fields.splice(targetFieldIndex, 1)
-                this.createMainViewSpec(this.mainViewPattern, 'lite')
+                this.createMainViewSpec(this.mainViewPattern)
             }
         }
     }
@@ -236,7 +259,7 @@ export class ExploreStore {
         if (this.insightSpaces && this.insightSpaces.length > index) {
             const iSpace = this.insightSpaces[index];
             const patt = this.createMainViewPattern(iSpace);
-            this.createMainViewSpec(patt, 'lite');
+            this.createMainViewSpec(patt);
             this.pageIndex = index;
             this.details = []
             this.showAsso = false;

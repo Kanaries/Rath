@@ -11,6 +11,8 @@ import {
     Toggle,
     SpinButton,
     Position,
+    ChoiceGroup,
+    IChoiceGroupOption,
 } from 'office-ui-fabric-react';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../store';
@@ -19,7 +21,7 @@ import { IResizeMode } from '../../interfaces';
 
 const PreferencePanel: React.FC = () => {
     const { exploreStore } = useGlobalStore();
-    const { visualConfig, showPreferencePannel, nlgThreshold } = exploreStore;
+    const { visualConfig, showPreferencePannel, nlgThreshold, vizMode } = exploreStore;
 
     const { nlg } = visualConfig;
 
@@ -51,6 +53,13 @@ const PreferencePanel: React.FC = () => {
         </div>
     );
 
+    const vizModeOptions  = useMemo<IChoiceGroupOption[]>(() => {
+        return [
+            { text: intl.get('discovery.main.vizsys.lite'), key: 'lite' },
+            { text: intl.get('discovery.main.vizsys.strict'), key: 'strict' }
+        ]
+    }, [])
+
     return (
         <Panel
             isOpen={showPreferencePannel}
@@ -60,6 +69,16 @@ const PreferencePanel: React.FC = () => {
             closeButtonAriaLabel="Close"
             onRenderFooterContent={onRenderFooterContent}
         >
+            <Stack.Item>
+            <ChoiceGroup
+                label={intl.get('discovery.main.vizsys.title')}
+                onChange={(e, op) => {
+                    op && exploreStore.setVizMode(op.key as 'lite' | 'strict')
+                }}
+                selectedKey={vizMode}
+                options={vizModeOptions}
+            />
+            </Stack.Item>
             <Stack.Item>
                 <Dropdown
                     style={{ minWidth: '120px' }}
