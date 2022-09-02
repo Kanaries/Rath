@@ -12,6 +12,7 @@ import PatternPage from './pages/semiAutomation/index';
 import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
 import LTSPage from './pages/megaAutomation';
+import PainterPage from './pages/painter';
 import MessageSegment from "./components/messageSegment";
 import AppNav from "./components/appNav";
 import { destroyRathWorker, initRathWorker } from "./service";
@@ -121,6 +122,7 @@ function App() {
         {appKey === PIVOT_KEYS.support && <SupportPage />}
         {appKey === PIVOT_KEYS.lts && <LTSPage />}
         {appKey === PIVOT_KEYS.pattern && <PatternPage />}
+        {appKey === PIVOT_KEYS.painter && <PainterPage />}
         <CrInfo />
         </div>
       </div>
