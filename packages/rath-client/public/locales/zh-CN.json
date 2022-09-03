@@ -20,7 +20,8 @@
         "lts": "全自动分析",
         "pattern": "半自动探索",
         "devCollection": "调试模式",
-        "progressiveDashBoard": "Dashboard Designer"
+        "progressiveDashBoard": "报表设计器",
+        "painter": "画板"
     },
     "preference": {
         "title": "个人偏好"
@@ -263,6 +264,7 @@
         },
         "bring": "自定义分析",
         "commandBar": {
+            "painting": "画板",
             "editing": "编辑图表",
             "associate": "联想",
             "constraints": "分析约束"

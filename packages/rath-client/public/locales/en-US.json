@@ -21,7 +21,8 @@
         "lts": "Mega-auto Exploration",
         "pattern": "Semi-auto Exploration",
         "devCollection": "Debug",
-        "progressiveDashBoard": "Dashboard Designer"
+        "progressiveDashBoard": "Dashboard Designer",
+        "painter": "Painter"
     },
     "preference": {
         "title": "preference"
@@ -263,6 +264,7 @@
         },
         "bring": "Customize Analysis",
         "commandBar": {
+            "painting": "painting",
             "editing": "editing chart",
             "associate": "associate views",
             "constraints": "analysis constraints"

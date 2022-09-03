@@ -17,6 +17,7 @@ export class CommonStore {
     public showAnalysisConfig: boolean = false;
     public navMode: 'text' | 'icon' = 'text';
     public graphicWalkerSpec: Specification;
+    public vizSpec: IVegaSubset | null = null;
     constructor() {
         const taskMode = localStorage.getItem(TASK_TEST_MODE_COOKIE_KEY) || ITaskTestMode.local;
         this.taskMode = taskMode as ITaskTestMode;
@@ -35,10 +36,13 @@ export class CommonStore {
         })
     }
     public visualAnalysisInGraphicWalker (spec: IVegaSubset) {
-        console.log(spec)
         this.graphicWalkerSpec = transVegaSubset2Schema(spec);
-        console.log(this.graphicWalkerSpec)
+        this.vizSpec = spec;
         this.appKey = PIVOT_KEYS.editor;
+    }
+    public analysisInPainter (spec: IVegaSubset) {
+        this.vizSpec = spec;
+        this.appKey = PIVOT_KEYS.painter;
     }
     public setNavMode (mode: 'text' | 'icon') {
         this.navMode = mode;

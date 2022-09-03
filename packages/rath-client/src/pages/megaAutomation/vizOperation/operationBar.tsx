@@ -34,6 +34,12 @@ const OperationBar: React.FC<OperationBarProps> = props => {
         }
     }, [exploreStore, commonStore])
 
+    const analysisInPainter = useCallback(() => {
+        if (exploreStore.mainViewSpec) {
+            commonStore.analysisInPainter(exploreStore.mainViewSpec)
+        }
+    }, [commonStore, exploreStore])
+
     const commandProps: ICommandBarItemProps[] = [
         {
             key: 'dimensions',
@@ -52,6 +58,12 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             text: intl.get('lts.commandBar.editing'),
             iconProps: { iconName: 'BarChartVerticalEdit' },
             onClick: customizeAnalysis
+        },
+        {
+            key: 'painting',
+            text: intl.get('lts.commandBar.painting'),
+            iconProps: { iconName: 'EditCreate' },
+            onClick: analysisInPainter
         },
         {
             key: 'associate',

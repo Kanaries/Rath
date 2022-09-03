@@ -1,191 +1,290 @@
-import { entropy,  IFieldMeta, IRow, liteGroupBy, rangeNormilize } from '@kanaries/loa';
+import { IFieldMeta, IRow } from '@kanaries/loa';
 import { observer } from 'mobx-react-lite';
-import { PrimaryButton } from 'office-ui-fabric-react';
+import { DefaultButton, PrimaryButton, Slider, Toggle, Stack, SwatchColorPicker } from 'office-ui-fabric-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import embed, { vega, Result } from 'vega-embed';
+import embed, { vega } from 'vega-embed';
 import ReactVega from '../../components/react-vega';
 import { IVegaSubset } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import { deepcopy } from '../../utils';
+import { deepcopy, getRange } from '../../utils';
+import { batchMutInCircle, nnMic } from './utils';
+import styled from 'styled-components';
+
+const Cont = styled.div`
+    /* cursor: none !important; */
+`;
+
+const PainterContainer = styled.div`
+    display: flex;
+    .vis-segment {
+        flex-grow: 1;
+    }
+    .operation-segment {
+        flex-grow: 0;
+        flex-shrink: 0;
+        min-width: 200px;
+    }
+`;
+
+const COLOR_SCHEME: string[] = [];
+const RAW = '4c78a8f58518e4575672b7b254a24beeca3bb279a2ff9da69d755dbab0ac';
+for (let i = 0; i < RAW.length; i += 6) {
+    COLOR_SCHEME.push('#' + RAW.slice(i, i + 6));
+}
+
+const colorCells = COLOR_SCHEME.map((c, i) => ({
+    id: `L_${i + 1}`,
+    color: c,
+    label: `L_${i + 1}`,
+}));
 
 const LABEL_FIELD_KEY = '_lab_field';
 const LABEL_INDEX = '_label_index';
-const BIN_SIZE = 16
 
-function vecAdd (mutVec: number[], inc: number[]) {
-    const size = Math.min(mutVec.length, inc.length);
-    for (let i = 0; i < size; i++) {
-        mutVec[i] += inc[i];
-    }
-}
-
-function getFreqMap (values: any[]): Map<any, number> {
-    const counter: Map<any, number> = new Map();
-    for (let val of values) {
-        if (!counter.has(val)) {
-            counter.set(val, 0)
-        }
-        counter.set(val, counter.get(val)! + 1)
-    }
-    return counter
-}
-
-export function getFreqRange (values: any[]): [any, number][] {
-    const FM = getFreqMap(values);
-    const sortedFM = [...FM.entries()].sort((a, b) => b[1] - a[1])
-    return sortedFM.slice(0, BIN_SIZE);
-}
-
-export function binGroupByShareFreqRange (Y: any[], range: any[]): number[] {
-    const fl: number[] = new Array(range.length).fill(0);
-    const rangeIndices: Map<any, number> = new Map();
-    // for (let val of range) {
-    for (let i = 0; i < range.length; i++) {
-        rangeIndices.set(range[i], i);
-    }
-    for (let val of Y) {
-        if (rangeIndices.has(val)) {
-            fl[rangeIndices.get(val)!]++;
-        } else {
-            fl[fl.length - 1]++;
-        }
-    }
-    return fl;
-}
-
-function nnMic (X: any[], Y: any[]) {
-    // const FM = getFreqMap(Y);
-    // const globalRange = [...FM.keys()];
-    const globalRange = getFreqRange(Y)
-
-    const groups = liteGroupBy(Y, X)
-
-    const sortedGroup = [...groups.entries()].sort((a, b) => b[1].length - a[1].length)
-    // for (let group of sortedGroup)
-    let usedGroupNum = sortedGroup.length
-    // debugger
-    let i = 0;
-    let condH = 0;
-    let globalFl = new Array(globalRange.length).fill(0);
-    for (i = 0; i < usedGroupNum; i++) {
-        const p = sortedGroup[i][1].length / Y.length;
-        const subFl = binGroupByShareFreqRange(sortedGroup[i][1], globalRange.map(g => g[0]))
-        const subEnt = entropy(rangeNormilize(subFl.filter(v => v > 0)))
-        condH += subEnt * p;
-        vecAdd(globalFl, subFl);
-    }
-
-    const H = entropy(rangeNormilize(globalFl.filter(v => v > 0)))
-    return (H - condH) / Math.log2(globalRange.length)
-
-}
-
-const Painter: React.FC = props => {
+const Painter: React.FC = (props) => {
     const container = useRef<HTMLDivElement>(null);
-    const { dataSourceStore, commonStore, exploreStore } = useGlobalStore();
+    const { dataSourceStore, commonStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
-    const { mainViewPattern, mainViewSpec } = exploreStore;
+    const { vizSpec } = commonStore;
     const [mutData, setMutData] = useState<IRow[]>([]);
-    const [nearFields, setNearFields] = useState<IFieldMeta[]>([])
+    const [nearFields, setNearFields] = useState<IFieldMeta[]>([]);
+    const [nearIndex, setNearIndex] = useState<number>(0);
+    const [mutFeatValues, setMutFeatValues] = useState<string[]>(colorCells.map((c) => c.id));
+    const [mutFeatIndex, setMutFeatIndex] = useState<number>(1);
+    const [painting, setPainting] = useState<boolean>(false);
+    const [painterSize, setPainterSize] = useState<number>(1);
+
+    const initValue = mutFeatValues[0];
+
+    const clearPainting = useCallback(() => {
+        setMutData(
+            cleanedData.map((r, i) => {
+                return { ...r, [LABEL_FIELD_KEY]: initValue, [LABEL_INDEX]: i };
+            })
+        );
+    }, [cleanedData, initValue]);
 
     useEffect(() => {
-        setMutData(cleanedData.map((r, i) => {
-            return { ...r, [LABEL_FIELD_KEY]: 'label1', [LABEL_INDEX]: i }
-        }))
-    }, [cleanedData, fieldMetas])
+        setMutData(
+            cleanedData.map((r, i) => {
+                return { ...r, [LABEL_FIELD_KEY]: initValue, [LABEL_INDEX]: i };
+            })
+        );
+    }, [cleanedData, fieldMetas, initValue]);
 
-    const getNearFields = useCallback((data: IRow[]) => {
-        const X = data.map(r => r[LABEL_FIELD_KEY])
-        const ans: { field: IFieldMeta, score: number}[] = [];
-        for (let field of fieldMetas) {
-            if (field.semanticType !== 'quantitative') {
-                const Y = data.map(r => r[field.fid])
-                const score = nnMic(X, Y)
-                ans.push({
-                    field,
-                    score
-                })
+    const getNearFields = useCallback(
+        (data: IRow[]) => {
+            const X = data.map((r) => r[LABEL_FIELD_KEY]);
+            const ans: { field: IFieldMeta; score: number }[] = [];
+            for (let field of fieldMetas) {
+                if (true) {
+                    const Y = data.map((r) => r[field.fid]);
+                    const score = nnMic(X, Y);
+                    ans.push({
+                        field,
+                        score,
+                    });
+                }
             }
-        }
-        ans.sort((a, b) => b.score - a.score)
-        setNearFields(ans.map(a => a.field));
-        console.log(ans);
-    }, [fieldMetas])
+            ans.sort((a, b) => b.score - a.score);
+            setNearFields(ans.map((a) => a.field));
+            console.log(ans);
+        },
+        [fieldMetas]
+    );
 
-    const noViz = mutData.length === 0 || fieldMetas.length === 0 || mainViewPattern === null || mainViewSpec === null;
+    const noViz = mutData.length === 0 || fieldMetas.length === 0 || vizSpec === null;
     useEffect(() => {
         if (!noViz && container.current) {
             const mvd: any = {
-                ...deepcopy(mainViewSpec),
+                ...deepcopy(vizSpec),
                 data: {
-                    name: 'dataSource'
+                    name: 'dataSource',
                     // values: mutData
-                }
-            }
+                },
+            };
             mvd.encoding.color = {
                 field: LABEL_FIELD_KEY,
                 type: 'nominal',
                 title: 'custom feature',
                 scale: {
-                    domain: ['label1', 'label2']
-                }
-            }
-            
+                    domain: mutFeatValues,
+                },
+            };
+
             // @ts-ignore
             embed(container.current, mvd, {
-                actions: true
-            }).then(res => {
-                res.view.change('dataSource', vega.changeset().remove(() => true).insert(mutData))
+                actions: true,
+            }).then((res) => {
+                res.view.change(
+                    'dataSource',
+                    vega
+                        .changeset()
+                        .remove(() => true)
+                        .insert(mutData)
+                );
+                const xField = mvd.encoding.x.field;
+                const yField = mvd.encoding.y.field;
+                const xRange = getRange(mutData.map((r) => r[xField]));
+                const yRange = getRange(mutData.map((r) => r[yField]));
+                // const scaleX = res.view.scale('x');
+                // const scaleY = res.view.scale('y');
                 res.view.addEventListener('mouseover', (e, item) => {
-                    if (item && item.datum) {
+                    if (painting && item && item.datum) {
+                        // console.log(e)
                         // @ts-ignore
-                        const index = item.datum[LABEL_INDEX];
-                        mutData[index][LABEL_FIELD_KEY] = 'label2'
-                        res.view.change('dataSource', vega.changeset().remove(() => true).insert(mutData))
+                        // const index = item.datum[LABEL_INDEX];
+
+                        batchMutInCircle({
+                            mutData,
+                            fields: [xField, yField],
+                            point: [item.datum[xField], item.datum[yField]],
+                            a: xRange[1] - xRange[0],
+                            b: yRange[1] - yRange[0],
+                            r: painterSize,
+                            key: LABEL_FIELD_KEY,
+                            value: mutFeatValues[mutFeatIndex],
+                        });
+                        // batchMutInRange(mutData, xField, [item.datum[xField] -10, item.datum[xField] + 10], LABEL_FIELD_KEY, mutFeatValues[mutFeatIndex])
+                        // batchMutInRange(mutData, yField, [item.datum[yField] -10, item.datum[yField] + 10], LABEL_FIELD_KEY, mutFeatValues[mutFeatIndex])
+                        // console.log(scaleX(0), scaleY(0), scaleX(500), scaleY(5000))
+                        // @ts-ignore
+                        // res.view.scale('x')
+
+                        // console.log(item, scaleX(e.layerX), scaleY(e.layerY), res.view)
+                        // mutData[index][LABEL_FIELD_KEY] = 'label2'
+                        res.view.change(
+                            'dataSource',
+                            vega
+                                .changeset()
+                                .remove(() => true)
+                                .insert(mutData)
+                        );
                     }
-                })
-            })
+                });
+                res.view.resize();
+                res.view.runAsync();
+            });
         }
-    }, [noViz, mainViewSpec, mutData])
+    }, [noViz, vizSpec, mutData, mutFeatValues, mutFeatIndex, painting, painterSize]);
 
     const nearSpec = useMemo<IVegaSubset | null>(() => {
         if (nearFields.length > 0) {
             const mvd: any = {
-                ...deepcopy(mainViewSpec),
+                ...deepcopy(vizSpec),
                 data: {
-                    name: 'dataSource'
+                    name: 'dataSource',
                     // values: mutData
-                }
-            }
+                },
+            };
             mvd.encoding.color = {
-                field: nearFields[0].fid,
-                type: nearFields[0].semanticType,
-                title: nearFields[0].name || nearFields[0].fid
-            }
-            return mvd
+                field: nearFields[nearIndex].fid,
+                type: nearFields[nearIndex].semanticType,
+                title: nearFields[nearIndex].name || nearFields[nearIndex].fid,
+            };
+            return mvd;
         }
         return null;
-    }, [mainViewSpec, nearFields])
+    }, [vizSpec, nearFields, nearIndex]);
+
     if (noViz) {
-        return <div>404</div>
+        return <div>404</div>;
     }
-    return <div>
-        <div ref={container}></div>
-        <PrimaryButton
-            text='check'
-            onClick={() => {
-                getNearFields(mutData)
-            }}
-        />
-        <div>
-            {
-                nearSpec && <ReactVega
-                    spec={nearSpec}
-                    dataSource={cleanedData}
-                />
-            }
-        </div>
-    </div>
-}
+    return (
+        <Cont style={{ padding: '1em' }}>
+            <div className="cursor rounded"></div>
+            <div className="card">
+                <PainterContainer>
+                    <div className="vis-segment">
+                        <div ref={container}></div>
+                    </div>
+                    <div className="operation-segment">
+                        <Stack tokens={{ childrenGap: 18 }}>
+                            <Stack.Item>
+                                <Toggle
+                                    label="Painting"
+                                    checked={painting}
+                                    onChange={(e, checked) => {
+                                        setPainting(Boolean(checked));
+                                    }}
+                                />
+                            </Stack.Item>
+                            <Stack.Item>
+                                <SwatchColorPicker
+                                    selectedId={mutFeatValues[mutFeatIndex]}
+                                    columnCount={5}
+                                    cellShape={'circle'}
+                                    colorCells={colorCells}
+                                    onColorChanged={(id) => {
+                                        if (id) {
+                                            const targetIndex = colorCells.findIndex((f) => f.id === id);
+                                            targetIndex > -1 && setMutFeatIndex(targetIndex);
+                                        }
+                                    }}
+                                />
+                            </Stack.Item>
+                            <Stack.Item>
+                                <Slider
+                                    min={0.2}
+                                    max={2}
+                                    step={0.2}
+                                    value={painterSize}
+                                    label="Painter Size"
+                                    onChanged={(e, v) => {
+                                        setPainterSize(v);
+                                    }}
+                                />
+                            </Stack.Item>
+                            <Stack.Item>
+                                <DefaultButton
+                                    disabled
+                                    text="Add label"
+                                    onClick={() => {
+                                        setMutFeatValues((v) => [...v, `Label ${v.length + 1}`]);
+                                    }}
+                                />
+                            </Stack.Item>
+                        </Stack>
+                    </div>
+                </PainterContainer>
+                <div>
+                    <Stack horizontal tokens={{ childrenGap: 10 }}>
+                        <PrimaryButton
+                            text="Search"
+                            iconProps={{ iconName: 'Search' }}
+                            onClick={() => {
+                                getNearFields(mutData);
+                            }}
+                        />
+                        <DefaultButton
+                            iconProps={{ iconName: 'Trash' }}
+                            text="Clear Painting"
+                            onClick={clearPainting}
+                        />
+                    </Stack>
+                </div>
+            </div>
+            <div className="card">
+                <Stack horizontal tokens={{ childrenGap: 10 }}>
+                    <DefaultButton
+                        text="Last"
+                        iconProps={{ iconName: 'Back' }}
+                        onClick={() => {
+                            setNearIndex((v) => (v - 1 + nearFields.length) % nearFields.length);
+                        }}
+                    />
+                    <DefaultButton
+                        text="Next"
+                        iconProps={{ iconName: 'Forward' }}
+                        onClick={() => {
+                            setNearIndex((v) => (v + 1) % nearFields.length);
+                        }}
+                    />
+                </Stack>
+                {nearSpec && <ReactVega spec={nearSpec} dataSource={cleanedData} />}
+            </div>
+        </Cont>
+    );
+};
 
 export default observer(Painter);
