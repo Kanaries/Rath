@@ -19,6 +19,7 @@ import { LoadingLayer } from '../semiAutomation/components';
 import ComputationProgress from './computationProgress';
 import ReactVega from '../../components/react-vega';
 import Constraints from './vizOperation/constraints';
+import AssoPanel from './assoPanel';
 
 const MainHeader = styled.div`
     font-size: 1.5em;
@@ -86,6 +87,7 @@ const LTSPage: React.FC = () => {
             <VizPreference />
             <SaveModal />
             <Constraints />
+            <AssoPanel />
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { exploreStore.setShowSubinsights(false) }} /> */}
             <div className="card">
                 <CommandBarButton

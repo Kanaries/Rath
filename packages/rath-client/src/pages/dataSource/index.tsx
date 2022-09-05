@@ -247,11 +247,12 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             />
             <CommandButton
               text={intl.get('dataSource.extend.title')}
-              disabled
-              // disabled={rawData.length === 0}
+              disabled={rawData.length === 0}
               iconProps={{ iconName: 'AppIconDefaultAdd' }}
               onClick={() => {
-                dataSourceStore.extendData();
+                // dataSourceStore.extendData();
+                // TODO: 更多的扩展方式
+                dataSourceStore.expandDateTime();
               }}
             />
         </Stack>

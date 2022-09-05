@@ -8,6 +8,8 @@ import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag } from "../interfaces";
 import { getQuantiles } from "../pages/dataSource/utils";
 import { cleanDataService, extendDataService, filterDataService, getFieldsSummaryService, inferMetaService } from "../service";
+import { expandDateTimeService } from "../dev/services";
+// import { expandDateTimeService } from "../service";
 import { findRathSafeColumnIndex } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
 
@@ -400,6 +402,7 @@ export class DataSourceStore {
     } 
 
     public async extendData () {
+        // TODO: IRawField增加了extInfo?: IFieldExtInfoBase属性，此处应在新增字段的时候补充详细信息
         try {
             const { fields, cleanedData } = this;
             const res = await extendDataService({
@@ -441,6 +444,33 @@ export class DataSourceStore {
                     }
                 }
                 this.mutFields = metas;
+            })
+        }
+    }
+
+    /**
+     * Expand all temporal fields to (year, month, date, weekday, hour, minute, second, millisecond).
+     * @depends this.fields, this.cleanedDate
+     * @effects this.rawData, this.mutFields
+     */
+    public async expandDateTime() {
+        try {
+            let { mutFields, cleanedData } = this;
+            mutFields = mutFields.map(f => toJS(f))
+            const res = await expandDateTimeService({
+                dataSource: cleanedData,
+                fields: mutFields
+            })
+            runInAction(() => {
+                this.rawData = res.dataSource;
+                this.mutFields = res.fields
+            })
+        } catch (error) {
+            console.error(error)
+            notify({
+                title: 'Expand DateTime API Error',
+                type: 'error',
+                content: `[extension]${error}`
             })
         }
     }

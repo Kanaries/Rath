@@ -1,8 +1,8 @@
 import { IAnalyticType, IRow, ISemanticType } from "visual-insights";
 import { IGeoRole, IMuteFieldBase, IRawField } from "../../interfaces";
-import { inferAnalyticType, inferAnalyticTypeFromSemanticType, inferSemanticType } from "../../utils";
+import { inferAnalyticTypeFromSemanticType, inferSemanticType } from "../../utils";
 
-export function emptyCount (dataSource: IRow[], colKey: string): number {
+function emptyCount (dataSource: IRow[], colKey: string): number {
     // const counter: Map<string, number> = new Map();
     let counter = 0;
     for (let i = 0; i < dataSource.length; i++) {

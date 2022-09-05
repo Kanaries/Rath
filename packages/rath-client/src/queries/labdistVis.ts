@@ -24,6 +24,7 @@ interface BaseVisProps {
     resizeMode?: IResizeMode;
     width?: number;
     height?: number;
+    stepSize?: number;
 }
 
 function isSetEqual(a1: any[], a2: any[]) {
@@ -86,7 +87,7 @@ function autoCoord(fields: IFieldMeta[], spec: {[key: string]: any}, dataSource:
 }
 
 export function labDistVis(props: BaseVisProps): IVegaSubset {
-    const { pattern, dataSource, width, height, interactive, resizeMode = IResizeMode.auto } = props;
+    const { pattern, dataSource, width, height, interactive, resizeMode = IResizeMode.auto, stepSize } = props;
     const fields = deepcopy(pattern.fields) as IFieldMeta[];
     const measures = fields.filter(f => f.analyticType === 'measure');
     const dimensions = fields.filter(f => f.analyticType === 'dimension');
@@ -144,7 +145,7 @@ export function labDistVis(props: BaseVisProps): IVegaSubset {
         dimensions[i].features.entropy = totalEntLoss;
     }
     const { statFields, distFields, statEncodes } = autoStat(fields);
-    let markType = autoMark(fields, statFields, distFields, statEncodes)
+    let markType = autoMark(fields, statFields, distFields, statEncodes, dataSource)
     const channelEncoder = new VizEncoder(markType);
     // if (filters && filters.length > 0) {
     //     usedChannels.add('color')
@@ -202,7 +203,8 @@ export function labDistVis(props: BaseVisProps): IVegaSubset {
     applySizeConfig2DistViz(basicSpec, {
         mode: resizeMode,
         width,
-        height
+        height,
+        stepSize
     })
     if (interactive) {
         applyInteractiveParams2DistViz(basicSpec);
