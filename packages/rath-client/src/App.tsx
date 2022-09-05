@@ -19,6 +19,7 @@ import { destroyRathWorker, initRathWorker } from "./service";
 import { PIVOT_KEYS } from "./constants";
 import CrInfo from "./components/crInfo";
 import { Spinner, SpinnerSize } from "office-ui-fabric-react";
+import ProgressiveDashboard from "./pages/progressiveDashboard";
 // import VegaVis from "./renderer/vegaVis";
 // import { loadTheme } from "office-ui-fabric-react";
 // import { RATH_DARK_PALETTE, RATH_DARK_THEME } from "./theme";
@@ -123,6 +124,7 @@ function App() {
         {appKey === PIVOT_KEYS.lts && <LTSPage />}
         {appKey === PIVOT_KEYS.pattern && <PatternPage />}
         {appKey === PIVOT_KEYS.painter && <PainterPage />}
+        {appKey === PIVOT_KEYS.progressiveDashBoard && <ProgressiveDashboard />}
         <CrInfo />
         </div>
       </div>
