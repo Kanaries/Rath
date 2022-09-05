@@ -9,6 +9,10 @@ import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
 import { batchMutInCircle, nnMic } from './utils';
 import styled from 'styled-components';
+import EmbedAnalysis from './embedAnalysis';
+import { transVegaSubset2Schema } from '../../utils/transform';
+import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
+import { Specification } from 'visual-insights';
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -53,6 +57,7 @@ const Painter: React.FC = (props) => {
     const [mutFeatIndex, setMutFeatIndex] = useState<number>(1);
     const [painting, setPainting] = useState<boolean>(false);
     const [painterSize, setPainterSize] = useState<number>(1);
+    const [showWalker, setShowWalker] = useState<boolean>(false);
 
     const initValue = mutFeatValues[0];
 
@@ -187,6 +192,27 @@ const Painter: React.FC = (props) => {
         return null;
     }, [vizSpec, nearFields, nearIndex]);
 
+    const fieldsInWalker = useMemo<IMutField[]>(() => {
+        return fieldMetas.map(f => ({
+            fid: f.fid,
+            name: f.name,
+            semanticType: f.semanticType,
+            analyticType: f.analyticType
+        })).concat({
+            fid: LABEL_FIELD_KEY,
+            name: 'new field',
+            semanticType: 'nominal',
+            analyticType: 'dimension'
+        })
+    }, [fieldMetas])
+
+    const walkerSchema = useMemo<Specification>(() => {
+        if (nearSpec) {
+            return transVegaSubset2Schema(nearSpec)
+        }
+        return {}
+    }, [nearSpec])
+
     if (noViz) {
         return <div>404</div>;
     }
@@ -256,6 +282,14 @@ const Painter: React.FC = (props) => {
                                 getNearFields(mutData);
                             }}
                         />
+                        <PrimaryButton
+                            text='Explore'
+                            iconProps={{ iconName: 'BarChartVerticalEdit' }}
+                            onClick={() => {
+                                getNearFields(mutData);
+                                setShowWalker(true)
+                            }}
+                        />
                         <DefaultButton
                             iconProps={{ iconName: 'Trash' }}
                             text="Clear Painting"
@@ -264,25 +298,34 @@ const Painter: React.FC = (props) => {
                     </Stack>
                 </div>
             </div>
-            <div className="card">
-                <Stack horizontal tokens={{ childrenGap: 10 }}>
-                    <DefaultButton
-                        text="Last"
-                        iconProps={{ iconName: 'Back' }}
-                        onClick={() => {
-                            setNearIndex((v) => (v - 1 + nearFields.length) % nearFields.length);
-                        }}
-                    />
-                    <DefaultButton
-                        text="Next"
-                        iconProps={{ iconName: 'Forward' }}
-                        onClick={() => {
-                            setNearIndex((v) => (v + 1) % nearFields.length);
-                        }}
-                    />
-                </Stack>
-                {nearSpec && <ReactVega spec={nearSpec} dataSource={cleanedData} />}
-            </div>
+            {
+                !showWalker && <div className="card">
+                    <Stack horizontal tokens={{ childrenGap: 10 }}>
+                        <DefaultButton
+                            text="Last"
+                            iconProps={{ iconName: 'Back' }}
+                            onClick={() => {
+                                setNearIndex((v) => (v - 1 + nearFields.length) % nearFields.length);
+                            }}
+                        />
+                        <DefaultButton
+                            text="Next"
+                            iconProps={{ iconName: 'Forward' }}
+                            onClick={() => {
+                                setNearIndex((v) => (v + 1) % nearFields.length);
+                            }}
+                        />
+                    </Stack>
+                    {nearSpec && <ReactVega spec={nearSpec} dataSource={cleanedData} />}
+                </div>
+            }
+            {
+                showWalker && nearSpec && <EmbedAnalysis
+                    dataSource={mutData}
+                    spec={walkerSchema}
+                    fields={fieldsInWalker}
+                />
+            }
         </Cont>
     );
 };
