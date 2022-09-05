@@ -11,11 +11,12 @@ interface VizOperationBarProps {
     resizeMode: IResizeMode;
     width: number;
     height: number;
+    nlg: boolean;
     onValueChange: (key: 'debug' | 'interactive' | 'resizeMode' | 'width' | 'height' | 'nlg', value: any) => void;
 }
 
 const VizOperationBar: React.FC<VizOperationBarProps> = props => {
-    const { gap = 10, width, height, interactive, debug, resizeMode, onValueChange, stackLayout } = props;
+    const { gap = 10, width, height, interactive, debug, resizeMode, onValueChange, stackLayout, nlg } = props;
     const resizeModeList = useMemo<IDropdownOption[]>(() => {
         return [
             {
@@ -48,7 +49,7 @@ const VizOperationBar: React.FC<VizOperationBarProps> = props => {
         </Stack.Item>
         <Stack.Item>
             <Toggle label="NLG"
-                checked={interactive}
+                checked={nlg}
                 onChange={(e, checked) => {
                     onValueChange('nlg', Boolean(checked))
                 }}
