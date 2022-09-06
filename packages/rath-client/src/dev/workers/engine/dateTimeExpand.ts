@@ -282,6 +282,10 @@ function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
 export function dateTimeExpand(props: { dataSource: IRow[]; fields: IMuteFieldBase[] })
     : { dataSource: IRow[]; fields: IMuteFieldBase[] } {
     const { dataSource, fields } = props;
+    if (dataSource.length === 0 || fields.length === 0) {
+        console.error("[dateTimeExpand]: dataSource x fields is empty")
+        return props
+    }
 
     let extFields: IMuteFieldBase[] = []
     let fieldIds = new Set(fields.map(f => (f.extInfo && f.extInfo?.extOpt === "dateTimeExpand") ? f.extInfo?.extFrom[0] : ''))
