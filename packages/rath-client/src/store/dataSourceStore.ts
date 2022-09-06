@@ -456,10 +456,10 @@ export class DataSourceStore {
      */
     public async expandDateTime() {
         try {
-            let { mutFields, cleanedData } = this;
+            let { mutFields, rawData } = this;
             mutFields = mutFields.map(f => toJS(f))
             const res = await expandDateTimeService({
-                dataSource: cleanedData,
+                dataSource: rawData,
                 fields: mutFields
             })
             runInAction(() => {
