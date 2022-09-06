@@ -220,11 +220,7 @@ function date2Info(date: Date): DateTimeInfo {
 function parseDateTime(dateTime: string, reg_id?: number): DateTimeInfo {
     try {
         if (reg_id !== undefined) return parseReg(dateTime, reg_id)
-        if (dateTime === null) return UnknownDateTimeInfo;
-        if (dateTime === undefined) {
-            let date = new Date()
-            return date2Info(date)
-        }
+        if (dateTime === null || dateTime === undefined) return UnknownDateTimeInfo;
         // if (!/Z$/i.test(dateTime)) {
         // }
         // Polyfill
@@ -378,7 +374,9 @@ export function doTest() {
         ["2015-12-14", "2013-08-09", "2013-10-11", "2016-02-25"],
         ["April-8-09"],
         ["04.29,2004", "12.29, 2008"],
-        ["2008,08.24"]
+        ["2008,08.24"],
+        ["980409", "", "000412", ""],
+        ["200924", "", "200128"],
     ]
     for (let c of testCases) dateTimeExpandTest(c)
 }
