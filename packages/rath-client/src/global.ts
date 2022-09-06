@@ -18,7 +18,7 @@ export type OperatorType = 'sum' | 'mean' | 'count';
 export enum IDataSourceType {
   FILE = 'file',
   RESTFUL = 'restful',
-  MYSQL = 'mysql',
+  DATABASE = 'database',
   DEMO = 'demo',
   CLICKHOUSE = 'clickhouse',
   LOCAL = 'local',

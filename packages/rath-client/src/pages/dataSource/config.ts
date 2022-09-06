@@ -8,7 +8,8 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
     // const mysqlText = intl.get(`dataSource.importData.type.${IDataSourceType.MYSQL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
     const clickHouseText = 'clickhouse';
-    const localText = intl.get('common.history')
+    const localText = intl.get('common.history');
+    const dbText = intl.get(`dataSource.importData.type.${IDataSourceType.DATABASE}`);
 
     const options = useMemo<Array<{ key: IDataSourceType; text: string }>>(() => {
         return [
@@ -32,6 +33,11 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 key: IDataSourceType.RESTFUL,
                 text: restfulText,
                 iconProps: { iconName: "Cloud" },
+            },
+            {
+                key: IDataSourceType.DATABASE,
+                text: dbText,
+                iconProps: { iconName: "Database" }
             },
             // {
             //     key: IDataSourceType.MYSQL,

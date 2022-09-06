@@ -87,6 +87,7 @@
         "metaView": "元数据视图",
         "dataView": "数据视图",
         "charset": "字符集编码",
+        "databaseType": "选择数据库",
         "advice": {
             "lackData": "缺少有效数据",
             "lackDimension": "数据集中缺少维度，无法进行完整的分析任务。",
@@ -111,7 +112,8 @@
                 "file": "文件",
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
-                "demo": "示例数据"
+                "demo": "示例数据",
+                "database": "数据库"
             },
             "load": "加载数据",
             "demo": {

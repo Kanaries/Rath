@@ -11,6 +11,7 @@ import RestfulData from './restful';
 import ClickHouseData from './clickhouse';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import Local from './local';
+import DatabaseData from './database';
 import DataLoadingStatus from '../dataLoadingStatus';
 import AirTableSource from './airtable';
 
@@ -30,6 +31,30 @@ const Selection: React.FC<SelectionProps> = props => {
     const dsTypeOptions = useDataSourceTypeOptions();
 
     const dsTypeLabelId = useId('dataSourceType');
+
+    const formMap: Record<IDataSourceType, JSX.Element> = {
+        [IDataSourceType.FILE]: (
+            <FileData onDataLoading={onDataLoading} onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+        ),
+        [IDataSourceType.DEMO]: (
+            <DemoData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+        ),
+        [IDataSourceType.CLICKHOUSE]: (
+            <ClickHouseData onClose={onClose} onDataLoaded={onDataLoaded} />
+        ),
+        [IDataSourceType.RESTFUL]: (
+            <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+        ),
+        [IDataSourceType.LOCAL]: (
+            <Local onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+        ),
+        [IDataSourceType.DATABASE]: (
+            <DatabaseData onClose={onClose} onDataLoaded={onDataLoaded} />
+        ),
+        [IDataSourceType.AIRTABLE]: (
+            <AirTableSource onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+        ),
+    };
 
 
     return (
@@ -51,12 +76,7 @@ const Selection: React.FC<SelectionProps> = props => {
                 />
                 {loading && dataSourceType !== IDataSourceType.FILE && <ProgressIndicator description="loading" />}
                 {loading && dataSourceType === IDataSourceType.FILE && <DataLoadingStatus />}
-                {dataSourceType === IDataSourceType.FILE && <FileData onDataLoading={onDataLoading} onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
-                {dataSourceType === IDataSourceType.DEMO && <DemoData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
-                {dataSourceType === IDataSourceType.CLICKHOUSE && <ClickHouseData onClose={onClose} onDataLoaded={onDataLoaded} />}
-                {dataSourceType === IDataSourceType.RESTFUL && <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
-                {dataSourceType === IDataSourceType.LOCAL && <Local onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
-                {dataSourceType === IDataSourceType.AIRTABLE && <AirTableSource onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />}
+                {formMap[dataSourceType]}
             </div>
         </Modal>
     );

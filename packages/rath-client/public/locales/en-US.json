@@ -88,6 +88,7 @@
         "metaView": "Meta View",
         "dataView": "Table View",
         "charset": "character encoding",
+        "databaseType": "select database",
         "advice": {
             "lackData": "Lack of Data",
             "lackDimension": "There should includes dimensions in the datasource.",
@@ -112,7 +113,8 @@
                 "file": "File",
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
-                "demo": "Demo"
+                "demo": "Demo",
+                "database": "Database"
             },
             "demo": {
                 "available": "Available Datasets"
