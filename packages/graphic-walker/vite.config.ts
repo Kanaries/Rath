@@ -19,7 +19,9 @@ export default defineConfig({
       apply: 'build'
     }
   ],
-  dedupe: ['react', 'react-dom'],
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
   build: {
     lib: {
       entry: path.resolve(__dirname, './src/index.tsx'),
@@ -27,7 +29,7 @@ export default defineConfig({
       fileName: (format) => `graphic-walker.${format}.js`
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: ['React', 'ReactDOM'],
       
     },
     minify: 'esbuild',
