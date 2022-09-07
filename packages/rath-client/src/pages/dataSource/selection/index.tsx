@@ -11,7 +11,7 @@ import RestfulData from './restful';
 import ClickHouseData from './clickhouse';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import Local from './local';
-import DatabaseData from './database';
+import DatabaseData from './database/';
 import DataLoadingStatus from '../dataLoadingStatus';
 import AirTableSource from './airtable';
 
@@ -23,9 +23,11 @@ interface SelectionProps {
     onLoadingFailed: (err: any) => void;
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
     onDataLoading: (p: number) => void;
+    setLoadingAnimation: (on: boolean) => void;
 }
+
 const Selection: React.FC<SelectionProps> = props => {
-    const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed, onDataLoading } = props;
+    const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed, onDataLoading, setLoadingAnimation } = props;
 
     const [dataSourceType, setDataSourceType] = useState<IDataSourceType>(IDataSourceType.DEMO);
     const dsTypeOptions = useDataSourceTypeOptions();
@@ -49,7 +51,7 @@ const Selection: React.FC<SelectionProps> = props => {
             <Local onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
         ),
         [IDataSourceType.DATABASE]: (
-            <DatabaseData onClose={onClose} onDataLoaded={onDataLoaded} />
+            <DatabaseData onClose={onClose} onDataLoaded={onDataLoaded} setLoadingAnimation={setLoadingAnimation} />
         ),
         [IDataSourceType.AIRTABLE]: (
             <AirTableSource onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />

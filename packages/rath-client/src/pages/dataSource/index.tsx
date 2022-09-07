@@ -33,7 +33,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     showDataImportSelection,
     dataPreviewMode,
     staisfyAnalysisCondition,
-    dataPrepProgressTag
+    dataPrepProgressTag,
+    setLoading,
   } = dataSourceStore;
 
   const { exploreMode, taskMode } = commonStore;
@@ -100,6 +101,10 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     dataSourceStore.setLoading(false);
     commonStore.showError('error', `[Data Loading Error]${err}`)
   }, [dataSourceStore, commonStore])
+
+  const toggleLoadingAnimation = useCallback((on: boolean) => {
+    dataSourceStore.setLoading(on);
+  }, [dataSourceStore]);
 
   const analysisOptions: IContextualMenuProps = useMemo(() => {
     return {
@@ -214,6 +219,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             onDataLoaded={onSelectDataLoaded}
             onStartLoading={onSelectStartLoading}
             onLoadingFailed={onSelectLoadingFailed}
+            setLoadingAnimation={toggleLoadingAnimation}
           />
         </Stack>
         { rawData.length > 0 && <Advice onForceAnalysis={() => { startMode.onClick && startMode.onClick() }} /> }

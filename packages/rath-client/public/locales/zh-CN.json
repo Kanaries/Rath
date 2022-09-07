@@ -88,6 +88,18 @@
         "dataView": "数据视图",
         "charset": "字符集编码",
         "databaseType": "选择数据库",
+        "connectUri": "连接 URI",
+        "databaseName": "Database",
+        "schemaName": "Schema",
+        "tableName": "Table",
+        "preview": "数据预览",
+        "query": "SQL 查询",
+        "btn": {
+            "connect": "建立连接",
+            "reset": "返回并重置",
+            "connectFailed": "建立连接失败",
+            "query": "提交查询"
+        },
         "advice": {
             "lackData": "缺少有效数据",
             "lackDimension": "数据集中缺少维度，无法进行完整的分析任务。",
