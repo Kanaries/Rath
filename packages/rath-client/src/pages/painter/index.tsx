@@ -140,7 +140,7 @@ const Painter: React.FC = (props) => {
                         // @ts-ignore
                         // const index = item.datum[LABEL_INDEX];
 
-                        batchMutInCircle({
+                        const { mutIndices, mutValues } = batchMutInCircle({
                             mutData,
                             fields: [xField, yField],
                             point: [item.datum[xField], item.datum[yField]],
@@ -148,6 +148,7 @@ const Painter: React.FC = (props) => {
                             b: yRange[1] - yRange[0],
                             r: painterSize,
                             key: LABEL_FIELD_KEY,
+                            indexKey: LABEL_INDEX,
                             value: mutFeatValues[mutFeatIndex],
                         });
                         // batchMutInRange(mutData, xField, [item.datum[xField] -10, item.datum[xField] + 10], LABEL_FIELD_KEY, mutFeatValues[mutFeatIndex])
@@ -162,8 +163,12 @@ const Painter: React.FC = (props) => {
                             'dataSource',
                             vega
                                 .changeset()
-                                .remove(() => true)
-                                .insert(mutData)
+                                // .remove(vega.truthy)
+                                // .insert(mutData)
+                                //@ts-ignore
+                                // .modify((r: any) => 0 /*&& mutIndices.has(r[LABEL_INDEX])*/, LABEL_FIELD_KEY, t => t[LABEL_FIELD_KEY])
+                                .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                .insert(mutValues)
                         );
                     }
                 });
