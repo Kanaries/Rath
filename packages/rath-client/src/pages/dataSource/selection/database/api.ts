@@ -1,4 +1,4 @@
-import { SupportedDatabaseType, TableData, TableLabels } from '.';
+import type { SupportedDatabaseType, TableData, TableLabels } from '.';
 import { notify } from '../../../../components/error';
 import type { IDatasetBase } from '../../../../interfaces';
 import { transformRawDataService } from '../../utils';
@@ -84,7 +84,7 @@ export const listDatabases = async (sourceId: number): Promise<string[] | null> 
     }
 };
 
-export const listSchemas = async (sourceId: number, db: string): Promise<string[] | null> => {
+export const listSchemas = async (sourceId: number, db: string | null): Promise<string[] | null> => {
     try {
         const res = await fetch(
             `${apiPathPrefix}/schema_list`, {
@@ -97,7 +97,7 @@ export const listSchemas = async (sourceId: number, db: string): Promise<string[
                     db,
                 }),
             }
-        ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as ListDatabasesResult;
+        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListDatabasesResult;
 
         return res.success ? res.data : (() => { throw new Error(res.message) })();
     } catch (error) {
@@ -111,7 +111,7 @@ export const listSchemas = async (sourceId: number, db: string): Promise<string[
     }
 };
 
-export const listTables = async (sourceId: number, db: string, schema?: string | undefined): Promise<string[] | null> => {
+export const listTables = async (sourceId: number, db: string | null, schema: string | null): Promise<string[] | null> => {
     try {
         const res = await fetch(
             `${apiPathPrefix}/table_list`, {
@@ -130,7 +130,7 @@ export const listTables = async (sourceId: number, db: string, schema?: string |
                     }
                 ),
             }
-        ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as ListDatabasesResult;
+        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListDatabasesResult;
 
         return res.success ? res.data : (() => { throw new Error(res.message) })();
     } catch (error) {
@@ -144,7 +144,7 @@ export const listTables = async (sourceId: number, db: string, schema?: string |
     }
 };
 
-export const fetchTablePreview = async (sourceId: number, db: string, schema: string | undefined, table: string): Promise<TableData<TableLabels> | null> => {
+export const fetchTablePreview = async (sourceId: number, db: string | null, schema: string | null, table: string): Promise<TableData<TableLabels> | null> => {
     try {
         const res = await fetch(
             `${apiPathPrefix}/table_detail`, {

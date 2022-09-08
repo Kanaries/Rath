@@ -13,16 +13,17 @@ const StackTokens = {
 };
 
 export type SupportedDatabaseType = (
-    | 'progres'
+    | 'postgres'
     | 'clickhouse'
     | 'mysql'
 );
 
 const datasetOptions = ([
     {
-        text: 'ProgreSQL',
-        key: 'progres',
+        text: 'PostgreSQL',
+        key: 'postgres',
         rule: 'postgresql://{userName}:{password}@{host}:{port}/{database}',
+        hasDataset: false,
         requiredSchema: true,
     },
     {
@@ -40,7 +41,8 @@ const datasetOptions = ([
     & {
         key: SupportedDatabaseType;
         rule: string;
-        requiredSchema: boolean;
+        hasDataset?: boolean;
+        requiredSchema?: boolean;
     }
 >).sort((a, b) => a.text.localeCompare(b.text));
 
@@ -71,8 +73,8 @@ type DatabaseOptions = [
     sourceType: SupportedDatabaseType,
     connectUri: string,
     sourceId: 'pending' | number | null,
-    databaseList: string[],
-    selectedDatabase: string,
+    databaseList: string[] | null,
+    selectedDatabase: string | null,
     schemaList: 'pending' | string[] | null,
     selectedSchema: string | null,
     tableList: 'pending' | string[],
@@ -128,6 +130,22 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
             const sId = await getSourceId(sourceType, connectUri);
 
+            if (whichDataset?.hasDataset === false) {
+                setOptions(prevOpt => {
+                    const [sType, cUri, sIdFlag] = prevOpt;
+
+                    if (sType === sourceType && connectUri === cUri && sIdFlag === 'pending') {
+                        return [sourceType, connectUri, sId, null, null];
+                    }
+
+                    return prevOpt;
+                });
+
+                setLoadingAnimation(false);
+
+                return;
+            }
+
             const databases = typeof sId === 'number' ? await listDatabases(sId) : null;
 
             if (databases) {
@@ -154,11 +172,11 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
             setLoadingAnimation(false);
         }
-    }, [sourceType, connectUri, sourceId, setLoadingAnimation]);
+    }, [sourceType, connectUri, sourceId, setLoadingAnimation, whichDataset?.hasDataset]);
 
     // automatically fetch schema list when selected database changes
     useEffect(() => {
-        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList && whichDataset && selectedDatabase !== undefined && schemaList === undefined) {
+        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && whichDataset && selectedDatabase !== undefined && schemaList === undefined) {
             if (whichDataset.requiredSchema) {
                 setOptions([sourceType, connectUri, sourceId, databaseList, selectedDatabase, 'pending']);
                 setLoadingAnimation(true);
@@ -186,7 +204,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
     // automatically fetch table list when selected schema changes
     useEffect(() => {
-        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList && (schemaList === null || Array.isArray(schemaList)) && typeof selectedDatabase === 'string' && selectedSchema !== undefined && tableList === undefined) {
+        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && (schemaList === null || Array.isArray(schemaList)) && selectedDatabase !== undefined && selectedSchema !== undefined && tableList === undefined) {
             setOptions([
                 sourceType,
                 connectUri,
@@ -199,7 +217,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             ]);
             setLoadingAnimation(true);
             
-            listTables(sourceId, selectedDatabase, selectedSchema ?? undefined).then(tables => {
+            listTables(sourceId, selectedDatabase, selectedSchema).then(tables => {
                 if (tables) {
                     setOptions(([sType, cUri, sId, dbList, curDb, smList, curSm]) => {
                         return [sType, cUri, sId, dbList, curDb, smList, curSm, tables] as PartialDatabaseOptions;
@@ -217,7 +235,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
     // automatically fetch table preview when selected table changes
     useEffect(() => {
-        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList && (schemaList === null || Array.isArray(schemaList)) && tableList && typeof selectedDatabase === 'string' && selectedSchema !== undefined && typeof selectedTable === 'string') {
+        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && (schemaList === null || Array.isArray(schemaList)) && tableList && selectedDatabase !== undefined && selectedSchema !== undefined && typeof selectedTable === 'string') {
             setOptions([
                 sourceType,
                 connectUri,
@@ -232,7 +250,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             ]);
             setLoadingAnimation(true);
 
-            fetchTablePreview(sourceId, selectedDatabase, selectedSchema ?? undefined, selectedTable).then(data => {
+            fetchTablePreview(sourceId, selectedDatabase, selectedSchema, selectedTable).then(data => {
                 if (data) {
                     setOptions(([sType, cUri, sId, dbList, curDb, smList, curSm, tList, curT]) => {
                         return [
@@ -250,13 +268,13 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         }
     }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, tableList, selectedTable, setLoadingAnimation]);
 
-    const databaseSelector: IDropdownOption[] = useMemo(() => {
+    const databaseSelector: IDropdownOption[] | null = useMemo(() => {
         return databaseList?.map<IDropdownOption>(
             dbName => ({
                 text: dbName,
                 key: dbName,
             })
-        ) ?? [];
+        ) ?? null;
     }, [databaseList]);
 
     const schemaSelector: IDropdownOption[] | null = useMemo(() => {
@@ -414,24 +432,28 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                             />
                         </Stack>
                         <Stack horizontal tokens={StackTokens}>
-                            <Dropdown
-                                label={intl.get('dataSource.databaseName')}
-                                style={{ width: inputWidth }}
-                                options={databaseSelector}
-                                selectedKey={selectedDatabase}
-                                required
-                                onChange={(_, item) => {
-                                    if (item && typeof connectUri === 'string' && databaseList) {
-                                        setOptions([
-                                            sourceType,
-                                            connectUri,
-                                            sourceId,
-                                            databaseList,
-                                            item.key as string,
-                                        ]);
-                                    }
-                                }}
-                            />
+                            {
+                                databaseSelector && (
+                                    <Dropdown
+                                        label={intl.get('dataSource.databaseName')}
+                                        style={{ width: inputWidth }}
+                                        options={databaseSelector}
+                                        selectedKey={selectedDatabase}
+                                        required
+                                        onChange={(_, item) => {
+                                            if (item && typeof connectUri === 'string' && databaseList) {
+                                                setOptions([
+                                                    sourceType,
+                                                    connectUri,
+                                                    sourceId,
+                                                    databaseList,
+                                                    item.key as string,
+                                                ]);
+                                            }
+                                        }}
+                                    />
+                                )
+                            }
                             {
                                 schemaSelector && (
                                     <Dropdown
@@ -441,7 +463,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                         selectedKey={selectedSchema}
                                         required
                                         onChange={(_, item) => {
-                                            if (item && typeof connectUri === 'string' && databaseList && typeof selectedDatabase === 'string' && schemaList) {
+                                            if (item && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && schemaList) {
                                                 setOptions([
                                                     sourceType,
                                                     connectUri,
@@ -465,7 +487,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                         selectedKey={selectedTable}
                                         required
                                         onChange={(_, item) => {
-                                            if (item && typeof connectUri === 'string' && databaseList && typeof selectedDatabase === 'string' && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && tableList) {
+                                            if (item && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && tableList) {
                                                 setOptions([
                                                     sourceType,
                                                     connectUri,
