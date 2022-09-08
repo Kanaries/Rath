@@ -68,6 +68,7 @@
     "source-map-explorer": "^2.5.2",
     "typescript": "^4.7.4"
   },
+  "proxy": "http://localhost:5000",
   "scripts": {
     "start": "react-app-rewired start",
     "build": "GENERATE_SOURCEMAP=false react-app-rewired build",

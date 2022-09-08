@@ -5,6 +5,7 @@ import { DefaultButton, Dropdown, IDropdownOption, Label, PrimaryButton, Stack, 
 import intl from 'react-intl-universal';
 import TablePreview from './table-preview';
 import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, requestSQL } from './api';
+import { logDataImport } from '../../../../loggers/dataImport';
 
 
 const StackTokens = {
@@ -106,7 +107,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         setLoadingAnimation(false);
 
         return () => setLoadingAnimation(false);
-    }, []);
+    }, [setLoadingAnimation]);
 
     const uriPrefix = /^[a-z]+:\/{2}/i.exec(whichDataset?.rule ?? '')?.[0];
 
@@ -198,7 +199,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 setLoadingAnimation(false);
             });
         }
-    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, setLoadingAnimation]);
+    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, setLoadingAnimation, tableList]);
 
     // automatically fetch table preview when selected table changes
     useEffect(() => {
@@ -266,7 +267,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         }
 
         return null;
-    }, [whichDataset, tableList]);
+    }, [tableList]);
 
     const [sql, setSql] = useState<string>();
     const [isQuerying, setQuerying] = useState(false);
@@ -276,19 +277,35 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             return;
         }
 
-        setLoadingAnimation(true);
-
         if (typeof sourceId === 'number' && typeof selectedTable === 'string' && sql) {
+            setLoadingAnimation(true);
+    
             setQuerying(true);
 
             requestSQL(sourceId, sql).then(data => {
-                console.log('get', data);   // TODO:
+                if (data) {
+                    const { dataSource, fields } = data;
+                    
+                    logDataImport({
+                        dataType: `Database/${sourceType}`,
+                        name: [selectedDatabase, selectedSchema, selectedTable].filter(
+                            Boolean
+                        ).join('.'),
+                        fields,
+                        dataSource: [],
+                        size: dataSource.length,
+                    });
+
+                    onDataLoaded(fields, dataSource);
+
+                    onClose();
+                }
             }).finally(() => {
                 setQuerying(false);
                 setLoadingAnimation(false);
             });
         }
-    }, [sourceId, selectedTable, isQuerying, sql]);
+    }, [isQuerying, sourceId, selectedTable, sql, setLoadingAnimation, sourceType, selectedDatabase, selectedSchema, onDataLoaded, onClose]);
 
     return (
         <Stack>
@@ -488,7 +505,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                             }}
                                         />
                                         <PrimaryButton
-                                            text={intl.get('dataSource.btn.connect')}
+                                            text={intl.get('dataSource.btn.query')}
                                             disabled={isQuerying}
                                             onClick={query}
                                         />

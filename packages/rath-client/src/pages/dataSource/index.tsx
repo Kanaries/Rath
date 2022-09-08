@@ -34,7 +34,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     dataPreviewMode,
     staisfyAnalysisCondition,
     dataPrepProgressTag,
-    setLoading,
   } = dataSourceStore;
 
   const { exploreMode, taskMode } = commonStore;

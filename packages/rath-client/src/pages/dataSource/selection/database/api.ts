@@ -1,6 +1,10 @@
 import { SupportedDatabaseType, TableData, TableLabels } from '.';
 import { notify } from '../../../../components/error';
+import type { IDatasetBase } from '../../../../interfaces';
+import { transformRawDataService } from '../../utils';
 
+
+const apiPathPrefix = '/api';
 
 interface TableDataResult<TL extends TableLabels> {
     success: boolean;
@@ -14,24 +18,20 @@ interface TestConnectionResult {
 }
 
 type ListDatabasesResult = {
-    success: boolean;
+    success: true;
     data: string[];
 } | {
     success: false;
-    msg: any; // FIXME: `message`?
+    message: string;
 };
 
 export const getSourceId = async (
     sourceType: SupportedDatabaseType,
     uri: string,
 ): Promise<number | null> => {
-    // FIXME: dev debug
-    await new Promise(resolve => setTimeout(resolve, 200 * Math.random()));
-    return 12;
-
     try {
         const res = await fetch(
-            '/api/upsert', {
+            `${apiPathPrefix}/upsert`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -41,12 +41,10 @@ export const getSourceId = async (
                     uri,
                 }),
             }
-        ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as TestConnectionResult;
+        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TestConnectionResult;
 
         return res?.success ? res.data : null;
     } catch (error) {
-        console.error(error);
-
         notify({
             title: 'Failed to get source id',
             type: 'error',
@@ -58,129 +56,95 @@ export const getSourceId = async (
 };
 
 export const listDatabases = async (sourceId: number): Promise<string[] | null> => {
-    // FIXME: dev debug
-    await new Promise(resolve => setTimeout(resolve, 300 * Math.random()));
-    return ['database1', 'database2'];
+    try {
+        const res = await fetch(
+            `${apiPathPrefix}/database_list`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sourceId,
+                }),
+            }
+        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListDatabasesResult;
 
-    // try {
-    //     const res = await fetch(
-    //         '/api/database_list', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify({
-    //                 sourceId,
-    //             }),
-    //         }
-    //     ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as ListDatabasesResult;
-
-    //     return res?.success ? res.data : null;
-    // } catch (error) {
-    //     notify({
-    //         title: 'Failed to get database list',
-    //         type: 'error',
-    //         content: `Failed to get database list. `
-    //     });
+        return res.success ? res.data : (() => { throw new Error(res.message) })();
+    } catch (error) {
+        notify({
+            title: 'Failed to get database list',
+            type: 'error',
+            content: `Failed to get database list. `
+        });
         
-    //     return null;
-    // }
+        return null;
+    }
 };
 
 export const listSchemas = async (sourceId: number, db: string): Promise<string[] | null> => {
-    // FIXME: dev debug
-    await new Promise(resolve => setTimeout(resolve, 400 * Math.random()));
-    return ['schema1', 'schema2', 'schema3'];
+    try {
+        const res = await fetch(
+            `${apiPathPrefix}/schema_list`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sourceId,
+                    db,
+                }),
+            }
+        ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as ListDatabasesResult;
 
-    // try {
-    //     const res = await fetch(
-    //         '/api/schema_list', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify({
-    //                 sourceId,
-    //                 db,
-    //             }),
-    //         }
-    //     ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as ListDatabasesResult;
-
-    //     return res?.success ? res.data : null;
-    // } catch (error) {
-    //     notify({
-    //         title: 'Failed to get schema list',
-    //         type: 'error',
-    //         content: `Failed to get schema list. \n ${error}`
-    //     });
+        return res.success ? res.data : (() => { throw new Error(res.message) })();
+    } catch (error) {
+        notify({
+            title: 'Failed to get schema list',
+            type: 'error',
+            content: `Failed to get schema list. \n ${error}`
+        });
         
-    //     return null;
-    // }
+        return null;
+    }
 };
 
 export const listTables = async (sourceId: number, db: string, schema?: string | undefined): Promise<string[] | null> => {
-    // FIXME: dev debug
-    await new Promise(resolve => setTimeout(resolve, 600 * Math.random()));
-    return ['table1', 'table2', 'table3', 'table4', 'table5'];
-    
-    // try {
-    //     const res = await fetch(
-    //         '/api/table_list', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(
-    //                 typeof schema === 'string' ? {
-    //                     sourceId,
-    //                     db,
-    //                     schema,
-    //                 } : {
-    //                     sourceId,
-    //                     db,
-    //                 }
-    //             ),
-    //         }
-    //     ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as ListDatabasesResult;
+    try {
+        const res = await fetch(
+            `${apiPathPrefix}/table_list`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(
+                    typeof schema === 'string' ? {
+                        sourceId,
+                        db,
+                        schema,
+                    } : {
+                        sourceId,
+                        db,
+                    }
+                ),
+            }
+        ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as ListDatabasesResult;
 
-    //     return res?.success ? res.data : null;
-    // } catch (error) {
-    //     notify({
-    //         title: 'Failed to get table list',
-    //         type: 'error',
-    //         content: `Failed to get table list. \n ${error}`
-    //     });
+        return res.success ? res.data : (() => { throw new Error(res.message) })();
+    } catch (error) {
+        notify({
+            title: 'Failed to get table list',
+            type: 'error',
+            content: `Failed to get table list. \n ${error}`
+        });
 
-    //     return null;
-    // }
+        return null;
+    }
 };
 
 export const fetchTablePreview = async (sourceId: number, db: string, schema: string | undefined, table: string): Promise<TableData<TableLabels> | null> => {
-    // FIXME: dev debug
-    await new Promise(resolve => setTimeout(resolve, 1400 * Math.random()));
-    return {
-        columns: [
-            {
-                key: 'name',
-                colIndex: 0,
-                dataType: null,
-            },
-            {
-                key: 'age',
-                colIndex: 1,
-                dataType: 'Int64',
-            },
-        ],
-        rows: [
-            ['admin', 18],
-            ['jhon', 24],
-            ['nobody', 234],
-        ],
-    };
-    
     try {
         const res = await fetch(
-            '/api/data', {
+            `${apiPathPrefix}/table_detail`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -198,7 +162,7 @@ export const fetchTablePreview = async (sourceId: number, db: string, schema: st
             }
         ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as TableDataResult<TableLabels>;
 
-        return res?.success ? res.data : null;
+        return res.success ? res.data : null;
     } catch (error) {
         notify({
             title: 'Failed to get table data',
@@ -210,32 +174,10 @@ export const fetchTablePreview = async (sourceId: number, db: string, schema: st
     }
 };
 
-export const requestSQL = async (sourceId: number, queryString: string): Promise<TableData<TableLabels> | null> => {
-    // FIXME: dev debug
-    await new Promise(resolve => setTimeout(resolve, 1400 * Math.random()));
-    return {
-        columns: [
-            {
-                key: 'name',
-                colIndex: 0,
-                dataType: null,
-            },
-            {
-                key: 'age',
-                colIndex: 1,
-                dataType: 'Int64',
-            },
-        ],
-        rows: [
-            ['admin', 18],
-            ['jhon', 24],
-            ['nobody', 234],
-        ],
-    };
-    
+export const requestSQL = async (sourceId: number, queryString: string): Promise<IDatasetBase | null> => {
     try {
         const res = await fetch(
-            '/api/execute', {
+            `${apiPathPrefix}/execute`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -247,12 +189,24 @@ export const requestSQL = async (sourceId: number, queryString: string): Promise
             }
         ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as TableDataResult<TableLabels>;
 
-        return res?.success ? res.data : null;
+        const data = res.success ? res.data : (() => { throw new Error() })();
+        
+        if (!data) {
+            return null;
+        }
+
+        return await transformRawDataService(
+            data.rows.map(
+                row => Object.fromEntries(
+                    row.map<[string, any]>((val, colIdx) => [data.columns[colIdx]!.key, val])
+                )
+            )
+        );
     } catch (error) {
         notify({
             title: 'Failed to execute SQL query',
             type: 'error',
-            content: `Failed to execute SQL query "${queryString}". \n ${error}`
+            content: `Failed to execute SQL query "${queryString}". `
         });
 
         return null;
