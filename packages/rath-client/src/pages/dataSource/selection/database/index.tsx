@@ -78,9 +78,18 @@ type DatabaseOptions = [
     tableList: 'pending' | string[],
     selectedTable: string,
     tablePreview: 'pending' | TableData<TableLabels>,
+    queryString: string,
 ];
 
-type PartialDatabaseOptions = Partial<DatabaseOptions>;
+type Others<T extends any[]> = T extends [any, ...infer P] ? P : never;
+
+type PartialArrayAsProgress<T extends any[]> = T extends { [1]: any } ? (
+    [T[0]] | [T[0], ...PartialArrayAsProgress<Others<T>>]
+) : T extends { [0]: any } ? (
+    T
+) : [];
+
+type PartialDatabaseOptions = PartialArrayAsProgress<DatabaseOptions>;
 
 const inputWidth = '180px';
 
@@ -97,6 +106,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             tableList,
             selectedTable,
             tablePreview,
+            queryString,
         ],
         setOptions
     ] = useState<PartialDatabaseOptions>(['mysql']);
@@ -121,20 +131,24 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             const databases = typeof sId === 'number' ? await listDatabases(sId) : null;
 
             if (databases) {
-                setOptions(([sType, cUri, sIdFlag, ...trailings]) => {
+                setOptions(prevOpt => {
+                    const [sType, cUri, sIdFlag] = prevOpt;
+
                     if (sType === sourceType && connectUri === cUri && sIdFlag === 'pending') {
                         return [sourceType, connectUri, sId, databases];
                     }
 
-                    return [sType, cUri, sIdFlag, ...trailings];
+                    return prevOpt;
                 });
             } else {
-                setOptions(([sType, cUri, sIdFlag, ...trailings]) => {
+                setOptions(prevOpt => {
+
+                    const [sType, cUri, sIdFlag] = prevOpt;
                     if (sType === sourceType && connectUri === cUri && sIdFlag === 'pending') {
                         return [sourceType, connectUri, null];
                     }
         
-                    return [sType, cUri, sIdFlag, ...trailings];
+                    return prevOpt;
                 });
             }
 
@@ -144,7 +158,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
     // automatically fetch schema list when selected database changes
     useEffect(() => {
-        if (typeof sourceId === 'number' && whichDataset && selectedDatabase !== undefined && schemaList === undefined) {
+        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList && whichDataset && selectedDatabase !== undefined && schemaList === undefined) {
             if (whichDataset.requiredSchema) {
                 setOptions([sourceType, connectUri, sourceId, databaseList, selectedDatabase, 'pending']);
                 setLoadingAnimation(true);
@@ -152,11 +166,11 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 listSchemas(sourceId, selectedDatabase).then(schemas => {
                     if (schemas) {
                         setOptions(([sType, cUri, sId, dbList, curDb]) => {
-                            return [sType, cUri, sId, dbList, curDb, schemas];
+                            return [sType, cUri, sId, dbList, curDb, schemas] as PartialDatabaseOptions;
                         });
                     } else {
                         setOptions(([sType, cUri, sId, dbList]) => {
-                            return [sType, cUri, sId, dbList];
+                            return [sType, cUri, sId, dbList] as PartialDatabaseOptions;
                         });
                     }
                 }).finally(() => {
@@ -172,7 +186,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
     // automatically fetch table list when selected schema changes
     useEffect(() => {
-        if (typeof sourceId === 'number' && typeof selectedDatabase === 'string' && selectedSchema !== undefined && tableList === undefined) {
+        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList && (schemaList === null || Array.isArray(schemaList)) && typeof selectedDatabase === 'string' && selectedSchema !== undefined && tableList === undefined) {
             setOptions([
                 sourceType,
                 connectUri,
@@ -188,11 +202,11 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             listTables(sourceId, selectedDatabase, selectedSchema ?? undefined).then(tables => {
                 if (tables) {
                     setOptions(([sType, cUri, sId, dbList, curDb, smList, curSm]) => {
-                        return [sType, cUri, sId, dbList, curDb, smList, curSm, tables];
+                        return [sType, cUri, sId, dbList, curDb, smList, curSm, tables] as PartialDatabaseOptions;
                     });
                 } else {
                     setOptions(([sType, cUri, sId, dbList, curDb, smList]) => {
-                        return [sType, cUri, sId, dbList, curDb, smList];
+                        return [sType, cUri, sId, dbList, curDb, smList] as PartialDatabaseOptions;
                     });
                 }
             }).finally(() => {
@@ -203,7 +217,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
     // automatically fetch table preview when selected table changes
     useEffect(() => {
-        if (typeof sourceId === 'number' && typeof selectedDatabase === 'string' && selectedSchema !== undefined && typeof selectedTable === 'string') {
+        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList && (schemaList === null || Array.isArray(schemaList)) && tableList && typeof selectedDatabase === 'string' && selectedSchema !== undefined && typeof selectedTable === 'string') {
             setOptions([
                 sourceType,
                 connectUri,
@@ -221,11 +235,13 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             fetchTablePreview(sourceId, selectedDatabase, selectedSchema ?? undefined, selectedTable).then(data => {
                 if (data) {
                     setOptions(([sType, cUri, sId, dbList, curDb, smList, curSm, tList, curT]) => {
-                        return [sType, cUri, sId, dbList, curDb, smList, curSm, tList, curT, data];
+                        return [
+                            sType, cUri, sId, dbList, curDb, smList, curSm, tList, curT, data, `select * from ${selectedTable || '<table_name>'}`
+                        ] as PartialDatabaseOptions;
                     });
                 } else {
                     setOptions(([sType, cUri, sId, dbList, curDb, smList, curSm, tList]) => {
-                        return [sType, cUri, sId, dbList, curDb, smList, curSm, tList];
+                        return [sType, cUri, sId, dbList, curDb, smList, curSm, tList] as PartialDatabaseOptions;
                     });
                 }
             }).finally(() => {
@@ -269,7 +285,6 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         return null;
     }, [tableList]);
 
-    const [sql, setSql] = useState<string>();
     const [isQuerying, setQuerying] = useState(false);
 
     const query = useCallback(() => {
@@ -277,12 +292,12 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             return;
         }
 
-        if (typeof sourceId === 'number' && typeof selectedTable === 'string' && sql) {
+        if (typeof sourceId === 'number' && typeof selectedTable === 'string' && queryString) {
             setLoadingAnimation(true);
     
             setQuerying(true);
 
-            requestSQL(sourceId, sql).then(data => {
+            requestSQL(sourceId, queryString).then(data => {
                 if (data) {
                     const { dataSource, fields } = data;
                     
@@ -305,7 +320,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 setLoadingAnimation(false);
             });
         }
-    }, [isQuerying, sourceId, selectedTable, sql, setLoadingAnimation, sourceType, selectedDatabase, selectedSchema, onDataLoaded, onClose]);
+    }, [isQuerying, sourceId, selectedTable, queryString, setLoadingAnimation, sourceType, selectedDatabase, selectedSchema, onDataLoaded, onClose]);
 
     return (
         <Stack>
@@ -406,7 +421,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                 selectedKey={selectedDatabase}
                                 required
                                 onChange={(_, item) => {
-                                    if (item) {
+                                    if (item && typeof connectUri === 'string' && databaseList) {
                                         setOptions([
                                             sourceType,
                                             connectUri,
@@ -426,7 +441,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                         selectedKey={selectedSchema}
                                         required
                                         onChange={(_, item) => {
-                                            if (item) {
+                                            if (item && typeof connectUri === 'string' && databaseList && typeof selectedDatabase === 'string' && schemaList) {
                                                 setOptions([
                                                     sourceType,
                                                     connectUri,
@@ -450,7 +465,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                         selectedKey={selectedTable}
                                         required
                                         onChange={(_, item) => {
-                                            if (item) {
+                                            if (item && typeof connectUri === 'string' && databaseList && typeof selectedDatabase === 'string' && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && tableList) {
                                                 setOptions([
                                                     sourceType,
                                                     connectUri,
@@ -490,13 +505,28 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                             required
                                             readOnly={isQuerying}
                                             placeholder={`select * from ${selectedTable || '<table_name>'}`}
+                                            value={queryString}
                                             styles={{
                                                 root: {
                                                     flexGrow: 1,
                                                 },
                                             }}
                                             onChange={(_, sql) => {
-                                                setSql(sql);
+                                                if (sql && typeof connectUri === 'string' && databaseList && typeof selectedDatabase === 'string' && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && tableList && typeof selectedTable === 'string' && tablePreview) {
+                                                    setOptions([
+                                                        sourceType,
+                                                        connectUri,
+                                                        sourceId,
+                                                        databaseList,
+                                                        selectedDatabase,
+                                                        schemaList,
+                                                        selectedSchema,
+                                                        tableList,
+                                                        selectedTable,
+                                                        tablePreview,
+                                                        sql,
+                                                    ]);
+                                                }
                                             }}
                                             onKeyPress={e => {
                                                 if (e.key === 'Enter') {
@@ -506,7 +536,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                         />
                                         <PrimaryButton
                                             text={intl.get('dataSource.btn.query')}
-                                            disabled={isQuerying}
+                                            disabled={isQuerying || !(typeof sourceId === 'number' && typeof selectedTable === 'string' && queryString)}
                                             onClick={query}
                                         />
                                     </Stack>

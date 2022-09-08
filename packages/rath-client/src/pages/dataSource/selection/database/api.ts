@@ -6,10 +6,13 @@ import { transformRawDataService } from '../../utils';
 
 const apiPathPrefix = '/api';
 
-interface TableDataResult<TL extends TableLabels> {
-    success: boolean;
+type TableDataResult<TL extends TableLabels> = {
+    success: true;
     data: TableData<TL>;
-}
+} | {
+    success: false;
+    message: string;
+};
 
 interface TestConnectionResult {
     success: boolean;
@@ -154,15 +157,17 @@ export const fetchTablePreview = async (sourceId: number, db: string, schema: st
                         sourceId,
                         db,
                         schema,
+                        table,
                     } : {
                         sourceId,
                         db,
+                        table,
                     }
                 ),
             }
-        ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as TableDataResult<TableLabels>;
+        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TableDataResult<TableLabels>;
 
-        return res.success ? res.data : null;
+        return res.success ? res.data : (() => { throw new Error (res.message) })();
     } catch (error) {
         notify({
             title: 'Failed to get table data',
@@ -187,9 +192,9 @@ export const requestSQL = async (sourceId: number, queryString: string): Promise
                     query: queryString,
                 }),
             }
-        ).then(res => res.ok ? res.json() : (()=>{throw new Error()})()) as TableDataResult<TableLabels>;
+        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TableDataResult<TableLabels>;
 
-        const data = res.success ? res.data : (() => { throw new Error() })();
+        const data = res.success ? res.data : (() => { throw new Error(res.message) })();
         
         if (!data) {
             return null;
@@ -198,11 +203,12 @@ export const requestSQL = async (sourceId: number, queryString: string): Promise
         return await transformRawDataService(
             data.rows.map(
                 row => Object.fromEntries(
-                    row.map<[string, any]>((val, colIdx) => [data.columns[colIdx]!.key, val])
+                    row.map<[string, any]>((val, colIdx) => [data.columns?.[colIdx]?.key ?? `${colIdx}`, val])
                 )
             )
         );
     } catch (error) {
+        console.error(error);
         notify({
             title: 'Failed to execute SQL query',
             type: 'error',
