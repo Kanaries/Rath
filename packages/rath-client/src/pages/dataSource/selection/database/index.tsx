@@ -6,6 +6,7 @@ import intl from 'react-intl-universal';
 import TablePreview from './table-preview';
 import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, requestSQL } from './api';
 import { logDataImport } from '../../../../loggers/dataImport';
+import Progress from './progress';
 
 
 const StackTokens = {
@@ -69,7 +70,7 @@ interface DatabaseDataProps {
     setLoadingAnimation: (on: boolean) => void;
 }
 
-type DatabaseOptions = [
+export type DatabaseOptions = [
     sourceType: SupportedDatabaseType,
     connectUri: string,
     sourceId: 'pending' | number | null,
@@ -96,24 +97,22 @@ type PartialDatabaseOptions = PartialArrayAsProgress<DatabaseOptions>;
 const inputWidth = '180px';
 
 const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLoadingAnimation }) => {
+    const [progress, setOptions] = useState<PartialDatabaseOptions>(['mysql']);
     const [
-        [
-            sourceType,
-            connectUri,
-            sourceId,
-            databaseList,
-            selectedDatabase,
-            schemaList,
-            selectedSchema,
-            tableList,
-            selectedTable,
-            tablePreview,
-            queryString,
-        ],
-        setOptions
-    ] = useState<PartialDatabaseOptions>(['mysql']);
+        sourceType,
+        connectUri,
+        sourceId,
+        databaseList,
+        selectedDatabase,
+        schemaList,
+        selectedSchema,
+        tableList,
+        selectedTable,
+        tablePreview,
+        queryString,
+    ] = progress;
 
-    const whichDataset = datasetOptions.find(which => which.key === sourceType) ?? null;
+    const whichDataset = datasetOptions.find(which => which.key === sourceType)!;
 
     useEffect(() => {
         setLoadingAnimation(false);
@@ -121,7 +120,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         return () => setLoadingAnimation(false);
     }, [setLoadingAnimation]);
 
-    const uriPrefix = /^[a-z]+:\/{2}/i.exec(whichDataset?.rule ?? '')?.[0];
+    const uriPrefix = /^[a-z]+:\/{2}/i.exec(whichDataset.rule ?? '')?.[0];
 
     const handleConnectionTest = useCallback(async () => {
         if (sourceType && connectUri && sourceId === undefined) {
@@ -130,7 +129,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
             const sId = await getSourceId(sourceType, connectUri);
 
-            if (whichDataset?.hasDataset === false) {
+            if (whichDataset.hasDataset === false) {
                 setOptions(prevOpt => {
                     const [sType, cUri, sIdFlag] = prevOpt;
 
@@ -172,11 +171,11 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
             setLoadingAnimation(false);
         }
-    }, [sourceType, connectUri, sourceId, setLoadingAnimation, whichDataset?.hasDataset]);
+    }, [sourceType, connectUri, sourceId, setLoadingAnimation, whichDataset.hasDataset]);
 
     // automatically fetch schema list when selected database changes
     useEffect(() => {
-        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && whichDataset && selectedDatabase !== undefined && schemaList === undefined) {
+        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && schemaList === undefined) {
             if (whichDataset.requiredSchema) {
                 setOptions([sourceType, connectUri, sourceId, databaseList, selectedDatabase, 'pending']);
                 setLoadingAnimation(true);
@@ -278,7 +277,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
     }, [databaseList]);
 
     const schemaSelector: IDropdownOption[] | null = useMemo(() => {
-        if (whichDataset?.requiredSchema && Array.isArray(schemaList)) {
+        if (whichDataset.requiredSchema && Array.isArray(schemaList)) {
             return schemaList.map<IDropdownOption>(
                 dbName => ({
                     text: dbName,
@@ -342,60 +341,91 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
     return (
         <Stack>
+            <Progress
+                progress={progress}
+            />
             {
                 typeof sourceId !== 'number' && (
-                    <>
-                        <Stack horizontal tokens={StackTokens}>
-                            <Dropdown
-                                label={intl.get('dataSource.databaseType')}
-                                style={{ width: inputWidth }}
-                                options={datasetOptions}
-                                selectedKey={sourceType}
-                                onChange={(_, item) => {
-                                    if (item) {
-                                        setOptions([item.key as SupportedDatabaseType]);
-                                    }
-                                }}
-                            />
-                        </Stack>
-                        {
-                            whichDataset && (
-                                <Stack tokens={StackTokens}>
-                                    <TextField
-                                        prefix={uriPrefix}
-                                        label={intl.get('dataSource.connectUri')}
-                                        required
-                                        value={(connectUri ?? '').replace(uriPrefix ?? /^/, '')}
-                                        placeholder={whichDataset.rule.replace(uriPrefix ?? /^/, '')}
-                                        errorMessage={
-                                            sourceId === null
-                                                ? intl.get('dataSource.btn.connectFailed')
-                                                : undefined
-                                        }
-                                        onChange={(_, uri) => {
-                                            if (typeof uri === 'string') {
-                                                setOptions([sourceType, `${uriPrefix ?? ''}${uri}`]);
-                                            } else {
-                                                setOptions([sourceType]);
-                                            }
-                                        }}
-                                    />
-                                    <PrimaryButton
-                                        text={intl.get('dataSource.btn.connect')}
-                                        style={{
-                                            width: '20em',
-                                        }}
-                                        disabled={
-                                            !Boolean(connectUri)
-                                            || sourceId === 'pending'
-                                            || sourceId === null
-                                        }
-                                        onClick={handleConnectionTest}
-                                    />
-                                </Stack>
-                            )
-                        }
-                    </>
+                    <Stack horizontal style={{ alignItems: 'flex-end' }}>
+                        <Dropdown
+                            label={intl.get('dataSource.connectUri')}
+                            title={intl.get('dataSource.databaseType')}
+                            ariaLabel={intl.get('dataSource.databaseType')}
+                            required
+                            style={{
+                                width: '120px',
+                                borderRadius: '2px 0 0 2px',
+                            }}
+                            options={datasetOptions}
+                            selectedKey={sourceType}
+                            onChange={(_, item) => {
+                                if (item) {
+                                    setOptions([item.key as SupportedDatabaseType]);
+                                }
+                            }}
+                        />
+                        <TextField
+                            prefix={uriPrefix}
+                            title={intl.get('dataSource.connectUri')}
+                            aria-required
+                            value={(connectUri ?? '').replace(uriPrefix ?? /^/, '')}
+                            placeholder={whichDataset.rule.replace(uriPrefix ?? /^/, '')}
+                            errorMessage={
+                                sourceId === null
+                                    ? intl.get('dataSource.btn.connectFailed')
+                                    : undefined
+                            }
+                            onChange={(_, uri) => {
+                                if (typeof uri === 'string') {
+                                    setOptions([sourceType, `${uriPrefix ?? ''}${uri.replace(uriPrefix ?? /^/, '')}`]);
+                                } else {
+                                    setOptions([sourceType]);
+                                }
+                            }}
+                            onKeyPress={e => {
+                                if (e.key === 'Enter' && !(!Boolean(connectUri) || sourceId === 'pending' || sourceId === null)) {
+                                    handleConnectionTest();
+                                }
+                            }}
+                            styles={{
+                                root: {
+                                    position: 'relative',
+                                    marginRight: '1em',
+                                    flexGrow: 1,
+                                    flexShrink: 1,
+                                },
+                                fieldGroup: {
+                                    borderLeft: 'none',
+                                    borderRadius: '0 4px 4px 0',
+                                },
+                                prefix: {
+                                    backgroundColor: 'rgba(243, 242, 241, 0.5)',
+                                    opacity: 0.8,
+                                    paddingInlineEnd: '2px',
+                                },
+                                field: {
+                                    paddingInlineStart: '3px',
+                                },
+                                // 如果错误信息被插入到下方，
+                                // static 定位时会导致布局被向上顶开.
+                                errorMessage: {
+                                    position: 'absolute',
+                                    paddingBlock: '5px',
+                                    paddingInlineStart: '1em',
+                                    bottom: '100%',
+                                },
+                            }}
+                        />
+                        <PrimaryButton
+                            text={intl.get('dataSource.btn.connect')}
+                            disabled={
+                                !Boolean(connectUri)
+                                || sourceId === 'pending'
+                                || sourceId === null
+                            }
+                            onClick={handleConnectionTest}
+                        />
+                    </Stack>
                 )
             }
             {
@@ -516,7 +546,6 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                     />
                                     <Stack
                                         horizontal
-                                        tokens={StackTokens}
                                         style={{
                                             alignItems: 'flex-end',
                                             marginBlockEnd: '10px',
@@ -559,7 +588,11 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                         <PrimaryButton
                                             text={intl.get('dataSource.btn.query')}
                                             disabled={isQuerying || !(typeof sourceId === 'number' && typeof selectedTable === 'string' && queryString)}
+                                            autoFocus
                                             onClick={query}
+                                            style={{
+                                                marginInline: '10px',
+                                            }}
                                         />
                                     </Stack>
                                 </Stack>
