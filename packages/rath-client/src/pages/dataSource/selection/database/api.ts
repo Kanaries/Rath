@@ -4,7 +4,7 @@ import type { IDatasetBase } from '../../../../interfaces';
 import { transformRawDataService } from '../../utils';
 
 
-const apiPathPrefix = '/api';
+let apiPathPrefix = '/unknown-source-type';
 
 type TableDataResult<TL extends TableLabels> = {
     success: true;
@@ -34,7 +34,7 @@ export const getSourceId = async (
 ): Promise<number | null> => {
     try {
         const res = await fetch(
-            `${apiPathPrefix}/upsert`, {
+            `${'sqlite'}/upsert`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -45,6 +45,8 @@ export const getSourceId = async (
                 }),
             }
         ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TestConnectionResult;
+
+        apiPathPrefix = `/${sourceType}`;
 
         return res?.success ? res.data : null;
     } catch (error) {
@@ -87,7 +89,7 @@ export const listDatabases = async (sourceId: number): Promise<string[] | null> 
 export const listSchemas = async (sourceId: number, db: string | null): Promise<string[] | null> => {
     try {
         const res = await fetch(
-            `${apiPathPrefix}/schema_list`, {
+            `${apiPathPrefix}/schema_list`.replace(/^\/postgres\/schema_list$/, '/postgres/database_list'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -119,16 +121,11 @@ export const listTables = async (sourceId: number, db: string | null, schema: st
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(
-                    typeof schema === 'string' ? {
-                        sourceId,
-                        db,
-                        schema,
-                    } : {
-                        sourceId,
-                        db,
-                    }
-                ),
+                body: JSON.stringify({
+                    sourceId,
+                    db,
+                    [apiPathPrefix.match(/^\/(postgres|kylin)$/) ? 'db' : 'schema']: schema,
+                }),
             }
         ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListDatabasesResult;
 
@@ -144,7 +141,7 @@ export const listTables = async (sourceId: number, db: string | null, schema: st
     }
 };
 
-export const fetchTablePreview = async (sourceId: number, db: string | null, schema: string | null, table: string): Promise<TableData<TableLabels> | null> => {
+export const fetchTablePreview = async (sourceId: number, db: string | null, schema: string | null, table: string | null, silent: boolean = false): Promise<TableData<TableLabels> | null> => {
     try {
         const res = await fetch(
             `${apiPathPrefix}/table_detail`, {
@@ -152,28 +149,24 @@ export const fetchTablePreview = async (sourceId: number, db: string | null, sch
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(
-                    typeof schema === 'string' ? {
-                        sourceId,
-                        db,
-                        schema,
-                        table,
-                    } : {
-                        sourceId,
-                        db,
-                        table,
-                    }
-                ),
+                body: JSON.stringify({
+                    sourceId,
+                    db,
+                    [apiPathPrefix.match(/^\/(postgres|kylin)$/) ? 'db' : 'schema']: schema,
+                    table,
+                }),
             }
         ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TableDataResult<TableLabels>;
 
         return res.success ? res.data : (() => { throw new Error (res.message) })();
     } catch (error) {
-        notify({
-            title: 'Failed to get table data',
-            type: 'error',
-            content: `Failed to get table data. \n ${error}`
-        });
+        if (silent) {
+            notify({
+                title: 'Failed to get table data',
+                type: 'error',
+                content: `Failed to get table data. \n ${error}`
+            });
+        }
 
         return null;
     }

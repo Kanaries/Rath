@@ -13,6 +13,18 @@ const styles: Record<TableDataType, CSSProperties> & Record<string, any> = {
 };
 
 const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }) {
+    const columns = [...data.columns];
+
+    if (columns.length === 0) {
+        data.rows[0]?.forEach((_, i) => {
+            columns.push({
+                key: `col_${i + 1}`,
+                colIndex: i,
+                dataType: null,
+            });
+        });
+    }
+
     return (
         <div
             style={{
@@ -21,7 +33,7 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
                 maxHeight: '30vh',
                 padding: '4px',
                 display: 'inline-grid',
-                gridTemplateColumns: `repeat(${data.columns.length + 1}, max-content)`,
+                gridTemplateColumns: `repeat(${columns.length + 1}, max-content)`,
                 rowGap: '3px',
                 columnGap: '0.5em',
                 border: '1px solid rgb(235, 235, 235)',
@@ -36,7 +48,7 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
                 }}
             />
             {
-                data.columns.map(col => (
+                columns.map(col => (
                     <label
                         key={col.colIndex}
                         style={{
@@ -66,7 +78,7 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
                                     key={j}
                                     style={{
                                         paddingInline: '0.6em',
-                                        ...styles[data.columns[j]!.dataType ?? ''],
+                                        ...styles[data.columns[j]?.dataType ?? ''],
                                     }}
                                 >
                                     {e}
@@ -75,6 +87,19 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
                         }
                     </Fragment>
                 ))
+            }
+            {
+                data.rows.length === 0 && (
+                    <span
+                        style={{
+                            paddingInline: '0.6em',
+                            color: 'rgb(133, 133, 133)',
+                            fontStyle: 'italic',
+                        }}
+                    >
+                        (empty)
+                    </span>
+                )
             }
         </div>
     );

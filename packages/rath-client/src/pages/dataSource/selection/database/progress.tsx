@@ -127,23 +127,23 @@ const Progress: React.FC<ProgressProps> = ({ progress }) => {
     return (
         <div style={{ margin: '2em 0em 1em 0em' }}>
             <Box sx={{ width: '100%' }}>
-            <Stepper alternativeLabel>
-                {
-                    stages.map(stage => (
-                        <Step
-                            key={stage.label}
-                            completed={stage.completed}
-                            active={stage.active}
-                            style={{ textAlign: 'center' }}
-                        >
-                            <StepLabel error={stage.failed}>
-                                {stage.label}
-                            </StepLabel>
-                            <p>{stage.desc}</p>
-                        </Step>
-                    ))
-                }
-            </Stepper>
+                <Stepper alternativeLabel>
+                    {
+                        stages.map(stage => (
+                            <Step
+                                key={stage.label}
+                                completed={stage.completed}
+                                active={stage.active}
+                                style={{ textAlign: 'center' }}
+                            >
+                                <StepLabel error={stage.failed}>
+                                    {stage.label}
+                                </StepLabel>
+                                <p>{stage.desc}</p>
+                            </Step>
+                        ))
+                    }
+                </Stepper>
             </Box>
         </div>
     );
