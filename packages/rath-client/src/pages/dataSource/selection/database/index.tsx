@@ -4,7 +4,7 @@ import { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { DefaultButton, Dropdown, IDropdownOption, Label, PrimaryButton, Stack, TextField, Icon, registerIcons } from 'office-ui-fabric-react';
 import intl from 'react-intl-universal';
 import TablePreview from './table-preview';
-import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, requestSQL } from './api';
+import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, pingConnector, requestSQL } from './api';
 import { logDataImport } from '../../../../loggers/dataImport';
 import Progress from './progress';
 import prefetch from '../../../../utils/prefetch';
@@ -60,6 +60,7 @@ const datasetOptions = ([
         requiredSchema: true,
         schemaEnumerable: false,
         tableEnumerable: false,
+        icon: 'kylin.png'
     },
     {
         text: 'Oracle',
@@ -71,17 +72,20 @@ const datasetOptions = ([
     {
         text: 'Apache Doris',
         key: 'doris',
+        icon: 'doris.png',
         rule: '',
     },
     {
         text: 'Apache Impala',
         key: 'impala',
         rule: 'impala://{hostname}:{port}/{database}',
+        icon: 'impala.png',
     },
     {
         text: 'Amazon Athena',
         key: 'awsathena',
         rule: 'awsathena+rest://{aws_access_key_id}:{aws_secret_access_key}@athena.{region_name}.amazonaws.com/{',
+        icon: 'athena.png',
     },
     {
         text: 'Amazon Redshift',
@@ -93,11 +97,13 @@ const datasetOptions = ([
         text: 'Amazon Spark SQL',
         key: 'sparksql',
         rule: 'hive://hive@{hostname}:{port}/{database}',
+        icon: 'sparksql.png',
     },
     {
         text: 'Apache Hive',
         key: 'hive',
         rule: 'hive://hive@{hostname}:{port}/{database}',
+        icon: 'hive.jpg',
     },
     {
         text: 'SQL Server',
@@ -171,6 +177,7 @@ interface DatabaseDataProps {
 }
 
 export type DatabaseOptions = [
+    connectorReady: boolean,
     sourceType: SupportedDatabaseType,
     connectUri: string,
     sourceId: 'pending' | number | null,
@@ -186,13 +193,19 @@ export type DatabaseOptions = [
 
 type Others<T extends any[]> = T extends [any, ...infer P] ? P : never;
 
-type PartialArrayAsProgress<T extends any[]> = T extends { [1]: any } ? (
-    [T[0]] | [T[0], ...PartialArrayAsProgress<Others<T>>]
-) : T extends { [0]: any } ? (
-    T
-) : [];
+type PartialArrayAsProgress<T extends any[], IsOrigin extends boolean> = IsOrigin extends true ? (
+    T extends { [2]: any } ? (
+        [T[0], T[1]] | [T[0], T[1], ...PartialArrayAsProgress<Others<Others<T>>, false>]
+    ) : T
+) : (
+    T extends { [1]: any } ? (
+        [T[0]] | [T[0], ...PartialArrayAsProgress<Others<T>, false>]
+    ) : T extends { [0]: any } ? (
+        T
+    ) : []
+);
 
-type PartialDatabaseOptions = PartialArrayAsProgress<DatabaseOptions>;
+type PartialDatabaseOptions = PartialArrayAsProgress<DatabaseOptions, true>;
 
 const inputWidth = '180px';
 const FETCH_THROTTLE_SPAN = 600;
@@ -271,8 +284,9 @@ const renderDropdownItem: React.FC<typeof datasetOptions[0] | undefined> = props
 };
 
 const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLoadingAnimation }) => {
-    const [progress, setOptions] = useState<PartialDatabaseOptions>(['mysql']);
+    const [progress, setOptions] = useState<PartialDatabaseOptions>([false, 'mysql']);
     const [
+        connectorReady,
         sourceType,
         connectUri,
         sourceId,
@@ -285,6 +299,10 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         tablePreview,
         queryString,
     ] = progress;
+
+    useEffect(() => {
+        pingConnector().then(ok => setOptions(([_, sType]) => [ok, sType]));
+    }, []);
 
     // prefetch icons
     useEffect(() => {
@@ -305,17 +323,17 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
     const handleConnectionTest = useCallback(async () => {
         if (sourceType && connectUri && sourceId === undefined) {
-            setOptions([sourceType, connectUri, 'pending']);
+            setOptions([connectorReady, sourceType, connectUri, 'pending']);
             setLoadingAnimation(true);
 
             const sId = await getSourceId(sourceType, connectUri);
 
             if (whichDatabase.hasDatabase === false) {
                 setOptions(prevOpt => {
-                    const [sType, cUri, sIdFlag] = prevOpt;
+                    const [cr, sType, cUri, sIdFlag] = prevOpt;
 
                     if (sType === sourceType && connectUri === cUri && sIdFlag === 'pending') {
-                        return [sourceType, connectUri, sId, null, null];
+                        return [cr, sourceType, connectUri, sId, null, null];
                     }
 
                     return prevOpt;
@@ -326,10 +344,10 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 return;
             } else if (whichDatabase.databaseEnumerable === false) {
                 setOptions(prevOpt => {
-                    const [sType, cUri, sIdFlag] = prevOpt;
+                    const [cr, sType, cUri, sIdFlag] = prevOpt;
 
                     if (sType === sourceType && connectUri === cUri && sIdFlag === 'pending') {
-                        return [sourceType, connectUri, sId, 'input'];
+                        return [cr, sourceType, connectUri, sId, 'input'];
                     }
 
                     return prevOpt;
@@ -344,10 +362,10 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
             if (databases) {
                 setOptions(prevOpt => {
-                    const [sType, cUri, sIdFlag] = prevOpt;
+                    const [cr, sType, cUri, sIdFlag] = prevOpt;
 
                     if (sType === sourceType && connectUri === cUri && sIdFlag === 'pending') {
-                        return [sourceType, connectUri, sId, databases];
+                        return [cr, sourceType, connectUri, sId, databases];
                     }
 
                     return prevOpt;
@@ -355,9 +373,9 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             } else {
                 setOptions(prevOpt => {
 
-                    const [sType, cUri, sIdFlag] = prevOpt;
+                    const [cr, sType, cUri, sIdFlag] = prevOpt;
                     if (sType === sourceType && connectUri === cUri && sIdFlag === 'pending') {
-                        return [sourceType, connectUri, null];
+                        return [cr, sourceType, connectUri, null];
                     }
         
                     return prevOpt;
@@ -366,25 +384,25 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
             setLoadingAnimation(false);
         }
-    }, [sourceType, connectUri, sourceId, setLoadingAnimation, whichDatabase.hasDatabase, whichDatabase.databaseEnumerable]);
+    }, [sourceType, connectUri, sourceId, connectorReady, setLoadingAnimation, whichDatabase.hasDatabase, whichDatabase.databaseEnumerable]);
 
     // automatically fetch schema list when selected database changes
     useEffect(() => {
         if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && schemaList === undefined) {
             if (whichDatabase.requiredSchema) {
                 if (whichDatabase.schemaEnumerable === false) {
-                    setOptions([sourceType, connectUri, sourceId, databaseList, selectedDatabase, 'input']);
+                    setOptions([connectorReady, sourceType, connectUri, sourceId, databaseList, selectedDatabase, 'input']);
                     
                     return;
                 }
 
-                setOptions([sourceType, connectUri, sourceId, databaseList, selectedDatabase, 'pending']);
+                setOptions([connectorReady, sourceType, connectUri, sourceId, databaseList, selectedDatabase, 'pending']);
                 setLoadingAnimation(true);
                 
                 listSchemas(sourceId, selectedDatabase).then(schemas => {
                     if (schemas) {
-                        setOptions(([sType, cUri, sId, dbList, curDb]) => {
-                            return [sType, cUri, sId, dbList, curDb, schemas] as PartialDatabaseOptions;
+                        setOptions(([cr, sType, cUri, sId, dbList, curDb]) => {
+                            return [cr, sType, cUri, sId, dbList, curDb, schemas] as PartialDatabaseOptions;
                         });
                     } else {
                         setOptions(([sType, cUri, sId, dbList]) => {
@@ -396,17 +414,18 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 });
             } else {
                 setOptions([
-                    sourceType, connectUri, sourceId, databaseList, selectedDatabase, null, null
+                    connectorReady, sourceType, connectUri, sourceId, databaseList, selectedDatabase, null, null
                 ]);
             }
         }
-    }, [sourceId, connectUri, sourceType, databaseList, whichDatabase, selectedDatabase, schemaList, setLoadingAnimation]);
+    }, [sourceId, connectUri, sourceType, databaseList, whichDatabase, selectedDatabase, schemaList, setLoadingAnimation, connectorReady]);
 
     // automatically fetch table list when selected schema changes
     useEffect(() => {
         if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && (schemaList === null || schemaList === 'input' || Array.isArray(schemaList)) && selectedDatabase !== undefined && selectedSchema !== undefined && tableList === undefined) {
             if (whichDatabase.hasTableList === false) {
                 setOptions([
+                    connectorReady,
                     sourceType,
                     connectUri,
                     sourceId,
@@ -421,6 +440,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 return;
             } else if (whichDatabase.tableEnumerable === false) {
                 setOptions([
+                    connectorReady,
                     sourceType,
                     connectUri,
                     sourceId,
@@ -435,6 +455,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             }
 
             setOptions([
+                connectorReady,
                 sourceType,
                 connectUri,
                 sourceId,
@@ -448,8 +469,8 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             
             listTables(sourceId, selectedDatabase, selectedSchema).then(tables => {
                 if (tables) {
-                    setOptions(([sType, cUri, sId, dbList, curDb, smList, curSm]) => {
-                        return [sType, cUri, sId, dbList, curDb, smList, curSm, tables] as PartialDatabaseOptions;
+                    setOptions(([cr, sType, cUri, sId, dbList, curDb, smList, curSm]) => {
+                        return [cr, sType, cUri, sId, dbList, curDb, smList, curSm, tables] as PartialDatabaseOptions;
                     });
                 } else {
                     setOptions(([sType, cUri, sId, dbList, curDb, smList]) => {
@@ -460,7 +481,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 setLoadingAnimation(false);
             });
         }
-    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, setLoadingAnimation, tableList, whichDatabase.hasTableList, whichDatabase.tableEnumerable]);
+    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, setLoadingAnimation, tableList, whichDatabase.hasTableList, whichDatabase.tableEnumerable, connectorReady]);
 
     let lastInputTimeRef = useRef(0);
     let throttledRef = useRef<NodeJS.Timeout | null>(null);
@@ -469,6 +490,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
     useEffect(() => {
         if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && (schemaList === null || schemaList === 'input' || Array.isArray(schemaList)) && tableList !== undefined && selectedDatabase !== undefined && selectedSchema !== undefined && selectedTable !== undefined) {
             setOptions([
+                connectorReady,
                 sourceType,
                 connectUri,
                 sourceId,
@@ -485,9 +507,9 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             const autoPreview = () => {
                 fetchTablePreview(sourceId, selectedDatabase, selectedSchema, selectedTable, !(whichDatabase.tableEnumerable ?? true)).then(data => {
                     if (data) {
-                        setOptions(([sType, cUri, sId, dbList, curDb, smList, curSm, tList, curT]) => {
+                        setOptions(([cr, sType, cUri, sId, dbList, curDb, smList, curSm, tList, curT]) => {
                             return [
-                                sType, cUri, sId, dbList, curDb, smList, curSm, tList, curT, data, `select * from ${selectedTable || '<table_name>'}`
+                                cr, sType, cUri, sId, dbList, curDb, smList, curSm, tList, curT, data, `select * from ${selectedTable || '<table_name>'}`
                             ] as PartialDatabaseOptions;
                         });
                     } else {
@@ -511,7 +533,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 autoPreview();
             }
         }
-    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, tableList, selectedTable, setLoadingAnimation, whichDatabase.tableEnumerable]);
+    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, tableList, selectedTable, setLoadingAnimation, whichDatabase.tableEnumerable, connectorReady]);
 
     const databaseSelector: IDropdownOption[] | null = useMemo(() => {
         return databaseList === 'input' ? null : databaseList?.map<IDropdownOption>(
@@ -585,7 +607,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         }
     }, [isQuerying, sourceId, selectedTable, queryString, setLoadingAnimation, sourceType, selectedDatabase, selectedSchema, onDataLoaded, onClose]);
 
-    return (
+    return connectorReady ? (
         <Stack>
             <Progress
                 progress={progress}
@@ -624,7 +646,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                             onRenderTitle={renderDropdownTitle as (e?: IDropdownOption[]) => JSX.Element}
                             onChange={(_, item) => {
                                 if (item) {
-                                    setOptions([item.key as SupportedDatabaseType]);
+                                    setOptions([connectorReady, item.key as SupportedDatabaseType]);
                                 }
                             }}
                         />
@@ -641,9 +663,9 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                             }
                             onChange={(_, uri) => {
                                 if (typeof uri === 'string') {
-                                    setOptions([sourceType, uri]);
+                                    setOptions([connectorReady, sourceType, uri]);
                                 } else {
-                                    setOptions([sourceType]);
+                                    setOptions([connectorReady, sourceType]);
                                 }
                             }}
                             onKeyPress={e => {
@@ -714,7 +736,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                     paddingInline: '0.6em',
                                     fontSize: '70%',
                                 }}
-                                onClick={() => setOptions([sourceType])}
+                                onClick={() => setOptions([connectorReady, sourceType])}
                             />
                         </Stack>
                         <Stack horizontal tokens={StackTokens}>
@@ -730,6 +752,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                             onChange={(_, item) => {
                                                 if (item && typeof connectUri === 'string' && databaseList) {
                                                     setOptions([
+                                                        connectorReady,
                                                         sourceType,
                                                         connectUri,
                                                         sourceId,
@@ -751,6 +774,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                                 
                                                 if (typeof key === 'string' && typeof connectUri === 'string' && databaseList) {
                                                     setOptions([
+                                                        connectorReady,
                                                         sourceType,
                                                         connectUri,
                                                         sourceId,
@@ -775,6 +799,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                             onChange={(_, item) => {
                                                 if (item && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && schemaList) {
                                                     setOptions([
+                                                        connectorReady,
                                                         sourceType,
                                                         connectUri,
                                                         sourceId,
@@ -798,6 +823,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                                 
                                                 if (typeof key === 'string' && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && schemaList) {
                                                     setOptions([
+                                                        connectorReady,
                                                         sourceType,
                                                         connectUri,
                                                         sourceId,
@@ -824,6 +850,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                             onChange={(_, item) => {
                                                 if (item && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && tableList) {
                                                     setOptions([
+                                                        connectorReady,
                                                         sourceType,
                                                         connectUri,
                                                         sourceId,
@@ -849,6 +876,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                                 
                                                 if (typeof key === 'string' && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || schemaList === 'input' || Array.isArray(schemaList)) && selectedSchema !== undefined && tableList) {
                                                     setOptions([
+                                                        connectorReady,
                                                         sourceType,
                                                         connectUri,
                                                         sourceId,
@@ -897,6 +925,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                             onChange={(_, sql) => {
                                                 if (typeof sql === 'string' && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && (tableList !== undefined && tableList !== 'pending') && selectedTable !== undefined && tablePreview) {
                                                     setOptions([
+                                                        connectorReady,
                                                         sourceType,
                                                         connectUri,
                                                         sourceId,
@@ -934,7 +963,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 )
             }
         </Stack>
-    );
+    ) : null;
 };
 
 

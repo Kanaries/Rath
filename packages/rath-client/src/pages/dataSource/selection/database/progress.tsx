@@ -49,25 +49,30 @@ const getStageInfo = (progress: Readonly<Partial<DatabaseOptions>>): StageInfo[]
 
     /* eslint-disable @typescript-eslint/no-unused-vars */
     const [
-        _0,
+        connectorReady,
         _1,
+        _2,
         sourceId,
-        _3,
         _4,
         _5,
         _6,
         _7,
+        _8,
         selectedTable,
         tablePreview,
-        _10,
+        _11,
     ] = progress;
     /* eslint-enable @typescript-eslint/no-unused-vars */
 
     let cursorFixed = false;
 
     if (sourceId === undefined || sourceId === 'pending') {
-        stages[0]!.active = true;
-        stages[0]!.desc = intl.get('dataSource.dbProgress.0.msgRunning');
+        stages[0]!.active = connectorReady ?? false;
+
+        if (connectorReady) {
+            stages[0]!.desc = intl.get('dataSource.dbProgress.0.msgRunning');
+        }
+        
         cursorFixed = true;
     } else {
         stages[0]!.completed = true;

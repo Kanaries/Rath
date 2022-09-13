@@ -26,8 +26,18 @@ enum ERR_NAMESPACES {
 }
 
 const RATH_ERROR = {
-    SourceIdError: {
+    ConnectorError: {
         errId: `E${ERR_NAMESPACES.DATA_SOURCE}00`,
+        displayName: 'ConnectorError',
+        message: {
+            raw: 'Connector did not respond to the ping.\nPlease make sure the server of the connector is started.',
+            locales: {
+                'zh-CN': 'Connector 没有响应 ping 请求。\n请检查 connector 服务是否已开启。',
+            },
+        },
+    } as RathErrorType,
+    SourceIdError: {
+        errId: `E${ERR_NAMESPACES.DATA_SOURCE}01`,
         displayName: 'SourceIdError',
         message: {
             raw: 'Failed to get source id.',
@@ -37,7 +47,7 @@ const RATH_ERROR = {
         },
     } as RathErrorType,
     FetchDatabaseListFailed: {
-        errId: `E${ERR_NAMESPACES.DATA_SOURCE}01`,
+        errId: `E${ERR_NAMESPACES.DATA_SOURCE}02`,
         displayName: 'FetchDatabaseListFailed',
         message: {
             raw: 'Failed to get database list.',
@@ -47,7 +57,7 @@ const RATH_ERROR = {
         },
     } as RathErrorType,
     FetchSchemaListFailed: {
-        errId: `E${ERR_NAMESPACES.DATA_SOURCE}02`,
+        errId: `E${ERR_NAMESPACES.DATA_SOURCE}03`,
         displayName: 'FetchSchemaListFailed',
         message: {
             raw: 'Failed to get schema list.',
@@ -57,7 +67,7 @@ const RATH_ERROR = {
         },
     } as RathErrorType,
     FetchTableListFailed: {
-        errId: `E${ERR_NAMESPACES.DATA_SOURCE}03`,
+        errId: `E${ERR_NAMESPACES.DATA_SOURCE}04`,
         displayName: 'FetchTableListFailed',
         message: {
             raw: 'Failed to get table list.',
@@ -67,7 +77,7 @@ const RATH_ERROR = {
         },
     } as RathErrorType,
     FetchTablePreviewFailed: {
-        errId: `E${ERR_NAMESPACES.DATA_SOURCE}04`,
+        errId: `E${ERR_NAMESPACES.DATA_SOURCE}05`,
         displayName: 'FetchTablePreviewFailed',
         message: {
             raw: 'Failed to get table preview.',
@@ -77,7 +87,7 @@ const RATH_ERROR = {
         },
     } as RathErrorType,
     QueryExecutionError: {
-        errId: `E${ERR_NAMESPACES.DATA_SOURCE}05`,
+        errId: `E${ERR_NAMESPACES.DATA_SOURCE}06`,
         displayName: 'QueryExecutionError',
         message: {
             raw: 'Failed to execute SQL query `{sql}`.',
@@ -94,7 +104,7 @@ export const getRathError = (name: keyof typeof RATH_ERROR, detail?: any, data?:
     return {
         title: `[${err.errId}] ${err.displayName}`,
         type: 'error',
-        content: `${intl.get(`error.${err.displayName}`, data)}${detail ? `\n\n${detail}` : ''}`,
+        content: `${intl.get(`error.${err.displayName}`, data)}${detail && detail instanceof Error && (detail as Error).message ? `\n\n${detail}` : ''}`,
     };
 };
 

@@ -5,7 +5,7 @@ import { getRathError } from '../../../../rath-error';
 import { transformRawDataService } from '../../utils';
 
 
-let apiPathPrefix = '/unknown-source-type';
+const apiPathPrefix = '/api';
 
 type TableDataResult<TL extends TableLabels> = {
     success: true;
@@ -29,13 +29,38 @@ type ListDatabasesResult = {
     message: string;
 };
 
+export const pingConnector = async (): Promise<boolean> => {
+    try {
+        const res = await fetch(
+            '/ping', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }
+        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TestConnectionResult;
+
+        if (!res.success) {
+            throw new Error('Operation failed.');
+        }
+
+        return true;
+    } catch (error) {
+        const rathError = getRathError('ConnectorError', error);
+
+        notify(rathError);
+
+        return false;
+    }
+};
+
 export const getSourceId = async (
     sourceType: SupportedDatabaseType,
     uri: string,
 ): Promise<number | null> => {
     try {
         const res = await fetch(
-            `${'sqlite'}/upsert`, {
+            `${apiPathPrefix}/upsert`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -46,8 +71,6 @@ export const getSourceId = async (
                 }),
             }
         ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TestConnectionResult;
-
-        apiPathPrefix = `/${sourceType.replace(/^awsathena$/, 'athena').replace(/^hive$/, 'sparksql')}`;
 
         if (!res.success) {
             throw new Error('Operation failed.');
@@ -90,7 +113,7 @@ export const listDatabases = async (sourceId: number): Promise<string[] | null> 
 export const listSchemas = async (sourceId: number, db: string | null): Promise<string[] | null> => {
     try {
         const res = await fetch(
-            `${apiPathPrefix}/schema_list`.replace(/^\/postgres\/schema_list$/, '/postgres/database_list'), {
+            `${apiPathPrefix}/database_list`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -123,7 +146,7 @@ export const listTables = async (sourceId: number, db: string | null, schema: st
                 body: JSON.stringify({
                     sourceId,
                     db,
-                    [apiPathPrefix.match(/^\/(postgres|kylin)$/) ? 'db' : 'schema']: schema,
+                    schema,
                 }),
             }
         ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListDatabasesResult;
@@ -149,7 +172,7 @@ export const fetchTablePreview = async (sourceId: number, db: string | null, sch
                 body: JSON.stringify({
                     sourceId,
                     db,
-                    [apiPathPrefix.match(/^\/(postgres|kylin)$/) ? 'db' : 'schema']: schema,
+                    schema,
                     table,
                 }),
             }
