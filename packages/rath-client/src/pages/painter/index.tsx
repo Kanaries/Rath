@@ -1,4 +1,4 @@
-import { IFieldMeta, IRow } from '@kanaries/loa';
+import { IFieldMeta, IRow, ISemanticType } from '@kanaries/loa';
 import { observer } from 'mobx-react-lite';
 import { DefaultButton, PrimaryButton, Slider, Toggle, Stack, SwatchColorPicker } from 'office-ui-fabric-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -7,7 +7,7 @@ import ReactVega from '../../components/react-vega';
 import { IVegaSubset } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
-import { batchMutInCircle, nnMic } from './utils';
+import { batchMutInCatRange, batchMutInCircle, nnMic } from './utils';
 import styled from 'styled-components';
 import EmbedAnalysis from './embedAnalysis';
 import { transVegaSubset2Schema } from '../../utils/transform';
@@ -93,7 +93,6 @@ const Painter: React.FC = (props) => {
             }
             ans.sort((a, b) => b.score - a.score);
             setNearFields(ans.map((a) => a.field));
-            console.log(ans);
         },
         [fieldMetas]
     );
@@ -130,48 +129,81 @@ const Painter: React.FC = (props) => {
                 );
                 const xField = mvd.encoding.x.field;
                 const yField = mvd.encoding.y.field;
-                const xRange = getRange(mutData.map((r) => r[xField]));
-                const yRange = getRange(mutData.map((r) => r[yField]));
-                // const scaleX = res.view.scale('x');
-                // const scaleY = res.view.scale('y');
-                res.view.addEventListener('mouseover', (e, item) => {
-                    if (painting && item && item.datum) {
-                        // console.log(e)
-                        // @ts-ignore
-                        // const index = item.datum[LABEL_INDEX];
+                const xFieldType = mvd.encoding.x.type as ISemanticType;
+                const yFieldType = mvd.encoding.y.type as ISemanticType;
+                if (xFieldType === 'quantitative' && yFieldType === 'quantitative') {
+                    const xRange = getRange(mutData.map((r) => r[xField]));
+                    const yRange = getRange(mutData.map((r) => r[yField]));
+                    res.view.addEventListener('mouseover', (e, item) => {
+                        if (painting && item && item.datum) {
 
-                        const { mutIndices, mutValues } = batchMutInCircle({
-                            mutData,
-                            fields: [xField, yField],
-                            point: [item.datum[xField], item.datum[yField]],
-                            a: xRange[1] - xRange[0],
-                            b: yRange[1] - yRange[0],
-                            r: painterSize,
-                            key: LABEL_FIELD_KEY,
-                            indexKey: LABEL_INDEX,
-                            value: mutFeatValues[mutFeatIndex],
-                        });
-                        // batchMutInRange(mutData, xField, [item.datum[xField] -10, item.datum[xField] + 10], LABEL_FIELD_KEY, mutFeatValues[mutFeatIndex])
-                        // batchMutInRange(mutData, yField, [item.datum[yField] -10, item.datum[yField] + 10], LABEL_FIELD_KEY, mutFeatValues[mutFeatIndex])
-                        // console.log(scaleX(0), scaleY(0), scaleX(500), scaleY(5000))
-                        // @ts-ignore
-                        // res.view.scale('x')
-
-                        // console.log(item, scaleX(e.layerX), scaleY(e.layerY), res.view)
-                        // mutData[index][LABEL_FIELD_KEY] = 'label2'
-                        res.view.change(
-                            'dataSource',
-                            vega
-                                .changeset()
-                                // .remove(vega.truthy)
-                                // .insert(mutData)
-                                //@ts-ignore
-                                // .modify((r: any) => 0 /*&& mutIndices.has(r[LABEL_INDEX])*/, LABEL_FIELD_KEY, t => t[LABEL_FIELD_KEY])
-                                .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                .insert(mutValues)
-                        );
-                    }
-                });
+                            const { mutIndices, mutValues } = batchMutInCircle({
+                                mutData,
+                                fields: [xField, yField],
+                                point: [item.datum[xField], item.datum[yField]],
+                                a: xRange[1] - xRange[0],
+                                b: yRange[1] - yRange[0],
+                                r: painterSize,
+                                key: LABEL_FIELD_KEY,
+                                indexKey: LABEL_INDEX,
+                                value: mutFeatValues[mutFeatIndex],
+                            });
+                            res.view.change(
+                                'dataSource',
+                                vega
+                                    .changeset()
+                                    .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                    .insert(mutValues)
+                            );
+                        }
+                    });
+                } else if (xFieldType !== 'quantitative' && yFieldType === 'quantitative') {
+                    const yRange = getRange(mutData.map((r) => r[yField]));
+                    res.view.addEventListener('mouseover', (e, item) => {
+                        if (painting && item && item.datum) {
+                            const { mutIndices, mutValues } = batchMutInCatRange({
+                                mutData,
+                                fields: [xField, yField],
+                                point: [item.datum[xField], item.datum[yField]],
+                                r: painterSize,
+                                key: LABEL_FIELD_KEY,
+                                range: yRange[1] - yRange[0],
+                                indexKey: LABEL_INDEX,
+                                value: mutFeatValues[mutFeatIndex],
+                            });
+                            res.view.change(
+                                'dataSource',
+                                vega
+                                    .changeset()
+                                    .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                    .insert(mutValues)
+                            );
+                        }
+                    });
+                } else if (yFieldType !== 'quantitative' && xFieldType === 'quantitative') {
+                    res.view.addEventListener('mouseover', (e, item) => {
+                        if (painting && item && item.datum) {
+                            const xRange = getRange(mutData.map((r) => r[xField]));
+                            const { mutIndices, mutValues } = batchMutInCatRange({
+                                mutData,
+                                fields: [yField, xField],
+                                point: [item.datum[yField], item.datum[xField]],
+                                r: painterSize,
+                                range: xRange[1] - xRange[0],
+                                key: LABEL_FIELD_KEY,
+                                indexKey: LABEL_INDEX,
+                                value: mutFeatValues[mutFeatIndex],
+                            });
+                            res.view.change(
+                                'dataSource',
+                                vega
+                                    .changeset()
+                                    .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                    .insert(mutValues)
+                            );
+                        }
+                    });
+                }
                 res.view.resize();
                 res.view.runAsync();
             });

@@ -116,3 +116,43 @@ export function batchMutInCircle (props: BatchMutInCircleProps) {
         mutValues
     }
 }
+
+interface BatchMutInCatRangeProps {
+    mutData: IRow;
+    fields: [string, string];
+    point: [any, number];
+    r: number;
+    range: number;
+    key: string;
+    value: any;
+    indexKey: string;
+}
+export function batchMutInCatRange (props: BatchMutInCatRangeProps) {
+    const {
+        mutData,
+        fields,
+        point,
+        r,
+        range,
+        key,
+        value,
+        indexKey
+    } = props;
+    const mutIndices = new Set();
+    const mutValues: IRow[] = [];
+    for (let i = 0; i < mutData.length; i++) {
+        if (mutData[i][fields[0]] === point[0]) {
+            if (Math.abs(mutData[i][fields[1]] - point[1]) < r * Math.sqrt(range)) {
+                if (mutData[i][key] !== value) {
+                    mutData[i][key] = value;
+                    mutValues.push(mutData[i])
+                    mutIndices.add(mutData[i][indexKey])
+                }
+            }
+        }
+    }
+    return {
+        mutIndices,
+        mutValues
+    }
+}
