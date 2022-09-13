@@ -1,8 +1,9 @@
-import type { SupportedDatabaseType, TableData, TableLabels } from '.';
+import type { TableData, TableLabels } from '.';
 import { notify } from '../../../../components/error';
 import type { IDatasetBase } from '../../../../interfaces';
 import { getRathError } from '../../../../rath-error';
 import { transformRawDataService } from '../../utils';
+import { SupportedDatabaseType } from './type';
 
 
 const apiPathPrefix = '/api';
@@ -113,7 +114,7 @@ export const listDatabases = async (sourceId: number): Promise<string[] | null> 
 export const listSchemas = async (sourceId: number, db: string | null): Promise<string[] | null> => {
     try {
         const res = await fetch(
-            `${apiPathPrefix}/database_list`, {
+            `${apiPathPrefix}/schema_list`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

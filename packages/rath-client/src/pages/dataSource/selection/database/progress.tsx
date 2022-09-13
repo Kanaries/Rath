@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Step, StepLabel, Stepper } from '@material-ui/core';
-import type { DatabaseOptions } from '.';
 import intl from 'react-intl-universal';
+import type { DatabaseOptions } from './type';
 
 
 interface StepConfig {

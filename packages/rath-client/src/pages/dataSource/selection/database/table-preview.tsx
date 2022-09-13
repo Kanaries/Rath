@@ -1,12 +1,12 @@
 import { FC, memo, CSSProperties, Fragment } from 'react';
-import type { TableData, TableDataType } from '.';
+import type { TableData } from '.';
 
 
 interface TablePreviewProps {
     data: TableData;
 }
 
-const styles: Record<TableDataType, CSSProperties> & Record<string, any> = {
+const styles: Record<string, CSSProperties> & Record<string, any> = {
     Int64: {
         color: 'rgb(38, 139, 210)',
     },
