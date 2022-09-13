@@ -47,9 +47,13 @@ export const getSourceId = async (
             }
         ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TestConnectionResult;
 
-        apiPathPrefix = `/${sourceType.replace(/^awsathena$/, 'athena')}`;
+        apiPathPrefix = `/${sourceType.replace(/^awsathena$/, 'athena').replace(/^hive$/, 'sparksql')}`;
 
-        return res?.success ? res.data : null;
+        if (!res.success) {
+            throw new Error('Operation failed.');
+        }
+
+        return res.data;
     } catch (error) {
         const rathError = getRathError('SourceIdError', error);
 

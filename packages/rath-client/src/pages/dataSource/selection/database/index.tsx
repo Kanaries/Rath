@@ -23,6 +23,10 @@ export type SupportedDatabaseType = (
     | 'doris'
     | 'impala'
     | 'awsathena'
+    | 'redshift'
+    | 'sparksql'
+    | 'hive'
+    | 'sqlserver'
 );
 
 const datasetOptions = ([
