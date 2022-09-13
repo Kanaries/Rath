@@ -29,7 +29,7 @@ export default defineConfig({
       fileName: (format) => `graphic-walker.${format}.js`
     },
     rollupOptions: {
-      external: ['React', 'ReactDOM'],
+      external: ['react', 'react-dom'],
       
     },
     minify: 'esbuild',
