@@ -56,9 +56,9 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 text: 'AirTable',
                 iconProps: { iconName: 'Table' },
                 disabled: false
-            }
+            },
         ];
-    }, [fileText, restfulText, demoText, localText]);
+    }, [fileText, restfulText, demoText, localText, dbText]);
     return options;
 };
 
