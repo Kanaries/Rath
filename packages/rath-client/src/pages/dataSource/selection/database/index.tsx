@@ -7,6 +7,7 @@ import TablePreview from './table-preview';
 import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, requestSQL } from './api';
 import { logDataImport } from '../../../../loggers/dataImport';
 import Progress from './progress';
+import prefetch from '../../../../utils/prefetch';
 
 
 const StackTokens = {
@@ -42,6 +43,7 @@ const datasetOptions = ([
                 xlinkHref="/assets/images/postgres_logo.png"
             />
         ),
+        assetSrc: '/assets/images/postgres_logo.png',
     },
     {
         text: 'ClickHouse',
@@ -58,6 +60,7 @@ const datasetOptions = ([
                 xlinkHref="/assets/images/clickhouse_logo.png"
             />
         ),
+        assetSrc: '/assets/images/clickhouse_logo.png',
     },
     {
         text: 'MySQL',
@@ -92,8 +95,8 @@ const datasetOptions = ([
         rule: 'kylin://{username}:{password}@{hostname}:{port}/{project}?{param1}={value1}&{param2}={value2}',
         hasDatabase: false,
         requiredSchema: true,
-        schemaEnumable: false,
-        tableEnumable: false,
+        schemaEnumerable: false,
+        tableEnumerable: false,
         iconSvg: (
             <image
                 role="presentation"
@@ -105,6 +108,7 @@ const datasetOptions = ([
                 xlinkHref="/assets/images/kylin_logo.png"
             />
         ),
+        assetSrc: '/assets/images/kylin_logo.png',
     },
     {
         text: 'Oracle',
@@ -157,12 +161,93 @@ const datasetOptions = ([
                 xlinkHref="/assets/images/impala_logo.png"
             />
         ),
+        assetSrc: '/assets/images/impala_logo.png',
     },
     {
         text: 'Amazon Athena',
         key: 'awsathena',
         rule: 'awsathena+rest://{aws_access_key_id}:{aws_secret_access_key}@athena.{region_name}.amazonaws.com/{',
-        // TODO:
+        iconSvg: (
+            <image
+                role="presentation"
+                aria-hidden
+                x="0"
+                y="0"
+                width="100"
+                height="100"
+                xlinkHref="/assets/images/athena_logo.png"
+            />
+        ),
+        assetSrc: '/assets/images/athena_logo.png',
+    },
+    {
+        text: 'Amazon Redshift',
+        key: 'redshift',
+        rule: 'redshift+psycopg2://<userName>:<DBPassword>@<AWS End Point>:5439/<Database Name>',
+        iconSvg: (
+            <image
+                role="presentation"
+                aria-hidden
+                x="0"
+                y="0"
+                width="100"
+                height="100"
+                xlinkHref="/assets/images/redshift_logo.png"
+            />
+        ),
+        assetSrc: '/assets/images/redshift_logo.png',
+    },
+    {
+        text: 'Amazon Spark SQL',
+        key: 'sparksql',
+        rule: 'hive://hive@{hostname}:{port}/{database}',
+        iconSvg: (
+            <image
+                role="presentation"
+                aria-hidden
+                x="0"
+                y="0"
+                width="100"
+                height="100"
+                xlinkHref="/assets/images/spark_logo.png"
+            />
+        ),
+        assetSrc: '/assets/images/spark_logo.png',
+    },
+    {
+        text: 'Apache Hive',
+        key: 'hive',
+        rule: 'hive://hive@{hostname}:{port}/{database}',
+        iconSvg: (
+            <image
+                role="presentation"
+                aria-hidden
+                x="0"
+                y="0"
+                width="100"
+                height="100"
+                xlinkHref="/assets/images/hive_logo.png"
+            />
+        ),
+        assetSrc: '/assets/images/hive_logo.png',
+    },
+    {
+        text: 'SQL Server',
+        key: 'sqlserver',
+        rule: 'mssql://',
+        requiredSchema: true,
+        iconSvg: (
+            <image
+                role="presentation"
+                aria-hidden
+                x="0"
+                y="0"
+                width="100"
+                height="100"
+                xlinkHref="/assets/images/sqlserver_logo.png"
+            />
+        ),
+        assetSrc: '/assets/images/sqlserver_logo.png',
     },
 ] as Array<
     & IDropdownOption
@@ -170,18 +255,19 @@ const datasetOptions = ([
         key: SupportedDatabaseType;
         iconSvg?: JSX.Element;
         rule: string;
+        assetSrc?: string;
         /** @default true */
         hasDatabase?: boolean;
         /** @default true */
-        databaseEnumable?: boolean;
+        databaseEnumerable?: boolean;
         /** @default false */
         requiredSchema?: boolean;
         /** @default true */
-        schemaEnumable?: boolean;
+        schemaEnumerable?: boolean;
         /** @default true */
         hasTableList?: boolean;
         /** @default true */
-        tableEnumable?: boolean;
+        tableEnumerable?: boolean;
     }
 >).sort((a, b) => a.text.localeCompare(b.text));
 
@@ -344,6 +430,15 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         queryString,
     ] = progress;
 
+    // prefetch icons
+    useEffect(() => {
+        datasetOptions.forEach(({ assetSrc }) => {
+            if (assetSrc) {
+                prefetch(assetSrc);
+            }
+        });
+    }, []);
+
     const whichDatabase = datasetOptions.find(which => which.key === sourceType)!;
 
     useEffect(() => {
@@ -373,7 +468,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 setLoadingAnimation(false);
 
                 return;
-            } else if (whichDatabase.databaseEnumable === false) {
+            } else if (whichDatabase.databaseEnumerable === false) {
                 setOptions(prevOpt => {
                     const [sType, cUri, sIdFlag] = prevOpt;
 
@@ -415,13 +510,13 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
             setLoadingAnimation(false);
         }
-    }, [sourceType, connectUri, sourceId, setLoadingAnimation, whichDatabase.hasDatabase, whichDatabase.databaseEnumable]);
+    }, [sourceType, connectUri, sourceId, setLoadingAnimation, whichDatabase.hasDatabase, whichDatabase.databaseEnumerable]);
 
     // automatically fetch schema list when selected database changes
     useEffect(() => {
         if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && schemaList === undefined) {
             if (whichDatabase.requiredSchema) {
-                if (whichDatabase.schemaEnumable === false) {
+                if (whichDatabase.schemaEnumerable === false) {
                     setOptions([sourceType, connectUri, sourceId, databaseList, selectedDatabase, 'input']);
                     
                     return;
@@ -468,7 +563,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 ]);
 
                 return;
-            } else if (whichDatabase.tableEnumable === false) {
+            } else if (whichDatabase.tableEnumerable === false) {
                 setOptions([
                     sourceType,
                     connectUri,
@@ -509,7 +604,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 setLoadingAnimation(false);
             });
         }
-    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, setLoadingAnimation, tableList, whichDatabase.hasTableList, whichDatabase.tableEnumable]);
+    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, setLoadingAnimation, tableList, whichDatabase.hasTableList, whichDatabase.tableEnumerable]);
 
     let lastInputTimeRef = useRef(0);
     let throttledRef = useRef<NodeJS.Timeout | null>(null);
@@ -532,7 +627,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             setLoadingAnimation(true);
 
             const autoPreview = () => {
-                fetchTablePreview(sourceId, selectedDatabase, selectedSchema, selectedTable, whichDatabase.tableEnumable ?? true).then(data => {
+                fetchTablePreview(sourceId, selectedDatabase, selectedSchema, selectedTable, !(whichDatabase.tableEnumerable ?? true)).then(data => {
                     if (data) {
                         setOptions(([sType, cUri, sId, dbList, curDb, smList, curSm, tList, curT]) => {
                             return [
@@ -560,7 +655,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 autoPreview();
             }
         }
-    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, tableList, selectedTable, setLoadingAnimation, whichDatabase.tableEnumable]);
+    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, tableList, selectedTable, setLoadingAnimation, whichDatabase.tableEnumerable]);
 
     const databaseSelector: IDropdownOption[] | null = useMemo(() => {
         return databaseList === 'input' ? null : databaseList?.map<IDropdownOption>(
@@ -649,8 +744,14 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                             required
                             styles={{
                                 dropdown: {
-                                    width: '10em',
+                                    width: '13.6em',
                                     borderRadius: '2px 0 0 2px',
+                                },
+                                dropdownItems: {
+                                    paddingBlockStart: '6px',
+                                    paddingBlockEnd: '6px',
+                                    maxHeight: '20vh',
+                                    overflowY: 'scroll',
                                 },
                                 dropdownItemSelected: {
                                     position: 'static',
@@ -938,7 +1039,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                                 },
                                             }}
                                             onChange={(_, sql) => {
-                                                if (sql && typeof connectUri === 'string' && databaseList && typeof selectedDatabase === 'string' && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && tableList && typeof selectedTable === 'string' && tablePreview) {
+                                                if (typeof sql === 'string' && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && (tableList !== undefined && tableList !== 'pending') && selectedTable !== undefined && tablePreview) {
                                                     setOptions([
                                                         sourceType,
                                                         connectUri,

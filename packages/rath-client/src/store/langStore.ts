@@ -2,6 +2,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { SUPPORT_LANG } from "../locales";
 import intl from 'react-intl-universal';
 import { notify } from "../components/error";
+import { loadRathErrorLocales } from "../rath-error";
 
 export class LangStore {
     public lang: string = SUPPORT_LANG[0].value;
@@ -21,10 +22,14 @@ export class LangStore {
             });
             localStorage.setItem('lang', lang);
             const result = await res.json();
+            const errorMsgLocales = loadRathErrorLocales(lang);
             await intl.init({
                 currentLocale: lang,
                 locales: {
-                    [lang]: result,
+                    [lang]: {
+                        ...result,
+                        error: errorMsgLocales,
+                    },
                 },
             });
             runInAction(() => {

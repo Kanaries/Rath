@@ -1,6 +1,7 @@
 import type { SupportedDatabaseType, TableData, TableLabels } from '.';
 import { notify } from '../../../../components/error';
 import type { IDatasetBase } from '../../../../interfaces';
+import { getRathError } from '../../../../rath-error';
 import { transformRawDataService } from '../../utils';
 
 
@@ -46,15 +47,13 @@ export const getSourceId = async (
             }
         ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TestConnectionResult;
 
-        apiPathPrefix = `/${sourceType}`;
+        apiPathPrefix = `/${sourceType.replace(/^awsathena$/, 'athena')}`;
 
         return res?.success ? res.data : null;
     } catch (error) {
-        notify({
-            title: 'Failed to get source id',
-            type: 'error',
-            content: `Failed to get source id. `
-        });
+        const rathError = getRathError('SourceIdError', error);
+
+        notify(rathError);
 
         return null;
     }
@@ -76,11 +75,9 @@ export const listDatabases = async (sourceId: number): Promise<string[] | null> 
 
         return res.success ? res.data : (() => { throw new Error(res.message) })();
     } catch (error) {
-        notify({
-            title: 'Failed to get database list',
-            type: 'error',
-            content: `Failed to get database list. `
-        });
+        const rathError = getRathError('FetchDatabaseListFailed', error);
+
+        notify(rathError);
         
         return null;
     }
@@ -103,11 +100,9 @@ export const listSchemas = async (sourceId: number, db: string | null): Promise<
 
         return res.success ? res.data : (() => { throw new Error(res.message) })();
     } catch (error) {
-        notify({
-            title: 'Failed to get schema list',
-            type: 'error',
-            content: `Failed to get schema list. \n ${error}`
-        });
+        const rathError = getRathError('FetchSchemaListFailed', error);
+
+        notify(rathError);
         
         return null;
     }
@@ -131,11 +126,9 @@ export const listTables = async (sourceId: number, db: string | null, schema: st
 
         return res.success ? res.data : (() => { throw new Error(res.message) })();
     } catch (error) {
-        notify({
-            title: 'Failed to get table list',
-            type: 'error',
-            content: `Failed to get table list. \n ${error}`
-        });
+        const rathError = getRathError('FetchTableListFailed', error);
+
+        notify(rathError);
 
         return null;
     }
@@ -160,12 +153,10 @@ export const fetchTablePreview = async (sourceId: number, db: string | null, sch
 
         return res.success ? res.data : (() => { throw new Error (res.message) })();
     } catch (error) {
-        if (silent) {
-            notify({
-                title: 'Failed to get table data',
-                type: 'error',
-                content: `Failed to get table data. \n ${error}`
-            });
+        if (!silent) {
+            const rathError = getRathError('FetchTablePreviewFailed', error);
+
+            notify(rathError);
         }
 
         return null;
@@ -201,12 +192,9 @@ export const requestSQL = async (sourceId: number, queryString: string): Promise
             )
         );
     } catch (error) {
-        console.error(error);
-        notify({
-            title: 'Failed to execute SQL query',
-            type: 'error',
-            content: `Failed to execute SQL query "${queryString}". `
-        });
+        const rathError = getRathError('QueryExecutionError', error, { sql: queryString });
+
+        notify(rathError);
 
         return null;
     }
