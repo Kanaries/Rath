@@ -2,7 +2,9 @@
   "name": "@kanaries/graphic-walker",
   "version": "0.1.0",
   "scripts": {
-    "dev": "vite --host",
+    "dev:front_end": "vite --host",
+    "dev:data_service": "npx serve ../rath-client/public -l 8080",
+    "dev": "concurrently \"npm run dev:front_end\" \"npm run dev:data_service\"",
     "build": "tsc && vite build",
     "serve": "vite preview",
     "type": "tsc src/lib.ts --declaration --emitDeclarationOnly --jsx react --esModuleInterop --outDir dist"
