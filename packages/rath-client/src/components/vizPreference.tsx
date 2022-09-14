@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { observer } from 'mobx-react-lite';
-import { PrimaryButton, Stack, Checkbox, Panel, PanelType, ComboBox, Label, Slider } from "office-ui-fabric-react";
-import { Aggregator } from "../global";
+import { PrimaryButton, Stack, Checkbox, Panel, PanelType, ComboBox, Label, Slider } from '@fluentui/react';
+import { AGGREGATION_LIST, Aggregator } from "../global";
 import { useGlobalStore } from "../store";
 const checkboxStyles = () => {
     return {
@@ -10,13 +10,6 @@ const checkboxStyles = () => {
         },
     };
 };
-
-// todo: import aggregators list from cube-core
-const aggregationList: Array<{ key: Aggregator; text: string }> = [
-    { key: "sum", text: "Sum" },
-    { key: "count", text: "Count" },
-    { key: "mean", text: "Mean" },
-];
 
 const PreferencePanel: React.FC = () => {
     const { exploreStore } = useGlobalStore()
@@ -55,7 +48,7 @@ const PreferencePanel: React.FC = () => {
                     label="aggregator"
                     allowFreeform={true}
                     autoComplete="on"
-                    options={aggregationList}
+                    options={AGGREGATION_LIST}
                     onChange={(e, option) => {
                         if (option) {
                             exploreStore.setVisualConig(config => {

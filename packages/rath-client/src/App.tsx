@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
-import { useGlobalStore, StoreWrapper } from './store/index'
 import { observer } from "mobx-react-lite";
+import { Spinner, SpinnerSize } from '@fluentui/react';
 import "./App.css";
-
+import { useGlobalStore, StoreWrapper } from './store/index'
 import Gallery from "./pages/gallery/index";
 import NoteBook from "./pages/notebook/index";
 import VisualInterface from './pages/manualControl';
@@ -17,9 +17,8 @@ import AppNav from "./components/appNav";
 import { destroyRathWorker, initRathWorker } from "./service";
 import { PIVOT_KEYS } from "./constants";
 import CrInfo from "./components/crInfo";
-import { Spinner, SpinnerSize } from "office-ui-fabric-react";
 // import VegaVis from "./renderer/vegaVis";
-// import { loadTheme } from "office-ui-fabric-react";
+// import { loadTheme } from '@fluentui/react';
 // import { RATH_DARK_PALETTE, RATH_DARK_THEME } from "./theme";
 
 

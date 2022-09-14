@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { deleteDataStorageById, getDataStorageById, getDataStorageList, IDBMeta } from '../../../utils/storage';
 import styled from 'styled-components';
-import { IconButton } from 'office-ui-fabric-react';
+import { IconButton } from '@fluentui/react';
 
 const LocalCont = styled.div`
     .items-container{

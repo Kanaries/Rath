@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Modal, ChoiceGroup, IconButton, ProgressIndicator } from 'office-ui-fabric-react';
-import { useId } from '@uifabric/react-hooks';
+import { Modal, ChoiceGroup, IconButton, ProgressIndicator } from '@fluentui/react';
+import { useId } from '@fluentui/react-hooks';
 import intl from 'react-intl-universal';
 import { IDataSourceType } from '../../../global';
 

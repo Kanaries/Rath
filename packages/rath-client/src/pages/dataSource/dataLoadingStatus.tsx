@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { ProgressIndicator } from 'office-ui-fabric-react';
+import { ProgressIndicator } from '@fluentui/react';
 import React from 'react';
 import { useGlobalStore } from '../../store';
 

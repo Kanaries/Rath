@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useState, useEffect } from 'react';
 import { useGlobalStore } from '../../../store';
 import Association from './assCharts';
-import { Pivot, PivotItem } from 'office-ui-fabric-react'
+import { Pivot, PivotItem } from '@fluentui/react'
 import intl from 'react-intl-universal';
 import { Pagination } from '@material-ui/core';
 

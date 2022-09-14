@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, Stack, TextField } from 'office-ui-fabric-react';
+import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { StackTokens } from '.';
 import datasetOptions from './config';

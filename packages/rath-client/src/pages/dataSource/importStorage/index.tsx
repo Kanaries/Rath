@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal'
-import { Modal, IconButton, Icon, SelectionMode, DefaultButton, IColumn, DetailsList, Stack, Pivot, PivotItem } from 'office-ui-fabric-react';
+import { Modal, IconButton, Icon, SelectionMode, DefaultButton, IColumn, DetailsList, Stack, Pivot, PivotItem } from '@fluentui/react';
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import dayjs from 'dayjs';
 import styled from 'styled-components';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pivot, PivotItem } from 'office-ui-fabric-react';
+import { Pivot, PivotItem } from '@fluentui/react';
 import { observer } from 'mobx-react-lite'
 import intl from 'react-intl-universal';
 

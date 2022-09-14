@@ -1,4 +1,4 @@
-import { PrimaryButton, Stack, TextField } from 'office-ui-fabric-react';
+import { PrimaryButton, Stack, TextField } from '@fluentui/react';
 import React, { useCallback, useState } from 'react';
 import ReactJson from 'react-json-view';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';

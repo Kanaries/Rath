@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import intl from 'react-intl-universal';
-import { PrimaryButton, DefaultButton, Stack, Separator, ProgressIndicator, IconButton } from "office-ui-fabric-react";
-import CombinedChart from "./combinedChart";
-import { useMemo } from "react";
-import { useGlobalStore } from "../../store";
-import { meta2fieldScores } from "../../utils/transform";
+import { PrimaryButton, DefaultButton, Stack, Separator, ProgressIndicator, IconButton } from '@fluentui/react';
 import { observer } from "mobx-react-lite";
+import { useGlobalStore } from "../../store";
+import CombinedChart from "./combinedChart";
+import { meta2fieldScores } from "../../utils/transform";
 import ConfigPannel from "./configPannel";
 
 const DashBoardPage: React.FC = props => {

@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { IContextualMenuProps, CommandBar, ICommandBarItemProps } from 'office-ui-fabric-react';
+import { IContextualMenuProps, CommandBar, ICommandBarItemProps } from '@fluentui/react';
 
 import { useGlobalStore } from '../../../store';
 

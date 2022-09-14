@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { CommandBarButton, IconButton } from 'office-ui-fabric-react';
+import { CommandBarButton, IconButton } from '@fluentui/react';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'

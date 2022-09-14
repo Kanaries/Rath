@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import { PrimaryButton } from 'office-ui-fabric-react';
+import { PrimaryButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';

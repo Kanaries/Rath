@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { SearchBox } from 'office-ui-fabric-react';
+import { SearchBox } from '@fluentui/react';
 import Fuse, { FuseOptions } from 'fuse.js';
 import { specification } from 'visual-insights';
 import { ViewSpace } from '../../../service';

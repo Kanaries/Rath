@@ -4,12 +4,12 @@ import intl from 'react-intl-universal'
 import { InsightSpace, DefaultIWorker } from 'visual-insights';
 import { specification } from "visual-insights";
 import { getInsightViewSpace } from '../../service';
-import { PrimaryButton, SpinButton, Slider, ProgressIndicator } from "office-ui-fabric-react";
+import { PrimaryButton, SpinButton, Slider, ProgressIndicator } from '@fluentui/react';
 import PreferencePanel, {
   PreferencePanelConfig
 } from "../../components/preference";
 import BaseChart from "../../visBuilder/vegaBase";
-import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
+import { Position } from "@fluentui/react";
 
 import { useComposeState } from '../../hooks/index';
 import SimpleTick from '../../components/simpleTick';

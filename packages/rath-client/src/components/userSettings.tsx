@@ -5,9 +5,9 @@ import {
   ActionButton,
   IDropdownOption,
   IconButton
-} from 'office-ui-fabric-react'
-import DropdownSelect from "./dropDownSelect";
+} from '@fluentui/react'
 import { observer } from 'mobx-react-lite'
+import DropdownSelect from "./dropDownSelect";
 import { SUPPORT_LANG } from "../locales";
 
 import { useGlobalStore } from "../store";

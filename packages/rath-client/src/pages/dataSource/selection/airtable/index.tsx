@@ -1,4 +1,4 @@
-import { DefaultButton, PrimaryButton, Stack, TextField } from 'office-ui-fabric-react';
+import { DefaultButton, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import React, { useCallback, useState } from 'react';
 import { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { transformRawDataService } from '../../utils';

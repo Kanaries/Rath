@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo } from "react";
-import { ChoiceGroup, IChoiceGroupOption, SpinButton, DefaultButton, Dropdown, IDropdownOption } from "office-ui-fabric-react";
-import { useId } from "@uifabric/react-hooks";
+import { ChoiceGroup, IChoiceGroupOption, SpinButton, DefaultButton, Dropdown, IDropdownOption } from '@fluentui/react';
+import { useId } from "@fluentui/react-hooks";
 import intl from "react-intl-universal";
 import { loadDataFile, SampleKey, useSampleOptions } from "../utils";
 import { dataBackup, logDataImport } from "../../../loggers/dataImport";

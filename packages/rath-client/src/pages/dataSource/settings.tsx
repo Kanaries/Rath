@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { Dropdown, IDropdownOption, Panel } from 'office-ui-fabric-react';
+import { Dropdown, IDropdownOption, Panel } from '@fluentui/react';
 import React, { useMemo } from 'react';
 import { ICubeStorageManageMode } from 'visual-insights';
 import { useGlobalStore } from '../../store';

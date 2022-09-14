@@ -1,4 +1,4 @@
-import { DetailsList, SelectionMode, Selection } from 'office-ui-fabric-react';
+import { DetailsList, SelectionMode, Selection } from '@fluentui/react';
 import React from 'react';
 import { IFieldMeta } from '../../interfaces';
 

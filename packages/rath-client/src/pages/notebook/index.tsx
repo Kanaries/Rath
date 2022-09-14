@@ -5,7 +5,7 @@ import FieldAnalysisBoard from './fieldAnalysis';
 import Subspaces from './subspaces';
 import ClusterBoard from './cluster';
 import { specification } from 'visual-insights';
-import { ProgressIndicator, Toggle, Slider } from 'office-ui-fabric-react';
+import { ProgressIndicator, Toggle, Slider } from '@fluentui/react';
 import VegaBase from '../../visBuilder/vegaBase';
 import './index.css';
 import { observer } from 'mobx-react-lite';

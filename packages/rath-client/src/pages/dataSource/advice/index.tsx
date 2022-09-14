@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { MessageBar, MessageBarButton, MessageBarType } from 'office-ui-fabric-react';
+import { MessageBar, MessageBarButton, MessageBarType } from '@fluentui/react';
 import React from 'react';
 import { useGlobalStore } from '../../../store';
 import styled from 'styled-components';

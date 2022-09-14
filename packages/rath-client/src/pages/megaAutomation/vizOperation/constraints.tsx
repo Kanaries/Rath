@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
-import { Panel, Stack, Checkbox, Separator } from 'office-ui-fabric-react';
+import { Panel, Stack, Checkbox, Separator } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
 
 const stackTokens = { childrenGap: 10 };

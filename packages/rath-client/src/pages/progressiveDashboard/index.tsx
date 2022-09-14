@@ -3,7 +3,7 @@ import { autoSet } from '../../dev/autoStat';
 import produce from 'immer';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { ActionButton, DefaultButton, Dropdown, IconButton, IDropdownOption, Stack, Toggle } from 'office-ui-fabric-react';
+import { ActionButton, DefaultButton, Dropdown, IconButton, IDropdownOption, Stack, Toggle } from '@fluentui/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactVega from '../../components/react-vega';
 import { IFieldMeta } from '../../interfaces';

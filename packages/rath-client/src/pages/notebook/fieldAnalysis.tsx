@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import intl from 'react-intl-universal';
-import { Icon, HoverCard, IExpandingCardProps } from 'office-ui-fabric-react';
+import { Icon, HoverCard, IExpandingCardProps } from '@fluentui/react';
 import chroma from 'chroma-js';
 import { FieldSummary } from '../../service';
 import DistributionChart from './distributionChart';

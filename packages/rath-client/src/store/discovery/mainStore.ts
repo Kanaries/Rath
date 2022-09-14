@@ -266,6 +266,7 @@ export class DiscoveryMainStore {
                 width: mainVizSetting.resize.width,
                 height: mainVizSetting.resize.height,
                 interactive: mainVizSetting.interactive,
+                stepSize: 32,
                 dataSource: this.dataSource
             })
         }

@@ -1,4 +1,4 @@
-import { createTheme } from 'office-ui-fabric-react'
+import { createTheme } from '@fluentui/react'
 
 export const RATH_DARK_PALETTE = {
     themePrimary: '#38fcff',

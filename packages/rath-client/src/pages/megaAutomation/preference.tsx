@@ -13,7 +13,7 @@ import {
     Position,
     ChoiceGroup,
     IChoiceGroupOption,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../store';
 import { EXPLORE_VIEW_ORDER } from '../../store/exploreStore';

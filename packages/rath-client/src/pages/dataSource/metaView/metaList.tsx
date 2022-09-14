@@ -1,4 +1,4 @@
-import { ChoiceGroup, IChoiceGroupOption, Separator, Toggle } from 'office-ui-fabric-react';
+import { ChoiceGroup, IChoiceGroupOption, Separator, Toggle } from '@fluentui/react';
 import React from 'react';
 import styled from 'styled-components';
 import { IAnalyticType, ISemanticType } from 'visual-insights';

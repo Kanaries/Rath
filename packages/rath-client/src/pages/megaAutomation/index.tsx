@@ -4,7 +4,7 @@ import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
-import { CommandBarButton, Spinner } from 'office-ui-fabric-react';
+import { CommandBarButton, Spinner } from '@fluentui/react';
 
 import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../visBuilder/visErrorBoundary';

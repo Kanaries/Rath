@@ -1,8 +1,7 @@
 import React from 'react';
-import { callTerminator, cancelTerminator, IErrorInfo } from './store';
-import { Icon } from 'office-ui-fabric-react';
-// import { CheckCircleOutlined, CloseCircleOutlined, CloseOutlined, InfoCircleOutlined, WarningOutlined } from '@ant-design/icons'
+import { Icon } from '@fluentui/react';
 import styled from 'styled-components';
+import { callTerminator, cancelTerminator, IErrorInfo } from './store';
 interface MessageProps extends IErrorInfo {
     onClose: () => void;
 };
@@ -64,13 +63,6 @@ const MessageCard: React.FC<MessageProps> = props => {
                 {type === 'success' && <Icon iconName="Completed" className="text-green-500 text-2xl" />}
                 {type === 'info' && <Icon iconName="Info" className="text-blue-500 text-2xl" />}
             </div>
-        {/* <CloseOutlined className="absolute right-4 top-4 text-gray-500 cursor-pointer" onClick={onClose} />
-        <div>
-            {type === 'error' && <CloseCircleOutlined className="text-red-500 text-2xl" />}
-            {type === 'warning' && <WarningOutlined className="text-yellow-500 text-2xl" />}
-            {type === 'success' && <CheckCircleOutlined className="text-green-500 text-2xl" />}
-            {type === 'info' && <InfoCircleOutlined className="text-blue-500 text-2xl" />}
-        </div> */}
         <div className="col-span-5">
             <h1 className="text-base">{title}</h1>
             <div className="text-sm mt-1 text-gray-600 allow-break-line">{content}</div>

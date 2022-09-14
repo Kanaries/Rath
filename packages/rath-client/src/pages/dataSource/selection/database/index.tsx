@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from  'react';
 import { observer } from 'mobx-react-lite';
 import { IMuteFieldBase, IRow } from '../../../../interfaces';
-import { IDropdownOption, Stack, registerIcons } from 'office-ui-fabric-react';
+import { IDropdownOption, Stack, registerIcons } from '@fluentui/react';
 import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, pingConnector, requestSQL } from './api';
 import { logDataImport } from '../../../../loggers/dataImport';
 import Progress from './progress';

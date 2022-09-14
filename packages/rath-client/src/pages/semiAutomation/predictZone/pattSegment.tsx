@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
-import { CommandButton, DefaultButton, Spinner, Stack } from 'office-ui-fabric-react';
+import { CommandButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
 
 import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';

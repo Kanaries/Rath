@@ -3,7 +3,7 @@ import VisDescription from "../../../plugins/visSummary/description";
 import useDigDimension, { DigDimensionProps } from "./digDimension";
 import BaseChart from "../../../visBuilder/vegaBase";
 import { Subspace } from "../../../service";
-import { IconButton, Stack } from "office-ui-fabric-react";
+import { IconButton, Stack } from '@fluentui/react';
 import { IFieldMeta } from "../../../interfaces";
 
 function isDimensionEqual(dimensions1: string[], dimensions2: string[]) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Panel, PanelType } from 'office-ui-fabric-react';
+import { Panel, PanelType } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
 import Association from './association';
 

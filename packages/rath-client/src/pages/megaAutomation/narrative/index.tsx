@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useGlobalStore } from '../../../store';
 import styled from 'styled-components';
-import { Spinner } from 'office-ui-fabric-react';
+import { Spinner } from '@fluentui/react';
 import { getTestServerAPI } from '../../../service';
 
 const InsightDesc = styled.div`

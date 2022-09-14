@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { IAnalyticType, ISemanticType } from 'visual-insights';
+import { Callout, IconButton, TextField } from '@fluentui/react';
+import { useId } from '@fluentui/react-hooks';
 import DistributionChart from '../metaView/distChart';
 import DropdownSelect from '../../../components/dropDownSelect'
 import { IFieldMeta, IRawField } from '../../../interfaces';
-import { IAnalyticType, ISemanticType } from 'visual-insights';
-import { Callout, IconButton, TextField } from 'office-ui-fabric-react';
-import { useId } from '@uifabric/react-hooks';
 
 const HeaderCellContainer = styled.div`
     .bottom-bar {
@@ -37,11 +37,12 @@ const HeaderCellContainer = styled.div`
         margin-top: 0px;
         margin-bottom: 0px;
         font-size: 18px;
+        font-weight: 500;
         line-height: 36px;
     }
     .checkbox-container{
         display: flex;
-        items-align: center;
+        align-items: center;
         margin-top: 2px;
         label{
             margin-right: 6px;

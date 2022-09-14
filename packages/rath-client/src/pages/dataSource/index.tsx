@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import intl from 'react-intl-universal'
-import { PrimaryButton, Stack, DefaultButton, Dropdown, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, CommandButton, ProgressIndicator } from 'office-ui-fabric-react';
+import { PrimaryButton, Stack, DefaultButton, Dropdown, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, CommandButton, ProgressIndicator } from '@fluentui/react';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
 import { useCleanMethodList } from '../../hooks';
