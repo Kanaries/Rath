@@ -7,7 +7,14 @@
         "settings": "Settings",
         "history": "History",
         "hide": "Hide",
-        "expand": "Expand"
+        "expand": "Expand",
+        "filter": "Filter",
+        "semanticType": {
+            "nominal": "nominal",
+            "ordinal": "ordinal",
+            "temporal": "temporal",
+            "quantitative": "quantitative"
+        }
     },
     "menu": {
         "dataSource": "DataSource",

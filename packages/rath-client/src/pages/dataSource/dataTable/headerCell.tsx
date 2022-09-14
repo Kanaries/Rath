@@ -111,7 +111,7 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                 }}>
                     {DataTypeOptions.map((op) => (
                         <option key={op.key} value={op.key}>
-                            {op.text}
+                            {intl.get(`common.semanticType.${op.key}`)}
                         </option>
                     ))}
                 </DropdownSelect>
