@@ -62,25 +62,25 @@ const InsightContainer = styled.div`
 `;
 
 const LTSPage: React.FC = () => {
-    const { ltsPipeLineStore, exploreStore } = useGlobalStore();
+    const { ltsPipeLineStore, megaAutoStore } = useGlobalStore();
     const { computing, rendering, dataSource } = ltsPipeLineStore;
 
-    const { pageIndex, visualConfig, insightSpaces, mainViewSpec } = exploreStore;
+    const { pageIndex, visualConfig, insightSpaces, mainViewSpec } = megaAutoStore;
 
     // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
     // const downloadResults = useCallback(() => {
-    //     exploreStore.downloadResults();
-    // }, [exploreStore])
+    //     megaAutoStore.downloadResults();
+    // }, [megaAutoStore])
 
     // const dataIsEmpty = ltsPipeLineStore.dataSource.length === 0;
 
     // const getSubinsights = useCallback((dimensions: string[], measures: string[]) => {
-    //     exploreStore.getSubInsights(dimensions, measures).then(res => {
+    //     megaAutoStore.getSubInsights(dimensions, measures).then(res => {
     //         setSubinsightsData(res)
-    //         exploreStore.setShowSubinsights(true)
+    //         megaAutoStore.setShowSubinsights(true)
     //     })
-    // }, [exploreStore])
+    // }, [megaAutoStore])
 
     return (
         <div className="content-container">
@@ -88,7 +88,7 @@ const LTSPage: React.FC = () => {
             <SaveModal />
             <Constraints />
             <AssoPanel />
-            {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { exploreStore.setShowSubinsights(false) }} /> */}
+            {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
             <div className="card">
                 <CommandBarButton
                     style={{ float: 'right' }}
@@ -97,7 +97,7 @@ const LTSPage: React.FC = () => {
                     ariaLabel={intl.get('explore.preference')}
                     onClick={() => {
                         runInAction(() => {
-                            exploreStore.showPreferencePannel = true;
+                            megaAutoStore.showPreferencePannel = true;
                         });
                     }}
                 />
@@ -111,7 +111,7 @@ const LTSPage: React.FC = () => {
                     count={insightSpaces.length}
                     page={pageIndex + 1}
                     onChange={(e, v) => {
-                        exploreStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
+                        megaAutoStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
                     }}
                 />
                 <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
@@ -126,7 +126,7 @@ const LTSPage: React.FC = () => {
                                 schema={spec.schema}
                                 fields={fieldMetas}
                                 onSchemaChange={(schemaKey, pos, val) => {
-                                    exploreStore.setSpecSchema(schemaKey, pos, val);
+                                    megaAutoStore.setSpecSchema(schemaKey, pos, val);
                                 }}
                             />
                         }

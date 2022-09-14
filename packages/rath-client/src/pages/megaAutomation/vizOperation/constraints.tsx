@@ -13,15 +13,15 @@ const CHECKBOX_EXAMPLES = [
     { fid: 'include', state: 1 },
 ];
 const ConstraintsPanel: React.FC<ConstraintsPanelProps> = (props) => {
-    const { exploreStore } = useGlobalStore();
-    const { showConstraints, globalConstraints } = exploreStore;
+    const { megaAutoStore } = useGlobalStore();
+    const { showConstraints, globalConstraints } = megaAutoStore;
     const { dimensions, measures } = globalConstraints;
     const closePanel = useCallback(() => {
-        exploreStore.setShowContraints(false);
-    }, [exploreStore]);
+        megaAutoStore.setShowContraints(false);
+    }, [megaAutoStore]);
     useEffect(() => {
-        exploreStore.initConstraints();
-    }, [exploreStore, showConstraints]);
+        megaAutoStore.initConstraints();
+    }, [megaAutoStore, showConstraints]);
     return (
         <Panel headerText={intl.get('lts.commandBar.constraints')} isOpen={showConstraints} onDismiss={closePanel}>
             <Stack tokens={stackTokens}>
@@ -43,7 +43,7 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = (props) => {
                         indeterminate={f.state === 0}
                         checked={f.state === 1}
                         onChange={(e, checked) => {
-                            exploreStore.updateConstraints('dimensions', fIndex);
+                            megaAutoStore.updateConstraints('dimensions', fIndex);
                         }}
                     />
                 ))}
@@ -55,7 +55,7 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = (props) => {
                         indeterminate={f.state === 0}
                         checked={f.state === 1}
                         onChange={(e, checked) => {
-                            exploreStore.updateConstraints('dimensions', fIndex);
+                            megaAutoStore.updateConstraints('dimensions', fIndex);
                         }}
                     />
                 ))}

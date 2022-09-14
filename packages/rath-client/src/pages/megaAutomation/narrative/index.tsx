@@ -38,8 +38,8 @@ const InsightDesc = styled.div`
 `
 
 const Narrative: React.FC = props => {
-    const { exploreStore, langStore } = useGlobalStore();
-    const { pageIndex, insightSpaces, dataSource, fieldMetas, nlgThreshold } = exploreStore;
+    const { megaAutoStore, langStore } = useGlobalStore();
+    const { pageIndex, insightSpaces, dataSource, fieldMetas, nlgThreshold } = megaAutoStore;
     const [explainLoading, setExplainLoading] = useState(false);
     const requestId = useRef<number>(0);
     const fms = toJS(fieldMetas);

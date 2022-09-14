@@ -9,8 +9,8 @@ const OpCont = styled.div`
 `
 
 const OperationBar: React.FC = props => {
-    const { discoveryMainStore } = useGlobalStore();
-    const { mainVizSetting } = discoveryMainStore;
+    const { semiAutoStore } = useGlobalStore();
+    const { mainVizSetting } = semiAutoStore;
     const { interactive, resize, debug } = mainVizSetting;
 
     return <OpCont>
@@ -24,27 +24,27 @@ const OperationBar: React.FC = props => {
             height={resize.height}
             onValueChange={(key, value) => {
                 if (key === 'resizeMode') {
-                    discoveryMainStore.updateMainVizSettings(s => {
+                    semiAutoStore.updateMainVizSettings(s => {
                         s.resize.mode = value
                     })
                 } else if (key === 'interactive') {
-                    discoveryMainStore.updateMainVizSettings(s => {
+                    semiAutoStore.updateMainVizSettings(s => {
                         s.interactive = value;
                     })
                 } else if (key === 'width') {
-                    discoveryMainStore.updateMainVizSettings(s => {
+                    semiAutoStore.updateMainVizSettings(s => {
                         s.resize.width = value
                     })
                 } else if (key === 'height') {
-                    discoveryMainStore.updateMainVizSettings(s => {
+                    semiAutoStore.updateMainVizSettings(s => {
                         s.resize.height = value
                     })
                 } else if (key === 'debug') {
-                    discoveryMainStore.updateMainVizSettings(s => {
+                    semiAutoStore.updateMainVizSettings(s => {
                         s.debug = value
                     })
                 } else if (key === 'nlg') {
-                    discoveryMainStore.updateMainVizSettings(s => {
+                    semiAutoStore.updateMainVizSettings(s => {
                         s.nlg = value
                     })
                 }

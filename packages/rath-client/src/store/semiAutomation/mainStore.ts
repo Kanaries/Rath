@@ -12,7 +12,7 @@ import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoView
 
 const RENDER_BATCH_SIZE = 5;
 
-export class DiscoveryMainStore {
+export class SemiAutomationStore {
     public settings: ISetting;
     public showSettings: boolean = false;
     public mainVizSetting: IMainVizSetting;

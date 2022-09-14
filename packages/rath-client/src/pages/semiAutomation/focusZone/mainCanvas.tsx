@@ -13,8 +13,8 @@ interface MainCanvasProps{
 }
 const MainCanvas: React.FC<MainCanvasProps> = props => {
     const { view, spec } = props;
-    const { discoveryMainStore } = useGlobalStore()
-    const { mainVizSetting, dataSource } = discoveryMainStore;
+    const { semiAutoStore } = useGlobalStore()
+    const { mainVizSetting, dataSource } = semiAutoStore;
 
     const { resize, debug } = mainVizSetting
     const { width, height, mode } = resize;
@@ -32,7 +32,7 @@ const MainCanvas: React.FC<MainCanvasProps> = props => {
                 height: height + 20
             }}
             onResizeStop={(e, dir, ref, d) => {
-                discoveryMainStore.updateMainVizSettings(s => {
+                semiAutoStore.updateMainVizSettings(s => {
                     s.resize.width = s.resize.width + d.width;
                     s.resize.height = s.resize.height + d.height
                 })

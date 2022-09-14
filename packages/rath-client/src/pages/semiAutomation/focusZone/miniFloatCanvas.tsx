@@ -30,8 +30,8 @@ interface MiniFloatCanvasProps{
 }
 const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = props => {
     const { pined } = props;
-    const { discoveryMainStore } = useGlobalStore()
-    const { settings, mainVizSetting, dataSource } = discoveryMainStore;
+    const { semiAutoStore } = useGlobalStore()
+    const { settings, mainVizSetting, dataSource } = semiAutoStore;
     const { vizAlgo } = settings;
     const [hide, setHide] = useState<boolean>(false);
 

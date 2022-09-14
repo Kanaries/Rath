@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import intl from 'react-intl-universal'
 import { PrimaryButton, Stack, DefaultButton, Dropdown, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, CommandButton, ProgressIndicator } from '@fluentui/react';
+import { observer } from 'mobx-react-lite';
+
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
 import { useCleanMethodList } from '../../hooks';
 import Selection from './selection/index';
 import ImportStorage from "./importStorage";
-import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
 import { EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
 import { CleanMethod, IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from "../../interfaces";
@@ -22,7 +23,7 @@ interface DataSourceBoardProps {
 }
 
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-  const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, exploreStore } = useGlobalStore();
+  const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, megaAutoStore } = useGlobalStore();
 
   const {
     cleanedData,
@@ -69,15 +70,15 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
   const onV1EngineStart = useCallback(() => {
     ltsPipeLineStore.startTask(taskMode).then(() => {
-      exploreStore.emitViewChangeTransaction(0);
+      megaAutoStore.emitViewChangeTransaction(0);
     })
     commonStore.setAppKey(PIVOT_KEYS.lts);
-  }, [ltsPipeLineStore, exploreStore, commonStore, taskMode])
+  }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode])
 
   const onCheckResults = useCallback(() => {
-    exploreStore.emitViewChangeTransaction(0)
+    megaAutoStore.emitViewChangeTransaction(0)
     commonStore.setAppKey(PIVOT_KEYS.lts)
-  }, [exploreStore, commonStore])
+  }, [megaAutoStore, commonStore])
 
   const onBuildKnowledge = useCallback(() => {
     commonStore.setAppKey(PIVOT_KEYS.pattern)
@@ -134,7 +135,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     }
   }, [onV1EngineStart, onCheckResults, onBuildKnowledge, commonStore])
 
-  const hasResults = exploreStore.insightSpaces.length > 0;
+  const hasResults = megaAutoStore.insightSpaces.length > 0;
 
   const startMode = useMemo<IContextualMenuItem>(() => {
     if (exploreMode === EXPLORE_MODE.first) {

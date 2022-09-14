@@ -1,7 +1,7 @@
 
 import { IInsightSpace, InsightFlow, Cube, ViewSpace,  } from 'visual-insights'
 import { IRow } from '../../interfaces';
-import { IVizSpace } from '../../store/exploreStore';
+import { IVizSpace } from '../../store/megaAutomation';
 import { isSetEqual } from '../../utils';
 // import { setStateInStorage } from '../../utils/storage';
 import { intersect, setStateInStorage } from './utils';

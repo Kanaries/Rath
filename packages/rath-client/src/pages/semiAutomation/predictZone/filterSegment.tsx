@@ -9,14 +9,14 @@ import ReactVega from '../../../components/react-vega';
 import { applyFilter } from '../utils';
 
 const FilterSegment: React.FC = () => {
-    const { discoveryMainStore } = useGlobalStore();
-    const { filterSpecList, filterViews, mainVizSetting, dataSource, autoAsso, hasMainView } = discoveryMainStore;
+    const { semiAutoStore } = useGlobalStore();
+    const { filterSpecList, filterViews, mainVizSetting, dataSource, autoAsso, hasMainView } = semiAutoStore;
     const loadMore = useCallback(() => {
-        discoveryMainStore.increaseRenderAmount('filterViews');
-    }, [discoveryMainStore])
+        semiAutoStore.increaseRenderAmount('filterViews');
+    }, [semiAutoStore])
     const recommandFilter = useCallback(() => {
-        discoveryMainStore.filterAssociate();
-    }, [discoveryMainStore])
+        semiAutoStore.filterAssociate();
+    }, [semiAutoStore])
     if (filterViews.views.length === 0 && autoAsso.filterViews) return <div />
     return <div className="pure-card">
         <h1 className="ms-fontSize-18">{intl.get('discovery.main.associate.filters')}</h1>
@@ -40,14 +40,14 @@ const FilterSegment: React.FC = () => {
                             iconProps={{ iconName: 'Pinned' }}
                             text={intl.get('discovery.main.pin')}
                             onClick={() => {
-                                discoveryMainStore.updateMainView(filterViews.views[i])
+                                semiAutoStore.updateMainView(filterViews.views[i])
                             }}
                         />
                         <CommandButton
                             iconProps={{ iconName: 'Compare' }}
                             text={intl.get('discovery.main.compare')}
                             onClick={() => {
-                                discoveryMainStore.updateCompareView(filterViews.views[i])
+                                semiAutoStore.updateCompareView(filterViews.views[i])
                             }}
                         />
                     </Stack>
