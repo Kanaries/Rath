@@ -1,9 +1,10 @@
+import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Dropdown, IDropdownOption, Panel } from '@fluentui/react';
-import React, { useMemo } from 'react';
 import { ICubeStorageManageMode } from 'visual-insights';
-import { useGlobalStore } from '../../store';
 import intl from 'react-intl-universal';
+import { useGlobalStore } from '../../store';
+
 import { COMPUTATION_ENGINE, EXPLORE_MODE } from '../../constants';
 import { makeRenderLabelHandler } from '../../components/labelTooltip';
 import { ITaskTestMode } from '../../interfaces';
@@ -46,7 +47,6 @@ const AnalysisSettings: React.FC = props => {
         headerText={intl.get('config.analysisConfig')}
         onDismiss={() => {commonStore.setShowAnalysisConfig(false) }}>
         <Dropdown options={options}
-        ariaLabel="asdfsdf asdf asd s"
             style={{ minWidth: '180px', marginRight: '1em' }}
             label={intl.get('config.cubeStorageManageMode.title')}
             selectedKey={ltsPipeLineStore.cubeStorageManageMode}

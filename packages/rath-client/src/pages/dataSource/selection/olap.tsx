@@ -15,12 +15,12 @@ const StackTokens = {
 //     { text: 'https', key: 'https' },
 //     { text: 'http', key: 'http' }
 // ]
-interface CHDataProps {
+interface OLAPDataProps {
     onClose: () => void;
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 
-const ClickHouseData: React.FC<CHDataProps> = props => {
+const OLAPData: React.FC<OLAPDataProps> = props => {
     const { onDataLoaded, onClose } = props;
     const { clickHouseStore } = useGlobalStore();
 
@@ -150,4 +150,4 @@ const ClickHouseData: React.FC<CHDataProps> = props => {
     </div>
 }
 
-export default observer(ClickHouseData);
+export default observer(OLAPData);

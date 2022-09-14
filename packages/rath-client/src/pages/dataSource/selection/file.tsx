@@ -34,7 +34,7 @@ const FileData: React.FC<FileDataProps> = (props) => {
                 key: 'gb2312'
             },
             {
-                text: 'us-ascii',
+                text: 'US-ASCII',
                 key: 'us-ascii'
             },
             {

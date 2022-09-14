@@ -20,7 +20,7 @@ export enum IDataSourceType {
   RESTFUL = 'restful',
   DATABASE = 'database',
   DEMO = 'demo',
-  CLICKHOUSE = 'clickhouse',
+  OLAP = 'olap',
   LOCAL = 'local',
   AIRTABLE = 'airtable'
 }

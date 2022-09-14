@@ -8,7 +8,7 @@ import { useDataSourceTypeOptions } from '../config';
 import FileData from './file';
 import DemoData from './demo';
 import RestfulData from './restful';
-import ClickHouseData from './clickhouse';
+import OLAPData from './olap';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import Local from './local';
 import DatabaseData from './database/';
@@ -41,8 +41,8 @@ const Selection: React.FC<SelectionProps> = props => {
         [IDataSourceType.DEMO]: (
             <DemoData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
         ),
-        [IDataSourceType.CLICKHOUSE]: (
-            <ClickHouseData onClose={onClose} onDataLoaded={onDataLoaded} />
+        [IDataSourceType.OLAP]: (
+            <OLAPData onClose={onClose} onDataLoaded={onDataLoaded} />
         ),
         [IDataSourceType.RESTFUL]: (
             <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
