@@ -36,6 +36,8 @@ const HeaderCellContainer = styled.div`
     .header{
         margin-top: 0px;
         margin-bottom: 0px;
+        font-size: 18px;
+        line-height: 36px;
     }
     .checkbox-container{
         display: flex;
