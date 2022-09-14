@@ -12,6 +12,9 @@ const CustomBaseTable = styled(BaseTable)`
     .${Classes.tableHeaderCell} {
         position: relative;
     }
+    thead{
+        vertical-align: top;
+    }
 `;
 
 const TableInnerStyle = {
