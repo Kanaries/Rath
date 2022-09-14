@@ -17,9 +17,6 @@ import AppNav from "./components/appNav";
 import { destroyRathWorker, initRathWorker } from "./service";
 import { PIVOT_KEYS } from "./constants";
 import CrInfo from "./components/crInfo";
-// import VegaVis from "./renderer/vegaVis";
-// import { loadTheme } from '@fluentui/react';
-// import { RATH_DARK_PALETTE, RATH_DARK_THEME } from "./theme";
 
 
 // FIXME: 这两代码好像没什么用
@@ -32,16 +29,6 @@ function App() {
 
   useEffect(() => {
     initRathWorker(commonStore.computationEngine);
-    // notify({
-    //   title: 'test',
-    //   type: 'info',
-    //   content: 'thisn asiudfhius diuahsi iudh fiuasdf'
-    // })
-    // notify({
-    //   title: 'test',
-    //   type: 'info',
-    //   content: 'thisn asiudfhius diuahsi iudh fiuasdf'
-    // })
     return () => {
       destroyRathWorker();
     }
@@ -128,8 +115,6 @@ function App() {
 }
 
 const OBApp = observer(App);
-
-// loadTheme(RATH_DARK_THEME);
 
 export default function WrappedApp() {
   return (
