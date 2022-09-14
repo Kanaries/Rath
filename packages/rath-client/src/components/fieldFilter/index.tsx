@@ -2,12 +2,13 @@ import { useId } from '@uifabric/react-hooks';
 import produce from 'immer';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Callout, ChoiceGroup, DefaultButton, IconButton, PrimaryButton, Stack, Selection, SelectionMode, Toggle } from 'office-ui-fabric-react';
+import { Callout, ChoiceGroup, DefaultButton, PrimaryButton, Stack, Selection, SelectionMode, Toggle, ActionButton } from 'office-ui-fabric-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { IFilter } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import RangeSelection from './rangeSelection';
 import SetSelection from './setSelection';
+import intl from 'react-intl-universal';
 
 
 interface FieldFilterProps {
@@ -75,8 +76,8 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
     }, [])
 
     return <div>
-        <IconButton id={buttonId}
-            text="Filter"
+        <ActionButton
+            text={intl.get('common.filter')}
             iconProps={{ iconName: 'filter' }}
             onClick={toggleShowFilter}
         />

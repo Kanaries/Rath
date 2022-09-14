@@ -100,6 +100,11 @@ const MetaItem: React.FC<MetaItemProps> = props => {
         ...ch,
         text: intl.get(`common.${ch.key}`)
     }))
+
+    const SEMANTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = SEMANTIC_TYPE_CHOICES.map(ch => ({
+        ...ch,
+        text: intl.get(`common.semanticType.${ch.key}`)
+    }))
     
     return <MetaItemContainer className="ms-depth-4">
         <div className={`${analyticType} bottom-bar`}></div>
@@ -130,7 +135,7 @@ const MetaItem: React.FC<MetaItemProps> = props => {
             <div className="operation-column">
                 <ChoiceGroup
                     label={intl.get('dataSource.meta.semanticType')}
-                    options={SEMANTIC_TYPE_CHOICES}
+                    options={SEMANTIC_TYPE_CHOICES_LANG}
                     selectedKey={semanticType}
                     onChange={(ev, option) => {
                         onChange && option && onChange(colKey, 'semanticType', option.key)

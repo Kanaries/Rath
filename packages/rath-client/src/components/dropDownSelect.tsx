@@ -46,7 +46,7 @@ const Cont = styled.div<{border?: boolean}>`
         font-size: inherit;
         height: 100%;
         outline: none;
-        padding-left: 7px;
+        padding-left: ${props => props.border ? '7px' : '0px'};
         width: 100%;
     }
 `

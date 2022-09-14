@@ -7,7 +7,14 @@
         "settings": "设置",
         "history": "历史记录",
         "hide": "隐藏",
-        "expand": "展开"
+        "expand": "展开",
+        "filter": "筛选",
+        "semanticType": {
+            "nominal": "类别类型",
+            "ordinal": "有序类型",
+            "temporal": "时间类型",
+            "quantitative": "数值类型"
+        }
     },
     "menu": {
         "dataSource": "数据源",
