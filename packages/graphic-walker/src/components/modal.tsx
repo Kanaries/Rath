@@ -1,6 +1,17 @@
 import React from 'react';
 import styled from 'styled-components';
 import { XCircleIcon } from '@heroicons/react/24/outline';
+
+const Background = styled.div({
+  position: 'fixed',
+  left: 0,
+  top: 0,
+  width: '100vw',
+  height: '100vh',
+  backdropFilter: 'blur(2px)',
+  zIndex: 25535,
+});
+
 const Container = styled.div`
   width: 880px;
   max-height: 800px;
@@ -25,23 +36,31 @@ const Container = styled.div`
   z-index: 999;
 `;
 interface ModalProps {
-    onClose?: () => void
-    title?: string;
+  onClose?: () => void
+  title?: string;
 }
 const Modal: React.FC<ModalProps> = props => {
-    const { onClose, title } = props;
-    return (
-        <Container className="shadow-lg">
-            <div className="header relative h-9">
-                {title}
-                <XCircleIcon
-                    className="text-red-600 absolute right-2 w-6 cursor-pointer"
-                    onClick={onClose}
-                />
-            </div>
-            <div className="container">{props.children}</div>
-        </Container>
-    )
+  const { onClose, title } = props;
+
+  return (
+    <Background onClick={onClose}>
+      <Container role="dialog" className="shadow-lg" onClick={e => e.stopPropagation()}>
+        <div className="header relative h-9">
+          <header className="font-bold">
+            {title}
+          </header>
+          <XCircleIcon
+            className="text-red-600 absolute right-2 w-6 cursor-pointer"
+            role="button"
+            tabIndex={0}
+            aria-label="close dialog"
+            onClick={onClose}
+          />
+        </div>
+        <div className="container">{props.children}</div>
+      </Container>
+    </Background>
+  );
 }
 
 export default Modal;

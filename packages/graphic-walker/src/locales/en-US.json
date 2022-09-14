@@ -1,0 +1,30 @@
+{
+    "App": {
+        "labels": {
+            "data_interpretation": "Interpret Data"
+        }
+    },
+    "DataSource": {
+        "labels": {
+            "cur_dataset": "Current Dataset"
+        },
+        "buttons": {
+            "create_dataset": "Create Dataset"
+        },
+        "dialog": {
+            "create_data_source": "New Data Source",
+            "data_types": "Choose Import Methods",
+            "text_file_data": "Open Local Text File",
+            "public_data": "Use Public Dataset",
+            "data_source_type": "Data Source Type: [{{sourceType}}]",
+            "file": {
+                "open": "Open...",
+                "submit": "Submit",
+                "dataset_name": "Dataset Name"
+            },
+            "public": {
+                "submit": "Submit"
+            }
+        }
+    }
+}
