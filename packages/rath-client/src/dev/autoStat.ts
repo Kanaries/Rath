@@ -193,7 +193,6 @@ function extendSpecGroup(props: IExtendSpecGroup) {
     while(wcn > 1) {
         const sEdge = findStrongestEdge2GroupNotMarked(relationMatrix, markMatrix, dynamicGroupIndices)
         if (sEdge.to >= 0) {
-            console.log(sEdge)
             wcn--;
             vertexIndices.push(sEdge.from, sEdge.to);
             dynamicGroupIndices.push(sEdge.to)
@@ -224,7 +223,6 @@ export function autoSet(dataSource: IRow[], fields: IFieldMeta[], views: ILoaVie
     // 3. 推荐逻辑，
 
     // 如果有主view
-    console.log('props', views)
     const lockedFieldSet: IFieldMeta[] = [];
     const lockedFieldWeightsMap: Map<string, number> = new Map();
     const fieldIndexMap: Map<string, number> = new Map();

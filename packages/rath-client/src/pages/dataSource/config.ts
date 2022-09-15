@@ -1,13 +1,11 @@
-import { IDataSourceType } from "../../global";
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
+import { IDataSourceType } from "../../global";
 
 export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceType; text: string }> {
     const fileText = intl.get(`dataSource.importData.type.${IDataSourceType.FILE}`);
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
-    // const mysqlText = intl.get(`dataSource.importData.type.${IDataSourceType.MYSQL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
-    const clickHouseText = 'clickhouse';
     const localText = intl.get('common.history');
     const dbText = intl.get(`dataSource.importData.type.${IDataSourceType.DATABASE}`);
 
@@ -39,15 +37,9 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 text: dbText,
                 iconProps: { iconName: "Database" }
             },
-            // {
-            //     key: IDataSourceType.MYSQL,
-            //     text: mysqlText,
-            //     iconProps: { iconName: "LinkedDatabase" },
-            //     disabled: true,
-            // },
             {
-                key: IDataSourceType.CLICKHOUSE,
-                text: clickHouseText,
+                key: IDataSourceType.OLAP,
+                text: 'OLAP',
                 iconProps: { iconName: "TripleColumn" },
                 disabled: false,
             },

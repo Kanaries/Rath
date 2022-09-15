@@ -1,4 +1,4 @@
-import type { IDropdownOption } from "office-ui-fabric-react";
+import type { IDropdownOption } from '@fluentui/react';
 import { SupportedDatabaseType } from "./type";
 
 

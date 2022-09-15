@@ -1,4 +1,4 @@
-import { Dropdown, IDropdownOption, TextField } from 'office-ui-fabric-react';
+import { Dropdown, IDropdownOption, TextField } from '@fluentui/react';
 import type { FC } from 'react';
 import intl from 'react-intl-universal';
 import { inputWidth } from '.';

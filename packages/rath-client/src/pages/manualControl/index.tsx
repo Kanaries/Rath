@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { GraphicWalker } from '@kanaries/graphic-walker';
-import { useGlobalStore } from '../../store';
 import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
+import { useGlobalStore } from '../../store';
 import '@kanaries/graphic-walker/dist/style.css';
 
 const VisualInterface: React.FC = props => {

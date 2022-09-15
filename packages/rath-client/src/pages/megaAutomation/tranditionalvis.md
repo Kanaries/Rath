@@ -77,7 +77,7 @@ save buttons
         iconProps={{ iconName: 'clouddownload' }}
         disabled={dataIsEmpty}
         onClick={() => {
-            exploreStore.setShowSaveModal(true);
+            megaAutoStore.setShowSaveModal(true);
         }}
     />
     <IconButton

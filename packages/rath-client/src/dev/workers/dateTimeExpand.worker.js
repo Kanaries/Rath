@@ -1,6 +1,6 @@
+import { timer } from '../../workers/timer';
 /* eslint no-restricted-globals: 0 */
 import { dateTimeExpand } from "./engine/dateTimeExpand";
-import { timer } from '../../workers/timer';
 
 const expandService = e => {
     try {

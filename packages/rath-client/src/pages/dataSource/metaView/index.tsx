@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite'
 import { useGlobalStore } from '../../../store';
-import MetaList from './metaList';
 import { IFieldMeta } from '../../../interfaces';
+import MetaList from './metaList';
 
 
 const MetaView: React.FC = props => {

@@ -1,6 +1,6 @@
 import { combineLatest, Observable } from "rxjs";
-import { Subspace } from "../service";
 import * as op from 'rxjs/operators';
+import { Subspace } from "../service";
 import { INIT_TOP_K_DIM_GROUP_NUM } from "../constants";
 /**
  * A temporay implement of auto params, should be replaced by using recommanded advice from vi engine.

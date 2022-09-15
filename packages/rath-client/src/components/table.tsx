@@ -1,5 +1,5 @@
 import React from 'react';
-import { DetailsList, SelectionMode } from 'office-ui-fabric-react';
+import { DetailsList, SelectionMode } from '@fluentui/react';
 import { BIField } from '../global';
 import { IRow } from '../interfaces';
 export interface DataTableProps {

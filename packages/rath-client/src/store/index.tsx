@@ -7,9 +7,9 @@ import { LitePipeStore } from './pipeLineStore/lite';
 import { NoteBookStore } from './notebookStore';
 import { DashBoardStore } from './dashboard';
 import { LTSPipeLine } from './pipeLineStore/lts';
-import { ExploreStore } from './exploreStore';
+import { MegaAutomationStore } from './megaAutomation';
 import { ClickHouseStore } from './clickhouseStore';
-import { DiscoveryMainStore } from './discovery/mainStore';
+import { SemiAutomationStore } from './semiAutomation/mainStore';
 
 export interface StoreCollection {
     langStore: LangStore;
@@ -19,10 +19,10 @@ export interface StoreCollection {
     noteBookStore: NoteBookStore;
     dashBoardStore: DashBoardStore;
     ltsPipeLineStore: LTSPipeLine;
-    exploreStore: ExploreStore;
+    megaAutoStore: MegaAutomationStore;
     commonStore: CommonStore;
     clickHouseStore: ClickHouseStore;
-    discoveryMainStore: DiscoveryMainStore;
+    semiAutoStore: SemiAutomationStore;
 }
 
 const langStore = new LangStore();
@@ -34,8 +34,8 @@ const ltsPipeLineStore = new LTSPipeLine(dataSourceStore, commonStore, clickHous
 const galleryStore = new GalleryStore(litePipeStore);
 const noteBookStore = new NoteBookStore(litePipeStore);
 const dashBoardStore = new DashBoardStore(litePipeStore);
-const exploreStore = new ExploreStore(ltsPipeLineStore);
-const discoveryMainStore = new DiscoveryMainStore(dataSourceStore);
+const megaAutoStore = new MegaAutomationStore(ltsPipeLineStore);
+const semiAutoStore = new SemiAutomationStore(dataSourceStore);
 
 
 const storeCol: StoreCollection = {
@@ -47,9 +47,9 @@ const storeCol: StoreCollection = {
     noteBookStore,
     dashBoardStore,
     ltsPipeLineStore,
-    exploreStore,
+    megaAutoStore,
     clickHouseStore,
-    discoveryMainStore
+    semiAutoStore
 }
 
 const StoreContext = React.createContext<StoreCollection>(null!);

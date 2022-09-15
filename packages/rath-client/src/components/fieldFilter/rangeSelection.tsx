@@ -1,4 +1,4 @@
-import { Slider } from 'office-ui-fabric-react';
+import { Slider } from '@fluentui/react';
 import React, { useEffect, useMemo } from 'react';
 
 

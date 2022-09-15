@@ -1,10 +1,10 @@
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
 import { IRow, IAnalyticType, ISemanticType, Specification } from "visual-insights"
-import { inferAnalyticTypeFromSemanticType } from "."
 import { Field } from "../global"
 import { IFieldMeta, IGeoRole, IVegaSubset } from "../interfaces"
 import { FieldSummary } from "../service"
+import { inferAnalyticTypeFromSemanticType } from "."
 
 dayjs.extend(customParseFormat);
 

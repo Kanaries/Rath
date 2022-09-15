@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { IconButton, Dropdown, IDropdownOption, Stack } from 'office-ui-fabric-react';
+import { IconButton, Dropdown, IDropdownOption, Stack } from '@fluentui/react';
 import { ISpec } from 'visual-insights';
 import { IFieldMeta } from '../../../interfaces';
 import { GEMO_TYPES } from './config';
