@@ -21,7 +21,6 @@ import { Specification } from 'visual-insights';
 import VisNav from './segments/visNav';
 import { useTranslation } from 'react-i18next';
 import { mergeLocaleRes, setLocaleLanguage } from './locales/i18n';
-import type { Resource } from 'i18next';
 
 
 export interface EditorProps {
@@ -29,7 +28,7 @@ export interface EditorProps {
 	rawFields?: IMutField[];
 	spec?: Specification;
 	i18nLang?: string;
-	i18nResources?: { [lang: string]: Resource };
+	i18nResources?: { [lang: string]: Record<string, string | any> };
 }
 
 const App: React.FC<EditorProps> = props => {
