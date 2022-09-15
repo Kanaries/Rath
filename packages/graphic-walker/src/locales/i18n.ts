@@ -30,7 +30,8 @@ i18n.use(initReactI18next).use(LanguageDetector).init({
 });
 
 export const setLocaleLanguage = (lang: string) => {
-    if (Object.hasOwn(locales, lang)) {
+    // Object.hasOwn() is not supported yet
+    if (locales.hasOwnProperty(lang)) { // if (Object.hasOwn(locales, lang)) {
         return i18n.changeLanguage(lang);
     }
 
