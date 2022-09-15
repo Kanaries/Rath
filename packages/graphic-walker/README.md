@@ -66,10 +66,7 @@ const YourApp = props => {
 If you need i18n support to cover languages not supported currently, or to totally rewrite the content of any built-in resource(s), you can also provide your resource(s) as `props.i18nResources` to Graphic Walker like this.
 
 ```typescript
-const yourResources: { [lang: string]: Resource } = {
-    en: {
-        ...
-    },
+const yourResources = {
     'de-DE': {
         ...
     },
