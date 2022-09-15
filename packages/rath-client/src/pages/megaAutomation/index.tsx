@@ -8,16 +8,16 @@ import { CommandBarButton, Spinner } from '@fluentui/react';
 
 import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../visBuilder/visErrorBoundary';
+import { IResizeMode } from '../../interfaces';
+import { LoadingLayer } from '../semiAutomation/components';
+import ReactVega from '../../components/react-vega';
 import VizPreference from './preference';
 import SaveModal from './save';
 import OperationBar from './vizOperation/operationBar';
 import FieldContainer from './vizOperation/fieldContainer';
-import { IResizeMode } from '../../interfaces';
 import ResizeContainer from './resizeContainer';
 import Narrative from './narrative';
-import { LoadingLayer } from '../semiAutomation/components';
 import ComputationProgress from './computationProgress';
-import ReactVega from '../../components/react-vega';
 import Constraints from './vizOperation/constraints';
 import AssoPanel from './assoPanel';
 

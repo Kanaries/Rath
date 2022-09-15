@@ -4,11 +4,11 @@ import { Modal, IconButton, Icon, SelectionMode, DefaultButton, IColumn, Details
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import dayjs from 'dayjs';
 import styled from 'styled-components';
+import { runInAction } from 'mobx';
 import { useGlobalStore } from '../../../store';
 import { loadRathStorageFile } from '../utils';
 import { STORAGE_FILE_SUFFIX } from '../../../constants';
 import { deleteStorageByIdInLocal, getStorageByIdInLocal, getStorageListInLocal, IDBMeta, IRathStorage, RathStorageParse } from '../../../utils/storage';
-import { runInAction } from 'mobx';
 
 const OperationStack = styled(Stack)`
     .ope-icon{

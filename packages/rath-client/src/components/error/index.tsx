@@ -7,7 +7,7 @@ const containerRef: { ref: HTMLDivElement | null } = {
 }
 
 export function notify (message: IErrorInfo) {
-    console.log(message)
+    console.warn(message)
     if (containerRef.ref === null) {
         const container = document.createElement('div');
         document.getElementsByTagName('body')[0].appendChild(container)

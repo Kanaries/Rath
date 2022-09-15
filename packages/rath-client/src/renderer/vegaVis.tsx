@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useRef } from 'react';
 import { View, parse } from 'vega';
 import { compile } from 'vega-lite';
@@ -48,7 +49,6 @@ const VegaVis: React.FC = props => {
             const view = new View(parse(vegaSpec.spec), {
                 renderer: 'none'
             })
-            console.log(view)
             // view.runAsync().then(resView => {
             //     if (canvasRef.current && canvasRefOff.current) {
             //         var offscreen = new OffscreenCanvas(256, 256);

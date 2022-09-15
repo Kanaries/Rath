@@ -1,9 +1,9 @@
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useGlobalStore } from '../../../store';
 import styled from 'styled-components';
 import { Spinner } from '@fluentui/react';
+import { useGlobalStore } from '../../../store';
 import { getTestServerAPI } from '../../../service';
 
 const InsightDesc = styled.div`

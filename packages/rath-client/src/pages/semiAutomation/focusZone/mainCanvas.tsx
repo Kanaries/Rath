@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import React, { useMemo } from 'react';
-import ReactVega from '../../../components/react-vega';
 import { IPattern } from '@kanaries/loa';
+import ReactVega from '../../../components/react-vega';
 import { IResizeMode, IRow, IVegaSubset } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { applyFilter } from '../utils';

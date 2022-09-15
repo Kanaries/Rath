@@ -1,15 +1,17 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import intl from 'react-intl-universal';
+import { specification } from 'visual-insights';
+import { ProgressIndicator, Toggle, Slider } from '@fluentui/react';
+import { observer } from 'mobx-react-lite';
+import { useGlobalStore } from '../../store';
 import {  Field } from '../../global';
+import VegaBase from '../../visBuilder/vegaBase';
 import FieldAnalysisBoard from './fieldAnalysis';
 import Subspaces from './subspaces';
 import ClusterBoard from './cluster';
-import { specification } from 'visual-insights';
-import { ProgressIndicator, Toggle, Slider } from '@fluentui/react';
-import VegaBase from '../../visBuilder/vegaBase';
+
+
 import './index.css';
-import { observer } from 'mobx-react-lite';
-import { useGlobalStore } from '../../store';
 // const maxMeasureInView = 4;
 
 interface ClusterState {
@@ -63,7 +65,7 @@ const NoteBook: React.FC = (props) => {
       // })
       return schema;
     } catch (error) {
-      console.log(error)
+      console.error(error)
       return {
         position: []
       }

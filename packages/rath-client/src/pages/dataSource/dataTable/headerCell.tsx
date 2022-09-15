@@ -63,7 +63,7 @@ interface HeaderCellProps {
     meta: IFieldMeta | null;
 }
 
-interface IOption<T = string> { key: T; text: string };
+interface IOption<T = string> { key: T; text: string }
 
 const DataTypeOptions: IOption<ISemanticType>[] = [
     { key: 'nominal', text: 'nominal' },

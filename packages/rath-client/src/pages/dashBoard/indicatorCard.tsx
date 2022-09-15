@@ -55,7 +55,7 @@ const IndicatorCard: React.FC<IndicatorProps> = props => {
         ans = AGGREGATION_FUNCS[operator](dataSource.map(d => d[measures[0]]));
       }
     } catch (error) {
-      console.log('operator does not exist or not in vega/datalib.')
+      console.error('operator does not supported.')
     }
     if (Math.abs(ans - Math.round(ans)) > 0.00001) {
       ans = Number(ans.toFixed(2));

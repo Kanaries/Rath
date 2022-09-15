@@ -1,10 +1,10 @@
 import type { FC } from 'react';
 import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import intl from 'react-intl-universal';
-import { StackTokens } from '.';
 import datasetOptions from './config';
 import { renderDropdownItem, renderDropdownTitle } from './custom-dropdown';
 import type { SupportedDatabaseType } from './type';
+import { StackTokens } from '.';
 
 
 interface ConnectFormProps {
@@ -78,7 +78,7 @@ const ConnectForm: FC<ConnectFormProps> = ({
                     setConnectUri(uri ?? '');
                 }}
                 onKeyPress={e => {
-                    if (e.key === 'Enter' && !(!Boolean(connectUri) || sourceId === 'pending' || sourceId === null)) {
+                    if (e.key === 'Enter' && !(!connectUri || sourceId === 'pending' || sourceId === null)) {
                         handleConnectionTest();
                     }
                 }}
@@ -106,7 +106,7 @@ const ConnectForm: FC<ConnectFormProps> = ({
             <PrimaryButton
                 text={intl.get('dataSource.btn.connect')}
                 disabled={
-                    !Boolean(connectUri)
+                    !connectUri
                     || sourceId === 'pending'
                     || sourceId === null
                 }

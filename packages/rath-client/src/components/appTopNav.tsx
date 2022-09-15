@@ -2,11 +2,9 @@ import React from 'react';
 import { Pivot, PivotItem } from '@fluentui/react';
 import { observer } from 'mobx-react-lite'
 import intl from 'react-intl-universal';
-
-import UserSettings from './userSettings';
-
 import { PIVOT_KEYS } from '../constants';
 import { useGlobalStore } from '../store';
+import UserSettings from './userSettings';
 
 interface AppTopNavProps { }
 const AppTopNav: React.FC<AppTopNavProps> = props => {

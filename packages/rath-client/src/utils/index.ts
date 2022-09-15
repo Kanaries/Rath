@@ -1,11 +1,11 @@
+import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visual-insights';
+import { IRow } from '../interfaces';
+import { RATH_INDEX_COLUMN_KEY } from '../constants';
 import * as FileLoader from './fileParser';
 import * as Transform from './transform';
 import { getRange } from './stat';
 import deepcopy from './deepcopy';
-import { IRow } from '../interfaces';
-// TODO: Rath和VI中都有一套，弱约束关联，可能带来潜在的迭代负担或bug
-import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visual-insights';
-import { RATH_INDEX_COLUMN_KEY } from '../constants';
+
 
 function isASCII(str: string) {
   // eslint-disable-next-line no-control-regex

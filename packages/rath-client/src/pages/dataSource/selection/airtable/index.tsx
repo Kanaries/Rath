@@ -1,10 +1,10 @@
 import { DefaultButton, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import React, { useCallback, useState } from 'react';
+import intl from 'react-intl-universal'
+import { logDataImport } from '../../../../loggers/dataImport';
 import { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { transformRawDataService } from '../../utils';
 import { fetchAllRecordsFromAirTable } from './utils';
-import intl from 'react-intl-universal'
-import { logDataImport } from '../../../../loggers/dataImport';
 
 interface AirTableSourceProps {
     onClose: () => void;

@@ -1,9 +1,9 @@
 import { observer } from 'mobx-react-lite';
 import { MessageBar, MessageBarButton, MessageBarType } from '@fluentui/react';
 import React from 'react';
-import { useGlobalStore } from '../../../store';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { useGlobalStore } from '../../../store';
 import { IDataPrepProgressTag } from '../../../interfaces';
 
 const AdviceContainer = styled.div`

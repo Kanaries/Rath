@@ -1,10 +1,10 @@
 import React from "react";
+import { IconButton, Stack } from '@fluentui/react';
 import VisDescription from "../../../plugins/visSummary/description";
-import useDigDimension, { DigDimensionProps } from "./digDimension";
 import BaseChart from "../../../visBuilder/vegaBase";
 import { Subspace } from "../../../service";
-import { IconButton, Stack } from '@fluentui/react';
 import { IFieldMeta } from "../../../interfaces";
+import useDigDimension, { DigDimensionProps } from "./digDimension";
 
 function isDimensionEqual(dimensions1: string[], dimensions2: string[]) {
   if (dimensions1.length !== dimensions2.length) {

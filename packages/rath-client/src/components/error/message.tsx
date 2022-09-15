@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { callTerminator, cancelTerminator, IErrorInfo } from './store';
 interface MessageProps extends IErrorInfo {
     onClose: () => void;
-};
+}
 
 const Cont = styled.div`
     box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d;

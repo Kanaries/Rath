@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect, useState } from 'react';
-import { Subspace } from '../../service';
 import embed from 'vega-embed';
+import { Subspace } from '../../service';
 import { IRow } from '../../interfaces';
 
 function encodeArr (arr: any[]): string {

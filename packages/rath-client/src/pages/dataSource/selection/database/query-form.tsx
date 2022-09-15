@@ -1,8 +1,8 @@
 import type { FC } from 'react';
 import { Label, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import intl from 'react-intl-universal';
-import { StackTokens, TableData, TableLabels } from '.';
 import TablePreview from './table-preview';
+import { StackTokens, TableData, TableLabels } from '.';
 
 
 interface QueryFormProps {

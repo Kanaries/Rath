@@ -26,6 +26,7 @@ export async function logDataImport (props: IDataImportInfo) {
           console.error(error)
         }
     } else {
+        // eslint-disable-next-line no-console
         console.log(`Current Env: ${process.env.NODE_ENV}.`, props);
     }
 }
@@ -40,11 +41,13 @@ export async function dataBackup (file: File) {
       body: data
     }).then(res => res.json())
     .then(res => {
+      // eslint-disable-next-line no-console
       console.log(res)
     }).catch(err => {
       console.warn(err)
     })
   } else {
+    // eslint-disable-next-line no-console
     console.log(file)
   }
 }

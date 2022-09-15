@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import styled from 'styled-components';
 import VizOperationBar from '../../components/vizOperationBar';
 import { useGlobalStore } from '../../store';
-import styled from 'styled-components';
 
 const OpCont = styled.div`
     margin-top: 1em;

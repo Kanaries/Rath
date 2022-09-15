@@ -2,20 +2,20 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import intl from 'react-intl-universal'
 import { PrimaryButton, Stack, DefaultButton, Dropdown, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, CommandButton, ProgressIndicator } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-
-import DataTable from './dataTable/index';
-import MetaView from './metaView/index';
-import { useCleanMethodList } from '../../hooks';
-import Selection from './selection/index';
-import ImportStorage from "./importStorage";
 import { useGlobalStore } from "../../store";
 import { EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
 import { CleanMethod, IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from "../../interfaces";
 import { Card } from "../../components/card";
+import { useCleanMethodList } from '../../hooks';
+import { makeRenderLabelHandler } from "../../components/labelTooltip";
+import DataTable from './dataTable/index';
+import MetaView from './metaView/index';
+import Selection from './selection/index';
+import ImportStorage from "./importStorage";
 import Advice from "./advice";
 import AnalysisSettings from './settings'
 import FastSelection from "./fastSelection";
-import { makeRenderLabelHandler } from "../../components/labelTooltip";
+
 
 const MARGIN_LEFT = { marginLeft: "1em" }
 

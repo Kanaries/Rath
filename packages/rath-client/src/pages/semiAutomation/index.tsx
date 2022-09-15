@@ -3,10 +3,10 @@ import { observer } from 'mobx-react-lite';
 import { ActionButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../store';
+import { throttle } from '../../utils';
 import Settings from './settings';
 import FocusZone from './focusZone';
 import PredictZone from './predictZone';
-import { throttle } from '../../utils';
 
 
 const PatternPage: React.FC = () => {

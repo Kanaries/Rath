@@ -1,11 +1,11 @@
 import { PrimaryButton, Stack, TextField } from '@fluentui/react';
 import React, { useCallback, useState } from 'react';
 import ReactJson from 'react-json-view';
+import styled from 'styled-components'
+import intl from 'react-intl-universal'
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
 import { logDataImport } from '../../../loggers/dataImport';
-import styled from 'styled-components'
-import intl from 'react-intl-universal'
 
 function requestAPIData (api: string): Promise<IDatasetBase> {
     return new Promise<IDatasetBase>((resolve, reject) => {

@@ -1,6 +1,6 @@
-import { IDataSourceType } from "../../global";
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
+import { IDataSourceType } from "../../global";
 
 export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceType; text: string }> {
     const fileText = intl.get(`dataSource.importData.type.${IDataSourceType.FILE}`);

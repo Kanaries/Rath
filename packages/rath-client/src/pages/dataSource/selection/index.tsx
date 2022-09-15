@@ -3,16 +3,15 @@ import { Modal, ChoiceGroup, IconButton, ProgressIndicator } from '@fluentui/rea
 import { useId } from '@fluentui/react-hooks';
 import intl from 'react-intl-universal';
 import { IDataSourceType } from '../../../global';
-
+import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useDataSourceTypeOptions } from '../config';
+import DataLoadingStatus from '../dataLoadingStatus';
 import FileData from './file';
 import DemoData from './demo';
 import RestfulData from './restful';
 import OLAPData from './olap';
-import { IMuteFieldBase, IRow } from '../../../interfaces';
 import Local from './local';
 import DatabaseData from './database/';
-import DataLoadingStatus from '../dataLoadingStatus';
 import AirTableSource from './airtable';
 
 interface SelectionProps {

@@ -1,8 +1,8 @@
 import React from "react";
 import { observer } from 'mobx-react-lite';
+import { action } from "mobx";
 import { PrimaryButton, Stack, Checkbox, Panel, PanelType, ComboBox, Label } from '@fluentui/react';
 import { AGGREGATION_LIST, Aggregator } from "../../global";
-import { action } from "mobx";
 import { useGlobalStore } from "../../store";
 const checkboxStyles = () => {
     return {

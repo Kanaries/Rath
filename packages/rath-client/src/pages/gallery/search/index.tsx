@@ -2,12 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { SearchBox } from '@fluentui/react';
 import Fuse, { FuseOptions } from 'fuse.js';
 import { specification } from 'visual-insights';
+import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 import { ViewSpace } from '../../../service';
 import BaseChart from "../../../visBuilder/vegaBase";
-import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
 import { meta2fieldScores } from '../../../utils/transform';
-import { observer } from 'mobx-react-lite';
 
 const VisCard = styled.div`
   padding: 1rem;

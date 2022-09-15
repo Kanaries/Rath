@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import { ChoiceGroup, IChoiceGroupOption, Label, Panel, Toggle } from '@fluentui/react';
 import React, { useMemo } from 'react';
-import { useGlobalStore } from '../../store';
 import intl from 'react-intl-universal';
+import { useGlobalStore } from '../../store';
 import OperationBar from './operationBar';
 
 const PatternSetting: React.FC = () => {
