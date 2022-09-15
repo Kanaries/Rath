@@ -19,7 +19,7 @@
     "@kanaries/web-data-loader": "0.1.7",
     "@material-ui/core": "^5.0.0-beta.5",
     "airtable": "^0.11.4",
-    "ali-react-table": "^2.3.1",
+    "ali-react-table": "^2.6.1",
     "chroma-js": "^2.0.6",
     "cube-core": "^2.13.0",
     "dayjs": "^1.10.7",
