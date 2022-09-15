@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Record, IMutField, IRow } from './interfaces';
+import { IMutField, IRow } from './interfaces';
 import VisualSettings from './visualSettings';
 import { Container, NestContainer } from './components/container';
 import ClickMenu from './components/clickMenu';
@@ -20,7 +20,8 @@ import { Specification } from 'visual-insights';
 // import PureTabs from './components/tabs/pureTab';
 import VisNav from './segments/visNav';
 import { useTranslation } from 'react-i18next';
-import { setLocaleLanguage } from './locales/i18n';
+import { mergeLocaleRes, setLocaleLanguage } from './locales/i18n';
+import type { Resource } from 'i18next';
 
 
 export interface EditorProps {
@@ -28,10 +29,11 @@ export interface EditorProps {
 	rawFields?: IMutField[];
 	spec?: Specification;
 	i18nLang?: string;
+	i18nResources?: { [lang: string]: Resource };
 }
 
 const App: React.FC<EditorProps> = props => {
-	const { dataSource = [], rawFields = [], spec, i18nLang = 'en-US' } = props;
+	const { dataSource = [], rawFields = [], spec, i18nLang = 'en-US', i18nResources } = props;
 	const { commonStore, vizStore } = useGlobalStore();
 	const [insightReady, setInsightReady] = useState<boolean>(true);
 
@@ -39,6 +41,12 @@ const App: React.FC<EditorProps> = props => {
 
 	const { t, i18n } = useTranslation();
 	const curLang = i18n.language;
+
+	useEffect(() => {
+		if (i18nResources) {
+			mergeLocaleRes(i18nResources);
+		}
+	}, [i18nResources]);
 
 	useEffect(() => {
 		if (i18nLang !== curLang) {

@@ -29,11 +29,22 @@ i18n.use(initReactI18next).use(LanguageDetector).init({
     resources: locales,
 });
 
-export const setLocaleLanguage = (lang: string) => {
-    // Object.hasOwn() is not supported yet
-    if (locales.hasOwnProperty(lang)) { // if (Object.hasOwn(locales, lang)) {
-        return i18n.changeLanguage(lang);
-    }
+const loadedLangs: string[] = Object.keys(locales);
 
-    return i18n.changeLanguage('en-US');
-}
+export const mergeLocaleRes = (resources: { [lang: string]: Resource }) => {
+    for (const lang in resources) {
+        if (Object.prototype.hasOwnProperty.call(resources, lang)) {
+            if (loadedLangs.includes(lang)) {
+                continue;
+            }
+
+            loadedLangs.push(lang);
+            const resource = resources[lang];
+            i18n.addResourceBundle(lang, 'translation', resource, false, true);
+        }
+    }
+};
+
+export const setLocaleLanguage = (lang: string) => {
+    return i18n.changeLanguage(lang);
+};

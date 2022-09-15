@@ -41,3 +41,53 @@ export default YourEmbeddingTableauStyleApp;
 # packages/graphic-walker
 npm run dev
 ```
+
+
+## I18n Support
+
+Graphic Walker now support _English_ (as `"en"` or `"en-US"`) and _Chinese_ (as `"zh"` or `"zh-CN"`) with built-in locale resources. You can simply provide a valid string value (enumerated above) as `props.i18nLang` to set a language or synchronize your global i18n language with the component like the example given as follow.
+
+```typescript
+const YourApp = props => {
+    // ...
+
+    const curLang = /* get your i18n language */;
+
+    return <GraphicWalker
+        dataSource={dataSource}
+        rawFields={fields}
+        i18nLang={curLang}
+    />
+}
+```
+
+### Customize I18n
+
+If you need i18n support to cover languages not supported currently, or to totally rewrite the content of any built-in resource(s), you can also provide your resource(s) as `props.i18nResources` to Graphic Walker like this.
+
+```typescript
+const yourResources: { [lang: string]: Resource } = {
+    en: {
+        ...
+    },
+    'de-DE': {
+        ...
+    },
+    'fr-FE': {
+        ...
+    },
+};
+
+const YourApp = props => {
+    // ...
+
+    const curLang = /* get your i18n language */;
+
+    return <GraphicWalker
+        dataSource={dataSource}
+        rawFields={fields}
+        i18nLang={curLang}
+        i18nResources={yourResources}
+    />
+}
+```
