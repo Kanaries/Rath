@@ -29,7 +29,7 @@ i18n.use(initReactI18next).use(LanguageDetector).init({
     resources: locales,
 });
 
-const loadedLangs: string[] = Object.keys(locales);
+const loadedLangs: string[] = []; // exclude built-in keys to enable rewrite
 
 export const mergeLocaleRes = (resources: { [lang: string]: Resource }) => {
     for (const lang in resources) {
