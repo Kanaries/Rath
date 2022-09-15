@@ -7,7 +7,7 @@ import { IRow } from "../../../interfaces";
 import HeaderCell from "./headerCell";
 
 const CustomBaseTable = styled(BaseTable)`
-    --header-bgcolor: #fafafa;
+    --header-bgcolor: #fafafa!important;
     --bgcolor: rgba(0, 0, 0, 0);
     .${Classes.tableHeaderCell} {
         position: relative;
@@ -25,8 +25,6 @@ const TableInnerStyle = {
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
     const { mutFields, rawData, fieldMetas, fields } = dataSourceStore;
-
-
 
     const updateFieldInfo = useCallback((fieldId: string, fieldPropKey: string, value: any) => {
         dataSourceStore.updateFieldInfo(fieldId, fieldPropKey, value);
