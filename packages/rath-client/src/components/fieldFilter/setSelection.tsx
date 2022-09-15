@@ -14,11 +14,6 @@ const SetSelection: React.FC<SetSelectionProps> = props => {
         <DetailsList
             selection={selection}
             selectionMode={SelectionMode.multiple}
-            onItemInvoked={(p) => {
-                // TODO: implement set filter.
-                // eslint-disable-next-line no-console
-                console.log(p);
-            }}
             columns={[
                 {
                     key: 'memberName',
