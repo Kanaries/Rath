@@ -40,20 +40,11 @@ const App: React.FC<EditorProps> = props => {
 	const { t, i18n } = useTranslation();
 	const curLang = i18n.language;
 
-	// useEffect(() => {
-	// 	if (i18nLang !== curLang) {
-	// 		setLocaleLanguage(i18nLang);
-	// 	}
-	// }, [i18nLang, curLang]);
-
-	// FIXME:
-	document.body.ondblclick = () => {
-		if (curLang.startsWith('en')) {
-			setLocaleLanguage('zh-CN');
-		} else {
-			setLocaleLanguage('en-US');
+	useEffect(() => {
+		if (i18nLang !== curLang) {
+			setLocaleLanguage(i18nLang);
 		}
-	}
+	}, [i18nLang, curLang]);
 
 	// use as an embeding module, use outside datasource from props.
 	useEffect(() => {
@@ -97,7 +88,7 @@ const App: React.FC<EditorProps> = props => {
 				{/* <PureTabs tabs={[{label: 'a', key: 'a'}, {label: 'b', key: 'b'}]} selectedKey='a' onSelected={() => {}} /> */}
 			</div>
 			<Container style={{ marginTop: '0em', borderTop: 'none' }}>
-			<VisualSettings />
+				<VisualSettings />
 				<div className="grid grid-cols-12 xl:grid-cols-6">
 					<div className="col-span-3 xl:col-span-1">
 						<DatasetFields />
@@ -116,14 +107,16 @@ const App: React.FC<EditorProps> = props => {
 							<InsightBoard />
 							{vizEmbededMenu.show && (
 								<ClickMenu x={vizEmbededMenu.position[0]} y={vizEmbededMenu.position[1]}>
-									<div className="flex items-center whitespace-nowrap"
+									<div className="flex items-center whitespace-nowrap py-1 px-4 hover:bg-gray-100"
 										onClick={() => {
 											commonStore.closeEmbededMenu();
 											commonStore.setShowInsightBoard(true)
 										}}
 									>
-										{t('App.labels.data_interpretation')}
-										<LightBulbIcon className="ml-1 w-3 inline-block" />
+										<span className="flex-1 pr-2">
+											{t('App.labels.data_interpretation')}
+										</span>
+										<LightBulbIcon className="ml-1 w-3 flex-grow-0 flex-shrink-0" />
 									</div>
 								</ClickMenu>
 							)}

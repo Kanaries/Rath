@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { XCircleIcon } from '@heroicons/react/24/outline';
 
+
 const Background = styled.div({
   position: 'fixed',
   left: 0,
@@ -44,7 +45,11 @@ const Modal: React.FC<ModalProps> = props => {
 
   return (
     <Background onClick={onClose}>
-      <Container role="dialog" className="shadow-lg" onClick={e => e.stopPropagation()}>
+      <Container
+        role="dialog"
+        className="shadow-lg"
+        onClick={e => e.stopPropagation()}
+      >
         <div className="header relative h-9">
           <header className="font-bold">
             {title}

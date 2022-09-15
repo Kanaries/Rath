@@ -1,4 +1,40 @@
 {
+    "constant": {
+        "mark_type": {
+            "__enum__": "标记类型",
+            "auto": "自动",
+            "bar": "条形",
+            "line": "折线",
+            "area": "面积",
+            "point": "散点",
+            "circle": "圆",
+            "tick": "标记",
+            "rect": "矩形",
+            "arc": "弧形",
+            "boxplot": "统计箱"
+        },
+        "layout_type": {
+            "__enum__": "尺寸模式",
+            "auto": "自动",
+            "fixed": "固定"
+        },
+        "draggable_key": {
+            "fields": "字段",
+            "columns": "列",
+            "rows": "行",
+            "color": "颜色",
+            "opacity": "透明度",
+            "size": "大小",
+            "shape": "形状",
+            "theta": "角度",
+            "radius": "半径"
+        },
+        "aggregator": {
+            "sum": "求和",
+            "mean": "平均值",
+            "count": "计数"
+        }
+    },
     "App": {
         "labels": {
             "data_interpretation": "数据解读"
@@ -24,6 +60,36 @@
             },
             "public": {
                 "submit": "确认"
+            }
+        }
+    },
+    "main": {
+        "tablist": {
+            "new": "+ 新建",
+            "autoTitle": "图表 {{idx}}"
+        },
+        "tabpanel": {
+            "settings": {
+                "toggle": {
+                    "aggregation": "聚合度量",
+                    "stack": "开启堆叠",
+                    "axes_resize": "坐标系缩放",
+                    "debug": "图表调试"
+                },
+                "sort": "排序",
+                "button": {
+                    "ascending": "升序排序",
+                    "descending": "降序排序",
+                    "transpose": "转置"
+                },
+                "size": "调整尺寸",
+                "size_setting": {
+                    "width": "宽度",
+                    "height": "高度"
+                }
+            },
+            "DatasetFields": {
+                "field_list": "字段列表"
             }
         }
     }
