@@ -90,7 +90,7 @@ function initEncoding(): DraggableFieldState {
 function initVisualConfig (): IVisualConfig {
     return {
         defaultAggregated: true,
-        geoms: [GEMO_TYPES[0].value],
+        geoms: [GEMO_TYPES[0]!],
         defaultStack: true,
         showActions: false,
         interactiveScale: false,
@@ -104,7 +104,7 @@ function initVisualConfig (): IVisualConfig {
 }
 
 interface IVisSpec {
-    name?: string;
+    name?: [string, Record<string, any>?];
     visId: string;
     encodings: DraggableFieldState;
     config: IVisualConfig;
@@ -122,7 +122,7 @@ export class VizSpecStore {
         this.draggableFieldState = initEncoding();
         this.visualConfig = initVisualConfig();
         this.visList.push({
-            name: '图表 1',
+            name: ['main.tablist.autoTitle', { idx: 1 }],
             visId: uuidv4(),
             config: initVisualConfig(),
             encodings: initEncoding()
@@ -166,7 +166,7 @@ export class VizSpecStore {
     }
     public addVisualization () {
         this.visList.push({
-            name: '图表 ' + (this.visList.length + 1),
+            name: ['main.tablist.autoTitle', { idx: this.visList.length + 1 }],
             visId: uuidv4(),
             config: initVisualConfig(),
             encodings: initEncoding()
@@ -183,8 +183,8 @@ export class VizSpecStore {
     public setVisName (visIndex: number, name: string) {
         this.visList[visIndex] = {
             ...this.visList[visIndex],
-            name
-        }
+            name: [name],
+        };
     }
     /**
      * FIXME: tmp

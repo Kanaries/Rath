@@ -12,7 +12,7 @@ const aestheticFields = DRAGGABLE_STATE_KEYS.filter(f => ['color', 'opacity', 's
 const AestheticFields: React.FC = props => {
     return <div>
         {
-            aestheticFields.map(dkey => <AestheticFieldContainer name={dkey.name} key={dkey.id}>
+            aestheticFields.map(dkey => <AestheticFieldContainer name={dkey.id} key={dkey.id}>
                 <Droppable droppableId={dkey.id} direction="horizontal">
                     {(provided, snapshot) => (
                         <OBFieldContainer dkey={dkey} provided={provided} />
