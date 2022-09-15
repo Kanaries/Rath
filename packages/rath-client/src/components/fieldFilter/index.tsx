@@ -11,10 +11,10 @@ import RangeSelection from './rangeSelection';
 import SetSelection from './setSelection';
 
 
-
 interface FieldFilterProps {
     fid: string;
 }
+
 const FieldFilter: React.FC<FieldFilterProps> = props => {
     const { fid } = props;
     const buttonId = useId('filter-button');
@@ -81,6 +81,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
             text={intl.get('common.filter')}
             iconProps={{ iconName: 'filter' }}
             onClick={toggleShowFilter}
+            id={buttonId}
         />
         {
             showFilterConfig && <Callout target={`#${buttonId}`}
