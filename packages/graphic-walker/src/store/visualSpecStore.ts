@@ -104,11 +104,22 @@ function initVisualConfig (): IVisualConfig {
 }
 
 interface IVisSpec {
+    readonly visId: string;
     name?: [string, Record<string, any>?];
-    visId: string;
     encodings: DraggableFieldState;
     config: IVisualConfig;
 }
+
+class RevertibleVisSpec {
+
+    readonly visId: IVisSpec['visId'];
+
+    constructor(initState: IVisSpec) {
+        this.visId = initState.visId;
+    }
+    
+}
+
 export class VizSpecStore {
     // public fields: IViewField[] = [];
     private commonStore: CommonStore;
@@ -124,17 +135,25 @@ export class VizSpecStore {
         this.visList.push({
             name: ['main.tablist.autoTitle', { idx: 1 }],
             visId: uuidv4(),
-            config: initVisualConfig(),
-            encodings: initEncoding()
+            config: this.visualConfig,
+            encodings: this.draggableFieldState,
         })
         makeAutoObservable(this, {
             visList: observable.shallow
         });
         // FIXME!!!!!
-        this.reactions.push(reaction(() => commonStore.currentDataset, (dataset) => {
-            this.initState();
-            this.initMetaState(dataset);
-        }))
+        this.reactions.push(
+            reaction(() => commonStore.currentDataset, (dataset) => {
+                this.initState();
+                this.initMetaState(dataset);
+            }),
+            reaction(() => this.visList[this.visIndex].config, curVisCfg => {
+                this.visualConfig = curVisCfg;
+            }),
+            reaction(() => this.visList[this.visIndex].encodings, curEncodings => {
+                this.draggableFieldState = curEncodings;
+            }),
+        );
     }
     /**
      * dimension fields in visualization
@@ -172,13 +191,9 @@ export class VizSpecStore {
             encodings: initEncoding()
         })
         this.visIndex = this.visList.length - 1;
-        this.draggableFieldState = this.visList[this.visIndex].encodings;
-        this.visualConfig = this.visList[this.visIndex].config;
     }
     public selectVisualization (visIndex: number) {
         this.visIndex = visIndex;
-        this.draggableFieldState = this.visList[visIndex].encodings;
-        this.visualConfig = this.visList[visIndex].config
     }
     public setVisName (visIndex: number, name: string) {
         this.visList[visIndex] = {
