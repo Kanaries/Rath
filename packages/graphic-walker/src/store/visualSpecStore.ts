@@ -163,8 +163,6 @@ class IVisSpecWithHistory {
                 ...snapshot,
             }),
         ];
-        console.log('commit', snapshot);
-        console.trace();
 
         if (this.snapshots.length > MAX_HISTORY_SIZE) {
             this.snapshots.splice(0, 1);
