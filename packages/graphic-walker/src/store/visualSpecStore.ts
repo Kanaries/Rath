@@ -163,6 +163,8 @@ class IVisSpecWithHistory {
                 ...snapshot,
             }),
         ];
+        console.log('commit', snapshot);
+        console.trace();
 
         if (this.snapshots.length > MAX_HISTORY_SIZE) {
             this.snapshots.splice(0, 1);
@@ -297,6 +299,14 @@ export class VizSpecStore {
                 this.initState();
                 this.initMetaState(dataset);
             }),
+            reaction(() => this.visList[this.visIndex], frame => {
+                // @ts-ignore Allow assignment here to trigger watch
+                this.draggableFieldState = frame.encodings;
+                // @ts-ignore Allow assignment here to trigger watch
+                this.visualConfig = frame.config;
+                this.canUndo = frame.canUndo;
+                this.canRedo = frame.canRedo;
+            }),
         );
     }
     /**
@@ -354,9 +364,9 @@ export class VizSpecStore {
         }
     }
     private freezeHistory() {
-        this.useMutable(() => {
-            this.visList[this.visIndex]?.rebase();
-        });
+        this.visList[this.visIndex]?.rebase();
+        this.canUndo = this.visList[this.visIndex].canUndo;
+        this.canRedo = this.visList[this.visIndex].canRedo;
     }
     /**
      * dimension fields in visualization
@@ -396,9 +406,7 @@ export class VizSpecStore {
         this.visIndex = this.visList.length - 1;
     }
     public selectVisualization (visIndex: number) {
-        this.useMutable(() => {
-            this.visIndex = visIndex;
-        });
+        this.visIndex = visIndex;
     }
     public setVisName (visIndex: number, name: string) {
         this.useMutable(() => {
@@ -440,9 +448,9 @@ export class VizSpecStore {
                     semanticType: f.semanticType,
                     aggName: 'sum'
             }));
-
-            this.freezeHistory();
         });
+
+        this.freezeHistory();
         // this.draggableFieldState.measures.push({
             //     dragId: uuidv4(),
             //     fid: COUNT_FIELD_ID,

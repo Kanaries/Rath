@@ -1,12 +1,8 @@
-import { BarsArrowDownIcon, BarsArrowUpIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { LiteForm } from '../components/liteForm';
-import SizeSetting from '../components/sizeSetting';
-import { CHART_LAYOUT_TYPE, GEMO_TYPES } from '../config';
 import { useGlobalStore } from '../store';
 import styled from 'styled-components'
-import { ArrowPathIcon } from '@heroicons/react/24/solid';
+import { ArrowUturnLeftIcon, ArrowUturnRightIcon } from '@heroicons/react/24/solid';
 import { useTranslation } from 'react-i18next';
 
 
@@ -19,7 +15,8 @@ const Button = styled.button(({ disabled = false }) => ({
     '&:hover': disabled ? {} : {
         backgroundColor: 'rgba(243, 244, 246, 0.5)',
     },
-    color: disabled ? 'rgb(156, 163, 175)' : 'rgb(55, 65, 81)',
+    color: disabled ? 'rgba(156, 163, 175, 0.5)' : 'rgb(55, 65, 81)',
+    boxShadow: disabled ? undefined : '1px 1px 2px #0002, inset 2px 2px 4px #0001',
     '& > pre': {
         display: 'inline-block',
         marginInlineStart: '0.2em',
@@ -36,14 +33,33 @@ interface ButtonWithShortcutProps {
     shortcut: string;
     disabled: boolean;
     handler: () => void;
+    icon?: JSX.Element;
 }
 
-const ButtonWithShortcut: React.FC<ButtonWithShortcutProps> = ({ label, shortcut, disabled, handler }) => {
+const ButtonWithShortcut: React.FC<ButtonWithShortcutProps> = ({ label, shortcut, disabled, handler, icon }) => {
     const { t } = useTranslation('translation', { keyPrefix: 'main.tabpanel.menubar' });
+
+    const rule = React.useMemo(() => {
+        const keys = shortcut.split('+').map(d => d.trim());
+
+        return {
+            key: keys.filter(
+                d => /^[a-z]$/i.test(d)
+            )[0],
+            ctrlKey: keys.includes('Ctrl'),
+            shiftKey: keys.includes('Shift'),
+            altKey: keys.includes('Alt'),
+        };
+    }, [shortcut]);
 
     React.useEffect(() => {
         const cb = (ev: KeyboardEvent) => {
-            if (ev.key === shortcut.toLowerCase()) {
+            if (
+                ev.ctrlKey === rule.ctrlKey
+                && ev.shiftKey === rule.shiftKey
+                && ev.altKey === rule.altKey
+                && ev.key.toLowerCase() === rule.key.toLowerCase()
+            ) {
                 handler();
                 ev.stopPropagation();
             }
@@ -52,7 +68,7 @@ const ButtonWithShortcut: React.FC<ButtonWithShortcutProps> = ({ label, shortcut
         document.body.addEventListener('keydown', cb);
 
         return () => document.body.removeEventListener('keydown', cb);
-    }, [shortcut, handler]);
+    }, [rule, handler]);
 
     return (
         <Button
@@ -60,16 +76,9 @@ const ButtonWithShortcut: React.FC<ButtonWithShortcutProps> = ({ label, shortcut
             disabled={disabled}
             onClick={handler}
             aria-label={t(label)}
-            title={t(label)}
+            title={`${t(label)} (${shortcut})`}
         >
-            {t(label)}
-            <pre>
-                {"("}
-                    <u>
-                        {shortcut}
-                    </u>
-                {")"}
-            </pre>
+            {icon || t(label)}
         </Button>
     );
 };
@@ -84,13 +93,15 @@ const Menubar: React.FC = () => {
                 label="undo"
                 disabled={!canUndo}
                 handler={vizStore.undo.bind(vizStore)}
-                shortcut="U"
+                shortcut="Ctrl+Z"
+                icon={<ArrowUturnLeftIcon width="1.4em" height="1.4em" />}
             />
             <ButtonWithShortcut
                 label="redo"
                 disabled={!canRedo}
                 handler={vizStore.redo.bind(vizStore)}
-                shortcut="R"
+                shortcut="Ctrl+Shift+Z"
+                icon={<ArrowUturnRightIcon width="1.4em" height="1.4em" />}
             />
         </MenubarContainer>
     );
