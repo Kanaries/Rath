@@ -21,6 +21,7 @@ import { Specification } from 'visual-insights';
 import VisNav from './segments/visNav';
 import { useTranslation } from 'react-i18next';
 import { mergeLocaleRes, setLocaleLanguage } from './locales/i18n';
+import Menubar from './visualSettings/menubar';
 
 
 export interface EditorProps {
@@ -95,6 +96,7 @@ const App: React.FC<EditorProps> = props => {
 				{/* <PureTabs tabs={[{label: 'a', key: 'a'}, {label: 'b', key: 'b'}]} selectedKey='a' onSelected={() => {}} /> */}
 			</div>
 			<Container style={{ marginTop: '0em', borderTop: 'none' }}>
+				<Menubar />
 				<VisualSettings />
 				<div className="grid grid-cols-12 xl:grid-cols-6">
 					<div className="col-span-3 xl:col-span-1">

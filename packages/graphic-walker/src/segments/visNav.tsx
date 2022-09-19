@@ -24,11 +24,9 @@ const VisNav: React.FC = (props) => {
 
     const visSelectionHandler = useCallback((tabKey: string, tabIndex: number) => {
         if (tabKey === ADD_KEY) {
-            vizStore.saveVisChange();
             vizStore.addVisualization();
             vizStore.initMetaState(currentDataset)
         } else {
-            vizStore.saveVisChange();
             vizStore.selectVisualization(tabIndex);
         }
     }, [currentDataset, vizStore])

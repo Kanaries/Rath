@@ -26,7 +26,7 @@ export function mergeMeasures(measures1: IMeasure[], measures2: IMeasure[]): IMe
     return merged;
 }
 
-export function formatFieldName(fid: string, fields: IField[]) {
+export function formatFieldName(fid: string, fields: Readonly<IField[]>) {
     const target = fields.find(f => f.fid === fid);
     return target ? target.name : fid;
 }

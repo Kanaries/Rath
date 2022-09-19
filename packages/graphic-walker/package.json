@@ -31,6 +31,7 @@
     "autoprefixer": "^10.3.5",
     "i18next": "^21.9.1",
     "i18next-browser-languagedetector": "^6.1.5",
+    "immer": "^9.0.15",
     "mobx": "^6.3.3",
     "mobx-react-lite": "^3.2.1",
     "postcss": "^8.3.7",

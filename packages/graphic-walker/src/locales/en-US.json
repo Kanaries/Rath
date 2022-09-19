@@ -69,6 +69,10 @@
             "autoTitle": "Chart {{idx}}"
         },
         "tabpanel": {
+            "menubar": {
+                "undo": "Undo",
+                "redo": "Redo"
+            },
             "settings": {
                 "toggle": {
                     "aggregation": "Enable Aggregation",
