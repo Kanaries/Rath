@@ -69,6 +69,10 @@
             "autoTitle": "图表 {{idx}}"
         },
         "tabpanel": {
+            "menubar": {
+                "undo": "撤销",
+                "redo": "重做"
+            },
             "settings": {
                 "toggle": {
                     "aggregation": "聚合度量",
