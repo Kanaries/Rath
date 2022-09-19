@@ -1,6 +1,7 @@
 import { StatFuncName } from "visual-insights/build/esm/statistics";
 import { AggFC } from 'cube-core/built/types';
 import { IAnalyticType, IMutField as VIMutField, ISemanticType } from 'visual-insights';
+
 /**
  * @deprecated
  */
@@ -95,6 +96,11 @@ export interface IDataSource {
     id: string;
     data: IRow[]
 }
+
+export interface IFilterField extends IViewField {
+    rule: IFilterRule | null;
+}
+
 export interface DraggableFieldState {
     fields: IViewField[];
     dimensions: IViewField[];
@@ -107,9 +113,24 @@ export interface DraggableFieldState {
     shape: IViewField[];
     theta: IViewField[];
     radius: IViewField[];
+    filters: IFilterField[];
 }
 
 export interface IDraggableStateKey {
     id: keyof DraggableFieldState;
     mode: number
 }
+
+export type IFilterRule = {
+    type: 'equal';
+    value: any;
+} | {
+    type: 'range';
+    value: [number, number];
+} | {
+    type: 'temporal range';
+    value: [string, string];
+} | {
+    type: 'one of';
+    value: any[];
+};

@@ -27,7 +27,8 @@
             "size": "大小",
             "shape": "形状",
             "theta": "角度",
-            "radius": "半径"
+            "radius": "半径",
+            "filters": "筛选器"
         },
         "aggregator": {
             "sum": "求和",
