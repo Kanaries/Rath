@@ -2,6 +2,7 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback } from 'react';
 import Modal from '../components/modal';
+import type { IField } from '../interfaces';
 import { useGlobalStore } from '../store';
 import InsightMainBoard from './mainBoard';
 
