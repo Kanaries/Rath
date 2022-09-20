@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
+import { specification } from 'visual-insights';
 import { FieldSummary, ViewSpace } from '../../../service';
 import { Field } from '../../../global';
-import { specification } from 'visual-insights';
 import { PreferencePanelConfig } from '../../../components/preference';
 import { IRow } from '../../../interfaces';
 // import { FieldSummary } from '\';

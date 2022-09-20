@@ -1,7 +1,7 @@
 import React from 'react';
+import { Box, Step, StepLabel, Stepper } from '@material-ui/core';
 import { IECStatus } from '../interfaces';
 import { ENGINE_CONNECTION_STAGES } from '../constants';
-import { Box, Step, StepLabel, Stepper } from '@material-ui/core';
 
 interface ConnectionStatusProps {
     status: IECStatus;

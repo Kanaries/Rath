@@ -3,6 +3,9 @@ import Table from '../table';
 import { DemoDataAssets, PUBLIC_DATA_LIST } from '../config'
 import { useGlobalStore } from '../../store';
 import { observer } from 'mobx-react-lite';
+import { useTranslation } from 'react-i18next';
+
+
 interface IPublicDataProps {
 
 }
@@ -10,6 +13,8 @@ interface IPublicDataProps {
 const PublicData: React.FC<IPublicDataProps> = props => {
     const { commonStore } = useGlobalStore();
     const { tmpDataSource } = commonStore;
+    const { t } = useTranslation('translation', { keyPrefix: 'DataSource.dialog.public' });
+
     return <div>
         <div className="h-48 overflow-auto mb-1">
             {
@@ -41,7 +46,9 @@ const PublicData: React.FC<IPublicDataProps> = props => {
         <button className="inline-block min-w-96 text-xs mr-2 pt-1 pb-1 pl-6 pr-6 bg-yellow-600 rounded-sm hover:bg-yellow-500 text-white font-bold disabled:bg-gray-300"
             disabled={tmpDataSource.length === 0}
             onClick={() => { commonStore.commitTempDS() }}
-        >确认使用</button>
+        >
+            {t('submit')}
+        </button>
         <hr className="m-1" />
         <Table />
     </div>

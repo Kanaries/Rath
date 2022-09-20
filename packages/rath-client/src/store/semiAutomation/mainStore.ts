@@ -12,7 +12,7 @@ import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoView
 
 const RENDER_BATCH_SIZE = 5;
 
-export class DiscoveryMainStore {
+export class SemiAutomationStore {
     public settings: ISetting;
     public showSettings: boolean = false;
     public mainVizSetting: IMainVizSetting;
@@ -266,6 +266,7 @@ export class DiscoveryMainStore {
                 width: mainVizSetting.resize.width,
                 height: mainVizSetting.resize.height,
                 interactive: mainVizSetting.interactive,
+                stepSize: 32,
                 dataSource: this.dataSource
             })
         }

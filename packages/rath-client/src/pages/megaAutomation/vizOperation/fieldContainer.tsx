@@ -11,8 +11,8 @@ const PillsContainer = styled.div`
 `
 
 const FieldContainer: React.FC = props => {
-    const { exploreStore } = useGlobalStore();
-    const { mainViewPattern } = exploreStore;
+    const { megaAutoStore } = useGlobalStore();
+    const { mainViewPattern } = megaAutoStore;
     
     if (mainViewPattern === null) {
         return <div></div>
@@ -24,7 +24,7 @@ const FieldContainer: React.FC = props => {
                     text={f.name || f.fid}
                     key={f.fid}
                     onRemove={() => {
-                        exploreStore.removeFieldInViewPattern(f.fid)
+                        megaAutoStore.removeFieldInViewPattern(f.fid)
                     }}
                 />
             })}
@@ -35,7 +35,7 @@ const FieldContainer: React.FC = props => {
                     type="measure" text={`${f.name || f.fid}`}
                     key={f.fid}
                     onRemove={() => {
-                        exploreStore.removeFieldInViewPattern(f.fid)
+                        megaAutoStore.removeFieldInViewPattern(f.fid)
                     }}
                 />
             })}

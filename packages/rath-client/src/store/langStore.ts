@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { SUPPORT_LANG } from "../locales";
 import intl from 'react-intl-universal';
+import { SUPPORT_LANG } from "../locales";
 import { notify } from "../components/error";
 import { loadRathErrorLocales } from "../rath-error";
 

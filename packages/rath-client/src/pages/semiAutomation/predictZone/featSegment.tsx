@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
-import { CommandButton, DefaultButton, PrimaryButton, Spinner, Stack } from 'office-ui-fabric-react';
+import { CommandButton, DefaultButton, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 
 import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
@@ -9,14 +9,14 @@ import ReactVega from '../../../components/react-vega';
 import { applyFilter } from '../utils';
 
 const FeatSegment: React.FC = () => {
-    const { discoveryMainStore } = useGlobalStore();
-    const { featSpecList, featViews, mainVizSetting, dataSource, autoAsso, hasMainView } = discoveryMainStore;
+    const { semiAutoStore } = useGlobalStore();
+    const { featSpecList, featViews, mainVizSetting, dataSource, autoAsso, hasMainView } = semiAutoStore;
     const loadMore = useCallback(() => {
-        discoveryMainStore.increaseRenderAmount('featViews');
-    }, [discoveryMainStore])
+        semiAutoStore.increaseRenderAmount('featViews');
+    }, [semiAutoStore])
     const advicePureFeature = useCallback(() => {
-        discoveryMainStore.featAssociate()
-    }, [discoveryMainStore])
+        semiAutoStore.featAssociate()
+    }, [semiAutoStore])
     if (featViews.views.length === 0 && autoAsso.featViews) return <div />
     return <div className="pure-card">
         <h1 className="ms-fontSize-18">{intl.get('discovery.main.associate.features')}</h1>
@@ -41,7 +41,7 @@ const FeatSegment: React.FC = () => {
                             iconProps={{ iconName: 'Pinned' }}
                             text={intl.get('discovery.main.pin')}
                             onClick={() => {
-                                discoveryMainStore.updateMainView(featViews.views[i])
+                                semiAutoStore.updateMainView(featViews.views[i])
                             }}
                         />
                     </Stack>

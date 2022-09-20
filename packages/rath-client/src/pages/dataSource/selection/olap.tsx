@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from  'react';
 import { observer } from 'mobx-react-lite';
+import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, ProgressIndicator, Stack, TextField } from '@fluentui/react';
 import ConnectionStatus from '../../../components/connectionStatus';
-import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, ProgressIndicator, Stack, TextField } from 'office-ui-fabric-react';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { logDataImport } from '../../../loggers/dataImport';
@@ -15,12 +15,12 @@ const StackTokens = {
 //     { text: 'https', key: 'https' },
 //     { text: 'http', key: 'http' }
 // ]
-interface CHDataProps {
+interface OLAPDataProps {
     onClose: () => void;
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 
-const ClickHouseData: React.FC<CHDataProps> = props => {
+const OLAPData: React.FC<OLAPDataProps> = props => {
     const { onDataLoaded, onClose } = props;
     const { clickHouseStore } = useGlobalStore();
 
@@ -150,4 +150,4 @@ const ClickHouseData: React.FC<CHDataProps> = props => {
     </div>
 }
 
-export default observer(ClickHouseData);
+export default observer(OLAPData);

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import { PrimaryButton } from 'office-ui-fabric-react';
+import { PrimaryButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
@@ -12,14 +12,14 @@ import MiniFloatCanvas from './miniFloatCanvas';
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' }
 
 const FocusZone: React.FC = props => {
-    const { discoveryMainStore, commonStore } = useGlobalStore();
-    const { mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec } = discoveryMainStore;
+    const { semiAutoStore, commonStore } = useGlobalStore();
+    const { mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec } = semiAutoStore;
 
     const explainDiff = useCallback(() => {
         if (mainView && compareView) {
-            discoveryMainStore.explainViewDiff(mainView, compareView);
+            semiAutoStore.explainViewDiff(mainView, compareView);
         }
-    }, [mainView, compareView, discoveryMainStore])
+    }, [mainView, compareView, semiAutoStore])
 
     const editChart = useCallback(() => {
         if (mainViewSpec) {
@@ -44,7 +44,7 @@ const FocusZone: React.FC = props => {
                 type={f.analyticType}
                 text={f.name || f.fid}
                 onRemove={() => {
-                    discoveryMainStore.removeMainViewField(f.fid)
+                    semiAutoStore.removeMainViewField(f.fid)
                 }}
             />)
         }
@@ -56,7 +56,7 @@ const FocusZone: React.FC = props => {
                 type={f.field.analyticType}
                 text={`${f.field.name || f.field.fid} | ${f.values.join(',')}`}
                 onRemove={() => {
-                    discoveryMainStore.removeMainViewFilter(f.field.fid)
+                    semiAutoStore.removeMainViewFilter(f.field.fid)
                 }}
             />)
         }

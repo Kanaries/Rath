@@ -9,19 +9,19 @@
     "singleQuote": true
   },
   "dependencies": {
-    "@emotion/react": "^11.4.1",
-    "@emotion/styled": "^11.3.0",
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@fluentui/font-icons-mdl2": "^8.4.13",
+    "@fluentui/react": "^8.94.4",
+    "@fluentui/react-hooks": "^8.6.11",
     "@kanaries/graphic-walker": "0.1.0",
-    "@kanaries/loa": "0.0.5",
+    "@kanaries/loa": "^0.0.8",
     "@kanaries/web-data-loader": "0.1.7",
     "@material-ui/core": "^5.0.0-beta.5",
-    "@uifabric/icons": "^7.5.17",
-    "@uifabric/react-hooks": "^7.13.9",
     "airtable": "^0.11.4",
-    "ali-react-table": "^2.3.1",
+    "ali-react-table": "^2.6.1",
     "chroma-js": "^2.0.6",
     "cube-core": "^2.13.0",
-    "datalib": "^1.9.2",
     "dayjs": "^1.10.7",
     "fuse.js": "^3.4.6",
     "immer": "^9.0.6",
@@ -29,24 +29,22 @@
     "mobx": "^6.3.2",
     "mobx-react-lite": "^3.2.0",
     "mobx-utils": "^6.0.4",
-    "mocha": "^6.2.0",
     "office-ui-fabric-core": "^11.0.1",
-    "office-ui-fabric-react": "^7.185.7",
     "re-resizable": "^6.9.9",
     "react": "^17.0.1",
     "react-app-rewired": "^2.1.5",
     "react-beautiful-dnd": "^13.0.0",
     "react-dom": "^17.0.1",
-    "react-intl-universal": "^2.4.2",
+    "react-intl-universal": "^2.6.6",
     "react-json-view": "^1.19.1",
     "react-markdown": "^5.0.3",
     "react-scripts": "4.0.1",
     "rxjs": "6.x",
-    "styled-components": "^5.2.1",
+    "styled-components": "^5.3.5",
     "symbol-observable": "^4.0.0",
     "vega": "^5.22.1",
-    "vega-embed": "^6.20.8",
-    "vega-lite": "^5.2.0",
+    "vega-embed": "^6.21.0",
+    "vega-lite": "^5.5.0",
     "visual-insights": "0.11.2",
     "web-vitals": "^0.2.4",
     "worker-loader": "^3.0.7"
@@ -74,12 +72,6 @@
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [

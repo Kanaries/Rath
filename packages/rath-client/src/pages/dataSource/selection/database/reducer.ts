@@ -1,7 +1,6 @@
 import { useReducer } from 'react';
-import type { TableData, TableLabels } from '.';
 import type { PartialDatabaseOptions, SupportedDatabaseType, ThisOptionIsNotRequired } from './type';
-
+import type { TableData, TableLabels } from '.';
 
 export type ActionType = (
     | 'ENABLE_CONNECTOR'

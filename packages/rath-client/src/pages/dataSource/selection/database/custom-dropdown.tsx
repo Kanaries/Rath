@@ -1,4 +1,4 @@
-import { Icon } from 'office-ui-fabric-react';
+import { Icon } from '@fluentui/react';
 import datasetOptions from './config';
 
 

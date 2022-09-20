@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { PrimaryButton, Stack, Checkbox, Panel, PanelType, ComboBox, Label } from 'office-ui-fabric-react';
-import { Aggregator } from '../global';
+import { PrimaryButton, Stack, Checkbox, Panel, PanelType, ComboBox, Label } from '@fluentui/react';
+import { AGGREGATION_LIST, Aggregator } from '../global';
 const checkboxStyles = () => {
   return {
     root: {
@@ -9,12 +9,6 @@ const checkboxStyles = () => {
   };
 }
 
-// todo: import aggregators list from cube-core
-const aggregationList: Array<{ key: Aggregator; text: string }> = [
-  { key: 'sum', text: 'Sum' },
-  { key: 'count', text: 'Count' },
-  { key: 'mean', text: 'Mean' }
-]
 export interface PreferencePanelConfig {
   aggregator: Aggregator;
   defaultAggregated: boolean;
@@ -67,7 +61,7 @@ const PreferencePanel: React.FC<PreferencePanelProps> = (props) => {
         label="Aggregator"
         allowFreeform={true}
         autoComplete="on"
-        options={aggregationList}
+        options={AGGREGATION_LIST}
         onChange={(e, option) => {option && setAggregator(option.key as Aggregator)}}
       />
       <Checkbox styles={checkboxStyles} label="measurement aggregation" checked={defaultAggregated} onChange={(e, isChecked) => {setDefaultAggregated(isChecked || false)}} />

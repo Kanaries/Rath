@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DefaultButton, Label, Modal, PrimaryButton, Slider, Stack, Toggle } from 'office-ui-fabric-react';
+import { DefaultButton, Label, Modal, PrimaryButton, Slider, Stack, Toggle } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../../store';
 

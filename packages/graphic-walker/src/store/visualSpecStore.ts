@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { Specification } from "visual-insights";
 import { GEMO_TYPES } from "../config";
 import { makeBinField, makeLogField } from "../utils/normalization";
+import produce from 'immer';
+
 
 interface IVisualConfig {
     defaultAggregated: boolean;
@@ -90,7 +92,7 @@ function initEncoding(): DraggableFieldState {
 function initVisualConfig (): IVisualConfig {
     return {
         defaultAggregated: true,
-        geoms: [GEMO_TYPES[0].value],
+        geoms: [GEMO_TYPES[0]!],
         defaultStack: true,
         showActions: false,
         interactiveScale: false,
@@ -103,38 +105,266 @@ function initVisualConfig (): IVisualConfig {
     }
 }
 
+type DeepReadonly<T extends Record<keyof any, any>> = {
+    readonly [K in keyof T]: T[K] extends Record<keyof any, any> ? DeepReadonly<T[K]> : T[K];
+};
+
 interface IVisSpec {
-    name?: string;
-    visId: string;
-    encodings: DraggableFieldState;
-    config: IVisualConfig;
+    readonly visId: string;
+    readonly name?: [string, Record<string, any>?];
+    readonly encodings: DeepReadonly<DraggableFieldState>;
+    readonly config: DeepReadonly<IVisualConfig>;
 }
+
+const MAX_HISTORY_SIZE = 20;
+
+class IVisSpecWithHistory {
+
+    readonly visId: IVisSpec['visId'];
+    private snapshots: Pick<IVisSpec, 'name' | 'encodings' | 'config'>[];
+    private cursor: number;
+
+    constructor(data: IVisSpec) {
+        this.visId = data.visId;
+        this.snapshots = [{
+            name: data.name,
+            encodings: data.encodings,
+            config: data.config,
+        }];
+        this.cursor = 0;
+    }
+
+    private get frame(): Readonly<IVisSpec> {
+        return {
+            visId: this.visId,
+            ...this.snapshots[this.cursor]!,
+        };
+    }
+
+    private batchFlag = false;
+
+    private commit(snapshot: Partial<Readonly<IVisSpecWithHistory['snapshots'][0]>>): void {
+        if (this.batchFlag) {
+            // batch this commit
+            this.snapshots[this.cursor] = toJS({
+                ...this.frame,
+                ...snapshot,
+            });
+
+            return;
+        }
+
+        this.batchFlag = true;
+
+        this.snapshots = [
+            ...this.snapshots.slice(0, this.cursor + 1),
+            toJS({
+                ...this.frame,
+                ...snapshot,
+            }),
+        ];
+
+        if (this.snapshots.length > MAX_HISTORY_SIZE) {
+            this.snapshots.splice(0, 1);
+        }
+
+        this.cursor = this.snapshots.length - 1;
+
+        requestAnimationFrame(() => this.batchFlag = false);
+    }
+
+    public get canUndo() {
+        return this.cursor > 0;
+    }
+
+    public undo(): boolean {
+        if (this.cursor === 0) {
+            return false;
+        }
+
+        this.cursor -= 1;
+
+        return true;
+    }
+
+    public get canRedo() {
+        return this.cursor < this.snapshots.length - 1;
+    }
+
+    public redo(): boolean {
+        if (this.cursor === this.snapshots.length - 1) {
+            return false;
+        }
+
+        this.cursor += 1;
+
+        return true;
+    }
+
+    public rebase() {
+        this.snapshots = [this.snapshots[this.cursor]];
+        this.cursor = 0;
+    }
+
+    get name() {
+        return this.frame.name;
+    }
+
+    set name(name: IVisSpec['name']) {
+        this.commit({
+            name,
+        });
+    }
+
+    get encodings(): DeepReadonly<DraggableFieldState> {
+        return this.frame.encodings;
+    }
+
+    set encodings(encodings: IVisSpec['encodings']) {
+        this.commit({
+            encodings,
+        });
+    }
+
+    get config(): DeepReadonly<IVisualConfig> {
+        return this.frame.config;
+    }
+
+    set config(config: IVisSpec['config']) {
+        this.commit({
+            config,
+        });
+    }
+
+}
+
 export class VizSpecStore {
     // public fields: IViewField[] = [];
     private commonStore: CommonStore;
-    public draggableFieldState: DraggableFieldState;
+    /**
+     * This segment will always refers to the state of the active tab -
+     * `this.visList[this.visIndex].encodings`.
+     * Notice that observing rule of `this.visList` is `"shallow"`
+     * so mobx will NOT compare every deep value of `this.visList`,
+     * because the active tab is the only item in the list that may change.
+     * @readonly
+     * Assignment or mutable operations applied to ANY members of this segment
+     * is strictly FORBIDDEN.
+     * Members of it can only be got as READONLY objects.
+     * 
+     * If you're trying to change the value of it and let mobx catch the action to trigger an update,
+     * please use `this.useMutable()` to access to a writable reference
+     * (an `immer` draft) of `this.visList[this.visIndex]`.
+     */
+    public readonly draggableFieldState: DeepReadonly<DraggableFieldState>;
     private reactions: IReactionDisposer[] = []
-    public visualConfig: IVisualConfig;
-    public visList: IVisSpec[] = [];
+    /**
+     * This segment will always refers to the state of the active tab -
+     * `this.visList[this.visIndex].config`.
+     * Notice that observing rule of `this.visList` is `"shallow"`
+     * so mobx will NOT compare every deep value of `this.visList`,
+     * because the active tab is the only item in the list that may change.
+     * @readonly
+     * Assignment or mutable operations applied to ANY members of this segment
+     * is strictly FORBIDDEN.
+     * Members of it can only be got as READONLY objects.
+     * 
+     * If you're trying to change the value of it and let mobx catch the action to trigger an update,
+     * please use `this.useMutable()` to access to a writable reference
+     * (an `immer` draft) of `this.visList[this.visIndex]`.
+     */
+    public readonly visualConfig: Readonly<IVisualConfig>;
+    public visList: IVisSpecWithHistory[] = [];
     public visIndex: number = 0;
+    public canUndo = false;
+    public canRedo = false;
     constructor (commonStore: CommonStore) {
         this.commonStore = commonStore;
         this.draggableFieldState = initEncoding();
         this.visualConfig = initVisualConfig();
-        this.visList.push({
-            name: '图表 1',
+        this.visList.push(new IVisSpecWithHistory({
+            name: ['main.tablist.autoTitle', { idx: 1 }],
             visId: uuidv4(),
-            config: initVisualConfig(),
-            encodings: initEncoding()
-        })
+            config: this.visualConfig,
+            encodings: this.draggableFieldState,
+        }));
         makeAutoObservable(this, {
-            visList: observable.shallow
+            visList: observable.shallow,
         });
         // FIXME!!!!!
-        this.reactions.push(reaction(() => commonStore.currentDataset, (dataset) => {
-            this.initState();
-            this.initMetaState(dataset);
-        }))
+        this.reactions.push(
+            reaction(() => commonStore.currentDataset, (dataset) => {
+                this.initState();
+                this.initMetaState(dataset);
+            }),
+            reaction(() => this.visList[this.visIndex], frame => {
+                // @ts-ignore Allow assignment here to trigger watch
+                this.draggableFieldState = frame.encodings;
+                // @ts-ignore Allow assignment here to trigger watch
+                this.visualConfig = frame.config;
+                this.canUndo = frame.canUndo;
+                this.canRedo = frame.canRedo;
+            }),
+        );
+    }
+    /**
+     * Allow to change any deep member of `encodings` or `config`
+     * in the active tab `this.visList[this.visIndex]`.
+     * 
+     * - `tab.encodings`
+     * 
+     * A mutable reference of `this.draggableFieldState`
+     * 
+     * - `tab.config`
+     * 
+     * A mutable reference of `this.visualConfig`
+     */
+    private useMutable(
+        cb: (tab: {
+            encodings: DraggableFieldState;
+            config: IVisualConfig;
+        }) => void,
+    ) {
+        const { encodings, config } = produce({
+            encodings: this.visList[this.visIndex].encodings,
+            config: this.visList[this.visIndex].config,
+        }, draft => { cb(draft) }); // notice that cb() may unexpectedly returns a non-nullable value
+        
+        this.visList[this.visIndex].encodings = encodings;
+        this.visList[this.visIndex].config = config;
+
+        this.canUndo = this.visList[this.visIndex].canUndo;
+        this.canRedo = this.visList[this.visIndex].canRedo;
+
+        // @ts-ignore Allow assignment here to trigger watch
+        this.visualConfig = config;
+        // @ts-ignore Allow assignment here to trigger watch
+        this.draggableFieldState = encodings;
+    }
+    public undo() {
+        if (this.visList[this.visIndex]?.undo()) {
+            this.canUndo = this.visList[this.visIndex].canUndo;
+            this.canRedo = this.visList[this.visIndex].canRedo;
+            // @ts-ignore Allow assignment here to trigger watch
+            this.visualConfig = this.visList[this.visIndex].config;
+            // @ts-ignore Allow assignment here to trigger watch
+            this.draggableFieldState = this.visList[this.visIndex].encodings;
+        }
+    }
+    public redo() {
+        if (this.visList[this.visIndex]?.redo()) {
+            this.canUndo = this.visList[this.visIndex].canUndo;
+            this.canRedo = this.visList[this.visIndex].canRedo;
+            // @ts-ignore Allow assignment here to trigger watch
+            this.visualConfig = this.visList[this.visIndex].config;
+            // @ts-ignore Allow assignment here to trigger watch
+            this.draggableFieldState = this.visList[this.visIndex].encodings;
+        }
+    }
+    private freezeHistory() {
+        this.visList[this.visIndex]?.rebase();
+        this.canUndo = this.visList[this.visIndex].canUndo;
+        this.canRedo = this.visList[this.visIndex].canRedo;
     }
     /**
      * dimension fields in visualization
@@ -165,65 +395,60 @@ export class VizSpecStore {
         return fields;
     }
     public addVisualization () {
-        this.visList.push({
-            name: '图表 ' + (this.visList.length + 1),
+        this.visList.push(new IVisSpecWithHistory({
+            name: ['main.tablist.autoTitle', { idx: this.visList.length + 1 }],
             visId: uuidv4(),
             config: initVisualConfig(),
             encodings: initEncoding()
-        })
+        }));
         this.visIndex = this.visList.length - 1;
-        this.draggableFieldState = this.visList[this.visIndex].encodings;
-        this.visualConfig = this.visList[this.visIndex].config;
     }
     public selectVisualization (visIndex: number) {
         this.visIndex = visIndex;
-        this.draggableFieldState = this.visList[visIndex].encodings;
-        this.visualConfig = this.visList[visIndex].config
     }
     public setVisName (visIndex: number, name: string) {
-        this.visList[visIndex] = {
-            ...this.visList[visIndex],
-            name
-        }
-    }
-    /**
-     * FIXME: tmp
-     */
-    public saveVisChange () {
-        this.visList[this.visIndex].config = toJS(this.visualConfig);
-        this.visList[this.visIndex].encodings = toJS(this.draggableFieldState);
+        this.useMutable(() => {
+            this.visList[visIndex].name = [name];
+        });
     }
     public initState () {
-        this.draggableFieldState = initEncoding();
+        this.useMutable(tab => {
+            tab.encodings = initEncoding();
+            this.freezeHistory();
+        });
     }
     public initMetaState (dataset: DataSet) {
-        this.draggableFieldState.fields = dataset.rawFields.map((f) => ({
-            dragId: uuidv4(),
-            fid: f.fid,
-            name: f.name || f.fid,
-            aggName: f.analyticType === 'measure' ? 'sum' : undefined,
-            analyticType: f.analyticType,
-            semanticType: f.semanticType
-        }))
-        this.draggableFieldState.dimensions = dataset.rawFields
-            .filter(f => f.analyticType === 'dimension')
-            .map((f) => ({
+        this.useMutable(({ encodings }) => {
+            encodings.fields = dataset.rawFields.map((f) => ({
                 dragId: uuidv4(),
                 fid: f.fid,
                 name: f.name || f.fid,
-                semanticType: f.semanticType,
+                aggName: f.analyticType === 'measure' ? 'sum' : undefined,
                 analyticType: f.analyticType,
-        }))
-        this.draggableFieldState.measures = dataset.rawFields
-            .filter(f => f.analyticType === 'measure')
-            .map((f) => ({
-                dragId: uuidv4(),
-                fid: f.fid,
-                name: f.name || f.fid,
-                analyticType: f.analyticType,
-                semanticType: f.semanticType,
-                aggName: 'sum'
-        }))
+                semanticType: f.semanticType
+            }));
+            encodings.dimensions = dataset.rawFields
+                .filter(f => f.analyticType === 'dimension')
+                .map((f) => ({
+                    dragId: uuidv4(),
+                    fid: f.fid,
+                    name: f.name || f.fid,
+                    semanticType: f.semanticType,
+                    analyticType: f.analyticType,
+            }));
+            encodings.measures = dataset.rawFields
+                .filter(f => f.analyticType === 'measure')
+                .map((f) => ({
+                    dragId: uuidv4(),
+                    fid: f.fid,
+                    name: f.name || f.fid,
+                    analyticType: f.analyticType,
+                    semanticType: f.semanticType,
+                    aggName: 'sum'
+            }));
+        });
+
+        this.freezeHistory();
         // this.draggableFieldState.measures.push({
             //     dragId: uuidv4(),
             //     fid: COUNT_FIELD_ID,
@@ -234,25 +459,31 @@ export class VizSpecStore {
             // })
     }
     public clearState () {
-        for (let key in this.draggableFieldState) {
-            if (!MetaFieldKeys.includes(key as keyof DraggableFieldState)) {
-                this.draggableFieldState[key] = []
+        this.useMutable(({ encodings }) => {
+            for (let key in encodings) {
+                if (!MetaFieldKeys.includes(key as keyof DraggableFieldState)) {
+                    encodings[key] = [];
+                }
             }
-        }
+        });
     }
-    public setVisualConfig (configKey: keyof IVisualConfig, value: any) {
-        // this.visualConfig[configKey] = //value;
-        if (configKey === 'defaultAggregated' || configKey === 'defaultStack' || configKey === 'showActions' || configKey === 'interactiveScale') {
-            this.visualConfig[configKey] = Boolean(value);
-        } else if (configKey === 'geoms' && value instanceof Array) {
-            this.visualConfig[configKey] = value;
-        } else if (configKey === 'size' && value instanceof Object) {
-            this.visualConfig[configKey] = value;
-        } else if (configKey === 'sorted') {
-            this.visualConfig[configKey] = value;
-        } else {
-            console.error('unknow key' + configKey)
-        }
+    public setVisualConfig<K extends keyof IVisualConfig>(configKey: K, value: IVisualConfig[K]) {
+        this.useMutable(({ config }) => {
+            switch (true) {
+                case ['defaultAggregated', 'defaultStack', 'showActions', 'interactiveScale'].includes(configKey): {
+                    return (config as unknown as {[k: string]: boolean})[configKey] = Boolean(value);
+                }
+                case configKey === 'geoms' && Array.isArray(value):
+                case configKey === 'size' && typeof value === 'object':
+                case configKey === 'sorted':
+                {
+                    return config[configKey] = value;
+                }
+                default: {
+                    console.error('unknown key' + configKey);
+                }
+            }
+        });
     }
     public transformCoord (coord: 'cartesian' | 'polar') {
         if (coord === 'polar') {
@@ -260,81 +491,103 @@ export class VizSpecStore {
         }
     }
     public setChartLayout(props: {mode: IVisualConfig['size']['mode'], width?: number, height?: number }) {
-        const {
-            mode = this.visualConfig.size.mode,
-            width = this.visualConfig.size.width,
-            height = this.visualConfig.size.height
-        } = props
-        this.visualConfig.size.mode = mode;
-        this.visualConfig.size.width = width;
-        this.visualConfig.size.height = height;
+        this.useMutable(({ config }) => {
+            const {
+                mode = config.size.mode,
+                width = config.size.width,
+                height = config.size.height
+            } = props;
+
+            config.size.mode = mode;
+            config.size.width = width;
+            config.size.height = height;
+        });
     }
     public reorderField(stateKey: keyof DraggableFieldState, sourceIndex: number, destinationIndex: number) {
         if (MetaFieldKeys.includes(stateKey)) return;
         if (sourceIndex === destinationIndex) return;
-        const fields = this.draggableFieldState[stateKey];
-        const [field] = fields.splice(sourceIndex, 1);
-        fields.splice(destinationIndex, 0, field);
+
+        this.useMutable(({ encodings }) => {
+            const fields = encodings[stateKey];
+            const [field] = fields.splice(sourceIndex, 1);
+            fields.splice(destinationIndex, 0, field);
+        });
     }
     public moveField(sourceKey: keyof DraggableFieldState, sourceIndex: number, destinationKey: keyof DraggableFieldState, destinationIndex: number) {
-        let movingField: IViewField;
-        // 来源是不是metafield，是->clone；不是->直接删掉
-        if (MetaFieldKeys.includes(sourceKey)) {
-            // use toJS for cloning
-            movingField = toJS(this.draggableFieldState[sourceKey][sourceIndex])
-            movingField.dragId = uuidv4();
-        } else {
-            [movingField] = this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
-        }
-        // 目的地是metafields的情况，只有在来源也是metafields时，会执行字段类型转化操作
-        if (MetaFieldKeys.includes(destinationKey)) {
-            if (!MetaFieldKeys.includes(sourceKey))return;
-            this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
-            movingField.analyticType = destinationKey === 'dimensions' ? 'dimension' : 'measure';
-        }
-        const limitSize = getChannelSizeLimit(destinationKey);
-        const fixedDestinationIndex = Math.min(destinationIndex, limitSize - 1);
-        const overflowSize = Math.max(0, this.draggableFieldState[destinationKey].length + 1 - limitSize);
-        this.draggableFieldState[destinationKey].splice(fixedDestinationIndex, overflowSize, movingField)
+        this.useMutable(({ encodings }) => {
+            let movingField: IViewField;
+            // 来源是不是metafield，是->clone；不是->直接删掉
+            if (MetaFieldKeys.includes(sourceKey)) {
+                // use toJS for cloning
+                movingField = toJS(encodings[sourceKey][sourceIndex])
+                movingField.dragId = uuidv4();
+            } else {
+                [movingField] = encodings[sourceKey].splice(sourceIndex, 1);
+            }
+            // 目的地是metafields的情况，只有在来源也是metafields时，会执行字段类型转化操作
+            if (MetaFieldKeys.includes(destinationKey)) {
+                if (!MetaFieldKeys.includes(sourceKey))return;
+                encodings[sourceKey].splice(sourceIndex, 1);
+                movingField.analyticType = destinationKey === 'dimensions' ? 'dimension' : 'measure';
+            }
+            const limitSize = getChannelSizeLimit(destinationKey);
+            const fixedDestinationIndex = Math.min(destinationIndex, limitSize - 1);
+            const overflowSize = Math.max(0, encodings[destinationKey].length + 1 - limitSize);
+            encodings[destinationKey].splice(fixedDestinationIndex, overflowSize, movingField);
+        });
     }
     public removeField(sourceKey: keyof DraggableFieldState, sourceIndex: number) {
         if (MetaFieldKeys.includes(sourceKey))return;
-        this.draggableFieldState[sourceKey].splice(sourceIndex, 1);
+
+        this.useMutable(({ encodings }) => {
+            const fields = encodings[sourceKey];
+            fields.splice(sourceIndex, 1);
+        });
     }
     public transpose() {
-        const fieldsInCup = this.draggableFieldState.columns;
-        this.draggableFieldState.columns = this.draggableFieldState.rows;
-        this.draggableFieldState.rows = fieldsInCup;
+        this.useMutable(({ encodings }) => {
+            const fieldsInCup = encodings.columns;
+
+            encodings.columns = encodings.rows;
+            encodings.rows = fieldsInCup as typeof encodings.rows;  // assume this as writable
+        });
     }
     public createBinField(stateKey: keyof DraggableFieldState, index: number) {
-        const originField = this.draggableFieldState[stateKey][index]
-        const binField: IViewField = {
-            fid: uuidv4(),
-            dragId: uuidv4(),
-            name: `bin(${originField.name})`,
-            semanticType: 'ordinal',
-            analyticType: 'dimension',
-        };
-        this.draggableFieldState.dimensions.push(binField);
-        this.commonStore.currentDataset.dataSource = makeBinField(this.commonStore.currentDataset.dataSource, originField.fid, binField.fid)
+        this.useMutable(({ encodings }) => {
+            const originField = encodings[stateKey][index]
+            const binField: IViewField = {
+                fid: uuidv4(),
+                dragId: uuidv4(),
+                name: `bin(${originField.name})`,
+                semanticType: 'ordinal',
+                analyticType: 'dimension',
+            };
+            encodings.dimensions.push(binField);
+            this.commonStore.currentDataset.dataSource = makeBinField(this.commonStore.currentDataset.dataSource, originField.fid, binField.fid)
+        });
     }
     public createLogField(stateKey: keyof DraggableFieldState, index: number) {
-        const originField = this.draggableFieldState[stateKey][index];
-        const logField: IViewField = {
-            fid: uuidv4(),
-            dragId: uuidv4(),
-            name: `log10(${originField.name})`,
-            semanticType: 'quantitative',
-            analyticType: originField.analyticType
-        }
-        this.draggableFieldState[stateKey].push(logField);
-        this.commonStore.currentDataset.dataSource = makeLogField(this.commonStore.currentDataset.dataSource, originField.fid, logField.fid)
+        this.useMutable(({ encodings }) => {
+            const originField = encodings[stateKey][index];
+            const logField: IViewField = {
+                fid: uuidv4(),
+                dragId: uuidv4(),
+                name: `log10(${originField.name})`,
+                semanticType: 'quantitative',
+                analyticType: originField.analyticType
+            };
+            encodings[stateKey].push(logField);
+            this.commonStore.currentDataset.dataSource = makeLogField(this.commonStore.currentDataset.dataSource, originField.fid, logField.fid)
+        });
     }
     public setFieldAggregator (stateKey: keyof DraggableFieldState, index: number, aggName: string) {
-        const fields = this.draggableFieldState[stateKey]
-        if (fields[index]) {
-            fields[index].aggName = aggName;
-        }
+        this.useMutable(({ encodings }) => {
+            const fields = encodings[stateKey];
+
+            if (fields[index]) {
+                encodings[stateKey][index].aggName = aggName;
+            }
+        });
     }
     public get sortCondition () {
         const { rows, columns } = this.draggableFieldState;
@@ -349,57 +602,65 @@ export class VizSpecStore {
         return false;
     }
     public setFieldSort (stateKey: keyof DraggableFieldState, index: number, sortType: 'none' | 'ascending' | 'descending') {
-        this.draggableFieldState[stateKey][index].sort = sortType;
+        this.useMutable(({ encodings }) => {
+            encodings[stateKey][index].sort = sortType;
+        });
     }
     public applyDefaultSort(sortType: 'none' | 'ascending' | 'descending' = 'ascending') {
-        const { rows, columns } = this.draggableFieldState;
-        const yField = rows.length > 0 ? rows[rows.length - 1] : null;
-        const xField = columns.length > 0 ? columns[columns.length - 1] : null;
-
-        if (xField !== null && xField.analyticType === 'dimension' && yField !== null && yField.analyticType === 'measure') {
-            xField.sort = sortType
-            return
-        }
-        if (xField !== null && xField.analyticType === 'measure' && yField !== null && yField.analyticType === 'dimension') {
-            yField.sort = sortType
-            return
-        }
+        this.useMutable(({ encodings }) => {
+            const { rows, columns } = encodings;
+            const yField = rows.length > 0 ? rows[rows.length - 1] : null;
+            const xField = columns.length > 0 ? columns[columns.length - 1] : null;
+    
+            if (xField !== null && xField.analyticType === 'dimension' && yField !== null && yField.analyticType === 'measure') {
+                encodings.columns[columns.length - 1].sort = sortType;
+                return;
+            }
+            if (xField !== null && xField.analyticType === 'measure' && yField !== null && yField.analyticType === 'dimension') {
+                encodings.rows[rows.length - 1].sort = sortType;
+                return;
+            }
+        });
     }
     public appendField (destinationKey: keyof DraggableFieldState, field: IViewField | undefined) {
         if (MetaFieldKeys.includes(destinationKey)) return;
         if (typeof field === 'undefined') return;
-        const cloneField = toJS(field);
-        cloneField.dragId = uuidv4();
-        this.draggableFieldState[destinationKey].push(cloneField);
+
+        this.useMutable(({ encodings }) => {
+            const cloneField = toJS(field);
+            cloneField.dragId = uuidv4();
+            encodings[destinationKey].push(cloneField);
+        });
     }
     public renderSpec (spec: Specification) {
-        const fields = this.draggableFieldState.fields;
-        // thi
-        // const [xField, yField, ] = spec.position;
-        this.clearState();
-        if (spec.geomType && spec.geomType.length > 0) {
-            this.setVisualConfig('geoms', spec.geomType.map(g => geomAdapter(g)));
-        }
-        if (spec.facets && spec.facets.length > 0) {
-            const facets = (spec.facets || []).concat(spec.highFacets || []);
-            for (let facet of facets) {
-                this.appendField('rows', fields.find(f => f.fid === facet));
+        this.useMutable(tab => {
+            const fields = tab.encodings.fields;
+            // thi
+            // const [xField, yField, ] = spec.position;
+            this.clearState();
+            if (spec.geomType && spec.geomType.length > 0) {
+                this.setVisualConfig('geoms', spec.geomType.map(g => geomAdapter(g)));
             }
-        }
-        if (spec.position) {
-            if (spec.position.length > 0) this.appendField('columns', fields.find(f => f.fid === spec.position![0]));
-            if (spec.position.length > 1) this.appendField('rows', fields.find(f => f.fid === spec.position![1]));
-        }
-        if (spec.color && spec.color.length > 0) {
-            this.appendField('color', fields.find(f => f.fid === spec.color![0]));
-        }
-        if (spec.size && spec.size.length > 0) {
-            this.appendField('size', fields.find(f => f.fid === spec.size![0]));
-        }
-        if (spec.opacity && spec.opacity.length > 0) {
-            this.appendField('opacity', fields.find(f => f.fid === spec.opacity![0]));
-        }
-
+            if (spec.facets && spec.facets.length > 0) {
+                const facets = (spec.facets || []).concat(spec.highFacets || []);
+                for (let facet of facets) {
+                    this.appendField('rows', fields.find(f => f.fid === facet));
+                }
+            }
+            if (spec.position) {
+                if (spec.position.length > 0) this.appendField('columns', fields.find(f => f.fid === spec.position![0]));
+                if (spec.position.length > 1) this.appendField('rows', fields.find(f => f.fid === spec.position![1]));
+            }
+            if (spec.color && spec.color.length > 0) {
+                this.appendField('color', fields.find(f => f.fid === spec.color![0]));
+            }
+            if (spec.size && spec.size.length > 0) {
+                this.appendField('size', fields.find(f => f.fid === spec.size![0]));
+            }
+            if (spec.opacity && spec.opacity.length > 0) {
+                this.appendField('opacity', fields.find(f => f.fid === spec.opacity![0]));
+            }
+        });
     }
     public destroy () {
         this.reactions.forEach(rec => {

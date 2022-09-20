@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Record, IMutField } from './interfaces';
+import { IMutField, IRow } from './interfaces';
 import VisualSettings from './visualSettings';
 import { Container, NestContainer } from './components/container';
 import ClickMenu from './components/clickMenu';
@@ -17,21 +17,42 @@ import { toJS } from 'mobx';
 import "tailwindcss/tailwind.css"
 import './index.css'
 import { Specification } from 'visual-insights';
-import PureTabs from './components/tabs/pureTab';
+// import PureTabs from './components/tabs/pureTab';
 import VisNav from './segments/visNav';
+import { useTranslation } from 'react-i18next';
+import { mergeLocaleRes, setLocaleLanguage } from './locales/i18n';
+import Menubar from './visualSettings/menubar';
+
 
 export interface EditorProps {
-	dataSource?: Record[];
+	dataSource?: IRow[];
 	rawFields?: IMutField[];
-	spec?: Specification
+	spec?: Specification;
+	i18nLang?: string;
+	i18nResources?: { [lang: string]: Record<string, string | any> };
 }
 
 const App: React.FC<EditorProps> = props => {
-	const { dataSource = [], rawFields = [], spec } = props;
+	const { dataSource = [], rawFields = [], spec, i18nLang = 'en-US', i18nResources } = props;
 	const { commonStore, vizStore } = useGlobalStore();
 	const [insightReady, setInsightReady] = useState<boolean>(true);
 
 	const { currentDataset, datasets, vizEmbededMenu } = commonStore;
+
+	const { t, i18n } = useTranslation();
+	const curLang = i18n.language;
+
+	useEffect(() => {
+		if (i18nResources) {
+			mergeLocaleRes(i18nResources);
+		}
+	}, [i18nResources]);
+
+	useEffect(() => {
+		if (i18nLang !== curLang) {
+			setLocaleLanguage(i18nLang);
+		}
+	}, [i18nLang, curLang]);
 
 	// use as an embeding module, use outside datasource from props.
 	useEffect(() => {
@@ -75,7 +96,8 @@ const App: React.FC<EditorProps> = props => {
 				{/* <PureTabs tabs={[{label: 'a', key: 'a'}, {label: 'b', key: 'b'}]} selectedKey='a' onSelected={() => {}} /> */}
 			</div>
 			<Container style={{ marginTop: '0em', borderTop: 'none' }}>
-			<VisualSettings />
+				<Menubar />
+				<VisualSettings />
 				<div className="grid grid-cols-12 xl:grid-cols-6">
 					<div className="col-span-3 xl:col-span-1">
 						<DatasetFields />
@@ -94,13 +116,16 @@ const App: React.FC<EditorProps> = props => {
 							<InsightBoard />
 							{vizEmbededMenu.show && (
 								<ClickMenu x={vizEmbededMenu.position[0]} y={vizEmbededMenu.position[1]}>
-									<div className="flex items-center"
+									<div className="flex items-center whitespace-nowrap py-1 px-4 hover:bg-gray-100"
 										onClick={() => {
 											commonStore.closeEmbededMenu();
 											commonStore.setShowInsightBoard(true)
 										}}
 									>
-										数据解读<LightBulbIcon className="ml-1 w-3 inline-block" />
+										<span className="flex-1 pr-2">
+											{t('App.labels.data_interpretation')}
+										</span>
+										<LightBulbIcon className="ml-1 w-3 flex-grow-0 flex-shrink-0" />
 									</div>
 								</ClickMenu>
 							)}

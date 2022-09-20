@@ -1,6 +1,5 @@
-import type { IErrorInfo } from './components/error/store';
 import intl from 'react-intl-universal';
-
+import type { IErrorInfo } from './components/error/store';
 
 type ErrorMessageLocales = {
     raw: string;

@@ -17,7 +17,7 @@ export function baseVis(
     measures: string[],
     predicates: IPredicate[] | null,
     aggregatedMeasures: Array<{ op: string; field: string; as: string }>,
-    fields: IField[],
+    fields: Readonly<IField[]>,
     type: IReasonType,
     defaultAggregated?: boolean,
     defaultStack?: boolean

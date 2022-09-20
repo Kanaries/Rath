@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { Modal, ChoiceGroup, IconButton, ProgressIndicator } from 'office-ui-fabric-react';
-import { useId } from '@uifabric/react-hooks';
+import { Modal, ChoiceGroup, IconButton, ProgressIndicator } from '@fluentui/react';
+import { useId } from '@fluentui/react-hooks';
 import intl from 'react-intl-universal';
 import { IDataSourceType } from '../../../global';
-
+import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useDataSourceTypeOptions } from '../config';
+import DataLoadingStatus from '../dataLoadingStatus';
 import FileData from './file';
 import DemoData from './demo';
 import RestfulData from './restful';
-import ClickHouseData from './clickhouse';
-import { IMuteFieldBase, IRow } from '../../../interfaces';
+import OLAPData from './olap';
 import Local from './local';
 import DatabaseData from './database/';
-import DataLoadingStatus from '../dataLoadingStatus';
 import AirTableSource from './airtable';
 
 interface SelectionProps {
@@ -41,8 +40,8 @@ const Selection: React.FC<SelectionProps> = props => {
         [IDataSourceType.DEMO]: (
             <DemoData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
         ),
-        [IDataSourceType.CLICKHOUSE]: (
-            <ClickHouseData onClose={onClose} onDataLoaded={onDataLoaded} />
+        [IDataSourceType.OLAP]: (
+            <OLAPData onClose={onClose} onDataLoaded={onDataLoaded} />
         ),
         [IDataSourceType.RESTFUL]: (
             <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />

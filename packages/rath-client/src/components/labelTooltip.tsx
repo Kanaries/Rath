@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconButton, IDropdownProps, Label, Stack, TooltipHost } from "office-ui-fabric-react";
+import { IconButton, IDropdownProps, Label, Stack, TooltipHost } from '@fluentui/react';
 
 export function makeRenderLabelHandler (mp?: string | JSX.Element | JSX.Element[]) {
     return (props?: IDropdownProps): JSX.Element => {

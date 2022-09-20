@@ -28,7 +28,7 @@ interface IConstranints {
     state: number;
 }
 
-export class ExploreStore {
+export class MegaAutomationStore {
     public pageIndex: number = 0;
     private ltsPipeLineStore: LTSPipeLine;
     public specForGraphicWalker: ISpec | undefined = undefined;

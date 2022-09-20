@@ -1,9 +1,9 @@
-import type { TableData, TableLabels } from '.';
 import { notify } from '../../../../components/error';
 import type { IDatasetBase } from '../../../../interfaces';
 import { getRathError } from '../../../../rath-error';
 import { transformRawDataService } from '../../utils';
 import { SupportedDatabaseType } from './type';
+import type { TableData, TableLabels } from '.';
 
 
 const apiPathPrefix = '/api';

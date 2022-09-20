@@ -111,6 +111,5 @@ export interface DraggableFieldState {
 
 export interface IDraggableStateKey {
     id: keyof DraggableFieldState;
-    name: string;
     mode: number
 }

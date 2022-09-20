@@ -17,8 +17,8 @@ const CanvaContainer = styled.div<{rowSize: number; colSize: number;}>`
 
 const SELECTION_NAME = 'geom';
 interface ReactVegaProps {
-  rows: IViewField[];
-  columns: IViewField[];
+  rows: Readonly<IViewField[]>;
+  columns: Readonly<IViewField[]>;
   dataSource: IRow[];
   defaultAggregate?: boolean;
   defaultStack?: boolean;

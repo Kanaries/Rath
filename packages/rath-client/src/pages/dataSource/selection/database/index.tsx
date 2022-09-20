@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from  'react';
 import { observer } from 'mobx-react-lite';
+import { IDropdownOption, Stack, registerIcons } from '@fluentui/react';
 import { IMuteFieldBase, IRow } from '../../../../interfaces';
-import { IDropdownOption, Stack, registerIcons } from 'office-ui-fabric-react';
-import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, pingConnector, requestSQL } from './api';
 import { logDataImport } from '../../../../loggers/dataImport';
-import Progress from './progress';
 import prefetch from '../../../../utils/prefetch';
+import Progress from './progress';
 import datasetOptions from './config';
 import ConnectForm, { ConnectFormReadonly } from './connect-form';
 import DropdownOrInput from './dropdown-or-input';
 import QueryForm from './query-form';
 import useDatabaseReducer from './reducer';
+import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, pingConnector, requestSQL } from './api';
 
 
 export const StackTokens = {

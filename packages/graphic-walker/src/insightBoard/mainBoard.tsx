@@ -26,7 +26,7 @@ interface SubSpace {
 
 interface InsightMainBoardProps {
   dataSource: IRow[];
-  fields: IField[];
+  fields: Readonly<IField[]>;
   filters?: Filters;
   viewDs: IField[];
   viewMs: IField[];

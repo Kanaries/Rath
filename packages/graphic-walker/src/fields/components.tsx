@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import { COLORS } from "../config";
+import { useTranslation } from 'react-i18next';
+
 
 export const AestheticSegment = styled.div`
   border: 1px solid #dfe3e8;
@@ -21,10 +23,12 @@ export const AestheticSegment = styled.div`
 `
 
 export const FieldListContainer: React.FC<{ name: string }> = (props) => {
+  const { t } = useTranslation('translation', { keyPrefix: 'constant.draggable_key' });
+
   return (
     <FieldListSegment>
       <div className="fl-header">
-        <h4>{props.name}</h4>
+        <h4>{t(props.name)}</h4>
       </div>
       <div className="fl-container">{props.children}</div>
     </FieldListSegment>
@@ -32,10 +36,12 @@ export const FieldListContainer: React.FC<{ name: string }> = (props) => {
 };
 
 export const AestheticFieldContainer: React.FC<{ name: string }> = props => {
+  const { t } = useTranslation('translation', { keyPrefix: 'constant.draggable_key' });
+
   return (
     <AestheticSegment>
-      <div className="aes-header">
-        <h4>{props.name}</h4>
+      <div className="aes-header cursor-default select-none">
+        <h4>{t(props.name)}</h4>
       </div>
       <div className="aes-container">{props.children}</div>
     </AestheticSegment>

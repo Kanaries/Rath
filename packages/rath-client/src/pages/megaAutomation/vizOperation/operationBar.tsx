@@ -1,13 +1,13 @@
 import React, { useCallback } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { IContextualMenuProps, CommandBar, ICommandBarItemProps } from 'office-ui-fabric-react';
+import { IContextualMenuProps, CommandBar, ICommandBarItemProps } from '@fluentui/react';
 
 import { useGlobalStore } from '../../../store';
 
 interface OperationBarProps {}
 const OperationBar: React.FC<OperationBarProps> = props => {
-    const { exploreStore, commonStore, dataSourceStore } = useGlobalStore();
+    const { megaAutoStore, commonStore, dataSourceStore } = useGlobalStore();
     const { taskMode } = commonStore;
     const { dimFields, meaFields } = dataSourceStore;
 
@@ -15,24 +15,24 @@ const OperationBar: React.FC<OperationBarProps> = props => {
         items: dimFields.map(f => ({
             key: f.fid,
             text: f.name,
-            // onClick: () => { exploreStore.addFieldToForkView('dimensions', f.fid) }
-            onClick: () => { exploreStore.addField2MainViewPattern(f.fid) }
+            // onClick: () => { megaAutoStore.addFieldToForkView('dimensions', f.fid) }
+            onClick: () => { megaAutoStore.addField2MainViewPattern(f.fid) }
         }))
     }
     const measureOptions: IContextualMenuProps = {
         items: meaFields.map(f => ({
             key: f.fid,
             text: f.name,
-            // onClick: () => { exploreStore.addFieldToForkView('measures', f.fid) }
-            onClick: () => { exploreStore.addField2MainViewPattern(f.fid) }
+            // onClick: () => { megaAutoStore.addFieldToForkView('measures', f.fid) }
+            onClick: () => { megaAutoStore.addField2MainViewPattern(f.fid) }
         }))
     }
 
     const customizeAnalysis = useCallback(() => {
-        if (exploreStore.mainViewSpec) {
-            commonStore.visualAnalysisInGraphicWalker(exploreStore.mainViewSpec)
+        if (megaAutoStore.mainViewSpec) {
+            commonStore.visualAnalysisInGraphicWalker(megaAutoStore.mainViewSpec)
         }
-    }, [exploreStore, commonStore])
+    }, [megaAutoStore, commonStore])
 
     const commandProps: ICommandBarItemProps[] = [
         {
@@ -58,7 +58,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             text: intl.get('lts.commandBar.associate'),
             iconProps: { iconName: 'Lightbulb' },
             onClick: () => {
-                exploreStore.getAssociatedViews(taskMode);
+                megaAutoStore.getAssociatedViews(taskMode);
             }
         },
         {
@@ -66,7 +66,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             text: intl.get('lts.commandBar.constraints'),
             iconProps: { iconName: 'MultiSelect' },
             onClick: () => {
-                exploreStore.setShowContraints(true);
+                megaAutoStore.setShowContraints(true);
             }
         }
     ]

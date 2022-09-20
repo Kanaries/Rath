@@ -1,17 +1,17 @@
-import { ChoiceGroup, IChoiceGroupOption, Separator, Toggle } from 'office-ui-fabric-react';
+import { ChoiceGroup, IChoiceGroupOption, Separator, Toggle } from '@fluentui/react';
 import React from 'react';
 import styled from 'styled-components';
+import intl from 'react-intl-universal'
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { IFieldMeta, IRawField, IRow } from '../../../interfaces';
-import DistributionChart from './distChart';
-import intl from 'react-intl-universal'
 import FieldFilter from '../../../components/fieldFilter/index';
+import DistributionChart from './distChart';
 
 const MetaContainer = styled.div`
     overflow: auto;
 `
 const MetaItemContainer = styled.div`
-    over-flow: hidden;
+    overflow: hidden;
     position: relative;
     color: #333;
     .bottom-bar {

@@ -62,7 +62,7 @@ export function applyDefaultSort (spec: any, fields: IFieldMeta[]): any {
             const quanField = fields.find(f => f.fid === quanChannel.field);
             if (nomField && quanField && nomField.features.unique > 2) {
                 nomChannel.sort = {
-                    field: quanChannel.fid,
+                    field: quanChannel.field,
                     op: quanChannel.aggregate ? quanChannel.aggregate : 'count',
                     order: 'descending'
                 }

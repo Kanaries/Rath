@@ -5,6 +5,7 @@ import {
     Droppable,
     Draggable,
 } from "react-beautiful-dnd";
+import { useTranslation } from 'react-i18next';
 
 import { useGlobalStore } from '../../store';
 import DataTypeIcon from '../../components/dataTypeIcon';
@@ -15,6 +16,8 @@ import MeaFields from './meaFields';
 const FIELDS_KEY: keyof DraggableFieldState = 'fields';
 
 const DatasetFields: React.FC = props => {
+    const { t } = useTranslation('translation', { keyPrefix: 'main.tabpanel.DatasetFields' });
+
     const { vizStore } = useGlobalStore();
     const { draggableFieldState } = vizStore;
     const { fields } = draggableFieldState;
@@ -34,8 +37,10 @@ const DatasetFields: React.FC = props => {
         }
     }
 
-    return <NestContainer className="flex flex-col" style={{ height: '680px' }}>
-        <h4 className="text-xs mb-2 flex-grow-0">字段列表</h4>
+    return <NestContainer className="flex flex-col" style={{ height: '680px', paddingBlock: 0 }}>
+        <h4 className="text-xs mb-2 flex-grow-0 cursor-default select-none mt-2">
+            {t('field_list')}
+        </h4>
         <div className="pd-1 overflow-y-auto" style={{ maxHeight: '380px'}}>
             <Droppable droppableId="dimensions" direction="vertical">
                 {
