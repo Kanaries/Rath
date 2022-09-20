@@ -101,6 +101,9 @@
         "tableName": "Table",
         "preview": "数据预览",
         "query": "SQL 查询",
+        "connectorConfig": "连接器设置",
+        "connectorService": "连接器服务地址 (可选)",
+        "apply": "设置并测试",
         "dbProgress": [
             {
                 "label": "建立连接",

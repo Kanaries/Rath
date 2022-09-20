@@ -8,6 +8,21 @@ import type { TableData, TableLabels } from '.';
 
 const apiPathPrefix = '/api';
 
+const DB_CONNECTOR_SERVICE_KEY = 'db_api'
+
+export function getConnectorServiceInfo () {
+    return localStorage.getItem(DB_CONNECTOR_SERVICE_KEY) || '';
+}
+
+export function setConnectorServiceInfo (info: string) {
+    localStorage.setItem(DB_CONNECTOR_SERVICE_KEY, info)
+}
+
+function getAPIPathPrefix (apiPrefix: string | undefined = '') {
+    const servicePrefix = getConnectorServiceInfo();
+    return `${servicePrefix}${apiPrefix}`
+}
+
 type TableDataResult<TL extends TableLabels> = {
     success: true;
     data: TableData<TL>;
@@ -33,7 +48,7 @@ type ListDatabasesResult = {
 export const pingConnector = async (): Promise<boolean> => {
     try {
         const res = await fetch(
-            '/ping', {
+            `${getAPIPathPrefix()}/ping`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -61,7 +76,7 @@ export const getSourceId = async (
 ): Promise<number | null> => {
     try {
         const res = await fetch(
-            `${apiPathPrefix}/upsert`, {
+            `${getAPIPathPrefix(apiPathPrefix)}/upsert`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -90,7 +105,7 @@ export const getSourceId = async (
 export const listDatabases = async (sourceId: number): Promise<string[] | null> => {
     try {
         const res = await fetch(
-            `${apiPathPrefix}/database_list`, {
+            `${getAPIPathPrefix(apiPathPrefix)}/database_list`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -114,7 +129,7 @@ export const listDatabases = async (sourceId: number): Promise<string[] | null> 
 export const listSchemas = async (sourceId: number, db: string | null): Promise<string[] | null> => {
     try {
         const res = await fetch(
-            `${apiPathPrefix}/schema_list`, {
+            `${getAPIPathPrefix(apiPathPrefix)}/schema_list`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -139,7 +154,7 @@ export const listSchemas = async (sourceId: number, db: string | null): Promise<
 export const listTables = async (sourceId: number, db: string | null, schema: string | null): Promise<string[] | null> => {
     try {
         const res = await fetch(
-            `${apiPathPrefix}/table_list`, {
+            `${getAPIPathPrefix(apiPathPrefix)}/table_list`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -165,7 +180,7 @@ export const listTables = async (sourceId: number, db: string | null, schema: st
 export const fetchTablePreview = async (sourceId: number, db: string | null, schema: string | null, table: string | null, silent: boolean = false): Promise<TableData<TableLabels> | null> => {
     try {
         const res = await fetch(
-            `${apiPathPrefix}/table_detail`, {
+            `${getAPIPathPrefix(apiPathPrefix)}/table_detail`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -194,7 +209,7 @@ export const fetchTablePreview = async (sourceId: number, db: string | null, sch
 export const requestSQL = async (sourceId: number, queryString: string): Promise<IDatasetBase | null> => {
     try {
         const res = await fetch(
-            `${apiPathPrefix}/execute`, {
+            `${getAPIPathPrefix(apiPathPrefix)}/execute`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
