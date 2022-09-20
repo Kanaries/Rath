@@ -568,7 +568,6 @@ export class VizSpecStore {
         this.useMutable(({ encodings }) => {
             encodings.filters[index].rule = rule;
         });
-        this.closeFilterEditing();
     }
     public setFilterEditing(index: number) {
         this.editingFilterIdx = index;

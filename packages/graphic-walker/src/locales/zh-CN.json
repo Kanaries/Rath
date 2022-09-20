@@ -34,6 +34,11 @@
             "sum": "求和",
             "mean": "平均值",
             "count": "计数"
+        },
+        "filter_type": {
+            "one_of": "按值筛选",
+            "range": "按范围筛选",
+            "temporal_range": "按日期范围筛选"
         }
     },
     "App": {
@@ -96,6 +101,26 @@
             "DatasetFields": {
                 "field_list": "字段列表"
             }
+        }
+    },
+    "filters": {
+        "to_edit": "编辑这条规则",
+        "empty_rule": "! (空的规则)",
+        "editing": "编辑规则",
+        "form": {
+            "name": "字段",
+            "rule": "规则"
+        },
+        "header": {
+            "visibility": "可见",
+            "value": "标签",
+            "count": "计数"
+        },
+        "selected_keys": "{{ count }} 个标签已选择",
+        "btn": {
+            "select_all": "全部选中",
+            "unselect_all": "全部取消",
+            "reverse": "选择反向"
         }
     }
 }

@@ -9,7 +9,7 @@ const Background = styled.div({
   top: 0,
   width: '100vw',
   height: '100vh',
-  backdropFilter: 'blur(2px)',
+  backdropFilter: 'blur(1px)',
   zIndex: 25535,
 });
 

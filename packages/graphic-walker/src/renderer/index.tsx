@@ -2,6 +2,7 @@ import { runInAction, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import React from 'react';
+import { useMemo } from 'react';
 import { useCallback } from 'react';
 import { useGlobalStore } from '../store';
 import ReactVega from '../vis/react-vega';
@@ -11,6 +12,7 @@ const ReactiveRenderer: React.FC = props => {
     const { draggableFieldState, visualConfig } = vizStore;
     const { geoms, interactiveScale, defaultAggregated, defaultStack, showActions, size } = visualConfig;
     const { currentDataset } = commonStore;
+    const { filters } = draggableFieldState;
 
     const rows = toJS(draggableFieldState.rows)
     const columns = toJS(draggableFieldState.columns)
@@ -32,6 +34,61 @@ const ReactiveRenderer: React.FC = props => {
             commonStore.setFilters(values);
         })
     }, [])
+
+    // apply filters
+    const { dataSource } = currentDataset;
+    
+    const data = useMemo(() => {
+        // TODO: 放到 worker 里去做
+        return dataSource.filter(which => {
+            for (const { rule, fid } of filters) {
+                if (!rule) {
+                    continue;
+                }
+
+                switch (rule.type) {
+                    case 'one of': {
+                        if (rule.value.has(which[fid])) {
+                            break;
+                        } else {
+                            return false;
+                        }
+                    }
+                    case 'range': {
+                        if (rule.value[0] <= which[fid] && which[fid] <= rule.value[1]) {
+                            break;
+                        } else {
+                            return false;
+                        }
+                    }
+                    case 'temporal range': {
+                        try {
+                            const time = new Date(which[fid]).getTime();
+
+                            if (
+                                rule.value[0] <= time && time <= rule.value[1]
+                            ) {
+                                break;
+                            } else {
+                                return false;
+                            }
+                        } catch (error) {
+                            console.error(error);
+
+                            return false;
+                        }
+                    }
+                    default: {
+                        console.warn('Unresolvable filter rule', rule);
+                        continue;
+                    }
+                }
+            }
+
+            return true;
+        });
+    }, [filters, dataSource]);
+
     return <Resizable className={(size.mode === 'fixed' && !hasFacet) ? "border-blue-400 border-2 overflow-hidden" : ""}
     style={{ padding: '12px' }}
     onResizeStop={(e, direction, ref, d) => {
@@ -51,7 +108,7 @@ const ReactiveRenderer: React.FC = props => {
         geomType={geoms[0]}
         defaultAggregate={defaultAggregated}
         defaultStack={defaultStack}
-        dataSource={currentDataset.dataSource}
+        dataSource={data}
         rows={rows}
         columns={columns}
         color={color[0]}

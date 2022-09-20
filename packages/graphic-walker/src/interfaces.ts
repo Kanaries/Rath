@@ -122,15 +122,12 @@ export interface IDraggableStateKey {
 }
 
 export type IFilterRule = {
-    type: 'equal';
-    value: any;
-} | {
     type: 'range';
     value: [number, number];
 } | {
     type: 'temporal range';
-    value: [string, string];
+    value: [number, number];
 } | {
     type: 'one of';
-    value: any[];
+    value: Set<string | number>;
 };
