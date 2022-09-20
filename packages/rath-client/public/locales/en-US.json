@@ -102,6 +102,9 @@
         "tableName": "Table",
         "preview": "Data Preview",
         "query": "SQL Query",
+        "connectorConfig": "Connector Settings",
+        "connectorService": "Connector Service URL (Optional)",
+        "apply": "Apply&Test",
         "dbProgress": [
             {
                 "label": "Connection",
