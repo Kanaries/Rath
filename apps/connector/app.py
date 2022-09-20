@@ -1,12 +1,12 @@
 from flask import Flask
 
-from bp import bp_Druid, bp_Drill, bp_Athena, bp_Clickhouse, bp_Oracle, bp_Sqlite, bp_SQLserver, bp_Doris, bp_Redshift, bp_Mysql, bp_Impala, bp_Kylin, bp_SparkSQL, bp_Postgres
 from bp import bp_database
 from database import init_db
 from database import db_session
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+CORS(app)
 
 @app.route('/')
 def hello_world():  # put application's code here

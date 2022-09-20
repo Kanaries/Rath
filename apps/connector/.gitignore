@@ -5,3 +5,4 @@ __pycache__/
 connect.db
 not_sqlalchemy/
 run_flask_app.bat
+bp_useless
