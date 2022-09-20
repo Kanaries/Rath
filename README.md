@@ -108,6 +108,12 @@ Rath now runs all the computation tasks on webworker. For some large datasets, R
 #### deploy connector service
 RATH requires a database connector to connect common databases. You need to deploy `apps/connector` and then you can connect a number of common databases as datasource.
 
+#### OLAP Service
+Connector service is used as a pure datasource, RATH fetches the data from the bases and loads them into memory.
+
+For larger datasets, or if you can access a high performance OLAP service (such as a clusters of clickhouse). You can start `packages/connectors` which is a OLAP service connector. Not only will it fecthes data from OLAP, but use it as a computation engine as well. RATH
+ will push SQL query to the OLAP services instead of computate those tasks in its own engine.
+
 
 ## Documentation
 + [Tutorial: Using Rath to find deep insight in your data](https://www.yuque.com/docs/share/3f32e044-3530-4ebe-9b01-287bfbdb7ce0?#)
