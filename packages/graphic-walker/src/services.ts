@@ -124,6 +124,7 @@ export const applyFilter = async (data: readonly IRow[], filters: readonly IFilt
 
         return res;
     } catch (error) {
+        // @ts-ignore @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
         throw new Error('Uncaught error in FilterWorker', { cause: error });
     } finally {
         if (filterWorkerAutoTerminator !== null) {
