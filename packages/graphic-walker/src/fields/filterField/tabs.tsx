@@ -359,7 +359,10 @@ export interface TabsProps extends RuleFormProps {
     tabs: IFilterRule['type'][];
 }
 
-const Tabs: React.FC<TabsProps> = ({ field, onChange, tabs }) => {
+const Tabs: React.FC<TabsProps> = observer(({ field, onChange, tabs }) => {
+    const { vizStore } = useGlobalStore();
+    const { draggableFieldState } = vizStore;
+
     const { t } = useTranslation('translation', { keyPrefix: 'constant.filter_type' });
 
     const [which, setWhich] = React.useState(field.rule?.type ?? tabs[0]!);
@@ -392,7 +395,7 @@ const Tabs: React.FC<TabsProps> = ({ field, onChange, tabs }) => {
                     tabs.map((tab, i) => {
                         const Component = filterTabs[tab];
 
-                        return (
+                        return draggableFieldState === null ? null : (
                             <TabItem
                                 key={i}
                                 id={`filter-panel-${tab.replaceAll(/ /g, '_')}`}
@@ -413,7 +416,7 @@ const Tabs: React.FC<TabsProps> = ({ field, onChange, tabs }) => {
             </TabPanel>
         </TabsContainer>
     );
-};
+});
 
 
 export default Tabs;

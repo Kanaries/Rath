@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Modal from '../../components/modal';
-import type { IFilterRule } from '../../interfaces';
+import type { IFilterField, IFilterRule } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import Tabs, { RuleFormProps } from './tabs';
 
@@ -61,28 +61,53 @@ const TemporalRuleForm: React.FC<RuleFormProps> = ({
     );
 };
 
+const EmptyForm: React.FC<RuleFormProps> = () => <React.Fragment />;
+
 const FilterEditDialog: React.FC = observer(() => {
     const { vizStore } = useGlobalStore();
     const { editingFilterIdx, draggableFieldState } = vizStore;
 
     const { t } = useTranslation('translation', { keyPrefix: 'filters' });
 
-    const field = editingFilterIdx !== null ? draggableFieldState.filters[editingFilterIdx] : null;
+    const field = React.useMemo(() => {
+        return editingFilterIdx !== null ? draggableFieldState.filters[editingFilterIdx] : null;
+    }, [editingFilterIdx, draggableFieldState]);
 
-    const handleChange = React.useCallback((rule: IFilterRule) => {
+    const [uncontrolledField, setUncontrolledField] = React.useState(field as IFilterField | null);
+    const ufRef = React.useRef(uncontrolledField);
+    ufRef.current = uncontrolledField;
+
+    React.useEffect(() => {
+        if (field !== ufRef.current) {
+            setUncontrolledField(field);
+        }
+    }, [field]);
+
+    const handleChange = React.useCallback((r: IFilterRule) => {
         if (editingFilterIdx !== null) {
-            vizStore.writeFilter(editingFilterIdx, rule);
+            setUncontrolledField(uf => ({
+                ...uf,
+                rule: r,
+            }) as IFilterField);
         }
     }, [editingFilterIdx]);
+
+    const handleSubmit = React.useCallback(() => {
+        if (editingFilterIdx !== null) {
+            vizStore.writeFilter(editingFilterIdx, uncontrolledField?.rule ?? null);
+        }
+
+        vizStore.closeFilterEditing();
+    }, [editingFilterIdx, uncontrolledField]);
 
     const Form = field ? ({
         quantitative: QuantitativeRuleForm,
         nominal: NominalRuleForm,
         ordinal: OrdinalRuleForm,
         temporal: TemporalRuleForm,
-    }[field.semanticType] as React.FC<RuleFormProps>) : React.Fragment;
-
-    return field ? (
+    }[field.semanticType] as React.FC<RuleFormProps>) : EmptyForm;
+    
+    return uncontrolledField ? (
         <Modal
             title={t('editing')}
             onClose={() => vizStore.closeFilterEditing()}
@@ -90,12 +115,12 @@ const FilterEditDialog: React.FC = observer(() => {
             <header className="text-lg font-semibold py-2 outline-none">
                 {t('form.name')}
             </header>
-            <input className="border py-1 px-4" readOnly value={field.name}/>
+            <input className="border py-1 px-4" readOnly value={uncontrolledField.name}/>
             <header className="text-lg font-semibold py-2 outline-none">
                 {t('form.rule')}
             </header>
             <Form
-                field={field}
+                field={uncontrolledField}
                 onChange={handleChange}
             />
             <div className="flex justify-center text-green-500 mt-4">
@@ -106,7 +131,7 @@ const FilterEditDialog: React.FC = observer(() => {
                     tabIndex={0}
                     aria-label="ok"
                     className="cursor-pointer hover:bg-green-50 p-1"
-                    onClick={() => vizStore.closeFilterEditing()}
+                    onClick={handleSubmit}
                     strokeWidth="1.5"
                 />
             </div>

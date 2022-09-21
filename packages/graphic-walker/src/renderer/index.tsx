@@ -1,11 +1,11 @@
 import { runInAction, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
-import React from 'react';
-import { useMemo } from 'react';
-import { useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { applyFilter } from '../services';
 import { useGlobalStore } from '../store';
 import ReactVega from '../vis/react-vega';
+
 
 const ReactiveRenderer: React.FC = props => {
     const { vizStore, commonStore } = useGlobalStore();
@@ -37,57 +37,33 @@ const ReactiveRenderer: React.FC = props => {
 
     // apply filters
     const { dataSource } = currentDataset;
-    
-    const data = useMemo(() => {
-        // TODO: 放到 worker 里去做
-        return dataSource.filter(which => {
-            for (const { rule, fid } of filters) {
-                if (!rule) {
-                    continue;
-                }
 
-                switch (rule.type) {
-                    case 'one of': {
-                        if (rule.value.has(which[fid])) {
-                            break;
-                        } else {
-                            return false;
-                        }
-                    }
-                    case 'range': {
-                        if (rule.value[0] <= which[fid] && which[fid] <= rule.value[1]) {
-                            break;
-                        } else {
-                            return false;
-                        }
-                    }
-                    case 'temporal range': {
-                        try {
-                            const time = new Date(which[fid]).getTime();
+    const [data, setData] = useState(dataSource);
+    const pendingPromiseRef = useRef<Promise<typeof data> | null>(null);
 
-                            if (
-                                rule.value[0] <= time && time <= rule.value[1]
-                            ) {
-                                break;
-                            } else {
-                                return false;
-                            }
-                        } catch (error) {
-                            console.error(error);
+    useEffect(() => {
+        setData(dataSource);
+    }, [dataSource]);
 
-                            return false;
-                        }
-                    }
-                    default: {
-                        console.warn('Unresolvable filter rule', rule);
-                        continue;
-                    }
-                }
+    useEffect(() => {
+        const p = filters.length === 0 ? Promise.resolve(dataSource) : applyFilter(dataSource, filters);
+        pendingPromiseRef.current = p;
+
+        p.then(d => {
+            if (p !== pendingPromiseRef.current) {
+                // This promise is out-of-date
+                return;
             }
 
-            return true;
+            setData(d);
+        }).catch(err => {
+            console.error(err);
         });
-    }, [filters, dataSource]);
+
+        return () => {
+            pendingPromiseRef.current = null;
+        };
+    }, [dataSource, filters]);
 
     return <Resizable className={(size.mode === 'fixed' && !hasFacet) ? "border-blue-400 border-2 overflow-hidden" : ""}
     style={{ padding: '12px' }}
