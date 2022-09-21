@@ -528,7 +528,7 @@ export class VizSpecStore {
             if (MetaFieldKeys.includes(sourceKey)) {
                 // use a different dragId
                 movingField = {
-                    ...toJS(encodings[sourceKey][sourceIndex]),
+                    ...toJS(encodings[sourceKey][sourceIndex]), // toJS will NOT shallow copy a object here
                     dragId: uuidv4(),
                 };
             } else {
