@@ -1,8 +1,0 @@
-language: node_js
-node_js:
-  - "14"
-install:
-  - yarn install
-script:
-  - yarn workspace @kanaries/graphic-walker build
-  - yarn workspace rath-client build
