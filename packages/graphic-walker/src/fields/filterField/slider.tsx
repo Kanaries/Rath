@@ -48,11 +48,9 @@ const SliderTrack = styled.div({
     position: 'relative',
 });
 
-const SliderThumb = styled.div<{ value: number; pos: 'left' | 'right' }>(({ value, pos }) => ({
+const SliderThumb = styled.div({
     position: 'absolute',
-    left: `${value * 100}%`,
     top: '50%',
-    transform: `translate(${pos === 'left' ? '-100%' : '0'}, -50%)`,
     cursor: 'ew-resize',
     backgroundColor: '#e2e2e2',
     backgroundImage: `
@@ -67,20 +65,18 @@ const SliderThumb = styled.div<{ value: number; pos: 'left' | 'right' }>(({ valu
     ':hover': {
         backgroundColor: '#fff',
     },
-}));
+});
 
-const SliderSlice = styled.div<{ range: readonly [number, number] }>(({ range }) => ({
+const SliderSlice = styled.div({
     backgroundColor: '#fff',
     position: 'absolute',
-    left: `${range[0] * 100}%`,
-    width: `${(range[1] - range[0]) * 100}%`,
     height: '100%',
     borderRadius: '5px',
 
     ':hover': {
         backgroundColor: '#fff',
     },
-}));
+});
 
 
 const nicer = (range: readonly [number, number], value: number): string => {
@@ -117,14 +113,21 @@ const Slider: React.FC<SliderProps> = React.memo(function Slider ({
 
     React.useEffect(() => {
         if (dragging) {
-            const stop = () => {
+            const stop = (ev?: MouseEvent) => {
                 setDragging(null);
+                ev?.stopPropagation();
             };
 
             const dragHandler = fromEvent(document.body, 'mousemove').pipe(
-                throttleTime(200),
+                throttleTime(100),
                 map(ev => {
                     if (!trackRef.current || !dragging) {
+                        return null;
+                    }
+
+                    if ((ev as MouseEvent).buttons !== 1) {
+                        stop();
+
                         return null;
                     }
 
@@ -177,13 +180,14 @@ const Slider: React.FC<SliderProps> = React.memo(function Slider ({
                     ref={e => trackRef.current = e}
                 >
                     <SliderSlice
-                        range={range}
                         role="presentation"
                         ref={e => sliceRef.current = e}
+                        style={{
+                            left: `${range[0] * 100}%`,
+                            width: `${(range[1] - range[0]) * 100}%`,
+                        }}
                     />
                     <SliderThumb
-                        value={range[0]}
-                        pos="left"
                         role="slider"
                         aria-label="minimum"
                         id="slider:min"
@@ -198,10 +202,12 @@ const Slider: React.FC<SliderProps> = React.memo(function Slider ({
                                 setDragging('left');
                             }
                         }}
+                        style={{
+                            left: `${range[0] * 100}%`,
+                            transform: 'translate(-100%, -50%)',
+                        }}
                     />
                     <SliderThumb
-                        value={range[1]}
-                        pos="right"
                         role="slider"
                         aria-label="maximum"
                         id="slider:max"
@@ -215,6 +221,10 @@ const Slider: React.FC<SliderProps> = React.memo(function Slider ({
                                 mouseOffsetRef.current = ev.nativeEvent.offsetX;
                                 setDragging('right');
                             }
+                        }}
+                        style={{
+                            left: `${range[1] * 100}%`,
+                            transform: 'translate(0, -50%)',
                         }}
                     />
                 </SliderTrack>

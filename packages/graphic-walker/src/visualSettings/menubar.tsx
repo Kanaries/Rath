@@ -13,10 +13,9 @@ export const MenubarContainer = styled.div({
 
 const Button = styled.button(({ disabled = false }) => ({
     '&:hover': disabled ? {} : {
-        backgroundColor: 'rgba(243, 244, 246, 0.5)',
+        backgroundColor: 'rgba(243, 244, 246, 0.7)',
     },
     color: disabled ? 'rgba(156, 163, 175, 0.5)' : 'rgb(55, 65, 81)',
-    boxShadow: disabled ? undefined : '1px 1px 2px #0002, inset 2px 2px 4px #0001',
     '& > pre': {
         display: 'inline-block',
         marginInlineStart: '0.2em',

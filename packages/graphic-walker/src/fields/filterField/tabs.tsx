@@ -88,13 +88,12 @@ const TabHeader = styled.label({
 
     '&[aria-selected]': {
         borderBottomColor: '#0000',
-        boxShadow: '4px 2px 6px -3px #0004',
         zIndex: 15,
     },
     '&[aria-selected=false]': {
         backgroundColor: '#f8f8f8',
+        borderBottomColor: '#e2e2e2',
         cursor: 'pointer',
-        boxShadow: 'inset 0 -2px 0 #0001',
         zIndex: 14,
     },
 });

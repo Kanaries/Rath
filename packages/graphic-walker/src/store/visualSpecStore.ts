@@ -171,7 +171,7 @@ class IVisSpecWithHistory {
 
         this.cursor = this.snapshots.length - 1;
 
-        setTimeout(() => this.batchFlag = false, 300);
+        requestAnimationFrame(() => this.batchFlag = false);
     }
 
     public get canUndo() {
