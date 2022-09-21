@@ -1,3 +1,4 @@
+import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -86,17 +87,29 @@ const FilterEditDialog: React.FC = observer(() => {
             title={t('editing')}
             onClose={() => vizStore.closeFilterEditing()}
         >
-            <header>
+            <header className="text-lg font-semibold py-2 outline-none">
                 {t('form.name')}
             </header>
-            <input readOnly value={field.name}/>
-            <header>
+            <input className="border py-1 px-4" readOnly value={field.name}/>
+            <header className="text-lg font-semibold py-2 outline-none">
                 {t('form.rule')}
             </header>
             <Form
                 field={field}
                 onChange={handleChange}
             />
+            <div className="flex justify-center text-green-500 mt-4">
+                <CheckCircleIcon
+                    width="3em"
+                    height="3em"
+                    role="button"
+                    tabIndex={0}
+                    aria-label="ok"
+                    className="cursor-pointer hover:bg-green-50 p-1"
+                    onClick={() => vizStore.closeFilterEditing()}
+                    strokeWidth="1.5"
+                />
+            </div>
         </Modal>
     ) : null;
 });

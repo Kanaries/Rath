@@ -5,6 +5,7 @@ import styled from 'styled-components';
 
 import type { IFilterField, IFilterRule } from '../../interfaces';
 import { useGlobalStore } from '../../store';
+import Slider from './slider';
 
 
 export type RuleFormProps = {
@@ -131,7 +132,7 @@ export const FilterOneOfRule: React.FC<RuleFormProps & { active: boolean }> = ob
         }
     }, [active, onChange, field, count]);
 
-    return (
+    return field.rule?.type === 'one of' ? (
         <Container>
             <Table>
                 <label className="header">
@@ -146,7 +147,7 @@ export const FilterOneOfRule: React.FC<RuleFormProps & { active: boolean }> = ob
             </Table>
             <Table>
                 {
-                    field.rule?.type === 'one of' && [...count.entries()].map(([value, count], idx) => {
+                    [...count.entries()].map(([value, count], idx) => {
                         const id = `rule_checkbox_${idx}`;
 
                         return (
@@ -193,69 +194,61 @@ export const FilterOneOfRule: React.FC<RuleFormProps & { active: boolean }> = ob
                     })
                 }
             </Table>
-            {
-                field.rule?.type === 'one of' && (
-                    <Table className="text-gray-600">
-                        <label></label>
-                        <label>
-                            {t('selected_keys', { count: field.rule.value.size })}
-                        </label>
-                        <label>
-                            {[...field.rule.value].reduce<number>((sum, key) => {
-                                const s = dataSource.filter(which => which[field.fid] === key).length;
+            <Table className="text-gray-600">
+                <label></label>
+                <label>
+                    {t('selected_keys', { count: field.rule.value.size })}
+                </label>
+                <label>
+                    {[...field.rule.value].reduce<number>((sum, key) => {
+                        const s = dataSource.filter(which => which[field.fid] === key).length;
 
-                                return sum + s;
-                            }, 0)}
-                        </label>
-                    </Table>
-                )
-            }
-            {
-                field.rule?.type === 'one of' && (
-                    <div className="btn-grp">
-                        <Button
-                            onClick={() => {
-                                if (field.rule?.type === 'one of') {
-                                    const curSet = field.rule.value;
+                        return sum + s;
+                    }, 0)}
+                </label>
+            </Table>
+            <div className="btn-grp">
+                <Button
+                    onClick={() => {
+                        if (field.rule?.type === 'one of') {
+                            const curSet = field.rule.value;
 
-                                    onChange({
-                                        type: 'one of',
-                                        value: new Set<number | string>(
-                                            curSet.size === count.size
-                                                ? []
-                                                : count.keys()
-                                        ),
-                                    });
-                                }
-                            }}
-                        >
-                            {
-                                field.rule.value.size === count.size
-                                    ? t('btn.unselect_all')
-                                    : t('btn.select_all')
-                            }
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                if (field.rule?.type === 'one of') {
-                                    const curSet = field.rule.value;
+                            onChange({
+                                type: 'one of',
+                                value: new Set<number | string>(
+                                    curSet.size === count.size
+                                        ? []
+                                        : count.keys()
+                                ),
+                            });
+                        }
+                    }}
+                >
+                    {
+                        field.rule.value.size === count.size
+                            ? t('btn.unselect_all')
+                            : t('btn.select_all')
+                    }
+                </Button>
+                <Button
+                    onClick={() => {
+                        if (field.rule?.type === 'one of') {
+                            const curSet = field.rule.value;
 
-                                    onChange({
-                                        type: 'one of',
-                                        value: new Set<number | string>(
-                                            [...count.keys()].filter(key => !curSet.has(key))
-                                        ),
-                                    });
-                                }
-                            }}
-                        >
-                            {t('btn.reverse')}
-                        </Button>
-                    </div>
-                )
-            }
+                            onChange({
+                                type: 'one of',
+                                value: new Set<number | string>(
+                                    [...count.keys()].filter(key => !curSet.has(key))
+                                ),
+                            });
+                        }
+                    }}
+                >
+                    {t('btn.reverse')}
+                </Button>
+            </div>
         </Container>
-    );
+    ) : null;
 });
 
 export const FilterTemporalRangeRule: React.FC<RuleFormProps & { active: boolean }> = observer(({
@@ -279,22 +272,37 @@ export const FilterTemporalRangeRule: React.FC<RuleFormProps & { active: boolean
         }, []).sort((a, b) => a - b);
     }, [dataSource, field]);
 
-    const { t } = useTranslation('translation', { keyPrefix: 'filters' });
+    const [min, max] = React.useMemo(() => {
+        return [sorted[0] ?? 0, Math.max(sorted[sorted.length - 1] ?? 0, sorted[0] ?? 0)];
+    }, [sorted]);
 
     React.useEffect(() => {
         if (active && field.rule?.type !== 'temporal range') {
             onChange({
                 type: 'temporal range',
-                value: [sorted[0] ?? 0, Math.max(sorted[sorted.length - 1] ?? 0, (sorted[0] ?? 0) + 1)],
+                value: [sorted[0] ?? 0, Math.max(sorted[sorted.length - 1] ?? 0, sorted[0] ?? 0)],
             });
         }
     }, [onChange, field, sorted, active]);
 
-    return (
+    const handleChange = React.useCallback((value: readonly [number, number]) => {
+        onChange({
+            type: 'temporal range',
+            value,
+        });
+    }, []);
+
+    return field.rule?.type === 'temporal range' ? (
         <Container>
-            temporal range
+            <Slider
+                min={min}
+                max={max}
+                value={field.rule.value}
+                onChange={handleChange}
+                isDateTime
+            />
         </Container>
-    );
+    ) : null;
 });
 
 export const FilterRangeRule: React.FC<RuleFormProps & { active: boolean }> = observer(({
@@ -309,22 +317,36 @@ export const FilterRangeRule: React.FC<RuleFormProps & { active: boolean }> = ob
         return dataSource.map(d => d[field.fid]).sort((a, b) => a - b);
     }, [dataSource, field]);
 
-    const { t } = useTranslation('translation', { keyPrefix: 'filters' });
+    const [min, max] = React.useMemo(() => {
+        return [sorted[0] ?? 0, Math.max(sorted[sorted.length - 1] ?? 0, sorted[0] ?? 0)];
+    }, [sorted]);
 
     React.useEffect(() => {
         if (active && field.rule?.type !== 'range') {
             onChange({
                 type: 'range',
-                value: [sorted[0] ?? 0, Math.max(sorted[sorted.length - 1] ?? 0, (sorted[0] ?? 0) + 1)],
+                value: [min, max],
             });
         }
-    }, [onChange, field, sorted, active]);
+    }, [onChange, field, min, max, active]);
 
-    return (
+    const handleChange = React.useCallback((value: readonly [number, number]) => {
+        onChange({
+            type: 'range',
+            value,
+        });
+    }, []);
+
+    return field.rule?.type === 'range' ? (
         <Container>
-            range
+            <Slider
+                min={min}
+                max={max}
+                value={field.rule.value}
+                onChange={handleChange}
+            />
         </Container>
-    );
+    ) : null;
 });
 
 const filterTabs: Record<IFilterRule['type'], React.FC<RuleFormProps & { active: boolean }>> = {
@@ -351,8 +373,8 @@ const Tabs: React.FC<TabsProps> = ({ field, onChange, tabs }) => {
                             key={i}
                             role="tab"
                             aria-selected={which === tab}
-                            id={`filter-tab-${tab}`}
-                            aria-controls={`filter-panel-${tab}`}
+                            id={`filter-tab-${tab.replaceAll(/ /g, '_')}`}
+                            aria-controls={`filter-panel-${tab.replaceAll(/ /g, '_')}`}
                             tabIndex={-1}
                             onClick={() => {
                                 if (which !== tab) {
@@ -373,8 +395,8 @@ const Tabs: React.FC<TabsProps> = ({ field, onChange, tabs }) => {
                         return (
                             <TabItem
                                 key={i}
-                                id={`filter-panel-${tab}`}
-                                aria-labelledby={`filter-tab-${tab}`}
+                                id={`filter-panel-${tab.replaceAll(/ /g, '_')}`}
+                                aria-labelledby={`filter-tab-${tab.replaceAll(/ /g, '_')}`}
                                 role="tabpanel"
                                 hidden={which !== tab}
                                 tabIndex={0}

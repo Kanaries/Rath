@@ -123,10 +123,10 @@ export interface IDraggableStateKey {
 
 export type IFilterRule = {
     type: 'range';
-    value: [number, number];
+    value: readonly [number, number];
 } | {
     type: 'temporal range';
-    value: [number, number];
+    value: readonly [number, number];
 } | {
     type: 'one of';
     value: Set<string | number>;
