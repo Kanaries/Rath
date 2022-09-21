@@ -1,5 +1,5 @@
 import { IReactionDisposer, makeAutoObservable, observable, reaction, toJS } from "mobx";
-import { DataSet, DraggableFieldState, IViewField } from "../interfaces";
+import { DataSet, DraggableFieldState, IFilterRule, IViewField } from "../interfaces";
 import { CommonStore } from "./commonStore";
 import { v4 as uuidv4 } from 'uuid';
 import { Specification } from "visual-insights";
@@ -85,8 +85,9 @@ function initEncoding(): DraggableFieldState {
         size: [],
         shape: [],
         radius: [],
-        theta: []
-    }
+        theta: [],
+        filters: [],
+    };
 }
 
 function initVisualConfig (): IVisualConfig {
@@ -278,6 +279,7 @@ export class VizSpecStore {
     public visIndex: number = 0;
     public canUndo = false;
     public canRedo = false;
+    public editingFilterIdx: number | null = null;
     constructor (commonStore: CommonStore) {
         this.commonStore = commonStore;
         this.draggableFieldState = initEncoding();
@@ -514,13 +516,21 @@ export class VizSpecStore {
         });
     }
     public moveField(sourceKey: keyof DraggableFieldState, sourceIndex: number, destinationKey: keyof DraggableFieldState, destinationIndex: number) {
+        if (sourceKey === 'filters') {
+            return this.removeField(sourceKey, sourceIndex);
+        } else if (destinationKey === 'filters') {
+            return this.appendFilter(destinationIndex, this.draggableFieldState[sourceKey][sourceIndex])
+        }
+        
         this.useMutable(({ encodings }) => {
             let movingField: IViewField;
             // 来源是不是metafield，是->clone；不是->直接删掉
             if (MetaFieldKeys.includes(sourceKey)) {
-                // use toJS for cloning
-                movingField = toJS(encodings[sourceKey][sourceIndex])
-                movingField.dragId = uuidv4();
+                // use a different dragId
+                movingField = {
+                    ...toJS(encodings[sourceKey][sourceIndex]), // toJS will NOT shallow copy a object here
+                    dragId: uuidv4(),
+                };
             } else {
                 [movingField] = encodings[sourceKey].splice(sourceIndex, 1);
             }
@@ -543,6 +553,27 @@ export class VizSpecStore {
             const fields = encodings[sourceKey];
             fields.splice(sourceIndex, 1);
         });
+    }
+    private appendFilter(index: number, data: IViewField) {
+        this.useMutable(({ encodings }) => {
+            encodings.filters.splice(index, 0, {
+                ...toJS(data),
+                dragId: uuidv4(),
+                rule: null,
+            });
+            this.editingFilterIdx = index;
+        });
+    }
+    public writeFilter(index: number, rule: IFilterRule | null) {
+        this.useMutable(({ encodings }) => {
+            encodings.filters[index].rule = rule;
+        });
+    }
+    public setFilterEditing(index: number) {
+        this.editingFilterIdx = index;
+    }
+    public closeFilterEditing() {
+        this.editingFilterIdx = null;
     }
     public transpose() {
         this.useMutable(({ encodings }) => {
@@ -567,6 +598,10 @@ export class VizSpecStore {
         });
     }
     public createLogField(stateKey: keyof DraggableFieldState, index: number) {
+        if (stateKey === 'filters') {
+            return;
+        }
+
         this.useMutable(({ encodings }) => {
             const originField = encodings[stateKey][index];
             const logField: IViewField = {
@@ -625,7 +660,11 @@ export class VizSpecStore {
     public appendField (destinationKey: keyof DraggableFieldState, field: IViewField | undefined) {
         if (MetaFieldKeys.includes(destinationKey)) return;
         if (typeof field === 'undefined') return;
-
+        if (destinationKey === 'filters') {
+            return;
+        }
+        
+        
         this.useMutable(({ encodings }) => {
             const cloneField = toJS(field);
             cloneField.dragId = uuidv4();

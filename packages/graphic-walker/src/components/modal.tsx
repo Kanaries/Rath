@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 import { XCircleIcon } from '@heroicons/react/24/outline';
 
@@ -9,7 +9,7 @@ const Background = styled.div({
   top: 0,
   width: '100vw',
   height: '100vh',
-  backdropFilter: 'blur(2px)',
+  backdropFilter: 'blur(1px)',
   zIndex: 25535,
 });
 
@@ -42,13 +42,27 @@ interface ModalProps {
 }
 const Modal: React.FC<ModalProps> = props => {
   const { onClose, title } = props;
+  const prevMouseDownTimeRef = useRef(0);
 
   return (
-    <Background onClick={onClose}>
+    <Background
+      // This is a safer replacement of onClick handler.
+      // onClick also happens if the click event is begun by pressing mouse button
+      // at a different element and then released when the mouse is moved on the target element.
+      // This case is required to be prevented, especially disturbing when interacting
+      // with a Slider component.
+      onMouseDown={() => prevMouseDownTimeRef.current = Date.now()}
+      onMouseOut={() => prevMouseDownTimeRef.current = 0}
+      onMouseUp={() => {
+        if (Date.now() - prevMouseDownTimeRef.current < 1000) {
+          onClose?.();
+        }
+      }}
+    >
       <Container
         role="dialog"
         className="shadow-lg"
-        onClick={e => e.stopPropagation()}
+        onMouseDown={e => e.stopPropagation()}
       >
         <div className="header relative h-9">
           <header className="font-bold">

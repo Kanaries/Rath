@@ -27,12 +27,18 @@
             "size": "Size",
             "shape": "Shape",
             "theta": "Angle",
-            "radius": "Radius"
+            "radius": "Radius",
+            "filters": "Filters"
         },
         "aggregator": {
             "sum": "Sum",
             "mean": "Mean",
             "count": "Count"
+        },
+        "filter_type": {
+            "one_of": "One-Of",
+            "range": "Range",
+            "temporal_range": "Date Range"
         }
     },
     "App": {
@@ -95,6 +101,26 @@
             "DatasetFields": {
                 "field_list": "Field List"
             }
+        }
+    },
+    "filters": {
+        "to_edit": "Edit This Rule",
+        "empty_rule": "! (empty rule)",
+        "editing": "Edit Rule",
+        "form": {
+            "name": "Field",
+            "rule": "Rule"
+        },
+        "header": {
+            "visibility": "Visible",
+            "value": "Label",
+            "count": "Count"
+        },
+        "selected_keys": "{{ count }} items selected",
+        "btn": {
+            "select_all": "Select All",
+            "unselect_all": "Unselect All",
+            "reverse": "Reverse Selection"
         }
     }
 }

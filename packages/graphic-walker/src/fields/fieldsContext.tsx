@@ -48,7 +48,8 @@ export const DRAGGABLE_STATE_KEYS: Readonly<IDraggableStateKey[]> = [
     { id: 'size', mode: 1 },
     { id: 'shape', mode: 1},
     { id: 'theta', mode: 1 },
-    { id: 'radius', mode: 1 }
+    { id: 'radius', mode: 1 },
+    { id: 'filters', mode: 1 },
 ] as const;
 
 export const AGGREGATOR_LIST: Readonly<string[]> = [

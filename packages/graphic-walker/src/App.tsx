@@ -22,6 +22,7 @@ import VisNav from './segments/visNav';
 import { useTranslation } from 'react-i18next';
 import { mergeLocaleRes, setLocaleLanguage } from './locales/i18n';
 import Menubar from './visualSettings/menubar';
+import FilterField from './fields/filterField';
 
 
 export interface EditorProps {
@@ -103,6 +104,7 @@ const App: React.FC<EditorProps> = props => {
 						<DatasetFields />
 					</div>
 					<div className="col-span-2 xl:col-span-1">
+						<FilterField />
 						<AestheticFields />
 					</div>
 					<div className="col-span-7 xl:col-span-4">

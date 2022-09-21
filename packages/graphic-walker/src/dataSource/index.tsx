@@ -19,9 +19,9 @@ const DataSourceSegment: React.FC<DSSegmentProps> = props => {
 
     const { currentDataset, datasets, showDSPanel } = commonStore;
 
-    return <Container>
+    return <Container className="flex flex-row items-stretch">
         {!preWorkDone && <div className="animate-spin inline-block mr-2 ml-2 w-4 h-4 rounded-full border-t-2 border-l-2 border-blue-500"></div>}
-        <label className="text-xs mr-1">
+        <label className="text-xs mr-1 whitespace-nowrap self-center h-4">
             {t('DataSource.labels.cur_dataset')}
         </label>
         <select

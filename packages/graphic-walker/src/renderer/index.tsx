@@ -1,16 +1,18 @@
 import { runInAction, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
-import React from 'react';
-import { useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { applyFilter } from '../services';
 import { useGlobalStore } from '../store';
 import ReactVega from '../vis/react-vega';
+
 
 const ReactiveRenderer: React.FC = props => {
     const { vizStore, commonStore } = useGlobalStore();
     const { draggableFieldState, visualConfig } = vizStore;
     const { geoms, interactiveScale, defaultAggregated, defaultStack, showActions, size } = visualConfig;
     const { currentDataset } = commonStore;
+    const { filters } = draggableFieldState;
 
     const rows = toJS(draggableFieldState.rows)
     const columns = toJS(draggableFieldState.columns)
@@ -32,6 +34,37 @@ const ReactiveRenderer: React.FC = props => {
             commonStore.setFilters(values);
         })
     }, [])
+
+    // apply filters
+    const { dataSource } = currentDataset;
+
+    const [data, setData] = useState(dataSource);
+    const pendingPromiseRef = useRef<Promise<typeof data> | null>(null);
+
+    useEffect(() => {
+        setData(dataSource);
+    }, [dataSource]);
+
+    useEffect(() => {
+        const p = filters.length === 0 ? Promise.resolve(dataSource) : applyFilter(dataSource, filters);
+        pendingPromiseRef.current = p;
+
+        p.then(d => {
+            if (p !== pendingPromiseRef.current) {
+                // This promise is out-of-date
+                return;
+            }
+
+            setData(d);
+        }).catch(err => {
+            console.error(err);
+        });
+
+        return () => {
+            pendingPromiseRef.current = null;
+        };
+    }, [dataSource, filters]);
+
     return <Resizable className={(size.mode === 'fixed' && !hasFacet) ? "border-blue-400 border-2 overflow-hidden" : ""}
     style={{ padding: '12px' }}
     onResizeStop={(e, direction, ref, d) => {
@@ -51,7 +84,7 @@ const ReactiveRenderer: React.FC = props => {
         geomType={geoms[0]}
         defaultAggregate={defaultAggregated}
         defaultStack={defaultStack}
-        dataSource={currentDataset.dataSource}
+        dataSource={data}
         rows={rows}
         columns={columns}
         color={color[0]}
