@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
-import { CommandButton, DefaultButton, Spinner, Stack } from 'office-ui-fabric-react';
+import { CommandButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
 
 import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
@@ -9,14 +9,14 @@ import ReactVega from '../../../components/react-vega';
 import { applyFilter } from '../utils';
 
 const PattSegment: React.FC = () => {
-    const { discoveryMainStore } = useGlobalStore();
-    const { pattSpecList, pattViews, mainVizSetting, dataSource, autoAsso, hasMainView } = discoveryMainStore;
+    const { semiAutoStore } = useGlobalStore();
+    const { pattSpecList, pattViews, mainVizSetting, dataSource, autoAsso, hasMainView } = semiAutoStore;
     const loadMore = useCallback(() => {
-        discoveryMainStore.increaseRenderAmount('pattViews');
-    }, [discoveryMainStore])
+        semiAutoStore.increaseRenderAmount('pattViews');
+    }, [semiAutoStore])
     const assViews = useCallback(() => {
-        discoveryMainStore.pattAssociate();
-    }, [discoveryMainStore])
+        semiAutoStore.pattAssociate();
+    }, [semiAutoStore])
     if (pattViews.views.length === 0 && autoAsso.pattViews) return <div />
     return <div className="pure-card">
         <h1 className="ms-fontSize-18">{intl.get('discovery.main.associate.patterns')}</h1>
@@ -40,7 +40,7 @@ const PattSegment: React.FC = () => {
                             iconProps={{ iconName: 'Pinned' }}
                             text={intl.get('discovery.main.pin')}
                             onClick={() => {
-                                discoveryMainStore.updateMainView(pattViews.views[i])
+                                semiAutoStore.updateMainView(pattViews.views[i])
                             }}
                         />
                     </Stack>

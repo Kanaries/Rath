@@ -1,4 +1,4 @@
-import { DetailsList, SelectionMode, Selection } from 'office-ui-fabric-react';
+import { DetailsList, SelectionMode, Selection } from '@fluentui/react';
 import React from 'react';
 import { IFieldMeta } from '../../interfaces';
 
@@ -14,7 +14,6 @@ const SetSelection: React.FC<SetSelectionProps> = props => {
         <DetailsList
             selection={selection}
             selectionMode={SelectionMode.multiple}
-            onItemInvoked={(p) => { console.log(p); }}
             columns={[
                 {
                     key: 'memberName',

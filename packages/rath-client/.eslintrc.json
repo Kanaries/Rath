@@ -1,0 +1,15 @@
+{
+    "extends": [
+        "eslint:recommended",
+        "react-app",
+        "react-app/jest"
+    ],
+    "rules": {
+        "no-console": ["warn", { "allow": ["warn", "error"] }],
+        "no-param-reassign": "off",
+        "import/order": "warn"
+    },
+    "parserOptions": {
+        "project": "./tsconfig.json"
+    }
+}

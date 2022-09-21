@@ -21,6 +21,6 @@ export async function recallLogger (props: RecallProps) {
             console.error(error);
         }
     } else {
-        console.log(`current env ${process.env.NODE_ENV}`, props);
+        console.warn(`current env ${process.env.NODE_ENV}`, props);
     }
 }

@@ -19,7 +19,7 @@ function fl2bins(data: IRow[], valueField: string, ctField: string) {
     bins[BIN_SIZE - 1] += bins[BIN_SIZE]
     bins.pop();
     return bins.map((b, i) => ({
-        [valueField]: `[${i + 1}]${Math.round(_min + i * step)}`,
+        [valueField]: Math.round(_min + i * step),
         [ctField]: b
     }))
 }

@@ -1,15 +1,14 @@
 import React, { useCallback, useMemo } from 'react';
 import intl from 'react-intl-universal';
-import { Icon, HoverCard, IExpandingCardProps } from 'office-ui-fabric-react';
+import { Icon, HoverCard, IExpandingCardProps } from '@fluentui/react';
 import chroma from 'chroma-js';
-import { FieldSummary } from '../../service';
-import DistributionChart from './distributionChart';
 import { BaseTable, ArtColumn } from 'ali-react-table';
 import styled from 'styled-components';
-
-import './fieldAnalysis.css';
-import { IRow } from '../../interfaces';
 import { ISemanticType } from 'visual-insights';
+import { FieldSummary } from '../../service';
+import { IRow } from '../../interfaces';
+import DistributionChart from './distributionChart';
+import './fieldAnalysis.css';
 
 // todo: distribution info
 

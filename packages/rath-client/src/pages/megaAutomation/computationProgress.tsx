@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import intl from 'react-intl-universal';
-import { ProgressIndicator } from 'office-ui-fabric-react';
+import { ProgressIndicator } from '@fluentui/react';
 import { getStateInStorage, setStateInStorage } from '../../workers/engine/utils';
 
 interface CPProps {

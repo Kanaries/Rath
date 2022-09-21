@@ -37,7 +37,6 @@ export class CommonStore {
     }
     public visualAnalysisInGraphicWalker (spec: IVegaSubset) {
         this.graphicWalkerSpec = transVegaSubset2Schema(spec);
-        this.vizSpec = spec;
         this.appKey = PIVOT_KEYS.editor;
     }
     public analysisInPainter (spec: IVegaSubset) {

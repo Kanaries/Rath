@@ -138,7 +138,7 @@ export class DataSourceStore {
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
             if (ev.source && msg.type === 'init_data') {
-                console.log('[Get DataSource From Other Pages]', msg)
+                console.warn('[Get DataSource From Other Pages]', msg)
                 // @ts-ignore
                 ev.source.postMessage(true, ev.origin)
                 this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
@@ -194,7 +194,7 @@ export class DataSourceStore {
     public get hasOriginalDimensionInData () {
         if (this.dimensions.length === 0) return false;
         if (this.dimensions.length === 1) {
-            return !Boolean(this.dimensions.find(f => f === RATH_INDEX_COLUMN_KEY))
+            return !this.dimensions.find(f => f === RATH_INDEX_COLUMN_KEY)
         }
         return true;
     }

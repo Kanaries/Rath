@@ -6,7 +6,10 @@ import typescript from '@rollup/plugin-typescript'
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    port: 2002
+    port: 2002,
+    proxy: {
+      '/datasets': 'http://localhost:8080',
+    },
   },
   plugins: [
     // @ts-ignore
@@ -29,7 +32,7 @@ export default defineConfig({
       fileName: (format) => `graphic-walker.${format}.js`
     },
     rollupOptions: {
-      external: ['React', 'ReactDOM'],
+      external: ['react', 'react-dom'],
       
     },
     minify: 'esbuild',

@@ -196,7 +196,6 @@ export function parseReg(value: string, reg_id: number): DateTimeInfo {
         let res = analyzer.lex.trans(parse_res, analyzer.rules[reg_id].symbols)
         let infoArray = new Array<string | undefined>(7)
         for (let i = 0; i < res.length; ++i) infoArray[res[i][1]] = res[i][0];
-        // console.log(analyzer.rules[reg_id].reg, reg_id, infoArray)
         return new DateTimeInfo(...infoArray)
     }
     return {} as DateTimeInfo
@@ -340,16 +339,19 @@ export function dateTimeExpand(props: { dataSource: IRow[]; fields: IMuteFieldBa
 }
 
 export function dateTimeExpandTest(testCase: Array<string>) {
+    // eslint-disable-next-line no-console
     console.log(parseDateTimeArray(testCase))
     for (let i = 0;i < analyzer.rules.length;++i) {
         let cnt = 0
         for (let s of testCase) {
             let res = analyzer.rules[i].exec(s)
             if (res) {
+                // eslint-disable-next-line no-console
                 console.log(i, s, analyzer.rules[i].trans(res));
                 cnt += 1;
             }
         }
+        // eslint-disable-next-line no-console
         console.log(i, cnt, analyzer.rules[i].reg)
     }
 }

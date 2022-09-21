@@ -3,7 +3,7 @@ import { autoSet } from '../../dev/autoStat';
 import produce from 'immer';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { ActionButton, DefaultButton, Dropdown, IconButton, IDropdownOption, Stack } from 'office-ui-fabric-react';
+import { ActionButton, DefaultButton, Dropdown, IconButton, IDropdownOption, Stack } from '@fluentui/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactVega from '../../components/react-vega';
 import { IFieldMeta } from '../../interfaces';
@@ -240,11 +240,6 @@ const ProgressiveDashboard: React.FC = (props) => {
         setVisSettingList(originSpecList.map(() => false));
     }, [originSpecList]);
 
-    console.log({
-        recommendVisList,
-        originSpecList
-    })
-
     return (
         <Segment className="flex flex-wrap">
             {recommendVisList.map((vis, visIndex) => (
@@ -292,7 +287,7 @@ const ProgressiveDashboard: React.FC = (props) => {
                                             ? '*'
                                             : (originSpecList[visIndex].fields[fIndex] as IFieldMeta).fid;
                                     const fieldSizeMatch = originSpecList[visIndex].fields.length === recommendVisList[visIndex].fields.length;
-                                    let selectedName: string | null = null;;
+                                    let selectedName: string | null = null;
                                     if (fieldSizeMatch) {
                                         selectedName = ((recommendVisList[visIndex].fields[fIndex] as IFieldMeta).name || (recommendVisList[visIndex].fields[fIndex] as IFieldMeta).fid)
                                     }

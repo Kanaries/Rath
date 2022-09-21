@@ -4,10 +4,10 @@
 import 'symbol-observable'
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { initializeIcons } from '@fluentui/font-icons-mdl2'
 import 'office-ui-fabric-core/dist/css/fabric.css'
 import './index.css';
 import App from './App';
-import { initializeIcons } from '@uifabric/icons'
 
 initializeIcons()
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Icon } from '@fluentui/react';
 import { IFieldMeta } from '../../../interfaces';
-import { Icon } from 'office-ui-fabric-react';
 
 const COLORS = {
     // tableau style

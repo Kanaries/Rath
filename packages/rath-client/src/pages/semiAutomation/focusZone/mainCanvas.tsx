@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import React, { useMemo } from 'react';
-import ReactVega from '../../../components/react-vega';
 import { IPattern } from '@kanaries/loa';
+import ReactVega from '../../../components/react-vega';
 import { IResizeMode, IRow, IVegaSubset } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { applyFilter } from '../utils';
@@ -13,8 +13,8 @@ interface MainCanvasProps{
 }
 const MainCanvas: React.FC<MainCanvasProps> = props => {
     const { view, spec } = props;
-    const { discoveryMainStore } = useGlobalStore()
-    const { mainVizSetting, dataSource } = discoveryMainStore;
+    const { semiAutoStore } = useGlobalStore()
+    const { mainVizSetting, dataSource } = semiAutoStore;
 
     const { resize, debug } = mainVizSetting
     const { width, height, mode } = resize;
@@ -32,7 +32,7 @@ const MainCanvas: React.FC<MainCanvasProps> = props => {
                 height: height + 20
             }}
             onResizeStop={(e, dir, ref, d) => {
-                discoveryMainStore.updateMainVizSettings(s => {
+                semiAutoStore.updateMainVizSettings(s => {
                     s.resize.width = s.resize.width + d.width;
                     s.resize.height = s.resize.height + d.height
                 })

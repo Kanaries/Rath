@@ -1,16 +1,19 @@
 import React, { useCallback} from "react";
 import { BaseTable, Classes } from "ali-react-table";
-import { IRow } from "../../../interfaces";
-import HeaderCell from "./headerCell";
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite'
 import { useGlobalStore } from "../../../store";
+import { IRow } from "../../../interfaces";
+import HeaderCell from "./headerCell";
 
 const CustomBaseTable = styled(BaseTable)`
-    --header-bgcolor: #fafafa;
+    --header-bgcolor: #fafafa!important;
     --bgcolor: rgba(0, 0, 0, 0);
     .${Classes.tableHeaderCell} {
         position: relative;
+    }
+    thead{
+        vertical-align: top;
     }
 `;
 
@@ -22,8 +25,6 @@ const TableInnerStyle = {
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
     const { mutFields, rawData, fieldMetas, fields } = dataSourceStore;
-
-
 
     const updateFieldInfo = useCallback((fieldId: string, fieldPropKey: string, value: any) => {
         dataSourceStore.updateFieldInfo(fieldId, fieldPropKey, value);

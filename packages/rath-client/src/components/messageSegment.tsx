@@ -1,6 +1,6 @@
-import { observer } from 'mobx-react-lite';
-import { MessageBar, MessageBarType } from 'office-ui-fabric-react';
 import React from 'react';
+import { observer } from 'mobx-react-lite';
+import { MessageBar, MessageBarType } from '@fluentui/react';
 import { useGlobalStore } from '../store';
 
 const MessageSegment: React.FC = props => {

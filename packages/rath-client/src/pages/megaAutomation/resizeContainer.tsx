@@ -8,13 +8,13 @@ interface ResizeContainerProps {
 }
 const ResizeContainer: React.FC<ResizeContainerProps> = props => {
     const { enableResize } = props;
-    const { exploreStore } = useGlobalStore();
-    const { visualConfig } = exploreStore;
+    const { megaAutoStore } = useGlobalStore();
+    const { visualConfig } = megaAutoStore;
     const { resizeConfig } = visualConfig;
     if (enableResize) {
         return <Resizable size={{ width: resizeConfig.width + 24, height: resizeConfig.height + 24 }}
             onResizeStop={(e, dir, ref, d) => {
-                exploreStore.setVisualConig(cnf => {
+                megaAutoStore.setVisualConig(cnf => {
                     cnf.resizeConfig.width = cnf.resizeConfig.width + d.width;
                     cnf.resizeConfig.height = cnf.resizeConfig.height + d.height
             })

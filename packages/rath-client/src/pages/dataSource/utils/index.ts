@@ -1,18 +1,18 @@
-import { STORAGE_FILE_SUFFIX } from "../../../constants";
-import { FileLoader } from "../../../utils";
 import { Sampling } from 'visual-insights';
 import { FileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
+import { STORAGE_FILE_SUFFIX } from "../../../constants";
+import { FileLoader } from "../../../utils";
 import { IMuteFieldBase, IRow } from "../../../interfaces";
 import { IRathStorage, RathStorageParse } from "../../../utils/storage";
+import { workerService } from "../../../service";
+
 
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
 import FileDataTransformWorker from './transFileData.worker?worker';
-import { workerService } from "../../../service";
-
 
 export enum SampleKey {
   none = 'none',
@@ -41,19 +41,15 @@ export async function transformRawDataService (rawData: IRow[]): Promise<{
     fields: IMuteFieldBase[];
     dataSource: IRow[]
 }> {
-    try {
-        const worker = new FileDataTransformWorker()
-        const res = await workerService<{
-                fields: IMuteFieldBase[];
-                dataSource: IRow[]
-            }, IRow[]>(worker, rawData);
-        if (res.success) {
-            return res.data;
-        } else {
-            throw new Error(res.message)
-        }
-    } catch (error) {
-        throw error
+    const worker = new FileDataTransformWorker()
+    const res = await workerService<{
+            fields: IMuteFieldBase[];
+            dataSource: IRow[]
+        }, IRow[]>(worker, rawData);
+    if (res.success) {
+        return res.data;
+    } else {
+        throw new Error(res.message)
     }
 }
 
