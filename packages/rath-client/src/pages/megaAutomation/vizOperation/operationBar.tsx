@@ -35,10 +35,10 @@ const OperationBar: React.FC<OperationBarProps> = props => {
     }, [megaAutoStore, commonStore])
 
     const analysisInPainter = useCallback(() => {
-        if (exploreStore.mainViewSpec) {
-            commonStore.analysisInPainter(exploreStore.mainViewSpec)
+        if (megaAutoStore.mainViewSpec) {
+            commonStore.analysisInPainter(megaAutoStore.mainViewSpec)
         }
-    }, [commonStore, exploreStore])
+    }, [commonStore, megaAutoStore])
 
     const commandProps: ICommandBarItemProps[] = [
         {

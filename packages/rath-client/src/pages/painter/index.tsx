@@ -1,6 +1,6 @@
 import { IFieldMeta, IRow, ISemanticType } from '@kanaries/loa';
 import { observer } from 'mobx-react-lite';
-import { DefaultButton, PrimaryButton, Slider, Toggle, Stack, SwatchColorPicker } from 'office-ui-fabric-react';
+import { DefaultButton, PrimaryButton, Slider, Toggle, Stack, SwatchColorPicker } from '@fluentui/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
 import ReactVega from '../../components/react-vega';
@@ -82,6 +82,7 @@ const Painter: React.FC = (props) => {
             const X = data.map((r) => r[LABEL_FIELD_KEY]);
             const ans: { field: IFieldMeta; score: number }[] = [];
             for (let field of fieldMetas) {
+                // eslint-disable-next-line no-constant-condition
                 if (true) {
                     const Y = data.map((r) => r[field.fid]);
                     const score = nnMic(X, Y);

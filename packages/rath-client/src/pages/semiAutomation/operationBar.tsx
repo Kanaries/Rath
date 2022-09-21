@@ -11,7 +11,7 @@ const OpCont = styled.div`
 const OperationBar: React.FC = props => {
     const { semiAutoStore } = useGlobalStore();
     const { mainVizSetting } = semiAutoStore;
-    const { interactive, resize, debug } = mainVizSetting;
+    const { interactive, resize, debug, nlg } = mainVizSetting;
 
     return <OpCont>
         <VizOperationBar
