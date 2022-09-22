@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { DefaultButton, TeachingBubble, DirectionalHint } from '@fluentui/react';
 import { FieldSummary, Subspace } from '../../service';
-import { DefaultButton, TeachingBubble, DirectionalHint } from 'office-ui-fabric-react';
 
 import './index.css';
 import { Specification } from '../../visBuilder/vegaBase';

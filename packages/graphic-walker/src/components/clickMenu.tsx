@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 const MenuContainer = styled.div`
-    width: 100px;
+    min-width: 100px;
     background-color: #fff;
     border: 1px solid #f0f0f0;
     position: absolute;

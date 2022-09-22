@@ -1,9 +1,10 @@
-import { useId } from '@uifabric/react-hooks';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useId } from '@fluentui/react-hooks';
 import produce from 'immer';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Callout, ChoiceGroup, DefaultButton, IconButton, PrimaryButton, Stack, Selection, SelectionMode, Toggle } from 'office-ui-fabric-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { Callout, ChoiceGroup, DefaultButton, PrimaryButton, Stack, Selection, SelectionMode, Toggle, ActionButton } from '@fluentui/react';
+import intl from 'react-intl-universal';
 import { IFilter } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import RangeSelection from './rangeSelection';
@@ -13,6 +14,7 @@ import SetSelection from './setSelection';
 interface FieldFilterProps {
     fid: string;
 }
+
 const FieldFilter: React.FC<FieldFilterProps> = props => {
     const { fid } = props;
     const buttonId = useId('filter-button');
@@ -23,7 +25,13 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
 
     const { rawData } = dataSourceStore;
 
-    const fieldValues = useMemo(() => rawData.map(r => r[fid]), [rawData, fid]);
+    const fieldValues = useMemo(() => rawData.map(r => {
+        try {
+            return parseFloat(r[fid]);
+        } catch {
+            return NaN;
+        }
+    }), [rawData, fid]);
 
     const [filter, setFilter] = useState<IFilter>((meta && meta.semanticType === 'quantitative') ? {
         fid,
@@ -63,7 +71,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
         setShowFilterConfig(v => !v);
     }, [])
 
-    const onRangeValueChange = useCallback((v: number, r: [number, number]) => {
+    const onRangeValueChange = useCallback((r: [number, number]) => {
         setFilter(f => {
             const nextF = produce(f, draft => {
                 if (draft.type === 'range' && r) {
@@ -75,10 +83,11 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
     }, [])
 
     return <div>
-        <IconButton id={buttonId}
-            text="Filter"
+        <ActionButton
+            text={intl.get('common.filter')}
             iconProps={{ iconName: 'filter' }}
             onClick={toggleShowFilter}
+            id={buttonId}
         />
         {
             showFilterConfig && <Callout target={`#${buttonId}`}
@@ -86,11 +95,11 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                 >
                 <div style={{ padding: '1em', minWidth: '400px'}}>
 
-                <h2>Filter Config</h2>
+                <h2>{intl.get('dataSource.filter.title')}</h2>
                 <Toggle
-                    onText='Apply'
-                    offText='Disable'
-                    label="Filter"
+                    onText={intl.get('dataSource.filter.enabled')}
+                    offText={intl.get('dataSource.filter.disabled')}
+                    label={intl.get('dataSource.filter.active')}
                     checked={!filter.disable}
                     onChange={(e, checked) => {
                         setFilter(f => ({
@@ -101,10 +110,10 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                 />
                 <div>
                     <ChoiceGroup
-                        label="Filter by"
+                        label={intl.get('dataSource.filter.key')}
                         options={[
-                            { key: 'range', text: 'range' },
-                            { key: 'set', text: 'set'}
+                            { key: 'range', text: intl.get('dataSource.filter.range') },
+                            { key: 'set', text: intl.get('dataSource.filter.set')}
                         ]}
                         selectedKey={filter.type}
                         onChange={(ev, op) => {
@@ -140,12 +149,12 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                 }
                 <Stack horizontal>
                     <PrimaryButton
-                        text="Submit"
+                        text={intl.get('dataSource.filter.submit')}
                         onClick={submitFilter}
                     />
                     <DefaultButton
                         style={{ marginLeft: '1em' }}
-                        text="Cancel"
+                        text={intl.get('dataSource.filter.cancel')}
                         onClick={toggleShowFilter}
                     />
                 </Stack>

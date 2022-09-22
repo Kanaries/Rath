@@ -39,29 +39,21 @@ export const FieldsContextWrapper: React.FC = props => {
 
 export default FieldsContextWrapper;
 
-export const DRAGGABLE_STATE_KEYS: Array<IDraggableStateKey> = [
-    { id: 'fields', name: '字段', mode: 0 },
-    { id: 'columns', name: '列', mode: 0 },
-    { id: 'rows', name: '行', mode: 0 },
-    { id: 'color', name: '颜色', mode: 1 },
-    { id: 'opacity', name: '透明度', mode: 1 },
-    { id: 'size', name: '大小', mode: 1 },
-    { id: 'shape', name: '形状', mode: 1},
-    { id: 'theta', name: '角度', mode: 1 },
-    { id: 'radius', name: '半径', mode: 1 }
-];
+export const DRAGGABLE_STATE_KEYS: Readonly<IDraggableStateKey[]> = [
+    { id: 'fields', mode: 0 },
+    { id: 'columns', mode: 0 },
+    { id: 'rows', mode: 0 },
+    { id: 'color', mode: 1 },
+    { id: 'opacity', mode: 1 },
+    { id: 'size', mode: 1 },
+    { id: 'shape', mode: 1},
+    { id: 'theta', mode: 1 },
+    { id: 'radius', mode: 1 },
+    { id: 'filters', mode: 1 },
+] as const;
 
-export const AGGREGATOR_LIST = [
-    {
-      value: "sum",
-      label: "求和",
-    },
-    {
-      value: "mean",
-      label: "平均值",
-    },
-    {
-      value: "count",
-      label: "计数",
-    },
-];
+export const AGGREGATOR_LIST: Readonly<string[]> = [
+    'sum',
+    'mean',
+    'count',
+] as const;

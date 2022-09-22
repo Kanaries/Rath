@@ -11,15 +11,17 @@ import {
     Toggle,
     SpinButton,
     Position,
-} from 'office-ui-fabric-react';
+    ChoiceGroup,
+    IChoiceGroupOption,
+} from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../store';
-import { EXPLORE_VIEW_ORDER } from '../../store/exploreStore';
+import { EXPLORE_VIEW_ORDER } from '../../store/megaAutomation';
 import { IResizeMode } from '../../interfaces';
 
 const PreferencePanel: React.FC = () => {
-    const { exploreStore } = useGlobalStore();
-    const { visualConfig, showPreferencePannel, nlgThreshold } = exploreStore;
+    const { megaAutoStore } = useGlobalStore();
+    const { visualConfig, showPreferencePannel, nlgThreshold, vizMode } = megaAutoStore;
 
     const { nlg } = visualConfig;
 
@@ -42,14 +44,21 @@ const PreferencePanel: React.FC = () => {
     }, []);
 
     const closeVisualPannel = useCallback(() => {
-        exploreStore.setShowPreferencePannel(false);
-    }, [exploreStore]);
+        megaAutoStore.setShowPreferencePannel(false);
+    }, [megaAutoStore]);
 
     const onRenderFooterContent = () => (
         <div>
             <PrimaryButton onClick={closeVisualPannel}>Save</PrimaryButton>
         </div>
     );
+
+    const vizModeOptions  = useMemo<IChoiceGroupOption[]>(() => {
+        return [
+            { text: intl.get('discovery.main.vizsys.lite'), key: 'lite' },
+            { text: intl.get('discovery.main.vizsys.strict'), key: 'strict' }
+        ]
+    }, [])
 
     return (
         <Panel
@@ -61,13 +70,23 @@ const PreferencePanel: React.FC = () => {
             onRenderFooterContent={onRenderFooterContent}
         >
             <Stack.Item>
+            <ChoiceGroup
+                label={intl.get('discovery.main.vizsys.title')}
+                onChange={(e, op) => {
+                    op && megaAutoStore.setVizMode(op.key as 'lite' | 'strict')
+                }}
+                selectedKey={vizMode}
+                options={vizModeOptions}
+            />
+            </Stack.Item>
+            <Stack.Item>
                 <Dropdown
                     style={{ minWidth: '120px' }}
-                    selectedKey={exploreStore.orderBy}
+                    selectedKey={megaAutoStore.orderBy}
                     options={orderOptions}
                     label={intl.get('lts.orderBy.title')}
                     onChange={(e, item) => {
-                        item && exploreStore.setExploreOrder(item.key as string);
+                        item && megaAutoStore.setExploreOrder(item.key as string);
                     }}
                 />
             </Stack.Item>
@@ -77,7 +96,7 @@ const PreferencePanel: React.FC = () => {
                         label={intl.get('lts.operation.debug')}
                         checked={visualConfig.debug}
                         onChange={(e, checked) => {
-                            exploreStore.setVisualConig((cnf) => {
+                            megaAutoStore.setVisualConig((cnf) => {
                                 cnf.debug = Boolean(checked);
                             });
                         }}
@@ -88,7 +107,7 @@ const PreferencePanel: React.FC = () => {
                         label={intl.get('lts.operation.zoom')}
                         checked={visualConfig.zoom}
                         onChange={(e, checked) => {
-                            exploreStore.setVisualConig((cnf) => {
+                            megaAutoStore.setVisualConig((cnf) => {
                                 cnf.zoom = Boolean(checked);
                             });
                         }}
@@ -99,7 +118,7 @@ const PreferencePanel: React.FC = () => {
                         label="NLG(beta)"
                         checked={visualConfig.nlg}
                         onChange={(e, checked) => {
-                            exploreStore.setVisualConig((cnf) => {
+                            megaAutoStore.setVisualConig((cnf) => {
                                 cnf.nlg = Boolean(checked);
                             });
                         }}
@@ -116,7 +135,7 @@ const PreferencePanel: React.FC = () => {
                         valueFormat={(value: number) => `${Math.round(value * 100)}%`}
                         showValue={true}
                         onChange={(value: number) => {
-                            exploreStore.setNlgThreshold(value);
+                            megaAutoStore.setNlgThreshold(value);
                         }}
                     />
                 </Stack.Item>
@@ -127,7 +146,7 @@ const PreferencePanel: React.FC = () => {
                         options={resizeModeList}
                         onChange={(e, op) => {
                             op &&
-                                exploreStore.setVisualConig((cnf) => {
+                                megaAutoStore.setVisualConig((cnf) => {
                                     cnf.resize = op.key as any;
                                 });
                         }}
@@ -144,17 +163,17 @@ const PreferencePanel: React.FC = () => {
                             max={1000}
                             step={10}
                             onValidate={(v) => {
-                                exploreStore.setVisualConig((cnf) => {
+                                megaAutoStore.setVisualConig((cnf) => {
                                     cnf.resizeConfig.width = parseInt(v);
                                 });
                             }}
                             onIncrement={() => {
-                                exploreStore.setVisualConig((cnf) => {
+                                megaAutoStore.setVisualConig((cnf) => {
                                     cnf.resizeConfig.width = Math.min(cnf.resizeConfig.width + 10, 1000);
                                 });
                             }}
                             onDecrement={() => {
-                                exploreStore.setVisualConig((cnf) => {
+                                megaAutoStore.setVisualConig((cnf) => {
                                     cnf.resizeConfig.width = Math.max(cnf.resizeConfig.width - 10, 10);
                                 });
                             }}
@@ -172,17 +191,17 @@ const PreferencePanel: React.FC = () => {
                             step={10}
                             style={{ width: '32px' }}
                             onValidate={(v) => {
-                                exploreStore.setVisualConig((cnf) => {
+                                megaAutoStore.setVisualConig((cnf) => {
                                     cnf.resizeConfig.height = parseInt(v);
                                 });
                             }}
                             onIncrement={() => {
-                                exploreStore.setVisualConig((cnf) => {
+                                megaAutoStore.setVisualConig((cnf) => {
                                     cnf.resizeConfig.height = Math.min(cnf.resizeConfig.height + 10, 1000);
                                 });
                             }}
                             onDecrement={() => {
-                                exploreStore.setVisualConig((cnf) => {
+                                megaAutoStore.setVisualConig((cnf) => {
                                     cnf.resizeConfig.height = Math.max(cnf.resizeConfig.height - 10, 10);
                                 });
                             }}

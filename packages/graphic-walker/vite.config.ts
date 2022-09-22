@@ -6,7 +6,10 @@ import typescript from '@rollup/plugin-typescript'
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    port: 2002
+    port: 2002,
+    proxy: {
+      '/datasets': 'http://localhost:8080',
+    },
   },
   plugins: [
     // @ts-ignore
@@ -19,7 +22,9 @@ export default defineConfig({
       apply: 'build'
     }
   ],
-  dedupe: ['react', 'react-dom'],
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
   build: {
     lib: {
       entry: path.resolve(__dirname, './src/index.tsx'),

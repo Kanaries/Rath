@@ -1,11 +1,11 @@
+import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visual-insights';
+import { IRow } from '../interfaces';
+import { RATH_INDEX_COLUMN_KEY } from '../constants';
 import * as FileLoader from './fileParser';
 import * as Transform from './transform';
 import { getRange } from './stat';
 import deepcopy from './deepcopy';
-import { IRow } from '../interfaces';
-// TODO: Rath和VI中都有一套，弱约束关联，可能带来潜在的迭代负担或bug
-import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visual-insights';
-import { RATH_INDEX_COLUMN_KEY } from '../constants';
+
 
 function isASCII(str: string) {
   // eslint-disable-next-line no-control-regex
@@ -114,14 +114,18 @@ export function findRathSafeColumnIndex<T extends IGeneralColumn> (fields: T[]):
   return fields.findIndex(f => f.fid === RATH_INDEX_COLUMN_KEY);
 }
 
-export function throttle<F extends Function> (func: F, delay: number) {
+export function throttle<F extends (...args: any[]) => any> (func: F, delay: number) {
   let timer: number | null = null;
-  return function () {
+  return function (...args: Parameters<F>): Promise<ReturnType<F>> | null {
     if (timer === null) {
-      timer = window.setTimeout(() => {
-        func();
-        timer = null;
-      }, delay);
+      return new Promise<ReturnType<F>>(resolve => {
+        timer = window.setTimeout(() => {
+          resolve(func(...args));
+          timer = null;
+        }, delay);
+      });
+    } else {
+      return null;
     }
   }
 }

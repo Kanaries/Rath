@@ -8,17 +8,16 @@ import {
   SpinButton,
   Pivot,
   PivotItem,
-} from "office-ui-fabric-react";
-import { Position } from "office-ui-fabric-react/lib/utilities/positioning";
-
-import SearchBoard from "./search/index";
+  Position
+} from '@fluentui/react';
+import { toJS } from "mobx";
 import { observer } from 'mobx-react-lite'
-
+import { useGlobalStore } from "../../store";
+import SearchBoard from "./search/index";
 import ObserverChart from "./observerChart";
 import VizPreference from "./vizPreference";
-import { useGlobalStore } from "../../store";
 import Association from "./association";
-import { toJS } from "mobx";
+
 
 const pivotKeyList = [
   'rankList',

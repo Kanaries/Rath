@@ -26,7 +26,7 @@ const PosFields: React.FC = props => {
     }, [geoms[0]])
     return <div>
         {
-            channels.map(dkey => <FieldListContainer name={dkey.name} key={dkey.id}>
+            channels.map(dkey => <FieldListContainer name={dkey.id} key={dkey.id}>
                 <Droppable droppableId={dkey.id} direction="horizontal">
                     {(provided, snapshot) => (
                         <OBFieldContainer dkey={dkey} provided={provided} />

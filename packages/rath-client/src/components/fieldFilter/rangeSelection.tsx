@@ -1,4 +1,4 @@
-import { Slider } from 'office-ui-fabric-react';
+import { Slider } from '@fluentui/react';
 import React, { useEffect, useMemo } from 'react';
 
 
@@ -6,7 +6,7 @@ interface RangeSelectionProps {
     values: number[];
     left: number;
     right: number;
-    onValueChange: (value: number, range: [number, number]) => void;
+    onValueChange: (range: [number, number]) => void;
 }
 const RangeSelection: React.FC<RangeSelectionProps> = props => {
     const { values, left, right, onValueChange } = props;
@@ -15,18 +15,19 @@ const RangeSelection: React.FC<RangeSelectionProps> = props => {
         if (values.length === 0) return [0, 0]
         let _min = Infinity;
         let _max = -Infinity;
-        for (let i = 0; i < values.length; i++) {
-            if (values[i] > _max) _max = values[i];
-            if (values[i] < _min) _min = values[i];
+        for (const v of values) {
+            if (Number.isNaN(v)) continue;
+            if (v > _max) _max = v;
+            if (v < _min) _min = v;
         }
-        return [_min, _max]
+        return [_min, _max].every(Number.isFinite) ? [_min, _max] : [0, 0];
     }, [values])
 
     useEffect(() => {
-        onValueChange(0 ,fieldRange);
+        onValueChange(fieldRange);
     }, [fieldRange, onValueChange])
 
-    return <div>
+    return <div className="flex overflow-hidden items-center">
         <Slider
             label='range'
             min={fieldRange[0]}
@@ -34,8 +35,26 @@ const RangeSelection: React.FC<RangeSelectionProps> = props => {
             value={right}
             lowerValue={left}
             ranged
-            onChange={(v, r) => {
-                r && onValueChange(v, r);
+            onChange={(_v, r) => {
+                r && onValueChange(r);
+            }}
+            styles={{
+                root: {
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                },
+                container: {
+                    display: 'flex',
+                },
+                slideBox: {
+                    flex: 1,
+                },
+                valueLabel: {
+                    minWidth: '40px',
+                    width: 'unset',
+                },
             }}
         />
     </div>

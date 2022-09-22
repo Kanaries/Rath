@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import { COLORS } from "../config";
+import { useTranslation } from 'react-i18next';
+
 
 export const AestheticSegment = styled.div`
   border: 1px solid #dfe3e8;
@@ -21,10 +23,12 @@ export const AestheticSegment = styled.div`
 `
 
 export const FieldListContainer: React.FC<{ name: string }> = (props) => {
+  const { t } = useTranslation('translation', { keyPrefix: 'constant.draggable_key' });
+
   return (
     <FieldListSegment>
       <div className="fl-header">
-        <h4>{props.name}</h4>
+        <h4>{t(props.name)}</h4>
       </div>
       <div className="fl-container">{props.children}</div>
     </FieldListSegment>
@@ -32,13 +36,28 @@ export const FieldListContainer: React.FC<{ name: string }> = (props) => {
 };
 
 export const AestheticFieldContainer: React.FC<{ name: string }> = props => {
+  const { t } = useTranslation('translation', { keyPrefix: 'constant.draggable_key' });
+
   return (
     <AestheticSegment>
-      <div className="aes-header">
-        <h4>{props.name}</h4>
+      <div className="aes-header cursor-default select-none">
+        <h4>{t(props.name)}</h4>
       </div>
       <div className="aes-container">{props.children}</div>
     </AestheticSegment>
+  );
+}
+
+export const FilterFieldContainer: React.FC = props => {
+  const { t } = useTranslation('translation', { keyPrefix: 'constant.draggable_key' });
+
+  return (
+    <FilterFieldSegment>
+      <div className="flt-header cursor-default select-none">
+        <h4>{t('filters')}</h4>
+      </div>
+      <div className="flt-container">{props.children}</div>
+    </FilterFieldSegment>
   );
 }
 
@@ -51,6 +70,18 @@ export const FieldsContainer = styled.div`
     margin: 1px;
   }
 `;
+
+export const FilterFieldsContainer = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  paddingBlock: '0.5em 0.8em',
+  paddingInline: '0.2em',
+  minHeight: '4em',
+  '> div': {
+    marginBlock: '0.3em',
+    marginInline: '1px',
+  },
+});
 
 export const FieldListSegment = styled.div`
   display: flex;
@@ -75,6 +106,25 @@ export const FieldListSegment = styled.div`
     overflow-y: hidden; */
   }
 `;
+
+export const FilterFieldSegment = styled.div({
+  border: '1px solid #dfe3e8',
+  fontSize: '12px',
+  margin: '0.2em',
+
+  '.flt-header': {
+    borderBottom: '1px solid #dfe3e8',
+    padding: '0.6em',
+
+    '> h4': {
+      fontWeight: 400,
+    },
+  },
+
+  '.flt-container': {
+
+  },
+});
 
 export const Pill = styled.div<{colType: 'discrete' | 'continuous'}>`
   background-color: ${props => props.colType === 'continuous' ? COLORS.white : COLORS.black};

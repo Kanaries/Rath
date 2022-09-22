@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PrimaryButton, Panel, PanelType, Toggle } from 'office-ui-fabric-react';
+import { PrimaryButton, Panel, PanelType, Toggle } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { IAnalyticType } from 'visual-insights';
 import { BIField } from '../global';

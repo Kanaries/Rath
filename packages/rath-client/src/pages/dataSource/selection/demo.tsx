@@ -1,6 +1,6 @@
-import { ChoiceGroup, DefaultButton, Label } from 'office-ui-fabric-react';
+import { ChoiceGroup, DefaultButton, Label } from '@fluentui/react';
 import React, { useCallback, useState } from 'react';
-import { useId } from "@uifabric/react-hooks";
+import { useId } from "@fluentui/react-hooks";
 import intl from 'react-intl-universal';
 import { DemoDataAssets, IDemoDataKey, useDemoDataOptions } from '../config';
 import { logDataImport } from '../../../loggers/dataImport';

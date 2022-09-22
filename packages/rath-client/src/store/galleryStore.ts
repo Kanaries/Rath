@@ -1,12 +1,13 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { specification } from "visual-insights";
+import { IRow } from "../interfaces";
 import { FieldSummary } from "../service";
 import { Aggregator, globalRef } from "../global";
 import { recallLogger } from "../loggers/recall";
 import { Specification } from "../visBuilder/vegaBase";
-import { specification } from "visual-insights";
 import { fieldMeta2fieldSummary } from "../utils/transform";
 import { LitePipeStore } from "./pipeLineStore/lite";
-import { IRow } from "../interfaces";
+
 
 interface DataView {
     schema: Specification;

@@ -1,56 +1,20 @@
-export const GEMO_TYPES = [
-    {
-        value: 'auto',
-        label: '自动'
-    },
-    {
-        value: 'bar',
-        label: '条形图',
-    },
-    {
-        value: 'line',
-        label: '线',
-    },
-    {
-        value: 'area',
-        label: '面',
-    },
-    {
-        value: 'point',
-        label: '点',
-    },
-    {
-        value: 'circle',
-        label: '圆'
-    },
-    {
-        value: 'tick',
-        label: '标记',
-    },
-    {
-        value: 'rect',
-        label: '矩形',
-    },
-    {
-        value: 'arc',
-        label: '弧形'
-    },
-    {
-        value: 'boxplot',
-        label: '统计箱'
-    },
-];
+export const GEMO_TYPES: Readonly<string[]> = [
+    'auto',
+    'bar',
+    'line',
+    'area',
+    'point',
+    'circle',
+    'tick',
+    'rect',
+    'arc',
+    'boxplot',
+] as const;
 
-export const CHART_LAYOUT_TYPE = [
-    {
-        value: 'auto',
-        label: '自动'
-    },
-    {
-        value: 'fixed',
-        label: '固定'
-    }
-]
+export const CHART_LAYOUT_TYPE: Readonly<string[]> = [
+    'auto',
+    'fixed',
+] as const;
 
 export const COLORS = {
     // tableau style

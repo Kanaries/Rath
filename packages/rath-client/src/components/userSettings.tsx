@@ -5,12 +5,12 @@ import {
   ActionButton,
   IDropdownOption,
   IconButton
-} from 'office-ui-fabric-react'
-import DropdownSelect from "./dropDownSelect";
+} from '@fluentui/react'
 import { observer } from 'mobx-react-lite'
 import { SUPPORT_LANG } from "../locales";
-
 import { useGlobalStore } from "../store";
+import DropdownSelect from "./dropDownSelect";
+
 const langOptions: IDropdownOption[] = SUPPORT_LANG.map(lang => ({
   key: lang.value,
   text: lang.name

@@ -1,17 +1,17 @@
-import { ChoiceGroup, IChoiceGroupOption, Separator, Toggle } from 'office-ui-fabric-react';
+import { ChoiceGroup, IChoiceGroupOption, Separator, Toggle } from '@fluentui/react';
 import React from 'react';
 import styled from 'styled-components';
+import intl from 'react-intl-universal'
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { IFieldMeta, IRawField, IRow } from '../../../interfaces';
-import DistributionChart from './distChart';
-import intl from 'react-intl-universal'
 import FieldFilter from '../../../components/fieldFilter/index';
+import DistributionChart from './distChart';
 
 const MetaContainer = styled.div`
     overflow: auto;
 `
 const MetaItemContainer = styled.div`
-    over-flow: hidden;
+    overflow: hidden;
     position: relative;
     color: #333;
     .bottom-bar {
@@ -100,6 +100,11 @@ const MetaItem: React.FC<MetaItemProps> = props => {
         ...ch,
         text: intl.get(`common.${ch.key}`)
     }))
+
+    const SEMANTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = SEMANTIC_TYPE_CHOICES.map(ch => ({
+        ...ch,
+        text: intl.get(`common.semanticType.${ch.key}`)
+    }))
     
     return <MetaItemContainer className="ms-depth-4">
         <div className={`${analyticType} bottom-bar`}></div>
@@ -130,7 +135,7 @@ const MetaItem: React.FC<MetaItemProps> = props => {
             <div className="operation-column">
                 <ChoiceGroup
                     label={intl.get('dataSource.meta.semanticType')}
-                    options={SEMANTIC_TYPE_CHOICES}
+                    options={SEMANTIC_TYPE_CHOICES_LANG}
                     selectedKey={semanticType}
                     onChange={(ev, option) => {
                         onChange && option && onChange(colKey, 'semanticType', option.key)

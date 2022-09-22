@@ -91,6 +91,7 @@ export class LTSPipeLine {
                     }
                 })
             }
+            // eslint-disable-next-line no-console
             PRINT_PERFORMANCE && console.log(res.performance)
             runInAction(() => {
                 this.insightSpaces = res.insightSpaces;
@@ -255,18 +256,14 @@ export class LTSPipeLine {
         }
     }
     public async syncStateFromEngine () {
-        try {
-            const engineState: ISyncEngine = await rathEngineService({
-                task: 'sync'
-            })
-            runInAction(() => {
-                this.dataSource = engineState.dataSource
-                this.fields = engineState.fields
-                this.insightSpaces = engineState.insightSpaces
-            })
-        } catch (error) {
-            throw error;
-        }
+        const engineState: ISyncEngine = await rathEngineService({
+            task: 'sync'
+        })
+        runInAction(() => {
+            this.dataSource = engineState.dataSource
+            this.fields = engineState.fields
+            this.insightSpaces = engineState.insightSpaces
+        })
     }
     public async downloadResults (): Promise<Pick<IRathStorage, 'engineStorage' | 'dataStorage'>> {
         try {

@@ -1,4 +1,4 @@
-import { Modal } from 'office-ui-fabric-react';
+import { Modal } from '@fluentui/react';
 import React from 'react';
 import ReactJson from 'react-json-view';
 import intl from 'react-intl-universal'

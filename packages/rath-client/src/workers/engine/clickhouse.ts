@@ -1,5 +1,5 @@
 import { Computation, IDataViewMeta, IInsightSpace } from 'visual-insights';
-import { IVizSpace } from '../../store/exploreStore';
+import { IVizSpace } from '../../store/megaAutomation';
 import { isSetEqual } from '../../utils';
 import { intersect, setStateInStorage } from './utils';
 

@@ -12,7 +12,9 @@ RATH is an OpenSource automated data exploration tool that can help you automate
 
  It is not only an open source replacement of tableau but a version with more automation power, including auto insights discovery, predictive interaction, and visual recommendation.
 
-Try RATH [here](https://kanaries.net/)
+Try RATH [here](https://rath.kanaries.net)
+
+or visit our official website[kanaries website](https://kanaries.net)
 
 ## Introduction
 
@@ -102,6 +104,15 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 ### deploy
 
 Rath now runs all the computation tasks on webworker. For some large datasets, Rath will use indexedDB to avoid too much memory cost of browsers. For larger datasets (>100MB), Rath can put some of its computation to computation engine support SQL query(such as clickhouse). If you are interested in a server version, check the older version or contact us.
+
+#### deploy connector service
+RATH requires a database connector to connect common databases. You need to deploy `apps/connector` and then you can connect a number of common databases as datasource.
+
+#### OLAP Service
+Connector service is used as a pure datasource, RATH fetches the data from the bases and loads them into memory.
+
+For larger datasets, or if you can access a high performance OLAP service (such as a clusters of clickhouse). You can start `packages/connectors` which is a OLAP service connector. Not only will it fecthes data from OLAP, but use it as a computation engine as well. RATH
+ will push SQL query to the OLAP services instead of computate those tasks in its own engine.
 
 
 ## Documentation

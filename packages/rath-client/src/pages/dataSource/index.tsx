@@ -1,20 +1,21 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import intl from 'react-intl-universal'
-import { PrimaryButton, Stack, DefaultButton, Dropdown, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, CommandButton, ProgressIndicator } from 'office-ui-fabric-react';
-import DataTable from './dataTable/index';
-import MetaView from './metaView/index';
-import { useCleanMethodList } from '../../hooks';
-import Selection from './selection/index';
-import ImportStorage from "./importStorage";
+import { PrimaryButton, Stack, DefaultButton, Dropdown, IContextualMenuProps, Toggle, IContextualMenuItem, IconButton, CommandButton, ProgressIndicator } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from "../../store";
 import { EXPLORE_MODE, PIVOT_KEYS } from "../../constants";
 import { CleanMethod, IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from "../../interfaces";
 import { Card } from "../../components/card";
+import { useCleanMethodList } from '../../hooks';
+import { makeRenderLabelHandler } from "../../components/labelTooltip";
+import DataTable from './dataTable/index';
+import MetaView from './metaView/index';
+import Selection from './selection/index';
+import ImportStorage from "./importStorage";
 import Advice from "./advice";
 import AnalysisSettings from './settings'
 import FastSelection from "./fastSelection";
-import { makeRenderLabelHandler } from "../../components/labelTooltip";
+
 
 const MARGIN_LEFT = { marginLeft: "1em" }
 
@@ -22,7 +23,7 @@ interface DataSourceBoardProps {
 }
 
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-  const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, exploreStore } = useGlobalStore();
+  const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, megaAutoStore } = useGlobalStore();
 
   const {
     cleanedData,
@@ -33,7 +34,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     showDataImportSelection,
     dataPreviewMode,
     staisfyAnalysisCondition,
-    dataPrepProgressTag
+    dataPrepProgressTag,
   } = dataSourceStore;
 
   const { exploreMode, taskMode } = commonStore;
@@ -69,15 +70,15 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
   const onV1EngineStart = useCallback(() => {
     ltsPipeLineStore.startTask(taskMode).then(() => {
-      exploreStore.emitViewChangeTransaction(0);
+      megaAutoStore.emitViewChangeTransaction(0);
     })
     commonStore.setAppKey(PIVOT_KEYS.lts);
-  }, [ltsPipeLineStore, exploreStore, commonStore, taskMode])
+  }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode])
 
   const onCheckResults = useCallback(() => {
-    exploreStore.emitViewChangeTransaction(0)
+    megaAutoStore.emitViewChangeTransaction(0)
     commonStore.setAppKey(PIVOT_KEYS.lts)
-  }, [exploreStore, commonStore])
+  }, [megaAutoStore, commonStore])
 
   const onBuildKnowledge = useCallback(() => {
     commonStore.setAppKey(PIVOT_KEYS.pattern)
@@ -100,6 +101,10 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     dataSourceStore.setLoading(false);
     commonStore.showError('error', `[Data Loading Error]${err}`)
   }, [dataSourceStore, commonStore])
+
+  const toggleLoadingAnimation = useCallback((on: boolean) => {
+    dataSourceStore.setLoading(on);
+  }, [dataSourceStore]);
 
   const analysisOptions: IContextualMenuProps = useMemo(() => {
     return {
@@ -130,7 +135,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     }
   }, [onV1EngineStart, onCheckResults, onBuildKnowledge, commonStore])
 
-  const hasResults = exploreStore.insightSpaces.length > 0;
+  const hasResults = megaAutoStore.insightSpaces.length > 0;
 
   const startMode = useMemo<IContextualMenuItem>(() => {
     if (exploreMode === EXPLORE_MODE.first) {
@@ -214,6 +219,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             onDataLoaded={onSelectDataLoaded}
             onStartLoading={onSelectStartLoading}
             onLoadingFailed={onSelectLoadingFailed}
+            setLoadingAnimation={toggleLoadingAnimation}
           />
         </Stack>
         { rawData.length > 0 && <Advice onForceAnalysis={() => { startMode.onClick && startMode.onClick() }} /> }
@@ -247,16 +253,16 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             />
             <CommandButton
               text={intl.get('dataSource.extend.title')}
-              disabled
-              // disabled={rawData.length === 0}
+              disabled={rawData.length === 0}
               iconProps={{ iconName: 'AppIconDefaultAdd' }}
               onClick={() => {
-                dataSourceStore.extendData();
+                // dataSourceStore.extendData();
+                // TODO: 更多的扩展方式
+                dataSourceStore.expandDateTime();
               }}
             />
         </Stack>
         <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
-          {intl.get('dataSource.recordCount', { count: cleanedData.length })} <br />
           {intl.get('dataSource.rowsInViews', { origin: rawData.length, select: filteredData.length, clean: cleanedData.length })}
         </i>
         <Toggle checked={dataPreviewMode === IDataPreviewMode.meta}

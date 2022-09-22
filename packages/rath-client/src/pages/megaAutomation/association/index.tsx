@@ -1,17 +1,17 @@
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useState, useEffect } from 'react';
-import { useGlobalStore } from '../../../store';
-import Association from './assCharts';
-import { Pivot, PivotItem } from 'office-ui-fabric-react'
+import { Pivot, PivotItem } from '@fluentui/react'
 import intl from 'react-intl-universal';
 import { Pagination } from '@material-ui/core';
+import { useGlobalStore } from '../../../store';
+import Association from './assCharts';
 
 const PAGE_SIZE = 7;
 
 const ObservableAssociation: React.FC = props => {
-    const {  exploreStore } = useGlobalStore()
-    const { samplingDataSource,  assoListT1, assoListT2, visualConfig, fieldMetas } = exploreStore;
+    const {  megaAutoStore } = useGlobalStore()
+    const { samplingDataSource,  assoListT1, assoListT2, visualConfig, fieldMetas } = megaAutoStore;
 
     const [pivotKey, setPivotKey] = useState<string>('T1')
     const [assoIndex, setAssoIndex] = useState<number>(0);
@@ -39,7 +39,7 @@ const ObservableAssociation: React.FC = props => {
         }} />
         <Association
             onSelectView={(viz) => {
-              exploreStore.jumpToView(viz)
+              megaAutoStore.jumpToView(viz)
             }}
             dataSource={samplingDataSource}
             visualConfig={toJS(visualConfig)}

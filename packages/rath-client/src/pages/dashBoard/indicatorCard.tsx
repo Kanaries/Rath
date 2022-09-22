@@ -1,13 +1,15 @@
 import React, { useMemo } from "react";
 import styled from "styled-components";
 import { Aggregator } from "../../global";
-import datalib from "datalib";
 import { IRow } from "../../interfaces";
+import { sum, mean, count, numberWithCommas } from './utils'
 
-function numberWithCommas(x: number): string {
-  let parts = x.toString().split(".");
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return parts.join(".");
+const AGGREGATION_FUNCS: {
+  [key in Aggregator]: (values: number[]) => number;
+} = {
+  sum,
+  mean,
+  count
 }
 
 const Card = styled.div`
@@ -50,10 +52,10 @@ const IndicatorCard: React.FC<IndicatorProps> = props => {
       if (operator === 'count') {
         ans = dataSource.length;
       } else {
-        ans = datalib[operator](dataSource.map(d => d[measures[0]]));
+        ans = AGGREGATION_FUNCS[operator](dataSource.map(d => d[measures[0]]));
       }
     } catch (error) {
-      console.log('operator does not exist or not in vega/datalib.')
+      console.error('operator does not supported.')
     }
     if (Math.abs(ans - Math.round(ans)) > 0.00001) {
       ans = Number(ans.toFixed(2));

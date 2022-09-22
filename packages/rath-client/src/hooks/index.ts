@@ -1,7 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
 import produce, { Draft } from 'immer';
-import { CleanMethod } from '../interfaces';
 import intl from "react-intl-universal";
+import { CleanMethod } from '../interfaces';
+
 /**
  * @param S type of the composed state
  */
