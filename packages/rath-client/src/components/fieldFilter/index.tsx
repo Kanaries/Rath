@@ -25,7 +25,13 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
 
     const { rawData } = dataSourceStore;
 
-    const fieldValues = useMemo(() => rawData.map(r => r[fid]), [rawData, fid]);
+    const fieldValues = useMemo(() => rawData.map(r => {
+        try {
+            return parseFloat(r[fid]);
+        } catch {
+            return NaN;
+        }
+    }), [rawData, fid]);
 
     const [filter, setFilter] = useState<IFilter>((meta && meta.semanticType === 'quantitative') ? {
         fid,
@@ -65,7 +71,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
         setShowFilterConfig(v => !v);
     }, [])
 
-    const onRangeValueChange = useCallback((v: number, r: [number, number]) => {
+    const onRangeValueChange = useCallback((r: [number, number]) => {
         setFilter(f => {
             const nextF = produce(f, draft => {
                 if (draft.type === 'range' && r) {
