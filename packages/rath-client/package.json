@@ -45,7 +45,7 @@
     "vega": "^5.22.1",
     "vega-embed": "^6.21.0",
     "vega-lite": "^5.5.0",
-    "visual-insights": "^0.12.1",
+    "visual-insights": "^0.12.2",
     "web-vitals": "^0.2.4",
     "worker-loader": "^3.0.7"
   },
