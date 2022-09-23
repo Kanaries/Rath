@@ -95,6 +95,9 @@ function channelEncode(props: EncodeProps) {
         title: props[c].name,
         type: props[c].semanticType
       }
+      if (props[c].semanticType === 'temporal') {
+        encoding[c].axis = { format: '%Y-%m' }
+      }
     }
   })
   // FIXME: 临时处理逻辑，只处理xy排序
