@@ -2,6 +2,7 @@
 import { UnivariateSummary } from 'visual-insights';
 import { Statistics } from 'visual-insights';
 import { bin, rangeNormilize } from '@kanaries/loa';
+import { getRange } from '../utils';
 import { timer } from './timer';
 
 const { getAllFieldsDistribution, getAllFieldTypes, getAllFieldsEntropy } = UnivariateSummary;
@@ -30,9 +31,13 @@ const fieldSummary = (e) => {
     const fieldEntropyList = getAllFieldsEntropy(dataSource, fieldNames);
     for (let i = 0; i < fieldEntropyList.length; i++) {
       if (fieldTypeList[i].type === 'quantitative') {
-        const bins = bin(dataSource.map(r => r[fieldEntropyList[i].fieldName]));
+        const values = dataSource.map(r => Number(r[fieldEntropyList[i].fieldName]))
+        const bins = bin(values);
         fieldEntropyList[i].entropy = Statistics.entropy(rangeNormilize(bins.filter(b => b > 0)));
         fieldEntropyList[i].maxEntropy = Math.log2(16)
+        const range = getRange(values)
+        fieldEntropyList[i].max = range[1];
+        fieldEntropyList[i].min = range[0];
       }
     }
     self.postMessage({
