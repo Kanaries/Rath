@@ -13,6 +13,12 @@
             "arc": "Arc",
             "boxplot": "Box (Box Plot)"
         },
+        "stack_mode": {
+            "__enum__": "Stack Mode",
+            "none": "None",
+            "stack": "Stack",
+            "normalize": "Normalize"
+        },
         "layout_type": {
             "__enum__": "Layout Mode",
             "auto": "Auto",
@@ -81,10 +87,10 @@
             },
             "settings": {
                 "toggle": {
-                    "aggregation": "Enable Aggregation",
-                    "stack": "Enable Stack",
-                    "axes_resize": "Enable Axes Resizing",
-                    "debug": "Enable debugging"
+                    "aggregation": "Aggregation",
+                    "stack": "Stack",
+                    "axes_resize": "Axes Resizing",
+                    "debug": "debugging"
                 },
                 "sort": "Sorting Order",
                 "button": {

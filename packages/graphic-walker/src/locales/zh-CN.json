@@ -18,6 +18,12 @@
             "auto": "自动",
             "fixed": "固定"
         },
+        "stack_mode": {
+            "__enum__": "堆叠模式",
+            "none": "关闭",
+            "stack": "堆叠",
+            "normalize": "归一化"
+        },
         "draggable_key": {
             "fields": "字段",
             "columns": "列",

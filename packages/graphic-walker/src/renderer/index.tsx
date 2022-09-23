@@ -10,7 +10,7 @@ import ReactVega from '../vis/react-vega';
 const ReactiveRenderer: React.FC = props => {
     const { vizStore, commonStore } = useGlobalStore();
     const { draggableFieldState, visualConfig } = vizStore;
-    const { geoms, interactiveScale, defaultAggregated, defaultStack, showActions, size } = visualConfig;
+    const { geoms, interactiveScale, defaultAggregated, stack, showActions, size } = visualConfig;
     const { currentDataset } = commonStore;
     const { filters } = draggableFieldState;
 
@@ -83,7 +83,7 @@ const ReactiveRenderer: React.FC = props => {
         interactiveScale={interactiveScale}
         geomType={geoms[0]}
         defaultAggregate={defaultAggregated}
-        defaultStack={defaultStack}
+        stack={stack}
         dataSource={data}
         rows={rows}
         columns={columns}
