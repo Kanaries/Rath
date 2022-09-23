@@ -221,7 +221,7 @@
         "filter": {
             "title": "Filter Config",
             "active": "Filter",
-            "enable": "Enabled",
+            "enabled": "Enabled",
             "disabled": "Disabled",
             "key": "Filter by",
             "range": "range",

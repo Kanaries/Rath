@@ -221,7 +221,7 @@
         "filter": {
             "title": "筛选规则",
             "active": "启用筛选",
-            "enable": "开启",
+            "enabled": "开启",
             "disabled": "关闭",
             "key": "筛选方式",
             "range": "区间",
