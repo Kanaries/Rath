@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { IViewField, IRow } from '../interfaces';
+import { IViewField, IRow, IStackMode } from '../interfaces';
 import embed from 'vega-embed';
 import { Subject } from 'rxjs'
 import * as op from 'rxjs/operators';
@@ -21,7 +21,7 @@ interface ReactVegaProps {
   columns: Readonly<IViewField[]>;
   dataSource: IRow[];
   defaultAggregate?: boolean;
-  defaultStack?: boolean;
+  stack: IStackMode;
   interactiveScale: boolean;
   geomType: string;
   color?: IViewField;
@@ -72,7 +72,7 @@ interface SingleViewProps {
   theta: IViewField;
   radius: IViewField;
   defaultAggregated: boolean;
-  defaultStack: boolean;
+  stack: IStackMode;
   geomType: string;
 }
 
@@ -128,12 +128,13 @@ function channelAggregate(encoding: {[key: string]: any}, fields: IViewField[]) 
     }
   })
 }
-function channelStack(encoding: {[key: string]: any}) {
+function channelStack(encoding: {[key: string]: any}, stackMode: IStackMode) {
+  if (stackMode === 'stack') return;
   if (encoding.x && encoding.x.type === 'quantitative') {
-    encoding.x.stack = null
+    encoding.x.stack = stackMode === 'none' ? null : 'normalize'
   }
   if (encoding.y && encoding.y.type === 'quantitative') {
-    encoding.y.stack = null
+    encoding.y.stack = stackMode === 'none' ? null : 'normalize'
   }
 }
 // TODO: xOffset等通道的特性不太稳定，建议后续vega相关特性稳定后，再使用。
@@ -157,7 +158,7 @@ function getSingleView(props: SingleViewProps) {
     xOffset,
     yOffset,
     defaultAggregated,
-    defaultStack,
+    stack,
     geomType
   } = props
   const fields: IViewField[] = [x, y, color, opacity, size, shape, row, column, xOffset, yOffset, theta, radius]
@@ -173,9 +174,7 @@ function getSingleView(props: SingleViewProps) {
   if (defaultAggregated) {
     channelAggregate(encoding, fields);
   }
-  if (!defaultStack) {
-    channelStack(encoding);
-  }
+  channelStack(encoding, stack);
   const spec = {
     mark: {
       type: markType,
@@ -192,7 +191,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     rows = [],
     columns = [],
     defaultAggregate = true,
-    defaultStack = true,
+    stack = 'stack',
     geomType,
     color,
     opacity,
@@ -291,7 +290,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
         xOffset: NULL_FIELD,
         yOffset: NULL_FIELD,
         defaultAggregated: defaultAggregate,
-        defaultStack,
+        stack,
         geomType
       });
       // if (layoutMode === 'fixed') {
@@ -336,7 +335,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
             xOffset: NULL_FIELD,
             yOffset: NULL_FIELD,
             defaultAggregated: defaultAggregate,
-            defaultStack,
+            stack,
             geomType
           });
           const node = i * colRepeatFields.length + j < viewPlaceholders.length ? viewPlaceholders[i * colRepeatFields.length + j].current : null
@@ -376,7 +375,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
     colFacetFields,
     rowRepeatFields,
     colRepeatFields,
-    defaultStack,
+    stack,
     showActions,
     interactiveScale,
     layoutMode,

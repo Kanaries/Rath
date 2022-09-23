@@ -1,17 +1,16 @@
 import { IReactionDisposer, makeAutoObservable, observable, reaction, toJS } from "mobx";
-import { DataSet, DraggableFieldState, IFilterRule, IViewField } from "../interfaces";
-import { CommonStore } from "./commonStore";
+import produce from 'immer';
 import { v4 as uuidv4 } from 'uuid';
 import { Specification } from "visual-insights";
+import { DataSet, DraggableFieldState, IFilterRule, IViewField } from "../interfaces";
 import { GEMO_TYPES } from "../config";
 import { makeBinField, makeLogField } from "../utils/normalization";
-import produce from 'immer';
-
+import { CommonStore } from "./commonStore";
 
 interface IVisualConfig {
     defaultAggregated: boolean;
     geoms:  string[];        
-    defaultStack: boolean;
+    stack: 'none' | 'stack' | 'normalize';
     showActions: boolean;
     interactiveScale: boolean;
     sorted: 'none' | 'ascending' | 'descending';
@@ -21,7 +20,6 @@ interface IVisualConfig {
         height: number;
     }
 }
-
 
 export const MetaFieldKeys: Array<keyof DraggableFieldState> = [
     'dimensions',
@@ -94,7 +92,7 @@ function initVisualConfig (): IVisualConfig {
     return {
         defaultAggregated: true,
         geoms: [GEMO_TYPES[0]!],
-        defaultStack: true,
+        stack: 'stack',
         showActions: false,
         interactiveScale: false,
         sorted: 'none',
@@ -478,6 +476,7 @@ export class VizSpecStore {
                 case configKey === 'geoms' && Array.isArray(value):
                 case configKey === 'size' && typeof value === 'object':
                 case configKey === 'sorted':
+                case configKey === 'stack':
                 {
                     return config[configKey] = value;
                 }

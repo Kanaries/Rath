@@ -1,13 +1,14 @@
 import { BarsArrowDownIcon, BarsArrowUpIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { LiteForm } from '../components/liteForm';
-import SizeSetting from '../components/sizeSetting';
-import { CHART_LAYOUT_TYPE, GEMO_TYPES } from '../config';
-import { useGlobalStore } from '../store';
 import styled from 'styled-components'
 import { ArrowPathIcon } from '@heroicons/react/24/solid';
 import { useTranslation } from 'react-i18next';
+import { LiteForm } from '../components/liteForm';
+import SizeSetting from '../components/sizeSetting';
+import { CHART_LAYOUT_TYPE, GEMO_TYPES, STACK_MODE } from '../config';
+import { useGlobalStore } from '../store';
+import { IStackMode } from '../interfaces';
 
 
 export const LiteContainer = styled.div`
@@ -45,25 +46,6 @@ const VisualSettings: React.FC = () => {
                 </label>
             </div>
             <div className="item">
-                <input
-                    className="cursor-pointer"
-                    type="checkbox"
-                    id="toggle:stack"
-                    aria-describedby="toggle:stack:label"
-                    checked={visualConfig.defaultStack}
-                    onChange={(e) => {
-                        vizStore.setVisualConfig('defaultStack', e.target.checked);
-                    }}
-                />
-                <label
-                    className="text-xs text-color-gray-700 ml-2 cursor-pointer"
-                    id="toggle:stack:label"
-                    htmlFor="toggle:stack"
-                >
-                    {t('toggle.stack')}
-                </label>
-            </div>
-            <div className="item px-6">
                 <label
                     className="px-2"
                     id="dropdown:mark_type:label"
@@ -88,6 +70,35 @@ const VisualSettings: React.FC = () => {
                             className="cursor-pointer"
                         >
                             {tGlobal(`constant.mark_type.${g}`)}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="item">
+                <label
+                    className="px-2"
+                    id="dropdown:stack:label"
+                    htmlFor="dropdown:stack"
+                >
+                    {tGlobal('constant.stack_mode.__enum__')}
+                </label>
+                <select
+                    className="border border-gray-500 rounded-sm text-xs pt-0.5 pb-0.5 pl-2 pr-2 cursor-pointer"
+                    id="dropdown:stack"
+                    aria-describedby="dropdown:stack:label"
+                    value={visualConfig.stack}
+                    onChange={(e) => {
+                        vizStore.setVisualConfig('stack', e.target.value as IStackMode);
+                    }}
+                >
+                    {STACK_MODE.map(g => (
+                        <option
+                            key={g}
+                            value={g}
+                            aria-selected={visualConfig.stack === g}
+                            className="cursor-pointer"
+                        >
+                            {tGlobal(`constant.stack_mode.${g}`)}
                         </option>
                     ))}
                 </select>

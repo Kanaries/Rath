@@ -1,3 +1,5 @@
+import { IStackMode } from "./interfaces";
+
 export const GEMO_TYPES: Readonly<string[]> = [
     'auto',
     'bar',
@@ -10,6 +12,12 @@ export const GEMO_TYPES: Readonly<string[]> = [
     'arc',
     'boxplot',
 ] as const;
+
+export const STACK_MODE: Readonly<IStackMode[]> = [
+    'none',
+    'stack',
+    'normalize'
+]
 
 export const CHART_LAYOUT_TYPE: Readonly<string[]> = [
     'auto',

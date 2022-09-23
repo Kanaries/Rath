@@ -131,3 +131,6 @@ export type IFilterRule = {
     type: 'one of';
     value: Set<string | number>;
 };
+
+
+export type IStackMode = 'none' | 'stack' | 'normalize';
