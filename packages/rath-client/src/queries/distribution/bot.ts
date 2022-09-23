@@ -1,6 +1,8 @@
 import { IRow, ISemanticType } from "@kanaries/loa";
-import { groupBy } from "visual-insights/build/esm/statistics";
+import { Statistics } from "visual-insights";
 import { IFieldMeta, IVegaSubset } from "../../interfaces";
+
+const { groupBy } = Statistics;
 interface IFieldEncode {
     field?: string;
     title?: string;
