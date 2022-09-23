@@ -5,6 +5,7 @@ export const GEMO_TYPES: Readonly<string[]> = [
     'bar',
     'line',
     'area',
+    'trail',
     'point',
     'circle',
     'tick',

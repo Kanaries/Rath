@@ -6,6 +6,7 @@
             "bar": "Bar",
             "line": "Polyline",
             "area": "Area",
+            "trail": "Trail",
             "point": "Scatter",
             "circle": "Circle",
             "tick": "Tick",
