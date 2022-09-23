@@ -1987,10 +1987,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@kanaries/adapters@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.npmmirror.com/@kanaries/adapters/-/adapters-1.0.3.tgz#67704fd94eca59d05edea5f098c8cb867b026dc5"
-  integrity sha512-OlrMGI/w6U5TE9hBH0hH0/fqG/OS0y0OyE1Nvq/vqZXskfLyxmxrRQsSnUvhOe2JgsGi/EtSB4iSh7+rZaF0TA==
+"@kanaries/adapters@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.npmmirror.com/@kanaries/adapters/-/adapters-1.0.5.tgz#bbc4844a772c507f901dd956633e98f14c231049"
+  integrity sha512-wRBlApLlIZ//dHscr+hHUi24QQSyPN/CPCuc364Q97ZjSTY5VWcQBeJ43SEEepZea4Ypy9gXTjnfVkbFEswU1g==
   dependencies:
     localforage "^1.10.0"
 
@@ -3684,6 +3684,14 @@ axios@^0.22.0:
   integrity sha1-v3AsQftQ+8pFOVidg5oHcRe3myU=
   dependencies:
     follow-redirects "^1.14.4"
+
+axios@^0.27.2:
+  version "0.27.2"
+  resolved "https://registry.npmmirror.com/axios/-/axios-0.27.2.tgz#207658cc8621606e586c85db4b41a750e756d972"
+  integrity sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==
+  dependencies:
+    follow-redirects "^1.14.9"
+    form-data "^4.0.0"
 
 axobject-query@^2.2.0:
   version "2.2.0"
@@ -7020,6 +7028,11 @@ follow-redirects@^1.0.0, follow-redirects@^1.14.0, follow-redirects@^1.14.4:
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.8.tgz#016996fb9a11a100566398b1c6839337d7bfa8fc"
   integrity sha512-1x0S9UVJHsQprFcEC/qnNzBLcIxsjAV905f/UkQxbclCsoTWlacCNOpQa/anodLl2uaEKFhfWOvM2Qg77+15zA==
 
+follow-redirects@^1.14.9:
+  version "1.15.2"
+  resolved "https://registry.npmmirror.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
+  integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
+
 for-in@^1.0.2:
   version "1.0.2"
   resolved "https://registry.nlark.com/for-in/download/for-in-1.0.2.tgz#81068d295a8142ec0ac726c6e2200c30fb6d5e80"
@@ -7047,6 +7060,15 @@ form-data@^3.0.0:
   version "3.0.1"
   resolved "https://registry.nlark.com/form-data/download/form-data-3.0.1.tgz#ebd53791b78356a99af9a300d4282c4d5eb9755f"
   integrity sha1-69U3kbeDVqma+aMA1CgsTV65dV8=
+  dependencies:
+    asynckit "^0.4.0"
+    combined-stream "^1.0.8"
+    mime-types "^2.1.12"
+
+form-data@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.npmmirror.com/form-data/-/form-data-4.0.0.tgz#93919daeaf361ee529584b9b31664dc12c9fa452"
+  integrity sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
@@ -14724,17 +14746,6 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-visual-insights@0.11.2:
-  version "0.11.2"
-  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.11.2.tgz#c10f29aeeeca3e35c116b8af2c3ae8e4e4531088"
-  integrity sha512-MFQfIPLDVvCTQ+Mw7aUw5ZOl8sRe5kK4yPsGDH3bsVFwG4KIwYXpTu0tNehwkZC5JG27wAQ7yXM2nBT6HbjzIA==
-  dependencies:
-    "@kanaries/adapters" "1.0.3"
-    axios "^0.22.0"
-    detect-browser "^5.3.0"
-    localforage "^1.10.0"
-    tslib "^2.4.0"
-
 visual-insights@0.7.15:
   version "0.7.15"
   resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.7.15.tgz#04806c8c78739f7bb8a7ee60bb56ee8ddc7668a7"
@@ -14744,6 +14755,17 @@ visual-insights@0.7.15:
     axios "^0.22.0"
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
+
+visual-insights@^0.12.1:
+  version "0.12.1"
+  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.12.1.tgz#4c4bcdaf8c5e2d1cfd2845f62746a3ca5453cfb9"
+  integrity sha512-ysKsGKz0WHIB1LzX5VyirNFbyZhY6DGGyjQ4MJntd7GA6uwAZ1Cli6A8dSf73AMDLJiYTRHY1DxIVOCPncLwsQ==
+  dependencies:
+    "@kanaries/adapters" "^1.0.5"
+    axios "^0.27.2"
+    detect-browser "^5.3.0"
+    localforage "^1.10.0"
+    tslib "^2.4.0"
 
 vite@^3.1.0:
   version "3.1.0"

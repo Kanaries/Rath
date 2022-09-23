@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useId } from '@fluentui/react-hooks';
 import produce from 'immer';
 import { toJS } from 'mobx';
@@ -25,14 +25,6 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
 
     const { rawData } = dataSourceStore;
 
-    const fieldValues = useMemo(() => rawData.map(r => {
-        try {
-            return parseFloat(r[fid]);
-        } catch {
-            return NaN;
-        }
-    }), [rawData, fid]);
-
     const [filter, setFilter] = useState<IFilter>((meta && meta.semanticType === 'quantitative') ? {
         fid,
         type: 'range',
@@ -42,6 +34,21 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
         type: 'set',
         values: []
     })
+
+    const filterType = filter.type;
+
+    const fieldValues = useMemo<number[]>(() => {
+        if (filterType === 'range') {
+            return rawData.map(r => {
+                try {
+                    return parseFloat(r[fid]);
+                } catch {
+                    return NaN;
+                }
+            })
+        }
+        return []
+    }, [rawData, fid, filterType]);
 
     const selection = useMemo(() => {
         return new Selection({
@@ -81,6 +88,24 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
             return nextF
         })
     }, [])
+
+    const fieldRange = useMemo<[number, number]>(() => {
+        if (fieldValues.length === 0) return [0, 0]
+        let _min = Infinity;
+        let _max = -Infinity;
+        for (const v of fieldValues) {
+            if (Number.isNaN(v)) continue;
+            if (v > _max) _max = v;
+            if (v < _min) _min = v;
+        }
+        return [_min, _max].every(Number.isFinite) ? [_min, _max] : [0, 0];
+    }, [fieldValues])
+
+    useEffect(() => {
+        if (filterType === 'range') {
+            onRangeValueChange(fieldRange);
+        }
+    }, [fieldRange, onRangeValueChange, filterType])
 
     return <div>
         <ActionButton
@@ -141,7 +166,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                 }
                 {
                     filter.type === 'range' && meta && <RangeSelection
-                        values={fieldValues}
+                        range={fieldRange}
                         left={filter.range[0]}
                         right={filter.range[1]}
                         onValueChange={onRangeValueChange}

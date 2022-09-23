@@ -1,6 +1,6 @@
 import { ISemanticType } from "visual-insights";
-import { Specification } from "visual-insights";
-import { groupBy } from "visual-insights/build/esm/statistics";
+import { Specification, Statistics } from "visual-insights";
+
 import { IFieldMeta, IResizeMode, IRow } from "../interfaces";
 import { applySizeConfig } from "./base/utils";
 export const geomTypeMap: { [key: string]: any } = {
@@ -14,6 +14,8 @@ export const geomTypeMap: { [key: string]: any } = {
   // density: 'rect'
   density: "point"
 };
+
+const { groupBy } = Statistics;
 interface BaseVisProps {
   query: Specification;
   dataSource: IRow[];

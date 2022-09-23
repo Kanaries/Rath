@@ -130,7 +130,9 @@ export interface FieldSummary {
   entropy: number;
   maxEntropy: number;
   distribution: Array<{ memberName: string; count: number }>
-  type: ISemanticType
+  type: ISemanticType;
+  max: number;
+  min: number;
 }
 export async function getFieldsSummaryService (dataSource: IRow[], fields: string[] | Field[], useServer?: boolean): Promise<FieldSummary[]> {
   let fieldSummaryList: FieldSummary[] = [];

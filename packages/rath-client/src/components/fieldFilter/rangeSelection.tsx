@@ -1,37 +1,21 @@
 import { Slider } from '@fluentui/react';
-import React, { useEffect, useMemo } from 'react';
+import React from 'react';
 
 
 interface RangeSelectionProps {
-    values: number[];
+    range: [number, number];
     left: number;
     right: number;
     onValueChange: (range: [number, number]) => void;
 }
 const RangeSelection: React.FC<RangeSelectionProps> = props => {
-    const { values, left, right, onValueChange } = props;
-    
-    const fieldRange = useMemo<[number, number]>(() => {
-        if (values.length === 0) return [0, 0]
-        let _min = Infinity;
-        let _max = -Infinity;
-        for (const v of values) {
-            if (Number.isNaN(v)) continue;
-            if (v > _max) _max = v;
-            if (v < _min) _min = v;
-        }
-        return [_min, _max].every(Number.isFinite) ? [_min, _max] : [0, 0];
-    }, [values])
-
-    useEffect(() => {
-        onValueChange(fieldRange);
-    }, [fieldRange, onValueChange])
+    const { range, left, right, onValueChange } = props;
 
     return <div className="flex overflow-hidden items-center">
         <Slider
             label='range'
-            min={fieldRange[0]}
-            max={fieldRange[1]}
+            min={range[0]}
+            max={range[1]}
             value={right}
             lowerValue={left}
             ranged
