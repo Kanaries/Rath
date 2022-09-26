@@ -14756,10 +14756,10 @@ visual-insights@0.7.15:
     cube-core "^2.13.0"
     simple-statistics "^7.1.0"
 
-visual-insights@^0.12.2:
-  version "0.12.2"
-  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.12.2.tgz#3d7048ff39b267d6f7c070caeb24a332a9acf484"
-  integrity sha512-2HVqDMeuLWYSK8kkn0mBxQVRByhbTyi7d7Zdtcn5XviGReYXHyguyVzOpegVbAmcIzZ/a3gK3vTLECrVyvdvPg==
+visual-insights@^0.12.3:
+  version "0.12.3"
+  resolved "https://registry.npmmirror.com/visual-insights/-/visual-insights-0.12.3.tgz#22341e345a10aaa5721ae1dd5c5e7b555e2cef8b"
+  integrity sha512-Edq/SPfC7M4RCf1OU2FBwKh91NjZwaNMPSZBKLqZ57NZ1Z/A2BTUseh9+3fKSzeVZ9fJo1GWGVcy4hDaTxfP6g==
   dependencies:
     "@kanaries/adapters" "^1.0.5"
     axios "^0.27.2"
