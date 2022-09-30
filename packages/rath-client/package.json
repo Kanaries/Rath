@@ -14,7 +14,7 @@
     "@fluentui/font-icons-mdl2": "^8.4.13",
     "@fluentui/react": "^8.94.4",
     "@fluentui/react-hooks": "^8.6.11",
-    "@kanaries/graphic-walker": "^0.2.1",
+    "@kanaries/graphic-walker": "^0.2.2",
     "@kanaries/loa": "^0.0.8",
     "@kanaries/web-data-loader": "0.1.7",
     "@material-ui/core": "^5.0.0-beta.5",
