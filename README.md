@@ -4,6 +4,7 @@
 ![](https://img.shields.io/badge/license-AGPL-brightgreen)
 ![](https://img.shields.io/github/stars/kanaries/rath?color=%23ff85c0)
 ![](https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build)
+![](https://img.shields.io/npm/v/@kanaries/graphic-walker/latest?label=%40kanaries%2Fgraphic-walker)
 
 
 <img src="https://kanaries.cn/assets/kanaries-logo.png" alt="logo" width="180px" style="" />
@@ -121,8 +122,6 @@ For larger datasets, or if you can access a high performance OLAP service (such 
 
 ## LICENSE (AGPL)
 Rath is an automated data analysis and visualization tool (auto-EDA).
-
-Copyright (C) 2019-now Observed Observer(Hao Chen)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
