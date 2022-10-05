@@ -25,7 +25,14 @@ const FocusZone: React.FC = props => {
         if (mainViewSpec) {
             commonStore.visualAnalysisInGraphicWalker(mainViewSpec);
         }
-    }, [mainViewSpec,  commonStore])
+    }, [mainViewSpec, commonStore]);
+
+    const paintChart = useCallback(() => {
+        if (mainViewSpec) {
+            commonStore.analysisInPainter(mainViewSpec);
+        }
+    }, [mainViewSpec, commonStore]);
+
     return <MainViewContainer>
         {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
         <div className="vis-container">
@@ -69,6 +76,13 @@ const FocusZone: React.FC = props => {
                 disabled={mainView === null}
                 onClick={editChart}
             />
+            <PrimaryButton
+                    style={BUTTON_STYLE}
+                    text={intl.get('lts.commandBar.painting')}
+                    iconProps={{ iconName: 'EditCreate' }}
+                    disabled={mainView === null}
+                    onClick={paintChart}
+                />
             <PrimaryButton style={BUTTON_STYLE} text={intl.get('discovery.main.explainDiff')}
                 iconProps={{ iconName: 'Compare' }}
                 disabled={mainView === null || compareView === null}

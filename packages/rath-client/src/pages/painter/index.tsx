@@ -1,18 +1,20 @@
 import { IFieldMeta, IRow, ISemanticType } from '@kanaries/loa';
 import { observer } from 'mobx-react-lite';
+import styled from 'styled-components';
+import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
+import { Specification } from 'visual-insights';
 import { DefaultButton, PrimaryButton, Slider, Toggle, Stack, SwatchColorPicker } from '@fluentui/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
+import { Item, ScenegraphEvent } from 'vega';
 import ReactVega from '../../components/react-vega';
 import { IVegaSubset } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
-import { batchMutInCatRange, batchMutInCircle, nnMic } from './utils';
-import styled from 'styled-components';
-import EmbedAnalysis from './embedAnalysis';
 import { transVegaSubset2Schema } from '../../utils/transform';
-import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
-import { Specification } from 'visual-insights';
+import { batchMutInCatRange, batchMutInCircle, nnMic } from './utils';
+import EmbedAnalysis from './embedAnalysis';
+
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -56,7 +58,7 @@ const Painter: React.FC = (props) => {
     const [mutFeatValues, setMutFeatValues] = useState<string[]>(colorCells.map((c) => c.id));
     const [mutFeatIndex, setMutFeatIndex] = useState<number>(1);
     const [painting, setPainting] = useState<boolean>(false);
-    const [painterSize, setPainterSize] = useState<number>(1);
+    const [painterSize, setPainterSize] = useState<number>(0.1);
     const [showWalker, setShowWalker] = useState<boolean>(false);
 
     const initValue = mutFeatValues[0];
@@ -135,9 +137,8 @@ const Painter: React.FC = (props) => {
                 if (xFieldType === 'quantitative' && yFieldType === 'quantitative') {
                     const xRange = getRange(mutData.map((r) => r[xField]));
                     const yRange = getRange(mutData.map((r) => r[yField]));
-                    res.view.addEventListener('mouseover', (e, item) => {
+                    const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         if (painting && item && item.datum) {
-
                             const { mutIndices, mutValues } = batchMutInCircle({
                                 mutData,
                                 fields: [xField, yField],
@@ -156,11 +157,14 @@ const Painter: React.FC = (props) => {
                                     .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
                                     .insert(mutValues)
                             );
+                            res.view.runAsync();
                         }
-                    });
+                    }
+                    res.view.addEventListener('mouseover', hdr);
+                    res.view.addEventListener('touchmove', hdr);
                 } else if (xFieldType !== 'quantitative' && yFieldType === 'quantitative') {
                     const yRange = getRange(mutData.map((r) => r[yField]));
-                    res.view.addEventListener('mouseover', (e, item) => {
+                    const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         if (painting && item && item.datum) {
                             const { mutIndices, mutValues } = batchMutInCatRange({
                                 mutData,
@@ -180,9 +184,11 @@ const Painter: React.FC = (props) => {
                                     .insert(mutValues)
                             );
                         }
-                    });
+                    }
+                    res.view.addEventListener('mouseover', hdr);
+                    res.view.addEventListener('touchmove', hdr);
                 } else if (yFieldType !== 'quantitative' && xFieldType === 'quantitative') {
-                    res.view.addEventListener('mouseover', (e, item) => {
+                    const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         if (painting && item && item.datum) {
                             const xRange = getRange(mutData.map((r) => r[xField]));
                             const { mutIndices, mutValues } = batchMutInCatRange({
@@ -203,10 +209,12 @@ const Painter: React.FC = (props) => {
                                     .insert(mutValues)
                             );
                         }
-                    });
+                    }
+                    res.view.addEventListener('mouseover', hdr);
+                    res.view.addEventListener('touchmove', hdr);
                 }
                 res.view.resize();
-                res.view.runAsync();
+                res.view.run();
             });
         }
     }, [noViz, vizSpec, mutData, mutFeatValues, mutFeatIndex, painting, painterSize]);
@@ -289,13 +297,13 @@ const Painter: React.FC = (props) => {
                             </Stack.Item>
                             <Stack.Item>
                                 <Slider
-                                    min={0.2}
-                                    max={2}
-                                    step={0.2}
+                                    min={0.01}
+                                    max={1}
+                                    step={0.01}
                                     value={painterSize}
                                     label="Painter Size"
-                                    onChanged={(e, v) => {
-                                        setPainterSize(v);
+                                    onChange={(s, v) => {
+                                        setPainterSize(s);
                                     }}
                                 />
                             </Stack.Item>

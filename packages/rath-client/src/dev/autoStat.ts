@@ -1,22 +1,22 @@
-import { IFieldMeta, IRow } from "../interfaces";
 import { binMap, BIN_SIZE, entropy, generalMic, mic, pureGeneralMic, rangeNormilize } from "@kanaries/loa";
+import { IFieldMeta, IRow } from "../interfaces";
 
 interface ILoaView {
     fields: (IFieldMeta | '*')[];
     locked?: boolean;
 }
 
-function getCausers (fields: IFieldMeta[], relationMatrix: number[][], baseIndex: number): [number, number][] {
-    let causers: [number, number][] = fields.map((f, fi) => [relationMatrix[fi][baseIndex], fi]);
-    causers.sort((a, b) => b[0] - a[0])
-    return causers;
-}
+// function getCausers (fields: IFieldMeta[], relationMatrix: number[][], baseIndex: number): [number, number][] {
+//     let causers: [number, number][] = fields.map((f, fi) => [relationMatrix[fi][baseIndex], fi]);
+//     causers.sort((a, b) => b[0] - a[0])
+//     return causers;
+// }
 
-function getEffects (fields: IFieldMeta[], relationMatrix: number[][], baseIndex: number): [number, number][] {
-    let effects: [number, number][] = fields.map((f, fi) => [relationMatrix[baseIndex][fi], fi]);
-    effects.sort((a, b) => b[0] - a[0])
-    return effects;
-}
+// function getEffects (fields: IFieldMeta[], relationMatrix: number[][], baseIndex: number): [number, number][] {
+//     let effects: [number, number][] = fields.map((f, fi) => [relationMatrix[baseIndex][fi], fi]);
+//     effects.sort((a, b) => b[0] - a[0])
+//     return effects;
+// }
 
 function getSubMatrix<T = any> (mat: T[][], indices: number[]): T[][] {
     const size = indices.length;
@@ -414,7 +414,7 @@ export function autoSet(dataSource: IRow[], fields: IFieldMeta[], views: ILoaVie
         } else {
             ansFields = view.fields.filter(f => f !== '*') as IFieldMeta[];
         }
-        console.log('ans fields', ansFields, view.fields, ansFields.map(af => ansFields.map(af2 => relationMatrix[fieldIndexMap.get(af.fid)!][fieldIndexMap.get(af2.fid)!])))
+        // console.log('ans fields', ansFields, view.fields, ansFields.map(af => ansFields.map(af2 => relationMatrix[fieldIndexMap.get(af.fid)!][fieldIndexMap.get(af2.fid)!])))
         ansViews.push({
             ...view,
             fields: uniqueFieldMeta(ansFields)

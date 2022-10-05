@@ -103,7 +103,7 @@ export function batchMutInCircle (props: BatchMutInCircleProps) {
     const mutIndices = new Set();
     const mutValues: IRow[] = [];
     for (let i = 0; i < mutData.length; i++) {
-        if ((mutData[i][fields[0]] - point[0]) ** 2 / a + (mutData[i][fields[1]] - point[1]) ** 2 / b <= r ** 2) {
+        if (((mutData[i][fields[0]] - point[0]) ** 2) / (a ** 2) + ((mutData[i][fields[1]] - point[1]) ** 2) / (b ** 2) <= (r ** 2)) {
             if (mutData[i][key] !== value) {
                 mutData[i][key] = value;
                 mutValues.push(mutData[i])
