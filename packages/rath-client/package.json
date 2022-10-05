@@ -14,7 +14,7 @@
     "@fluentui/font-icons-mdl2": "^8.4.13",
     "@fluentui/react": "^8.94.4",
     "@fluentui/react-hooks": "^8.6.11",
-    "@kanaries/graphic-walker": "0.1.0",
+    "@kanaries/graphic-walker": "^0.2.2",
     "@kanaries/loa": "^0.0.8",
     "@kanaries/web-data-loader": "0.1.7",
     "@material-ui/core": "^5.0.0-beta.5",
@@ -45,7 +45,7 @@
     "vega": "^5.22.1",
     "vega-embed": "^6.21.0",
     "vega-lite": "^5.5.0",
-    "visual-insights": "0.11.2",
+    "visual-insights": "^0.12.3",
     "web-vitals": "^0.2.4",
     "worker-loader": "^3.0.7"
   },

@@ -218,6 +218,17 @@
         },
         "extend": {
             "title": "Extend Information"
+        },
+        "filter": {
+            "title": "Filter Config",
+            "active": "Filter",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "key": "Filter by",
+            "range": "range",
+            "set": "set",
+            "submit": "Submit",
+            "cancel": "Cancel"
         }
     },
     "meta": {

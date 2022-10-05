@@ -218,6 +218,17 @@
         },
         "extend": {
             "title": "扩展信息"
+        },
+        "filter": {
+            "title": "筛选规则",
+            "active": "启用筛选",
+            "enabled": "开启",
+            "disabled": "关闭",
+            "key": "筛选方式",
+            "range": "区间",
+            "set": "集合",
+            "submit": "应用",
+            "cancel": "取消"
         }
     },
     "meta": {

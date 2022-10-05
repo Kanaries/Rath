@@ -37,6 +37,10 @@
       "**/visual-insights"
     ]
   },
+  "resolutions": {
+    "@types/react": "^17.x",
+    "@types/react-dom": "^17.x"
+  },
   "homepage": "https://github.com/ObservedObserver/showme#readme",
   "devDependencies": {
     "concurrently": "^4.1.2",
