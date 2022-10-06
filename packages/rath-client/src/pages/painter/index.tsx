@@ -3,17 +3,18 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
 import { Specification } from 'visual-insights';
-import { DefaultButton, PrimaryButton, Slider, Toggle, Stack, SwatchColorPicker } from '@fluentui/react';
+import { DefaultButton, PrimaryButton, Slider, Toggle, Stack, SwatchColorPicker, ChoiceGroup } from '@fluentui/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
 import { Item, ScenegraphEvent } from 'vega';
 import ReactVega from '../../components/react-vega';
-import { IVegaSubset } from '../../interfaces';
+import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
 import { transVegaSubset2Schema } from '../../utils/transform';
 import { batchMutInCatRange, batchMutInCircle, nnMic } from './utils';
 import EmbedAnalysis from './embedAnalysis';
+import { useViewData } from './viewDataHook';
 
 
 const Cont = styled.div`
@@ -52,7 +53,7 @@ const Painter: React.FC = (props) => {
     const { dataSourceStore, commonStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
     const { vizSpec } = commonStore;
-    const [mutData, setMutData] = useState<IRow[]>([]);
+    // const [mutData, setMutData] = useState<IRow[]>([]);
     const [nearFields, setNearFields] = useState<IFieldMeta[]>([]);
     const [nearIndex, setNearIndex] = useState<number>(0);
     const [mutFeatValues, setMutFeatValues] = useState<string[]>(colorCells.map((c) => c.id));
@@ -60,24 +61,26 @@ const Painter: React.FC = (props) => {
     const [painting, setPainting] = useState<boolean>(false);
     const [painterSize, setPainterSize] = useState<number>(0.1);
     const [showWalker, setShowWalker] = useState<boolean>(false);
+    const { trigger, viewData, setViewData, maintainViewDataRemove } = useViewData(cleanedData);
+    const [painterMode, setPainterMode] = useState<PAINTER_MODE>(PAINTER_MODE.COLOR)
 
     const initValue = mutFeatValues[0];
 
     const clearPainting = useCallback(() => {
-        setMutData(
+        setViewData(
             cleanedData.map((r, i) => {
                 return { ...r, [LABEL_FIELD_KEY]: initValue, [LABEL_INDEX]: i };
             })
         );
-    }, [cleanedData, initValue]);
+    }, [cleanedData, initValue, setViewData]);
 
     useEffect(() => {
-        setMutData(
+        setViewData(
             cleanedData.map((r, i) => {
                 return { ...r, [LABEL_FIELD_KEY]: initValue, [LABEL_INDEX]: i };
             })
         );
-    }, [cleanedData, fieldMetas, initValue]);
+    }, [cleanedData, fieldMetas, initValue, setViewData]);
 
     const getNearFields = useCallback(
         (data: IRow[]) => {
@@ -100,7 +103,7 @@ const Painter: React.FC = (props) => {
         [fieldMetas]
     );
 
-    const noViz = mutData.length === 0 || fieldMetas.length === 0 || vizSpec === null;
+    const noViz = viewData.length === 0 || fieldMetas.length === 0 || vizSpec === null;
     useEffect(() => {
         if (!noViz && container.current) {
             const mvd: any = {
@@ -128,19 +131,19 @@ const Painter: React.FC = (props) => {
                     vega
                         .changeset()
                         .remove(() => true)
-                        .insert(mutData)
+                        .insert(viewData)
                 );
                 const xField = mvd.encoding.x.field;
                 const yField = mvd.encoding.y.field;
                 const xFieldType = mvd.encoding.x.type as ISemanticType;
                 const yFieldType = mvd.encoding.y.type as ISemanticType;
                 if (xFieldType === 'quantitative' && yFieldType === 'quantitative') {
-                    const xRange = getRange(mutData.map((r) => r[xField]));
-                    const yRange = getRange(mutData.map((r) => r[yField]));
+                    const xRange = getRange(viewData.map((r) => r[xField]));
+                    const yRange = getRange(viewData.map((r) => r[yField]));
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         if (painting && item && item.datum) {
                             const { mutIndices, mutValues } = batchMutInCircle({
-                                mutData,
+                                mutData: viewData,
                                 fields: [xField, yField],
                                 point: [item.datum[xField], item.datum[yField]],
                                 a: xRange[1] - xRange[0],
@@ -149,25 +152,36 @@ const Painter: React.FC = (props) => {
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
+                                painterMode
                             });
-                            res.view.change(
-                                'dataSource',
-                                vega
-                                    .changeset()
-                                    .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                    .insert(mutValues)
-                            );
-                            res.view.runAsync();
+                            if (painterMode === PAINTER_MODE.COLOR) {
+                                res.view.change(
+                                    'dataSource',
+                                    vega
+                                        .changeset()
+                                        .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                        .insert(mutValues)
+                                );
+                            } else if (painterMode === PAINTER_MODE.ERASE) {
+                                res.view.change(
+                                    'dataSource',
+                                    vega
+                                        .changeset()
+                                        .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                );
+                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                // maintainViewDataChange(viewData.filter(r => !mutIndices.has(r[LABEL_INDEX])))
+                            }
                         }
                     }
                     res.view.addEventListener('mouseover', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 } else if (xFieldType !== 'quantitative' && yFieldType === 'quantitative') {
-                    const yRange = getRange(mutData.map((r) => r[yField]));
+                    const yRange = getRange(viewData.map((r) => r[yField]));
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         if (painting && item && item.datum) {
                             const { mutIndices, mutValues } = batchMutInCatRange({
-                                mutData,
+                                mutData: viewData,
                                 fields: [xField, yField],
                                 point: [item.datum[xField], item.datum[yField]],
                                 r: painterSize,
@@ -190,9 +204,9 @@ const Painter: React.FC = (props) => {
                 } else if (yFieldType !== 'quantitative' && xFieldType === 'quantitative') {
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         if (painting && item && item.datum) {
-                            const xRange = getRange(mutData.map((r) => r[xField]));
+                            const xRange = getRange(viewData.map((r) => r[xField]));
                             const { mutIndices, mutValues } = batchMutInCatRange({
-                                mutData,
+                                mutData: viewData,
                                 fields: [yField, xField],
                                 point: [item.datum[yField], item.datum[xField]],
                                 r: painterSize,
@@ -214,10 +228,10 @@ const Painter: React.FC = (props) => {
                     res.view.addEventListener('touchmove', hdr);
                 }
                 res.view.resize();
-                res.view.run();
+                res.view.runAsync();
             });
         }
-    }, [noViz, vizSpec, mutData, mutFeatValues, mutFeatIndex, painting, painterSize]);
+    }, [noViz, vizSpec, viewData, mutFeatValues, mutFeatIndex, painting, painterSize, painterMode]);
 
     const nearSpec = useMemo<IVegaSubset | null>(() => {
         if (nearFields.length > 0) {
@@ -282,6 +296,18 @@ const Painter: React.FC = (props) => {
                                 />
                             </Stack.Item>
                             <Stack.Item>
+                                <ChoiceGroup
+                                    selectedKey={painterMode}
+                                    onChange={(e, op) => {
+                                        op && setPainterMode(op.key as PAINTER_MODE)
+                                    }}
+                                options={[
+                                    { key: PAINTER_MODE.COLOR, text: 'color', iconProps: { iconName: 'Color' } },
+                                    { key: PAINTER_MODE.ERASE, text: 'clean', iconProps: { iconName: 'EraseTool' } },
+                                    { key: PAINTER_MODE.CREATE, text: 'create', iconProps: {iconName: 'Brush' }, disabled: true}
+                                ]} />
+                            </Stack.Item>
+                            <Stack.Item>
                                 <SwatchColorPicker
                                     selectedId={mutFeatValues[mutFeatIndex]}
                                     columnCount={5}
@@ -325,14 +351,14 @@ const Painter: React.FC = (props) => {
                             text="Search"
                             iconProps={{ iconName: 'Search' }}
                             onClick={() => {
-                                getNearFields(mutData);
+                                getNearFields(viewData);
                             }}
                         />
                         <PrimaryButton
                             text='Explore'
                             iconProps={{ iconName: 'BarChartVerticalEdit' }}
                             onClick={() => {
-                                getNearFields(mutData);
+                                getNearFields(viewData);
                                 setShowWalker(true)
                             }}
                         />
@@ -367,7 +393,7 @@ const Painter: React.FC = (props) => {
             }
             {
                 showWalker && nearSpec && <EmbedAnalysis
-                    dataSource={mutData}
+                    dataSource={viewData}
                     spec={walkerSchema}
                     fields={fieldsInWalker}
                 />

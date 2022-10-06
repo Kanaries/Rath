@@ -1,4 +1,5 @@
 import { entropy, IRow, liteGroupBy, rangeNormilize } from '@kanaries/loa';
+import { PAINTER_MODE } from '../../interfaces';
 const BIN_SIZE = 16
 
 export function vecAdd (mutVec: number[], inc: number[]) {
@@ -87,6 +88,7 @@ interface BatchMutInCircleProps {
     key: string;
     value: any;
     indexKey: string;
+    painterMode?: PAINTER_MODE
 }
 export function batchMutInCircle (props: BatchMutInCircleProps) {
     const {
@@ -98,14 +100,20 @@ export function batchMutInCircle (props: BatchMutInCircleProps) {
         r,
         key,
         value,
-        indexKey
+        indexKey,
+        painterMode = PAINTER_MODE.COLOR
     } = props;
     const mutIndices = new Set();
     const mutValues: IRow[] = [];
     for (let i = 0; i < mutData.length; i++) {
         if (((mutData[i][fields[0]] - point[0]) ** 2) / (a ** 2) + ((mutData[i][fields[1]] - point[1]) ** 2) / (b ** 2) <= (r ** 2)) {
-            if (mutData[i][key] !== value) {
-                mutData[i][key] = value;
+            if (painterMode === PAINTER_MODE.COLOR) {
+                if (mutData[i][key] !== value) {
+                    mutData[i][key] = value;
+                    mutValues.push(mutData[i])
+                    mutIndices.add(mutData[i][indexKey])
+                }
+            } else if (painterMode === PAINTER_MODE.ERASE) {
                 mutValues.push(mutData[i])
                 mutIndices.add(mutData[i][indexKey])
             }
