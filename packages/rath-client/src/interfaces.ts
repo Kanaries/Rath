@@ -166,5 +166,6 @@ export interface IVegaSubset {
 export enum PAINTER_MODE {
     COLOR = 'color',
     ERASE = 'erase',
-    CREATE = 'create'
+    CREATE = 'create',
+    NONE = 'none'
 }

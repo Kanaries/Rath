@@ -15,7 +15,7 @@ import { transVegaSubset2Schema } from '../../utils/transform';
 import { batchMutInCatRange, batchMutInCircle, nnMic } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
-
+import { baseDemoSample } from './sample';
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -45,8 +45,26 @@ const colorCells = COLOR_SCHEME.map((c, i) => ({
     label: `L_${i + 1}`,
 }));
 
+const painterModeList = [
+    { key: PAINTER_MODE.NONE, text: 'Move', iconProps: { iconName: 'Move', style: { fontSize: '18px' } } },
+    { key: PAINTER_MODE.COLOR, text: 'color', iconProps: { iconName: 'Color', style: { fontSize: '18px' } } },
+    { key: PAINTER_MODE.ERASE, text: 'clean', iconProps: { iconName: 'EraseTool', style: { fontSize: '18px' } } },
+    {
+        key: PAINTER_MODE.CREATE,
+        text: 'create',
+        iconProps: { iconName: 'Brush', style: { fontSize: '18px' } },
+        disabled: true,
+    },
+];
+
 const LABEL_FIELD_KEY = '_lab_field';
 const LABEL_INDEX = '_label_index';
+
+function labelingData (data: IRow[], initValue: any) {
+    return data.map((r, i) => {
+        return { ...r, [LABEL_FIELD_KEY]: initValue, [LABEL_INDEX]: i };
+    })
+}
 
 const Painter: React.FC = (props) => {
     const container = useRef<HTMLDivElement>(null);
@@ -58,29 +76,24 @@ const Painter: React.FC = (props) => {
     const [nearIndex, setNearIndex] = useState<number>(0);
     const [mutFeatValues, setMutFeatValues] = useState<string[]>(colorCells.map((c) => c.id));
     const [mutFeatIndex, setMutFeatIndex] = useState<number>(1);
-    const [painting, setPainting] = useState<boolean>(false);
     const [painterSize, setPainterSize] = useState<number>(0.1);
     const [showWalker, setShowWalker] = useState<boolean>(false);
     const { trigger, viewData, setViewData, maintainViewDataRemove } = useViewData(cleanedData);
-    const [painterMode, setPainterMode] = useState<PAINTER_MODE>(PAINTER_MODE.COLOR)
+    const [samplePercent, setSamplePercent] = useState<number>(1);
+    const [painterMode, setPainterMode] = useState<PAINTER_MODE>(PAINTER_MODE.COLOR);
 
     const initValue = mutFeatValues[0];
 
+    const painting = painterMode !== PAINTER_MODE.NONE;
+
     const clearPainting = useCallback(() => {
-        setViewData(
-            cleanedData.map((r, i) => {
-                return { ...r, [LABEL_FIELD_KEY]: initValue, [LABEL_INDEX]: i };
-            })
-        );
+        setViewData(labelingData(cleanedData, initValue));
     }, [cleanedData, initValue, setViewData]);
 
     useEffect(() => {
-        setViewData(
-            cleanedData.map((r, i) => {
-                return { ...r, [LABEL_FIELD_KEY]: initValue, [LABEL_INDEX]: i };
-            })
-        );
-    }, [cleanedData, fieldMetas, initValue, setViewData]);
+        const size = Math.min(cleanedData.length, Math.round(cleanedData.length * samplePercent))
+        setViewData(labelingData(baseDemoSample(cleanedData, size), initValue))
+    }, [cleanedData, fieldMetas, initValue, setViewData, samplePercent]);
 
     const getNearFields = useCallback(
         (data: IRow[]) => {
@@ -121,10 +134,20 @@ const Painter: React.FC = (props) => {
                     domain: mutFeatValues,
                 },
             };
+            if (painterMode === PAINTER_MODE.NONE) {
+                if (!(mvd.params instanceof Array)) {
+                    mvd.params = []
+                }
+                mvd.params.push({
+                    name: 'grid',
+                    select: 'interval',
+                    bind: 'scales'
+                })
+            }
 
             // @ts-ignore
             embed(container.current, mvd, {
-                actions: true,
+                actions: painterMode === PAINTER_MODE.NONE,
             }).then((res) => {
                 res.view.change(
                     'dataSource',
@@ -152,28 +175,31 @@ const Painter: React.FC = (props) => {
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
-                                painterMode
+                                painterMode,
                             });
                             if (painterMode === PAINTER_MODE.COLOR) {
-                                res.view.change(
-                                    'dataSource',
-                                    vega
-                                        .changeset()
-                                        .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                        .insert(mutValues)
-                                );
+                                // const rd = mutValues.filter(f => Math.random() > 0.7)
+                                res.view
+                                    .change(
+                                        'dataSource',
+                                        vega
+                                            .changeset()
+                                            .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                            .insert(mutValues)
+                                    )
+                                    .runAsync();
                             } else if (painterMode === PAINTER_MODE.ERASE) {
-                                res.view.change(
-                                    'dataSource',
-                                    vega
-                                        .changeset()
-                                        .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                );
-                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                res.view
+                                    .change(
+                                        'dataSource',
+                                        vega.changeset().remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                    )
+                                    .runAsync();
+                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
                                 // maintainViewDataChange(viewData.filter(r => !mutIndices.has(r[LABEL_INDEX])))
                             }
                         }
-                    }
+                    };
                     res.view.addEventListener('mouseover', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 } else if (xFieldType !== 'quantitative' && yFieldType === 'quantitative') {
@@ -198,7 +224,7 @@ const Painter: React.FC = (props) => {
                                     .insert(mutValues)
                             );
                         }
-                    }
+                    };
                     res.view.addEventListener('mouseover', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 } else if (yFieldType !== 'quantitative' && xFieldType === 'quantitative') {
@@ -223,7 +249,7 @@ const Painter: React.FC = (props) => {
                                     .insert(mutValues)
                             );
                         }
-                    }
+                    };
                     res.view.addEventListener('mouseover', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 }
@@ -231,7 +257,17 @@ const Painter: React.FC = (props) => {
                 res.view.runAsync();
             });
         }
-    }, [noViz, vizSpec, viewData, mutFeatValues, mutFeatIndex, painting, painterSize, painterMode]);
+    }, [
+        noViz,
+        vizSpec,
+        viewData,
+        mutFeatValues,
+        mutFeatIndex,
+        painting,
+        painterSize,
+        painterMode,
+        maintainViewDataRemove,
+    ]);
 
     const nearSpec = useMemo<IVegaSubset | null>(() => {
         if (nearFields.length > 0) {
@@ -253,25 +289,27 @@ const Painter: React.FC = (props) => {
     }, [vizSpec, nearFields, nearIndex]);
 
     const fieldsInWalker = useMemo<IMutField[]>(() => {
-        return fieldMetas.map(f => ({
-            fid: f.fid,
-            name: f.name,
-            semanticType: f.semanticType,
-            analyticType: f.analyticType
-        })).concat({
-            fid: LABEL_FIELD_KEY,
-            name: 'new field',
-            semanticType: 'nominal',
-            analyticType: 'dimension'
-        })
-    }, [fieldMetas])
+        return fieldMetas
+            .map((f) => ({
+                fid: f.fid,
+                name: f.name,
+                semanticType: f.semanticType,
+                analyticType: f.analyticType,
+            }))
+            .concat({
+                fid: LABEL_FIELD_KEY,
+                name: 'new field',
+                semanticType: 'nominal',
+                analyticType: 'dimension',
+            });
+    }, [fieldMetas]);
 
     const walkerSchema = useMemo<Specification>(() => {
         if (nearSpec) {
-            return transVegaSubset2Schema(nearSpec)
+            return transVegaSubset2Schema(nearSpec);
         }
-        return {}
-    }, [nearSpec])
+        return {};
+    }, [nearSpec]);
 
     if (noViz) {
         return <div>404</div>;
@@ -287,37 +325,39 @@ const Painter: React.FC = (props) => {
                     <div className="operation-segment">
                         <Stack tokens={{ childrenGap: 18 }}>
                             <Stack.Item>
-                                <Toggle
-                                    label="Painting"
-                                    checked={painting}
-                                    onChange={(e, checked) => {
-                                        setPainting(Boolean(checked));
-                                    }}
-                                />
-                            </Stack.Item>
-                            <Stack.Item>
                                 <ChoiceGroup
                                     selectedKey={painterMode}
                                     onChange={(e, op) => {
-                                        op && setPainterMode(op.key as PAINTER_MODE)
+                                        op && setPainterMode(op.key as PAINTER_MODE);
                                     }}
-                                options={[
-                                    { key: PAINTER_MODE.COLOR, text: 'color', iconProps: { iconName: 'Color' } },
-                                    { key: PAINTER_MODE.ERASE, text: 'clean', iconProps: { iconName: 'EraseTool' } },
-                                    { key: PAINTER_MODE.CREATE, text: 'create', iconProps: {iconName: 'Brush' }, disabled: true}
-                                ]} />
+                                    options={painterModeList}
+                                />
                             </Stack.Item>
+                            {painterMode === PAINTER_MODE.COLOR && (
+                                <Stack.Item>
+                                    <SwatchColorPicker
+                                        selectedId={mutFeatValues[mutFeatIndex]}
+                                        columnCount={5}
+                                        cellShape={'circle'}
+                                        colorCells={colorCells}
+                                        onChange={(e, id) => {
+                                            if (id) {
+                                                const targetIndex = colorCells.findIndex((f) => f.id === id);
+                                                targetIndex > -1 && setMutFeatIndex(targetIndex);
+                                            }
+                                        }}
+                                    />
+                                </Stack.Item>
+                            )}
                             <Stack.Item>
-                                <SwatchColorPicker
-                                    selectedId={mutFeatValues[mutFeatIndex]}
-                                    columnCount={5}
-                                    cellShape={'circle'}
-                                    colorCells={colorCells}
-                                    onColorChanged={(id) => {
-                                        if (id) {
-                                            const targetIndex = colorCells.findIndex((f) => f.id === id);
-                                            targetIndex > -1 && setMutFeatIndex(targetIndex);
-                                        }
+                                <Slider
+                                    min={0.01}
+                                    max={1}
+                                    step={0.01}
+                                    value={samplePercent}
+                                    label="Sample Percent (%)"
+                                    onChange={(s, v) => {
+                                        setSamplePercent(s)
                                     }}
                                 />
                             </Stack.Item>
@@ -333,15 +373,17 @@ const Painter: React.FC = (props) => {
                                     }}
                                 />
                             </Stack.Item>
-                            <Stack.Item>
-                                <DefaultButton
-                                    disabled
-                                    text="Add label"
-                                    onClick={() => {
-                                        setMutFeatValues((v) => [...v, `Label ${v.length + 1}`]);
-                                    }}
-                                />
-                            </Stack.Item>
+                            {painterMode === PAINTER_MODE.COLOR && (
+                                <Stack.Item>
+                                    <DefaultButton
+                                        disabled
+                                        text="Add label"
+                                        onClick={() => {
+                                            setMutFeatValues((v) => [...v, `Label ${v.length + 1}`]);
+                                        }}
+                                    />
+                                </Stack.Item>
+                            )}
                         </Stack>
                     </div>
                 </PainterContainer>
@@ -355,11 +397,11 @@ const Painter: React.FC = (props) => {
                             }}
                         />
                         <PrimaryButton
-                            text='Explore'
+                            text="Explore"
                             iconProps={{ iconName: 'BarChartVerticalEdit' }}
                             onClick={() => {
                                 getNearFields(viewData);
-                                setShowWalker(true)
+                                setShowWalker(true);
                             }}
                         />
                         <DefaultButton
@@ -370,8 +412,8 @@ const Painter: React.FC = (props) => {
                     </Stack>
                 </div>
             </div>
-            {
-                !showWalker && <div className="card">
+            {!showWalker && (
+                <div className="card">
                     <Stack horizontal tokens={{ childrenGap: 10 }}>
                         <DefaultButton
                             text="Last"
@@ -390,14 +432,10 @@ const Painter: React.FC = (props) => {
                     </Stack>
                     {nearSpec && <ReactVega spec={nearSpec} dataSource={cleanedData} />}
                 </div>
-            }
-            {
-                showWalker && nearSpec && <EmbedAnalysis
-                    dataSource={viewData}
-                    spec={walkerSchema}
-                    fields={fieldsInWalker}
-                />
-            }
+            )}
+            {showWalker && nearSpec && (
+                <EmbedAnalysis dataSource={viewData} spec={walkerSchema} fields={fieldsInWalker} />
+            )}
         </Cont>
     );
 };
