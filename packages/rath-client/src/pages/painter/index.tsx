@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
 import { Specification } from 'visual-insights';
-import { DefaultButton, PrimaryButton, Slider, Toggle, Stack, SwatchColorPicker, ChoiceGroup } from '@fluentui/react';
+import { DefaultButton, PrimaryButton, Slider, Stack, SwatchColorPicker, ChoiceGroup } from '@fluentui/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
 import { Item, ScenegraphEvent } from 'vega';
@@ -15,7 +15,7 @@ import { transVegaSubset2Schema } from '../../utils/transform';
 import { batchMutInCatRange, batchMutInCircle, nnMic } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
-import { baseDemoSample } from './sample';
+import { viewSampling } from './sample';
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -90,10 +90,24 @@ const Painter: React.FC = (props) => {
         setViewData(labelingData(cleanedData, initValue));
     }, [cleanedData, initValue, setViewData]);
 
+    const fieldsInView = useMemo<IFieldMeta[]>(() => {
+        const res: IFieldMeta[] = [];
+        if (vizSpec) {
+            Object.values(vizSpec.encoding).forEach(ch => {
+                const f = fieldMetas.find(m => m.fid === ch.field)
+                if (f) {
+                    res.push(f)
+                }
+            })
+        }
+        return res;
+    }, [fieldMetas, vizSpec])
+
     useEffect(() => {
         const size = Math.min(cleanedData.length, Math.round(cleanedData.length * samplePercent))
-        setViewData(labelingData(baseDemoSample(cleanedData, size), initValue))
-    }, [cleanedData, fieldMetas, initValue, setViewData, samplePercent]);
+        const sampleData = viewSampling(cleanedData, fieldsInView, size)
+        setViewData(labelingData(sampleData, initValue))
+    }, [cleanedData, fieldMetas, initValue, setViewData, samplePercent, fieldsInView]);
 
     const getNearFields = useCallback(
         (data: IRow[]) => {

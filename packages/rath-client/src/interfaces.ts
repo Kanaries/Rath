@@ -169,3 +169,7 @@ export enum PAINTER_MODE {
     CREATE = 'create',
     NONE = 'none'
 }
+
+export interface IDataFrame {
+    [key: string]: any[]
+}
