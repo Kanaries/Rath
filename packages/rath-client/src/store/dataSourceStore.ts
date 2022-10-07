@@ -1,5 +1,4 @@
 import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
-import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from, Subscription } from "rxjs";
 import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights";
@@ -12,6 +11,7 @@ import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
 import { findRathSafeColumnIndex } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
+import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 
 interface IDataMessage {
     type: 'init_data' | 'others';
@@ -58,9 +58,9 @@ export class DataSourceStore {
     public dataPreviewMode: IDataPreviewMode = IDataPreviewMode.data;
     public showDataImportSelection: boolean = false;
     public showFastSelectionModal: boolean = false;
-    private fieldMetasRef: IStreamListener<IFieldMeta[]>;
-    private cleanedDataRef: IStreamListener<IRow[]>;
-    private filteredDataRef: IStreamListener<IRow[]>;
+    private fieldMetasRef: StreamListener<IFieldMeta[]>;
+    private cleanedDataRef: StreamListener<IRow[]>;
+    private filteredDataRef: StreamListener<IRow[]>;
     public loadingDataProgress: number = 0;
     public dataPrepProgressTag: IDataPrepProgressTag = IDataPrepProgressTag.none;
     private subscriptions: Subscription[] = [];
