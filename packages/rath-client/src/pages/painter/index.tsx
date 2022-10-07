@@ -12,7 +12,7 @@ import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
 import { transVegaSubset2Schema } from '../../utils/transform';
-import { batchMutInCatRange, batchMutInCircle, nnMic } from './utils';
+import { batchMutInCatRange, batchMutInCircle, labelingData, nnMic } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
 import { viewSampling } from './sample';
@@ -33,13 +33,6 @@ const PainterContainer = styled.div`
         min-width: 200px;
     }
 `;
-
-
-function labelingData (data: IRow[], initValue: any) {
-    return data.map((r, i) => {
-        return { ...r, [LABEL_FIELD_KEY]: initValue, [LABEL_INDEX]: i };
-    })
-}
 
 const Painter: React.FC = (props) => {
     const container = useRef<HTMLDivElement>(null);
@@ -68,20 +61,20 @@ const Painter: React.FC = (props) => {
     const fieldsInView = useMemo<IFieldMeta[]>(() => {
         const res: IFieldMeta[] = [];
         if (vizSpec) {
-            Object.values(vizSpec.encoding).forEach(ch => {
-                const f = fieldMetas.find(m => m.fid === ch.field)
+            Object.values(vizSpec.encoding).forEach((ch) => {
+                const f = fieldMetas.find((m) => m.fid === ch.field);
                 if (f) {
-                    res.push(f)
+                    res.push(f);
                 }
-            })
+            });
         }
         return res;
-    }, [fieldMetas, vizSpec])
+    }, [fieldMetas, vizSpec]);
 
     useEffect(() => {
-        const size = Math.min(cleanedData.length, Math.round(cleanedData.length * samplePercent))
-        const sampleData = viewSampling(cleanedData, fieldsInView, size)
-        setViewData(labelingData(sampleData, initValue))
+        const size = Math.min(cleanedData.length, Math.round(cleanedData.length * samplePercent));
+        const sampleData = viewSampling(cleanedData, fieldsInView, size);
+        setViewData(labelingData(sampleData, initValue));
     }, [cleanedData, fieldMetas, initValue, setViewData, samplePercent, fieldsInView]);
 
     const getNearFields = useCallback(
@@ -125,13 +118,13 @@ const Painter: React.FC = (props) => {
             };
             if (painterMode === PAINTER_MODE.NONE) {
                 if (!(mvd.params instanceof Array)) {
-                    mvd.params = []
+                    mvd.params = [];
                 }
                 mvd.params.push({
                     name: 'grid',
                     select: 'interval',
-                    bind: 'scales'
-                })
+                    bind: 'scales',
+                });
             }
 
             // @ts-ignore
@@ -346,7 +339,7 @@ const Painter: React.FC = (props) => {
                                     value={samplePercent}
                                     label="Sample Percent (%)"
                                     onChange={(s, v) => {
-                                        setSamplePercent(s)
+                                        setSamplePercent(s);
                                     }}
                                 />
                             </Stack.Item>
