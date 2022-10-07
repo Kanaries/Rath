@@ -171,3 +171,22 @@ export function labelingData (data: IRow[], initValue: any) {
         return { ...r, [LABEL_FIELD_KEY]: initValue, [LABEL_INDEX]: i };
     })
 }
+
+/**
+ * It is not a normal debounce, I develop it for a temp special case.
+ * @param initAction 
+ * @param func 
+ * @param waitFor 
+ * @returns 
+ */
+export const debounceShouldNeverBeUsed = <F extends ((...args: any) => any)>(initAction: F, func: F, waitFor: number) => {
+    let timeout: number = 0
+
+    const debounced = (...args: any) => {
+        initAction(...args)
+        clearTimeout(timeout)
+        setTimeout(() => func(...args), waitFor)
+    }
+    
+    return debounced as (...args: Parameters<F>) => ReturnType<F>
+}

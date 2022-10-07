@@ -1,22 +1,30 @@
-import { IFieldMeta, IRow, ISemanticType } from '@kanaries/loa';
+import { IFieldMeta, ISemanticType } from '@kanaries/loa';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
 import { Specification } from 'visual-insights';
-import { DefaultButton, PrimaryButton, Slider, Stack, SwatchColorPicker, ChoiceGroup } from '@fluentui/react';
+import {
+    DefaultButton,
+    Slider,
+    Stack,
+    SwatchColorPicker,
+    ChoiceGroup,
+    Pivot,
+    PivotItem,
+} from '@fluentui/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
 import { Item, ScenegraphEvent } from 'vega';
-import ReactVega from '../../components/react-vega';
-import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
+import { PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
 import { transVegaSubset2Schema } from '../../utils/transform';
-import { batchMutInCatRange, batchMutInCircle, labelingData, nnMic } from './utils';
+import { batchMutInCatRange, batchMutInCircle, debounceShouldNeverBeUsed, labelingData } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
 import { viewSampling } from './sample';
 import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './constants';
+import NeighborAutoLink from './neighborAutoLink';
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -34,21 +42,23 @@ const PainterContainer = styled.div`
     }
 `;
 
+enum PIVOT_TAB_KEYS {
+    SEARCH = 'Search',
+    EXPLORE = 'Explore',
+}
+
 const Painter: React.FC = (props) => {
     const container = useRef<HTMLDivElement>(null);
-    const { dataSourceStore, commonStore } = useGlobalStore();
+    const { dataSourceStore, commonStore, painterStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
     const { vizSpec } = commonStore;
-    // const [mutData, setMutData] = useState<IRow[]>([]);
-    const [nearFields, setNearFields] = useState<IFieldMeta[]>([]);
-    const [nearIndex, setNearIndex] = useState<number>(0);
     const [mutFeatValues, setMutFeatValues] = useState<string[]>(COLOR_CELLS.map((c) => c.id));
     const [mutFeatIndex, setMutFeatIndex] = useState<number>(1);
     const [painterSize, setPainterSize] = useState<number>(0.1);
-    const [showWalker, setShowWalker] = useState<boolean>(false);
     const { trigger, viewData, setViewData, maintainViewDataRemove } = useViewData(cleanedData);
     const [samplePercent, setSamplePercent] = useState<number>(1);
     const [painterMode, setPainterMode] = useState<PAINTER_MODE>(PAINTER_MODE.COLOR);
+    const [pivotKey, setPivotKey] = useState<PIVOT_TAB_KEYS>(PIVOT_TAB_KEYS.SEARCH);
 
     const initValue = mutFeatValues[0];
 
@@ -77,26 +87,11 @@ const Painter: React.FC = (props) => {
         setViewData(labelingData(sampleData, initValue));
     }, [cleanedData, fieldMetas, initValue, setViewData, samplePercent, fieldsInView]);
 
-    const getNearFields = useCallback(
-        (data: IRow[]) => {
-            const X = data.map((r) => r[LABEL_FIELD_KEY]);
-            const ans: { field: IFieldMeta; score: number }[] = [];
-            for (let field of fieldMetas) {
-                // eslint-disable-next-line no-constant-condition
-                if (true) {
-                    const Y = data.map((r) => r[field.fid]);
-                    const score = nnMic(X, Y);
-                    ans.push({
-                        field,
-                        score,
-                    });
-                }
-            }
-            ans.sort((a, b) => b.score - a.score);
-            setNearFields(ans.map((a) => a.field));
-        },
-        [fieldMetas]
-    );
+    const linkNearViz = useCallback(debounceShouldNeverBeUsed(() => {
+        painterStore.setPaintingForTrigger(true);
+    }, () => {
+        painterStore.pullTrigger()
+    }, 800), [painterStore])
 
     const noViz = viewData.length === 0 || fieldMetas.length === 0 || vizSpec === null;
     useEffect(() => {
@@ -160,6 +155,7 @@ const Painter: React.FC = (props) => {
                                 painterMode,
                             });
                             if (painterMode === PAINTER_MODE.COLOR) {
+                                linkNearViz();
                                 // const rd = mutValues.filter(f => Math.random() > 0.7)
                                 res.view
                                     .change(
@@ -249,26 +245,8 @@ const Painter: React.FC = (props) => {
         painterSize,
         painterMode,
         maintainViewDataRemove,
+        linkNearViz
     ]);
-
-    const nearSpec = useMemo<IVegaSubset | null>(() => {
-        if (nearFields.length > 0) {
-            const mvd: any = {
-                ...deepcopy(vizSpec),
-                data: {
-                    name: 'dataSource',
-                    // values: mutData
-                },
-            };
-            mvd.encoding.color = {
-                field: nearFields[nearIndex].fid,
-                type: nearFields[nearIndex].semanticType,
-                title: nearFields[nearIndex].name || nearFields[nearIndex].fid,
-            };
-            return mvd;
-        }
-        return null;
-    }, [vizSpec, nearFields, nearIndex]);
 
     const fieldsInWalker = useMemo<IMutField[]>(() => {
         return fieldMetas
@@ -287,11 +265,11 @@ const Painter: React.FC = (props) => {
     }, [fieldMetas]);
 
     const walkerSchema = useMemo<Specification>(() => {
-        if (nearSpec) {
-            return transVegaSubset2Schema(nearSpec);
+        if (vizSpec) {
+            return transVegaSubset2Schema(vizSpec);
         }
         return {};
-    }, [nearSpec]);
+    }, [vizSpec]);
 
     if (noViz) {
         return <div>404</div>;
@@ -371,21 +349,6 @@ const Painter: React.FC = (props) => {
                 </PainterContainer>
                 <div>
                     <Stack horizontal tokens={{ childrenGap: 10 }}>
-                        <PrimaryButton
-                            text="Search"
-                            iconProps={{ iconName: 'Search' }}
-                            onClick={() => {
-                                getNearFields(viewData);
-                            }}
-                        />
-                        <PrimaryButton
-                            text="Explore"
-                            iconProps={{ iconName: 'BarChartVerticalEdit' }}
-                            onClick={() => {
-                                getNearFields(viewData);
-                                setShowWalker(true);
-                            }}
-                        />
                         <DefaultButton
                             iconProps={{ iconName: 'Trash' }}
                             text="Clear Painting"
@@ -393,29 +356,28 @@ const Painter: React.FC = (props) => {
                         />
                     </Stack>
                 </div>
+                <hr style={{ margin: '1em' }} />
+                <Pivot
+                    selectedKey={pivotKey}
+                    onLinkClick={(item) => {
+                        item && setPivotKey(item.props.itemKey as PIVOT_TAB_KEYS);
+                    }}
+                    style={{ marginTop: '1em' }}
+                >
+                    <PivotItem headerText={PIVOT_TAB_KEYS.SEARCH} itemKey={PIVOT_TAB_KEYS.SEARCH} itemIcon="Search" />
+                    <PivotItem
+                        headerText={PIVOT_TAB_KEYS.EXPLORE}
+                        itemKey={PIVOT_TAB_KEYS.EXPLORE}
+                        itemIcon="BarChartVerticalEdit"
+                    />
+                </Pivot>
             </div>
-            {!showWalker && (
-                <div className="card">
-                    <Stack horizontal tokens={{ childrenGap: 10 }}>
-                        <DefaultButton
-                            text="Last"
-                            iconProps={{ iconName: 'Back' }}
-                            onClick={() => {
-                                setNearIndex((v) => (v - 1 + nearFields.length) % nearFields.length);
-                            }}
-                        />
-                        <DefaultButton
-                            text="Next"
-                            iconProps={{ iconName: 'Forward' }}
-                            onClick={() => {
-                                setNearIndex((v) => (v + 1) % nearFields.length);
-                            }}
-                        />
-                    </Stack>
-                    {nearSpec && <ReactVega spec={nearSpec} dataSource={cleanedData} />}
-                </div>
-            )}
-            {showWalker && nearSpec && (
+            {pivotKey === PIVOT_TAB_KEYS.SEARCH && <NeighborAutoLink
+                vizSpec={vizSpec}
+                dataSource={viewData}
+                fieldMetas={fieldMetas}
+            />}
+            {pivotKey === PIVOT_TAB_KEYS.EXPLORE && (
                 <EmbedAnalysis dataSource={viewData} spec={walkerSchema} fields={fieldsInWalker} />
             )}
         </Cont>

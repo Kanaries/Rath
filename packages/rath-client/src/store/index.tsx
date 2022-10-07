@@ -10,7 +10,7 @@ import { LTSPipeLine } from './pipeLineStore/lts';
 import { MegaAutomationStore } from './megaAutomation';
 import { ClickHouseStore } from './clickhouseStore';
 import { SemiAutomationStore } from './semiAutomation/mainStore';
-
+import { PainterStore } from './painterStore'
 export interface StoreCollection {
     langStore: LangStore;
     galleryStore: GalleryStore;
@@ -23,6 +23,7 @@ export interface StoreCollection {
     commonStore: CommonStore;
     clickHouseStore: ClickHouseStore;
     semiAutoStore: SemiAutomationStore;
+    painterStore: PainterStore;
 }
 
 const langStore = new LangStore();
@@ -36,7 +37,7 @@ const noteBookStore = new NoteBookStore(litePipeStore);
 const dashBoardStore = new DashBoardStore(litePipeStore);
 const megaAutoStore = new MegaAutomationStore(ltsPipeLineStore);
 const semiAutoStore = new SemiAutomationStore(dataSourceStore);
-
+const painterStore = new PainterStore();
 
 const storeCol: StoreCollection = {
     commonStore,
@@ -49,7 +50,8 @@ const storeCol: StoreCollection = {
     ltsPipeLineStore,
     megaAutoStore,
     clickHouseStore,
-    semiAutoStore
+    semiAutoStore,
+    painterStore
 }
 
 const StoreContext = React.createContext<StoreCollection>(null!);
