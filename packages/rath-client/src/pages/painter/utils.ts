@@ -1,5 +1,6 @@
 import { entropy, IRow, liteGroupBy, rangeNormilize } from '@kanaries/loa';
 import { PAINTER_MODE } from '../../interfaces';
+import { LABEL_FIELD_KEY, LABEL_INDEX } from './constants';
 const BIN_SIZE = 16
 
 export function vecAdd (mutVec: number[], inc: number[]) {
@@ -163,4 +164,10 @@ export function batchMutInCatRange (props: BatchMutInCatRangeProps) {
         mutIndices,
         mutValues
     }
+}
+
+export function labelingData (data: IRow[], initValue: any) {
+    return data.map((r, i) => {
+        return { ...r, [LABEL_FIELD_KEY]: initValue, [LABEL_INDEX]: i };
+    })
 }

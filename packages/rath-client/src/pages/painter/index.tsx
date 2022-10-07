@@ -16,6 +16,7 @@ import { batchMutInCatRange, batchMutInCircle, nnMic } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
 import { viewSampling } from './sample';
+import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './constants';
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -33,32 +34,6 @@ const PainterContainer = styled.div`
     }
 `;
 
-const COLOR_SCHEME: string[] = [];
-const RAW = '4c78a8f58518e4575672b7b254a24beeca3bb279a2ff9da69d755dbab0ac';
-for (let i = 0; i < RAW.length; i += 6) {
-    COLOR_SCHEME.push('#' + RAW.slice(i, i + 6));
-}
-
-const colorCells = COLOR_SCHEME.map((c, i) => ({
-    id: `L_${i + 1}`,
-    color: c,
-    label: `L_${i + 1}`,
-}));
-
-const painterModeList = [
-    { key: PAINTER_MODE.NONE, text: 'Move', iconProps: { iconName: 'Move', style: { fontSize: '18px' } } },
-    { key: PAINTER_MODE.COLOR, text: 'color', iconProps: { iconName: 'Color', style: { fontSize: '18px' } } },
-    { key: PAINTER_MODE.ERASE, text: 'clean', iconProps: { iconName: 'EraseTool', style: { fontSize: '18px' } } },
-    {
-        key: PAINTER_MODE.CREATE,
-        text: 'create',
-        iconProps: { iconName: 'Brush', style: { fontSize: '18px' } },
-        disabled: true,
-    },
-];
-
-const LABEL_FIELD_KEY = '_lab_field';
-const LABEL_INDEX = '_label_index';
 
 function labelingData (data: IRow[], initValue: any) {
     return data.map((r, i) => {
@@ -74,7 +49,7 @@ const Painter: React.FC = (props) => {
     // const [mutData, setMutData] = useState<IRow[]>([]);
     const [nearFields, setNearFields] = useState<IFieldMeta[]>([]);
     const [nearIndex, setNearIndex] = useState<number>(0);
-    const [mutFeatValues, setMutFeatValues] = useState<string[]>(colorCells.map((c) => c.id));
+    const [mutFeatValues, setMutFeatValues] = useState<string[]>(COLOR_CELLS.map((c) => c.id));
     const [mutFeatIndex, setMutFeatIndex] = useState<number>(1);
     const [painterSize, setPainterSize] = useState<number>(0.1);
     const [showWalker, setShowWalker] = useState<boolean>(false);
@@ -344,7 +319,7 @@ const Painter: React.FC = (props) => {
                                     onChange={(e, op) => {
                                         op && setPainterMode(op.key as PAINTER_MODE);
                                     }}
-                                    options={painterModeList}
+                                    options={PAINTER_MODE_LIST}
                                 />
                             </Stack.Item>
                             {painterMode === PAINTER_MODE.COLOR && (
@@ -353,10 +328,10 @@ const Painter: React.FC = (props) => {
                                         selectedId={mutFeatValues[mutFeatIndex]}
                                         columnCount={5}
                                         cellShape={'circle'}
-                                        colorCells={colorCells}
+                                        colorCells={COLOR_CELLS}
                                         onChange={(e, id) => {
                                             if (id) {
-                                                const targetIndex = colorCells.findIndex((f) => f.id === id);
+                                                const targetIndex = COLOR_CELLS.findIndex((f) => f.id === id);
                                                 targetIndex > -1 && setMutFeatIndex(targetIndex);
                                             }
                                         }}
