@@ -11,6 +11,7 @@ import {
     ChoiceGroup,
     Pivot,
     PivotItem,
+    Toggle,
 } from '@fluentui/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
@@ -19,12 +20,13 @@ import { PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
 import { transVegaSubset2Schema } from '../../utils/transform';
-import { batchMutInCatRange, batchMutInCircle, debounceShouldNeverBeUsed, labelingData } from './utils';
+import { batchMutInCatRange, batchMutInCircle, clearAggregation, debounceShouldNeverBeUsed, labelingData } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
 import { viewSampling } from './sample';
 import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './constants';
 import NeighborAutoLink from './neighborAutoLink';
+import { toJS } from 'mobx';
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -32,13 +34,13 @@ const Cont = styled.div`
 
 const PainterContainer = styled.div`
     display: flex;
+    overflow-x: auto;
     .vis-segment {
         flex-grow: 1;
     }
     .operation-segment {
         flex-grow: 0;
         flex-shrink: 0;
-        min-width: 200px;
     }
 `;
 
@@ -51,7 +53,7 @@ const Painter: React.FC = (props) => {
     const container = useRef<HTMLDivElement>(null);
     const { dataSourceStore, commonStore, painterStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
-    const { vizSpec } = commonStore;
+    const { vizSpec: passSpec } = commonStore;
     const [mutFeatValues, setMutFeatValues] = useState<string[]>(COLOR_CELLS.map((c) => c.id));
     const [mutFeatIndex, setMutFeatIndex] = useState<number>(1);
     const [painterSize, setPainterSize] = useState<number>(0.1);
@@ -59,6 +61,13 @@ const Painter: React.FC = (props) => {
     const [samplePercent, setSamplePercent] = useState<number>(1);
     const [painterMode, setPainterMode] = useState<PAINTER_MODE>(PAINTER_MODE.COLOR);
     const [pivotKey, setPivotKey] = useState<PIVOT_TAB_KEYS>(PIVOT_TAB_KEYS.SEARCH);
+    const [clearAgg, setClearAgg] = useState<boolean>(false);
+
+    const vizSpec = useMemo(() => {
+        if (passSpec === null) return null;
+        if (!clearAgg) return passSpec;
+        return clearAggregation(toJS(passSpec));
+    }, [passSpec, clearAgg])
 
     const initValue = mutFeatValues[0];
 
@@ -141,6 +150,8 @@ const Painter: React.FC = (props) => {
                     const xRange = getRange(viewData.map((r) => r[xField]));
                     const yRange = getRange(viewData.map((r) => r[yField]));
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
+                        e.stopPropagation();
+                        e.preventDefault();
                         if (painting && item && item.datum) {
                             const { mutIndices, mutValues } = batchMutInCircle({
                                 mutData: viewData,
@@ -156,7 +167,6 @@ const Painter: React.FC = (props) => {
                             });
                             if (painterMode === PAINTER_MODE.COLOR) {
                                 linkNearViz();
-                                // const rd = mutValues.filter(f => Math.random() > 0.7)
                                 res.view
                                     .change(
                                         'dataSource',
@@ -174,7 +184,6 @@ const Painter: React.FC = (props) => {
                                     )
                                     .runAsync();
                                 maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
-                                // maintainViewDataChange(viewData.filter(r => !mutIndices.has(r[LABEL_INDEX])))
                             }
                         }
                     };
@@ -183,6 +192,8 @@ const Painter: React.FC = (props) => {
                 } else if (xFieldType !== 'quantitative' && yFieldType === 'quantitative') {
                     const yRange = getRange(viewData.map((r) => r[yField]));
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
+                        e.stopPropagation();
+                        e.preventDefault();
                         if (painting && item && item.datum) {
                             const { mutIndices, mutValues } = batchMutInCatRange({
                                 mutData: viewData,
@@ -194,19 +205,34 @@ const Painter: React.FC = (props) => {
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
                             });
-                            res.view.change(
-                                'dataSource',
-                                vega
-                                    .changeset()
-                                    .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                    .insert(mutValues)
-                            );
+                            if (painterMode === PAINTER_MODE.COLOR) {
+                                linkNearViz();
+                                res.view
+                                    .change(
+                                        'dataSource',
+                                        vega
+                                            .changeset()
+                                            .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                            .insert(mutValues)
+                                    )
+                                    .runAsync();
+                            } else if (painterMode === PAINTER_MODE.ERASE) {
+                                res.view
+                                    .change(
+                                        'dataSource',
+                                        vega.changeset().remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                    )
+                                    .runAsync();
+                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                            }
                         }
                     };
                     res.view.addEventListener('mouseover', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 } else if (yFieldType !== 'quantitative' && xFieldType === 'quantitative') {
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
+                        e.stopPropagation();
+                        e.preventDefault();
                         if (painting && item && item.datum) {
                             const xRange = getRange(viewData.map((r) => r[xField]));
                             const { mutIndices, mutValues } = batchMutInCatRange({
@@ -219,13 +245,26 @@ const Painter: React.FC = (props) => {
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
                             });
-                            res.view.change(
-                                'dataSource',
-                                vega
-                                    .changeset()
-                                    .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
-                                    .insert(mutValues)
-                            );
+                            if (painterMode === PAINTER_MODE.COLOR) {
+                                linkNearViz();
+                                res.view
+                                    .change(
+                                        'dataSource',
+                                        vega
+                                            .changeset()
+                                            .remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                            .insert(mutValues)
+                                    )
+                                    .runAsync();
+                            } else if (painterMode === PAINTER_MODE.ERASE) {
+                                res.view
+                                    .change(
+                                        'dataSource',
+                                        vega.changeset().remove((r: any) => mutIndices.has(r[LABEL_INDEX]))
+                                    )
+                                    .runAsync();
+                                maintainViewDataRemove((r: any) => mutIndices.has(r[LABEL_INDEX]));
+                            }
                         }
                     };
                     res.view.addEventListener('mouseover', hdr);
@@ -279,7 +318,10 @@ const Painter: React.FC = (props) => {
             <div className="cursor rounded"></div>
             <div className="card">
                 <PainterContainer>
-                    <div className="vis-segment">
+                    <div className="vis-segment" onTouchMove={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    }}>
                         <div ref={container}></div>
                     </div>
                     <div className="operation-segment">
@@ -332,6 +374,11 @@ const Painter: React.FC = (props) => {
                                         setPainterSize(s);
                                     }}
                                 />
+                            </Stack.Item>
+                            <Stack.Item>
+                                <Toggle label="Use original distribution" inlineLabel checked={clearAgg} onChange={(e, checked) => {
+                                    setClearAgg(Boolean(checked))
+                                }} />
                             </Stack.Item>
                             {painterMode === PAINTER_MODE.COLOR && (
                                 <Stack.Item>

@@ -1,5 +1,6 @@
 import { entropy, IRow, liteGroupBy, rangeNormilize } from '@kanaries/loa';
-import { PAINTER_MODE } from '../../interfaces';
+import produce from 'immer';
+import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { LABEL_FIELD_KEY, LABEL_INDEX } from './constants';
 const BIN_SIZE = 16
 
@@ -189,4 +190,22 @@ export const debounceShouldNeverBeUsed = <F extends ((...args: any) => any)>(ini
     }
     
     return debounced as (...args: Parameters<F>) => ReturnType<F>
+}
+
+export function clearAggregation (spec: IVegaSubset): IVegaSubset {
+    const nextSpec = produce<IVegaSubset>(spec, draft => {
+        Object.values(draft.encoding).forEach(ch => {
+            if (ch.aggregate) ch.aggregate = undefined;
+        })
+        switch (draft.mark) {
+            case 'area':
+            case 'line':
+            case 'boxplot':
+                draft.mark = 'point';
+                break;
+            default:
+                draft.mark = 'tick'
+        }
+    })
+    return nextSpec;
 }
