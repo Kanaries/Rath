@@ -51,7 +51,7 @@ enum PIVOT_TAB_KEYS {
 
 const Painter: React.FC = (props) => {
     const container = useRef<HTMLDivElement>(null);
-    const { dataSourceStore, commonStore, painterStore } = useGlobalStore();
+    const { dataSourceStore, commonStore, painterStore, langStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
     const { vizSpec: passSpec } = commonStore;
     const [mutFeatValues, setMutFeatValues] = useState<string[]>(COLOR_CELLS.map((c) => c.id));
@@ -435,7 +435,7 @@ const Painter: React.FC = (props) => {
                 fieldMetas={fieldMetas}
             />}
             {pivotKey === PIVOT_TAB_KEYS.EXPLORE && (
-                <EmbedAnalysis dataSource={viewData} spec={walkerSchema} fields={fieldsInWalker} trigger={gwTrigger} />
+                <EmbedAnalysis dataSource={viewData} spec={walkerSchema} fields={fieldsInWalker} trigger={gwTrigger} i18nLang={langStore.lang} />
             )}
         </Cont>
     );
