@@ -8,10 +8,11 @@ interface EmbedAnalysisProps {
     dataSource: IRow[];
     fields: IMutField[];
     spec: Specification;
+    trigger?: boolean;
 }
 
 const EmbedAnalysis: React.FC<EmbedAnalysisProps> = props => {
-    const { dataSource, fields, spec } = props;
+    const { dataSource, fields, spec, trigger } = props;
     return <GraphicWalker
         dataSource={dataSource}
         rawFields={fields}

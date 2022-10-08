@@ -19,6 +19,15 @@ const NavContainer = styled.div`
         padding: 1em;
     }
     padding-left: 10px;
+    .text-red{
+        color: #e94726
+    }
+    .text-yellow{
+        color: rgb(237, 167, 15)
+    }
+    .text-gray{
+        color: rgb(103, 109, 108)
+    }
 `
 
 const LogoBar = styled.div`
@@ -64,7 +73,8 @@ const AppNav: React.FC<AppNavProps> = props => {
                 key: p,
                 name: navMode === 'text' ? intl.get(`menu.${p}`) : '',
                 forceAnchor: true,
-                iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
+                iconProps: {iconName: getIcon(p) },
+                // iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
                 onClick (e: any) {
                     e.preventDefault();
                     commonStore.setAppKey(p)
@@ -100,7 +110,8 @@ const AppNav: React.FC<AppNavProps> = props => {
                 {
                     url: '/',
                     name: navMode === 'text' ? intl.get('common.home') : '',
-                    iconProps: navMode === 'icon' ? {iconName: 'Home'} : undefined
+                    // iconProps: navMode === 'icon' ? {iconName: 'Home'} : undefined,
+                    iconProps: {iconName: 'Home'}
                 },
                 ...getLinks([PIVOT_KEYS.support]),
                 // ...pivotList.map(item => {
@@ -130,7 +141,7 @@ const AppNav: React.FC<AppNavProps> = props => {
                     alt="rath"
                 />
             </a>
-            {navMode === 'text' && <h1>RATH</h1>}
+            {navMode === 'text' && <h1><span>R</span><span className='text-red'>A</span><span className='text-yellow'>T</span><span>H</span></h1>}
         </LogoBar>
         <Nav
             selectedKey={appKey}

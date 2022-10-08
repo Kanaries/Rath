@@ -13,6 +13,7 @@ import {
     PivotItem,
     Toggle,
 } from '@fluentui/react';
+import { toJS } from 'mobx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
 import { Item, ScenegraphEvent } from 'vega';
@@ -26,7 +27,6 @@ import { useViewData } from './viewDataHook';
 import { viewSampling } from './sample';
 import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './constants';
 import NeighborAutoLink from './neighborAutoLink';
-import { toJS } from 'mobx';
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -62,6 +62,7 @@ const Painter: React.FC = (props) => {
     const [painterMode, setPainterMode] = useState<PAINTER_MODE>(PAINTER_MODE.COLOR);
     const [pivotKey, setPivotKey] = useState<PIVOT_TAB_KEYS>(PIVOT_TAB_KEYS.SEARCH);
     const [clearAgg, setClearAgg] = useState<boolean>(false);
+    const [gwTrigger, setGWTrigger] = useState<boolean>(false);
 
     const vizSpec = useMemo(() => {
         if (passSpec === null) return null;
@@ -303,6 +304,8 @@ const Painter: React.FC = (props) => {
             });
     }, [fieldMetas]);
 
+    console.log(fieldsInWalker)
+
     const walkerSchema = useMemo<Specification>(() => {
         if (vizSpec) {
             return transVegaSubset2Schema(vizSpec);
@@ -401,6 +404,13 @@ const Painter: React.FC = (props) => {
                             text="Clear Painting"
                             onClick={clearPainting}
                         />
+                        <DefaultButton
+                            iconProps={{ iconName: 'Sync' }}
+                            text="Sync Data"
+                            onClick={() => {
+                                setGWTrigger(v => !v)
+                            }}
+                        />
                     </Stack>
                 </div>
                 <hr style={{ margin: '1em' }} />
@@ -425,7 +435,7 @@ const Painter: React.FC = (props) => {
                 fieldMetas={fieldMetas}
             />}
             {pivotKey === PIVOT_TAB_KEYS.EXPLORE && (
-                <EmbedAnalysis dataSource={viewData} spec={walkerSchema} fields={fieldsInWalker} />
+                <EmbedAnalysis dataSource={viewData} spec={walkerSchema} fields={fieldsInWalker} trigger={gwTrigger} />
             )}
         </Cont>
     );
