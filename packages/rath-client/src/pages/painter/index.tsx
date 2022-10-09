@@ -17,7 +17,7 @@ import { toJS } from 'mobx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
 import { Item, ScenegraphEvent } from 'vega';
-import { PAINTER_MODE } from '../../interfaces';
+import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
 import { transVegaSubset2Schema } from '../../utils/transform';
@@ -104,8 +104,8 @@ const Painter: React.FC = (props) => {
     }, 800), [painterStore])
 
     const noViz = viewData.length === 0 || fieldMetas.length === 0 || vizSpec === null;
-    useEffect(() => {
-        if (!noViz && container.current) {
+    const painterSpec = useMemo<IVegaSubset | null>(() => {
+        if (!noViz) {
             const mvd: any = {
                 ...deepcopy(vizSpec),
                 data: {
@@ -131,9 +131,15 @@ const Painter: React.FC = (props) => {
                     bind: 'scales',
                 });
             }
+            return mvd;
+        }
+        return null;
+    }, [vizSpec, mutFeatValues, noViz, painterMode]);
+    useEffect(() => {
+        if (painterSpec !== null && container.current) {
 
             // @ts-ignore
-            embed(container.current, mvd, {
+            embed(container.current, painterSpec, {
                 actions: painterMode === PAINTER_MODE.NONE,
             }).then((res) => {
                 res.view.change(
@@ -143,10 +149,11 @@ const Painter: React.FC = (props) => {
                         .remove(() => true)
                         .insert(viewData)
                 );
-                const xField = mvd.encoding.x.field;
-                const yField = mvd.encoding.y.field;
-                const xFieldType = mvd.encoding.x.type as ISemanticType;
-                const yFieldType = mvd.encoding.y.type as ISemanticType;
+                if (!(painterSpec.encoding.x && painterSpec.encoding.y)) return;
+                const xField = painterSpec.encoding.x.field;
+                const yField = painterSpec.encoding.y.field;
+                const xFieldType = painterSpec.encoding.x.type as ISemanticType;
+                const yFieldType = painterSpec.encoding.y.type as ISemanticType;
                 if (xFieldType === 'quantitative' && yFieldType === 'quantitative') {
                     const xRange = getRange(viewData.map((r) => r[xField]));
                     const yRange = getRange(viewData.map((r) => r[yField]));
@@ -276,8 +283,6 @@ const Painter: React.FC = (props) => {
             });
         }
     }, [
-        noViz,
-        vizSpec,
         viewData,
         mutFeatValues,
         mutFeatIndex,
@@ -285,7 +290,8 @@ const Painter: React.FC = (props) => {
         painterSize,
         painterMode,
         maintainViewDataRemove,
-        linkNearViz
+        linkNearViz,
+        painterSpec
     ]);
 
     const fieldsInWalker = useMemo<IMutField[]>(() => {
@@ -304,14 +310,12 @@ const Painter: React.FC = (props) => {
             });
     }, [fieldMetas]);
 
-    console.log(fieldsInWalker)
-
     const walkerSchema = useMemo<Specification>(() => {
-        if (vizSpec) {
-            return transVegaSubset2Schema(vizSpec);
+        if (painterSpec) {
+            return transVegaSubset2Schema(painterSpec);
         }
         return {};
-    }, [vizSpec]);
+    }, [painterSpec]);
 
     if (noViz) {
         return <div>404</div>;

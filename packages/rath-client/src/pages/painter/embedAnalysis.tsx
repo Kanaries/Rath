@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import '@kanaries/graphic-walker/dist/style.css';
 import { Specification } from 'visual-insights';
@@ -15,9 +15,14 @@ interface EmbedAnalysisProps {
 
 const EmbedAnalysis: React.FC<EmbedAnalysisProps> = props => {
     const { dataSource, fields, spec, trigger, i18nLang } = props;
+
+    const triggerFields = useMemo(() => {
+        return [...fields]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [trigger, fields])
     return <GraphicWalker
         dataSource={dataSource}
-        rawFields={fields}
+        rawFields={triggerFields}
         spec={spec}
         i18nLang={i18nLang}
         hideDataSourceConfig
