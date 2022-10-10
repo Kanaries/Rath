@@ -11,7 +11,7 @@ const apiPathPrefix = '/api';
 const DB_CONNECTOR_SERVICE_KEY = 'db_api'
 
 export function getConnectorServiceInfo () {
-    return localStorage.getItem(DB_CONNECTOR_SERVICE_KEY) || '';
+    return localStorage.getItem(DB_CONNECTOR_SERVICE_KEY) || 'https://data-service.kanaries.net/connector/ping';
 }
 
 export function setConnectorServiceInfo (info: string) {
