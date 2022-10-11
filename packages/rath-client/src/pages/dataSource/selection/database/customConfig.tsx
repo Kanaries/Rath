@@ -1,13 +1,14 @@
-import { TextField, Stack, PrimaryButton, DefaultButton } from '@fluentui/react';
+import { TextField, Stack, PrimaryButton, DefaultButton, Spinner } from '@fluentui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import intl from 'react-intl-universal';
 import { getConnectorServiceInfo, setConnectorServiceInfo } from './api';
 
 interface CustomConfigProps {
     ping: () => void;
+    loading?: boolean;
 }
 const CustomConfig: React.FC<CustomConfigProps> = props => {
-    const { ping } = props;
+    const { ping, loading } = props;
     const [show, setShow] = useState<boolean>(false);
     const [serviceInfo, setServiceInfo] = useState('');
     useEffect(() => {
@@ -25,6 +26,9 @@ const CustomConfig: React.FC<CustomConfigProps> = props => {
             }}
             iconProps={{ iconName: 'Settings' }}
         />
+        {
+            loading && <Spinner label='loading' />
+        }
         {
             show && <Stack horizontal verticalAlign='end' tokens={{ childrenGap: '6px' }}>
                 <TextField

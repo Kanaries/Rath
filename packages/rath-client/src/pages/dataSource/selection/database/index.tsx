@@ -12,6 +12,7 @@ import QueryForm from './query-form';
 import useDatabaseReducer from './reducer';
 import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, pingConnector, requestSQL } from './api';
 import CustomConfig from './customConfig';
+import { notify } from '../../../../components/error';
 
 
 export const StackTokens = {
@@ -66,6 +67,7 @@ const FETCH_THROTTLE_SPAN = 600;
 
 const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLoadingAnimation }) => {
     const [progress, dispatch] = useDatabaseReducer();
+    const [loading, setLoading] = useState<boolean>(false);
 
     const [
         connectorReady,
@@ -82,11 +84,25 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         queryString,
     ] = progress;
 
-    const ping = useCallback(() => {
-        pingConnector().then(ok => ok && dispatch({
-            type: 'ENABLE_CONNECTOR',
-            payload: undefined
-        }));
+    const ping = useCallback(async () => {
+        try {
+            setLoading(true)
+            const ok = await pingConnector();
+            if (ok) {
+                dispatch({
+                    type: 'ENABLE_CONNECTOR',
+                    payload: undefined
+                })
+            }
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: 'ping connector error',
+                content: `${error}`
+            })
+        } finally {
+            setLoading(false);
+        }
     }, [dispatch])
 
     useEffect(() => {
@@ -420,7 +436,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
     }, [isQuerying, sourceId, selectedTable, queryString, setLoadingAnimation, sourceType, selectedDatabase, selectedSchema, onDataLoaded, onClose]);
 
     return <div>
-        <CustomConfig ping={ping} />
+        <CustomConfig ping={ping} loading={loading} />
         {
             connectorReady && <Stack>
                 <Progress
