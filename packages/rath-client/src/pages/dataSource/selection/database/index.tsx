@@ -4,6 +4,7 @@ import { IDropdownOption, Stack, registerIcons } from '@fluentui/react';
 import { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { logDataImport } from '../../../../loggers/dataImport';
 import prefetch from '../../../../utils/prefetch';
+import { notify } from '../../../../components/error';
 import Progress from './progress';
 import datasetOptions from './config';
 import ConnectForm, { ConnectFormReadonly } from './connect-form';
@@ -12,8 +13,6 @@ import QueryForm from './query-form';
 import useDatabaseReducer from './reducer';
 import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, pingConnector, requestSQL } from './api';
 import CustomConfig from './customConfig';
-import { notify } from '../../../../components/error';
-
 
 export const StackTokens = {
     childrenGap: 20,
