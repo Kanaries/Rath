@@ -29,7 +29,7 @@
         "pattern": "Semi-auto Exploration",
         "devCollection": "Debug",
         "progressiveDashBoard": "Dashboard Designer",
-        "painter": "Painter"
+        "painter": "Data Painter"
     },
     "preference": {
         "title": "preference"
