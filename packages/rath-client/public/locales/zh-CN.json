@@ -14,7 +14,8 @@
             "ordinal": "有序类型",
             "temporal": "时间类型",
             "quantitative": "数值类型"
-        }
+        },
+        "addVar": "添加变量"
     },
     "menu": {
         "dataSource": "数据源",
@@ -26,7 +27,7 @@
         "support": "帮助",
         "lts": "全自动分析",
         "pattern": "半自动探索",
-        "devCollection": "调试模式",
+        "devCollection": "实验特性(α)",
         "progressiveDashBoard": "智能报表",
         "painter": "数据绘板"
     },

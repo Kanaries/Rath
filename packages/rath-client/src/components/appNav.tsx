@@ -87,11 +87,10 @@ const AppNav: React.FC<AppNavProps> = props => {
         {
             links: [
                 ...getLinks([PIVOT_KEYS.dataSource,
-                    PIVOT_KEYS.lts,
                     PIVOT_KEYS.editor,
                     PIVOT_KEYS.pattern,
-                    PIVOT_KEYS.painter,
-                    PIVOT_KEYS.progressiveDashBoard
+                    PIVOT_KEYS.lts,
+                    PIVOT_KEYS.painter
                 ]),
                 {
                     url: '#dev-mode',
@@ -101,10 +100,11 @@ const AppNav: React.FC<AppNavProps> = props => {
                     forceAnchor: true,
                     onClick (e: any) { e.preventDefault() },
                     links: getLinks([
-                        PIVOT_KEYS.noteBook,
-                        PIVOT_KEYS.gallery,
-                        PIVOT_KEYS.explainer,
-                        PIVOT_KEYS.dashBoard,
+                        // PIVOT_KEYS.noteBook,
+                        // PIVOT_KEYS.gallery,
+                        // PIVOT_KEYS.explainer,
+                        // PIVOT_KEYS.dashBoard,
+                        PIVOT_KEYS.progressiveDashBoard
                     ])
                 },
                 {

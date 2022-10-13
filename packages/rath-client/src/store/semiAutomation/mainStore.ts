@@ -294,6 +294,13 @@ export class SemiAutomationStore {
             })
         }
     }
+    public addMainViewField (fieldId: string) {
+        if (this.mainView === null) return;
+        const targetFieldIndex = this.fieldMetas.findIndex(f => f.fid === fieldId);
+        this.mainView = produce(this.mainView, draft => {
+            draft.fields.push(this.fieldMetas[targetFieldIndex])
+        })
+    }
     public removeMainViewFilter (filterFieldId: string) {
         if (!this.mainView?.filters) return;
         this.mainView = produce(this.mainView, draft => {

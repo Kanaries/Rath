@@ -5,21 +5,27 @@ import intl from 'react-intl-universal';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
+import FieldPlaceholder from '../../../components/fieldPlaceholder';
 import { MainViewContainer } from '../components';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
+
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
 const FocusZone: React.FC = props => {
     const { semiAutoStore, commonStore } = useGlobalStore();
-    const { mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec } = semiAutoStore;
+    const { mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas } = semiAutoStore;
 
     const explainDiff = useCallback(() => {
         if (mainView && compareView) {
             semiAutoStore.explainViewDiff(mainView, compareView);
         }
     }, [mainView, compareView, semiAutoStore])
+
+    const appendFieldHandler = useCallback((fid: string) => {
+        semiAutoStore.addMainViewField(fid);
+    }, [semiAutoStore])
 
     const editChart = useCallback(() => {
         if (mainViewSpec) {
@@ -55,6 +61,10 @@ const FocusZone: React.FC = props => {
                 }}
             />)
         }
+        <FieldPlaceholder
+            fields={fieldMetas}
+            onAdd={appendFieldHandler}
+        />
         </div>
         <div className="fields-container">
         {

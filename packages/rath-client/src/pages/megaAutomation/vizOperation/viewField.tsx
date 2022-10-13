@@ -43,6 +43,34 @@ export const Pill = styled.div<{colType: IFieldMeta['analyticType']}>`
   }
 `
 
+export const PillPlaceholder = styled.div`
+    color: ${COLORS.black};
+    -ms-user-select: none;
+    -webkit-align-items: center;
+    -webkit-user-select: none;
+    align-items: center;
+    /* border-radius: 10px; */
+    border-style: dashed;
+    border-radius: 10px;
+    border-style: solid;
+    border-width: 1px;
+    box-sizing: border-box;
+    cursor: default;
+    display: -webkit-flex;
+    display: flex;
+    font-size: 12px;
+    height: 20px;
+    min-width: 150px;
+    overflow-y: hidden;
+    padding: 0 10px;
+    user-select: none;
+    margin-right: 4px;
+    justify-content: center;
+    .cancel-icon{
+        cursor: pointer;
+    }
+`
+
 interface ViewFieldProps {
     type: IFieldMeta['analyticType'];
     text: string;

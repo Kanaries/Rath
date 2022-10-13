@@ -23,7 +23,7 @@ interface DataSourceBoardProps {
 }
 
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-  const { dataSourceStore, pipeLineStore, commonStore, ltsPipeLineStore, megaAutoStore } = useGlobalStore();
+  const { dataSourceStore, commonStore, ltsPipeLineStore, megaAutoStore } = useGlobalStore();
 
   const {
     cleanedData,
@@ -62,11 +62,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
       />
     );
   }, [dataSourceStore])
-
-  const onOrignEngineStart = useCallback(() => {
-    pipeLineStore.startTask();
-    commonStore.setAppKey(PIVOT_KEYS.gallery);
-  }, [commonStore, pipeLineStore])
 
   const onV1EngineStart = useCallback(() => {
     ltsPipeLineStore.startTask(taskMode).then(() => {
@@ -193,20 +188,12 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
               commonStore.setShowStorageModal(true)
             }}
           />
-          <IconButton
-            style={MARGIN_LEFT}
-            disabled={rawData.length === 0}
-            iconProps={{ iconName: 'TestBeakerSolid' }}
-            title={intl.get('dataSource.extractInsightOld')}
-            ariaLabel={intl.get('dataSource.extractInsightOld')}
-            onClick={onOrignEngineStart}
-          />
 
           <IconButton
             style={MARGIN_LEFT}
             iconProps={{ iconName: 'Settings' }}
-            title={intl.get('dataSource.extractInsightOld')}
-            ariaLabel={intl.get('dataSource.extractInsightOld')}
+            title={intl.get('common.settins')}
+            ariaLabel={intl.get('common.settins')}
             onClick={() => {
               commonStore.setShowAnalysisConfig(true)
             }}

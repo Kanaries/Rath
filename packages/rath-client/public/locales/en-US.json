@@ -14,7 +14,8 @@
             "ordinal": "ordinal",
             "temporal": "temporal",
             "quantitative": "quantitative"
-        }
+        },
+        "addVar": "Add Variable"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -27,7 +28,7 @@
         "support": "Support",
         "lts": "Mega-auto Exploration",
         "pattern": "Semi-auto Exploration",
-        "devCollection": "Debug",
+        "devCollection": "Insiders(α)",
         "progressiveDashBoard": "Dashboard Designer",
         "painter": "Data Painter"
     },
@@ -56,7 +57,7 @@
         "confirm": "Confirm",
         "cancel": "Cancel",
         "analysis": {
-            "start": "Insight Analysis",
+            "start": "Start Analysis",
             "checkResult": "Check Existed Results",
             "pattern": "Build Knowledge(beta)",
             "manual": "Manual Explore"
