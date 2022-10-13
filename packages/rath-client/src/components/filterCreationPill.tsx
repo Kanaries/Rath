@@ -81,7 +81,12 @@ const FilterCreationPill: React.FC<FilterCreationPillProps> = (props) => {
 
     const submitResult = () => {
         if (curField) {
-            onFilterSubmit(curField, filter);
+            const ansFilter = produce(filter, draft => {
+                if (draft.type === 'set') {
+                    draft.values = selection.getSelectedIndices().map(i => curField.distribution[i].memberName)
+                }
+            })
+            onFilterSubmit(curField, ansFilter);
             toggleShow();
         }
     };

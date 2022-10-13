@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { PrimaryButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
@@ -6,7 +6,6 @@ import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
 import FieldPlaceholder from '../../../components/fieldPlaceholder';
-import FilterPlaceholder from '../../../components/filterPlaceholder';
 import { MainViewContainer } from '../components';
 import FilterCreationPill from '../../../components/filterCreationPill';
 import MainCanvas from './mainCanvas';
@@ -20,7 +19,6 @@ const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 const FocusZone: React.FC = props => {
     const { semiAutoStore, commonStore } = useGlobalStore();
     const { mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas } = semiAutoStore;
-    const filterPillRef = useRef<HTMLDivElement>(null);
     const explainDiff = useCallback(() => {
         if (mainView && compareView) {
             semiAutoStore.explainViewDiff(mainView, compareView);
