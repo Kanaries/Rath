@@ -1,6 +1,6 @@
 import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
-import { IPattern } from "@kanaries/loa";
+import { IFilter, IPattern } from "@kanaries/loa";
 import { Specification } from "visual-insights";
 import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
@@ -304,7 +304,14 @@ export class SemiAutomationStore {
     public removeMainViewFilter (filterFieldId: string) {
         if (!this.mainView?.filters) return;
         this.mainView = produce(this.mainView, draft => {
-            draft.filters = draft.filters!.filter(f => f.field.fid !== filterFieldId)
+            draft.filters = draft.filters!.filter(f => f.fid !== filterFieldId)
+        })
+    }
+    public addMainViewFilter (filter: IFilter) {
+        if (!this.mainView) return;
+        if (typeof this.mainView.filters === 'undefined') this.mainView.filters = [];
+        this.mainView = produce(this.mainView, draft => {
+            draft.filters!.push(filter)
         })
     }
     public removeMainViewField (fieldId: string) {

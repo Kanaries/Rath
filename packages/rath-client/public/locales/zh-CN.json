@@ -15,7 +15,9 @@
             "temporal": "时间类型",
             "quantitative": "数值类型"
         },
-        "addVar": "添加变量"
+        "addVar": "添加变量",
+        "addFilter": "添加筛选项",
+        "field": "字段"
     },
     "menu": {
         "dataSource": "数据源",
@@ -23,13 +25,13 @@
         "explore": "探索分析(旧)",
         "dashBoard": "报表推荐",
         "explainer": "数据解读",
-        "editor": "自助分析",
+        "editor": "自助分析⭐️",
         "support": "帮助",
         "lts": "全自动分析",
-        "pattern": "半自动探索",
+        "pattern": "半自动探索⭐️",
         "devCollection": "实验特性(α)",
         "progressiveDashBoard": "智能报表",
-        "painter": "数据绘板"
+        "painter": "数据绘板🚀"
     },
     "preference": {
         "title": "个人偏好"

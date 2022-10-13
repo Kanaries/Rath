@@ -2,15 +2,15 @@ import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
-
+import { applyFilters } from '@kanaries/loa';
 import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
-import { applyFilter } from '../utils';
+
 
 const PattSegment: React.FC = () => {
     const { semiAutoStore } = useGlobalStore();
-    const { pattSpecList, pattViews, mainVizSetting, dataSource, autoAsso, hasMainView } = semiAutoStore;
+    const { pattSpecList, pattViews, mainVizSetting, dataSource, autoAsso, hasMainView, fieldMetas } = semiAutoStore;
     const loadMore = useCallback(() => {
         semiAutoStore.increaseRenderAmount('pattViews');
     }, [semiAutoStore])
@@ -48,13 +48,17 @@ const PattSegment: React.FC = () => {
                         <ReactVega
                             actions={mainVizSetting.debug}
                             spec={spec}
-                            dataSource={applyFilter(dataSource, pattViews.views[i].filters)}
+                            dataSource={applyFilters(dataSource, pattViews.views[i].filters)}
                         />
                     </div>
                     <div className="chart-desc">
                         { pattViews.views[i].fields?.filter(f => f.analyticType === 'dimension').map(f => f.name || f.fid).join(', ') } <br />
                         { pattViews.views[i].fields?.filter(f => f.analyticType === 'measure').map(f => f.name || f.fid).join(', ') } <br />
-                        { pattViews.views[i].filters?.map(f => `${f.field.name || f.field.fid} = ${f.values.join(', ')}`).join('\n') }
+                        { pattViews.views[i].filters?.map(f => {
+                            const meta = fieldMetas.find(m => m.fid === f.fid);
+                            if (!meta) return '';
+                            return `${meta.name || meta.fid} = ${f.type === 'set' ? f.values.join(',') : `[${f.range.join(',')}]`}`
+                        })}
                     </div>
                 </div>)
             }

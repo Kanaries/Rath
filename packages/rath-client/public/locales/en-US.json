@@ -15,7 +15,9 @@
             "temporal": "temporal",
             "quantitative": "quantitative"
         },
-        "addVar": "Add Variable"
+        "addVar": "Add Variable",
+        "addFilter": "Add Filter",
+        "field": "Field"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -23,14 +25,14 @@
         "explore": "Explore(alpha version)",
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
-        "editor": "Manual Exploration",
+        "editor": "Manual Exploration⭐️",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
         "lts": "Mega-auto Exploration",
-        "pattern": "Semi-auto Exploration",
+        "pattern": "Semi-auto Exploration⭐️",
         "devCollection": "Insiders(α)",
         "progressiveDashBoard": "Dashboard Designer",
-        "painter": "Data Painter"
+        "painter": "Data Painter🚀"
     },
     "preference": {
         "title": "preference"
@@ -226,8 +228,8 @@
             "enabled": "Enabled",
             "disabled": "Disabled",
             "key": "Filter by",
-            "range": "range",
-            "set": "set",
+            "range": "value range",
+            "set": "value set",
             "submit": "Submit",
             "cancel": "Cancel"
         }
