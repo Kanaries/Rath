@@ -73,12 +73,12 @@ const NeighborAutoLink: React.FC<NALProps> = (props) => {
             setNearFields(ans.map((a) => a.field));
             painterStore.setPainting(false);
         },
-        [fieldMetas]
+        [fieldMetas, painterStore]
     );
 
     useEffect(() => {
         getNearFields(dataSource)
-    }, [dataSource, painterStore.linkTrigger])
+    }, [dataSource, painterStore.linkTrigger, getNearFields])
     return (
         <div className="card" style={{ position: 'relative' }}>
                 {
