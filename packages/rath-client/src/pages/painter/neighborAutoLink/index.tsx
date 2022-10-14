@@ -116,6 +116,7 @@ const NeighborAutoLink: React.FC<NALProps> = (props) => {
                             setNearIndex((v) => (v + 1) % nearFields.length);
                         }}
                     />
+                    <span className="state-description">{nearIndex + 1} of {nearFields.length}</span>
                 </Stack>
                 {nearSpec && <ReactVega spec={nearSpec} dataSource={dataSource} />}
             </div>
