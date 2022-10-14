@@ -51,7 +51,8 @@ const IconMap = {
     [PIVOT_KEYS.gallery]: 'ReadingMode',
     [PIVOT_KEYS.explainer]: 'SiteScan',
     [PIVOT_KEYS.painter]: 'Brush',
-    [PIVOT_KEYS.progressiveDashBoard]: 'SizeLegacy'
+    [PIVOT_KEYS.progressiveDashBoard]: 'SizeLegacy',
+    [PIVOT_KEYS.collection]: 'Heart'
 } as {
     [key: string]: string
 }
@@ -90,7 +91,8 @@ const AppNav: React.FC<AppNavProps> = props => {
                     PIVOT_KEYS.editor,
                     PIVOT_KEYS.pattern,
                     PIVOT_KEYS.lts,
-                    PIVOT_KEYS.painter
+                    PIVOT_KEYS.painter,
+                    PIVOT_KEYS.collection
                 ]),
                 {
                     url: '#dev-mode',

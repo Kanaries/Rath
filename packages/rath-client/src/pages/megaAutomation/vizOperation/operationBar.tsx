@@ -1,58 +1,39 @@
 import React, { useCallback } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { IContextualMenuProps, CommandBar, ICommandBarItemProps } from '@fluentui/react';
-
+import {  CommandBar, ICommandBarItemProps } from '@fluentui/react';
+import { toJS } from 'mobx';
 import { useGlobalStore } from '../../../store';
 
 interface OperationBarProps {}
 const OperationBar: React.FC<OperationBarProps> = props => {
-    const { megaAutoStore, commonStore, dataSourceStore } = useGlobalStore();
+    const { megaAutoStore, commonStore, collectionStore } = useGlobalStore();
     const { taskMode } = commonStore;
-    const { dimFields, meaFields } = dataSourceStore;
-
-    const dimensionOptions: IContextualMenuProps = {
-        items: dimFields.map(f => ({
-            key: f.fid,
-            text: f.name,
-            // onClick: () => { megaAutoStore.addFieldToForkView('dimensions', f.fid) }
-            onClick: () => { megaAutoStore.addField2MainViewPattern(f.fid) }
-        }))
-    }
-    const measureOptions: IContextualMenuProps = {
-        items: meaFields.map(f => ({
-            key: f.fid,
-            text: f.name,
-            // onClick: () => { megaAutoStore.addFieldToForkView('measures', f.fid) }
-            onClick: () => { megaAutoStore.addField2MainViewPattern(f.fid) }
-        }))
-    }
+    const { mainViewSpec, mainViewPattern } = megaAutoStore;
 
     const customizeAnalysis = useCallback(() => {
-        if (megaAutoStore.mainViewSpec) {
-            commonStore.visualAnalysisInGraphicWalker(megaAutoStore.mainViewSpec)
+        if (mainViewSpec) {
+            commonStore.visualAnalysisInGraphicWalker(mainViewSpec)
         }
-    }, [megaAutoStore, commonStore])
+    }, [mainViewSpec, commonStore])
 
     const analysisInPainter = useCallback(() => {
-        if (megaAutoStore.mainViewSpec) {
-            commonStore.analysisInPainter(megaAutoStore.mainViewSpec)
+        if (mainViewSpec) {
+            commonStore.analysisInPainter(mainViewSpec)
         }
-    }, [commonStore, megaAutoStore])
+    }, [mainViewSpec, commonStore])
+
+    const viewExists = !(mainViewPattern === null || mainViewSpec === null);
+    let starIconName = 'FavoriteStar';
+    if (viewExists) {
+        const viewFields = toJS(mainViewPattern.fields);
+        const viewSpec = toJS(mainViewSpec);
+        if (collectionStore.collectionContains(viewFields, viewSpec)) {
+            starIconName = 'FavoriteStarFill'
+        }
+    }
 
     const commandProps: ICommandBarItemProps[] = [
-        {
-            key: 'dimensions',
-            text: intl.get('common.dimension'),
-            iconProps: { iconName: 'AddTo' },
-            subMenuProps: dimensionOptions,
-        },
-        {
-            key: 'measures',
-            text: intl.get('common.measure'),
-            iconProps: { iconName: 'AddTo' },
-            subMenuProps: measureOptions,
-        },
         {
             key: 'editing',
             text: intl.get('lts.commandBar.editing'),
@@ -74,12 +55,23 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             }
         },
         {
+            key: 'star',
+            text: 'star',
+            iconProps: { iconName: starIconName },
+            onClick: () => {
+                if (mainViewPattern && mainViewSpec) {
+                    collectionStore.collectView(toJS(mainViewPattern.fields), toJS(mainViewSpec))
+                }
+            }
+        },
+        {
             key: 'constraints',
             text: intl.get('lts.commandBar.constraints'),
             iconProps: { iconName: 'MultiSelect' },
             onClick: () => {
                 megaAutoStore.setShowContraints(true);
-            }
+            },
+            disabled: true
         }
     ]
 

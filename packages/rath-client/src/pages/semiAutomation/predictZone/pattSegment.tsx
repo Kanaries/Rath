@@ -7,9 +7,8 @@ import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 
-
 const PattSegment: React.FC = () => {
-    const { semiAutoStore } = useGlobalStore();
+    const { semiAutoStore, collectionStore } = useGlobalStore();
     const { pattSpecList, pattViews, mainVizSetting, dataSource, autoAsso, hasMainView, fieldMetas } = semiAutoStore;
     const loadMore = useCallback(() => {
         semiAutoStore.increaseRenderAmount('pattViews');
@@ -41,6 +40,13 @@ const PattSegment: React.FC = () => {
                             text={intl.get('discovery.main.pin')}
                             onClick={() => {
                                 semiAutoStore.updateMainView(pattViews.views[i])
+                            }}
+                        />
+                        <CommandButton
+                            iconProps={{ iconName: collectionStore.collectionContains(pattViews.views[i].fields, spec) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            text={intl.get('common.star')}
+                            onClick={() => {
+                                collectionStore.collectView(pattViews.views[i].fields, spec)
                             }}
                         />
                     </Stack>

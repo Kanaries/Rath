@@ -163,6 +163,13 @@ export interface IVegaSubset {
     }
 }
 
+export interface IInsightVizView {
+    viewId: string;
+    spec: IVegaSubset;
+    fields: IFieldMeta[];
+    score?: number;
+}
+
 export enum PAINTER_MODE {
     COLOR = 'color',
     ERASE = 'erase',

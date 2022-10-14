@@ -9,7 +9,7 @@ import ReactVega from '../../../components/react-vega';
 
 
 const FilterSegment: React.FC = () => {
-    const { semiAutoStore } = useGlobalStore();
+    const { semiAutoStore, collectionStore } = useGlobalStore();
     const { filterSpecList, filterViews, mainVizSetting, dataSource, autoAsso, hasMainView, fieldMetas } = semiAutoStore;
     const loadMore = useCallback(() => {
         semiAutoStore.increaseRenderAmount('filterViews');
@@ -48,6 +48,13 @@ const FilterSegment: React.FC = () => {
                             text={intl.get('discovery.main.compare')}
                             onClick={() => {
                                 semiAutoStore.updateCompareView(filterViews.views[i])
+                            }}
+                        />
+                        <CommandButton
+                            iconProps={{ iconName: collectionStore.collectionContains(filterViews.views[i].fields, spec) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            text={intl.get('common.star')}
+                            onClick={() => {
+                                collectionStore.collectView(filterViews.views[i].fields, spec)
                             }}
                         />
                     </Stack>

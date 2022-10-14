@@ -88,6 +88,9 @@ const LTSPage: React.FC = () => {
             <SaveModal />
             <Constraints />
             <AssoPanel />
+            {/* <div className="card">
+                <Gallery />
+            </div> */}
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
             <div className="card">
                 <CommandBarButton

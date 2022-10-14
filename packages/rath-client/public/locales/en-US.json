@@ -17,7 +17,8 @@
         },
         "addVar": "Add Variable",
         "addFilter": "Add Filter",
-        "field": "Field"
+        "field": "Field",
+        "star": "Star"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -32,7 +33,8 @@
         "pattern": "Semi-auto Exploration⭐️",
         "devCollection": "Insiders(α)",
         "progressiveDashBoard": "Dashboard Designer",
-        "painter": "Data Painter🚀"
+        "painter": "Data Painter🚀",
+        "collection": "Collection"
     },
     "preference": {
         "title": "preference"
@@ -318,7 +320,7 @@
         "autoAnalysis": "Auto Analysis",
         "computing": "computing",
         "title": "Visual Insights",
-        "hintMain": "Here are some interesting patterns and insights found by Rath. If you are interested in some of them, try to use 'summary' to know more details about current view and use 'associate' to explore relative visualizations.",
+        "hintMain": "Here are some interesting patterns and insights found by RATH. If you are interested in some of them, try to use 'edit charts' to know more details about current view and use 'associate' to explore related insights",
         "summary": "Summary",
         "associate": "Associate",
         "asso": {
@@ -328,8 +330,8 @@
         },
         "bring": "Customize Analysis",
         "commandBar": {
-            "painting": "painting",
-            "editing": "editing chart",
+            "painting": "data painter",
+            "editing": "edit chart",
             "associate": "associate views",
             "constraints": "analysis constraints"
         },

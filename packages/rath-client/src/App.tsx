@@ -19,6 +19,7 @@ import { PIVOT_KEYS } from './constants';
 import CrInfo from './components/crInfo';
 import ProgressiveDashboard from './pages/progressiveDashboard';
 import Painter from './pages/painter';
+import Collection from './pages/collection';
 
 function App() {
   const { langStore, commonStore } = useGlobalStore();
@@ -108,6 +109,7 @@ function App() {
         {appKey === PIVOT_KEYS.pattern && <PatternPage />}
         {appKey === PIVOT_KEYS.painter && <Painter />}
         {appKey === PIVOT_KEYS.progressiveDashBoard && <ProgressiveDashboard />}
+        {appKey === PIVOT_KEYS.collection && <Collection />}
         <CrInfo />
         </div>
       </div>

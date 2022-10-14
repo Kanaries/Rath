@@ -9,7 +9,7 @@ import ReactVega from '../../../components/react-vega';
 
 
 const FeatSegment: React.FC = () => {
-    const { semiAutoStore } = useGlobalStore();
+    const { semiAutoStore, collectionStore } = useGlobalStore();
     const { featSpecList, featViews, mainVizSetting, dataSource, autoAsso, hasMainView, fieldMetas } = semiAutoStore;
     const loadMore = useCallback(() => {
         semiAutoStore.increaseRenderAmount('featViews');
@@ -42,6 +42,13 @@ const FeatSegment: React.FC = () => {
                             text={intl.get('discovery.main.pin')}
                             onClick={() => {
                                 semiAutoStore.updateMainView(featViews.views[i])
+                            }}
+                        />
+                        <CommandButton
+                            iconProps={{ iconName: collectionStore.collectionContains(featViews.views[i].fields, spec) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            text={intl.get('common.star')}
+                            onClick={() => {
+                                collectionStore.collectView(featViews.views[i].fields, spec)
                             }}
                         />
                     </Stack>

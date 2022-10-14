@@ -192,8 +192,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
           <IconButton
             style={MARGIN_LEFT}
             iconProps={{ iconName: 'Settings' }}
-            title={intl.get('common.settins')}
-            ariaLabel={intl.get('common.settins')}
+            title={intl.get('common.settings')}
+            ariaLabel={intl.get('common.settings')}
             onClick={() => {
               commonStore.setShowAnalysisConfig(true)
             }}

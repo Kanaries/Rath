@@ -122,6 +122,44 @@ export class MegaAutomationStore {
     public get samplingDataSource () {
         return this.ltsPipeLineStore.samplingDataSource;
     }
+    public galleryPageIndex: number = 10;
+    public setGalleryPageIndex (index: number) {
+        this.galleryPageIndex = index;
+    }
+    public get galleryViewList () {
+        const PAGE_SIZE = 5;
+        const { pageIndex, insightSpaces } = this;
+        return insightSpaces.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE)
+    }
+    public get gallerySpecList () {
+        const { visualConfig, vizMode, galleryViewList, fieldMetas } = this;
+        return galleryViewList.map(view => {
+            const fields = fieldMetas.filter(m => view.dimensions.includes(m.fid) || view.measures.includes(m.fid))
+            const pattern = {
+                fields,
+                imp: view.score || 0
+            };
+            if (vizMode === 'lite') {
+                return distVis({
+                    resizeMode: visualConfig.resize,
+                    pattern,
+                    width: 200,
+                    height: 160,
+                    interactive: visualConfig.zoom,
+                    stepSize: 32
+                })
+            } else if (vizMode === 'strict') {
+                return labDistVis({
+                    resizeMode: visualConfig.resize,
+                    pattern,
+                    width: 200,
+                    height: 160,
+                    interactive: visualConfig.zoom,
+                    dataSource: this.dataSource
+                })
+            }
+        })
+    }
     public setNlgThreshold (num: number) {
         this.nlgThreshold = num;
     }

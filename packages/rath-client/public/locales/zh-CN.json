@@ -17,7 +17,8 @@
         },
         "addVar": "添加变量",
         "addFilter": "添加筛选项",
-        "field": "字段"
+        "field": "字段",
+        "star": "收藏"
     },
     "menu": {
         "dataSource": "数据源",
@@ -31,7 +32,8 @@
         "pattern": "半自动探索⭐️",
         "devCollection": "实验特性(α)",
         "progressiveDashBoard": "智能报表",
-        "painter": "数据绘板🚀"
+        "painter": "数据绘板🚀",
+        "collection": "收藏夹"
     },
     "preference": {
         "title": "个人偏好"
@@ -318,7 +320,7 @@
         "autoAnalysis": "自动分析",
         "computing": "计算中",
         "title": "洞察推荐",
-        "hintMain": "洞察推荐板块展示了Rath自动化挖掘数据时发现的有趣的规律和洞察，如果你对其中的某些图表感兴趣，尝试使用'概览'来获取更多细节或使用'联想'来探索与当前图表相关的内容。",
+        "hintMain": "洞察推荐板块展示了Rath自动化挖掘数据时发现的有趣的规律和洞察，如果你对其中的某些图表感兴趣，尝试使用'编辑图表'来进行更定制化的分析或使用'联想'来探索与当前图表相关的内容。",
         "summary": "概览",
         "associate": "联想",
         "asso": {
