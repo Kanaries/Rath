@@ -27,6 +27,7 @@ import { useViewData } from './viewDataHook';
 import { viewSampling } from './sample';
 import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './constants';
 import NeighborAutoLink from './neighborAutoLink';
+import EmptyError from './emptyError';
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -318,7 +319,7 @@ const Painter: React.FC = (props) => {
     }, [painterSpec]);
 
     if (noViz) {
-        return <div>404</div>;
+        return <EmptyError />;
     }
     return (
         <Cont style={{ padding: '1em' }}>

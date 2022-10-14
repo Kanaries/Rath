@@ -4,7 +4,7 @@ import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
-import { CommandBarButton, Spinner } from '@fluentui/react';
+import { CommandBarButton, DefaultButton, PrimaryButton, Spinner } from '@fluentui/react';
 
 import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../visBuilder/visErrorBoundary';
@@ -20,6 +20,7 @@ import Narrative from './narrative';
 import ComputationProgress from './computationProgress';
 import Constraints from './vizOperation/constraints';
 import AssoPanel from './assoPanel';
+import { PIVOT_KEYS } from '../../constants';
 
 const MainHeader = styled.div`
     font-size: 1.5em;
@@ -62,7 +63,7 @@ const InsightContainer = styled.div`
 `;
 
 const LTSPage: React.FC = () => {
-    const { ltsPipeLineStore, megaAutoStore } = useGlobalStore();
+    const { ltsPipeLineStore, megaAutoStore, commonStore } = useGlobalStore();
     const { computing, rendering, dataSource } = ltsPipeLineStore;
 
     const { pageIndex, visualConfig, insightSpaces, mainViewSpec } = megaAutoStore;
@@ -93,7 +94,7 @@ const LTSPage: React.FC = () => {
             </div> */}
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
             <div className="card">
-                <CommandBarButton
+                <DefaultButton
                     style={{ float: 'right' }}
                     iconProps={{ iconName: 'Settings' }}
                     text={intl.get('explore.preference')}
@@ -102,6 +103,18 @@ const LTSPage: React.FC = () => {
                         runInAction(() => {
                             megaAutoStore.showPreferencePannel = true;
                         });
+                    }}
+                />
+                <PrimaryButton
+                    style={{ float: 'right', marginRight: '1em' }}
+                    iconProps={{ iconName: 'Rerun' }}
+                    text={intl.get('lts.reRun')}
+                    ariaLabel={intl.get('lts.reRun')}
+                    onClick={() => {
+                        ltsPipeLineStore.startTask(commonStore.taskMode).then(() => {
+                            megaAutoStore.emitViewChangeTransaction(0);
+                        })
+                        commonStore.setAppKey(PIVOT_KEYS.lts);
                     }}
                 />
                 <ComputationProgress computing={computing} />

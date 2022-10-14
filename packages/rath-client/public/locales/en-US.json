@@ -318,6 +318,7 @@
     },
     "lts": {
         "autoAnalysis": "Auto Analysis",
+        "reRun": "Re-Run Task",
         "computing": "computing",
         "title": "Visual Insights",
         "hintMain": "Here are some interesting patterns and insights found by RATH. If you are interested in some of them, try to use 'edit charts' to know more details about current view and use 'associate' to explore related insights",
