@@ -38,6 +38,7 @@ export const Pill = styled.div<{colType: IFieldMeta['analyticType']}>`
   padding: 0 10px;
   user-select: none;
   margin-right: 4px;
+  margin-bottom: 4px;
   .cancel-icon{
       cursor: pointer;
   }
@@ -65,6 +66,7 @@ export const PillPlaceholder = styled.div`
     padding: 0 10px;
     user-select: none;
     margin-right: 4px;
+    margin-bottom: 4px;
     justify-content: center;
     .cancel-icon{
         cursor: pointer;
@@ -78,7 +80,7 @@ interface ViewFieldProps {
 }
 const ViewField: React.FC<ViewFieldProps> = props => {
     return <Pill colType={props.type}>
-        <Icon className="cancel-icon" iconName="Cancel" onClick={props.onRemove} />
+        {props.onRemove && <Icon className="cancel-icon" iconName="Cancel" onClick={props.onRemove} />}
         {/* <IconButton iconProps={{ iconName: 'Cancel', style: { fontSize: '8px' } }} /> */}
         {props.text}
     </Pill>
