@@ -46,10 +46,10 @@ const FeatSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            iconProps={{ iconName: collectionStore.collectionContains(featViews.views[i].fields, spec) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            iconProps={{ iconName: collectionStore.collectionContains(featViews.views[i].fields, spec, featViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.collectView(featViews.views[i].fields, spec)
+                                collectionStore.collectView(featViews.views[i].fields, spec, featViews.views[i].filters)
                             }}
                         />
                     </Stack>

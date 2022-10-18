@@ -4,13 +4,13 @@ import { Divider, Pagination } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
-import { CommandBarButton, DefaultButton, PrimaryButton, Spinner } from '@fluentui/react';
-
+import { DefaultButton, PrimaryButton, Spinner } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../visBuilder/visErrorBoundary';
 import { IResizeMode } from '../../interfaces';
 import { LoadingLayer } from '../semiAutomation/components';
 import ReactVega from '../../components/react-vega';
+import { PIVOT_KEYS } from '../../constants';
 import VizPreference from './preference';
 import SaveModal from './save';
 import OperationBar from './vizOperation/operationBar';
@@ -20,7 +20,7 @@ import Narrative from './narrative';
 import ComputationProgress from './computationProgress';
 import Constraints from './vizOperation/constraints';
 import AssoPanel from './assoPanel';
-import { PIVOT_KEYS } from '../../constants';
+
 
 const MainHeader = styled.div`
     font-size: 1.5em;

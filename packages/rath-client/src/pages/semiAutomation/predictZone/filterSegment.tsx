@@ -52,10 +52,10 @@ const FilterSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            iconProps={{ iconName: collectionStore.collectionContains(filterViews.views[i].fields, spec) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            iconProps={{ iconName: collectionStore.collectionContains(filterViews.views[i].fields, spec, filterViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.collectView(filterViews.views[i].fields, spec)
+                                collectionStore.collectView(filterViews.views[i].fields, spec, filterViews.views[i].filters)
                             }}
                         />
                     </Stack>

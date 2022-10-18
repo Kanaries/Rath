@@ -48,7 +48,16 @@ export function searchFilterView (searchContent: string, views: IInsightVizView[
         for (let field of view.fields) {
             if (field.name && lookupPattern.test(field.name)) return true;
             if (lookupPattern.test(field.fid)) return true;
+            if (view.filters && view.filters.length > 0) {
+                for (let filter of view.filters) {
+                    if (filter.type === 'set') {
+                        if (filter.values.some(v => lookupPattern.test(v))) return true;
+                    }
+                }
+            }
         }
         return false
     })
 }
+
+export const VIEW_NUM_IN_PAGE = 8;

@@ -388,6 +388,10 @@
     },
     "collection": {
         "title": "Collection",
-        "desc": "This is a collection of your favorite views in all segments."
+        "desc": "This is a collection of your favorite views in all segments.",
+        "viewMode": {
+            "card": "Cards",
+            "list": "List"
+        }
     }
 }

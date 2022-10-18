@@ -10,7 +10,6 @@ import CardView from './collectionView/cardView';
 import ListView from './collectionView/listView';
 import { searchFilterView } from './utils';
 
-
 enum VIEW_MODE {
     CARD = 'card',
     LIST = 'list',
@@ -47,12 +46,16 @@ const Collection: React.FC = (props) => {
                             onClick={() => {
                                 setViewMode(VIEW_MODE.LIST);
                             }}
+                            title={intl.get('collection.viewMode.list')}
+                            ariaLabel={intl.get('collection.viewMode.list')}
                         />
                         <IconButton
                             iconProps={{ iconName: 'SnapToGrid' }}
                             onClick={() => {
                                 setViewMode(VIEW_MODE.CARD);
                             }}
+                            title={intl.get('collection.viewMode.card')}
+                            ariaLabel={intl.get('collection.viewMode.card')}
                         />
                     </div>
                     {viewMode === VIEW_MODE.CARD && <CardView metas={fieldMetas} data={sampleData} views={filteredColcList} />}

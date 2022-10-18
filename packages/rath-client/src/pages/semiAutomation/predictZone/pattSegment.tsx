@@ -44,10 +44,10 @@ const PattSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            iconProps={{ iconName: collectionStore.collectionContains(pattViews.views[i].fields, spec) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            iconProps={{ iconName: collectionStore.collectionContains(pattViews.views[i].fields, spec, pattViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.collectView(pattViews.views[i].fields, spec)
+                                collectionStore.collectView(pattViews.views[i].fields, spec, pattViews.views[i].filters)
                             }}
                         />
                     </Stack>
