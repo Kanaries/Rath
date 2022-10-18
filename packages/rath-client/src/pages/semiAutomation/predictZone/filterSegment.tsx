@@ -6,6 +6,7 @@ import { applyFilters } from '@kanaries/loa';
 import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
+import { adviceVisSize } from '../../collection/utils';
 
 
 const FilterSegment: React.FC = () => {
@@ -61,7 +62,7 @@ const FilterSegment: React.FC = () => {
                     <div className="chart-container">
                         <ReactVega
                             actions={mainVizSetting.debug}
-                            spec={spec}
+                            spec={adviceVisSize(spec, fieldMetas)}
                             dataSource={applyFilters(dataSource, filterViews.views[i].filters)}
                         />
                     </div>
