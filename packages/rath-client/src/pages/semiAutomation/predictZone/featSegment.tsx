@@ -49,7 +49,7 @@ const FeatSegment: React.FC = () => {
                             iconProps={{ iconName: collectionStore.collectionContains(featViews.views[i].fields, spec, featViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.collectView(featViews.views[i].fields, spec, featViews.views[i].filters)
+                                collectionStore.toggleCollectState(featViews.views[i].fields, spec, featViews.views[i].filters)
                             }}
                         />
                     </Stack>

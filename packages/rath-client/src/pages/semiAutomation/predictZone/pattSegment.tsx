@@ -47,7 +47,7 @@ const PattSegment: React.FC = () => {
                             iconProps={{ iconName: collectionStore.collectionContains(pattViews.views[i].fields, spec, pattViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.collectView(pattViews.views[i].fields, spec, pattViews.views[i].filters)
+                                collectionStore.toggleCollectState(pattViews.views[i].fields, spec, pattViews.views[i].filters)
                             }}
                         />
                     </Stack>

@@ -12,13 +12,15 @@ function encodeViewKey (fields: IFieldMeta[], spec: IVegaSubset, filters: IFilte
 
 export class CollectionStore {
     private dataSourceStore: DataSourceStore;
-    private vizHash: Map<string, string>;
+    public vizHash: Map<string, string>;
     public collectionList: IInsightVizView[] = [];
     constructor (dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore;
         this.vizHash = new Map();
         makeAutoObservable(this, {
-            collectionList: observable.shallow
+            collectionList: observable.shallow,
+            // @ts-expect-error private field
+            dataSourceStore: false,
         })
     }
     public collectView (fields: IFieldMeta[], spec: IVegaSubset, filters: IFilter[] | undefined = []) {
@@ -34,7 +36,29 @@ export class CollectionStore {
             })
         }
     }
-    public removeView (index: number) {
+    private removeViewByCode (vizCode: string) {
+        if (this.vizHash.has(vizCode)) {
+            const visId = this.vizHash.get(vizCode);
+            const targetIndex = this.collectionList.findIndex(c => c.viewId === visId)
+            if (targetIndex > -1) {
+                this.collectionList.splice(targetIndex, 1)
+                this.vizHash.delete(vizCode);
+            }
+        }
+    }
+    public removeView (fields: IFieldMeta[], spec: IVegaSubset, filters: IFilter[] | undefined = []) {
+        const vizCode = encodeViewKey(fields, spec, filters);
+        this.removeViewByCode(vizCode);
+    }
+    public toggleCollectState (fields: IFieldMeta[], spec: IVegaSubset, filters: IFilter[] | undefined = []) {
+        const vizCode = encodeViewKey(fields, spec, filters);
+        if (this.vizHash.has(vizCode)) {
+            this.removeViewByCode(vizCode)
+        } else {
+            this.collectView(fields, spec, filters)
+        }
+    }
+    public removeViewByIndex (index: number) {
         this.collectionList.splice(index, 1)
         // const vizCode = encodeViewKey(fields, spec);
         // this.vizHash.delete(vizCode)

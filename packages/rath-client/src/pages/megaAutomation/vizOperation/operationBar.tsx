@@ -60,7 +60,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             iconProps: { iconName: starIconName },
             onClick: () => {
                 if (mainViewPattern && mainViewSpec) {
-                    collectionStore.collectView(toJS(mainViewPattern.fields), toJS(mainViewSpec))
+                    collectionStore.toggleCollectState(toJS(mainViewPattern.fields), toJS(mainViewSpec))
                 }
             }
         },
