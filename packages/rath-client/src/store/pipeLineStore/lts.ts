@@ -29,7 +29,12 @@ export class LTSPipeLine {
             insightSpaces: observable.ref,
             fields: observable.ref,
             dataSource: observable.ref,
-            samplingDataSource: observable.ref
+            samplingDataSource: observable.ref,
+            // @ts-expect-error private field
+            dataSourceStore: false,
+            commonStore: false,
+            clickHouseStore: false
+
         });
         this.dataSourceStore = dataSourceStore;
         this.commonStore = commonStore;

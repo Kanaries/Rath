@@ -75,8 +75,9 @@ export class MegaAutomationStore {
             details: observable.ref,
             assoListT1: observable.ref,
             assoListT2: observable.ref,
-            insightSpaces: computed
-            // viewData: observable.ref
+            insightSpaces: computed,
+            // @ts-expect-error private field
+            ltsPipeLineStore: false
         });
         this.ltsPipeLineStore = ltsPipeLineStore;
     }
@@ -139,16 +140,7 @@ export class MegaAutomationStore {
                 fields,
                 imp: view.score || 0
             };
-            if (vizMode === 'lite') {
-                return distVis({
-                    resizeMode: visualConfig.resize,
-                    pattern,
-                    width: 200,
-                    height: 160,
-                    interactive: visualConfig.zoom,
-                    stepSize: 32
-                })
-            } else if (vizMode === 'strict') {
+            if (vizMode === 'strict') {
                 return labDistVis({
                     resizeMode: visualConfig.resize,
                     pattern,
@@ -158,6 +150,14 @@ export class MegaAutomationStore {
                     dataSource: this.dataSource
                 })
             }
+            return distVis({
+                resizeMode: visualConfig.resize,
+                pattern,
+                width: 200,
+                height: 160,
+                interactive: visualConfig.zoom,
+                stepSize: 32
+            })
         })
     }
     public setNlgThreshold (num: number) {

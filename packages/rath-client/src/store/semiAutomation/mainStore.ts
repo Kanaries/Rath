@@ -78,7 +78,9 @@ export class SemiAutomationStore {
             featViews: observable.shallow,
             filterViews: observable.shallow,
             mainView: observable.ref,
-            compareView: observable.ref
+            compareView: observable.ref,
+            // @ts-expect-error private field
+            dataSourceStore: false
         });
     }
     public setShowSettings (show: boolean) {

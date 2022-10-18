@@ -68,8 +68,9 @@ export class DataSourceStore {
         makeAutoObservable(this, {
             rawData: observable.ref,
             cookedDataSource: observable.ref,
-            cookedMeasures: observable.ref
-            // subscriptions: false
+            cookedMeasures: observable.ref,
+            // @ts-expect-error private field
+            subscriptions: false,
         });
         const fields$ = from(toStream(() => this.fields, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
