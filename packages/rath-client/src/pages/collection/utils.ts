@@ -37,6 +37,18 @@ export function changeVisSize(spec: IVegaSubset, propsWidth: number, propsHeight
             height,
             hasFacets: Boolean(spec.encoding.row || spec.encoding.column),
         });
+        if (draft.encoding.x) {
+            draft.encoding.x.axis = {
+                labelLimit: 42,
+                labelOverlap: "parity",
+            }
+        }
+        if (draft.encoding.y) {
+            draft.encoding.y.axis = {
+                labelLimit: 42,
+                labelOverlap: "parity",
+            }
+        }
     });
     return nextSpec;
 }
