@@ -385,5 +385,9 @@
     },
     "desc": {
         "dataViewInfo": "Pattern in {measures} by {dimensions} where {filters}."
+    },
+    "collection": {
+        "title": "Collection",
+        "desc": "This is a collection of your favorite views in all segments."
     }
 }

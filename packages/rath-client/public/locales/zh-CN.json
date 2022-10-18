@@ -385,5 +385,9 @@
     },
     "desc": {
         "dataViewInfo": "在 {dimensions} 中 {measures} 的表现， 限制条件 {filters}."
+    },
+    "collection": {
+        "title": "收藏夹",
+        "desc": "这里会存放你在各个模块收藏的可视化视图。"
     }
 }

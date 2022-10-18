@@ -1,6 +1,7 @@
 import { SearchBox, IconButton } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo, useState } from 'react';
+import intl from 'react-intl-universal'
 import { useGlobalStore } from '../../store';
 import { baseDemoSample } from '../painter/sample';
 import { IInsightVizView } from '../../interfaces';
@@ -33,8 +34,8 @@ const Collection: React.FC = (props) => {
         <div className="content-container">
             <div className="card">
                 <MainCardContainer>
-                    <h1 className="seg-header">Collection</h1>
-                    <p className="seg-desc">This is a collection of your analytic result</p>
+                    <h1 className="seg-header">{intl.get('collection.title')}</h1>
+                    <p className="seg-desc">{intl.get('collection.desc')}</p>
                     <SearchBox placeholder="Search" onSearch={(newValue) => {
                         // const res = searchFilterView(newValue, collectionList)
                         // console.log(res)
