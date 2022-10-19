@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { applyFilters } from '@kanaries/loa';
 import { Divider, Pagination } from '@material-ui/core';
 import ReactVega from '../../../components/react-vega';
-import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
+import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IInsightVizView, IRow } from '../../../interfaces';
 import { changeVisSize, VIEW_NUM_IN_PAGE } from '../utils';
 import ViewInfo from '../../../components/viewInfo/pillInfo';

@@ -8,10 +8,6 @@ export interface IRow {
     [key: string]: any
 }
 
-// export interface IRawField extends BIField {
-//     disable: boolean;
-// }
-
 export type IGeoRole = 'longitude' | 'latitude' | 'none';
 
 /** Detailed information of a extended field.  */
