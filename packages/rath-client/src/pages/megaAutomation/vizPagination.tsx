@@ -14,7 +14,7 @@ import VisErrorBoundary from '../../visBuilder/visErrorBoundary';
 import { changeVisSize } from '../collection/utils';
 
 const VizCard = styled.div<{ selected?: boolean }>`
-    width: 140px;
+    /* width: 140px; */
     height: 140px;
     padding: 4px;
     margin: 4px;
@@ -29,6 +29,7 @@ const VizCard = styled.div<{ selected?: boolean }>`
 
 const VizCardContainer = styled.div`
     display: flex;
+    overflow-x: auto;
 `;
 
 const StyledChart = styled(ReactVega)`
@@ -72,7 +73,7 @@ const VizPagination: React.FC = (props) => {
         count: insightSpaces.length,
         showFirstButton: false,
         showLastButton: false,
-        siblingCount: 0,
+        siblingCount: 1,
         page: pageIndex + 1,
         onChange: updatePage,
     });

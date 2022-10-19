@@ -2,12 +2,13 @@ import { DefaultButton, Label, PrimaryButton, Spinner, SpinnerSize, Stack, Toggl
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { purennMic } from '@kanaries/loa';
 import ReactVega from '../../../components/react-vega';
 import { IFieldMeta, IRow, IVegaSubset } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { deepcopy } from '../../../utils';
 import { LABEL_FIELD_KEY } from '../constants';
-import { nnMic } from '../utils';
+
 
 const LoadingLayer = styled.div`
     position: absolute;
@@ -62,7 +63,7 @@ const NeighborAutoLink: React.FC<NALProps> = (props) => {
                 // eslint-disable-next-line no-constant-condition
                 if (true) {
                     const Y = data.map((r) => r[field.fid]);
-                    const score = nnMic(X, Y);
+                    const score = purennMic(X, Y);
                     ans.push({
                         field,
                         score,

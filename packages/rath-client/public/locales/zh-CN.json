@@ -377,9 +377,9 @@
             },
             "loadMore": "加载更多",
             "associate": {
-                "patterns": "关联规律",
-                "features": "关联维度",
-                "filters": "关联子集"
+                "patterns": "联想规律",
+                "features": "联想维度",
+                "filters": "推荐子集"
             }
         }
     },
