@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Divider } from '@material-ui/core';
 import styled from 'styled-components';
@@ -64,9 +64,10 @@ const InsightContainer = styled.div`
 
 const LTSPage: React.FC = () => {
     const { ltsPipeLineStore, megaAutoStore, commonStore } = useGlobalStore();
-    const { computing, rendering, dataSource } = ltsPipeLineStore;
+    const { rendering, dataSource } = ltsPipeLineStore;
 
-    const { visualConfig, insightSpaces, mainViewSpec } = megaAutoStore;
+    const { visualConfig, mainViewSpec } = megaAutoStore;
+    const { taskMode } = commonStore;
 
     // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
@@ -82,7 +83,12 @@ const LTSPage: React.FC = () => {
     //         megaAutoStore.setShowSubinsights(true)
     //     })
     // }, [megaAutoStore])
-
+    const startTask = useCallback(() => {
+        ltsPipeLineStore.startTask(taskMode).then(() => {
+            megaAutoStore.emitViewChangeTransaction(0);
+        });
+        commonStore.setAppKey(PIVOT_KEYS.lts);
+    }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode]);
     return (
         <div className="content-container">
             <VizPreference />
@@ -110,14 +116,9 @@ const LTSPage: React.FC = () => {
                     iconProps={{ iconName: 'Rerun' }}
                     text={intl.get('lts.reRun')}
                     ariaLabel={intl.get('lts.reRun')}
-                    onClick={() => {
-                        ltsPipeLineStore.startTask(commonStore.taskMode).then(() => {
-                            megaAutoStore.emitViewChangeTransaction(0);
-                        });
-                        commonStore.setAppKey(PIVOT_KEYS.lts);
-                    }}
+                    onClick={startTask}
                 />
-                <ComputationProgress computing={computing} />
+                <ComputationProgress />
                 <MainHeader>{intl.get('lts.title')}</MainHeader>
                 <p className="state-description">{intl.get('lts.hintMain')}</p>
                 <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
@@ -145,7 +146,7 @@ const LTSPage: React.FC = () => {
                                     <Spinner label="Rendering..." />
                                 </LoadingLayer>
                             )}
-                            {insightSpaces.length > 0 && mainViewSpec && (
+                            {mainViewSpec && (
                                 <ResizeContainer
                                     enableResize={
                                         visualConfig.resize === IResizeMode.control &&
