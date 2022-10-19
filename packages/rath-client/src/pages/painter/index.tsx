@@ -59,7 +59,7 @@ const Painter: React.FC = (props) => {
     const [mutFeatValues, setMutFeatValues] = useState<string[]>(COLOR_CELLS.map((c) => c.id));
     const [mutFeatIndex, setMutFeatIndex] = useState<number>(1);
     const [painterSize, setPainterSize] = useState<number>(0.1);
-    const { trigger, viewData, setViewData, maintainViewDataRemove } = useViewData(cleanedData);
+    const { viewData, setViewData, maintainViewDataRemove } = useViewData(cleanedData);
     const [samplePercent, setSamplePercent] = useState<number>(1);
     const [painterMode, setPainterMode] = useState<PAINTER_MODE>(PAINTER_MODE.COLOR);
     const [pivotKey, setPivotKey] = useState<PIVOT_TAB_KEYS>(PIVOT_TAB_KEYS.SEARCH);
@@ -99,6 +99,7 @@ const Painter: React.FC = (props) => {
         setViewData(labelingData(sampleData, initValue));
     }, [cleanedData, fieldMetas, initValue, setViewData, samplePercent, fieldsInView]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const linkNearViz = useCallback(debounceShouldNeverBeUsed(() => {
         painterStore.setPaintingForTrigger(true);
     }, () => {

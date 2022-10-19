@@ -34,7 +34,7 @@ interface NALProps {
 const NeighborAutoLink: React.FC<NALProps> = (props) => {
     const { vizSpec, dataSource, fieldMetas } = props;
     const { painterStore } = useGlobalStore();
-    const { linkTrigger, painting, autoLink } = painterStore
+    const { painting, autoLink } = painterStore
     const [nearFields, setNearFields] = useState<IFieldMeta[]>([]);
     const [nearIndex, setNearIndex] = useState<number>(0);
     const nearSpec = useMemo<IVegaSubset | null>(() => {

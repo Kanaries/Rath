@@ -1,4 +1,4 @@
-import { PrimaryButton, Stack } from '@fluentui/react';
+import { PrimaryButton } from '@fluentui/react';
 import React from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
