@@ -1,11 +1,10 @@
 import { observer } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
 import React, { useMemo } from 'react';
-import { IPattern } from '@kanaries/loa';
+import { applyFilters, IPattern } from '@kanaries/loa';
 import ReactVega from '../../../components/react-vega';
 import { IResizeMode, IRow, IVegaSubset } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
-import { applyFilter } from '../utils';
 
 interface MainCanvasProps{
     view: IPattern;
@@ -19,7 +18,7 @@ const MainCanvas: React.FC<MainCanvasProps> = props => {
     const { resize, debug } = mainVizSetting
     const { width, height, mode } = resize;
     const viewData = useMemo<IRow[]>(() => {
-        if (view) return applyFilter(dataSource, view.filters)
+        if (view) return applyFilters(dataSource, view.filters)
         return []
     }, [dataSource, view])
 

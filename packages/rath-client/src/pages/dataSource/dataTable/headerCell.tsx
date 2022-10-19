@@ -33,12 +33,25 @@ const HeaderCellContainer = styled.div`
     .disable {
         background-color: #9e9e9e;
     }
-    .header{
-        margin-top: 0px;
-        margin-bottom: 0px;
-        font-size: 18px;
-        font-weight: 500;
-        line-height: 36px;
+    .header-row{
+        display: flex;
+        flex-wrap: nowrap;
+        .header{
+            margin-top: 0px;
+            margin-bottom: 0px;
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 36px;
+            flex-grow: 1;
+            max-width: 160px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .edit-icon{
+            flex-shrink: 0;
+            flex-grow: 0;
+        }
     }
     .checkbox-container{
         display: flex;
@@ -92,19 +105,22 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
     return (
         <HeaderCellContainer>
             <div className="info-container">
-                <h3 className="header">
-                    {name}
-                    <IconButton id={buttonId}
-                        iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
-                        onClick={() => {
-                            setShowNameEditor(true)
-                        }}
-                    />
-                    {meta && meta.geoRole !== 'none' && 'lalal'}
+                <div className="header-row">
+                    <h3 className="header">
                     {
-                        meta && meta.geoRole !== 'none' && <IconButton iconProps={{ iconName: 'globe', style: { fontSize: '12px' } }} />
-                    }
-                </h3>
+                            meta && meta.geoRole !== 'none' && <IconButton iconProps={{ iconName: 'globe', style: { fontSize: '12px' } }} />
+                        }
+                        {name}
+                    </h3>
+                    <div className="edit-icon">
+                    <IconButton id={buttonId}
+                            iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
+                            onClick={() => {
+                                setShowNameEditor(true)
+                            }}
+                        />
+                    </div>
+                </div>
                 {
                     showNameEditor && <Callout
                         target={`#${buttonId}`}

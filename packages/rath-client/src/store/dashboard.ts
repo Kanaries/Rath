@@ -17,7 +17,9 @@ export class DashBoardStore {
             aggregator: 'sum'
         }
         makeAutoObservable(this, {
-            dashBoardList: observable.ref
+            dashBoardList: observable.ref,
+            // @ts-expect-error private field
+            pipeLineStore: false
         });
         this.pipeLineStore = pipleLineStore;
     }

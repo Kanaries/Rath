@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Divider, Pagination } from '@material-ui/core';
+import { Divider } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
-import { CommandBarButton, Spinner } from '@fluentui/react';
-
+import { DefaultButton, PrimaryButton, Spinner } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../visBuilder/visErrorBoundary';
 import { IResizeMode } from '../../interfaces';
 import { LoadingLayer } from '../semiAutomation/components';
 import ReactVega from '../../components/react-vega';
+import { PIVOT_KEYS } from '../../constants';
 import VizPreference from './preference';
 import SaveModal from './save';
 import OperationBar from './vizOperation/operationBar';
@@ -20,6 +20,7 @@ import Narrative from './narrative';
 import ComputationProgress from './computationProgress';
 import Constraints from './vizOperation/constraints';
 import AssoPanel from './assoPanel';
+import VizPagination from './vizPagination';
 
 const MainHeader = styled.div`
     font-size: 1.5em;
@@ -62,10 +63,11 @@ const InsightContainer = styled.div`
 `;
 
 const LTSPage: React.FC = () => {
-    const { ltsPipeLineStore, megaAutoStore } = useGlobalStore();
-    const { computing, rendering, dataSource } = ltsPipeLineStore;
+    const { ltsPipeLineStore, megaAutoStore, commonStore } = useGlobalStore();
+    const { rendering, dataSource } = ltsPipeLineStore;
 
-    const { pageIndex, visualConfig, insightSpaces, mainViewSpec } = megaAutoStore;
+    const { visualConfig, mainViewSpec } = megaAutoStore;
+    const { taskMode } = commonStore;
 
     // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
@@ -81,16 +83,24 @@ const LTSPage: React.FC = () => {
     //         megaAutoStore.setShowSubinsights(true)
     //     })
     // }, [megaAutoStore])
-
+    const startTask = useCallback(() => {
+        ltsPipeLineStore.startTask(taskMode).then(() => {
+            megaAutoStore.emitViewChangeTransaction(0);
+        });
+        commonStore.setAppKey(PIVOT_KEYS.lts);
+    }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode]);
     return (
         <div className="content-container">
             <VizPreference />
             <SaveModal />
             <Constraints />
             <AssoPanel />
+            {/* <div className="card">
+                <Gallery />
+            </div> */}
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
             <div className="card">
-                <CommandBarButton
+                <DefaultButton
                     style={{ float: 'right' }}
                     iconProps={{ iconName: 'Settings' }}
                     text={intl.get('explore.preference')}
@@ -101,19 +111,18 @@ const LTSPage: React.FC = () => {
                         });
                     }}
                 />
-                <ComputationProgress computing={computing} />
+                <PrimaryButton
+                    style={{ float: 'right', marginRight: '1em' }}
+                    iconProps={{ iconName: 'Rerun' }}
+                    text={intl.get('lts.reRun')}
+                    ariaLabel={intl.get('lts.reRun')}
+                    onClick={startTask}
+                />
+                <ComputationProgress />
                 <MainHeader>{intl.get('lts.title')}</MainHeader>
                 <p className="state-description">{intl.get('lts.hintMain')}</p>
-                <Pagination
-                    style={{ marginTop: '1em', marginLeft: '1em' }}
-                    variant="outlined"
-                    shape="rounded"
-                    count={insightSpaces.length}
-                    page={pageIndex + 1}
-                    onChange={(e, v) => {
-                        megaAutoStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
-                    }}
-                />
+                <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
+                <VizPagination />
                 <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
                 <InsightContainer>
                     <div className="ope-container">
@@ -137,7 +146,7 @@ const LTSPage: React.FC = () => {
                                     <Spinner label="Rendering..." />
                                 </LoadingLayer>
                             )}
-                            {insightSpaces.length > 0 && mainViewSpec && (
+                            {mainViewSpec && (
                                 <ResizeContainer
                                     enableResize={
                                         visualConfig.resize === IResizeMode.control &&

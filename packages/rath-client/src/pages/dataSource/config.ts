@@ -97,10 +97,6 @@ export const useDemoDataOptions = function (): Array<{key: IDemoDataKey; text: s
                 text: 'Bike Sharing in Washington D.C.'
             },
             {
-                key: "BIKE_SHARING",
-                text: "Bike Sharing"
-            },
-            {
                 key: "CAR_SALES",
                 text: "Car Sales"
             },

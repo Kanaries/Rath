@@ -14,7 +14,11 @@
             "ordinal": "ordinal",
             "temporal": "temporal",
             "quantitative": "quantitative"
-        }
+        },
+        "addVar": "Add Variable",
+        "addFilter": "Add Filter",
+        "field": "Field",
+        "star": "Star"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -22,13 +26,15 @@
         "explore": "Explore(alpha version)",
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
-        "editor": "Manual Exploration",
+        "editor": "Manual Exploration⭐️",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
         "lts": "Mega-auto Exploration",
-        "pattern": "Semi-auto Exploration",
-        "devCollection": "Debug",
-        "progressiveDashBoard": "Dashboard Designer"
+        "pattern": "Semi-auto Exploration⭐️",
+        "devCollection": "Insiders(α)",
+        "progressiveDashBoard": "Dashboard Designer",
+        "painter": "Data Painter🚀",
+        "collection": "Collection"
     },
     "preference": {
         "title": "preference"
@@ -55,7 +61,7 @@
         "confirm": "Confirm",
         "cancel": "Cancel",
         "analysis": {
-            "start": "Insight Analysis",
+            "start": "Start Analysis",
             "checkResult": "Check Existed Results",
             "pattern": "Build Knowledge(beta)",
             "manual": "Manual Explore"
@@ -224,8 +230,8 @@
             "enabled": "Enabled",
             "disabled": "Disabled",
             "key": "Filter by",
-            "range": "range",
-            "set": "set",
+            "range": "value range",
+            "set": "value set",
             "submit": "Submit",
             "cancel": "Cancel"
         }
@@ -312,9 +318,10 @@
     },
     "lts": {
         "autoAnalysis": "Auto Analysis",
+        "reRun": "Re-Run Task",
         "computing": "computing",
         "title": "Visual Insights",
-        "hintMain": "Here are some interesting patterns and insights found by Rath. If you are interested in some of them, try to use 'summary' to know more details about current view and use 'associate' to explore relative visualizations.",
+        "hintMain": "Here are some interesting patterns and insights found by RATH. If you are interested in some of them, try to use 'edit charts' to know more details about current view and use 'associate' to explore related insights",
         "summary": "Summary",
         "associate": "Associate",
         "asso": {
@@ -324,7 +331,8 @@
         },
         "bring": "Customize Analysis",
         "commandBar": {
-            "editing": "editing chart",
+            "painting": "data painter",
+            "editing": "edit chart",
             "associate": "associate views",
             "constraints": "analysis constraints"
         },
@@ -377,5 +385,32 @@
     },
     "desc": {
         "dataViewInfo": "Pattern in {measures} by {dimensions} where {filters}."
+    },
+    "collection": {
+        "title": "Collection",
+        "desc": "This is a collection of your favorite views in all segments.",
+        "viewMode": {
+            "card": "Cards",
+            "list": "List"
+        }
+    },
+    "painter": {
+        "samplePercent": "Sample Percent(%)",
+        "brushSize": "Brush Size",
+        "useOriginalDist": "Use original distribution",
+        "clearPainting": "Clear Painting",
+        "syncData": "Sync Data",
+        "search": "Search",
+        "explore": "Explore",
+        "autoSearch": "Auto Search",
+        "last": "Last",
+        "next": "Next",
+        "addLabel": "Add Label",
+        "tools": {
+            "move": "Move",
+            "color": "Color",
+            "clean": "Erase",
+            "create": "Create"
+        }
     }
 }

@@ -14,7 +14,9 @@ export const PIVOT_KEYS = {
     support: 'support',
     lts: 'lts',
     pattern: 'pattern',
-    progressiveDashBoard: 'progressiveDashBoard'
+    progressiveDashBoard: 'progressiveDashBoard',
+    painter: 'painter',
+    collection: 'collection'
   } as const;
 
 export const COMPUTATION_ENGINE = {

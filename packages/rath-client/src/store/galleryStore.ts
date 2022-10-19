@@ -51,7 +51,10 @@ export class GalleryStore {
             defaultAggregated: true,
             defaultStack: true,
         };
-        makeAutoObservable(this);
+        makeAutoObservable(this, {
+            // @ts-expect-error private field
+            pipeLine: false,
+        });
         this.pipeLine = pipeStore;
 
     }

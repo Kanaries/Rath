@@ -1,5 +1,5 @@
 {
-  "name": "rath-utils",
+  "name": "@kanaries/rath-utils",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,5 +8,11 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "localforage": "^1.10.0"
+  }
 }

@@ -1,15 +1,16 @@
-// import { autoSet } from '@kanaries/loa';
-import { autoSet } from '../../dev/autoStat';
+import { autoSet } from '@kanaries/loa';
+import styled from 'styled-components';
 import produce from 'immer';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { ActionButton, DefaultButton, Dropdown, IconButton, IDropdownOption, Stack } from '@fluentui/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactVega from '../../components/react-vega';
+
 import { IFieldMeta } from '../../interfaces';
 import { distVis } from '../../queries/distVis';
 import { useGlobalStore } from '../../store';
-import styled from 'styled-components';
+
 
 const Segment = styled.div`
     display: flex;
@@ -172,7 +173,7 @@ const ProgressiveDashboard: React.FC = (props) => {
     // recommendVisList里是确定性的推荐，不含wildcard
     const recommendVisList = useMemo(() => {
         if (cleanedData.length > 0 && fieldMetas.length > 0) {
-            console.log(cleanedData, toJS(fieldMetas));
+            // console.log(cleanedData, toJS(fieldMetas));
             return autoSet(cleanedData, toJS(fieldMetas), originSpecList);
         }
         return [];

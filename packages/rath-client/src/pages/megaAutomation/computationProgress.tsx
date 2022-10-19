@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import intl from 'react-intl-universal';
 import { ProgressIndicator } from '@fluentui/react';
+import { observer } from 'mobx-react-lite';
 import { getStateInStorage, setStateInStorage } from '../../workers/engine/utils';
+import { useGlobalStore } from '../../store';
 
-interface CPProps {
-    computing: boolean;
-}
-const ComputationProgress: React.FC<CPProps> = (props) => {
-    const { computing } = props;
+const ComputationProgress: React.FC = () => {
+    const { ltsPipeLineStore } = useGlobalStore();
+    const { computing } = ltsPipeLineStore;
 
     const [pn, setPn] = useState<number>(0);
 
@@ -45,4 +45,4 @@ const ComputationProgress: React.FC<CPProps> = (props) => {
     );
 };
 
-export default ComputationProgress;
+export default observer(ComputationProgress);

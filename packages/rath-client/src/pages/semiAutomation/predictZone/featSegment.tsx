@@ -2,15 +2,16 @@ import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, PrimaryButton, Spinner, Stack } from '@fluentui/react';
-
+import { applyFilters } from '@kanaries/loa';
 import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
-import { applyFilter } from '../utils';
+import { adviceVisSize } from '../../collection/utils';
+
 
 const FeatSegment: React.FC = () => {
-    const { semiAutoStore } = useGlobalStore();
-    const { featSpecList, featViews, mainVizSetting, dataSource, autoAsso, hasMainView } = semiAutoStore;
+    const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
+    const { featSpecList, featViews, mainVizSetting, dataSource, autoAsso, hasMainView, fieldMetas } = semiAutoStore;
     const loadMore = useCallback(() => {
         semiAutoStore.increaseRenderAmount('featViews');
     }, [semiAutoStore])
@@ -44,18 +45,36 @@ const FeatSegment: React.FC = () => {
                                 semiAutoStore.updateMainView(featViews.views[i])
                             }}
                         />
+                        <CommandButton
+                            iconProps={{ iconName: collectionStore.collectionContains(featViews.views[i].fields, spec, featViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            text={intl.get('common.star')}
+                            onClick={() => {
+                                collectionStore.toggleCollectState(featViews.views[i].fields, spec, featViews.views[i].filters)
+                            }}
+                        />
+                        <CommandButton
+                            text={intl.get('lts.commandBar.editing')}
+                            iconProps={{ iconName: 'BarChartVerticalEdit'}}
+                            onClick={() => {
+                                commonStore.visualAnalysisInGraphicWalker(spec)
+                            }}
+                        />
                     </Stack>
                     <div className="chart-container">
                         <ReactVega
                             actions={mainVizSetting.debug}
-                            spec={spec}
-                            dataSource={applyFilter(dataSource, featViews.views[i].filters)}
+                            spec={adviceVisSize(spec, fieldMetas)}
+                            dataSource={applyFilters(dataSource, featViews.views[i].filters)}
                         />
                     </div>
                     <div className="chart-desc">
                         { featViews.views[i].fields?.filter(f => f.analyticType === 'dimension').map(f => f.name || f.fid).join(', ') } <br />
                         { featViews.views[i].fields?.filter(f => f.analyticType === 'measure').map(f => f.name || f.fid).join(', ') } <br />
-                        { featViews.views[i].filters?.map(f => `${f.field.name || f.field.fid} = ${f.values.join(',')}`).join('\n') }
+                        { featViews.views[i].filters?.map(f => {
+                            const meta = fieldMetas.find(m => m.fid === f.fid);
+                            if (!meta) return '';
+                            return `${meta.name || meta.fid} = ${f.type === 'set' ? f.values.join(',') : `[${f.range.join(',')}]`}`
+                        })}
                     </div>
                 </div>)
             }

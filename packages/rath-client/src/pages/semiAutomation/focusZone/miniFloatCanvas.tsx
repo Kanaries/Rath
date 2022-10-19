@@ -3,13 +3,12 @@ import { CommandBarButton, IconButton } from '@fluentui/react';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
-import { IPattern } from '@kanaries/loa';
+import { applyFilters, IPattern } from '@kanaries/loa';
 import ReactVega from '../../../components/react-vega';
 import { IRow } from '../../../interfaces';
 import { distVis } from '../../../queries/distVis';
 import { labDistVis } from '../../../queries/labdistVis';
 import { useGlobalStore } from '../../../store';
-import { applyFilter } from '../utils';
 
 const FloatContainer = styled.div<{hide: boolean}>`
     position: fixed;
@@ -36,7 +35,7 @@ const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = props => {
 
     const { debug } = mainVizSetting
     const mainViewData = useMemo<IRow[]>(() => {
-        if (pined) return applyFilter(dataSource, pined.filters)
+        if (pined) return applyFilters(dataSource, pined.filters)
         return []
     }, [dataSource, pined])
 

@@ -1,4 +1,5 @@
 
+import { getCombination } from '@kanaries/loa';
 import { IInsightSpace, InsightFlow, Cube, ViewSpace,  } from 'visual-insights'
 import { IRow } from '../../interfaces';
 import { IVizSpace } from '../../store/megaAutomation';
@@ -377,7 +378,17 @@ export class RathEngine extends VIEngine {
         if (context.cube === null) return ansSpace;
         const globalCuboid = await context.cube.getCuboid([]);
         const globalDist = await globalCuboid.getAggregatedRows(globalMeasures, globalMeasures.map(() => 'dist'));
+        const pureMeasureViewMeasures: string[][] = [];
         for (let measures of context.dataGraph.MClusters) {
+            if (measures.length > 4) {
+                pureMeasureViewMeasures.push(...getCombination(measures, 4, 4))
+            } else {
+                pureMeasureViewMeasures.push(measures)
+            }
+        }
+        const meaUniqSet: Set<string> = new Set();
+        const tmpAnsSpace: IInsightSpace[] = []
+        for (let measures of pureMeasureViewMeasures) {
             // const ent = 
             let totalEntLoss = 0;
             for (let mea of measures) {
@@ -389,13 +400,24 @@ export class RathEngine extends VIEngine {
             }
             totalEntLoss /= measures.length;
             
-            ansSpace.push({
+            tmpAnsSpace.push({
                 dimensions: [],
                 measures: measures,
                 significance: 1,
                 score: totalEntLoss,
                 impurity: totalEntLoss
             })
+        }
+        tmpAnsSpace.sort((a, b) => Number(b.score) - Number(a.score));
+        for (let space of tmpAnsSpace) {
+            if (space.measures.every(m => meaUniqSet.has(m))) {
+                continue;
+            }
+            for (let mea of space.measures) {
+                meaUniqSet.add(mea);
+            }
+            ansSpace.push(space);
+            if (meaUniqSet.size === context.measures.length) break;
         }
         let ii = 0;
         for (let space of viewSpaces) {

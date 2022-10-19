@@ -6,7 +6,10 @@ import { LitePipeStore } from "./pipeLineStore/lite";
 export class NoteBookStore {
     private pipeLineStore: LitePipeStore;
     constructor (pipeLineStore: LitePipeStore) {
-        makeAutoObservable(this);
+        makeAutoObservable(this, {
+            // @ts-expect-error private field
+            pipeLineStore: false
+        });
         this.pipeLineStore = pipeLineStore
     }
     public get summary (): { origin: FieldSummary[]; grouped: FieldSummary[]; } {
