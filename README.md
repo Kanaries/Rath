@@ -30,29 +30,29 @@ Here are the main parts of Rath,
 ### DataSource
 DataSource board is for data uploading, sampling(currently support stream data, which means there is no limit on the size of the file you uploaded), cleaning, and defining fields type(dimensions, measures). In visual insights, we regard dimensions as independent variables or features and measures as dependent variables or targets.
 
-![dataSource-en.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/kanaries/Rath-Demos/dataSource-en.png)
+![dataSource-en.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-datasource-01.png)
 
-![dataSource-filter-en.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/datasource-2.png)
+![dataSource-filter-en.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/datasource-02.png)
 
 ### Mega Automation
 
 Rath automates exploring your dataset and discovering interesting patterns, and relations, recommending expressiveness and effective visualizations.
-![gallery.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/rath-auto-explore.png)
+![gallery.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-mega-auto-01.png)
 
 If some of the recommendations catch your interest, you can click the associate button, and Rath will associate more related insights for you.
 
-![gallery-asso](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/rath-associate.png)
+![gallery-asso](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-asso-01.png)
 
 If you have some very specific target, you can switch to a manual EDA tool inside Rath called Graphic Walker.
 
 ### Manual Exploration
 Graphic Walker is a lite tableau/polaris style visual analysis app, which is also based on Wilkinson's Grammer of Graphics. It is used for cases when users have specific analytic targets or want to analyze further results based on the recommended results by Rath's auto insights.
 
-![graphic-walker.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/graphic-walker.png)
+![graphic-walker.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-gw-01.png)
 
 We use similar visualization specification rules in polaris, which is friendly to users who are familiar with tableau.
 
-![graphic-waler.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/graphic-walker-2.png)
+![graphic-waler.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-gw-02.png)
 
 Manual Exploration is an independent embedding module. You can use it independently in your own app. See more details in `packages/graphic-walker/README.md`
 
@@ -66,17 +66,22 @@ npm i --save @kanaries/graphic-walker
 ### SemiAutomation
 Discovery or knowledge build module is a semi-automated data exploration system. It automates step by step and tries to understand what the users are thinking in real-time. Users can tell Rath what they are more interested in and Rath will focus more on the subset user care about.
 
-![discovery](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/discovery-1.png)
+![semi-auto](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-semi-02.png)
+
+![discovery](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-semi-01.png)
+
 
 
 ### Dashboard
 Generate interactive dashboards for yours. Rath will figure out sets of visualizations of which contents are connected to each other and can be used to analyze a specific problem.
-![](https://ch-resources.oss-cn-shanghai.aliyuncs.com/kanaries/Rath-Demos/dashboard-en.png)
 
-### Notebook
+You can also specify parts of the dashboard, and RATH
+will figure out the best fits for the rest of the dashboard.
+
+### Notebook (deprecated)
 Notebook is a board for the user to know what happened in the automatic analysis process and how RATH uses visual-insights. It shows how decisions are made by the application and provide an interactive interface to adjust some of the parameters and operators used by the algorithm.
 
-### Explainer
+### Explainer (deprecated)
 Explainer uses several insight discovery algorithms to detect what the specific insight type is shown in a visualization recommended. Explainer is an extension of B. Tang's Top K insight paper[4].
 
 
@@ -84,11 +89,8 @@ You can also use Graphic Walker as a lite tableau style analysis app independent
 
 more details can be found in README.md in graphic-walker folder.
 
-## Examples
-
-+ [DataSet: NASA - Kepler](https://www.kaggle.com/nasa/kepler-exoplanet-search-results)
-
-Details of the test result can be accessed [here](https://www.yuque.com/chenhao-sv93h/umv780/mbs440)
+## Docs
++ [docs](https://kanaries.net)
 
 
 
