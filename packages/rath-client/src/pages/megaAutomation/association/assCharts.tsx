@@ -2,7 +2,7 @@ import React from 'react';
 import { CommandButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { IInsightSpace, Specification } from 'visual-insights';
-import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
+import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { PreferencePanelConfig } from '../../../components/preference';
 import { IFieldMeta, IRow } from '../../../interfaces';
 import ReactVega from '../../../components/react-vega';

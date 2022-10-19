@@ -6,10 +6,6 @@ export const INIT_TOP_K_DIM_GROUP_NUM = 50;
 
 export const PIVOT_KEYS = {
     dataSource: 'dataSource',
-    noteBook: 'noteBook',
-    gallery: 'explore',
-    dashBoard: 'dashBoard',
-    explainer: 'explainer',
     editor: 'editor',
     support: 'support',
     lts: 'lts',

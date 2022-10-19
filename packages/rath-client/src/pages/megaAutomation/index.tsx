@@ -6,7 +6,7 @@ import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
 import { DefaultButton, PrimaryButton, Spinner } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
-import VisErrorBoundary from '../../visBuilder/visErrorBoundary';
+import VisErrorBoundary from '../../components/visErrorBoundary';
 import { IResizeMode } from '../../interfaces';
 import { LoadingLayer } from '../semiAutomation/components';
 import ReactVega from '../../components/react-vega';

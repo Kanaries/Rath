@@ -6,11 +6,10 @@ import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag } from "../interfaces";
 import { getQuantiles } from "../pages/dataSource/utils";
-import { cleanDataService, extendDataService, filterDataService, getFieldsSummaryService, inferMetaService } from "../service";
+import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
 import { findRathSafeColumnIndex } from "../utils";
-import { fieldSummary2fieldMeta } from "../utils/transform";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 
 interface IDataMessage {
@@ -103,20 +102,7 @@ export class DataSourceStore {
         const originFieldMetas$ = cleanedData$.pipe(
             op.withLatestFrom(fields$),
             op.map(([dataSource, fields]) => {
-                const ableFiledIds = fields.map(f => f.fid);
-                return from(getFieldsSummaryService(dataSource, ableFiledIds)).pipe(
-                    op.map(summary => {
-                        const analyticTypes = fields.map(f => f.analyticType);
-                        const geoRoles = fields.map(f => f.geoRole);
-                        const metas = fieldSummary2fieldMeta({
-                            summary,
-                            analyticTypes,
-                            geoRoles,
-                            semanticTypes: fields.map(f => f.semanticType)
-                        });
-                        return metas
-                    })
-                )
+                return from(computeFieldMetaService({ dataSource, fields: fields.map(f => toJS(f)) }))
             }),
             op.switchAll(),
             op.share()

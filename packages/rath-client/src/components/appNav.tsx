@@ -46,10 +46,6 @@ const IconMap = {
     [PIVOT_KEYS.editor]: 'LineChart',
     [PIVOT_KEYS.support]: 'Telemarketer',
     [PIVOT_KEYS.dataSource]: 'DataManagementSettings',
-    [PIVOT_KEYS.noteBook]: 'Game',
-    [PIVOT_KEYS.dashBoard]: 'ViewDashboard',
-    [PIVOT_KEYS.gallery]: 'ReadingMode',
-    [PIVOT_KEYS.explainer]: 'SiteScan',
     [PIVOT_KEYS.painter]: 'Brush',
     [PIVOT_KEYS.progressiveDashBoard]: 'SizeLegacy',
     [PIVOT_KEYS.collection]: 'Heart'

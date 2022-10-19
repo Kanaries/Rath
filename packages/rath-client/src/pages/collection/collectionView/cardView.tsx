@@ -5,7 +5,7 @@ import { Divider, Pagination } from '@material-ui/core';
 import ReactVega from '../../../components/react-vega';
 import ViewInfo from '../../../components/viewInfo/textInfo';
 import { IFieldMeta, IInsightVizView, IRow } from '../../../interfaces';
-import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
+import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { changeVisSize, VIEW_NUM_IN_PAGE } from '../utils';
 
 const CollectContainer = styled.div`

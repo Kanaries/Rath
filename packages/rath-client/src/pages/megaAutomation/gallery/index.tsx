@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import ReactVega from '../../../components/react-vega';
 import { useGlobalStore } from '../../../store';
-import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';
+import VisErrorBoundary from '../../../components/visErrorBoundary';
 
 const GalleryCard = styled.div`
     padding: 1em;
