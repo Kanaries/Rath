@@ -393,5 +393,24 @@
             "card": "卡片",
             "list": "列表"
         }
+    },
+    "painter": {
+        "samplePercent": "样本采样(%)",
+        "brushSize": "笔刷尺寸",
+        "useOriginalDist": "使用原始分布",
+        "clearPainting": "清除画布",
+        "syncData": "同步数据",
+        "search": "搜索",
+        "explore": "探索",
+        "autoSearch": "自动搜索",
+        "last": "上一步",
+        "next": "下一步",
+        "addLabel": "添加标签",
+        "tools": {
+            "move": "移动",
+            "color": "上色",
+            "clean": "橡皮",
+            "create": "创建"
+        }
     }
 }

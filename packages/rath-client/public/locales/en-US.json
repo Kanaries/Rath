@@ -393,5 +393,24 @@
             "card": "Cards",
             "list": "List"
         }
+    },
+    "painter": {
+        "samplePercent": "Sample Percent(%)",
+        "brushSize": "Brush Size",
+        "useOriginalDist": "Use original distribution",
+        "clearPainting": "Clear Painting",
+        "syncData": "Sync Data",
+        "search": "Search",
+        "explore": "Explore",
+        "autoSearch": "Auto Search",
+        "last": "Last",
+        "next": "Next",
+        "addLabel": "Add Label",
+        "tools": {
+            "move": "Move",
+            "color": "Color",
+            "clean": "Erase",
+            "create": "Create"
+        }
     }
 }

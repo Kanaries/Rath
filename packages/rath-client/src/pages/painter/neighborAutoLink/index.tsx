@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { purennMic } from '@kanaries/loa';
+import intl from 'react-intl-universal';
 import ReactVega from '../../../components/react-vega';
 import { IFieldMeta, IRow, IVegaSubset } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
@@ -91,27 +92,27 @@ const NeighborAutoLink: React.FC<NALProps> = (props) => {
                     </LoadingLayer>
                 }
                 <div>
-                <Toggle label="Auto Search" inlineLabel checked={autoLink} onChange={(e, checked) => {
+                <Toggle label={intl.get('painter.autoSearch')} inlineLabel checked={autoLink} onChange={(e, checked) => {
                         painterStore.setAutoLinkMode(Boolean(checked))
                     }} />
                 </div>
                 <Stack horizontal tokens={{ childrenGap: 10, padding: '0em 0em 2em 0em' }}>
                     <PrimaryButton
-                            text="Search"
+                            text={intl.get('painter.search')}
                             iconProps={{ iconName: 'Search' }}
                             onClick={() => {
                                 getNearFields(dataSource);
                             }}
                         />
                     <DefaultButton
-                        text="Last"
+                        text={intl.get('painter.last')}
                         iconProps={{ iconName: 'Back' }}
                         onClick={() => {
                             setNearIndex((v) => (v - 1 + nearFields.length) % nearFields.length);
                         }}
                     />
                     <DefaultButton
-                        text="Next"
+                        text={intl.get('painter.next')}
                         iconProps={{ iconName: 'Forward' }}
                         onClick={() => {
                             setNearIndex((v) => (v + 1) % nearFields.length);

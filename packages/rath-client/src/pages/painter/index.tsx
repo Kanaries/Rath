@@ -17,6 +17,7 @@ import { toJS } from 'mobx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
 import { Item, ScenegraphEvent } from 'vega';
+import intl from 'react-intl-universal';
 import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
@@ -73,7 +74,7 @@ const Painter: React.FC = (props) => {
 
     const initValue = mutFeatValues[0];
 
-    const painting = painterMode !== PAINTER_MODE.NONE;
+    const painting = painterMode !== PAINTER_MODE.MOVE;
 
     const clearPainting = useCallback(() => {
         setViewData(labelingData(cleanedData, initValue));
@@ -122,7 +123,7 @@ const Painter: React.FC = (props) => {
                     domain: mutFeatValues,
                 },
             };
-            if (painterMode === PAINTER_MODE.NONE) {
+            if (painterMode === PAINTER_MODE.MOVE) {
                 if (!(mvd.params instanceof Array)) {
                     mvd.params = [];
                 }
@@ -141,7 +142,7 @@ const Painter: React.FC = (props) => {
 
             // @ts-ignore
             embed(container.current, painterSpec, {
-                actions: painterMode === PAINTER_MODE.NONE,
+                actions: painterMode === PAINTER_MODE.MOVE,
             }).then((res) => {
                 res.view.change(
                     'dataSource',
@@ -340,7 +341,10 @@ const Painter: React.FC = (props) => {
                                     onChange={(e, op) => {
                                         op && setPainterMode(op.key as PAINTER_MODE);
                                     }}
-                                    options={PAINTER_MODE_LIST}
+                                    options={PAINTER_MODE_LIST.map(r => ({
+                                        ...r,
+                                        text: intl.get(`painter.tools.${r.key}`)
+                                    }))}
                                 />
                             </Stack.Item>
                             {painterMode === PAINTER_MODE.COLOR && (
@@ -365,7 +369,7 @@ const Painter: React.FC = (props) => {
                                     max={1}
                                     step={0.01}
                                     value={samplePercent}
-                                    label="Sample Percent (%)"
+                                    label={intl.get('painter.samplePercent')}
                                     onChange={(s, v) => {
                                         setSamplePercent(s);
                                     }}
@@ -377,14 +381,14 @@ const Painter: React.FC = (props) => {
                                     max={1}
                                     step={0.01}
                                     value={painterSize}
-                                    label="Painter Size"
+                                    label={intl.get('painter.brushSize')}
                                     onChange={(s, v) => {
                                         setPainterSize(s);
                                     }}
                                 />
                             </Stack.Item>
                             <Stack.Item>
-                                <Toggle label="Use original distribution" inlineLabel checked={clearAgg} onChange={(e, checked) => {
+                                <Toggle label={intl.get('painter.useOriginalDist')} inlineLabel checked={clearAgg} onChange={(e, checked) => {
                                     setClearAgg(Boolean(checked))
                                 }} />
                             </Stack.Item>
@@ -392,7 +396,7 @@ const Painter: React.FC = (props) => {
                                 <Stack.Item>
                                     <DefaultButton
                                         disabled
-                                        text="Add label"
+                                        text={intl.get('painter.addLabel')}
                                         onClick={() => {
                                             setMutFeatValues((v) => [...v, `Label ${v.length + 1}`]);
                                         }}
@@ -406,12 +410,12 @@ const Painter: React.FC = (props) => {
                     <Stack horizontal tokens={{ childrenGap: 10 }}>
                         <DefaultButton
                             iconProps={{ iconName: 'Trash' }}
-                            text="Clear Painting"
+                            text={intl.get('painter.clearPainting')}
                             onClick={clearPainting}
                         />
                         <DefaultButton
                             iconProps={{ iconName: 'Sync' }}
-                            text="Sync Data"
+                            text={intl.get('painter.syncData')}
                             onClick={() => {
                                 setGWTrigger(v => !v)
                             }}
@@ -426,9 +430,9 @@ const Painter: React.FC = (props) => {
                     }}
                     style={{ marginTop: '1em' }}
                 >
-                    <PivotItem headerText={PIVOT_TAB_KEYS.SEARCH} itemKey={PIVOT_TAB_KEYS.SEARCH} itemIcon="Search" />
+                    <PivotItem headerText={intl.get('painter.search')} itemKey={PIVOT_TAB_KEYS.SEARCH} itemIcon="Search" />
                     <PivotItem
-                        headerText={PIVOT_TAB_KEYS.EXPLORE}
+                        headerText={intl.get('painter.explore')}
                         itemKey={PIVOT_TAB_KEYS.EXPLORE}
                         itemIcon="BarChartVerticalEdit"
                     />

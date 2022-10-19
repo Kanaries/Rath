@@ -10,7 +10,7 @@ export const COLOR_CELLS = COLOR_SCHEME.map((c, i) => ({
 }));
 
 export const PAINTER_MODE_LIST: IChoiceGroupOption[] = [
-    { key: PAINTER_MODE.NONE, text: 'Move', iconProps: { iconName: 'Move', style: { fontSize: '18px' } } },
+    { key: PAINTER_MODE.MOVE, text: 'Move', iconProps: { iconName: 'Move', style: { fontSize: '18px' } } },
     { key: PAINTER_MODE.COLOR, text: 'color', iconProps: { iconName: 'Color', style: { fontSize: '18px' } } },
     { key: PAINTER_MODE.ERASE, text: 'clean', iconProps: { iconName: 'EraseTool', style: { fontSize: '18px' } } },
     {

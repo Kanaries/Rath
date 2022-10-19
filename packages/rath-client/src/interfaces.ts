@@ -164,9 +164,9 @@ export interface IInsightVizView {
 
 export enum PAINTER_MODE {
     COLOR = 'color',
-    ERASE = 'erase',
+    ERASE = 'clean',
     CREATE = 'create',
-    NONE = 'none'
+    MOVE = 'move'
 }
 
 export interface IDataFrame {
