@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Divider, Pagination } from '@material-ui/core';
+import { Divider } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
@@ -20,7 +20,7 @@ import Narrative from './narrative';
 import ComputationProgress from './computationProgress';
 import Constraints from './vizOperation/constraints';
 import AssoPanel from './assoPanel';
-
+import VizPagination from './vizPagination';
 
 const MainHeader = styled.div`
     font-size: 1.5em;
@@ -66,7 +66,7 @@ const LTSPage: React.FC = () => {
     const { ltsPipeLineStore, megaAutoStore, commonStore } = useGlobalStore();
     const { computing, rendering, dataSource } = ltsPipeLineStore;
 
-    const { pageIndex, visualConfig, insightSpaces, mainViewSpec } = megaAutoStore;
+    const { visualConfig, insightSpaces, mainViewSpec } = megaAutoStore;
 
     // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
 
@@ -113,23 +113,15 @@ const LTSPage: React.FC = () => {
                     onClick={() => {
                         ltsPipeLineStore.startTask(commonStore.taskMode).then(() => {
                             megaAutoStore.emitViewChangeTransaction(0);
-                        })
+                        });
                         commonStore.setAppKey(PIVOT_KEYS.lts);
                     }}
                 />
                 <ComputationProgress computing={computing} />
                 <MainHeader>{intl.get('lts.title')}</MainHeader>
                 <p className="state-description">{intl.get('lts.hintMain')}</p>
-                <Pagination
-                    style={{ marginTop: '1em', marginLeft: '1em' }}
-                    variant="outlined"
-                    shape="rounded"
-                    count={insightSpaces.length}
-                    page={pageIndex + 1}
-                    onChange={(e, v) => {
-                        megaAutoStore.emitViewChangeTransaction((v - 1) % insightSpaces.length);
-                    }}
-                />
+                <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
+                <VizPagination />
                 <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
                 <InsightContainer>
                     <div className="ope-container">

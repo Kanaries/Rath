@@ -10,7 +10,7 @@ import { adviceVisSize } from '../../collection/utils';
 
 
 const FeatSegment: React.FC = () => {
-    const { semiAutoStore, collectionStore } = useGlobalStore();
+    const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
     const { featSpecList, featViews, mainVizSetting, dataSource, autoAsso, hasMainView, fieldMetas } = semiAutoStore;
     const loadMore = useCallback(() => {
         semiAutoStore.increaseRenderAmount('featViews');
@@ -50,6 +50,13 @@ const FeatSegment: React.FC = () => {
                             text={intl.get('common.star')}
                             onClick={() => {
                                 collectionStore.toggleCollectState(featViews.views[i].fields, spec, featViews.views[i].filters)
+                            }}
+                        />
+                        <CommandButton
+                            text={intl.get('lts.commandBar.editing')}
+                            iconProps={{ iconName: 'BarChartVerticalEdit'}}
+                            onClick={() => {
+                                commonStore.visualAnalysisInGraphicWalker(spec)
                             }}
                         />
                     </Stack>

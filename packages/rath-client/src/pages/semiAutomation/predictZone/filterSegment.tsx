@@ -10,7 +10,7 @@ import { adviceVisSize } from '../../collection/utils';
 
 
 const FilterSegment: React.FC = () => {
-    const { semiAutoStore, collectionStore } = useGlobalStore();
+    const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
     const { filterSpecList, filterViews, mainVizSetting, dataSource, autoAsso, hasMainView, fieldMetas } = semiAutoStore;
     const loadMore = useCallback(() => {
         semiAutoStore.increaseRenderAmount('filterViews');
@@ -45,17 +45,24 @@ const FilterSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            iconProps={{ iconName: 'Compare' }}
-                            text={intl.get('discovery.main.compare')}
-                            onClick={() => {
-                                semiAutoStore.updateCompareView(filterViews.views[i])
-                            }}
-                        />
-                        <CommandButton
                             iconProps={{ iconName: collectionStore.collectionContains(filterViews.views[i].fields, spec, filterViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
                                 collectionStore.toggleCollectState(filterViews.views[i].fields, spec, filterViews.views[i].filters)
+                            }}
+                        />
+                        <CommandButton
+                            text={intl.get('lts.commandBar.editing')}
+                            iconProps={{ iconName: 'BarChartVerticalEdit'}}
+                            onClick={() => {
+                                commonStore.visualAnalysisInGraphicWalker(spec)
+                            }}
+                        />
+                        <CommandButton
+                            iconProps={{ iconName: 'Compare' }}
+                            text={intl.get('discovery.main.compare')}
+                            onClick={() => {
+                                semiAutoStore.updateCompareView(filterViews.views[i])
                             }}
                         />
                     </Stack>

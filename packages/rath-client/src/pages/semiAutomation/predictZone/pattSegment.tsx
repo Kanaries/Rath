@@ -9,7 +9,7 @@ import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
 
 const PattSegment: React.FC = () => {
-    const { semiAutoStore, collectionStore } = useGlobalStore();
+    const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
     const { pattSpecList, pattViews, mainVizSetting, dataSource, autoAsso, hasMainView, fieldMetas } = semiAutoStore;
     const loadMore = useCallback(() => {
         semiAutoStore.increaseRenderAmount('pattViews');
@@ -48,6 +48,13 @@ const PattSegment: React.FC = () => {
                             text={intl.get('common.star')}
                             onClick={() => {
                                 collectionStore.toggleCollectState(pattViews.views[i].fields, spec, pattViews.views[i].filters)
+                            }}
+                        />
+                        <CommandButton
+                            text={intl.get('lts.commandBar.editing')}
+                            iconProps={{ iconName: 'BarChartVerticalEdit'}}
+                            onClick={() => {
+                                commonStore.visualAnalysisInGraphicWalker(spec)
                             }}
                         />
                     </Stack>

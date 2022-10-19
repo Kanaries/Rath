@@ -56,7 +56,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
         },
         {
             key: 'star',
-            text: 'star',
+            text: intl.get('common.star'),
             iconProps: { iconName: starIconName },
             onClick: () => {
                 if (mainViewPattern && mainViewSpec) {
