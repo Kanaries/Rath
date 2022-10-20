@@ -35,7 +35,6 @@ function App() {
     </div>
 )
   }
-
   return (
     <div>
       <div className="main-app-container">

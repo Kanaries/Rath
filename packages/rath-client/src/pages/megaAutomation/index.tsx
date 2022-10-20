@@ -4,23 +4,19 @@ import { Divider } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
-import { DefaultButton, PrimaryButton, Spinner } from '@fluentui/react';
+import { DefaultButton, PrimaryButton } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
-import VisErrorBoundary from '../../components/visErrorBoundary';
-import { IResizeMode } from '../../interfaces';
-import { LoadingLayer } from '../semiAutomation/components';
-import ReactVega from '../../components/react-vega';
 import { PIVOT_KEYS } from '../../constants';
 import VizPreference from './preference';
 import SaveModal from './save';
 import OperationBar from './vizOperation/operationBar';
 import FieldContainer from './vizOperation/fieldContainer';
-import ResizeContainer from './resizeContainer';
 import Narrative from './narrative';
 import ComputationProgress from './computationProgress';
 import Constraints from './vizOperation/constraints';
 import AssoPanel from './assoPanel';
 import VizPagination from './vizPagination';
+import MainCanvas from './mainCanvas';
 
 const MainHeader = styled.div`
     font-size: 1.5em;
@@ -64,9 +60,8 @@ const InsightContainer = styled.div`
 
 const LTSPage: React.FC = () => {
     const { ltsPipeLineStore, megaAutoStore, commonStore } = useGlobalStore();
-    const { rendering, dataSource } = ltsPipeLineStore;
 
-    const { visualConfig, mainViewSpec } = megaAutoStore;
+    const { visualConfig } = megaAutoStore;
     const { taskMode } = commonStore;
 
     // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
@@ -95,9 +90,6 @@ const LTSPage: React.FC = () => {
             <SaveModal />
             <Constraints />
             <AssoPanel />
-            {/* <div className="card">
-                <Gallery />
-            </div> */}
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
             <div className="card">
                 <DefaultButton
@@ -140,29 +132,7 @@ const LTSPage: React.FC = () => {
                             />
                         }
                     </div> */}
-                        <div className="insight-viz">
-                            {rendering && (
-                                <LoadingLayer>
-                                    <Spinner label="Rendering..." />
-                                </LoadingLayer>
-                            )}
-                            {mainViewSpec && (
-                                <ResizeContainer
-                                    enableResize={
-                                        visualConfig.resize === IResizeMode.control &&
-                                        !(mainViewSpec.encoding.column || mainViewSpec.encoding.row)
-                                    }
-                                >
-                                    <VisErrorBoundary>
-                                        <ReactVega
-                                            dataSource={dataSource}
-                                            spec={mainViewSpec}
-                                            actions={visualConfig.debug}
-                                        />
-                                    </VisErrorBoundary>
-                                </ResizeContainer>
-                            )}
-                        </div>
+                        <MainCanvas />
                         <div className="insight-info">{visualConfig.nlg && <Narrative />}</div>
                     </div>
                     <div>
