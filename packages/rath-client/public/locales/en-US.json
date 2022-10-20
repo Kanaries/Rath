@@ -7,7 +7,18 @@
         "settings": "Settings",
         "history": "History",
         "hide": "Hide",
-        "expand": "Expand"
+        "expand": "Expand",
+        "filter": "Filter",
+        "semanticType": {
+            "nominal": "nominal",
+            "ordinal": "ordinal",
+            "temporal": "temporal",
+            "quantitative": "quantitative"
+        },
+        "addVar": "Add Variable",
+        "addFilter": "Add Filter",
+        "field": "Field",
+        "star": "Star"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -15,13 +26,15 @@
         "explore": "Explore(alpha version)",
         "dashBoard": "DashBoard",
         "explainer": "Explainer",
-        "editor": "Manual Exploration",
+        "editor": "Manual Exploration⭐️",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
         "lts": "Mega-auto Exploration",
-        "pattern": "Semi-auto Exploration",
-        "devCollection": "Debug",
-        "progressiveDashBoard": "Dashboard Designer"
+        "pattern": "Semi-auto Exploration⭐️",
+        "devCollection": "Insiders(α)",
+        "progressiveDashBoard": "Dashboard Designer",
+        "painter": "Data Painter🚀",
+        "collection": "Collection"
     },
     "preference": {
         "title": "preference"
@@ -48,7 +61,7 @@
         "confirm": "Confirm",
         "cancel": "Cancel",
         "analysis": {
-            "start": "Insight Analysis",
+            "start": "Start Analysis",
             "checkResult": "Check Existed Results",
             "pattern": "Build Knowledge(beta)",
             "manual": "Manual Explore"
@@ -88,6 +101,48 @@
         "metaView": "Meta View",
         "dataView": "Table View",
         "charset": "character encoding",
+        "databaseType": "Select Database",
+        "connectUri": "Connection URI",
+        "databaseName": "Database",
+        "schemaName": "Schema",
+        "tableName": "Table",
+        "preview": "Data Preview",
+        "query": "SQL Query",
+        "connectorConfig": "Connector Settings",
+        "connectorService": "Connector Service URL (Optional)",
+        "apply": "Apply&Test",
+        "dbProgress": [
+            {
+                "label": "Connection",
+                "msgRunning": "Waiting to connect to host...",
+                "msgSucceeded": "Connection succeeded.",
+                "msgFailed": "Connection failed."
+            },
+            {
+                "label": "Focus",
+                "msgRunning": "Find a table to continue.",
+                "msgSucceeded": "Completed.",
+                "msgFailed": "Operation failed."
+            },
+            {
+                "label": "Preview",
+                "msgRunning": "Fetching data from the table.",
+                "msgSucceeded": "Preview generated.",
+                "msgFailed": "Operation failed."
+            },
+            {
+                "label": "Fetch",
+                "msgRunning": "Loading data by submitting the SQL statement.",
+                "msgSucceeded": "Succeeded to execute.",
+                "msgFailed": "Failed to execute."
+            }
+        ],
+        "btn": {
+            "connect": "Connect",
+            "reset": "Back and Reset",
+            "connectFailed": "Failed to connect",
+            "query": "Submit Query"
+        },
         "advice": {
             "lackData": "Lack of Data",
             "lackDimension": "There should includes dimensions in the datasource.",
@@ -112,7 +167,8 @@
                 "file": "File",
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
-                "demo": "Demo"
+                "demo": "Demo",
+                "database": "Database"
             },
             "demo": {
                 "available": "Available Datasets"
@@ -167,6 +223,17 @@
         },
         "extend": {
             "title": "Extend Information"
+        },
+        "filter": {
+            "title": "Filter Config",
+            "active": "Filter",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "key": "Filter by",
+            "range": "value range",
+            "set": "value set",
+            "submit": "Submit",
+            "cancel": "Cancel"
         }
     },
     "meta": {
@@ -251,9 +318,10 @@
     },
     "lts": {
         "autoAnalysis": "Auto Analysis",
+        "reRun": "Re-Run Task",
         "computing": "computing",
         "title": "Visual Insights",
-        "hintMain": "Here are some interesting patterns and insights found by Rath. If you are interested in some of them, try to use 'summary' to know more details about current view and use 'associate' to explore relative visualizations.",
+        "hintMain": "Here are some interesting patterns and insights found by RATH. If you are interested in some of them, try to use 'edit charts' to know more details about current view and use 'associate' to explore related insights",
         "summary": "Summary",
         "associate": "Associate",
         "asso": {
@@ -263,7 +331,8 @@
         },
         "bring": "Customize Analysis",
         "commandBar": {
-            "editing": "editing chart",
+            "painting": "data painter",
+            "editing": "edit chart",
             "associate": "associate views",
             "constraints": "analysis constraints"
         },
@@ -316,5 +385,32 @@
     },
     "desc": {
         "dataViewInfo": "Pattern in {measures} by {dimensions} where {filters}."
+    },
+    "collection": {
+        "title": "Collection",
+        "desc": "This is a collection of your favorite views in all segments.",
+        "viewMode": {
+            "card": "Cards",
+            "list": "List"
+        }
+    },
+    "painter": {
+        "samplePercent": "Sample Percent(%)",
+        "brushSize": "Brush Size",
+        "useOriginalDist": "Use original distribution",
+        "clearPainting": "Clear Painting",
+        "syncData": "Sync Data",
+        "search": "Search",
+        "explore": "Explore",
+        "autoSearch": "Auto Search",
+        "last": "Last",
+        "next": "Next",
+        "addLabel": "Add Label",
+        "tools": {
+            "move": "Move",
+            "color": "Color",
+            "clean": "Erase",
+            "create": "Create"
+        }
     }
 }

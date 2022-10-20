@@ -1,9 +1,9 @@
 import { makeAutoObservable, reaction } from "mobx";
-import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { from, Subscription } from "rxjs";
 import { IComputeMode } from "../../interfaces";
 import { Subspace, ViewSpace } from "../../service";
 import { getDataEventStreams, ICookedDataset, IDataEventStreams, IUnivarateSummary } from "../../stream/litePipe";
+import { fromStream, StreamListener, toStream } from "../../utils/mobx-utils";
 import { DataSourceStore } from "../dataSourceStore";
 
 export type IPipeProgressTag = 'univar' | 'subspace' | 'others' | 'none'
@@ -16,17 +16,17 @@ export class LitePipeStore {
     public computateMode: IComputeMode = IComputeMode.worker;
     private streams: IDataEventStreams;
     private subscrptions: Subscription[] = [];
-    public cookedDatasetRef: IStreamListener<ICookedDataset>;
+    public cookedDatasetRef: StreamListener<ICookedDataset>;
     // public viewSpaces: ViewSpace[] = [];
-    public viewSpacesRef: IStreamListener<ViewSpace[]>;
-    public fullDataSubspacesRef: IStreamListener<Subspace[]>;
-    public univarRef: IStreamListener<IUnivarateSummary>;
-    public dataSubspacesRef: IStreamListener<Subspace[]>;
+    public viewSpacesRef: StreamListener<ViewSpace[]>;
+    public fullDataSubspacesRef: StreamListener<Subspace[]>;
+    public univarRef: StreamListener<IUnivarateSummary>;
+    public dataSubspacesRef: StreamListener<Subspace[]>;
     public TOP_K_DIM_PERCENT: number = 0.72;
     public TOP_K_MEA_PERCENT: number = 1;
     public TOP_K_DIM_GROUP_NUM: number = 100;
     public MAX_MEA_GROUP_NUM: number = 4;
-    public AUTO_TOP_K_DIM_GROUP_NUM_Ref: IStreamListener<number>;
+    public AUTO_TOP_K_DIM_GROUP_NUM_Ref: StreamListener<number>;
     public progressTag: IPipeProgressTag = 'none';
     public auto: boolean = true;
     constructor (dataSourceStore: DataSourceStore) {

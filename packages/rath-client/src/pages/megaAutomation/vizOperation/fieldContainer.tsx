@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
+import FieldPlaceholder from '../../../components/fieldPlaceholder';
 import ViewField from './viewField';
 
 const PillsContainer = styled.div`
@@ -11,8 +12,12 @@ const PillsContainer = styled.div`
 `
 
 const FieldContainer: React.FC = props => {
-    const { exploreStore } = useGlobalStore();
-    const { mainViewPattern } = exploreStore;
+    const { megaAutoStore } = useGlobalStore();
+    const { mainViewPattern, fieldMetas } = megaAutoStore;
+
+    const appendFieldHandler = useCallback((fid: string) => {
+        megaAutoStore.addField2MainViewPattern(fid);
+    }, [megaAutoStore])
     
     if (mainViewPattern === null) {
         return <div></div>
@@ -24,7 +29,7 @@ const FieldContainer: React.FC = props => {
                     text={f.name || f.fid}
                     key={f.fid}
                     onRemove={() => {
-                        exploreStore.removeFieldInViewPattern(f.fid)
+                        megaAutoStore.removeFieldInViewPattern(f.fid)
                     }}
                 />
             })}
@@ -35,10 +40,14 @@ const FieldContainer: React.FC = props => {
                     type="measure" text={`${f.name || f.fid}`}
                     key={f.fid}
                     onRemove={() => {
-                        exploreStore.removeFieldInViewPattern(f.fid)
+                        megaAutoStore.removeFieldInViewPattern(f.fid)
                     }}
                 />
             })}
+            <FieldPlaceholder
+                fields={fieldMetas}
+                onAdd={appendFieldHandler }
+            />
         </PillsContainer>
     </div>
 }

@@ -1,22 +1,23 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
-import { CommandButton, DefaultButton, Spinner, Stack } from 'office-ui-fabric-react';
-
+import { CommandButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
+import { applyFilters } from '@kanaries/loa';
 import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
-import { applyFilter } from '../utils';
+import { adviceVisSize } from '../../collection/utils';
+
 
 const FilterSegment: React.FC = () => {
-    const { discoveryMainStore } = useGlobalStore();
-    const { filterSpecList, filterViews, mainVizSetting, dataSource, autoAsso, hasMainView } = discoveryMainStore;
+    const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
+    const { filterSpecList, filterViews, mainVizSetting, dataSource, autoAsso, hasMainView, fieldMetas } = semiAutoStore;
     const loadMore = useCallback(() => {
-        discoveryMainStore.increaseRenderAmount('filterViews');
-    }, [discoveryMainStore])
+        semiAutoStore.increaseRenderAmount('filterViews');
+    }, [semiAutoStore])
     const recommandFilter = useCallback(() => {
-        discoveryMainStore.filterAssociate();
-    }, [discoveryMainStore])
+        semiAutoStore.filterAssociate();
+    }, [semiAutoStore])
     if (filterViews.views.length === 0 && autoAsso.filterViews) return <div />
     return <div className="pure-card">
         <h1 className="ms-fontSize-18">{intl.get('discovery.main.associate.filters')}</h1>
@@ -40,28 +41,46 @@ const FilterSegment: React.FC = () => {
                             iconProps={{ iconName: 'Pinned' }}
                             text={intl.get('discovery.main.pin')}
                             onClick={() => {
-                                discoveryMainStore.updateMainView(filterViews.views[i])
+                                semiAutoStore.updateMainView(filterViews.views[i])
+                            }}
+                        />
+                        <CommandButton
+                            iconProps={{ iconName: collectionStore.collectionContains(filterViews.views[i].fields, spec, filterViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            text={intl.get('common.star')}
+                            onClick={() => {
+                                collectionStore.toggleCollectState(filterViews.views[i].fields, spec, filterViews.views[i].filters)
+                            }}
+                        />
+                        <CommandButton
+                            text={intl.get('lts.commandBar.editing')}
+                            iconProps={{ iconName: 'BarChartVerticalEdit'}}
+                            onClick={() => {
+                                commonStore.visualAnalysisInGraphicWalker(spec)
                             }}
                         />
                         <CommandButton
                             iconProps={{ iconName: 'Compare' }}
                             text={intl.get('discovery.main.compare')}
                             onClick={() => {
-                                discoveryMainStore.updateCompareView(filterViews.views[i])
+                                semiAutoStore.updateCompareView(filterViews.views[i])
                             }}
                         />
                     </Stack>
                     <div className="chart-container">
                         <ReactVega
                             actions={mainVizSetting.debug}
-                            spec={spec}
-                            dataSource={applyFilter(dataSource, filterViews.views[i].filters)}
+                            spec={adviceVisSize(spec, fieldMetas)}
+                            dataSource={applyFilters(dataSource, filterViews.views[i].filters)}
                         />
                     </div>
                     <div className="chart-desc">
                         { filterViews.views[i].fields?.filter(f => f.analyticType === 'dimension').map(f => f.name || f.fid).join(', ') } <br />
                         { filterViews.views[i].fields?.filter(f => f.analyticType === 'measure').map(f => f.name || f.fid).join(', ') } <br />
-                        { filterViews.views[i].filters?.map(f => `${f.field.name || f.field.fid} = ${f.values.join(',')}`).join('\n') }
+                        { filterViews.views[i].filters?.map(f => {
+                            const meta = fieldMetas.find(m => m.fid === f.fid);
+                            if (!meta) return '';
+                            return `${meta.name || meta.fid} = ${f.type === 'set' ? f.values.join(',') : `[${f.range.join(',')}]`}`
+                        })}
                     </div>
                 </div>)
             }

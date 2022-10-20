@@ -1,16 +1,14 @@
 import { observer } from 'mobx-react-lite';
-import { CommandBarButton, IconButton } from 'office-ui-fabric-react';
+import { CommandBarButton, IconButton } from '@fluentui/react';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
-
+import { applyFilters, IPattern } from '@kanaries/loa';
 import ReactVega from '../../../components/react-vega';
-import { IPattern } from '@kanaries/loa';
 import { IRow } from '../../../interfaces';
 import { distVis } from '../../../queries/distVis';
 import { labDistVis } from '../../../queries/labdistVis';
 import { useGlobalStore } from '../../../store';
-import { applyFilter } from '../utils';
 
 const FloatContainer = styled.div<{hide: boolean}>`
     position: fixed;
@@ -30,14 +28,14 @@ interface MiniFloatCanvasProps{
 }
 const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = props => {
     const { pined } = props;
-    const { discoveryMainStore } = useGlobalStore()
-    const { settings, mainVizSetting, dataSource } = discoveryMainStore;
+    const { semiAutoStore } = useGlobalStore()
+    const { settings, mainVizSetting, dataSource } = semiAutoStore;
     const { vizAlgo } = settings;
     const [hide, setHide] = useState<boolean>(false);
 
     const { debug } = mainVizSetting
     const mainViewData = useMemo<IRow[]>(() => {
-        if (pined) return applyFilter(dataSource, pined.filters)
+        if (pined) return applyFilters(dataSource, pined.filters)
         return []
     }, [dataSource, pined])
 

@@ -31,7 +31,6 @@ function initEngine (engineMode: string) {
         })
         EngineRef.mode = engineMode;
     }
-    console.log(`Rath engine is created, engine mode is [${EngineRef.mode}].`)
 }
 
 function destroyEngine () {
@@ -56,7 +55,6 @@ async function startPipeLine (props: StartPipeLineProps) {
     let viewSampleData: IRow[] = [];
     let viewFields: IFieldSummary[] = [];
     times.push(performance.now())
-    console.log('[computation engine mode]', props.mode)
     if (EngineRef.mode === 'webworker' && props.mode === 'webworker') {
         const { dataSource, fieldMetas } = props;
         const fieldsProps = fieldMetas.map(f => ({ key: f.fid, semanticType: f.semanticType, analyticType: f.analyticType, dataType: '?' as '?' }));
@@ -98,8 +96,6 @@ async function startPipeLine (props: StartPipeLineProps) {
         viewFields = engine.fields;
         insightSpaces = engine.insightSpaces;
         viewSampleData = engine.dataSource;
-        // console.log('insightspaces, length', insightSpaces.length)
-        // console.log('insightspaces, length', engine.subSpaces.length)
     } else if (EngineRef.mode === 'clickhouse' && props.mode === 'clickhouse') {
         const engine = EngineRef.current;
         if (engine === null) throw new Error('Engine is not created.');
@@ -223,13 +219,13 @@ async function subInsight (props: ViewSpace) {
 
 export async function router (e: { data: MessageProps }, onSuccess: (res?: any) => void, onFailed: (res: string) => void) {
     const req = e.data;
-    console.log(req.task, 'worker router')
     try {
         switch (req.task) {
-            case 'cube':
+            case 'cube': {
                 const aggData = await aggregate(req.props);
                 onSuccess(aggData);
                 break;
+            }
             case 'init':
                 initEngine(req.props);
                 onSuccess()
@@ -238,38 +234,46 @@ export async function router (e: { data: MessageProps }, onSuccess: (res?: any) 
                 destroyEngine();
                 onSuccess()
                 break;
-            case 'start':
+            case 'start': {
                 const res_start = await startPipeLine(req.props);
                 onSuccess(res_start);
                 break;
-            case 'specification':
+            }
+            case 'specification': {
                 const res_spec = await specify(req.props);
                 onSuccess(res_spec)
                 break;
-            case 'associate':
+            }
+            case 'associate': {
                 const res_asso = await associate(req.props);
                 onSuccess(res_asso)
                 break;
-            case 'detail':
+            }
+            case 'detail': {
                 const res_details = scanDetails(req.props);
                 onSuccess(res_details)
                 break;
-            case 'download':
+            }
+            case 'download': {
                 const res_result = exportResult();
                 onSuccess(res_result)
                 break;
-            case 'sync':
+            }
+            case 'sync': {
                 const res_sync = syncEngine();
                 onSuccess(res_sync);
                 break;
-            case 'subinsight':
+            }
+            case 'subinsight': {
                 const res_subinsight = await subInsight(req.props);
                 onSuccess(res_subinsight);
                 break;
-            case 'upload':
+            }
+            case 'upload': {
                 const res_upload = importFromUploads(req.props);
                 onSuccess(res_upload)
                 break;
+            }
             default:
                 throw new Error(`Unknow task: "${req.task}".`)
         }

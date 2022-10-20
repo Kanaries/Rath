@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import styled from 'styled-components'
 import { getErrorStore } from './store';
 import MessageCard from './message';
-import styled from 'styled-components'
 
 const Cont = styled.div`
     position: fixed;

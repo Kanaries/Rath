@@ -1,57 +1,43 @@
-import React, { useEffect } from "react";
-import { useGlobalStore, StoreWrapper } from './store/index'
-import { observer } from "mobx-react-lite";
-import "./App.css";
-
-import Gallery from "./pages/gallery/index";
-import NoteBook from "./pages/notebook/index";
+import React, { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Spinner, SpinnerSize } from '@fluentui/react';
+import './App.css';
+import { useGlobalStore, StoreWrapper } from './store/index';
+import Gallery from './pages/gallery/index';
+import NoteBook from './pages/notebook/index';
 import VisualInterface from './pages/manualControl';
-import DataSourceBoard from "./pages/dataSource/index";
+import DataSourceBoard from './pages/dataSource/index';
 import DashBoardPage from './pages/dashBoard/index';
 import PatternPage from './pages/semiAutomation/index';
 import DevPage from './pages/dev';
 import SupportPage from './pages/support/index';
 import LTSPage from './pages/megaAutomation';
-import MessageSegment from "./components/messageSegment";
-import AppNav from "./components/appNav";
-import { destroyRathWorker, initRathWorker } from "./service";
-import { PIVOT_KEYS } from "./constants";
-import CrInfo from "./components/crInfo";
-import { Spinner, SpinnerSize } from "office-ui-fabric-react";
-// import VegaVis from "./renderer/vegaVis";
-// import { loadTheme } from "office-ui-fabric-react";
-// import { RATH_DARK_PALETTE, RATH_DARK_THEME } from "./theme";
-
-
-// FIXME: 这两代码好像没什么用
-require('intl/locale-data/jsonp/en.js')
-require('intl/locale-data/jsonp/zh.js')
+import MessageSegment from './components/messageSegment';
+import AppNav from './components/appNav';
+import { destroyRathWorker, initRathWorker } from './service';
+import { PIVOT_KEYS } from './constants';
+import CrInfo from './components/crInfo';
+import ProgressiveDashboard from './pages/progressiveDashboard';
+import Painter from './pages/painter';
+import Collection from './pages/collection';
 
 function App() {
-  const { langStore, commonStore } = useGlobalStore()
+  const { langStore, commonStore } = useGlobalStore();
   const { appKey, navMode } = commonStore;
 
   useEffect(() => {
     initRathWorker(commonStore.computationEngine);
-    // notify({
-    //   title: 'test',
-    //   type: 'info',
-    //   content: 'thisn asiudfhius diuahsi iudh fiuasdf'
-    // })
-    // notify({
-    //   title: 'test',
-    //   type: 'info',
-    //   content: 'thisn asiudfhius diuahsi iudh fiuasdf'
-    // })
     return () => {
       destroyRathWorker();
-    }
-  }, [commonStore])
+    };
+  }, [commonStore]);
 
   if (!langStore.loaded) {
-    return <div style={{ marginTop: '6em' }}>
+    return (
+    <div style={{ marginTop: '6em' }}>
       <Spinner label="Initializing Rath..." size={SpinnerSize.large} />
     </div>
+)
   }
 
   return (
@@ -121,6 +107,9 @@ function App() {
         {appKey === PIVOT_KEYS.support && <SupportPage />}
         {appKey === PIVOT_KEYS.lts && <LTSPage />}
         {appKey === PIVOT_KEYS.pattern && <PatternPage />}
+        {appKey === PIVOT_KEYS.painter && <Painter />}
+        {appKey === PIVOT_KEYS.progressiveDashBoard && <ProgressiveDashboard />}
+        {appKey === PIVOT_KEYS.collection && <Collection />}
         <CrInfo />
         </div>
       </div>
@@ -130,9 +119,7 @@ function App() {
 
 const OBApp = observer(App);
 
-// loadTheme(RATH_DARK_THEME);
-
-export default function WrappedApp() {
+export default function WrappedApp(): JSX.Element {
   return (
     <StoreWrapper>
         <OBApp />

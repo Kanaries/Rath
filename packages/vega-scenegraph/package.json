@@ -1,0 +1,37 @@
+{
+  "name": "vega-scenegraph",
+  "version": "4.10.1-kanaries-patch",
+  "description": "Vega scenegraph and renderers.",
+  "license": "BSD-3-Clause",
+  "author": "Jeffrey Heer (http://idl.cs.washington.edu)",
+  "main": "index.js",
+  "module": "index.js",
+  "unpkg": "build/vega-scenegraph.min.js",
+  "repository": "vega/vega",
+  "scripts": {
+    "schema": "node schema > build/vega-scenegraph-schema.json",
+    "prebuild": "rimraf build",
+    "build": "rollup -c",
+    "postbuild": "yarn schema",
+    "pretest": "yarn build --config-test",
+    "test": "tape -r ./test/__init__ 'test/**/*-test.js' && yarn xmllint",
+    "xmllint": "xmllint --noout ./test/resources/svg/*.svg",
+    "prepublishOnly": "yarn test && yarn build"
+  },
+  "dependencies": {
+    "d3-path": "^3.0.1",
+    "d3-shape": "^3.1.0",
+    "vega-canvas": "^1.2.5",
+    "vega-loader": "^4.4.0",
+    "vega-scale": "^7.2.0",
+    "vega-util": "^1.15.2"
+  },
+  "gitHead": "7eafbbd4d53d0ce9f08e74ff96c90d411b1bb80a",
+  "devDependencies": {
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^14.1.0",
+    "rollup-plugin-bundle-size": "^1.0.3",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}

@@ -1,41 +1,44 @@
-import { Slider } from 'office-ui-fabric-react';
-import React, { useEffect, useMemo } from 'react';
+import { Slider } from '@fluentui/react';
+import React from 'react';
 
 
 interface RangeSelectionProps {
-    values: number[];
+    range: [number, number];
     left: number;
     right: number;
-    onValueChange: (value: number, range: [number, number]) => void;
+    onValueChange: (range: [number, number]) => void;
 }
 const RangeSelection: React.FC<RangeSelectionProps> = props => {
-    const { values, left, right, onValueChange } = props;
-    
-    const fieldRange = useMemo<[number, number]>(() => {
-        if (values.length === 0) return [0, 0]
-        let _min = Infinity;
-        let _max = -Infinity;
-        for (let i = 0; i < values.length; i++) {
-            if (values[i] > _max) _max = values[i];
-            if (values[i] < _min) _min = values[i];
-        }
-        return [_min, _max]
-    }, [values])
+    const { range, left, right, onValueChange } = props;
 
-    useEffect(() => {
-        onValueChange(0 ,fieldRange);
-    }, [fieldRange, onValueChange])
-
-    return <div>
+    return <div className="flex overflow-hidden items-center">
         <Slider
             label='range'
-            min={fieldRange[0]}
-            max={fieldRange[1]}
+            min={range[0]}
+            max={range[1]}
             value={right}
             lowerValue={left}
             ranged
-            onChange={(v, r) => {
-                r && onValueChange(v, r);
+            onChange={(_v, r) => {
+                r && onValueChange(r);
+            }}
+            styles={{
+                root: {
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                },
+                container: {
+                    display: 'flex',
+                },
+                slideBox: {
+                    flex: 1,
+                },
+                valueLabel: {
+                    minWidth: '40px',
+                    width: 'unset',
+                },
             }}
         />
     </div>

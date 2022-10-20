@@ -1,15 +1,9 @@
 import React, { useCallback } from "react";
 import { observer } from 'mobx-react-lite';
-import { PrimaryButton, Stack, Panel, PanelType, ComboBox, Label } from "office-ui-fabric-react";
-import { Aggregator } from "../../global";
+import { PrimaryButton, Stack, Panel, PanelType, ComboBox, Label } from '@fluentui/react';
+import { AGGREGATION_LIST, Aggregator } from "../../global";
 import { useGlobalStore } from "../../store";
 
-// todo: import aggregators list from cube-core
-const aggregationList: Array<{ key: Aggregator; text: string }> = [
-    { key: "sum", text: "Sum" },
-    { key: "count", text: "Count" },
-    { key: "mean", text: "Mean" },
-];
 export interface PreferencePanelConfig {
     aggregator: Aggregator;
     defaultAggregated: boolean;
@@ -51,7 +45,7 @@ const PreferencePanel: React.FC = () => {
                     label="Aggregator"
                     allowFreeform={true}
                     autoComplete="on"
-                    options={aggregationList}
+                    options={AGGREGATION_LIST}
                     onChange={(ev, option) => {
                         if (option) {
                             dashBoardStore.setAggregator(option.key as Aggregator);

@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { observer } from 'mobx-react-lite'
-import { DefaultButton, Modal, PrimaryButton, Stack, TextField } from 'office-ui-fabric-react'
+import { DefaultButton, Modal, PrimaryButton, Stack, TextField } from '@fluentui/react'
 import dayjs from 'dayjs';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
@@ -18,22 +18,22 @@ const Container = styled.div`
 `
 
 const SaveModal: React.FC = props => {
-    const { exploreStore, commonStore } = useGlobalStore();
+    const { megaAutoStore, commonStore } = useGlobalStore();
     const [name, setName] = useState<string>('')
-    const { showSaveModal } = exploreStore;
+    const { showSaveModal } = megaAutoStore;
 
     const saveInIndexDB = useCallback(() => {
-        exploreStore.getStorageContent()
+        megaAutoStore.getStorageContent()
             .then(content => setStorageByIdInLocal(`[Rath_Storage]${dayjs().unix()}`, name === '' ? `[Rath_Storage]${dayjs().unix()}` : name, content))
             .catch(err => {
                 commonStore.showError('error', err);
             })
-        exploreStore.setShowSaveModal(false)
-    }, [exploreStore, commonStore, name])
+        megaAutoStore.setShowSaveModal(false)
+    }, [megaAutoStore, commonStore, name])
 
     const closeModal = useCallback(() => {
-        exploreStore.setShowSaveModal(false)
-    }, [exploreStore])
+        megaAutoStore.setShowSaveModal(false)
+    }, [megaAutoStore])
 
     return <Modal isOpen={showSaveModal} onDismiss={closeModal}>
         <Container>

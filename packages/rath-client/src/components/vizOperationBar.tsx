@@ -1,7 +1,7 @@
-import { Dropdown, IDropdownOption, Position, SpinButton, Stack, Toggle } from 'office-ui-fabric-react';
 import React, { useMemo } from 'react';
-import { IResizeMode } from '../interfaces';
+import { Dropdown, IDropdownOption, Position, SpinButton, Stack, Toggle } from '@fluentui/react';
 import intl from 'react-intl-universal';
+import { IResizeMode } from '../interfaces';
 
 interface VizOperationBarProps {
     gap?: number;

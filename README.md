@@ -4,6 +4,7 @@
 ![](https://img.shields.io/badge/license-AGPL-brightgreen)
 ![](https://img.shields.io/github/stars/kanaries/rath?color=%23ff85c0)
 ![](https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build)
+![](https://img.shields.io/npm/v/@kanaries/graphic-walker/latest?label=%40kanaries%2Fgraphic-walker)
 
 
 <img src="https://kanaries.cn/assets/kanaries-logo.png" alt="logo" width="180px" style="" />
@@ -12,7 +13,9 @@ RATH is an OpenSource automated data exploration tool that can help you automate
 
  It is not only an open source replacement of tableau but a version with more automation power, including auto insights discovery, predictive interaction, and visual recommendation.
 
-Try RATH [here](https://kanaries.net/)
+Try RATH [here](https://rath.kanaries.net)
+
+or visit our official website[kanaries website](https://kanaries.net)
 
 ## Introduction
 
@@ -103,6 +106,15 @@ Details of the test result can be accessed [here](https://www.yuque.com/chenhao-
 
 Rath now runs all the computation tasks on webworker. For some large datasets, Rath will use indexedDB to avoid too much memory cost of browsers. For larger datasets (>100MB), Rath can put some of its computation to computation engine support SQL query(such as clickhouse). If you are interested in a server version, check the older version or contact us.
 
+#### deploy connector service
+RATH requires a database connector to connect common databases. You need to deploy `apps/connector` and then you can connect a number of common databases as datasource.
+
+#### OLAP Service
+Connector service is used as a pure datasource, RATH fetches the data from the bases and loads them into memory.
+
+For larger datasets, or if you can access a high performance OLAP service (such as a clusters of clickhouse). You can start `packages/connectors` which is a OLAP service connector. Not only will it fecthes data from OLAP, but use it as a computation engine as well. RATH
+ will push SQL query to the OLAP services instead of computate those tasks in its own engine.
+
 
 ## Documentation
 + [Tutorial: Using Rath to find deep insight in your data](https://www.yuque.com/docs/share/3f32e044-3530-4ebe-9b01-287bfbdb7ce0?#)
@@ -110,8 +122,6 @@ Rath now runs all the computation tasks on webworker. For some large datasets, R
 
 ## LICENSE (AGPL)
 Rath is an automated data analysis and visualization tool (auto-EDA).
-
-Copyright (C) 2019-now Observed Observer(Hao Chen)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

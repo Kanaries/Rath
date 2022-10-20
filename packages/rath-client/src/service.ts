@@ -1,3 +1,4 @@
+import { InsightSpace, ISemanticType } from 'visual-insights';
 import { Field, OperatorType } from './global';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
@@ -43,11 +44,10 @@ import CleanWorker from './workers/clean.worker?worker';
 // @ts-ignore
 // eslint-disable-next-line
 import FilterWorker from './workers/filterData.worker?worker';
-import { InsightSpace } from 'visual-insights';
+
 import { MessageProps } from './workers/engine/service';
 
 import { CleanMethod, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from './interfaces';
-import { ISemanticType } from 'visual-insights';
 import { IFootmanProps } from './workers/footman/service';
 
 interface SuccessResult<T> {
@@ -55,14 +55,14 @@ interface SuccessResult<T> {
   data: T;
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface FailResult<T> {
+interface FailResult {
   success: false;
   message: string;
 }
 
-type Result<T> = SuccessResult<T> | FailResult<T>;
+type Result<T> = SuccessResult<T> | FailResult;
 
-export function workerService<T, R> (worker: Worker, data: R): Promise<Result<T>> {
+export function workerService<T, R>(worker: Worker, data: R): Promise<Result<T>> {
   return new Promise<Result<T>>((resolve, reject) => {
     worker.postMessage(data);
     worker.onmessage = (e: MessageEvent) => {
@@ -81,9 +81,9 @@ const rathGlobalWorkerRef: { current: Worker | null } = {
   current: null
 }
 
-export function getRathWorker (): Worker {
+export function getRathWorker(): Worker {
   if (rathGlobalWorkerRef.current === null) {
-    console.log('create another')
+    console.warn('create another')
     throw new Error('Worker is not created.')
   } return rathGlobalWorkerRef.current!
 }
@@ -95,7 +95,7 @@ export function destroyRathWorker () {
   }
 }
 
-export function initRathWorker (engineMode: string) {
+export function initRathWorker(engineMode: string) {
   if (rathGlobalWorkerRef.current === null) {
     // if (engineMode === COMPUTATION_ENGINE.clickhouse) {
     //   rathGlobalWorkerRef.current = new RathCHEngine();
@@ -130,7 +130,9 @@ export interface FieldSummary {
   entropy: number;
   maxEntropy: number;
   distribution: Array<{ memberName: string; count: number }>
-  type: ISemanticType
+  type: ISemanticType;
+  max: number;
+  min: number;
 }
 export async function getFieldsSummaryService (dataSource: IRow[], fields: string[] | Field[], useServer?: boolean): Promise<FieldSummary[]> {
   let fieldSummaryList: FieldSummary[] = [];

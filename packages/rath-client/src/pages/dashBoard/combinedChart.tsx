@@ -1,13 +1,13 @@
 import React, { useMemo, useEffect, useState } from "react";
+import { IconButton } from '@fluentui/react';
+import { specification } from "visual-insights";
 import { DashBoard } from "../../service";
 import { Aggregator, Field } from "../../global";
-import { specification } from "visual-insights";
 import { useComposeState } from "../../hooks/index";
-import { IconButton } from "office-ui-fabric-react";
-import IndicatorCard from "./indicatorCard";
 import ReactVega from '../../components/react-vega';
 import { DataField, featureVis, targetVis } from '../../queries/index';
 import { IRow } from "../../interfaces";
+import IndicatorCard from "./indicatorCard";
 
 const IndicatorCardType = "indicator" as const;
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CommandButton } from 'office-ui-fabric-react';
+import { CommandButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { IInsightSpace, Specification } from 'visual-insights';
 import VisErrorBoundary from '../../../visBuilder/visErrorBoundary';

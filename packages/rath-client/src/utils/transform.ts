@@ -1,10 +1,10 @@
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
 import { IRow, IAnalyticType, ISemanticType, Specification } from "visual-insights"
-import { inferAnalyticTypeFromSemanticType } from "."
 import { Field } from "../global"
 import { IFieldMeta, IGeoRole, IVegaSubset } from "../interfaces"
 import { FieldSummary } from "../service"
+import { inferAnalyticTypeFromSemanticType } from "."
 
 dayjs.extend(customParseFormat);
 
@@ -21,7 +21,9 @@ export function fieldMeta2fieldSummary(metas: IFieldMeta[]): FieldSummary[] {
         entropy: f.features.entropy,
         maxEntropy: f.features.maxEntropy,
         type: f.semanticType,
-        distribution: f.distribution
+        distribution: f.distribution,
+        max: typeof f.features.max === 'number' ? f.features.max : 0,
+        min: typeof f.features.min === 'number' ? f.features.min : 0,
     }))
 }
 
@@ -50,7 +52,9 @@ export function fieldSummary2fieldMeta(props: {
             features: {
                 maxEntropy: s.maxEntropy,
                 entropy: s.entropy,
-                unique: s.distribution.length
+                unique: s.distribution.length,
+                max: s.max,
+                min: s.min
             },
             semanticType: sType,
             analyticType: analyticTypes ? analyticTypes[i] : inferAnalyticTypeFromSemanticType(sType),

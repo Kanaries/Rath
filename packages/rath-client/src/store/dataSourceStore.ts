@@ -1,5 +1,4 @@
 import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
-import { fromStream, IStreamListener, toStream } from "mobx-utils";
 import { combineLatest, from, Subscription } from "rxjs";
 import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights";
@@ -12,6 +11,7 @@ import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
 import { findRathSafeColumnIndex } from "../utils";
 import { fieldSummary2fieldMeta } from "../utils/transform";
+import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 
 interface IDataMessage {
     type: 'init_data' | 'others';
@@ -58,9 +58,9 @@ export class DataSourceStore {
     public dataPreviewMode: IDataPreviewMode = IDataPreviewMode.data;
     public showDataImportSelection: boolean = false;
     public showFastSelectionModal: boolean = false;
-    private fieldMetasRef: IStreamListener<IFieldMeta[]>;
-    private cleanedDataRef: IStreamListener<IRow[]>;
-    private filteredDataRef: IStreamListener<IRow[]>;
+    private fieldMetasRef: StreamListener<IFieldMeta[]>;
+    private cleanedDataRef: StreamListener<IRow[]>;
+    private filteredDataRef: StreamListener<IRow[]>;
     public loadingDataProgress: number = 0;
     public dataPrepProgressTag: IDataPrepProgressTag = IDataPrepProgressTag.none;
     private subscriptions: Subscription[] = [];
@@ -68,8 +68,9 @@ export class DataSourceStore {
         makeAutoObservable(this, {
             rawData: observable.ref,
             cookedDataSource: observable.ref,
-            cookedMeasures: observable.ref
-            // subscriptions: false
+            cookedMeasures: observable.ref,
+            // @ts-expect-error private field
+            subscriptions: false,
         });
         const fields$ = from(toStream(() => this.fields, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
@@ -138,7 +139,7 @@ export class DataSourceStore {
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
             if (ev.source && msg.type === 'init_data') {
-                console.log('[Get DataSource From Other Pages]', msg)
+                console.warn('[Get DataSource From Other Pages]', msg)
                 // @ts-ignore
                 ev.source.postMessage(true, ev.origin)
                 this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
@@ -194,7 +195,7 @@ export class DataSourceStore {
     public get hasOriginalDimensionInData () {
         if (this.dimensions.length === 0) return false;
         if (this.dimensions.length === 1) {
-            return !Boolean(this.dimensions.find(f => f === RATH_INDEX_COLUMN_KEY))
+            return !this.dimensions.find(f => f === RATH_INDEX_COLUMN_KEY)
         }
         return true;
     }

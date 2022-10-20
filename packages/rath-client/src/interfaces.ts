@@ -1,6 +1,7 @@
 // define new interfaces here, global.ts is no longer maintained.
 import { AnyMark } from "vega-lite/build/src/mark";
 import { IAnalyticType, IFieldSummary, IInsightSpace, ISemanticType } from "visual-insights";
+import { IFilter } from '@kanaries/loa'
 import { Aggregator } from "./global";
 
 export interface IRow {
@@ -117,17 +118,7 @@ export enum IResizeMode {
     control = 'control'
 }
 
-export type IFilter = {
-    fid: string;
-    disable?: boolean;
-    type: 'set';
-    values: any[]
-} | {
-    fid: string;
-    disable?: boolean;
-    type: 'range';
-    range: [number, number]
-}
+export type { IFilter }
 
 export type CleanMethod = 'dropNull' | 'useMode' | 'simpleClean' | 'none';
 
@@ -161,4 +152,23 @@ export interface IVegaSubset {
         size?: IVegaChannel;
         shape?: IVegaChannel;
     }
+}
+
+export interface IInsightVizView {
+    viewId: string;
+    spec: IVegaSubset;
+    fields: IFieldMeta[];
+    filters: IFilter[];
+    score?: number;
+}
+
+export enum PAINTER_MODE {
+    COLOR = 'color',
+    ERASE = 'clean',
+    CREATE = 'create',
+    MOVE = 'move'
+}
+
+export interface IDataFrame {
+    [key: string]: any[]
 }

@@ -1,14 +1,13 @@
-import { IDataSourceType } from "../../global";
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
+import { IDataSourceType } from "../../global";
 
 export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceType; text: string }> {
     const fileText = intl.get(`dataSource.importData.type.${IDataSourceType.FILE}`);
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
-    // const mysqlText = intl.get(`dataSource.importData.type.${IDataSourceType.MYSQL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
-    const clickHouseText = 'clickhouse';
-    const localText = intl.get('common.history')
+    const localText = intl.get('common.history');
+    const dbText = intl.get(`dataSource.importData.type.${IDataSourceType.DATABASE}`);
 
     const options = useMemo<Array<{ key: IDataSourceType; text: string }>>(() => {
         return [
@@ -33,15 +32,14 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 text: restfulText,
                 iconProps: { iconName: "Cloud" },
             },
-            // {
-            //     key: IDataSourceType.MYSQL,
-            //     text: mysqlText,
-            //     iconProps: { iconName: "LinkedDatabase" },
-            //     disabled: true,
-            // },
             {
-                key: IDataSourceType.CLICKHOUSE,
-                text: clickHouseText,
+                key: IDataSourceType.DATABASE,
+                text: dbText,
+                iconProps: { iconName: "Database" }
+            },
+            {
+                key: IDataSourceType.OLAP,
+                text: 'OLAP',
                 iconProps: { iconName: "TripleColumn" },
                 disabled: false,
             },
@@ -50,9 +48,9 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 text: 'AirTable',
                 iconProps: { iconName: 'Table' },
                 disabled: false
-            }
+            },
         ];
-    }, [fileText, restfulText, demoText, localText]);
+    }, [fileText, restfulText, demoText, localText, dbText]);
     return options;
 };
 
@@ -97,10 +95,6 @@ export const useDemoDataOptions = function (): Array<{key: IDemoDataKey; text: s
             {
                 key: 'BIKE_SHARING_DC',
                 text: 'Bike Sharing in Washington D.C.'
-            },
-            {
-                key: "BIKE_SHARING",
-                text: "Bike Sharing"
             },
             {
                 key: "CAR_SALES",

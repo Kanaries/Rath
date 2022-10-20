@@ -1,52 +1,39 @@
 import React, { useCallback } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { IContextualMenuProps, CommandBar, ICommandBarItemProps } from 'office-ui-fabric-react';
-
+import {  CommandBar, ICommandBarItemProps } from '@fluentui/react';
+import { toJS } from 'mobx';
 import { useGlobalStore } from '../../../store';
 
 interface OperationBarProps {}
 const OperationBar: React.FC<OperationBarProps> = props => {
-    const { exploreStore, commonStore, dataSourceStore } = useGlobalStore();
+    const { megaAutoStore, commonStore, collectionStore } = useGlobalStore();
     const { taskMode } = commonStore;
-    const { dimFields, meaFields } = dataSourceStore;
-
-    const dimensionOptions: IContextualMenuProps = {
-        items: dimFields.map(f => ({
-            key: f.fid,
-            text: f.name,
-            // onClick: () => { exploreStore.addFieldToForkView('dimensions', f.fid) }
-            onClick: () => { exploreStore.addField2MainViewPattern(f.fid) }
-        }))
-    }
-    const measureOptions: IContextualMenuProps = {
-        items: meaFields.map(f => ({
-            key: f.fid,
-            text: f.name,
-            // onClick: () => { exploreStore.addFieldToForkView('measures', f.fid) }
-            onClick: () => { exploreStore.addField2MainViewPattern(f.fid) }
-        }))
-    }
+    const { mainViewSpec, mainViewPattern } = megaAutoStore;
 
     const customizeAnalysis = useCallback(() => {
-        if (exploreStore.mainViewSpec) {
-            commonStore.visualAnalysisInGraphicWalker(exploreStore.mainViewSpec)
+        if (mainViewSpec) {
+            commonStore.visualAnalysisInGraphicWalker(mainViewSpec)
         }
-    }, [exploreStore, commonStore])
+    }, [mainViewSpec, commonStore])
+
+    const analysisInPainter = useCallback(() => {
+        if (mainViewSpec) {
+            commonStore.analysisInPainter(mainViewSpec)
+        }
+    }, [mainViewSpec, commonStore])
+
+    const viewExists = !(mainViewPattern === null || mainViewSpec === null);
+    let starIconName = 'FavoriteStar';
+    if (viewExists) {
+        const viewFields = toJS(mainViewPattern.fields);
+        const viewSpec = toJS(mainViewSpec);
+        if (collectionStore.collectionContains(viewFields, viewSpec)) {
+            starIconName = 'FavoriteStarFill'
+        }
+    }
 
     const commandProps: ICommandBarItemProps[] = [
-        {
-            key: 'dimensions',
-            text: intl.get('common.dimension'),
-            iconProps: { iconName: 'AddTo' },
-            subMenuProps: dimensionOptions,
-        },
-        {
-            key: 'measures',
-            text: intl.get('common.measure'),
-            iconProps: { iconName: 'AddTo' },
-            subMenuProps: measureOptions,
-        },
         {
             key: 'editing',
             text: intl.get('lts.commandBar.editing'),
@@ -54,11 +41,27 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             onClick: customizeAnalysis
         },
         {
+            key: 'painting',
+            text: intl.get('lts.commandBar.painting'),
+            iconProps: { iconName: 'EditCreate' },
+            onClick: analysisInPainter
+        },
+        {
             key: 'associate',
             text: intl.get('lts.commandBar.associate'),
             iconProps: { iconName: 'Lightbulb' },
             onClick: () => {
-                exploreStore.getAssociatedViews(taskMode);
+                megaAutoStore.getAssociatedViews(taskMode);
+            }
+        },
+        {
+            key: 'star',
+            text: intl.get('common.star'),
+            iconProps: { iconName: starIconName },
+            onClick: () => {
+                if (mainViewPattern && mainViewSpec) {
+                    collectionStore.toggleCollectState(toJS(mainViewPattern.fields), toJS(mainViewSpec))
+                }
             }
         },
         {
@@ -66,8 +69,9 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             text: intl.get('lts.commandBar.constraints'),
             iconProps: { iconName: 'MultiSelect' },
             onClick: () => {
-                exploreStore.setShowContraints(true);
-            }
+                megaAutoStore.setShowContraints(true);
+            },
+            disabled: true
         }
     ]
 

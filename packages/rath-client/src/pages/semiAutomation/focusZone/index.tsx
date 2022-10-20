@@ -1,31 +1,46 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import { PrimaryButton } from 'office-ui-fabric-react';
+import { PrimaryButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
+import FieldPlaceholder from '../../../components/fieldPlaceholder';
 import { MainViewContainer } from '../components';
+import FilterCreationPill from '../../../components/filterCreationPill';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
 
-const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' }
+
+
+
+const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
 const FocusZone: React.FC = props => {
-    const { discoveryMainStore, commonStore } = useGlobalStore();
-    const { mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec } = discoveryMainStore;
-
+    const { semiAutoStore, commonStore } = useGlobalStore();
+    const { mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas } = semiAutoStore;
     const explainDiff = useCallback(() => {
         if (mainView && compareView) {
-            discoveryMainStore.explainViewDiff(mainView, compareView);
+            semiAutoStore.explainViewDiff(mainView, compareView);
         }
-    }, [mainView, compareView, discoveryMainStore])
+    }, [mainView, compareView, semiAutoStore])
+
+    const appendFieldHandler = useCallback((fid: string) => {
+        semiAutoStore.addMainViewField(fid);
+    }, [semiAutoStore])
 
     const editChart = useCallback(() => {
         if (mainViewSpec) {
             commonStore.visualAnalysisInGraphicWalker(mainViewSpec);
         }
-    }, [mainViewSpec,  commonStore])
+    }, [mainViewSpec, commonStore]);
+
+    const paintChart = useCallback(() => {
+        if (mainViewSpec) {
+            commonStore.analysisInPainter(mainViewSpec);
+        }
+    }, [mainViewSpec, commonStore]);
+
     return <MainViewContainer>
         {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
         <div className="vis-container">
@@ -44,22 +59,35 @@ const FocusZone: React.FC = props => {
                 type={f.analyticType}
                 text={f.name || f.fid}
                 onRemove={() => {
-                    discoveryMainStore.removeMainViewField(f.fid)
+                    semiAutoStore.removeMainViewField(f.fid)
                 }}
             />)
         }
+        <FieldPlaceholder
+            fields={fieldMetas}
+            onAdd={appendFieldHandler}
+        />
         </div>
         <div className="fields-container">
         {
-            mainView &&  mainView.filters && mainView.filters.map(f => <ViewField
-                key={f.field.fid}
-                type={f.field.analyticType}
-                text={`${f.field.name || f.field.fid} | ${f.values.join(',')}`}
-                onRemove={() => {
-                    discoveryMainStore.removeMainViewFilter(f.field.fid)
-                }}
-            />)
+            mainView &&  mainView.filters && mainView.filters.map(f => {
+                const targetField = fieldMetas.find(m => m.fid === f.fid);
+                if (!targetField) return null;
+                let filterDesc = `${targetField.name || targetField.fid} ∈ `;
+                filterDesc += (f.type === 'range' ? `[${f.range.join(',')}]` : `{${f.values.join(',')}}`)
+                return  <ViewField
+                    key={f.fid}
+                    type={targetField.analyticType}
+                    text={filterDesc}
+                    onRemove={() => {
+                        semiAutoStore.removeMainViewFilter(f.fid)
+                    }}
+                />
+            })
         }
+        <FilterCreationPill fields={fieldMetas} onFilterSubmit={(field, filter) => {
+            semiAutoStore.addMainViewFilter(filter);
+        }} />
         </div>
         <div className="action-buttons">
             <PrimaryButton
@@ -69,6 +97,13 @@ const FocusZone: React.FC = props => {
                 disabled={mainView === null}
                 onClick={editChart}
             />
+            <PrimaryButton
+                    style={BUTTON_STYLE}
+                    text={intl.get('lts.commandBar.painting')}
+                    iconProps={{ iconName: 'EditCreate' }}
+                    disabled={mainView === null}
+                    onClick={paintChart}
+                />
             <PrimaryButton style={BUTTON_STYLE} text={intl.get('discovery.main.explainDiff')}
                 iconProps={{ iconName: 'Compare' }}
                 disabled={mainView === null || compareView === null}

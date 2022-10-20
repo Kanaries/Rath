@@ -1,7 +1,7 @@
 import { Specification } from 'visual-insights'
 import { Aggregator } from '../global';
-import { geomTypeMap, DataField } from './index';
 import { inferFieldSemanticTypeWithDict, inferFieldTypeWithDict } from './utils';
+import { geomTypeMap, DataField } from './index';
 
 export function targetVis(query: Specification, fields: DataField[], aggregator: Aggregator | undefined = 'sum') {
   let fieldTypeDict: {[key: string]: DataField} = {};

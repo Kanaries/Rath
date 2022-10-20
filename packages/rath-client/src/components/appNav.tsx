@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Nav, INavLinkGroup } from 'office-ui-fabric-react';
+import { Nav, INavLinkGroup } from '@fluentui/react';
 import { observer } from 'mobx-react-lite'
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
@@ -19,6 +19,15 @@ const NavContainer = styled.div`
         padding: 1em;
     }
     padding-left: 10px;
+    .text-red{
+        color: #e94726
+    }
+    .text-yellow{
+        color: rgb(237, 167, 15)
+    }
+    .text-gray{
+        color: rgb(103, 109, 108)
+    }
 `
 
 const LogoBar = styled.div`
@@ -40,7 +49,10 @@ const IconMap = {
     [PIVOT_KEYS.noteBook]: 'Game',
     [PIVOT_KEYS.dashBoard]: 'ViewDashboard',
     [PIVOT_KEYS.gallery]: 'ReadingMode',
-    [PIVOT_KEYS.explainer]: 'SiteScan'
+    [PIVOT_KEYS.explainer]: 'SiteScan',
+    [PIVOT_KEYS.painter]: 'Brush',
+    [PIVOT_KEYS.progressiveDashBoard]: 'SizeLegacy',
+    [PIVOT_KEYS.collection]: 'Heart'
 } as {
     [key: string]: string
 }
@@ -62,7 +74,8 @@ const AppNav: React.FC<AppNavProps> = props => {
                 key: p,
                 name: navMode === 'text' ? intl.get(`menu.${p}`) : '',
                 forceAnchor: true,
-                iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
+                iconProps: {iconName: getIcon(p) },
+                // iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
                 onClick (e: any) {
                     e.preventDefault();
                     commonStore.setAppKey(p)
@@ -75,9 +88,11 @@ const AppNav: React.FC<AppNavProps> = props => {
         {
             links: [
                 ...getLinks([PIVOT_KEYS.dataSource,
-                    PIVOT_KEYS.lts,
                     PIVOT_KEYS.editor,
                     PIVOT_KEYS.pattern,
+                    PIVOT_KEYS.lts,
+                    PIVOT_KEYS.painter,
+                    PIVOT_KEYS.collection
                 ]),
                 {
                     url: '#dev-mode',
@@ -87,16 +102,18 @@ const AppNav: React.FC<AppNavProps> = props => {
                     forceAnchor: true,
                     onClick (e: any) { e.preventDefault() },
                     links: getLinks([
-                        PIVOT_KEYS.noteBook,
-                        PIVOT_KEYS.gallery,
-                        PIVOT_KEYS.explainer,
-                        PIVOT_KEYS.dashBoard,
+                        // PIVOT_KEYS.noteBook,
+                        // PIVOT_KEYS.gallery,
+                        // PIVOT_KEYS.explainer,
+                        // PIVOT_KEYS.dashBoard,
+                        PIVOT_KEYS.progressiveDashBoard
                     ])
                 },
                 {
                     url: '/',
                     name: navMode === 'text' ? intl.get('common.home') : '',
-                    iconProps: navMode === 'icon' ? {iconName: 'Home'} : undefined
+                    // iconProps: navMode === 'icon' ? {iconName: 'Home'} : undefined,
+                    iconProps: {iconName: 'Home'}
                 },
                 ...getLinks([PIVOT_KEYS.support]),
                 // ...pivotList.map(item => {
@@ -126,7 +143,7 @@ const AppNav: React.FC<AppNavProps> = props => {
                     alt="rath"
                 />
             </a>
-            {navMode === 'text' && <h1>RATH</h1>}
+            {navMode === 'text' && <h1><span>R</span><span className='text-red'>A</span><span className='text-yellow'>T</span><span>H</span></h1>}
         </LogoBar>
         <Nav
             selectedKey={appKey}

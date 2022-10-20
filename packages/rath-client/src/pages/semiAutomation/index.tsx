@@ -1,25 +1,25 @@
 import React, { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { ActionButton } from 'office-ui-fabric-react';
+import { ActionButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../store';
+import { throttle } from '../../utils';
 import Settings from './settings';
 import FocusZone from './focusZone';
 import PredictZone from './predictZone';
-import { throttle } from '../../utils';
 
 
 const PatternPage: React.FC = () => {
     const focusZoneContainer = useRef<HTMLDivElement>(null);
-    const { discoveryMainStore } = useGlobalStore();
+    const { semiAutoStore } = useGlobalStore();
     const { 
         fieldMetas,
         dataSource
-    } = discoveryMainStore;
+    } = semiAutoStore;
 
     useEffect(() => {
         if (dataSource.length > 1e5) {
-            discoveryMainStore.updateSettings('vizAlgo', 'lite')
+            semiAutoStore.updateSettings('vizAlgo', 'lite')
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fieldMetas, dataSource])
@@ -31,9 +31,9 @@ const PatternPage: React.FC = () => {
         const callback = throttle((e: Event) => {
             if (focusZoneContainer.current && ele) {
                 if (focusZoneContainer.current.offsetTop + focusZoneContainer.current.offsetHeight < ele.scrollTop) {
-                    discoveryMainStore.setShowMiniFloatView(true)
+                    semiAutoStore.setShowMiniFloatView(true)
                 } else {
-                    discoveryMainStore.setShowMiniFloatView(false);
+                    semiAutoStore.setShowMiniFloatView(false);
                 }
             }
         }, 300)
@@ -43,7 +43,7 @@ const PatternPage: React.FC = () => {
                 ele.removeEventListener('scroll', callback);
             }
         }
-    }, [discoveryMainStore])
+    }, [semiAutoStore])
 
     return <div className="content-container">
         <Settings />
@@ -55,7 +55,7 @@ const PatternPage: React.FC = () => {
                 title={intl.get('common.settings')}
                 text={intl.get('common.settings')}
                 onClick={() => {
-                    discoveryMainStore.setShowSettings(true);
+                    semiAutoStore.setShowSettings(true);
                 }}
             />
             <FocusZone />

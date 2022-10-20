@@ -9,6 +9,7 @@ export function timer (task) {
       task(e);
     } finally {
       let cost = new Date().getTime() - startTime;
+      // eslint-disable-next-line no-console
       console.log(`Task [${task.name}] cost ${cost} ms.`)
     }
   }
