@@ -218,7 +218,13 @@
             "title": "下载数据"
         },
         "extend": {
-            "title": "扩展信息"
+            "title": "扩展信息",
+            "autoExtend": "{ count } 个字段可以自动扩展生成新的字段以增强分析和探索。",
+            "findThem": "查看",
+            "auto": "扩展建议",
+            "suggestion": {
+                "dateTimeExpand": "将数据映射到不同时间单位。|时间序列可能在不同的单位尺度下展现出更强的周期性或相关性。"
+            }
         },
         "filter": {
             "title": "筛选规则",

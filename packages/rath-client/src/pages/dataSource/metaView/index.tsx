@@ -1,31 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite'
 import { useGlobalStore } from '../../../store';
-import { IFieldMeta } from '../../../interfaces';
 import MetaList from './metaList';
 import { MessageBar, MessageBarType, PrimaryButton } from '@fluentui/react';
+import intl from 'react-intl-universal';
 
 
 const MetaView: React.FC = props => {
     const { dataSourceStore } = useGlobalStore();
-    const { fieldMetas, mutFields } = dataSourceStore;
+    const { fieldsWithExtSug: fields } = dataSourceStore;
     const updateFieldInfo = useCallback((fieldId: string, fieldPropKey: string, value: any) => {
         dataSourceStore.updateFieldInfo(fieldId, fieldPropKey, value);
     }, [dataSourceStore])
 
-    const expandMetas: (IFieldMeta & { canExpandAsTime: boolean })[] = mutFields.map(f => {
-        const meta = fieldMetas.find(m => m.fid === f.fid);
-        const dist = meta ? meta.distribution : []
-        return {
-            ...f,
-            disable: f.disable,
-            distribution: dist,
-            features: meta ? meta.features: { entropy: 0, maxEntropy: 0, unique: dist.length },
-            canExpandAsTime: dataSourceStore.canExpandAsDateTime(f.fid),
-        }
-    })
-    const fieldsCanExpand = expandMetas.map((f, i) => ({ ...f, index: i })).filter(
-        f => f.canExpandAsTime,
+    const fieldsCanExpand = fields.map((f, i) => ({ ...f, index: i })).filter(
+        f => f.extSuggestions.length > 0,
     );
 
     const [focusIdx, setFocusIdx] = useState(-1);
@@ -82,8 +71,7 @@ const MetaView: React.FC = props => {
                                 }}
                                 onClick={focusNext}
                             >
-                                {/* TODO: i18n */}
-                                {'查找'}
+                                {intl.get('dataSource.extend.findThem')}
                             </PrimaryButton>
                         </div>
                     }
@@ -97,14 +85,13 @@ const MetaView: React.FC = props => {
                         },
                     }}
                 >
-                    {/* TODO: i18n */}
                     <span>
-                        {`${fieldsCanExpand.length} 个字段可以扩展生成新的字段。`}
+                        {intl.get('dataSource.extend.autoExtend', { count: fieldsCanExpand.length })}
                     </span>
                 </MessageBar>
             </div>
         )}
-        <MetaList metas={expandMetas} focusIdx={fieldsCanExpand[focusIdx]?.index ?? -1} onChange={updateFieldInfo} />
+        <MetaList metas={fields} focusIdx={fieldsCanExpand[focusIdx]?.index ?? -1} onChange={updateFieldInfo} />
     </div>
 }
 

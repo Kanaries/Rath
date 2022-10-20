@@ -3,6 +3,7 @@ import { AnyMark } from "vega-lite/build/src/mark";
 import { IAnalyticType, IFieldSummary, IInsightSpace, ISemanticType } from "visual-insights";
 import { IFilter } from '@kanaries/loa'
 import { Aggregator } from "./global";
+import type { InfoType } from "./dev/workers/engine/dateTimeExpand";
 
 export interface IRow {
     [key: string]: any
@@ -24,6 +25,23 @@ interface IFieldExtInfoBase {
     extInfo: any;
 }
 
+interface IFieldExtInfoBaseDateTime extends IFieldExtInfoBase {
+    extFrom: [string];  // from only one field
+    extOpt: 'dateTimeExpand';
+    extInfo: InfoType;
+}
+
+type FieldExtInfoBase = (
+    | IFieldExtInfoBaseDateTime
+);
+
+export type FieldExtSuggestion = {
+    /** score 越高，推荐顺序越靠前 */
+    score: number;
+    type: string;
+    apply: (fieldId: string) => Promise<void>;
+};
+
 interface IFieldBase {
     fid: string;
     name?: string;
@@ -31,7 +49,7 @@ interface IFieldBase {
     semanticType: ISemanticType;
     geoRole: IGeoRole;
     /** detailed information of field extension operations. defined only if this field is extended */
-    extInfo?: IFieldExtInfoBase;
+    extInfo?: FieldExtInfoBase;
 }
 export interface IRawField extends IFieldBase {
     disable?: boolean;
@@ -64,6 +82,10 @@ export interface IFieldMeta extends IFieldBase {
     };
     distribution: Array<{ memberName: string; count: number }>;
     disable?: boolean;
+}
+
+export interface IFieldMetaWithExtSuggestions extends IFieldMeta {
+    extSuggestions: FieldExtSuggestion[];
 }
 
 export enum IComputeMode {

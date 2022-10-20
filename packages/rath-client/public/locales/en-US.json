@@ -218,7 +218,13 @@
             "title": "Download Data"
         },
         "extend": {
-            "title": "Extend Information"
+            "title": "Extend Information",
+            "autoExtend": "More fields can be generated from { count } existing fields to enhance analyze and exploration.",
+            "findThem": "Check",
+            "auto": "Extend Suggestions",
+            "suggestion": {
+                "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months."
+            }
         },
         "filter": {
             "title": "Filter Config",

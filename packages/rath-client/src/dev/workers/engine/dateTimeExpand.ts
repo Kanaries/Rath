@@ -246,7 +246,7 @@ interface DateTimeInfoArray {
 const UnknownDateTimeInfo: DateTimeInfo = {}
 
 type InfoArrayType = keyof DateTimeInfoArray
-type InfoType = keyof DateTimeInfo
+export type InfoType = keyof DateTimeInfo
 function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
     // TODO: Polyfills: 中文格式等
     // TODO: assume the same dateTime format or support different format in one column

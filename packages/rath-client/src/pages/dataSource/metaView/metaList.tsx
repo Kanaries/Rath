@@ -3,10 +3,10 @@ import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
 import { IAnalyticType, ISemanticType } from 'visual-insights';
-import { IFieldMeta, IRawField, IRow } from '../../../interfaces';
+import { FieldExtSuggestion, IFieldMetaWithExtSuggestions, IRawField, IRow } from '../../../interfaces';
 import FieldFilter from '../../../components/fieldFilter/index';
 import DistributionChart from './distChart';
-import FieldExpand from '../../../components/fieldExpand';
+import FieldExtSuggestions from '../../../components/fieldExtend/suggestions';
 
 const MetaContainer = styled.div`
     overflow: auto;
@@ -133,7 +133,7 @@ interface MetaItemProps {
     colName: string;
     semanticType: ISemanticType;
     analyticType: IAnalyticType;
-    canExpandAsTime: boolean;
+    extSuggestions: FieldExtSuggestion[];
     dist: IRow[];
     disable?: boolean;
     onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
@@ -151,7 +151,7 @@ const ANALYTIC_TYPE_CHOICES: IChoiceGroupOption[] = [
     { key: 'measure', text: 'measure' },
 ]
 const MetaItem: React.FC<MetaItemProps> = props => {
-    const { colKey, colName, semanticType, analyticType, dist, disable, onChange, focus, canExpandAsTime } = props;
+    const { colKey, colName, semanticType, analyticType, dist, disable, onChange, focus, extSuggestions } = props;
     const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map(ch => ({
         ...ch,
         text: intl.get(`common.${ch.key}`)
@@ -222,11 +222,11 @@ const MetaItem: React.FC<MetaItemProps> = props => {
             </div>
             <div className="operation-column">
                 <FieldFilter fid={colKey} />
-                {canExpandAsTime && (
+                {extSuggestions.length > 0 && (
                     <LiveContainer ref={expandBtnRef}>
-                        <FieldExpand fid={colKey} />
+                        <FieldExtSuggestions fid={colKey} suggestions={extSuggestions} />
                         <div className="badge">
-                            !
+                            {extSuggestions.length}
                         </div>
                     </LiveContainer>
                 )}
@@ -236,7 +236,7 @@ const MetaItem: React.FC<MetaItemProps> = props => {
 }
 
 interface MetaListProps {
-    metas: (IFieldMeta & { canExpandAsTime: boolean })[];
+    metas: IFieldMetaWithExtSuggestions[];
     focusIdx: number;
     onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
 }
@@ -253,7 +253,7 @@ const MetaList: React.FC<MetaListProps> = props => {
                 analyticType={m.analyticType}
                 dist={m.distribution}
                 disable={m.disable}
-                canExpandAsTime={m.canExpandAsTime}
+                extSuggestions={m.extSuggestions}
                 onChange={onChange}
             />)
         }

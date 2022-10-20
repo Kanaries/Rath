@@ -1,10 +1,10 @@
-import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
+import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { combineLatest, from, Subscription } from "rxjs";
 import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag } from "../interfaces";
+import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag, IFieldMetaWithExtSuggestions, FieldExtSuggestion } from "../interfaces";
 import { getQuantiles } from "../pages/dataSource/utils";
 import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
@@ -30,6 +30,7 @@ interface IDataSourceStoreStorage {
     cleanMethod: CleanMethod;
     fieldMetas: IFieldMeta[];
 }
+
 export class DataSourceStore {
     /**
      * raw data is fetched and parsed data or uploaded data without any other changes.
@@ -42,6 +43,7 @@ export class DataSourceStore {
      * This is defined by user's purpose or domain knowledge.
      */
     public mutFields: IRawField[] = [];
+    public fieldsWithExtSug: IFieldMetaWithExtSuggestions[] = [];
     public filters: IFilter[] = [];
     
     // public fields: BIField[] = [];
@@ -147,6 +149,25 @@ export class DataSourceStore {
                 this.dataPrepProgressTag = IDataPrepProgressTag.none;
             })
         }))
+        const suggestExt = (mutFields: IRawField[] | undefined, fieldMetas: IFieldMeta[] | undefined) => {
+            this.getExtSuggestions().then(res => {
+                if (mutFields && mutFields !== this.mutFields) {
+                    return;
+                } else if (fieldMetas && fieldMetas !== this.fieldMetas) {
+                    return;
+                }
+
+                runInAction(() => {
+                    this.fieldsWithExtSug = res;
+                });
+            });
+        };
+        reaction(() => this.mutFields, mutFields => {
+            suggestExt(mutFields, undefined);
+        })
+        reaction(() => this.fieldMetas, fieldMetas => {
+            suggestExt(undefined, fieldMetas);
+        })
     }
 
     public get fields () {
@@ -463,6 +484,49 @@ export class DataSourceStore {
         }
     }
 
+    protected async getExtSuggestions(): Promise<IFieldMetaWithExtSuggestions[]> {
+        return this.mutFields.map(mf => {
+            const meta = this.fieldMetas.find(m => m.fid === mf.fid);
+            const dist = meta ? meta.distribution : [];
+
+            const f: IFieldMeta = {
+                ...mf,
+                disable: mf.disable,
+                distribution: dist,
+                features: meta ? meta.features: { entropy: 0, maxEntropy: 0, unique: dist.length },
+            };
+
+            if (f.extInfo) {
+                // 属于扩展得到的字段，不进行推荐
+                return {
+                    ...f,
+                    extSuggestions: [],
+                };
+            }
+
+            const suggestions: FieldExtSuggestion[] = [];
+
+            if (f.semanticType === 'temporal') {
+                const alreadyExpandedAsDateTime = Boolean(this.mutFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'dateTimeExpand'
+                ));
+
+                if (!alreadyExpandedAsDateTime) {
+                    suggestions.push({
+                        score: 10,
+                        type: 'dateTimeExpand',
+                        apply: () => this.expandSingleDateTime(f.fid),
+                    });
+                }
+            }
+
+            return {
+                ...f,
+                extSuggestions: suggestions.sort((a, b) => b.score - a.score),
+            };
+        });
+    }
+
     public canExpandAsDateTime(fid: string) {
         const which = this.mutFields.find(f => f.fid === fid);
         const expanded = Boolean(this.mutFields.find(
@@ -492,7 +556,16 @@ export class DataSourceStore {
 
             runInAction(() => {
                 this.rawData = res.dataSource;
-                this.mutFields = [...this.mutFields, ...enteringFields];
+                this.mutFields = [
+                    ...this.mutFields,
+                    ...enteringFields.filter(f => {
+                        if (f.extInfo?.extOpt !== 'dateTimeExpand' || f.extInfo.extInfo === 'utime') {
+                            return false;
+                        }
+                        // TODO: 非空校验？
+                        return true;
+                    })
+                ];
             })
         } catch (error) {
             console.error(error)
