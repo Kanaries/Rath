@@ -13,12 +13,16 @@ export interface IRow {
 
 export type IGeoRole = 'longitude' | 'latitude' | 'none';
 
+export type FieldExtOptType = (
+    | 'dateTimeExpand'
+);
+
 /** Detailed information of a extended field.  */
 interface IFieldExtInfoBase {
-    /** Field id of fields that this field infered from.  */
+    /** Field id of fields that this field inferred from.  */
     extFrom: string[];
     /** The identifier of the data-extension operation. */
-    extOpt: string;
+    extOpt: FieldExtOptType;
     /** Additional information of the specified extension operation */
     extInfo: any;
 }

@@ -1,16 +1,17 @@
 import { ChoiceGroup, IChoiceGroupOption, Separator, Toggle } from '@fluentui/react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { IFieldMeta, IRawField, IRow } from '../../../interfaces';
 import FieldFilter from '../../../components/fieldFilter/index';
 import DistributionChart from './distChart';
+import FieldExpand from '../../../components/fieldExpand';
 
 const MetaContainer = styled.div`
     overflow: auto;
 `
-const MetaItemContainer = styled.div`
+const MetaItemContainer = styled.div<{ focus: boolean }>`
     overflow: hidden;
     position: relative;
     color: #333;
@@ -55,6 +56,23 @@ const MetaItemContainer = styled.div`
     .dist-graphics{
         flex-grow: 0;
     }
+
+    animation: ${({ focus }) => focus ? 'outline 2s linear' : ''};
+
+    @keyframes outline {
+        from {
+            background-color: transparent;
+        }
+        5% {
+            background-color: rgb(255, 244, 206);
+        }
+        20% {
+            background-color: rgb(255, 244, 206);
+        }
+        to {
+            background-color: transparent;
+        }
+    }
 `
 
 const IndicatorCard = styled.div`
@@ -73,11 +91,49 @@ const IndicatorCard = styled.div`
     }
 `
 
+const LiveContainer = styled.div({
+    position: 'relative',
+
+    '> .badge': {
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        backgroundColor: 'rgb(223, 246, 221)',
+        color: 'rgb(16, 124, 16)',
+        width: '16px',
+        height: '16px',
+        fontSize: '12px',
+        borderRadius: '50%',
+        pointerEvents: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transform: 'translate(33%, -33%)',
+    },
+
+    '@keyframes live-polite': {
+        from: {
+            backgroundColor: 'transparent',
+        },
+        '48%': {
+            backgroundColor: '#1890ff40',
+        },
+        '52%': {
+            backgroundColor: '#1890ff40',
+        },
+        to: {
+            backgroundColor: 'transparent',
+        },
+    },
+});
+
 interface MetaItemProps {
+    focus: boolean;
     colKey: string;
     colName: string;
     semanticType: ISemanticType;
     analyticType: IAnalyticType;
+    canExpandAsTime: boolean;
     dist: IRow[];
     disable?: boolean;
     onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
@@ -95,7 +151,7 @@ const ANALYTIC_TYPE_CHOICES: IChoiceGroupOption[] = [
     { key: 'measure', text: 'measure' },
 ]
 const MetaItem: React.FC<MetaItemProps> = props => {
-    const { colKey, colName, semanticType, analyticType, dist, disable, onChange } = props;
+    const { colKey, colName, semanticType, analyticType, dist, disable, onChange, focus, canExpandAsTime } = props;
     const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map(ch => ({
         ...ch,
         text: intl.get(`common.${ch.key}`)
@@ -105,8 +161,19 @@ const MetaItem: React.FC<MetaItemProps> = props => {
         ...ch,
         text: intl.get(`common.semanticType.${ch.key}`)
     }))
+
+    const expandBtnRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (focus) {
+            expandBtnRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+            });
+        }
+    }, [focus]);
     
-    return <MetaItemContainer className="ms-depth-4">
+    return <MetaItemContainer className="ms-depth-4" focus={focus}>
         <div className={`${analyticType} bottom-bar`}></div>
         <h1>{colName}</h1>
         <div className="fid">Column ID: {colKey}</div>
@@ -155,20 +222,30 @@ const MetaItem: React.FC<MetaItemProps> = props => {
             </div>
             <div className="operation-column">
                 <FieldFilter fid={colKey} />
+                {canExpandAsTime && (
+                    <LiveContainer ref={expandBtnRef}>
+                        <FieldExpand fid={colKey} />
+                        <div className="badge">
+                            !
+                        </div>
+                    </LiveContainer>
+                )}
             </div>
         </div>
     </MetaItemContainer>
 }
 
 interface MetaListProps {
-    metas: IFieldMeta[];
+    metas: (IFieldMeta & { canExpandAsTime: boolean })[];
+    focusIdx: number;
     onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
 }
 const MetaList: React.FC<MetaListProps> = props => {
-    const { metas, onChange } = props;
+    const { metas, onChange, focusIdx } = props;
     return <MetaContainer>
         {
-            metas.map(m => <MetaItem
+            metas.map((m, i) => <MetaItem
+                focus={i === focusIdx}
                 key={m.fid}
                 colKey={m.fid}
                 colName={`${m.name}`}
@@ -176,6 +253,7 @@ const MetaList: React.FC<MetaListProps> = props => {
                 analyticType={m.analyticType}
                 dist={m.distribution}
                 disable={m.disable}
+                canExpandAsTime={m.canExpandAsTime}
                 onChange={onChange}
             />)
         }
