@@ -27,15 +27,15 @@ const EmptyError: React.FC = () => {
             <div>
                 <PrimaryButton
                     style={{ marginRight: '1em' }}
-                    text={intl.get('menu.lts')}
+                    text={intl.get('menu.megaAuto')}
                     onClick={() => {
-                        commonStore.setAppKey(PIVOT_KEYS.lts);
+                        commonStore.setAppKey(PIVOT_KEYS.megaAuto);
                     }}
                 />
                 <PrimaryButton
-                    text={intl.get('menu.pattern')}
+                    text={intl.get('menu.semiAuto')}
                     onClick={() => {
-                        commonStore.setAppKey(PIVOT_KEYS.pattern);
+                        commonStore.setAppKey(PIVOT_KEYS.semiAuto);
                     }}
                 />
             </div>

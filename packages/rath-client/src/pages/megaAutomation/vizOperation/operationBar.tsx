@@ -36,19 +36,19 @@ const OperationBar: React.FC<OperationBarProps> = props => {
     const commandProps: ICommandBarItemProps[] = [
         {
             key: 'editing',
-            text: intl.get('lts.commandBar.editing'),
+            text: intl.get('megaAuto.commandBar.editing'),
             iconProps: { iconName: 'BarChartVerticalEdit' },
             onClick: customizeAnalysis
         },
         {
             key: 'painting',
-            text: intl.get('lts.commandBar.painting'),
+            text: intl.get('megaAuto.commandBar.painting'),
             iconProps: { iconName: 'EditCreate' },
             onClick: analysisInPainter
         },
         {
             key: 'associate',
-            text: intl.get('lts.commandBar.associate'),
+            text: intl.get('megaAuto.commandBar.associate'),
             iconProps: { iconName: 'Lightbulb' },
             onClick: () => {
                 megaAutoStore.getAssociatedViews(taskMode);
@@ -66,7 +66,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
         },
         {
             key: 'constraints',
-            text: intl.get('lts.commandBar.constraints'),
+            text: intl.get('megaAuto.commandBar.constraints'),
             iconProps: { iconName: 'MultiSelect' },
             onClick: () => {
                 megaAutoStore.setShowContraints(true);

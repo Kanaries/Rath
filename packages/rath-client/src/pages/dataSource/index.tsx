@@ -67,16 +67,16 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     ltsPipeLineStore.startTask(taskMode).then(() => {
       megaAutoStore.emitViewChangeTransaction(0);
     })
-    commonStore.setAppKey(PIVOT_KEYS.lts);
+    commonStore.setAppKey(PIVOT_KEYS.megaAuto);
   }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode])
 
   const onCheckResults = useCallback(() => {
     megaAutoStore.emitViewChangeTransaction(0)
-    commonStore.setAppKey(PIVOT_KEYS.lts)
+    commonStore.setAppKey(PIVOT_KEYS.megaAuto)
   }, [megaAutoStore, commonStore])
 
   const onBuildKnowledge = useCallback(() => {
-    commonStore.setAppKey(PIVOT_KEYS.pattern)
+    commonStore.setAppKey(PIVOT_KEYS.semiAuto)
   }, [commonStore])
 
   const onSelectPannelClose = useCallback(() => {

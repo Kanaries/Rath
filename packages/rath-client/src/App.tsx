@@ -10,7 +10,7 @@ import SupportPage from './pages/support/index';
 import LTSPage from './pages/megaAutomation';
 import MessageSegment from './components/messageSegment';
 import AppNav from './components/appNav';
-import { destroyRathWorker, initRathWorker } from './services';
+import { destroyRathWorker, initRathWorker } from './services/index';
 import { PIVOT_KEYS } from './constants';
 import CrInfo from './components/crInfo';
 import ProgressiveDashboard from './pages/progressiveDashboard';
@@ -51,10 +51,10 @@ function App() {
         )}
         {appKey === PIVOT_KEYS.editor && <VisualInterface />}
         {appKey === PIVOT_KEYS.support && <SupportPage />}
-        {appKey === PIVOT_KEYS.lts && <LTSPage />}
-        {appKey === PIVOT_KEYS.pattern && <PatternPage />}
+        {appKey === PIVOT_KEYS.megaAuto && <LTSPage />}
+        {appKey === PIVOT_KEYS.semiAuto && <PatternPage />}
         {appKey === PIVOT_KEYS.painter && <Painter />}
-        {appKey === PIVOT_KEYS.progressiveDashBoard && <ProgressiveDashboard />}
+        {appKey === PIVOT_KEYS.dashBoardDesigner && <ProgressiveDashboard />}
         {appKey === PIVOT_KEYS.collection && <Collection />}
         <CrInfo />
         </div>

@@ -26,18 +26,18 @@ const PreferencePanel: React.FC = () => {
     const { nlg } = visualConfig;
 
     const orderOptions: IDropdownOption[] = Object.values(EXPLORE_VIEW_ORDER).map((or) => ({
-        text: intl.get(`lts.orderBy.${or}`),
+        text: intl.get(`megaAuto.orderBy.${or}`),
         key: or,
     }));
 
     const resizeModeList = useMemo<IDropdownOption[]>(() => {
         return [
             {
-                text: intl.get('lts.operation.resizeMode.none'),
+                text: intl.get('megaAuto.operation.resizeMode.none'),
                 key: IResizeMode.auto,
             },
             {
-                text: intl.get('lts.operation.resizeMode.resizable'),
+                text: intl.get('megaAuto.operation.resizeMode.resizable'),
                 key: IResizeMode.control,
             },
         ];
@@ -55,8 +55,8 @@ const PreferencePanel: React.FC = () => {
 
     const vizModeOptions  = useMemo<IChoiceGroupOption[]>(() => {
         return [
-            { text: intl.get('discovery.main.vizsys.lite'), key: 'lite' },
-            { text: intl.get('discovery.main.vizsys.strict'), key: 'strict' }
+            { text: intl.get('semiAuto.main.vizsys.lite'), key: 'lite' },
+            { text: intl.get('semiAuto.main.vizsys.strict'), key: 'strict' }
         ]
     }, [])
 
@@ -71,7 +71,7 @@ const PreferencePanel: React.FC = () => {
         >
             <Stack.Item>
             <ChoiceGroup
-                label={intl.get('discovery.main.vizsys.title')}
+                label={intl.get('semiAuto.main.vizsys.title')}
                 onChange={(e, op) => {
                     op && megaAutoStore.setVizMode(op.key as 'lite' | 'strict')
                 }}
@@ -84,7 +84,7 @@ const PreferencePanel: React.FC = () => {
                     style={{ minWidth: '120px' }}
                     selectedKey={megaAutoStore.orderBy}
                     options={orderOptions}
-                    label={intl.get('lts.orderBy.title')}
+                    label={intl.get('megaAuto.orderBy.title')}
                     onChange={(e, item) => {
                         item && megaAutoStore.setExploreOrder(item.key as string);
                     }}
@@ -93,7 +93,7 @@ const PreferencePanel: React.FC = () => {
             <Stack tokens={{ childrenGap: 10 }}>
                 <Stack.Item>
                     <Toggle
-                        label={intl.get('lts.operation.debug')}
+                        label={intl.get('megaAuto.operation.debug')}
                         checked={visualConfig.debug}
                         onChange={(e, checked) => {
                             megaAutoStore.setVisualConig((cnf) => {
@@ -104,7 +104,7 @@ const PreferencePanel: React.FC = () => {
                 </Stack.Item>
                 <Stack.Item>
                     <Toggle
-                        label={intl.get('lts.operation.zoom')}
+                        label={intl.get('megaAuto.operation.zoom')}
                         checked={visualConfig.zoom}
                         onChange={(e, checked) => {
                             megaAutoStore.setVisualConig((cnf) => {
@@ -142,7 +142,7 @@ const PreferencePanel: React.FC = () => {
                 <Stack.Item>
                     <Dropdown
                         selectedKey={visualConfig.resize}
-                        label={intl.get('lts.operation.resize')}
+                        label={intl.get('megaAuto.operation.resize')}
                         options={resizeModeList}
                         onChange={(e, op) => {
                             op &&

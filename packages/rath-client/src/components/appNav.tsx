@@ -41,13 +41,13 @@ const LogoBar = styled.div`
 `
 
 const IconMap = {
-    [PIVOT_KEYS.lts]: 'Robot',
-    [PIVOT_KEYS.pattern]: 'Manufacturing',
+    [PIVOT_KEYS.megaAuto]: 'Robot',
+    [PIVOT_KEYS.semiAuto]: 'Manufacturing',
     [PIVOT_KEYS.editor]: 'LineChart',
     [PIVOT_KEYS.support]: 'Telemarketer',
     [PIVOT_KEYS.dataSource]: 'DataManagementSettings',
     [PIVOT_KEYS.painter]: 'Brush',
-    [PIVOT_KEYS.progressiveDashBoard]: 'SizeLegacy',
+    [PIVOT_KEYS.dashBoardDesigner]: 'SizeLegacy',
     [PIVOT_KEYS.collection]: 'Heart'
 } as {
     [key: string]: string
@@ -85,8 +85,8 @@ const AppNav: React.FC<AppNavProps> = props => {
             links: [
                 ...getLinks([PIVOT_KEYS.dataSource,
                     PIVOT_KEYS.editor,
-                    PIVOT_KEYS.pattern,
-                    PIVOT_KEYS.lts,
+                    PIVOT_KEYS.semiAuto,
+                    PIVOT_KEYS.megaAuto,
                     PIVOT_KEYS.painter,
                     PIVOT_KEYS.collection
                 ]),
@@ -102,7 +102,7 @@ const AppNav: React.FC<AppNavProps> = props => {
                         // PIVOT_KEYS.gallery,
                         // PIVOT_KEYS.explainer,
                         // PIVOT_KEYS.dashBoard,
-                        PIVOT_KEYS.progressiveDashBoard
+                        PIVOT_KEYS.dashBoardDesigner
                     ])
                 },
                 {

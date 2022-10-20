@@ -92,19 +92,19 @@ const FocusZone: React.FC = props => {
         <div className="action-buttons">
             <PrimaryButton
                 style={BUTTON_STYLE}
-                text={intl.get('lts.commandBar.editing')}
+                text={intl.get('megaAuto.commandBar.editing')}
                 iconProps={{ iconName: 'BarChartVerticalEdit'}}
                 disabled={mainView === null}
                 onClick={editChart}
             />
             <PrimaryButton
                     style={BUTTON_STYLE}
-                    text={intl.get('lts.commandBar.painting')}
+                    text={intl.get('megaAuto.commandBar.painting')}
                     iconProps={{ iconName: 'EditCreate' }}
                     disabled={mainView === null}
                     onClick={paintChart}
                 />
-            <PrimaryButton style={BUTTON_STYLE} text={intl.get('discovery.main.explainDiff')}
+            <PrimaryButton style={BUTTON_STYLE} text={intl.get('semiAuto.main.explainDiff')}
                 iconProps={{ iconName: 'Compare' }}
                 disabled={mainView === null || compareView === null}
                 onClick={explainDiff}

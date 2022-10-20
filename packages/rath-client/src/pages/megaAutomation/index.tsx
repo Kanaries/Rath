@@ -87,7 +87,7 @@ const LTSPage: React.FC = () => {
         ltsPipeLineStore.startTask(taskMode).then(() => {
             megaAutoStore.emitViewChangeTransaction(0);
         });
-        commonStore.setAppKey(PIVOT_KEYS.lts);
+        commonStore.setAppKey(PIVOT_KEYS.megaAuto);
     }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode]);
     return (
         <div className="content-container">
@@ -114,13 +114,13 @@ const LTSPage: React.FC = () => {
                 <PrimaryButton
                     style={{ float: 'right', marginRight: '1em' }}
                     iconProps={{ iconName: 'Rerun' }}
-                    text={intl.get('lts.reRun')}
-                    ariaLabel={intl.get('lts.reRun')}
+                    text={intl.get('megaAuto.reRun')}
+                    ariaLabel={intl.get('megaAuto.reRun')}
                     onClick={startTask}
                 />
                 <ComputationProgress />
-                <MainHeader>{intl.get('lts.title')}</MainHeader>
-                <p className="state-description">{intl.get('lts.hintMain')}</p>
+                <MainHeader>{intl.get('megaAuto.title')}</MainHeader>
+                <p className="state-description">{intl.get('megaAuto.hintMain')}</p>
                 <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
                 <VizPagination />
                 <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />

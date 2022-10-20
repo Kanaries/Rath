@@ -6,7 +6,7 @@ import { STORAGE_FILE_SUFFIX } from "../../../constants";
 import { FileLoader } from "../../../utils";
 import { IMuteFieldBase, IRow } from "../../../interfaces";
 import { IRathStorage, RathStorageParse } from "../../../utils/storage";
-import { workerService } from "../../../services";
+import { workerService } from "../../../services/index";
 
 
 /* eslint import/no-webpack-loader-syntax:0 */
