@@ -9,6 +9,7 @@
     "singleQuote": true
   },
   "dependencies": {
+    "@babel/parser": "^7.19.6",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
     "@fluentui/font-icons-mdl2": "^8.4.13",
