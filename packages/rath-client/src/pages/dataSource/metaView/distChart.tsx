@@ -66,7 +66,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         }
         adjustData = adjustData.slice(0, 100)
         return adjustData
-    }, [dataSource, x, y, semanticType])
+    }, [dataSource, x, y, semanticType, maxItemInView])
 
     const sortBy = useMemo(() => {
         let sortBy: string | undefined | any = undefined;
