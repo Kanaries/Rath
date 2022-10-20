@@ -63,7 +63,8 @@
     "build2": "react-app-rewired --max_old_space_size=4096 build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
-    "analyze": "source-map-explorer 'build/static/js/*.js'"
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "count": "cloc --exclude-dir=$(tr '\n' ',' < ../../.clocignore) ."
   },
   "resolutions": {
     "vega-scenegraph": "4.10.1-kanaries-patch"
