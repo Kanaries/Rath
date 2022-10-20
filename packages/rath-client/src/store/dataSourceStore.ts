@@ -439,6 +439,7 @@ export class DataSourceStore {
      * Expand all temporal fields to (year, month, date, weekday, hour, minute, second, millisecond).
      * @depends this.fields, this.cleanedDate
      * @effects this.rawData, this.mutFields
+     * @deprecated for a single field, use `dataSourceStore.expandSingleDateTime()` instead.
      */
     public async expandDateTime() {
         try {
