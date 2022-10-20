@@ -461,4 +461,45 @@ export class DataSourceStore {
             })
         }
     }
+
+    public canExpandAsDateTime(fid: string) {
+        const which = this.mutFields.find(f => f.fid === fid);
+        const expanded = Boolean(this.mutFields.find(
+            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
+        ));
+
+        if (expanded || !which) {
+            return false;
+        }
+
+        return which.semanticType === 'temporal' && !which.extInfo;
+    }
+
+    public async expandSingleDateTime(fid: string) {
+        if (!this.canExpandAsDateTime(fid)) {
+            return;
+        }
+
+        try {
+            let { mutFields, cleanedData } = this;
+            mutFields = mutFields.filter(f => f.fid === fid).map(f => toJS(f))
+            const res = await expandDateTimeService({
+                dataSource: cleanedData,
+                fields: mutFields
+            })
+            const [_origin, ...enteringFields] = res.fields;
+
+            runInAction(() => {
+                this.rawData = res.dataSource;
+                this.mutFields = [...this.mutFields, ...enteringFields];
+            })
+        } catch (error) {
+            console.error(error)
+            notify({
+                title: 'Expand DateTime API Error',
+                type: 'error',
+                content: `[extension]${error}`
+            })
+        }
+    }
 }
