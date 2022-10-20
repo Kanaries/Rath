@@ -22,17 +22,13 @@
     },
     "menu": {
         "dataSource": "DataSource",
-        "noteBook": "Interactive Pipeline Visualization",
-        "explore": "Explore(alpha version)",
-        "dashBoard": "DashBoard",
-        "explainer": "Explainer",
         "editor": "Manual Exploration⭐️",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
-        "lts": "Mega-auto Exploration",
-        "pattern": "Semi-auto Exploration⭐️",
+        "megaAuto": "Mega-auto Exploration",
+        "semiAuto": "Semi-auto Exploration⭐️",
         "devCollection": "Insiders(α)",
-        "progressiveDashBoard": "Dashboard Designer",
+        "dashBoardDesigner": "Dashboard Designer",
         "painter": "Data Painter🚀",
         "collection": "Collection"
     },
@@ -63,7 +59,7 @@
         "analysis": {
             "start": "Start Analysis",
             "checkResult": "Check Existed Results",
-            "pattern": "Build Knowledge(beta)",
+            "pattern": "Data Copilot",
             "manual": "Manual Explore"
         },
         "importStorage": {
@@ -242,81 +238,7 @@
         "dimension": "dimension",
         "measure": "measure"
     },
-    "noteBook": {
-        "autoParams": {
-            "title": "Auto Recommand Parameters",
-            "auto": "Auto",
-            "manual": "Manual"
-        },
-        "univariate": {
-            "title": "Univariate Summary",
-            "desc": "Hover your mouse over the fields and see the distails and entropy reducing strategy.",
-            "columns": {
-                "fieldName": "field name",
-                "type": "type",
-                "entropy": "impurity",
-                "maxEntropy": "impurity(max)"
-            }
-        },
-        "subspace": {
-            "title": "Subspace Searching",
-            "desc": "Try to choose one row(combination of dimensions) of the subspace and see the changes of the processes below.",
-            "topKDimension": "top k percent dimension used",
-            "topKSubspace": "top ( {k} / {total} ) number of subspaces used"
-        },
-        "clustering": {
-            "title": "Measurement Clustering",
-            "desc": "Try to choose one group to visualize them.",
-            "maxGroupNum": "Max Group Number"
-        },
-        "vis": {
-            "title": "Visualization",
-            "desc": "If there is no result here, try to click one group of measures in ***Clustering*** process above.",
-            "aggMea": "aggregate measures"
-        }
-    },
-    "explore": {
-        "title": "Visual Insights",
-        "preference": "Preference",
-        "rankList": "Rank List",
-        "search": "Search",
-        "digIn": "Dig In",
-        "desc": "Details of the recommendation process can be seen in  <b>NoteBook</b> Board. You can adjust some of the parameters and operators and see how it influence recommendation results.",
-        "tip": "Try to use the setting button beside the \"visual insight\" title to adjust the visualization settings to get a view you prefer better.",
-        "currentPage": "Current Page",
-        "last": "Last",
-        "next": "Next",
-        "summary": "Summary",
-        "related": {
-            "title": "Related Views"
-        },
-        "like": "like"
-    },
-    "dashBoard": {
-        "generateButton": "Generate Dashboard",
-        "last": "Last",
-        "next": "Next",
-        "desc": "Double click the chart with selection to clear selection(filter).",
-        "pageNo": "current page no: {current} of {total}"
-    },
-    "explainer": {
-        "notReadyTip": "Dev Page now is testing for different types of insight worker. \n If you see this hint, it means you have not upload dataSource or not click the 'extract insights' button in dataSource page which will produce a cooked dataSource for dev page.",
-        "insightButton": "Get Insights",
-        "sigThreshold": "significance threshold",
-        "desc": "There are {num} of views of which insight significance is no less than {threshold} %",
-        "currentIndex": "Current Index",
-        "explainTemp": {
-            "viewDesc": "Dimensions are {dimensions}, and measures are {measures}.",
-            "sig": "There is a significance of {sig} % that there exists a {itype} in the graph."
-        },
-        "insightTypes": {
-            "default_outlier": "outlier",
-            "general": "general",
-            "default_group": "group distribution",
-            "default_trend": "trend"
-        }
-    },
-    "lts": {
+    "megaAuto": {
         "autoAnalysis": "Auto Analysis",
         "reRun": "Re-Run Task",
         "computing": "computing",
@@ -361,7 +283,7 @@
             }
         }
     },
-    "discovery": {
+    "semiAuto": {
         "main": {
             "mainView": "Main View",
             "relatePatterns": "associate patterns",

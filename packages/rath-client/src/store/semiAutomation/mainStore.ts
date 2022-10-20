@@ -5,7 +5,7 @@ import { Specification } from "visual-insights";
 import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
 import { labDistVis } from "../../queries/labdistVis";
-import { footmanEngineService } from "../../services";
+import { footmanEngineService } from "../../services/index";
 import { DataSourceStore } from "../dataSourceStore";
 import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoViews } from "./localTypes";
 

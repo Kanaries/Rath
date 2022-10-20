@@ -20,11 +20,11 @@ const VizOperationBar: React.FC<VizOperationBarProps> = props => {
     const resizeModeList = useMemo<IDropdownOption[]>(() => {
         return [
             {
-                text: intl.get('lts.operation.resizeMode.none'),
+                text: intl.get('megaAuto.operation.resizeMode.none'),
                 key: IResizeMode.auto
             },
             {
-                text: intl.get('lts.operation.resizeMode.resizable'),
+                text: intl.get('megaAuto.operation.resizeMode.resizable'),
                 key: IResizeMode.control
             }
         ]
@@ -32,7 +32,7 @@ const VizOperationBar: React.FC<VizOperationBarProps> = props => {
 
     return <Stack tokens={{ childrenGap: gap }} horizontal={stackLayout === 'horizontal'}>
         <Stack.Item>
-            <Toggle label={intl.get('lts.operation.debug')}
+            <Toggle label={intl.get('megaAuto.operation.debug')}
                 checked={debug}
                 onChange={(e, checked) => {
                     onValueChange('debug', Boolean(checked))
@@ -40,7 +40,7 @@ const VizOperationBar: React.FC<VizOperationBarProps> = props => {
             />
         </Stack.Item>
         <Stack.Item>
-            <Toggle label={intl.get('lts.operation.zoom')}
+            <Toggle label={intl.get('megaAuto.operation.zoom')}
                 checked={interactive}
                 onChange={(e, checked) => {
                     onValueChange('interactive', Boolean(checked))
@@ -58,7 +58,7 @@ const VizOperationBar: React.FC<VizOperationBarProps> = props => {
         <Stack.Item>
             <Dropdown selectedKey={resizeMode}
                 style={{ width: '120px' }}
-                label={intl.get('lts.operation.resize')}
+                label={intl.get('megaAuto.operation.resize')}
                 options={resizeModeList}
                 onChange={(e, op) => {
                     op && onValueChange('resizeMode', op.key as IResizeMode)

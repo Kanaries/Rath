@@ -19,12 +19,12 @@ const PattSegment: React.FC = () => {
     }, [semiAutoStore])
     if (pattViews.views.length === 0 && autoAsso.pattViews) return <div />
     return <div className="pure-card">
-        <h1 className="ms-fontSize-18">{intl.get('discovery.main.associate.patterns')}</h1>
+        <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.patterns')}</h1>
         {
             !autoAsso.pattViews && <DefaultButton
                 disabled={!hasMainView}
                 iconProps={{ iconName: 'ScatterChart' }}
-                text={intl.get('discovery.main.relatePatterns')} onClick={assViews}
+                text={intl.get('semiAuto.main.relatePatterns')} onClick={assViews}
             />
         }
         <AssoContainer>
@@ -38,7 +38,7 @@ const PattSegment: React.FC = () => {
                     <Stack horizontal>
                         <CommandButton
                             iconProps={{ iconName: 'Pinned' }}
-                            text={intl.get('discovery.main.pin')}
+                            text={intl.get('semiAuto.main.pin')}
                             onClick={() => {
                                 semiAutoStore.updateMainView(pattViews.views[i])
                             }}
@@ -51,7 +51,7 @@ const PattSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            text={intl.get('lts.commandBar.editing')}
+                            text={intl.get('megaAuto.commandBar.editing')}
                             iconProps={{ iconName: 'BarChartVerticalEdit'}}
                             onClick={() => {
                                 commonStore.visualAnalysisInGraphicWalker(spec)
@@ -79,7 +79,7 @@ const PattSegment: React.FC = () => {
         </AssoContainer>
         <DefaultButton disabled={pattViews.amount >= pattViews.views.length}
             style={{ marginTop: '8px' }}
-            text={intl.get('discovery.main.loadMore')}
+            text={intl.get('semiAuto.main.loadMore')}
             onClick={loadMore}
         />
     </div>

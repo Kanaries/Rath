@@ -37,7 +37,7 @@ const ComputationProgress: React.FC = () => {
         <div>
             {computing && (
                 <ProgressIndicator
-                    description={`${intl.get('lts.computing')}: ${pn > 0 ? Math.round(pn * 100) + '%' : ''}`}
+                    description={`${intl.get('megaAuto.computing')}: ${pn > 0 ? Math.round(pn * 100) + '%' : ''}`}
                     percentComplete={pn > 0 ? pn : undefined}
                 />
             )}

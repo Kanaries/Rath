@@ -2,7 +2,7 @@ import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Specification } from 'visual-insights';
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
 import { ITaskTestMode, IVegaSubset } from '../interfaces';
-import { destroyRathWorker, initRathWorker, rathEngineService } from '../services';
+import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
 import { transVegaSubset2Schema } from '../utils/transform';
 
 export type ErrorType = 'error' | 'info' | 'success';

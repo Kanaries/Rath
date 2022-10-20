@@ -19,7 +19,7 @@ interface SubinsightProps {
 const SubinsightSegment: React.FC<SubinsightProps> = props => {
     return <Modal isOpen={props.show} onDismiss={props.onClose}>
         <Container>
-            <h2>{intl.get('lts.subinsights')}</h2>
+            <h2>{intl.get('megaAuto.subinsights')}</h2>
             <ReactJson src={props.data} displayDataTypes={false} />
         </Container>
     </Modal>

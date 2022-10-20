@@ -20,9 +20,9 @@ const FilterSegment: React.FC = () => {
     }, [semiAutoStore])
     if (filterViews.views.length === 0 && autoAsso.filterViews) return <div />
     return <div className="pure-card">
-        <h1 className="ms-fontSize-18">{intl.get('discovery.main.associate.filters')}</h1>
+        <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.filters')}</h1>
         {
-            !autoAsso.filterViews && <DefaultButton text={intl.get('discovery.main.pointInterests')}
+            !autoAsso.filterViews && <DefaultButton text={intl.get('semiAuto.main.pointInterests')}
                 iconProps={{ iconName: 'SplitObject' }}
                 disabled={!hasMainView}
                 onClick={recommandFilter}
@@ -39,7 +39,7 @@ const FilterSegment: React.FC = () => {
                     <Stack horizontal>
                         <CommandButton
                             iconProps={{ iconName: 'Pinned' }}
-                            text={intl.get('discovery.main.pin')}
+                            text={intl.get('semiAuto.main.pin')}
                             onClick={() => {
                                 semiAutoStore.updateMainView(filterViews.views[i])
                             }}
@@ -52,7 +52,7 @@ const FilterSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            text={intl.get('lts.commandBar.editing')}
+                            text={intl.get('megaAuto.commandBar.editing')}
                             iconProps={{ iconName: 'BarChartVerticalEdit'}}
                             onClick={() => {
                                 commonStore.visualAnalysisInGraphicWalker(spec)
@@ -60,7 +60,7 @@ const FilterSegment: React.FC = () => {
                         />
                         <CommandButton
                             iconProps={{ iconName: 'Compare' }}
-                            text={intl.get('discovery.main.compare')}
+                            text={intl.get('semiAuto.main.compare')}
                             onClick={() => {
                                 semiAutoStore.updateCompareView(filterViews.views[i])
                             }}
@@ -87,7 +87,7 @@ const FilterSegment: React.FC = () => {
         </AssoContainer>
         <DefaultButton disabled={filterViews.amount >= filterViews.views.length}
             style={{ marginTop: '8px' }}
-            text={intl.get('discovery.main.loadMore')}
+            text={intl.get('semiAuto.main.loadMore')}
             onClick={loadMore}
         />
     </div>

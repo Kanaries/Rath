@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Spinner } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
-import { getTestServerAPI } from '../../../services';
+import { getTestServerAPI } from '../../../services/index';
 
 const InsightDesc = styled.div`
     margin: 4px 12px 0px 12px;

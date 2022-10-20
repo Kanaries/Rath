@@ -5,7 +5,7 @@ import { STORAGE_FILE_SUFFIX } from '../constants';
 import {  IResizeMode, IRow, ITaskTestMode, IVegaSubset, PreferencePanelConfig } from '../interfaces';
 import { distVis } from '../queries/distVis';
 import { labDistVis } from '../queries/labdistVis';
-import { rathEngineService } from '../services';
+import { rathEngineService } from '../services/index';
 import { isSetEqual } from '../utils';
 import { RathStorageDump } from '../utils/storage';
 import { LTSPipeLine } from './pipeLineStore/lts';

@@ -9,8 +9,8 @@ const PatternSetting: React.FC = () => {
     const { semiAutoStore } = useGlobalStore();
     const options = useMemo<IChoiceGroupOption[]>(() => {
         return [
-            { text: intl.get('discovery.main.vizsys.lite'), key: 'lite' },
-            { text: intl.get('discovery.main.vizsys.strict'), key: 'strict' }
+            { text: intl.get('semiAuto.main.vizsys.lite'), key: 'lite' },
+            { text: intl.get('semiAuto.main.vizsys.strict'), key: 'strict' }
         ]
     }, [])
     const { showSettings, settings, autoAsso } = semiAutoStore;
@@ -24,7 +24,7 @@ const PatternSetting: React.FC = () => {
         >
         <hr />
         <ChoiceGroup
-            label={intl.get('discovery.main.vizsys.title')}
+            label={intl.get('semiAuto.main.vizsys.title')}
             onChange={(e, op) => {
                 op && semiAutoStore.updateSettings('vizAlgo', op.key)
             }}

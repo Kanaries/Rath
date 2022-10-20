@@ -61,7 +61,7 @@ const PatternPage: React.FC = () => {
             <FocusZone />
             {/* <DefaultButton disabled={renderAmount >= specs.length}
                 style={{ marginTop: '5px' }}
-                text={intl.get('discovery.main.loadMore')}
+                text={intl.get('semiAuto.main.loadMore')}
                 onClick={() => {
                     setRenderAmount(a => a + RENDER_BATCH_SIZE)
                 }}

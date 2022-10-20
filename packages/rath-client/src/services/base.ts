@@ -9,7 +9,7 @@ import InferMetaWorker from '../workers/metaInfer.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import FootmanWorker from '../workers/footman/index.worker?worker';
+import FootmanWorker from '../workers/loa/index.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
@@ -22,7 +22,7 @@ import FilterWorker from '../workers/filterData.worker?worker';
 import { MessageProps } from '../workers/engine/service';
 
 import { CleanMethod, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from '../interfaces';
-import { IFootmanProps } from '../workers/footman/service';
+import { IFootmanProps } from '../workers/loa/service';
 
 interface SuccessResult<T> {
     success: true;
