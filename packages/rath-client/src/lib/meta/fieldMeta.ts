@@ -2,6 +2,7 @@ import { bin, ISemanticType, rangeNormilize } from '@kanaries/loa';
 import { Statistics } from 'visual-insights';
 import { IFieldMeta, IRawField, IRow } from '../../interfaces';
 import { getRange } from '../../utils';
+import { getQuantiles } from '../stat';
 
 export function computeFieldFeatures(values: any[], semanticType: ISemanticType): { features: IFieldMeta['features']; distribution: IFieldMeta['distribution'] } {
     const valueMap: Map<any, number> = new Map();
@@ -15,11 +16,24 @@ export function computeFieldFeatures(values: any[], semanticType: ISemanticType)
 
     const [_min, _max] = getRange(values);
     let ent = 0,
-        maxEnt = 4;
-    const sum = values.reduce((t, v) => t + v, 0);
+        maxEnt = 4,
+        s = 0,
+        sum = 0,
+        qt_25 = 0,
+        qt_50 = 0,
+        qt_75 = 0;
+
     if (semanticType === 'quantitative') {
         ent = Statistics.entropy(rangeNormilize(bin(values).filter((v) => v > 0)));
         maxEnt = Math.log2(dist.length);
+        const sum = values.reduce((t, v) => t + v, 0);
+        const mean = sum / values.length;
+        for (let i = 0; i < values.length; i++) {
+            s += (values[i] - mean) ** 2;
+        }
+        s /= (values.length - 1);
+        s = Math.sqrt(s);
+        [qt_25, qt_50, qt_75]  = getQuantiles(values, [0.25, 0.5, 0.75]);
     }
     return {
         features: {
@@ -31,6 +45,10 @@ export function computeFieldFeatures(values: any[], semanticType: ISemanticType)
             sum: sum,
             mean: sum / values.length,
             count: values.length,
+            stdev: s,
+            qt_25,
+            qt_50,
+            qt_75
         },
         distribution: dist
     };

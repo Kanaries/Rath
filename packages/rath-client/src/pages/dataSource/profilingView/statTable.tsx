@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import intl from 'react-intl-universal'
 import { IFieldMeta } from '../../../interfaces';
 import { formatNumbers } from './utils';
 
@@ -10,6 +11,24 @@ const Table = styled.table`
         font-size: 14px;
     }
 `
+
+const QuantitativeMetrics: string[] = [
+    'min',
+    'max',
+    'mean',
+    'qt_50',
+    'qt_25',
+    'qt_75',
+    'stdev',
+    // 'skewness',
+    // 'kurtosis',
+    // 'unique',
+    // 'missing',
+    // 'outliers',
+    // 'distinct',
+    // 'top',
+    // 'bottom',
+]
 
 interface StatTableProps {
     title?: string;
@@ -27,31 +46,21 @@ const StatTable: React.FC<StatTableProps> = (props) => {
             </thead>
             <tbody>
                 <tr>
-                    <td>Unique Values</td>
+                    <td>{intl.get("common.stat.unique")}</td>
                     <td align="right">{features.unique}</td>
                 </tr>
                 <tr>
-                    <td>Count</td>
+                    <td>{intl.get("common.stat.count")}</td>
                     <td align="right">{features.count}</td>
                 </tr>
                 {semanticType === 'quantitative' && (
                     <React.Fragment>
-                        <tr>
-                            <td>Max</td>
-                            <td align="right">{formatNumbers(features.max)}</td>
-                        </tr>
-                        <tr>
-                            <td>Min</td>
-                            <td align="right">{formatNumbers(features.min)}</td>
-                        </tr>
-                        <tr>
-                            <td>Mean</td>
-                            <td align="right">{formatNumbers(features.mean)}</td>
-                        </tr>
-                        <tr>
-                            <td>Sum</td>
-                            <td align="right">{formatNumbers(features.sum)}</td>
-                        </tr>
+                        {
+                            QuantitativeMetrics.map((metric) => (<tr key={metric}>
+                                <td>{intl.get(`common.stat.${metric}`)}</td>
+                                <td align="right">{formatNumbers(features[metric])}</td>
+                            </tr>))
+                        }
                     </React.Fragment>
                 )}
             </tbody>

@@ -5,12 +5,12 @@ import { IAnalyticType, ISemanticType } from "visual-insights";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag } from "../interfaces";
-import { getQuantiles } from "../pages/dataSource/utils";
 import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
 import { findRathSafeColumnIndex } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
+import { getQuantiles } from "../lib/stat";
 
 interface IDataMessage {
     type: 'init_data' | 'others';

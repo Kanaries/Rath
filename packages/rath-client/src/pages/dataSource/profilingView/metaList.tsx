@@ -7,11 +7,30 @@ import DistributionChart from '../metaView/distChart';
 
 const ColumnItem = styled.div`
     padding: 2px;
-    margin: 2px;
-    border-bottom: 1px solid #dedede;
+    margin: 0px 2px 2px 2px;
+    /* border-bottom: 1px solid #dedede; */
     cursor: pointer;
     canvas {
         cursor: pointer;
+    }
+    position: relative;
+    .bottom-bar {
+        position: absolute;
+        height: 2px;
+        border-radius: 0px 0px 2px 2px;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        margin: 0px 1px;
+    }
+    .dimension {
+        background-color: #1890ff;
+    }
+    .measure {
+        background-color: #13c2c2;
+    }
+    .disable {
+        background-color: #9e9e9e;
     }
 `;
 
@@ -40,6 +59,7 @@ const MetaList: React.FC<MetaListProps> = (props) => {
                         onColumnIndexChange(fIndex);
                     }}
                 >
+                    <div className={`${fm.analyticType} bottom-bar`}></div>
                     <h1>{fm.name}</h1>
                     <DistributionChart
                         dataSource={fm.distribution}

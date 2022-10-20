@@ -9,6 +9,8 @@ const Cont = styled.div`
     display: flex;
     width: 100%;
     overflow-x: auto;
+    border-top: 1px solid #eee;
+    margin-top: 8px;
 `;
 
 const ProfilingVieiw: React.FC = (props) => {

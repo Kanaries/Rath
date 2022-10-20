@@ -1,9 +1,12 @@
-import { Stack } from '@fluentui/react';
+import { PrimaryButton, Stack } from '@fluentui/react';
 import { applyFilters, IFilter, IRow } from '@kanaries/loa';
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import intl from 'react-intl-universal';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { debounce } from 'vega';
+import { PIVOT_KEYS } from '../../../constants';
 import { IFieldMeta } from '../../../interfaces';
 import { computeFieldFeatures } from '../../../lib/meta/fieldMeta';
 import { useGlobalStore } from '../../../store';
@@ -23,6 +26,25 @@ const DetailContainer = styled.div`
         color: #666;
         font-size: 12px;
     }
+    position: relative;
+    .bottom-bar {
+        position: absolute;
+        height: 4px;
+        border-radius: 0px 0px 2px 2px;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        margin: 0px 1px;
+    }
+    .dimension {
+        background-color: #1890ff;
+    }
+    .measure {
+        background-color: #13c2c2;
+    }
+    .disable {
+        background-color: #9e9e9e;
+    }
 `;
 
 interface MetaDetailProps {
@@ -31,7 +53,7 @@ interface MetaDetailProps {
 const MetaDetail: React.FC<MetaDetailProps> = (props) => {
     const { field } = props;
     const [selection, setSelection] = React.useState<any[]>([]);
-    const { dataSourceStore } = useGlobalStore();
+    const { dataSourceStore, commonStore, semiAutoStore } = useGlobalStore();
     const { cleanedData } = dataSourceStore;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,6 +99,7 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
     if (typeof field === 'undefined') return <div></div>;
     return (
         <DetailContainer>
+            <div className={`${field.analyticType} bottom-bar`}></div>
             <h1 className="detail-header">{field.name}</h1>
             <p className="detail-content">Column ID: {field.fid}</p>
             <FullDistViz
@@ -90,9 +113,26 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
                 semanticType={field.semanticType}
                 onSelect={onSelectionChange}
             />
+            <Stack horizontal tokens={{ childrenGap: 10 }}>
+                <PrimaryButton
+                    text={intl.get('dataSource.statViewInfo.explore')}
+                    iconProps={{ iconName: 'BarChartVerticalFill' }}
+                    onClick={() => {
+                        runInAction(() => {
+                            commonStore.setAppKey(PIVOT_KEYS.semiAuto);
+                            semiAutoStore.clearMainView();
+                            semiAutoStore.updateMainView({
+                                fields: [field],
+                                imp: field.features.entropy,
+                            })
+                        })
+                    }}
+                />
+            </Stack>
+            <hr style={{ margin: '1em' }} />
             <Stack horizontal tokens={{ childrenGap: '3em' }}>
-            <StatTable title='origin' features={field.features} semanticType={field.semanticType} />
-                { filters.length > 0 && <StatTable title='selection' features={features} semanticType={field.semanticType} />}
+            <StatTable title={intl.get('dataSource.statViewInfo.originStatTable')} features={field.features} semanticType={field.semanticType} />
+                { filters.length > 0 && <StatTable title={intl.get('dataSource.statViewInfo.selectionStatTable')} features={features} semanticType={field.semanticType} />}
             </Stack>
             {
                 filters.length > 0 && <DetailTable data={filteredData} />

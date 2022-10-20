@@ -8,6 +8,7 @@ const Cont = styled.div`
     overflow: auto;
     max-height: 200px;
     width: auto;
+    max-width: 880px;
 `
 
 interface DetailTableProps {

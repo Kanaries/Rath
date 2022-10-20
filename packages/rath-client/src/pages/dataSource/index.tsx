@@ -6,12 +6,11 @@ import {
     DefaultButton,
     Dropdown,
     IContextualMenuProps,
-    Toggle,
     IContextualMenuItem,
     IconButton,
     CommandButton,
     ProgressIndicator,
-    Icon,
+    Label,
 } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
@@ -290,33 +289,31 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         clean: cleanedData.length,
                     })}
                 </i>
-                {/* <Toggle checked={dataPreviewMode === IDataPreviewMode.meta}
-          disabled={rawData.length === 0}
-          label={intl.get('dataSource.viewMode')}
-          onText={intl.get('dataSource.metaView')}
-          offText={intl.get('dataSource.dataView')}
-          onChange={(ev, checked) => {
-            dataSourceStore.setDataPreviewMode(checked ? IDataPreviewMode.meta : IDataPreviewMode.data)
-          }}
-        /> */}
                 <Stack horizontal>
+                    <Label>{intl.get('dataSource.viewMode')}</Label>
                     <IconButton
                         iconProps={{ iconName: 'Table' }}
                         onClick={() => {
                             dataSourceStore.setDataPreviewMode(IDataPreviewMode.data);
                         }}
+                        title={intl.get('dataSource.dataView')}
+                        ariaLabel={intl.get('dataSource.dataView')}
                     />
                     <IconButton
                         iconProps={{ iconName: 'ViewList' }}
                         onClick={() => {
                             dataSourceStore.setDataPreviewMode(IDataPreviewMode.meta);
                         }}
+                        title={intl.get('dataSource.metaView')}
+                        ariaLabel={intl.get('dataSource.metaView')}
                     />
                     <IconButton
                         iconProps={{ iconName: 'BarChartVerticalFilter' }}
                         onClick={() => {
                             dataSourceStore.setDataPreviewMode(IDataPreviewMode.stat);
                         }}
+                        title={intl.get('dataSource.statView')}
+                        ariaLabel={intl.get('dataSource.statView')}
                     />
                 </Stack>
                 {/* <ActionButton iconProps={{ iconName: 'download' }}>download data</ActionButton> */}
