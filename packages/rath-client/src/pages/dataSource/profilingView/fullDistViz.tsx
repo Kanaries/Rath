@@ -104,24 +104,21 @@ const FullDistViz: React.FC<FullDistVizProps> = (props) => {
                             "labelOverlap": "parity",
                             ticks: false
                         },
-                        // bin: semanticType === 'quantitative' ? true : undefined,
-                        //   axis: null,    
                         type: semanticType === 'quantitative' ? 'ordinal' : semanticType, sort: sortBy
                     },
                     y: { field: y, type: 'quantitative', aggregate: 'sum', title: null },
-                    color: {
+                    color: semanticType !== 'temporal' ? {
                         condition: {
                             param: 'brush',
                         },
                         value: 'gray'
-                    }
+                    } : undefined
                 }
             }, {
                 actions: false
             }).then(res => {
                 setView(res.view);
                 res.view.addSignalListener('brush', (name, value) => {
-                    // console.log(name, value)
                     onSelect(value[x] || [])
                 })
                 return res
