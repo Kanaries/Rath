@@ -13,9 +13,9 @@ RATH is an OpenSource automated data exploration tool that can help you automate
 
  It is not only an open source replacement of tableau but a version with more automation power, including auto insights discovery, predictive interaction, and visual recommendation.
 
-Try RATH [here](https://rath.kanaries.net)
-
-or visit our official website[kanaries website](https://kanaries.net)
++ Try RATH [here](https://rath.kanaries.net)
++ visit our official website[kanaries website](https://kanaries.net)
++ [🚀 Quick View of RATH's Exploratory Data Analysis](https://www.yuque.com/docs/share/03ae907a-8fa5-4822-897b-c1245e3c2014)
 
 ## Introduction
 
@@ -119,8 +119,7 @@ For larger datasets, or if you can access a high performance OLAP service (such 
 
 
 ## Documentation
-+ [Tutorial: Using Rath to find deep insight in your data](https://www.yuque.com/docs/share/3f32e044-3530-4ebe-9b01-287bfbdb7ce0?#)
-+ doc for reuseable hooks: todos
++ [🚀 Quick View of RATH's Exploratory Data Analysis](https://www.yuque.com/docs/share/03ae907a-8fa5-4822-897b-c1245e3c2014)
 
 ## LICENSE (AGPL)
 Rath is an automated data analysis and visualization tool (auto-EDA).
