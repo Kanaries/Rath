@@ -9,6 +9,11 @@ export interface IRow {
     [key: string]: any
 }
 
+export interface ICol<T> {
+    name: string;
+    data: Array<T>;
+}
+
 export type IGeoRole = 'longitude' | 'latitude' | 'none';
 
 export type FieldExtOptType = (
