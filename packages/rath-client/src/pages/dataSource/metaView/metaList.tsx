@@ -1,7 +1,7 @@
-import { ChoiceGroup, IChoiceGroupOption, IconButton, Separator, Toggle } from '@fluentui/react';
 import React, { useEffect, useRef } from 'react';
+import { ChoiceGroup, IChoiceGroupOption, IconButton, PrimaryButton, Separator, TextField, Toggle } from '@fluentui/react';
 import styled from 'styled-components';
-import intl from 'react-intl-universal'
+import intl from 'react-intl-universal';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { FieldExtSuggestion, IFieldMetaWithExtSuggestions, IRawField, IRow } from '../../../interfaces';
 import FieldFilter from '../../../components/fieldFilter/index';
@@ -55,8 +55,10 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         font-size: 26px;
         color: #333;
     }
-    .fid{
-        font-size: 12px; font-weight: 400; color: rgb(89, 89, 89);
+    .fid {
+        font-size: 12px;
+        font-weight: 400;
+        color: rgb(89, 89, 89);
     }
     padding: 1em;
     padding-top: ${({ isPreview }) => isPreview ? '2.2em' : '1em'};
@@ -66,12 +68,12 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
     .flex-container {
         display: flex;
     }
-    .operation-column{
+    .operation-column {
         margin-left: 1em;
         padding: 0em 1em;
-        border-left: 1px solid rgb(229, 231, 235)
+        border-left: 1px solid rgb(229, 231, 235);
     }
-    .dist-graphics{
+    .dist-graphics {
         flex-grow: 0;
     }
 
@@ -103,23 +105,28 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
             color: #c50f1f;
         }
     }
+    .col-name-container {
+        display: flex;
+        align-items: center;
+    }
 `
 
 const IndicatorCard = styled.div`
     padding: 0em 1em;
     margin-left: 1em;
-    .ind-title{
-        font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+    .ind-title {
+        font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto,
+            'Helvetica Neue', sans-serif;
         font-size: 14px;
         font-weight: 600;
         color: rgb(50, 49, 48);
         box-sizing: border-box;
     }
-    .ind-value{
+    .ind-value {
         font-size: 3em;
         font-weight: 500;
     }
-`
+`;
 
 export const LiveContainer = styled.div({
     position: 'relative',
@@ -168,19 +175,25 @@ interface MetaItemProps {
     isPreview: boolean;
     isExt: boolean;
     disable?: boolean;
-    onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
+    onChange?: (fid: string, propKey: keyof IRawField, value: any) => void;
 }
 
 
 const MetaItem: React.FC<MetaItemProps> = props => {
     const { colKey, colName, semanticType, analyticType, dist, disable, onChange, focus, extSuggestions, isPreview, isExt } = props;
     const { dataSourceStore } = getGlobalStore();
-    const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map(ch => ({
+    const [editing, setEditing] = React.useState(false);
+    const [editingName, setEditingName] = React.useState(colName);
+    useEffect(() => {
+        setEditingName(colName);
+    }, [colName]);
+
+    const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map((ch) => ({
         ...ch,
-        text: intl.get(`common.${ch.key}`)
+        text: intl.get(`common.analyticType.${ch.key}`)
     }))
 
-    const SEMANTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = SEMANTIC_TYPE_CHOICES.map(ch => ({
+    const SEMANTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = SEMANTIC_TYPE_CHOICES.map((ch) => ({
         ...ch,
         text: intl.get(`common.semanticType.${ch.key}`)
     }))
@@ -236,7 +249,34 @@ const MetaItem: React.FC<MetaItemProps> = props => {
                 </>
             ) : ''}
         </div>
-        <h1>{colName}</h1>
+        <div className="col-name-container">
+                {!editing && (
+                    <React.Fragment>
+                        <h1>{colName}</h1>
+                        <IconButton
+                            iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
+                            onClick={() => {
+                                setEditing(true);
+                            }}
+                        />
+                    </React.Fragment>
+                )}
+                {
+                    editing && <React.Fragment>
+                        <TextField value={editingName} onChange={(e, val) => {
+                            setEditingName(val || '');
+                        }} />
+                        <PrimaryButton
+                            style={{ marginLeft: '3px' }}
+                            text={intl.get('function.confirm')}
+                            onClick={() => {
+                                onChange && onChange(colKey, 'name', editingName);
+                                setEditing(false);
+                            }}
+                        />
+                    </React.Fragment>
+                }
+            </div>
         <div className="fid">Column ID: {colKey}</div>
         <Separator />
         <div className="flex-container">
@@ -259,6 +299,44 @@ const MetaItem: React.FC<MetaItemProps> = props => {
                         onChange && option && onChange(colKey, 'analyticType', option.key)
                     }}
                 />
+                <IndicatorCard>
+                    <div className="ind-title ms-Label root-130">{intl.get('dataSource.meta.uniqueValue')}</div>
+                    <div className="ind-value">{dist.length}</div>
+                </IndicatorCard>
+                <div className="operation-column">
+                    <ChoiceGroup
+                        label={intl.get('dataSource.meta.analyticType')}
+                        options={ANALYTIC_TYPE_CHOICES_LANG}
+                        selectedKey={analyticType}
+                        onChange={(ev, option) => {
+                            onChange && option && onChange(colKey, 'analyticType', option.key);
+                        }}
+                    />
+                </div>
+                <div className="operation-column">
+                    <ChoiceGroup
+                        label={intl.get('dataSource.meta.semanticType')}
+                        options={SEMANTIC_TYPE_CHOICES_LANG}
+                        selectedKey={semanticType}
+                        onChange={(ev, option) => {
+                            onChange && option && onChange(colKey, 'semanticType', option.key);
+                        }}
+                    />
+                </div>
+                <div className="operation-column">
+                    <Toggle
+                        label={intl.get('dataSource.meta.disable.title')}
+                        checked={!disable}
+                        onText={intl.get('dataSource.meta.disable.on')}
+                        offText={intl.get('dataSource.meta.disable.off')}
+                        onChange={(ev, checked) => {
+                            onChange && onChange(colKey, 'disable', !checked);
+                        }}
+                    />
+                </div>
+                <div className="operation-column">
+                    <FieldFilter fid={colKey} />
+                </div>
             </div>
             <div className="operation-column">
                 <ChoiceGroup
