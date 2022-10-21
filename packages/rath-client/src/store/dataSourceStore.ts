@@ -559,7 +559,7 @@ export class DataSourceStore {
                 this.mutFields = [
                     ...this.mutFields,
                     ...enteringFields.filter(f => {
-                        if (f.extInfo?.extOpt !== 'dateTimeExpand' || f.extInfo.extInfo === 'utime') {
+                        if (f.extInfo?.extOpt !== 'dateTimeExpand') {
                             return false;
                         }
                         // TODO: 非空校验？
