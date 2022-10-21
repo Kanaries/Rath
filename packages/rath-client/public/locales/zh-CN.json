@@ -18,7 +18,20 @@
         "addVar": "添加变量",
         "addFilter": "添加筛选项",
         "field": "字段",
-        "star": "收藏"
+        "star": "收藏",
+        "stat": {
+            "unique": "唯一值",
+            "min": "最小值",
+            "max": "最大值",
+            "mean": "平均值",
+            "median": "中位数",
+            "stdev": "标准差",
+            "count": "计数",
+            "sum": "总和",
+            "qt_25": "25%分位数",
+            "qt_75": "75%分位数",
+            "qt_50": "中位数"
+        }
     },
     "menu": {
         "dataSource": "数据源",
@@ -95,6 +108,7 @@
         "viewMode": "视图模式",
         "metaView": "元数据视图",
         "dataView": "数据视图",
+        "statView": "统计视图",
         "charset": "字符集编码",
         "databaseType": "选择数据库",
         "connectUri": "连接 URI",
@@ -106,6 +120,13 @@
         "connectorConfig": "连接器设置",
         "connectorService": "连接器服务地址 (可选)",
         "apply": "设置并测试",
+        "statViewInfo": {
+            "title": "统计视图",
+            "desc": "统计视图是对数据集的统计信息，包括数据集的大小、数据类型、缺失值、重复值等。",
+            "explore": "探索分析",
+            "originStatTable": "原始数据统计信息",
+            "selectionStatTable": "筛选部分统计信息"
+        },
         "dbProgress": [
             {
                 "label": "建立连接",

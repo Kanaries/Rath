@@ -80,7 +80,8 @@ export class SemiAutomationStore {
             mainView: observable.ref,
             compareView: observable.ref,
             // @ts-expect-error private field
-            dataSourceStore: false
+            dataSourceStore: false,
+            reactions: false
         });
     }
     public setShowSettings (show: boolean) {
@@ -91,6 +92,10 @@ export class SemiAutomationStore {
     }
     public initRenderViews (akey: IRenderViewKey) {
         this[akey] = makeInitAssoViews();
+    }
+    public clearMainView () {
+        this.mainView = null;
+        this.compareView = null;
     }
     public updateAutoAssoConfig (akey: IRenderViewKey, value: boolean) {
         this.autoAsso[akey] = value;

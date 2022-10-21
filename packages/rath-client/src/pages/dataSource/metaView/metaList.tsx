@@ -5,6 +5,7 @@ import intl from 'react-intl-universal'
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { IFieldMeta, IRawField, IRow } from '../../../interfaces';
 import FieldFilter from '../../../components/fieldFilter/index';
+import { ANALYTIC_TYPE_CHOICES, SEMANTIC_TYPE_CHOICES } from '../config';
 import DistributionChart from './distChart';
 
 const MetaContainer = styled.div`
@@ -83,17 +84,7 @@ interface MetaItemProps {
     onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
 }
 
-const SEMANTIC_TYPE_CHOICES: IChoiceGroupOption[] = [
-    { key: 'nominal', text: 'nominal' },
-    { key: 'ordinal', text: 'ordinal' },
-    { key: 'temporal', text: 'temporal' },
-    { key: 'quantitative', text: 'quantitative' },
-]
 
-const ANALYTIC_TYPE_CHOICES: IChoiceGroupOption[] = [
-    { key: 'dimension', text: 'dimension' },
-    { key: 'measure', text: 'measure' },
-]
 const MetaItem: React.FC<MetaItemProps> = props => {
     const { colKey, colName, semanticType, analyticType, dist, disable, onChange } = props;
     const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map(ch => ({
