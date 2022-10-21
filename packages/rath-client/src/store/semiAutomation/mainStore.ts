@@ -42,7 +42,8 @@ export class SemiAutomationStore {
                 width: 320,
                 height: 320,
             },
-            nlg: false
+            nlg: false,
+            excludeScaleZero: false
         }
         this.settings = {
             vizAlgo: 'strict'
@@ -264,7 +265,8 @@ export class SemiAutomationStore {
                 width: mainVizSetting.resize.width,
                 height: mainVizSetting.resize.height,
                 interactive: mainVizSetting.interactive,
-                stepSize: 32
+                stepSize: 32,
+                excludeScaleZero: mainVizSetting.excludeScaleZero
             })
         } else {
             return labDistVis({
@@ -274,7 +276,8 @@ export class SemiAutomationStore {
                 height: mainVizSetting.resize.height,
                 interactive: mainVizSetting.interactive,
                 stepSize: 32,
-                dataSource: this.dataSource
+                dataSource: this.dataSource,
+                excludeScaleZero: mainVizSetting.excludeScaleZero
             })
         }
     }
@@ -288,7 +291,8 @@ export class SemiAutomationStore {
                 width: mainVizSetting.resize.width,
                 height: mainVizSetting.resize.height,
                 interactive: mainVizSetting.interactive,
-                stepSize: 32
+                stepSize: 32,
+                excludeScaleZero: mainVizSetting.excludeScaleZero
             })
         } else {
             return labDistVis({
@@ -297,7 +301,8 @@ export class SemiAutomationStore {
                 width: mainVizSetting.resize.width,
                 height: mainVizSetting.resize.height,
                 interactive: mainVizSetting.interactive,
-                dataSource: this.dataSource
+                dataSource: this.dataSource,
+                excludeScaleZero: mainVizSetting.excludeScaleZero
             })
         }
     }

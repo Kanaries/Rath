@@ -6,7 +6,7 @@ import { IPattern } from '@kanaries/loa';
 import { bin, binMap, mic, pureGeneralMic, rangeNormilize } from '@kanaries/loa';
 import { IFieldMeta, IResizeMode, IRow, IVegaSubset } from "../interfaces";
 import { deepcopy } from "../utils";
-import { encodingDecorate } from "./base/utils";
+import { applyZeroScale, encodingDecorate } from "./base/utils";
 import { applyDefaultSort, applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
 import { autoMark, autoStat, encode, humanHabbit, VizEncoder } from './distribution/bot';
 export const geomTypeMap: { [key: string]: any } = {
@@ -25,6 +25,7 @@ interface BaseVisProps {
     width?: number;
     height?: number;
     stepSize?: number;
+    excludeScaleZero?: boolean;
 }
 
 function isSetEqual(a1: any[], a2: any[]) {
@@ -87,7 +88,7 @@ function autoCoord(fields: IFieldMeta[], spec: {[key: string]: any}, dataSource:
 }
 
 export function labDistVis(props: BaseVisProps): IVegaSubset {
-    const { pattern, dataSource, width, height, interactive, resizeMode = IResizeMode.auto, stepSize } = props;
+    const { pattern, dataSource, width, height, interactive, resizeMode = IResizeMode.auto, stepSize, excludeScaleZero } = props;
     const fields = deepcopy(pattern.fields) as IFieldMeta[];
     const measures = fields.filter(f => f.analyticType === 'measure');
     const dimensions = fields.filter(f => f.analyticType === 'dimension');
@@ -156,6 +157,9 @@ export function labDistVis(props: BaseVisProps): IVegaSubset {
         statFields,
         statEncodes
     })
+    if (excludeScaleZero) {
+        applyZeroScale(enc)
+    }
     // if (filters && filters.length > 0) {
     //     const field = filters[0].field;
     //     enc.color = {

@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
-import { Callout, IconButton, TextField } from '@fluentui/react';
+import { Callout, IconButton, PrimaryButton, TextField } from '@fluentui/react';
 import { useId } from '@fluentui/react-hooks';
 import DistributionChart from '../metaView/distChart';
 import DropdownSelect from '../../../components/dropDownSelect'
@@ -124,10 +124,14 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
     const { dataSourceStore } = getGlobalStore();
     const { name, code, meta, disable, isPreview, onChange, extSuggestions, isExt } = props;
     const [showNameEditor, setShowNameEditor] = useState<boolean>(false);
+    const [headerName, setHeaderName] = useState<string>(name);
     const optionsOfBIFieldType = useBIFieldTypeOptions();
     const buttonId = useId('edit-button');
     const canDelete = !isPreview && isExt;
 
+    useEffect(() => {
+        setHeaderName(name);
+    }, [name])
     return (
         <HeaderCellContainer isPreview={isPreview}>
             <div className="info-container">
@@ -180,13 +184,23 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                     showNameEditor && <Callout
                         target={`#${buttonId}`}
                         onDismiss={() => { setShowNameEditor(false); }}
+                        
                     >
                         <div className="p-4">
                             <h1 className="text-xl">{intl.get('dataSource.table.edit')}</h1>
                             <div className="p-4">
-                                <TextField label={intl.get('dataSource.table.fieldName')} value={name} onChange={(e, val) => {
-                                    onChange && onChange(code, 'name', `${val}`)
+                                <TextField label={intl.get('dataSource.table.fieldName')} value={headerName} onChange={(e, val) => {
+                                    setHeaderName(`${val}`);
                                 }} />
+                            </div>
+                            <div className="p-4">
+                                <PrimaryButton
+                                    text={intl.get('function.confirm')}
+                                    onClick={() => {
+                                        onChange && onChange(code, 'name', headerName)
+                                        setShowNameEditor(false);
+                                    }}
+                                />
                             </div>
                         </div>
                     </Callout>

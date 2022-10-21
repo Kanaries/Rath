@@ -64,7 +64,8 @@ export class MegaAutomationStore {
                 width: 320,
                 height: 320
             },
-            nlg: false
+            nlg: false,
+            excludeScaleZero: false,
         };
         this.globalConstraints = {
             dimensions: [],
@@ -249,7 +250,8 @@ export class MegaAutomationStore {
                 width: visualConfig.resizeConfig.width,
                 height: visualConfig.resizeConfig.height,
                 interactive: visualConfig.zoom,
-                stepSize: 32
+                stepSize: 32,
+                excludeScaleZero: visualConfig.excludeScaleZero
             })
         } else if (vizMode === 'strict') {
             this.mainViewSpec = labDistVis({
@@ -259,7 +261,8 @@ export class MegaAutomationStore {
                 height: visualConfig.resizeConfig.height,
                 interactive: visualConfig.zoom,
                 stepSize: 32,
-                dataSource: this.dataSource
+                dataSource: this.dataSource,
+                excludeScaleZero: visualConfig.excludeScaleZero
             })
         }
     }
@@ -308,6 +311,9 @@ export class MegaAutomationStore {
             // const viewData = await this.getViewData(iSpace.dimensions, iSpace.measures);
 
         }
+    }
+    public refreshMainView () {
+        this.emitViewChangeTransaction(this.pageIndex)
     }
     public setAggState (aggState: boolean) {
         this.visualConfig.defaultAggregated = aggState;

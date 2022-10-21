@@ -11,10 +11,11 @@ const OpCont = styled.div`
 const OperationBar: React.FC = props => {
     const { semiAutoStore } = useGlobalStore();
     const { mainVizSetting } = semiAutoStore;
-    const { interactive, resize, debug, nlg } = mainVizSetting;
+    const { interactive, resize, debug, nlg, excludeScaleZero } = mainVizSetting;
 
     return <OpCont>
         <VizOperationBar
+            excludeScaleZero={excludeScaleZero}
             nlg={nlg}
             gap={10}
             debug={debug}
@@ -47,6 +48,10 @@ const OperationBar: React.FC = props => {
                 } else if (key === 'nlg') {
                     semiAutoStore.updateMainVizSettings(s => {
                         s.nlg = value
+                    })
+                } else if (key === 'excludeScaleZero') {
+                    semiAutoStore.updateMainVizSettings(s => {
+                        s.excludeScaleZero = value
                     })
                 }
             }}

@@ -1,4 +1,4 @@
-import { IFieldMeta, IResizeMode } from "../../interfaces";
+import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
 
 export interface ISizeConfig {
     mode: IResizeMode;
@@ -66,4 +66,11 @@ export function encodingDecorate (encoding: any, fields: IFieldMeta[], statField
         return true
     }
     return false;
+}
+
+export function applyZeroScale (encoding: IVegaSubset['encoding']) {
+    Object.values(encoding).forEach(ch => {
+        if (!ch.scale) ch.scale = {};
+        ch.scale.zero = false;
+    })
 }

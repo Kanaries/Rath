@@ -12,11 +12,12 @@ interface VizOperationBarProps {
     width: number;
     height: number;
     nlg: boolean;
-    onValueChange: (key: 'debug' | 'interactive' | 'resizeMode' | 'width' | 'height' | 'nlg', value: any) => void;
+    excludeScaleZero: boolean;
+    onValueChange: (key: 'debug' | 'interactive' | 'resizeMode' | 'width' | 'height' | 'nlg' | 'excludeScaleZero', value: any) => void;
 }
 
 const VizOperationBar: React.FC<VizOperationBarProps> = props => {
-    const { gap = 10, width, height, interactive, debug, resizeMode, onValueChange, stackLayout, nlg } = props;
+    const { gap = 10, width, height, interactive, debug, resizeMode, onValueChange, stackLayout, nlg, excludeScaleZero } = props;
     const resizeModeList = useMemo<IDropdownOption[]>(() => {
         return [
             {
@@ -31,6 +32,14 @@ const VizOperationBar: React.FC<VizOperationBarProps> = props => {
     }, [])
 
     return <Stack tokens={{ childrenGap: gap }} horizontal={stackLayout === 'horizontal'}>
+        <Stack.Item>
+            <Toggle label={intl.get('megaAuto.operation.excludeScaleZero')}
+                checked={excludeScaleZero}
+                onChange={(e, checked) => {
+                    onValueChange('excludeScaleZero', Boolean(checked))
+                }}
+            />
+        </Stack.Item>
         <Stack.Item>
             <Toggle label={intl.get('megaAuto.operation.debug')}
                 checked={debug}

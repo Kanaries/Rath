@@ -315,7 +315,8 @@
             "resizeMode": {
                 "resizable": "resizable",
                 "none": "none"
-            }
+            },
+            "excludeScaleZero": "exclude scale zero"
         }
     },
     "semiAuto": {

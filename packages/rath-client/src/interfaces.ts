@@ -125,6 +125,7 @@ export interface PreferencePanelConfig {
     },
     visMode: 'common' | 'dist';
     nlg: boolean;
+    excludeScaleZero: boolean;
 }
 export interface IDBFieldMeta {
     fid: string;
