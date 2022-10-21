@@ -65,3 +65,7 @@ export const getOperator = (op: Omit<OpToken, 'output'>, loc?: ConstructorParame
     loc
   );
 };
+
+export const getOperatorList = () => {
+  return operators as readonly Readonly<Operator>[];
+};

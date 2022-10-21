@@ -16,9 +16,7 @@ import CrInfo from './components/crInfo';
 import ProgressiveDashboard from './pages/progressiveDashboard';
 import Painter from './pages/painter';
 import Collection from './pages/collection';
-import parse from './latiao/program/index';
 
-console.log('app', parse);
 
 function App() {
   const { langStore, commonStore } = useGlobalStore();

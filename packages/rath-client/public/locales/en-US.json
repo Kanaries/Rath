@@ -240,8 +240,13 @@
         },
         "extend": {
             "title": "Extend Information",
+            "manual": "LaTiao",
+            "editor": "Editor",
             "autoExtend": "More fields can be generated from { count } existing fields to enhance analyze and exploration.",
-            "findThem": "Check",
+            "findThem": "Find Next",
+            "empty": "No column exported.",
+            "apply": "Apply",
+            "cancel": "Cancel",
             "auto": "Extend Suggestions",
             "suggestion": {
                 "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months."
@@ -360,6 +365,21 @@
             "color": "Color",
             "clean": "Erase",
             "create": "Create"
+        }
+    },
+    "latiao": {
+        "maybe": {
+            "keyword": "keyword",
+            "operator": "operator",
+            "fid": "field"
+        },
+        "keyword": {
+            "out": "Append field to data."
+        },
+        "op": {
+            "$id": "Generate an automatically incrementing id field, starting from 1.",
+            "$order": "Return rank index of the data sorted on the target numeric field, starting from 1.",
+            "$dict": "Return rank index of the data sorted on the target string field, starting from 1."
         }
     }
 }

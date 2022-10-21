@@ -4,7 +4,7 @@ import type { FieldToken } from '../program/token';
 
 
 subscribeOperator<['RATH.FIELD::set']>({
-  name: '$sort',
+  name: '$order',
   args: ['RATH.FIELD::set'],
   returns: 'RATH.FIELD::set',
   exec: async (context, [source]) => {
@@ -35,7 +35,7 @@ subscribeOperator<['RATH.FIELD::set']>({
 });
 
 subscribeOperator<['RATH.FIELD::group']>({
-  name: '$sort',
+  name: '$order',
   args: ['RATH.FIELD::group'],
   returns: 'RATH.FIELD::set',
   exec: async (context, [source]) => {
@@ -66,7 +66,7 @@ subscribeOperator<['RATH.FIELD::group']>({
 });
 
 subscribeOperator<['RATH.FIELD::collection']>({
-  name: '$order',
+  name: '$dict',
   args: ['RATH.FIELD::collection'],
   returns: 'RATH.FIELD::set',
   exec: async (context, [source]) => {

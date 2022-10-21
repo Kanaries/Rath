@@ -240,8 +240,13 @@
         },
         "extend": {
             "title": "扩展信息",
+            "manual": "LaTiao",
+            "editor": "编辑器",
             "autoExtend": "{ count } 个字段可以自动扩展生成新的字段以增强分析和探索。",
-            "findThem": "查看",
+            "findThem": "查看下一个",
+            "empty": "没有导出的列。",
+            "apply": "扩展",
+            "cancel": "取消",
             "auto": "扩展建议",
             "suggestion": {
                 "dateTimeExpand": "将数据映射到不同时间单位。|时间序列可能在不同的单位尺度下展现出更强的周期性或相关性。"
@@ -360,6 +365,21 @@
             "color": "上色",
             "clean": "橡皮",
             "create": "创建"
+        }
+    },
+    "latiao": {
+        "maybe": {
+            "keyword": "关键字",
+            "operator": "算子",
+            "fid": "字段"
+        },
+        "keyword": {
+            "out": "扩充这个字段。"
+        },
+        "op": {
+            "$id": "生成一列从 1 起自增的 ID。",
+            "$order": "计算数据按目标字段数学排序后的位次，从 1 开始。",
+            "$dict": "计算数据按目标字段字典排序后的位次，从 1 开始。"
         }
     }
 }

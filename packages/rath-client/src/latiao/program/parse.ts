@@ -1,8 +1,6 @@
 import { parse as p } from '@babel/parser';
-import { exec } from 'child_process';
-import { IRow, IMuteFieldBase } from 'visual-insights';
 import type { Context } from '.';
-import { LaTiaoParseError, LaTiaoSyntaxError, LaTiaoTypeError } from './error';
+import { LaTiaoSyntaxError, LaTiaoTypeError } from './error';
 import { getOperator } from './operator';
 import type { OpToken, Token, TokenType } from './token';
 
@@ -13,16 +11,16 @@ export type ASTExpression = (ReturnType<typeof p>['program']['body'][0] & {
 
 export type ASTNode = {};
 
-const prefix = `/* LaTiao 100 */
+export const prefix = `/* LaTiao 100 */
 
 function main() {
-  `;
+`;
 
-const suffix = `
+export const suffix = `
 }
 `;
 
-const validNameRegExp = /^[^$\s,\.;:'"`\+\-~!?<>@#%^&*/\\|]+$/;
+export const validNameRegExp = /^[^$\s,\.;:'"`\+\-~!?<>@#%^&*/\\|]+$/;
 
 const translate = (source: string): string => {
   return `${prefix}${
@@ -156,9 +154,17 @@ const resolveCall = (exp: CallExpression, context: Context, out: () => void): Op
 
 const parse = (source: string, context: Context): OpToken[] => {
   let expCount = 0;
-  const res = p(
-    translate(source)
-  );
+
+  let res = undefined as unknown as ReturnType<typeof p>;
+
+  try {
+    res = p(translate(source));
+  } catch (error) {
+    throw new LaTiaoSyntaxError(
+      'Failed to parse.',
+    );
+  }
+
   const body = findEntry(res);
 
   if (body.length === 0) {

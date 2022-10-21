@@ -562,7 +562,6 @@ export class DataSourceStore {
                         if (f.extInfo?.extOpt !== 'dateTimeExpand') {
                             return false;
                         }
-                        // TODO: 非空校验？
                         return true;
                     })
                 ];
@@ -573,6 +572,28 @@ export class DataSourceStore {
                 title: 'Expand DateTime API Error',
                 type: 'error',
                 content: `[extension]${error}`
+            })
+        }
+    }
+
+    public mergeExtended(data: readonly IRow[], fields: IFieldMeta[]) {
+        try {
+            let { cleanedData } = this;
+            console.log(cleanedData.map((row, i) => Object.assign({}, data[i], row)));
+
+            runInAction(() => {
+                this.rawData = cleanedData.map((row, i) => Object.assign({}, data[i], row));
+                this.mutFields = [
+                    ...this.mutFields,
+                    ...fields,
+                ];
+            })
+        } catch (error) {
+            console.error(error)
+            notify({
+                title: 'mergeExtended Error',
+                type: 'error',
+                content: `[merge]${error}`
             })
         }
     }
