@@ -4,7 +4,7 @@ import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag } from "../interfaces";
+import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions } from "../interfaces";
 import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";

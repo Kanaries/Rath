@@ -86,13 +86,13 @@ const createDateObject = (
           if (typeof p === 'string' && p.match(/^[YMWD]{1,4}$/)) {
             const tokens: DateToken[] = [];
 
-            for (const member of p) {
-              switch (member as DateObjectDimension) {
-                case 'Y': {
+            // for (const member of p) {
+            //   switch (member as DateObjectDimension) {
+            //     case 'Y': {
 
-                }
-              }
-            }
+            //     }
+            //   }
+            // }
 
             return tokens;
           }
