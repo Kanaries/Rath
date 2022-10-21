@@ -1,7 +1,7 @@
-import { ChoiceGroup, IChoiceGroupOption, Separator, Toggle } from '@fluentui/react';
-import React from 'react';
+import { ChoiceGroup, IChoiceGroupOption, IconButton, PrimaryButton, Separator, TextField, Toggle } from '@fluentui/react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import intl from 'react-intl-universal'
+import intl from 'react-intl-universal';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { IFieldMeta, IRawField, IRow } from '../../../interfaces';
 import FieldFilter from '../../../components/fieldFilter/index';
@@ -10,7 +10,7 @@ import DistributionChart from './distChart';
 
 const MetaContainer = styled.div`
     overflow: auto;
-`
+`;
 const MetaItemContainer = styled.div`
     overflow: hidden;
     position: relative;
@@ -33,13 +33,15 @@ const MetaItemContainer = styled.div`
     .disable {
         background-color: #9e9e9e;
     }
-    h1{
+    h1 {
         font-weight: 500;
         font-size: 26px;
         color: #333;
     }
-    .fid{
-        font-size: 12px; font-weight: 400; color: rgb(89, 89, 89);
+    .fid {
+        font-size: 12px;
+        font-weight: 400;
+        color: rgb(89, 89, 89);
     }
     padding: 1em;
     margin: 1em;
@@ -48,31 +50,36 @@ const MetaItemContainer = styled.div`
     .flex-container {
         display: flex;
     }
-    .operation-column{
+    .operation-column {
         margin-left: 1em;
         padding: 0em 1em;
-        border-left: 1px solid rgb(229, 231, 235)
+        border-left: 1px solid rgb(229, 231, 235);
     }
-    .dist-graphics{
+    .dist-graphics {
         flex-grow: 0;
     }
-`
+    .col-name-container {
+        display: flex;
+        align-items: center;
+    }
+`;
 
 const IndicatorCard = styled.div`
     padding: 0em 1em;
     margin-left: 1em;
-    .ind-title{
-        font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+    .ind-title {
+        font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto,
+            'Helvetica Neue', sans-serif;
         font-size: 14px;
         font-weight: 600;
         color: rgb(50, 49, 48);
         box-sizing: border-box;
     }
-    .ind-value{
+    .ind-value {
         font-size: 3em;
         font-weight: 500;
     }
-`
+`;
 
 interface MetaItemProps {
     colKey: string;
@@ -81,96 +88,133 @@ interface MetaItemProps {
     analyticType: IAnalyticType;
     dist: IRow[];
     disable?: boolean;
-    onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
+    onChange?: (fid: string, propKey: keyof IRawField, value: any) => void;
 }
 
-
-const MetaItem: React.FC<MetaItemProps> = props => {
+const MetaItem: React.FC<MetaItemProps> = (props) => {
     const { colKey, colName, semanticType, analyticType, dist, disable, onChange } = props;
-    const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map(ch => ({
-        ...ch,
-        text: intl.get(`common.${ch.key}`)
-    }))
+    const [editing, setEditing] = React.useState(false);
+    const [editingName, setEditingName] = React.useState(colName);
+    useEffect(() => {
+        setEditingName(colName);
+    }, [colName]);
 
-    const SEMANTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = SEMANTIC_TYPE_CHOICES.map(ch => ({
+    const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map((ch) => ({
         ...ch,
-        text: intl.get(`common.semanticType.${ch.key}`)
-    }))
-    
-    return <MetaItemContainer className="ms-depth-4">
-        <div className={`${analyticType} bottom-bar`}></div>
-        <h1>{colName}</h1>
-        <div className="fid">Column ID: {colKey}</div>
-        <Separator />
-        <div className="flex-container">
-            <DistributionChart
-                dataSource={dist}
-                x="memberName"
-                y="count"
-                analyticType={analyticType}
-                semanticType={semanticType} />
-            <IndicatorCard>
-                <div className="ind-title ms-Label root-130">{intl.get('dataSource.meta.uniqueValue')}</div>
-                <div className="ind-value">{dist.length}</div>
-            </IndicatorCard>
-            <div className="operation-column">
-                <ChoiceGroup
-                    label={intl.get('dataSource.meta.analyticType')}
-                    options={ANALYTIC_TYPE_CHOICES_LANG}
-                    selectedKey={analyticType}
-                    onChange={(ev, option) => {
-                        onChange && option && onChange(colKey, 'analyticType', option.key)
-                    }}
+        text: intl.get(`common.${ch.key}`),
+    }));
+
+    const SEMANTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = SEMANTIC_TYPE_CHOICES.map((ch) => ({
+        ...ch,
+        text: intl.get(`common.semanticType.${ch.key}`),
+    }));
+
+    return (
+        <MetaItemContainer className="ms-depth-4">
+            <div className={`${analyticType} bottom-bar`}></div>
+            <div className="col-name-container">
+                {!editing && (
+                    <React.Fragment>
+                        <h1>{colName}</h1>
+                        <IconButton
+                            iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
+                            onClick={() => {
+                                setEditing(true);
+                            }}
+                        />
+                    </React.Fragment>
+                )}
+                {
+                    editing && <React.Fragment>
+                        <TextField value={editingName} onChange={(e, val) => {
+                            setEditingName(val || '');
+                        }} />
+                        <PrimaryButton
+                            style={{ marginLeft: '3px' }}
+                            text={intl.get('function.confirm')}
+                            onClick={() => {
+                                onChange && onChange(colKey, 'name', editingName);
+                                setEditing(false);
+                            }}
+                        />
+                    </React.Fragment>
+                }
+            </div>
+            <div className="fid">Column ID: {colKey}</div>
+            <Separator />
+            <div className="flex-container">
+                <DistributionChart
+                    dataSource={dist}
+                    x="memberName"
+                    y="count"
+                    analyticType={analyticType}
+                    semanticType={semanticType}
                 />
+                <IndicatorCard>
+                    <div className="ind-title ms-Label root-130">{intl.get('dataSource.meta.uniqueValue')}</div>
+                    <div className="ind-value">{dist.length}</div>
+                </IndicatorCard>
+                <div className="operation-column">
+                    <ChoiceGroup
+                        label={intl.get('dataSource.meta.analyticType')}
+                        options={ANALYTIC_TYPE_CHOICES_LANG}
+                        selectedKey={analyticType}
+                        onChange={(ev, option) => {
+                            onChange && option && onChange(colKey, 'analyticType', option.key);
+                        }}
+                    />
+                </div>
+                <div className="operation-column">
+                    <ChoiceGroup
+                        label={intl.get('dataSource.meta.semanticType')}
+                        options={SEMANTIC_TYPE_CHOICES_LANG}
+                        selectedKey={semanticType}
+                        onChange={(ev, option) => {
+                            onChange && option && onChange(colKey, 'semanticType', option.key);
+                        }}
+                    />
+                </div>
+                <div className="operation-column">
+                    <Toggle
+                        label={intl.get('dataSource.meta.disable.title')}
+                        checked={!disable}
+                        onText={intl.get('dataSource.meta.disable.on')}
+                        offText={intl.get('dataSource.meta.disable.off')}
+                        onChange={(ev, checked) => {
+                            onChange && onChange(colKey, 'disable', !checked);
+                        }}
+                    />
+                </div>
+                <div className="operation-column">
+                    <FieldFilter fid={colKey} />
+                </div>
             </div>
-            <div className="operation-column">
-                <ChoiceGroup
-                    label={intl.get('dataSource.meta.semanticType')}
-                    options={SEMANTIC_TYPE_CHOICES_LANG}
-                    selectedKey={semanticType}
-                    onChange={(ev, option) => {
-                        onChange && option && onChange(colKey, 'semanticType', option.key)
-                    }}
-                />
-            </div>
-            <div className="operation-column">
-                <Toggle
-                    label={intl.get('dataSource.meta.disable.title')}
-                    checked={!disable}
-                    onText={intl.get('dataSource.meta.disable.on')}
-                    offText={intl.get('dataSource.meta.disable.off')}
-                    onChange={(ev, checked) => {
-                        onChange && onChange(colKey, 'disable', !checked)
-                    }}
-                />
-            </div>
-            <div className="operation-column">
-                <FieldFilter fid={colKey} />
-            </div>
-        </div>
-    </MetaItemContainer>
-}
+        </MetaItemContainer>
+    );
+};
 
 interface MetaListProps {
     metas: IFieldMeta[];
-    onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
+    onChange?: (fid: string, propKey: keyof IRawField, value: any) => void;
 }
-const MetaList: React.FC<MetaListProps> = props => {
+const MetaList: React.FC<MetaListProps> = (props) => {
     const { metas, onChange } = props;
-    return <MetaContainer>
-        {
-            metas.map(m => <MetaItem
-                key={m.fid}
-                colKey={m.fid}
-                colName={`${m.name}`}
-                semanticType={m.semanticType}
-                analyticType={m.analyticType}
-                dist={m.distribution}
-                disable={m.disable}
-                onChange={onChange}
-            />)
-        }
-    </MetaContainer>
-}
+    return (
+        <MetaContainer>
+            {metas.map((m) => (
+                <MetaItem
+                    key={m.fid}
+                    colKey={m.fid}
+                    colName={`${m.name}`}
+                    semanticType={m.semanticType}
+                    analyticType={m.analyticType}
+                    dist={m.distribution}
+                    disable={m.disable}
+                    onChange={onChange}
+                />
+            ))}
+        </MetaContainer>
+    );
+};
 
 export default MetaList;
