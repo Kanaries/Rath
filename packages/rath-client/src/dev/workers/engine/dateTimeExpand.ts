@@ -246,7 +246,7 @@ interface DateTimeInfoArray {
 const UnknownDateTimeInfo: DateTimeInfo = {}
 
 type InfoArrayType = keyof DateTimeInfoArray
-export type InfoType = keyof DateTimeInfo
+export type DateTimeInfoType = keyof DateTimeInfo
 function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
     // TODO: Polyfills: 中文格式等
     // TODO: assume the same dateTime format or support different format in one column
@@ -263,7 +263,7 @@ function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
     for (let i = 0; i < dateTime.length; ++i) {
         let info = parseDateTime(dateTime[i], max_cnt > 0 ? reg_id : undefined)
         Object.keys(info).forEach(key => {
-            let infoKey = key as InfoType, infoArrayKey = key as InfoArrayType
+            let infoKey = key as DateTimeInfoType, infoArrayKey = key as InfoArrayType
             if (info[infoKey] !== undefined && info[infoKey] !== "") {
                 if (infoArray[infoArrayKey] === undefined) {
                     infoArray[infoArrayKey] = new Array<any>(dateTime.length)
