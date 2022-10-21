@@ -3,7 +3,7 @@
  */
 import { IPattern } from '@kanaries/loa';
 import { IResizeMode, IVegaSubset } from "../interfaces";
-import { encodingDecorate } from "./base/utils";
+import { applyZeroScale, encodingDecorate } from "./base/utils";
 import { autoMark, autoStat, encode, humanHabbit, VizEncoder } from './distribution/bot';
 import { applyDefaultSort, applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
 export const geomTypeMap: { [key: string]: any } = {
@@ -22,10 +22,11 @@ interface BaseVisProps {
     width?: number;
     height?: number;
     stepSize?: number;
+    excludeScaleZero?: boolean;
 }
 
 export function distVis(props: BaseVisProps): IVegaSubset {
-    const { pattern, resizeMode = IResizeMode.auto, width, height, interactive, stepSize } = props;
+    const { pattern, resizeMode = IResizeMode.auto, width, height, interactive, stepSize, excludeScaleZero } = props;
     const { fields } = pattern;
     const { statFields, distFields, statEncodes } = autoStat(fields);
     let markType = autoMark(fields, statFields, distFields, statEncodes)
@@ -39,6 +40,9 @@ export function distVis(props: BaseVisProps): IVegaSubset {
         statFields,
         statEncodes
     })
+    if (excludeScaleZero) {
+        applyZeroScale(enc);
+    }
     // if (filters && filters.length > 0) {
     //     const field = filters[0].field;
     //     enc.color = {

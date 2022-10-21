@@ -301,7 +301,8 @@
             "resizeMode": {
                 "resizable": "可控尺寸",
                 "none": "自适应"
-            }
+            },
+            "excludeScaleZero": "排除坐标0点"
         }
     },
     "semiAuto": {

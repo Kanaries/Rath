@@ -15,6 +15,7 @@ import {
     IChoiceGroupOption,
 } from '@fluentui/react';
 import intl from 'react-intl-universal';
+import { runInAction } from 'mobx';
 import { useGlobalStore } from '../../store';
 import { EXPLORE_VIEW_ORDER } from '../../store/megaAutomation';
 import { IResizeMode } from '../../interfaces';
@@ -47,18 +48,25 @@ const PreferencePanel: React.FC = () => {
         megaAutoStore.setShowPreferencePannel(false);
     }, [megaAutoStore]);
 
+    const submitChange = useCallback(() => {
+        runInAction(() => {
+            megaAutoStore.setShowPreferencePannel(false);
+            megaAutoStore.refreshMainViewSpec();
+        })
+    }, [megaAutoStore])
+
     const onRenderFooterContent = () => (
         <div>
-            <PrimaryButton onClick={closeVisualPannel}>Save</PrimaryButton>
+            <PrimaryButton onClick={submitChange}>{intl.get('function.confirm')}</PrimaryButton>
         </div>
     );
 
-    const vizModeOptions  = useMemo<IChoiceGroupOption[]>(() => {
+    const vizModeOptions = useMemo<IChoiceGroupOption[]>(() => {
         return [
             { text: intl.get('semiAuto.main.vizsys.lite'), key: 'lite' },
-            { text: intl.get('semiAuto.main.vizsys.strict'), key: 'strict' }
-        ]
-    }, [])
+            { text: intl.get('semiAuto.main.vizsys.strict'), key: 'strict' },
+        ];
+    }, []);
 
     return (
         <Panel
@@ -70,14 +78,14 @@ const PreferencePanel: React.FC = () => {
             onRenderFooterContent={onRenderFooterContent}
         >
             <Stack.Item>
-            <ChoiceGroup
-                label={intl.get('semiAuto.main.vizsys.title')}
-                onChange={(e, op) => {
-                    op && megaAutoStore.setVizMode(op.key as 'lite' | 'strict')
-                }}
-                selectedKey={vizMode}
-                options={vizModeOptions}
-            />
+                <ChoiceGroup
+                    label={intl.get('semiAuto.main.vizsys.title')}
+                    onChange={(e, op) => {
+                        op && megaAutoStore.setVizMode(op.key as 'lite' | 'strict');
+                    }}
+                    selectedKey={vizMode}
+                    options={vizModeOptions}
+                />
             </Stack.Item>
             <Stack.Item>
                 <Dropdown
@@ -91,6 +99,17 @@ const PreferencePanel: React.FC = () => {
                 />
             </Stack.Item>
             <Stack tokens={{ childrenGap: 10 }}>
+                <Stack.Item>
+                    <Toggle
+                        label={intl.get('megaAuto.operation.excludeScaleZero')}
+                        checked={visualConfig.excludeScaleZero}
+                        onChange={(e, checked) => {
+                            megaAutoStore.setVisualConig((cnf) => {
+                                cnf.excludeScaleZero = Boolean(checked);
+                            });
+                        }}
+                    />
+                </Stack.Item>
                 <Stack.Item>
                     <Toggle
                         label={intl.get('megaAuto.operation.debug')}
