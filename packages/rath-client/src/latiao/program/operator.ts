@@ -1,7 +1,6 @@
-import { nanoid } from 'nanoid';
 import type { Context } from '.';
-import { LaTiaoError, LaTiaoSyntaxError } from './error';
-import type { TokenType, Token } from './token';
+import { LaTiaoError, LaTiaoNameError, LaTiaoTypeError } from './error';
+import type { TokenType, Token, OpToken } from './token';
 
 
 export type OperatorName = `$${string}`;
@@ -13,9 +12,9 @@ type MapParameters<A extends TokenType[]> = {
 type MapReturnType<R extends TokenType> = Token & { type: R };
 
 export type Operator<
-  A extends TokenType[] = TokenType[],
+  A extends Exclude<TokenType, 'OP'>[] = Exclude<TokenType, 'OP'>[],
+  R extends Exclude<TokenType, 'OP'> = Exclude<TokenType, 'OP'>,
   P extends MapParameters<A> = MapParameters<A>,
-  R extends TokenType = TokenType,
   S extends MapReturnType<R> = MapReturnType<R>,
 > = {
   name: OperatorName;
@@ -27,38 +26,42 @@ export type Operator<
   ) => Promise<S>;
 };
 
-const operators: Readonly<Operator[]> = [
-  {
-    name: '$id',
-    args: [],
-    returns: 'RATH.FIELD',
-    exec: async context => {
-      return {
-        type: 'RATH.FIELD',
-        fid: nanoid(),
-        name: 'id',
-        mode: 'set',
-      };
-    },
-  },
-];
+const operators: Operator[] = [];
 
-export const getOperator = (op: Token & { type: 'OP' }, loc?: ConstructorParameters<typeof LaTiaoError>[1]): Readonly<Operator> => {
+export const subscribeOperator = <
+  A extends Exclude<TokenType, 'OP'>[] = Exclude<TokenType, 'OP'>[],
+  R extends Exclude<TokenType, 'OP'> = Exclude<TokenType, 'OP'>,
+  P extends MapParameters<A> = MapParameters<A>,
+  S extends MapReturnType<R> = MapReturnType<R>,
+>(op: Operator<A, R, P, S>): void => {
+  operators.push(op as unknown as Operator);
+};
+
+export const getOperator = (op: Omit<OpToken, 'output'>, loc?: ConstructorParameters<typeof LaTiaoError>[1]): Readonly<Operator> => {
   const overloads = operators.filter(o => o.name === op.op);
 
   if (overloads.length === 0) {
-    throw new LaTiaoSyntaxError(`"${op.op}" is not an operator.`, loc);
+    throw new LaTiaoNameError(`"${op.op}" is not an operator.`, loc);
   }
+
+  const input = op.args.map(arg => arg.type === 'OP' ? arg.output : arg.type);
 
   for (const overload of overloads) {
     if (overload.args.length !== op.args.length) {
       continue;
-    } else if (!overload.args.every((arg, i) => arg === op.args[i].type)) {
+    }
+    
+    if (!overload.args.every((arg, i) => arg === input[i])) {
       continue;
     }
 
     return overload;
   }
 
-  throw new LaTiaoSyntaxError(`No overload of ${op.op} matches arguments: [${op.args.map(a => a.type).join(', ')}]`, loc);
+  throw new LaTiaoTypeError(
+    `No overload of ${op.op} matches arguments: [${input.join(', ')}]\nPossible overloads: ${
+      overloads.map((o, i) => `\n  [${i + 1}] ${op.op}(${o.args.join(',')})`).join('')
+    }`,
+    loc
+  );
 };

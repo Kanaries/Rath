@@ -38,6 +38,12 @@ export class LaTiaoSyntaxError extends LaTiaoError {
 
 }
 
+export class LaTiaoNameError extends LaTiaoError {
+
+  override name = 'LaTiao Name Error';
+
+}
+
 export class LaTiaoTypeError extends LaTiaoError {
 
   override name = 'LaTiao Type Error';
