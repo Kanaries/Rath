@@ -18,7 +18,20 @@
         "addVar": "Add Variable",
         "addFilter": "Add Filter",
         "field": "Field",
-        "star": "Star"
+        "star": "Star",
+        "stat": {
+            "unique": "Unique",
+            "min": "Minimum",
+            "max": "Maximum",
+            "mean": "Mean",
+            "median": "Median",
+            "stdev": "Standard Deviation",
+            "count": "Count",
+            "sum": "Sum",
+            "qt_25": "25th Percentile",
+            "qt_75": "75th Percentile",
+            "qt_50": "Median"
+        }
     },
     "menu": {
         "dataSource": "DataSource",
@@ -96,6 +109,7 @@
         "viewMode": "View Mode",
         "metaView": "Meta View",
         "dataView": "Table View",
+        "statView": "Statistics View",
         "charset": "character encoding",
         "databaseType": "Select Database",
         "connectUri": "Connection URI",
@@ -107,6 +121,13 @@
         "connectorConfig": "Connector Settings",
         "connectorService": "Connector Service URL (Optional)",
         "apply": "Apply&Test",
+        "statViewInfo": {
+            "title": "Statistics View",
+            "desc": "Statistics View is a quick way to get a sense of the data. It shows the distribution of each field in the dataset. You can click the field name to see the distribution of the field in detail.",
+            "explore": "Explore In Dataset",
+            "originStatTable": "Original Data Statistics",
+            "selectionStatTable": "Selection Data Statistics"
+        },
         "dbProgress": [
             {
                 "label": "Connection",

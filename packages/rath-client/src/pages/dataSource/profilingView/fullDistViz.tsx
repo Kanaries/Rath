@@ -1,9 +1,7 @@
-import React, { useRef, useEffect, useMemo, useState } from 'react';
-import embed, { vega, Result } from 'vega-embed';
-import { IAnalyticType, ISemanticType } from 'visual-insights';
+import { getRange, IAnalyticType, ISemanticType } from '@kanaries/loa';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import embed, { Result, vega } from 'vega-embed';
 import { IRow } from '../../../interfaces';
-import { getRange } from '../../../utils';
-
 const DATA_NAME = 'dataSource';
 const DEFAULT_BIN_SIZE = 10;
 function fl2bins(data: IRow[], valueField: string, ctField: string, binSize: number | undefined = DEFAULT_BIN_SIZE) {
@@ -22,7 +20,7 @@ function fl2bins(data: IRow[], valueField: string, ctField: string, binSize: num
         [ctField]: b
     }))
 }
-export interface DistributionChartProps {
+interface FullDistVizProps {
     semanticType: ISemanticType;
     analyticType: IAnalyticType;
     x: string;
@@ -30,12 +28,12 @@ export interface DistributionChartProps {
     width?: number;
     height?: number;
     maxItemInView?: number;
-    dataSource: IRow[]
+    dataSource: IRow[];
+    onSelect: (values: IRow[]) => void;
 }
-
-const DistributionChart: React.FC<DistributionChartProps> = (props) => {
+const FullDistViz: React.FC<FullDistVizProps> = (props) => {
     const chart = useRef<HTMLDivElement>(null);
-    const { x, y, dataSource, semanticType, width = 180, height = 80, maxItemInView = 10 } = props;
+    const { x, y, dataSource, semanticType, width = 180, height = 80, maxItemInView = 1000, onSelect } = props;
     const [view, setView] = useState<Result['view']>();
     // 是否有分箱的ordinal列
     const hasBinIndex = useMemo(() => {
@@ -60,11 +58,10 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
         } else if (semanticType === 'nominal') {
             adjustData = [...dataSource].sort((a, b) => b['y'] - a['y']).slice(0, maxItemInView)
         } else if (semanticType === 'quantitative') {
-            adjustData = fl2bins(dataSource, x, y, maxItemInView)
+            adjustData = fl2bins(dataSource, x, y, 10)
         } else {
             adjustData = dataSource
         }
-        adjustData = adjustData.slice(0, 100)
         return adjustData
     }, [dataSource, x, y, semanticType, maxItemInView])
 
@@ -85,16 +82,18 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 data: {
                     name: DATA_NAME
                 },
-                view: {
-                    stroke: null,
-                    fill: null
-                },
                 height,
                 width,
                 mark: {
-                    type: ['quantitative', 'temporal'].includes(semanticType) ? 'area' : 'bar',
+                    type: ['temporal'].includes(semanticType) ? 'area' : 'bar',
                     opacity: 0.86
                 },
+                params: [
+                    {
+                        name: 'brush',
+                        select: { type: 'interval', encodings: ['x']},
+                    }
+                ],
                 encoding: {
                     x: {
                         field: x,
@@ -105,15 +104,23 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                             "labelOverlap": "parity",
                             ticks: false
                         },
-                        //   axis: null,    
                         type: semanticType === 'quantitative' ? 'ordinal' : semanticType, sort: sortBy
                     },
-                    y: { field: y, type: 'quantitative', aggregate: 'sum', title: null, axis: null }
+                    y: { field: y, type: 'quantitative', aggregate: 'sum', title: null },
+                    color: semanticType !== 'temporal' ? {
+                        condition: {
+                            param: 'brush',
+                        },
+                        value: 'gray'
+                    } : undefined
                 }
             }, {
                 actions: false
             }).then(res => {
                 setView(res.view);
+                res.view.addSignalListener('brush', (name, value) => {
+                    onSelect(value[x] || [])
+                })
                 return res
             })
             return () => {
@@ -124,7 +131,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 }).catch(console.error)
             }
         }
-    }, [x, y, sortBy, semanticType, width, height, maxItemInView])
+    }, [x, y, sortBy, semanticType, width, height, maxItemInView, onSelect])
     useEffect(() => {
         if (view) {
             try {
@@ -139,4 +146,4 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     return <div ref={chart}></div>
 }
 
-export default DistributionChart;
+export default FullDistViz;

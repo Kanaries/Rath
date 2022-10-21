@@ -127,7 +127,8 @@ export interface IDatasetBase {
 
 export enum IDataPreviewMode {
     meta = 'meta',
-    data = 'data'
+    data = 'data',
+    stat = 'stat'
 }
 
 export enum ITaskTestMode {
