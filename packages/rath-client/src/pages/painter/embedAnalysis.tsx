@@ -26,6 +26,7 @@ const EmbedAnalysis: React.FC<EmbedAnalysisProps> = props => {
         spec={spec}
         i18nLang={i18nLang}
         hideDataSourceConfig
+        keepAlive
     />
 }
 

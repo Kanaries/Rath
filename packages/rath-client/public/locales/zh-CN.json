@@ -349,6 +349,7 @@
         "last": "上一步",
         "next": "下一步",
         "addLabel": "添加标签",
+        "newField": "绘制字段",
         "tools": {
             "move": "移动",
             "color": "上色",

@@ -307,7 +307,7 @@ const Painter: React.FC = (props) => {
             }))
             .concat({
                 fid: LABEL_FIELD_KEY,
-                name: 'new field',
+                name: intl.get('painter.newField'),
                 semanticType: 'nominal',
                 analyticType: 'dimension',
             });
