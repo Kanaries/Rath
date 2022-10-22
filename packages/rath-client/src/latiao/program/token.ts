@@ -1,7 +1,8 @@
+import type { IFieldMeta } from '../../interfaces';
 import type { OperatorName } from './operator';
 
 
-type DateObjectDimension = 'Y' | 'M' | 'W' | 'D' | 'h' | 'm' | 's';
+export type DateObjectDimension = 'Y' | 'M' | 'W' | 'D' | 'h' | 'm' | 's';
 
 export type FieldType = (
   | 'set'         // number set not supporting operation
@@ -45,6 +46,8 @@ export interface FieldToken<T extends FieldType = FieldType> extends IToken {
   fid: string;
   name: string;
   mode: T;
+  extInfo?: IFieldMeta['extInfo'];
+  out: false | string;
 }
 
 export interface FieldListToken<T extends FieldType[] = FieldType[]> extends IToken {
@@ -56,9 +59,9 @@ export interface FieldListToken<T extends FieldType[] = FieldType[]> extends ITo
 
 export interface DateToken extends IToken {
   type: '$DATE';
-  source: string;
-  fid: string;
-  dimensions: DateObjectDimension[];
+  source: FieldToken;
+  dimensions: 'all' | DateObjectDimension[];
+  exports: false | string;
 }
 
 export type Token = (

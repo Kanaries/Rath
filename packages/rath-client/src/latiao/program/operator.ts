@@ -20,6 +20,8 @@ export type Operator<
   name: OperatorName;
   args: Readonly<A>;
   returns: R;
+  /** @default false */
+  secret?: boolean;
   exec: (
     context: Context,
     args: P,
@@ -67,5 +69,5 @@ export const getOperator = (op: Omit<OpToken, 'output'>, loc?: ConstructorParame
 };
 
 export const getOperatorList = () => {
-  return operators as readonly Readonly<Operator>[];
+  return operators.filter(op => !op.secret) as readonly Readonly<Operator>[];
 };

@@ -8,7 +8,6 @@ import { IRow, IFieldMeta } from '../../interfaces';
 import { rich } from '../../latiao/ide-helper';
 import createProgram, { resolveFields } from '../../latiao/program';
 import { getOperatorList } from '../../latiao/program/operator';
-import { FieldToken, FieldType } from '../../latiao/program/token';
 import { computeFieldMetaService } from '../../services';
 import { useGlobalStore } from '../../store';
 import DistributionChart from './metaView/distChart';
@@ -306,12 +305,13 @@ const LaTiaoConsole = observer(() => {
             return {
                 fid: f.fid,
                 name: f.name ?? f.fid,
-                mode: ({
+                mode: typeof cleanedData[0]?.[f.fid] === 'string' ? 'collection' : ({
                     nominal: 'collection',
                     ordinal: 'set',
                     quantitative: 'group',
                     temporal: 'group',
                 } as const)[f.semanticType],
+                out: f.name ?? f.fid,
             };
         });
 
@@ -347,11 +347,14 @@ const LaTiaoConsole = observer(() => {
                 serviceRef.current = s;
 
                 s.then(meta => {
-                    if (serviceRef.current !== s) {
-                        return meta;
-                    }
-                    
-                    setPreview(meta);
+                    if (serviceRef.current === s) {
+                        setPreview(
+                            meta.map((f, i) => ({
+                                ...f,
+                                extInfo: fields[i].extInfo,
+                            }))
+                        );
+                    }                    
                 });
 
                 // console.log('扩展数据', {fields, f, data, rows});

@@ -13,6 +13,12 @@ subscribeOperator({
       fid: nanoid(),
       name: 'Data ID',
       mode: 'set',
+      extInfo: {
+        extOpt: 'LaTiao.$id',
+        extFrom: [],
+        extInfo: '',
+      },
+      out: false,
     };
     
     context.write(field, new Array<0>(context.size).fill(0).map((_, i) => i + 1));
