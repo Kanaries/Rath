@@ -39,6 +39,12 @@ const color = (token: string, prev: string | null, fields: readonly IRawField[])
         {token}
       </span>
     );
+  } else if (/^[*+-/]$/.test(token)) {
+    return (
+      <span style={{ color: 'rgb(193,118,11)' }}>
+        {token}
+      </span>
+    );
   } else if (token.startsWith('$')) {
     if (getOperatorList().find(op => op.name === token)) {
       return (
@@ -120,8 +126,7 @@ export const rich = (source: string, fields: readonly IRawField[]): JSX.Element 
   let prev: string | null = null;
 
   while (temp) {
-    const next = /^(\s+|('[^']*')|("[^"]*")|[$\w]+|\(|\)|,|\.)/.exec(temp)?.[0];
-    console.log([next])
+    const next = /^(\s+|('[^']*')|("[^"]*")|[*+-/]|[$\w]+|\(|\)|,|\.)/.exec(temp)?.[0];
     
     if (next) {
       tokens.push(color(next, prev, fields));

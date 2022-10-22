@@ -5,17 +5,17 @@ import type { FieldToken } from '../program/token';
 
 
 subscribeOperator({
-  name: '$inset',
+  name: '$log',
   args: ['RATH.FIELD::group'],
   returns: 'RATH.FIELD::group',
   exec: async (context, [source]) => {
     const field: FieldToken<'group'> = {
       type: 'RATH.FIELD::group',
       fid: nanoid(),
-      name: `${source.name} Scaled to -1 ~ +1`,
+      name: `log(${source.name})`,
       mode: 'group',
       extInfo: {
-        extOpt: 'LaTiao.$inset',
+        extOpt: 'LaTiao.$log',
         extFrom: resolveDependencies([source.fid], context),
         extInfo: '',
       },
@@ -23,32 +23,25 @@ subscribeOperator({
     };
 
     const col = await context.col(source) as number[];
-
-    const validNum = col.filter(d => Number.isFinite(d));
-
-    const [min, max] = validNum.reduce<[number, number]>(([_min, _max], d) => [
-      Math.min(_min, d),
-      Math.max(_max, d),
-    ], [Infinity, -Infinity]);
     
-    context.write(field, col.map(d => (d - min) / (max - min) * 2 - 1));
+    context.write(field, col.map(d => Math.log(d || NaN)));
 
     return field;
   },
 });
 
 subscribeOperator({
-  name: '$bound',
+  name: '$log1p',
   args: ['RATH.FIELD::group'],
   returns: 'RATH.FIELD::group',
   exec: async (context, [source]) => {
     const field: FieldToken<'group'> = {
       type: 'RATH.FIELD::group',
       fid: nanoid(),
-      name: `${source.name} Scaled to 0 ~ 1`,
+      name: `log1p(${source.name})`,
       mode: 'group',
       extInfo: {
-        extOpt: 'LaTiao.$bound',
+        extOpt: 'LaTiao.$log',
         extFrom: resolveDependencies([source.fid], context),
         extInfo: '',
       },
@@ -56,32 +49,25 @@ subscribeOperator({
     };
 
     const col = await context.col(source) as number[];
-
-    const validNum = col.filter(d => Number.isFinite(d));
-
-    const [min, max] = validNum.reduce<[number, number]>(([_min, _max], d) => [
-      Math.min(_min, d),
-      Math.max(_max, d),
-    ], [Infinity, -Infinity]);
     
-    context.write(field, col.map(d => (d - min) / (max - min)));
+    context.write(field, col.map(d => Math.log((1 + d) || NaN)));
 
     return field;
   },
 });
 
-subscribeOperator({
-  name: '$normalize',
-  args: ['RATH.FIELD::group'],
+subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
+  name: '$log',
+  args: ['RATH.FIELD::group', 'JS.number'],
   returns: 'RATH.FIELD::group',
-  exec: async (context, [source]) => {
+  exec: async (context, [source, { value: base }]) => {
     const field: FieldToken<'group'> = {
       type: 'RATH.FIELD::group',
       fid: nanoid(),
-      name: `Normalized ${source.name}`,
+      name: `log ${base} (${source.name})`,
       mode: 'group',
       extInfo: {
-        extOpt: 'LaTiao.$normalize',
+        extOpt: 'LaTiao.$log',
         extFrom: resolveDependencies([source.fid], context),
         extInfo: '',
       },
@@ -89,30 +75,25 @@ subscribeOperator({
     };
 
     const col = await context.col(source) as number[];
-
-    const validNum = col.filter(d => Number.isFinite(d));
-
-    const mean = validNum.reduce<number>((sum, d) => sum + d, 0) / validNum.length;
-    const sd = (validNum.reduce<number>((m, d) => m + ((d - mean) ** 2), 0) / validNum.length) ** 0.5;
-
-    context.write(field, col.map(d => (d - mean) / sd));
+    
+    context.write(field, col.map(d => Math.log(d) / Math.log(base || NaN)));
 
     return field;
   },
 });
 
 subscribeOperator({
-  name: '$ReLU',
+  name: '$log2',
   args: ['RATH.FIELD::group'],
   returns: 'RATH.FIELD::group',
   exec: async (context, [source]) => {
     const field: FieldToken<'group'> = {
       type: 'RATH.FIELD::group',
       fid: nanoid(),
-      name: `ReLU(${source.name})`,
+      name: `log2(${source.name})`,
       mode: 'group',
       extInfo: {
-        extOpt: 'LaTiao.$ReLU',
+        extOpt: 'LaTiao.$log2',
         extFrom: resolveDependencies([source.fid], context),
         extInfo: '',
       },
@@ -120,25 +101,25 @@ subscribeOperator({
     };
 
     const col = await context.col(source) as number[];
-
-    context.write(field, col.map(d => Math.max(0, d)));
+    
+    context.write(field, col.map(d => Math.log2(d || NaN)));
 
     return field;
   },
 });
 
 subscribeOperator({
-  name: '$sigmoid',
+  name: '$log10',
   args: ['RATH.FIELD::group'],
   returns: 'RATH.FIELD::group',
   exec: async (context, [source]) => {
     const field: FieldToken<'group'> = {
       type: 'RATH.FIELD::group',
       fid: nanoid(),
-      name: `S(${source.name})`,
+      name: `log10(${source.name})`,
       mode: 'group',
       extInfo: {
-        extOpt: 'LaTiao.$sigmoid',
+        extOpt: 'LaTiao.$log10',
         extFrom: resolveDependencies([source.fid], context),
         extInfo: '',
       },
@@ -146,8 +127,8 @@ subscribeOperator({
     };
 
     const col = await context.col(source) as number[];
-
-    context.write(field, col.map(d => 1 / (1 + Math.exp(- 1 * d))));
+    
+    context.write(field, col.map(d => Math.log10(d || NaN)));
 
     return field;
   },

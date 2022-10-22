@@ -113,7 +113,7 @@ const Container = styled.div({
             
             '&.err-msg': {
                 margin: '1em 0',
-                height: '5em',
+                height: '8em',
                 fontSize: '0.8rem',
                 lineHeight: '1.5em',
                 color: '#c22',
@@ -138,6 +138,9 @@ const Container = styled.div({
                 padding: '0.2em 1em',
                 display: 'flex',
                 flexDirection: 'row',
+                '.highlight': {
+                    backgroundColor: 'rgba(0, 120, 212, 0.12)',
+                },
                 ':hover': {
                     backgroundColor: 'rgba(0, 120, 212, 0.3)',
                 },
@@ -155,9 +158,6 @@ const Container = styled.div({
                     flexGrow: 1,
                     flexShrink: 1,
                 },
-            },
-            '&:not(:hover) > *:first-child': {
-                backgroundColor: 'rgba(0, 120, 212, 0.12)',
             },
         },
 
@@ -203,7 +203,15 @@ export type InputMaybe = {
 
 const LaTiaoConsole = observer(() => {
     const { dataSourceStore } = useGlobalStore();
-    const { cleanedData, mutFields } = dataSourceStore;
+    const { rawData, extData, fields: mutFields } = dataSourceStore;
+
+    const mergedData = useMemo(() => {
+        return rawData.map((row, i) => Object.fromEntries(
+            mutFields.map<[string, string | number]>(({ fid, extInfo }) => {
+                return [fid, extInfo ? extData.get(fid)!.data[i] : row[fid]];
+            })
+        ));
+    }, [rawData, extData, mutFields]);
 
     const [open, setOpen] = useState(false);
     const [code, setCode] = useState('');
@@ -266,7 +274,7 @@ const LaTiaoConsole = observer(() => {
 
         maybe.push(...fields.map(f => ({
             type: 'fid' as const,
-            content: f.fid,
+            content: `_${f.fid}`,
             description: f.name ?? f.fid,
         })));
 
@@ -307,9 +315,9 @@ const LaTiaoConsole = observer(() => {
     const program = useMemo(() => {
         const fields = mutFields.map<Parameters<typeof createProgram>[1][0]>(f => {
             return {
-                fid: f.fid,
+                fid: `_${f.fid}`,
                 name: f.name ?? f.fid,
-                mode: typeof cleanedData[0]?.[f.fid] === 'string' ? 'collection' : ({
+                mode: typeof mergedData[0]?.[f.fid] === 'string' ? 'collection' : ({
                     nominal: 'collection',
                     ordinal: 'set',
                     quantitative: 'group',
@@ -320,9 +328,13 @@ const LaTiaoConsole = observer(() => {
         });
 
         const p = createProgram(
-            cleanedData,
+            mergedData.map(row => Object.fromEntries(Object.entries(row).map(([k, v]) => [`_${k}`, v]))),
             fields,
-            (fields, data) => {
+            (fs, data) => {
+                const fields = fs.map(f => ({
+                    ...f,
+                    fid: f.fid.slice(1),
+                }));
                 setErrMsg(['', [-1, -1]]);
 
                 const rows: IRow[] = data[0].map(d => ({
@@ -372,7 +384,7 @@ const LaTiaoConsole = observer(() => {
         });
 
         return p;
-    }, [cleanedData, mutFields]);
+    }, [mergedData, mutFields]);
 
     useEffect(() => {
         if (open) {
@@ -418,6 +430,23 @@ const LaTiaoConsole = observer(() => {
     }>({ x: 0, y: 0, w: 0, h: 0, H: 0, offset: 0 });
 
     const editorRef = useRef<HTMLDivElement>(null);
+    const cursorPosRef = useRef<number>();
+
+    useEffect(() => {
+        if (cursorPosRef.current) {
+            if (open) {
+                const textarea = editorRef.current?.querySelector('textarea');
+    
+                if (textarea) {
+                    textarea.setSelectionRange(cursorPosRef.current, null);
+                    // textarea.selectionStart = cursorPosRef.current;
+                    // textarea.selectionEnd = cursorPosRef.current;
+                }
+            }
+
+            cursorPosRef.current = undefined;
+        }
+    }, [open]);
 
     useEffect(() => {
         const textarea = editorRef.current?.querySelector('textarea');
@@ -457,13 +486,35 @@ const LaTiaoConsole = observer(() => {
         }
     }, [open]);
 
+    const submitMaybe = (data: string) => {
+        const textarea = editorRef.current?.querySelector('textarea');
+
+        if (open && textarea) {
+            cursorPosRef.current = textarea.selectionEnd;
+
+            setCode(
+                `${
+                    code.slice(0, editing.pos[0])
+                }${data}${
+                    code.slice(editing.pos[1])
+                }`
+            );
+        }
+    };
+
+    const [maybeIdx, setMaybeIdx] = useState(0);
+
+    useEffect(() => {
+        setMaybeIdx(0);
+    }, [inputMaybe]);
+
     return (
         <Fragment>
             <CommandButton
                 text={intl.get('dataSource.extend.manual')}
-                disabled={cleanedData.length === 0}
+                disabled={rawData.length === 0}
                 iconProps={{ iconName: 'AppIconDefaultAdd' }}
-                onClick={() => cleanedData.length && setOpen(true)}
+                onClick={() => rawData.length && setOpen(true)}
             />
             {open && (
                 <Mask onClick={() => setOpen(false)}>
@@ -481,19 +532,27 @@ const LaTiaoConsole = observer(() => {
                                     autoAdjustHeight
                                     resizable={false}
                                     style={{
-                                        minHeight: '10vmin',
+                                        minHeight: '15vmin',
                                         maxHeight: '30vh',
                                     }}
                                     onKeyDown={e => {
-                                        if (e.key === 'Enter' && !e.shiftKey && inputMaybe.length > 0) {
-                                            setCode(
-                                                `${
-                                                    code.slice(0, editing.pos[0])
-                                                }${inputMaybe[0].content}${
-                                                    code.slice(editing.pos[1])
-                                                }`
-                                            );
+                                        if (e.key === 'Tab') {
+                                            const target = inputMaybe[maybeIdx];
+
+                                            if (target) {
+                                                submitMaybe(target.content);
+                                                setMaybeIdx(0);
+                                            } else {
+                                                // const ele = editorRef.current?.querySelector('textarea') as HTMLTextAreaElement;
+
+                                                // setCode(`${
+                                                //     code.slice(0, ele.selectionStart)
+                                                // }`);
+                                            }
+
                                             e.preventDefault();
+                                        // } else if (e.key === 'ArrowDown') {
+
                                         }
                                     }}
                                 />
@@ -512,7 +571,10 @@ const LaTiaoConsole = observer(() => {
                                             transform: `translateY(${-1 * position.offset}px)`,
                                         }}
                                     >
-                                        {rich(code, mutFields)}
+                                        {rich(code, mutFields.map(f => ({
+                                            ...f,
+                                            fid: `_${f.fid}`,
+                                        })))}
                                     </pre>
                                 </div>
                             </div>
@@ -520,15 +582,11 @@ const LaTiaoConsole = observer(() => {
                                 {inputMaybe.map((maybe, i) => (
                                     <div
                                         key={i}
+                                        className={i === maybeIdx ? 'highlight' : undefined}
                                         onClick={
                                             () => {
-                                                setCode(
-                                                    `${
-                                                        code.slice(0, editing.pos[0])
-                                                    }${maybe.content}${
-                                                        code.slice(editing.pos[1])
-                                                    }`
-                                                );
+                                                submitMaybe(maybe.content);
+                                                setMaybeIdx(0);
                                             }
                                         }
                                     >
@@ -547,7 +605,7 @@ const LaTiaoConsole = observer(() => {
                                         </div>
                                         {i === 0 && (
                                             <span>
-                                                {'[Enter]'}
+                                                {'[Tab]'}
                                             </span>
                                         )}
                                     </div>
@@ -599,11 +657,11 @@ const LaTiaoConsole = observer(() => {
                                         if (preview.length === 0 || !resultRef.current) {
                                             return;
                                         }
-                                        if (resultRef.current.length !== cleanedData.length) {
+                                        if (resultRef.current.length !== rawData.length) {
                                             console.error(
                                                 'Lengths do not match:',
                                                 resultRef.current[0].length,
-                                                cleanedData.length,
+                                                rawData.length,
                                             );
 
                                             return;

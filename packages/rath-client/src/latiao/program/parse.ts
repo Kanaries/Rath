@@ -72,6 +72,9 @@ const findEntry = (res: ReturnType<typeof p>) => {
       case 'CallExpression': {
         return [expression];
       }
+      case 'BinaryExpression': {
+        return [expression];
+      }
       case 'AssignmentExpression': {
         return [expression];
       }
@@ -98,6 +101,49 @@ export type Statement = ReturnType<typeof p>['program']['body'][0];
 export type ExportExpression = ReturnType<typeof findEntry>[0] & { type: 'AssignmentExpression' };
 export type CallExpression = ReturnType<typeof findEntry>[0] & { type: 'CallExpression' };
 export type SliceExpression = ReturnType<typeof findEntry>[0] & { type: 'MemberExpression' };
+export type BinOpExpression = ReturnType<typeof findEntry>[0] & { type: 'BinaryExpression' };
+
+const resolveNode = (exp: CallExpression['arguments'][0], context: Context, out: () => void): Token => {
+  switch (exp.type) {
+    case 'Identifier': {
+      const { name } = exp;
+      const field = context.resolveFid(name);
+      
+      return field;
+    }
+    case 'CallExpression': {
+      return resolveCall(exp, context, out);
+    }
+    case 'AssignmentExpression': {
+      return resolveExport(exp, context, out);
+    }
+    case 'MemberExpression': {
+      return resolveSlice(exp, context, out);
+    }
+    case 'StringLiteral': {
+      return {
+        type: 'JS.string',
+        value: exp.value,
+      };
+    }
+    case 'NumericLiteral': {
+      return {
+        type: 'JS.number',
+        value: exp.value,
+      };
+    }
+    case 'BinaryExpression': {
+      return resolveBinOp(exp, context, out);
+    }
+    default: {
+      console.log('->', exp);
+      throw new LaTiaoSyntaxError(
+        'Unexpected token.',
+        exp,
+      );
+    }
+  }
+};
 
 const resolveExport = (exp: ExportExpression, context: Context, out: () => void): OpToken => {
   if (exp.operator !== '=' || exp.left.type !== 'Identifier' || !exp.left.name.startsWith('$')) {
@@ -115,6 +161,15 @@ const resolveExport = (exp: ExportExpression, context: Context, out: () => void)
 
     out();
   
+    return {
+      ...op,
+      exports: name,
+    };
+  } else if (exp.right.type === 'BinaryExpression') {
+    const op = resolveBinOp(exp.right, context, out);
+
+    out();
+
     return {
       ...op,
       exports: name,
@@ -184,6 +239,63 @@ const resolveSlice = (exp: SliceExpression, context: Context, out: () => void): 
   );
 };
 
+const resolveBinOp = (exp: BinOpExpression, context: Context, out: () => void): OpToken => {
+  if (exp.left.type === 'PrivateName') {
+    throw new LaTiaoSyntaxError(
+      'Unexpected token.',
+      exp,
+    );
+  }
+
+  const left = resolveNode(exp.left, context, out);
+  const right = resolveNode(exp.right, context, out);
+
+  switch (exp.operator) {
+    case '+': {
+      return {
+        type: 'OP',
+        op: '$__add',
+        args: [left, right],
+        output: 'RATH.FIELD::group',
+        exports: false,
+      };
+    }
+    case '-': {
+      return {
+        type: 'OP',
+        op: '$__minus',
+        args: [left, right],
+        output: 'RATH.FIELD::group',
+        exports: false,
+      };
+    }
+    case '*': {
+      return {
+        type: 'OP',
+        op: '$__multiply',
+        args: [left, right],
+        output: 'RATH.FIELD::group',
+        exports: false,
+      };
+    }
+    case '/': {
+      return {
+        type: 'OP',
+        op: '$__divide',
+        args: [left, right],
+        output: 'RATH.FIELD::group',
+        exports: false,
+      };
+    }
+    default: {
+      throw new LaTiaoSyntaxError(
+        `Invalid syntax: ${exp.operator}.`,
+        exp,
+      );
+    }
+  }
+};
+
 const resolveCall = (exp: CallExpression, context: Context, out: () => void): OpToken => {
   const opName = exp.callee.type === 'Identifier' ? exp.callee.name : null;
 
@@ -195,35 +307,7 @@ const resolveCall = (exp: CallExpression, context: Context, out: () => void): Op
   }
 
   const args: Token[] = exp.arguments.map(arg => {
-    switch (arg.type) {
-      case 'Identifier': {
-        const { name } = arg;
-        const field = context.resolveFid(name);
-        
-        return field;
-      }
-      case 'CallExpression': {
-        return resolveCall(arg, context, out);
-      }
-      case 'AssignmentExpression': {
-        return resolveExport(arg, context, out);
-      }
-      case 'MemberExpression': {
-        return resolveSlice(arg, context, out);
-      }
-      case 'StringLiteral': {
-        return {
-          type: 'JS.string',
-          value: arg.value,
-        };
-      }
-      default: {
-        throw new LaTiaoTypeError(
-          'Invalid argument.',
-          arg,
-        );
-      }
-    }
+    return resolveNode(arg, context, out);
   });
 
   const op: OpToken = {
@@ -282,6 +366,8 @@ const parse = (source: string, context: Context): OpToken[] => {
       t.type === 'AssignmentExpression' ? resolveExport(
         t, context, () => expCount += 1
       ) : t.type === 'MemberExpression' ? resolveSlice(
+        t, context, () => expCount += 1
+      ) : t.type === 'BinaryExpression' ? resolveBinOp(
         t, context, () => expCount += 1
       ) : resolveCall(
         t, context, () => expCount += 1
