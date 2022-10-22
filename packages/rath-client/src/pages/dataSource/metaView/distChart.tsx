@@ -18,7 +18,7 @@ function fl2bins(data: IRow[], valueField: string, ctField: string, binSize: num
     bins[binSize - 1] += bins[binSize]
     bins.pop();
     return bins.map((b, i) => ({
-        [valueField]: Math.round(_min + i * step),
+        [valueField]: (_min + i * step).toPrecision(3),
         [ctField]: b
     }))
 }
@@ -74,6 +74,8 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
             sortBy = '-y'
         } else if (semanticType === 'ordinal' && hasBinIndex) {
             sortBy = { field: 'index' }
+        } else if (semanticType === 'quantitative') {
+            sortBy = { field: 'x' }
         }
         return sortBy
     }, [semanticType, hasBinIndex])
