@@ -493,7 +493,7 @@ export class DataSourceStore {
     }
 
     protected async getExtSuggestions(): Promise<IFieldMetaWithExtSuggestions[]> {
-        return this.mutFields.map(mf => {
+        return this.fields.map(mf => {
             const meta = this.fieldMetas.find(m => m.fid === mf.fid);
             const dist = meta ? meta.distribution : [];
 
