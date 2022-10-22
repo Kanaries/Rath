@@ -353,30 +353,32 @@ export class DataSourceStore {
     }
 
     public updateFieldAnalyticType (type: IAnalyticType, fid: string) {
-        const target = this.mutFields.find(f => f.fid === fid);
+        const target = this.mutFields.find(f => f.fid === fid) ?? this.extFields.find(f => f.fid === fid);
         if (target) {
             target.analyticType = type;
         }
     }
 
     public updateFieldSemanticType (type: ISemanticType, fid: string) {
-        const target = this.mutFields.find(f => f.fid === fid);
+        const target = this.mutFields.find(f => f.fid === fid) ?? this.extFields.find(f => f.fid === fid);
         if (target) {
             target.semanticType = type;
             // 触发fieldsMeta监控可以被执行
             this.mutFields = [...this.mutFields];
+            this.extFields = [...this.extFields];
         }
     }
     // public updateFieldInfo <K extends keyof IRawField> (fieldId: string, fieldPropKey: K, value: IRawField[K]) {
     public updateFieldInfo (fieldId: string, fieldPropKey: string, value: any) {
         // type a = keyof IRawField
-        const target = this.mutFields.find(f => f.fid === fieldId);
+        const target = this.mutFields.find(f => f.fid === fieldId) ?? this.extFields.find(f => f.fid === fieldId);
         if (target) {
             // @ts-ignore
             target[fieldPropKey] = value;
             // target.type = type;
             // 触发fieldsMeta监控可以被执行
             this.mutFields = [...this.mutFields];
+            this.extFields = [...this.extFields];
         }
     }
 
