@@ -1,6 +1,6 @@
-import { IRow, ISemanticType } from '@kanaries/loa';
+import { IRow, ISemanticType, IFieldEncode } from '@kanaries/loa';
 import { Statistics } from 'visual-insights';
-import { IFieldEncode, IFieldMeta, IVegaSubset } from '../../interfaces';
+import { IFieldMeta, IVegaSubset } from '../../interfaces';
 
 const { groupBy } = Statistics;
 
@@ -15,8 +15,8 @@ function isSetEqual(a1: any[], a2: any[]) {
 }
 export function autoMark(
     fields: IFieldMeta[],
-    statFields: IFieldMeta[] = [],
-    originFields: IFieldMeta[] = [],
+    transedFields: IFieldMeta[] = [],
+    pureFields: IFieldMeta[] = [],
     statEncodes: IFieldEncode[] = [],
     dataSource?: IRow[]
 ) {
@@ -24,17 +24,20 @@ export function autoMark(
     // const orderStatFields = [...statFields];
     // orderFields.sort((a, b) => b.features.entropy - a.features.entropy);
     // orderStatFields.sort((a, b) => b.features.entropy - a.features.entropy);
-    const allFields = [...statFields, ...originFields].sort((a, b) => b.features.entropy - a.features.entropy);
+    const allFields = [...transedFields, ...pureFields].sort((a, b) => b.features.entropy - a.features.entropy);
     const semanticFields = allFields.slice(0, 2);
     const semantics = semanticFields.map((f) => f.semanticType);
     // if (fields.length === 1) {
     //     return 'bar'
     // }
     // FIXME: 时间序列多目标
-    // if (statFields.length > 0) {
+    // if (transedFields.length > 0) {
     //     // 仅对count生效。
     //     return 'bar'
     // }
+    if (transedFields.length + pureFields.length <= 1) {
+        return 'tick'
+    }
     if (statEncodes.find((f) => f.aggregate === 'count')) {
         return 'bar';
     }
@@ -105,6 +108,9 @@ export function autoStat(
 ): {
     statEncodes: IFieldEncode[];
 } {
+    if (specifiedEncodes.length > 0) {
+        return { statEncodes: [...specifiedEncodes] }
+    }
     const statEncodes: IFieldEncode[] = [];
     const cond_singlefield = fields.length === 1;
     const cond_nonquanmeasure =
@@ -122,8 +128,6 @@ export function autoStat(
             statEncodes.push({
                 aggregate: 'count',
             });
-        } else {
-            statEncodes.push(existedEncode);
         }
     } else {
         const targets = fields.filter((f) => f.analyticType === 'measure');
@@ -133,7 +137,7 @@ export function autoStat(
             targets.forEach((f) => {
                 const existedEncode = specifiedEncodes.find((e) => e.field === f.fid);
                 if (existedEncode) {
-                    statEncodes.push(existedEncode);
+                    return
                 } else {
                     statEncodes.push({
                         field: f.fid,
@@ -148,7 +152,7 @@ export function autoStat(
                 .forEach((f) => {
                     const existedEncode = specifiedEncodes.find((e) => e.field === f.fid);
                     if (existedEncode) {
-                        statEncodes.push(existedEncode);
+                        return
                     } else {
                         statEncodes.push({
                             field: f.fid,
@@ -160,6 +164,7 @@ export function autoStat(
                 });
         }
     }
+    statEncodes.push(...specifiedEncodes)
     return { statEncodes };
 }
 

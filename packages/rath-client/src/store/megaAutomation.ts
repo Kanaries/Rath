@@ -1,4 +1,4 @@
-import { IPattern } from '@kanaries/loa';
+import { IFieldEncode, IPattern } from '@kanaries/loa';
 import { computed, makeAutoObservable, observable, runInAction, toJS } from 'mobx';
 import { Specification, IInsightSpace, ISpec } from 'visual-insights';
 import { STORAGE_FILE_SUFFIX } from '../constants';
@@ -238,7 +238,8 @@ export class MegaAutomationStore {
         const viewFields = this.fieldMetas.filter(f => iSpace.dimensions.includes(f.fid) || iSpace.measures.includes(f.fid));
         this.mainViewPattern = {
             fields: viewFields,
-            imp: iSpace.score || 0
+            imp: iSpace.score || 0,
+            encodes: []
         }
         return this.mainViewPattern;
     }
@@ -252,7 +253,8 @@ export class MegaAutomationStore {
                 height: visualConfig.resizeConfig.height,
                 interactive: visualConfig.zoom,
                 stepSize: 32,
-                excludeScaleZero: visualConfig.excludeScaleZero
+                excludeScaleZero: visualConfig.excludeScaleZero,
+                specifiedEncodes: pattern.encodes
             })
         } else if (vizMode === 'strict') {
             this.mainViewSpec = labDistVis({
@@ -263,13 +265,30 @@ export class MegaAutomationStore {
                 interactive: visualConfig.zoom,
                 stepSize: 32,
                 dataSource: this.dataSource,
-                excludeScaleZero: visualConfig.excludeScaleZero
+                excludeScaleZero: visualConfig.excludeScaleZero,
+                specifiedEncodes: pattern.encodes
             })
         }
     }
     public refreshMainViewSpec () {
         if (this.mainViewPattern) {
             this.createMainViewSpec(this.mainViewPattern)
+        }
+    }
+    public addFieldEncode2MainViewPattern (encode: IFieldEncode) {
+        if (this.mainViewPattern) {
+            if (!this.mainViewPattern.encodes) {
+                this.mainViewPattern.encodes = [];
+            }
+            this.mainViewPattern.encodes.push(encode)
+        }
+    }
+    public removeFieldEncodeFromMainViewPattern (encode: IFieldEncode) {
+        if (this.mainViewPattern) {
+            if (!this.mainViewPattern.encodes) {
+                this.mainViewPattern.encodes = [];
+            }
+            this.mainViewPattern.encodes = this.mainViewPattern.encodes.filter(e => e.field !== encode.field)
         }
     }
     public addField2MainViewPattern (fid: string) {

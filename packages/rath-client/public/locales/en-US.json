@@ -17,6 +17,7 @@
         },
         "addVar": "Add Variable",
         "addFilter": "Add Filter",
+        "addEncode": "Add Computation",
         "field": "Field",
         "star": "Star",
         "stat": {

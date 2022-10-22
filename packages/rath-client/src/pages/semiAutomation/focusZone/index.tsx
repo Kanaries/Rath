@@ -8,11 +8,9 @@ import ViewField from '../../megaAutomation/vizOperation/viewField';
 import FieldPlaceholder from '../../../components/fieldPlaceholder';
 import { MainViewContainer } from '../components';
 import FilterCreationPill from '../../../components/filterCreationPill';
+import EncodeCreationPill from '../../../components/encodeCreationPill';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
-
-
-
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
@@ -88,6 +86,36 @@ const FocusZone: React.FC = props => {
         <FilterCreationPill fields={fieldMetas} onFilterSubmit={(field, filter) => {
             semiAutoStore.addMainViewFilter(filter);
         }} />
+        </div>
+        <div className="fields-container">
+        {
+            mainView &&  mainView.encodes && mainView.encodes.map(f => {
+                if (f.field === undefined) return   <ViewField
+                    key={"_"}
+                    type="measure"
+                    text="count"
+                    onRemove={() => {
+                        semiAutoStore.removeFieldEncodeFromMainViewPattern(f)
+                    }}
+                />
+                const targetField = fieldMetas.find(m => m.fid === f.field);
+                if (!targetField) return null;
+                let filterDesc = `${f.aggregate}(${targetField.name || targetField.fid})`;
+                return  <ViewField
+                    key={f.field}
+                    type={targetField.analyticType}
+                    text={filterDesc}
+                    onRemove={() => {
+                        semiAutoStore.removeFieldEncodeFromMainViewPattern(f)
+                    }}
+                />
+            })
+        }
+        {
+            mainView && <EncodeCreationPill fields={mainView.fields} onSubmit={(encode) => {
+                semiAutoStore.addFieldEncode2MainViewPattern(encode)
+            }} />
+        }
         </div>
         <div className="action-buttons">
             <PrimaryButton
