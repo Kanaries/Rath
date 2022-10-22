@@ -1853,10 +1853,10 @@
   dependencies:
     localforage "^1.10.0"
 
-"@kanaries/graphic-walker@^0.2.3":
-  version "0.2.3"
-  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.2.3.tgz#6662f800cb011744492a248d92fdf29ea3e747e9"
-  integrity sha512-UAc95Z5K88Z26JHk9oM+ZWIIIF91pzKJ2E2PnIWLQ6XDswI9El4YudlogNpiU0VkIZxA6YI/aVpR6wY7m81nfQ==
+"@kanaries/graphic-walker@^0.2.6":
+  version "0.2.6"
+  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.2.6.tgz#9cc2c942432cba11069e75559b9090f344f91df0"
+  integrity sha512-V6cWGRUEdB/IGgIstXFZqCu5rl7wJ6r0rEOz7ATTO260UN9cjypVcRCpMB95ybGdvkUk0T8jlFbcEonMNufVCQ==
   dependencies:
     "@heroicons/react" "^2.0.8"
     "@kanaries/web-data-loader" "0.1.5"

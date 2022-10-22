@@ -360,6 +360,7 @@
         "last": "Last",
         "next": "Next",
         "addLabel": "Add Label",
+        "newField": "Paint Field",
         "tools": {
             "move": "Move",
             "color": "Color",
