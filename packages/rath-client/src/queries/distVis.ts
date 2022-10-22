@@ -1,8 +1,8 @@
 /**
  * distVis 是分布式可视化的推荐，是比较新的模块，目前暂时用于dev模块，即voyager模式下的测试。
  */
-import { IPattern } from '@kanaries/loa';
-import { IFieldEncode, IResizeMode, IVegaSubset } from "../interfaces";
+import { IPattern, IFieldEncode } from '@kanaries/loa';
+import { IResizeMode, IVegaSubset } from "../interfaces";
 import { autoScale } from './base/scale';
 import { applyZeroScale, encodingDecorate, splitFieldsByEnocdes } from "./base/utils";
 import { autoMark, autoStat, encode, humanHabbit, VizEncoder } from './distribution/bot';

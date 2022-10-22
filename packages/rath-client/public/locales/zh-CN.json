@@ -21,6 +21,7 @@
         },
         "addVar": "添加变量",
         "addFilter": "添加筛选项",
+        "addEncode": "添加计算",
         "field": "字段",
         "star": "收藏",
         "stat": {

@@ -1,4 +1,5 @@
-import { IFieldEncode, IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
+import { IFieldEncode } from "@kanaries/loa";
+import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
 
 export interface ISizeConfig {
     mode: IResizeMode;

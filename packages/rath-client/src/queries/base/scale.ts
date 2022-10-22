@@ -1,5 +1,4 @@
-import { BIN_SIZE, IFieldMeta } from '@kanaries/loa';
-import { IFieldEncode } from '../../interfaces';
+import { BIN_SIZE, IFieldMeta, IFieldEncode } from '@kanaries/loa';
 
 interface IFieldCatByScale {
     scaleEncodes: IFieldEncode[];

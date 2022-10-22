@@ -1883,10 +1883,10 @@
     vega-lite "^5.2.0"
     visual-insights "0.7.15"
 
-"@kanaries/loa@0.0.11":
-  version "0.0.11"
-  resolved "https://registry.npmmirror.com/@kanaries/loa/-/loa-0.0.11.tgz#c4773a3f5d6826bc45fa5f94fa4ba7afa8466b92"
-  integrity sha512-lSVnQKkzQAD79u/VByy0mkhQOkn+RqH7eM1/fCeH+RTc/a2dN0L2q+VTdaB0Af4WALOOEdRS4M8tabuxAfH3JA==
+"@kanaries/loa@^0.0.13":
+  version "0.0.13"
+  resolved "https://registry.npmmirror.com/@kanaries/loa/-/loa-0.0.13.tgz#2a82a629d66c4fe866dab067215e799cc81305c3"
+  integrity sha512-/+JSy0wm3wUiYYHbPEvwpTYUgiFsoleGSjIXaV6KXD7O9KmLbdRRkhFxb99UJJzXAT7gje1kTWkPKcINaF0vng==
 
 "@kanaries/web-data-loader@0.1.5":
   version "0.1.5"

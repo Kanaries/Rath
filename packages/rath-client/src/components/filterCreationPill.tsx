@@ -15,7 +15,7 @@ import intl from 'react-intl-universal';
 import produce from 'immer';
 import { IFilter } from '@kanaries/loa';
 import { IFieldMeta } from '../interfaces';
-import FilterPlaceholder from './filterPlaceholder';
+import BasePillPlaceholder from './basePillPlaceholder';
 import SetSelection from './fieldFilter/setSelection';
 import RangeSelection from './fieldFilter/rangeSelection';
 
@@ -92,7 +92,7 @@ const FilterCreationPill: React.FC<FilterCreationPillProps> = (props) => {
     };
     return (
         <div ref={container}>
-            <FilterPlaceholder onClick={toggleShow} />
+            <BasePillPlaceholder text={intl.get('common.addFilter')} onClick={toggleShow} />
             {show && (
                 <Callout
                     target={container}
