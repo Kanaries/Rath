@@ -579,7 +579,11 @@ export class DataSourceStore {
     public mergeExtended(data: readonly IRow[], fields: IFieldMeta[]) {
         try {
             let { cleanedData } = this;
-            console.log(cleanedData.map((row, i) => Object.assign({}, data[i], row)));
+            // console.log(
+            //     'mergeExtended',
+            //     cleanedData.map((row, i) => Object.assign({}, data[i], row)),
+            //     fields,
+            // );
 
             runInAction(() => {
                 this.rawData = cleanedData.map((row, i) => Object.assign({}, data[i], row));

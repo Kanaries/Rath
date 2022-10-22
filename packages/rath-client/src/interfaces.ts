@@ -13,6 +13,7 @@ export type IGeoRole = 'longitude' | 'latitude' | 'none';
 
 export type FieldExtOptType = (
     | 'dateTimeExpand'
+    | `LaTiao.$${string}`
 );
 
 /** Detailed information of a extended field.  */
@@ -25,14 +26,20 @@ interface IFieldExtInfoBase {
     extInfo: any;
 }
 
-interface IFieldExtInfoBaseDateTime extends IFieldExtInfoBase {
+export interface IFieldExtInfoBaseDateTime extends IFieldExtInfoBase {
     extFrom: [string];  // from only one field
     extOpt: 'dateTimeExpand';
     extInfo: InfoType;
 }
 
+interface IFieldExtInfoBaseLaTiao extends IFieldExtInfoBase {
+    extOpt: `LaTiao.$${string}`;
+    extInfo: '';
+}
+
 type FieldExtInfoBase = (
     | IFieldExtInfoBaseDateTime
+    | IFieldExtInfoBaseLaTiao
 );
 
 export type FieldExtSuggestion = {

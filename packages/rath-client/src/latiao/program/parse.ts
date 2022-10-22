@@ -1,5 +1,6 @@
 import { parse as p } from '@babel/parser';
 import type { Context } from '.';
+import { validDateSlice } from '../implement/date-slice';
 import { LaTiaoSyntaxError, LaTiaoTypeError } from './error';
 import { getOperator } from './operator';
 import type { OpToken, Token, TokenType } from './token';
@@ -37,6 +38,24 @@ const translate = (source: string): string => {
   }${suffix}`;
 };
 
+const resolveMemberExp = (exp: ASTExpression & { type: 'MemberExpression' }): (ASTExpression & { type: 'MemberExpression' })[] => {
+  if (
+    exp.object.type === 'CallExpression'
+    && exp.object.callee.type === 'Identifier'
+    && exp.object.callee.name === '$toDate'
+    && exp.property.type === 'Identifier'
+  ) {
+    validDateSlice(exp.property.name);
+
+    return [exp];
+  }
+
+  throw new LaTiaoTypeError(
+    'Left value does not support slice.',
+    exp,
+  );
+};
+
 const findEntry = (res: ReturnType<typeof p>) => {
   const body = res.program.body[0];
 
@@ -55,6 +74,9 @@ const findEntry = (res: ReturnType<typeof p>) => {
       }
       case 'AssignmentExpression': {
         return [expression];
+      }
+      case 'MemberExpression': {
+        return resolveMemberExp(expression);
       }
       case 'SequenceExpression': {
         if (expression.expressions.every(exp => ['CallExpression', 'AssignmentExpression'].includes(exp.type))) {
@@ -75,6 +97,7 @@ const findEntry = (res: ReturnType<typeof p>) => {
 export type Statement = ReturnType<typeof p>['program']['body'][0];
 export type ExportExpression = ReturnType<typeof findEntry>[0] & { type: 'AssignmentExpression' };
 export type CallExpression = ReturnType<typeof findEntry>[0] & { type: 'CallExpression' };
+export type SliceExpression = ReturnType<typeof findEntry>[0] & { type: 'MemberExpression' };
 
 const resolveExport = (exp: ExportExpression, context: Context, out: () => void): OpToken => {
   if (exp.operator !== '=' || exp.left.type !== 'Identifier' || !exp.left.name.startsWith('$')) {
@@ -85,6 +108,17 @@ const resolveExport = (exp: ExportExpression, context: Context, out: () => void)
 
   if (name && !validNameRegExp.test(name)) {
     throw new LaTiaoSyntaxError(`"${name}" is not a valid field id.`);
+  }
+
+  if (exp.right.type === 'MemberExpression') {
+    const op = resolveSlice(exp.right, context, out);
+
+    out();
+  
+    return {
+      ...op,
+      exports: name,
+    };
   }
 
   if (exp.right.type !== 'CallExpression' || exp.right.callee.type !== 'Identifier') {
@@ -102,6 +136,52 @@ const resolveExport = (exp: ExportExpression, context: Context, out: () => void)
     ...op,
     exports: name,
   };
+};
+
+const resolveSlice = (exp: SliceExpression, context: Context, out: () => void): OpToken => {
+  const targetOp = exp.object.type === 'AssignmentExpression' ? resolveExport(exp.object, context, out)
+    : exp.object.type === 'CallExpression' ? resolveCall(exp.object, context, out)
+    : null;
+
+  if (!targetOp) {
+    throw new LaTiaoTypeError(
+      'Left value does not support slice.',
+      exp,
+    );
+  }
+
+  const target = getOperator(targetOp);
+
+  if (target.returns === '$DATE') {
+    if (exp.property.type !== 'Identifier' || !exp.property.name) {
+      throw new LaTiaoTypeError(
+        'Invalid slice call.',
+        exp,
+      );
+    }
+
+    const sliceKey = exp.property.name;
+
+    validDateSlice(sliceKey);
+
+    const op: OpToken = {
+      type: 'OP',
+      op: sliceKey.length === 1 ? '$__projDate' : '$__sliceDate',
+      args: [targetOp, {
+        type: 'JS.string',
+        value: sliceKey,
+      }],
+      output: sliceKey.length === 1 ? 'RATH.FIELD::group' : 'RATH.FIELD_LIST',
+      exports: false,
+    };
+
+    return op;
+  }
+
+  throw new LaTiaoTypeError(
+    'Left value does not support slice.',
+    exp,
+  );
 };
 
 const resolveCall = (exp: CallExpression, context: Context, out: () => void): OpToken => {
@@ -128,6 +208,9 @@ const resolveCall = (exp: CallExpression, context: Context, out: () => void): Op
       case 'AssignmentExpression': {
         return resolveExport(arg, context, out);
       }
+      case 'MemberExpression': {
+        return resolveSlice(arg, context, out);
+      }
       default: {
         throw new LaTiaoTypeError(
           'Invalid argument.',
@@ -150,6 +233,20 @@ const resolveCall = (exp: CallExpression, context: Context, out: () => void): Op
   op.output = opr.returns;
 
   return op;
+};
+
+export const resolveDependencies = (sources: string[], context: Context): string[] => {
+  return sources.reduce<string[]>((list, source) => {
+    const field = context.resolveFid(source);
+
+    if (field.out !== false) {
+      list.push(source);
+    } else if (field.extInfo) {
+      list.push(...resolveDependencies(field.extInfo.extFrom, context));
+    }
+
+    return list;
+  }, []);
 };
 
 const parse = (source: string, context: Context): OpToken[] => {
@@ -175,10 +272,14 @@ const parse = (source: string, context: Context): OpToken[] => {
   }
 
   const root = body.map(
-    t => t.type === 'AssignmentExpression' ? resolveExport(
-      t, context, () => expCount += 1
-    ) : resolveCall(
-      t, context, () => expCount += 1
+    t => (
+      t.type === 'AssignmentExpression' ? resolveExport(
+        t, context, () => expCount += 1
+      ) : t.type === 'MemberExpression' ? resolveSlice(
+        t, context, () => expCount += 1
+      ) : resolveCall(
+        t, context, () => expCount += 1
+      )
     )
   );
 

@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid';
 import { subscribeOperator } from '../program/operator';
+import { resolveDependencies } from '../program/parse';
 import type { FieldToken } from '../program/token';
 
 
@@ -13,6 +14,12 @@ subscribeOperator<['RATH.FIELD::set']>({
       fid: nanoid(),
       name: `Order of ${source.name}`,
       mode: 'set',
+      extInfo: {
+        extOpt: 'LaTiao.$order',
+        extFrom: resolveDependencies([source.fid], context),
+        extInfo: '',
+      },
+      out: false,
     };
 
     const col = (await context.col(context.resolveFid(source.fid))) as number[];
@@ -44,6 +51,12 @@ subscribeOperator<['RATH.FIELD::group']>({
       fid: nanoid(),
       name: `Order of ${source.name}`,
       mode: 'set',
+      extInfo: {
+        extOpt: 'LaTiao.$order',
+        extFrom: resolveDependencies([source.fid], context),
+        extInfo: '',
+      },
+      out: false,
     };
 
     const col = (await context.col(context.resolveFid(source.fid))) as number[];
@@ -75,6 +88,12 @@ subscribeOperator<['RATH.FIELD::collection']>({
       fid: nanoid(),
       name: `Order of ${source.name}`,
       mode: 'set',
+      extInfo: {
+        extOpt: 'LaTiao.$order',
+        extFrom: resolveDependencies([source.fid], context),
+        extInfo: '',
+      },
+      out: false,
     };
 
     const col = (await context.col(context.resolveFid(source.fid))) as string[];
