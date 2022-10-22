@@ -139,8 +139,10 @@ export interface FilterServiceProps {
     extData: Map<string, ICol<any>>;
     filters: IFilter[];
 }
+/**
+ * Merge `extData` with `dataSource` and filter data at the same time
+ */
 export async function filterDataService(props: FilterServiceProps): Promise<IRow[]> {
-    if (props.filters.length === 0) return props.dataSource;
     let data: IRow[] = [];
     try {
         const worker = new FilterWorker();
