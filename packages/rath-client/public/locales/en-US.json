@@ -15,6 +15,10 @@
             "temporal": "temporal",
             "quantitative": "quantitative"
         },
+        "analyticType": {
+            "dimension": "dimension",
+            "measure": "measure"
+        },
         "addVar": "Add Variable",
         "addFilter": "Add Filter",
         "field": "Field",
@@ -47,7 +51,8 @@
         "dashboard": "Dashboard📋"
     },
     "preference": {
-        "title": "preference"
+        "title": "preference",
+        "config": "Configuration"
     },
     "support": {
         "title": "How to Get Support",
@@ -396,5 +401,15 @@
             "$inset": "Scales a field to range -1 ~ +1 as a new column.",
             "$bound": "Scales a field to range 0 ~ 1 as a new column."
         }
+    },
+    "time_format": {
+        "dateTime": "%x, %X",
+        "date": "%-m/%-d/%Y",
+        "time": "%-I:%M:%S %p",
+        "periods": ["AM", "PM"],
+        "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     }
 }

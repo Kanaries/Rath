@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import embed, { vega, Result } from 'vega-embed';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
+import intl from 'react-intl-universal';
 import { IRow } from '../../../interfaces';
 import { getRange } from '../../../utils';
 
@@ -113,7 +114,8 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                     y: { field: y, type: 'quantitative', aggregate: 'sum', title: null, axis: null }
                 }
             }, {
-                actions: false
+                actions: false,
+                timeFormatLocale: intl.get('time_format') as any
             }).then(res => {
                 setView(res.view);
                 return res

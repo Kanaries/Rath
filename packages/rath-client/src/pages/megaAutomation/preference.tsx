@@ -73,7 +73,7 @@ const PreferencePanel: React.FC = () => {
             isOpen={showPreferencePannel}
             type={PanelType.smallFixedFar}
             onDismiss={closeVisualPannel}
-            headerText={intl.get('explore.preference')}
+            headerText={intl.get('preference.config')}
             closeButtonAriaLabel="Close"
             onRenderFooterContent={onRenderFooterContent}
         >

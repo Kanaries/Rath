@@ -1,5 +1,5 @@
 import React, { useCallback} from "react";
-import { BaseTable, Classes } from "ali-react-table";
+import { ArtColumn, BaseTable, Classes } from "ali-react-table";
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite'
 import { MessageBar, MessageBarType } from "@fluentui/react";
@@ -103,6 +103,15 @@ const DataTable: React.FC = (props) => {
                         isPreview={f.stage === 'preview'}
                     />
                 ),
+                // render (value: any, record: any, rowIndex: number) {
+                //     return <div contentEditable onInput={
+                //         (e) => {
+                //             const val = e.currentTarget.textContent
+                //             console.log(val)
+                //         }
+                    
+                //     }>{value}</div>
+                // }
             };
     })
 

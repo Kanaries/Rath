@@ -15,6 +15,7 @@ import { changeVisSize } from '../collection/utils';
 
 const VizCard = styled.div<{ selected?: boolean }>`
     /* width: 140px; */
+    overflow: hidden;
     height: 140px;
     padding: 4px;
     margin: 4px;

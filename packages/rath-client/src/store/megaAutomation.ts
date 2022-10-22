@@ -1,5 +1,5 @@
 import { IPattern } from '@kanaries/loa';
-import { computed, makeAutoObservable, observable, runInAction } from 'mobx';
+import { computed, makeAutoObservable, observable, runInAction, toJS } from 'mobx';
 import { Specification, IInsightSpace, ISpec } from 'visual-insights';
 import { STORAGE_FILE_SUFFIX } from '../constants';
 import {  IResizeMode, IRow, ITaskTestMode, IVegaSubset, PreferencePanelConfig } from '../interfaces';
@@ -77,6 +77,7 @@ export class MegaAutomationStore {
             assoListT1: observable.ref,
             assoListT2: observable.ref,
             insightSpaces: computed,
+            mainViewSpec: observable.ref,
             // @ts-expect-error private field
             ltsPipeLineStore: false
         });
@@ -246,7 +247,7 @@ export class MegaAutomationStore {
         if (vizMode === 'lite') {
             this.mainViewSpec = distVis({
                 resizeMode: visualConfig.resize,
-                pattern,
+                pattern: toJS(pattern),
                 width: visualConfig.resizeConfig.width,
                 height: visualConfig.resizeConfig.height,
                 interactive: visualConfig.zoom,
@@ -256,7 +257,7 @@ export class MegaAutomationStore {
         } else if (vizMode === 'strict') {
             this.mainViewSpec = labDistVis({
                 resizeMode: visualConfig.resize,
-                pattern,
+                pattern: toJS(pattern),
                 width: visualConfig.resizeConfig.width,
                 height: visualConfig.resizeConfig.height,
                 interactive: visualConfig.zoom,
