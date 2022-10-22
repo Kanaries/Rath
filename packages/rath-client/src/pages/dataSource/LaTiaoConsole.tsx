@@ -143,9 +143,13 @@ const Container = styled.div({
                 },
     
                 '> span': {
+                    flexGrow: 0,
+                    flexShrink: 0,
                     color: 'rgb(0, 120, 212)',
                     fontSize: '0.6rem',
                     width: '6em',
+                    padding: '0 0.4em',
+                    textAlign: 'center',
                 },
                 '> div': {
                     flexGrow: 1,
