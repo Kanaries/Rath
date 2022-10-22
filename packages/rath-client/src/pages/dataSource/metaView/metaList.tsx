@@ -1,4 +1,4 @@
-import { ChoiceGroup, IChoiceGroupOption, Separator, Toggle } from '@fluentui/react';
+import { ChoiceGroup, DefaultButton, IChoiceGroupOption, Icon, IconButton, PrimaryButton, Separator, Toggle } from '@fluentui/react';
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
@@ -8,22 +8,35 @@ import FieldFilter from '../../../components/fieldFilter/index';
 import { ANALYTIC_TYPE_CHOICES, SEMANTIC_TYPE_CHOICES } from '../config';
 import DistributionChart from './distChart';
 import FieldExtSuggestions from '../../../components/fieldExtend/suggestions';
+import { getGlobalStore } from '../../../store';
 
 const MetaContainer = styled.div`
     overflow: auto;
 `
-const MetaItemContainer = styled.div<{ focus: boolean }>`
+const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
     overflow: hidden;
     position: relative;
     color: #333;
     .bottom-bar {
         position: absolute;
-        height: 4px;
+        display: flex;
+        justify-content: space-between;
+        height: ${({ isPreview }) => isPreview ? '2.4em' : '4px'};
+        font-size: 0.9rem;
+        line-height: 2.4em;
         border-radius: 0px 0px 2px 2px;
         left: 0px;
         right: 0px;
         top: 0px;
-        margin: 0px 1px;
+        margin: 0px ${({ isPreview }) => isPreview ? '0px' : '1px'};
+        padding: 0 0.8em;
+        color: #fff;
+        font-weight: 600;
+
+        > div {
+            display: flex;
+            align-items: center;
+        }
     }
     .dimension {
         background-color: #1890ff;
@@ -34,6 +47,9 @@ const MetaItemContainer = styled.div<{ focus: boolean }>`
     .disable {
         background-color: #9e9e9e;
     }
+    .preview {
+        background-color: #eaa300;
+    }
     h1{
         font-weight: 500;
         font-size: 26px;
@@ -43,6 +59,7 @@ const MetaItemContainer = styled.div<{ focus: boolean }>`
         font-size: 12px; font-weight: 400; color: rgb(89, 89, 89);
     }
     padding: 1em;
+    padding-top: ${({ isPreview }) => isPreview ? '2.2em' : '1em'};
     margin: 1em;
     box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%);
     border-radius: 8px;
@@ -74,6 +91,18 @@ const MetaItemContainer = styled.div<{ focus: boolean }>`
             background-color: transparent;
         }
     }
+
+    .remove {
+        position: absolute;
+        right: 0;
+        top: 0;
+        transform: scale(1.4);
+        
+        & * {
+            background: none;
+            color: #c50f1f;
+        }
+    }
 `
 
 const IndicatorCard = styled.div`
@@ -92,7 +121,7 @@ const IndicatorCard = styled.div`
     }
 `
 
-const LiveContainer = styled.div({
+export const LiveContainer = styled.div({
     position: 'relative',
 
     '> .badge': {
@@ -136,13 +165,16 @@ interface MetaItemProps {
     analyticType: IAnalyticType;
     extSuggestions: FieldExtSuggestion[];
     dist: IRow[];
+    isPreview: boolean;
+    isExt: boolean;
     disable?: boolean;
     onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
 }
 
 
 const MetaItem: React.FC<MetaItemProps> = props => {
-    const { colKey, colName, semanticType, analyticType, dist, disable, onChange, focus, extSuggestions } = props;
+    const { colKey, colName, semanticType, analyticType, dist, disable, onChange, focus, extSuggestions, isPreview, isExt } = props;
+    const { dataSourceStore } = getGlobalStore();
     const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map(ch => ({
         ...ch,
         text: intl.get(`common.${ch.key}`)
@@ -153,6 +185,7 @@ const MetaItem: React.FC<MetaItemProps> = props => {
         text: intl.get(`common.semanticType.${ch.key}`)
     }))
 
+    const containerRef = useRef<HTMLDivElement>(null);
     const expandBtnRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -163,9 +196,46 @@ const MetaItem: React.FC<MetaItemProps> = props => {
             });
         }
     }, [focus]);
+
+    useEffect(() => {
+        if (isPreview) {
+            containerRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+            });
+        }
+    }, [isPreview]);
+
+    const canDelete = !isPreview && isExt;
     
-    return <MetaItemContainer className="ms-depth-4" focus={focus}>
-        <div className={`${analyticType} bottom-bar`}></div>
+    return <MetaItemContainer className="ms-depth-4" focus={focus} isPreview={isPreview} ref={containerRef}>
+        <div className={`${isPreview ? 'preview' : analyticType} bottom-bar`}>
+            {isPreview ? (
+                <>
+                    <span>preview</span>
+                    <div>
+                        <IconButton
+                            onClick={() => dataSourceStore.settleExtField(colKey)}
+                            iconProps={{
+                                iconName: 'CompletedSolid',
+                                style: {
+                                    color: '#0027b4',
+                                },
+                            }}
+                        />
+                        <IconButton
+                            onClick={() => dataSourceStore.deleteExtField(colKey)}
+                            iconProps={{
+                                iconName: 'StatusErrorFull',
+                                style: {
+                                    color: '#c50f1f',
+                                },
+                            }}
+                        />
+                    </div>
+                </>
+            ) : ''}
+        </div>
         <h1>{colName}</h1>
         <div className="fid">Column ID: {colKey}</div>
         <Separator />
@@ -223,30 +293,47 @@ const MetaItem: React.FC<MetaItemProps> = props => {
                 )}
             </div>
         </div>
+        {canDelete && (
+            <div className="remove">
+                <IconButton
+                    iconProps={{
+                        iconName: 'StatusErrorFull',
+                    }}
+                    onClick={() => dataSourceStore.deleteExtField(colKey)}
+                />
+            </div>
+        )}
     </MetaItemContainer>
 }
 
 interface MetaListProps {
     metas: IFieldMetaWithExtSuggestions[];
+    onlyExt: boolean;
     focusIdx: number;
     onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
 }
 const MetaList: React.FC<MetaListProps> = props => {
-    const { metas, onChange, focusIdx } = props;
+    const { metas, onChange, focusIdx, onlyExt } = props;
     return <MetaContainer>
         {
-            metas.map((m, i) => <MetaItem
-                focus={i === focusIdx}
-                key={m.fid}
-                colKey={m.fid}
-                colName={`${m.name}`}
-                semanticType={m.semanticType}
-                analyticType={m.analyticType}
-                dist={m.distribution}
-                disable={m.disable}
-                extSuggestions={m.extSuggestions}
-                onChange={onChange}
-            />)
+            metas.map((m, i) => (
+                !onlyExt || m.extSuggestions.length > 0 ? (
+                    <MetaItem
+                        focus={i === focusIdx}
+                        key={m.fid}
+                        colKey={m.fid}
+                        colName={`${m.name}`}
+                        semanticType={m.semanticType}
+                        analyticType={m.analyticType}
+                        dist={m.distribution}
+                        disable={m.disable}
+                        extSuggestions={m.extSuggestions}
+                        onChange={onChange}
+                        isExt={Boolean(m.extInfo)}
+                        isPreview={m.stage === 'preview'}
+                    />
+                ) : null
+            ))
         }
     </MetaContainer>
 }

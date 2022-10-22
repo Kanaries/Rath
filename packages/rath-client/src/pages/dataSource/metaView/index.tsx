@@ -2,22 +2,48 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite'
 import { useGlobalStore } from '../../../store';
 import MetaList from './metaList';
-import { MessageBar, MessageBarType, PrimaryButton } from '@fluentui/react';
+import { ActionButton, DefaultButton, MessageBar, MessageBarType } from '@fluentui/react';
 import intl from 'react-intl-universal';
 
 
 const MetaView: React.FC = props => {
     const { dataSourceStore } = useGlobalStore();
-    const { fieldsWithExtSug: fields } = dataSourceStore;
+    const { fieldsWithExtSug } = dataSourceStore;
     const updateFieldInfo = useCallback((fieldId: string, fieldPropKey: string, value: any) => {
         dataSourceStore.updateFieldInfo(fieldId, fieldPropKey, value);
     }, [dataSourceStore])
+
+    const fields: typeof fieldsWithExtSug = [];
+
+    for (const f of fieldsWithExtSug) {
+        if (f.stage === undefined) {
+            fields.push(f);
+        }
+    }
+
+    for (const f of fieldsWithExtSug) {
+        if (f.stage !== undefined) {
+            const from = f.extInfo?.extFrom.at(-1);
+            const parent = fields.findIndex(_f => _f.fid === from);
+
+            if (parent !== -1) {
+                fields.splice(parent + 1, 0, f);
+            } else {
+                fields.push(f);
+            }
+        }
+    }
 
     const fieldsCanExpand = fields.map((f, i) => ({ ...f, index: i })).filter(
         f => f.extSuggestions.length > 0,
     );
 
+    const fieldsNotDecided = fields.filter(
+        f => f.stage === 'preview',
+    );
+
     const [focusIdx, setFocusIdx] = useState(-1);
+    const [onlyAutoExtent, setOnlyAutoExtent] = useState(false);
 
     useEffect(() => {
         setFocusIdx(-1);
@@ -64,7 +90,20 @@ const MetaView: React.FC = props => {
                     }}
                     actions={
                         <div>
-                            <PrimaryButton
+                            <DefaultButton
+                                toggle
+                                checked={onlyAutoExtent}
+                                onClick={() => setOnlyAutoExtent(!onlyAutoExtent)}
+                                style={{
+                                    padding: '0 12px',
+                                    height: '24px',
+                                    border: 'none',
+                                    filter: onlyAutoExtent ? 'contrast(0.9)' : 'opacity(0.7)',
+                                }}
+                            >
+                                {intl.get('dataSource.extend.checkThem')}
+                            </DefaultButton>
+                            <ActionButton
                                 style={{
                                     padding: '0 12px',
                                     height: '24px',
@@ -72,7 +111,7 @@ const MetaView: React.FC = props => {
                                 onClick={focusNext}
                             >
                                 {intl.get('dataSource.extend.findThem')}
-                            </PrimaryButton>
+                            </ActionButton>
                         </div>
                     }
                     styles={{
@@ -91,7 +130,24 @@ const MetaView: React.FC = props => {
                 </MessageBar>
             </div>
         )}
-        <MetaList metas={fields} focusIdx={fieldsCanExpand[focusIdx]?.index ?? -1} onChange={updateFieldInfo} />
+        {fieldsNotDecided.length > 0 && (
+            <MessageBar
+                messageBarType={MessageBarType.warning}
+                isMultiline={false}
+                styles={{
+                    root: {
+                        boxSizing: 'border-box',
+                        width: 'unset',
+                        margin: '0.4em 1em 1em',
+                    },
+                }}
+            >
+                <span>
+                    {intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}
+                </span>
+            </MessageBar>
+        )}
+        <MetaList onlyExt={onlyAutoExtent} metas={fields} focusIdx={fieldsCanExpand[focusIdx]?.index ?? -1} onChange={updateFieldInfo} />
     </div>
 }
 

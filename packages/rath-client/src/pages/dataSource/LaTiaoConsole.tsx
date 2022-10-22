@@ -207,8 +207,9 @@ const LaTiaoConsole = observer(() => {
 
     const mergedData = useMemo(() => {
         return rawData.map((row, i) => Object.fromEntries(
-            mutFields.map<[string, string | number]>(({ fid, extInfo }) => {
-                return [fid, extInfo ? extData.get(fid)!.data[i] : row[fid]];
+            mutFields.map<[string, string | number]>(({ fid }) => {
+                const col = extData.get(fid);
+                return [fid, col ? col.data[i] : row[fid]];
             })
         ));
     }, [rawData, extData, mutFields]);
@@ -668,7 +669,13 @@ const LaTiaoConsole = observer(() => {
                                         }
 
                                         // dataSourceStore.mergeExtended(resultRef.current, preview);
-                                        dataSourceStore.addExtFieldsFromRows(resultRef.current, preview);
+                                        dataSourceStore.addExtFieldsFromRows(
+                                            resultRef.current,
+                                            preview.map(f => ({
+                                                ...f,
+                                                stage: 'settled',
+                                            })),
+                                        );
                                         setOpen(false);
                                         setCode('');
                                         resultRef.current = undefined;

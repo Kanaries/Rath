@@ -64,8 +64,14 @@ interface IFieldBase {
     extInfo?: FieldExtInfoBase;
 }
 export interface IRawField extends IFieldBase {
+    /** @default "settled" */
+    stage?: 'preview' | 'settled';
     disable?: boolean;
     pfid?: string | null;
+}
+
+export interface IExtField extends IRawField {
+    stage: 'preview' | 'settled';
 }
 
 /**
@@ -98,6 +104,7 @@ export interface IFieldMeta extends IFieldBase {
 
 export interface IFieldMetaWithExtSuggestions extends IFieldMeta {
     extSuggestions: FieldExtSuggestion[];
+    stage?: 'preview' | 'settled';
 }
 
 export enum IComputeMode {

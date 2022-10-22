@@ -4,7 +4,7 @@ import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, ICol, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions } from "../interfaces";
+import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, ICol, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions, IExtField } from "../interfaces";
 import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
@@ -44,7 +44,7 @@ export class DataSourceStore {
      * This is defined by user's purpose or domain knowledge.
      */
     public mutFields: IRawField[] = [];
-    public extFields: IRawField[] = [];
+    public extFields: IExtField[] = [];
     public fieldsWithExtSug: IFieldMetaWithExtSuggestions[] = [];
     public filters: IFilter[] = [];
     
@@ -75,7 +75,7 @@ export class DataSourceStore {
             // @ts-expect-error private field
             subscriptions: false,
         });
-        const fields$ = from(toStream(() => this.fields, false));
+        const fields$ = from(toStream(() => this.fieldsAndPreview, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
         const rawData$ = from(toStream(() => this.rawData, false));
         const extData$ = from(toStream(() => this.extData, true));
@@ -153,9 +153,9 @@ export class DataSourceStore {
                 this.dataPrepProgressTag = IDataPrepProgressTag.none;
             })
         }))
-        const suggestExt = (mutFields: IRawField[] | undefined, fieldMetas: IFieldMeta[] | undefined) => {
+        const suggestExt = (allFields: IRawField[] | undefined, fieldMetas: IFieldMeta[] | undefined) => {
             this.getExtSuggestions().then(res => {
-                if (mutFields && mutFields !== this.mutFields) {
+                if (allFields && allFields !== this.allFields) {
                     return;
                 } else if (fieldMetas && fieldMetas !== this.fieldMetas) {
                     return;
@@ -166,8 +166,8 @@ export class DataSourceStore {
                 });
             });
         };
-        reaction(() => this.mutFields, mutFields => {
-            suggestExt(mutFields, undefined);
+        reaction(() => this.allFields, allFields => {
+            suggestExt(allFields, undefined);
         })
         reaction(() => this.fieldMetas, fieldMetas => {
             suggestExt(undefined, fieldMetas);
@@ -179,7 +179,18 @@ export class DataSourceStore {
     }
     public get fields () {
         // return this.mutFields.filter(f => !f.disable);
-        return this.mutFields.filter(f => !f.disable).concat(this.extFields.filter(f => !f.disable))
+        return this.mutFields.filter(
+            f => !f.disable
+        ).concat(
+            this.extFields.filter(f => !f.disable && f.stage === 'settled')
+        );
+    }
+    public get fieldsAndPreview () {
+        return this.mutFields.filter(
+            f => !f.disable
+        ).concat(
+            this.extFields.filter(f => !f.disable)
+        );
     }
     public get fieldMetas () {
         return this.fieldMetasRef.current
@@ -493,7 +504,7 @@ export class DataSourceStore {
     }
 
     protected async getExtSuggestions(): Promise<IFieldMetaWithExtSuggestions[]> {
-        return this.fields.map(mf => {
+        return this.allFields.map(mf => {
             const meta = this.fieldMetas.find(m => m.fid === mf.fid);
             const dist = meta ? meta.distribution : [];
 
@@ -515,7 +526,7 @@ export class DataSourceStore {
             const suggestions: FieldExtSuggestion[] = [];
 
             if (f.semanticType === 'temporal') {
-                const alreadyExpandedAsDateTime = Boolean(this.mutFields.find(
+                const alreadyExpandedAsDateTime = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'dateTimeExpand'
                 ));
 
@@ -554,26 +565,21 @@ export class DataSourceStore {
         }
 
         try {
-            let { mutFields, cleanedData } = this;
-            mutFields = mutFields.filter(f => f.fid === fid).map(f => toJS(f))
+            let { allFields, rawData } = this;
+            allFields = allFields.filter(f => f.fid === fid).map(f => toJS(f))
             const res = await expandDateTimeService({
-                dataSource: cleanedData,
-                fields: mutFields
+                dataSource: rawData,
+                fields: allFields
             })
             const [_origin, ...enteringFields] = res.fields;
 
-            runInAction(() => {
-                this.rawData = res.dataSource;
-                this.mutFields = [
-                    ...this.mutFields,
-                    ...enteringFields.filter(f => {
-                        if (f.extInfo?.extOpt !== 'dateTimeExpand') {
-                            return false;
-                        }
-                        return true;
-                    })
-                ];
-            })
+            this.addExtFieldsFromRows(
+                res.dataSource,
+                enteringFields.map(f => ({
+                    ...f,
+                    stage: 'preview',
+                }))
+            );
         } catch (error) {
             console.error(error)
             notify({
@@ -617,7 +623,7 @@ export class DataSourceStore {
      * Add extended data into `dataSourceStore.extFields` and `dataSourceStore.extData`.
      * @effects `this.extData`, `this.extFields`
      */
-    public addExtFieldsFromRows(extData: readonly IRow[], extFields: IRawField[]) {
+    public addExtFieldsFromRows(extData: readonly IRow[], extFields: IExtField[]) {
         let extDataCol = colFromIRow(extData, extFields);
         this.addExtFields(extDataCol, extFields);
     }
@@ -625,7 +631,7 @@ export class DataSourceStore {
      * Add extended data into `dataSourceStore.extFields` and `dataSourceStore.extData`.
      * @effects `this.extData`, `this.extFields`
      */
-    public addExtFields(extData: Map<string, ICol<any>>, extFields: IRawField[]) {
+    public addExtFields(extData: Map<string, ICol<any>>, extFields: IExtField[]) {
         try {
             runInAction(() => {
                 this.extFields = this.extFields.concat(extFields);
@@ -644,6 +650,31 @@ export class DataSourceStore {
                 type: 'error',
                 content: `[addExt]${error}`
             })
+        }
+    }
+
+    public settleExtField(fid: string) {
+        const fields = [...this.extFields];
+        const f = fields.find(which => which.fid === fid);
+
+        if (f) {
+            runInAction(() => {
+                f.stage = 'settled';
+                this.extFields = fields;
+            });
+        }
+    }
+
+    public deleteExtField(fid: string) {
+        const fields = [...this.extFields];
+        const idx = fields.findIndex(which => which.fid === fid);
+
+        if (idx !== -1) {
+            fields.splice(idx, 1);
+            
+            runInAction(() => {
+                this.extFields = fields;
+            });
         }
     }
 }

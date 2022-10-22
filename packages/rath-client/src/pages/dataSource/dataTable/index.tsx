@@ -3,8 +3,11 @@ import { BaseTable, Classes } from "ali-react-table";
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite'
 import { useGlobalStore } from "../../../store";
-import { IRow } from "../../../interfaces";
+import type { IRow } from "../../../interfaces";
 import HeaderCell from "./headerCell";
+import { MessageBar, MessageBarType } from "@fluentui/react";
+import intl from 'react-intl-universal';
+
 
 const CustomBaseTable = styled(BaseTable)`
     --header-bgcolor: #fafafa!important;
@@ -24,7 +27,15 @@ const TableInnerStyle = {
 
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
-    const { allFields: mutFields, filteredData: rawData, fieldMetas, fields } = dataSourceStore;
+    const { allFields: mutFields, filteredData: rawData, fieldMetas, fieldsWithExtSug: fields } = dataSourceStore;
+
+    const fieldsCanExpand = fields.filter(
+        f => f.extSuggestions.length > 0,
+    );
+
+    const fieldsNotDecided = fields.filter(
+        f => f.stage === 'preview',
+    );
 
     const updateFieldInfo = useCallback((fieldId: string, fieldPropKey: string, value: any) => {
         dataSourceStore.updateFieldInfo(fieldId, fieldPropKey, value);
@@ -51,8 +62,31 @@ const DataTable: React.FC = (props) => {
         // });
     // }, [fieldMetas, mutFields, updateFieldInfo])
 
-    const columns = mutFields.map((f, i) => {
-        const fm = (fieldMetas[i] && fieldMetas[i].fid === mutFields[i].fid) ? fieldMetas[i] : fieldMetas.find(m => m.fid === f.fid);
+    const displayList: typeof mutFields = [];
+
+    for (const f of mutFields) {
+        if (f.stage === undefined) {
+            displayList.push(f);
+        }
+    }
+
+    for (const f of mutFields) {
+        if (f.stage !== undefined) {
+            const from = f.extInfo?.extFrom.at(-1);
+            const parent = displayList.findIndex(_f => _f.fid === from);
+
+            if (parent !== -1) {
+                displayList.splice(parent + 1, 0, f);
+            } else {
+                displayList.push(f);
+            }
+        }
+    }
+
+    const columns = displayList.map((f, i) => {
+        const fm = (fieldMetas[i] && fieldMetas[i].fid === displayList[i].fid) ? fieldMetas[i] : fieldMetas.find(m => m.fid === f.fid);
+        const suggestions = fields.find(_f => _f.fid === f.fid)?.extSuggestions ?? [];
+
         return {
                 name: f.name || f.fid,
                 code: f.fid,
@@ -64,6 +98,9 @@ const DataTable: React.FC = (props) => {
                         code={f.fid}
                         meta={fm || null}
                         onChange={updateFieldInfo}
+                        extSuggestions={suggestions}
+                        isExt={Boolean(f.extInfo)}
+                        isPreview={f.stage === 'preview'}
                     />
                 ),
             };
@@ -82,6 +119,50 @@ const DataTable: React.FC = (props) => {
 
     return (
         <div>
+            {fieldsCanExpand.length > 0 && (
+                <MessageBar
+                    messageBarType={MessageBarType.warning}
+                    isMultiline={false}
+                    messageBarIconProps={{
+                        iconName: 'AutoEnhanceOn',
+                        style: {
+                            color: 'rgb(0, 120, 212)',
+                            fontWeight: 800,
+                        },
+                    }}
+                    styles={{
+                        root: {
+                            boxSizing: 'border-box',
+                            width: 'unset',
+                            color: 'rgb(0, 120, 212)',
+                            backgroundColor: 'rgba(0, 120, 212, 0.02)',
+                            border: '1px solid',
+                            margin: '1em 0 2em',
+                        },
+                    }}
+                >
+                    <span>
+                        {intl.get('dataSource.extend.autoExtend', { count: fieldsCanExpand.length })}
+                    </span>
+                </MessageBar>
+            )}
+            {fieldsNotDecided.length > 0 && (
+                <MessageBar
+                    messageBarType={MessageBarType.warning}
+                    isMultiline={false}
+                    styles={{
+                        root: {
+                            boxSizing: 'border-box',
+                            width: 'unset',
+                            margin: '1em 0 2em',
+                        },
+                    }}
+                >
+                    <span>
+                        {intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}
+                    </span>
+                </MessageBar>
+            )}
             {
                 columns.length > 0 && <CustomBaseTable
                 useVirtual={true}
