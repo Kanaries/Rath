@@ -4,11 +4,11 @@ import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions } from "../interfaces";
+import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, ICol, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions } from "../interfaces";
 import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
-import { findRathSafeColumnIndex } from "../utils";
+import { findRathSafeColumnIndex, colFromIRow, rowFromICol } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
 
@@ -37,12 +37,14 @@ export class DataSourceStore {
      * computed value `dataSource` will be calculated
      */
     public rawData: IRow[] = [];
+    public extData = new Map<string, ICol<any>>();
     /**
      * fields contains fields with `dimension` or `measure` type.
      * currently, this kind of type is not computed property unlike 'quantitative', 'nominal'...
      * This is defined by user's purpose or domain knowledge.
      */
     public mutFields: IRawField[] = [];
+    public extFields: IRawField[] = [];
     public fieldsWithExtSug: IFieldMetaWithExtSuggestions[] = [];
     public filters: IFilter[] = [];
     
@@ -76,12 +78,14 @@ export class DataSourceStore {
         const fields$ = from(toStream(() => this.fields, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
         const rawData$ = from(toStream(() => this.rawData, false));
+        const extData$ = from(toStream(() => this.extData, true));
         const filters$ = from(toStream(() => this.filters, true))
         // const filteredData$ = from(toStream(() => this.filteredData, true));
-        const filteredData$ = combineLatest([rawData$, filters$]).pipe(
-            op.map(([dataSource, filters]) => {
+        const filteredData$ = combineLatest([rawData$, extData$, filters$]).pipe(
+            op.map(([dataSource, extData, filters]) => {
                 return from(filterDataService({
                     dataSource,
+                    extData: toJS(extData),
                     filters: toJS(filters)
                 }))
             }),
@@ -171,7 +175,8 @@ export class DataSourceStore {
     }
 
     public get fields () {
-        return this.mutFields.filter(f => !f.disable);
+        // return this.mutFields.filter(f => !f.disable);
+        return this.mutFields.filter(f => !f.disable).concat(this.extFields.filter(f => !f.disable))
     }
     public get fieldMetas () {
         return this.fieldMetasRef.current
@@ -576,6 +581,9 @@ export class DataSourceStore {
         }
     }
 
+    /**
+     * @deprecated use `dataSourceStore.addExtFieldsFromRow` to avoid changes of rawData.
+     */
     public mergeExtended(data: readonly IRow[], fields: IFieldMeta[]) {
         try {
             let { cleanedData } = this;
@@ -598,6 +606,38 @@ export class DataSourceStore {
                 title: 'mergeExtended Error',
                 type: 'error',
                 content: `[merge]${error}`
+            })
+        }
+    }
+
+    /**
+     * Add extended data into `dataSourceStore.extFields` and `dataSourceStore.extData`.
+     * @effects `this.extData`, `this.extFields`
+     */
+    public addExtFieldsFromRows(extData: readonly IRow[], extFields: IRawField[]) {
+        let extDataCol = colFromIRow(extData, extFields);
+        this.addExtFields(extDataCol, extFields);
+    }
+    /**
+     * Add extended data into `dataSourceStore.extFields` and `dataSourceStore.extData`.
+     * @effects `this.extData`, `this.extFields`
+     */
+    public addExtFields(extData: Map<string, ICol<any>>, extFields: IRawField[]) {
+        try {
+            runInAction(() => {
+                this.extFields.concat(extFields);
+                for (let i = 0; i < extFields.length; ++i) {
+                    let fid = extFields[i].fid
+                    if (!extData.has(fid)) throw new Error("unknown fid: " + fid);
+                    this.extData.set(fid, extData.get(fid) as ICol<any>);
+                }
+            })
+        } catch (error) {
+            console.error(error);
+            notify({
+                title: 'addExtFields Error',
+                type: 'error',
+                content: `[addExt]${error}`
             })
         }
     }

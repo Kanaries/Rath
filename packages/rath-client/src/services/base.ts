@@ -21,7 +21,7 @@ import FilterWorker from '../workers/filterData.worker?worker';
 
 import { MessageProps } from '../workers/engine/service';
 
-import { CleanMethod, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from '../interfaces';
+import { CleanMethod, ICol, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from '../interfaces';
 import { IFootmanProps } from '../workers/loa/service';
 
 interface SuccessResult<T> {
@@ -136,6 +136,7 @@ export async function cleanDataService(props: CleanServiceProps): Promise<IRow[]
 
 export interface FilterServiceProps {
     dataSource: IRow[];
+    extData: Map<string, ICol<any>>;
     filters: IFilter[];
 }
 export async function filterDataService(props: FilterServiceProps): Promise<IRow[]> {

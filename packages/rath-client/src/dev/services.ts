@@ -12,8 +12,12 @@ interface ExpandDateTimeProps {
   dataSource: IRow[];
   fields: IRawField[];
 }
+
 const ExpandEnv = checkExpandEnv();
 
+/**
+ * @deprecated use generic fields extension API
+ */
 export async function expandDateTimeService (props: ExpandDateTimeProps): Promise<ExpandDateTimeProps> {
   if (ExpandEnv === 'debug') {
     doTest()

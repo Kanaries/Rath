@@ -1,11 +1,42 @@
 import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visual-insights';
-import { IRow } from '../interfaces';
+import { IRow, ICol } from '../interfaces';
 import { RATH_INDEX_COLUMN_KEY } from '../constants';
 import * as FileLoader from './fileParser';
 import * as Transform from './transform';
 import { getRange } from './stat';
 import deepcopy from './deepcopy';
 
+interface IFieldId { fid: string }
+export function colFromIRow(from: readonly IRow[], fields?: string[] | IFieldId[]): Map<string, ICol<any>> {
+  let col = new Map<string, ICol<any>>();
+  if (fields === undefined) {
+    if (from.length === 0) return col;
+    fields = Object.keys(from[0]);
+  }
+  else if (fields.length === 0) return col;
+  else if (!(fields instanceof String)) fields = fields.map(f => (f as IFieldId).fid);
+  const fieldIds = fields as string[];
+  fieldIds.forEach(fid => {
+    col.set(fid, { fid, data: from.map(data => data[fid]) } as ICol<any>);
+  })
+  return col;
+}
+export function rowFromICol(from: Map<string, ICol<any>>, fields: string[] | IFieldId[]): IRow[] {
+  let row = new Array<IRow>();
+  if (fields.length === 0) return row;
+  else if (!(fields instanceof String)) fields = fields.map(f => (f as IFieldId).fid);
+  const fieldIds = fields as string[];
+  if (!fieldIds.map(fid => from.get(fid)?.data.length).every((v, i, array) => v === array[0])) {
+    throw new Error("[col2row]: lengths not match")
+  }
+  for (let fid of fieldIds) {
+    let col = from.get(fid) as ICol<any>;
+    for (let i = 0; i < col.data.length; ++i) {
+      row[i][fid] = col.data[i];
+    }
+  }
+  return row;
+}
 
 function isASCII(str: string) {
   // eslint-disable-next-line no-control-regex

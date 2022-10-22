@@ -609,7 +609,8 @@ const LaTiaoConsole = observer(() => {
                                             return;
                                         }
 
-                                        dataSourceStore.mergeExtended(resultRef.current, preview);
+                                        // dataSourceStore.mergeExtended(resultRef.current, preview);
+                                        dataSourceStore.addExtFieldsFromRows(resultRef.current, preview);
                                         setOpen(false);
                                         setCode('');
                                         resultRef.current = undefined;

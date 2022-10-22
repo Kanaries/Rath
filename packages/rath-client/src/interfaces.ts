@@ -3,10 +3,15 @@ import { AnyMark } from "vega-lite/build/src/mark";
 import { IAnalyticType, IFieldSummary, IInsightSpace, ISemanticType } from "visual-insights";
 import { IFilter } from '@kanaries/loa'
 import { Aggregator } from "./global";
-import type { InfoType } from "./dev/workers/engine/dateTimeExpand";
+import type { DateTimeInfoType } from "./dev/workers/engine/dateTimeExpand";
 
 export interface IRow {
     [key: string]: any
+}
+
+export interface ICol<T> {
+    fid: string;
+    data: Array<T>;
 }
 
 export type IGeoRole = 'longitude' | 'latitude' | 'none';
@@ -29,7 +34,7 @@ interface IFieldExtInfoBase {
 export interface IFieldExtInfoBaseDateTime extends IFieldExtInfoBase {
     extFrom: [string];  // from only one field
     extOpt: 'dateTimeExpand';
-    extInfo: InfoType;
+    extInfo: DateTimeInfoType;
 }
 
 interface IFieldExtInfoBaseLaTiao extends IFieldExtInfoBase {
