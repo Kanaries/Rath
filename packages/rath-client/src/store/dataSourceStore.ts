@@ -174,6 +174,9 @@ export class DataSourceStore {
         })
     }
 
+    public get allFields() {
+        return this.mutFields.concat(this.extFields)
+    }
     public get fields () {
         // return this.mutFields.filter(f => !f.disable);
         return this.mutFields.filter(f => !f.disable).concat(this.extFields.filter(f => !f.disable))
@@ -625,12 +628,14 @@ export class DataSourceStore {
     public addExtFields(extData: Map<string, ICol<any>>, extFields: IRawField[]) {
         try {
             runInAction(() => {
-                this.extFields.concat(extFields);
+                this.extFields = this.extFields.concat(extFields);
+                let data = new Map<string, ICol<any>>(this.extData.entries());
                 for (let i = 0; i < extFields.length; ++i) {
                     let fid = extFields[i].fid
                     if (!extData.has(fid)) throw new Error("unknown fid: " + fid);
-                    this.extData.set(fid, extData.get(fid) as ICol<any>);
+                    data.set(fid, extData.get(fid) as ICol<any>);
                 }
+                this.extData = data;
             })
         } catch (error) {
             console.error(error);
