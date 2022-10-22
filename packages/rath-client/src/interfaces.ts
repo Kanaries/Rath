@@ -10,7 +10,7 @@ export interface IRow {
 }
 
 export interface ICol<T> {
-    name: string;
+    fid: string;
     data: Array<T>;
 }
 

@@ -8,7 +8,7 @@ import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, 
 import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
-import { findRathSafeColumnIndex } from "../utils";
+import { findRathSafeColumnIndex, colFromIRow, rowFromICol } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
 
@@ -85,7 +85,7 @@ export class DataSourceStore {
             op.map(([dataSource, extData, filters]) => {
                 return from(filterDataService({
                     dataSource,
-                    extData,
+                    extData: toJS(extData),
                     filters: toJS(filters)
                 }))
             }),
@@ -278,11 +278,6 @@ export class DataSourceStore {
                 range: [0, Math.random() * 10]
             })
         }
-    }
-
-    public addExtFields(extFields: IRawField, extData: IRow[]) {
-        this.extFields.concat(extFields);
-        // TODO
     }
 
     public setFilter (filter: IFilter) {
@@ -586,6 +581,9 @@ export class DataSourceStore {
         }
     }
 
+    /**
+     * @deprecated use `dataSourceStore.addExtFieldsFromRow` to avoid changes of rawData.
+     */
     public mergeExtended(data: readonly IRow[], fields: IFieldMeta[]) {
         try {
             let { cleanedData } = this;
@@ -608,6 +606,38 @@ export class DataSourceStore {
                 title: 'mergeExtended Error',
                 type: 'error',
                 content: `[merge]${error}`
+            })
+        }
+    }
+
+    /**
+     * Add extended data into `dataSourceStore.extFields` and `dataSourceStore.extData`.
+     * @effects `this.extData`, `this.extFields`
+     */
+    public addExtFieldsFromRows(extData: readonly IRow[], extFields: IRawField[]) {
+        let extDataCol = colFromIRow(extData, extFields);
+        this.addExtFields(extDataCol, extFields);
+    }
+    /**
+     * Add extended data into `dataSourceStore.extFields` and `dataSourceStore.extData`.
+     * @effects `this.extData`, `this.extFields`
+     */
+    public addExtFields(extData: Map<string, ICol<any>>, extFields: IRawField[]) {
+        try {
+            runInAction(() => {
+                this.extFields.concat(extFields);
+                for (let i = 0; i < extFields.length; ++i) {
+                    let fid = extFields[i].fid
+                    if (!extData.has(fid)) throw new Error("unknown fid: " + fid);
+                    this.extData.set(fid, extData.get(fid) as ICol<any>);
+                }
+            })
+        } catch (error) {
+            console.error(error);
+            notify({
+                title: 'addExtFields Error',
+                type: 'error',
+                content: `[addExt]${error}`
             })
         }
     }
