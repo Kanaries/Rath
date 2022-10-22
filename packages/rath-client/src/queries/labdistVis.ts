@@ -4,11 +4,12 @@
 import { Statistics } from 'visual-insights'
 import { IPattern } from '@kanaries/loa';
 import { bin, binMap, mic, pureGeneralMic, rangeNormilize } from '@kanaries/loa';
-import { IFieldMeta, IResizeMode, IRow, IVegaSubset } from "../interfaces";
+import { IFieldEncode, IFieldMeta, IResizeMode, IRow, IVegaSubset } from "../interfaces";
 import { deepcopy } from "../utils";
-import { applyZeroScale, encodingDecorate } from "./base/utils";
+import { applyZeroScale, encodingDecorate, splitFieldsByEnocdes } from "./base/utils";
 import { applyDefaultSort, applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
 import { autoMark, autoStat, encode, humanHabbit, VizEncoder } from './distribution/bot';
+import { autoScale } from './base/scale';
 export const geomTypeMap: { [key: string]: any } = {
     interval: "boxplot",
     line: "line",
@@ -26,6 +27,7 @@ interface BaseVisProps {
     height?: number;
     stepSize?: number;
     excludeScaleZero?: boolean;
+    specifiedEncodes?: IFieldEncode[];
 }
 
 function isSetEqual(a1: any[], a2: any[]) {
@@ -88,7 +90,7 @@ function autoCoord(fields: IFieldMeta[], spec: {[key: string]: any}, dataSource:
 }
 
 export function labDistVis(props: BaseVisProps): IVegaSubset {
-    const { pattern, dataSource, width, height, interactive, resizeMode = IResizeMode.auto, stepSize, excludeScaleZero } = props;
+    const { pattern, dataSource, width, height, interactive, resizeMode = IResizeMode.auto, stepSize, excludeScaleZero, specifiedEncodes = [] } = props;
     const fields = deepcopy(pattern.fields) as IFieldMeta[];
     const measures = fields.filter(f => f.analyticType === 'measure');
     const dimensions = fields.filter(f => f.analyticType === 'dimension');
@@ -145,57 +147,34 @@ export function labDistVis(props: BaseVisProps): IVegaSubset {
         dimensions[i].features.originEntropy = dimensions[i].features.entropy
         dimensions[i].features.entropy = totalEntLoss;
     }
-    const { statFields, distFields, statEncodes } = autoStat(fields);
-    let markType = autoMark(fields, statFields, distFields, statEncodes, dataSource)
+    const { statEncodes } = autoStat(fields, specifiedEncodes);
+    const { pureFields: distFields, transedFields: statFields } = splitFieldsByEnocdes(fields, statEncodes);
+
+    const { scaleEncodes} = autoScale(distFields, statEncodes);
+
+    const transedEncodes = statEncodes.concat(scaleEncodes);
+
+    const { pureFields, transedFields } = splitFieldsByEnocdes(fields, transedEncodes);
+
+    let markType = autoMark(fields, transedFields, pureFields, transedEncodes, dataSource)
     const channelEncoder = new VizEncoder(markType);
-    // if (filters && filters.length > 0) {
-    //     usedChannels.add('color')
-    // }
     const enc = encode({
-        fields: distFields,
+        fields: pureFields,
         channelEncoder,
-        statFields,
-        statEncodes
+        statFields: transedFields,
+        statEncodes: transedEncodes
     })
     if (excludeScaleZero) {
         applyZeroScale(enc)
     }
-    // if (filters && filters.length > 0) {
-    //     const field = filters[0].field;
-    //     enc.color = {
-    //         // field: field.fid,
-    //         // type: field.semanticType,
-    //         condition: {
-    //             test: `datum['${field.fid}'] == '${filters[0].values[0]}'`
-    //         },
-    //         value: '#aaa'
-    //         // value: '#000'
-    //     }
-    // }
-    // autoAgg({
-    //     encoding: enc, fields, markType,
-    //     statFields
-    // })
+
     humanHabbit(enc);
-    // const shouldFixVisSize = encodingDecorate(enc, fields);
     if (resizeMode === IResizeMode.control) {
         encodingDecorate(enc, fields, statFields);
     }
 
     let basicSpec: IVegaSubset = {
-        // "config": {
-        //     "range": {
-        //       "category": {
-        //         "scheme": "set2"
-        //       }
-        //     }
-        //   },
         data: { name: 'dataSource' },
-        // "params": [{
-        //     "name": "grid",
-        //     "select": "interval",
-        //     "bind": "scales"
-        //   }],
         mark: {
             type: markType as any,
             opacity: markType === 'circle' ? 0.66 : 0.88
@@ -213,15 +192,5 @@ export function labDistVis(props: BaseVisProps): IVegaSubset {
     if (interactive) {
         applyInteractiveParams2DistViz(basicSpec);
     }
-    // if (filters && filters.length > 1) {
-    //     basicSpec.transform = filters.slice(1).map(f => ({
-    //         filter: `datum.${f.field.fid} == '${f.values[0]}'`
-    //     }))
-    // }
-    // if (filters && filters.length > 0) {
-    //     basicSpec.transform = filters.map(f => ({
-    //         filter: `datum.${f.field.fid} == '${f.values[0]}'`
-    //     }))
-    // }
     return basicSpec;
 }

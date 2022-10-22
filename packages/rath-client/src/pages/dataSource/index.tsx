@@ -27,6 +27,7 @@ import Advice from './advice';
 import AnalysisSettings from './settings';
 import FastSelection from './fastSelection';
 import ProfilingView from './profilingView';
+// import Ideas from './ideas';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -188,7 +189,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     );
 
     return (
-        <div className="content-container">
+        <div className="content-container" style={{ position: 'relative' }}>
             <Card>
                 <ImportStorage />
                 <AnalysisSettings />
@@ -320,6 +321,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
                 {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
                 {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}
+                {/* <Ideas /> */}
             </Card>
         </div>
     );

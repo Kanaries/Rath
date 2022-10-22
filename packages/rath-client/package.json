@@ -37,7 +37,7 @@
     "styled-components": "^5.3.5",
     "vega": "^5.22.1",
     "vega-embed": "^6.21.0",
-    "vega-lite": "^5.5.0",
+    "vega-lite": "5.2.0",
     "vega-scenegraph": "4.10.1-kanaries-patch",
     "visual-insights": "^0.12.3",
     "web-vitals": "^0.2.4",

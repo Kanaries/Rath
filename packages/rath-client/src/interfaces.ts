@@ -170,3 +170,11 @@ export enum PAINTER_MODE {
 export interface IDataFrame {
     [key: string]: any[]
 }
+
+export interface IFieldEncode {
+    field?: string;
+    title?: string;
+    type?: ISemanticType;
+    aggregate?: string;
+    bin?: boolean;
+}

@@ -95,8 +95,8 @@ const LTSPage: React.FC = () => {
                 <DefaultButton
                     style={{ float: 'right' }}
                     iconProps={{ iconName: 'Settings' }}
-                    text={intl.get('explore.preference')}
-                    ariaLabel={intl.get('explore.preference')}
+                    text={intl.get('preference.config')}
+                    ariaLabel={intl.get('preference.config')}
                     onClick={() => {
                         runInAction(() => {
                             megaAutoStore.showPreferencePannel = true;

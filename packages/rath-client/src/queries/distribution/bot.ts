@@ -1,16 +1,10 @@
-import { IRow, ISemanticType } from "@kanaries/loa";
-import { Statistics } from "visual-insights";
-import { IFieldMeta, IVegaSubset } from "../../interfaces";
+import { IRow, ISemanticType } from '@kanaries/loa';
+import { Statistics } from 'visual-insights';
+import { IFieldEncode, IFieldMeta, IVegaSubset } from '../../interfaces';
 
 const { groupBy } = Statistics;
-interface IFieldEncode {
-    field?: string;
-    title?: string;
-    type?: string;
-    aggregate?: string;
-    bin?: boolean;
-}
-function isSetEqual (a1: any[], a2: any[]) {
+
+function isSetEqual(a1: any[], a2: any[]) {
     const s1 = new Set(a1);
     const s2 = new Set(a2);
     if (s1.size !== s2.size) return false;
@@ -19,14 +13,20 @@ function isSetEqual (a1: any[], a2: any[]) {
     }
     return true;
 }
-export function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], originFields: IFieldMeta[] = [], statEncodes: IFieldEncode[] = [], dataSource?: IRow[]) {
+export function autoMark(
+    fields: IFieldMeta[],
+    statFields: IFieldMeta[] = [],
+    originFields: IFieldMeta[] = [],
+    statEncodes: IFieldEncode[] = [],
+    dataSource?: IRow[]
+) {
     // const orderFields = [...fields];
     // const orderStatFields = [...statFields];
     // orderFields.sort((a, b) => b.features.entropy - a.features.entropy);
     // orderStatFields.sort((a, b) => b.features.entropy - a.features.entropy);
     const allFields = [...statFields, ...originFields].sort((a, b) => b.features.entropy - a.features.entropy);
     const semanticFields = allFields.slice(0, 2);
-    const semantics = semanticFields.map(f => f.semanticType)
+    const semantics = semanticFields.map((f) => f.semanticType);
     // if (fields.length === 1) {
     //     return 'bar'
     // }
@@ -35,157 +35,157 @@ export function autoMark (fields: IFieldMeta[], statFields: IFieldMeta[]= [], or
     //     // 仅对count生效。
     //     return 'bar'
     // }
-    if (statEncodes.find(f => f.aggregate === 'count')) {
-        return 'bar'
+    if (statEncodes.find((f) => f.aggregate === 'count')) {
+        return 'bar';
     }
     // if (fields.length === 1) {
     //     return 'bar'
     // }
-    const cond_sinleTargets = fields.filter(f => f.analyticType === 'measure').length === 1;
+    const cond_sinleTargets = fields.filter((f) => f.analyticType === 'measure').length === 1;
 
     if (cond_sinleTargets) {
         if (isSetEqual(semantics, ['nominal', 'nominal'])) {
-            return 'text'
+            return 'text';
         } else if (isSetEqual(semantics, ['nominal', 'quantitative'])) {
-            const quanField = semanticFields.find(s => s.semanticType === 'quantitative')!;
-            const onlyNominalDimension = fields.filter(f => f.analyticType === 'dimension')
-                .filter(f => f.semanticType !== 'nominal').length === 0;
+            const quanField = semanticFields.find((s) => s.semanticType === 'quantitative')!;
+            const onlyNominalDimension =
+                fields.filter((f) => f.analyticType === 'dimension').filter((f) => f.semanticType !== 'nominal')
+                    .length === 0;
             if (onlyNominalDimension) {
                 if (quanField.features.unique > 400) return 'boxplot';
                 // if (quanField.features.unique > 16) return 'tick';
             }
-            return 'bar'
+            return 'bar';
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
             if (dataSource) {
-                const dims = allFields.filter(f => f.analyticType === 'dimension');
+                const dims = allFields.filter((f) => f.analyticType === 'dimension');
                 const dsize = dims.reduce((c, t) => c * t.features.unique, 1);
-                const groups = groupBy(dataSource, allFields.filter(f => f.analyticType === 'dimension').map(f => f.fid));
+                const groups = groupBy(
+                    dataSource,
+                    allFields.filter((f) => f.analyticType === 'dimension').map((f) => f.fid)
+                );
                 if (groups.size < dsize) {
-                    return 'bar'
+                    return 'bar';
                 }
-                return 'line'
+                return 'line';
             }
 
-            return 'line'
-        } else  if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
-            return 'point'
-        } else  if (isSetEqual(semantics, ['nominal', 'temporal'])) {
-            return 'point'
+            return 'line';
+        } else if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
+            return 'point';
+        } else if (isSetEqual(semantics, ['nominal', 'temporal'])) {
+            return 'point';
         } else if (isSetEqual(semantics, ['quantitative', 'quantitative'])) {
-            return 'area'
+            return 'area';
         } else if (isSetEqual(semantics, ['temporal', 'quantitative'])) {
-            return 'line'
+            return 'line';
         }
     } else {
         if (isSetEqual(semantics, ['nominal', 'nominal'])) {
-            return 'square'
+            return 'square';
         } else if (isSetEqual(semantics, ['nominal', 'quantitative'])) {
-            return 'tick'
+            return 'tick';
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
-            return 'point'
+            return 'point';
         } else if (isSetEqual(semantics, ['nominal', 'ordinal'])) {
-            return 'tick'
+            return 'tick';
         } else if (isSetEqual(semantics, ['quantitative', 'quantitative'])) {
-            return 'circle'
+            return 'circle';
         } else if (isSetEqual(semantics, ['nominal', 'temporal'])) {
-            return 'point'
+            return 'point';
         }
     }
-    return 'point'
+    return 'point';
 }
 
 // FIXME: 统一aggregate逻辑。
-export function autoStat(fields: IFieldMeta[]): {
-    statFields: IFieldMeta[];
-    distFields: IFieldMeta[];
+export function autoStat(
+    fields: IFieldMeta[],
+    specifiedEncodes: IFieldEncode[]
+): {
     statEncodes: IFieldEncode[];
 } {
-    const statFields: IFieldMeta[] = [];
     const statEncodes: IFieldEncode[] = [];
     const cond_singlefield = fields.length === 1;
-    const cond_nonquanmeasure = fields.filter(f => f.analyticType === 'measure').filter(f => f.semanticType === 'nominal' || f.semanticType === 'ordinal').length > 0;
+    const cond_nonquanmeasure =
+        fields
+            .filter((f) => f.analyticType === 'measure')
+            .filter((f) => f.semanticType === 'nominal' || f.semanticType === 'ordinal').length > 0;
+    const existedEnhanceCount = specifiedEncodes.find((e) => e.aggregate === 'count');
+    if (existedEnhanceCount) {
+        statEncodes.push(existedEnhanceCount);
+        return { statEncodes };
+    }
     if (cond_singlefield || cond_nonquanmeasure) {
-        statFields.push({
-            fid: '__tmp_stat_id_unique',
-            semanticType: 'quantitative',
-            analyticType: 'measure',
-            geoRole: 'none',
-            features: {
-                entropy: Infinity,
-                maxEntropy: Infinity,
-                unique: 1000
-            },
-            distribution: []
-        })
-        statEncodes.push({
-            aggregate: 'count'
-        })
-        fields.filter(f => f.semanticType === 'quantitative').forEach(f => {
-            statFields.push({ ...f })
+        const existedEncode = specifiedEncodes.find((e) => e.aggregate === 'count');
+        if (!existedEncode) {
             statEncodes.push({
-                field: f.fid,
-                title: f.name || f.fid,
-                type: f.semanticType,
-                bin: true
-            })
-        })
+                aggregate: 'count',
+            });
+        } else {
+            statEncodes.push(existedEncode);
+        }
     } else {
-        const targets = fields.filter(f => f.analyticType === 'measure');
+        const targets = fields.filter((f) => f.analyticType === 'measure');
         // 单目标的场景
         if (targets.length === 1) {
             // 连续型 度量做聚合，非连续型度量做分箱；
-            targets.forEach(f => {
-                statFields.push({ ...f })
-                statEncodes.push({
-                    field: f.fid,
-                    type: f.semanticType,
-                    title: `mean(${f.name || f.fid})`,
-                    aggregate: 'mean'
-                })
-            })
-            fields.filter(f => f.analyticType === 'dimension' && f.semanticType === 'quantitative').forEach(f => {
-                statFields.push({ ...f })
-                statEncodes.push({
-                    field: f.fid,
-                    title: f.name || f.fid,
-                    type: f.semanticType,
-                    bin: true
-                })
-            })
+            targets.forEach((f) => {
+                const existedEncode = specifiedEncodes.find((e) => e.field === f.fid);
+                if (existedEncode) {
+                    statEncodes.push(existedEncode);
+                } else {
+                    statEncodes.push({
+                        field: f.fid,
+                        type: f.semanticType,
+                        title: `mean(${f.name || f.fid})`,
+                        aggregate: 'mean',
+                    });
+                }
+            });
+            fields
+                .filter((f) => f.analyticType === 'dimension' && f.semanticType === 'quantitative')
+                .forEach((f) => {
+                    const existedEncode = specifiedEncodes.find((e) => e.field === f.fid);
+                    if (existedEncode) {
+                        statEncodes.push(existedEncode);
+                    } else {
+                        statEncodes.push({
+                            field: f.fid,
+                            title: f.name || f.fid,
+                            type: f.semanticType,
+                            bin: true,
+                        });
+                    }
+                });
         }
     }
-    const distFields = fields.filter(f => !statFields.find(sf => sf.fid === f.fid));
-    return { statFields, distFields, statEncodes }
+    return { statEncodes };
 }
 
 export type IChannel = 'y' | 'x' | 'size' | 'color' | 'opacity' | 'row' | 'column' | 'shape';
-export const channels: { [key in ISemanticType]: IChannel[]} = {
+export const channels: { [key in ISemanticType]: IChannel[] } = {
     quantitative: ['y', 'x', 'size', 'color', 'opacity'],
     ordinal: ['y', 'x', 'color', 'opacity', 'size', 'shape'],
     nominal: ['y', 'x', 'color', 'row', 'column', 'size', 'shape', 'opacity'],
-    temporal: ['y', 'x', 'size', 'color', 'opacity', 'shape']
+    temporal: ['y', 'x', 'size', 'color', 'opacity', 'shape'],
 };
 
 export const highOrderChannels = {
     dimension: ['row', 'column'],
-    measure: ['repeat']
+    measure: ['repeat'],
 } as const;
 
 interface EncodeProps {
     fields: IFieldMeta[];
     channelEncoder: VizEncoder;
     statFields?: IFieldMeta[];
-    statEncodes?: IFieldEncode[]
+    statEncodes?: IFieldEncode[];
 }
 export function encode(props: EncodeProps) {
-    const {
-        fields,
-        channelEncoder = new VizEncoder(),
-        statFields = [],
-        statEncodes = []
-    } = props;
+    const { fields, channelEncoder = new VizEncoder(), statFields = [], statEncodes = [] } = props;
     const orderFields = [...fields];
-    let encoding: any = {}
+    let encoding: any = {};
     let inHighOrderStatus: keyof typeof highOrderChannels | null = null;
     let highOrderIndex: number = 0;
     orderFields.sort((a, b) => b.features.entropy - a.features.entropy);
@@ -195,14 +195,14 @@ export function encode(props: EncodeProps) {
     for (let i = 0; i < totalFields.length; i++) {
         const chs = channels[totalFields[i].semanticType];
         let encoded: boolean = false;
-        const statIndex = statFields.findIndex(f => f.fid === totalFields[i].fid)
-        const orderIndex = orderFields.findIndex(f => f.fid === totalFields[i].fid)
+        const statIndex = statFields.findIndex((f) => f.fid === totalFields[i].fid);
+        const orderIndex = orderFields.findIndex((f) => f.fid === totalFields[i].fid);
         const isStatField = statIndex > -1;
         if (isStatField) {
             for (let j = 0; j < chs.length; j++) {
                 if (channelEncoder.avaiable(chs[j])) {
-                    encoding[chs[j]] = statEncodes[statIndex]
-                    channelEncoder.encode(chs[j], null)
+                    encoding[chs[j]] = statEncodes[statIndex];
+                    channelEncoder.encode(chs[j], null);
                     encoded = true;
                     break;
                 }
@@ -212,8 +212,8 @@ export function encode(props: EncodeProps) {
             if (!encoded) {
                 inHighOrderStatus = statFields[statIndex].analyticType;
                 if (inHighOrderStatus === 'dimension' && highOrderIndex < highOrderChannels[inHighOrderStatus].length) {
-                    encoding[highOrderChannels[inHighOrderStatus][highOrderIndex]] = statEncodes[statIndex]
-                    highOrderIndex++
+                    encoding[highOrderChannels[inHighOrderStatus][highOrderIndex]] = statEncodes[statIndex];
+                    highOrderIndex++;
                 }
             }
         } else {
@@ -222,14 +222,14 @@ export function encode(props: EncodeProps) {
                     encoding[chs[j]] = {
                         field: orderFields[orderIndex].fid,
                         type: orderFields[orderIndex].semanticType,
-                        title: orderFields[orderIndex].name || orderFields[orderIndex].fid
-                    }
+                        title: orderFields[orderIndex].name || orderFields[orderIndex].fid,
+                    };
                     if (orderFields[orderIndex].semanticType === 'temporal' && chs[j] === 'color') {
                         encoding[chs[j]].scale = {
-                            scheme: 'viridis'
-                        }
+                            scheme: 'viridis',
+                        };
                     }
-                    channelEncoder.encode(chs[j], orderFields[orderIndex])
+                    channelEncoder.encode(chs[j], orderFields[orderIndex]);
                     encoded = true;
                     break;
                 }
@@ -239,17 +239,17 @@ export function encode(props: EncodeProps) {
                 if (inHighOrderStatus === 'dimension' && highOrderIndex < highOrderChannels[inHighOrderStatus].length) {
                     encoding[highOrderChannels[inHighOrderStatus][highOrderIndex]] = {
                         field: orderFields[orderIndex].fid,
-                        type: orderFields[orderIndex].semanticType
-                    }
-                    highOrderIndex++
+                        type: orderFields[orderIndex].semanticType,
+                    };
+                    highOrderIndex++;
                 }
             }
         }
     }
-    return encoding
+    return encoding;
 }
 
-export function humanHabbit (encoding: IVegaSubset['encoding']) {
+export function humanHabbit(encoding: IVegaSubset['encoding']) {
     if (encoding.x && encoding.x.type !== 'ordinal') {
         if (encoding.y && encoding.y.type === 'ordinal') {
             const t = encoding.x;
@@ -266,13 +266,13 @@ export function humanHabbit (encoding: IVegaSubset['encoding']) {
     }
 }
 
-function markFixEncoding (markType: string, usedChannels: Map<string, string | null>) {
+function markFixEncoding(markType: string, usedChannels: Map<string, string | null>) {
     if (markType === 'bar') {
         usedChannels.set('size', null);
         usedChannels.set('shape', null);
     }
     if (markType === 'tick') {
-        usedChannels.set('size', null)
+        usedChannels.set('size', null);
     }
 }
 
@@ -291,20 +291,20 @@ function markFixEncoding (markType: string, usedChannels: Map<string, string | n
 export class VizEncoder {
     public useChannels: Map<IChannel, string | null>;
     public markType: string | null = null;
-    constructor (markType?: string) {
+    constructor(markType?: string) {
         this.useChannels = new Map();
         if (markType) {
             this.markType = markType || null;
-            markFixEncoding(markType, this.useChannels)
+            markFixEncoding(markType, this.useChannels);
         }
     }
     /**
-     * 
-     * @param channel 
-     * @param fieldId 
+     *
+     * @param channel
+     * @param fieldId
      * @returns success or not
      */
-    public encode (channel: IChannel, field?: IFieldMeta | null): boolean {
+    public encode(channel: IChannel, field?: IFieldMeta | null): boolean {
         if (this.useChannels.has(channel)) return false;
         if (channel === 'color' && field?.semanticType !== 'nominal') {
             this.useChannels.set('opacity', null);
@@ -313,9 +313,9 @@ export class VizEncoder {
             this.useChannels.set('opacity', null);
         }
         this.useChannels.set(channel, field ? field.fid : null);
-        return true
+        return true;
     }
-    public avaiable (channel: IChannel) {
+    public avaiable(channel: IChannel) {
         return !this.useChannels.has(channel);
     }
 }

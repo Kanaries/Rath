@@ -1,5 +1,5 @@
 import React, { useCallback} from "react";
-import { BaseTable, Classes } from "ali-react-table";
+import { ArtColumn, BaseTable, Classes } from "ali-react-table";
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite'
 import { useGlobalStore } from "../../../store";
@@ -51,7 +51,7 @@ const DataTable: React.FC = (props) => {
         // });
     // }, [fieldMetas, mutFields, updateFieldInfo])
 
-    const columns = mutFields.map((f, i) => {
+    const columns: ArtColumn[] = mutFields.map((f, i) => {
         const fm = (fieldMetas[i] && fieldMetas[i].fid === mutFields[i].fid) ? fieldMetas[i] : fieldMetas.find(m => m.fid === f.fid);
         return {
                 name: f.name || f.fid,
@@ -66,6 +66,15 @@ const DataTable: React.FC = (props) => {
                         onChange={updateFieldInfo}
                     />
                 ),
+                // render (value: any, record: any, rowIndex: number) {
+                //     return <div contentEditable onInput={
+                //         (e) => {
+                //             const val = e.currentTarget.textContent
+                //             console.log(val)
+                //         }
+                    
+                //     }>{value}</div>
+                // }
             };
     })
 
