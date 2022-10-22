@@ -16,7 +16,7 @@ subscribeOperator<[], 'RATH.FIELD::collection', 'RATH.FIELD::collection'>({
       name: `Concat {${fields.map(f => f.name).join(',')}}`,
       mode: 'collection',
       extInfo: {
-        extOpt: 'LaTiao.$inset',
+        extOpt: 'LaTiao.$concat',
         extFrom: resolveDependencies(fields.map(f => f.fid), context),
         extInfo: '',
       },
@@ -51,7 +51,7 @@ subscribeOperator<['JS.string'], 'RATH.FIELD::collection', 'RATH.FIELD::collecti
       name: `Concat {${fields.map(f => f.name).join(separator.value)}}`,
       mode: 'collection',
       extInfo: {
-        extOpt: 'LaTiao.$inset',
+        extOpt: 'LaTiao.$concat',
         extFrom: resolveDependencies(fields.map(f => f.fid), context),
         extInfo: '',
       },
