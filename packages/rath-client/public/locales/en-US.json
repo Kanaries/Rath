@@ -380,13 +380,17 @@
         "op": {
             "$set": "Transforms a field to ordinals as a new column.",
             "$group": "Transforms a field to calculative numbers as a new column.",
+            "$nominal": "Transforms a field to strings as a new column.",
             "$id": "Generates an automatically incrementing id field, starting from 1.",
             "$order": "Returns rank index of the data sorted on the target numeric field, starting from 1.",
             "$dict": "Returns rank index of the data sorted on the target string field, starting from 1.",
             "$isNaN": "Transforms numbers to string \"1\" if the number is NaN, otherwise string \"0\" as a new column.",
             "$isZero": "Transforms numbers to string \"1\" if the number is zero, otherwise string \"0\" as a new column.",
             "$toDate": "Transforms a field to a set of operative Date objects, which could be sliced on time units.",
-            "$isValidDate": "Transforms Date objects to string \"1\" if the Date object is valid, otherwise string \"0\" as a new column."
+            "$isValidDate": "Transforms Date objects to string \"1\" if the Date object is valid, otherwise string \"0\" as a new column.",
+            "$normalize": "Normalizes a field as a new column.",
+            "$inset": "Scales a field to range -1 ~ +1 as a new column.",
+            "$bound": "Scales a field to range 0 ~ 1 as a new column."
         }
     }
 }

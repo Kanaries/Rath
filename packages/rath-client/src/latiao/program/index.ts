@@ -7,11 +7,14 @@ import type { IRawField } from '../../interfaces';
 
 import '../implement/$set';
 import '../implement/$group';
+import '../implement/$nominal';
 import '../implement/$id';
 import '../implement/$order';
 import '../implement/$isNaN';
 import '../implement/$isZero';
 import '../implement/$toDate';
+import '../implement/$normalize';
+import '../implement/$concat';
 
 
 export type Context = {
@@ -169,7 +172,7 @@ export const resolveFields = (tokens: readonly FieldToken[]): IRawField[] => {
   return tokens.map<IRawField>(token => ({
     fid: token.fid,
     name: token.name,
-    analyticType: token.mode === 'set' ? 'dimension' : 'measure',
+    analyticType: token.mode === 'group' ? 'measure' : 'dimension',
     semanticType: token.extInfo?.extOpt === 'dateTimeExpand' ? 'temporal' : ({
       set: 'ordinal',
       group: 'quantitative',

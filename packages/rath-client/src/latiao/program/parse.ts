@@ -211,6 +211,12 @@ const resolveCall = (exp: CallExpression, context: Context, out: () => void): Op
       case 'MemberExpression': {
         return resolveSlice(arg, context, out);
       }
+      case 'StringLiteral': {
+        return {
+          type: 'JS.string',
+          value: arg.value,
+        };
+      }
       default: {
         throw new LaTiaoTypeError(
           'Invalid argument.',

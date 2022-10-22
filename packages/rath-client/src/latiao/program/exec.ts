@@ -6,6 +6,7 @@ import type { DateToken, FieldListToken, FieldToken, OpToken, Token } from './to
 
 const execOp = async (op: OpToken, context: Context, exp: (fid: string) => void): Promise<Exclude<Token, OpToken>> => {
   const opt = getOperator(op);
+  console.log({op, opt});
   const args: Exclude<Token, OpToken>[] = [];
 
   for await (const arg of op.args) {

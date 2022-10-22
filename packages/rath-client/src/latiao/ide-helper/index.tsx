@@ -27,6 +27,12 @@ const color = (token: string, prev: string | null, fields: readonly IRawField[])
         ))}
       </Fragment>
     );
+  } else if (token.match(/^('[^']*')|("[^"]*")$/)) {
+    return (
+      <span style={{ color: 'rgb(251,103,55)' }}>
+        {token}
+      </span>
+    );
   } else if (['(', ')', ',', '.', ';'].includes(token)) {
     return (
       <span style={{ color: '#0f6cbd' }}>
@@ -114,7 +120,8 @@ export const rich = (source: string, fields: readonly IRawField[]): JSX.Element 
   let prev: string | null = null;
 
   while (temp) {
-    const next = /^(\s+|[$\w]+|\(|\)|,|\.)/.exec(temp)?.[0];
+    const next = /^(\s+|('[^']*')|("[^"]*")|[$\w]+|\(|\)|,|\.)/.exec(temp)?.[0];
+    console.log([next])
     
     if (next) {
       tokens.push(color(next, prev, fields));
