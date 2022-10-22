@@ -5,8 +5,12 @@ import { timer } from './timer';
 
 const filterService = e => {
     try {
-        const { dataSource, filters } = e.data;
-        const res = applyFilters(dataSource, filters)
+        const { dataSource,
+            extData,
+            filters } = e.data;
+        const res = applyFilters(dataSource,
+            extData,
+            filters)
         self.postMessage({
             success: true,
             data: res

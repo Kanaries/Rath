@@ -4,7 +4,7 @@ import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions } from "../interfaces";
+import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, ICol, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions } from "../interfaces";
 import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
@@ -37,12 +37,14 @@ export class DataSourceStore {
      * computed value `dataSource` will be calculated
      */
     public rawData: IRow[] = [];
+    public extData = new Map<string, ICol<any>>();
     /**
      * fields contains fields with `dimension` or `measure` type.
      * currently, this kind of type is not computed property unlike 'quantitative', 'nominal'...
      * This is defined by user's purpose or domain knowledge.
      */
     public mutFields: IRawField[] = [];
+    public extFields: IRawField[] = [];
     public fieldsWithExtSug: IFieldMetaWithExtSuggestions[] = [];
     public filters: IFilter[] = [];
     
@@ -76,12 +78,14 @@ export class DataSourceStore {
         const fields$ = from(toStream(() => this.fields, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
         const rawData$ = from(toStream(() => this.rawData, false));
+        const extData$ = from(toStream(() => this.extData, true));
         const filters$ = from(toStream(() => this.filters, true))
         // const filteredData$ = from(toStream(() => this.filteredData, true));
-        const filteredData$ = combineLatest([rawData$, filters$]).pipe(
-            op.map(([dataSource, filters]) => {
+        const filteredData$ = combineLatest([rawData$, extData$, filters$]).pipe(
+            op.map(([dataSource, extData, filters]) => {
                 return from(filterDataService({
                     dataSource,
+                    extData,
                     filters: toJS(filters)
                 }))
             }),
@@ -171,7 +175,8 @@ export class DataSourceStore {
     }
 
     public get fields () {
-        return this.mutFields.filter(f => !f.disable);
+        // return this.mutFields.filter(f => !f.disable);
+        return this.mutFields.filter(f => !f.disable).concat(this.extFields.filter(f => !f.disable))
     }
     public get fieldMetas () {
         return this.fieldMetasRef.current
@@ -273,6 +278,11 @@ export class DataSourceStore {
                 range: [0, Math.random() * 10]
             })
         }
+    }
+
+    public addExtFields(extFields: IRawField, extData: IRow[]) {
+        this.extFields.concat(extFields);
+        // TODO
     }
 
     public setFilter (filter: IFilter) {
