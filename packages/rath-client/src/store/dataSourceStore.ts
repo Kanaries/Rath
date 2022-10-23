@@ -573,7 +573,7 @@ export class DataSourceStore {
                 dataSource: rawData,
                 fields: allFields
             })
-            /* @eslint-disable-next-line @typescript-eslint/no-unused-vars */
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [_origin, ...enteringFields] = res.fields;
 
             this.addExtFieldsFromRows(

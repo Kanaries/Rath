@@ -1,6 +1,6 @@
-import type { Context } from '.';
 import { LaTiaoError, LaTiaoNameError, LaTiaoTypeError } from './error';
 import type { TokenType, Token, OpToken } from './token';
+import type { Context } from '.';
 
 
 export type OperatorName = `$${string}`;

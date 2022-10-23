@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite'
 import intl from 'react-intl-universal';
+import { ActionButton, DefaultButton, MessageBar, MessageBarType } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
 import MetaList from './metaList';
-import { ActionButton, DefaultButton, MessageBar, MessageBarType } from '@fluentui/react';
 
 
 const MetaView: React.FC = props => {
