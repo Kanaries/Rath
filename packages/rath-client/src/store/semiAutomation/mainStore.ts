@@ -46,7 +46,7 @@ export class SemiAutomationStore {
             excludeScaleZero: false
         }
         this.settings = {
-            vizAlgo: 'strict'
+            vizAlgo: 'lite'
         }
         this.pattViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.featViews = makeInitAssoViews(RENDER_BATCH_SIZE);
