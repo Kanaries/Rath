@@ -165,7 +165,7 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                             {canDelete && (
                                 <IconButton
                                     iconProps={{
-                                        iconName: 'StatusErrorFull',
+                                        iconName: 'Delete',
                                         style: {
                                             color: '#c50f1f',
                                         },
@@ -254,7 +254,7 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                             <IconButton
                                 onClick={() => dataSourceStore.deleteExtField(code)}
                                 iconProps={{
-                                    iconName: 'StatusErrorFull',
+                                    iconName: 'Delete',
                                     style: {
                                         color: '#c50f1f',
                                     },

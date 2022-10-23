@@ -1,4 +1,4 @@
-import { ChoiceGroup, DefaultButton, IChoiceGroupOption, Icon, IconButton, PrimaryButton, Separator, Toggle } from '@fluentui/react';
+import { ChoiceGroup, IChoiceGroupOption, IconButton, Separator, Toggle } from '@fluentui/react';
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
@@ -226,7 +226,7 @@ const MetaItem: React.FC<MetaItemProps> = props => {
                         <IconButton
                             onClick={() => dataSourceStore.deleteExtField(colKey)}
                             iconProps={{
-                                iconName: 'StatusErrorFull',
+                                iconName: 'Delete',
                                 style: {
                                     color: '#c50f1f',
                                 },
@@ -297,7 +297,7 @@ const MetaItem: React.FC<MetaItemProps> = props => {
             <div className="remove">
                 <IconButton
                     iconProps={{
-                        iconName: 'StatusErrorFull',
+                        iconName: 'Delete',
                     }}
                     onClick={() => dataSourceStore.deleteExtField(colKey)}
                 />
