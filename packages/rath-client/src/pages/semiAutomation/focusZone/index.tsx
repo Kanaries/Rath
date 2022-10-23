@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { PrimaryButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
@@ -10,15 +10,15 @@ import { MainViewContainer } from '../components';
 import FilterCreationPill from '../../../components/filterCreationPill';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
-
-
-
+import Narrative from '../narrative';
+import { ActionButton } from '@fluentui/react';
+import { FloatingOver } from '../components';
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
 const FocusZone: React.FC = props => {
     const { semiAutoStore, commonStore } = useGlobalStore();
-    const { mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas } = semiAutoStore;
+    const { mainVizSetting, mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas } = semiAutoStore;
     const explainDiff = useCallback(() => {
         if (mainView && compareView) {
             semiAutoStore.explainViewDiff(mainView, compareView);
@@ -41,6 +41,8 @@ const FocusZone: React.FC = props => {
         }
     }, [mainViewSpec, commonStore]);
 
+    const [showExplanation, setShowExplanation] = useState<boolean>(false);
+
     return <MainViewContainer>
         {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
         <div className="vis-container">
@@ -50,6 +52,16 @@ const FocusZone: React.FC = props => {
             <div>
                 {compareView && compareViewSpec && <MainCanvas view={compareView} spec={compareViewSpec} />}
             </div>
+            { mainVizSetting.nlg && 
+            <div style={{ overflow:'auto', visibility:showExplanation?'visible':'hidden' }}>
+                <Narrative setShow={(show) => {setShowExplanation(show)}} />
+            </div>}
+            {mainVizSetting.nlg && <FloatingOver>
+                <ActionButton iconProps={{ iconName: 'Lightbulb', style: { scale: "3" } }} onClick={() => {
+                    setShowExplanation(!showExplanation);
+                }} />
+            </FloatingOver>
+            }
         </div>
         <hr style={{ marginTop: '1em' }} />
         <div className="fields-container">
