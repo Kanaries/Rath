@@ -115,6 +115,7 @@ const IndicatorCard = styled.div`
     padding: 0em 1em;
     margin-left: 1em;
     .ind-title {
+        padding: 5px 0;
         font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto,
             'Helvetica Neue', sans-serif;
         font-size: 14px;
@@ -299,44 +300,6 @@ const MetaItem: React.FC<MetaItemProps> = props => {
                         onChange && option && onChange(colKey, 'analyticType', option.key)
                     }}
                 />
-                <IndicatorCard>
-                    <div className="ind-title ms-Label root-130">{intl.get('dataSource.meta.uniqueValue')}</div>
-                    <div className="ind-value">{dist.length}</div>
-                </IndicatorCard>
-                <div className="operation-column">
-                    <ChoiceGroup
-                        label={intl.get('dataSource.meta.analyticType')}
-                        options={ANALYTIC_TYPE_CHOICES_LANG}
-                        selectedKey={analyticType}
-                        onChange={(ev, option) => {
-                            onChange && option && onChange(colKey, 'analyticType', option.key);
-                        }}
-                    />
-                </div>
-                <div className="operation-column">
-                    <ChoiceGroup
-                        label={intl.get('dataSource.meta.semanticType')}
-                        options={SEMANTIC_TYPE_CHOICES_LANG}
-                        selectedKey={semanticType}
-                        onChange={(ev, option) => {
-                            onChange && option && onChange(colKey, 'semanticType', option.key);
-                        }}
-                    />
-                </div>
-                <div className="operation-column">
-                    <Toggle
-                        label={intl.get('dataSource.meta.disable.title')}
-                        checked={!disable}
-                        onText={intl.get('dataSource.meta.disable.on')}
-                        offText={intl.get('dataSource.meta.disable.off')}
-                        onChange={(ev, checked) => {
-                            onChange && onChange(colKey, 'disable', !checked);
-                        }}
-                    />
-                </div>
-                <div className="operation-column">
-                    <FieldFilter fid={colKey} />
-                </div>
             </div>
             <div className="operation-column">
                 <ChoiceGroup

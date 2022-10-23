@@ -27,7 +27,7 @@ const TableInnerStyle = {
 
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
-    const { allFields: mutFields, filteredData: rawData, fieldMetas, fieldsWithExtSug: fields } = dataSourceStore;
+    const { filteredData: rawData, fieldsWithExtSug: fields } = dataSourceStore;
 
     const fieldsCanExpand = fields.filter(
         f => f.extSuggestions.length > 0,
@@ -62,15 +62,15 @@ const DataTable: React.FC = (props) => {
         // });
     // }, [fieldMetas, mutFields, updateFieldInfo])
 
-    const displayList: typeof mutFields = [];
+    const displayList: typeof fields = [];
 
-    for (const f of mutFields) {
+    for (const f of fields) {
         if (f.stage === undefined) {
             displayList.push(f);
         }
     }
 
-    for (const f of mutFields) {
+    for (const f of fields) {
         if (f.stage !== undefined) {
             const from = f.extInfo?.extFrom.at(-1);
             const parent = displayList.findIndex(_f => _f.fid === from);
@@ -84,7 +84,7 @@ const DataTable: React.FC = (props) => {
     }
 
     const columns: ArtColumn[] = displayList.map((f, i) => {
-        const fm = (fieldMetas[i] && fieldMetas[i].fid === displayList[i].fid) ? fieldMetas[i] : fieldMetas.find(m => m.fid === f.fid);
+        const fm = (fields[i] && fields[i].fid === displayList[i].fid) ? fields[i] : fields.find(m => m.fid === f.fid);
         const suggestions = fields.find(_f => _f.fid === f.fid)?.extSuggestions ?? [];
 
         return {

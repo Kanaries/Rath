@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import { expandDateTimeService } from '../../dev/services';
-import type { IRow } from '../../interfaces';
+import type { IFieldExtInfoBaseDateTime, IRow } from '../../interfaces';
 import { resolveFields } from '../program';
 import { subscribeOperator } from '../program/operator';
 import { resolveDependencies } from '../program/parse';
@@ -203,10 +203,18 @@ subscribeOperator<['$DATE', 'JS.string'], 'RATH.FIELD_LIST'>({
         name: `${dim} | ${source.name}`,
         mode: 'group',
         extInfo: {
-          extOpt: 'LaTiao.$isValidDate',
+          extOpt: 'dateTimeExpand',
           extFrom: resolveDependencies([source.fid], context),
-          extInfo: '',
-        },
+          extInfo: ({
+            Y: '$y',
+            M: '$M',
+            W: '$W',
+            D: '$D',
+            h: '$H',
+            m: '$m',
+            s: '$s',
+          } as const)[dim],
+        } as IFieldExtInfoBaseDateTime,
         out: false,
       };
     
@@ -243,10 +251,18 @@ subscribeOperator<['$DATE', 'JS.string'], 'RATH.FIELD::group'>({
       name: `${dim} | ${source.name}`,
       mode: 'group',
       extInfo: {
-        extOpt: 'LaTiao.$isValidDate',
+        extOpt: 'dateTimeExpand',
         extFrom: resolveDependencies([source.fid], context),
-        extInfo: '',
-      },
+        extInfo: ({
+          Y: '$y',
+          M: '$M',
+          W: '$W',
+          D: '$D',
+          h: '$H',
+          m: '$m',
+          s: '$s',
+        } as const)[dim],
+      } as IFieldExtInfoBaseDateTime,
       out: false,
     };
     
