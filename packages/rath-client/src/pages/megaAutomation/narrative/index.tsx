@@ -74,7 +74,7 @@ const Narrative: React.FC = props => {
     }, [viewInfo])
     return <div>
         {
-            !explainLoading && explains.filter(ex => ex.score > nlgThreshold).map(ex => <InsightDesc key={ex.type}>
+            !explainLoading && explains.filter(ex => ex.score > nlgThreshold).sort((a, b) => b.score - a.score).map(ex => <InsightDesc key={ex.type}>
                 <div className="insight-header">
                     <div className="type-title">{ex.type}</div>
                     <div className="type-score">{(ex.score * 100).toFixed(1)} %</div>

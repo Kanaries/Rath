@@ -57,7 +57,7 @@ const Narrative: React.FC<INarrativeProps> = (props: INarrativeProps) => {
         height: '60%', maxWidth: '60%', right: '10%', top: '15%', overflow: 'auto', position: 'fixed', zIndex: '9999'
         }}>
         {
-            !explainLoading && explains.filter(ex => ex.score > 0.0).map(ex => <InsightDesc key={ex.type}>
+            !explainLoading && explains.filter(ex => ex.score > 0.0).sort((a, b) => b.score - a.score).map(ex => <InsightDesc key={ex.type}>
                 <div className="insight-header">
                     <div className="type-title">{ex.type}</div>
                     <div className="type-score">{(ex.score * 100).toFixed(1)} %</div>
