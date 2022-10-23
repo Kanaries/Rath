@@ -83,7 +83,7 @@ const DataTable: React.FC = (props) => {
         }
     }
 
-    const columns = displayList.map((f, i) => {
+    const columns: ArtColumn[] = displayList.map((f, i) => {
         const fm = (fieldMetas[i] && fieldMetas[i].fid === displayList[i].fid) ? fieldMetas[i] : fieldMetas.find(m => m.fid === f.fid);
         const suggestions = fields.find(_f => _f.fid === f.fid)?.extSuggestions ?? [];
 
