@@ -16,7 +16,7 @@ export async function getInsightExpl (props: IGetInsightExplProps) {
     setExplainLoading(true)
     requestId.current++;
     let rid = requestId.current;
-    let cleanedFields = fields.filter(v => v != undefined) as IFieldMeta[];
+    let cleanedFields = fields.filter(v => v !== undefined) as IFieldMeta[];
     fetch(getTestServerAPI('insight'), {
         method: 'POST',
         headers: {

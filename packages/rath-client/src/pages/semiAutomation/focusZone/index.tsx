@@ -2,17 +2,17 @@ import React, { useCallback, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { PrimaryButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
+import { ActionButton } from '@fluentui/react';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
 import FieldPlaceholder from '../../../components/fieldPlaceholder';
 import { MainViewContainer } from '../components';
+import { FloatingOver } from '../components';
 import FilterCreationPill from '../../../components/filterCreationPill';
+import Narrative from '../narrative';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
-import Narrative from '../narrative';
-import { ActionButton } from '@fluentui/react';
-import { FloatingOver } from '../components';
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 

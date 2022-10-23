@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Spinner } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
-import { getTestServerAPI } from '../../../services/index';
 import { getInsightExpl } from '../../../services/insights';
 
 const InsightDesc = styled.div`
@@ -55,7 +54,6 @@ const Narrative: React.FC = props => {
     useEffect(() => {
         setExplainLoading(true)
         requestId.current++;
-        let rid = requestId.current;
         getInsightExpl({
             requestId: requestId,
             dataSource: dataSource,

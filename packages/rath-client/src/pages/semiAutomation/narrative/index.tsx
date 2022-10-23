@@ -1,21 +1,17 @@
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
 import { Spinner } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
-import { getTestServerAPI } from '../../../services/index';
-import { IFieldMeta } from '../../../interfaces';
 import { getInsightExpl } from '../../../services/insights';
 import { InsightDesc } from '../components';
-import { throttle } from '../../../utils';
 
 interface INarrativeProps {
     setShow: (show: boolean) => any
 }
 const Narrative: React.FC<INarrativeProps> = (props: INarrativeProps) => {
+    const { setShow } = props;
     const { semiAutoStore, langStore } = useGlobalStore();
-    const { dataSource, fieldMetas, mainVizSetting, mainView } = semiAutoStore;
+    const { dataSource, mainView } = semiAutoStore;
     const [explainLoading, setExplainLoading] = useState(false);
     const requestId = useRef<number>(0);
     const fieldsInViz = useMemo(() => {
@@ -36,7 +32,7 @@ const Narrative: React.FC<INarrativeProps> = (props: INarrativeProps) => {
             setExplainLoading,
             resolveInsight: setViewInfo
         }))()
-    }, [dataSource, mainView, langStore.lang])
+    }, [dataSource, fieldsInViz, langStore.lang])
     const explains = useMemo<any[]>(() => {
         if (!viewInfo || viewInfo.length === 0) return []
         return Object.keys(viewInfo[0]).filter((k: string) => viewInfo[0][k].score > 0).map((k: string) => ({
@@ -49,14 +45,14 @@ const Narrative: React.FC<INarrativeProps> = (props: INarrativeProps) => {
     useEffect(() => {
         const onClick = function(e: MouseEvent) {
             if (ref.current && !(ref.current as any).contains(e.target)) {
-                props.setShow(false);
+                setShow(false);
             }
         }
         document.addEventListener('click', onClick, true);
         return () => {
             document.removeEventListener('click', onClick, true);
         }
-    }, [])
+    }, [setShow])
     return <div ref={ref} style={{
         height: '60%', maxWidth: '60%', right: '10%', top: '15%', overflow: 'auto', position: 'fixed', zIndex: '9999'
         }}>
