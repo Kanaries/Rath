@@ -1,14 +1,12 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { PrimaryButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
-import { ActionButton } from '@fluentui/react';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
 import FieldPlaceholder from '../../../components/fieldPlaceholder';
 import { MainViewContainer } from '../components';
-import { FloatingOver } from '../components';
 import FilterCreationPill from '../../../components/filterCreationPill';
 import Narrative from '../narrative';
 import EncodeCreationPill from '../../../components/encodeCreationPill';
@@ -42,8 +40,6 @@ const FocusZone: React.FC = props => {
         }
     }, [mainViewSpec, commonStore]);
 
-    const [showExplanation, setShowExplanation] = useState<boolean>(false);
-
     return <MainViewContainer>
         {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
         <div className="vis-container">
@@ -54,15 +50,9 @@ const FocusZone: React.FC = props => {
                 {compareView && compareViewSpec && <MainCanvas view={compareView} spec={compareViewSpec} />}
             </div>
             { mainVizSetting.nlg && 
-            <div style={{ overflow:'auto', visibility:showExplanation?'visible':'hidden' }}>
-                <Narrative setShow={(show) => {setShowExplanation(show)}} />
+            <div style={{ overflow:'auto' }}>
+                <Narrative />
             </div>}
-            {mainVizSetting.nlg && <FloatingOver>
-                <ActionButton iconProps={{ iconName: 'Lightbulb', style: { scale: "3" } }} onClick={() => {
-                    setShowExplanation(!showExplanation);
-                }} />
-            </FloatingOver>
-            }
         </div>
         <hr style={{ marginTop: '1em' }} />
         <div className="fields-container">

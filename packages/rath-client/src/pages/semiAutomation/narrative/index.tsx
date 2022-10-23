@@ -5,11 +5,8 @@ import { useGlobalStore } from '../../../store';
 import { getInsightExpl } from '../../../services/insights';
 import { InsightDesc } from '../components';
 
-interface INarrativeProps {
-    setShow: (show: boolean) => any
-}
-const Narrative: React.FC<INarrativeProps> = (props: INarrativeProps) => {
-    const { setShow } = props;
+
+const Narrative: React.FC = () => {
     const { semiAutoStore, langStore } = useGlobalStore();
     const { dataSource, mainView } = semiAutoStore;
     const [explainLoading, setExplainLoading] = useState(false);
@@ -41,20 +38,20 @@ const Narrative: React.FC<INarrativeProps> = (props: INarrativeProps) => {
             explain: viewInfo[0][k].para.explain
         }));
     }, [viewInfo])
-    const ref = useRef(null);
-    useEffect(() => {
-        const onClick = function(e: MouseEvent) {
-            if (ref.current && !(ref.current as any).contains(e.target)) {
-                setShow(false);
-            }
-        }
-        document.addEventListener('click', onClick, true);
-        return () => {
-            document.removeEventListener('click', onClick, true);
-        }
-    }, [setShow])
-    return <div ref={ref} style={{
-        height: '60%', maxWidth: '60%', right: '10%', top: '15%', overflow: 'auto', position: 'fixed', zIndex: '9999'
+    // const ref = useRef(null);
+    // useEffect(() => {
+    //     const onClick = function(e: MouseEvent) {
+    //         if (ref.current && !(ref.current as any).contains(e.target)) {
+    //             setShow(false);
+    //         }
+    //     }
+    //     document.addEventListener('click', onClick, true);
+    //     return () => {
+    //         document.removeEventListener('click', onClick, true);
+    //     }
+    // }, [setShow])
+    return <div style={{
+        height: '90%', maxHeight: '40vh', minWidth: '20vw', overflow: 'auto', marginLeft: '2em', borderLeft: '1px solid #8888', paddingLeft: '1.5em'
         }}>
         {
             !explainLoading && explains.filter(ex => ex.score > 0.0).sort((a, b) => b.score - a.score).map(ex => <InsightDesc key={ex.type}>
@@ -67,7 +64,7 @@ const Narrative: React.FC<INarrativeProps> = (props: INarrativeProps) => {
             </InsightDesc>)
         }
         {
-            explainLoading && <div>
+            explainLoading && <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%'}}>
                 <Spinner label="explain loading..." />
             </div>
         }
