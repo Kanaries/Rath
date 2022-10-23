@@ -8,7 +8,7 @@ import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, 
 import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
-import { findRathSafeColumnIndex, colFromIRow, rowFromICol } from "../utils";
+import { findRathSafeColumnIndex, colFromIRow } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
 
@@ -573,6 +573,7 @@ export class DataSourceStore {
                 dataSource: rawData,
                 fields: allFields
             })
+            /* @eslint-disable-next-line @typescript-eslint/no-unused-vars */
             const [_origin, ...enteringFields] = res.fields;
 
             this.addExtFieldsFromRows(

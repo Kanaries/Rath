@@ -1,9 +1,9 @@
 import type { IRow } from 'visual-insights';
+import type { IRawField } from '../../interfaces';
 import { LaTiaoError, LaTiaoNameError } from './error';
 import parse from './parse';
 import type { FieldListToken, FieldToken, FieldType } from './token';
 import exec from './exec';
-import type { IRawField } from '../../interfaces';
 
 import '../implement/$set';
 import '../implement/$group';

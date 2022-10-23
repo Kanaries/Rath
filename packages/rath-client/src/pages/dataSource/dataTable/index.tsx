@@ -2,11 +2,11 @@ import React, { useCallback} from "react";
 import { BaseTable, Classes } from "ali-react-table";
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite'
+import { MessageBar, MessageBarType } from "@fluentui/react";
+import intl from 'react-intl-universal';
 import { useGlobalStore } from "../../../store";
 import type { IRow } from "../../../interfaces";
 import HeaderCell from "./headerCell";
-import { MessageBar, MessageBarType } from "@fluentui/react";
-import intl from 'react-intl-universal';
 
 
 const CustomBaseTable = styled(BaseTable)`

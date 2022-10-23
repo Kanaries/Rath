@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
-import { Callout, DefaultButton, IconButton, PrimaryButton, TextField } from '@fluentui/react';
+import { Callout, IconButton, TextField } from '@fluentui/react';
 import { useId } from '@fluentui/react-hooks';
 import DistributionChart from '../metaView/distChart';
 import DropdownSelect from '../../../components/dropDownSelect'

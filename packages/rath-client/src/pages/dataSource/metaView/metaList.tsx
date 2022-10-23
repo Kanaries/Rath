@@ -6,9 +6,9 @@ import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { FieldExtSuggestion, IFieldMetaWithExtSuggestions, IRawField, IRow } from '../../../interfaces';
 import FieldFilter from '../../../components/fieldFilter/index';
 import { ANALYTIC_TYPE_CHOICES, SEMANTIC_TYPE_CHOICES } from '../config';
-import DistributionChart from './distChart';
 import FieldExtSuggestions from '../../../components/fieldExtend/suggestions';
 import { getGlobalStore } from '../../../store';
+import DistributionChart from './distChart';
 
 const MetaContainer = styled.div`
     overflow: auto;

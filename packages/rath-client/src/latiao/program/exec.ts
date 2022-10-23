@@ -1,7 +1,7 @@
-import type { Context } from '.';
 import { $DateToField } from '../implement/date-slice';
 import { getOperator } from './operator';
 import type { DateToken, FieldListToken, FieldToken, OpToken, Token } from './token';
+import type { Context } from '.';
 
 
 const execOp = async (op: OpToken, context: Context, exp: (fid: string) => void): Promise<Exclude<Token, OpToken>> => {

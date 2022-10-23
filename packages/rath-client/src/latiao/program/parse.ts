@@ -1,9 +1,9 @@
 import { parse as p } from '@babel/parser';
-import type { Context } from '.';
 import { validDateSlice } from '../implement/date-slice';
 import { LaTiaoSyntaxError, LaTiaoTypeError } from './error';
 import { getOperator } from './operator';
 import type { OpToken, Token, TokenType } from './token';
+import type { Context } from '.';
 
 
 export type ASTExpression = (ReturnType<typeof p>['program']['body'][0] & {
@@ -21,12 +21,12 @@ export const suffix = `
 }
 `;
 
-export const validNameRegExp = /^[^$\s,\.;:'"`\+\-~!?<>@#%^&*/\\|]+$/;
+export const validNameRegExp = /^[^$\s,.;:'"`+\-~!?<>@#%^&*/\\|]+$/;
 
 const translate = (source: string): string => {
   return `${prefix}${
     source.replaceAll(
-      /\b(out)\b(\s+(?<id>[^$\s,\.;:'"`\+\-~!?<>@#%^&*/\\|]+))?/g,
+      /\b(out)\b(\s+(?<id>[^$\s,.;:'"`+\-~!?<>@#%^&*/\\|]+))?/g,
       (_a0, _a1, _a2, _a3, _a4, _a5, { id }: { id: string | undefined }) => {
         if (id && !validNameRegExp.test(id)) {
           throw new LaTiaoSyntaxError(`"${id}" is not a valid field id.`);
@@ -136,7 +136,7 @@ const resolveNode = (exp: CallExpression['arguments'][0], context: Context, out:
       return resolveBinOp(exp, context, out);
     }
     default: {
-      console.log('->', exp);
+      // console.log('->', exp);
       throw new LaTiaoSyntaxError(
         'Unexpected token.',
         exp,

@@ -8,7 +8,7 @@ import '@kanaries/graphic-walker/dist/style.css';
 const VisualInterface: React.FC = (props) => {
     const { dataSourceStore, commonStore, langStore } = useGlobalStore();
     // TODO: discuss use clean data from dataSourceStore or cooked data from dataPipeline?
-    const { cleanedData, mutFields, extFields, fields } = dataSourceStore;
+    const { cleanedData, fields } = dataSourceStore;
     const { graphicWalkerSpec } = commonStore;
     const gwRawFields = useMemo<IMutField[]>(() => {
         return fields.map((f) => {
@@ -20,7 +20,7 @@ const VisualInterface: React.FC = (props) => {
                 analyticType: f.analyticType,
             };
         });
-    }, [mutFields, extFields]);
+    }, [fields]);
     return (
         <GraphicWalker
             dataSource={cleanedData}

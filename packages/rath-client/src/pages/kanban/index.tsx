@@ -2,18 +2,18 @@ import { applyFilters } from '@kanaries/loa';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useRef, useState } from 'react';
-import ReactVega from '../../components/react-vega';
 import GridLayout from "react-grid-layout";
-
-import { useGlobalStore } from '../../store';
-import Empty from './empty';
+import { IconButton, VerticalDivider } from '@fluentui/react';
 import { Pagination, Divider } from '@material-ui/core';
+
+import ReactVega from '../../components/react-vega';
+import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../components/visErrorBoundary';
+import { IInsightVizView } from '../../interfaces';
+import Empty from './empty';
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { IInsightVizView } from '../../interfaces';
-import { IconButton, VerticalDivider } from '@fluentui/react';
 
 
 const Segment = styled.div`
