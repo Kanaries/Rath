@@ -5,7 +5,7 @@ import { getTestServerAPI } from "./base";
 export interface IGetInsightExplProps {
     requestId: React.MutableRefObject<number>,
     dataSource: IRow[],
-    fields: IFieldMeta[],
+    fields: (IFieldMeta|undefined)[],
     aggrType: Aggregator,
     langType: string,
     setExplainLoading: (value: React.SetStateAction<boolean>) => void,
@@ -16,14 +16,21 @@ export async function getInsightExpl (props: IGetInsightExplProps) {
     setExplainLoading(true)
     requestId.current++;
     let rid = requestId.current;
+    let cleanedFields = fields.filter(v => v != undefined) as IFieldMeta[];
     fetch(getTestServerAPI('insight'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            dataSource: dataSource,
-            fields: fields,
+            dataSource: dataSource.map(row => {
+                let res: IRow = {};
+                for (let f of cleanedFields) {
+                    res[f.fid] = row[f.fid]
+                }
+                return res;
+            }),
+            fields: cleanedFields,
             aggrType: aggrType,
             langType: langType
         })
