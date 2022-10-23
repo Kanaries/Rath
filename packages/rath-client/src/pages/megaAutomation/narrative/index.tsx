@@ -6,6 +6,11 @@ import { Spinner } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
 import { getInsightExpl } from '../../../services/insights';
 
+const InsightContainer = styled.div({
+    height: '40vh',
+    overflow: 'hidden auto',
+})
+
 const InsightDesc = styled.div`
     margin: 4px 12px 0px 12px;
     padding: 12px;
@@ -58,7 +63,7 @@ const Narrative: React.FC = props => {
             requestId: requestId,
             dataSource: dataSource,
             fields: fieldsInViz,
-            aggrType: 'sum',
+            aggrType: 'mean',
             langType: langStore.lang,
             setExplainLoading: setExplainLoading,
             resolveInsight: setViewInfo
@@ -72,7 +77,7 @@ const Narrative: React.FC = props => {
             explain: viewInfo[0][k].para.explain
         }));
     }, [viewInfo])
-    return <div>
+    return <InsightContainer>
         {
             !explainLoading && explains.filter(ex => ex.score > nlgThreshold).sort((a, b) => b.score - a.score).map(ex => <InsightDesc key={ex.type}>
                 <div className="insight-header">
@@ -90,7 +95,7 @@ const Narrative: React.FC = props => {
         }
         {/* <ReactJson src={viewInfo} /> */}
         {/* {JSON.stringify(viewInfo)} */}
-    </div>
+    </InsightContainer>
 }
 
 export default observer(Narrative);

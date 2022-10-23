@@ -27,7 +27,7 @@ const Narrative: React.FC<INarrativeProps> = (props: INarrativeProps) => {
             requestId,
             dataSource,
             fields: fieldsInViz,
-            aggrType: 'sum',
+            aggrType: 'mean',
             langType: langStore.lang,
             setExplainLoading,
             resolveInsight: setViewInfo
