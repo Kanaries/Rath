@@ -175,8 +175,10 @@ export const resolveFields = (tokens: readonly FieldToken[]): IRawField[] => {
   return tokens.map<IRawField>(token => ({
     fid: token.fid,
     name: token.name,
-    analyticType: token.mode === 'group' ? 'measure' : 'dimension',
-    semanticType: token.extInfo?.extOpt === 'dateTimeExpand' ? 'temporal' : ({
+    analyticType: token.extInfo?.extOpt === 'dateTimeExpand' ? 'dimension' : token.mode === 'group' ? 'measure' : 'dimension',
+    semanticType: token.extInfo?.extOpt === 'dateTimeExpand' ? (
+      token.extInfo.extInfo === 'utime' ? 'temporal' : token.extInfo.extInfo === '$y' ? 'quantitative' : 'ordinal'
+    ) : ({
       set: 'ordinal',
       group: 'quantitative',
       collection: 'nominal',

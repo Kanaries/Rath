@@ -62,10 +62,10 @@ interface IFieldBase {
     geoRole: IGeoRole;
     /** detailed information of field extension operations. defined only if this field is extended */
     extInfo?: FieldExtInfoBase;
-}
-export interface IRawField extends IFieldBase {
     /** @default "settled" */
     stage?: 'preview' | 'settled';
+}
+export interface IRawField extends IFieldBase {
     disable?: boolean;
     pfid?: string | null;
 }

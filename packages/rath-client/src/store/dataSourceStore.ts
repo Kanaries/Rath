@@ -8,7 +8,7 @@ import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, 
 import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
-import { findRathSafeColumnIndex, colFromIRow } from "../utils";
+import { findRathSafeColumnIndex, colFromIRow, readableWeekday } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
 
@@ -119,7 +119,8 @@ export class DataSourceStore {
                 return originFieldMetas.map((m, index) => {
                     return {
                         ...m,
-                        name: fieldNames[index]
+                        stage: this.extFields.find(f => f.fid === m.fid)?.stage,
+                        name: this.extFields.find(f => f.fid === m.fid)?.name ?? fieldNames[index]
                     }
                 })
             }),
@@ -153,11 +154,11 @@ export class DataSourceStore {
                 this.dataPrepProgressTag = IDataPrepProgressTag.none;
             })
         }))
-        const suggestExt = (allFields: IRawField[] | undefined, fieldMetas: IFieldMeta[] | undefined) => {
+        const suggestExt = (allFields: IRawField[] | undefined, fieldMetaAndPreviews: IFieldMeta[] | undefined) => {
             this.getExtSuggestions().then(res => {
                 if (allFields && allFields !== this.allFields) {
                     return;
-                } else if (fieldMetas && fieldMetas !== this.fieldMetas) {
+                } else if (fieldMetaAndPreviews && fieldMetaAndPreviews !== this.fieldMetaAndPreviews) {
                     return;
                 }
 
@@ -169,8 +170,8 @@ export class DataSourceStore {
         reaction(() => this.allFields, allFields => {
             suggestExt(allFields, undefined);
         })
-        reaction(() => this.fieldMetas, fieldMetas => {
-            suggestExt(undefined, fieldMetas);
+        reaction(() => this.fieldMetaAndPreviews, fieldMetaAndPreviews => {
+            suggestExt(undefined, fieldMetaAndPreviews);
         })
     }
 
@@ -193,6 +194,9 @@ export class DataSourceStore {
         );
     }
     public get fieldMetas () {
+        return this.fieldMetasRef.current.filter(m => m.stage !== 'preview');
+    }
+    public get fieldMetaAndPreviews () {
         return this.fieldMetasRef.current
     }
 
@@ -507,7 +511,7 @@ export class DataSourceStore {
 
     protected async getExtSuggestions(): Promise<IFieldMetaWithExtSuggestions[]> {
         return this.allFields.map(mf => {
-            const meta = this.fieldMetas.find(m => m.fid === mf.fid);
+            const meta = this.fieldMetaAndPreviews.find(m => m.fid === mf.fid);
             const dist = meta ? meta.distribution : [];
 
             const f: IFieldMeta = {
@@ -594,7 +598,7 @@ export class DataSourceStore {
     }
 
     /**
-     * @deprecated use `dataSourceStore.addExtFieldsFromRow` to avoid changes of rawData.
+     * @deprecated use `dataSourceStore.addExtFieldsFromRows` to avoid changes of rawData.
      */
     public mergeExtended(data: readonly IRow[], fields: IFieldMeta[]) {
         try {
@@ -640,9 +644,22 @@ export class DataSourceStore {
                 this.extFields = this.extFields.concat(extFields);
                 let data = new Map<string, ICol<any>>(this.extData.entries());
                 for (let i = 0; i < extFields.length; ++i) {
-                    let fid = extFields[i].fid
+                    const { fid, extInfo } = extFields[i];
+                    const isWeekday = extInfo?.extOpt === 'dateTimeExpand' && extInfo.extInfo === '$W';
                     if (!extData.has(fid)) throw new Error("unknown fid: " + fid);
-                    data.set(fid, extData.get(fid) as ICol<any>);
+
+                    if (isWeekday) {
+                        const col = extData.get(fid) as ICol<number>;
+
+                        extFields[i].semanticType = 'ordinal';
+
+                        data.set(fid, {
+                            fid: col.fid,
+                            data: col.data.map(d => readableWeekday(d)),
+                        });
+                    } else {
+                        data.set(fid, extData.get(fid) as ICol<any>);
+                    }
                 }
                 this.extData = data;
             })
