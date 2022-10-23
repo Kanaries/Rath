@@ -2,6 +2,7 @@ import intl from 'react-intl-universal';
 import { useMemo } from "react";
 import { IDataSourceType } from "../../global";
 
+
 export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceType; text: string }> {
     const fileText = intl.get(`dataSource.importData.type.${IDataSourceType.FILE}`);
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
@@ -120,3 +121,15 @@ export const useDemoDataOptions = function (): Array<{key: IDemoDataKey; text: s
     }, []);
     return options;
 }
+
+export const SEMANTIC_TYPE_CHOICES: {key: string; text: string }[] = [
+    { key: 'nominal', text: 'nominal' },
+    { key: 'ordinal', text: 'ordinal' },
+    { key: 'temporal', text: 'temporal' },
+    { key: 'quantitative', text: 'quantitative' },
+]
+
+export const ANALYTIC_TYPE_CHOICES: {key: string; text: string }[] = [
+    { key: 'dimension', text: 'dimension' },
+    { key: 'measure', text: 'measure' },
+]

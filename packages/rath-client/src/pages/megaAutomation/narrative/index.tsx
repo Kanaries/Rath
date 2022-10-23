@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { Spinner } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
-import { getTestServerAPI } from '../../../service';
+import { getInsightExpl } from '../../../services/insights';
 
 const InsightDesc = styled.div`
     margin: 4px 12px 0px 12px;
@@ -54,32 +54,15 @@ const Narrative: React.FC = props => {
     useEffect(() => {
         setExplainLoading(true)
         requestId.current++;
-        let rid = requestId.current;
-        fetch(getTestServerAPI('insight'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    dataSource,
-                    fields: fieldsInViz,
-                    aggrType: 'sum',
-                    langType: langStore.lang
-                })
-            })
-            .then(res => res.json())
-            .then(res => {
-                if (res.success) {
-                    rid === requestId.current && setViewInfo(res.data)
-                } else {
-                    throw new Error(res.message)
-                }
-            }).catch(err => {
-                console.error(err);
-                setViewInfo([])
-            }).finally(() => {
-                setExplainLoading(false)
-            })
+        getInsightExpl({
+            requestId: requestId,
+            dataSource: dataSource,
+            fields: fieldsInViz,
+            aggrType: 'sum',
+            langType: langStore.lang,
+            setExplainLoading: setExplainLoading,
+            resolveInsight: setViewInfo
+        })
     }, [pageIndex, dataSource, fieldsInViz, langStore.lang])
     const explains = useMemo<any[]>(() => {
         if (!viewInfo || viewInfo.length === 0) return []
@@ -91,7 +74,7 @@ const Narrative: React.FC = props => {
     }, [viewInfo])
     return <div>
         {
-            !explainLoading && explains.filter(ex => ex.score > nlgThreshold).map(ex => <InsightDesc key={ex.type}>
+            !explainLoading && explains.filter(ex => ex.score > nlgThreshold).sort((a, b) => b.score - a.score).map(ex => <InsightDesc key={ex.type}>
                 <div className="insight-header">
                     <div className="type-title">{ex.type}</div>
                     <div className="type-score">{(ex.score * 100).toFixed(1)} %</div>

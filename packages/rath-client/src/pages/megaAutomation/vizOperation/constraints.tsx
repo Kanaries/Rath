@@ -23,14 +23,14 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = (props) => {
         megaAutoStore.initConstraints();
     }, [megaAutoStore, showConstraints]);
     return (
-        <Panel headerText={intl.get('lts.commandBar.constraints')} isOpen={showConstraints} onDismiss={closePanel}>
+        <Panel headerText={intl.get('megaAuto.commandBar.constraints')} isOpen={showConstraints} onDismiss={closePanel}>
             <Stack tokens={stackTokens}>
                 <Separator>Explain</Separator>
                 {CHECKBOX_EXAMPLES.map((f) => (
                     <Checkbox
                         disabled
                         key={f.fid}
-                        label={intl.get(`lts.constraints.${f.fid}`)}
+                        label={intl.get(`megaAuto.constraints.${f.fid}`)}
                         indeterminate={f.state === 0}
                         checked={f.state === 1}
                     />

@@ -1,10 +1,7 @@
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
-import { IRow, IAnalyticType, ISemanticType, Specification } from "visual-insights"
-import { Field } from "../global"
-import { IFieldMeta, IGeoRole, IVegaSubset } from "../interfaces"
-import { FieldSummary } from "../service"
-import { inferAnalyticTypeFromSemanticType } from "."
+import { IRow, Specification } from "visual-insights"
+import { IVegaSubset } from "../interfaces"
 
 dayjs.extend(customParseFormat);
 
@@ -15,64 +12,6 @@ export function transNumber(num: any): number | null {
     return Number(num)
 }
 
-export function fieldMeta2fieldSummary(metas: IFieldMeta[]): FieldSummary[] {
-    return metas.map(f => ({
-        fieldName: f.fid,
-        entropy: f.features.entropy,
-        maxEntropy: f.features.maxEntropy,
-        type: f.semanticType,
-        distribution: f.distribution,
-        max: typeof f.features.max === 'number' ? f.features.max : 0,
-        min: typeof f.features.min === 'number' ? f.features.min : 0,
-    }))
-}
-
-export function fieldSummary2fieldMeta(props: {
-    summary: FieldSummary[];
-    analyticTypes?: IAnalyticType[];
-    semanticTypes?: (ISemanticType | '?')[];
-    geoRoles?: IGeoRole[];
-}): IFieldMeta[] {
-    const { summary, analyticTypes, semanticTypes, geoRoles } = props;
-    if (typeof analyticTypes === 'undefined') {
-        console.warn('You are using analytic types infered from semantic type, it may not be safe.')
-    }
-    return summary.map((s, i) => {
-        let sType: ISemanticType = s.type;
-        if (semanticTypes && semanticTypes[i] !== '?') {
-            sType = semanticTypes[i] as ISemanticType;
-        }
-        let geoRole: IGeoRole = 'none';
-        if (geoRoles && geoRoles[i]) {
-            geoRole = geoRoles[i]
-        }
-        return {
-            fid: s.fieldName,
-            geoRole: geoRole,
-            features: {
-                maxEntropy: s.maxEntropy,
-                entropy: s.entropy,
-                unique: s.distribution.length,
-                max: s.max,
-                min: s.min
-            },
-            semanticType: sType,
-            analyticType: analyticTypes ? analyticTypes[i] : inferAnalyticTypeFromSemanticType(sType),
-            distribution: s.distribution,
-            disable: false
-        }
-    })
-}
-
-/**
- * @deprecated
- */
-export function meta2fieldScores(metas: IFieldMeta[]): [string, number, number, Field][] {
-    return metas.map(m => [m.fid, m.features.entropy, m.features.maxEntropy, {
-        name: m.fid,
-        type: m.semanticType
-    }])
-}
 // todo: Sync time rules in visual-insights
 // const TIME_RULES: RegExp[] = [
 //     /^[0-9]{2,4}[-/][0-9]{1,2}([-/][0-9]{1,2})?$/, // YYYY-MM-DD

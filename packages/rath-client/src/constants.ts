@@ -2,21 +2,16 @@ import { IECStatus } from "./interfaces";
 
 export const RATH_INDEX_COLUMN_KEY = '__rath_index_col_key__';
 
-export const INIT_TOP_K_DIM_GROUP_NUM = 50;
-
 export const PIVOT_KEYS = {
     dataSource: 'dataSource',
-    noteBook: 'noteBook',
-    gallery: 'explore',
-    dashBoard: 'dashBoard',
-    explainer: 'explainer',
     editor: 'editor',
     support: 'support',
-    lts: 'lts',
-    pattern: 'pattern',
-    progressiveDashBoard: 'progressiveDashBoard',
+    megaAuto: 'megaAuto',
+    semiAuto: 'semiAuto',
+    dashBoardDesigner: 'dashBoardDesigner',
     painter: 'painter',
-    collection: 'collection'
+    collection: 'collection',
+    dashboard: 'dashboard',
   } as const;
 
 export const COMPUTATION_ENGINE = {

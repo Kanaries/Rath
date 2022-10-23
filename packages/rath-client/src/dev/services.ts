@@ -1,6 +1,6 @@
 import { IRow } from "visual-insights";
-import { IRawField } from "rath-client/src/interfaces";
-import { workerService } from "rath-client/src/service";
+import { IRawField } from "../interfaces";
+import { workerService } from "../services";
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
@@ -12,8 +12,12 @@ interface ExpandDateTimeProps {
   dataSource: IRow[];
   fields: IRawField[];
 }
+
 const ExpandEnv = checkExpandEnv();
 
+/**
+ * @deprecated use generic fields extension API
+ */
 export async function expandDateTimeService (props: ExpandDateTimeProps): Promise<ExpandDateTimeProps> {
   if (ExpandEnv === 'debug') {
     doTest()

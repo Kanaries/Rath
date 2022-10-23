@@ -18,23 +18,33 @@
         "addVar": "Add Variable",
         "addFilter": "Add Filter",
         "field": "Field",
-        "star": "Star"
+        "star": "Star",
+        "stat": {
+            "unique": "Unique",
+            "min": "Minimum",
+            "max": "Maximum",
+            "mean": "Mean",
+            "median": "Median",
+            "stdev": "Standard Deviation",
+            "count": "Count",
+            "sum": "Sum",
+            "qt_25": "25th Percentile",
+            "qt_75": "75th Percentile",
+            "qt_50": "Median"
+        }
     },
     "menu": {
         "dataSource": "DataSource",
-        "noteBook": "Interactive Pipeline Visualization",
-        "explore": "Explore(alpha version)",
-        "dashBoard": "DashBoard",
-        "explainer": "Explainer",
         "editor": "Manual Exploration⭐️",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
-        "lts": "Mega-auto Exploration",
-        "pattern": "Semi-auto Exploration⭐️",
+        "megaAuto": "Mega-auto Exploration",
+        "semiAuto": "Semi-auto Exploration⭐️",
         "devCollection": "Insiders(α)",
-        "progressiveDashBoard": "Dashboard Designer",
+        "dashBoardDesigner": "Dashboard Designer",
         "painter": "Data Painter🚀",
-        "collection": "Collection"
+        "collection": "Collection",
+        "dashboard": "Dashboard📋"
     },
     "preference": {
         "title": "preference"
@@ -63,7 +73,7 @@
         "analysis": {
             "start": "Start Analysis",
             "checkResult": "Check Existed Results",
-            "pattern": "Build Knowledge(beta)",
+            "pattern": "Data Copilot",
             "manual": "Manual Explore"
         },
         "importStorage": {
@@ -100,6 +110,7 @@
         "viewMode": "View Mode",
         "metaView": "Meta View",
         "dataView": "Table View",
+        "statView": "Statistics View",
         "charset": "character encoding",
         "databaseType": "Select Database",
         "connectUri": "Connection URI",
@@ -111,6 +122,13 @@
         "connectorConfig": "Connector Settings",
         "connectorService": "Connector Service URL (Optional)",
         "apply": "Apply&Test",
+        "statViewInfo": {
+            "title": "Statistics View",
+            "desc": "Statistics View is a quick way to get a sense of the data. It shows the distribution of each field in the dataset. You can click the field name to see the distribution of the field in detail.",
+            "explore": "Explore In Dataset",
+            "originStatTable": "Original Data Statistics",
+            "selectionStatTable": "Selection Data Statistics"
+        },
         "dbProgress": [
             {
                 "label": "Connection",
@@ -222,7 +240,20 @@
             "title": "Download Data"
         },
         "extend": {
-            "title": "Extend Information"
+            "title": "Extend Information",
+            "manual": "LaTiao",
+            "editor": "Editor",
+            "autoExtend": "More fields can be generated from { count } existing fields to enhance analyze and exploration.",
+            "notDecided": "{ count } fields has not been decided.",
+            "findThem": "Find Next",
+            "checkThem": "Check",
+            "empty": "No column exported.",
+            "apply": "Apply",
+            "cancel": "Cancel",
+            "auto": "Extend Suggestions",
+            "suggestion": {
+                "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months."
+            }
         },
         "filter": {
             "title": "Filter Config",
@@ -242,81 +273,7 @@
         "dimension": "dimension",
         "measure": "measure"
     },
-    "noteBook": {
-        "autoParams": {
-            "title": "Auto Recommand Parameters",
-            "auto": "Auto",
-            "manual": "Manual"
-        },
-        "univariate": {
-            "title": "Univariate Summary",
-            "desc": "Hover your mouse over the fields and see the distails and entropy reducing strategy.",
-            "columns": {
-                "fieldName": "field name",
-                "type": "type",
-                "entropy": "impurity",
-                "maxEntropy": "impurity(max)"
-            }
-        },
-        "subspace": {
-            "title": "Subspace Searching",
-            "desc": "Try to choose one row(combination of dimensions) of the subspace and see the changes of the processes below.",
-            "topKDimension": "top k percent dimension used",
-            "topKSubspace": "top ( {k} / {total} ) number of subspaces used"
-        },
-        "clustering": {
-            "title": "Measurement Clustering",
-            "desc": "Try to choose one group to visualize them.",
-            "maxGroupNum": "Max Group Number"
-        },
-        "vis": {
-            "title": "Visualization",
-            "desc": "If there is no result here, try to click one group of measures in ***Clustering*** process above.",
-            "aggMea": "aggregate measures"
-        }
-    },
-    "explore": {
-        "title": "Visual Insights",
-        "preference": "Preference",
-        "rankList": "Rank List",
-        "search": "Search",
-        "digIn": "Dig In",
-        "desc": "Details of the recommendation process can be seen in  <b>NoteBook</b> Board. You can adjust some of the parameters and operators and see how it influence recommendation results.",
-        "tip": "Try to use the setting button beside the \"visual insight\" title to adjust the visualization settings to get a view you prefer better.",
-        "currentPage": "Current Page",
-        "last": "Last",
-        "next": "Next",
-        "summary": "Summary",
-        "related": {
-            "title": "Related Views"
-        },
-        "like": "like"
-    },
-    "dashBoard": {
-        "generateButton": "Generate Dashboard",
-        "last": "Last",
-        "next": "Next",
-        "desc": "Double click the chart with selection to clear selection(filter).",
-        "pageNo": "current page no: {current} of {total}"
-    },
-    "explainer": {
-        "notReadyTip": "Dev Page now is testing for different types of insight worker. \n If you see this hint, it means you have not upload dataSource or not click the 'extract insights' button in dataSource page which will produce a cooked dataSource for dev page.",
-        "insightButton": "Get Insights",
-        "sigThreshold": "significance threshold",
-        "desc": "There are {num} of views of which insight significance is no less than {threshold} %",
-        "currentIndex": "Current Index",
-        "explainTemp": {
-            "viewDesc": "Dimensions are {dimensions}, and measures are {measures}.",
-            "sig": "There is a significance of {sig} % that there exists a {itype} in the graph."
-        },
-        "insightTypes": {
-            "default_outlier": "outlier",
-            "general": "general",
-            "default_group": "group distribution",
-            "default_trend": "trend"
-        }
-    },
-    "lts": {
+    "megaAuto": {
         "autoAnalysis": "Auto Analysis",
         "reRun": "Re-Run Task",
         "computing": "computing",
@@ -361,7 +318,7 @@
             }
         }
     },
-    "discovery": {
+    "semiAuto": {
         "main": {
             "mainView": "Main View",
             "relatePatterns": "associate patterns",
@@ -406,11 +363,37 @@
         "last": "Last",
         "next": "Next",
         "addLabel": "Add Label",
+        "newField": "Paint Field",
         "tools": {
             "move": "Move",
             "color": "Color",
             "clean": "Erase",
             "create": "Create"
+        }
+    },
+    "latiao": {
+        "maybe": {
+            "keyword": "keyword",
+            "operator": "operator",
+            "fid": "field"
+        },
+        "keyword": {
+            "out": "Append field to data."
+        },
+        "op": {
+            "$set": "Transforms a field to ordinals as a new column.",
+            "$group": "Transforms a field to calculative numbers as a new column.",
+            "$nominal": "Transforms a field to strings as a new column.",
+            "$id": "Generates an automatically incrementing id field, starting from 1.",
+            "$order": "Returns rank index of the data sorted on the target numeric field, starting from 1.",
+            "$dict": "Returns rank index of the data sorted on the target string field, starting from 1.",
+            "$isNaN": "Transforms numbers to string \"1\" if the number is NaN, otherwise string \"0\" as a new column.",
+            "$isZero": "Transforms numbers to string \"1\" if the number is zero, otherwise string \"0\" as a new column.",
+            "$toDate": "Transforms a field to a set of operative Date objects, which could be sliced on time units.",
+            "$isValidDate": "Transforms Date objects to string \"1\" if the Date object is valid, otherwise string \"0\" as a new column.",
+            "$normalize": "Normalizes a field as a new column.",
+            "$inset": "Scales a field to range -1 ~ +1 as a new column.",
+            "$bound": "Scales a field to range 0 ~ 1 as a new column."
         }
     }
 }

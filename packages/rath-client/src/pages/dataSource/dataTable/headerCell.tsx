@@ -6,18 +6,35 @@ import { Callout, IconButton, TextField } from '@fluentui/react';
 import { useId } from '@fluentui/react-hooks';
 import DistributionChart from '../metaView/distChart';
 import DropdownSelect from '../../../components/dropDownSelect'
-import { IFieldMeta, IRawField } from '../../../interfaces';
+import { FieldExtSuggestion, IFieldMeta, IRawField } from '../../../interfaces';
+import { LiveContainer } from '../metaView/metaList';
+import FieldExtSuggestions from '../../../components/fieldExtend/suggestions';
+import { getGlobalStore } from '../../../store';
 
-const HeaderCellContainer = styled.div`
+
+const HeaderCellContainer = styled.div<{ isPreview: boolean }>`
     .bottom-bar {
         position: absolute;
-        height: 4px;
-        border-radius: 0px 0px 2px 2px;
+        display: flex;
+        justify-content: space-between;
+        height: ${({ isPreview }) => isPreview ? '2.4em' : '4px'};
+        font-size: 0.9rem;
+        line-height: 2.4em;
+        border-radius: ${({ isPreview }) => isPreview ? '0' : '0px 0px 2px 2px'};
         left: 0px;
         right: 0px;
         top: 0px;
-        margin: 0px 1px;
+        margin: 0px ${({ isPreview }) => isPreview ? '0px' : '1px'};
+        padding: 0 0.8em;
+        color: #fff;
+        font-weight: 600;
+
+        > div {
+            display: flex;
+            align-items: center;
+        }
     }
+    padding-top: ${({ isPreview }) => isPreview ? '2.2em' : '0'};
     .info-container{
         min-height: 50px;
     }
@@ -32,6 +49,9 @@ const HeaderCellContainer = styled.div`
     }
     .disable {
         background-color: #9e9e9e;
+    }
+    .preview {
+        background-color: #eaa300;
     }
     .header-row{
         display: flex;
@@ -74,6 +94,9 @@ interface HeaderCellProps {
     disable: boolean;
     onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
     meta: IFieldMeta | null;
+    extSuggestions: FieldExtSuggestion[];
+    isExt: boolean;
+    isPreview: boolean;
 }
 
 interface IOption<T = string> { key: T; text: string }
@@ -98,12 +121,15 @@ function useBIFieldTypeOptions(): IOption<IAnalyticType>[] {
 }
 
 const HeaderCell: React.FC<HeaderCellProps> = props => {
-    const { name, code, meta, disable, onChange } = props;
+    const { dataSourceStore } = getGlobalStore();
+    const { name, code, meta, disable, isPreview, onChange, extSuggestions, isExt } = props;
     const [showNameEditor, setShowNameEditor] = useState<boolean>(false);
     const optionsOfBIFieldType = useBIFieldTypeOptions();
     const buttonId = useId('edit-button');
+    const canDelete = !isPreview && isExt;
+
     return (
-        <HeaderCellContainer>
+        <HeaderCellContainer isPreview={isPreview}>
             <div className="info-container">
                 <div className="header-row">
                     <h3 className="header">
@@ -112,14 +138,43 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
                         }
                         {name}
                     </h3>
-                    <div className="edit-icon">
-                    <IconButton id={buttonId}
-                            iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
-                            onClick={() => {
-                                setShowNameEditor(true)
-                            }}
-                        />
-                    </div>
+                    {isPreview || (
+                        <>
+                            <div className="edit-icon">
+                            <IconButton id={buttonId}
+                                    iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
+                                    onClick={() => {
+                                        setShowNameEditor(true)
+                                    }}
+                                />
+                            </div>
+                            {extSuggestions.length > 0 && (
+                                <LiveContainer
+                                    style={{
+                                        transform: 'scale(0.75)',
+                                        margin: '-4px -18px',
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    <FieldExtSuggestions fid={code} suggestions={extSuggestions} />
+                                    <div className="badge">
+                                        {extSuggestions.length}
+                                    </div>
+                                </LiveContainer>
+                            )}
+                            {canDelete && (
+                                <IconButton
+                                    iconProps={{
+                                        iconName: 'Delete',
+                                        style: {
+                                            color: '#c50f1f',
+                                        },
+                                    }}
+                                    onClick={() => dataSourceStore.deleteExtField(code)}
+                                />
+                            )}
+                        </>
+                    )}
                 </div>
                 {
                     showNameEditor && <Callout
@@ -182,7 +237,33 @@ const HeaderCell: React.FC<HeaderCellProps> = props => {
             }} /> */}
             {/* {meta && <DistributionMiniChart dataSource={meta ? meta.distribution : []} x="memberName" y="count" fieldType={meta?.semanticType || 'nominal'} />} */}
             
-            <div className={`bottom-bar ${getClassName(meta?.analyticType || 'dimension', disable)}`}></div>
+            <div className={`bottom-bar ${isPreview ? 'preview' : getClassName(meta?.analyticType || 'dimension', disable)}`}>
+                {isPreview ? (
+                    <>
+                        <span>preview</span>
+                        <div>
+                            <IconButton
+                                onClick={() => dataSourceStore.settleExtField(code)}
+                                iconProps={{
+                                    iconName: 'CompletedSolid',
+                                    style: {
+                                        color: '#0027b4',
+                                    },
+                                }}
+                            />
+                            <IconButton
+                                onClick={() => dataSourceStore.deleteExtField(code)}
+                                iconProps={{
+                                    iconName: 'Delete',
+                                    style: {
+                                        color: '#c50f1f',
+                                    },
+                                }}
+                            />
+                        </div>
+                    </>
+                ) : ''}
+            </div>
         </HeaderCellContainer>
     );
 }

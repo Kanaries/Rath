@@ -3,26 +3,56 @@ import { AnyMark } from "vega-lite/build/src/mark";
 import { IAnalyticType, IFieldSummary, IInsightSpace, ISemanticType } from "visual-insights";
 import { IFilter } from '@kanaries/loa'
 import { Aggregator } from "./global";
+import type { DateTimeInfoType } from "./dev/workers/engine/dateTimeExpand";
 
 export interface IRow {
     [key: string]: any
 }
 
-// export interface IRawField extends BIField {
-//     disable: boolean;
-// }
+export interface ICol<T> {
+    fid: string;
+    data: Array<T>;
+}
 
 export type IGeoRole = 'longitude' | 'latitude' | 'none';
 
+export type FieldExtOptType = (
+    | 'dateTimeExpand'
+    | `LaTiao.$${string}`
+);
+
 /** Detailed information of a extended field.  */
 interface IFieldExtInfoBase {
-    /** Field id of fields that this field infered from.  */
+    /** Field id of fields that this field inferred from.  */
     extFrom: string[];
     /** The identifier of the data-extension operation. */
-    extOpt: string;
+    extOpt: FieldExtOptType;
     /** Additional information of the specified extension operation */
     extInfo: any;
 }
+
+export interface IFieldExtInfoBaseDateTime extends IFieldExtInfoBase {
+    extFrom: [string];  // from only one field
+    extOpt: 'dateTimeExpand';
+    extInfo: DateTimeInfoType;
+}
+
+interface IFieldExtInfoBaseLaTiao extends IFieldExtInfoBase {
+    extOpt: `LaTiao.$${string}`;
+    extInfo: '';
+}
+
+type FieldExtInfoBase = (
+    | IFieldExtInfoBaseDateTime
+    | IFieldExtInfoBaseLaTiao
+);
+
+export type FieldExtSuggestion = {
+    /** score 越高，推荐顺序越靠前 */
+    score: number;
+    type: string;
+    apply: (fieldId: string) => Promise<void>;
+};
 
 interface IFieldBase {
     fid: string;
@@ -31,11 +61,17 @@ interface IFieldBase {
     semanticType: ISemanticType;
     geoRole: IGeoRole;
     /** detailed information of field extension operations. defined only if this field is extended */
-    extInfo?: IFieldExtInfoBase;
+    extInfo?: FieldExtInfoBase;
 }
 export interface IRawField extends IFieldBase {
+    /** @default "settled" */
+    stage?: 'preview' | 'settled';
     disable?: boolean;
     pfid?: string | null;
+}
+
+export interface IExtField extends IRawField {
+    stage: 'preview' | 'settled';
 }
 
 /**
@@ -64,6 +100,11 @@ export interface IFieldMeta extends IFieldBase {
     };
     distribution: Array<{ memberName: string; count: number }>;
     disable?: boolean;
+}
+
+export interface IFieldMetaWithExtSuggestions extends IFieldMeta {
+    extSuggestions: FieldExtSuggestion[];
+    stage?: 'preview' | 'settled';
 }
 
 export enum IComputeMode {
@@ -105,7 +146,8 @@ export interface IDatasetBase {
 
 export enum IDataPreviewMode {
     meta = 'meta',
-    data = 'data'
+    data = 'data',
+    stat = 'stat'
 }
 
 export enum ITaskTestMode {

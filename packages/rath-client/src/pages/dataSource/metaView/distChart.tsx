@@ -5,21 +5,20 @@ import { IRow } from '../../../interfaces';
 import { getRange } from '../../../utils';
 
 const DATA_NAME = 'dataSource';
-
-function fl2bins(data: IRow[], valueField: string, ctField: string) {
+const DEFAULT_BIN_SIZE = 10;
+function fl2bins(data: IRow[], valueField: string, ctField: string, binSize: number | undefined = DEFAULT_BIN_SIZE) {
     const values: number[] = data.map(row => Number(row[valueField]));
     const [_min, _max] = getRange(values)
-    const BIN_SIZE = 8;
-    const bins: number[] = new Array(BIN_SIZE + 1).fill(0);
-    const step = (_max - _min) / BIN_SIZE;
+    const bins: number[] = new Array(binSize + 1).fill(0);
+    const step = (_max - _min) / binSize;
     for (let i = 0; i < data.length; i++) {
         const index = Math.floor((values[i] - _min) / step);
         bins[index] += data[i][ctField];
     }
-    bins[BIN_SIZE - 1] += bins[BIN_SIZE]
+    bins[binSize - 1] += bins[binSize]
     bins.pop();
     return bins.map((b, i) => ({
-        [valueField]: Math.round(_min + i * step),
+        [valueField]: (_min + i * step).toPrecision(3),
         [ctField]: b
     }))
 }
@@ -28,12 +27,15 @@ export interface DistributionChartProps {
     analyticType: IAnalyticType;
     x: string;
     y: string;
+    width?: number;
+    height?: number;
+    maxItemInView?: number;
     dataSource: IRow[]
 }
 
 const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     const chart = useRef<HTMLDivElement>(null);
-    const { x, y, dataSource, semanticType } = props;
+    const { x, y, dataSource, semanticType, width = 180, height = 80, maxItemInView = 10 } = props;
     const [view, setView] = useState<Result['view']>();
     // 是否有分箱的ordinal列
     const hasBinIndex = useMemo(() => {
@@ -56,15 +58,15 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 }
             })
         } else if (semanticType === 'nominal') {
-            adjustData = [...dataSource].sort((a, b) => b['y'] - a['y']).slice(0, 8)
+            adjustData = [...dataSource].sort((a, b) => b['y'] - a['y']).slice(0, maxItemInView)
         } else if (semanticType === 'quantitative') {
-            adjustData = fl2bins(dataSource, x, y)
+            adjustData = fl2bins(dataSource, x, y, maxItemInView)
         } else {
             adjustData = dataSource
         }
         adjustData = adjustData.slice(0, 100)
         return adjustData
-    }, [dataSource, x, y, semanticType])
+    }, [dataSource, x, y, semanticType, maxItemInView])
 
     const sortBy = useMemo(() => {
         let sortBy: string | undefined | any = undefined;
@@ -72,6 +74,8 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
             sortBy = '-y'
         } else if (semanticType === 'ordinal' && hasBinIndex) {
             sortBy = { field: 'index' }
+        } else if (semanticType === 'quantitative') {
+            sortBy = { field: 'x' }
         }
         return sortBy
     }, [semanticType, hasBinIndex])
@@ -87,8 +91,8 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                     stroke: null,
                     fill: null
                 },
-                height: 80,
-                width: 180,
+                height,
+                width,
                 mark: {
                     type: ['quantitative', 'temporal'].includes(semanticType) ? 'area' : 'bar',
                     opacity: 0.86
@@ -122,7 +126,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 }).catch(console.error)
             }
         }
-    }, [x, y, sortBy, semanticType])
+    }, [x, y, sortBy, semanticType, width, height, maxItemInView])
     useEffect(() => {
         if (view) {
             try {

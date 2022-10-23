@@ -10,7 +10,7 @@ import { IVegaSubset } from '../../interfaces';
 import { distVis } from '../../queries/distVis';
 import { labDistVis } from '../../queries/labdistVis';
 import { useGlobalStore } from '../../store';
-import VisErrorBoundary from '../../visBuilder/visErrorBoundary';
+import VisErrorBoundary from '../../components/visErrorBoundary';
 import { changeVisSize } from '../collection/utils';
 
 const VizCard = styled.div<{ selected?: boolean }>`

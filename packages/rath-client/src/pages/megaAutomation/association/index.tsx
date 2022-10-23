@@ -25,14 +25,14 @@ const ObservableAssociation: React.FC = props => {
     const assoShownList =  assoShownFullList.slice(assoIndex * PAGE_SIZE, (assoIndex + 1) * PAGE_SIZE);
 
     return <div>
-        <div className="state-description">{intl.get('lts.asso.hint')}</div>
+        <div className="state-description">{intl.get('megaAuto.asso.hint')}</div>
         <Pivot headersOnly selectedKey={pivotKey} onLinkClick={(item) => {
             if (item && item.props.itemKey) {
                 setPivotKey(item.props.itemKey)
             }
         }}>
-            <PivotItem headerText={`${intl.get('lts.asso.T1')}(${assoListT1.length})`} itemKey="T1" />
-            <PivotItem headerText={`${intl.get('lts.asso.T2')}(${assoListT2.length})`} itemKey="T2" />
+            <PivotItem headerText={`${intl.get('megaAuto.asso.T1')}(${assoListT1.length})`} itemKey="T1" />
+            <PivotItem headerText={`${intl.get('megaAuto.asso.T2')}(${assoListT2.length})`} itemKey="T2" />
         </Pivot>
         <Pagination count={Math.floor(assoShownFullList.length / PAGE_SIZE) + 1} page={assoIndex + 1} onChange={(e, v) => {
             setAssoIndex(Math.max(v - 1, 0));

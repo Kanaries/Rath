@@ -3,7 +3,7 @@ import { ICubeStorageManageMode, Sampling, Specification, IFieldSummary, IInsigh
 
 import { IRow, ISyncEngine, ITaskTestMode } from "../../interfaces";
 import { IVizSpace } from "../../pages/megaAutomation/association/assCharts";
-import { initRathWorker, rathEngineServerService, rathEngineService } from "../../service";
+import { initRathWorker, rathEngineServerService, rathEngineService } from "../../services/index";
 import { IRathStorage } from "../../utils/storage";
 import { ClickHouseStore } from "../clickhouseStore";
 import { CommonStore } from "../commonStore";

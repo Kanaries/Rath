@@ -52,3 +52,53 @@ export const MainViewContainer = styled.div`
         align-items: flex;
     }
 `
+
+export const InsightDesc = styled.div`
+    margin: 4px 12px 0px 12px;
+    padding: 12px;
+    border: 1px solid #95de64;
+    font-size: 12px;
+    max-width: 600px;
+    overflow-y: auto;
+    background-color: rgba(255, 255, 255, 0.9);
+    .insight-header{
+        display: flex;
+        font-size: 14px;
+        line-height: 14px;
+        margin-bottom: 8px;
+        .type-title{
+
+        }
+        .type-score{
+            margin-left: 1em;
+            padding-left: 1em;
+            border-left: 1px solid #bfbfbf;
+        }
+    }
+    .type-label{
+        background-color: green;
+        color: white;
+        display: inline-block;
+        padding: 0px 1em;
+        border-radius: 8px;
+        font-size: 12px;
+    }
+`
+
+export const FloatingOver = styled.div`
+    background-color: transparent;
+    color:#ffffff;
+    opacity: 30%;
+    z-index: 9999;
+    position: fixed;
+    height: auto;
+    width: auto;
+    padding:5px;
+    text-align:center;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    right: 10%;
+    top: 5%;
+`

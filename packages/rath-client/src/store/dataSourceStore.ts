@@ -1,17 +1,16 @@
-import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
+import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { combineLatest, from, Subscription } from "rxjs";
 import * as op from 'rxjs/operators'
 import { IAnalyticType, ISemanticType } from "visual-insights";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag } from "../interfaces";
-import { getQuantiles } from "../pages/dataSource/utils";
-import { cleanDataService, extendDataService, filterDataService, getFieldsSummaryService, inferMetaService } from "../service";
+import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, ICol, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions, IExtField } from "../interfaces";
+import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
-import { findRathSafeColumnIndex } from "../utils";
-import { fieldSummary2fieldMeta } from "../utils/transform";
+import { findRathSafeColumnIndex, colFromIRow } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
+import { getQuantiles } from "../lib/stat";
 
 interface IDataMessage {
     type: 'init_data' | 'others';
@@ -31,18 +30,22 @@ interface IDataSourceStoreStorage {
     cleanMethod: CleanMethod;
     fieldMetas: IFieldMeta[];
 }
+
 export class DataSourceStore {
     /**
      * raw data is fetched and parsed data or uploaded data without any other changes.
      * computed value `dataSource` will be calculated
      */
     public rawData: IRow[] = [];
+    public extData = new Map<string, ICol<any>>();
     /**
      * fields contains fields with `dimension` or `measure` type.
      * currently, this kind of type is not computed property unlike 'quantitative', 'nominal'...
      * This is defined by user's purpose or domain knowledge.
      */
     public mutFields: IRawField[] = [];
+    public extFields: IExtField[] = [];
+    public fieldsWithExtSug: IFieldMetaWithExtSuggestions[] = [];
     public filters: IFilter[] = [];
     
     // public fields: BIField[] = [];
@@ -72,15 +75,17 @@ export class DataSourceStore {
             // @ts-expect-error private field
             subscriptions: false,
         });
-        const fields$ = from(toStream(() => this.fields, false));
+        const fields$ = from(toStream(() => this.fieldsAndPreview, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
         const rawData$ = from(toStream(() => this.rawData, false));
+        const extData$ = from(toStream(() => this.extData, true));
         const filters$ = from(toStream(() => this.filters, true))
         // const filteredData$ = from(toStream(() => this.filteredData, true));
-        const filteredData$ = combineLatest([rawData$, filters$]).pipe(
-            op.map(([dataSource, filters]) => {
+        const filteredData$ = combineLatest([rawData$, extData$, filters$]).pipe(
+            op.map(([dataSource, extData, filters]) => {
                 return from(filterDataService({
                     dataSource,
+                    extData: toJS(extData),
                     filters: toJS(filters)
                 }))
             }),
@@ -103,20 +108,7 @@ export class DataSourceStore {
         const originFieldMetas$ = cleanedData$.pipe(
             op.withLatestFrom(fields$),
             op.map(([dataSource, fields]) => {
-                const ableFiledIds = fields.map(f => f.fid);
-                return from(getFieldsSummaryService(dataSource, ableFiledIds)).pipe(
-                    op.map(summary => {
-                        const analyticTypes = fields.map(f => f.analyticType);
-                        const geoRoles = fields.map(f => f.geoRole);
-                        const metas = fieldSummary2fieldMeta({
-                            summary,
-                            analyticTypes,
-                            geoRoles,
-                            semanticTypes: fields.map(f => f.semanticType)
-                        });
-                        return metas
-                    })
-                )
+                return from(computeFieldMetaService({ dataSource, fields: fields.map(f => toJS(f)) }))
             }),
             op.switchAll(),
             op.share()
@@ -161,10 +153,44 @@ export class DataSourceStore {
                 this.dataPrepProgressTag = IDataPrepProgressTag.none;
             })
         }))
+        const suggestExt = (allFields: IRawField[] | undefined, fieldMetas: IFieldMeta[] | undefined) => {
+            this.getExtSuggestions().then(res => {
+                if (allFields && allFields !== this.allFields) {
+                    return;
+                } else if (fieldMetas && fieldMetas !== this.fieldMetas) {
+                    return;
+                }
+
+                runInAction(() => {
+                    this.fieldsWithExtSug = res;
+                });
+            });
+        };
+        reaction(() => this.allFields, allFields => {
+            suggestExt(allFields, undefined);
+        })
+        reaction(() => this.fieldMetas, fieldMetas => {
+            suggestExt(undefined, fieldMetas);
+        })
     }
 
+    public get allFields() {
+        return this.mutFields.concat(this.extFields)
+    }
     public get fields () {
-        return this.mutFields.filter(f => !f.disable);
+        // return this.mutFields.filter(f => !f.disable);
+        return this.mutFields.filter(
+            f => !f.disable
+        ).concat(
+            this.extFields.filter(f => !f.disable && f.stage === 'settled')
+        );
+    }
+    public get fieldsAndPreview () {
+        return this.mutFields.filter(
+            f => !f.disable
+        ).concat(
+            this.extFields.filter(f => !f.disable)
+        );
     }
     public get fieldMetas () {
         return this.fieldMetasRef.current
@@ -327,30 +353,32 @@ export class DataSourceStore {
     }
 
     public updateFieldAnalyticType (type: IAnalyticType, fid: string) {
-        const target = this.mutFields.find(f => f.fid === fid);
+        const target = this.mutFields.find(f => f.fid === fid) ?? this.extFields.find(f => f.fid === fid);
         if (target) {
             target.analyticType = type;
         }
     }
 
     public updateFieldSemanticType (type: ISemanticType, fid: string) {
-        const target = this.mutFields.find(f => f.fid === fid);
+        const target = this.mutFields.find(f => f.fid === fid) ?? this.extFields.find(f => f.fid === fid);
         if (target) {
             target.semanticType = type;
             // 触发fieldsMeta监控可以被执行
             this.mutFields = [...this.mutFields];
+            this.extFields = [...this.extFields];
         }
     }
     // public updateFieldInfo <K extends keyof IRawField> (fieldId: string, fieldPropKey: K, value: IRawField[K]) {
     public updateFieldInfo (fieldId: string, fieldPropKey: string, value: any) {
         // type a = keyof IRawField
-        const target = this.mutFields.find(f => f.fid === fieldId);
+        const target = this.mutFields.find(f => f.fid === fieldId) ?? this.extFields.find(f => f.fid === fieldId);
         if (target) {
             // @ts-ignore
             target[fieldPropKey] = value;
             // target.type = type;
             // 触发fieldsMeta监控可以被执行
             this.mutFields = [...this.mutFields];
+            this.extFields = [...this.extFields];
         }
     }
 
@@ -453,6 +481,7 @@ export class DataSourceStore {
      * Expand all temporal fields to (year, month, date, weekday, hour, minute, second, millisecond).
      * @depends this.fields, this.cleanedDate
      * @effects this.rawData, this.mutFields
+     * @deprecated for a single field, use `dataSourceStore.expandSingleDateTime()` instead.
      */
     public async expandDateTime() {
         try {
@@ -473,6 +502,182 @@ export class DataSourceStore {
                 type: 'error',
                 content: `[extension]${error}`
             })
+        }
+    }
+
+    protected async getExtSuggestions(): Promise<IFieldMetaWithExtSuggestions[]> {
+        return this.allFields.map(mf => {
+            const meta = this.fieldMetas.find(m => m.fid === mf.fid);
+            const dist = meta ? meta.distribution : [];
+
+            const f: IFieldMeta = {
+                ...mf,
+                disable: mf.disable,
+                distribution: dist,
+                features: meta ? meta.features: { entropy: 0, maxEntropy: 0, unique: dist.length },
+            };
+
+            if (f.extInfo) {
+                // 属于扩展得到的字段，不进行推荐
+                return {
+                    ...f,
+                    extSuggestions: [],
+                };
+            }
+
+            const suggestions: FieldExtSuggestion[] = [];
+
+            if (f.semanticType === 'temporal') {
+                const alreadyExpandedAsDateTime = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'dateTimeExpand'
+                ));
+
+                if (!alreadyExpandedAsDateTime) {
+                    suggestions.push({
+                        score: 10,
+                        type: 'dateTimeExpand',
+                        apply: () => this.expandSingleDateTime(f.fid),
+                    });
+                }
+            }
+
+            return {
+                ...f,
+                extSuggestions: suggestions.sort((a, b) => b.score - a.score),
+            };
+        });
+    }
+
+    public canExpandAsDateTime(fid: string) {
+        const which = this.mutFields.find(f => f.fid === fid);
+        const expanded = Boolean(this.mutFields.find(
+            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
+        ));
+
+        if (expanded || !which) {
+            return false;
+        }
+
+        return which.semanticType === 'temporal' && !which.extInfo;
+    }
+
+    public async expandSingleDateTime(fid: string) {
+        if (!this.canExpandAsDateTime(fid)) {
+            return;
+        }
+
+        try {
+            let { allFields, rawData } = this;
+            allFields = allFields.filter(f => f.fid === fid).map(f => toJS(f))
+            const res = await expandDateTimeService({
+                dataSource: rawData,
+                fields: allFields
+            })
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const [_origin, ...enteringFields] = res.fields;
+
+            this.addExtFieldsFromRows(
+                res.dataSource,
+                enteringFields.map(f => ({
+                    ...f,
+                    stage: 'preview',
+                }))
+            );
+        } catch (error) {
+            console.error(error)
+            notify({
+                title: 'Expand DateTime API Error',
+                type: 'error',
+                content: `[extension]${error}`
+            })
+        }
+    }
+
+    /**
+     * @deprecated use `dataSourceStore.addExtFieldsFromRow` to avoid changes of rawData.
+     */
+    public mergeExtended(data: readonly IRow[], fields: IFieldMeta[]) {
+        try {
+            let { cleanedData } = this;
+            // console.log(
+            //     'mergeExtended',
+            //     cleanedData.map((row, i) => Object.assign({}, data[i], row)),
+            //     fields,
+            // );
+
+            runInAction(() => {
+                this.rawData = cleanedData.map((row, i) => Object.assign({}, data[i], row));
+                this.mutFields = [
+                    ...this.mutFields,
+                    ...fields,
+                ];
+            })
+        } catch (error) {
+            console.error(error)
+            notify({
+                title: 'mergeExtended Error',
+                type: 'error',
+                content: `[merge]${error}`
+            })
+        }
+    }
+
+    /**
+     * Add extended data into `dataSourceStore.extFields` and `dataSourceStore.extData`.
+     * @effects `this.extData`, `this.extFields`
+     */
+    public addExtFieldsFromRows(extData: readonly IRow[], extFields: IExtField[]) {
+        let extDataCol = colFromIRow(extData, extFields);
+        this.addExtFields(extDataCol, extFields);
+    }
+    /**
+     * Add extended data into `dataSourceStore.extFields` and `dataSourceStore.extData`.
+     * @effects `this.extData`, `this.extFields`
+     */
+    public addExtFields(extData: Map<string, ICol<any>>, extFields: IExtField[]) {
+        try {
+            runInAction(() => {
+                this.extFields = this.extFields.concat(extFields);
+                let data = new Map<string, ICol<any>>(this.extData.entries());
+                for (let i = 0; i < extFields.length; ++i) {
+                    let fid = extFields[i].fid
+                    if (!extData.has(fid)) throw new Error("unknown fid: " + fid);
+                    data.set(fid, extData.get(fid) as ICol<any>);
+                }
+                this.extData = data;
+            })
+        } catch (error) {
+            console.error(error);
+            notify({
+                title: 'addExtFields Error',
+                type: 'error',
+                content: `[addExt]${error}`
+            })
+        }
+    }
+
+    public settleExtField(fid: string) {
+        const fields = [...this.extFields];
+        const f = fields.find(which => which.fid === fid);
+
+        if (f) {
+            runInAction(() => {
+                f.stage = 'settled';
+                this.extFields = fields;
+            });
+        }
+    }
+
+    public deleteExtField(fid: string) {
+        const fields = [...this.extFields];
+        const idx = fields.findIndex(which => which.fid === fid);
+
+        if (idx !== -1) {
+            fields.splice(idx, 1);
+            
+            runInAction(() => {
+                this.extFields = fields;
+            });
         }
     }
 }
