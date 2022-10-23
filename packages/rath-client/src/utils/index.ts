@@ -1,6 +1,7 @@
 import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visual-insights';
 import { IRow, ICol } from '../interfaces';
 import { RATH_INDEX_COLUMN_KEY } from '../constants';
+import { isDateTimeArray } from '../dev/workers/engine/dateTimeExpand';
 import * as FileLoader from './fileParser';
 import * as Transform from './transform';
 import { getRange } from './stat';
@@ -71,7 +72,10 @@ function inferAnalyticTypeFromSemanticType (semanticType: ISemanticType): IAnaly
  */
  export function inferSemanticType (data: IRow[], fid: string): ISemanticType {
   let st = UnivariateSummary.getFieldType(data, fid);
-  if (st === 'ordinal') {
+  if (st === 'nominal') {
+    if (isDateTimeArray(data.map(row => row[fid]))) st = 'temporal'
+  }
+  else if (st === 'ordinal') {
     const valueSet: Set<number> = new Set();
     let _max = -Infinity;
     let _min = Infinity;

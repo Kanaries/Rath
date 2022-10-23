@@ -247,7 +247,7 @@ const UnknownDateTimeInfo: DateTimeInfo = {}
 
 type InfoArrayType = keyof DateTimeInfoArray
 export type DateTimeInfoType = keyof DateTimeInfo
-function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
+export function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
     // TODO: Polyfills: 中文格式等
     // TODO: assume the same dateTime format or support different format in one column
     let infoArray = {} as DateTimeInfoArray
@@ -273,6 +273,18 @@ function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
         })
     }
     return infoArray
+}
+export function isDateTimeArray(data: string[]): boolean {
+    let max_cnt = 0;
+    let emptyCount = data.map<number>(d => (d === null || d === undefined || d === "") ? 1 : 0)
+        .reduce((a, b) => a + b);
+    for (let i = 0; i < analyzer.rules.length; ++i) {
+        let cnt = data.map<number>(d => analyzer.rules[i].test(d) ? 1 : 0).reduce((a, b) => a + b)
+        if (cnt > max_cnt) {
+            max_cnt = cnt
+        }
+    }
+    return max_cnt + emptyCount === data.length;
 }
 
 export function dateTimeExpand(props: { dataSource: IRow[]; fields: IMuteFieldBase[] })
