@@ -42,7 +42,8 @@
         "devCollection": "实验特性(α)",
         "dashBoardDesigner": "智能报表",
         "painter": "数据绘板🚀",
-        "collection": "收藏夹"
+        "collection": "收藏夹",
+        "dashboard": "报表📋"
     },
     "preference": {
         "title": "个人偏好"
