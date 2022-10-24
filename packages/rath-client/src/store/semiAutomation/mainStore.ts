@@ -126,13 +126,15 @@ export class SemiAutomationStore {
         if (this.settings.vizAlgo === 'lite') {
             return renderedViews.map(v => distVis({
                 pattern: v,
-                specifiedEncodes: v.encodes
+                specifiedEncodes: v.encodes,
+                excludeScaleZero: this.mainVizSetting.excludeScaleZero
             }))
         } else {
             return renderedViews.map(v => labDistVis({
                 pattern: v,
                 dataSource: this.dataSource,
-                specifiedEncodes: v.encodes
+                specifiedEncodes: v.encodes,
+                excludeScaleZero: this.mainVizSetting.excludeScaleZero
             }))
         }
     }
@@ -144,13 +146,15 @@ export class SemiAutomationStore {
         if (this.settings.vizAlgo === 'lite') {
             return renderedViews.map(v => distVis({
                 pattern: v,
-                specifiedEncodes: v.encodes
+                specifiedEncodes: v.encodes,
+                excludeScaleZero: this.mainVizSetting.excludeScaleZero
             }))
         } else {
             return renderedViews.map(v => labDistVis({
                 pattern: v,
                 dataSource: this.dataSource,
-                specifiedEncodes: v.encodes
+                specifiedEncodes: v.encodes,
+                excludeScaleZero: this.mainVizSetting.excludeScaleZero
             }))
         }
     }
@@ -162,13 +166,15 @@ export class SemiAutomationStore {
         if (this.settings.vizAlgo === 'lite') {
             return renderedViews.map(v => distVis({
                 pattern: v,
+                excludeScaleZero: this.mainVizSetting.excludeScaleZero,
                 specifiedEncodes: v.encodes
             }))
         } else {
             return renderedViews.map(v => labDistVis({
                 pattern: v,
                 dataSource: this.dataSource,
-                specifiedEncodes: v.encodes
+                specifiedEncodes: v.encodes,
+                excludeScaleZero: this.mainVizSetting.excludeScaleZero
             }))
         }
     }
