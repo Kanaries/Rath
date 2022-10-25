@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react';
-import embed, { vega, Result } from 'vega-embed';
+import React, { useRef, useEffect } from 'react';
+import { View } from 'vega';
+import intl from 'react-intl-universal';
+import embed, { vega } from 'vega-embed';
 import { EDITOR_URL } from '../constants';
-// import { Result } from 'vega-embed';
 
 interface ReactVegaProps {
   dataSource: any[];
@@ -15,57 +16,63 @@ interface ReactVegaProps {
 const ReactVega: React.FC<ReactVegaProps> = props => {
   const { spec, dataSource, signalHandler = {}, actions } = props
   const container = useRef<HTMLDivElement>(null);
-  const [view, setView] = useState<Result['view']>()
+  const viewRef = useRef<View>();
   useEffect(() => {
-    const viewRef: { view: any } = { view: null }
     if (container.current) {
-      // @ts-ignore
-      embed(container.current, spec, {
+      const sspec = {
+        ...spec,
+        data: {
+          ...spec.data,
+        }
+      };
+      if (spec.data) {
+        sspec.data = {
+          ...spec.data
+        }
+      }
+      sspec.data.values = dataSource;
+      embed(container.current, sspec, {
         editorUrl: EDITOR_URL,
+        timeFormatLocale: intl.get('time_format') as any,
         actions
       }).then(res => {
-        setView(res.view);
         const view = res.view;
-        viewRef.view = view;
-        try {
-          view && view.change('dataSource', vega.changeset().remove(() => true).insert(dataSource))
-          view && view.resize();
-          view && view.runAsync(); 
-        } catch (error) {
-          console.error(error)
+        viewRef.current = view;
+        for (let key in signalHandler) {
+          view.addSignalListener('sl', signalHandler[key]);
         }
       })
     }
     return () => {
-      if (viewRef.view) {
-        viewRef.view.finalize();
+      if (viewRef.current) {
+        viewRef.current.finalize();
       }
     }
-  }, [spec, actions, dataSource])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spec, actions])
+
   useEffect(() => {
-    if (view && signalHandler) {
+    if (viewRef.current && signalHandler) {
       for (let key in signalHandler) {
-        view.addSignalListener('sl', signalHandler[key]);
+        viewRef.current.addSignalListener('sl', signalHandler[key]);
       }
     }
     return () => {
-      if (view && signalHandler) {
+      if (viewRef.current && signalHandler) {
         for (let key in signalHandler) {
-          view.removeSignalListener('sl', signalHandler[key]);
+          viewRef.current.removeSignalListener('sl', signalHandler[key]);
         }
       }
     }
-  }, [view, signalHandler])
-  // TODO：分析下面写法会产生抖动的原因
-  // useEffect(() => {
-  //   try {
-  //     view && view.change('dataSource', vega.changeset().remove(() => true).insert(dataSource))
-  //     view && view.resize();
-  //     view && view.runAsync(); 
-  //   } catch (error) {
-  //     console.error(error)
-  //   }
-  // }, [view, dataSource])
+  }, [signalHandler])
+
+  useEffect(() => {
+    if (viewRef.current) {
+      viewRef.current.change('dataSource', vega.changeset().remove(() => true).insert(dataSource));
+      viewRef.current.resize();
+      viewRef.current.runAsync(); 
+    }
+  }, [dataSource])
   return <div ref={container} />
 }
 

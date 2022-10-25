@@ -1,4 +1,5 @@
-import { IFieldMeta, IResizeMode } from "../../interfaces";
+import { IFieldEncode } from "@kanaries/loa";
+import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
 
 export interface ISizeConfig {
     mode: IResizeMode;
@@ -66,4 +67,43 @@ export function encodingDecorate (encoding: any, fields: IFieldMeta[], statField
         return true
     }
     return false;
+}
+
+export function applyZeroScale (encoding: IVegaSubset['encoding']) {
+    Object.values(encoding).forEach(ch => {
+        if (!ch.scale) ch.scale = {};
+        ch.scale.zero = false;
+    })
+}
+
+const COUNT_FIELD_ID = '__tmp_stat_id_unique'
+
+export function splitFieldsByEnocdes (fields: IFieldMeta[], encodes: IFieldEncode[]) {
+    const pureFields: IFieldMeta[] = [];
+    const transedFields: IFieldMeta[] = [];
+    for (let field of fields) {
+        if (encodes.find(e => e.field === field.fid)) {
+            transedFields.push(field);
+        } else {
+            pureFields.push(field);
+        }
+    }
+    if (encodes.find(e => e.aggregate === 'count') && !fields.find(f => f.fid === COUNT_FIELD_ID)) {
+        transedFields.push({
+            fid: COUNT_FIELD_ID,
+            semanticType: 'quantitative',
+            analyticType: 'measure',
+            geoRole: 'none',
+            features: {
+                entropy: Infinity,
+                maxEntropy: Infinity,
+                unique: 1000
+            },
+            distribution: []
+        })
+    }
+    return {
+        pureFields,
+        transedFields
+    }
 }

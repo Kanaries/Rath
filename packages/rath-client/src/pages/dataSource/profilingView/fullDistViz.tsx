@@ -1,6 +1,7 @@
 import { getRange, IAnalyticType, ISemanticType } from '@kanaries/loa';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import embed, { Result, vega } from 'vega-embed';
+import intl from 'react-intl-universal';
 import { IRow } from '../../../interfaces';
 const DATA_NAME = 'dataSource';
 const DEFAULT_BIN_SIZE = 10;
@@ -115,7 +116,8 @@ const FullDistViz: React.FC<FullDistVizProps> = (props) => {
                     } : undefined
                 }
             }, {
-                actions: false
+                actions: false,
+                timeFormatLocale: intl.get('time_format') as any
             }).then(res => {
                 setView(res.view);
                 res.view.addSignalListener('brush', (name, value) => {

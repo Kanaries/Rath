@@ -10,7 +10,8 @@ export const PIVOT_KEYS = {
     semiAuto: 'semiAuto',
     dashBoardDesigner: 'dashBoardDesigner',
     painter: 'painter',
-    collection: 'collection'
+    collection: 'collection',
+    dashboard: 'dashboard',
   } as const;
 
 export const COMPUTATION_ENGINE = {

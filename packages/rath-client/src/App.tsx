@@ -16,6 +16,8 @@ import CrInfo from './components/crInfo';
 import ProgressiveDashboard from './pages/progressiveDashboard';
 import Painter from './pages/painter';
 import Collection from './pages/collection';
+import Kanban from './pages/kanban';
+
 
 function App() {
   const { langStore, commonStore } = useGlobalStore();
@@ -55,6 +57,7 @@ function App() {
         {appKey === PIVOT_KEYS.painter && <Painter />}
         {appKey === PIVOT_KEYS.dashBoardDesigner && <ProgressiveDashboard />}
         {appKey === PIVOT_KEYS.collection && <Collection />}
+        {appKey === PIVOT_KEYS.dashboard && <Kanban />}
         <CrInfo />
         </div>
       </div>

@@ -1,16 +1,16 @@
 import React, { useRef } from 'react';
-import intl from 'react-intl-universal';
 import { PillPlaceholder } from './fieldPlaceholder';
  
-interface FilterPlaceholderProps {
+interface BasePillPlaceholderProps {
     onClick: () => void;
+    text: string;
 }
-const  FilterPlaceholder: React.FC<FilterPlaceholderProps> = props => {
-    const { onClick } = props;
+const  BasePillPlaceholder: React.FC<BasePillPlaceholderProps> = props => {
+    const { onClick, text } = props;
     const container = useRef<HTMLDivElement>(null);
     return <PillPlaceholder ref={container} onClick={onClick}>
-        + {intl.get('common.addFilter')}
+        + {text}
     </PillPlaceholder>
 }
 
-export default FilterPlaceholder;
+export default BasePillPlaceholder;

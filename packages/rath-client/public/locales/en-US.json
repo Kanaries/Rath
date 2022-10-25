@@ -15,8 +15,13 @@
             "temporal": "temporal",
             "quantitative": "quantitative"
         },
+        "analyticType": {
+            "dimension": "dimension",
+            "measure": "measure"
+        },
         "addVar": "Add Variable",
         "addFilter": "Add Filter",
+        "addEncode": "Add Computation",
         "field": "Field",
         "star": "Star",
         "stat": {
@@ -43,10 +48,12 @@
         "devCollection": "Insiders(α)",
         "dashBoardDesigner": "Dashboard Designer",
         "painter": "Data Painter🚀",
-        "collection": "Collection"
+        "collection": "Collection",
+        "dashboard": "Dashboard📋"
     },
     "preference": {
-        "title": "preference"
+        "title": "preference",
+        "config": "Configuration"
     },
     "support": {
         "title": "How to Get Support",
@@ -239,7 +246,20 @@
             "title": "Download Data"
         },
         "extend": {
-            "title": "Extend Information"
+            "title": "Extend Information",
+            "manual": "LaTiao",
+            "editor": "Editor",
+            "autoExtend": "More fields can be generated from { count } existing fields to enhance analyze and exploration.",
+            "notDecided": "{ count } fields has not been decided.",
+            "findThem": "Find Next",
+            "checkThem": "Check",
+            "empty": "No column exported.",
+            "apply": "Apply",
+            "cancel": "Cancel",
+            "auto": "Extend Suggestions",
+            "suggestion": {
+                "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months."
+            }
         },
         "filter": {
             "title": "Filter Config",
@@ -301,7 +321,8 @@
             "resizeMode": {
                 "resizable": "resizable",
                 "none": "none"
-            }
+            },
+            "excludeScaleZero": "exclude scale zero"
         }
     },
     "semiAuto": {
@@ -356,5 +377,40 @@
             "clean": "Erase",
             "create": "Create"
         }
+    },
+    "latiao": {
+        "maybe": {
+            "keyword": "keyword",
+            "operator": "operator",
+            "fid": "field"
+        },
+        "keyword": {
+            "out": "Append field to data."
+        },
+        "op": {
+            "$set": "Transforms a field to ordinals as a new column.",
+            "$group": "Transforms a field to calculative numbers as a new column.",
+            "$nominal": "Transforms a field to strings as a new column.",
+            "$id": "Generates an automatically incrementing id field, starting from 1.",
+            "$order": "Returns rank index of the data sorted on the target numeric field, starting from 1.",
+            "$dict": "Returns rank index of the data sorted on the target string field, starting from 1.",
+            "$isNaN": "Transforms numbers to string \"1\" if the number is NaN, otherwise string \"0\" as a new column.",
+            "$isZero": "Transforms numbers to string \"1\" if the number is zero, otherwise string \"0\" as a new column.",
+            "$toDate": "Transforms a field to a set of operative Date objects, which could be sliced on time units.",
+            "$isValidDate": "Transforms Date objects to string \"1\" if the Date object is valid, otherwise string \"0\" as a new column.",
+            "$normalize": "Normalizes a field as a new column.",
+            "$inset": "Scales a field to range -1 ~ +1 as a new column.",
+            "$bound": "Scales a field to range 0 ~ 1 as a new column."
+        }
+    },
+    "time_format": {
+        "dateTime": "%x, %X",
+        "date": "%-m/%-d/%Y",
+        "time": "%-I:%M:%S %p",
+        "periods": ["AM", "PM"],
+        "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     }
 }

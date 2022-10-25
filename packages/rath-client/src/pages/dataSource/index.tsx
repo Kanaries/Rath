@@ -27,6 +27,7 @@ import Advice from './advice';
 import AnalysisSettings from './settings';
 import FastSelection from './fastSelection';
 import ProfilingView from './profilingView';
+import LaTiaoConsole from './LaTiaoConsole';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -188,7 +189,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     );
 
     return (
-        <div className="content-container">
+        <div className="content-container" style={{ position: 'relative' }}>
             <Card>
                 <ImportStorage />
                 <AnalysisSettings />
@@ -222,6 +223,19 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         ariaLabel={intl.get('common.settings')}
                         onClick={() => {
                             commonStore.setShowAnalysisConfig(true);
+                        }}
+                    />
+
+                    <CommandButton
+                        text={intl.get('dataSource.downloadData.title')}
+                        disabled={rawData.length === 0}
+                        onClick={exportData}
+                        iconProps={{ iconName: 'download' }}
+                        styles={{
+                            root: {
+                                height: '32px',
+                                marginLeft: '1.5em !important',
+                            },
                         }}
                     />
 
@@ -265,22 +279,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                             dataSourceStore.setShowFastSelection(true);
                         }}
                     />
-                    <CommandButton
-                        text={intl.get('dataSource.downloadData.title')}
-                        disabled={rawData.length === 0}
-                        onClick={exportData}
-                        iconProps={{ iconName: 'download' }}
-                    />
-                    <CommandButton
-                        text={intl.get('dataSource.extend.title')}
-                        disabled={rawData.length === 0}
-                        iconProps={{ iconName: 'AppIconDefaultAdd' }}
-                        onClick={() => {
-                            // dataSourceStore.extendData();
-                            // TODO: 更多的扩展方式
-                            dataSourceStore.expandDateTime();
-                        }}
-                    />
+                    <LaTiaoConsole />
                 </Stack>
                 <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
                     {intl.get('dataSource.rowsInViews', {
@@ -320,6 +319,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
                 {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
                 {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}
+                {/* <Ideas /> */}
             </Card>
         </div>
     );

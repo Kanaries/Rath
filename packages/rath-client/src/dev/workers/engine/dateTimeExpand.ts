@@ -219,11 +219,7 @@ function date2Info(date: Date): DateTimeInfo {
 function parseDateTime(dateTime: string, reg_id?: number): DateTimeInfo {
     try {
         if (reg_id !== undefined) return parseReg(dateTime, reg_id)
-        if (dateTime === null) return UnknownDateTimeInfo;
-        if (dateTime === undefined) {
-            let date = new Date()
-            return date2Info(date)
-        }
+        if (dateTime === null || dateTime === undefined) return UnknownDateTimeInfo;
         // if (!/Z$/i.test(dateTime)) {
         // }
         // Polyfill
@@ -250,8 +246,8 @@ interface DateTimeInfoArray {
 const UnknownDateTimeInfo: DateTimeInfo = {}
 
 type InfoArrayType = keyof DateTimeInfoArray
-type InfoType = keyof DateTimeInfo
-function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
+export type DateTimeInfoType = keyof DateTimeInfo
+export function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
     // TODO: Polyfills: 中文格式等
     // TODO: assume the same dateTime format or support different format in one column
     let infoArray = {} as DateTimeInfoArray
@@ -267,7 +263,7 @@ function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
     for (let i = 0; i < dateTime.length; ++i) {
         let info = parseDateTime(dateTime[i], max_cnt > 0 ? reg_id : undefined)
         Object.keys(info).forEach(key => {
-            let infoKey = key as InfoType, infoArrayKey = key as InfoArrayType
+            let infoKey = key as DateTimeInfoType, infoArrayKey = key as InfoArrayType
             if (info[infoKey] !== undefined && info[infoKey] !== "") {
                 if (infoArray[infoArrayKey] === undefined) {
                     infoArray[infoArrayKey] = new Array<any>(dateTime.length)
@@ -278,10 +274,26 @@ function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
     }
     return infoArray
 }
+export function isDateTimeArray(data: string[]): boolean {
+    let max_cnt = 0;
+    let emptyCount = data.map<number>(d => (d === null || d === undefined || d === "") ? 1 : 0)
+        .reduce((a, b) => a + b);
+    for (let i = 0; i < analyzer.rules.length; ++i) {
+        let cnt = data.map<number>(d => analyzer.rules[i].test(d) ? 1 : 0).reduce((a, b) => a + b)
+        if (cnt > max_cnt) {
+            max_cnt = cnt
+        }
+    }
+    return max_cnt + emptyCount === data.length;
+}
 
 export function dateTimeExpand(props: { dataSource: IRow[]; fields: IMuteFieldBase[] })
     : { dataSource: IRow[]; fields: IMuteFieldBase[] } {
     const { dataSource, fields } = props;
+    if (dataSource.length === 0 || fields.length === 0) {
+        console.error("[dateTimeExpand]: dataSource x fields is empty")
+        return props
+    }
 
     let extFields: IMuteFieldBase[] = []
     let fieldIds = new Set(fields.map(f => (f.extInfo && f.extInfo?.extOpt === "dateTimeExpand") ? f.extInfo?.extFrom[0] : ''))
@@ -376,7 +388,9 @@ export function doTest() {
         ["2015-12-14", "2013-08-09", "2013-10-11", "2016-02-25"],
         ["April-8-09"],
         ["04.29,2004", "12.29, 2008"],
-        ["2008,08.24"]
+        ["2008,08.24"],
+        ["980409", "", "000412", ""],
+        ["200924", "", "200128"],
     ]
     for (let c of testCases) dateTimeExpandTest(c)
 }

@@ -15,8 +15,13 @@
             "temporal": "时间类型",
             "quantitative": "数值类型"
         },
+        "analyticType": {
+            "dimension": "维度",
+            "measure": "度量"
+        },
         "addVar": "添加变量",
         "addFilter": "添加筛选项",
+        "addEncode": "添加计算",
         "field": "字段",
         "star": "收藏",
         "stat": {
@@ -42,10 +47,12 @@
         "devCollection": "实验特性(α)",
         "dashBoardDesigner": "智能报表",
         "painter": "数据绘板🚀",
-        "collection": "收藏夹"
+        "collection": "收藏夹",
+        "dashboard": "报表📋"
     },
     "preference": {
-        "title": "个人偏好"
+        "title": "个人偏好",
+        "config": "配置"
     },
     "support": {
         "title": "如何获取帮助/支持",
@@ -239,7 +246,20 @@
             "title": "下载数据"
         },
         "extend": {
-            "title": "扩展信息"
+            "title": "扩展信息",
+            "manual": "LaTiao",
+            "editor": "编辑器",
+            "autoExtend": "{ count } 个字段可以自动扩展生成新的字段以增强分析和探索。",
+            "notDecided": "{ count } 个自动扩展的字段待确认。",
+            "findThem": "下一个",
+            "checkThem": "筛选",
+            "empty": "没有导出的列。",
+            "apply": "扩展",
+            "cancel": "取消",
+            "auto": "扩展建议",
+            "suggestion": {
+                "dateTimeExpand": "将数据映射到不同时间单位。|时间序列可能在不同的单位尺度下展现出更强的周期性或相关性。"
+            }
         },
         "filter": {
             "title": "筛选规则",
@@ -301,7 +321,8 @@
             "resizeMode": {
                 "resizable": "可控尺寸",
                 "none": "自适应"
-            }
+            },
+            "excludeScaleZero": "排除坐标0点"
         }
     },
     "semiAuto": {
@@ -356,5 +377,40 @@
             "clean": "橡皮",
             "create": "创建"
         }
+    },
+    "latiao": {
+        "maybe": {
+            "keyword": "关键字",
+            "operator": "算子",
+            "fid": "字段"
+        },
+        "keyword": {
+            "out": "扩充这个字段。"
+        },
+        "op": {
+            "$set": "将一列转换至序数作为新的字段。",
+            "$group": "将一列转换至可计算数值作为新的字段。",
+            "$nominal": "将一列转换至字符字面量作为新的字段。",
+            "$id": "生成一列从 1 起自增的 ID。",
+            "$order": "计算数据按目标字段数学排序后的位次，从 1 开始。",
+            "$dict": "计算数据按目标字段字典排序后的位次，从 1 开始。",
+            "$isNaN": "将一列中是 NaN 的数字记为字符 \"1\" ，其他记为字符 \"0\" 作为新的字段。",
+            "$isZero": "将一列中是 0 的数字记为字符 \"1\" ，其他记为字符 \"0\" 作为新的字段。",
+            "$toDate": "将一个字段识别为可沿时间单位切面的 Date 对象作为新的字段。",
+            "$isValidDate": "将一列中是有效 Date 对象的记为字符 \"1\" ，其他记为字符 \"0\" 作为新的字段。",
+            "$normalize": "标准化一个列作为新的字段。",
+            "$inset": "将一个列线性映射到 -1 ~ +1 区间作为新的字段。",
+            "$bound": "将一个列线性映射到 0 ~ 1 区间作为新的字段。"
+        }
+    },
+    "time_format": {
+        "dateTime": "%x %A %X",
+        "date": "%Y年%-m月%-d日",
+        "time": "%H:%M:%S",
+        "periods": ["上午", "下午"],
+        "days": ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+        "shortDays": ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+        "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+        "shortMonths": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
     }
 }

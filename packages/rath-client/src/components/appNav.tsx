@@ -48,7 +48,8 @@ const IconMap = {
     [PIVOT_KEYS.dataSource]: 'DataManagementSettings',
     [PIVOT_KEYS.painter]: 'Brush',
     [PIVOT_KEYS.dashBoardDesigner]: 'SizeLegacy',
-    [PIVOT_KEYS.collection]: 'Heart'
+    [PIVOT_KEYS.collection]: 'Heart',
+    [PIVOT_KEYS.dashboard]: 'CRMReport',
 } as {
     [key: string]: string
 }
@@ -88,7 +89,8 @@ const AppNav: React.FC<AppNavProps> = props => {
                     PIVOT_KEYS.semiAuto,
                     PIVOT_KEYS.megaAuto,
                     PIVOT_KEYS.painter,
-                    PIVOT_KEYS.collection
+                    PIVOT_KEYS.collection,
+                    PIVOT_KEYS.dashboard,
                 ]),
                 {
                     url: '#dev-mode',

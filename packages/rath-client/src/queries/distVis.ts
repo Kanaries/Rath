@@ -1,9 +1,10 @@
 /**
  * distVis 是分布式可视化的推荐，是比较新的模块，目前暂时用于dev模块，即voyager模式下的测试。
  */
-import { IPattern } from '@kanaries/loa';
+import { IPattern, IFieldEncode } from '@kanaries/loa';
 import { IResizeMode, IVegaSubset } from "../interfaces";
-import { encodingDecorate } from "./base/utils";
+import { autoScale } from './base/scale';
+import { applyZeroScale, encodingDecorate, splitFieldsByEnocdes } from "./base/utils";
 import { autoMark, autoStat, encode, humanHabbit, VizEncoder } from './distribution/bot';
 import { applyDefaultSort, applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
 export const geomTypeMap: { [key: string]: any } = {
@@ -22,39 +23,37 @@ interface BaseVisProps {
     width?: number;
     height?: number;
     stepSize?: number;
+    excludeScaleZero?: boolean;
+    specifiedEncodes?: IFieldEncode[]
 }
 
 export function distVis(props: BaseVisProps): IVegaSubset {
-    const { pattern, resizeMode = IResizeMode.auto, width, height, interactive, stepSize } = props;
+    const { pattern, resizeMode = IResizeMode.auto, width, height, interactive, stepSize, excludeScaleZero, specifiedEncodes = [] } = props;
     const { fields } = pattern;
-    const { statFields, distFields, statEncodes } = autoStat(fields);
-    let markType = autoMark(fields, statFields, distFields, statEncodes)
+    const { statEncodes } = autoStat(fields, specifiedEncodes);
+    const { pureFields: distFields, transedFields: statFields } = splitFieldsByEnocdes(fields, statEncodes);
+
+    const { scaleEncodes} = autoScale(distFields, statEncodes);
+
+    const transedEncodes = statEncodes.concat(scaleEncodes);
+
+    const { pureFields, transedFields } = splitFieldsByEnocdes(fields, transedEncodes);
+    // const { statFields, distFields, statEncodes } = autoStat(fields);
+    let markType = autoMark(fields, transedFields, pureFields, transedEncodes)
     const channelEncoder = new VizEncoder(markType);
     // if (filters && filters.length > 0) {
     //     usedChannels.add('color')
     // }
     const enc = encode({
-        fields: distFields,
+        fields: pureFields,
         channelEncoder,
-        statFields,
-        statEncodes
+        statFields: transedFields,
+        statEncodes: transedEncodes,
     })
-    // if (filters && filters.length > 0) {
-    //     const field = filters[0].field;
-    //     enc.color = {
-    //         // field: field.fid,
-    //         // type: field.semanticType,
-    //         condition: {
-    //             test: `datum['${field.fid}'] == '${filters[0].values[0]}'`
-    //         },
-    //         value: '#aaa'
-    //         // value: '#000'
-    //     }
-    // }
-    // autoAgg({
-    //     encoding: enc, fields, markType,
-    //     statFields
-    // })
+    if (excludeScaleZero) {
+        applyZeroScale(enc);
+    }
+
     humanHabbit(enc);
 
     if (resizeMode === IResizeMode.control) {
@@ -62,13 +61,7 @@ export function distVis(props: BaseVisProps): IVegaSubset {
     }
 
     let basicSpec: IVegaSubset = {
-        // "config": {
-        //     "range": {
-        //       "category": {
-        //         "scheme": "set2"
-        //       }
-        //     }
-        //   },
+
         data: { name: 'dataSource' },
         mark: {
             type: markType as any,
@@ -86,15 +79,5 @@ export function distVis(props: BaseVisProps): IVegaSubset {
     if (interactive) {
         applyInteractiveParams2DistViz(basicSpec);
     }
-    // if (filters && filters.length > 1) {
-    //     basicSpec.transform = filters.slice(1).map(f => ({
-    //         filter: `datum.${f.field.fid} == '${f.values[0]}'`
-    //     }))
-    // }
-    // if (filters && filters.length > 0) {
-    //     basicSpec.transform = filters.map(f => ({
-    //         filter: `datum.${f.field.fid} == '${f.values[0]}'`
-    //     }))
-    // }
     return basicSpec;
 }

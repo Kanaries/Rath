@@ -21,7 +21,7 @@ import FilterWorker from '../workers/filterData.worker?worker';
 
 import { MessageProps } from '../workers/engine/service';
 
-import { CleanMethod, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from '../interfaces';
+import { CleanMethod, ICol, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from '../interfaces';
 import { IFootmanProps } from '../workers/loa/service';
 
 interface SuccessResult<T> {
@@ -136,10 +136,13 @@ export async function cleanDataService(props: CleanServiceProps): Promise<IRow[]
 
 export interface FilterServiceProps {
     dataSource: IRow[];
+    extData: Map<string, ICol<any>>;
     filters: IFilter[];
 }
+/**
+ * Merge `extData` with `dataSource` and filter data at the same time
+ */
 export async function filterDataService(props: FilterServiceProps): Promise<IRow[]> {
-    if (props.filters.length === 0) return props.dataSource;
     let data: IRow[] = [];
     try {
         const worker = new FilterWorker();
@@ -170,7 +173,7 @@ function getTestServerUrl(): URL | null {
 }
 
 export function getTestServerAPI(api: string): string {
-    const url = new URL(window.location.href).searchParams.get('server') || 'http://localhost:8000';
+    const url = new URL(window.location.href).searchParams.get('server') || 'http://gateway.kanaries.cn:2280';
     let surl = new URL(url);
     surl.pathname = api;
     return surl.href;

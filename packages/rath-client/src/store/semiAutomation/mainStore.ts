@@ -1,6 +1,6 @@
 import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
-import { IFilter, IPattern } from "@kanaries/loa";
+import { IFieldEncode, IFilter, IPattern } from "@kanaries/loa";
 import { Specification } from "visual-insights";
 import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
@@ -42,10 +42,11 @@ export class SemiAutomationStore {
                 width: 320,
                 height: 320,
             },
-            nlg: false
+            nlg: false,
+            excludeScaleZero: false
         }
         this.settings = {
-            vizAlgo: 'strict'
+            vizAlgo: 'lite'
         }
         this.pattViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.featViews = makeInitAssoViews(RENDER_BATCH_SIZE);
@@ -124,12 +125,14 @@ export class SemiAutomationStore {
         const renderedViews = views.slice(0, amount);
         if (this.settings.vizAlgo === 'lite') {
             return renderedViews.map(v => distVis({
-                pattern: v
+                pattern: v,
+                specifiedEncodes: v.encodes
             }))
         } else {
             return renderedViews.map(v => labDistVis({
                 pattern: v,
-                dataSource: this.dataSource
+                dataSource: this.dataSource,
+                specifiedEncodes: v.encodes
             }))
         }
     }
@@ -140,12 +143,14 @@ export class SemiAutomationStore {
         const renderedViews = views.slice(0, amount);
         if (this.settings.vizAlgo === 'lite') {
             return renderedViews.map(v => distVis({
-                pattern: v
+                pattern: v,
+                specifiedEncodes: v.encodes
             }))
         } else {
             return renderedViews.map(v => labDistVis({
                 pattern: v,
-                dataSource: this.dataSource
+                dataSource: this.dataSource,
+                specifiedEncodes: v.encodes
             }))
         }
     }
@@ -156,12 +161,14 @@ export class SemiAutomationStore {
         const renderedViews = views.slice(0, amount);
         if (this.settings.vizAlgo === 'lite') {
             return renderedViews.map(v => distVis({
-                pattern: v
+                pattern: v,
+                specifiedEncodes: v.encodes
             }))
         } else {
             return renderedViews.map(v => labDistVis({
                 pattern: v,
-                dataSource: this.dataSource
+                dataSource: this.dataSource,
+                specifiedEncodes: v.encodes
             }))
         }
     }
@@ -264,7 +271,9 @@ export class SemiAutomationStore {
                 width: mainVizSetting.resize.width,
                 height: mainVizSetting.resize.height,
                 interactive: mainVizSetting.interactive,
-                stepSize: 32
+                stepSize: 32,
+                excludeScaleZero: mainVizSetting.excludeScaleZero,
+                specifiedEncodes: mainView.encodes
             })
         } else {
             return labDistVis({
@@ -274,7 +283,9 @@ export class SemiAutomationStore {
                 height: mainVizSetting.resize.height,
                 interactive: mainVizSetting.interactive,
                 stepSize: 32,
-                dataSource: this.dataSource
+                dataSource: this.dataSource,
+                excludeScaleZero: mainVizSetting.excludeScaleZero,
+                specifiedEncodes: mainView.encodes
             })
         }
     }
@@ -288,7 +299,8 @@ export class SemiAutomationStore {
                 width: mainVizSetting.resize.width,
                 height: mainVizSetting.resize.height,
                 interactive: mainVizSetting.interactive,
-                stepSize: 32
+                stepSize: 32,
+                excludeScaleZero: mainVizSetting.excludeScaleZero
             })
         } else {
             return labDistVis({
@@ -297,7 +309,28 @@ export class SemiAutomationStore {
                 width: mainVizSetting.resize.width,
                 height: mainVizSetting.resize.height,
                 interactive: mainVizSetting.interactive,
-                dataSource: this.dataSource
+                dataSource: this.dataSource,
+                excludeScaleZero: mainVizSetting.excludeScaleZero
+            })
+        }
+    }
+    public addFieldEncode2MainViewPattern (encode: IFieldEncode) {
+        if (this.mainView) {
+            this.mainView = produce(this.mainView, draft => {
+                if (!draft.encodes) {
+                    draft.encodes = [];
+                }
+                draft.encodes.push(encode)
+            })
+        }
+    }
+    public removeFieldEncodeFromMainViewPattern (encode: IFieldEncode) {
+        if (this.mainView) {
+            this.mainView = produce(this.mainView, draft => {
+                if (!draft.encodes) {
+                    draft.encodes = [];
+                }
+                draft.encodes = draft.encodes.filter(e => e.field !== encode.field)
             })
         }
     }

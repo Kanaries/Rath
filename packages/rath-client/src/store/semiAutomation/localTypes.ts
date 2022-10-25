@@ -13,6 +13,7 @@ export interface IMainVizSetting {
         height: number;
     };
     nlg: boolean;
+    excludeScaleZero: boolean;
 }
 
 export type IRenderViewKey = 'pattViews' | 'featViews' | 'filterViews';
