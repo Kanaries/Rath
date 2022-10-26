@@ -70,13 +70,13 @@ const QueryEditor = memo<QueryEditorProps>(function QueryEditor ({ tables, query
                 enabled: Array.isArray(tables),
             },
         ];
-    }, []);
+    }, [tables]);
 
     useEffect(() => {
         if (tables === 'input' && mode === 'diagram') {
             setMode('query');
         }
-    }, [tables]);
+    }, [tables, mode]);
 
     useEffect(() => {
         setQuery('');

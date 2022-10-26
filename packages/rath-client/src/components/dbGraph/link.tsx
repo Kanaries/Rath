@@ -1,7 +1,7 @@
 import { Fragment, memo } from "react";
 import styled from "styled-components";
-import { BOX_HEIGHT, BOX_WIDTH, encodePath } from ".";
 import type { IDBEdge, IDBNode } from './localTypes';
+import { BOX_HEIGHT, BOX_WIDTH, encodePath } from ".";
 
 
 const OPTION_WIDTH = 60;

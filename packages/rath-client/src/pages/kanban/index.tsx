@@ -5,19 +5,19 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import GridLayout from "react-grid-layout";
 import { CommandButton, IconButton, VerticalDivider } from '@fluentui/react';
 import { Pagination, Divider } from '@material-ui/core';
+import { debounceTime, Subject } from 'rxjs';
 
 import ReactVega from '../../components/react-vega';
 import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../components/visErrorBoundary';
 import { IInsightVizView } from '../../interfaces';
-import Empty from './empty';
-
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
 import FilterCreationPill from '../../components/filterCreationPill';
 import ViewField from '../megaAutomation/vizOperation/viewField';
 import { IFilter } from '../../interfaces';
-import { debounceTime, Subject } from 'rxjs';
+
+import Empty from './empty';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 
 
 const Segment = styled.div`
@@ -189,7 +189,7 @@ const Kanban: React.FC = (props) => {
                 },
             });
         }
-    }, [items]);
+    }, [items, dashboardStore]);
 
     const handleResize = useCallback((layout: GridLayout.Layout[], o: GridLayout.Layout) => {
         const box = editAreaRef.current?.querySelector(`#item-id-${o.i}`);
@@ -212,7 +212,7 @@ const Kanban: React.FC = (props) => {
                 },
             });
         }
-    }, [items]);
+    }, [items, dashboardStore]);
 
     const toCanvas = useCallback((size = 4): [string, number, number] => {
         const container = editAreaRef.current?.children[0] as undefined | HTMLDivElement;
@@ -312,6 +312,7 @@ const Kanban: React.FC = (props) => {
 
     // console.log(JSON.parse(JSON.stringify(items)), JSON.parse(JSON.stringify(filters)));
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const filter$ = useMemo(() => new Subject<{ index: number; data: IFilter[] }>(), [dashboardStore.page]);
 
     useEffect(() => {
@@ -325,7 +326,7 @@ const Kanban: React.FC = (props) => {
         });
 
         return () => subscription.unsubscribe();
-    }, [filter$, dashboardStore]);
+    }, [filter$, dashboardStore, items]);
 
     return collectionList.length === 0 ? (
         <Empty />

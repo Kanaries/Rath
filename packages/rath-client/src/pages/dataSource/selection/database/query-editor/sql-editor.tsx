@@ -1,8 +1,8 @@
 import { memo, useEffect, useRef, useState } from 'react';
-import { QueryEditorProps } from '.';
 import { EditorView, basicSetup } from 'codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { DefaultButton } from '@fluentui/react';
+import { QueryEditorProps } from '.';
 
 const SQLEditor = memo<QueryEditorProps>(function QueryEditor({ query, tables, setQuery, preview }) {
     const container = useRef<HTMLDivElement>(null);
