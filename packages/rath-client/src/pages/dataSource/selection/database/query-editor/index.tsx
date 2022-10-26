@@ -46,8 +46,8 @@ const Container = styled.div({
 
 export interface QueryEditorProps {
     tables: TableInfo[] | 'input';
-    query: string;
-    setQuery: (query: string) => void;
+    query: string[];
+    setQuery: (query: string[]) => void;
 }
 
 export type QueryEditorMode = 'diagram' | 'query';

@@ -66,17 +66,7 @@ export const DBBox = styled.span`
         background-color: #f3f3f3;
     }
 `;
-function getBoxRightPoint(x: number, y: number) {
-    return [x + BOX_WIDTH, y + BOX_HEIGHT / 2];
-}
-
-function getBoxLeftPoint(x: number, y: number) {
-    return [x, y + BOX_HEIGHT / 2];
-}
-
-function getMidPoint(x1: number, y1: number, x2: number, y2: number): [number, number] {
-    return [(x1 + x2) / 2, (y1 + y2) / 2];
-}
+const Output = styled.output({});
 
 const STROKE_RADIUS = 12;
 
@@ -140,19 +130,6 @@ export interface DbGraphProps {
 const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }) {
     const [width, setWidth] = useState(600);
     const container = useRef<HTMLDivElement>(null);
-    // const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
-    // const fixes = useRef<{x: number; y: number}>({ x: 0, y: 0 })
-
-    // const updateNodePosition = (id: string | null, x: number, y: number) => {
-    //     if (id === null)return;
-    //     const newGraph = { ...graph };
-    //     const node = newGraph.nodes.find((n) => n.id === id);
-    //     if (node) {
-    //         node.x = x;
-    //         node.y = y;
-    //     }
-    //     setGraph(newGraph);
-    // };
 
     useEffect(() => {
         const c = container.current;
@@ -246,10 +223,16 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
             };
 
             graph.edges.forEach(edge => {
-                if (edge.from !== index && edge.to !== index) {
+                if (edge.from.table !== index && edge.to.table !== index) {
                     edges.push({
-                        from: shift(edge.from),
-                        to: shift(edge.to),
+                        from: {
+                            table: shift(edge.from.table),
+                            col: edge.from.col,
+                        },
+                        to: {
+                            table: shift(edge.to.table),
+                            col: edge.to.col,
+                        },
                         type: edge.type,
                     });
                 }
@@ -278,8 +261,18 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
         setGraph({
             nodes: graph.nodes,
             edges: [...graph.edges, {
-                from: linkPreview.from,
-                to: linkPreview.to,
+                from: {
+                    table: linkPreview.from,
+                    col: tables.find(t => t.name === graph.nodes[linkPreview.from].source)?.meta.map(
+                        m => m.key
+                    )?.[0] ?? '',
+                },
+                to: {
+                    table: linkPreview.to,
+                    col: tables.find(t => t.name === graph.nodes[linkPreview.to as number].source)?.meta.map(
+                        m => m.key
+                    )?.[0] ?? '',
+                },
                 type: 'LEFT JOIN',
             }],
         });
@@ -324,17 +317,55 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
     const handleLinkOver = useCallback((index: number) => {
         if (linkPreview) {
             const alreadyLinked = Boolean(graph.edges.find(edge => (
-                [edge.from, edge.to].every(d => [index, linkPreview.from].includes(d))
+                [edge.from, edge.to].some(d => index === d.table)
             )));
 
             const willBeCircle = ((): boolean => {
-                // const walk = (from: number, except?: number) => {
+                const checker = new Map<number, 1>();
 
-                // };
+                checker.set(index, 1);
 
-                // walk
+                const walk = (from: number, except: number | null = null) => {
+                    checker.set(from, 1);
+                    let failed = false;
 
-                return false;
+                    const neighbors = graph.edges.reduce<number[]>((list, edge) => {
+                        if (failed) {
+                            return [];
+                        }
+                        if (edge.from.table === from) {
+                            if (except === edge.to.table) {
+                                return list;
+                            } else if (checker.has(edge.to.table)) {
+                                failed = true;
+                                return [];
+                            }
+                            checker.set(edge.to.table, 1);
+                            return [...list, edge.to.table];
+                        } else if (edge.to.table === from) {
+                            if (except === edge.from.table) {
+                                return list;
+                            } else if (checker.has(edge.from.table)) {
+                                failed = true;
+                                return [];
+                            }
+                            checker.set(edge.from.table, 1);
+                            return [...list, edge.from.table];
+                        }
+                        return list;
+                    }, []);
+
+                    for (const n of neighbors) {
+                        const res = walk(n, from);
+                        if (res === true) {
+                            return true;
+                        }
+                    }
+
+                    return failed;
+                };
+
+                return walk(linkPreview.from);
             })();
 
             if (alreadyLinked || willBeCircle) {
@@ -372,7 +403,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
         }
     }, [linkPreview]);
 
-    return (
+    return (<>
         <Container>
             <ListContainer
                 onDrop={e => {
@@ -404,9 +435,6 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
                             dragSourceRef.current = t.name;
                             e.dataTransfer.setData('text/plain', t.name);
                             e.dataTransfer.dropEffect = 'copy';
-                            // setDraggingNodeId(node.id)
-                            // fixes.current.x = e.currentTarget.getBoundingClientRect().left - e.clientX
-                            // fixes.current.y = e.currentTarget.getBoundingClientRect().top - e.clientY
                         }}
                     >
                         {t.name}
@@ -420,27 +448,9 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
                 onDragOver={e => {
                     e.stopPropagation();
                     e.preventDefault();
-                    // console.log('d over', e);
                 }}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
-                // onDrop={(e) => {
-                //     e.stopPropagation()
-                //     if (container.current && draggingNodeId) {
-                //         const contRect = container.current.getBoundingClientRect()
-                //         updateNodePosition(draggingNodeId, e.clientX + fixes.current.x - contRect.left , e.clientY + fixes.current.y - contRect.top);
-                //         setDraggingNodeId(null);
-
-                //     }
-                // }}
-                // onDragOver={e => {
-                //     e.preventDefault()
-                //     if (container.current && draggingNodeId) {
-                //         const contRect = container.current.getBoundingClientRect()
-                //         updateNodePosition(draggingNodeId, e.clientX + fixes.current.x - contRect.left , e.clientY + fixes.current.y - contRect.top);
-
-                //     }
-                // }}
             >
                 <svg
                     width={`${width}px`}
@@ -454,8 +464,54 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
                         {graph.edges.map((edge, i) => (
                             <Link
                                 key={i}
-                                from={graph.nodes[edge.from]}
-                                to={graph.nodes[edge.to]}
+                                from={graph.nodes[edge.from.table]}
+                                fromCols={
+                                    tables.find(t => t.name === graph.nodes[edge.from.table].source)?.meta.map(
+                                        m => m.key
+                                    ) ?? []
+                                }
+                                fromCol={edge.from.col}
+                                setFromCol={col => {
+                                    setGraph({
+                                        nodes: graph.nodes,
+                                        edges: [
+                                            ...graph.edges.slice(0, i),
+                                            {
+                                                from: {
+                                                    table: graph.edges[i].from.table,
+                                                    col,
+                                                },
+                                                to: graph.edges[i].to,
+                                                type: graph.edges[i].type,
+                                            },
+                                            ...graph.edges.slice(i + 1),
+                                        ],
+                                    });
+                                }}
+                                to={graph.nodes[edge.to.table]}
+                                toCols={
+                                    tables.find(t => t.name === graph.nodes[edge.to.table].source)?.meta.map(
+                                        m => m.key
+                                    ) ?? []
+                                }
+                                toCol={edge.to.col}
+                                setToCol={col => {
+                                    setGraph({
+                                        nodes: graph.nodes,
+                                        edges: [
+                                            ...graph.edges.slice(0, i),
+                                            {
+                                                from: graph.edges[i].from,
+                                                to: {
+                                                    table: graph.edges[i].to.table,
+                                                    col,
+                                                },
+                                                type: graph.edges[i].type,
+                                            },
+                                            ...graph.edges.slice(i + 1),
+                                        ],
+                                    });
+                                }}
                                 type={edge.type}
                                 setType={type => {
                                     setGraph({
@@ -522,42 +578,6 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
                             )}
                         </g>
                     )}
-                    {/* {graph.edges.map((edge, index) => {
-                        const fromNode = graph.nodes.find((node) => node.id === edge.from);
-                        const toNode = graph.nodes.find((node) => node.id === edge.to);
-                        if (!fromNode || !toNode) {
-                            return null;
-                        }
-                        const fromPoint = getBoxRightPoint(fromNode.x, fromNode.y);
-                        const toPoint = getBoxLeftPoint(toNode.x, toNode.y);
-                        const midPoint = getMidPoint(fromPoint[0], fromPoint[1], toPoint[0], toPoint[1]);
-                        return (
-                            <g key={index}>
-                                <path
-                                    // d={`M ${fromPoint[0]} ${fromPoint[1]}  Q ${midPoint[0]} ${midPoint[1]} ${toPoint[0]} ${toPoint[1]}`}
-                                    d={`M ${fromPoint[0]} ${fromPoint[1]} C ${toPoint[0]} ${fromPoint[1]} ${fromPoint[0]} ${toPoint[1]} ${toPoint[0]} ${toPoint[1]}`}
-                                    stroke="#868686"
-                                    strokeOpacity="1"
-                                    fill="none"
-                                    pointerEvents="visibleStroke"
-                                    fillOpacity="1"
-                                    className={`line selected`}
-                                    style={{ strokeWidth: 2, cursor: 'pointer' }}
-                                />
-                                <circle cx={midPoint[0]} cy={midPoint[1]} r="5" fill="#333" />
-                            </g>
-                        );
-                    })} */}
-                    {/* <path
-                        stroke="#868686"
-                        strokeOpacity="1"
-                        fill="none"
-                        pointerEvents="visibleStroke"
-                        fillOpacity="1"
-                        className={`line selected`}
-                        style={{ strokeWidth: 2, cursor: 'pointer' }}
-                        d={`M ${getBoxRightPoint(pointA[0], pointA[1])} Q ${getMidPoint(pointA[0], pointA[1], pointB[0], pointB[1])} ${getBoxLeftPoint(pointB[0], pointB[1])}`}
-                    ></path> */}
                 </svg>
                 {graph.nodes.map((node, index) => {
                     return (
@@ -565,6 +585,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
                             key={index}
                             node={node}
                             id={index}
+                            canLink={graph.edges.every(e => e.from.table !== index)}
                             linkingId={linkPreview?.from ?? null}
                             handleDragStart={e => {
                                 const target = e.target as HTMLSpanElement;
@@ -578,9 +599,6 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
                                 dragNodeRef.current = index;
                                 e.dataTransfer.setData('text/plain', node.source);
                                 e.dataTransfer.dropEffect = 'move';
-                                // setDraggingNodeId(node.id)
-                                // fixes.current.x = e.currentTarget.getBoundingClientRect().left - e.clientX
-                                // fixes.current.y = e.currentTarget.getBoundingClientRect().top - e.clientY
                             }}
                             beginPath={() => {
                                 setLinkPreview({
@@ -598,7 +616,10 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
                 })}
             </DiagramContainer>
         </Container>
-    );
+        <Output>
+
+        </Output>
+    </>);
 });
 
 export default DbGraph;

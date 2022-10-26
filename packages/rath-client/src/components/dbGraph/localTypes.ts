@@ -5,8 +5,14 @@ export interface IDBNode {
 }
 
 export interface IDBEdge {
-    from: number;
-    to: number;
+    from: {
+        table: number;
+        col: string;
+    };
+    to: {
+        table: number;
+        col: string;
+    };
     type: 'LEFT JOIN' | 'RIGHT JOIN' | 'INNER JOIN' | 'FULL JOIN';
 }
 
