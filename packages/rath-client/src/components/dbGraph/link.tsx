@@ -34,14 +34,22 @@ const Select = styled.g({
 
 export interface LinkProps {
     from: IDBNode;
+    fromCols: string[];
+    fromCol: string;
     to: IDBNode;
+    toCols: string[];
+    toCol: string;
     type: IDBEdge['type'];
     setType: (type: IDBEdge['type']) => void;
     deleteLink: () => void;
     reverse: () => void;
+    setFromCol: (col: string) => void;
+    setToCol: (col: string) => void;
 }
 
-const Link = memo<LinkProps>(function Link({ from, to, type, setType, deleteLink, reverse }) {
+const Link = memo<LinkProps>(function Link({
+    from, fromCols, fromCol, to, toCols, toCol, type, setType, deleteLink, reverse, setFromCol, setToCol,
+}) {
     return (
         <>
             <path
@@ -52,6 +60,54 @@ const Link = memo<LinkProps>(function Link({ from, to, type, setType, deleteLink
                     to.y + BOX_HEIGHT / 2,
                 )}
             />
+            <Select style={{ transform: `translateX(${-1 * OPTION_WIDTH}px)` }}>
+                <rect
+                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
+                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2}
+                    width={OPTION_WIDTH}
+                    height={OPTION_HEIGHT}
+                    fill="#fff"
+                    stroke="#0027b4"
+                    strokeWidth="1"
+                />
+                <text
+                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
+                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2}
+                    textAnchor="middle"
+                    stroke="none"
+                    fill="#0027b4"
+                >
+                    {fromCol}
+                </text>
+                {fromCols.map((col, i) => (
+                    <Fragment key={i}>
+                        <rect
+                            className="option type"
+                            x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
+                            y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 + (i + 1) * OPTION_HEIGHT + 1}
+                            width={OPTION_WIDTH}
+                            height={OPTION_HEIGHT}
+                            fill="#fff"
+                            stroke="#888"
+                            strokeWidth="1"
+                            onClick={e => {
+                                e.stopPropagation();
+                                setFromCol(col);
+                            }}
+                        />
+                        <text
+                            className="option"
+                            x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
+                            y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 + (i + 1) * OPTION_HEIGHT + 1}
+                            textAnchor="middle"
+                            stroke="none"
+                            fill="currentColor"
+                        >
+                            {col}
+                        </text>
+                    </Fragment>
+                ))}
+            </Select>
             <Select>
                 <rect
                     x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
@@ -146,6 +202,54 @@ const Link = memo<LinkProps>(function Link({ from, to, type, setType, deleteLink
                             fill="currentColor"
                         >
                             {t}
+                        </text>
+                    </Fragment>
+                ))}
+            </Select>
+            <Select style={{ transform: `translateX(${OPTION_WIDTH}px)` }}>
+                <rect
+                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
+                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2}
+                    width={OPTION_WIDTH}
+                    height={OPTION_HEIGHT}
+                    fill="#fff"
+                    stroke="#0027b4"
+                    strokeWidth="1"
+                />
+                <text
+                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
+                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2}
+                    textAnchor="middle"
+                    stroke="none"
+                    fill="#0027b4"
+                >
+                    {toCol}
+                </text>
+                {toCols.map((col, i) => (
+                    <Fragment key={i}>
+                        <rect
+                            className="option type"
+                            x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
+                            y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 + (i + 1) * OPTION_HEIGHT + 1}
+                            width={OPTION_WIDTH}
+                            height={OPTION_HEIGHT}
+                            fill="#fff"
+                            stroke="#888"
+                            strokeWidth="1"
+                            onClick={e => {
+                                e.stopPropagation();
+                                setToCol(col);
+                            }}
+                        />
+                        <text
+                            className="option"
+                            x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
+                            y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 + (i + 1) * OPTION_HEIGHT + 1}
+                            textAnchor="middle"
+                            stroke="none"
+                            fill="currentColor"
+                        >
+                            {col}
                         </text>
                     </Fragment>
                 ))}

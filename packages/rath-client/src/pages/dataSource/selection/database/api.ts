@@ -1,7 +1,5 @@
 import { notify } from '../../../../components/error';
-import type { IDatasetBase } from '../../../../interfaces';
 import { getRathError } from '../../../../rath-error';
-import { transformRawDataService } from '../../utils';
 import { SupportedDatabaseType } from './type';
 import type { TableData, TableLabels } from '.';
 
@@ -172,59 +170,23 @@ export const listSchemas = async (sourceId: number, db: string | null): Promise<
 
 export const listTables = async (sourceId: number, db: string | null, schema: string | null): Promise<TableList | null> => {
     try {
-        // FIXME:
-        return [
-            {
-                "name": "table_1",
-                "meta": [
-                    {
-                        "key": "col_1",
-                        "colIndex": 0,
-                        "dataType": "xxx"
-                    },
-                    {
-                        "key": "col_2",
-                        "colIndex": 1,
-                        "dataType": null
-                    },
-                ]
-            },
-            {
-                "name": "table_2",
-                "meta": [
-                    {
-                        "key": "col_1",
-                        "colIndex": 0,
-                        "dataType": "xxx"
-                    },
-                    {
-                        "key": "col_2",
-                        "colIndex": 1,
-                        "dataType": null
-                    },
-                    {
-                        "key": "col_3",
-                        "colIndex": 2,
-                        "dataType": "xxx"
-                    },
-                ]
+        const res = await fetch(
+            // FIXME: 临时接口
+            `http://192.168.31.68:5000/api/table_list`, {
+            // `${getAPIPathPrefix(apiPathPrefix)}/table_list`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sourceId,
+                    db,
+                    schema,
+                }),
             }
-        ];
-        // const res = await fetch(
-        //     `${getAPIPathPrefix(apiPathPrefix)}/table_list`, {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({
-        //             sourceId,
-        //             db,
-        //             schema,
-        //         }),
-        //     }
-        // ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListTableResult;
+        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListTableResult;
 
-        // return res.success ? res.data : (() => { throw new Error(res.message) })();
+        return res.success ? res.data : (() => { throw new Error(res.message) })();
     } catch (error) {
         const rathError = getRathError('FetchTableListFailed', error);
 
@@ -263,7 +225,7 @@ export const fetchTablePreview = async (sourceId: number, db: string | null, sch
     }
 };
 
-export const requestSQL = async (sourceId: number, queryString: string): Promise<IDatasetBase | null> => {
+export const requestSQL = async (sourceId: number, queryString: string) => {
     try {
         const res = await fetch(
             `${getAPIPathPrefix(apiPathPrefix)}/execute`, {
@@ -284,13 +246,7 @@ export const requestSQL = async (sourceId: number, queryString: string): Promise
             return null;
         }
 
-        return await transformRawDataService(
-            data.rows.map(
-                row => Object.fromEntries(
-                    row.map<[string, any]>((val, colIdx) => [data.columns?.[colIdx]?.key ?? `${colIdx}`, val])
-                )
-            )
-        );
+        return data;
     } catch (error) {
         const rathError = getRathError('QueryExecutionError', error, { sql: queryString });
 

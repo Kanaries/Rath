@@ -31,12 +31,13 @@ export interface DBNodeProps {
     beginPath: (e: MouseEvent<HTMLDivElement>) => void;
     id: number;
     linkingId: number | null;
+    canLink: boolean;
     handleLinkOver: () => void;
     handleLinkOut: (e: MouseEvent<HTMLDivElement>) => void;
 }
 
 const DBNode = memo<DBNodeProps>(function DBNode({
-    node, handleDragStart, beginPath, id, linkingId, handleLinkOver, handleLinkOut,
+    node, handleDragStart, beginPath, id, linkingId, canLink, handleLinkOver, handleLinkOut,
 }) {
     const [active, setActive] = useState(false);
 
@@ -78,7 +79,7 @@ const DBNode = memo<DBNodeProps>(function DBNode({
             >
                 {node.source}
             </DBBox>
-            {(linkingId === id || (linkingId === null && active)) && (
+            {(linkingId === id || (linkingId === null && active)) && canLink && (
                 <>
                     <Button
                         style={{
@@ -86,7 +87,7 @@ const DBNode = memo<DBNodeProps>(function DBNode({
                             top: '50%',
                             transform: 'translate(0, -50%)',
                         }}
-                        onMouseDown={beginPath}
+                        onMouseDown={e => canLink && beginPath(e)}
                     />
                     <Button
                         style={{
@@ -94,7 +95,7 @@ const DBNode = memo<DBNodeProps>(function DBNode({
                             top: '50%',
                             transform: 'translate(0, -50%)',
                         }}
-                        onMouseDown={beginPath}
+                        onMouseDown={e => canLink && beginPath(e)}
                     />
                     <Button
                         style={{
@@ -102,7 +103,7 @@ const DBNode = memo<DBNodeProps>(function DBNode({
                             top: 0,
                             transform: 'translate(-50%, 0)',
                         }}
-                        onMouseDown={beginPath}
+                        onMouseDown={e => canLink && beginPath(e)}
                     />
                     <Button
                         style={{
@@ -110,7 +111,7 @@ const DBNode = memo<DBNodeProps>(function DBNode({
                             bottom: 0,
                             transform: 'translate(-50%, 0)',
                         }}
-                        onMouseDown={beginPath}
+                        onMouseDown={e => canLink && beginPath(e)}
                     />
                 </>
             )}

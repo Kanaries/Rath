@@ -13,7 +13,7 @@ const styles: Record<string, CSSProperties> & Record<string, any> = {
 };
 
 const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }) {
-    const columns = [...data.columns];
+    const columns = [...data.columns ?? []];
 
     if (columns.length === 0) {
         data.rows[0]?.forEach((_, i) => {
@@ -78,7 +78,7 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
                                     key={j}
                                     style={{
                                         paddingInline: '0.6em',
-                                        ...styles[data.columns[j]?.dataType ?? ''],
+                                        ...styles[data.columns?.[j]?.dataType ?? ''],
                                     }}
                                 >
                                     {e}
