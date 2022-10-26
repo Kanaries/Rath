@@ -9,7 +9,7 @@ const apiPathPrefix = '/api';
 const DB_CONNECTOR_SERVICE_KEY = 'db_api'
 
 export function getConnectorServiceInfo () {
-    return localStorage.getItem(DB_CONNECTOR_SERVICE_KEY) || 'https://data-service.kanaries.net/connector';
+    return localStorage.getItem(DB_CONNECTOR_SERVICE_KEY) || 'https://gateway.kanaries.net/connector';
 }
 
 export function setConnectorServiceInfo (info: string) {
