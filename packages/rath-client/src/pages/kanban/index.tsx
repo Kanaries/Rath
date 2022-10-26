@@ -310,7 +310,7 @@ const Kanban: React.FC = (props) => {
         ];
     };
 
-    // console.log(JSON.parse(JSON.stringify(items)), JSON.parse(JSON.stringify(filters)));
+    // console.log(JSON.parse(JSON.stringify(items)));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const filter$ = useMemo(() => new Subject<{ index: number; data: IFilter[] }>(), [dashboardStore.page]);
@@ -467,20 +467,38 @@ const Kanban: React.FC = (props) => {
                                                         item.filter.length === 2 && item.filter[0].type === 'range' && item.filter[1].type === 'range' ? {
                                                             x: item.filter[0].range,
                                                             y: item.filter[1].range,
+                                                        } : item.filter.length === 1 && item.filter[0].type === 'range' ? {
+                                                            x: item.filter[0].range,
                                                         } : undefined
                                                     ) : undefined,
                                                     select: {
                                                         type: 'interval',
                                                         // encodings: ['x'],
                                                     },
-                                                }] : undefined,
+                                                }, new Array<typeof vis.spec.mark>(
+                                                    'bar', 'arc', 'point', 'circle', 'rect'
+                                                ).includes((vis.spec.mark as unknown as { type: typeof vis.spec.mark })?.type) && {
+                                                    name: 'select',
+                                                    value: typeof item.filter === 'object' && item.filter[0]?.type === 'set' ? (
+                                                        item.filter[0].values.map(val => ({
+                                                            [dataSourceStore.fieldMetas.find(f => (
+                                                                (item.filter as (IFilter & { type: 'set' })[])[0].fid === f.fid
+                                                            ))!.name ?? '']: val,
+                                                        }))
+                                                    ) : undefined,
+                                                    select: {
+                                                        type: 'point',
+                                                    },
+                                                }].filter(Boolean) : undefined,
                                                 mark: vis.spec.mark,
                                                 encoding: vis.spec.encoding,
                                                 width: item.chartSize.w,
                                                 height: item.chartSize.h,
                                             }, {
                                                 transform: [{
-                                                    filter: { param: 'brush' },
+                                                    filter: {
+                                                        param: typeof item.filter === 'object' && item.filter[0]?.type === 'set' ? 'select' : 'brush',
+                                                    },
                                                 }],
                                                 mark: vis.spec.mark,
                                                 encoding: {
@@ -534,6 +552,45 @@ const Kanban: React.FC = (props) => {
                                                 filter$.next({
                                                     index: i,
                                                     data: filter,
+                                                });
+                                            },
+                                            select: (name: 'select', value, view) => {
+                                                const ids = [...(value as { _vgsid_?: number[] })._vgsid_ ?? []];
+                                                const items = ['data_1', 'data_0'].map(name => {
+                                                    try {
+                                                        return view.data(name);
+                                                    } catch (error) {
+                                                        return [];
+                                                    }
+                                                }).flat() as { [key: string]: string | number }[];
+                                                const chosen = items.filter(
+                                                    d => ids.includes(d['_vgsid_'] as number ?? -1)
+                                                );
+
+                                                if (chosen.length) {
+                                                    const keys = Object.keys(chosen[0]);
+                                                    const [key] = keys.filter(k => !['__count', '_vgsid_'].includes(k));
+                                                    const f = dataSourceStore.fieldMetas.find(f => f.name === key);
+
+                                                    if (f) {
+                                                        const filter: IFilter = {
+                                                            type: 'set',
+                                                            fid: f.fid,
+                                                            values: chosen.map(d => d[key]),
+                                                        };
+                                                
+                                                        filter$.next({
+                                                            index: i,
+                                                            data: [filter],
+                                                        });
+
+                                                        return;
+                                                    }
+                                                }
+                                                
+                                                filter$.next({
+                                                    index: i,
+                                                    data: [],
                                                 });
                                             },
                                         } : undefined}
