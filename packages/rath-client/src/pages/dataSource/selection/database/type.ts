@@ -31,7 +31,7 @@ export type DatabaseOptions = [
     tableList: 'pending' | 'input' | TableInfo[] | ThisOptionIsNotRequired,
     selectedTable: string | ThisOptionIsNotRequired,
     tablePreview: 'pending' | TableData<TableLabels>,
-    queryStrings: string[],
+    queryString: string,
 ];
 
 type Others<T extends any[]> = T extends [any, ...infer P] ? P : never;

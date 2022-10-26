@@ -38,7 +38,7 @@ export type ActionPayload<T extends ActionType> = (
     } : T extends 'SET_PREVIEW' ? {
         preview: 'pending' | TableData<TableLabels>;
     } : T extends 'SET_SQL' ? {
-        sql: string[];
+        sql: string;
     } : undefined
 );
 

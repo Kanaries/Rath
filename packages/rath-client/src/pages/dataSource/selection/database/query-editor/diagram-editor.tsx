@@ -5,7 +5,7 @@ import type { IDBGraph } from "../../../../../components/dbGraph/localTypes";
 import { toSQL } from "../../../../../components/dbGraph/utils";
 
 
-const DiagramEditor = memo<QueryEditorProps>(function DiagramEditor ({ tables, setQuery }) {
+const DiagramEditor = memo<QueryEditorProps>(function DiagramEditor ({ query, tables, setQuery, preview }) {
     const [graph, setGraph] = useState<IDBGraph>({
         nodes: [],
         edges: [],
@@ -14,19 +14,21 @@ const DiagramEditor = memo<QueryEditorProps>(function DiagramEditor ({ tables, s
     useEffect(() => {
         if (tables !== 'input') {
             const sql = toSQL(graph, tables);
-            setQuery([sql]);
+            setQuery(sql);
         }
     }, [graph, setQuery]);
 
     useEffect(() => {
-        setQuery([]);
-    }, [graph, setQuery]);
+        setQuery('');
+    }, [setQuery]);
 
     return tables === 'input' ? null : (
         <DbGraph
             tables={tables}
             graph={graph}
             setGraph={setGraph}
+            sql={query}
+            preview={preview}
         />
     );
 });
