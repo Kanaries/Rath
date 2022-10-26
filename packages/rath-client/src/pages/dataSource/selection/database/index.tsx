@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { IDropdownOption, Stack, registerIcons } from '@fluentui/react';
+import { IDropdownOption, Stack, registerIcons, PrimaryButton } from '@fluentui/react';
 import type { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { logDataImport } from '../../../../loggers/dataImport';
 import prefetch from '../../../../utils/prefetch';
@@ -337,7 +337,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                         dispatch({
                             type: 'SET_SQL',
                             payload: {
-                                sql: [`select * from ${selectedTable || '<table_name>'}`],
+                                sql: `select * from ${selectedTable || '<table_name>'}`,
                             }
                         });
                     } else {
@@ -388,9 +388,10 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
     const [isQuerying, setQuerying] = useState(false);
 
-    const [previewList, setPreviewList] = useState<TableData[]>([]);
+    const [preview, setPreview] = useState<TableData | null>(null);
 
     const query = useCallback(() => {
+        console.log(queryString);
         if (isQuerying) {
             return;
         }
@@ -400,46 +401,48 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
             setQuerying(true);
 
-            queryString.forEach(sql => {
-                requestSQL(sourceId, sql).then(data => {
-                    if (data) {
-                        setPreviewList(list => [...list, data]);
-                    }
-                }).finally(() => {
-                    setQuerying(false);
-                    setLoadingAnimation(false);
-                });
+            requestSQL(sourceId, queryString).then(data => {
+                if (data) {
+                    setPreview(data);
+                }
+            }).finally(() => {
+                setQuerying(false);
+                setLoadingAnimation(false);
             });
         }
     }, [isQuerying, sourceId, selectedTable, queryString, setLoadingAnimation, sourceType, selectedDatabase, selectedSchema, onDataLoaded, onClose]);
 
     useEffect(() => {
-        setPreviewList([]);
+        setPreview(null);
     }, [queryString]);
     
     const submit = async () => {
-        for await (const { rows, columns } of previewList) {
-            const data = await transformRawDataService(
-                rows.map(
-                    row => Object.fromEntries(
-                        row.map<[string, any]>((val, colIdx) => [columns?.[colIdx]?.key ?? `${colIdx}`, val])
-                    )
-                )
-            );
-            const { dataSource, fields } = data;
-
-            logDataImport({
-                dataType: `Database/${sourceType}`,
-                name: [selectedDatabase, selectedSchema, selectedTable].filter(
-                    Boolean
-                ).join('.'),
-                fields,
-                dataSource: [],
-                size: dataSource.length,
-            });
-
-            onDataLoaded(fields, dataSource);
+        if (!preview) {
+            return;
         }
+
+        const { rows, columns } = preview;
+        const data = await transformRawDataService(
+            rows.map(
+                row => Object.fromEntries(
+                    row.map<[string, any]>((val, colIdx) => [columns?.[colIdx]?.key ?? `${colIdx}`, val])
+                )
+            )
+        );
+        const { dataSource, fields } = data;
+
+        logDataImport({
+            dataType: `Database/${sourceType}`,
+            name: [selectedDatabase, selectedSchema, selectedTable].filter(
+                Boolean
+            ).join('.'),
+            fields,
+            dataSource: [],
+            size: dataSource.length,
+        });
+
+        onDataLoaded(fields, dataSource);
+
         onClose();
     };
 
@@ -491,42 +494,34 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                         <>
                                             <QueryEditor
                                                 tables={tableList}
-                                                query={queryString ?? []}
+                                                query={queryString ?? ''}
                                                 setQuery={sql => {
-                                                    if (typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && tableList !== undefined && selectedTable !== undefined && tablePreview) {
-                                                        dispatch({
-                                                            type: 'SET_SQL',
-                                                            payload: {
-                                                                sql
-                                                            }
-                                                        });
-                                                    }
+                                                    dispatch({
+                                                        type: 'SET_SQL',
+                                                        payload: {
+                                                            sql
+                                                        }
+                                                    });
                                                 }}
+                                                preview={query}
                                             />
-                                            <div>
-                                                <button
-                                                    onClick={query}
-                                                >
-                                                    preview
-                                                </button>
-                                            </div>
-                                            {previewList.length > 0 && (
+                                            {preview && (
                                                 <div>
-                                                    {previewList.map((pv, i) => (
-                                                        <TablePreview
-                                                            key={i}
-                                                            data={pv}
-                                                        />
-                                                    ))}
+                                                    <header>
+                                                        {'preview'}
+                                                    </header>
+                                                    <TablePreview
+                                                        data={preview}
+                                                    />
                                                 </div>
                                             )}
-                                            {previewList.length > 0 && (
+                                            {preview && (
                                                 <div>
-                                                    <button
+                                                    <PrimaryButton
                                                         onClick={submit}
                                                     >
                                                         submit
-                                                    </button>
+                                                    </PrimaryButton>
                                                 </div>
                                             )}
                                         </>

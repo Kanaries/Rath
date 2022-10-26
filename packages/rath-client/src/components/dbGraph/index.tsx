@@ -1,3 +1,4 @@
+import { PrimaryButton } from '@fluentui/react';
 import { DragEvent, memo, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { TableInfo } from '../../pages/dataSource/selection/database/api';
@@ -66,7 +67,12 @@ export const DBBox = styled.span`
         background-color: #f3f3f3;
     }
 `;
-const Output = styled.output({});
+const Output = styled.div({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+});
 
 const STROKE_RADIUS = 12;
 
@@ -124,10 +130,12 @@ export const encodePath = (x1: number, y1: number, x2: number, y2: number, isPre
 export interface DbGraphProps {
     tables: TableInfo[];
     graph: IDBGraph;
+    sql: string;
     setGraph: (graph: IDBGraph) => void;
+    preview: () => void;
 }
 
-const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }) {
+const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, preview, sql }) {
     const [width, setWidth] = useState(600);
     const container = useRef<HTMLDivElement>(null);
 
@@ -617,7 +625,12 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables }
             </DiagramContainer>
         </Container>
         <Output>
-
+            <span>
+                {sql}
+            </span>
+            <PrimaryButton>
+                {'preview'}
+            </PrimaryButton>
         </Output>
     </>);
 });

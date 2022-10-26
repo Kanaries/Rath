@@ -46,13 +46,14 @@ const Container = styled.div({
 
 export interface QueryEditorProps {
     tables: TableInfo[] | 'input';
-    query: string[];
-    setQuery: (query: string[]) => void;
+    query: string;
+    setQuery: (query: string) => void;
+    preview: () => void;
 }
 
 export type QueryEditorMode = 'diagram' | 'query';
 
-const QueryEditor = memo<QueryEditorProps>(function QueryEditor ({ tables, query, setQuery }) {
+const QueryEditor = memo<QueryEditorProps>(function QueryEditor ({ tables, query, setQuery, preview }) {
     const [mode, setMode] = useState<QueryEditorMode>('diagram');
 
     const modes = useMemo<{
@@ -102,12 +103,14 @@ const QueryEditor = memo<QueryEditorProps>(function QueryEditor ({ tables, query
                         tables={tables}
                         query={query}
                         setQuery={setQuery}
+                        preview={preview}
                     />
                 ) : (
                     <SQLEditor
                         tables={tables}
                         query={query}
                         setQuery={setQuery}
+                        preview={preview}
                     />
                 )}
             </div>
