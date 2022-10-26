@@ -13,6 +13,7 @@ import QueryForm from './query-form';
 import useDatabaseReducer from './reducer';
 import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, pingConnector, requestSQL } from './api';
 import CustomConfig from './customConfig';
+import DbGraph from '../../../../components/dbGraph';
 
 export const StackTokens = {
     childrenGap: 20,
@@ -565,6 +566,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 }
             </Stack>
         }
+        <DbGraph />
     </div>
 };
 
