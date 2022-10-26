@@ -1,9 +1,9 @@
 import { applyFilters } from '@kanaries/loa';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import GridLayout from "react-grid-layout";
-import { IconButton, VerticalDivider } from '@fluentui/react';
+import { CommandButton, IconButton, VerticalDivider } from '@fluentui/react';
 import { Pagination, Divider } from '@material-ui/core';
 
 import ReactVega from '../../components/react-vega';
@@ -14,6 +14,10 @@ import Empty from './empty';
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
+import FilterCreationPill from '../../components/filterCreationPill';
+import ViewField from '../megaAutomation/vizOperation/viewField';
+import { IFilter } from '../../interfaces';
+import { debounceTime, Subject } from 'rxjs';
 
 
 const Segment = styled.div`
@@ -36,13 +40,14 @@ const CollectContainer = styled.div`
     display: flex;
     overflow: auto hidden;
     flex-grow: 0;
-    height: 200px;
+    height: 120px;
     > * {
         flex-shrink: 0;
         margin-right: 10px;
         border: 1px solid rgb(218, 220, 224);
         padding: 10px 12px 0 2px;
         height: max-content;
+        position: relative;
         &:last-child: {
             margin-right: 0;
         }
@@ -59,6 +64,8 @@ const CollectContainer = styled.div`
 `;
 
 const ResourceList = styled.div({
+    flexGrow: 0,
+    flexShrink: 0,
     margin: '0 0.6em 0.8em',
     padding: '0.8em 1em',
     display: 'flex',
@@ -86,8 +93,21 @@ const EditItem = styled.div({
     alignItems: 'center',
     justifyContent: 'center',
     // overflow: 'hidden',
-    '> div': {
-        pointerEvents: 'none',
+    '> div.group': {
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        opacity: 0,
+        display: 'block',
+        width: 'max-content',
+        height: 'max-content',
+
+        '&.float': {
+            left: 0,
+        },
+    },
+    '&:hover > div.group': {
+        opacity: 1,
     },
 });
 
@@ -108,93 +128,89 @@ const ToolGroup = styled.div({
 
 const VIEW_NUM_IN_PAGE = 5;
 
-type KanbanItem = {
+export type KanbanItem = {
     viewId: string;
-    geometry: {
+    layout: {
         x: number;
         y: number;
         w: number;
         h: number;
     };
-    size: {
+    chartSize: {
         w: number;
         h: number;
     };
+    filter: IFilter[] | boolean;
 };
 
 const CANVAS_PADDING = 40;
 
 const Kanban: React.FC = (props) => {
-    const { collectionStore, dataSourceStore } = useGlobalStore();
+    const { collectionStore, dataSourceStore, dashboardStore } = useGlobalStore();
     const { collectionList } = collectionStore;
     const { cleanedData } = dataSourceStore;
 
-    const [pageIndex, setPageIndex] = useState<number>(0);
+    const [pageIndex, setPageIndex] = useState(0);
 
-    const [items, setItems] = useState<KanbanItem[]>([]);
+    const { items, filters } = dashboardStore.page;
+    const pageSize = dashboardStore.pages.length;
 
     const addItem = useCallback((item: IInsightVizView) => {
-        setItems(list => {
-            return list.concat([{
-                viewId: item.viewId,
-                geometry: {
-                    x: 0,
-                    y: 0,
-                    w: 2,
-                    h: 2,
-                },
-                size: {
-                    w: 2 * 100 - 100,
-                    h: 2 * 100 - 80,
-                },
-            }]);
+        dashboardStore.addItem({
+            viewId: item.viewId,
+            layout: {
+                x: 0,
+                y: 0,
+                w: 2,
+                h: 2,
+            },
+            chartSize: {
+                w: 2 * 100 - 100,
+                h: 2 * 100 - 80,
+            },
+            filter: false,
         });
-    }, []);
+    }, [dashboardStore]);
 
     const editAreaRef = useRef<HTMLDivElement>(null);
 
-    const handleDrop = useCallback((layout: GridLayout.Layout[], item: GridLayout.Layout) => {
-        const targetIdx = items.findIndex(e => e.viewId === item.i);
+    const handleDrop = useCallback((layout: GridLayout.Layout[], o: GridLayout.Layout) => {
+        const targetIdx = items.findIndex(e => e.viewId === o.i);
+        const item = layout.find(d => d.i === o.i);
 
-        if (targetIdx !== -1) {
-            setItems([
-                ...items.slice(0, targetIdx),
-                {
-                    ...items[targetIdx],
-                    geometry: {
-                        x: item.x,
-                        y: item.y,
-                        w: item.w,
-                        h: item.h,
-                    },
+        if (targetIdx !== -1 && item) {
+            dashboardStore.setItem(targetIdx, {
+                ...items[targetIdx],
+                layout: {
+                    x: item.x,
+                    y: item.y,
+                    w: item.w,
+                    h: item.h,
                 },
-                ...items.slice(targetIdx + 1),
-            ]);
+            });
         }
     }, [items]);
 
-    const handleResize = useCallback((layout: GridLayout.Layout[], item: GridLayout.Layout) => {
-        const box = editAreaRef.current?.querySelector(`#item-id-${item.i}`);
-        const targetIdx = items.findIndex(e => e.viewId === item.i);
+    const handleResize = useCallback((layout: GridLayout.Layout[], o: GridLayout.Layout) => {
+        const box = editAreaRef.current?.querySelector(`#item-id-${o.i}`);
+        const targetIdx = items.findIndex(e => e.viewId === o.i);
+        
+        const item = layout.find(d => d.i === o.i);
 
-        if (targetIdx !== -1 && box) {
-            setItems([
-                ...items.slice(0, targetIdx),
-                {
-                    ...items[targetIdx],
-                    geometry: {
-                        x: item.x,
-                        y: item.y,
-                        w: item.w,
-                        h: item.h,
-                    },
-                    size: {
-                        w: box.getBoundingClientRect().width - 100,
-                        h: box.getBoundingClientRect().height - 80,
-                    },
+        if (targetIdx !== -1 && box && item) {
+            dashboardStore.setItem(targetIdx, {
+                ...items[targetIdx],
+                layout: {
+                    x: item.x,
+                    y: item.y,
+                    w: item.w,
+                    h: item.h,
                 },
-                ...items.slice(targetIdx + 1),
-            ]);
+                chartSize: {
+                    w: box.getBoundingClientRect().width - 100,
+                    h: box.getBoundingClientRect().height - 80,
+                },
+            });
         }
     }, [items]);
 
@@ -284,10 +300,70 @@ const Kanban: React.FC = (props) => {
         a.click();
     }, [toCanvas]);
 
+    const mergeFilters = (index: number, vis: IInsightVizView): IFilter[] => {
+        return [
+            ...vis.filters,
+            ...filters.map(f => f.filter),
+            ...items.map((item, i) => {
+                return i === index ? [] : typeof item.filter === 'boolean' ? [] : item.filter;
+            }).flat(),
+        ];
+    };
+
+    // console.log(JSON.parse(JSON.stringify(items)), JSON.parse(JSON.stringify(filters)));
+
+    const filter$ = useMemo(() => new Subject<{ index: number; data: IFilter[] }>(), [dashboardStore.page]);
+
+    useEffect(() => {
+        const subscription = filter$.pipe(
+            debounceTime(200),
+        ).subscribe(({ index, data }) => {
+            dashboardStore.setItem(index, {
+                ...items[index],
+                filter: data,
+            });
+        });
+
+        return () => subscription.unsubscribe();
+    }, [filter$, dashboardStore]);
+
     return collectionList.length === 0 ? (
         <Empty />
     ) : (
         <Segment>
+            <ResourceList style={{ flexDirection: 'row', alignItems: 'center', padding: '0.8em 0.6em 0.5em' }}>
+                <header
+                    style={{
+                        flexGrow: 0,
+                        flexShrink: 0,
+                        width: 'unset',
+                        marginRight: '1em',
+                    }}
+                >
+                    {'Dashboard'}
+                </header>
+                <Pagination
+                    style={{
+                        flexGrow: 1,
+                        flexShrink: 1,
+                        width: 'unset',
+                        marginRight: '1em',
+                    }}
+                    variant="outlined"
+                    shape="rounded"
+                    count={pageSize}
+                    page={dashboardStore.cursor + 1}
+                    onChange={(_, v) => {
+                        dashboardStore.setCursor(v - 1);
+                    }}
+                />
+                <CommandButton
+                    onClick={() => dashboardStore.newPage()}
+                    iconProps={{
+                        iconName: 'Add',
+                    }}
+                />
+            </ResourceList>
             <ResourceList>
                 <Pagination
                     style={{
@@ -312,7 +388,7 @@ const Kanban: React.FC = (props) => {
                         >
                             <VisErrorBoundary>
                                 <ReactVega
-                                    dataSource={applyFilters(cleanedData, item.filters)}
+                                    dataSource={applyFilters(cleanedData, [...item.filters, ...filters.map(f => f.filter)])}
                                     spec={{
                                         ...item.spec,
                                         width: 120,
@@ -324,6 +400,31 @@ const Kanban: React.FC = (props) => {
                         </div>
                     ))}
                 </CollectContainer>
+            </ResourceList>
+            <ResourceList style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+                <header style={{ flexGrow: 0, flexShrink: 0, marginRight: '1em' }}>Filters</header>
+                {filters.map((filter, i) => {
+                    const targetField = dataSourceStore.fieldMetas.find(m => m.fid === filter.field.fid);
+                    if (!targetField) return null;
+                    let filterDesc = `${targetField.name || targetField.fid} ∈ `;
+                    filterDesc += (filter.filter.type === 'range' ? `[${filter.filter.range.join(',')}]` : `{${filter.filter.values.join(',')}}`)
+                    return  (
+                        <ViewField
+                            key={i}
+                            type={targetField.analyticType}
+                            text={filterDesc}
+                            onRemove={() => {
+                                dashboardStore.deleteFilter(i);
+                            }}
+                        />
+                    );
+                })}
+                <FilterCreationPill
+                    fields={dataSourceStore.fieldMetas}
+                    onFilterSubmit={(field, filter) => {
+                        dashboardStore.addFilter(field, filter);
+                    }}
+                />
             </ResourceList>
             <EditArea ref={editAreaRef}>
                 <GridLayout
@@ -337,7 +438,7 @@ const Kanban: React.FC = (props) => {
                         width: 12 * 100,
                     }}
                 >
-                    {items.map(item => {
+                    {items.map((item, i) => {
                         const vis = collectionList.find(e => e.viewId === item.viewId);
 
                         return vis ? (
@@ -345,25 +446,124 @@ const Kanban: React.FC = (props) => {
                                 key={item.viewId}
                                 id={`item-id-${item.viewId}`}
                                 data-grid={{
-                                    ...item.geometry,
+                                    ...item.layout,
                                     minW: 2,
-                                    maxW: 6,
+                                    maxW: 12,
                                     minH: 2,
-                                    maxH: 6,
+                                    maxH: 12,
                                     resizeHandles: ['s', 'e', 'se'],
                                 }}
                             >
                                 <VisErrorBoundary>
                                     <ReactVega
-                                        dataSource={applyFilters(cleanedData, vis.filters)}
-                                        spec={{
+                                        dataSource={applyFilters(cleanedData, mergeFilters(i, vis))}
+                                        spec={item.filter ? {
+                                            data: vis.spec.data,
+                                            layer: [{
+                                                params: item.filter ? [{
+                                                    name: 'brush',
+                                                    value: typeof item.filter === 'object' ? (
+                                                        item.filter.length === 2 && item.filter[0].type === 'range' && item.filter[1].type === 'range' ? {
+                                                            x: item.filter[0].range,
+                                                            y: item.filter[1].range,
+                                                        } : undefined
+                                                    ) : undefined,
+                                                    select: {
+                                                        type: 'interval',
+                                                        // encodings: ['x'],
+                                                    },
+                                                }] : undefined,
+                                                mark: vis.spec.mark,
+                                                encoding: vis.spec.encoding,
+                                                width: item.chartSize.w,
+                                                height: item.chartSize.h,
+                                            }, {
+                                                transform: [{
+                                                    filter: { param: 'brush' },
+                                                }],
+                                                mark: vis.spec.mark,
+                                                encoding: {
+                                                    ...vis.spec.encoding,
+                                                    color: { value: 'goldenrod' },
+                                                },
+                                                width: item.chartSize.w,
+                                                height: item.chartSize.h,
+                                            }],
+                                            width: item.chartSize.w,
+                                            height: item.chartSize.h,
+                                        } : {
                                             ...vis.spec,
-                                            width: item.size.w,
-                                            height: item.size.h,
+                                            width: item.chartSize.w,
+                                            height: item.chartSize.h,
                                         }}
                                         actions={false}
+                                        signalHandler={item.filter ? {
+                                            // brush_tuple: (name: 'brush_tuple', value: { fields: { field: string }[], values: [number, number][] }) => {
+                                            //     const filter = value.fields.map<IFilter | null>(({ field: name }, i) => {
+                                            //         const f = dataSourceStore.fieldMetas.find(f => f.name === name);
+
+                                            //         return f ? {
+                                            //             type: 'range',
+                                            //             fid: f.fid,
+                                            //             range: [
+                                            //                 Math.min(...value.values[i]),
+                                            //                 Math.max(...value.values[i]),
+                                            //             ],
+                                            //         } : null;
+                                            //     }).filter(Boolean) as IFilter[];
+
+                                            //     dashboardStore.setItem(i, {
+                                            //         ...item,
+                                            //         filter,
+                                            //     });
+                                            // },
+                                            brush: (name: 'brush', filters: {
+                                                [name: string]: [number, number];
+                                            }) => {
+                                                const filter = Object.entries(filters).map<IFilter | null>(([k, v]) => {
+                                                    const f = dataSourceStore.fieldMetas.find(f => f.name === k);
+
+                                                    return f ? {
+                                                        type: 'range',
+                                                        fid: f.fid,
+                                                        range: v,
+                                                    } : null;
+                                                }).filter(Boolean) as IFilter[];
+
+                                                filter$.next({
+                                                    index: i,
+                                                    data: filter,
+                                                });
+                                            },
+                                        } : undefined}
                                     />
                                 </VisErrorBoundary>
+                                <div
+                                    className="group"
+                                    style={{ opacity: item.filter ? 1 : undefined }}
+                                    onMouseDown={e => e.stopPropagation()}
+                                >
+                                    <CommandButton
+                                        iconProps={{
+                                            iconName: item.filter ? 'FilterSolid' : 'Filter',
+                                        }}
+                                        onClick={() => {
+                                            dashboardStore.setItem(i, {
+                                                ...item,
+                                                filter: !item.filter,
+                                            });
+                                        }}
+                                    />
+                                </div>
+                                <div
+                                    className="group float"
+                                >
+                                    <CommandButton
+                                        iconProps={{
+                                            iconName: 'Move',
+                                        }}
+                                    />
+                                </div>
                             </EditItem>
                         ) : null;
                     })}
@@ -371,7 +571,7 @@ const Kanban: React.FC = (props) => {
             </EditArea>
             <ToolGroup>
                 <IconButton
-                    onClick={() => setItems([])}
+                    onClick={() => dashboardStore.clearPage()}
                     iconProps={{
                         iconName: 'DeleteTable',
                         style: {

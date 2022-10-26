@@ -39,7 +39,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
         const view = res.view;
         viewRef.current = view;
         for (let key in signalHandler) {
-          view.addSignalListener('sl', signalHandler[key]);
+          view.addSignalListener(key, signalHandler[key]);
         }
       })
     }
@@ -54,13 +54,17 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
   useEffect(() => {
     if (viewRef.current && signalHandler) {
       for (let key in signalHandler) {
-        viewRef.current.addSignalListener('sl', signalHandler[key]);
+        try {
+          viewRef.current.addSignalListener(key, signalHandler[key]);
+        } catch (error) {
+          console.warn(error);
+        }
       }
     }
     return () => {
       if (viewRef.current && signalHandler) {
         for (let key in signalHandler) {
-          viewRef.current.removeSignalListener('sl', signalHandler[key]);
+          viewRef.current.removeSignalListener(key, signalHandler[key]);
         }
       }
     }
@@ -73,7 +77,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       viewRef.current.runAsync(); 
     }
   }, [dataSource])
-  return <div ref={container} />
+  return <div ref={container} onMouseDown={e => e.stopPropagation()} />
 }
 
 export default ReactVega;
