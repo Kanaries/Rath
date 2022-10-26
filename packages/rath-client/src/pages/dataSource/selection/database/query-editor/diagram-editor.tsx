@@ -18,10 +18,6 @@ const DiagramEditor = memo<QueryEditorProps>(function DiagramEditor ({ query, ta
         }
     }, [graph, setQuery]);
 
-    useEffect(() => {
-        setQuery('');
-    }, [setQuery]);
-
     return tables === 'input' ? null : (
         <DbGraph
             tables={tables}
