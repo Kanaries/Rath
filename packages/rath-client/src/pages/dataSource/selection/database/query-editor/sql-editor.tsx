@@ -22,7 +22,6 @@ const SQLEditor = memo<QueryEditorProps>(function QueryEditor({ query, tables, s
                 <DefaultButton
                     onClick={() => {
                         if (view !== null) {
-                            console.log("2")
                             setQuery(view.state.doc.text);
                         }
                     }}
