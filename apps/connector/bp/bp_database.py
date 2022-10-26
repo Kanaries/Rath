@@ -115,11 +115,12 @@ def get_table_detail():
         schema = props.get('schema', None)
         table = props['table']
         connect_id = props['sourceId']
+        rows_num = props.get('rowsNum', 500)
         uri = get_uri(connect_id)
         source_type = get_source_type(connect_id)
         dict__ = basefunc.__dict__
         meta = dict__['{0}_getmeta'.format(source_type)](uri=uri, database=database, table=table, schema=schema)
-        data = dict__['{0}_getdata'.format(source_type)](uri=uri, database=database, table=table, schema=schema)
+        data = dict__['{0}_getdata'.format(source_type)](uri=uri, database=database, table=table, schema=schema, rows_num=rows_num)
     except Exception as e:
         return {
             'success': False,
