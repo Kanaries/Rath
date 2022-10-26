@@ -9,11 +9,10 @@ import Progress from './progress';
 import datasetOptions from './config';
 import ConnectForm, { ConnectFormReadonly } from './connect-form';
 import DropdownOrInput from './dropdown-or-input';
-import QueryForm from './query-form';
 import useDatabaseReducer from './reducer';
 import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, pingConnector, requestSQL } from './api';
 import CustomConfig from './customConfig';
-import DbGraph from '../../../../components/dbGraph';
+import QueryEditor from './query-editor';
 
 export const StackTokens = {
     childrenGap: 20,
@@ -479,94 +478,72 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                             />
                             <Stack horizontal tokens={StackTokens}>
                                 {
-                                    databaseList !== null && databaseList !== undefined && (
-                                        <DropdownOrInput
-                                            name="dataSource.databaseName"
-                                            options={databaseSelector}
-                                            value={selectedDatabase}
-                                            setValue={val => {
-                                                if (typeof connectUri === 'string' && databaseList) {
+                                    tableList !== null && tableList !== undefined && tableList !== 'pending' ? (
+                                        <QueryEditor
+                                            tables={tableList}
+                                            query={queryString ?? ''}
+                                            setQuery={sql => {
+                                                if (typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && (tableList !== undefined && tableList !== 'pending') && selectedTable !== undefined && tablePreview) {
                                                     dispatch({
-                                                        type: 'SET_DATABASE',
+                                                        type: 'SET_SQL',
                                                         payload: {
-                                                            dbName: val
+                                                            sql
                                                         }
                                                     });
                                                 }
                                             }}
-                                            updateInputTime={updateInputTime}
                                         />
-                                    )
-                                }
-                                {
-                                    schemaList !== null && schemaList !== undefined && schemaList !== 'pending' && (
-                                        <DropdownOrInput
-                                            name="dataSource.schemaName"
-                                            options={schemaSelector}
-                                            value={selectedSchema}
-                                            setValue={val => {
-                                                if (typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && schemaList) {
-                                                    dispatch({
-                                                        type: 'SET_SCHEMA',
-                                                        payload: {
-                                                            sName: val
-                                                        }
-                                                    });
-                                                }
-                                            }}
-                                            updateInputTime={updateInputTime}
-                                        />
-                                    )
-                                }
-                                {
-                                    tableList !== null && tableList !== undefined && tableList !== 'pending' && (
-                                        <DropdownOrInput
-                                            name="dataSource.tableName"
-                                            options={tableSelector}
-                                            value={selectedTable}
-                                            setValue={val => {
-                                                if (typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || schemaList === 'input' || Array.isArray(schemaList)) && selectedSchema !== undefined && tableList) {
-                                                    dispatch({
-                                                        type: 'SET_TABLE',
-                                                        payload: {
-                                                            tName: val
-                                                        }
-                                                    });
-                                                }
-                                            }}
-                                            updateInputTime={updateInputTime}
-                                        />
+                                    ) : (
+                                        <>
+                                            {
+                                                databaseList !== null && databaseList !== undefined && (
+                                                    <DropdownOrInput
+                                                        name="dataSource.databaseName"
+                                                        options={databaseSelector}
+                                                        value={selectedDatabase}
+                                                        setValue={val => {
+                                                            if (typeof connectUri === 'string' && databaseList) {
+                                                                dispatch({
+                                                                    type: 'SET_DATABASE',
+                                                                    payload: {
+                                                                        dbName: val
+                                                                    }
+                                                                });
+                                                            }
+                                                        }}
+                                                        updateInputTime={updateInputTime}
+                                                    />
+                                                )
+                                            }
+                                            {
+                                                schemaList !== null && schemaList !== undefined && schemaList !== 'pending' && (
+                                                    <DropdownOrInput
+                                                        name="dataSource.schemaName"
+                                                        options={schemaSelector}
+                                                        value={selectedSchema}
+                                                        setValue={val => {
+                                                            if (typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && schemaList) {
+                                                                dispatch({
+                                                                    type: 'SET_SCHEMA',
+                                                                    payload: {
+                                                                        sName: val
+                                                                    }
+                                                                });
+                                                            }
+                                                        }}
+                                                        updateInputTime={updateInputTime}
+                                                    />
+                                                )
+                                            }
+                                        </>
                                     )
                                 }
                             </Stack>
-                            {
-                                typeof tablePreview === 'object' && (
-                                    <QueryForm
-                                        preview={tablePreview}
-                                        tableName={selectedTable}
-                                        isQuerying={isQuerying}
-                                        queryString={queryString}
-                                        setQueryString={sql => {
-                                            if (typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && (tableList !== undefined && tableList !== 'pending') && selectedTable !== undefined && tablePreview) {
-                                                dispatch({
-                                                    type: 'SET_SQL',
-                                                    payload: {
-                                                        sql
-                                                    }
-                                                });
-                                            }
-                                        }}
-                                        disableQuery={!(typeof sourceId === 'number' && typeof selectedTable === 'string' && queryString)}
-                                        query={query}
-                                    />
-                                )
-                            }
                         </>
                     )
                 }
             </Stack>
         }
-        <DbGraph />
     </div>
 };
 
