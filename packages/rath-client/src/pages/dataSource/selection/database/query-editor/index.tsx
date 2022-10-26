@@ -1,5 +1,6 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
+import type { TableInfo } from "../api";
 import DiagramEditor from "./diagram-editor";
 import SQLEditor from "./sql-editor";
 
@@ -44,7 +45,7 @@ const Container = styled.div({
 });
 
 export interface QueryEditorProps {
-    tables: string[] | 'input';
+    tables: TableInfo[] | 'input';
     query: string;
     setQuery: (query: string) => void;
 }

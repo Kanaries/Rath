@@ -1,4 +1,5 @@
 import type { TableData, TableLabels } from '.';
+import type { TableInfo } from './api';
 
 
 export type SupportedDatabaseType = (
@@ -27,7 +28,7 @@ export type DatabaseOptions = [
     selectedDatabase: string | ThisOptionIsNotRequired,
     schemaList: 'pending' | 'input' | string[] | ThisOptionIsNotRequired,
     selectedSchema: string | ThisOptionIsNotRequired,
-    tableList: 'pending' | 'input' | string[] | ThisOptionIsNotRequired,
+    tableList: 'pending' | 'input' | TableInfo[] | ThisOptionIsNotRequired,
     selectedTable: string | ThisOptionIsNotRequired,
     tablePreview: 'pending' | TableData<TableLabels>,
     queryString: string,
