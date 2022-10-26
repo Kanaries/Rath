@@ -22,15 +22,17 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                table_list.append(item)
+                meta = basefunc.athena_getmeta(uri=uri, database=database, schema=schema, table=item)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
         return table_list
 
     @staticmethod
-    def athena_getmeta(uri, database, table, schema, rows_num):
+    def athena_getmeta(uri, database, table, schema):
         engine = create_engine(uri, echo=True)
-        metaRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).keys()
+        metaRes = engine.execute('select * from ' + database + '.' + table + ' limit 500').keys()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData, "colIndex": i, "dataType": None}
             meta.append(scores)
@@ -79,7 +81,9 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                table_list.append(item)
+                meta = basefunc.clickhouse_getmeta(uri=uri, database=database, schema=schema, table=item)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -87,7 +91,7 @@ class basefunc:
         engine = create_engine(uri, echo=True)
         metaRes = engine.execute('desc ' + database + '.' + table).fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.name, "colIndex": i, "dataType": colData.type}
             meta.append(scores)
@@ -136,7 +140,9 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                table_list.append(item)
+                meta = basefunc.doris_getmeta(uri=uri, database=database, schema=schema, table=item)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -144,7 +150,7 @@ class basefunc:
         engine = create_engine(uri, echo=True)
         metaRes = engine.execute('show full columns from ' + database + '.' + table).fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.name, "colIndex": i, "dataType": colData.type}
             meta.append(scores)
@@ -192,7 +198,9 @@ class basefunc:
         res = engine.execute('SHOW TABLES FROM ' + database).fetchall()
         table_list = []
         for row in res:
-            table_list.append(row.TABLE_NAME)
+            meta = basefunc.drill_getmeta(uri=uri, database=database, schema=schema, table=row.TABLE_NAME)
+            scores = {"name": row.TABLE_NAME, "meta": meta}
+            table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -200,7 +208,7 @@ class basefunc:
         engine = create_engine(uri, echo=True)
         metaRes = engine.execute('desc ' + database + '.' + table).fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.COLUMN_NAME, "colIndex": i, "dataType": colData.DATA_TYPE}
             meta.append(scores)
@@ -249,7 +257,9 @@ class basefunc:
             'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \'' + schema + '\'').fetchall()
         table_list = []
         for row in res:
-            table_list.append(row.TABLE_NAME)
+            meta = basefunc.druid_getmeta(uri=uri, database=database, schema=schema, table=row.TABLE_NAME)
+            scores = {"name": row.TABLE_NAME, "meta": meta}
+            table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -258,7 +268,7 @@ class basefunc:
         metaRes = engine.execute(
             'select COLUMN_NAME, DATA_TYPE from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA = \'' + schema + '\' and  TABLE_NAME = \'' + table + '\'').fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.COLUMN_NAME, "colIndex": i, "dataType": colData.DATA_TYPE}
             meta.append(scores)
@@ -307,7 +317,9 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                table_list.append(item)
+                meta = basefunc.impala_getmeta(uri=uri, database=database, schema=schema, table=item)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -315,7 +327,7 @@ class basefunc:
         engine = create_engine(uri, echo=True)
         metaRes = engine.execute('desc ' + database + '.' + table).fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.col_name, "colIndex": i, "dataType": colData.data_type}
             meta.append(scores)
@@ -352,7 +364,7 @@ class basefunc:
         engine = create_engine(uri, echo=True)
         metaRes = engine.execute('select * from ' + schema + '.' + table + ' limit 500').keys()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData, "colIndex": i, "dataType": None}
             meta.append(scores)
@@ -401,7 +413,9 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                table_list.append(item)
+                meta = basefunc.mysql_getmeta(uri=uri, database=database, schema=schema, table=item)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -409,7 +423,7 @@ class basefunc:
         engine = create_engine(uri, echo=True)
         metaRes = engine.execute('desc ' + database + '.' + table).fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.Field, "colIndex": i, "dataType": colData.Type}
             meta.append(scores)
@@ -448,7 +462,9 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                table_list.append(item)
+                meta = basefunc.oracle_getmeta(uri=uri, database=database, schema=schema, table=item)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -481,7 +497,7 @@ class basefunc:
             '''.format(table, table)
         ).fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.column_name, "colIndex": i, "dataType": colData.data_type}
             meta.append(scores)
@@ -531,7 +547,9 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                table_list.append(item)
+                meta = basefunc.postgres_getmeta(uri=uri, database=database, schema=schema, table=item)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -540,7 +558,7 @@ class basefunc:
         metaRes = engine.execute(
             'select column_name, data_type from information_schema.columns where table_schema= \'' + schema + '\' and table_name= \'' + table + '\'').fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.column_name, "colIndex": i, "dataType": colData.data_type}
             meta.append(scores)
@@ -590,7 +608,9 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                table_list.append(item)
+                meta = basefunc.redshift_getmeta(uri=uri, database=database, schema=schema, table=item)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -603,7 +623,7 @@ class basefunc:
             AND schemaname = '{1}'
         '''.format(table, database)).fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.column, "colIndex": i, "dataType": colData.type}
             meta.append(scores)
@@ -652,7 +672,9 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                table_list.append(item)
+                meta = basefunc.sparksql_getmeta(uri=uri, database=database, schema=schema, table=item)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -660,7 +682,7 @@ class basefunc:
         engine = create_engine(uri, echo=True)
         metaRes = engine.execute('desc ' + database + '.' + table).fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.col_name, "colIndex": i, "dataType": colData.data_type}
             meta.append(scores)
@@ -723,7 +745,9 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                table_list.append(item)
+                meta = basefunc.sqlserver_getmeta(uri=uri, database=database, schema=schema, table=item)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
         return table_list
 
     @staticmethod
@@ -743,7 +767,7 @@ class basefunc:
             ORDER BY SO.name, SC.colorder
         '''.format(database, database, database, table)).fetchall()
         meta = []
-        i = 1
+        i = 0
         for colData in metaRes:
             scores = {"key": colData.table_name, "colIndex": i, "dataType": colData.table_column}
             meta.append(scores)
@@ -753,7 +777,8 @@ class basefunc:
     @staticmethod
     def sqlserver_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select top ' + rows_num + ' * from ' + database + '.' + schema + '.' + table).fetchall()
+        dataRes = engine.execute(
+            'select top ' + rows_num + ' * from ' + database + '.' + schema + '.' + table).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -801,7 +826,7 @@ class basefunc:
     #     engine = create_engine(uri, echo=True)
     #     metaRes = engine.execute('desc ' + database + '.' + table).fetchall()
     #     meta = []
-    #     i = 1
+    #     i = 0
     #     for colData in metaRes:
     #         scores = {"key": colData.col_name, "colIndex": i, "dataType": colData.data_type}
     #         meta.append(scores)
