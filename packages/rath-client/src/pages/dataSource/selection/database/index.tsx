@@ -446,6 +446,15 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         onClose();
     };
 
+    const setSQL = useCallback((sql: string) => {
+        dispatch({
+            type: 'SET_SQL',
+            payload: {
+                sql
+            }
+        });
+    }, [dispatch]);
+
     return <div>
         <CustomConfig ping={ping} loading={loading} />
         {
@@ -495,33 +504,30 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                             <QueryEditor
                                                 tables={tableList}
                                                 query={queryString ?? ''}
-                                                setQuery={sql => {
-                                                    dispatch({
-                                                        type: 'SET_SQL',
-                                                        payload: {
-                                                            sql
-                                                        }
-                                                    });
-                                                }}
+                                                setQuery={setSQL}
                                                 preview={query}
                                             />
                                             {preview && (
                                                 <div>
-                                                    <header>
-                                                        {'preview'}
+                                                    <header
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'space-between',
+                                                        }}
+                                                    >
+                                                        <span>
+                                                            {'Preview'}
+                                                        </span>
+                                                        <PrimaryButton
+                                                            onClick={submit}
+                                                        >
+                                                            submit
+                                                        </PrimaryButton>
                                                     </header>
                                                     <TablePreview
                                                         data={preview}
                                                     />
-                                                </div>
-                                            )}
-                                            {preview && (
-                                                <div>
-                                                    <PrimaryButton
-                                                        onClick={submit}
-                                                    >
-                                                        submit
-                                                    </PrimaryButton>
                                                 </div>
                                             )}
                                         </>

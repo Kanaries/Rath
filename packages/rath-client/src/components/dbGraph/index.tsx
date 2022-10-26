@@ -72,6 +72,17 @@ const Output = styled.div({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    border: '1px solid',
+    borderTop: 'none',
+    marginBottom: '1em',
+
+    '> span': {
+        flexGrow: 1,
+        flexShrink: 1,
+        padding: '0 1em',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+    },
 });
 
 const STROKE_RADIUS = 12;
@@ -325,7 +336,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
     const handleLinkOver = useCallback((index: number) => {
         if (linkPreview) {
             const alreadyLinked = Boolean(graph.edges.find(edge => (
-                [edge.from, edge.to].some(d => index === d.table)
+                [edge.from, edge.to].every(d => [index, linkPreview.from].includes(d.table))
             )));
 
             const willBeCircle = ((): boolean => {
@@ -628,7 +639,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             <span>
                 {sql}
             </span>
-            <PrimaryButton>
+            <PrimaryButton onClick={preview}>
                 {'preview'}
             </PrimaryButton>
         </Output>

@@ -54,7 +54,7 @@ export interface QueryEditorProps {
 export type QueryEditorMode = 'diagram' | 'query';
 
 const QueryEditor = memo<QueryEditorProps>(function QueryEditor ({ tables, query, setQuery, preview }) {
-    const [mode, setMode] = useState<QueryEditorMode>('diagram');
+    const [mode, setMode] = useState<QueryEditorMode>('query');
 
     const modes = useMemo<{
         mode: QueryEditorMode;
@@ -62,12 +62,12 @@ const QueryEditor = memo<QueryEditorProps>(function QueryEditor ({ tables, query
     }[]>(() => {
         return [
             {
-                mode: 'diagram',
-                enabled: Array.isArray(tables),
-            },
-            {
                 mode: 'query',
                 enabled: true,
+            },
+            {
+                mode: 'diagram',
+                enabled: Array.isArray(tables),
             },
         ];
     }, []);
@@ -77,6 +77,10 @@ const QueryEditor = memo<QueryEditorProps>(function QueryEditor ({ tables, query
             setMode('query');
         }
     }, [tables]);
+
+    useEffect(() => {
+        setQuery('');
+    }, [mode, setQuery]);
 
     return (
         <Container>

@@ -36,7 +36,7 @@ const SQLEditor = memo<QueryEditorProps>(function QueryEditor({ query, tables, s
                         }
                     }}
                 >
-                    Run
+                    {'Preview'}
                 </DefaultButton>
             </div>
             <div style={{ display: 'flex' }}>
