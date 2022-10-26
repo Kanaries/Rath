@@ -26,9 +26,9 @@ class basefunc:
         return table_list
 
     @staticmethod
-    def athena_getmeta(uri, database, table, schema):
+    def athena_getmeta(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        metaRes = engine.execute('select * from ' + database + '.' + table + ' limit 500').keys()
+        metaRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).keys()
         meta = []
         i = 1
         for colData in metaRes:
@@ -38,9 +38,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def athena_getdata(uri, database, table, schema):
+    def athena_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -95,9 +95,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def clickhouse_getdata(uri, database, table, schema):
+    def clickhouse_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -152,9 +152,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def doris_getdata(uri, database, table, schema):
+    def doris_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -208,9 +208,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def drill_getdata(uri, database, table, schema):
+    def drill_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -266,9 +266,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def druid_getdata(uri, database, table, schema):
+    def druid_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + schema + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + schema + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -323,9 +323,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def impala_getdata(uri, database, table, schema):
+    def impala_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -360,9 +360,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def kylin_getdata(uri, database, table, schema):
+    def kylin_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + schema + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + schema + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -417,9 +417,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def mysql_getdata(uri, database, table, schema):
+    def mysql_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -489,9 +489,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def oracle_getdata(uri, database, table):
+    def oracle_getdata(uri, database, table, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + table + ' where rownum <= 500').fetchall()
+        dataRes = engine.execute('select * from ' + table + ' where rownum <= ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -548,9 +548,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def postgres_getdata(uri, database, table, schema):
+    def postgres_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + schema + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + schema + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -611,9 +611,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def redshift_getdata(uri, database, table, schema):
+    def redshift_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -668,9 +668,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def sparksql_getdata(uri, database, table, schema):
+    def sparksql_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit 500').fetchall()
+        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
         for row in dataRes:
             rows = []
@@ -751,9 +751,9 @@ class basefunc:
         return meta
 
     @staticmethod
-    def sqlserver_getdata(uri, database, table, schema):
+    def sqlserver_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select top 500 * from ' + database + '.' + schema + '.' + table).fetchall()
+        dataRes = engine.execute('select top ' + rows_num + ' * from ' + database + '.' + schema + '.' + table).fetchall()
         data = []
         for row in dataRes:
             rows = []
