@@ -15,7 +15,7 @@ RATH is an OpenSource automated data exploration tool that can help you automate
 
 + Try RATH [here](https://rath.kanaries.net)
 + visit our official website[kanaries website](https://kanaries.net)
-+ [🚀 Quick View of RATH's Exploratory Data Analysis](https://www.yuque.com/docs/share/03ae907a-8fa5-4822-897b-c1245e3c2014)
++ [🚀 Quick View of RATH's Exploratory Data Analysis](https://medium.com/@observedobserver/quick-view-of-raths-exploratory-data-analysis-65c71866eca5)
 
 ## Introduction
 
@@ -119,7 +119,7 @@ For larger datasets, or if you can access a high performance OLAP service (such 
 
 
 ## Documentation
-+ [🚀 Quick View of RATH's Exploratory Data Analysis](https://www.yuque.com/docs/share/03ae907a-8fa5-4822-897b-c1245e3c2014)
++ [🚀 Quick View of RATH's Exploratory Data Analysis](https://medium.com/@observedobserver/quick-view-of-raths-exploratory-data-analysis-65c71866eca5)
 
 ## LICENSE (AGPL)
 Rath is an automated data analysis and visualization tool (auto-EDA).
