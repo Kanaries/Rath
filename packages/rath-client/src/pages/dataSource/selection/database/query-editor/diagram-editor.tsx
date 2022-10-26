@@ -1,8 +1,8 @@
 import { memo, useEffect, useState } from "react";
-import { QueryEditorProps } from ".";
 import DbGraph from "../../../../../components/dbGraph";
 import type { IDBGraph } from "../../../../../components/dbGraph/localTypes";
 import { toSQL } from "../../../../../components/dbGraph/utils";
+import { QueryEditorProps } from ".";
 
 
 const DiagramEditor = memo<QueryEditorProps>(function DiagramEditor ({ query, tables, setQuery, preview }) {
@@ -16,7 +16,7 @@ const DiagramEditor = memo<QueryEditorProps>(function DiagramEditor ({ query, ta
             const sql = toSQL(graph, tables);
             setQuery(sql);
         }
-    }, [graph, setQuery]);
+    }, [graph, setQuery, tables]);
 
     return tables === 'input' ? null : (
         <DbGraph

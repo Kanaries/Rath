@@ -1,6 +1,6 @@
 import { makeAutoObservable, observable, toJS } from "mobx";
-import type { KanbanItem } from "../pages/kanban";
 import produce from "immer";
+import type { KanbanItem } from "../pages/kanban";
 import type { IFieldMeta, IFilter } from "../interfaces";
 
 

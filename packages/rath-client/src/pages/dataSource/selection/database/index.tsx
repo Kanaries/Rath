@@ -5,6 +5,7 @@ import type { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { logDataImport } from '../../../../loggers/dataImport';
 import prefetch from '../../../../utils/prefetch';
 import { notify } from '../../../../components/error';
+import { transformRawDataService } from '../../utils';
 import Progress from './progress';
 import datasetOptions from './config';
 import ConnectForm, { ConnectFormReadonly } from './connect-form';
@@ -14,7 +15,6 @@ import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables,
 import CustomConfig from './customConfig';
 import QueryEditor from './query-editor';
 import TablePreview from './table-preview';
-import { transformRawDataService } from '../../utils';
 
 export const StackTokens = {
     childrenGap: 20,
@@ -81,6 +81,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         selectedSchema,
         tableList,
         selectedTable,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         tablePreview,
         queryString,
     ] = progress;
@@ -391,7 +392,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
     const [preview, setPreview] = useState<TableData | null>(null);
 
     const query = useCallback(() => {
-        console.log(queryString);
+        // console.log(queryString);
         if (isQuerying) {
             return;
         }
@@ -410,7 +411,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 setLoadingAnimation(false);
             });
         }
-    }, [isQuerying, sourceId, selectedTable, queryString, setLoadingAnimation, sourceType, selectedDatabase, selectedSchema, onDataLoaded, onClose]);
+    }, [isQuerying, sourceId, queryString, setLoadingAnimation]);
 
     useEffect(() => {
         setPreview(null);

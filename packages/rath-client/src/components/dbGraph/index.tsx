@@ -319,7 +319,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
 
             return;
         }
-    }, [linkPreview]);
+    }, [linkPreview, width]);
 
     const handleMouseUp = () => {
         if (container.current && linkPreview) {
@@ -396,7 +396,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
                 to: index,
             });
         }
-    }, [linkPreview]);
+    }, [linkPreview, graph.edges]);
 
     const handleLinkOut = useCallback((e: MouseEvent<HTMLDivElement>) => {
         if (container.current && linkPreview) {
@@ -420,7 +420,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
 
             return;
         }
-    }, [linkPreview]);
+    }, [linkPreview, width]);
 
     return (<>
         <Container>

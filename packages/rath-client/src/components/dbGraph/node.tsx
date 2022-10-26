@@ -1,7 +1,7 @@
 import { DragEvent, memo, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { DBBox } from ".";
 import { IDBNode } from "./localTypes";
+import { DBBox } from ".";
 
 
 const PADDING = 6;
