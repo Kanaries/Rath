@@ -1,6 +1,7 @@
 import { useReducer } from 'react';
 import type { PartialDatabaseOptions, SupportedDatabaseType, ThisOptionIsNotRequired } from './type';
 import type { TableData, TableLabels } from '.';
+import type { TableInfo } from './api';
 
 export type ActionType = (
     | 'ENABLE_CONNECTOR'
@@ -31,7 +32,7 @@ export type ActionPayload<T extends ActionType> = (
     } : T extends 'SET_SCHEMA' ? {
         sName: string;
     } : T extends 'SET_TABLE_LIST' ? {
-        tList: 'pending' | string[] | 'input' | ThisOptionIsNotRequired;
+        tList: 'pending' | TableInfo[] | 'input' | ThisOptionIsNotRequired;
     } : T extends 'SET_TABLE' ? {
         tName: string;
     } : T extends 'SET_PREVIEW' ? {

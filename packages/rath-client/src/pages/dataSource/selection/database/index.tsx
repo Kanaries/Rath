@@ -384,19 +384,6 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         return null;
     }, [whichDatabase, schemaList]);
 
-    const tableSelector: IDropdownOption[] | null = useMemo(() => {
-        if (Array.isArray(tableList)) {
-            return tableList.map<IDropdownOption>(
-                tName => ({
-                    text: tName,
-                    key: tName,
-                })
-            ) ?? [];
-        }
-
-        return null;
-    }, [tableList]);
-
     const [isQuerying, setQuerying] = useState(false);
 
     const query = useCallback(() => {
@@ -483,7 +470,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                             tables={tableList}
                                             query={queryString ?? ''}
                                             setQuery={sql => {
-                                                if (typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && (tableList !== undefined && tableList !== 'pending') && selectedTable !== undefined && tablePreview) {
+                                                if (typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && (schemaList === null || Array.isArray(schemaList)) && selectedSchema !== undefined && tableList !== undefined && selectedTable !== undefined && tablePreview) {
                                                     dispatch({
                                                         type: 'SET_SQL',
                                                         payload: {

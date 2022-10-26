@@ -45,6 +45,25 @@ type ListDatabasesResult = {
     message: string;
 };
 
+export type TableInfo = {
+    name: string;
+    meta: {
+        key: string;
+        colIndex: number;
+        dataType: string | null;
+    }[];
+};
+
+type TableList = TableInfo[];
+
+type ListTableResult = {
+    success: true;
+    data: TableList;
+} | {
+    success: false;
+    message: string;
+};
+
 export const pingConnector = async (): Promise<boolean> => {
     try {
         const res = await fetch(
@@ -151,23 +170,61 @@ export const listSchemas = async (sourceId: number, db: string | null): Promise<
     }
 };
 
-export const listTables = async (sourceId: number, db: string | null, schema: string | null): Promise<string[] | null> => {
+export const listTables = async (sourceId: number, db: string | null, schema: string | null): Promise<TableList | null> => {
     try {
-        const res = await fetch(
-            `${getAPIPathPrefix(apiPathPrefix)}/table_list`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    sourceId,
-                    db,
-                    schema,
-                }),
+        // FIXME:
+        return [
+            {
+                "name": "table_1",
+                "meta": [
+                    {
+                        "key": "col_1",
+                        "colIndex": 0,
+                        "dataType": "xxx"
+                    },
+                    {
+                        "key": "col_2",
+                        "colIndex": 1,
+                        "dataType": null
+                    },
+                ]
+            },
+            {
+                "name": "table_2",
+                "meta": [
+                    {
+                        "key": "col_1",
+                        "colIndex": 0,
+                        "dataType": "xxx"
+                    },
+                    {
+                        "key": "col_2",
+                        "colIndex": 1,
+                        "dataType": null
+                    },
+                    {
+                        "key": "col_3",
+                        "colIndex": 2,
+                        "dataType": "xxx"
+                    },
+                ]
             }
-        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListDatabasesResult;
+        ];
+        // const res = await fetch(
+        //     `${getAPIPathPrefix(apiPathPrefix)}/table_list`, {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify({
+        //             sourceId,
+        //             db,
+        //             schema,
+        //         }),
+        //     }
+        // ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListTableResult;
 
-        return res.success ? res.data : (() => { throw new Error(res.message) })();
+        // return res.success ? res.data : (() => { throw new Error(res.message) })();
     } catch (error) {
         const rathError = getRathError('FetchTableListFailed', error);
 

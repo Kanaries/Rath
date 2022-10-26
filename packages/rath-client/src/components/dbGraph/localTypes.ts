@@ -1,14 +1,13 @@
 export interface IDBNode {
-    id: string;
-    label: string;
+    source: string;
     x: number;
     y: number;
 }
 
 export interface IDBEdge {
-    from: string;
-    to: string;
-    label: string;
+    from: number;
+    to: number;
+    type: 'LEFT JOIN' | 'RIGHT JOIN' | 'INNER JOIN' | 'FULL JOIN';
 }
 
 export interface IDBGraph {
