@@ -175,10 +175,9 @@ const Kanban: React.FC = (props) => {
     const editAreaRef = useRef<HTMLDivElement>(null);
 
     const handleLayoutChange = useCallback((layout: GridLayout.Layout[]) => {
-        // console.log('??');
         items.forEach((item, i) => {
             const box = editAreaRef.current?.querySelector(`#item-id-${item.viewId}`);
-            const self = layout.find(d => d.i === item.viewId);
+            const self = layout.find(d => d.i === `${dashboardStore.cursor}:${item.viewId}`);
             if (box && self) {
                 dashboardStore.setItem(i, {
                     ...item,
@@ -432,7 +431,7 @@ const Kanban: React.FC = (props) => {
 
                         return vis ? (
                             <EditItem
-                                key={item.viewId}
+                                key={`${dashboardStore.cursor}:${item.viewId}`}
                                 id={`item-id-${item.viewId}`}
                                 data-grid={{
                                     ...item.layout,
