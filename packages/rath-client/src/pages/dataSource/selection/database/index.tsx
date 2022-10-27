@@ -391,7 +391,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
     const [preview, setPreview] = useState<TableData | null>(null);
 
-    const query = useCallback(() => {
+    const query = useCallback(async () => {
         // console.log(queryString);
         if (isQuerying) {
             return;
@@ -402,7 +402,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
             setQuerying(true);
 
-            requestSQL(sourceId, queryString).then(data => {
+            await requestSQL(sourceId, queryString).then(data => {
                 if (data) {
                     setPreview(data);
                 }
@@ -456,6 +456,11 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         });
     }, [dispatch]);
 
+    const genPreview = useCallback(() => {
+        setPreview(null);
+        query();
+    }, [query]);
+
     return <div>
         <CustomConfig ping={ping} loading={loading} />
         {
@@ -506,7 +511,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                                 tables={tableList}
                                                 query={queryString ?? ''}
                                                 setQuery={setSQL}
-                                                preview={query}
+                                                preview={genPreview}
                                             />
                                             {preview && (
                                                 <div>

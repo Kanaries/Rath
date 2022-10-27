@@ -174,44 +174,27 @@ const Kanban: React.FC = (props) => {
 
     const editAreaRef = useRef<HTMLDivElement>(null);
 
-    const handleDrop = useCallback((layout: GridLayout.Layout[], o: GridLayout.Layout) => {
-        const targetIdx = items.findIndex(e => e.viewId === o.i);
-        const item = layout.find(d => d.i === o.i);
-
-        if (targetIdx !== -1 && item) {
-            dashboardStore.setItem(targetIdx, {
-                ...items[targetIdx],
-                layout: {
-                    x: item.x,
-                    y: item.y,
-                    w: item.w,
-                    h: item.h,
-                },
-            });
-        }
-    }, [items, dashboardStore]);
-
-    const handleResize = useCallback((layout: GridLayout.Layout[], o: GridLayout.Layout) => {
-        const box = editAreaRef.current?.querySelector(`#item-id-${o.i}`);
-        const targetIdx = items.findIndex(e => e.viewId === o.i);
-        
-        const item = layout.find(d => d.i === o.i);
-
-        if (targetIdx !== -1 && box && item) {
-            dashboardStore.setItem(targetIdx, {
-                ...items[targetIdx],
-                layout: {
-                    x: item.x,
-                    y: item.y,
-                    w: item.w,
-                    h: item.h,
-                },
-                chartSize: {
-                    w: box.getBoundingClientRect().width - 100,
-                    h: box.getBoundingClientRect().height - 80,
-                },
-            });
-        }
+    const handleLayoutChange = useCallback((layout: GridLayout.Layout[]) => {
+        // console.log('??');
+        items.forEach((item, i) => {
+            const box = editAreaRef.current?.querySelector(`#item-id-${item.viewId}`);
+            const self = layout.find(d => d.i === item.viewId);
+            if (box && self) {
+                dashboardStore.setItem(i, {
+                    ...item,
+                    layout: {
+                        x: self.x,
+                        y: self.y,
+                        w: self.w,
+                        h: self.h,
+                    },
+                    chartSize: {
+                        w: box.getBoundingClientRect().width - 100,
+                        h: box.getBoundingClientRect().height - 80,
+                    },
+                });
+            }
+        });
     }, [items, dashboardStore]);
 
     const toCanvas = useCallback((size = 4): [string, number, number] => {
@@ -310,15 +293,21 @@ const Kanban: React.FC = (props) => {
         ];
     };
 
-    // console.log(JSON.parse(JSON.stringify(items)));
+    // console.log(JSON.parse(JSON.stringify(items)), JSON.parse(JSON.stringify(dashboardStore.page)));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const filter$ = useMemo(() => new Subject<{ index: number; data: IFilter[] }>(), [dashboardStore.page]);
 
     useEffect(() => {
+        const whichPage = dashboardStore.cursor;
+
         const subscription = filter$.pipe(
             debounceTime(200),
         ).subscribe(({ index, data }) => {
+            if (whichPage !== dashboardStore.cursor) {
+                return;
+            }
+
             dashboardStore.setItem(index, {
                 ...items[index],
                 filter: data,
@@ -433,8 +422,7 @@ const Kanban: React.FC = (props) => {
                     cols={12}
                     width={12 * 100}
                     rowHeight={100}
-                    onDrop={handleDrop}
-                    onResizeStop={handleResize}
+                    onLayoutChange={handleLayoutChange}
                     style={{
                         width: 12 * 100,
                     }}

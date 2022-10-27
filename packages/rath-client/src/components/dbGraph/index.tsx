@@ -68,6 +68,9 @@ export const DBBox = styled.span`
     }
 `;
 const Output = styled.div({
+    flexGrow: 1,
+    flexShrink: 1,
+    overflow: 'hidden',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
@@ -81,7 +84,8 @@ const Output = styled.div({
         flexShrink: 1,
         padding: '0 1em',
         overflow: 'hidden',
-        textOverflow: 'ellipsis',
+        // textOverflow: 'ellipsis',
+        maxWidth: '30vw',
     },
 });
 

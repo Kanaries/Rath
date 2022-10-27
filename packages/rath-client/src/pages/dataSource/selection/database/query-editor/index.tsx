@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import type { TableInfo } from "../api";
 import DiagramEditor from "./diagram-editor";
@@ -7,6 +7,8 @@ import SQLEditor from "./sql-editor";
 
 const Container = styled.div({
     flexGrow: 1,
+    flexShrink: 1,
+    overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
 
@@ -41,7 +43,14 @@ const Container = styled.div({
             borderBottom: '1px solid #888',
         },
     },
-    '> *[role=tabpanel]': {},
+    '> *[role=tabpanel]': {
+        flexGrow: 1,
+        flexShrink: 1,
+        overflow: 'hidden',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+    },
 });
 
 export interface QueryEditorProps {
@@ -53,7 +62,7 @@ export interface QueryEditorProps {
 
 export type QueryEditorMode = 'diagram' | 'query';
 
-const QueryEditor = memo<QueryEditorProps>(function QueryEditor ({ tables, query, setQuery, preview }) {
+const QueryEditor = ({ tables, query, setQuery, preview }: QueryEditorProps) => {
     const [mode, setMode] = useState<QueryEditorMode>('query');
 
     const modes = useMemo<{
@@ -120,7 +129,7 @@ const QueryEditor = memo<QueryEditorProps>(function QueryEditor ({ tables, query
             </div>
         </Container>
     );
-});
+};
 
 
 export default QueryEditor;

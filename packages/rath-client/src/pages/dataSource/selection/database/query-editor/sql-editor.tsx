@@ -1,10 +1,10 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EditorView, basicSetup } from 'codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { DefaultButton } from '@fluentui/react';
 import { QueryEditorProps } from '.';
 
-const SQLEditor = memo<QueryEditorProps>(function QueryEditor({ query, tables, setQuery, preview }) {
+const SQLEditor = ({ setQuery, preview }: QueryEditorProps) => {
     const container = useRef<HTMLDivElement>(null);
     const [view, setView] = useState<any>(null);
     useEffect(() => {
@@ -16,14 +16,6 @@ const SQLEditor = memo<QueryEditorProps>(function QueryEditor({ query, tables, s
             setView(editorView);
         }
     }, []);
-    const doPreviewRef = useRef(false);
-
-    useEffect(() => {
-        if (doPreviewRef.current) {
-            preview();
-            doPreviewRef.current = false;
-        }
-    });
     
     return (
         <div style={{ width: '100%', height: 300, marginTop: 10 }}>
@@ -32,7 +24,7 @@ const SQLEditor = memo<QueryEditorProps>(function QueryEditor({ query, tables, s
                     onClick={() => {
                         if (view !== null) {
                             setQuery((view.state.doc.text as string[]).join(' '));
-                            doPreviewRef.current = true;
+                            preview();
                         }
                     }}
                 >
@@ -50,6 +42,6 @@ const SQLEditor = memo<QueryEditorProps>(function QueryEditor({ query, tables, s
             </div>
         </div>
     );
-});
+};
 
 export default SQLEditor;
