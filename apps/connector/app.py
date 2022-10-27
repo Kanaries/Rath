@@ -4,6 +4,7 @@ from bp import bp_database
 from database import init_db
 from database import db_session
 from flask_cors import CORS
+from gevent import pywsgi
 
 app = Flask(__name__)
 CORS(app)
@@ -33,4 +34,5 @@ init_db()
 
 if __name__ == '__main__':
     # init_db()
-    app.run(host='0.0.0.0')
+    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app)
+    server.serve_forever()

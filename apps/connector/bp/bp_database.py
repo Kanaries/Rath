@@ -49,7 +49,7 @@ def get_databases_list():
         uri = get_uri(connect_id)
         source_type = get_source_type(connect_id)
         dict__ = basefunc.__dict__
-        db_list = dict__['{0}_getdb'.format(source_type)](uri=uri, schema=schema)
+        db_list = dict__['{0}_getdb'.format(source_type)].__func__(uri=uri, schema=schema)
     except Exception as e:
         return {
             'success': False,
@@ -71,7 +71,7 @@ def get_schema_list():
         uri = get_uri(connect_id)
         source_type = get_source_type(connect_id)
         dict__ = basefunc.__dict__
-        schema_list = dict__['{0}_getschema'.format(source_type)](uri=uri, db=database)
+        schema_list = dict__['{0}_getschema'.format(source_type)].__func__(uri=uri, db=database)
     except Exception as e:
         return {
             'success': False,
@@ -94,7 +94,7 @@ def get_table_list():
         uri = get_uri(connect_id)
         source_type = get_source_type(connect_id)
         dict__ = basefunc.__dict__
-        table_list = dict__['{0}_gettable'.format(source_type)](uri=uri, database=database, schema=schema)
+        table_list = dict__['{0}_gettable'.format(source_type)].__func__(uri=uri, database=database, schema=schema)
     except Exception as e:
         return {
             'success': False,
@@ -119,8 +119,8 @@ def get_table_detail():
         uri = get_uri(connect_id)
         source_type = get_source_type(connect_id)
         dict__ = basefunc.__dict__
-        meta = dict__['{0}_getmeta'.format(source_type)](uri=uri, database=database, table=table, schema=schema)
-        data = dict__['{0}_getdata'.format(source_type)](uri=uri, database=database, table=table, schema=schema, rows_num=rows_num)
+        meta = dict__['{0}_getmeta'.format(source_type)].__func__(uri=uri, database=database, table=table, schema=schema)
+        data = dict__['{0}_getdata'.format(source_type)].__func__(uri=uri, database=database, table=table, schema=schema, rows_num=rows_num)
     except Exception as e:
         return {
             'success': False,
@@ -145,7 +145,7 @@ def execute_sql():
         uri = get_uri(connect_id)
         source_type = get_source_type(connect_id)
         dict__ = basefunc.__dict__
-        sql_result = dict__['{0}_getresult'.format(source_type)](uri=uri, sql=sql)
+        sql_result = dict__['{0}_getresult'.format(source_type)].__func__(uri=uri, sql=sql)
     except Exception as e:
         return {
             'success': False,
