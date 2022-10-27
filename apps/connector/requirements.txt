@@ -1,2 +1,4 @@
-Flask==2.0.3
-SQLAlchemy==1.4.41
+Flask
+Flask_cors
+SQLAlchemy
+gevent
