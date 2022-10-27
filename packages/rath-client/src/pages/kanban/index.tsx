@@ -321,8 +321,8 @@ const Kanban: React.FC = () => {
                     }}
                 />
             </ResourceList>
-            <EditArea ref={editAreaRef}>
-                <div style={{ padding: '1em 1.5em' }}>
+            <EditArea>
+                <div style={{ padding: '1em 1.5em' }} ref={editAreaRef}>
                     <GridLayout
                         className="layout"
                         cols={12}

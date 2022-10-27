@@ -62,7 +62,10 @@ const KanbanChart: FC<KanbanChartProps> = ({
                                 },
                             }].filter(Boolean) : undefined,
                             mark: vis.spec.mark,
-                            encoding: vis.spec.encoding,
+                            encoding: {
+                                ...vis.spec.encoding,
+                                opacity: { value: 0.33 },
+                            },
                             width: item.chartSize.w,
                             height: item.chartSize.h,
                         }, {
@@ -74,7 +77,7 @@ const KanbanChart: FC<KanbanChartProps> = ({
                             mark: vis.spec.mark,
                             encoding: {
                                 ...vis.spec.encoding,
-                                color: { value: 'goldenrod' },
+                                opacity: { value: 1 },
                             },
                             width: item.chartSize.w,
                             height: item.chartSize.h,
@@ -92,7 +95,7 @@ const KanbanChart: FC<KanbanChartProps> = ({
                             [name: string]: [number, number];
                         }) => {
                             const filter = Object.entries(filters).map<IFilter | null>(([k, v]) => {
-                                const f = fieldMeta.find(f => f.name === k);
+                                const f = fieldMeta.find(f => f.fid === k);
 
                                 return f ? {
                                     type: 'range',
