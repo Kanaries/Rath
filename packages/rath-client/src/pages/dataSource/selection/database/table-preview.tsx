@@ -13,17 +13,11 @@ const styles: Record<string, CSSProperties> & Record<string, any> = {
 };
 
 const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }) {
-    const columns = [...data.columns ?? []];
-
-    if (columns.length === 0) {
-        data.rows[0]?.forEach((_, i) => {
-            columns.push({
-                key: `col_${i + 1}`,
-                colIndex: i,
-                dataType: null,
-            });
-        });
-    }
+    const columns = ((data.columns ?? []).length === 0) ? data.rows[0]?.map((_, i) => ({
+        key: `col_${i + 1}`,
+        colIndex: i,
+        dataType: null,
+    })) : data.columns;
 
     return (
         <div

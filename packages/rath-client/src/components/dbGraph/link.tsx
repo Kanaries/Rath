@@ -7,30 +7,30 @@ import { BOX_HEIGHT, BOX_WIDTH, encodePath } from ".";
 const OPTION_WIDTH = 60;
 const OPTION_HEIGHT = 15;
 
-const Select = styled.g({
-    fontSize: '10px',
+const Select = styled.g`
+    font-size: 10px;
 
-    '& rect': {
-        opacity: 0.88,
-    },
-    '& text': {
-        fontSize: '10px',
-        lineHeight: '1em',
-        transform: `translate(${OPTION_WIDTH / 2}px, calc(0.9em + (${OPTION_HEIGHT}px - 1em) / 2))`,
-        pointerEvents: 'none',
-        userSelect: 'none',
-    },
-    '> .option': {
-        display: 'none',
-        cursor: 'pointer',
-        '&.type:hover': {
-            fill: '#d8d8d8',
-        },
-    },
-    ':hover > .option': {
-        display: 'unset',
-    },
-});
+    & rect {
+        opacity: 0.88;
+    }
+    & text {
+        font-size: 10px;
+        line-height: 1em;
+        transform: ${() => `translate(${OPTION_WIDTH / 2}px, calc(0.9em + (${OPTION_HEIGHT}px - 1em) / 2))`};
+        pointer-events: none;
+        user-select: none;
+    }
+    > .option {
+        display: none;
+        cursor: pointer;
+        &.type:hover {
+            fill: #d8d8d8;
+        }
+    }
+    :hover > .option {
+        display: unset;
+    }
+`;
 
 export interface LinkNode {
     readonly layout: {

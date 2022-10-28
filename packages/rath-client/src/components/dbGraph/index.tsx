@@ -196,34 +196,23 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             switch (dragEffectRef.current) {
                 case 'append': {
                     if (dragSourceRef.current && !graph.nodes.find(node => node.source === dragSourceRef.current)) {
-                        setGraph({
-                            nodes: [...graph.nodes, {
-                                source: dragSourceRef.current,
+                        setGraph(produce(graph, draft => {
+                            draft.nodes.push({
+                                source: dragSourceRef.current!,
                                 x,
                                 y,
-                            }],
-                            edges: graph.edges,
-                        });
+                            });
+                        }));
                     }
 
                     break;
                 }
                 case 'move': {
                     if (dragNodeRef.current !== null) {
-                        const node = graph.nodes[dragNodeRef.current];
-
-                        setGraph({
-                            nodes: [
-                                ...graph.nodes.slice(0, dragNodeRef.current),
-                                {
-                                    source: node.source,
-                                    x,
-                                    y
-                                },
-                                ...graph.nodes.slice(dragNodeRef.current + 1),
-                            ],
-                            edges: graph.edges,
-                        });
+                        setGraph(produce(graph, draft => {
+                            draft.nodes[dragNodeRef.current!].x = x;
+                            draft.nodes[dragNodeRef.current!].y = y;
+                        }));
                     }
 
                     break;
@@ -263,13 +252,9 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
                 }
             });
 
-            setGraph({
-                nodes: [
-                    ...graph.nodes.slice(0, index),
-                    ...graph.nodes.slice(index + 1),
-                ],
-                edges,
-            });
+            setGraph(produce(graph, draft => {
+                draft.nodes.splice(index, 1);
+            }));
         }
     }, [graph, setGraph]);
 

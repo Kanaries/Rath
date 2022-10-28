@@ -24,7 +24,7 @@ const Button = styled.div({
     cursor: 'alias',
 });
 
-export interface DBNodeProps {
+export type DBNodeProps = {
     label: string;
     layout: {
         readonly x: number;
@@ -37,7 +37,7 @@ export interface DBNodeProps {
     readyToBeLinked: boolean;
     handleLinkOver: () => void;
     handleLinkOut: (x: number, y: number) => void;
-}
+};
 
 const DBNode: FC<DBNodeProps> = ({
     label, layout, handleDragStart, beginPath, isLinking, readyToLink, readyToBeLinked, handleLinkOver, handleLinkOut,

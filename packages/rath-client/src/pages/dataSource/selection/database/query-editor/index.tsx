@@ -66,7 +66,8 @@ const Container = styled.div`
 `;
 
 export interface QueryEditorProps {
-    tables: TableInfo[] | 'input';
+    tableEnumerable: boolean;
+    tables: TableInfo[];
     query: string;
     setQuery: (query: string) => void;
     preview: () => void;
@@ -74,7 +75,7 @@ export interface QueryEditorProps {
 
 export type QueryEditorMode = 'diagram' | 'query';
 
-const QueryEditor = ({ tables, query, setQuery, preview }: QueryEditorProps) => {
+const QueryEditor = ({ tableEnumerable, tables, query, setQuery, preview }: QueryEditorProps) => {
     const [mode, setMode] = useState<QueryEditorMode>('query');
 
     const modes = useMemo<{
@@ -94,10 +95,10 @@ const QueryEditor = ({ tables, query, setQuery, preview }: QueryEditorProps) => 
     }, [tables]);
 
     useEffect(() => {
-        if (tables === 'input' && mode === 'diagram') {
+        if (!tableEnumerable && mode === 'diagram') {
             setMode('query');
         }
-    }, [tables, mode]);
+    }, [tableEnumerable, mode]);
 
     useEffect(() => {
         setQuery('');
@@ -126,6 +127,7 @@ const QueryEditor = ({ tables, query, setQuery, preview }: QueryEditorProps) => 
             <div role="tabpanel">
                 {mode === 'diagram' ? (
                     <DiagramEditor
+                        tableEnumerable={tableEnumerable}
                         tables={tables}
                         query={query}
                         setQuery={setQuery}
@@ -133,6 +135,7 @@ const QueryEditor = ({ tables, query, setQuery, preview }: QueryEditorProps) => 
                     />
                 ) : (
                     <SQLEditor
+                        tableEnumerable={tableEnumerable}
                         tables={tables}
                         query={query}
                         setQuery={setQuery}

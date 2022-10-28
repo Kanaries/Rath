@@ -247,6 +247,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                     table.status === 'resolved' ? (
                                         <>
                                             <QueryEditor
+                                                tableEnumerable={whichDatabase.tableEnumerable ?? true}
                                                 tables={table.options}
                                                 query={queryString}
                                                 setQuery={actions.setQueryString}
