@@ -85,7 +85,7 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
       viewRef.current.runAsync(); 
     }
   }, [dataSource])
-  return <div ref={container} onMouseDown={e => e.stopPropagation()} />
+  return <div ref={container} />
 }
 
 export default ReactVega;

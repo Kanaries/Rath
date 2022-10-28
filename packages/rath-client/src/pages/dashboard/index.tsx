@@ -68,7 +68,7 @@ const CollectContainer = styled.div`
         padding: 10px 12px 0 2px;
         height: max-content;
         position: relative;
-        &:last-child: {
+        &:last-child {
             margin-right: 0;
         }
         &.selected {
@@ -83,101 +83,99 @@ const CollectContainer = styled.div`
     }
 `;
 
-const EditItem = styled.div({
-    backgroundColor: '#fff',
-    // boxShadow: '0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    // overflow: 'hidden',
-    ':hover::after': {
-        content: '""',
-        display: 'block',
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        border: '1px dashed #888a',
-        zIndex: 2,
-    },
-    '> div.group': {
-        position: 'absolute',
-        right: 0,
-        top: 0,
-        opacity: 0,
-        width: 'max-content',
-        height: 'max-content',
-        display: 'flex',
-        flexDirection: 'row',
-        border: '1px solid #888',
-        overflow: 'hidden',
-        borderRadius: '4px',
-        backdropFilter: 'blur(9999px)',
+const EditItem = styled.div`
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    :hover::after {
+        content: "";
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        border: 1px dashed #888a;
+        z-index: 2;
+    }
+    > div.group {
+        position: absolute;
+        right: 0;
+        top: 0;
+        opacity: 0;
+        width: max-content;
+        height: max-content;
+        display: flex;
+        flex-direction: row;
+        border: 1px solid #888;
+        overflow: hidden;
+        border-radius: 4px;
+        backdrop-filter: blur(9999px);
 
-        '&.float': {
-            left: 0,
-        },
-        '> button': {
-            backgroundColor: '#eee',
-            width: '1.8em',
-            height: '1.8em',
-            padding: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+        &.float {
+            left: 0;
+        }
+        > button {
+            background-color: #eee;
+            width: 1.8em;
+            height: 1.8em;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-            ':hover': {
-                backgroundColor: '#fff',
-            },
-            '> *': {
-                flexGrow: 0,
-                flexShrink: 0,
-            },
-        },
-    },
-    '&:hover > div.group': {
-        opacity: 1,
-    },
-    '& .react-resizable-handle': {
-        opacity: 0,
-    },
-    '&:hover .react-resizable-handle': {
-        opacity: 1,
-    },
-});
+            :hover {
+                background-color: #fff;
+            }
+            > * {
+                flex-grow: 0;
+                flex-shrink: 0;
+            }
+        }
+    }
+    &:hover > div.group {
+        opacity: 1;
+    }
+    & .react-resizable-handle {
+        opacity: 0;
+    }
+    &:hover .react-resizable-handle {
+        opacity: 1;
+    }
+`;
 
-const ResourceList = styled.div({
-    flexGrow: 0,
-    flexShrink: 0,
-    margin: '0 0.6em 0.8em',
-    padding: '0.8em 1em',
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: '#fff',
-    boxShadow: '0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%)',
-});
+const ResourceList = styled.div`
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin: 0 0.6em 0.8em;
+    padding: 0.8em 1em;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%);
+`;
 
-const EditArea = styled.div({
-    margin: '0 0.6em 0',
-    boxSizing: 'content-box',
-    height: '92vh',
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    '> *': {
-        flexGrow: 1,
-        flexShrink: 1,
-        overflow: 'auto',
-        backgroundColor: '#fff',
-        boxShadow: '0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%)',
-    },
-    marginBottom: 'calc(2vh + 1em)',
-    overflow: 'hidden',
-    boxShadow: '0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%)',
-});
+const EditArea = styled.div`
+    margin: 0 0.6em 0;
+    box-sizing: content-box;
+    height: 92vh;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    > * {
+        flex-grow: 1;
+        flex-shrink: 1;
+        overflow: auto;
+        background-color: #fff;
+        box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%);
+    }
+    margin-bottom: calc(2vh + 1em);
+    overflow: hidden;
+    box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%);
+`;
 
 const VIEW_NUM_IN_PAGE = 5;
 

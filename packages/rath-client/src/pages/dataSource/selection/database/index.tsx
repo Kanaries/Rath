@@ -438,7 +438,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 Boolean
             ).join('.'),
             fields,
-            dataSource: [],
+            dataSource: dataSource.slice(0, 10),
             size: dataSource.length,
         });
 

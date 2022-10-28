@@ -5,53 +5,65 @@ import DiagramEditor from "./diagram-editor";
 import SQLEditor from "./sql-editor";
 
 
-const Container = styled.div({
-    flexGrow: 1,
-    flexShrink: 1,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
+const Container = styled.div`
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
-    '> *[role=tablist]': {
-        display: 'flex',
-        flexDirection: 'row',
+    > *[role=tablist] {
+        display: flex;
+        flex-direction: row;
+        --corner-radius: 0.5em;
+        --border-color: #444;
+        --bgColor: #fff;
 
-        '> *[role=tab]': {
-            border: '1px solid #888',
-            borderLeft: 'none',
-            userSelect: 'none',
+        > *[role=tab] {
+            border: 1px solid var(--border-color);
+            border-left: none;
+            user-select: none;
+            line-height: 1.2em;
+            padding: 0.2em calc(1.25em + var(--corner-radius)) 0.4em 0.6em;
+            border-radius: var(--corner-radius) var(--corner-radius) 0 0;
+            position: relative;
+            background-color: var(--bgColor);
 
-            '&:first-child': {
-                borderLeft: '1px solid #888',
-            },
-            '&[aria-selected=false]': {
-                cursor: 'pointer',
-            },
-            '&[aria-disabled=true]': {
-                opacity: 0.6,
-            },
-            '&[aria-selected=true]': {
-                borderBottomColor: 'transparent',
-                cursor: 'default',
-            },
-        },
-        '::after': {
-            content: '""',
-            display: 'block',
-            flexGrow: 1,
-            flexShrink: 1,
-            borderBottom: '1px solid #888',
-        },
-    },
-    '> *[role=tabpanel]': {
-        flexGrow: 1,
-        flexShrink: 1,
-        overflow: 'hidden',
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-    },
-});
+            &:first-child, &[aria-selected=true] {
+                border-left: 1px solid var(--border-color);
+            }
+            &:not(:first-child) {
+                margin-left: calc(-2 * var(--corner-radius));
+                padding: 0.2em calc(1.25em + var(--corner-radius)) 0.4em calc(0.6em + var(--corner-radius));
+            }
+            &[aria-selected=false] {
+                cursor: pointer;
+            }
+            &[aria-disabled=true] {
+                opacity: 0.6;
+            }
+            &[aria-selected=true] {
+                border-bottom-color: var(--bgColor);
+                cursor: default;
+            }
+        }
+        ::after {
+            content: "";
+            display: block;
+            flex-grow: 1;
+            flex-shrink: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+    }
+    > *[role=tabpanel] {
+        flex-grow: 1;
+        flex-shrink: 1;
+        overflow: hidden;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+`;
 
 export interface QueryEditorProps {
     tables: TableInfo[] | 'input';
@@ -94,7 +106,7 @@ const QueryEditor = ({ tables, query, setQuery, preview }: QueryEditorProps) => 
     return (
         <Container>
             <div role="tablist">
-                {modes.map(m => (
+                {modes.map((m, i) => (
                     <div
                         role="tab"
                         aria-selected={m.mode === mode}
@@ -105,6 +117,7 @@ const QueryEditor = ({ tables, query, setQuery, preview }: QueryEditorProps) => 
                                 setMode(m.mode);
                             }
                         }}
+                        style={{ zIndex: m.mode === mode ? modes.length + 1 : modes.length - i }}
                     >
                         {m.mode}
                     </div>

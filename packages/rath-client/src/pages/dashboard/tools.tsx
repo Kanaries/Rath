@@ -6,19 +6,19 @@ import { Divider } from '@material-ui/core';
 import type { DashboardItem } from '.';
 
 
-const ToolGroup = styled.div({
-    margin: '0 0 0 0.6em',
-    padding: '1.2em 0.5em 2em',
-    display: 'flex',
-    flexShrink: '0 !important',
-    flexGrow: '0 !important',
-    flexDirection: 'column',
-    backgroundColor: '#fff',
-    overflow: 'hidden',
-    '> *:not(:last-child)': {
-        marginBottom: '1em',
-    },
-});
+const ToolGroup = styled.div`
+    margin: 0 0 0 0.6em;
+    padding: 1.2em 0.5em 2em;
+    display: flex;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    flex-direction: column;
+    background-color: #fff;
+    overflow: hidden;
+    > *:not(:last-child) {
+        margin-bottom: 1em;
+    }
+`;
 
 interface ToolsProps {
     items: DashboardItem[];
