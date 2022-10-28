@@ -3,7 +3,7 @@ import { useCallback, forwardRef } from 'react';
 import { IconButton } from '@fluentui/react';
 import { Divider } from '@material-ui/core';
 
-import type { KanbanItem } from '.';
+import type { DashboardItem } from '.';
 
 
 const ToolGroup = styled.div({
@@ -21,7 +21,7 @@ const ToolGroup = styled.div({
 });
 
 interface ToolsProps {
-    items: KanbanItem[];
+    items: DashboardItem[];
     clearPage: () => void;
 }
 

@@ -16,7 +16,7 @@ import CrInfo from './components/crInfo';
 import ProgressiveDashboard from './pages/progressiveDashboard';
 import Painter from './pages/painter';
 import Collection from './pages/collection';
-import Kanban from './pages/kanban';
+import Dashboard from './pages/dashboard';
 
 
 function App() {
@@ -57,7 +57,7 @@ function App() {
         {appKey === PIVOT_KEYS.painter && <Painter />}
         {appKey === PIVOT_KEYS.dashBoardDesigner && <ProgressiveDashboard />}
         {appKey === PIVOT_KEYS.collection && <Collection />}
-        {appKey === PIVOT_KEYS.dashboard && <Kanban />}
+        {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
         <CrInfo />
         </div>
       </div>

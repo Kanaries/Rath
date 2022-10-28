@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import type { KanbanItem } from "../pages/kanban";
+import type { DashboardItem } from "../pages/dashboard";
 import type { IFieldMeta, IFilter } from "../interfaces";
 
 
@@ -8,7 +8,7 @@ export interface DashboardDocument {
         field: IFieldMeta;
         filter: IFilter;
     }[];
-    items: KanbanItem[];
+    items: DashboardItem[];
 }
 
 export default class DashboardStore {
@@ -25,11 +25,11 @@ export default class DashboardStore {
         this.cursor = 0;
     }
 
-    public addItem(item: KanbanItem) {
+    public addItem(item: DashboardItem) {
         this.pages[this.cursor].items.push(item);
     }
 
-    public setItem(index: number, item: KanbanItem) {
+    public setItem(index: number, item: DashboardItem) {
         this.pages[this.cursor].items[index] = item;
     }
 

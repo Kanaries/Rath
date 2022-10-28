@@ -8,14 +8,14 @@ import VisErrorBoundary from '../../components/visErrorBoundary';
 import type { IFieldMeta, IRow, IVegaSubset } from '../../interfaces';
 import type { IFilter } from '../../interfaces';
 
-import type { KanbanItem } from '.';
+import type { DashboardItem } from '.';
 
 
-interface KanbanChartProps {
+interface DashboardChartProps {
     dataSource: IRow[];
     fieldMeta: IFieldMeta[];
     subset: IVegaSubset;
-    item: Readonly<KanbanItem>;
+    item: Readonly<DashboardItem>;
     filters: IFilter[];
     updateFilters: (filters: IFilter[]) => void;
     toggleFilter: () => void;
@@ -23,7 +23,7 @@ interface KanbanChartProps {
     edit: () => void;
 }
 
-const KanbanChart: FC<KanbanChartProps> = ({
+const DashboardChart: FC<DashboardChartProps> = ({
     item, dataSource, fieldMeta, filters, subset, updateFilters, toggleFilter, remove, edit,
 }) => {
     const data = useMemo(() => applyFilters(dataSource, filters), [dataSource, filters]);
@@ -193,4 +193,4 @@ const KanbanChart: FC<KanbanChartProps> = ({
     );
 };
 
-export default observer(KanbanChart);
+export default observer(DashboardChart);

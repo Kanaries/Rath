@@ -19,7 +19,7 @@ import { PIVOT_KEYS } from '../../constants';
 import Empty from './empty';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import KanbanChart from './kanban-chart';
+import DashboardChart from './dashboard-chart';
 import Tools from './tools';
 
 
@@ -181,7 +181,7 @@ const EditArea = styled.div({
 
 const VIEW_NUM_IN_PAGE = 5;
 
-export type KanbanItem = {
+export type DashboardItem = {
     viewId: string;
     layout: {
         x: number;
@@ -196,7 +196,7 @@ export type KanbanItem = {
     filter: IFilter[] | boolean;
 };
 
-const Kanban: React.FC = () => {
+const Dashboard: React.FC = () => {
     const { collectionStore, dataSourceStore, dashboardStore, commonStore, semiAutoStore } = useGlobalStore();
     const { collectionList } = collectionStore;
     const { cleanedData, fieldMetas } = dataSourceStore;
@@ -408,7 +408,7 @@ const Kanban: React.FC = () => {
                                         resizeHandles: ['s', 'e', 'se'],
                                     }}
                                 >
-                                    <KanbanChart
+                                    <DashboardChart
                                         dataSource={cleanedData}
                                         fieldMeta={fieldMetas}
                                         subset={vis.spec}
@@ -441,4 +441,4 @@ const Kanban: React.FC = () => {
     );
 };
 
-export default observer(Kanban);
+export default observer(Dashboard);
