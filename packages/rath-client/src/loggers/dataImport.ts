@@ -35,7 +35,7 @@ export async function dataBackup (file: File) {
   if (process.env.NODE_ENV === 'production') {
     const data = new FormData();
     data.append('file', file);
-    fetch("/api/ce/uploadDataset", {
+    fetch("https://kanaries.cn/api/ce/uploadDataset", {
       method: 'POST',
       credentials: 'include',
       body: data
