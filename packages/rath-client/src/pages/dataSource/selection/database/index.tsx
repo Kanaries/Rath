@@ -11,7 +11,7 @@ import datasetOptions from './config';
 import ConnectForm, { ConnectFormReadonly } from './connect-form';
 import DropdownOrInput from './dropdown-or-input';
 import useDatabaseReducer from './reducer';
-import { fetchTablePreview, getSourceId, listDatabases, listSchemas, listTables, pingConnector, requestSQL } from './api';
+import { getSourceId, pingConnector } from './api';
 import CustomConfig from './customConfig';
 import QueryEditor from './query-editor';
 import TablePreview from './table-preview';
@@ -64,48 +64,41 @@ interface DatabaseDataProps {
 }
 
 export const inputWidth = '180px';
-const FETCH_THROTTLE_SPAN = 600;
 
 const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLoadingAnimation }) => {
-    const [progress, dispatch] = useDatabaseReducer();
+    const { progress, actions } = useDatabaseReducer(setLoadingAnimation);
     const [loading, setLoading] = useState<boolean>(false);
 
-    const [
+    const {
         connectorReady,
-        sourceType,
+        databaseType,
         connectUri,
         sourceId,
-        databaseList,
-        selectedDatabase,
-        schemaList,
-        selectedSchema,
-        tableList,
-        selectedTable,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        tablePreview,
+        database,
+        schema,
+        table,
         queryString,
-    ] = progress;
+        preview,
+    } = progress;
 
     const ping = useCallback(async () => {
         try {
             setLoading(true)
             const ok = await pingConnector();
             if (ok) {
-                dispatch({
-                    type: 'ENABLE_CONNECTOR',
-                    payload: undefined
-                })
+                actions.setConnectorStatus(true);
             }
         } catch (error) {
+            actions.setConnectorStatus(false);
             notify({
                 type: 'error',
                 title: 'ping connector error',
                 content: `${error}`
-            })
+            });
         } finally {
             setLoading(false);
         }
-    }, [dispatch])
+    }, [actions])
 
     useEffect(() => {
         ping();
@@ -120,7 +113,12 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         });
     }, []);
 
-    const whichDatabase = datasetOptions.find(which => which.key === sourceType)!;
+    const whichDatabase = datasetOptions.find(which => which.key === databaseType)!;
+
+    const {
+        hasDatabase = true, databaseEnumerable = true,
+        requiredSchema = false, schemaEnumerable = true,
+    } = whichDatabase;
 
     useEffect(() => {
         setLoadingAnimation(false);
@@ -129,391 +127,132 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
     }, [setLoadingAnimation]);
 
     const handleConnectionTest = useCallback(async () => {
-        if (sourceType && connectUri && sourceId === undefined) {
-            dispatch({
-                type: 'SET_SOURCE_ID_AND_DATABASE_LIST',
-                payload: {
-                    sourceId: 'pending'
+        if (connectUri && Number.isNaN(sourceId.value)) {
+            actions.setSourceId(
+                {
+                    status: 'pending',
+                    value: NaN,
                 }
-            });
+            );
             setLoadingAnimation(true);
-
-            const sId = await getSourceId(sourceType, connectUri);
-
-            if (whichDatabase.hasDatabase === false) {
-                dispatch({
-                    type: 'SET_SOURCE_ID_AND_DATABASE_LIST',
-                    payload: {
-                        sourceId: sId,
-                        dbList: null
-                    }
-                });
-
-                setLoadingAnimation(false);
-
-                return;
-            } else if (whichDatabase.databaseEnumerable === false) {
-                dispatch({
-                    type: 'SET_SOURCE_ID_AND_DATABASE_LIST',
-                    payload: {
-                        sourceId: sId,
-                        dbList: 'input'
-                    }
-                });
-
-                setLoadingAnimation(false);
-
-                return;
-            }
-
-            const databases = typeof sId === 'number' ? await listDatabases(sId) : null;
-
-            if (databases) {
-                dispatch({
-                    type: 'SET_SOURCE_ID_AND_DATABASE_LIST',
-                    payload: {
-                        sourceId: sId,
-                        dbList: databases
-                    }
-                });
-            } else {
-                dispatch({
-                    type: 'SET_SOURCE_ID_AND_DATABASE_LIST',
-                    payload: {
-                        sourceId: null
-                    }
-                });
-            }
-
+            const sId = await getSourceId(databaseType, connectUri);
             setLoadingAnimation(false);
-        }
-    }, [sourceType, connectUri, sourceId, dispatch, setLoadingAnimation, whichDatabase.hasDatabase, whichDatabase.databaseEnumerable]);
-
-    // automatically fetch schema list when selected database changes
-    useEffect(() => {
-        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && schemaList === undefined) {
-            if (whichDatabase.requiredSchema) {
-                if (whichDatabase.schemaEnumerable === false) {
-                    dispatch({
-                        type: 'SET_SCHEMA_LIST',
-                        payload: {
-                            sList: 'input'
-                        }
-                    });
-
-                    return;
-                }
-
-                dispatch({
-                    type: 'SET_SCHEMA_LIST',
-                    payload: {
-                        sList: 'pending'
-                    }
-                });
-
-                setLoadingAnimation(true);
-
-                listSchemas(sourceId, selectedDatabase).then(schemas => {
-                    if (schemas) {
-                        dispatch({
-                            type: 'SET_SCHEMA_LIST',
-                            payload: {
-                                sList: schemas
-                            }
-                        });
-                    } else {
-                        dispatch({
-                            type: 'SET_SOURCE_ID_AND_DATABASE_LIST',
-                            payload: {
-                                sourceId,
-                                dbList: databaseList
-                            }
-                        });
-                    }
-                }).finally(() => {
-                    setLoadingAnimation(false);
-                });
-            } else {
-                dispatch({
-                    type: 'SET_SCHEMA_LIST',
-                    payload: {
-                        sList: null
-                    }
-                });
-            }
-        }
-    }, [sourceId, connectUri, sourceType, databaseList, whichDatabase, selectedDatabase, schemaList, setLoadingAnimation, connectorReady, dispatch]);
-
-    // automatically fetch table list when selected schema changes
-    useEffect(() => {
-        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && (schemaList === null || schemaList === 'input' || Array.isArray(schemaList)) && selectedDatabase !== undefined && selectedSchema !== undefined && tableList === undefined) {
-            if (whichDatabase.hasTableList === false) {
-                dispatch({
-                    type: 'SET_TABLE_LIST',
-                    payload: {
-                        tList: null
-                    }
-                });
-
-                return;
-            } else if (whichDatabase.tableEnumerable === false) {
-                dispatch({
-                    type: 'SET_TABLE_LIST',
-                    payload: {
-                        tList: 'input'
-                    }
-                });
-
+            if (sId === null) {
                 return;
             }
-
-            dispatch({
-                type: 'SET_TABLE_LIST',
-                payload: {
-                    tList: 'pending'
+            actions.setSourceId(
+                {
+                    status: 'resolved',
+                    value: sId,
                 }
-            });
-
-            setLoadingAnimation(true);
-
-            listTables(sourceId, selectedDatabase, selectedSchema).then(tables => {
-                if (tables) {
-                    dispatch({
-                        type: 'SET_TABLE_LIST',
-                        payload: {
-                            tList: tables
-                        }
-                    });
-                } else {
-                    dispatch({
-                        type: 'SET_SCHEMA_LIST',
-                        payload: {
-                            sList: schemaList
-                        }
-                    });
-                }
-            }).finally(() => {
-                setLoadingAnimation(false);
-            });
+            );
         }
-    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, setLoadingAnimation, tableList, whichDatabase.hasTableList, whichDatabase.tableEnumerable, connectorReady, dispatch]);
-
-    let lastInputTimeRef = useRef(0);
-    let throttledRef = useRef<NodeJS.Timeout | null>(null);
-    const updateInputTime = useCallback(() => {
-        lastInputTimeRef.current = Date.now();
-    }, []);
-
-    // automatically fetch table preview when selected table changes
-    useEffect(() => {
-        if (typeof sourceId === 'number' && typeof connectUri === 'string' && databaseList !== undefined && (schemaList === null || schemaList === 'input' || Array.isArray(schemaList)) && tableList !== undefined && selectedDatabase !== undefined && selectedSchema !== undefined && selectedTable !== undefined) {
-            dispatch({
-                type: 'SET_PREVIEW',
-                payload: {
-                    preview: 'pending'
-                }
-            });
-            setLoadingAnimation(true);
-
-            if (throttledRef.current !== null) {
-                clearTimeout(throttledRef.current);
-                throttledRef.current = null;
-            }
-
-            const autoPreview = () => {
-                const flag = throttledRef.current;
-
-                fetchTablePreview(sourceId, selectedDatabase, selectedSchema, selectedTable, !(whichDatabase.tableEnumerable ?? true)).then(data => {
-                    if (flag !== throttledRef.current) {
-                        return;
-                    }
-
-                    if (data) {
-                        dispatch({
-                            type: 'SET_PREVIEW',
-                            payload: {
-                                preview: data
-                            }
-                        });
-                        dispatch({
-                            type: 'SET_SQL',
-                            payload: {
-                                sql: `select * from ${selectedTable || '<table_name>'}`,
-                            }
-                        });
-                    } else {
-                        dispatch({
-                            type: 'SET_TABLE',
-                            payload: {
-                                tName: selectedTable!
-                            }
-                        });
-                    }
-                }).finally(() => {
-                    throttledRef.current = null;
-                    setLoadingAnimation(false);
-                });
-            };
-
-            const operationOffset = FETCH_THROTTLE_SPAN - (Date.now() - lastInputTimeRef.current);
-
-            if (operationOffset > 0) {
-                throttledRef.current = setTimeout(autoPreview, operationOffset);
-            } else {
-                autoPreview();
-            }
-        }
-    }, [sourceType, connectUri, sourceId, databaseList, selectedDatabase, schemaList, selectedSchema, tableList, selectedTable, setLoadingAnimation, whichDatabase.tableEnumerable, connectorReady, dispatch]);
+    }, [databaseType, connectUri, sourceId, setLoadingAnimation, actions]);
 
     const databaseSelector: IDropdownOption[] | null = useMemo(() => {
-        return databaseList === 'input' ? null : databaseList?.map<IDropdownOption>(
-            dbName => ({
-                text: dbName,
-                key: dbName,
-            })
-        ) ?? null;
-    }, [databaseList]);
-
-    const schemaSelector: IDropdownOption[] | null = useMemo(() => {
-        if (whichDatabase.requiredSchema && Array.isArray(schemaList)) {
-            return schemaList.map<IDropdownOption>(
+        if (hasDatabase && databaseEnumerable) {
+            return database.options.map<IDropdownOption>(
                 dbName => ({
                     text: dbName,
                     key: dbName,
+                })
+            );
+        }
+
+        return null;
+    }, [database.options, hasDatabase, databaseEnumerable]);
+        
+    const schemaSelector: IDropdownOption[] | null = useMemo(() => {
+        if (requiredSchema && schemaEnumerable) {
+            return schema.options.map<IDropdownOption>(
+                sName => ({
+                    text: sName,
+                    key: sName,
                 })
             ) ?? [];
         }
 
         return null;
-    }, [whichDatabase, schemaList]);
+    }, [schema.options, requiredSchema, schemaEnumerable]);
 
-    const [isQuerying, setQuerying] = useState(false);
+    const submitPendingRef = useRef(false);
 
-    const [preview, setPreview] = useState<TableData | null>(null);
-
-    const query = useCallback(async () => {
-        // console.log(queryString);
-        if (isQuerying) {
-            return;
-        }
-
-        if (typeof sourceId === 'number' && queryString) {
-            setLoadingAnimation(true);
-
-            setQuerying(true);
-
-            await requestSQL(sourceId, queryString).then(data => {
-                if (data) {
-                    setPreview(data);
-                }
-            }).finally(() => {
-                setQuerying(false);
-                setLoadingAnimation(false);
-            });
-        }
-    }, [isQuerying, sourceId, queryString, setLoadingAnimation]);
-
-    useEffect(() => {
-        setPreview(null);
-    }, [queryString]);
-    
     const submit = async () => {
-        if (!preview) {
+        if (!preview.value || submitPendingRef.current) {
             return;
         }
 
-        const { rows, columns } = preview;
-        const data = await transformRawDataService(
-            rows.map(
-                row => Object.fromEntries(
-                    row.map<[string, any]>((val, colIdx) => [columns?.[colIdx]?.key ?? `${colIdx}`, val])
+        submitPendingRef.current = true;
+
+        try {
+            const { rows, columns } = preview.value;
+            const data = await transformRawDataService(
+                rows.map(
+                    row => Object.fromEntries(
+                        row.map<[string, any]>((val, colIdx) => [columns?.[colIdx]?.key ?? `${colIdx}`, val])
+                    )
                 )
-            )
-        );
-        const { dataSource, fields } = data;
+            );
+            const { dataSource, fields } = data;
 
-        logDataImport({
-            dataType: `Database/${sourceType}`,
-            name: [selectedDatabase, selectedSchema, selectedTable].filter(
-                Boolean
-            ).join('.'),
-            fields,
-            dataSource: dataSource.slice(0, 10),
-            size: dataSource.length,
-        });
+            logDataImport({
+                dataType: `Database/${databaseType}`,
+                name: [database.value, schema.value].filter(
+                    Boolean
+                ).join('.'),
+                fields,
+                dataSource: dataSource.slice(0, 10),
+                size: dataSource.length,
+            });
 
-        onDataLoaded(fields, dataSource);
+            onDataLoaded(fields, dataSource);
 
-        onClose();
+            onClose();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            submitPendingRef.current = false;
+        }
     };
 
-    const setSQL = useCallback((sql: string) => {
-        dispatch({
-            type: 'SET_SQL',
-            payload: {
-                sql
-            }
-        });
-    }, [dispatch]);
-
-    const genPreview = useCallback(() => {
-        setPreview(null);
-        query();
-    }, [query]);
+    // console.log(progress);
 
     return <div>
         <CustomConfig ping={ping} loading={loading} />
         {
             connectorReady && <Stack>
-                <Progress
-                    progress={progress}
-                />
+                <Progress progress={progress} />
                 {
-                    typeof sourceId !== 'number' && (
+                    sourceId.status === 'empty' && (
                         <ConnectForm
-                            sourceType={sourceType}
-                            setSourceType={sType => dispatch({
-                                type: 'SET_SOURCE_TYPE',
-                                payload: {
-                                    sourceType: sType
-                                }
-                            })}
+                            sourceType={databaseType}
+                            setSourceType={actions.setDatabaseType}
                             whichDatabase={whichDatabase}
                             sourceId={sourceId}
                             connectUri={connectUri}
-                            setConnectUri={uri => dispatch({
-                                type: 'SET_CONNECT_URI',
-                                payload: {
-                                    uri
-                                }
-                            })}
+                            setConnectUri={actions.setConnectUri}
                             handleConnectionTest={handleConnectionTest}
                         />
                     )
                 }
                 {
-                    typeof sourceId === 'number' && (
+                    sourceId.status === 'resolved' && (
                         <>
                             <ConnectFormReadonly
                                 connectUri={connectUri!}
-                                resetConnectUri={() => dispatch({
-                                    type: 'SET_SOURCE_TYPE',
-                                    payload: {
-                                        sourceType,
-                                    }
-                                })}
+                                resetConnectUri={() => actions.setConnectorStatus(true)}
                             />
                             <Stack horizontal tokens={StackTokens} style={{ flexDirection: 'column' }}>
                                 {
-                                    tableList !== null && tableList !== undefined && tableList !== 'pending' ? (
+                                    table.status === 'resolved' ? (
                                         <>
                                             <QueryEditor
-                                                tables={tableList}
-                                                query={queryString ?? ''}
-                                                setQuery={setSQL}
-                                                preview={genPreview}
+                                                tables={table.options}
+                                                query={queryString}
+                                                setQuery={actions.setQueryString}
+                                                preview={actions.genPreview}
                                             />
-                                            {preview && (
+                                            {preview.value && (
                                                 <div>
                                                     <header
                                                         style={{
@@ -531,51 +270,29 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                                             submit
                                                         </PrimaryButton>
                                                     </header>
-                                                    <TablePreview
-                                                        data={preview}
-                                                    />
+                                                    <TablePreview data={preview.value} />
                                                 </div>
                                             )}
                                         </>
                                     ) : (
                                         <>
                                             {
-                                                databaseList !== null && databaseList !== undefined && (
+                                                database.status === 'resolved' && hasDatabase && (
                                                     <DropdownOrInput
                                                         name="dataSource.databaseName"
                                                         options={databaseSelector}
-                                                        value={selectedDatabase}
-                                                        setValue={val => {
-                                                            if (typeof connectUri === 'string' && databaseList) {
-                                                                dispatch({
-                                                                    type: 'SET_DATABASE',
-                                                                    payload: {
-                                                                        dbName: val
-                                                                    }
-                                                                });
-                                                            }
-                                                        }}
-                                                        updateInputTime={updateInputTime}
+                                                        value={database.value}
+                                                        setValue={actions.setDatabase}
                                                     />
                                                 )
                                             }
                                             {
-                                                schemaList !== null && schemaList !== undefined && schemaList !== 'pending' && (
+                                                schema.status === 'resolved' && requiredSchema && (
                                                     <DropdownOrInput
                                                         name="dataSource.schemaName"
                                                         options={schemaSelector}
-                                                        value={selectedSchema}
-                                                        setValue={val => {
-                                                            if (typeof connectUri === 'string' && databaseList !== undefined && selectedDatabase !== undefined && schemaList) {
-                                                                dispatch({
-                                                                    type: 'SET_SCHEMA',
-                                                                    payload: {
-                                                                        sName: val
-                                                                    }
-                                                                });
-                                                            }
-                                                        }}
-                                                        updateInputTime={updateInputTime}
+                                                        value={schema.value}
+                                                        setValue={actions.setSchema}
                                                     />
                                                 )
                                             }

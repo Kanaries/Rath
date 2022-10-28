@@ -90,7 +90,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
             width: item.chartSize.w,
             height: item.chartSize.h,
         };
-    }, [data, item.filter, item.chartSize]);
+    }, [item.filter, item.chartSize, fieldMeta, subset]);
 
     return (
         <>

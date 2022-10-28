@@ -9,7 +9,6 @@ interface DropdownOrInputProps {
     options: IDropdownOption[] | null;
     value: string | null | undefined;
     setValue: (key: string) => void;
-    updateInputTime: () => void;
 }
 
 const DropdownOrInput: FC<DropdownOrInputProps> = ({
@@ -17,7 +16,6 @@ const DropdownOrInput: FC<DropdownOrInputProps> = ({
     options,
     value,
     setValue,
-    updateInputTime,
 }) => {
     return options ? (
         <Dropdown
@@ -40,8 +38,6 @@ const DropdownOrInput: FC<DropdownOrInputProps> = ({
             value={value as string | undefined}
             required
             onChange={(_, key) => {
-                updateInputTime();
-                
                 if (typeof key === 'string') {
                     setValue(key);
                 }
