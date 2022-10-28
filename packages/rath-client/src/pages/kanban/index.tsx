@@ -14,6 +14,7 @@ import type { IInsightVizView } from '../../interfaces';
 import FilterCreationPill from '../../components/filterCreationPill';
 import ViewField from '../megaAutomation/vizOperation/viewField';
 import type { IFilter } from '../../interfaces';
+import { PIVOT_KEYS } from '../../constants';
 
 import Empty from './empty';
 import 'react-grid-layout/css/styles.css';
@@ -36,13 +37,30 @@ const Segment = styled.div`
         justify-content: space-between;
     }
     height: max-content;
+    & .react-resizable-hide {
+        pointer-events: none;
+        background-color: transparent;
+        ::after {
+            content: "";
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            border: 1px dashed #a10;
+            z-index: 1;
+            box-shadow: inset 0 0 0.5em #888;
+        }
+    }
 `;
 
 const CollectContainer = styled.div`
     display: flex;
     overflow: auto hidden;
     flex-grow: 0;
-    height: 120px;
+    height: 150px;
     > * {
         flex-shrink: 0;
         margin-right: 10px;
@@ -71,21 +89,62 @@ const EditItem = styled.div({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
     // overflow: 'hidden',
+    ':hover::after': {
+        content: '""',
+        display: 'block',
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        border: '1px dashed #888a',
+        zIndex: 2,
+    },
     '> div.group': {
         position: 'absolute',
         right: 0,
         top: 0,
         opacity: 0,
-        display: 'block',
         width: 'max-content',
         height: 'max-content',
+        display: 'flex',
+        flexDirection: 'row',
+        border: '1px solid #888',
+        overflow: 'hidden',
+        borderRadius: '4px',
+        backdropFilter: 'blur(9999px)',
 
         '&.float': {
             left: 0,
         },
+        '> button': {
+            backgroundColor: '#eee',
+            width: '1.8em',
+            height: '1.8em',
+            padding: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+
+            ':hover': {
+                backgroundColor: '#fff',
+            },
+            '> *': {
+                flexGrow: 0,
+                flexShrink: 0,
+            },
+        },
     },
     '&:hover > div.group': {
+        opacity: 1,
+    },
+    '& .react-resizable-handle': {
+        opacity: 0,
+    },
+    '&:hover .react-resizable-handle': {
         opacity: 1,
     },
 });
@@ -115,7 +174,7 @@ const EditArea = styled.div({
         backgroundColor: '#fff',
         boxShadow: '0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%)',
     },
-    marginBottom: '2vh',
+    marginBottom: 'calc(2vh + 1em)',
     overflow: 'hidden',
     boxShadow: '0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%)',
 });
@@ -138,7 +197,7 @@ export type KanbanItem = {
 };
 
 const Kanban: React.FC = () => {
-    const { collectionStore, dataSourceStore, dashboardStore } = useGlobalStore();
+    const { collectionStore, dataSourceStore, dashboardStore, commonStore, semiAutoStore } = useGlobalStore();
     const { collectionList } = collectionStore;
     const { cleanedData, fieldMetas } = dataSourceStore;
 
@@ -357,6 +416,15 @@ const Kanban: React.FC = () => {
                                         filters={mergeFilters(i, vis)}
                                         updateFilters={fs => filter$.next({ index: i, data: fs })}
                                         toggleFilter={() => dashboardStore.setItem(i, { ...item, filter: !item.filter })}
+                                        remove={() => dashboardStore.removeItem(i)}
+                                        edit={() => {
+                                            semiAutoStore.clearViews();
+                                            semiAutoStore.updateMainView({
+                                                fields: vis.fields,
+                                                imp: vis.score ?? 0,
+                                            });
+                                            commonStore.setAppKey(PIVOT_KEYS.semiAuto);
+                                        }}
                                     />
                                 </EditItem>
                             ) : null;

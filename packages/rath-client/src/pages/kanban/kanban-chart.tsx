@@ -19,10 +19,12 @@ interface KanbanChartProps {
     filters: IFilter[];
     updateFilters: (filters: IFilter[]) => void;
     toggleFilter: () => void;
+    remove: () => void;
+    edit: () => void;
 }
 
 const KanbanChart: FC<KanbanChartProps> = ({
-    item, dataSource, fieldMeta, filters, vis, updateFilters, toggleFilter,
+    item, dataSource, fieldMeta, filters, vis, updateFilters, toggleFilter, remove, edit,
 }) => {
     return (
         <>
@@ -152,6 +154,25 @@ const KanbanChart: FC<KanbanChartProps> = ({
                         iconName: item.filter ? 'FilterSolid' : 'Filter',
                     }}
                     onClick={toggleFilter}
+                />
+                <CommandButton
+                    iconProps={{
+                        iconName: 'Edit',
+                    }}
+                    onClick={edit}
+                />
+                <CommandButton
+                    iconProps={{
+                        iconName: 'Photo2Remove',
+                        style: {
+                            color: '#fff',
+                        },
+                    }}
+                    onClick={remove}
+                    style={{
+                        backgroundColor: 'rgb(197, 15, 31)',
+                        marginLeft: '0.6em',
+                    }}
                 />
             </div>
             <div

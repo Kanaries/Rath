@@ -40,6 +40,12 @@ export default class DashboardStore {
         });
     }
 
+    public removeItem(index: number) {
+        this.pages = produce(toJS(this.pages), draft => {
+            draft[this.cursor].items.splice(index, 1);
+        });
+    }
+
     public addFilter(field: IFieldMeta, filter: IFilter) {
         this.pages = produce(toJS(this.pages), draft => {
             draft[this.cursor].filters.push({ field, filter });
