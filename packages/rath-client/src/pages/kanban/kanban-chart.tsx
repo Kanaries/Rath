@@ -1,11 +1,11 @@
 import { applyFilters } from '@kanaries/loa';
 import { observer } from 'mobx-react-lite';
-import type { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { CommandButton } from '@fluentui/react';
 
 import ReactVega from '../../components/react-vega';
 import VisErrorBoundary from '../../components/visErrorBoundary';
-import type { IFieldMeta, IInsightVizView, IRow } from '../../interfaces';
+import type { IFieldMeta, IRow, IVegaSubset } from '../../interfaces';
 import type { IFilter } from '../../interfaces';
 
 import type { KanbanItem } from '.';
@@ -14,7 +14,7 @@ import type { KanbanItem } from '.';
 interface KanbanChartProps {
     dataSource: IRow[];
     fieldMeta: IFieldMeta[];
-    vis: IInsightVizView;
+    subset: IVegaSubset;
     item: Readonly<KanbanItem>;
     filters: IFilter[];
     updateFilters: (filters: IFilter[]) => void;
@@ -24,73 +24,80 @@ interface KanbanChartProps {
 }
 
 const KanbanChart: FC<KanbanChartProps> = ({
-    item, dataSource, fieldMeta, filters, vis, updateFilters, toggleFilter, remove, edit,
+    item, dataSource, fieldMeta, filters, subset, updateFilters, toggleFilter, remove, edit,
 }) => {
+    const data = useMemo(() => applyFilters(dataSource, filters), [dataSource, filters]);
+
+    const spec = useMemo(() => {
+        if (item.filter === false) {
+            return {
+                ...subset,
+                width: item.chartSize.w,
+                height: item.chartSize.h,
+            };
+        }
+
+        return {
+            data: subset.data,
+            layer: [{
+                params: item.filter ? [{
+                    name: 'brush',
+                    value: typeof item.filter === 'object' ? (
+                        item.filter.length === 2 && item.filter[0].type === 'range' && item.filter[1].type === 'range' ? {
+                            x: item.filter[0].range,
+                            y: item.filter[1].range,
+                        } : item.filter.length === 1 && item.filter[0].type === 'range' ? {
+                            x: item.filter[0].range,
+                        } : undefined
+                    ) : undefined,
+                    select: {
+                        type: 'interval',
+                    },
+                }, new Array<typeof subset.mark>(
+                    'bar', 'arc', 'point', 'circle', 'rect'
+                ).includes((subset.mark as unknown as { type: typeof subset.mark })?.type) && {
+                    name: 'select',
+                    value: typeof item.filter === 'object' && item.filter[0]?.type === 'set' ? (
+                        item.filter[0].values.map(val => ({
+                            [fieldMeta.find(f => (
+                                (item.filter as (IFilter & { type: 'set' })[])[0].fid === f.fid
+                            ))!.name ?? '']: val,
+                        }))
+                    ) : undefined,
+                    select: {
+                        type: 'point',
+                    },
+                }].filter(Boolean) : undefined,
+                mark: subset.mark,
+                encoding: {
+                    ...subset.encoding,
+                    opacity: { value: 0.33 },
+                },
+                width: item.chartSize.w,
+                height: item.chartSize.h,
+            }, {
+                transform: [{
+                    filter: {
+                        param: typeof item.filter === 'object' && item.filter[0]?.type === 'set' ? 'select' : 'brush',
+                    },
+                }],
+                mark: subset.mark,
+                encoding: {
+                    ...subset.encoding,
+                    opacity: { value: 1 },
+                },
+            }],
+            width: item.chartSize.w,
+            height: item.chartSize.h,
+        };
+    }, [data, item.filter, item.chartSize]);
+
     return (
         <>
             <VisErrorBoundary>
                 <ReactVega
-                    dataSource={applyFilters(dataSource, filters)}
-                    spec={item.filter ? {
-                        data: vis.spec.data,
-                        layer: [{
-                            params: item.filter ? [{
-                                name: 'brush',
-                                value: typeof item.filter === 'object' ? (
-                                    item.filter.length === 2 && item.filter[0].type === 'range' && item.filter[1].type === 'range' ? {
-                                        x: item.filter[0].range,
-                                        y: item.filter[1].range,
-                                    } : item.filter.length === 1 && item.filter[0].type === 'range' ? {
-                                        x: item.filter[0].range,
-                                    } : undefined
-                                ) : undefined,
-                                select: {
-                                    type: 'interval',
-                                    // encodings: ['x'],
-                                },
-                            }, new Array<typeof vis.spec.mark>(
-                                'bar', 'arc', 'point', 'circle', 'rect'
-                            ).includes((vis.spec.mark as unknown as { type: typeof vis.spec.mark })?.type) && {
-                                name: 'select',
-                                value: typeof item.filter === 'object' && item.filter[0]?.type === 'set' ? (
-                                    item.filter[0].values.map(val => ({
-                                        [fieldMeta.find(f => (
-                                            (item.filter as (IFilter & { type: 'set' })[])[0].fid === f.fid
-                                        ))!.name ?? '']: val,
-                                    }))
-                                ) : undefined,
-                                select: {
-                                    type: 'point',
-                                },
-                            }].filter(Boolean) : undefined,
-                            mark: vis.spec.mark,
-                            encoding: {
-                                ...vis.spec.encoding,
-                                opacity: { value: 0.33 },
-                            },
-                            width: item.chartSize.w,
-                            height: item.chartSize.h,
-                        }, {
-                            transform: [{
-                                filter: {
-                                    param: typeof item.filter === 'object' && item.filter[0]?.type === 'set' ? 'select' : 'brush',
-                                },
-                            }],
-                            mark: vis.spec.mark,
-                            encoding: {
-                                ...vis.spec.encoding,
-                                opacity: { value: 1 },
-                            },
-                            width: item.chartSize.w,
-                            height: item.chartSize.h,
-                        }],
-                        width: item.chartSize.w,
-                        height: item.chartSize.h,
-                    } : {
-                        ...vis.spec,
-                        width: item.chartSize.w,
-                        height: item.chartSize.h,
-                    }}
+                    dataSource={data}
+                    spec={spec}
                     actions={false}
                     signalHandler={item.filter ? {
                         brush: (name: 'brush', filters: {
@@ -175,9 +182,7 @@ const KanbanChart: FC<KanbanChartProps> = ({
                     }}
                 />
             </div>
-            <div
-                className="group float"
-            >
+            <div className="group float">
                 <CommandButton
                     iconProps={{
                         iconName: 'Move',

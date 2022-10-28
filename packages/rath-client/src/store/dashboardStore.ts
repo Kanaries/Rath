@@ -1,5 +1,4 @@
-import { makeAutoObservable, observable, toJS } from "mobx";
-import produce from "immer";
+import { makeAutoObservable } from "mobx";
 import type { KanbanItem } from "../pages/kanban";
 import type { IFieldMeta, IFilter } from "../interfaces";
 
@@ -18,9 +17,7 @@ export default class DashboardStore {
     public cursor: number;
 
     constructor() {
-        makeAutoObservable(this, {
-            pages: observable.shallow,
-        });
+        makeAutoObservable(this);
         this.pages = [{
             filters: [],
             items: [],
@@ -29,47 +26,33 @@ export default class DashboardStore {
     }
 
     public addItem(item: KanbanItem) {
-        this.pages = produce(toJS(this.pages), draft => {
-            draft[this.cursor].items.push(item);
-        });
+        this.pages[this.cursor].items.push(item);
     }
 
     public setItem(index: number, item: KanbanItem) {
-        this.pages = produce(toJS(this.pages), draft => {
-            draft[this.cursor].items[index] = item;
-        });
+        this.pages[this.cursor].items[index] = item;
     }
 
     public removeItem(index: number) {
-        this.pages = produce(toJS(this.pages), draft => {
-            draft[this.cursor].items.splice(index, 1);
-        });
+        this.pages[this.cursor].items.splice(index, 1);
     }
 
     public addFilter(field: IFieldMeta, filter: IFilter) {
-        this.pages = produce(toJS(this.pages), draft => {
-            draft[this.cursor].filters.push({ field, filter });
-        });
+        this.pages[this.cursor].filters.push({ field, filter });
     }
 
     public deleteFilter(index: number) {
-        this.pages = produce(toJS(this.pages), draft => {
-            draft[this.cursor].filters.splice(index, 1);
-        });
+        this.pages[this.cursor].filters.splice(index, 1);
     }
 
     public clearPage() {
-        this.pages = produce(toJS(this.pages), draft => {
-            draft[this.cursor].items = [];
-        });
+        this.pages[this.cursor].items = [];
     }
 
     public newPage() {
-        this.pages = produce(toJS(this.pages), draft => {
-            draft.push({
-                filters: [],
-                items: [],
-            });
+        this.pages.push({
+            filters: [],
+            items: [],
         });
         this.cursor = this.pages.length - 1;
     }

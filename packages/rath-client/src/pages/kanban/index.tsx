@@ -411,7 +411,7 @@ const Kanban: React.FC = () => {
                                     <KanbanChart
                                         dataSource={cleanedData}
                                         fieldMeta={fieldMetas}
-                                        vis={vis}
+                                        subset={vis.spec}
                                         item={item}
                                         filters={mergeFilters(i, vis)}
                                         updateFilters={fs => filter$.next({ index: i, data: fs })}
