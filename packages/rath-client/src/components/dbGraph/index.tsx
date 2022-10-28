@@ -1,10 +1,12 @@
 import { PrimaryButton } from '@fluentui/react';
+import produce from 'immer';
 import { DragEvent, memo, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { TableInfo } from '../../pages/dataSource/selection/database/api';
 import Link from './link';
 import { IDBGraph } from './localTypes';
 import DBNode from './node';
+import { hasCircle } from './utils';
 
 const height = 400;
 export const BOX_WIDTH = 120;
@@ -250,13 +252,13 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
                     edges.push({
                         from: {
                             table: shift(edge.from.table),
-                            col: edge.from.col,
+                            colIdx: edge.from.colIdx,
                         },
                         to: {
                             table: shift(edge.to.table),
-                            col: edge.to.col,
+                            colIdx: edge.to.colIdx,
                         },
-                        type: edge.type,
+                        joinOpt: edge.joinOpt,
                     });
                 }
             });
@@ -286,17 +288,13 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             edges: [...graph.edges, {
                 from: {
                     table: linkPreview.from,
-                    col: tables.find(t => t.name === graph.nodes[linkPreview.from].source)?.meta.map(
-                        m => m.key
-                    )?.[0] ?? '',
+                    colIdx: 0,
                 },
                 to: {
                     table: linkPreview.to,
-                    col: tables.find(t => t.name === graph.nodes[linkPreview.to as number].source)?.meta.map(
-                        m => m.key
-                    )?.[0] ?? '',
+                    colIdx: 0,
                 },
-                type: 'LEFT JOIN',
+                joinOpt: 'LEFT JOIN',
             }],
         });
     };
@@ -343,53 +341,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
                 [edge.from, edge.to].every(d => [index, linkPreview.from].includes(d.table))
             )));
 
-            const willBeCircle = ((): boolean => {
-                const checker = new Map<number, 1>();
-
-                checker.set(index, 1);
-
-                const walk = (from: number, except: number | null = null) => {
-                    checker.set(from, 1);
-                    let failed = false;
-
-                    const neighbors = graph.edges.reduce<number[]>((list, edge) => {
-                        if (failed) {
-                            return [];
-                        }
-                        if (edge.from.table === from) {
-                            if (except === edge.to.table) {
-                                return list;
-                            } else if (checker.has(edge.to.table)) {
-                                failed = true;
-                                return [];
-                            }
-                            checker.set(edge.to.table, 1);
-                            return [...list, edge.to.table];
-                        } else if (edge.to.table === from) {
-                            if (except === edge.from.table) {
-                                return list;
-                            } else if (checker.has(edge.from.table)) {
-                                failed = true;
-                                return [];
-                            }
-                            checker.set(edge.from.table, 1);
-                            return [...list, edge.from.table];
-                        }
-                        return list;
-                    }, []);
-
-                    for (const n of neighbors) {
-                        const res = walk(n, from);
-                        if (res === true) {
-                            return true;
-                        }
-                    }
-
-                    return failed;
-                };
-
-                return walk(linkPreview.from);
-            })();
+            const willBeCircle = hasCircle(graph.edges, linkPreview.from, index);
 
             if (alreadyLinked || willBeCircle) {
                 return;
@@ -402,13 +354,13 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
         }
     }, [linkPreview, graph.edges]);
 
-    const handleLinkOut = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    const handleLinkOut = useCallback((ex: number, ey: number) => {
         if (container.current && linkPreview) {
             const box = container.current.getBoundingClientRect();
 
             const [tx, ty] = [
-                e.clientX - box.x,
-                e.clientY - box.y,
+                ex - box.x,
+                ey - box.y,
             ];
 
             const x = Math.round(Math.max(Math.min(tx, width - BOX_PADDING - BOX_WIDTH - 1), BOX_PADDING));
@@ -484,97 +436,57 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
                     strokeWidth="2"
                 >
                     <g>
-                        {graph.edges.map((edge, i) => (
-                            <Link
-                                key={i}
-                                from={graph.nodes[edge.from.table]}
-                                fromCols={
-                                    tables.find(t => t.name === graph.nodes[edge.from.table].source)?.meta.map(
-                                        m => m.key
-                                    ) ?? []
-                                }
-                                fromCol={edge.from.col}
-                                setFromCol={col => {
-                                    setGraph({
-                                        nodes: graph.nodes,
-                                        edges: [
-                                            ...graph.edges.slice(0, i),
-                                            {
-                                                from: {
-                                                    table: graph.edges[i].from.table,
-                                                    col,
-                                                },
-                                                to: graph.edges[i].to,
-                                                type: graph.edges[i].type,
-                                            },
-                                            ...graph.edges.slice(i + 1),
-                                        ],
-                                    });
-                                }}
-                                to={graph.nodes[edge.to.table]}
-                                toCols={
-                                    tables.find(t => t.name === graph.nodes[edge.to.table].source)?.meta.map(
-                                        m => m.key
-                                    ) ?? []
-                                }
-                                toCol={edge.to.col}
-                                setToCol={col => {
-                                    setGraph({
-                                        nodes: graph.nodes,
-                                        edges: [
-                                            ...graph.edges.slice(0, i),
-                                            {
-                                                from: graph.edges[i].from,
-                                                to: {
-                                                    table: graph.edges[i].to.table,
-                                                    col,
-                                                },
-                                                type: graph.edges[i].type,
-                                            },
-                                            ...graph.edges.slice(i + 1),
-                                        ],
-                                    });
-                                }}
-                                type={edge.type}
-                                setType={type => {
-                                    setGraph({
-                                        nodes: graph.nodes,
-                                        edges: [
-                                            ...graph.edges.slice(0, i),
-                                            {
-                                                from: graph.edges[i].from,
-                                                to: graph.edges[i].to,
-                                                type,
-                                            },
-                                            ...graph.edges.slice(i + 1),
-                                        ],
-                                    });
-                                }}
-                                deleteLink={() => {
-                                    setGraph({
-                                        nodes: graph.nodes,
-                                        edges: [
-                                            ...graph.edges.slice(0, i),
-                                            ...graph.edges.slice(i + 1),
-                                        ],
-                                    });
-                                }}
-                                reverse={() => {
-                                    setGraph({
-                                        nodes: graph.nodes,
-                                        edges: [
-                                            ...graph.edges.slice(0, i),
-                                            {
-                                                from: graph.edges[i].to,
-                                                to: graph.edges[i].from,
-                                                type: graph.edges[i].type,
-                                            },
-                                            ...graph.edges.slice(i + 1),
-                                        ],
-                                    });
-                                }}
-                            />
-                        ))}
+                        {graph.edges.map((edge, i) => {
+                            const nodeFrom = graph.nodes[edge.from.table];
+                            const nodeTo = graph.nodes[edge.to.table];
+                            const tableFrom = tables.find(t => t.name === nodeFrom.source);
+                            const tableTo = tables.find(t => t.name === nodeTo.source);
+
+                            if (!tableFrom) {
+                                console.error(`Table ${tableFrom} is not found.`);
+                                return null;
+                            }
+                            if (!tableTo) {
+                                console.error(`Table ${tableTo} is not found.`);
+                                return null;
+                            }
+
+                            return (
+                                <Link
+                                    key={i}
+                                    from={{
+                                        layout: nodeFrom,
+                                        allCols: tableFrom.meta.map(m => m.key),
+                                        colIdx: edge.from.colIdx,
+                                        setColIdx: idx => setGraph(produce(graph, draft => {
+                                            draft.edges[i].from.colIdx = idx;
+                                        })),
+                                    }}
+                                    to={{
+                                        layout: nodeTo,
+                                        allCols: tableTo.meta.map(m => m.key),
+                                        colIdx: edge.to.colIdx,
+                                        setColIdx: idx => setGraph(produce(graph, draft => {
+                                            draft.edges[i].to.colIdx = idx;
+                                        })),
+                                    }}
+                                    joinOpt={edge.joinOpt}
+                                    setJoinOpt={opt => setGraph(produce(graph, draft => {
+                                        draft.edges[i].joinOpt = opt;
+                                    }))}
+                                    deleteLink={() => setGraph(produce(graph, draft => {
+                                        draft.edges.splice(i, 1);
+                                    }))}
+                                    reverse={() => setGraph(produce(graph, draft => {
+                                        draft.edges[i] = {
+                                            from: edge.to,
+                                            to: edge.from,
+                                            joinOpt: edge.joinOpt,
+                                        };
+                                    }))}
+                                />
+                            );
+                        })}
                     </g>
                     {linkPreview && (
                         <g style={{ pointerEvents: 'none', opacity: typeof linkPreview.to === 'number' ? 1 : 0.5 }} >
@@ -606,32 +518,24 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
                     return (
                         <DBNode
                             key={index}
-                            node={node}
-                            id={index}
-                            canLink={graph.edges.every(e => e.from.table !== index)}
-                            linkingId={linkPreview?.from ?? null}
-                            handleDragStart={e => {
-                                const target = e.target as HTMLSpanElement;
-                                const box = target.getBoundingClientRect();
-                                dragOffsetRef.current = [
-                                    e.clientX - box.x,
-                                    e.clientY - box.y,
-                                ];
+                            layout={node}
+                            label={node.source}
+                            isLinking={linkPreview?.from === index}
+                            readyToBeLinked={linkPreview ? linkPreview.from !== index : false}
+                            readyToLink={graph.edges.every(e => e.from.table !== index)}
+                            handleDragStart={offset => {
+                                dragOffsetRef.current = offset;
                                 dragEffectRef.current = 'move';
                                 dragSourceRef.current = null;
                                 dragNodeRef.current = index;
-                                e.dataTransfer.setData('text/plain', node.source);
-                                e.dataTransfer.dropEffect = 'move';
                             }}
-                            beginPath={() => {
-                                setLinkPreview({
-                                    from: index,
-                                    to: {
-                                        x: graph.nodes[index].x + BOX_WIDTH / 2,
-                                        y: graph.nodes[index].y + BOX_HEIGHT / 2,
-                                    },
-                                });
-                            }}
+                            beginPath={() => setLinkPreview({
+                                from: index,
+                                to: {
+                                    x: graph.nodes[index].x + BOX_WIDTH / 2,
+                                    y: graph.nodes[index].y + BOX_HEIGHT / 2,
+                                },
+                            })}
                             handleLinkOver={() => handleLinkOver(index)}
                             handleLinkOut={handleLinkOut}
                         />

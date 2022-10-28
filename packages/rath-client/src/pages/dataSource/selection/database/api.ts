@@ -171,9 +171,7 @@ export const listSchemas = async (sourceId: number, db: string | null): Promise<
 export const listTables = async (sourceId: number, db: string | null, schema: string | null): Promise<TableList | null> => {
     try {
         const res = await fetch(
-            // FIXME: 临时接口
-            `http://192.168.31.68:5000/api/table_list`, {
-            // `${getAPIPathPrefix(apiPathPrefix)}/table_list`, {
+            `${getAPIPathPrefix(apiPathPrefix)}/table_list`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,6 +1,6 @@
-import { Fragment, memo } from "react";
+import { Fragment, memo, useMemo } from "react";
 import styled from "styled-components";
-import type { IDBEdge, IDBNode } from './localTypes';
+import type { IDBEdge } from './localTypes';
 import { BOX_HEIGHT, BOX_WIDTH, encodePath } from ".";
 
 
@@ -32,228 +32,175 @@ const Select = styled.g({
     },
 });
 
-export interface LinkProps {
-    from: IDBNode;
-    fromCols: string[];
-    fromCol: string;
-    to: IDBNode;
-    toCols: string[];
-    toCol: string;
-    type: IDBEdge['type'];
-    setType: (type: IDBEdge['type']) => void;
-    deleteLink: () => void;
-    reverse: () => void;
-    setFromCol: (col: string) => void;
-    setToCol: (col: string) => void;
+export interface LinkNode {
+    readonly layout: {
+        readonly x: number;
+        readonly y: number;
+    };
+    readonly allCols: readonly string[];
+    readonly colIdx: number;
+    readonly setColIdx: (index: number) => void;
 }
 
+export interface LinkProps {
+    from: LinkNode;
+    to: LinkNode;
+    joinOpt: IDBEdge['joinOpt'];
+    setJoinOpt: (opt: IDBEdge['joinOpt']) => void;
+    deleteLink: () => void;
+    reverse: () => void;
+}
+
+interface SVGDropdownProps<T extends string> {
+    cx: number;
+    cy: number;
+    dx?: number;
+    options: readonly T[];
+    curIdx: number;
+    onChange: (index: number) => void;
+    actions?: readonly {
+        readonly text: string;
+        readonly action: () => void;
+        readonly color?: string;
+    }[];
+}
+
+const SVGDropdown = <T extends string = string>({ cx, cy, dx = 0, options, curIdx, onChange, actions = [] }: SVGDropdownProps<T>) => {
+    const x = cx - OPTION_WIDTH / 2;
+    const y = cy - OPTION_HEIGHT / 2;
+
+    return (
+        <Select style={{ transform: dx ? `translateX(${dx * OPTION_WIDTH}px)` : undefined }}>
+            <rect
+                x={x}
+                y={y}
+                width={OPTION_WIDTH}
+                height={OPTION_HEIGHT}
+                fill="#fff"
+                stroke="#0027b4"
+                strokeWidth="1"
+            />
+            <text
+                x={x}
+                y={y}
+                textAnchor="middle"
+                stroke="none"
+                fill="#0027b4"
+            >
+                {options[curIdx]}
+            </text>
+            {options.map((option, i) => (
+                <Fragment key={i}>
+                    <rect
+                        className="option type"
+                        x={x}
+                        y={y + (i + 1) * OPTION_HEIGHT + 1}
+                        width={OPTION_WIDTH}
+                        height={OPTION_HEIGHT}
+                        fill="#fff"
+                        stroke="#888"
+                        strokeWidth="1"
+                        onClick={e => {
+                            e.stopPropagation();
+                            if (i !== curIdx) {
+                                onChange(i);
+                            }
+                        }}
+                    />
+                    <text
+                        className="option"
+                        x={x}
+                        y={y + (i + 1) * OPTION_HEIGHT + 1}
+                        textAnchor="middle"
+                        stroke="none"
+                        fill="currentColor"
+                    >
+                        {option}
+                    </text>
+                </Fragment>
+            ))}
+            {actions.map((action, i) => (
+                <Fragment key={`action:${i}`}>
+                    <rect
+                        className="option"
+                        x={x}
+                        y={y - (i + 1) * OPTION_HEIGHT}
+                        width={OPTION_WIDTH}
+                        height={OPTION_HEIGHT}
+                        fill={action.color ?? "#0027b4"}
+                        stroke={action.color ?? "#0027b4"}
+                        strokeWidth="1"
+                        onClick={action.action}
+                    />
+                    <text
+                        className="option"
+                        x={x}
+                        y={y - (i + 1) * OPTION_HEIGHT}
+                        textAnchor="middle"
+                        stroke="none"
+                        fill="#fff"
+                    >
+                        {action.text}
+                    </text>
+                </Fragment>
+            ))}
+        </Select>
+    );
+};
+
+const allJoinTypes: Readonly<Array<IDBEdge['joinOpt']>> = ['LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'FULL JOIN'];
+
 const Link = memo<LinkProps>(function Link({
-    from, fromCols, fromCol, to, toCols, toCol, type, setType, deleteLink, reverse, setFromCol, setToCol,
+    from, to, joinOpt, setJoinOpt, deleteLink, reverse,
 }) {
+    const path = useMemo(() => encodePath(
+        from.layout.x + BOX_WIDTH / 2,
+        from.layout.y + BOX_HEIGHT / 2,
+        to.layout.x + BOX_WIDTH / 2,
+        to.layout.y + BOX_HEIGHT / 2,
+    ), [from.layout, to.layout]);
+
+    const cx = useMemo(() => (from.layout.x + to.layout.x) / 2 + BOX_WIDTH / 2, [from.layout.x, to.layout.x]);
+    const cy = useMemo(() => (from.layout.y + to.layout.y) / 2 + BOX_HEIGHT / 2, [from.layout.y, to.layout.y]);
+
     return (
         <>
-            <path
-                d={encodePath(
-                    from.x + BOX_WIDTH / 2,
-                    from.y + BOX_HEIGHT / 2,
-                    to.x + BOX_WIDTH / 2,
-                    to.y + BOX_HEIGHT / 2,
-                )}
+            <path d={path} />
+            <SVGDropdown
+                cx={cx}
+                cy={cy}
+                dx={-1}
+                options={from.allCols}
+                curIdx={from.colIdx}
+                onChange={idx => from.setColIdx(idx)}
             />
-            <Select style={{ transform: `translateX(${-1 * OPTION_WIDTH}px)` }}>
-                <rect
-                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2}
-                    width={OPTION_WIDTH}
-                    height={OPTION_HEIGHT}
-                    fill="#fff"
-                    stroke="#0027b4"
-                    strokeWidth="1"
-                />
-                <text
-                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2}
-                    textAnchor="middle"
-                    stroke="none"
-                    fill="#0027b4"
-                >
-                    {fromCol}
-                </text>
-                {fromCols.map((col, i) => (
-                    <Fragment key={i}>
-                        <rect
-                            className="option type"
-                            x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                            y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 + (i + 1) * OPTION_HEIGHT + 1}
-                            width={OPTION_WIDTH}
-                            height={OPTION_HEIGHT}
-                            fill="#fff"
-                            stroke="#888"
-                            strokeWidth="1"
-                            onClick={e => {
-                                e.stopPropagation();
-                                setFromCol(col);
-                            }}
-                        />
-                        <text
-                            className="option"
-                            x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                            y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 + (i + 1) * OPTION_HEIGHT + 1}
-                            textAnchor="middle"
-                            stroke="none"
-                            fill="currentColor"
-                        >
-                            {col}
-                        </text>
-                    </Fragment>
-                ))}
-            </Select>
-            <Select>
-                <rect
-                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2}
-                    width={OPTION_WIDTH}
-                    height={OPTION_HEIGHT}
-                    fill="#fff"
-                    stroke="#0027b4"
-                    strokeWidth="1"
-                />
-                <text
-                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2}
-                    textAnchor="middle"
-                    stroke="none"
-                    fill="#0027b4"
-                >
-                    {type}
-                </text>
-                <rect
-                    className="option"
-                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 - OPTION_HEIGHT * 2}
-                    width={OPTION_WIDTH}
-                    height={OPTION_HEIGHT}
-                    fill="#f22"
-                    stroke="#f22"
-                    strokeWidth="1"
-                    onClick={() => {
-                        deleteLink();
-                    }}
-                />
-                <text
-                    className="option"
-                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 - OPTION_HEIGHT * 2}
-                    textAnchor="middle"
-                    stroke="none"
-                    fill="#fff"
-                >
-                    {'x'}
-                </text>
-                <rect
-                    className="option"
-                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 - OPTION_HEIGHT}
-                    width={OPTION_WIDTH}
-                    height={OPTION_HEIGHT}
-                    fill="#0027b4"
-                    stroke="#0027b4"
-                    strokeWidth="1"
-                    onClick={() => {
-                        reverse();
-                    }}
-                />
-                <text
-                    className="option"
-                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 - OPTION_HEIGHT}
-                    textAnchor="middle"
-                    stroke="none"
-                    fill="#fff"
-                >
-                    {'⇋'}
-                </text>
-                {new Array<typeof type>('LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'FULL JOIN').filter(
-                    t => t !== type
-                ).map((t, i) => (
-                    <Fragment key={t}>
-                        <rect
-                            className="option type"
-                            x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                            y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 + (i + 1) * OPTION_HEIGHT + 1}
-                            width={OPTION_WIDTH}
-                            height={OPTION_HEIGHT}
-                            fill="#fff"
-                            stroke="#888"
-                            strokeWidth="1"
-                            onClick={e => {
-                                e.stopPropagation();
-                                if (t !== type) {
-                                    setType(t);
-                                }
-                            }}
-                        />
-                        <text
-                            className="option"
-                            x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                            y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 + (i + 1) * OPTION_HEIGHT + 1}
-                            textAnchor="middle"
-                            stroke="none"
-                            fill="currentColor"
-                        >
-                            {t}
-                        </text>
-                    </Fragment>
-                ))}
-            </Select>
-            <Select style={{ transform: `translateX(${OPTION_WIDTH}px)` }}>
-                <rect
-                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2}
-                    width={OPTION_WIDTH}
-                    height={OPTION_HEIGHT}
-                    fill="#fff"
-                    stroke="#0027b4"
-                    strokeWidth="1"
-                />
-                <text
-                    x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                    y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2}
-                    textAnchor="middle"
-                    stroke="none"
-                    fill="#0027b4"
-                >
-                    {toCol}
-                </text>
-                {toCols.map((col, i) => (
-                    <Fragment key={i}>
-                        <rect
-                            className="option type"
-                            x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                            y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 + (i + 1) * OPTION_HEIGHT + 1}
-                            width={OPTION_WIDTH}
-                            height={OPTION_HEIGHT}
-                            fill="#fff"
-                            stroke="#888"
-                            strokeWidth="1"
-                            onClick={e => {
-                                e.stopPropagation();
-                                setToCol(col);
-                            }}
-                        />
-                        <text
-                            className="option"
-                            x={(from.x + to.x) / 2 + BOX_WIDTH / 2 - OPTION_WIDTH / 2}
-                            y={(from.y + to.y) / 2 + BOX_HEIGHT / 2 - OPTION_HEIGHT / 2 + (i + 1) * OPTION_HEIGHT + 1}
-                            textAnchor="middle"
-                            stroke="none"
-                            fill="currentColor"
-                        >
-                            {col}
-                        </text>
-                    </Fragment>
-                ))}
-            </Select>
+            <SVGDropdown<typeof joinOpt>
+                cx={cx}
+                cy={cy}
+                dx={0}
+                options={allJoinTypes}
+                curIdx={allJoinTypes.findIndex(opt => opt === joinOpt)}
+                onChange={idx => setJoinOpt(allJoinTypes[idx])}
+                actions={[
+                    {
+                        text: 'x',
+                        action: deleteLink,
+                        color: '#f22',
+                    },
+                    {
+                        text: '⇋',
+                        action: reverse,
+                    },
+                ]}
+            />
+            <SVGDropdown
+                cx={cx}
+                cy={cy}
+                dx={1}
+                options={to.allCols}
+                curIdx={to.colIdx}
+                onChange={idx => to.setColIdx(idx)}
+            />
         </>
     );
 });

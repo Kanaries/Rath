@@ -1,6 +1,5 @@
-import { DragEvent, memo, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
+import { FC, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { IDBNode } from "./localTypes";
 import { DBBox } from ".";
 
 
@@ -26,60 +25,73 @@ const Button = styled.div({
 });
 
 export interface DBNodeProps {
-    node: IDBNode;
-    handleDragStart: (e: DragEvent<HTMLSpanElement>) => void;
-    beginPath: (e: MouseEvent<HTMLDivElement>) => void;
-    id: number;
-    linkingId: number | null;
-    canLink: boolean;
+    label: string;
+    layout: {
+        readonly x: number;
+        readonly y: number;
+    };
+    handleDragStart: (offset: [number, number]) => void;
+    beginPath: () => void;
+    readyToLink: boolean;
+    isLinking: boolean;
+    readyToBeLinked: boolean;
     handleLinkOver: () => void;
-    handleLinkOut: (e: MouseEvent<HTMLDivElement>) => void;
+    handleLinkOut: (x: number, y: number) => void;
 }
 
-const DBNode = memo<DBNodeProps>(function DBNode({
-    node, handleDragStart, beginPath, id, linkingId, canLink, handleLinkOver, handleLinkOut,
-}) {
-    const [active, setActive] = useState(false);
+const DBNode: FC<DBNodeProps> = ({
+    label, layout, handleDragStart, beginPath, isLinking, readyToLink, readyToBeLinked, handleLinkOver, handleLinkOut,
+}) => {
+    const [showTools, setShowTools] = useState(false);
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => setActive(false), [node]);
+    useEffect(() => setShowTools(false), [label]);
 
     const handleMouseEnter = useCallback(() => {
-        if (linkingId === id) {
+        if (isLinking) {
             return;
-        } else if (linkingId === null) {
-            setActive(true);
+        } else if (!readyToBeLinked) {
+            setShowTools(true);
         } else {
             handleLinkOver();
         }
-    }, [linkingId, id, handleLinkOver]);
+    }, [isLinking, readyToBeLinked, handleLinkOver]);
 
     const handleMouseLeave = useCallback((e: MouseEvent<HTMLDivElement>) => {
-        if (linkingId === id) {
+        if (isLinking) {
             return;
-        } else if (linkingId === null) {
-            setActive(false);
+        } else if (!readyToBeLinked) {
+            setShowTools(false);
         } else {
-            handleLinkOut(e);
+            handleLinkOut(e.clientX, e.clientY);
         }
-    }, [linkingId, id, handleLinkOut]);
+    }, [isLinking, readyToBeLinked, handleLinkOut]);
 
     return (
         <Container
-            style={{ left: `${node.x}px`, top: `${node.y}px` }}
+            style={{ left: `${layout.x}px`, top: `${layout.y}px` }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             ref={containerRef}
         >
             <DBBox
                 draggable
-                onDragStart={handleDragStart}
-                title={node.source}
+                onDragStart={e => {
+                    const target = e.target as HTMLSpanElement;
+                    const box = target.getBoundingClientRect();
+                    e.dataTransfer.setData('text/plain', label);
+                    e.dataTransfer.dropEffect = 'move';
+                    handleDragStart([
+                        e.clientX - box.x,
+                        e.clientY - box.y,
+                    ]);
+                }}
+                title={label}
             >
-                {node.source}
+                {label}
             </DBBox>
-            {(linkingId === id || (linkingId === null && active)) && canLink && (
+            {(isLinking || showTools) && readyToLink && (
                 <>
                     <Button
                         style={{
@@ -87,7 +99,7 @@ const DBNode = memo<DBNodeProps>(function DBNode({
                             top: '50%',
                             transform: 'translate(0, -50%)',
                         }}
-                        onMouseDown={e => canLink && beginPath(e)}
+                        onMouseDown={() => readyToLink && beginPath()}
                     />
                     <Button
                         style={{
@@ -95,7 +107,7 @@ const DBNode = memo<DBNodeProps>(function DBNode({
                             top: '50%',
                             transform: 'translate(0, -50%)',
                         }}
-                        onMouseDown={e => canLink && beginPath(e)}
+                        onMouseDown={() => readyToLink && beginPath()}
                     />
                     <Button
                         style={{
@@ -103,7 +115,7 @@ const DBNode = memo<DBNodeProps>(function DBNode({
                             top: 0,
                             transform: 'translate(-50%, 0)',
                         }}
-                        onMouseDown={e => canLink && beginPath(e)}
+                        onMouseDown={() => readyToLink && beginPath()}
                     />
                     <Button
                         style={{
@@ -111,13 +123,13 @@ const DBNode = memo<DBNodeProps>(function DBNode({
                             bottom: 0,
                             transform: 'translate(-50%, 0)',
                         }}
-                        onMouseDown={e => canLink && beginPath(e)}
+                        onMouseDown={() => readyToLink && beginPath()}
                     />
                 </>
             )}
         </Container>
     );
-});
+};
 
 
 export default DBNode;

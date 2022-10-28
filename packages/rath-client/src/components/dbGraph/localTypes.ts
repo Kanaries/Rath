@@ -7,13 +7,13 @@ export interface IDBNode {
 export interface IDBEdge {
     from: {
         table: number;
-        col: string;
+        colIdx: number;
     };
     to: {
         table: number;
-        col: string;
+        colIdx: number;
     };
-    type: 'LEFT JOIN' | 'RIGHT JOIN' | 'INNER JOIN' | 'FULL JOIN';
+    joinOpt: 'LEFT JOIN' | 'RIGHT JOIN' | 'INNER JOIN' | 'FULL JOIN';
 }
 
 export interface IDBGraph {
