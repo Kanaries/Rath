@@ -6,15 +6,13 @@ import type { View } from 'vega';
 
 import ReactVega from '../../components/react-vega';
 import VisErrorBoundary from '../../components/visErrorBoundary';
-import type { IFieldMeta, IRow, IVegaSubset } from '../../interfaces';
+import type { IRow, IVegaSubset } from '../../interfaces';
 import type { IFilter } from '../../interfaces';
-
-import type { DashboardItem } from '.';
+import type { DashboardItem } from '../../store/dashboardStore';
 
 
 interface DashboardChartProps {
     dataSource: IRow[];
-    fieldMeta: IFieldMeta[];
     subset: IVegaSubset;
     item: Readonly<DashboardItem>;
     filters: IFilter[];
@@ -25,7 +23,7 @@ interface DashboardChartProps {
 }
 
 const DashboardChart: FC<DashboardChartProps> = ({
-    item, dataSource, fieldMeta, filters, subset, updateFilters, toggleFilter, remove, edit,
+    item, dataSource, filters, subset, updateFilters, toggleFilter, remove, edit,
 }) => {
     const data = useMemo(() => applyFilters(dataSource, filters), [dataSource, filters]);
 
@@ -33,29 +31,29 @@ const DashboardChart: FC<DashboardChartProps> = ({
         const xField = subset.encoding.x?.field;
         const yField = subset.encoding.y?.field;
 
-        const anyFilterApplied = typeof item.filter !== 'boolean' && item.filter.length;
-        const rangeFilterApplied = anyFilterApplied && item.filter.every(f => f.type === 'range');
-        const setFilterApplied = anyFilterApplied && item.filter.every(f => f.type === 'set');
+        const anyFilterApplied = item.filter.enabled && item.filter.data.length > 0;
+        const rangeFilterApplied = anyFilterApplied && item.filter.data.every(f => f.type === 'range');
+        const setFilterApplied = anyFilterApplied && item.filter.data.every(f => f.type === 'set');
 
         const xRange = (rangeFilterApplied ? (
-            item.filter.find(f => f.fid === xField) as IFilter & { type: 'range' } | undefined
+            item.filter.data.find(f => f.fid === xField) as IFilter & { type: 'range' } | undefined
         )?.range : undefined) ?? [-Infinity, Infinity];
         const yRange = (rangeFilterApplied ? (
-            item.filter.find(f => f.fid === yField) as IFilter & { type: 'range' } | undefined
+            item.filter.data.find(f => f.fid === yField) as IFilter & { type: 'range' } | undefined
         )?.range : undefined) ?? [-Infinity, Infinity];
 
         const xValues = (setFilterApplied ? (
-            item.filter.find(f => f.fid === xField) as IFilter & { type: 'set' } | undefined
+            item.filter.data.find(f => f.fid === xField) as IFilter & { type: 'set' } | undefined
         )?.values : []) ?? [];
         const yValues = (setFilterApplied ? (
-            item.filter.find(f => f.fid === yField) as IFilter & { type: 'set' } | undefined
+            item.filter.data.find(f => f.fid === yField) as IFilter & { type: 'set' } | undefined
         )?.values : []) ?? [];
 
         return { xField, yField, rangeFilterApplied, setFilterApplied, xRange, yRange, xValues, yValues };
     }, [subset, item]);
 
     const spec = useMemo(() => {
-        if (item.filter === false) {
+        if (item.filter.enabled === false) {
             return {
                 ...subset,
                 width: item.chartSize.w,
@@ -66,7 +64,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
         return {
             data: subset.data,
             layer: [{
-                params: item.filter ? [{
+                params: item.filter.enabled ? [{
                     name: 'brush',
                     value: rangeFilterApplied ? {
                         x: [xRange[0], xRange[1]],
@@ -97,7 +95,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
             }, {
                 transform: [{
                     filter: {
-                        param: typeof item.filter === 'object' && item.filter[0]?.type === 'set' ? 'sl' : 'brush',
+                        param: item.filter.enabled && item.filter.data[0]?.type === 'set' ? 'sl' : 'brush',
                     },
                 }],
                 mark: subset.mark,
@@ -180,18 +178,18 @@ const DashboardChart: FC<DashboardChartProps> = ({
                         dataSource={data}
                         spec={spec}
                         actions={false}
-                        signalHandler={item.filter ? signalListeners : undefined}
+                        signalHandler={item.filter.enabled ? signalListeners : undefined}
                     />
                 </VisErrorBoundary>
             </div>
             <div
                 className="group"
-                style={{ opacity: item.filter ? 1 : undefined }}
+                style={{ opacity: item.filter.enabled ? 1 : undefined }}
                 onMouseDown={e => e.stopPropagation()}
             >
                 <CommandButton
                     iconProps={{
-                        iconName: item.filter ? 'FilterSolid' : 'Filter',
+                        iconName: item.filter.enabled ? 'FilterSolid' : 'Filter',
                     }}
                     onClick={toggleFilter}
                 />
