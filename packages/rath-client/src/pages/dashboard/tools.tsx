@@ -2,8 +2,7 @@ import styled from 'styled-components';
 import { useCallback, forwardRef } from 'react';
 import { IconButton } from '@fluentui/react';
 import { Divider } from '@material-ui/core';
-
-import type { DashboardItem } from '.';
+import type { DashboardItem } from '../../store/dashboardStore';
 
 
 const ToolGroup = styled.div`
