@@ -247,7 +247,7 @@
         },
         "extend": {
             "title": "Extend Information",
-            "manual": "LaTiao",
+            "manual": "Customized computation",
             "editor": "Editor",
             "autoExtend": "More fields can be generated from { count } existing fields to enhance analyze and exploration.",
             "notDecided": "{ count } fields has not been decided.",

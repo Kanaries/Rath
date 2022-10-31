@@ -9,7 +9,7 @@ interface ReactVegaProps {
   spec: any;
   actions?: boolean;
   signalHandler?: {
-    [key: string]: (name: any, value: any) => void
+    [key: string]: (name: any, value: any, view: View) => void
   }
 }
 
@@ -39,7 +39,11 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
         const view = res.view;
         viewRef.current = view;
         for (let key in signalHandler) {
-          view.addSignalListener('sl', signalHandler[key]);
+          try {
+            view.addSignalListener(key, (n, v) => signalHandler[key](n, v, view));
+          } catch (error) {
+            console.warn(error);
+          }
         }
       })
     }
@@ -54,13 +58,21 @@ const ReactVega: React.FC<ReactVegaProps> = props => {
   useEffect(() => {
     if (viewRef.current && signalHandler) {
       for (let key in signalHandler) {
-        viewRef.current.addSignalListener('sl', signalHandler[key]);
+        try {
+          viewRef.current.addSignalListener(key, (n, v) => signalHandler[key](n, v, viewRef.current!));
+        } catch (error) {
+          console.warn(error);
+        }
       }
     }
     return () => {
       if (viewRef.current && signalHandler) {
         for (let key in signalHandler) {
-          viewRef.current.removeSignalListener('sl', signalHandler[key]);
+          try {
+            viewRef.current.removeSignalListener(key, (n, v) => signalHandler[key](n, v, viewRef.current!));
+          } catch (error) {
+            console.warn(error);
+          }
         }
       }
     }

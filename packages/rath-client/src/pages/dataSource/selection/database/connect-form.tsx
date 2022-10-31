@@ -3,7 +3,7 @@ import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, Stack, TextFie
 import intl from 'react-intl-universal';
 import datasetOptions from './config';
 import { renderDropdownItem, renderDropdownTitle } from './custom-dropdown';
-import type { SupportedDatabaseType } from './type';
+import type { DatabaseOptions, SupportedDatabaseType } from './type';
 import { StackTokens } from '.';
 
 
@@ -11,8 +11,8 @@ interface ConnectFormProps {
     sourceType: SupportedDatabaseType;
     setSourceType: (sType: SupportedDatabaseType) => void;
     whichDatabase: typeof datasetOptions[0];
-    sourceId: string | null | undefined;
-    connectUri: string | undefined;
+    sourceId: DatabaseOptions['sourceId'];
+    connectUri: DatabaseOptions['connectUri'];
     setConnectUri: (uri: string) => void;
     handleConnectionTest: () => Promise<void>;
 }
@@ -67,7 +67,7 @@ const ConnectForm: FC<ConnectFormProps> = ({
                 name={`connectUri:${whichDatabase.key}`}
                 title={intl.get('dataSource.connectUri')}
                 aria-required
-                value={connectUri ?? ''}
+                value={connectUri}
                 placeholder={whichDatabase.rule}
                 errorMessage={
                     sourceId === null
@@ -78,7 +78,7 @@ const ConnectForm: FC<ConnectFormProps> = ({
                     setConnectUri(uri ?? '');
                 }}
                 onKeyPress={e => {
-                    if (e.key === 'Enter' && !(!connectUri || sourceId === 'pending' || sourceId === null)) {
+                    if (e.key === 'Enter') {
                         handleConnectionTest();
                     }
                 }}
@@ -105,11 +105,7 @@ const ConnectForm: FC<ConnectFormProps> = ({
             />
             <PrimaryButton
                 text={intl.get('dataSource.btn.connect')}
-                disabled={
-                    !connectUri
-                    || sourceId === 'pending'
-                    || sourceId === null
-                }
+                disabled={!connectUri || sourceId.status !== 'empty'}
                 onClick={handleConnectionTest}
             />
         </Stack>

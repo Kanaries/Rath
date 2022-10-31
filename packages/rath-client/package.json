@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@babel/parser": "^7.19.6",
+    "@codemirror/lang-sql": "^6.3.0",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
     "@fluentui/font-icons-mdl2": "^8.4.13",
@@ -21,6 +22,7 @@
     "@material-ui/core": "^5.0.0-beta.5",
     "airtable": "^0.11.4",
     "ali-react-table": "^2.6.1",
+    "codemirror": "^6.0.1",
     "dayjs": "^1.10.7",
     "immer": "^9.0.6",
     "localforage": "^1.10.0",

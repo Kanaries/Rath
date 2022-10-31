@@ -1,7 +1,5 @@
 import { notify } from '../../../../components/error';
-import type { IDatasetBase } from '../../../../interfaces';
 import { getRathError } from '../../../../rath-error';
-import { transformRawDataService } from '../../utils';
 import { SupportedDatabaseType } from './type';
 import type { TableData, TableLabels } from '.';
 
@@ -40,6 +38,25 @@ interface TestConnectionResult {
 type ListDatabasesResult = {
     success: true;
     data: string[];
+} | {
+    success: false;
+    message: string;
+};
+
+export type TableInfo = {
+    name: string;
+    meta: {
+        key: string;
+        colIndex: number;
+        dataType: string | null;
+    }[];
+};
+
+type TableList = TableInfo[];
+
+type ListTableResult = {
+    success: true;
+    data: TableList;
 } | {
     success: false;
     message: string;
@@ -151,7 +168,7 @@ export const listSchemas = async (sourceId: number, db: string | null): Promise<
     }
 };
 
-export const listTables = async (sourceId: number, db: string | null, schema: string | null): Promise<string[] | null> => {
+export const listTables = async (sourceId: number, db: string | null, schema: string | null): Promise<TableList | null> => {
     try {
         const res = await fetch(
             `${getAPIPathPrefix(apiPathPrefix)}/table_list`, {
@@ -165,7 +182,7 @@ export const listTables = async (sourceId: number, db: string | null, schema: st
                     schema,
                 }),
             }
-        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListDatabasesResult;
+        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListTableResult;
 
         return res.success ? res.data : (() => { throw new Error(res.message) })();
     } catch (error) {
@@ -206,7 +223,7 @@ export const fetchTablePreview = async (sourceId: number, db: string | null, sch
     }
 };
 
-export const requestSQL = async (sourceId: number, queryString: string): Promise<IDatasetBase | null> => {
+export const requestSQL = async (sourceId: number, queryString: string) => {
     try {
         const res = await fetch(
             `${getAPIPathPrefix(apiPathPrefix)}/execute`, {
@@ -227,13 +244,7 @@ export const requestSQL = async (sourceId: number, queryString: string): Promise
             return null;
         }
 
-        return await transformRawDataService(
-            data.rows.map(
-                row => Object.fromEntries(
-                    row.map<[string, any]>((val, colIdx) => [data.columns?.[colIdx]?.key ?? `${colIdx}`, val])
-                )
-            )
-        );
+        return data;
     } catch (error) {
         const rathError = getRathError('QueryExecutionError', error, { sql: queryString });
 

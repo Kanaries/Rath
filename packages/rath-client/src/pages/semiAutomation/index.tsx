@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { ActionButton } from '@fluentui/react';
+import { ActionButton, CommandButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../store';
 import { throttle } from '../../utils';
@@ -11,10 +11,12 @@ import PredictZone from './predictZone';
 
 const PatternPage: React.FC = () => {
     const focusZoneContainer = useRef<HTMLDivElement>(null);
-    const { semiAutoStore } = useGlobalStore();
+    const { semiAutoStore, collectionStore } = useGlobalStore();
     const { 
         fieldMetas,
-        dataSource
+        dataSource,
+        mainView,
+        mainViewSpec,
     } = semiAutoStore;
 
     useEffect(() => {
@@ -58,6 +60,18 @@ const PatternPage: React.FC = () => {
                     semiAutoStore.setShowSettings(true);
                 }}
             />
+            {mainView && mainViewSpec && (
+                <CommandButton
+                    style={{ float: 'right' }}
+                    iconProps={{ iconName: collectionStore.collectionContains(
+                        fieldMetas, mainViewSpec, mainView.filters
+                    ) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                    text={intl.get('common.star')}
+                    onClick={() => {
+                        collectionStore.toggleCollectState(fieldMetas, mainViewSpec, mainView.filters)
+                    }}
+                />
+            )}
             <FocusZone />
             {/* <DefaultButton disabled={renderAmount >= specs.length}
                 style={{ marginTop: '5px' }}

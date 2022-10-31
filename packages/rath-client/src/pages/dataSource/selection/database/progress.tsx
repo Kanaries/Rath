@@ -37,7 +37,7 @@ interface StageInfo {
     desc: string;
 }
 
-const getStageInfo = (progress: Readonly<Partial<DatabaseOptions>>): StageInfo[] => {
+const getStageInfo = (progress: Readonly<DatabaseOptions>): StageInfo[] => {
     const stages = steps.map<StageInfo>((step, i) => ({
         label: step.label,
         title: intl.get(`dataSource.dbProgress.${i}.label`),
@@ -47,26 +47,16 @@ const getStageInfo = (progress: Readonly<Partial<DatabaseOptions>>): StageInfo[]
         desc: '',
     }));
 
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    const [
+    const {
         connectorReady,
-        _1,
-        _2,
         sourceId,
-        _4,
-        _5,
-        _6,
-        _7,
-        _8,
-        selectedTable,
-        tablePreview,
-        _11,
-    ] = progress;
-    /* eslint-enable @typescript-eslint/no-unused-vars */
+        table,
+        preview,
+    } = progress;
 
     let cursorFixed = false;
 
-    if (sourceId === undefined || sourceId === 'pending') {
+    if (sourceId.status !== 'resolved') {
         stages[0]!.active = connectorReady ?? false;
 
         if (connectorReady) {
@@ -87,7 +77,7 @@ const getStageInfo = (progress: Readonly<Partial<DatabaseOptions>>): StageInfo[]
     }
 
     if (!cursorFixed) {
-        if (selectedTable === undefined) {
+        if (table.status !== 'resolved') {
             stages[1]!.active = true;
             stages[1]!.desc = intl.get('dataSource.dbProgress.1.msgRunning');
             cursorFixed = true;
@@ -98,7 +88,7 @@ const getStageInfo = (progress: Readonly<Partial<DatabaseOptions>>): StageInfo[]
     }
 
     if (!cursorFixed) {
-        if (tablePreview === undefined || typeof tablePreview === 'string') {
+        if (preview.status !== 'resolved') {
             stages[2]!.active = true;
             stages[2]!.desc = intl.get('dataSource.dbProgress.2.msgRunning');
             cursorFixed = true;
@@ -118,7 +108,7 @@ const getStageInfo = (progress: Readonly<Partial<DatabaseOptions>>): StageInfo[]
 };
 
 interface ProgressProps {
-    progress: Readonly<Partial<DatabaseOptions>>;
+    progress: Readonly<DatabaseOptions>;
 }
 
 const Progress: React.FC<ProgressProps> = ({ progress }) => {
