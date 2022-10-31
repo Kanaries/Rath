@@ -123,7 +123,8 @@ const Container = styled.div({
             overflow: 'hidden scroll',
             padding: '0.2em 0 1em',
             height: '6em',
-            border: '1px solid',
+            border: '1px solid #8888',
+            borderTop: 'none',
             display: 'flex',
             flexDirection: 'column',
     
@@ -138,7 +139,7 @@ const Container = styled.div({
                 padding: '0.2em 1em',
                 display: 'flex',
                 flexDirection: 'row',
-                '.highlight': {
+                '&.highlight': {
                     backgroundColor: 'rgba(0, 120, 212, 0.12)',
                 },
                 ':hover': {
@@ -189,7 +190,10 @@ const Container = styled.div({
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'space-around',
+                justifyContent: 'center',
+                '> *': {
+                    marginInline: '1em',
+                },
             },
         },
     },
@@ -536,6 +540,11 @@ const LaTiaoConsole = observer(() => {
                                         minHeight: '15vmin',
                                         maxHeight: '30vh',
                                     }}
+                                    styles={{
+                                        fieldGroup: {
+                                            border: '1px solid #8888',
+                                        },
+                                    }}
                                     onKeyDown={e => {
                                         if (e.key === 'Tab') {
                                             const target = inputMaybe[maybeIdx];
@@ -543,17 +552,13 @@ const LaTiaoConsole = observer(() => {
                                             if (target) {
                                                 submitMaybe(target.content);
                                                 setMaybeIdx(0);
-                                            } else {
-                                                // const ele = editorRef.current?.querySelector('textarea') as HTMLTextAreaElement;
-
-                                                // setCode(`${
-                                                //     code.slice(0, ele.selectionStart)
-                                                // }`);
                                             }
 
                                             e.preventDefault();
-                                        // } else if (e.key === 'ArrowDown') {
-
+                                        } else if (e.key === 'ArrowDown') {
+                                            setMaybeIdx((maybeIdx + 1) % inputMaybe.length);
+                                        } else if (e.key === 'ArrowUp') {
+                                            setMaybeIdx((maybeIdx + inputMaybe.length - 1) % inputMaybe.length);
                                         }
                                     }}
                                 />
@@ -590,6 +595,14 @@ const LaTiaoConsole = observer(() => {
                                                 setMaybeIdx(0);
                                             }
                                         }
+                                        ref={e => {
+                                            if (e && i === maybeIdx) {
+                                                e.scrollIntoView({
+                                                    behavior: 'smooth',
+                                                    block: 'nearest',
+                                                });
+                                            }
+                                        }}
                                     >
                                         <span>
                                             {intl.get(`latiao.maybe.${maybe.type}`)}
@@ -604,7 +617,7 @@ const LaTiaoConsole = observer(() => {
                                                 </small>
                                             )}
                                         </div>
-                                        {i === 0 && (
+                                        {i === maybeIdx && (
                                             <span>
                                                 {'[Tab]'}
                                             </span>
