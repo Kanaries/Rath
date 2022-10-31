@@ -255,8 +255,6 @@ const Dashboard: React.FC = () => {
         ];
     };
 
-    // console.log(JSON.parse(JSON.stringify(items)), JSON.parse(JSON.stringify(dashboardStore.page)));
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const filter$ = useMemo(() => new Subject<{ index: number; data: IFilter[] }>(), [dashboardStore.page]);
 
@@ -365,17 +363,13 @@ const Dashboard: React.FC = () => {
                             key={i}
                             type={targetField.analyticType}
                             text={filterDesc}
-                            onRemove={() => {
-                                dashboardStore.deleteFilter(i);
-                            }}
+                            onRemove={() => dashboardStore.deleteFilter(i)}
                         />
                     );
                 })}
                 <FilterCreationPill
                     fields={fieldMetas}
-                    onFilterSubmit={(field, filter) => {
-                        dashboardStore.addFilter(field, filter);
-                    }}
+                    onFilterSubmit={(field, filter) => dashboardStore.addFilter(field, filter)}
                 />
             </ResourceList>
             <EditArea>

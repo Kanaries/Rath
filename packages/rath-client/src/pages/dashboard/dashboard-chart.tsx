@@ -2,6 +2,7 @@ import { applyFilters } from '@kanaries/loa';
 import { observer } from 'mobx-react-lite';
 import { FC, useMemo } from 'react';
 import { CommandButton } from '@fluentui/react';
+import type { View } from 'vega';
 
 import ReactVega from '../../components/react-vega';
 import VisErrorBoundary from '../../components/visErrorBoundary';
@@ -28,6 +29,31 @@ const DashboardChart: FC<DashboardChartProps> = ({
 }) => {
     const data = useMemo(() => applyFilters(dataSource, filters), [dataSource, filters]);
 
+    const { xField, yField, rangeFilterApplied, xRange, yRange, xValues, yValues } = useMemo(() => {
+        const xField = subset.encoding.x?.field;
+        const yField = subset.encoding.y?.field;
+
+        const anyFilterApplied = typeof item.filter !== 'boolean' && item.filter.length;
+        const rangeFilterApplied = anyFilterApplied && item.filter.every(f => f.type === 'range');
+        const setFilterApplied = anyFilterApplied && item.filter.every(f => f.type === 'set');
+
+        const xRange = (rangeFilterApplied ? (
+            item.filter.find(f => f.fid === xField) as IFilter & { type: 'range' } | undefined
+        )?.range : undefined) ?? [-Infinity, Infinity];
+        const yRange = (rangeFilterApplied ? (
+            item.filter.find(f => f.fid === yField) as IFilter & { type: 'range' } | undefined
+        )?.range : undefined) ?? [-Infinity, Infinity];
+
+        const xValues = (setFilterApplied ? (
+            item.filter.find(f => f.fid === xField) as IFilter & { type: 'set' } | undefined
+        )?.values : []) ?? [];
+        const yValues = (setFilterApplied ? (
+            item.filter.find(f => f.fid === yField) as IFilter & { type: 'set' } | undefined
+        )?.values : []) ?? [];
+
+        return { xField, yField, rangeFilterApplied, setFilterApplied, xRange, yRange, xValues, yValues };
+    }, [subset, item]);
+
     const spec = useMemo(() => {
         if (item.filter === false) {
             return {
@@ -42,32 +68,25 @@ const DashboardChart: FC<DashboardChartProps> = ({
             layer: [{
                 params: item.filter ? [{
                     name: 'brush',
-                    value: typeof item.filter === 'object' ? (
-                        item.filter.length === 2 && item.filter[0].type === 'range' && item.filter[1].type === 'range' ? {
-                            x: item.filter[0].range,
-                            y: item.filter[1].range,
-                        } : item.filter.length === 1 && item.filter[0].type === 'range' ? {
-                            x: item.filter[0].range,
-                        } : undefined
-                    ) : undefined,
+                    value: rangeFilterApplied ? {
+                        x: [xRange[0], xRange[1]],
+                        y: [yRange[0], yRange[1]],
+                    } : undefined,
                     select: {
                         type: 'interval',
                     },
                 }, new Array<typeof subset.mark>(
                     'bar', 'arc', 'point', 'circle', 'rect'
                 ).includes((subset.mark as unknown as { type: typeof subset.mark })?.type) && {
-                    name: 'select',
-                    value: typeof item.filter === 'object' && item.filter[0]?.type === 'set' ? (
-                        item.filter[0].values.map(val => ({
-                            [fieldMeta.find(f => (
-                                (item.filter as (IFilter & { type: 'set' })[])[0].fid === f.fid
-                            ))!.name ?? '']: val,
-                        }))
-                    ) : undefined,
+                    name: 'sl',
+                    value: {
+                        x: xValues,
+                        y: yValues,
+                    },
                     select: {
                         type: 'point',
                     },
-                }].filter(Boolean) : undefined,
+                }].filter(Boolean) as ({ name: string })[] : undefined,
                 mark: subset.mark,
                 encoding: {
                     ...subset.encoding,
@@ -78,7 +97,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
             }, {
                 transform: [{
                     filter: {
-                        param: typeof item.filter === 'object' && item.filter[0]?.type === 'set' ? 'select' : 'brush',
+                        param: typeof item.filter === 'object' && item.filter[0]?.type === 'set' ? 'sl' : 'brush',
                     },
                 }],
                 mark: subset.mark,
@@ -90,67 +109,81 @@ const DashboardChart: FC<DashboardChartProps> = ({
             width: item.chartSize.w,
             height: item.chartSize.h,
         };
-    }, [item.filter, item.chartSize, fieldMeta, subset]);
+    }, [item.filter, item.chartSize, subset, rangeFilterApplied, xRange, yRange, xValues, yValues]);
+
+    const signalListeners = useMemo<{
+        [key: string]: (name: any, value: any, view: View) => void;
+    }>(() => {
+        // @see https://github.com/vega/react-vega-lite/issues/7#issuecomment-406105598
+        if (!spec.layer) {
+            return {};
+        }
+
+        const behaviors = spec.layer[0].params?.map(p => p.name) ?? [];
+
+        if (behaviors.length === 0) {
+            return {};
+        }
+
+        const listeners: { [key: string]: (name: any, value: any, view: View) => void } = {};
+
+        for (const bhv of behaviors) {
+            switch (bhv) {
+                case 'brush': {
+                    listeners['brush'] = (name: 'brush', data: { [fid: string]: [number, number] }) => {
+                        // 交互中连续触发
+                        if (Object.keys(data).length === 0) {
+                            updateFilters([]);
+                        }
+                    };
+                    listeners['brush_tuple'] = (name: 'brush_tuple', data: { fields: { field: string }[]; values: [number, number][] } | null) => {
+                        if (data) {
+                            // 仅结束时触发，但选中组为空时不触发
+                            updateFilters(data.fields.map((f, i) => ({
+                                type: 'range',
+                                fid: f.field,
+                                range: [
+                                    Math.min(...data.values[i]),
+                                    Math.max(...data.values[i]),
+                                ],
+                            })));
+                        }
+                    };
+                    break;
+                }
+                case 'sl': {
+                    // @see https://github.com/vega/vega-lite/issues/2790
+                    listeners['sl'] = (name: 'sl', data: { vlPoint: any; [field: string]: any[] }, view: View) => {
+                        const filters = Object.keys(data).filter(key => [xField, yField].includes(key)).map<IFilter>(key => ({
+                            type: 'set',
+                            fid: key,
+                            values: data[key],
+                        }));
+                        updateFilters(filters);
+                    };
+                    break;
+                }
+                default: {
+                    console.warn(`Param name "${bhv}" is not supported.`)
+                }
+            }
+        }
+
+        return listeners;
+    }, [spec, updateFilters, xField, yField]);
 
     return (
         <>
-            <VisErrorBoundary>
-                <ReactVega
-                    dataSource={data}
-                    spec={spec}
-                    actions={false}
-                    signalHandler={item.filter ? {
-                        brush: (name: 'brush', filters: {
-                            [name: string]: [number, number];
-                        }) => {
-                            const filter = Object.entries(filters).map<IFilter | null>(([k, v]) => {
-                                const f = fieldMeta.find(f => f.fid === k);
-
-                                return f ? {
-                                    type: 'range',
-                                    fid: f.fid,
-                                    range: v,
-                                } : null;
-                            }).filter(Boolean) as IFilter[];
-
-                            updateFilters(filter);
-                        },
-                        select: (name: 'select', value, view) => {
-                            const ids = [...(value as { _vgsid_?: number[] })._vgsid_ ?? []];
-                            const items = ['data_1', 'data_0'].map(name => {
-                                try {
-                                    return view.data(name);
-                                } catch (error) {
-                                    return [];
-                                }
-                            }).flat() as { [key: string]: string | number }[];
-                            const chosen = items.filter(
-                                d => ids.includes(d['_vgsid_'] as number ?? -1)
-                            );
-
-                            if (chosen.length) {
-                                const keys = Object.keys(chosen[0]);
-                                const [key] = keys.filter(k => !['__count', '_vgsid_'].includes(k));
-                                const f = fieldMeta.find(f => f.name === key);
-
-                                if (f) {
-                                    const filter: IFilter = {
-                                        type: 'set',
-                                        fid: f.fid,
-                                        values: chosen.map(d => d[key]),
-                                    };
-
-                                    updateFilters([filter]);
-
-                                    return;
-                                }
-                            }
-
-                            updateFilters([]);
-                        },
-                    } : undefined}
-                />
-            </VisErrorBoundary>
+            <div onMouseDown={e => e.stopPropagation()}>
+                <VisErrorBoundary>
+                    <ReactVega
+                        dataSource={data}
+                        spec={spec}
+                        actions={false}
+                        signalHandler={item.filter ? signalListeners : undefined}
+                    />
+                </VisErrorBoundary>
+            </div>
             <div
                 className="group"
                 style={{ opacity: item.filter ? 1 : undefined }}

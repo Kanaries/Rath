@@ -70,7 +70,7 @@ export interface QueryEditorProps {
     tables: TableInfo[];
     query: string;
     setQuery: (query: string) => void;
-    preview: () => void;
+    preview: (query?: string) => void;
 }
 
 export type QueryEditorMode = 'diagram' | 'query';

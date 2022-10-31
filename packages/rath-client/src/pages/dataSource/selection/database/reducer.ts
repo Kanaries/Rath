@@ -351,16 +351,17 @@ const useDatabaseReducer = (setLoadingAnimation: (show: boolean) => void) => {
         setQueryString: (sql: DatabaseOptions['queryString']) => {
             queryString$.next(sql);
         },
-        genPreview: () => {
+        genPreview: (sql?: DatabaseOptions['queryString']) => {
             const { sourceId, queryString } = ref.current;
-            if (!queryString || sourceId.status !== 'resolved') {
+            const content = sql ?? queryString;
+            if (!content || sourceId.status !== 'resolved') {
                 return;
             }
             preview$.next(Promise.resolve({
                 status: 'empty',
             }));
             setLoadingAnimation(true);
-            const task = requestSQL(sourceId.value, queryString);
+            const task = requestSQL(sourceId.value, content);
             preview$.next(task.then(data => {
                 if (data) {
                     return {
