@@ -1,6 +1,7 @@
 # Rath
 
-![](https://img.shields.io/twitter/follow/kanaries_data?style=social)
+[![kanaries data](https://img.shields.io/twitter/follow/kanaries_data?style=social)](https://twitter.com/kanaries_data)
+
 ![](https://img.shields.io/badge/license-AGPL-brightgreen)
 ![](https://img.shields.io/github/stars/kanaries/rath?color=%23ff85c0)
 ![](https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build)
