@@ -179,21 +179,6 @@ const EditArea = styled.div`
 
 const VIEW_NUM_IN_PAGE = 5;
 
-export type DashboardItem = {
-    viewId: string;
-    layout: {
-        x: number;
-        y: number;
-        w: number;
-        h: number;
-    };
-    chartSize: {
-        w: number;
-        h: number;
-    };
-    filter: IFilter[] | boolean;
-};
-
 const Dashboard: React.FC = () => {
     const { collectionStore, dataSourceStore, dashboardStore, commonStore, semiAutoStore } = useGlobalStore();
     const { collectionList } = collectionStore;
@@ -201,7 +186,7 @@ const Dashboard: React.FC = () => {
 
     const [pageIndex, setPageIndex] = useState(0);
 
-    const { items, filters } = dashboardStore.page;
+    const { items, data: { filters } } = dashboardStore.page;
     const pageSize = dashboardStore.pages.length;
 
     const addItem = useCallback((item: IInsightVizView) => {
@@ -217,7 +202,9 @@ const Dashboard: React.FC = () => {
                 w: 2 * 100 - 100,
                 h: 2 * 100 - 80,
             },
-            filter: false,
+            filter: {
+                enabled: false,
+            },
         });
     }, [dashboardStore]);
 
@@ -250,7 +237,7 @@ const Dashboard: React.FC = () => {
             ...vis.filters,
             ...filters.map(f => f.filter),
             ...items.map((item, i) => {
-                return i === index ? [] : typeof item.filter === 'boolean' ? [] : item.filter;
+                return i === index ? [] : item.filter.enabled ? item.filter.data : [];
             }).flat(),
         ];
     };
@@ -270,7 +257,10 @@ const Dashboard: React.FC = () => {
 
             dashboardStore.setItem(index, {
                 ...items[index],
-                filter: data,
+                filter: {
+                    enabled: true,
+                    data,
+                },
             });
         });
 
@@ -402,12 +392,16 @@ const Dashboard: React.FC = () => {
                                 >
                                     <DashboardChart
                                         dataSource={cleanedData}
-                                        fieldMeta={fieldMetas}
                                         subset={vis.spec}
                                         item={item}
                                         filters={mergeFilters(i, vis)}
                                         updateFilters={fs => filter$.next({ index: i, data: fs })}
-                                        toggleFilter={() => dashboardStore.setItem(i, { ...item, filter: !item.filter })}
+                                        toggleFilter={() => dashboardStore.setItem(
+                                            i, {
+                                                ...item,
+                                                filter: item.filter.enabled ? { enabled: false } : { enabled: true, data: [] }
+                                            }
+                                        )}
                                         remove={() => dashboardStore.removeItem(i)}
                                         edit={() => {
                                             semiAutoStore.clearViews();
