@@ -9,7 +9,7 @@ import InferMetaWorker from '../workers/metaInfer.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import FootmanWorker from '../workers/loa/index.worker?worker';
+import LoaWorker from '../workers/loa/index.worker?worker';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
@@ -22,7 +22,7 @@ import FilterWorker from '../workers/filterData.worker?worker';
 import { MessageProps } from '../workers/engine/service';
 
 import { CleanMethod, ICol, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from '../interfaces';
-import { IFootmanProps } from '../workers/loa/service';
+import { ILoaProps } from '../workers/loa/service';
 
 interface SuccessResult<T> {
     success: true;
@@ -205,8 +205,8 @@ export async function rathEngineServerService(props: MessageServerProps) {
     }
 }
 
-export async function footmanEngineService<R = any>(
-    props: IFootmanProps,
+export async function loaEngineService<R = any>(
+    props: ILoaProps,
     mode: 'server' | 'local' = 'local'
 ): Promise<R> {
     try {
@@ -231,8 +231,8 @@ export async function footmanEngineService<R = any>(
                 throw new Error(`[result.fail] ${result.message}`);
             }
         } else {
-            const worker = new FootmanWorker();
-            const result = await workerService<R, IFootmanProps>(worker, props);
+            const worker = new LoaWorker();
+            const result = await workerService<R, ILoaProps>(worker, props);
             worker.terminate();
             if (result.success) {
                 return result.data;

@@ -5,10 +5,9 @@ import { Specification } from "visual-insights";
 import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
 import { labDistVis } from "../../queries/labdistVis";
-import { footmanEngineService } from "../../services/index";
+import { loaEngineService } from "../../services/index";
 import { DataSourceStore } from "../dataSourceStore";
 import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoViews } from "./localTypes";
-
 
 const RENDER_BATCH_SIZE = 5;
 
@@ -191,7 +190,7 @@ export class SemiAutomationStore {
         this.featViews.computing = true
         const { fieldMetas, dataSource, mainView } = this;
         try {
-            const res = await footmanEngineService<IPattern[]>({
+            const res = await loaEngineService<IPattern[]>({
                 dataSource,
                 fields: fieldMetas,
                 task: 'featureSelection',
@@ -211,7 +210,7 @@ export class SemiAutomationStore {
         this.pattViews.computing = true
         const { fieldMetas, dataSource, mainView } = this;
         try {
-            const res = await footmanEngineService<IPattern[]>({
+            const res = await loaEngineService<IPattern[]>({
                 dataSource,
                 fields: fieldMetas,
                 task: 'patterns',
@@ -231,7 +230,7 @@ export class SemiAutomationStore {
         this.pattViews.computing = true;
         const { dataSource, fieldMetas } = this;
         try {
-            const res = await footmanEngineService<IPattern[]>({
+            const res = await loaEngineService<IPattern[]>({
                 dataSource,
                 fields: fieldMetas,
                 task: 'univar'
@@ -251,7 +250,7 @@ export class SemiAutomationStore {
         this.filterViews.computing = true;
         const { fieldMetas, dataSource, mainView } = this;
         try {
-            const res = await footmanEngineService<IPattern[]>({
+            const res = await loaEngineService<IPattern[]>({
                 dataSource,
                 fields: fieldMetas,
                 task: 'filterSelection',
@@ -391,7 +390,7 @@ export class SemiAutomationStore {
         this.featViews.computing = true
         const { fieldMetas, dataSource } = this;
         try {
-            const res = await footmanEngineService<{ features: IFieldMeta[] }>({
+            const res = await loaEngineService<{ features: IFieldMeta[] }>({
                 dataSource,
                 fields: fieldMetas,
                 task: 'comparison',

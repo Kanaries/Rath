@@ -1,13 +1,13 @@
 import { NextVICore, IPattern } from '@kanaries/loa'
 import { IFieldMeta, IRow } from "../../interfaces";
 
-export interface IFootmanProps {
+export interface ILoaProps {
     task: 'univar' | 'patterns' | 'featureSelection' | 'comparison' | 'filterSelection';
     props?: any;
     dataSource: IRow[];
     fields: IFieldMeta[];
 }
-export function serviceHandler(reqProps: IFootmanProps) {
+export function serviceHandler(reqProps: ILoaProps) {
     const { task, props, dataSource, fields } = reqProps
     try {
         if (task === 'univar') return univarService(dataSource, fields, props);
@@ -16,7 +16,7 @@ export function serviceHandler(reqProps: IFootmanProps) {
         if (task === 'comparison') return featureForComparison(dataSource, fields, props);
         if (task === 'filterSelection') return filterSelection(dataSource, fields, props);
     } catch (error: any) {
-        throw new Error(`[footman][${task}]${error}\n${error.stack}`)   
+        throw new Error(`[loa engine][${task}]${error}\n${error.stack}`)   
     }
 }
 

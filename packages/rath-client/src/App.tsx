@@ -18,59 +18,56 @@ import Painter from './pages/painter';
 import Collection from './pages/collection';
 import Dashboard from './pages/dashboard';
 
-
 function App() {
-  const { langStore, commonStore } = useGlobalStore();
-  const { appKey, navMode } = commonStore;
+    const { langStore, commonStore } = useGlobalStore();
+    const { appKey, navMode } = commonStore;
 
-  useEffect(() => {
-    initRathWorker(commonStore.computationEngine);
-    return () => {
-      destroyRathWorker();
-    };
-  }, [commonStore]);
+    useEffect(() => {
+        initRathWorker(commonStore.computationEngine);
+        return () => {
+            destroyRathWorker();
+        };
+    }, [commonStore]);
 
-  if (!langStore.loaded) {
+    if (!langStore.loaded) {
+        return (
+            <div style={{ marginTop: '6em' }}>
+                <Spinner label="Initializing Rath..." size={SpinnerSize.large} />
+            </div>
+        );
+    }
     return (
-    <div style={{ marginTop: '6em' }}>
-      <Spinner label="Initializing Rath..." size={SpinnerSize.large} />
-    </div>
-)
-  }
-  return (
-    <div>
-      <div className="main-app-container">
-        <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '20px' }}>
-          <AppNav />
+        <div>
+            <div className="main-app-container">
+                <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '20px' }}>
+                    <AppNav />
+                </div>
+                <div className="main-app-content">
+                    <div className="message-container">
+                        <MessageSegment />
+                    </div>
+                    {appKey === PIVOT_KEYS.dataSource && <DataSourceBoard />}
+                    {appKey === PIVOT_KEYS.editor && <VisualInterface />}
+                    {appKey === PIVOT_KEYS.support && <SupportPage />}
+                    {appKey === PIVOT_KEYS.megaAuto && <LTSPage />}
+                    {appKey === PIVOT_KEYS.semiAuto && <PatternPage />}
+                    {appKey === PIVOT_KEYS.painter && <Painter />}
+                    {appKey === PIVOT_KEYS.dashBoardDesigner && <ProgressiveDashboard />}
+                    {appKey === PIVOT_KEYS.collection && <Collection />}
+                    {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
+                    <CrInfo />
+                </div>
+            </div>
         </div>
-        <div className="main-app-content">
-        <div className="message-container">
-          <MessageSegment />
-        </div>
-        {appKey === PIVOT_KEYS.dataSource && (
-          <DataSourceBoard />
-        )}
-        {appKey === PIVOT_KEYS.editor && <VisualInterface />}
-        {appKey === PIVOT_KEYS.support && <SupportPage />}
-        {appKey === PIVOT_KEYS.megaAuto && <LTSPage />}
-        {appKey === PIVOT_KEYS.semiAuto && <PatternPage />}
-        {appKey === PIVOT_KEYS.painter && <Painter />}
-        {appKey === PIVOT_KEYS.dashBoardDesigner && <ProgressiveDashboard />}
-        {appKey === PIVOT_KEYS.collection && <Collection />}
-        {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
-        <CrInfo />
-        </div>
-      </div>
-    </div>
-  )
+    );
 }
 
 const OBApp = observer(App);
 
 export default function WrappedApp(): JSX.Element {
-  return (
-    <StoreWrapper>
-        <OBApp />
-    </StoreWrapper>
-  );
+    return (
+        <StoreWrapper>
+            <OBApp />
+        </StoreWrapper>
+    );
 }
