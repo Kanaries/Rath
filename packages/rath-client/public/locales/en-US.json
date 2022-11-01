@@ -40,16 +40,16 @@
     },
     "menu": {
         "dataSource": "DataSource",
-        "editor": "Manual Exploration⭐️",
+        "editor": "Manual Exploration",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
         "megaAuto": "Mega-auto Exploration",
-        "semiAuto": "Semi-auto Exploration⭐️",
+        "semiAuto": "Semi-auto Exploration",
         "devCollection": "Insiders(α)",
         "dashBoardDesigner": "Dashboard Designer",
-        "painter": "Data Painter🚀",
+        "painter": "Data Painter",
         "collection": "Collection",
-        "dashboard": "Dashboard📋"
+        "dashboard": "Dashboard"
     },
     "preference": {
         "title": "preference",
