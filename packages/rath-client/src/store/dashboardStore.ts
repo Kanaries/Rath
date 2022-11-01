@@ -90,11 +90,14 @@ export interface DashboardDocument {
 }
 
 export interface DashboardDocumentOperators {
+    // document level
     copy: () => void;
     remove: () => void;
     download: () => void;
     setName: (name: string) => void;
     setDesc: (desc: string) => void;
+    // data level
+    addCard: (layout: DashboardCard['layout']) => void;
 }
 
 export interface DashboardDocumentWithOperators {
@@ -182,8 +185,8 @@ export default class DashboardStore {
             cards: [],
             config: {
                 size: {
-                    w: 128,
-                    h: 128,
+                    w: 256,
+                    h: 256,
                 },
             },
         });
@@ -232,6 +235,15 @@ export default class DashboardStore {
         this.pages[index].info.description = desc;
         this.pages[index].info.lastModifyTime = Date.now();
     }
+    protected addPageCard(index: number, layout: DashboardCard['layout']) {
+        this.pages[index].cards.push({
+            layout,
+            content: {},
+            config: {
+                appearance: DashboardCardAppearance.Transparent,
+            },
+        });
+    }
 
     public setName(name: string) {
         this.name = name;
@@ -251,6 +263,7 @@ export default class DashboardStore {
                 download: this.downloadPage.bind(this, index),
                 setName: this.setPageName.bind(this, index),
                 setDesc: this.setPageDesc.bind(this, index),
+                addCard: this.addPageCard.bind(this, index),
             },
         };
     }
