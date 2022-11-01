@@ -1,12 +1,18 @@
 import { ChoiceGroup, DefaultButton, Label } from '@fluentui/react';
-import React, { useCallback, useState } from 'react';
-import { useId } from "@fluentui/react-hooks";
+import React, { useCallback, useEffect, useState } from 'react';
+import { useId } from '@fluentui/react-hooks';
 import intl from 'react-intl-universal';
 import { DemoDataAssets, IDemoDataKey, useDemoDataOptions } from '../config';
 import { logDataImport } from '../../../loggers/dataImport';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 
+interface DemoOption {
+    key: string;
+    text: string;
+    url: string;
+    isRelease: boolean;
+}
 interface DemoDataProps {
     onClose: () => void;
     onStartLoading: () => void;
@@ -14,7 +20,7 @@ interface DemoDataProps {
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
 }
 
-function valueFix (ds: IDatasetBase): IDatasetBase {
+function valueFix(ds: IDatasetBase): IDatasetBase {
     for (let field of ds.fields) {
         if (typeof field.analyticType !== 'string') field.analyticType = 'dimension';
         if (typeof field.semanticType !== 'string') field.semanticType = 'nominal';
@@ -23,64 +29,73 @@ function valueFix (ds: IDatasetBase): IDatasetBase {
     return ds;
 }
 
-function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<IDatasetBase> {
+async function getOptionValue() {
+    const res = await fetch('https://chspace.oss-cn-hongkong.aliyuncs.com/api/manifest.json');
+    const result = (await res.json()) as DemoOption[];
+    return result;
+}
+
+function requestDemoData(assetUrl: string): Promise<IDatasetBase> {
     return new Promise<IDatasetBase>((resolve, reject) => {
-        const assetUrl = DemoDataAssets[dsKey];
         let isTimeout = false;
         setTimeout(() => {
             isTimeout = true;
-        }, DEMO_DATA_REQUEST_TIMEOUT)
-        fetch(assetUrl).then(res => res.json())
-            .then(res => {
+        }, DEMO_DATA_REQUEST_TIMEOUT);
+        fetch(assetUrl)
+            .then((res) => res.json())
+            .then((res) => {
                 if (!isTimeout) {
-                    resolve(valueFix(res as IDatasetBase))
+                    resolve(valueFix(res as IDatasetBase));
                 } else {
-                    reject('Demo Data Request Timeout.')
+                    reject('Demo Data Request Timeout.');
                 }
             })
-            .catch(err => reject(err));
-    })
-    // const assetUrl = DemoDataAssets[dsKey];
-    // try {
-    //     const res = await fetch(assetUrl);
-    //     const { dataSource, fields } = await res.json();
-    //     return { dataSource, fields };
-    // } catch (error) {
-    //     console.error(error)
-    //     return {
-    //         dataSource: [],
-    //         fields: []
-    //     }
-    // }
-} 
+            .catch((err) => reject(err));
+    });
+}
 
-const DemoData: React.FC<DemoDataProps> = props => {
+const DemoData: React.FC<DemoDataProps> = (props) => {
     const { onDataLoaded, onClose, onStartLoading, onLoadingFailed } = props;
-    const options = useDemoDataOptions();
+    const [options, setOptions] = useState<DemoOption[]>([]);
     const [dsKey, setDSKey] = useState<IDemoDataKey>('CARS');
-
+    const [urlList, setUrlList] = useState<{ key: string; url: string }[]>([]);
     const loadData = useCallback(() => {
         onStartLoading();
-        requestDemoData(dsKey).then(data => {
-            const { dataSource, fields } = data;
-            onDataLoaded(fields, dataSource);
-            logDataImport({
-                dataType: "Demo",
-                name: dsKey,
-                fields,
-                dataSource: [],
-                size: dataSource.length,
+        const url = urlList.filter((item) => item.key === dsKey)[0].url;
+        requestDemoData(url)
+            .then((data) => {
+                const { dataSource, fields } = data;
+                onDataLoaded(fields, dataSource);
+                logDataImport({
+                    dataType: 'Demo',
+                    name: dsKey,
+                    fields,
+                    dataSource: [],
+                    size: dataSource.length,
+                });
+            })
+            .catch((err) => {
+                onLoadingFailed(err);
             });
-        }).catch((err) => {
-            onLoadingFailed(err);
-        })
         onClose();
-    }, [dsKey, onDataLoaded, onClose, onStartLoading, onLoadingFailed])
+    }, [dsKey, onDataLoaded, onClose, onStartLoading, onLoadingFailed]);
+
+    useEffect(() => {
+        getOptionValue().then((res) => {
+            const newUrl: { key: string; url: string }[] = res.map((item: { key: string; url: string }) => ({
+                key: item.key,
+                url: item.url,
+            }));
+            setUrlList(newUrl);
+            const newOption = res.filter((item) => item.isRelease);
+            setOptions(newOption);
+        });
+    }, []);
 
     const labelId = useId('demo-ds');
     return (
         <div>
-            <Label id={labelId}>{intl.get("dataSource.importData.demo.available")}</Label>
+            <Label id={labelId}>{intl.get('dataSource.importData.demo.available')}</Label>
             <ChoiceGroup
                 options={options}
                 selectedKey={dsKey}
@@ -95,6 +110,6 @@ const DemoData: React.FC<DemoDataProps> = props => {
             </div>
         </div>
     );
-}
+};
 
 export default DemoData;
