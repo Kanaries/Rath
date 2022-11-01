@@ -31,6 +31,13 @@ export type DashboardCard = {
             config: IVisualConfig;
         };
     }>;
+    config: {
+        /**
+         * Appearance of cards.
+         * @default DashboardCardAppearance.Transparent
+         */
+        appearance: DashboardCardAppearance;
+    };
 };
 
 /**
@@ -57,6 +64,11 @@ export type DashboardItem = {
 };
 
 export interface DashboardDocument {
+    info: {
+        name: string;
+        createTime: number;
+        lastModifyTime: number;
+    };
     data: {
         /** Name of the data source, used to display and mention the data source */
         source: string;
@@ -72,37 +84,36 @@ export interface DashboardDocument {
     cards: DashboardCard[];
     config: {
         size: { w: number; h: number };
-        /**
-         * Appearance of cards.
-         * @default DashboardCardAppearance.Transparent
-         */
-        appearance: DashboardCardAppearance;
     };
 }
 
 export default class DashboardStore {
 
+    protected static writeObjectBlob(data: ReadableDashboardObject): Blob {
+        // TODO: optimize
+        const part = JSON.stringify(data);
+        const file = new Blob([ part ], { type: 'text/plain' });
+        return file;
+    }
+
+    protected static async readObjectBlob(blob: Blob): Promise<ReadableDashboardObject> {
+        const text = await blob.text();
+        // TODO: optimize
+        const data = JSON.parse(text) as ReadableDashboardObject;
+        return data;
+    }
+
+    public name: string;
     public pages: DashboardDocument[];
     public cursor: number;
 
     constructor() {
         makeAutoObservable(this);
-        this.pages = [{
-            data: {
-                source: 'context dataset', // TODO: get name from data source
-                filters: [],
-            },
-            items: [],
-            cards: [],
-            config: {
-                size: {
-                    w: 128,
-                    h: 128,
-                },
-                appearance: DashboardCardAppearance.Transparent,
-            },
-        }];
+        this.name = 'My Workspace';
+        this.pages = [];
         this.cursor = 0;
+        // FIXME: remove this call
+        this.newPage();
     }
 
     public addItem(item: DashboardItem) {
@@ -135,6 +146,11 @@ export default class DashboardStore {
 
     public newPage() {
         this.pages.push({
+            info: {
+                name: 'New Dashboard',
+                createTime: Date.now(),
+                lastModifyTime: Date.now(),
+            },
             data: {
                 source: 'context dataset', // TODO: get name from data source
                 filters: [],
@@ -146,7 +162,6 @@ export default class DashboardStore {
                     w: 128,
                     h: 128,
                 },
-                appearance: DashboardCardAppearance.Transparent,
             },
         });
         this.cursor = this.pages.length - 1;
@@ -160,5 +175,18 @@ export default class DashboardStore {
         return this.pages[this.cursor];
     }
 
+    public createObjectBlob(): Blob {
+        const storableState = DashboardStore.writeObjectBlob(this);
+        return storableState;
+    }
+
+    public async loadObjectBlob(data: Blob): Promise<void> {
+        const storedState = await DashboardStore.readObjectBlob(data);
+        this.name = storedState.name;
+        this.pages = storedState.pages;
+        this.cursor = 0;
+    }
+
 }
 
+export type ReadableDashboardObject = Pick<DashboardStore, 'name' | 'pages'>;
