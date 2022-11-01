@@ -1,19 +1,19 @@
 {
-  "name": "visual-insights",
+  "name": "Rath",
   "private": true,
   "version": "1.0.0",
-  "description": "![](https://www.travis-ci.org/ObservedObserver/showme.svg?branch=master) ![](https://img.shields.io/github/license/ObservedObserver/showme)",
+  "description": "![](https://img.shields.io/github/license/Kanaries/Rath)",
   "scripts": {
-    "build": "yarn workspace graphic-walker build && yarn workspace frontend build",
-    "test": "yarn workspace frontend test",
+    "build": "yarn workspace rath-client build",
+    "test": "yarn workspace rath-client test",
     "ui": "npm run test && npm run build && node start.js",
-    "devfront": "yarn workspace frontend start",
+    "devfront": "yarn workspace rath-client start",
     "devback": "yarn workspace backend dev",
     "count": "cloc --exclude-dir=$(tr '\n' ',' < .clocignore) ."
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ObservedObserver/showme.git"
+    "url": "git+https://github.com/Kanaries/Rath.git"
   },
   "keywords": [
     "insights",
@@ -22,7 +22,7 @@
   ],
   "author": "Observed Observer",
   "bugs": {
-    "url": "https://github.com/ObservedObserver/showme/issues"
+    "url": "https://github.com/Kanaries/Rath/issues"
   },
   "workspaces": {
     "packages": [
@@ -42,7 +42,7 @@
     "@types/react-dom": "^17.x",
     "vega-scenegraph": "4.10.1-kanaries-patch"
   },
-  "homepage": "https://github.com/ObservedObserver/showme#readme",
+  "homepage": "https://github.com/Kanaries/Rath#readme",
   "devDependencies": {
     "concurrently": "^4.1.2",
     "yarn": "^1.19.0"
