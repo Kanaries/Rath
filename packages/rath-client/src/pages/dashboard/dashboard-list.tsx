@@ -460,7 +460,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument }) => {
                     />
                 </TableContainer>
                 <Layer>
-                    {previewSource && (
+                    {previewSource && pages[previewSource.source] && (
                         <PreviewPopup
                             style={{
                                 left: previewSource.position[0],
