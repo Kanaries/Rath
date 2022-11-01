@@ -1,11 +1,11 @@
-import { ActionButton, DetailsList, DetailsRow, IColumn, IconButton, IDetailsRowProps, SelectionMode, Stack, TextField } from '@fluentui/react';
+import { ActionButton, DetailsList, DetailsRow, IColumn, IconButton, IDetailsRowProps, Layer, Popup, SelectionMode, Stack, TextField } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import type { DashboardDocument } from '../../store/dashboardStore';
-import { is } from 'immer/dist/internal';
+import DocumentPreview from './document-preview';
 
 
 const PageLayout = styled.div`
@@ -78,6 +78,7 @@ const CustomRow = styled.div`
     :hover .button-group {
         opacity: 1;
     }
+    position: relative;
 `;
 
 const ButtonGroup = styled.div`
@@ -106,9 +107,47 @@ const Editable = styled.div`
     }
 `;
 
-const Row = observer(function Row ({ content, handleClick }: { content: IDetailsRowProps; handleClick: () => void }) {
+const MAX_SIZE = Math.min(512, Math.min(window.innerWidth, window.innerHeight) * 0.15);
+
+const adjustSize = ({ w, h }: { w: number; h: number; }): [number, number] => {
+    const scale = MAX_SIZE / Math.max(w, h);
+    return [w * scale, h * scale];
+};
+
+const PreviewPopup = styled.div`
+    pointer-events: none;
+    position: fixed;
+    transform: translate(-50%, calc(-100% - 4px));
+    --bg-color: #fff;
+    width: 200px;
+    height: 150px;
+    background-color: var(--bg-color);
+    filter: drop-shadow(0 1.6px 3.6px rgb(0 0 0 / 26%)) drop-shadow(0 0.3px 0.9px rgb(0 0 0 / 22%));
+    ::after {
+        position: absolute;
+        content: "";
+        top: 100%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(45deg);
+        --size: 16px;
+        width: var(--size);
+        height: var(--size);
+        background-color: var(--bg-color);
+    }
+`;
+
+const Row = observer(function Row ({
+    content, handleClick, handleMouseOn, handleMouseOut,
+}: { content: IDetailsRowProps; handleClick: () => void; handleMouseOn: (x: number, y: number) => void; handleMouseOut: () => void; }) {
     return (
-        <CustomRow onClick={handleClick}>
+        <CustomRow
+            onClick={handleClick}
+            onMouseEnter={e => {
+                const { y } = (e.target as HTMLDivElement).getBoundingClientRect();
+                handleMouseOn(e.clientX, y);
+            }}
+            onMouseLeave={handleMouseOut}
+        >
             <DetailsRow {...content} />
         </CustomRow>
     );
@@ -190,6 +229,10 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument }) => {
     });
 
     const clearEditStateRef = useRef<() => void>();
+    const [previewSource, setPreviewSource] = useState<{
+        source: number;
+        position: [number, number];
+    } | null>(null);
 
     const columns = useMemo<(IColumn & { key: keyof FlatDocumentInfo | 'action'; fieldName?: keyof FlatDocumentInfo })[]>(() => {
         return [
@@ -335,6 +378,21 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument }) => {
         }
     }, [sortMode]);
 
+    const popupLayout = useMemo(() => {
+        if (previewSource) {
+            const { position, source } = previewSource;
+            const size = adjustSize(pages[source].config.size);
+
+            return {
+                left: position[0],
+                top: position[1],
+                width: size[0],
+                height: size[1],
+            }
+        }
+        return {};
+    }, [previewSource]);
+
     return (
         <PageLayout
             onClick={() => {
@@ -380,7 +438,9 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument }) => {
                 <div>
                     <TextField iconProps={{ iconName: 'Search' }} value={search} onChange={(_, d) => setSearch(d ?? '')} />
                 </div>
-                <TableContainer>
+                <TableContainer
+                    onScroll={() => setPreviewSource(null)}
+                >
                     <DetailsList
                         items={sortedItems}
                         columns={columns}
@@ -390,10 +450,29 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument }) => {
                             <Row
                                 content={props}
                                 handleClick={() => clearEditStateRef.current || openDocument((props.item as FlatDocumentInfo).index)}
+                                handleMouseOn={(x, y) => setPreviewSource({
+                                    source: (props.item as FlatDocumentInfo).index,
+                                    position: [x, y],
+                                })}
+                                handleMouseOut={() => setPreviewSource(null)}
                             />
                         ) : null}
                     />
                 </TableContainer>
+                <Layer>
+                    {previewSource && (
+                        <PreviewPopup
+                            style={{
+                                left: previewSource.position[0],
+                                top: previewSource.position[1],
+                                width: pages[previewSource.source].config.size.w,
+                                height: pages[previewSource.source].config.size.h,
+                            }}
+                        >
+                            <DocumentPreview index={previewSource.source} />
+                        </PreviewPopup>
+                    )}
+                </Layer>
             </DocumentListView>
         </PageLayout>
     );
