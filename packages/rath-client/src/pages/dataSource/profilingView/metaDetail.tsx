@@ -1,4 +1,4 @@
-import { Dropdown, IDropdownOption, PrimaryButton, Stack } from '@fluentui/react';
+import { DefaultButton, Dropdown, IDropdownOption, Stack } from '@fluentui/react';
 import { applyFilters, IFilter, IRow } from '@kanaries/loa';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
@@ -10,12 +10,12 @@ import { PIVOT_KEYS } from '../../../constants';
 import { IFieldMeta } from '../../../interfaces';
 import { computeFieldFeatures } from '../../../lib/meta/fieldMeta';
 import { useGlobalStore } from '../../../store';
+import FieldFilter from '../../../components/fieldFilter';
 import { ANALYTIC_TYPE_CHOICES, SEMANTIC_TYPE_CHOICES } from '../config';
 import DetailTable from './detailTable';
 import FullDistViz from './fullDistViz';
 import StatTable from './statTable';
 import { patchFilterTemporalRange } from './utils';
-
 
 const DetailContainer = styled.div`
     flex-grow: 1;
@@ -137,10 +137,10 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
                 semanticType={field.semanticType}
                 onSelect={onSelectionChange}
             />
-            <Stack horizontal tokens={{ childrenGap: 10 }} style={{ marginTop: '1em' }}>
-                <PrimaryButton
+            <Stack horizontal tokens={{ childrenGap: 10 }} style={{ marginTop: '1em' }} verticalAlign="center">
+                <DefaultButton
                     text={intl.get('dataSource.statViewInfo.explore')}
-                    iconProps={{ iconName: 'BarChartVerticalFill' }}
+                    iconProps={{ iconName: 'Lightbulb' }}
                     onClick={() => {
                         runInAction(() => {
                             commonStore.setAppKey(PIVOT_KEYS.semiAuto);
@@ -166,6 +166,7 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
                         option && dataSourceStore.updateFieldInfo(field.fid, 'semanticType', option.key);
                     }}
                 />
+                <FieldFilter fid={field.fid} />
             </Stack>
             <hr style={{ margin: '1em' }} />
             <Stack horizontal tokens={{ childrenGap: '3em' }}>

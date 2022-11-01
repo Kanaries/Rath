@@ -1,18 +1,30 @@
 import React, { useEffect, useRef } from 'react';
-import { ChoiceGroup, IChoiceGroupOption, IconButton, PrimaryButton, Separator, TextField, Toggle } from '@fluentui/react';
+import {
+    ActionButton,
+    ChoiceGroup,
+    IChoiceGroupOption,
+    IconButton,
+    PrimaryButton,
+    Separator,
+    Stack,
+    TextField,
+    Toggle,
+} from '@fluentui/react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { runInAction } from 'mobx';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import { FieldExtSuggestion, IFieldMetaWithExtSuggestions, IRawField, IRow } from '../../../interfaces';
 import FieldFilter from '../../../components/fieldFilter/index';
 import { ANALYTIC_TYPE_CHOICES, SEMANTIC_TYPE_CHOICES } from '../config';
 import FieldExtSuggestions from '../../../components/fieldExtend/suggestions';
 import { getGlobalStore } from '../../../store';
+import { PIVOT_KEYS } from '../../../constants';
 import DistributionChart from './distChart';
 
 const MetaContainer = styled.div`
     overflow: auto;
-`
+`;
 const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
     overflow: hidden;
     position: relative;
@@ -21,14 +33,14 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         position: absolute;
         display: flex;
         justify-content: space-between;
-        height: ${({ isPreview }) => isPreview ? '2.4em' : '4px'};
+        height: ${({ isPreview }) => (isPreview ? '2.4em' : '4px')};
         font-size: 0.9rem;
         line-height: 2.4em;
         border-radius: 0px 0px 2px 2px;
         left: 0px;
         right: 0px;
         top: 0px;
-        margin: 0px ${({ isPreview }) => isPreview ? '0px' : '1px'};
+        margin: 0px ${({ isPreview }) => (isPreview ? '0px' : '1px')};
         padding: 0 0.8em;
         color: #fff;
         font-weight: 600;
@@ -48,9 +60,9 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         background-color: #9e9e9e;
     }
     .preview {
-        background-color: #eaa300;
+        background-color: #faad14;
     }
-    h1{
+    h1 {
         font-weight: 500;
         font-size: 26px;
         color: #333;
@@ -61,7 +73,7 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         color: rgb(89, 89, 89);
     }
     padding: 1em;
-    padding-top: ${({ isPreview }) => isPreview ? '2.2em' : '1em'};
+    padding-top: ${({ isPreview }) => (isPreview ? '2.2em' : '1em')};
     margin: 1em;
     box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%);
     border-radius: 8px;
@@ -77,7 +89,7 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         flex-grow: 0;
     }
 
-    animation: ${({ focus }) => focus ? 'outline 2s linear' : ''};
+    animation: ${({ focus }) => (focus ? 'outline 2s linear' : '')};
 
     @keyframes outline {
         from {
@@ -99,7 +111,7 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         right: 0;
         top: 0;
         transform: scale(1.4);
-        
+
         & * {
             background: none;
             color: #c50f1f;
@@ -109,7 +121,7 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         display: flex;
         align-items: center;
     }
-`
+`;
 
 const IndicatorCard = styled.div`
     padding: 0em 1em;
@@ -179,10 +191,21 @@ interface MetaItemProps {
     onChange?: (fid: string, propKey: keyof IRawField, value: any) => void;
 }
 
-
-const MetaItem: React.FC<MetaItemProps> = props => {
-    const { colKey, colName, semanticType, analyticType, dist, disable, onChange, focus, extSuggestions, isPreview, isExt } = props;
-    const { dataSourceStore } = getGlobalStore();
+const MetaItem: React.FC<MetaItemProps> = (props) => {
+    const {
+        colKey,
+        colName,
+        semanticType,
+        analyticType,
+        dist,
+        disable,
+        onChange,
+        focus,
+        extSuggestions,
+        isPreview,
+        isExt,
+    } = props;
+    const { dataSourceStore, semiAutoStore, commonStore } = getGlobalStore();
     const [editing, setEditing] = React.useState(false);
     const [editingName, setEditingName] = React.useState(colName);
     useEffect(() => {
@@ -191,13 +214,13 @@ const MetaItem: React.FC<MetaItemProps> = props => {
 
     const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map((ch) => ({
         ...ch,
-        text: intl.get(`common.analyticType.${ch.key}`)
-    }))
+        text: intl.get(`common.analyticType.${ch.key}`),
+    }));
 
     const SEMANTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = SEMANTIC_TYPE_CHOICES.map((ch) => ({
         ...ch,
-        text: intl.get(`common.semanticType.${ch.key}`)
-    }))
+        text: intl.get(`common.semanticType.${ch.key}`),
+    }));
 
     const containerRef = useRef<HTMLDivElement>(null);
     const expandBtnRef = useRef<HTMLDivElement>(null);
@@ -221,40 +244,63 @@ const MetaItem: React.FC<MetaItemProps> = props => {
     }, [isPreview]);
 
     const canDelete = !isPreview && isExt;
-    
-    return <MetaItemContainer className="ms-depth-4" focus={focus} isPreview={isPreview} ref={containerRef}>
-        <div className={`${isPreview ? 'preview' : analyticType} bottom-bar`}>
-            {isPreview ? (
-                <>
-                    <span>preview</span>
-                    <div>
-                        <IconButton
-                            onClick={() => dataSourceStore.settleExtField(colKey)}
-                            iconProps={{
-                                iconName: 'CompletedSolid',
-                                style: {
-                                    color: '#0027b4',
-                                },
-                            }}
-                        />
-                        <IconButton
-                            onClick={() => dataSourceStore.deleteExtField(colKey)}
-                            iconProps={{
-                                iconName: 'Delete',
-                                style: {
-                                    color: '#c50f1f',
-                                },
-                            }}
-                        />
-                    </div>
-                </>
-            ) : ''}
-        </div>
-        <div className="col-name-container">
+
+    return (
+        <MetaItemContainer className="ms-depth-4" focus={focus} isPreview={isPreview} ref={containerRef}>
+            <div className={`${isPreview ? 'preview' : analyticType} bottom-bar`}>
+                {isPreview && (
+                    <>
+                        <span>{intl.get('dataSource.preview')}</span>
+                        <div>
+                            <IconButton
+                                onClick={() => dataSourceStore.settleExtField(colKey)}
+                                iconProps={{
+                                    iconName: 'CompletedSolid',
+                                    style: {
+                                        color: '#003a8c',
+                                    },
+                                }}
+                            />
+                            <IconButton
+                                onClick={() => dataSourceStore.deleteExtField(colKey)}
+                                iconProps={{
+                                    iconName: 'Delete',
+                                    style: {
+                                        color: '#c50f1f',
+                                    },
+                                }}
+                            />
+                        </div>
+                    </>
+                )}
+            </div>
+            <div style={{ float: 'right' }}>
+                <Stack horizontal tokens={{ childrenGap: 2 }}>
+                    <FieldFilter fid={colKey} />
+                    <ActionButton
+                        text={intl.get('dataSource.statViewInfo.explore')}
+                        iconProps={{ iconName: 'Lightbulb' }}
+                        onClick={() => {
+                            runInAction(() => {
+                                commonStore.setAppKey(PIVOT_KEYS.semiAuto);
+                                semiAutoStore.initMainViewWithSingleField(colKey);
+                            });
+                        }}
+                    />
+                    {extSuggestions.length > 0 && (
+                        <LiveContainer ref={expandBtnRef}>
+                            <FieldExtSuggestions fid={colKey} suggestions={extSuggestions} />
+                            <div className="badge">{extSuggestions.length}</div>
+                        </LiveContainer>
+                    )}
+                </Stack>
+            </div>
+            <div className="col-name-container">
                 {!editing && (
                     <React.Fragment>
                         <h1>{colName}</h1>
                         <IconButton
+                            title={intl.get('dataSource.editName')}
                             iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
                             onClick={() => {
                                 setEditing(true);
@@ -262,11 +308,14 @@ const MetaItem: React.FC<MetaItemProps> = props => {
                         />
                     </React.Fragment>
                 )}
-                {
-                    editing && <React.Fragment>
-                        <TextField value={editingName} onChange={(e, val) => {
-                            setEditingName(val || '');
-                        }} />
+                {editing && (
+                    <React.Fragment>
+                        <TextField
+                            value={editingName}
+                            onChange={(e, val) => {
+                                setEditingName(val || '');
+                            }}
+                        />
                         <PrimaryButton
                             style={{ marginLeft: '3px' }}
                             text={intl.get('function.confirm')}
@@ -276,88 +325,81 @@ const MetaItem: React.FC<MetaItemProps> = props => {
                             }}
                         />
                     </React.Fragment>
-                }
-            </div>
-        <div className="fid">Column ID: {colKey}</div>
-        <Separator />
-        <div className="flex-container">
-            <DistributionChart
-                dataSource={dist}
-                x="memberName"
-                y="count"
-                analyticType={analyticType}
-                semanticType={semanticType} />
-            <IndicatorCard>
-                <div className="ind-title ms-Label root-130">{intl.get('dataSource.meta.uniqueValue')}</div>
-                <div className="ind-value">{dist.length}</div>
-            </IndicatorCard>
-            <div className="operation-column">
-                <ChoiceGroup
-                    label={intl.get('dataSource.meta.analyticType')}
-                    options={ANALYTIC_TYPE_CHOICES_LANG}
-                    selectedKey={analyticType}
-                    onChange={(ev, option) => {
-                        onChange && option && onChange(colKey, 'analyticType', option.key)
-                    }}
-                />
-            </div>
-            <div className="operation-column">
-                <ChoiceGroup
-                    label={intl.get('dataSource.meta.semanticType')}
-                    options={SEMANTIC_TYPE_CHOICES_LANG}
-                    selectedKey={semanticType}
-                    onChange={(ev, option) => {
-                        onChange && option && onChange(colKey, 'semanticType', option.key)
-                    }}
-                />
-            </div>
-            <div className="operation-column">
-                <Toggle
-                    label={intl.get('dataSource.meta.disable.title')}
-                    checked={!disable}
-                    onText={intl.get('dataSource.meta.disable.on')}
-                    offText={intl.get('dataSource.meta.disable.off')}
-                    onChange={(ev, checked) => {
-                        onChange && onChange(colKey, 'disable', !checked)
-                    }}
-                />
-            </div>
-            <div className="operation-column">
-                <FieldFilter fid={colKey} />
-                {extSuggestions.length > 0 && (
-                    <LiveContainer ref={expandBtnRef}>
-                        <FieldExtSuggestions fid={colKey} suggestions={extSuggestions} />
-                        <div className="badge">
-                            {extSuggestions.length}
-                        </div>
-                    </LiveContainer>
                 )}
             </div>
-        </div>
-        {canDelete && (
-            <div className="remove">
-                <IconButton
-                    iconProps={{
-                        iconName: 'Delete',
-                    }}
-                    onClick={() => dataSourceStore.deleteExtField(colKey)}
+            <div className="fid">Column ID: {colKey}</div>
+            <Separator />
+            <div className="flex-container">
+                <DistributionChart
+                    dataSource={dist}
+                    x="memberName"
+                    y="count"
+                    analyticType={analyticType}
+                    semanticType={semanticType}
                 />
+                <IndicatorCard>
+                    <div className="ind-title ms-Label root-130">{intl.get('dataSource.meta.uniqueValue')}</div>
+                    <div className="ind-value">{dist.length}</div>
+                </IndicatorCard>
+                <div className="operation-column">
+                    <ChoiceGroup
+                        label={intl.get('dataSource.meta.analyticType')}
+                        options={ANALYTIC_TYPE_CHOICES_LANG}
+                        selectedKey={analyticType}
+                        onChange={(ev, option) => {
+                            onChange && option && onChange(colKey, 'analyticType', option.key);
+                        }}
+                    />
+                </div>
+                <div className="operation-column">
+                    <ChoiceGroup
+                        label={intl.get('dataSource.meta.semanticType')}
+                        options={SEMANTIC_TYPE_CHOICES_LANG}
+                        selectedKey={semanticType}
+                        onChange={(ev, option) => {
+                            onChange && option && onChange(colKey, 'semanticType', option.key);
+                        }}
+                    />
+                </div>
+                <div className="operation-column">
+                    <Toggle
+                        label={intl.get('dataSource.meta.disable.title')}
+                        checked={!disable}
+                        onText={intl.get('dataSource.meta.disable.on')}
+                        offText={intl.get('dataSource.meta.disable.off')}
+                        onChange={(ev, checked) => {
+                            onChange && onChange(colKey, 'disable', !checked);
+                        }}
+                    />
+                </div>
+                <div className="operation-column">
+                </div>
             </div>
-        )}
-    </MetaItemContainer>
-}
+            {canDelete && (
+                <div className="remove">
+                    <IconButton
+                        iconProps={{
+                            iconName: 'Delete',
+                        }}
+                        onClick={() => dataSourceStore.deleteExtField(colKey)}
+                    />
+                </div>
+            )}
+        </MetaItemContainer>
+    );
+};
 
 interface MetaListProps {
     metas: IFieldMetaWithExtSuggestions[];
     onlyExt: boolean;
     focusIdx: number;
-    onChange?: (fid: string, propKey: keyof IRawField, value: any) => void
+    onChange?: (fid: string, propKey: keyof IRawField, value: any) => void;
 }
-const MetaList: React.FC<MetaListProps> = props => {
+const MetaList: React.FC<MetaListProps> = (props) => {
     const { metas, onChange, focusIdx, onlyExt } = props;
-    return <MetaContainer>
-        {
-            metas.map((m, i) => (
+    return (
+        <MetaContainer>
+            {metas.map((m, i) =>
                 !onlyExt || m.extSuggestions.length > 0 ? (
                     <MetaItem
                         focus={i === focusIdx}
@@ -374,9 +416,9 @@ const MetaList: React.FC<MetaListProps> = props => {
                         isPreview={m.stage === 'preview'}
                     />
                 ) : null
-            ))
-        }
-    </MetaContainer>
-}
+            )}
+        </MetaContainer>
+    );
+};
 
 export default MetaList;

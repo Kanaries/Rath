@@ -40,16 +40,16 @@
     },
     "menu": {
         "dataSource": "DataSource",
-        "editor": "Manual Exploration⭐️",
+        "editor": "Manual Exploration",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
         "megaAuto": "Mega-auto Exploration",
-        "semiAuto": "Semi-auto Exploration⭐️",
+        "semiAuto": "Semi-auto Exploration",
         "devCollection": "Insiders(α)",
         "dashBoardDesigner": "Dashboard Designer",
-        "painter": "Data Painter🚀",
+        "painter": "Data Painter",
         "collection": "Collection",
-        "dashboard": "Dashboard📋"
+        "dashboard": "Dashboard"
     },
     "preference": {
         "title": "preference",
@@ -79,8 +79,8 @@
         "analysis": {
             "start": "Start Analysis",
             "checkResult": "Check Existed Results",
-            "pattern": "Data Copilot",
-            "manual": "Manual Explore"
+            "pattern": "Semi-auto Exploration",
+            "manual": "Manual Exploration"
         },
         "importStorage": {
             "title": "Import History Storage",
@@ -123,6 +123,7 @@
         "databaseName": "Database",
         "schemaName": "Schema",
         "tableName": "Table",
+        "editName": "Edit Name",
         "preview": "Data Preview",
         "query": "SQL Query",
         "connectorConfig": "Connector Settings",

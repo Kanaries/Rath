@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../../store';
 import { IDataPrepProgressTag } from '../../../interfaces';
+import { useActionModes } from '../baseActions/mainActionButton';
 
 const AdviceContainer = styled.div`
     .row{
@@ -14,14 +15,14 @@ const AdviceContainer = styled.div`
 
 `
 
-interface AdviceProps {
-    onForceAnalysis?: () => void;
-}
-
-const Advice: React.FC<AdviceProps> = props => {
-    const { onForceAnalysis } = props;
+const Advice: React.FC = props => {
     const { dataSourceStore } = useGlobalStore();
     const { measures, cleanedData, hasOriginalDimensionInData, groupMeanLimitCountsLog, dataPrepProgressTag } = dataSourceStore;
+    const { startMode } = useActionModes();
+
+    const onForceAnalysis = () => {
+        startMode.onClick && startMode.onClick();
+    }
 
     return <AdviceContainer>
         {

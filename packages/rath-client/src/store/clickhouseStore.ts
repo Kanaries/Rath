@@ -101,11 +101,7 @@ export class ClickHouseStore {
             runInAction(() => {
                 this.connectStatus = 'client'
             })
-            notify({
-                title: 'CK connection fail',
-                type: 'error',
-                content: `clickhouse connection fail.\n${error}`
-            })
+            throw new Error('OLAP Service Connection Error');
         }
     }
     public async loadDBList() {

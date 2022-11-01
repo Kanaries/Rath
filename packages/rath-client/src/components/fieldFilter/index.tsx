@@ -10,7 +10,6 @@ import { useGlobalStore } from '../../store';
 import RangeSelection from './rangeSelection';
 import SetSelection from './setSelection';
 
-
 interface FieldFilterProps {
     fid: string;
 }
