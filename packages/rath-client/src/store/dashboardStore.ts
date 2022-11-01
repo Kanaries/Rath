@@ -268,4 +268,15 @@ export default class DashboardStore {
         });
     }
 
+    protected readonly preview = new WeakMap<DashboardDocument, string>();
+
+    public usePreview(index: number): string | undefined {
+        const page = this.pages[index];
+        if (!this.preview.has(page)) {
+            // TODO:
+            this.preview.set(page, '');
+        }
+        return this.preview.get(page);
+    }
+
 }
