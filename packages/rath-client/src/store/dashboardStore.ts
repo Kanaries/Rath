@@ -66,6 +66,7 @@ export type DashboardItem = {
 export interface DashboardDocument {
     info: {
         name: string;
+        description: string;
         createTime: number;
         lastModifyTime: number;
     };
@@ -104,41 +105,47 @@ export default class DashboardStore {
     }
 
     public name: string;
+    public description: string;
     public pages: DashboardDocument[];
+    /** @deprecated */
     public cursor: number;
 
     constructor() {
         makeAutoObservable(this);
-        this.name = 'My Workspace';
+        this.name = 'My Dashboard List';
+        this.description = '';
         this.pages = [];
         this.cursor = 0;
         // FIXME: remove this call
         this.newPage();
     }
 
+    /** @deprecated */
     public addItem(item: DashboardItem) {
-        // TODO: rewrite using DashboardCard
         this.pages[this.cursor].items.push(item);
     }
 
+    /** @deprecated */
     public setItem(index: number, item: DashboardItem) {
-        // TODO: rewrite using DashboardCard
         this.pages[this.cursor].items[index] = item;
     }
 
+    /** @deprecated */
     public removeItem(index: number) {
-        // TODO: rewrite using DashboardCard
         this.pages[this.cursor].items.splice(index, 1);
     }
 
+    /** @deprecated */
     public addFilter(field: IFieldMeta, filter: IFilter) {
         this.pages[this.cursor].data.filters.push({ field, filter });
     }
 
+    /** @deprecated */
     public deleteFilter(index: number) {
         this.pages[this.cursor].data.filters.splice(index, 1);
     }
 
+    /** @deprecated */
     public clearPage() {
         this.pages[this.cursor].items = [];
         this.pages[this.cursor].cards = [];
@@ -148,6 +155,7 @@ export default class DashboardStore {
         this.pages.push({
             info: {
                 name: 'New Dashboard',
+                description: '',
                 createTime: Date.now(),
                 lastModifyTime: Date.now(),
             },
@@ -167,16 +175,22 @@ export default class DashboardStore {
         this.cursor = this.pages.length - 1;
     }
 
+    /** @deprecated */
     public setCursor(index: number) {
         this.cursor = index;
     }
 
+    /** @deprecated */
     public get page() {
         return this.pages[this.cursor];
     }
 
     public createObjectBlob(): Blob {
-        const storableState = DashboardStore.writeObjectBlob(this);
+        const storableState = DashboardStore.writeObjectBlob({
+            name: this.name,
+            description: this.description,
+            pages: this.pages,
+        });
         return storableState;
     }
 
@@ -189,4 +203,4 @@ export default class DashboardStore {
 
 }
 
-export type ReadableDashboardObject = Pick<DashboardStore, 'name' | 'pages'>;
+export type ReadableDashboardObject = Pick<DashboardStore, 'name' | 'description' | 'pages'>;
