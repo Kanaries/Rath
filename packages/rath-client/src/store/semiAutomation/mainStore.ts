@@ -97,6 +97,16 @@ export class SemiAutomationStore {
         this.mainView = null;
         this.compareView = null;
     }
+    public initMainViewWithSingleField (fid: string) {
+        const field = this.fieldMetas.find(f => f.fid === fid);
+        if (field) {
+            this.clearMainView()
+            this.updateMainView({
+                fields: [field],
+                imp: field.features.entropy
+            })
+        }
+    }
     public updateAutoAssoConfig (akey: IRenderViewKey, value: boolean) {
         this.autoAsso[akey] = value;
     }

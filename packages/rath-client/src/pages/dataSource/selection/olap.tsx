@@ -8,13 +8,13 @@ import { logDataImport } from '../../../loggers/dataImport';
 import { notify } from '../../../components/error';
 
 const StackTokens = {
-    childrenGap: 20
+    childrenGap: 1
 }
 
-// const PROTOCOL_LIST: IDropdownOption[] = [
-//     { text: 'https', key: 'https' },
-//     { text: 'http', key: 'http' }
-// ]
+const PROTOCOL_LIST: IDropdownOption[] = [
+    { text: 'https', key: 'https' },
+    { text: 'http', key: 'http' }
+]
 interface OLAPDataProps {
     onClose: () => void;
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
@@ -42,7 +42,7 @@ const OLAPData: React.FC<OLAPDataProps> = props => {
         clickHouseStore.loadSampleData()
             .then(({ fieldMetas, data}) => {
                 logDataImport({
-                    dataType: 'AirTable',
+                    dataType: 'OLAP',
                     fields: fieldMetas,
                     dataSource: data.slice(0, 10),
                     size: data.length
@@ -63,9 +63,9 @@ const OLAPData: React.FC<OLAPDataProps> = props => {
         clickHouseStore.getDefaultConfig()
         .catch((err) => {
             notify({
-                title: 'Clickhouse Config Init Error',
-                type: 'error',
-                content: `${err}\n It may be casued by a failure of start of clickhouse connector.`
+                title: 'Failed to load OLAP Config from server',
+                type: 'warning',
+                content: `${err}\n using default config instead.`
             })
         })
         .finally(() => {
@@ -87,23 +87,32 @@ const OLAPData: React.FC<OLAPDataProps> = props => {
 
     return <div>
         <Stack horizontal tokens={StackTokens}>
-            {/* <Dropdown options={PROTOCOL_LIST}
-                label="protocol"
-                selectedKey={protocol}
-                disabled
-            /> */}
-            <TextField prefix={`${proxyProtocol}://`} label="Proxy Host" value={proxyHost}
+            <Dropdown options={PROTOCOL_LIST}
+                label="Protocol"
+                selectedKey={proxyProtocol}
+                onChange={(e, option) => {
+                    clickHouseStore.setProxyConfig('protocol', option?.key as string)
+                }}
+            />
+            <TextField prefix={`://`} label="Proxy Host" value={proxyHost}
                 onChange={(e, v) => { clickHouseStore.setProxyConfig('host', v); }}
             />
-            <TextField label="Port" value={proxyPort}
+            <TextField label="Port" style={{ width: '80px' }} value={proxyPort}
                 onChange={(e, v) => { clickHouseStore.setProxyConfig('port', v); }}
             />
         </Stack>
         <Stack horizontal tokens={StackTokens}>
-            <TextField prefix={`${protocol}://`} label="Host" value={host}
+            <Dropdown options={PROTOCOL_LIST}
+                label="Protocol"
+                selectedKey={protocol}
+                onChange={(e, option) => {
+                    clickHouseStore.setConfig('protocol', option?.key as string)
+                }}
+            />
+            <TextField prefix={`://`} label="Host" value={host}
                 onChange={(e, v) => { clickHouseStore.setConfig('host', v); }}
             />
-            <TextField label="Port" value={port}
+            <TextField style={{ width: '80px' }} label="Port" value={port}
                 onChange={(e, v) => { clickHouseStore.setConfig('port', v); }}
             />
             <TextField label="User" value={user}

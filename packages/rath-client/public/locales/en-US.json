@@ -79,8 +79,8 @@
         "analysis": {
             "start": "Start Analysis",
             "checkResult": "Check Existed Results",
-            "pattern": "Data Copilot",
-            "manual": "Manual Explore"
+            "pattern": "Semi-auto Exploration",
+            "manual": "Manual Exploration"
         },
         "importStorage": {
             "title": "Import History Storage",
@@ -123,6 +123,7 @@
         "databaseName": "Database",
         "schemaName": "Schema",
         "tableName": "Table",
+        "editName": "Edit Name",
         "preview": "Data Preview",
         "query": "SQL Query",
         "connectorConfig": "Connector Settings",

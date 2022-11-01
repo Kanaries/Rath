@@ -1,12 +1,10 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import intl from 'react-intl-universal';
 import {
     PrimaryButton,
     Stack,
     DefaultButton,
     Dropdown,
-    IContextualMenuProps,
-    IContextualMenuItem,
     IconButton,
     CommandButton,
     ProgressIndicator,
@@ -14,7 +12,6 @@ import {
 } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
-import { EXPLORE_MODE, PIVOT_KEYS } from '../../constants';
 import { CleanMethod, IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
 import { Card } from '../../components/card';
 import { useCleanMethodList } from '../../hooks';
@@ -28,13 +25,14 @@ import AnalysisSettings from './settings';
 import FastSelection from './fastSelection';
 import ProfilingView from './profilingView';
 import LaTiaoConsole from './LaTiaoConsole';
+import MainActionButton from './baseActions/mainActionButton';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
 interface DataSourceBoardProps {}
 
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-    const { dataSourceStore, commonStore, ltsPipeLineStore, megaAutoStore } = useGlobalStore();
+    const { dataSourceStore, commonStore } = useGlobalStore();
 
     const {
         cleanedData,
@@ -44,11 +42,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         loading,
         showDataImportSelection,
         dataPreviewMode,
-        staisfyAnalysisCondition,
         dataPrepProgressTag,
     } = dataSourceStore;
-
-    const { exploreMode, taskMode } = commonStore;
 
     useEffect(() => {
         // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
@@ -76,22 +71,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         },
         [dataSourceStore]
     );
-
-    const onV1EngineStart = useCallback(() => {
-        ltsPipeLineStore.startTask(taskMode).then(() => {
-            megaAutoStore.emitViewChangeTransaction(0);
-        });
-        commonStore.setAppKey(PIVOT_KEYS.megaAuto);
-    }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode]);
-
-    const onCheckResults = useCallback(() => {
-        megaAutoStore.emitViewChangeTransaction(0);
-        commonStore.setAppKey(PIVOT_KEYS.megaAuto);
-    }, [megaAutoStore, commonStore]);
-
-    const onBuildKnowledge = useCallback(() => {
-        commonStore.setAppKey(PIVOT_KEYS.semiAuto);
-    }, [commonStore]);
 
     const onSelectPannelClose = useCallback(() => {
         dataSourceStore.setShowDataImportSelection(false);
@@ -124,50 +103,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         [dataSourceStore]
     );
 
-    const analysisOptions: IContextualMenuProps = useMemo(() => {
-        return {
-            items: [
-                {
-                    key: 'function.analysis.start',
-                    text: intl.get('function.analysis.start'),
-                    onClick: onV1EngineStart,
-                },
-                {
-                    key: 'function.analysis.checkResult',
-                    text: intl.get('function.analysis.checkResult'),
-                    onClick: onCheckResults,
-                },
-                {
-                    key: 'function.analysis.pattern',
-                    text: intl.get('function.analysis.pattern'),
-                    onClick: onBuildKnowledge,
-                },
-                {
-                    key: 'function.analysis.manual',
-                    text: intl.get('function.analysis.manual'),
-                    onClick: () => {
-                        commonStore.setAppKey(PIVOT_KEYS.editor);
-                    },
-                },
-            ],
-        };
-    }, [onV1EngineStart, onCheckResults, onBuildKnowledge, commonStore]);
-
-    const hasResults = megaAutoStore.insightSpaces.length > 0;
-
-    const startMode = useMemo<IContextualMenuItem>(() => {
-        if (exploreMode === EXPLORE_MODE.first) {
-            return analysisOptions.items[2];
-        }
-        if (exploreMode === EXPLORE_MODE.manual) {
-            return analysisOptions.items[3];
-        }
-        if (hasResults) {
-            return analysisOptions.items[1];
-        }
-        return analysisOptions.items[0];
-    }, [hasResults, exploreMode, analysisOptions]);
-
     const exportData = useCallback(() => {
         const ds = dataSourceStore.exportDataAsDSService();
         const content = JSON.stringify(ds);
@@ -195,16 +130,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 <AnalysisSettings />
                 <FastSelection />
                 <Stack horizontal>
-                    <PrimaryButton
-                        split
-                        disabled={!staisfyAnalysisCondition}
-                        iconProps={{ iconName: 'Financial' }}
-                        text={intl.get(`${startMode.key}`)}
-                        menuProps={analysisOptions}
-                        onClick={() => {
-                            startMode.onClick && startMode.onClick();
-                        }}
-                    />
+                    <MainActionButton />
                     {dataImportButton(intl.get('dataSource.importData.buttonName'), rawData)}
                     <IconButton
                         style={MARGIN_LEFT}
@@ -250,13 +176,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
                 </Stack>
-                {rawData.length > 0 && (
-                    <Advice
-                        onForceAnalysis={() => {
-                            startMode.onClick && startMode.onClick();
-                        }}
-                    />
-                )}
+                {rawData.length > 0 && <Advice />}
                 {dataPrepProgressTag !== IDataPrepProgressTag.none && <ProgressIndicator label={dataPrepProgressTag} />}
                 <Stack horizontal verticalAlign="end" style={{ margin: '1em 0px' }}>
                     <Dropdown
