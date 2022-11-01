@@ -1,6 +1,7 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction, toJS } from "mobx";
 import type { DraggableFieldState, IVisualConfig } from "@kanaries/graphic-walker/dist/interfaces";
 import type { IFieldMeta, IFilter } from "../interfaces";
+import produce from "immer";
 
 
 export enum DashboardCardAppearance {
@@ -88,19 +89,32 @@ export interface DashboardDocument {
     };
 }
 
+export interface DashboardDocumentOperators {
+    copy: () => void;
+    remove: () => void;
+    download: () => void;
+    setName: (name: string) => void;
+    setDesc: (desc: string) => void;
+}
+
+export interface DashboardDocumentWithOperators {
+    data: DashboardDocument;
+    operators: Readonly<DashboardDocumentOperators>;
+}
+
 export default class DashboardStore {
 
-    protected static writeObjectBlob(data: ReadableDashboardObject): Blob {
+    protected static writeDocumentObjectBlob(data: DashboardDocument): Blob {
         // TODO: optimize
         const part = JSON.stringify(data);
         const file = new Blob([ part ], { type: 'text/plain' });
         return file;
     }
 
-    protected static async readObjectBlob(blob: Blob): Promise<ReadableDashboardObject> {
+    protected static async readObjectBlob(blob: Blob): Promise<DashboardDocument> {
         const text = await blob.text();
         // TODO: optimize
-        const data = JSON.parse(text) as ReadableDashboardObject;
+        const data = JSON.parse(text) as DashboardDocument;
         return data;
     }
 
@@ -152,12 +166,13 @@ export default class DashboardStore {
     }
 
     public newPage() {
+        const now = Date.now();
         this.pages.push({
             info: {
                 name: 'New Dashboard',
                 description: '',
-                createTime: Date.now(),
-                lastModifyTime: Date.now(),
+                createTime: now,
+                lastModifyTime: now,
             },
             data: {
                 source: 'context dataset', // TODO: get name from data source
@@ -185,22 +200,72 @@ export default class DashboardStore {
         return this.pages[this.cursor];
     }
 
-    public createObjectBlob(): Blob {
-        const storableState = DashboardStore.writeObjectBlob({
-            name: this.name,
-            description: this.description,
-            pages: this.pages,
+    protected copyPage(index: number) {
+        const page = this.pages[index];
+        this.pages.push(produce(toJS(page), draft => {
+            const now = Date.now();
+            draft.info.createTime = now;
+            draft.info.lastModifyTime = now;
+            draft.info.name = `${draft.info.name} (copy)`;
+        }));
+    }
+    protected removePage(index: number) {
+        this.pages.splice(index, 1);
+    }
+    protected downloadPage(index: number) {
+        const page = this.pages[index];
+        const data = this.createDocumentObjectBlob(index);
+        const a = document.createElement('a');
+        const url = URL.createObjectURL(data);
+        a.href = url;
+        a.download = `${page.info.name}.rath-dashboard`;
+        a.click();
+        requestAnimationFrame(() => {
+            window.URL.revokeObjectURL(url);  
         });
+    }
+    protected setPageName(index: number, name: string) {
+        this.pages[index].info.name = name;
+        this.pages[index].info.lastModifyTime = Date.now();
+    }
+    protected setPageDesc(index: number, desc: string) {
+        this.pages[index].info.description = desc;
+        this.pages[index].info.lastModifyTime = Date.now();
+    }
+
+    public setName(name: string) {
+        this.name = name;
+    }
+    public setDesc(desc: string) {
+        this.description = desc;
+    }
+
+    public fromPage(index: number): DashboardDocumentWithOperators {
+        const page = this.pages[index];
+
+        return {
+            data: page,
+            operators: {
+                copy: this.copyPage.bind(this, index),
+                remove: this.removePage.bind(this, index),
+                download: this.downloadPage.bind(this, index),
+                setName: this.setPageName.bind(this, index),
+                setDesc: this.setPageDesc.bind(this, index),
+            },
+        };
+    }
+
+    protected createDocumentObjectBlob(index: number): Blob {
+        const page = this.pages[index];
+        const storableState = DashboardStore.writeDocumentObjectBlob(page);
         return storableState;
     }
 
-    public async loadObjectBlob(data: Blob): Promise<void> {
-        const storedState = await DashboardStore.readObjectBlob(data);
-        this.name = storedState.name;
-        this.pages = storedState.pages;
-        this.cursor = 0;
+    public async loadDocumentObjectBlob(data: Blob): Promise<void> {
+        const doc = await DashboardStore.readObjectBlob(data);
+        runInAction(() => {
+            this.pages.push(doc);
+        });
     }
 
 }
-
-export type ReadableDashboardObject = Pick<DashboardStore, 'name' | 'description' | 'pages'>;
