@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction, toJS } from "mobx";
 import type { DraggableFieldState, IVisualConfig } from "@kanaries/graphic-walker/dist/interfaces";
-import type { IFieldMeta, IFilter } from "../interfaces";
 import produce from "immer";
+import type { IFieldMeta, IFilter } from "../interfaces";
 
 
 export enum DashboardCardAppearance {
@@ -97,7 +97,9 @@ export interface DashboardDocumentOperators {
     setName: (name: string) => void;
     setDesc: (desc: string) => void;
     // data level
-    addCard: (layout: DashboardCard['layout']) => void;
+    addCard: (layout: DashboardCard['layout']) => number;
+    moveCard: (index: number, x: number, y: number) => void;
+    resizeCard: (index: number, w: number, h: number) => void;
 }
 
 export interface DashboardDocumentWithOperators {
@@ -236,13 +238,21 @@ export default class DashboardStore {
         this.pages[index].info.lastModifyTime = Date.now();
     }
     protected addPageCard(index: number, layout: DashboardCard['layout']) {
-        this.pages[index].cards.push({
+        return this.pages[index].cards.push({
             layout,
             content: {},
             config: {
                 appearance: DashboardCardAppearance.Transparent,
             },
         });
+    }
+    protected movePageCard(pageIndex: number, index: number, x: number, y: number) {
+        this.pages[pageIndex].cards[index].layout.x = x;
+        this.pages[pageIndex].cards[index].layout.y = y;
+    }
+    protected resizePageCard(pageIndex: number, index: number, w: number, h: number) {
+        this.pages[pageIndex].cards[index].layout.w = w;
+        this.pages[pageIndex].cards[index].layout.h = h;
     }
 
     public setName(name: string) {
@@ -264,6 +274,8 @@ export default class DashboardStore {
                 setName: this.setPageName.bind(this, index),
                 setDesc: this.setPageDesc.bind(this, index),
                 addCard: this.addPageCard.bind(this, index),
+                moveCard: this.movePageCard.bind(this, index),
+                resizeCard: this.resizePageCard.bind(this, index),
             },
         };
     }
