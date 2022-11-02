@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import { FC, useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
-import { scaleRatio } from "../dashboard-draft";
+import { scaleRatio } from "./constant";
 import { CardProviderProps } from "./card";
 import MoveHandler from "./components/move-handler";
 import ResizeHandler from "./components/resize-handler";
@@ -27,13 +27,14 @@ const DragBox = styled.div<{ canDrop: boolean }>`
     }
 `;
 
-const CardEditor: FC<CardProviderProps> = ({ item, index, children, transformCoord, draftRef, canDrop, isSizeValid, operators }) => {
+const CardEditor: FC<CardProviderProps> = ({
+    item, index, children, transformCoord, draftRef, canDrop, isSizeValid, operators, onFocus, focused
+}) => {
     const { moveCard, resizeCard } = operators;
 
-    const [hover, setHover] = useState(false);
-
-    const handleMouseEnter = useCallback(() => setHover(true), []);
-    const handleMouseLeave = useCallback(() => setHover(false), []);
+    const handleClick = useCallback(() => {
+        onFocus?.();
+    }, [onFocus]);
     const handleDoubleClick = useCallback(() => {
         const adjustSize = operators.adjustCardSize;
         if (adjustSize) {
@@ -132,18 +133,16 @@ const CardEditor: FC<CardProviderProps> = ({ item, index, children, transformCoo
     }, []);
 
     return children({
-        content: (
+        content: focused ? (
             <>
-                {(hover || dragging) && (
-                    <MoveHandler
-                        layout={item.layout}
-                        transformCoord={transformCoord}
-                        onDragStart={handleDragStart}
-                        onDrag={handleDrag}
-                        onDragEnd={handleDragEnd}
-                        onDragCancel={handleDragCancel}
-                    />
-                )}
+                <MoveHandler
+                    layout={item.layout}
+                    transformCoord={transformCoord}
+                    onDragStart={handleDragStart}
+                    onDrag={handleDrag}
+                    onDragEnd={handleDragEnd}
+                    onDragCancel={handleDragCancel}
+                />
                 {dragDest && draftRef.current && createPortal(
                     <DragBox
                         canDrop={readyToDrop}
@@ -156,17 +155,15 @@ const CardEditor: FC<CardProviderProps> = ({ item, index, children, transformCoo
                     />,
                     draftRef.current
                 )}
-                {(hover || resizing) && (
-                    <ResizeHandler
-                        layout={item.layout}
-                        transformCoord={transformCoord}
-                        onResizeStart={handleResizeStart}
-                        onResize={handleResize}
-                        onResizeEnd={handleResizeEnd}
-                        onResizeCancel={handleResizeCancel}
-                        adjustCardSize={operators.adjustCardSize}
-                    />
-                )}
+                <ResizeHandler
+                    layout={item.layout}
+                    transformCoord={transformCoord}
+                    onResizeStart={handleResizeStart}
+                    onResize={handleResize}
+                    onResizeEnd={handleResizeEnd}
+                    onResizeCancel={handleResizeCancel}
+                    adjustCardSize={operators.adjustCardSize}
+                />
                 {resizeDest && draftRef.current && createPortal(
                     <DragBox
                         canDrop={readyToResize}
@@ -180,13 +177,12 @@ const CardEditor: FC<CardProviderProps> = ({ item, index, children, transformCoo
                     draftRef.current
                 )}
             </>
-        ),
-        onMouseEnter: handleMouseEnter,
-        onMouseLeave: handleMouseLeave,
+        ) : null,
         onDoubleClick: handleDoubleClick,
         onRootMouseDown(x, y) {
             // console.log({x,y})
         },
+        onClick: handleClick,
     });
 };
 

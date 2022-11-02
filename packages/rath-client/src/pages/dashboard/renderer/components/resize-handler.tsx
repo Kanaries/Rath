@@ -105,7 +105,6 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
                             e.stopPropagation();
                             adjustCardSize('n');
                         }}
-                        onMouseDown={e => e.stopPropagation()}
                     />
                     <Adjuster
                         style={{
@@ -118,7 +117,6 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
                             adjustCardSize('n');
                             adjustCardSize('e');
                         }}
-                        onMouseDown={e => e.stopPropagation()}
                     />
                     <Adjuster
                         style={{
@@ -131,12 +129,11 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
                             e.stopPropagation();
                             adjustCardSize('e');
                         }}
-                        onMouseDown={e => e.stopPropagation()}
                     />
                     <Adjuster
                         style={{
-                            bottom: '-5px',
-                            right: '-5px',
+                            bottom: '-3px',
+                            right: '-3px',
                             transform: 'translate(100%, 100%)',
                             cursor: 'se-resize',
                         }}
@@ -145,7 +142,6 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
                             adjustCardSize('e');
                             adjustCardSize('s');
                         }}
-                        onMouseDown={e => e.stopPropagation()}
                     />
                     <Adjuster
                         style={{
@@ -158,7 +154,6 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
                             e.stopPropagation();
                             adjustCardSize('s');
                         }}
-                        onMouseDown={e => e.stopPropagation()}
                     />
                     <Adjuster
                         style={{
@@ -171,7 +166,6 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
                             adjustCardSize('s');
                             adjustCardSize('w');
                         }}
-                        onMouseDown={e => e.stopPropagation()}
                     />
                     <Adjuster
                         style={{
@@ -184,7 +178,6 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
                             e.stopPropagation();
                             adjustCardSize('w');
                         }}
-                        onMouseDown={e => e.stopPropagation()}
                     />
                     <Adjuster
                         style={{
@@ -197,7 +190,6 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
                             adjustCardSize('w');
                             adjustCardSize('n');
                         }}
-                        onMouseDown={e => e.stopPropagation()}
                     />
                 </>
             )}
