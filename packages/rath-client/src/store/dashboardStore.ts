@@ -1,7 +1,6 @@
 import { makeAutoObservable, runInAction, toJS } from "mobx";
-import type { DraggableFieldState, IVisualConfig } from "@kanaries/graphic-walker/dist/interfaces";
 import produce from "immer";
-import type { IFieldMeta, IFilter } from "../interfaces";
+import type { IFieldMeta, IFilter, IVegaSubset } from "../interfaces";
 
 
 export enum DashboardCardAppearance {
@@ -15,6 +14,15 @@ export enum DashboardCardAppearance {
     Neumorphism = 'neumorphism',
 }
 
+export enum DashboardCardInsetLayout {
+    /** 按卡片宽高比自动适配 */
+    Auto,
+    /** 横向布局 */
+    Row,
+    /** 纵向布局 */
+    Column,
+}
+
 export type DashboardCard = {
     layout: {
         x: number;
@@ -22,14 +30,13 @@ export type DashboardCard = {
         w: number;
         h: number;
     };
+    align: DashboardCardInsetLayout;
     content: Partial<{
         title: string;
         text: string;
         chart: {
-            /** calculated and passed to Vega */
-            size: { w: number; h: number };
-            encodings: DraggableFieldState;
-            config: IVisualConfig;
+            subset: IVegaSubset;
+            filters: IFilter[];
         };
     }>;
     config: {
@@ -40,6 +47,16 @@ export type DashboardCard = {
         appearance: DashboardCardAppearance;
     };
 };
+
+export interface DashboardCardState extends DashboardCard {
+    content: Partial<Required<DashboardCard['content']> & {
+        chart: DashboardCard['content']['chart'] & {
+            /* 这俩不要持久化 */
+            selectors: IFilter[];
+            size: { w: number; h: number };
+        };
+    }>;
+}
 
 /**
  * @deprecated use `DashboardCard` instead
@@ -83,9 +100,10 @@ export interface DashboardDocument {
     /** @deprecated use `cards` instead */
     items: DashboardItem[];
     /** All cards defined in the dashboard */
-    cards: DashboardCard[];
+    cards: DashboardCardState[];
     config: {
         size: { w: number; h: number };
+        filters: IFilter[];
     };
 }
 
@@ -190,6 +208,7 @@ export default class DashboardStore {
                     w: 256,
                     h: 256,
                 },
+                filters: [],
             },
         });
         this.cursor = this.pages.length - 1;
@@ -240,6 +259,7 @@ export default class DashboardStore {
     protected addPageCard(index: number, layout: DashboardCard['layout']) {
         return this.pages[index].cards.push({
             layout,
+            align: DashboardCardInsetLayout.Auto,
             content: {},
             config: {
                 appearance: DashboardCardAppearance.Transparent,

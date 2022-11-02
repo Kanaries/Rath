@@ -1,13 +1,18 @@
 import { observer } from "mobx-react-lite";
 import { FC, useMemo } from "react";
 import styled from "styled-components";
-import type { DashboardCard, DashboardDocumentOperators } from "../../../store/dashboardStore";
-import { scaleRatio } from "../dashboard-draft";
+import { DashboardCardAppearance, DashboardCardInsetLayout, DashboardCardState, DashboardDocumentOperators } from "../../../store/dashboardStore";
+import type { IFilter } from "../../../interfaces";
 import CardDisplay from "./card-display";
 import CardEditor from "./card-editor";
+import DashboardChart from "./components/dashboard-chart";
+import { MIN_CARD_SIZE, scaleRatio } from "./constant";
+
 
 export interface CardProps {
-    card: DashboardCard;
+    globalFilters: IFilter[];
+    cards: Readonly<DashboardCardState[]>;
+    card: DashboardCardState;
     index: number;
     /** @default undefined */
     editor?: Omit<CardProviderProps, 'children' | 'transformCoord' | 'item' | 'index'> | undefined;
@@ -16,38 +21,138 @@ export interface CardProps {
 
 export interface CardProvider {
     content: JSX.Element | null;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
     onRootMouseDown: (x: number, y: number) => void;
     onDoubleClick: () => void;
+    onClick: () => void;
 }
+
+export const layoutOption = {
+    title: {
+        flex: 0,
+        prefer: 10,
+    },
+    text: {
+        flex: 1,
+        prefer: 15,
+    },
+    chart: {
+        flex: 9,
+        prefer: 75,
+    },
+} as const;
 
 export interface CardProviderProps {
     children: (provider: Partial<CardProvider>) => JSX.Element;
     transformCoord: (ev: { clientX: number; clientY: number }) => { x: number; y: number };
     draftRef: { current: HTMLElement | null };
     index: number;
-    item: Readonly<DashboardCard>;
-    canDrop: (layout: DashboardCard['layout'], except?: number) => boolean;
+    item: Readonly<DashboardCardState>;
+    onFocus?: () => void;
+    focused?: boolean;
+    canDrop: (layout: DashboardCardState['layout'], except?: number) => boolean;
     isSizeValid: (w: number, h: number) => boolean;
     operators: Partial<DashboardDocumentOperators & {
         adjustCardSize: (dir: 'n' | 'e' | 's' | 'w') => void;
     }>;
 }
 
-const CardBox = styled.div`
+const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardCardAppearance }>`
     box-sizing: border-box;
     user-select: none;
     position: absolute;
-    border: 1px solid #8888;
-    backdrop-filter: blur(1px);
+    backdrop-filter: blur(100vmax);
+    border: 1px solid transparent;
+    --padding: ${MIN_CARD_SIZE * 0.1 * scaleRatio}px;
+    padding: var(--padding);
+    ${({ appearance }) => ({
+        transparent: `
+            border-color: transparent;
+        `,
+        outline: `
+            border-color: #888;
+        `,
+        dropping: `
+            border: none;
+            padding: calc(var(--padding) + 1px);
+            box-shadow:
+                0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%),
+                inset 0 6.4px 14.4px 0 rgb(0 0 0 / 6%), inset 0 1.2px 3.6px 0 rgb(0 0 0 / 4%);
+        `,
+        neumorphism: `
+            border: none;
+            padding: calc(var(--padding) + 1px);
+            border-radius: var(--padding);
+            background-image: linear-gradient(145deg, #00000008, #00000004, #00000002);
+            box-shadow:  6px 6px 12px #bebebe,
+                -6px -6px 12px #ffffff;
+        `,
+    } as const)[appearance]}
     cursor: default;
+    display: flex;
+    flex-direction: ${({ direction }) => direction};
+    align-items: stretch;
+    justify-content: center;
+    & .title {
+        padding: calc(var(--padding) * 0.4) calc(var(--padding) * 0.8);
+        font-size: 16px;
+        ${({ direction }) => direction === 'column' ? '' : 'writing-mode: vertical-lr;'}
+        writing-mode: ${({ direction }) => direction === 'column' ? 'horizontal-tb' : 'sideways-lr'};   // sideways-lr is not supported yet
+        text-orientation: mixed;
+        flex-grow: ${layoutOption.title.flex};
+        flex-shrink: ${999 / (layoutOption.title.flex || 1)};
+        flex-basis: ${layoutOption.title.prefer}%;
+        overflow: hidden;
+    }
+    & .text {
+        padding: calc(var(--padding) * 0.4) calc(var(--padding) * 0.8);
+        font-size: 13px;
+        flex-grow: ${layoutOption.text.flex};
+        flex-shrink: ${999 / (layoutOption.text.flex || 1)};
+        flex-basis: ${layoutOption.text.prefer}%;
+        overflow: hidden;
+    }
+    & .chart {
+        flex-grow: ${layoutOption.chart.flex};
+        flex-shrink: ${999 / (layoutOption.chart.flex || 1)};
+        flex-basis: ${layoutOption.chart.prefer}%;
+        overflow: hidden;
+        :not(:first-child) {
+            ${({ direction }) => direction === 'column' ? 'margin-top' : 'margin-left'}: 5%;
+        }
+    }
 `;
 
-const Card: FC<CardProps> = ({ card, editor, transformCoord, index }) => {
+const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoord, index }) => {
     const Provider = useMemo(() => {
         return editor ? CardEditor : CardDisplay;
     }, [editor]);
+
+    const filters = useMemo<IFilter[]>(() => {
+        return card.content.chart ? [
+            ...card.content.chart.filters,
+            ...globalFilters,
+            ...cards.map((c, i) => i === index ? [] : c.content.chart?.selectors ?? []).flat(),
+        ] : [];
+    }, [card.content.chart, globalFilters, cards, index]);
+
+    const containerDirection = card.layout.w / card.layout.h >= 1 ? 'horizontal' : 'portrait';
+
+    const flexDirection = useMemo<'row' | 'column'>(() => {
+        switch (card.align) {
+            case DashboardCardInsetLayout.Auto: {
+                return containerDirection === 'horizontal' ? 'row' : 'column';
+            }
+            case DashboardCardInsetLayout.Column: {
+                return 'column';
+            }
+            case DashboardCardInsetLayout.Row: {
+                return 'row';
+            }
+            default: {
+                return 'row';
+            }
+        }
+    }, [card.align, containerDirection]);
 
     return (
         <Provider
@@ -63,14 +168,18 @@ const Card: FC<CardProps> = ({ card, editor, transformCoord, index }) => {
         >
             {provider => (
                 <CardBox
-                    onMouseEnter={provider.onMouseEnter}
-                    onMouseLeave={provider.onMouseLeave}
                     onMouseDown={e => {
                         e.stopPropagation();
                         const pos = transformCoord(e);
                         provider.onRootMouseDown?.(pos.x, pos.y);
                     }}
+                    onClick={e => {
+                        e.stopPropagation();
+                        provider.onClick?.();
+                    }}
                     onDoubleClick={provider.onDoubleClick}
+                    direction={flexDirection}
+                    appearance={card.config.appearance}
                     style={{
                         left: card.layout.x * scaleRatio,
                         top: card.layout.y * scaleRatio,
@@ -78,6 +187,18 @@ const Card: FC<CardProps> = ({ card, editor, transformCoord, index }) => {
                         height: card.layout.h * scaleRatio,
                     }}
                 >
+                    {card.content.title && (
+                        <header className="title">{card.content.title}</header>
+                    )}
+                    {card.content.text && (
+                        <pre className="text">{card.content.text}</pre>
+                    )}
+                    {card.content.chart && (
+                        <DashboardChart
+                            item={card.content.chart}
+                            filters={filters}
+                        />
+                    )}
                     {provider.content}
                 </CardBox>
             )}

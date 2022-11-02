@@ -2,7 +2,6 @@ import { ActionButton } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { useGlobalStore } from '../../store';
 import DashboardDraft from './dashboard-draft';
 
 
@@ -25,12 +24,6 @@ const Header = styled.div`
     margin-inline: 16px;
 `;
 
-const Container = styled.div`
-    flex-grow: 1;
-    flex-shrink: 1;
-    overflow: auto;
-`;
-
 export interface DashboardDetailProps {
     cursor: number;
     /** back to dashboard list */
@@ -38,8 +31,6 @@ export interface DashboardDetailProps {
 }
 
 const DashboardDetail: FC<DashboardDetailProps> = ({ cursor, goBack }) => {
-    const { dashboardStore } = useGlobalStore();
-
     const [mode, setMode] = useState<'edit' | 'preview'>('preview');
 
     const toggleMode = useCallback(() => {
@@ -52,9 +43,7 @@ const DashboardDetail: FC<DashboardDetailProps> = ({ cursor, goBack }) => {
                 <ActionButton iconProps={{ iconName: 'Back' }} onClick={goBack} />
                 <ActionButton iconProps={{ iconName: mode === 'edit' ? 'AnalyticsView' : 'Edit' }} onClick={toggleMode} />
             </Header>
-            <Container>
-                <DashboardDraft cursor={cursor} mode={mode} />
-            </Container>
+            <DashboardDraft cursor={cursor} mode={mode} />
         </PageLayout>
     );
 };
