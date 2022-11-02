@@ -107,21 +107,15 @@ const Editable = styled.div`
     }
 `;
 
-const MAX_SIZE = Math.min(512, Math.min(window.innerWidth, window.innerHeight) * 0.15);
-
-const adjustSize = ({ w, h }: { w: number; h: number; }): [number, number] => {
-    const scale = MAX_SIZE / Math.max(w, h);
-    return [w * scale, h * scale];
-};
-
 const PreviewPopup = styled.div`
     pointer-events: none;
     position: fixed;
     transform: translate(-50%, calc(-100% - 4px));
     --bg-color: #fff;
-    width: 200px;
-    height: 150px;
     background-color: var(--bg-color);
+    display: block;
+    width: max-content;
+    height: max-content;
     filter: drop-shadow(0 1.6px 3.6px rgb(0 0 0 / 26%)) drop-shadow(0 0.3px 0.9px rgb(0 0 0 / 22%));
     ::after {
         position: absolute;
@@ -380,14 +374,11 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument }) => {
 
     const popupLayout = useMemo(() => {
         if (previewSource) {
-            const { position, source } = previewSource;
-            const size = adjustSize(pages[source].config.size);
+            const { position } = previewSource;
 
             return {
                 left: position[0],
                 top: position[1],
-                width: size[0],
-                height: size[1],
             }
         }
         return {};
