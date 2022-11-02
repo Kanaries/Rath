@@ -4,6 +4,7 @@ import { IAnalyticType, ISemanticType } from 'visual-insights';
 import intl from 'react-intl-universal';
 import { IRow } from '../../../interfaces';
 import { getRange } from '../../../utils';
+import { shallowCopyArray } from '../../../utils/deepcopy';
 
 const DATA_NAME = 'dataSource';
 const DEFAULT_BIN_SIZE = 10;
@@ -59,7 +60,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 }
             })
         } else if (semanticType === 'nominal') {
-            adjustData = [...dataSource].sort((a, b) => b['y'] - a['y']).slice(0, maxItemInView)
+            adjustData = shallowCopyArray(dataSource).sort((a, b) => b['y'] - a['y']).slice(0, maxItemInView)
         } else if (semanticType === 'quantitative') {
             adjustData = fl2bins(dataSource, x, y, maxItemInView)
         } else {

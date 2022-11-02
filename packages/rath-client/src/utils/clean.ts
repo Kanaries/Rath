@@ -1,9 +1,10 @@
 import { Cleaner } from "visual-insights"
 import { CleanMethod, IRow } from "../interfaces";
+import { shallowCopyArray } from "./deepcopy";
 const { dropNull, simpleClean, useMode: replaceByMode } = Cleaner;
 
 function unClean(dataSource: IRow[]) {
-    return [...dataSource];
+    return shallowCopyArray(dataSource);
 }
 
 export function cleanData(dataSource: IRow[], dimensions: string[], measures: string[], method: CleanMethod): IRow[] {
