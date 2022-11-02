@@ -2,23 +2,32 @@ import { observer } from "mobx-react-lite";
 import type { FC } from "react";
 import styled from "styled-components";
 import { useGlobalStore } from "../../store";
+import DashboardRenderer from './renderer';
 
 
 const Preview = styled.div`
-    width: 100%;
-    height: 100%;
+    display: flex;
+    width: max-content;
+    height: max-content;
+    overflow: hidden;
+    padding: 0;
 `;
 
 const DocumentPreview: FC<{ index: number }> = ({ index }) => {
     const { dashboardStore } = useGlobalStore();
-    const dataUrl = dashboardStore.usePreview(index);
+    const { pages } = dashboardStore;
+    const page = pages[index];
 
     return (
-        <Preview
-            style={{
-                backgroundImage: `url(${dataUrl})`,
-            }}
-        />
+        <Preview>
+            <DashboardRenderer
+                page={page}
+                renderRatio={1.5}
+                style={{
+                    margin: 0,
+                }}
+            />
+        </Preview>
     );
 };
 

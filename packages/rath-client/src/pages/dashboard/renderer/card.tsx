@@ -6,10 +6,11 @@ import type { IFilter } from "../../../interfaces";
 import CardDisplay from "./card-display";
 import CardEditor from "./card-editor";
 import DashboardChart from "./components/dashboard-chart";
-import { MIN_CARD_SIZE, scaleRatio } from "./constant";
+import { MIN_CARD_SIZE } from "./constant";
 
 
 export interface CardProps {
+    ratio: number;
     globalFilters: IFilter[];
     cards: Readonly<DashboardCardState[]>;
     card: DashboardCardState;
@@ -62,7 +63,6 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
     position: absolute;
     backdrop-filter: blur(100vmax);
     border: 1px solid transparent;
-    --padding: ${MIN_CARD_SIZE * 0.1 * scaleRatio}px;
     padding: var(--padding);
     ${({ appearance }) => ({
         transparent: `
@@ -122,7 +122,7 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
     }
 `;
 
-const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoord, index }) => {
+const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoord, index, ratio }) => {
     const Provider = useMemo(() => {
         return editor ? CardEditor : CardDisplay;
     }, [editor]);
@@ -181,10 +181,12 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
                     direction={flexDirection}
                     appearance={card.config.appearance}
                     style={{
-                        left: card.layout.x * scaleRatio,
-                        top: card.layout.y * scaleRatio,
-                        width: card.layout.w * scaleRatio,
-                        height: card.layout.h * scaleRatio,
+                        left: card.layout.x * ratio,
+                        top: card.layout.y * ratio,
+                        width: card.layout.w * ratio,
+                        height: card.layout.h * ratio,
+                        // @ts-ignore
+                        '--padding': `${MIN_CARD_SIZE * 0.1 * ratio}px`,
                     }}
                 >
                     {card.content.title && (

@@ -42,6 +42,7 @@ const DragBox = styled.div<{ canDrop: boolean }>`
 export interface DashboardDraftProps {
     cursor: number;
     mode: "edit" | "preview";
+    ratio: number;
 }
 
 const checkOverlap = (layout1: DashboardCard['layout'], layout2: DashboardCard['layout']): boolean => {
@@ -59,7 +60,7 @@ const checkOverlap = (layout1: DashboardCard['layout'], layout2: DashboardCard['
     });
 };
 
-const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode }) => {
+const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r }) => {
     const { dashboardStore } = useGlobalStore();
     const page = dashboardStore.pages[cursor];
     const { operators } = dashboardStore.fromPage(cursor);
@@ -134,7 +135,7 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode }) => {
         if (dragging) {
             const dragEnd = (ev: MouseEvent) => {
                 if (ev.type === 'mouseup' && draftRef.current) {
-                    const { x, y } = transformCoord(draftRef.current, ev, page.config.size.w, page.config.size.h);
+                    const { x, y } = transformCoord(draftRef.current, ev, page.config.size.w, page.config.size.h, r);
                     handleDragEnd({ x, y });
                 } else if (ev.type === 'mousemove' && ev.buttons !== 1) {
                     handleDragCancel();
@@ -147,31 +148,31 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode }) => {
                 document.body.removeEventListener('mousemove', dragEnd);
             };
         }
-    }, [dragging, handleDragCancel, page.config.size, handleDragEnd]);
+    }, [dragging, handleDragCancel, page.config.size, handleDragEnd, r]);
 
     const handleMouseDown = useCallback((ev: MEvent<HTMLDivElement>) => {
         if (mode === 'preview' || !draftRef.current) {
             return;
         }
-        const { x, y } = transformCoord(draftRef.current, ev, page.config.size.w, page.config.size.h);
+        const { x, y } = transformCoord(draftRef.current, ev, page.config.size.w, page.config.size.h, r);
         setDragging({
             from: { x, y },
             to: { x, y },
         });
-    }, [mode, page.config.size]);
+    }, [mode, page.config.size, r]);
 
     const handleMouseMove = useCallback((ev: MEvent<HTMLDivElement>) => {
         if (mode === 'preview') {
             return;
         }
         if (dragging && draftRef.current) {
-            const { x, y } = transformCoord(draftRef.current, ev, page.config.size.w, page.config.size.h);
+            const { x, y } = transformCoord(draftRef.current, ev, page.config.size.w, page.config.size.h, r);
             setDragging({
                 from: dragging.from,
                 to: { x, y },
             });
         }
-    }, [mode, dragging, page.config.size]);
+    }, [mode, dragging, page.config.size, r]);
 
     const adjustCardSize = useCallback((index: number, dir: 'n' | 'e' | 's' | 'w') => {
         const card = page.cards[index];
@@ -305,7 +306,7 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode }) => {
             return;
         }
         // 双击创建一个新的卡片，点击坐标作为左上角定位，大小延伸至最大填充位置
-        const { x, y } = transformCoord(draftRef.current, ev, page.config.size.w, page.config.size.h);
+        const { x, y } = transformCoord(draftRef.current, ev, page.config.size.w, page.config.size.h, r);
         // 猜一个宽高比
         const [guessW, guessH] = page.cards.length ? page.cards.reduce<[number, number]>(([w, h], card, _, arr) => {
             return [w + card.layout.w / arr.length, h + card.layout.h / arr.length];
@@ -349,7 +350,7 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode }) => {
             adjustCardSize(idx, 'e');
             adjustCardSize(idx, 's');
         }
-    }, [mode, page.config.size, page.cards, canDrop, addCard, adjustCardSize]);
+    }, [mode, page.config.size, page.cards, canDrop, addCard, adjustCardSize, r]);
 
     return (
         <Container>
