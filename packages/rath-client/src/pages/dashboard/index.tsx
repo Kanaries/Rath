@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useCallback, useState } from 'react';
 import DashboardList from './dashboard-list';
 import DashboardDetail from './dashboard-detail';
+import { scaleRatio } from './renderer/constant';
 
 
 const Dashboard: React.FC = () => {
@@ -29,7 +30,7 @@ const Dashboard: React.FC = () => {
 
     return path.page === 'list'
         ? <DashboardList openDocument={openDocument} />
-        : <DashboardDetail cursor={path.cursor} goBack={showList} />;
+        : <DashboardDetail cursor={path.cursor} goBack={showList} ratio={scaleRatio} />;
 };
 
 export default observer(Dashboard);

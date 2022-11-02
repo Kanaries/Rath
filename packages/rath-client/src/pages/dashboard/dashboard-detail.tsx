@@ -28,9 +28,10 @@ export interface DashboardDetailProps {
     cursor: number;
     /** back to dashboard list */
     goBack: () => void;
+    ratio: number;
 }
 
-const DashboardDetail: FC<DashboardDetailProps> = ({ cursor, goBack }) => {
+const DashboardDetail: FC<DashboardDetailProps> = ({ cursor, goBack, ratio }) => {
     const [mode, setMode] = useState<'edit' | 'preview'>('preview');
 
     const toggleMode = useCallback(() => {
@@ -43,7 +44,7 @@ const DashboardDetail: FC<DashboardDetailProps> = ({ cursor, goBack }) => {
                 <ActionButton iconProps={{ iconName: 'Back' }} onClick={goBack} />
                 <ActionButton iconProps={{ iconName: mode === 'edit' ? 'AnalyticsView' : 'Edit' }} onClick={toggleMode} />
             </Header>
-            <DashboardDraft cursor={cursor} mode={mode} />
+            <DashboardDraft cursor={cursor} mode={mode} ratio={ratio} />
         </PageLayout>
     );
 };

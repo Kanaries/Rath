@@ -7,12 +7,12 @@ import Card, { CardProps } from './card';
 import { scaleRatio } from './constant';
 
 
-export const transformCoord = (target: HTMLElement, ev: { clientX: number; clientY: number }, w: number, h: number) => {
+export const transformCoord = (target: HTMLElement, ev: { clientX: number; clientY: number }, w: number, h: number, ratio: number) => {
     const { x, y } = target.getBoundingClientRect();
 
     return {
-        x: Math.max(0, Math.min(Math.round((ev.clientX - x) / scaleRatio), w)),
-        y: Math.max(0, Math.min(Math.round((ev.clientY - y) / scaleRatio), h)),
+        x: Math.max(0, Math.min(Math.round((ev.clientX - x) / ratio), w)),
+        y: Math.max(0, Math.min(Math.round((ev.clientY - y) / ratio), h)),
     };
 };
 
@@ -32,9 +32,10 @@ const Draft = styled.div`
 export type DashboardRendererProps = StyledComponentProps<'div', {}, {
     page: DashboardDocument;
     editor?: (index: number) => CardProps['editor'];
+    renderRatio?: number;
 }, never>;
 
-const DashboardRenderer = forwardRef<HTMLDivElement, DashboardRendererProps>(function DashboardRenderer ({ page, editor, ...props }, ref) {
+const DashboardRenderer = forwardRef<HTMLDivElement, DashboardRendererProps>(function DashboardRenderer ({ page, editor, renderRatio = scaleRatio, ...props }, ref) {
     const id = useId();
 
     return (
@@ -44,13 +45,14 @@ const DashboardRenderer = forwardRef<HTMLDivElement, DashboardRendererProps>(fun
             {...props}
             style={{
                 ...props.style,
-                width: `${page.config.size.w * scaleRatio}px`,
-                height: `${page.config.size.h * scaleRatio}px`,
+                width: `${page.config.size.w * renderRatio}px`,
+                height: `${page.config.size.h * renderRatio}px`,
             }}
         >
             {page.cards.map((card, i) => (
                 <Card
                     key={i}
+                    ratio={renderRatio}
                     globalFilters={page.config.filters}
                     card={card}
                     cards={page.cards}
@@ -59,7 +61,7 @@ const DashboardRenderer = forwardRef<HTMLDivElement, DashboardRendererProps>(fun
                     transformCoord={ev => {
                         const parent = id ? document.getElementById(id) : null;
                         if (parent) {
-                            return transformCoord(parent, ev, page.config.size.w, page.config.size.h);
+                            return transformCoord(parent, ev, page.config.size.w, page.config.size.h, renderRatio);
                         }
                         return { x: NaN, y: NaN };
                     }}
