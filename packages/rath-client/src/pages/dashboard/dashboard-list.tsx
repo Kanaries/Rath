@@ -1,4 +1,4 @@
-import { ActionButton, DetailsList, DetailsRow, IColumn, IconButton, IDetailsRowProps, Layer, Popup, SelectionMode, Stack, TextField } from '@fluentui/react';
+import { ActionButton, DetailsList, DetailsRow, IColumn, IconButton, IDetailsRowProps, Layer, SelectionMode, Stack, TextField } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -391,7 +391,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument }) => {
             }
         }
         return {};
-    }, [previewSource]);
+    }, [previewSource, pages]);
 
     return (
         <PageLayout
@@ -438,9 +438,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument }) => {
                 <div>
                     <TextField iconProps={{ iconName: 'Search' }} value={search} onChange={(_, d) => setSearch(d ?? '')} />
                 </div>
-                <TableContainer
-                    onScroll={() => setPreviewSource(null)}
-                >
+                <TableContainer onScroll={() => setPreviewSource(null)}>
                     <DetailsList
                         items={sortedItems}
                         columns={columns}
@@ -460,15 +458,8 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument }) => {
                     />
                 </TableContainer>
                 <Layer>
-                    {previewSource && pages[previewSource.source] && (
-                        <PreviewPopup
-                            style={{
-                                left: previewSource.position[0],
-                                top: previewSource.position[1],
-                                width: pages[previewSource.source].config.size.w,
-                                height: pages[previewSource.source].config.size.h,
-                            }}
-                        >
+                    {previewSource && pages.length > previewSource.source && (
+                        <PreviewPopup style={popupLayout}>
                             <DocumentPreview index={previewSource.source} />
                         </PreviewPopup>
                     )}
