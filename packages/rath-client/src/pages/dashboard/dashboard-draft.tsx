@@ -3,29 +3,22 @@ import { FC, MouseEvent as MEvent, useCallback, useEffect, useMemo, useRef, useS
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import { DashboardCard } from '../../store/dashboardStore';
-import Card from './renderer/card';
+import DashboardPanel from './dashboard-panel';
+import DashboardRenderer, { transformCoord } from './renderer';
+import { scaleRatio, MIN_CARD_SIZE } from './renderer/constant';
 
 
-export const scaleRatio = Math.min(window.innerWidth, window.innerHeight) / 256;
-
-const Draft = styled.div<{ edit: boolean }>`
-    background-color: #fff;
-    border-radius: 2px;
-    margin: 16px;
-    box-shadow:
-        0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%),
-        0 -1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 -0.3px 0.9px 0 rgb(0 0 0 / 11%);
-    ${({ edit }) => edit ? `
-    background-image:
-        linear-gradient(to right, #8884 0.5px, transparent 0.5px),
-        linear-gradient(to left, #8884 0.5px, transparent 0.5px),
-        linear-gradient(to top, #8884 0.5px, transparent 0.5px),
-        linear-gradient(to bottom, #8884 0.5px, transparent 0.5px);
-    ` : ''}
-    background-repeat: repeat;
-    background-position: 0 0;
-    position: relative;
-    cursor: ${({ edit }) => edit ? 'crosshair' : 'default'};
+const Container = styled.div`
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    > .draft {
+        flex-grow: 1;
+        flex-shrink: 1;
+        overflow: auto;
+    }
 `;
 
 const DragBox = styled.div<{ canDrop: boolean }>`
@@ -51,15 +44,6 @@ export interface DashboardDraftProps {
     mode: "edit" | "preview";
 }
 
-const transformCoord = (target: HTMLElement, ev: { clientX: number; clientY: number }, w: number, h: number) => {
-    const { x, y } = target.getBoundingClientRect();
-
-    return {
-        x: Math.max(0, Math.min(Math.round((ev.clientX - x) / scaleRatio), w)),
-        y: Math.max(0, Math.min(Math.round((ev.clientY - y) / scaleRatio), h)),
-    };
-};
-
 const checkOverlap = (layout1: DashboardCard['layout'], layout2: DashboardCard['layout']): boolean => {
     return [[layout1, layout2], [layout2, layout1]].some(([a, b]) => {
         const x1 = a.x + 0.1;
@@ -75,8 +59,6 @@ const checkOverlap = (layout1: DashboardCard['layout'], layout2: DashboardCard['
     });
 };
 
-const MIN_CARD_SIZE = 64;
-
 const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode }) => {
     const { dashboardStore } = useGlobalStore();
     const page = dashboardStore.pages[cursor];
@@ -84,6 +66,16 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode }) => {
     const { addCard, moveCard, resizeCard } = operators;
 
     const draftRef = useRef<HTMLDivElement>(null);
+
+    const [focus, setFocus] = useState<null | number>(null);
+
+    useEffect(() => {
+        setFocus(null);
+    }, [page.cards.length, mode]);
+
+    const handleClick = useCallback(() => {
+        setFocus(null);
+    }, []);
 
     const [dragging, setDragging] = useState<null | { from: { x: number; y: number }; to: { x: number; y: number } }>(null);
 
@@ -360,50 +352,57 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode }) => {
     }, [mode, page.config.size, page.cards, canDrop, addCard, adjustCardSize]);
 
     return (
-        <Draft
-            ref={draftRef}
-            edit={mode === 'edit'}
-            style={{
-                width: `${page.config.size.w * scaleRatio}px`,
-                height: `${page.config.size.h * scaleRatio}px`,
-                backgroundSize: new Array<0>(4).fill(0).map(() => `${scaleRatio}px ${scaleRatio}px`).join(','),
-            }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onDoubleClick={handleDoubleClick}
-        >
-            {page.cards.map((card, i) => (
-                <Card
-                    key={i}
-                    card={card}
-                    index={i}
-                    editor={mode === 'edit' ? {
+        <Container>
+            <div className="draft">
+                <DashboardRenderer
+                    page={page}
+                    ref={draftRef}
+                    onClick={handleClick}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onDoubleClick={handleDoubleClick}
+                    editor={mode === 'edit' ? (index => ({
                         draftRef,
                         canDrop,
+                        focused: focus === index,
+                        onFocus: ()  => setFocus(index),
                         isSizeValid,
                         operators: {
                             ...operators,
-                            adjustCardSize: adjustCardSize.bind({}, i),
+                            adjustCardSize: adjustCardSize.bind({}, index),
                         },
-                    } : undefined}
-                    transformCoord={ev => draftRef.current
-                        ? transformCoord(draftRef.current, ev, page.config.size.w, page.config.size.h)
-                        : { x: NaN, y: NaN }
-                    }
-                />
-            ))}
-            {dragDest && (
-                <DragBox
-                    canDrop={canDrop(dragDest) && isSizeValid(dragDest.w, dragDest.h)}
+                    })) : undefined}
                     style={{
-                        left: dragDest.x * scaleRatio,
-                        top: dragDest.y * scaleRatio,
-                        width: dragDest.w * scaleRatio,
-                        height: dragDest.h * scaleRatio,
+                        // FIXME: remove this
+                        backgroundImage: `
+                            linear-gradient(to right, #8881 0.5px, transparent 0.5px),
+                            linear-gradient(to left, #8881 0.5px, transparent 0.5px),
+                            linear-gradient(to top, #8881 0.5px, transparent 0.5px),
+                            linear-gradient(to bottom, #8881 0.5px, transparent 0.5px)
+                        `,
+                        backgroundSize: new Array<0>(4).fill(0).map(() => `${scaleRatio}px ${scaleRatio}px`).join(','),
                     }}
+                >
+                    {mode === 'edit' && dragDest && (
+                        <DragBox
+                            canDrop={canDrop(dragDest) && isSizeValid(dragDest.w, dragDest.h)}
+                            style={{
+                                left: dragDest.x * scaleRatio,
+                                top: dragDest.y * scaleRatio,
+                                width: dragDest.w * scaleRatio,
+                                height: dragDest.h * scaleRatio,
+                            }}
+                        />
+                    )}
+                </DashboardRenderer>
+            </div>
+            {mode === 'edit' && focus !== null && (
+                <DashboardPanel
+                    page={page}
+                    card={page.cards[focus]}
                 />
             )}
-        </Draft>
+        </Container>
     );
 };
 
