@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import embed, { Result, vega } from 'vega-embed';
 import intl from 'react-intl-universal';
 import { IRow } from '../../../interfaces';
+import { shallowCopyArray } from '../../../utils/deepcopy';
 const DATA_NAME = 'dataSource';
 const DEFAULT_BIN_SIZE = 10;
 function fl2bins(data: IRow[], valueField: string, ctField: string, binSize: number | undefined = DEFAULT_BIN_SIZE) {
@@ -57,7 +58,7 @@ const FullDistViz: React.FC<FullDistVizProps> = (props) => {
                 }
             })
         } else if (semanticType === 'nominal') {
-            adjustData = [...dataSource].sort((a, b) => b['y'] - a['y']).slice(0, maxItemInView)
+            adjustData = shallowCopyArray(dataSource).sort((a, b) => b['y'] - a['y']).slice(0, maxItemInView)
         } else if (semanticType === 'quantitative') {
             adjustData = fl2bins(dataSource, x, y, 10)
         } else {

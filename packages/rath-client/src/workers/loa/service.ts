@@ -28,7 +28,6 @@ function univarService(dataSource: IRow[], fields: IFieldMeta[], props: any) {
 
 function patternService (dataSource: IRow[], fields: IFieldMeta[], props: IPattern) {
     const core = new NextVICore(dataSource, fields);
-    core.firstPattern();
     const ans = core.createHighOrderPatterns(props);
     return ans
 }

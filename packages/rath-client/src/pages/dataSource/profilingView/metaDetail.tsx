@@ -11,11 +11,13 @@ import { IFieldMeta } from '../../../interfaces';
 import { computeFieldFeatures } from '../../../lib/meta/fieldMeta';
 import { useGlobalStore } from '../../../store';
 import FieldFilter from '../../../components/fieldFilter';
+import { getRange } from '../../../utils';
 import { ANALYTIC_TYPE_CHOICES, SEMANTIC_TYPE_CHOICES } from '../config';
 import DetailTable from './detailTable';
 import FullDistViz from './fullDistViz';
 import StatTable from './statTable';
 import { patchFilterTemporalRange } from './utils';
+
 
 const DetailContainer = styled.div`
     flex-grow: 1;
@@ -74,16 +76,18 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
             const _min = field.features.min;
             const _max = field.features.max;
             const step = (_max - _min) / 10;
+            const [slMin, slMax] = getRange(selection);
             ans.push({
                 fid: field.fid,
                 type: 'range',
-                range: [Math.min(...selection) - step / 2, Math.max(...selection) + step / 2],
+                range: [slMin - step / 2, slMax + step / 2],
             });
         } else if (field.semanticType === 'temporal') {
+            const [slMin, slMax] = getRange(selection);
             ans.push({
                 fid: field.fid,
                 type: 'range',
-                range: [Math.min(...selection), Math.max(...selection)],
+                range: [slMin, slMax],
             });
         } else {
             ans.push({
