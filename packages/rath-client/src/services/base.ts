@@ -142,11 +142,11 @@ export interface FilterServiceProps {
 /**
  * Merge `extData` with `dataSource` and filter data at the same time
  */
-export async function filterDataService(props: FilterServiceProps): Promise<number[]> {
-    let data: number[] = [];
+export async function filterDataService(props: FilterServiceProps): Promise<IRow[]> {
+    let data: IRow[] = [];
     try {
         const worker = new FilterWorker();
-        const result = await workerService<number[], FilterServiceProps>(worker, props);
+        const result = await workerService<IRow[], FilterServiceProps>(worker, props);
         if (result.success) {
             data = result.data;
         } else {
