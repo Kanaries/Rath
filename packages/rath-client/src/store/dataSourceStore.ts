@@ -72,8 +72,12 @@ export class DataSourceStore {
             rawData: observable.ref,
             cookedDataSource: observable.ref,
             cookedMeasures: observable.ref,
+            fieldsWithExtSug: observable.ref,
             // @ts-expect-error private field
             subscriptions: false,
+            cleanedDataRef: false,
+            filteredDataRef: false,
+            fieldMetasRef: false,
         });
         const fields$ = from(toStream(() => this.fieldsAndPreview, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
