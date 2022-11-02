@@ -1,26 +1,22 @@
 /* eslint no-restricted-globals: 0 */
 
-import { applyFilters } from './engine/filter';
+import {  applyFiltersAsIndices } from './engine/filter';
 import { timer } from './timer';
 
-const filterService = e => {
+const filterService = (e) => {
     try {
-        const { dataSource,
-            extData,
-            filters } = e.data;
-        const res = applyFilters(dataSource,
-            extData,
-            filters)
+        const { dataSource, extData, filters } = e.data;
+        const res = applyFiltersAsIndices(dataSource, extData, filters);
         self.postMessage({
             success: true,
-            data: res
-        })
+            data: res,
+        });
     } catch (error) {
         self.postMessage({
             success: false,
-            message: `[filter data]${error}\n${error.stack}`
-        })
+            message: `[filter data]${error}\n${error.stack}`,
+        });
     }
-}
+};
 
-self.addEventListener('message', timer(filterService), false)
+self.addEventListener('message', timer(filterService), false);

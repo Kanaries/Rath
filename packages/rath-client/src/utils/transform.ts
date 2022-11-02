@@ -83,3 +83,11 @@ export function transVegaSubset2Schema (vegaSpec: IVegaSubset): Specification {
     })
     return schema
 }
+
+export function selectFilteredValues(data: IRow[], filteredIndices: number[]): IRow[] {
+    const filteredData: IRow[] = [];
+    for (let i = 0; i < filteredIndices.length; i++) {
+        filteredData.push(data[filteredIndices[i]]);
+    }
+    return filteredData;
+}

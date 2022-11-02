@@ -7,9 +7,9 @@ export function applyFilters (dataSource: IRow[],
     // const effectFilters = filters.filter(f => !f.disable);
     const effectFilters = filters.filter(f => !f.disable && !extFields.has(f.fid));
     const effectExtFilters = filters.filter(f => !f.disable && extFields.has(f.fid));
-    let extRow: IRow = new Object();
+    let extRow: IRow = {};
     for (let [key, val] of extFields.entries()) {
-        if (val.data.length !== dataSource.length) throw "applyFilter: data lengths not match";
+        if (val.data.length !== dataSource.length) throw new Error("applyFilter: data lengths not match");
         extRow[key] = val.data.at(0);
     }
 
@@ -27,8 +27,40 @@ export function applyFilters (dataSource: IRow[],
         })
         if (keep) {
             for (let [key, val] of extFields.entries()) extRow[key] = val.data.at(i);
-            ans.push(Object.assign({}, row, extRow) as IRow);
+            ans.push({ ...row, ...extRow });
             // ans.push(row);
+        }
+    }
+    return ans
+}
+
+export function applyFiltersAsIndices (dataSource: IRow[],
+    extFields: Map<string, ICol<any>>,
+    filters: IFilter[]): number[] {
+    const ans: number[] = [];
+    // const effectFilters = filters.filter(f => !f.disable);
+    const effectFilters = filters.filter(f => !f.disable && !extFields.has(f.fid));
+    const effectExtFilters = filters.filter(f => !f.disable && extFields.has(f.fid));
+    let extRow: IRow = {};
+    for (let [key, val] of extFields.entries()) {
+        if (val.data.length !== dataSource.length) throw new Error("applyFilter: data lengths not match");
+        extRow[key] = val.data.at(0);
+    }
+
+    for (let i = 0; i < dataSource.length; i++) {
+        const row = dataSource[i];
+        let keep = effectFilters.every(f => {
+            if (f.type === 'range') return f.range[0] <= row[f.fid] && row[f.fid] <= f.range[1];
+            if (f.type === 'set') return f.values.includes(row[f.fid]);
+            return false;
+        })
+        && effectExtFilters.every(f => {
+            if (f.type === 'range') return f.range[0] <= extFields.get(f.fid)!.data[i] && extFields.get(f.fid)!.data[i] <= f.range[1];
+            if (f.type === 'set') return f.values.includes(extFields.get(f.fid)!.data[i]);
+            return false;
+        })
+        if (keep) {
+            ans.push(i);
         }
     }
     return ans
