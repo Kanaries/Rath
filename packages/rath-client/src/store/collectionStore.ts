@@ -70,4 +70,7 @@ export class CollectionStore {
         const vizCode = encodeViewKey(fields, spec, filters);
         return this.vizHash.has(vizCode)
     }
+    public addConfigCollectionList(value: IInsightVizView[]) {
+        this.collectionList = value;
+    }
 }

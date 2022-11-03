@@ -37,9 +37,10 @@ interface ListViewProps {
     data: IRow[];
     metas: IFieldMeta[];
     views: IInsightVizView[];
+    onConfig: (data: IInsightVizView) => void;
 }
 const ListView: React.FC<ListViewProps> = (props) => {
-    const { data, views, metas } = props;
+    const { data, views, metas, onConfig } = props;
     const [pageIndex, setPageIndex] = useState<number>(0);
     return (
         <div>
@@ -56,8 +57,15 @@ const ListView: React.FC<ListViewProps> = (props) => {
             <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
             <CollectContainer>
                 {views.slice(pageIndex * VIEW_NUM_IN_PAGE, (pageIndex + 1) * VIEW_NUM_IN_PAGE).map((item, i) => (
-                    <div className="chart-container" key={item.viewId}>
+                    <div
+                        className="chart-container cursor-pointer"
+                        key={item.viewId}
+                        onClick={() => {
+                            onConfig(item);
+                        }}
+                    >
                         <div className="c-vis">
+                            <div className="flex justify-center text-lg font-bold mb-2">{item.title}</div>
                             <VisErrorBoundary>
                                 <ReactVega
                                     dataSource={applyFilters(data, item.filters)}
@@ -67,11 +75,8 @@ const ListView: React.FC<ListViewProps> = (props) => {
                             </VisErrorBoundary>
                         </div>
                         <div className="c-desc">
-                            <ViewInfo
-                                metas={metas}
-                                fields={item.fields}
-                                filters={item.filters}
-                            />
+                            <div className="w-full text-gray-700 text-sm">{item.desc}</div>
+                            <ViewInfo metas={metas} fields={item.fields} filters={item.filters} />
                         </div>
                     </div>
                 ))}
