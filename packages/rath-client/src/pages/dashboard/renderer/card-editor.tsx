@@ -4,7 +4,6 @@ import { createPortal } from "react-dom";
 import styled from "styled-components";
 import { runInAction } from "mobx";
 import type { IFilter } from "../../../interfaces";
-import { scaleRatio } from "./constant";
 import { CardProviderProps } from "./card";
 import MoveHandler from "./components/move-handler";
 import ResizeHandler from "./components/resize-handler";
@@ -31,11 +30,24 @@ const DragBox = styled.div<{ canDrop: boolean }>`
 `;
 
 const CardEditor: FC<CardProviderProps> = ({
-    item, index, children, transformCoord, draftRef, canDrop, isSizeValid, operators, onFocus, focused
+    item, index, children, transformCoord, draftRef, canDrop, isSizeValid, operators, onFocus, focused, ratio,
 }) => {
     const { moveCard, resizeCard } = operators;
 
     const { chart } = item.content;
+
+    useEffect(() => {
+        if (chart) {
+            runInAction(() => {
+                chart.highlighter = [];
+            });
+            return () => {
+                runInAction(() => {
+                    chart.highlighter = [];
+                });
+            };
+        }
+    }, [chart]);
 
     const handleClick = useCallback(() => {
         onFocus?.();
@@ -53,7 +65,7 @@ const CardEditor: FC<CardProviderProps> = ({
     useEffect(() => {
         operators.fireUpdate?.();
     }, [
-        operators.fireUpdate,
+        operators,
         item.config.appearance, item.config.align,
         item.layout.x, item.layout.y, item.layout.w, item.layout.h,
         item.content.title, item.content.text,
@@ -185,10 +197,10 @@ const CardEditor: FC<CardProviderProps> = ({
                     <DragBox
                         canDrop={readyToDrop}
                         style={{
-                            left: dragDest.x * scaleRatio,
-                            top: dragDest.y * scaleRatio,
-                            width: dragDest.w * scaleRatio,
-                            height: dragDest.h * scaleRatio,
+                            left: dragDest.x * ratio,
+                            top: dragDest.y * ratio,
+                            width: dragDest.w * ratio,
+                            height: dragDest.h * ratio,
                         }}
                     />,
                     draftRef.current
@@ -211,10 +223,10 @@ const CardEditor: FC<CardProviderProps> = ({
                     <DragBox
                         canDrop={readyToResize}
                         style={{
-                            left: resizeDest.x * scaleRatio,
-                            top: resizeDest.y * scaleRatio,
-                            width: resizeDest.w * scaleRatio,
-                            height: resizeDest.h * scaleRatio,
+                            left: resizeDest.x * ratio,
+                            top: resizeDest.y * ratio,
+                            width: resizeDest.w * ratio,
+                            height: resizeDest.h * ratio,
                         }}
                     />,
                     draftRef.current

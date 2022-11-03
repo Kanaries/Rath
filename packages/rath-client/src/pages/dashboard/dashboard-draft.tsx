@@ -5,7 +5,7 @@ import { useGlobalStore } from '../../store';
 import { DashboardCard } from '../../store/dashboardStore';
 import DashboardPanel from './dashboard-panel';
 import DashboardRenderer, { transformCoord } from './renderer';
-import { scaleRatio, MIN_CARD_SIZE } from './renderer/constant';
+import { MIN_CARD_SIZE } from './renderer/constant';
 
 
 const Container = styled.div`
@@ -371,6 +371,7 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r }) => 
                     editor={mode === 'edit' ? (index => ({
                         draftRef,
                         canDrop,
+                        ratio: r,
                         focused: focus === index,
                         onFocus: ()  => setFocus(index),
                         isSizeValid,
@@ -384,10 +385,10 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r }) => 
                         <DragBox
                             canDrop={canDrop(dragDest) && isSizeValid(dragDest.w, dragDest.h)}
                             style={{
-                                left: dragDest.x * scaleRatio,
-                                top: dragDest.y * scaleRatio,
-                                width: dragDest.w * scaleRatio,
-                                height: dragDest.h * scaleRatio,
+                                left: dragDest.x * r,
+                                top: dragDest.y * r,
+                                width: dragDest.w * r,
+                                height: dragDest.h * r,
                             }}
                         />
                     )}
