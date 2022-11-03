@@ -127,6 +127,7 @@ const PreviewPopup = styled.div`
         width: var(--size);
         height: var(--size);
         background-color: var(--bg-color);
+        z-index: -1;
     }
 `;
 
@@ -382,7 +383,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument }) => {
             }
         }
         return {};
-    }, [previewSource, pages]);
+    }, [previewSource]);
 
     return (
         <PageLayout

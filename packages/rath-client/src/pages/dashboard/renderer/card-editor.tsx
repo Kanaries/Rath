@@ -2,6 +2,8 @@ import { observer } from "mobx-react-lite";
 import { FC, useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
+import { runInAction } from "mobx";
+import type { IFilter } from "../../../interfaces";
 import { scaleRatio } from "./constant";
 import { CardProviderProps } from "./card";
 import MoveHandler from "./components/move-handler";
@@ -31,6 +33,8 @@ const CardEditor: FC<CardProviderProps> = ({
     item, index, children, transformCoord, draftRef, canDrop, isSizeValid, operators, onFocus, focused
 }) => {
     const { moveCard, resizeCard } = operators;
+
+    const { chart } = item.content;
 
     const handleClick = useCallback(() => {
         onFocus?.();
@@ -132,6 +136,14 @@ const CardEditor: FC<CardProviderProps> = ({
         setResizing(null);
     }, []);
 
+    const handleFilter = useCallback((filters: Readonly<IFilter[]>) => {
+        if (chart) {
+            runInAction(() => {
+                chart.selectors = [...filters];
+            });
+        }
+    }, [chart]);
+
     return children({
         content: focused ? (
             <>
@@ -179,10 +191,11 @@ const CardEditor: FC<CardProviderProps> = ({
             </>
         ) : null,
         onDoubleClick: handleDoubleClick,
-        onRootMouseDown(x, y) {
-            // console.log({x,y})
-        },
+        // onRootMouseDown(x, y) {
+        //     // console.log({x,y})
+        // },
         onClick: handleClick,
+        onFilter: handleFilter,
     });
 };
 

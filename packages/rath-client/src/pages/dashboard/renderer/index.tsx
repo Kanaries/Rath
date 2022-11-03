@@ -23,6 +23,11 @@ const Draft = styled.div`
     box-shadow:
         0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%),
         0 -1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 -0.3px 0.9px 0 rgb(0 0 0 / 11%);
+    background-image: 
+        linear-gradient(to right, #8881 0.5px, transparent 0.5px),
+        linear-gradient(to left, #8881 0.5px, transparent 0.5px),
+        linear-gradient(to top, #8881 0.5px, transparent 0.5px),
+        linear-gradient(to bottom, #8881 0.5px, transparent 0.5px);
     background-repeat: repeat;
     background-position: 0 0;
     position: relative;
@@ -47,6 +52,9 @@ const DashboardRenderer = forwardRef<HTMLDivElement, DashboardRendererProps>(fun
                 ...props.style,
                 width: `${page.config.size.w * renderRatio}px`,
                 height: `${page.config.size.h * renderRatio}px`,
+                // @ts-ignore
+                '--ratio': renderRatio * 0.25,
+                backgroundSize: new Array<0>(4).fill(0).map(() => `${renderRatio}px ${renderRatio}px`).join(','),
             }}
         >
             {page.cards.map((card, i) => (

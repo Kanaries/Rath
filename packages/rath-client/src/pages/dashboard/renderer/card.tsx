@@ -25,12 +25,12 @@ export interface CardProvider {
     onRootMouseDown: (x: number, y: number) => void;
     onDoubleClick: () => void;
     onClick: () => void;
+    onFilter: (filters: Readonly<IFilter[]>) => void;
 }
 
 export const layoutOption = {
     title: {
         flex: 0,
-        prefer: 10,
     },
     text: {
         flex: 1,
@@ -62,8 +62,8 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
     user-select: none;
     position: absolute;
     backdrop-filter: blur(100vmax);
-    border: 1px solid transparent;
-    padding: var(--padding);
+    border: calc(1px * var(--ratio)) solid transparent;
+    padding: calc(var(--padding) * var(--ratio));
     ${({ appearance }) => ({
         transparent: `
             border-color: transparent;
@@ -73,14 +73,14 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
         `,
         dropping: `
             border: none;
-            padding: calc(var(--padding) + 1px);
+            padding: calc(var(--padding) + 1px * var(--ratio));
             box-shadow:
                 0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%),
                 inset 0 6.4px 14.4px 0 rgb(0 0 0 / 6%), inset 0 1.2px 3.6px 0 rgb(0 0 0 / 4%);
         `,
         neumorphism: `
             border: none;
-            padding: calc(var(--padding) + 1px);
+            padding: calc(var(--padding) + 1px * var(--ratio));
             border-radius: var(--padding);
             background-image: linear-gradient(145deg, #00000008, #00000004, #00000002);
             box-shadow:  6px 6px 12px #bebebe,
@@ -92,24 +92,24 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
     flex-direction: ${({ direction }) => direction};
     align-items: stretch;
     justify-content: center;
-    & .title {
+    & .title, & .text {
         padding: calc(var(--padding) * 0.4) calc(var(--padding) * 0.8);
-        font-size: 16px;
-        ${({ direction }) => direction === 'column' ? '' : 'writing-mode: vertical-lr;'}
+        ${({ direction }) => direction === 'column' ? '' : 'writing-mode: vertical-rl;'}
         writing-mode: ${({ direction }) => direction === 'column' ? 'horizontal-tb' : 'sideways-lr'};   // sideways-lr is not supported yet
         text-orientation: mixed;
-        flex-grow: ${layoutOption.title.flex};
-        flex-shrink: ${999 / (layoutOption.title.flex || 1)};
-        flex-basis: ${layoutOption.title.prefer}%;
         overflow: hidden;
     }
+    & .title {
+        font-size: calc(16px * var(--ratio));
+        flex-grow: ${layoutOption.title.flex};
+        flex-shrink: ${layoutOption.title.flex ? 999 / layoutOption.title.flex : 0};
+        flex-basis: max-content;
+    }
     & .text {
-        padding: calc(var(--padding) * 0.4) calc(var(--padding) * 0.8);
-        font-size: 13px;
+        font-size: calc(13px * var(--ratio));
         flex-grow: ${layoutOption.text.flex};
         flex-shrink: ${999 / (layoutOption.text.flex || 1)};
         flex-basis: ${layoutOption.text.prefer}%;
-        overflow: hidden;
     }
     & .chart {
         flex-grow: ${layoutOption.chart.flex};
@@ -127,18 +127,20 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
         return editor ? CardEditor : CardDisplay;
     }, [editor]);
 
+    const selectors = cards.map((c, i) => i === index ? [] : c.content.chart?.selectors ?? []).flat();
+
     const filters = useMemo<IFilter[]>(() => {
         return card.content.chart ? [
             ...card.content.chart.filters,
             ...globalFilters,
-            ...cards.map((c, i) => i === index ? [] : c.content.chart?.selectors ?? []).flat(),
+            ...selectors,
         ] : [];
-    }, [card.content.chart, globalFilters, cards, index]);
+    }, [card.content.chart, globalFilters, selectors]);
 
     const containerDirection = card.layout.w / card.layout.h >= 1 ? 'horizontal' : 'portrait';
 
     const flexDirection = useMemo<'row' | 'column'>(() => {
-        switch (card.align) {
+        switch (card.config.align) {
             case DashboardCardInsetLayout.Auto: {
                 return containerDirection === 'horizontal' ? 'row' : 'column';
             }
@@ -152,7 +154,7 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
                 return 'row';
             }
         }
-    }, [card.align, containerDirection]);
+    }, [card.config.align, containerDirection]);
 
     return (
         <Provider
@@ -199,6 +201,8 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
                         <DashboardChart
                             item={card.content.chart}
                             filters={filters}
+                            ratio={ratio}
+                            onFilter={provider.onFilter}
                         />
                     )}
                     {provider.content}
