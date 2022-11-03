@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
 import { runInAction } from "mobx";
@@ -8,6 +8,7 @@ import { scaleRatio } from "./constant";
 import { CardProviderProps } from "./card";
 import MoveHandler from "./components/move-handler";
 import ResizeHandler from "./components/resize-handler";
+import DeleteButton from "./components/delete-button";
 
 
 const DragBox = styled.div<{ canDrop: boolean }>`
@@ -48,6 +49,17 @@ const CardEditor: FC<CardProviderProps> = ({
             adjustSize('w');
         }
     }, [operators.adjustCardSize]);
+
+    useEffect(() => {
+        operators.fireUpdate?.();
+    }, [
+        operators.fireUpdate,
+        item.config.appearance, item.config.align,
+        item.layout.x, item.layout.y, item.layout.w, item.layout.h,
+        item.content.title, item.content.text,
+        item.content.chart?.filters, item.content.chart?.selectors, item.content.chart?.subset,
+        item.content.chart?.size.w, item.content.chart?.size.h,
+    ]);
 
     // Move
     const [dragging, setDragging] = useState<null | { from: { x: number; y: number }; to: { x: number; y: number } }>(null);
@@ -144,6 +156,20 @@ const CardEditor: FC<CardProviderProps> = ({
         }
     }, [chart]);
 
+    const { removeCard } = operators;
+
+    useEffect(() => {
+        if (focused && removeCard) {
+            const cb = (ev: KeyboardEvent) => {
+                if (['Backspace'].includes(ev.key)) {
+                    removeCard(index);
+                }
+            };
+            document.body.addEventListener('keydown', cb);
+            return () => document.body.removeEventListener('keydown', cb);
+        }
+    }, [focused, removeCard, index]);
+
     return children({
         content: focused ? (
             <>
@@ -176,6 +202,11 @@ const CardEditor: FC<CardProviderProps> = ({
                     onResizeCancel={handleResizeCancel}
                     adjustCardSize={operators.adjustCardSize}
                 />
+                {removeCard && (
+                    <DeleteButton
+                        remove={() => removeCard(index)}
+                    />
+                )}
                 {resizeDest && draftRef.current && createPortal(
                     <DragBox
                         canDrop={readyToResize}
@@ -196,6 +227,9 @@ const CardEditor: FC<CardProviderProps> = ({
         // },
         onClick: handleClick,
         onFilter: handleFilter,
+        style: focused ? {
+            zIndex: 1,
+        } : undefined,
     });
 };
 

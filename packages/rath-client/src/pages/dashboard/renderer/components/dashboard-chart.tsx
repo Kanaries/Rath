@@ -87,7 +87,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
                 },
                 encoding: {
                     ...item.subset.encoding,
-                    opacity: { value: onFilter ? 0.33 : 0.8 },
+                    opacity: { value: onFilter ? 0.33 : 0.67 },
                 },
             }, onFilter ? {
                 transform: [{

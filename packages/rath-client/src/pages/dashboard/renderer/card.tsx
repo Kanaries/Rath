@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { FC, useMemo } from "react";
+import { CSSProperties, FC, useMemo } from "react";
 import styled from "styled-components";
 import { DashboardCardAppearance, DashboardCardInsetLayout, DashboardCardState, DashboardDocumentOperators } from "../../../store/dashboardStore";
 import type { IFilter } from "../../../interfaces";
@@ -26,6 +26,7 @@ export interface CardProvider {
     onDoubleClick: () => void;
     onClick: () => void;
     onFilter: (filters: Readonly<IFilter[]>) => void;
+    style: CSSProperties;
 }
 
 export const layoutOption = {
@@ -189,6 +190,7 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
                         height: card.layout.h * ratio,
                         // @ts-ignore
                         '--padding': `${MIN_CARD_SIZE * 0.1 * ratio}px`,
+                        ...provider.style,
                     }}
                 >
                     {card.content.title && (

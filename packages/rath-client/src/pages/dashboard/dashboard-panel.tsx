@@ -3,8 +3,9 @@ import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FC, useState } from "react";
 import styled from "styled-components";
-import { DashboardCardAppearance, DashboardCardInsetLayout, DashboardCardState, DashboardDocument } from "../../store/dashboardStore";
+import { DashboardCardAppearance, DashboardCardInsetLayout, DashboardCardState, DashboardDocument, DashboardDocumentOperators } from "../../store/dashboardStore";
 import SourcePanel from "./source-panel";
+import FilterList from './filter-list';
 
 
 const Panel = styled.div`
@@ -87,7 +88,8 @@ const OptionContainer = styled.div`
 
 export interface DashboardPanelProps {
     page: DashboardDocument;
-    card: DashboardCardState;
+    operators: DashboardDocumentOperators;
+    card: DashboardCardState | null;
 }
 
 const SupportedTabs = ['collection', 'editor'/*, 'loa' */] as const;
@@ -111,133 +113,199 @@ const CardAlignName: Readonly<Record<DashboardCardInsetLayout, string>> = {
     [DashboardCardInsetLayout.Row]: 'Row',
 };
 
-const DashboardPanel: FC<DashboardPanelProps> = ({ page, card }) => {
+const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators }) => {
     const [tab, setTab] = useState<typeof SupportedTabs[number]>('collection');
 
     return (
         <Panel>
             <Stack>
-                <Text block variant="xLarge" style={{ margin: '0 0 0.5em' }}>
-                    Common
-                </Text>
-                <TextField
-                    label="Title"
-                    value={card.content.title ?? ''}
-                    onChange={(_, d) => runInAction(() => {
-                        card.content.title = d || undefined;
-                    })}
-                />
-                <TextField
-                    label="Description"
-                    value={card.content.text ?? ''}
-                    onChange={(_, d) => runInAction(() => {
-                        card.content.text = d || undefined;
-                    })}
-                    multiline
-                    autoAdjustHeight
-                    resizable={false}
-                />
-                <ChoiceGroup
-                    label="Theme"
-                    selectedKey={card.config.appearance}
-                    options={CardThemes.map(thm => ({
-                        key: thm,
-                        text: thm,
-                        onRenderField: (option, origin) => {
-                            return option ? (
-                                <OptionContainer>
-                                    {origin?.(option)}
-                                    <ActionButton
-                                        onClick={() => {
-                                            const key = option?.key ?? '';
-                                            if ((CardThemes as string[]).includes(key)) {
-                                                runInAction(() => {
-                                                    page.cards.forEach(c => c.config.appearance = key as DashboardCardAppearance);
-                                                });
-                                            }
-                                        }}
-                                    >
-                                        Apply to all
-                                    </ActionButton>
-                                </OptionContainer>
-                            ) : null;
-                        },
-                    }))}
-                    onChange={(_, option) => {
-                        const key = option?.key ?? '';
-                        if ((CardThemes as string[]).includes(key)) {
-                            runInAction(() => {
-                                card.config.appearance = key as DashboardCardAppearance;
-                            });
-                        }
-                    }}
-                />
-                <ChoiceGroup
-                    label="Layout"
-                    selectedKey={CardAlignName[card.config.align]}
-                    options={CardAlignTypes.map(alg => ({
-                        key: CardAlignName[alg],
-                        text: CardAlignName[alg],
-                        onRenderField: (option, origin) => {
-                            return option ? (
-                                <OptionContainer>
-                                    {origin?.(option)}
-                                    <ActionButton
-                                        onClick={() => {
-                                            const key = {
-                                                Auto: DashboardCardInsetLayout.Auto,
-                                                Column: DashboardCardInsetLayout.Column,
-                                                Row: DashboardCardInsetLayout.Row,
-                                            }[option?.key ?? ''];
-                                            if (typeof key === 'number') {
-                                                runInAction(() => {
-                                                    page.cards.forEach(c => c.config.align = key);
-                                                });
-                                            }
-                                        }}
-                                    >
-                                        Apply to all
-                                    </ActionButton>
-                                </OptionContainer>
-                            ) : null;
-                        },
-                    }))}
-                    onChange={(_, option) => {
-                        const key = {
-                            Auto: DashboardCardInsetLayout.Auto,
-                            Column: DashboardCardInsetLayout.Column,
-                            Row: DashboardCardInsetLayout.Row,
-                        }[option?.key ?? ''];
-                        if (typeof key === 'number') {
-                            runInAction(() => {
-                                card.config.align = key;
-                            });
-                        }
-                    }}
-                />
-                <Text block variant="xLarge" style={{ margin: '1.5em 0 0.5em' }}>
-                    Chart
-                </Text>
-                <div role="tablist">
-                    {SupportedTabs.map((key, i) => (
-                        <div
-                            role="tab"
-                            key={key}
-                            aria-selected={key === tab}
-                            onClick={() => key !== tab && setTab(key)}
-                            style={{ zIndex: key === tab ? SupportedTabs.length + 1 : SupportedTabs.length - i }}
-                        >
-                            {key}
+                {card ? (
+                    <>
+                        <Text block variant="xLarge" style={{ margin: '0 0 0.5em' }}>
+                            Common
+                        </Text>
+                        <TextField
+                            label="Title"
+                            value={card.content.title ?? ''}
+                            onChange={(_, d) => runInAction(() => {
+                                card.content.title = d || undefined;
+                            })}
+                        />
+                        <TextField
+                            label="Description"
+                            value={card.content.text ?? ''}
+                            onChange={(_, d) => runInAction(() => {
+                                card.content.text = d || undefined;
+                            })}
+                            multiline
+                            autoAdjustHeight
+                            resizable={false}
+                        />
+                        <ChoiceGroup
+                            label="Theme"
+                            selectedKey={card.config.appearance}
+                            options={CardThemes.map(thm => ({
+                                key: thm,
+                                text: thm,
+                                onRenderField: (option, origin) => {
+                                    return option ? (
+                                        <OptionContainer>
+                                            {origin?.(option)}
+                                            <ActionButton
+                                                onClick={() => {
+                                                    const key = option?.key ?? '';
+                                                    if ((CardThemes as string[]).includes(key)) {
+                                                        runInAction(() => {
+                                                            page.cards.forEach(c => c.config.appearance = key as DashboardCardAppearance);
+                                                        });
+                                                    }
+                                                }}
+                                            >
+                                                Apply to all
+                                            </ActionButton>
+                                        </OptionContainer>
+                                    ) : null;
+                                },
+                            }))}
+                            onChange={(_, option) => {
+                                const key = option?.key ?? '';
+                                if ((CardThemes as string[]).includes(key)) {
+                                    runInAction(() => {
+                                        card.config.appearance = key as DashboardCardAppearance;
+                                    });
+                                }
+                            }}
+                        />
+                        <ChoiceGroup
+                            label="Layout"
+                            selectedKey={CardAlignName[card.config.align]}
+                            options={CardAlignTypes.map(alg => ({
+                                key: CardAlignName[alg],
+                                text: CardAlignName[alg],
+                                onRenderField: (option, origin) => {
+                                    return option ? (
+                                        <OptionContainer>
+                                            {origin?.(option)}
+                                            <ActionButton
+                                                onClick={() => {
+                                                    const key = {
+                                                        Auto: DashboardCardInsetLayout.Auto,
+                                                        Column: DashboardCardInsetLayout.Column,
+                                                        Row: DashboardCardInsetLayout.Row,
+                                                    }[option?.key ?? ''];
+                                                    if (typeof key === 'number') {
+                                                        runInAction(() => {
+                                                            page.cards.forEach(c => c.config.align = key);
+                                                        });
+                                                    }
+                                                }}
+                                            >
+                                                Apply to all
+                                            </ActionButton>
+                                        </OptionContainer>
+                                    ) : null;
+                                },
+                            }))}
+                            onChange={(_, option) => {
+                                const key = {
+                                    Auto: DashboardCardInsetLayout.Auto,
+                                    Column: DashboardCardInsetLayout.Column,
+                                    Row: DashboardCardInsetLayout.Row,
+                                }[option?.key ?? ''];
+                                if (typeof key === 'number') {
+                                    runInAction(() => {
+                                        card.config.align = key;
+                                    });
+                                }
+                            }}
+                        />
+                        <Text block variant="xLarge" style={{ margin: '1.5em 0 0.5em' }}>
+                            Chart
+                        </Text>
+                        <div role="tablist">
+                            {SupportedTabs.map((key, i) => (
+                                <div
+                                    role="tab"
+                                    key={key}
+                                    aria-selected={key === tab}
+                                    onClick={() => key !== tab && setTab(key)}
+                                    style={{ zIndex: key === tab ? SupportedTabs.length + 1 : SupportedTabs.length - i }}
+                                >
+                                    {key}
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
-                <div role="tabpanel">
-                    {({
-                        collection: <SourcePanel page={page} card={card} />,
-                        editor: null,   // FIXME:
-                        loa: null,      // TODO:
-                    } as const)[tab]}
-                </div>
+                        <div role="tabpanel">
+                            {({
+                                collection: <SourcePanel page={page} card={card} operators={operators} />,
+                                editor: null,   // FIXME:
+                                loa: null,      // TODO:
+                            } as const)[tab]}
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <Text block variant="xLarge" style={{ margin: '0 0 0.5em' }}>
+                            Global
+                        </Text>
+                        <ChoiceGroup
+                            label="Theme"
+                            options={CardThemes.map(thm => ({
+                                key: thm,
+                                text: thm,
+                                onRenderField: option => {
+                                    return option ? (
+                                        <ActionButton
+                                            onClick={() => {
+                                                const key = option?.key ?? '';
+                                                if ((CardThemes as string[]).includes(key)) {
+                                                    runInAction(() => {
+                                                        page.cards.forEach(c => c.config.appearance = key as DashboardCardAppearance);
+                                                    });
+                                                }
+                                            }}
+                                            style={{ height: 'unset' }}
+                                        >
+                                            {option.text}
+                                        </ActionButton>
+                                    ) : null;
+                                },
+                            }))}
+                        />
+                        <ChoiceGroup
+                            label="Layout"
+                            options={CardAlignTypes.map(alg => ({
+                                key: CardAlignName[alg],
+                                text: CardAlignName[alg],
+                                onRenderField: option => {
+                                    return option ? (
+                                        <ActionButton
+                                            onClick={() => {
+                                                const key = {
+                                                    Auto: DashboardCardInsetLayout.Auto,
+                                                    Column: DashboardCardInsetLayout.Column,
+                                                    Row: DashboardCardInsetLayout.Row,
+                                                }[option?.key ?? ''];
+                                                if (typeof key === 'number') {
+                                                    runInAction(() => {
+                                                        page.cards.forEach(c => c.config.align = key);
+                                                    });
+                                                }
+                                            }}
+                                            style={{ height: 'unset' }}
+                                        >
+                                            {option.text}
+                                        </ActionButton>
+                                    ) : null;
+                                },
+                            }))}
+                        />
+                        <Text block variant="xLarge" style={{ margin: '1.5em 0 0.5em' }}>
+                            Filters
+                        </Text>
+                        <FilterList page={page} operators={operators} />
+                    </>
+                )}
             </Stack>
         </Panel>
     );
