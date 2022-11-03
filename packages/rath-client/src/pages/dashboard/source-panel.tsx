@@ -3,6 +3,7 @@ import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import { deepcopy } from "visual-insights/build/esm/utils";
 import ReactVega from "../../components/react-vega";
 import VisErrorBoundary from "../../components/visErrorBoundary";
 import type { IInsightVizView } from "../../interfaces";
@@ -33,14 +34,16 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card }) => {
     const apply = useCallback((view: IInsightVizView) => {
         if (card) {
             runInAction(() => {
+                const data = deepcopy(view) as typeof view;
                 card.content.chart = {
-                    subset: view.spec,
-                    filters: view.filters,
+                    subset: data.spec,
+                    filters: data.filters,
                     size: {
                         w: 100,
                         h: 100,
                     },
                     selectors: [],
+                    highlighter: [],
                 };
             });
         }

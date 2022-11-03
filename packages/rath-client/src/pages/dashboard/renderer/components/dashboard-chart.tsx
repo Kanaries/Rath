@@ -19,47 +19,66 @@ interface DashboardChartProps {
     ratio: number;
     item: NonNullable<DashboardCardState['content']['chart']>;
     filters: IFilter[];
+    highlighters?: IFilter[];
     onFilter?: (filters: Readonly<IFilter[]>) => void;
 }
 
+const symbolRowIndex: unique symbol = Symbol('rowIndex');
+const highlightSelectorPredicateName = '__dashboard_chart_item_highlighted';
+
 const DashboardChart: FC<DashboardChartProps> = ({
-    item, filters, ratio, onFilter,
+    item, filters, highlighters, ratio, onFilter,
 }) => {
     const { dataSourceStore } = useGlobalStore();
     const { cleanedData } = dataSourceStore;
-    const data = useMemo(() => applyFilters(cleanedData, filters), [cleanedData, filters]);
+    const fullSet = cleanedData;    // TODO: 采样
+    const data = useMemo(() => applyFilters(fullSet, filters), [fullSet, filters]);
+    const highlightedData = useMemo(() => {
+        const indices = applyFilters(
+            data.map((row, i) => ({ ...row, [symbolRowIndex]: i })), highlighters
+        ).map(row => (row as { [symbolRowIndex]: number })[symbolRowIndex]);
+        const highlighted = new Map<number, 1>();
+        for (const i of indices) {
+            highlighted.set(i, 1);
+        }
+        return data.map((row, i) => ({ ...row, [highlightSelectorPredicateName]: highlighted.has(i) ? 1 : 0 }));
+    }, [data, highlighters]);
     const { selectors } = item;
 
     const { xField, yField, rangeFilterApplied, xRange, yRange, xValues, yValues } = useMemo(() => {
         const xField = item.subset.encoding.x?.field;
         const yField = item.subset.encoding.y?.field;
 
-        const anyFilterApplied = onFilter && selectors.length > 0;
-        const rangeFilterApplied = anyFilterApplied && selectors.every(f => f.type === 'range');
-        const setFilterApplied = anyFilterApplied && selectors.every(f => f.type === 'set');
+        const allFilters = highlighters ? item.highlighter : selectors;
+
+        const anyFilterApplied = onFilter && allFilters.length > 0;
+        const rangeFilterApplied = anyFilterApplied && allFilters.every(f => f.type === 'range');
+        const setFilterApplied = anyFilterApplied && allFilters.every(f => f.type === 'set');
 
         const xRange = (rangeFilterApplied ? (
-            selectors.find(f => f.fid === xField) as IFilter & { type: 'range' } | undefined
+            allFilters.find(f => f.fid === xField) as IFilter & { type: 'range' } | undefined
         )?.range : undefined) ?? [-Infinity, Infinity];
         const yRange = (rangeFilterApplied ? (
-            selectors.find(f => f.fid === yField) as IFilter & { type: 'range' } | undefined
+            allFilters.find(f => f.fid === yField) as IFilter & { type: 'range' } | undefined
         )?.range : undefined) ?? [-Infinity, Infinity];
 
         const xValues = (setFilterApplied ? (
-            selectors.find(f => f.fid === xField) as IFilter & { type: 'set' } | undefined
+            allFilters.find(f => f.fid === xField) as IFilter & { type: 'set' } | undefined
         )?.values : []) ?? [];
         const yValues = (setFilterApplied ? (
-            selectors.find(f => f.fid === yField) as IFilter & { type: 'set' } | undefined
+            allFilters.find(f => f.fid === yField) as IFilter & { type: 'set' } | undefined
         )?.values : []) ?? [];
 
         return { xField, yField, rangeFilterApplied, setFilterApplied, xRange, yRange, xValues, yValues };
-    }, [item, selectors, onFilter]);
+    }, [item, highlighters, selectors, onFilter]);
 
     const spec = useMemo(() => {
         return {
             data: item.subset.data,
             layer: [{
-                params: onFilter ? [{
+                params: onFilter && new Array<typeof item.subset.mark>(
+                    'bar', 'arc', 'point', 'circle', 'rect'
+                ).includes((item.subset.mark as unknown as { type: typeof item.subset.mark })?.type) ? [{
                     name: 'brush',
                     value: rangeFilterApplied ? {
                         x: [xRange[0], xRange[1]],
@@ -69,9 +88,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
                         type: 'interval',
                         clear: 'mouseup',
                     },
-                }, new Array<typeof item.subset.mark>(
-                    'bar', 'arc', 'point', 'circle', 'rect'
-                ).includes((item.subset.mark as unknown as { type: typeof item.subset.mark })?.type) && {
+                }, {
                     name: 'sl',
                     value: {
                         x: xValues,
@@ -80,19 +97,34 @@ const DashboardChart: FC<DashboardChartProps> = ({
                     select: {
                         type: 'point',
                     },
-                }].filter(Boolean) as ({ name: string })[] : undefined,
+                }] : undefined,
                 mark: {
                     type: (item.subset.mark as unknown as { type: typeof item.subset.mark })?.type,
                     tooltip: true,
                 },
                 encoding: {
                     ...item.subset.encoding,
-                    opacity: { value: onFilter ? 0.33 : 0.67 },
+                    opacity: { value: onFilter && (
+                        // highlighters 优先级高，不传 highlighters 时才走 selectors 逻辑
+                        highlighters ? (item.highlighter.length || highlighters.length) : item.selectors.length
+                    ) ? 0.33 : 0.8 },
                 },
-            }, onFilter ? {
+            }, highlighters?.length ? {
                 transform: [{
                     filter: {
-                        param: item.selectors[0]?.type === 'set' ? 'sl' : 'brush',
+                        field: highlightSelectorPredicateName,
+                        equal: 1,
+                    },
+                }],
+                mark: item.subset.mark,
+                encoding: {
+                    ...item.subset.encoding,
+                    opacity: { value: 1 },
+                },
+            } : onFilter && !highlighters && item.selectors[0] ? {
+                transform: [{
+                    filter: {
+                        param: item.selectors[0].type === 'set' ? 'sl' : 'brush',
                     },
                 }],
                 mark: item.subset.mark,
@@ -102,7 +134,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
                 },
             } : undefined].filter(Boolean),
         };
-    }, [item, rangeFilterApplied, xRange, yRange, xValues, yValues, onFilter]);
+    }, [item, highlighters, rangeFilterApplied, xRange, yRange, xValues, yValues, onFilter]);
 
     const brushDataRef = useRef<{ [fid: string]: [number, number] }>({});
 
@@ -185,7 +217,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
         <Container className="chart" ref={ref} onMouseDown={e => e.stopPropagation()}>
             <VisErrorBoundary>
                 <ReactVega
-                    dataSource={data}
+                    dataSource={highlightedData}
                     spec={{
                         ...spec,
                         width: item.size.w,
