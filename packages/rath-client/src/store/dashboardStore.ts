@@ -35,7 +35,10 @@ export type DashboardCard = {
         text: string;
         chart: {
             subset: IVegaSubset;
+            /** 图表自身数据的筛选器 */
             filters: IFilter[];
+            /** 图表对其他所有图表数据的筛选器 */
+            selectors: IFilter[];
         };
     }>;
     config: {
@@ -52,7 +55,8 @@ export interface DashboardCardState extends DashboardCard {
     content: Partial<Required<DashboardCard['content']> & {
         chart: DashboardCard['content']['chart'] & {
             /* 这俩不要持久化 */
-            selectors: IFilter[];
+            /** 图表对全局所有图表高亮数据的筛选器 */
+            highlighter: IFilter[];
             size: { w: number; h: number };
         };
     }>;

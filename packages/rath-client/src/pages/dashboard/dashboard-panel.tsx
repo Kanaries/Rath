@@ -117,7 +117,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators }) => {
     const [tab, setTab] = useState<typeof SupportedTabs[number]>('collection');
 
     return (
-        <Panel>
+        <Panel onClick={e => e.stopPropagation()}>
             <Stack>
                 {card ? (
                     <>

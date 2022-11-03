@@ -56,6 +56,7 @@ export interface CardProviderProps {
     operators: Partial<DashboardDocumentOperators & {
         adjustCardSize: (dir: 'n' | 'e' | 's' | 'w') => void;
     }>;
+    ratio: number;
 }
 
 const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardCardAppearance }>`
@@ -128,7 +129,11 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
         return editor ? CardEditor : CardDisplay;
     }, [editor]);
 
-    const selectors = cards.map((c, i) => i === index ? [] : c.content.chart?.selectors ?? []).flat();
+    // 在编辑模式 (Boolean(editor) === true) 下，卡片可作为筛选器，需要展现不经过自己筛选规则的全部数据，
+    // 而在预览模式下，卡片只呈现经过所有筛选规则的数据。
+    const selectors = cards.map((c, i) => (editor && i === index) ? [] : c.content.chart?.selectors ?? []).flat();
+    // 在编辑模式 (Boolean(editor) === true) 下，屏蔽 highlight 功能
+    const highlighters = editor ? undefined : cards.map(c => c.content.chart?.highlighter ?? []).flat();
 
     const filters = useMemo<IFilter[]>(() => {
         return card.content.chart ? [
@@ -168,6 +173,7 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
             transformCoord={transformCoord}
             item={card}
             index={index}
+            ratio={ratio}
         >
             {provider => (
                 <CardBox
@@ -203,6 +209,7 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
                         <DashboardChart
                             item={card.content.chart}
                             filters={filters}
+                            highlighters={highlighters}
                             ratio={ratio}
                             onFilter={provider.onFilter}
                         />
