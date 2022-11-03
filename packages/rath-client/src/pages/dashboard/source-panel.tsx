@@ -45,8 +45,8 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
                     subset: data.spec,
                     filters: data.filters,
                     size: {
-                        w: 100,
-                        h: 100,
+                        w: 1,
+                        h: 1,
                     },
                     selectors: [],
                     highlighter: [],
