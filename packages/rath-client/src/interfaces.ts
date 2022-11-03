@@ -203,6 +203,8 @@ export interface IInsightVizView {
     fields: IFieldMeta[];
     filters: IFilter[];
     score?: number;
+    title?: string;
+    desc?: string;
 }
 
 export enum PAINTER_MODE {

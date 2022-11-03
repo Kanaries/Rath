@@ -19,16 +19,18 @@ const ViewInfo: React.FC<ViewInfoProps> = (props) => {
     return (
         <Cont>
             <div className="chart-desc">
-                {fields
-                    .filter((f) => f.analyticType === 'dimension')
-                    .map((f) => f.name || f.fid)
-                    .join(', ')}{' '}
-                <br />
-                {fields
-                    .filter((f) => f.analyticType === 'measure')
-                    .map((f) => f.name || f.fid)
-                    .join(', ')}{' '}
-                <br />
+                <div>
+                    {fields
+                        .filter((f) => f.analyticType === 'dimension')
+                        .map((f) => f.name || f.fid)
+                        .join(', ')}{' '}
+                </div>
+                <div>
+                    {fields
+                        .filter((f) => f.analyticType === 'measure')
+                        .map((f) => f.name || f.fid)
+                        .join(', ')}{' '}
+                </div>
                 {filters &&
                     filters.map((f) => {
                         const meta = metas.find((m) => m.fid === f.fid);
