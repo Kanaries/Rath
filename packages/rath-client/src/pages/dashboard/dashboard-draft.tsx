@@ -352,14 +352,19 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r }) => 
         }
     }, [mode, page.config.size, page.cards, canDrop, addCard, adjustCardSize, r]);
 
+    useEffect(() => {
+        if (focus !== null && !page.cards[focus]) {
+            setFocus(null);
+        }
+    }, [focus, page.cards]);
+
     return (
-        <Container>
+        <Container onClick={handleClick}>
             <div className="draft">
                 <DashboardRenderer
                     page={page}
                     renderRatio={r}
                     ref={draftRef}
-                    onClick={handleClick}
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
                     onDoubleClick={handleDoubleClick}
@@ -388,10 +393,11 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r }) => 
                     )}
                 </DashboardRenderer>
             </div>
-            {mode === 'edit' && focus !== null && (
+            {mode === 'edit' && (
                 <DashboardPanel
                     page={page}
-                    card={page.cards[focus]}
+                    operators={operators}
+                    card={focus === null ? null : (page.cards[focus] ?? null)}
                 />
             )}
         </Container>

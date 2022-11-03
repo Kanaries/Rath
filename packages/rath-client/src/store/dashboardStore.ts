@@ -82,6 +82,7 @@ export type DashboardItem = {
 };
 
 export interface DashboardDocument {
+    version: number;
     info: {
         name: string;
         description: string;
@@ -117,7 +118,11 @@ export interface DashboardDocumentOperators {
     // data level
     addCard: (layout: DashboardCard['layout']) => number;
     moveCard: (index: number, x: number, y: number) => void;
+    removeCard: (index: number) => void;
     resizeCard: (index: number, w: number, h: number) => void;
+    addDataFilter: (filter: IFilter) => void;
+    removeDataFilter: (index: number) => void;
+    fireUpdate: () => void;
 }
 
 export interface DashboardDocumentWithOperators {
@@ -126,6 +131,8 @@ export interface DashboardDocumentWithOperators {
 }
 
 export default class DashboardStore {
+
+    public static readonly rendererVersion = 1;
 
     protected static writeDocumentObjectBlob(data: DashboardDocument): Blob {
         // TODO: optimize
@@ -191,6 +198,7 @@ export default class DashboardStore {
     public newPage() {
         const now = Date.now();
         this.pages.push({
+            version: DashboardStore.rendererVersion,
             info: {
                 name: 'New Dashboard',
                 description: '',
@@ -274,6 +282,15 @@ export default class DashboardStore {
         this.pages[pageIndex].cards[index].layout.w = w;
         this.pages[pageIndex].cards[index].layout.h = h;
     }
+    protected removePageCard(pageIndex: number, index: number) {
+        this.pages[pageIndex].cards.splice(index, 1);
+    }
+    protected addPageDataFilter(pageIndex: number, filter: IFilter) {
+        this.pages[pageIndex].config.filters.push(filter);
+    }
+    protected removeDataFilter(pageIndex: number, index: number) {
+        this.pages[pageIndex].config.filters.splice(index, 1);
+    }
 
     public setName(name: string) {
         this.name = name;
@@ -296,6 +313,10 @@ export default class DashboardStore {
                 addCard: this.addPageCard.bind(this, index),
                 moveCard: this.movePageCard.bind(this, index),
                 resizeCard: this.resizePageCard.bind(this, index),
+                removeCard: this.removePageCard.bind(this, index),
+                addDataFilter: this.addPageDataFilter.bind(this, index),
+                removeDataFilter: this.removeDataFilter.bind(this, index),
+                fireUpdate: () => this.pages[index].info.lastModifyTime = Date.now(),
             },
         };
     }
@@ -311,17 +332,6 @@ export default class DashboardStore {
         runInAction(() => {
             this.pages.push(doc);
         });
-    }
-
-    protected readonly preview = new WeakMap<DashboardDocument, string>();
-
-    public usePreview(index: number): string | undefined {
-        const page = this.pages[index];
-        if (!this.preview.has(page)) {
-            // TODO:
-            this.preview.set(page, '');
-        }
-        return this.preview.get(page);
     }
 
 }
