@@ -51,6 +51,8 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
                     selectors: [],
                     highlighter: [],
                 };
+                card.content.title = data.title;
+                card.content.text = data.desc;
             });
         }
     }, [card]);
