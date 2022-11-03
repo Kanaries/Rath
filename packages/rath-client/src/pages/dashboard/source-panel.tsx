@@ -1,4 +1,5 @@
 import { applyFilters } from "@kanaries/loa";
+import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -30,15 +31,19 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card }) => {
     const { cleanedData } = dataSourceStore;
 
     const apply = useCallback((view: IInsightVizView) => {
-        card.content.chart = {
-            subset: view.spec,
-            filters: view.filters,
-            size: {
-                w: 100,
-                h: 100,
-            },
-            selectors: [],
-        };
+        if (card) {
+            runInAction(() => {
+                card.content.chart = {
+                    subset: view.spec,
+                    filters: view.filters,
+                    size: {
+                        w: 100,
+                        h: 100,
+                    },
+                    selectors: [],
+                };
+            });
+        }
     }, [card]);
 
     // console.log(JSON.parse(JSON.stringify(card)));

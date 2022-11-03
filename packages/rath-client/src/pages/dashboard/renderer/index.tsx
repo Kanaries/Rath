@@ -1,6 +1,6 @@
 import useId from '@material-ui/core/utils/useId';
 import { observer } from 'mobx-react-lite';
-import { forwardRef } from 'react';
+import { forwardRef, useEffect } from 'react';
 import styled, { StyledComponentProps } from 'styled-components';
 import { DashboardDocument } from '../../../store/dashboardStore';
 import Card, { CardProps } from './card';
@@ -40,8 +40,16 @@ export type DashboardRendererProps = StyledComponentProps<'div', {}, {
     renderRatio?: number;
 }, never>;
 
+const rendererVersion = 1;
+
 const DashboardRenderer = forwardRef<HTMLDivElement, DashboardRendererProps>(function DashboardRenderer ({ page, editor, renderRatio = scaleRatio, ...props }, ref) {
     const id = useId();
+
+    useEffect(() => {
+        if (page.version !== rendererVersion) {
+            console.error(new Error(`Dashboard versions not matching\n  renderer: ${rendererVersion}  document: ${page.version}`));
+        }
+    }, [page.version]);
 
     return (
         <Draft

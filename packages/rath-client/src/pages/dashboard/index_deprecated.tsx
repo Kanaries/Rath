@@ -183,6 +183,7 @@ const EditArea = styled.div`
 
 const VIEW_NUM_IN_PAGE = 5;
 
+/** @deprecated */
 const Dashboard: React.FC = () => {
     const { collectionStore, dataSourceStore, dashboardStore, commonStore, semiAutoStore } = useGlobalStore();
     const { collectionList } = collectionStore;
