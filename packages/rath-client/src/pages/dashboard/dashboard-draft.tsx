@@ -357,6 +357,7 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r }) => 
             <div className="draft">
                 <DashboardRenderer
                     page={page}
+                    renderRatio={r}
                     ref={draftRef}
                     onClick={handleClick}
                     onMouseDown={handleMouseDown}
@@ -373,16 +374,6 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r }) => 
                             adjustCardSize: adjustCardSize.bind({}, index),
                         },
                     })) : undefined}
-                    style={{
-                        // FIXME: remove this
-                        backgroundImage: `
-                            linear-gradient(to right, #8881 0.5px, transparent 0.5px),
-                            linear-gradient(to left, #8881 0.5px, transparent 0.5px),
-                            linear-gradient(to top, #8881 0.5px, transparent 0.5px),
-                            linear-gradient(to bottom, #8881 0.5px, transparent 0.5px)
-                        `,
-                        backgroundSize: new Array<0>(4).fill(0).map(() => `${scaleRatio}px ${scaleRatio}px`).join(','),
-                    }}
                 >
                     {mode === 'edit' && dragDest && (
                         <DragBox

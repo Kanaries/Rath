@@ -1,4 +1,5 @@
 import { applyFilters } from '@kanaries/loa';
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { FC, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
@@ -15,53 +16,50 @@ import { getRange } from '../../../../utils';
 const Container = styled.div``;
 
 interface DashboardChartProps {
+    ratio: number;
     item: NonNullable<DashboardCardState['content']['chart']>;
     filters: IFilter[];
+    onFilter?: (filters: Readonly<IFilter[]>) => void;
 }
 
 const DashboardChart: FC<DashboardChartProps> = ({
-    item, filters,
+    item, filters, ratio, onFilter,
 }) => {
     const { dataSourceStore } = useGlobalStore();
     const { cleanedData } = dataSourceStore;
     const data = useMemo(() => applyFilters(cleanedData, filters), [cleanedData, filters]);
+    const { selectors } = item;
 
     const { xField, yField, rangeFilterApplied, xRange, yRange, xValues, yValues } = useMemo(() => {
         const xField = item.subset.encoding.x?.field;
         const yField = item.subset.encoding.y?.field;
 
-        const anyFilterApplied = item.selectors.length > 0;
-        const rangeFilterApplied = anyFilterApplied && item.selectors.every(f => f.type === 'range');
-        const setFilterApplied = anyFilterApplied && item.selectors.every(f => f.type === 'set');
+        const anyFilterApplied = onFilter && selectors.length > 0;
+        const rangeFilterApplied = anyFilterApplied && selectors.every(f => f.type === 'range');
+        const setFilterApplied = anyFilterApplied && selectors.every(f => f.type === 'set');
 
         const xRange = (rangeFilterApplied ? (
-            item.selectors.find(f => f.fid === xField) as IFilter & { type: 'range' } | undefined
+            selectors.find(f => f.fid === xField) as IFilter & { type: 'range' } | undefined
         )?.range : undefined) ?? [-Infinity, Infinity];
         const yRange = (rangeFilterApplied ? (
-            item.selectors.find(f => f.fid === yField) as IFilter & { type: 'range' } | undefined
+            selectors.find(f => f.fid === yField) as IFilter & { type: 'range' } | undefined
         )?.range : undefined) ?? [-Infinity, Infinity];
 
         const xValues = (setFilterApplied ? (
-            item.selectors.find(f => f.fid === xField) as IFilter & { type: 'set' } | undefined
+            selectors.find(f => f.fid === xField) as IFilter & { type: 'set' } | undefined
         )?.values : []) ?? [];
         const yValues = (setFilterApplied ? (
-            item.selectors.find(f => f.fid === yField) as IFilter & { type: 'set' } | undefined
+            selectors.find(f => f.fid === yField) as IFilter & { type: 'set' } | undefined
         )?.values : []) ?? [];
 
         return { xField, yField, rangeFilterApplied, setFilterApplied, xRange, yRange, xValues, yValues };
-    }, [item]);
+    }, [item, selectors, onFilter]);
 
     const spec = useMemo(() => {
-        if (item.selectors.length === 0) {
-            return {
-                ...item.subset,
-            };
-        }
-
         return {
             data: item.subset.data,
             layer: [{
-                params: item.selectors.length ? [{
+                params: onFilter ? [{
                     name: 'brush',
                     value: rangeFilterApplied ? {
                         x: [xRange[0], xRange[1]],
@@ -69,6 +67,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
                     } : undefined,
                     select: {
                         type: 'interval',
+                        clear: 'mouseup',
                     },
                 }, new Array<typeof item.subset.mark>(
                     'bar', 'arc', 'point', 'circle', 'rect'
@@ -82,12 +81,15 @@ const DashboardChart: FC<DashboardChartProps> = ({
                         type: 'point',
                     },
                 }].filter(Boolean) as ({ name: string })[] : undefined,
-                mark: item.subset.mark,
+                mark: {
+                    type: (item.subset.mark as unknown as { type: typeof item.subset.mark })?.type,
+                    tooltip: true,
+                },
                 encoding: {
                     ...item.subset.encoding,
-                    opacity: { value: 0.33 },
+                    opacity: { value: onFilter ? 0.33 : 0.8 },
                 },
-            }, {
+            }, onFilter ? {
                 transform: [{
                     filter: {
                         param: item.selectors[0]?.type === 'set' ? 'sl' : 'brush',
@@ -98,19 +100,21 @@ const DashboardChart: FC<DashboardChartProps> = ({
                     ...item.subset.encoding,
                     opacity: { value: 1 },
                 },
-            }],
+            } : undefined].filter(Boolean),
         };
-    }, [item, rangeFilterApplied, xRange, yRange, xValues, yValues]);
+    }, [item, rangeFilterApplied, xRange, yRange, xValues, yValues, onFilter]);
+
+    const brushDataRef = useRef<{ [fid: string]: [number, number] }>({});
 
     const signalListeners = useMemo<{
         [key: string]: (name: any, value: any, view: View) => void;
     }>(() => {
-        // @see https://github.com/vega/react-vega-lite/issues/7#issuecomment-406105598
-        if (!spec.layer) {
+        if (!onFilter) {
             return {};
         }
 
-        const behaviors = spec.layer[0].params?.map(p => p.name) ?? [];
+        // @see https://github.com/vega/react-vega-lite/issues/7#issuecomment-406105598
+        const behaviors = spec.layer[0]?.params?.map(p => p.name) ?? [];
 
         if (behaviors.length === 0) {
             return {};
@@ -122,20 +126,15 @@ const DashboardChart: FC<DashboardChartProps> = ({
             switch (bhv) {
                 case 'brush': {
                     listeners['brush'] = (name: 'brush', data: { [fid: string]: [number, number] }) => {
-                        // 交互中连续触发
                         if (Object.keys(data).length === 0) {
-                            item.selectors = [];
-                        }
-                    };
-                    listeners['brush_tuple'] = (name: 'brush_tuple', data: { fields: { field: string }[]; values: [number, number][] } | null) => {
-                        if (data) {
-                            // 仅结束时触发，但选中组为空时不触发
-                            item.selectors = data.fields.map((f, i) => ({
+                            // 交互结束
+                            onFilter(Object.keys(brushDataRef.current).map(key => ({
                                 type: 'range',
-                                fid: f.field,
-                                range: getRange(data.values[i]),
-                            }));
+                                fid: key,
+                                range: getRange(brushDataRef.current[key]),
+                            })));
                         }
+                        brushDataRef.current = data;
                     };
                     break;
                 }
@@ -147,7 +146,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
                             fid: key,
                             values: data[key],
                         }));
-                        item.selectors = filters;
+                        onFilter(filters);
                     };
                     break;
                 }
@@ -158,7 +157,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
         }
 
         return listeners;
-    }, [spec, item, xField, yField]);
+    }, [spec, xField, yField, onFilter]);
 
     const ref = useRef<HTMLDivElement>(null);
 
@@ -167,16 +166,20 @@ const DashboardChart: FC<DashboardChartProps> = ({
         if (container) {
             const cb = () => {
                 const { width, height } = container.getBoundingClientRect();
-                item.size = {
-                    w: width,
-                    h: height,
-                };
+                runInAction(() => {
+                    item.size = {
+                        w: width,
+                        h: height,
+                    };
+                });
             };
             const ro = new ResizeObserver(cb);
             ro.observe(container);
             return () => ro.disconnect();
         }
     }, [item]);
+
+    const fontSize = ratio * 3.3;
 
     return (
         <Container className="chart" ref={ref} onMouseDown={e => e.stopPropagation()}>
@@ -192,6 +195,19 @@ const DashboardChart: FC<DashboardChartProps> = ({
                             contains: 'padding',
                         },
                         background: '#0000',
+                        config: {
+                            axis: {
+                                titleFontSize: fontSize * 0.9,
+                                labelFontSize: fontSize * 0.75,
+                            },
+                            mark: {
+                                fontSize: fontSize,
+                            },
+                            legend: {
+                                titleFontSize: fontSize * 0.85,
+                                labelFontSize: fontSize * 0.7,
+                            },
+                        }
                     }}
                     actions={false}
                     signalHandler={signalListeners}

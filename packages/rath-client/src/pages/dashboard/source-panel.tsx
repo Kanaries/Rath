@@ -1,6 +1,6 @@
 import { applyFilters } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
-import { FC, useCallback } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import ReactVega from "../../components/react-vega";
 import VisErrorBoundary from "../../components/visErrorBoundary";
@@ -9,7 +9,18 @@ import { useGlobalStore } from "../../store";
 import { DashboardPanelProps } from "./dashboard-panel";
 
 
-const Container = styled.div``;
+const Container = styled.div`
+    & .item {
+        margin-block: 1em;
+        cursor: pointer;
+        :hover {
+            background-color: #8881;
+        }
+        & * {
+            pointer-events: none;
+        }
+    }
+`;
 
 const SourcePanel: FC<DashboardPanelProps> = ({ page, card }) => {
     const { filters } = page.data;
@@ -31,23 +42,45 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card }) => {
     }, [card]);
 
     // console.log(JSON.parse(JSON.stringify(card)));
+    const [width, setWidth] = useState(0);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const { current: container } = ref;
+        if (container) {
+            const cb = () => {
+                const { width: w } = container.getBoundingClientRect();
+                if (w !== width) {
+                    setWidth(w);
+                }
+            };
+            const ro = new ResizeObserver(cb);
+            ro.observe(container);
+            return () => ro.disconnect();
+        }
+    }, [width]);
 
     return (
-        <Container>
+        <Container ref={ref}>
             {collectionList.length === 0 && '你的收藏夹是空的'}
-            {/* {collectionList.slice(pageIndex * VIEW_NUM_IN_PAGE, (pageIndex + 1) * VIEW_NUM_IN_PAGE).map(item => ( */}
             {collectionList.map(item => (
                 <div
                     key={item.viewId}
                     onClick={() => apply(item)}
+                    className="item"
                 >
                     <VisErrorBoundary>
                         <ReactVega
                             dataSource={applyFilters(cleanedData, [...item.filters, ...filters.map(f => f.filter)])}
                             spec={{
                                 ...item.spec,
-                                width: 120,
-                                height: 50,
+                                width,
+                                height: width / 1.6,
+                                autosize: {
+                                    type: 'fit',
+                                    contains: 'padding',
+                                },
+                                background: '#0000',
                             }}
                             actions={false}
                         />
