@@ -91,6 +91,7 @@ const AppNav: React.FC<AppNavProps> = props => {
                     PIVOT_KEYS.painter,
                     PIVOT_KEYS.collection,
                     PIVOT_KEYS.dashboard,
+                    PIVOT_KEYS.causal
                 ]),
                 {
                     url: '#dev-mode',

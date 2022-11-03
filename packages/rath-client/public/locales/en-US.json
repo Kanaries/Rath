@@ -49,7 +49,8 @@
         "dashBoardDesigner": "Dashboard Designer",
         "painter": "Data Painter",
         "collection": "Collection",
-        "dashboard": "Dashboard"
+        "dashboard": "Dashboard",
+        "causal": "Causal"
     },
     "preference": {
         "title": "preference",

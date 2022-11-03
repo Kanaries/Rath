@@ -12,6 +12,7 @@ export const PIVOT_KEYS = {
     painter: 'painter',
     collection: 'collection',
     dashboard: 'dashboard',
+    causal: 'causal',
 } as const;
 
 export const COMPUTATION_ENGINE = {

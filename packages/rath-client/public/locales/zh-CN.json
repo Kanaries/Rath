@@ -48,7 +48,8 @@
         "dashBoardDesigner": "智能报表",
         "painter": "数据绘板",
         "collection": "收藏夹",
-        "dashboard": "报表"
+        "dashboard": "报表",
+        "causal": "因果分析"
     },
     "preference": {
         "title": "个人偏好",
