@@ -38,11 +38,13 @@ export type DashboardRendererProps = StyledComponentProps<'div', {}, {
     page: DashboardDocument;
     editor?: (index: number) => CardProps['editor'];
     renderRatio?: number;
+    /** @default 1000 */
+    dataLimit?: number;
 }, never>;
 
 const rendererVersion = 1;
 
-const DashboardRenderer = forwardRef<HTMLDivElement, DashboardRendererProps>(function DashboardRenderer ({ page, editor, renderRatio = scaleRatio, ...props }, ref) {
+const DashboardRenderer = forwardRef<HTMLDivElement, DashboardRendererProps>(function DashboardRenderer ({ page, editor, renderRatio = scaleRatio, dataLimit = 1000, ...props }, ref) {
     const id = useId();
 
     useEffect(() => {
@@ -70,6 +72,7 @@ const DashboardRenderer = forwardRef<HTMLDivElement, DashboardRendererProps>(fun
                     key={i}
                     ratio={renderRatio}
                     globalFilters={page.config.filters}
+                    sampleSize={dataLimit}
                     card={card}
                     cards={page.cards}
                     index={i}

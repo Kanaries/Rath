@@ -11,6 +11,7 @@ import { MIN_CARD_SIZE } from "./constant";
 
 export interface CardProps {
     ratio: number;
+    sampleSize: number;
     globalFilters: IFilter[];
     cards: Readonly<DashboardCardState[]>;
     card: DashboardCardState;
@@ -124,7 +125,7 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
     }
 `;
 
-const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoord, index, ratio }) => {
+const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoord, index, ratio, sampleSize }) => {
     const Provider = useMemo(() => {
         return editor ? CardEditor : CardDisplay;
     }, [editor]);
@@ -208,6 +209,7 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
                     {card.content.chart && (
                         <DashboardChart
                             item={card.content.chart}
+                            sampleSize={sampleSize}
                             filters={filters}
                             highlighters={highlighters}
                             ratio={ratio}

@@ -1,13 +1,14 @@
 import { applyFilters } from "@kanaries/loa";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { deepcopy } from "visual-insights/build/esm/utils";
 import ReactVega from "../../components/react-vega";
 import VisErrorBoundary from "../../components/visErrorBoundary";
 import type { IInsightVizView } from "../../interfaces";
 import { useGlobalStore } from "../../store";
+import { viewSampling } from "../painter/sample";
 import { DashboardPanelProps } from "./dashboard-panel";
 
 
@@ -24,12 +25,17 @@ const Container = styled.div`
     }
 `;
 
-const SourcePanel: FC<DashboardPanelProps> = ({ page, card }) => {
+const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
     const { filters } = page.data;
 
     const { collectionStore, dataSourceStore } = useGlobalStore();
     const { collectionList } = collectionStore;
     const { cleanedData } = dataSourceStore;
+    
+    const size = Math.min(cleanedData.length, sampleSize);
+    const fullSet = useMemo(() => {
+        return viewSampling(cleanedData, [], size);
+    }, [cleanedData, size]);
 
     const apply = useCallback((view: IInsightVizView) => {
         if (card) {
@@ -79,7 +85,7 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card }) => {
                 >
                     <VisErrorBoundary>
                         <ReactVega
-                            dataSource={applyFilters(cleanedData, [...item.filters, ...filters.map(f => f.filter)])}
+                            dataSource={applyFilters(fullSet, [...item.filters, ...filters.map(f => f.filter)])}
                             spec={{
                                 ...item.spec,
                                 width,
