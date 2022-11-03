@@ -34,7 +34,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
     const { dataSourceStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
     const fields = useMemo(() => {
-        return Object.values(item.subset.encoding).reduce<typeof fieldMetas>((list, encoding) => {
+        return Object.values(item.subset.encoding).filter(Boolean).reduce<typeof fieldMetas>((list, encoding) => {
             const f = fieldMetas.find(which => which.fid === encoding.field);
             if (f) {
                 list.push(f);
@@ -84,7 +84,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
         )?.values : []) ?? [];
 
         return { xField, yField, rangeFilterApplied, setFilterApplied, xRange, yRange, xValues, yValues };
-    }, [item, highlighters, selectors, onFilter]);
+    }, [item.subset.encoding.x?.field, item.subset.encoding.y?.field, item.highlighter, highlighters, selectors, onFilter]);
 
     const spec = useMemo(() => {
         return {

@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { DashboardCardAppearance, DashboardCardInsetLayout, DashboardCardState, DashboardDocument, DashboardDocumentOperators } from "../../store/dashboardStore";
 import SourcePanel from "./source-panel";
 import FilterList from './filter-list';
+import EditPanel from "./edit-panel";
 
 
 const Panel = styled.div`
@@ -118,7 +119,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
     const [tab, setTab] = useState<typeof SupportedTabs[number]>('collection');
 
     return (
-        <Panel onClick={e => e.stopPropagation()}>
+        <Panel onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
             <Stack>
                 {card ? (
                     <>
@@ -239,7 +240,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                         <div role="tabpanel">
                             {({
                                 collection: <SourcePanel page={page} card={card} operators={operators} sampleSize={sampleSize} />,
-                                editor: null,   // FIXME:
+                                editor: <EditPanel page={page} card={card} operators={operators} sampleSize={sampleSize} />,
                                 loa: null,      // TODO:
                             } as const)[tab]}
                         </div>

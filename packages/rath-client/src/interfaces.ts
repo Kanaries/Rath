@@ -178,6 +178,7 @@ export interface IVegaChannel {
     type: ISemanticType;
     aggregate?: string;
     order?: any;
+    bin?: boolean;
     [key: string]: any;
 }
 

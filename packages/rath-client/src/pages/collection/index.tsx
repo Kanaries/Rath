@@ -1,7 +1,8 @@
-import { SearchBox, IconButton, Panel, TextField, DefaultButton, ActionButton, PrimaryButton } from '@fluentui/react';
+import { SearchBox, IconButton, Panel, TextField, DefaultButton, PrimaryButton } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useMemo, useState } from 'react';
 import intl from 'react-intl-universal';
+import { useBoolean } from '@fluentui/react-hooks';
 import { useGlobalStore } from '../../store';
 import { baseDemoSample } from '../painter/sample';
 import { IInsightVizView } from '../../interfaces';
@@ -9,7 +10,6 @@ import { MainCardContainer } from './components';
 import CardView from './collectionView/cardView';
 import ListView from './collectionView/listView';
 import { searchFilterView } from './utils';
-import { useBoolean } from '@fluentui/react-hooks';
 
 enum VIEW_MODE {
     CARD = 'card',
