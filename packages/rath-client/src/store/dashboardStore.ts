@@ -30,7 +30,6 @@ export type DashboardCard = {
         w: number;
         h: number;
     };
-    align: DashboardCardInsetLayout;
     content: Partial<{
         title: string;
         text: string;
@@ -45,6 +44,7 @@ export type DashboardCard = {
          * @default DashboardCardAppearance.Transparent
          */
         appearance: DashboardCardAppearance;
+        align: DashboardCardInsetLayout;
     };
 };
 
@@ -259,10 +259,10 @@ export default class DashboardStore {
     protected addPageCard(index: number, layout: DashboardCard['layout']) {
         return this.pages[index].cards.push({
             layout,
-            align: DashboardCardInsetLayout.Auto,
             content: {},
             config: {
                 appearance: DashboardCardAppearance.Transparent,
+                align: DashboardCardInsetLayout.Auto,
             },
         });
     }

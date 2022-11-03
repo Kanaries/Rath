@@ -1,8 +1,9 @@
-import { ChoiceGroup, Stack, Text, TextField } from "@fluentui/react";
+import { ActionButton, ChoiceGroup, Stack, Text, TextField } from "@fluentui/react";
+import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FC, useState } from "react";
 import styled from "styled-components";
-import { DashboardCardAppearance, DashboardCardState, DashboardDocument } from "../../store/dashboardStore";
+import { DashboardCardAppearance, DashboardCardInsetLayout, DashboardCardState, DashboardDocument } from "../../store/dashboardStore";
 import SourcePanel from "./source-panel";
 
 
@@ -73,6 +74,17 @@ const Panel = styled.div`
     }
 `;
 
+const OptionContainer = styled.div`
+    > button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin-inline: 1em;
+        height: unset;
+        font-size: 90%;
+    }
+`;
+
 export interface DashboardPanelProps {
     page: DashboardDocument;
     card: DashboardCardState;
@@ -87,6 +99,18 @@ const CardThemes: readonly DashboardCardAppearance[] = [
     DashboardCardAppearance.Neumorphism,
 ];
 
+const CardAlignTypes: readonly DashboardCardInsetLayout[] = [
+    DashboardCardInsetLayout.Auto,
+    DashboardCardInsetLayout.Column,
+    DashboardCardInsetLayout.Row,
+];
+
+const CardAlignName: Readonly<Record<DashboardCardInsetLayout, string>> = {
+    [DashboardCardInsetLayout.Auto]: 'Auto',
+    [DashboardCardInsetLayout.Column]: 'Column',
+    [DashboardCardInsetLayout.Row]: 'Row',
+};
+
 const DashboardPanel: FC<DashboardPanelProps> = ({ page, card }) => {
     const [tab, setTab] = useState<typeof SupportedTabs[number]>('collection');
 
@@ -99,12 +123,16 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card }) => {
                 <TextField
                     label="Title"
                     value={card.content.title ?? ''}
-                    onChange={(_, d) => card.content.title = d || undefined}
+                    onChange={(_, d) => runInAction(() => {
+                        card.content.title = d || undefined;
+                    })}
                 />
                 <TextField
                     label="Description"
                     value={card.content.text ?? ''}
-                    onChange={(_, d) => card.content.text = d || undefined}
+                    onChange={(_, d) => runInAction(() => {
+                        card.content.text = d || undefined;
+                    })}
                     multiline
                     autoAdjustHeight
                     resizable={false}
@@ -115,11 +143,75 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card }) => {
                     options={CardThemes.map(thm => ({
                         key: thm,
                         text: thm,
+                        onRenderField: (option, origin) => {
+                            return option ? (
+                                <OptionContainer>
+                                    {origin?.(option)}
+                                    <ActionButton
+                                        onClick={() => {
+                                            const key = option?.key ?? '';
+                                            if ((CardThemes as string[]).includes(key)) {
+                                                runInAction(() => {
+                                                    page.cards.forEach(c => c.config.appearance = key as DashboardCardAppearance);
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        Apply to all
+                                    </ActionButton>
+                                </OptionContainer>
+                            ) : null;
+                        },
                     }))}
                     onChange={(_, option) => {
                         const key = option?.key ?? '';
                         if ((CardThemes as string[]).includes(key)) {
-                            card.config.appearance = key as DashboardCardAppearance;
+                            runInAction(() => {
+                                card.config.appearance = key as DashboardCardAppearance;
+                            });
+                        }
+                    }}
+                />
+                <ChoiceGroup
+                    label="Layout"
+                    selectedKey={CardAlignName[card.config.align]}
+                    options={CardAlignTypes.map(alg => ({
+                        key: CardAlignName[alg],
+                        text: CardAlignName[alg],
+                        onRenderField: (option, origin) => {
+                            return option ? (
+                                <OptionContainer>
+                                    {origin?.(option)}
+                                    <ActionButton
+                                        onClick={() => {
+                                            const key = {
+                                                Auto: DashboardCardInsetLayout.Auto,
+                                                Column: DashboardCardInsetLayout.Column,
+                                                Row: DashboardCardInsetLayout.Row,
+                                            }[option?.key ?? ''];
+                                            if (typeof key === 'number') {
+                                                runInAction(() => {
+                                                    page.cards.forEach(c => c.config.align = key);
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        Apply to all
+                                    </ActionButton>
+                                </OptionContainer>
+                            ) : null;
+                        },
+                    }))}
+                    onChange={(_, option) => {
+                        const key = {
+                            Auto: DashboardCardInsetLayout.Auto,
+                            Column: DashboardCardInsetLayout.Column,
+                            Row: DashboardCardInsetLayout.Row,
+                        }[option?.key ?? ''];
+                        if (typeof key === 'number') {
+                            runInAction(() => {
+                                card.config.align = key;
+                            });
                         }
                     }}
                 />
