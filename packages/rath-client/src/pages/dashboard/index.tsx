@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
 
     return path.page === 'list'
         ? <DashboardList openDocument={openDocument} />
-        : <DashboardDetail cursor={path.cursor} goBack={showList} ratio={scaleRatio} />;
+        : <DashboardDetail sampleSize={1_000} cursor={path.cursor} goBack={showList} ratio={scaleRatio} />;
 };
 
 export default observer(Dashboard);

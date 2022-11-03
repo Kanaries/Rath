@@ -43,6 +43,7 @@ export interface DashboardDraftProps {
     cursor: number;
     mode: "edit" | "preview";
     ratio: number;
+    sampleSize: number;
 }
 
 const checkOverlap = (layout1: DashboardCard['layout'], layout2: DashboardCard['layout']): boolean => {
@@ -60,7 +61,7 @@ const checkOverlap = (layout1: DashboardCard['layout'], layout2: DashboardCard['
     });
 };
 
-const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r }) => {
+const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r, sampleSize }) => {
     const { dashboardStore } = useGlobalStore();
     const page = dashboardStore.pages[cursor];
     const { operators } = dashboardStore.fromPage(cursor);
@@ -368,8 +369,10 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r }) => 
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
                     onDoubleClick={handleDoubleClick}
+                    dataLimit={mode === 'edit' ? 2_000 : Infinity}
                     editor={mode === 'edit' ? (index => ({
                         draftRef,
+                        sampleSize: 2_000,
                         canDrop,
                         ratio: r,
                         focused: focus === index,
@@ -398,6 +401,7 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r }) => 
                 <DashboardPanel
                     page={page}
                     operators={operators}
+                    sampleSize={sampleSize}
                     card={focus === null ? null : (page.cards[focus] ?? null)}
                 />
             )}

@@ -32,6 +32,7 @@ export interface DashboardDetailProps {
     /** back to dashboard list */
     goBack: () => void;
     ratio: number;
+    sampleSize: number;
 }
 
 const viewScales = {
@@ -52,8 +53,8 @@ const viewScales = {
     7: 2,
 } as const;
 
-const DashboardDetail: FC<DashboardDetailProps> = ({ cursor, goBack, ratio }) => {
-    const [mode, setMode] = useState<'edit' | 'preview'>('preview');
+const DashboardDetail: FC<DashboardDetailProps> = ({ cursor, goBack, ratio, sampleSize }) => {
+    const [mode, setMode] = useState<'edit' | 'preview'>('edit');
     const [scaleIdx, setScaleIdx] = useState(0);
 
     const toggleMode = useCallback(() => {
@@ -92,7 +93,7 @@ const DashboardDetail: FC<DashboardDetailProps> = ({ cursor, goBack, ratio }) =>
                     }}
                 />
             </Header>
-            <DashboardDraft cursor={cursor} mode={mode} ratio={ratio * scale} />
+            <DashboardDraft sampleSize={sampleSize} cursor={cursor} mode={mode} ratio={ratio * scale} />
         </PageLayout>
     );
 };

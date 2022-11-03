@@ -90,6 +90,7 @@ export interface DashboardPanelProps {
     page: DashboardDocument;
     operators: DashboardDocumentOperators;
     card: DashboardCardState | null;
+    sampleSize: number;
 }
 
 const SupportedTabs = ['collection', 'editor'/*, 'loa' */] as const;
@@ -113,7 +114,7 @@ const CardAlignName: Readonly<Record<DashboardCardInsetLayout, string>> = {
     [DashboardCardInsetLayout.Row]: 'Row',
 };
 
-const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators }) => {
+const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sampleSize }) => {
     const [tab, setTab] = useState<typeof SupportedTabs[number]>('collection');
 
     return (
@@ -237,7 +238,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators }) => {
                         </div>
                         <div role="tabpanel">
                             {({
-                                collection: <SourcePanel page={page} card={card} operators={operators} />,
+                                collection: <SourcePanel page={page} card={card} operators={operators} sampleSize={sampleSize} />,
                                 editor: null,   // FIXME:
                                 loa: null,      // TODO:
                             } as const)[tab]}
