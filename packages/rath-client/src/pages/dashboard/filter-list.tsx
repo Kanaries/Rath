@@ -41,7 +41,7 @@ interface FieldCellProps {
 
 const FilterCell: FC<FieldCellProps> = ({ field, data, remove }) => {
     const filterDesc = `∈ ${
-        data.type === 'range' ? `[${data.range.join(',')}]` : `{${data.values.join(',')}}`
+        data.type === 'range' ? `[${data.range.join(',')}]` : `{${data.values.map(v => JSON.stringify(v)).join(',')}}`
     }`;
 
     return (

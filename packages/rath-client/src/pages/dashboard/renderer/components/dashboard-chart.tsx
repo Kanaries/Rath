@@ -11,6 +11,7 @@ import type { IFilter } from '../../../../interfaces';
 import { useGlobalStore } from '../../../../store';
 import type { DashboardCardState } from '../../../../store/dashboardStore';
 import { getRange } from '../../../../utils';
+import { viewSampling } from '../../../painter/sample';
 
 
 const Container = styled.div``;
@@ -18,6 +19,7 @@ const Container = styled.div``;
 interface DashboardChartProps {
     ratio: number;
     item: NonNullable<DashboardCardState['content']['chart']>;
+    sampleSize: number;
     filters: IFilter[];
     highlighters?: IFilter[];
     onFilter?: (filters: Readonly<IFilter[]>) => void;
@@ -27,11 +29,23 @@ const symbolRowIndex: unique symbol = Symbol('rowIndex');
 const highlightSelectorPredicateName = '__dashboard_chart_item_highlighted';
 
 const DashboardChart: FC<DashboardChartProps> = ({
-    item, filters, highlighters, ratio, onFilter,
+    item, filters, highlighters, ratio, onFilter, sampleSize,
 }) => {
     const { dataSourceStore } = useGlobalStore();
-    const { cleanedData } = dataSourceStore;
-    const fullSet = cleanedData;    // TODO: 采样
+    const { cleanedData, fieldMetas } = dataSourceStore;
+    const fields = useMemo(() => {
+        return Object.values(item.subset.encoding).reduce<typeof fieldMetas>((list, encoding) => {
+            const f = fieldMetas.find(which => which.fid === encoding.field);
+            if (f) {
+                list.push(f);
+            }
+            return list;
+        }, []);
+    }, [fieldMetas, item.subset.encoding]);
+    const size = Math.min(cleanedData.length, sampleSize);
+    const fullSet = useMemo(() => {
+        return size >= cleanedData.length ? cleanedData : viewSampling(cleanedData, fields, size);
+    }, [cleanedData, fields, size]);
     const data = useMemo(() => applyFilters(fullSet, filters), [fullSet, filters]);
     const highlightedData = useMemo(() => {
         const indices = applyFilters(

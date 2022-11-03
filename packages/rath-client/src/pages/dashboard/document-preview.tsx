@@ -22,7 +22,8 @@ const DocumentPreview: FC<{ index: number }> = ({ index }) => {
         <Preview>
             <DashboardRenderer
                 page={page}
-                renderRatio={1.5}
+                renderRatio={1.25}
+                dataLimit={2**9}
                 style={{
                     margin: 0,
                 }}
