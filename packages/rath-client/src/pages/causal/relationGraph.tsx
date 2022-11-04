@@ -268,7 +268,7 @@ const RelationGraph: React.FC<RelationGraphProps> = props => {
                 ],
             });
         }
-    }, []);
+    }, [nodes, edges]);
     return <div ref={container}></div>;
 };
 

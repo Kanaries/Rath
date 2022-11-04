@@ -1,33 +1,30 @@
-import { DefaultButton, Stack } from '@fluentui/react';
-import { getFieldRelationMatrix } from '@kanaries/loa';
-import React, { useCallback, useMemo, useState } from 'react';
+import { DefaultButton, Label, PrimaryButton, Spinner, Stack } from '@fluentui/react';
+import { observer } from 'mobx-react-lite';
+import React, { useCallback, useEffect, useState } from 'react';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import CrossFilter from './crossFilter';
-import RelationGraph from './relationGraph';
+import Params from './params';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
+import RelationTree from './tree';
 
-const CausualPage: React.FC = () => {
-    const { dataSourceStore } = useGlobalStore();
+const CausalPage: React.FC = () => {
+    const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
+    const { igMatrix, igCondMatrix, causalStrength, computing } = causalStore;
 
-    const relationMatrix = useMemo(() => {
-        return getFieldRelationMatrix(cleanedData, fieldMetas);
-    }, [fieldMetas, cleanedData]);
-    const compareMatrix = useMemo(() => {
-        const ans: number[][] = [];
-        for (let i = 0; i < relationMatrix.length; i++) {
-            ans.push([]);
-            for (let j = 0; j < relationMatrix[i].length; j++) {
-                ans[i].push(relationMatrix[i][j] - relationMatrix[j][i]);
-            }
-        }
-        return ans;
-    }, [relationMatrix]);
+    useEffect(() => {
+        causalStore.computeIGMatrix(cleanedData, fieldMetas);
+    }, [fieldMetas, cleanedData, causalStore]);
+
+    useEffect(() => {
+        causalStore.computeIGCondMatrix(cleanedData, fieldMetas);
+    }, [fieldMetas, cleanedData, causalStore]);
 
     const onFieldGroupSelect = useCallback(
         (xFid: string, yFid: string) => {
+            causalStore.setFocusNodeIndex(fieldMetas.findIndex(f => f.fid === xFid));
             setFieldGroup((group) => {
                 const nextGroup = [...group];
                 if (!nextGroup.find((f) => f.fid === xFid)) {
@@ -39,14 +36,21 @@ const CausualPage: React.FC = () => {
                 return nextGroup;
             });
         },
-        [setFieldGroup, fieldMetas]
+        [setFieldGroup, fieldMetas, causalStore]
     );
     return (
         <div className="content-container">
             <div className="card">
-                <h1>Causal</h1>
-                <Stack horizontal style={{ marginTop: '1em' }}>
+                <Label>Causal Analysis</Label>
+                <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
                     <DefaultButton text="Clear Group" onClick={() => setFieldGroup([])} />
+                    <PrimaryButton
+                        text="Causal Discovery"
+                        onClick={() => {
+                            causalStore.causalDiscovery(cleanedData, fieldMetas);
+                        }}
+                    />
+                    <Params />
                 </Stack>
 
                 <div style={{ marginTop: '1em', display: 'flex' }}>
@@ -55,24 +59,56 @@ const CausualPage: React.FC = () => {
                             <RelationMatrixHeatMap
                                 absolute
                                 fields={fieldMetas}
-                                data={relationMatrix}
+                                data={igMatrix}
                                 onSelect={onFieldGroupSelect}
                             />
                         )}
                     </div>
-                    <div>
-                        {cleanedData.length > 0 && (
+                    {/* <div>
+                        {cleanedData.length > 0 && !computing && (
                             <RelationMatrixHeatMap
+                                absolute
                                 fields={fieldMetas}
-                                data={compareMatrix}
+                                data={igCondMatrix}
                                 onSelect={onFieldGroupSelect}
                             />
                         )}
+                        {computing && <Spinner label="computings" />}
+                    </div> */}
+                    <div>
+                        {cleanedData.length > 0 &&
+                            causalStrength.length > 0 &&
+                            causalStrength.length === fieldMetas.length &&
+                            !computing && (
+                                <RelationMatrixHeatMap
+                                    
+                                    // absolute
+                                    fields={fieldMetas}
+                                    data={causalStrength}
+                                    onSelect={onFieldGroupSelect}
+                                />
+                            )}
+                        {computing && <Spinner label="computings" />}
                     </div>
                 </div>
                 <div>
-                    <RelationGraph matrix={relationMatrix} fields={fieldMetas} />
+                    {cleanedData.length > 0 &&
+                        causalStrength.length > 0 &&
+                        causalStrength.length === fieldMetas.length &&
+                        !computing && (
+                            <RelationTree
+                                matrix={causalStrength}
+                                fields={fieldMetas}
+                                focusIndex={causalStore.focusNodeIndex}
+                                onFocusChange={(index) => {
+                                    causalStore.setFocusNodeIndex(index);
+                                }}
+                            />
+                        )}
                 </div>
+                {/* <div>
+                    { !computing && <RelationGraph matrix={causalMatrix} fields={fieldMetas} /> }
+                </div> */}
 
                 <div>
                     {cleanedData.length > 0 && fieldGroup.length > 0 && (
@@ -84,4 +120,4 @@ const CausualPage: React.FC = () => {
     );
 };
 
-export default CausualPage;
+export default observer(CausalPage);

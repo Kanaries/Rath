@@ -30,7 +30,7 @@ const RelationMatrixHeatMap: React.FC<Props> = (props) => {
         if (container.current) {
             embed(container.current, {
                 data: { values },
-                mark: 'circle',
+                mark: { type: 'circle', tooltip: true },
                 transform: !absolute ? [{ calculate: 'abs(datum.value)', as: 'abs_value' }] : [],
                 encoding: {
                     y: { field: 'x', type: 'nominal' },
