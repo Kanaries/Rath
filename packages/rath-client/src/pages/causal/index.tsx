@@ -3,11 +3,12 @@ import { getFieldRelationMatrix } from '@kanaries/loa';
 import React, { useCallback, useMemo, useState } from 'react';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
+import Explorer from './explorer';
 import CrossFilter from './crossFilter';
 import RelationGraph from './relationGraph';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 
-const CausualPage: React.FC = () => {
+const CausalPage: React.FC = () => {
     const { dataSourceStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
@@ -41,6 +42,7 @@ const CausualPage: React.FC = () => {
         },
         [setFieldGroup, fieldMetas]
     );
+
     return (
         <div className="content-container">
             <div className="card">
@@ -71,6 +73,12 @@ const CausualPage: React.FC = () => {
                     </div>
                 </div>
                 <div>
+                    <Explorer
+                        fields={fieldMetas}
+                        compareMatrix={compareMatrix}
+                    />
+                </div>
+                <div>
                     <RelationGraph matrix={relationMatrix} fields={fieldMetas} />
                 </div>
 
@@ -84,4 +92,4 @@ const CausualPage: React.FC = () => {
     );
 };
 
-export default CausualPage;
+export default CausalPage;
