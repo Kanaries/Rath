@@ -1,6 +1,17 @@
 import { FC, useMemo } from "react";
-import { dagStratify, sugiyama, decrossOpt } from 'd3-dag';
-import { line as d3Line/*, curveCatmullRom*/, curveMonotoneY } from 'd3-shape';
+import {
+    dagStratify,
+    sugiyama,
+    decrossOpt,
+    layeringLongestPath,
+    layeringSimplex,
+    decrossTwoLayer,
+    twolayerGreedy,
+    twolayerAgg,
+    coordGreedy,
+    coordQuad,
+} from 'd3-dag';
+import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
 import styled from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
@@ -39,7 +50,7 @@ const SVGGroup = styled.div`
     }
 `;
 
-const line = d3Line<{ x: number; y: number }>().curve(curveMonotoneY).x(d => d.x).y(d => d.y);
+const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
 // FIXME: 这个模块有 bug，cutThreshold 调低时会卡死（疑似解析 dag 时死循环）
 const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold }) => {
@@ -66,7 +77,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
                 const nextLinks: typeof links = [];
                 for (const link of links) {
                     if (link.causeId === source) {
-                        if (link.score >= cutThreshold) {
+                        if (link.score > 0 && link.score >= cutThreshold) {
                             mergeFlows(flows, {
                                 id: `${link.effectId}`,
                                 parentIds: [`${source}`],
@@ -97,7 +108,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
                 const nextLinks: typeof links = [];
                 for (const link of links) {
                     if (link.effectId === source) {
-                        if (link.score >= cutThreshold) {
+                        if (link.score > 0 && link.score >= cutThreshold) {
                             mergeFlows(flows, {
                                 id: `${source}`,
                                 parentIds: [`${link.causeId}`],
@@ -129,9 +140,25 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
         return flows;
     }, [flowsAsDestination, flowsAsOrigin]);
 
+    const tooManyLinks = data.links.length >= 16;
+
     const layout = useMemo(() => {
-        return sugiyama().decross(decrossOpt())//.nodeSize(node => [node ? 5 : 1, 3]);
-    }, []);
+        return tooManyLinks
+            ? sugiyama().layering(
+                layeringSimplex()
+            ).decross(
+                decrossTwoLayer().order(twolayerGreedy().base(twolayerAgg()))
+            ).coord(
+                coordGreedy()
+            )
+            : sugiyama().layering(
+                layeringLongestPath()
+            ).decross(
+                decrossOpt()
+            ).coord(
+                coordQuad()
+            );
+    }, [tooManyLinks]);
 
     const destinationTree = useMemo(() => {
         const dag = dagStratify()(flowsAsDestination);

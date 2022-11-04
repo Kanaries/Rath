@@ -2,6 +2,7 @@ import { Slider } from "@fluentui/react";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import type { IFieldMeta } from "../../../interfaces";
 import DiagramGraphEditor from "./diagramGraphEditor";
+import ErrorBoundary from "./errorBoundary";
 import FlowAnalyzer from "./flowAnalyzer";
 
 
@@ -98,24 +99,28 @@ const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix }) => {
                 showValue
                 onChange={d => setCutThreshold(d)}
             />
-            <DiagramGraphEditor
-                fields={fields}
-                value={value}
-                onChange={handleChange}
-                cutThreshold={cutThreshold}
-                onFocusChange={handleFocusChange}
-                style={{
-                    width: '400px',
-                    height: '300px',
-                }}
-            />
-            {focus !== -1 && (
-                <FlowAnalyzer
+            <ErrorBoundary>
+                <DiagramGraphEditor
                     fields={fields}
-                    data={value}
-                    index={focus}
+                    value={value}
+                    onChange={handleChange}
                     cutThreshold={cutThreshold}
+                    onFocusChange={handleFocusChange}
+                    style={{
+                        width: '100%',
+                        height: '300px',
+                    }}
                 />
+            </ErrorBoundary>
+            {focus !== -1 && (
+                <ErrorBoundary>
+                    <FlowAnalyzer
+                        fields={fields}
+                        data={value}
+                        index={focus}
+                        cutThreshold={cutThreshold}
+                    />
+                </ErrorBoundary>
             )}
         </div>
     );

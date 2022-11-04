@@ -1,7 +1,18 @@
 import { forwardRef, useEffect, useMemo, useState } from "react";
 // import { forceSimulation, forceLink, forceManyBody, forceY, forceCollide, forceX } from 'd3-force';
-import { line as d3Line/*, curveCatmullRom*/, curveMonotoneY } from 'd3-shape';
-import { dagStratify, sugiyama, decrossOpt } from 'd3-dag';
+import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
+import {
+    dagStratify,
+    sugiyama,
+    decrossOpt,
+    coordGreedy,
+    coordQuad,
+    decrossTwoLayer,
+    layeringLongestPath,
+    layeringSimplex,
+    twolayerAgg,
+    twolayerGreedy,
+} from 'd3-dag';
 import styled, { StyledComponentProps } from "styled-components";
 // import { getRange } from "@kanaries/loa";
 // import { Spinner, SpinnerSize } from "@fluentui/react";
@@ -11,7 +22,7 @@ import { Flow, mergeFlows } from "./flowAnalyzer";
 import { DiagramGraphData } from ".";
 
 
-const line = d3Line<{ x: number; y: number }>().curve(curveMonotoneY).x(d => d.x).y(d => d.y);
+const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
 const Container = styled.div`
     position: relative;
@@ -115,7 +126,7 @@ const DiagramGraphEditor = forwardRef<HTMLDivElement, DiagramGraphEditorProps>((
             });
         }
         for (const link of normalizedLinks) {
-            if (link.score >= cutThreshold) {
+            if (link.score > 0 && link.score >= cutThreshold) {
                 mergeFlows(flows, {
                     id: `${link.target}`,
                     parentIds: [`${link.source}`],
@@ -125,9 +136,25 @@ const DiagramGraphEditor = forwardRef<HTMLDivElement, DiagramGraphEditorProps>((
         return flows;
     }, [data.nodes, normalizedLinks, cutThreshold]);
 
+    const tooManyLinks = data.links.length >= 16;
+
     const layout = useMemo(() => {
-        return sugiyama().decross(decrossOpt())//.nodeSize(node => [node ? 5 : 1, 3]);
-    }, []);
+        return tooManyLinks
+            ? sugiyama().layering(
+                layeringSimplex()
+            ).decross(
+                decrossTwoLayer().order(twolayerGreedy().base(twolayerAgg()))
+            ).coord(
+                coordGreedy()
+            )
+            : sugiyama().layering(
+                layeringLongestPath()
+            ).decross(
+                decrossOpt()
+            ).coord(
+                coordQuad()
+            );
+    }, [tooManyLinks]);
 
     const dag = useMemo(() => {
         const dag = dagStratify()(flows);
@@ -470,14 +497,14 @@ const DiagramGraphEditor = forwardRef<HTMLDivElement, DiagramGraphEditorProps>((
                                     } else {
                                         // link
                                         onChange(produce(value, draft => {
-                                            const idx = draft.links.findIndex(
-                                                link => link.causeId === selected && link.effectId === i
+                                            const idxMe = draft.links.findIndex(
+                                                link => link.causeId === selected && link.effectId === idx
                                             );
-                                            if (idx !== -1) {
-                                                draft.links[idx].score = 1;
+                                            if (idxMe !== -1) {
+                                                draft.links[idxMe].score = 1;
                                             }
                                             const idxRev = draft.links.findIndex(
-                                                link => link.effectId === selected && link.causeId === i
+                                                link => link.effectId === selected && link.causeId === idx
                                             );
                                             if (idxRev !== -1) {
                                                 draft.links[idxRev].score = -1;
@@ -486,7 +513,7 @@ const DiagramGraphEditor = forwardRef<HTMLDivElement, DiagramGraphEditorProps>((
                                     }
                                 }}
                             />
-                            <text fill="white" stroke="#463782" strokeWidth={0.001} fontWeight="bold" fontSize={0.05} textAnchor="middle" >
+                            <text fill="#463782" stroke="#463782" strokeWidth={0.004} fontWeight="bold" fontSize={0.12} textAnchor="middle" >
                                 {f.name ?? f.fid}
                             </text>
                         </g>
