@@ -12,7 +12,7 @@ const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
-    const { igMatrix, igCondMatrix, causalStrength, computing } = causalStore;
+    const { igMatrix, causalStrength, computing } = causalStore;
 
     useEffect(() => {
         causalStore.computeIGMatrix(cleanedData, fieldMetas);

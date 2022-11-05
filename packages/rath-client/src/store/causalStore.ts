@@ -45,6 +45,11 @@ export interface ICausalParams {
     uc_priority?: UCPriority;
     mvpc?: boolean;
 }
+
+enum CausualServerUrl {
+    local = 'http://localhost:8000',
+    test = 'http://gateway.kanaries.cn:2080'
+}
 export class CausalStore {
     public igMatrix: number[][] = [];
     public igCondMatrix: number[][] = [];
@@ -95,7 +100,7 @@ export class CausalStore {
     }
     public async causalDiscovery (dataSource: IRow[], fields: IFieldMeta[]) {
         try {
-            const res = await fetch('http://gateway.kanaries.cn:2080/causal/causal/', {
+            const res = await fetch(`${CausualServerUrl.local}/causal/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
