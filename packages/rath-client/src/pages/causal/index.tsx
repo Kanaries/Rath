@@ -1,8 +1,9 @@
 import { DefaultButton, Label, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
+import Explorer from './explorer';
 import CrossFilter from './crossFilter';
 import Params from './params';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
@@ -38,6 +39,18 @@ const CausalPage: React.FC = () => {
         },
         [setFieldGroup, fieldMetas, causalStore]
     );
+
+    const compareMatrix = useMemo(() => {
+        const ans: number[][] = [];
+        for (let i = 0; i < igMatrix.length; i++) {
+            ans.push([]);
+            for (let j = 0; j < igMatrix[i].length; j++) {
+                ans[i].push(igMatrix[i][j] - igMatrix[j][i]);
+            }
+        }
+        return ans;
+    }, [igMatrix]);
+
     return (
         <div className="content-container">
             <div className="card">
@@ -105,6 +118,18 @@ const CausalPage: React.FC = () => {
                                 }}
                             />
                         )}
+                </div>
+                <div>
+                    {cleanedData.length > 0 &&
+                        compareMatrix.length > 0 && // FIXME: use causalStrength
+                        compareMatrix.length === fieldMetas.length && // FIXME: use causalStrength
+                        !computing && (
+                            <Explorer
+                                fields={fieldMetas}
+                                compareMatrix={compareMatrix} // FIXME: use causalStrength
+                            />
+                        )
+                    }
                 </div>
                 {/* <div>
                     { !computing && <RelationGraph matrix={causalMatrix} fields={fieldMetas} /> }
