@@ -13,7 +13,7 @@ import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { makeRenderLabelHandler } from '../../components/labelTooltip';
 import { useGlobalStore } from '../../store';
-import { ICausalAlgorithm, IndepenenceTest, UCPriority, UCRule } from '../../store/causalStore';
+import { ICausalAlgorithm, IndepenenceTest, UCPriority, UCRule, ICatEncodeType, IQuantEncodeType } from '../../store/causalStore';
 
 const CAUSUAL_ALGORITHM_OPTIONS: IDropdownOption[] = [
     { key: ICausalAlgorithm.PC, text: ICausalAlgorithm.PC },
@@ -43,6 +43,20 @@ const UC_PRIORITY_OPTIONS: IDropdownOption[] = [
     { key: UCPriority.stronger, text: 'prioritize stronger colliders' },
     { key: UCPriority.stronger_plus, text: 'prioritize stronger* colliders' },
 ];
+
+const CAT_ENCODING_OPTIONS: IDropdownOption[] = [
+    { key: ICatEncodeType.none, text: 'no encoding' },
+    { key: ICatEncodeType.binary, text: 'binary encoding' },
+    { key: ICatEncodeType.oneHot, text: 'one-hot encoding' },
+    { key: ICatEncodeType.lex, text: 'lexicographic ranking' }
+]
+
+const QUANT_ENCODING_OPTIONS: IDropdownOption[] = [
+    { key: IQuantEncodeType.none, text: 'no encoding' },
+    { key: IQuantEncodeType.bin, text: 'binning' }, // TODO: can be parameterized
+    { key: IQuantEncodeType.order, text: 'ranking' },
+    { key: IQuantEncodeType.id, text: 'any index' }
+]
 
 const Params: React.FC = (props) => {
     const { causalStore } = useGlobalStore();
@@ -134,6 +148,28 @@ const Params: React.FC = (props) => {
                             onChange={(e, v) => {
                                 causalStore.updateCausalParamsValue('mvpc', Boolean(v));
                             }}
+                        />
+                    </Stack.Item>
+                    <Stack.Item>
+                        <Dropdown
+                            label="Categorical encoding"
+                            options={CAT_ENCODING_OPTIONS}
+                            selectedKey={causalParams.catEncodeType}
+                            onChange={(e, o) => {
+                                o && causalStore.updateCausalParamsValue('catEncodeType', o.key as ICatEncodeType)
+                            }}
+                            onRenderLabel={makeRenderLabelHandler('method of value encoding for categorical data.')}
+                        />
+                    </Stack.Item>
+                    <Stack.Item>
+                        <Dropdown
+                            label="Quantitative encoding"
+                            options={QUANT_ENCODING_OPTIONS}
+                            selectedKey={causalParams.quantEncodeType}
+                            onChange={(e, o) => {
+                                o && causalStore.updateCausalParamsValue('quantEncodeType', o.key as IQuantEncodeType)
+                            }}
+                            onRenderLabel={makeRenderLabelHandler('method of value encoding for quantitative data.')}
                         />
                     </Stack.Item>
                     <Stack.Item>

@@ -36,6 +36,18 @@ export enum IndepenenceTest {
 }
 // type UCPriority = -1 | 0 | 1 | 2 | 3 | 4;
 // type UCRule = 0 | 1 | 2; 
+export enum ICatEncodeType {
+    none = 'none',
+    oneHot = 'one_hot',
+    binary = 'binary',
+    lex = 'lex'
+}
+export enum IQuantEncodeType {
+    none = 'none',
+    bin = 'bin',
+    id = 'id',
+    order = 'order',
+}
 export interface ICausalParams {
     algorithm?: ICausalAlgorithm; // | 'FCI' | 'CDNOD';
     alpha?: number; //desired significance level (float) in (0, 1). Default: 0.05.
@@ -44,6 +56,10 @@ export interface ICausalParams {
     uc_rule?: UCRule;
     uc_priority?: UCPriority;
     mvpc?: boolean;
+    catEncodeType?: ICatEncodeType;
+    keepOriginCat?: boolean;
+    quantEncodeType?: IQuantEncodeType;
+    keepOriginQuant?: boolean;
 }
 
 enum CausualServerUrl {
@@ -64,7 +80,11 @@ export class CausalStore {
         stable: true,
         uc_rule: UCRule.uc_supset,
         uc_priority: UCPriority.default,
-        mvpc: false
+        mvpc: false,
+        catEncodeType: ICatEncodeType.none, // encoding for catecorical data
+        quantEncodeType: IQuantEncodeType.none, // encoding for quantitative data
+        keepOriginCat: true,
+        keepOriginQuant: true
     };
     private dataSourceStore: DataSourceStore;
     constructor (dataSourceStore: DataSourceStore) {
