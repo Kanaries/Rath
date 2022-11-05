@@ -19,7 +19,6 @@ import type { DiagramGraphData } from ".";
 
 
 export interface FlowAnalyzerProps {
-    // full: readonly Flow[];
     fields: readonly Readonly<IFieldMeta>[];
     data: DiagramGraphData;
     index: number;
@@ -35,16 +34,18 @@ export const mergeFlows = (flows: Flow[], entering: Flow): void => {
     const item = flows.find(f => f.id === entering.id);
     if (item) {
         item.parentIds.push(...entering.parentIds);
-        item.parentIds = [...new Set(item.parentIds)];
     } else {
         flows.push(entering);
     }
 };
 
 const SVGGroup = styled.div`
+    flex-grow: 0;
+    flex-shrink: 0;
     display: flex;
     width: 100%;
-    height: 400px;
+    height: 30vh;
+    border: 1px solid #8888;
     > svg {
         flex: 1;
     }
@@ -52,9 +53,8 @@ const SVGGroup = styled.div`
 
 const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
-// FIXME: 这个模块有 bug，cutThreshold 调低时会卡死（疑似解析 dag 时死循环）
 const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold }) => {
-    const field = useMemo(() => fields.at(index), [fields, index]);
+    const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
 
     const normalizedLinks = useMemo(() => {
         const max = data.links.reduce<number>((m, d) => m > d.score ? m : d.score, 0);
@@ -160,29 +160,32 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
             );
     }, [tooManyLinks]);
 
-    const destinationTree = useMemo(() => {
-        const dag = dagStratify()(flowsAsDestination);
-        return {
-            // @ts-ignore
-            size: layout(dag),
-            steps: dag.size(),
-            nodes: dag.descendants(),
-            links: dag.links(),
-        };
-    }, [flowsAsDestination, layout]);
+    // const destinationTree = useMemo(() => {
+    //     const dag = dagStratify()(flowsAsDestination);
+    //     return {
+    //         // @ts-ignore
+    //         size: layout(dag),
+    //         steps: dag.size(),
+    //         nodes: dag.descendants(),
+    //         links: dag.links(),
+    //     };
+    // }, [flowsAsDestination, layout]);
 
-    const originTree = useMemo(() => {
-        const dag = dagStratify()(flowsAsOrigin);
-        return {
-            // @ts-ignore
-            size: layout(dag),
-            steps: dag.size(),
-            nodes: dag.descendants(),
-            links: dag.links(),
-        };
-    }, [flowsAsOrigin, layout]);
+    // const originTree = useMemo(() => {
+    //     const dag = dagStratify()(flowsAsOrigin);
+    //     return {
+    //         // @ts-ignore
+    //         size: layout(dag),
+    //         steps: dag.size(),
+    //         nodes: dag.descendants(),
+    //         links: dag.links(),
+    //     };
+    // }, [flowsAsOrigin, layout]);
 
     const combinedTree = useMemo(() => {
+        if (combinedFlows.length === 0) {
+            return null;
+        }
         const dag = dagStratify()(combinedFlows);
         return {
             // @ts-ignore
@@ -193,22 +196,22 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
         };
     }, [combinedFlows, layout]);
 
-    return field ? (
+    return (
         <SVGGroup>
-            {[combinedTree, destinationTree, originTree].map((tree, i) => (
-                <svg key={i} viewBox={`0 0 ${tree.size.width} ${tree.size.height}`} strokeLinecap="round" strokeLinejoin="round">
+            {field ? [combinedTree/*, destinationTree, originTree*/].map((tree, i) => tree ? (
+                <svg key={i} viewBox={`0 0 ${tree.size.height} ${tree.size.width}`} strokeLinecap="round" strokeLinejoin="round">
                     <defs>
-                        <marker id="flow-arrow" viewBox="0 -5 10 10" refX={23} refY="0" markerWidth={3} markerHeight={3} orient="auto">
+                        <marker id="flow-arrow" viewBox="0 -5 10 10" refX={32} refY="0" markerWidth={3} markerHeight={3} orient="auto">
                             <path fill="none" stroke="#9c94bb" strokeWidth={2} d="M0,-5L10,0L0,5" />
                         </marker>
                     </defs>
                     {tree.links.map((link, i) => (
                         <path
                             key={i}
-                            d={line(link.points) ?? ''}
+                            d={line(link.points.map(p => ({ x: p.y, y: p.x }))) ?? ''}
                             fill="none"
                             stroke="#9c94bb"
-                            strokeWidth={0.05}
+                            strokeWidth={0.03}
                             markerEnd="url(#flow-arrow)"
                         />
                     ))}
@@ -216,7 +219,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
                         const idx = parseInt(node.data.id, 10);
                         const f = fields[idx];
                         return (
-                            <g key={i} transform={`translate(${node.x ?? 0},${node.y ?? 0})`}>
+                            <g key={i} transform={`translate(${node.y ?? 0},${node.x ?? 0})`}>
                                 <circle r={0.2} fill={idx === index ? "#995ccf" : "#463782"} stroke="none" />
                                 <text fill="white" stroke="#463782" strokeWidth={0.001} fontWeight="bold" fontSize={0.05} textAnchor="middle" >
                                     {f.name ?? f.fid}
@@ -225,9 +228,9 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
                         );
                     })}
                 </svg>
-            ))}
+            ) : null) : null}
         </SVGGroup>
-    ) : null;
+    );
 };
 
 

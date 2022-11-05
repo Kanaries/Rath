@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
+import { forwardRef, useMemo } from "react";
 import { line as d3Line, curveCatmullRom } from 'd3-shape';
 import {
     dagStratify,
@@ -13,7 +13,6 @@ import {
     twolayerGreedy,
 } from 'd3-dag';
 import styled, { StyledComponentProps } from "styled-components";
-import produce from "immer";
 import type { IFieldMeta } from "../../../interfaces";
 import { Flow, mergeFlows } from "./flowAnalyzer";
 import type { DiagramGraphData } from ".";
@@ -50,10 +49,9 @@ export type DAGViewProps = Omit<StyledComponentProps<'div', {}, {
     value: Readonly<DiagramGraphData>;
     cutThreshold: number;
     mode: 'explore' | 'edit';
-}, never>, 'onChange' | 'ref'> & {
-    onChange: (value: Readonly<DiagramGraphData>) => void;
-    onFocusChange: (index: number) => void;
-};
+    focus: number | null;
+    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+}, never>, 'onChange' | 'ref'>;
 
 const MIN_RADIUS = 0.2;
 const MAX_RADIUS = 0.38;
@@ -61,7 +59,7 @@ const MIN_STROKE_WIDTH = 0.04;
 const MAX_STROKE_WIDTH = 0.09;
 
 const DAGView = forwardRef<HTMLDivElement, DAGViewProps>(({
-    fields, value, onChange, onFocusChange, cutThreshold, mode, ...props },
+    fields, value, onClickNode, focus, cutThreshold, mode, ...props },
     ref
 ) => {
     const [data] = useMemo(() => {
@@ -125,7 +123,7 @@ const DAGView = forwardRef<HTMLDivElement, DAGViewProps>(({
         return flows;
     }, [data.nodes, normalizedLinks, cutThreshold]);
 
-    const tooManyLinks = data.links.length >= 32;
+    const tooManyLinks = data.links.length >= 16;
 
     const layout = useMemo(() => {
         return tooManyLinks
@@ -156,16 +154,6 @@ const DAGView = forwardRef<HTMLDivElement, DAGViewProps>(({
         };
     }, [flows, layout]);
 
-    const [selected, setSelected] = useState<number>(-1);
-
-    useEffect(() => {
-        setSelected(-1);
-    }, [data]);
-
-    useEffect(() => {
-        onFocusChange(selected);
-    }, [selected, onFocusChange]);
-
     const nodes = useMemo(() => {
         return dag.nodes.map(node => {
             const me = normalizedNodes[parseInt(node.data.id)];
@@ -188,45 +176,12 @@ const DAGView = forwardRef<HTMLDivElement, DAGViewProps>(({
         });
     }, [dag, data]);
 
-    const handleClickCircle = useCallback((idx: number) => {
-        if (mode === 'explore') {
-            setSelected(idx === selected ? -1 : idx);
-        } else {
-            if (selected === -1) {
-                setSelected(idx);
-            } else if (idx === selected) {
-                setSelected(-1);
-            } else {
-                // link
-                onChange(produce(value, draft => {
-                    const idxMe = draft.links.findIndex(
-                        link => link.causeId === selected && link.effectId === idx
-                    );
-                    if (idxMe !== -1) {
-                        draft.links[idxMe].score = 1;
-                    }
-                    const idxRev = draft.links.findIndex(
-                        link => link.effectId === selected && link.causeId === idx
-                    );
-                    if (idxRev !== -1) {
-                        draft.links[idxRev].score = -1;
-                    }
-                }));
-            }
-        }
-    }, [selected, value, mode, onChange]);
-
     return (
         <Container {...props} ref={ref}>
             <svg
                 viewBox={`0 0 ${dag.size.width} ${dag.size.height}`}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                onClick={() => {
-                    if (selected !== -1) {
-                        setSelected(-1);
-                    }
-                }}
             >
                 {dag.links.map((link, i) => (
                     <path
@@ -237,7 +192,7 @@ const DAGView = forwardRef<HTMLDivElement, DAGViewProps>(({
                         strokeWidth={MIN_STROKE_WIDTH + (MAX_STROKE_WIDTH - MIN_STROKE_WIDTH) * (links[i]?.value ?? 0)}
                         style={{
                             filter: `hue-rotate(-${46 + 90 * (links[i]?.value ?? 0)}deg) saturate(${links[i] ? 1 : 0}) opacity(${
-                                selected === -1 ? 1 : 0.05
+                                focus === null ? 1 : 0.05
                             })`,
                         }}
                     />
@@ -254,12 +209,12 @@ const DAGView = forwardRef<HTMLDivElement, DAGViewProps>(({
                                 strokeWidth={0}
                                 style={{
                                     filter: `opacity(${
-                                        selected === -1 ? 1 : idx === selected ? 1 : 0.3
+                                        focus === null ? 1 : idx === focus ? 1 : 0.3
                                     })`,
                                 }}
                                 onClick={e => {
                                     e.stopPropagation();
-                                    handleClickCircle(idx);
+                                    onClickNode?.(value.nodes[idx]);
                                 }}
                             />
                             <text fill="#463782" stroke="#463782" strokeWidth={0.004} fontWeight="bold" fontSize={0.12} textAnchor="middle" >

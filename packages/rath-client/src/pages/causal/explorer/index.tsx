@@ -1,7 +1,7 @@
-import { Slider, Toggle } from "@fluentui/react";
+import { DefaultButton, Slider, Toggle } from "@fluentui/react";
+import produce from "immer";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import useErrorBoundary from "../../../hooks/use-error-boundary";
 import type { IFieldMeta } from "../../../interfaces";
 import ExplorerMainView from "./explorerMainView";
 import FlowAnalyzer from "./flowAnalyzer";
@@ -35,10 +35,8 @@ const Container = styled.div`
     width: 100%;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 8%), 0 0.3px 0.9px 0 rgb(0 0 0 / 5%),
-            inset 0 4.8px 10.8px 0 rgb(0 0 0 / 6%), 0 1.6px 5.4px 0 rgb(0 0 0 / 4%);
     margin-block: 4em;
-    border: 1px solid transparent;
+    border: 1px solid #8888;
     padding-block: 1.6em;
     padding-inline: 2em;
 `;
@@ -49,14 +47,12 @@ const Tools = styled.div`
     flex-shrink: 0;
     display: flex;
     flex-direction: row;
-    box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 8%), 0 0.3px 0.9px 0 rgb(0 0 0 / 5%),
-            inset 0 4.8px 10.8px 0 rgb(0 0 0 / 2%), 0 1.6px 5.4px 0 rgb(0 0 0 / 1%);
+    border: 1px solid #8888;
     margin-block: 1em;
-    border: 1px solid transparent;
     padding-block: 1.8em;
     padding-inline: 2em;
     align-items: center;
-    > * {
+    > *:not(button) {
         height: 100%;
         flex-grow: 1;
         flex-shrink: 1;
@@ -64,6 +60,9 @@ const Tools = styled.div`
         :not(:last-child) {
             margin-inline-end: 1em;
         }
+    }
+    > button {
+        margin-right: 2em;
     }
 `;
 
@@ -76,17 +75,14 @@ const MainView = styled.div`
     flex-direction: row;
     align-items: stretch;
     justify-content: stretch;
-    box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 8%), 0 0.3px 0.9px 0 rgb(0 0 0 / 5%),
-            inset 0 4.8px 10.8px 0 rgb(0 0 0 / 2%), 0 1.6px 5.4px 0 rgb(0 0 0 / 1%);
+    border: 1px solid #8888;
     margin-block: 1em;
-    border: 1px solid transparent;
     padding-block: 1.8em;
     padding-inline: 2em;
     > * {
         height: 100%;
         flex-grow: 1;
         flex-shrink: 1;
-        /* margin-block: 0; */
     }
 `;
 
@@ -99,7 +95,7 @@ const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix }) => {
     const [modifiedMatrix, setModifiedMatrix] = useState(data);
 
     useEffect(() => {
-        setModifiedMatrix(data)
+        setModifiedMatrix(data);
     }, [data]);
 
     const nodes = useMemo<CausalNode[]>(() => {
@@ -147,21 +143,48 @@ const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix }) => {
     // console.log(fields, links);
     const [focus, setFocus] = useState(-1);
 
-    const handleFocusChange = useCallback((idx: number) => setFocus(idx), []);
-
-    const ErrorBoundary = useErrorBoundary((err, info) => {
-        console.error(err ?? info);
-        return <p>{info}</p>;
-    }, [fields, value, handleChange, mode, cutThreshold, handleFocusChange]);
-
-    const DetailErrorBoundary = useErrorBoundary((err, info) => {
-        console.error(err ?? info);
-        return <p>{info}</p>;
-    }, [fields, value, focus, cutThreshold]);
+    const handleClickCircle = useCallback((node: Readonly<CausalNode>) => {
+        const idx = node.nodeId;
+        if (mode === 'explore') {
+            setFocus(idx === focus ? -1 : idx);
+        } else {
+            if (focus === -1) {
+                setFocus(idx);
+            } else if (idx === focus) {
+                setFocus(-1);
+            } else {
+                // link
+                handleChange(produce(value, draft => {
+                    const idxMe = draft.links.findIndex(
+                        link => link.causeId === focus && link.effectId === idx
+                    );
+                    if (idxMe !== -1) {
+                        draft.links[idxMe].score = 1;
+                    } else {
+                        draft.links.push({
+                            causeId: focus,
+                            effectId: idx,
+                            score: 1,
+                        });
+                    }
+                    const idxRev = draft.links.findIndex(
+                        link => link.effectId === focus && link.causeId === idx
+                    );
+                    if (idxRev !== -1) {
+                        draft.links[idxRev].score = -1;
+                    }
+                    setFocus(-1);
+                }));
+            }
+        }
+    }, [mode, focus, handleChange, value]);
 
     return (
-        <Container>
+        <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools>
+                <DefaultButton onClick={() => setModifiedMatrix(data)}>
+                    Reset
+                </DefaultButton>
                 <Toggle
                     label="Enable Edit"
                     checked={mode === 'edit'}
@@ -186,31 +209,25 @@ const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix }) => {
                 />
             </Tools>
             <MainView>
-                <ErrorBoundary>
-                    <ExplorerMainView
-                        fields={fields}
-                        value={value}
-                        onChange={handleChange}
-                        mode={mode}
-                        cutThreshold={cutThreshold}
-                        onFocusChange={handleFocusChange}
-                        style={{
-                            width: 'unset',
-                            height: '100%',
-                        }}
-                    />
-                </ErrorBoundary>
+                <ExplorerMainView
+                    fields={fields}
+                    value={value}
+                    focus={focus === -1 ? null : focus}
+                    mode={mode}
+                    cutThreshold={cutThreshold}
+                    onClickNode={handleClickCircle}
+                    style={{
+                        width: 'unset',
+                        height: '100%',
+                    }}
+                />
             </MainView>
-            {focus !== -1 && (
-                <DetailErrorBoundary>
-                    <FlowAnalyzer
-                        fields={fields}
-                        data={value}
-                        index={focus}
-                        cutThreshold={cutThreshold}
-                    />
-                </DetailErrorBoundary>
-            )}
+            <FlowAnalyzer
+                fields={fields}
+                data={value}
+                index={mode === 'explore' ? focus : -1}
+                cutThreshold={cutThreshold}
+            />
         </Container>
     );
 };

@@ -1,9 +1,10 @@
 import { forwardRef } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
-import type { DiagramGraphData } from ".";
+import useErrorBoundary from "../../../hooks/use-error-boundary";
 import DAGView from "./DAGView";
 import ForceView from "./forceView";
+import type { DiagramGraphData } from ".";
 
 
 const Container = styled.div`
@@ -23,43 +24,54 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     /** @default 0 */
     cutThreshold?: number;
     mode: 'explore' | 'edit';
-}, never>, 'onChange' | 'ref'> & {
-    onChange: (value: Readonly<DiagramGraphData>) => void;
-    onFocusChange: (index: number) => void;
-};
+    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+    focus: number | null;
+}, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
-    fields, value, onChange, onFocusChange, cutThreshold = 0, mode, ...props },
+    fields, value, focus, cutThreshold = 0, mode, onClickNode, ...props },
     ref
 ) => {
+    const ErrorBoundary = useErrorBoundary((err, info) => {
+        console.error(err ?? info);
+        return <div style={{
+            flexGrow: 1,
+            flexShrink: 1,
+            width: '60%',
+        }} />;
+        // return <p>{info}</p>;
+    }, [fields, value, mode, cutThreshold, onClickNode, focus]);
+
     return (
         <Container {...props} ref={ref}>
             <ForceView
                 fields={fields}
                 value={value}
-                onChange={onChange}
+                onClickNode={onClickNode}
+                focus={focus}
                 mode={mode}
                 cutThreshold={cutThreshold}
-                onFocusChange={onFocusChange}
                 style={{
                     flexGrow: 1,
                     flexShrink: 1,
-                    flexBasis: 0,
+                    width: '40%',
                 }}
             />
-            <DAGView
-                fields={fields}
-                value={value}
-                onChange={onChange}
-                mode={mode}
-                cutThreshold={cutThreshold}
-                onFocusChange={onFocusChange}
-                style={{
-                    flexGrow: 1,
-                    flexShrink: 1,
-                    flexBasis: 0,
-                }}
-            />
+            <ErrorBoundary>
+                <DAGView
+                    fields={fields}
+                    value={value}
+                    mode={mode}
+                    cutThreshold={cutThreshold}
+                    onClickNode={onClickNode}
+                    focus={focus}
+                    style={{
+                        flexGrow: 1,
+                        flexShrink: 1,
+                        width: '60%',
+                    }}
+                />
+            </ErrorBoundary>
         </Container>
     );
 });
