@@ -87,7 +87,7 @@ const MainView = styled.div`
 `;
 
 const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix }) => {
-    const [cutThreshold, setCutThreshold] = useState(0.2);
+    const [cutThreshold, setCutThreshold] = useState(0.05);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
     const data = useMemo(() => sNormalize(compareMatrix), [compareMatrix]);
