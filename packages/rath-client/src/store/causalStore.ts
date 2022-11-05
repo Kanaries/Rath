@@ -2,65 +2,25 @@ import { getFieldRelationMatrix } from "@kanaries/loa";
 import { makeAutoObservable, observable, runInAction } from "mobx";
 import { notify } from "../components/error";
 import { IFieldMeta, IRow } from "../interfaces";
+import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM } from "../pages/causal/config";
 import { causalService } from "../pages/causal/service";
-import { encodeDiscrete } from "../pages/causal/utils";
+// import { encodeDiscrete } from "../pages/causal/utils";
 import { DataSourceStore } from "./dataSourceStore";
 
-export enum UCRule {
-    uc_supset = 0,
-    maxP = 1,
-    definiteMaxP = 2
-}
 
-export enum UCPriority {
-    default = -1,
-    overwrite = 0,
-    biDirected = 1,
-    existing = 2,
-    stronger = 3,
-    stronger_plus = 4
-}
-
-export enum ICausalAlgorithm {
-    PC = 'PC',
-    FCI = 'FCI',
-    CONOD = 'CONOD'
-}
-
-export enum IndepenenceTest {
-    chiSquare = 'chisq',
-    fisherZ = 'fisherz',
-    kci = 'kci',
-    mvFisherz = 'mv_fisherz',
-    gSquare = 'gsq',
-}
-// type UCPriority = -1 | 0 | 1 | 2 | 3 | 4;
-// type UCRule = 0 | 1 | 2; 
-export enum ICatEncodeType {
-    none = 'none',
-    oneHot = 'one_hot',
-    binary = 'binary',
-    lex = 'lex'
-}
-export enum IQuantEncodeType {
-    none = 'none',
-    bin = 'bin',
-    id = 'id',
-    order = 'order',
-}
-export interface ICausalParams {
-    algorithm?: ICausalAlgorithm; // | 'FCI' | 'CDNOD';
-    alpha?: number; //desired significance level (float) in (0, 1). Default: 0.05.
-    indep_test?: IndepenenceTest;
-    stable?: boolean; //run stabilized skeleton discovery if True. Default: True.
-    uc_rule?: UCRule;
-    uc_priority?: UCPriority;
-    mvpc?: boolean;
-    catEncodeType?: ICatEncodeType;
-    keepOriginCat?: boolean;
-    quantEncodeType?: IQuantEncodeType;
-    keepOriginQuant?: boolean;
-}
+// export interface ICausalParams {
+//     algorithm?: ICausalAlgorithm; // | 'FCI' | 'CDNOD';
+//     alpha?: number; //desired significance level (float) in (0, 1). Default: 0.05.
+//     indep_test?: IndepenenceTest;
+//     stable?: boolean; //run stabilized skeleton discovery if True. Default: True.
+//     uc_rule?: UCRule;
+//     uc_priority?: UCPriority;
+//     mvpc?: boolean;
+//     cat_encode_type?: ICatEncodeType;
+//     keep_origin_cat?: boolean;
+//     quant_encode_type?: IQuantEncodeType;
+//     keep_origin_quant?: boolean;
+// }
 
 enum CausualServerUrl {
     local = 'http://localhost:8000',
@@ -73,22 +33,24 @@ export class CausalStore {
     public computing: boolean = false;
     public showSettings: boolean = false;
     public focusNodeIndex: number = 0;
-    public causalParams: ICausalParams = {
+    public causalParams: { [key: string]: any} = {
         algorithm: ICausalAlgorithm.PC,
-        alpha: 0.05,
-        indep_test: IndepenenceTest.fisherZ,
-        stable: true,
-        uc_rule: UCRule.uc_supset,
-        uc_priority: UCPriority.default,
-        mvpc: false,
-        catEncodeType: ICatEncodeType.none, // encoding for catecorical data
-        quantEncodeType: IQuantEncodeType.none, // encoding for quantitative data
-        keepOriginCat: true,
-        keepOriginQuant: true
+        // alpha: 0.05,
+        // indep_test: IndepenenceTest.fisherZ,
+        // stable: true,
+        // uc_rule: UCRule.uc_supset,
+        // uc_priority: UCPriority.default,
+        // mvpc: false,
+        // catEncodeType: ICatEncodeType.none, // encoding for catecorical data
+        // quantEncodeType: IQuantEncodeType.none, // encoding for quantitative data
+        // keepOriginCat: true,
+        // keepOriginQuant: true
     };
     private dataSourceStore: DataSourceStore;
     constructor (dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore
+        this.causalParams = makeFormInitParams(PC_PARAMS_FORM);
+        this.causalParams['algorithm'] = ICausalAlgorithm.PC;
         makeAutoObservable(this, {
             causalStrength: observable.ref,
             igMatrix: observable.ref,
@@ -97,7 +59,11 @@ export class CausalStore {
             dataSourceStore: false
         })
     }
-    public updateCausalParamsValue (key: keyof ICausalParams, value: any) {
+    public switchCausalAlgorithm (algorithm: ICausalAlgorithm) {
+        this.causalParams = makeFormInitParams(CAUSAL_ALGORITHM_FORM[algorithm]);
+        this.causalParams['algorithm'] = algorithm;
+    }
+    public updateCausalParamsValue (key: string, value: any) {
         this.causalParams[key] = value;
     }
     public toggleSettings (show: boolean) {
