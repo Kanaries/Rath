@@ -44,12 +44,12 @@ const RelationMatrixHeatMap: React.FC<Props> = (props) => {
             }).then(res => {
                 res.view.addEventListener('click', (event, item) => {
                     if (item && item.datum) {
-                        console.log(item.datum);
                         onSelect && onSelect(item.datum.X_FID, item.datum.Y_FID);
                     }
                 })
             });
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values, absolute]);
     return <div ref={container}></div>;
 };

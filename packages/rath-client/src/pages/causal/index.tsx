@@ -18,9 +18,9 @@ const CausalPage: React.FC = () => {
         causalStore.computeIGMatrix(cleanedData, fieldMetas);
     }, [fieldMetas, cleanedData, causalStore]);
 
-    useEffect(() => {
-        causalStore.computeIGCondMatrix(cleanedData, fieldMetas);
-    }, [fieldMetas, cleanedData, causalStore]);
+    // useEffect(() => {
+    //     causalStore.computeIGCondMatrix(cleanedData, fieldMetas);
+    // }, [fieldMetas, cleanedData, causalStore]);
 
     const onFieldGroupSelect = useCallback(
         (xFid: string, yFid: string) => {
@@ -55,7 +55,7 @@ const CausalPage: React.FC = () => {
 
                 <div style={{ marginTop: '1em', display: 'flex' }}>
                     <div>
-                        {cleanedData.length > 0 && (
+                        {cleanedData.length > 0 && igMatrix.length > 0 && (
                             <RelationMatrixHeatMap
                                 absolute
                                 fields={fieldMetas}

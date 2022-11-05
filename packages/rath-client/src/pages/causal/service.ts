@@ -4,18 +4,23 @@ import { workerService } from '../../services';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import ExpandDateTimeWorker from './computation.worker.js?worker';
+import CausalComputationWorker from './computation.worker.js?worker';
 
-interface CausalProps {
+type ICausalProps = {
+    task: 'ig';
+    dataSource: IRow[];
+    fields: IFieldMeta[];
+} | {
+    task: 'ig_cond';
     dataSource: IRow[];
     fields: IFieldMeta[];
     matrix: number[][];
 }
 
-export async function causalService(props: CausalProps): Promise<number[][]> {
+export async function causalService(props: ICausalProps): Promise<number[][]> {
     try {
-        const worker = new ExpandDateTimeWorker();
-        const result = await workerService<number[][], CausalProps>(worker, props);
+        const worker = new CausalComputationWorker();
+        const result = await workerService<number[][], ICausalProps>(worker, props);
         worker.terminate();
         if (result.success) {
             return result.data;

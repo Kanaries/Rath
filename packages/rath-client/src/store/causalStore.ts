@@ -1,12 +1,10 @@
-import { getFieldRelationMatrix } from "@kanaries/loa";
-import { makeAutoObservable, observable, runInAction } from "mobx";
-import { notify } from "../components/error";
-import { IFieldMeta, IRow } from "../interfaces";
-import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM } from "../pages/causal/config";
-import { causalService } from "../pages/causal/service";
+import { makeAutoObservable, observable, runInAction } from 'mobx';
+import { notify } from '../components/error';
+import { IFieldMeta, IRow } from '../interfaces';
+import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM } from '../pages/causal/config';
+import { causalService } from '../pages/causal/service';
 // import { encodeDiscrete } from "../pages/causal/utils";
-import { DataSourceStore } from "./dataSourceStore";
-
+import { DataSourceStore } from './dataSourceStore';
 
 // export interface ICausalParams {
 //     algorithm?: ICausalAlgorithm; // | 'FCI' | 'CDNOD';
@@ -24,7 +22,7 @@ import { DataSourceStore } from "./dataSourceStore";
 
 enum CausualServerUrl {
     local = 'http://localhost:8000',
-    test = 'http://gateway.kanaries.cn:2080'
+    test = 'http://gateway.kanaries.cn:2080',
 }
 export class CausalStore {
     public igMatrix: number[][] = [];
@@ -33,7 +31,7 @@ export class CausalStore {
     public computing: boolean = false;
     public showSettings: boolean = false;
     public focusNodeIndex: number = 0;
-    public causalParams: { [key: string]: any} = {
+    public causalParams: { [key: string]: any } = {
         algorithm: ICausalAlgorithm.PC,
         // alpha: 0.05,
         // indep_test: IndepenenceTest.fisherZ,
@@ -47,8 +45,8 @@ export class CausalStore {
         // keepOriginQuant: true
     };
     private dataSourceStore: DataSourceStore;
-    constructor (dataSourceStore: DataSourceStore) {
-        this.dataSourceStore = dataSourceStore
+    constructor(dataSourceStore: DataSourceStore) {
+        this.dataSourceStore = dataSourceStore;
         this.causalParams = makeFormInitParams(PC_PARAMS_FORM);
         this.causalParams['algorithm'] = ICausalAlgorithm.PC;
         makeAutoObservable(this, {
@@ -56,52 +54,57 @@ export class CausalStore {
             igMatrix: observable.ref,
             igCondMatrix: observable.ref,
             // @ts-ignore
-            dataSourceStore: false
-        })
+            dataSourceStore: false,
+        });
     }
-    public switchCausalAlgorithm (algorithm: ICausalAlgorithm) {
+    public switchCausalAlgorithm(algorithm: ICausalAlgorithm) {
         this.causalParams = makeFormInitParams(CAUSAL_ALGORITHM_FORM[algorithm]);
         this.causalParams['algorithm'] = algorithm;
     }
-    public updateCausalParamsValue (key: string, value: any) {
+    public updateCausalParamsValue(key: string, value: any) {
         this.causalParams[key] = value;
     }
-    public toggleSettings (show: boolean) {
+    public toggleSettings(show: boolean) {
         this.showSettings = show;
     }
-    public setFocusNodeIndex (index: number) {
+    public setFocusNodeIndex(index: number) {
         this.focusNodeIndex = index;
     }
 
-    public computeIGMatrix (dataSource: IRow[], fields: IFieldMeta[]) {
-        this.igMatrix = getFieldRelationMatrix(dataSource, fields);
-    }
-    public async computeIGCondMatrix (dataSource: IRow[], fields: IFieldMeta[]) {
+    public async computeIGMatrix(dataSource: IRow[], fields: IFieldMeta[]) {
         this.computing = true;
-        const res = await causalService({ dataSource, fields, matrix: this.igMatrix });
+        const res = await causalService({ task: 'ig', dataSource, fields });
+        runInAction(() => {
+            this.igMatrix = res;
+            this.computing = false;
+        });
+    }
+    public async computeIGCondMatrix(dataSource: IRow[], fields: IFieldMeta[]) {
+        this.computing = true;
+        const res = await causalService({ task: 'ig_cond', dataSource, fields, matrix: this.igMatrix });
         runInAction(() => {
             this.igCondMatrix = res;
-            this.computing = false
-        })
+            this.computing = false;
+        });
     }
-    public async causalDiscovery (dataSource: IRow[], fields: IFieldMeta[]) {
+    public async causalDiscovery(dataSource: IRow[], fields: IFieldMeta[]) {
         try {
             const res = await fetch(`${CausualServerUrl.local}/causal/`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    dataSource,// encodeDiscrte(dataSource, fields),
+                    dataSource, // encodeDiscrte(dataSource, fields),
                     fields,
-                    params: this.causalParams
-                })
-            })
+                    params: this.causalParams,
+                }),
+            });
             const result = await res.json();
             if (result.success) {
                 runInAction(() => {
                     this.causalStrength = result.data;
-                })
+                });
             } else {
                 throw new Error(result.message);
             }
@@ -109,11 +112,11 @@ export class CausalStore {
             notify({
                 title: 'Causal Discovery Error',
                 type: 'error',
-                content: `${error}`
-            })
+                content: `${error}`,
+            });
         }
     }
-    public async reRunCausalDiscovery () {
+    public async reRunCausalDiscovery() {
         const { cleanedData, fieldMetas } = this.dataSourceStore;
         this.causalDiscovery(cleanedData, fieldMetas);
     }

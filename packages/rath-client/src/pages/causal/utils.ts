@@ -2,6 +2,7 @@ import { binMap, mic, nnMic, inverseGeneralMic, pureGeneralMic, getTemporalFreqR
 import dayjs from "dayjs";
 import { IFieldMeta, IRow } from "../../interfaces";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function conditionalMic (condField: IFieldMeta, xField: IFieldMeta, yField: IFieldMeta, dataSource: IRow[]) {
     let condValues: any[] = dataSource.map(row => row[condField.fid])
     if (condField.semanticType === 'quantitative') {
@@ -138,11 +139,10 @@ function conditionaExtremelMic (condField: IFieldMeta, xField: IFieldMeta, yFiel
     return totalScore;
 }
 
-export function checkRelationMatrix (mat: number[][], fields: IFieldMeta[], dataSource: IRow[]) {
+export function getFieldRelationCheckedMatrix (mat: number[][], fields: IFieldMeta[], dataSource: IRow[]) {
     let ans: number[][] = new Array(mat.length).fill(0).map(() => new Array(mat.length).fill(1));
     for (let i = 0; i < mat.length; i++) {
         for (let j = 0; j < mat[i].length; j++) {
-            let c = 0;
             for (let k = 0; k < fields.length; k++) {
                 // ans[i][j] = mat[i][j]
                 if (i === j || i === k || j === k) continue;

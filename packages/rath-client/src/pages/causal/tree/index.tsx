@@ -177,6 +177,7 @@ const RelationTree: React.FC<RelationTreeProps> = (props) => {
                 })
             })
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nodes, fields]);
     return <div ref={container}></div>;
 };
