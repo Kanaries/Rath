@@ -245,7 +245,7 @@
             "title": "快速筛选/清洗"
         },
         "downloadData": {
-            "title": "下载数据"
+            "title": "导出数据集"
         },
         "extend": {
             "title": "扩展信息",

@@ -245,7 +245,7 @@
             "title": "Fast Selection"
         },
         "downloadData": {
-            "title": "Download Data"
+            "title": "export dataset"
         },
         "extend": {
             "title": "Extend Information",
