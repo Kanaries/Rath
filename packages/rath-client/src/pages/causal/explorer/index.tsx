@@ -1,8 +1,9 @@
-import { Slider } from "@fluentui/react";
+import { Slider, Toggle } from "@fluentui/react";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import styled from "styled-components";
+import useErrorBoundary from "../../../hooks/use-error-boundary";
 import type { IFieldMeta } from "../../../interfaces";
-import DiagramGraphEditor from "./diagramGraphEditor";
-import ErrorBoundary from "./errorBoundary";
+import ExplorerMainView from "./explorerMainView";
 import FlowAnalyzer from "./flowAnalyzer";
 
 
@@ -30,8 +31,68 @@ const sNormalize = (matrix: ExplorerProps['compareMatrix']): number[][] => {
     return matrix.map(vec => vec.map(n => 2 / (1 + Math.exp(-n)) - 1));
 };
 
+const Container = styled.div`
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 8%), 0 0.3px 0.9px 0 rgb(0 0 0 / 5%),
+            inset 0 4.8px 10.8px 0 rgb(0 0 0 / 6%), 0 1.6px 5.4px 0 rgb(0 0 0 / 4%);
+    margin-block: 4em;
+    border: 1px solid transparent;
+    padding-block: 1.6em;
+    padding-inline: 2em;
+`;
+
+const Tools = styled.div`
+    width: 100%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 8%), 0 0.3px 0.9px 0 rgb(0 0 0 / 5%),
+            inset 0 4.8px 10.8px 0 rgb(0 0 0 / 2%), 0 1.6px 5.4px 0 rgb(0 0 0 / 1%);
+    margin-block: 1em;
+    border: 1px solid transparent;
+    padding-block: 1.8em;
+    padding-inline: 2em;
+    align-items: center;
+    > * {
+        height: 100%;
+        flex-grow: 1;
+        flex-shrink: 1;
+        margin-block: 0;
+        :not(:last-child) {
+            margin-inline-end: 1em;
+        }
+    }
+`;
+
+const MainView = styled.div`
+    width: 100%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: 40vh;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: stretch;
+    box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 8%), 0 0.3px 0.9px 0 rgb(0 0 0 / 5%),
+            inset 0 4.8px 10.8px 0 rgb(0 0 0 / 2%), 0 1.6px 5.4px 0 rgb(0 0 0 / 1%);
+    margin-block: 1em;
+    border: 1px solid transparent;
+    padding-block: 1.8em;
+    padding-inline: 2em;
+    > * {
+        height: 100%;
+        flex-grow: 1;
+        flex-shrink: 1;
+        /* margin-block: 0; */
+    }
+`;
+
 const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix }) => {
     const [cutThreshold, setCutThreshold] = useState(0.2);
+    const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
     const data = useMemo(() => sNormalize(compareMatrix), [compareMatrix]);
 
@@ -88,41 +149,69 @@ const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix }) => {
 
     const handleFocusChange = useCallback((idx: number) => setFocus(idx), []);
 
+    const ErrorBoundary = useErrorBoundary((err, info) => {
+        console.error(err ?? info);
+        return <p>{info}</p>;
+    }, [fields, value, handleChange, mode, cutThreshold, handleFocusChange]);
+
+    const DetailErrorBoundary = useErrorBoundary((err, info) => {
+        console.error(err ?? info);
+        return <p>{info}</p>;
+    }, [fields, value, focus, cutThreshold]);
+
     return (
-        <div>
-            <Slider
-                label="Cutting Threshold"
-                min={0}
-                max={1}
-                step={0.01}
-                value={cutThreshold}
-                showValue
-                onChange={d => setCutThreshold(d)}
-            />
-            <ErrorBoundary>
-                <DiagramGraphEditor
-                    fields={fields}
-                    value={value}
-                    onChange={handleChange}
-                    cutThreshold={cutThreshold}
-                    onFocusChange={handleFocusChange}
-                    style={{
-                        width: '100%',
-                        height: '300px',
+        <Container>
+            <Tools>
+                <Toggle
+                    label="Enable Edit"
+                    checked={mode === 'edit'}
+                    onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
+                    onText="On"
+                    offText="Off"
+                />
+                <Slider
+                    label="Link Filter"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={cutThreshold}
+                    showValue
+                    onChange={d => setCutThreshold(d)}
+                    styles={{
+                        root: {
+                            flexGrow: 1,
+                            flexShrink: 1,
+                        },
                     }}
                 />
-            </ErrorBoundary>
-            {focus !== -1 && (
+            </Tools>
+            <MainView>
                 <ErrorBoundary>
+                    <ExplorerMainView
+                        fields={fields}
+                        value={value}
+                        onChange={handleChange}
+                        mode={mode}
+                        cutThreshold={cutThreshold}
+                        onFocusChange={handleFocusChange}
+                        style={{
+                            width: 'unset',
+                            height: '100%',
+                        }}
+                    />
+                </ErrorBoundary>
+            </MainView>
+            {focus !== -1 && (
+                <DetailErrorBoundary>
                     <FlowAnalyzer
                         fields={fields}
                         data={value}
                         index={focus}
                         cutThreshold={cutThreshold}
                     />
-                </ErrorBoundary>
+                </DetailErrorBoundary>
             )}
-        </div>
+        </Container>
     );
 };
 
