@@ -16,7 +16,8 @@ import DynamicForm from './dynamicForm';
 
 const Params: React.FC = (props) => {
     const { causalStore } = useGlobalStore();
-    const { causalParams, showSettings } = causalStore;
+    const { causalAlgorithm, causalParams, showSettings } = causalStore;
+    const { causalAlgorithmForm, causalAlgorithmOptions } = causalStore;
     return (
         <div>
             <IconButton
@@ -35,16 +36,16 @@ const Params: React.FC = (props) => {
                 <Label>Settings</Label>
                 <Dropdown
                     label="Algorithm"
-                    options={CAUSAL_ALGORITHM_OPTIONS}
-                    selectedKey={causalParams.algorithm}
+                    options={causalAlgorithmOptions}
+                    selectedKey={causalAlgorithm}
                     onChange={(e, o) => {
-                        o && causalStore.switchCausalAlgorithm(o.key as ICausalAlgorithm);
+                        o && causalStore.switchCausalAlgorithm(o.key as string);
                     }}
                     onRenderLabel={makeRenderLabelHandler('The algorithm to use.')}
                 />
                 <DynamicForm
-                    form={CAUSAL_ALGORITHM_FORM[causalParams.algorithm as ICausalAlgorithm]}
-                    values={toJS(causalParams)}
+                    form={causalAlgorithmForm[causalAlgorithm as string]!}
+                    values={toJS(causalParams[causalAlgorithm])}
                     onChange={(key, value) => {
                         causalStore.updateCausalParamsValue(key as any, value);
                     }}

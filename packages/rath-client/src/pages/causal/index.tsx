@@ -47,7 +47,7 @@ const CausalPage: React.FC = () => {
                     <PrimaryButton
                         text="Causal Discovery"
                         onClick={() => {
-                            causalStore.causalDiscovery(cleanedData, fieldMetas);
+                            causalStore.causalDiscovery(cleanedData, fieldMetas, causalStore.causalAlgorithm);
                         }}
                     />
                     <Params />

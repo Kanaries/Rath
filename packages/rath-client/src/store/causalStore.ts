@@ -1,7 +1,8 @@
+import { IDropdownOption } from '@fluentui/react';
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { notify } from '../components/error';
 import { IFieldMeta, IRow } from '../interfaces';
-import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM } from '../pages/causal/config';
+import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM, IAlgoSchema, CAUSAL_ALGORITHM_OPTIONS, IForm } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
 // import { encodeDiscrete } from "../pages/causal/utils";
 import { DataSourceStore } from './dataSourceStore';
@@ -20,7 +21,7 @@ import { DataSourceStore } from './dataSourceStore';
 //     keep_origin_quant?: boolean;
 // }
 
-enum CausualServerUrl {
+enum CausalServerUrl {
     local = 'http://localhost:8000',
     test = 'http://gateway.kanaries.cn:2080',
 }
@@ -31,8 +32,9 @@ export class CausalStore {
     public computing: boolean = false;
     public showSettings: boolean = false;
     public focusNodeIndex: number = 0;
-    public causalParams: { [key: string]: any } = {
-        algorithm: ICausalAlgorithm.PC,
+    public causalAlgorithm: string = ICausalAlgorithm.PC;
+    /** asserts algorithm in keys of `causalStore.causalAlgorithmForm`. */
+    public causalParams: { [algo: string]: { [key: string]: any } } = {
         // alpha: 0.05,
         // indep_test: IndepenenceTest.fisherZ,
         // stable: true,
@@ -44,11 +46,42 @@ export class CausalStore {
         // keepOriginCat: true,
         // keepOriginQuant: true
     };
+
+    /** Keep the options synchorized with `CausalStore.causalAlgorithmForm` */
+    private _causalAlgorithmOptions: IDropdownOption[] = CAUSAL_ALGORITHM_OPTIONS;
+    private _fetchedCausalAlgorithmForm: IAlgoSchema = Object.fromEntries(Object.entries(CAUSAL_ALGORITHM_FORM));
+    public get causalAlgorithmOptions(): IDropdownOption[] {
+        return this._causalAlgorithmOptions;
+        // console.log(this.causalAlgorithmForm)
+        // for (let [key, schema] of this.causalAlgorithmForm.entries()) {
+        //     options.push({ key, text: schema.title, ariaLabel: schema.description } as IDropdownOption)
+        // } return options;
+    }
+    public get causalAlgorithmForm(): IAlgoSchema {
+        return this._fetchedCausalAlgorithmForm;
+    }
+    public set causalAlgorithmForm(schema: IAlgoSchema) {
+        if (Object.keys(schema).length === 0) {
+            console.error("[causalAlgorithmForm]: schema is empty")
+            return;
+        }
+        this._fetchedCausalAlgorithmForm = schema;
+        this._causalAlgorithmOptions = Object.entries(schema).map(([key, form]) => {
+            return { key: key, text: `${key}: ${form.description}` } as IDropdownOption
+        })
+        let firstAlgorithm = Object.entries(schema)[0]
+        this.causalAlgorithm = firstAlgorithm[0];
+        for (let entry of Object.entries(schema)) {
+            this.causalParams[entry[0]] = makeFormInitParams(entry[1]);
+        }
+    }
+    private causalServer: CausalServerUrl = CausalServerUrl.local;
     private dataSourceStore: DataSourceStore;
     constructor(dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore;
-        this.causalParams = makeFormInitParams(PC_PARAMS_FORM);
-        this.causalParams['algorithm'] = ICausalAlgorithm.PC;
+        this.causalAlgorithm = ICausalAlgorithm.PC;
+        this.causalParams[ICausalAlgorithm.PC] = makeFormInitParams(PC_PARAMS_FORM);
+        this.updateCausalAlgorithmList();
         makeAutoObservable(this, {
             causalStrength: observable.ref,
             igMatrix: observable.ref,
@@ -57,12 +90,17 @@ export class CausalStore {
             dataSourceStore: false,
         });
     }
-    public switchCausalAlgorithm(algorithm: ICausalAlgorithm) {
-        this.causalParams = makeFormInitParams(CAUSAL_ALGORITHM_FORM[algorithm]);
-        this.causalParams['algorithm'] = algorithm;
+    public switchCausalAlgorithm(algorithm: string) {
+        console.log("switchCausalAlgorithm", algorithm, this.causalAlgorithmForm)
+        if (this.causalAlgorithmForm[algorithm] !== undefined) {
+            this.causalAlgorithm = algorithm;
+            // this.causalParams[algorithm] = // makeFormInitParams(this.causalAlgorithmForm[algorithm]);
+        } else {
+            console.error(`[switchCausalAlgorithm error]: algorithm ${algorithm} not known.`)
+        }
     }
     public updateCausalParamsValue(key: string, value: any) {
-        this.causalParams[key] = value;
+        this.causalParams[this.causalAlgorithm][key] = value;
     }
     public toggleSettings(show: boolean) {
         this.showSettings = show;
@@ -87,9 +125,25 @@ export class CausalStore {
             this.computing = false;
         });
     }
-    public async causalDiscovery(dataSource: IRow[], fields: IFieldMeta[]) {
+    public async updateCausalAlgorithmList() {
         try {
-            const res = await fetch(`${CausualServerUrl.local}/causal/`, {
+            const schema: IAlgoSchema = await fetch(`${this.causalServer}/algo/list`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then(resp => resp.json());
+            this.causalAlgorithmForm = schema;
+            // for (let [algoName, algoSchema] of schema.entries()) {
+            // }
+
+        } catch(error) {
+            console.error('[CausalAlgorithmList error]:', error);
+        }
+    }
+    public async causalDiscovery(dataSource: IRow[], fields: IFieldMeta[], algoName: string) {
+        try {
+            const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,7 +151,7 @@ export class CausalStore {
                 body: JSON.stringify({
                     dataSource, // encodeDiscrte(dataSource, fields),
                     fields,
-                    params: this.causalParams,
+                    params: this.causalParams[this.causalAlgorithm],
                 }),
             });
             const result = await res.json();
@@ -118,6 +172,6 @@ export class CausalStore {
     }
     public async reRunCausalDiscovery() {
         const { cleanedData, fieldMetas } = this.dataSourceStore;
-        this.causalDiscovery(cleanedData, fieldMetas);
+        this.causalDiscovery(cleanedData, fieldMetas, this.causalAlgorithm);
     }
 }

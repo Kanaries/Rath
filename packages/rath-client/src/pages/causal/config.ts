@@ -14,7 +14,10 @@ export interface IFormItem{
 export interface IForm {
     title: string;
     items: IFormItem[];
+    description?: string;
 }
+export type IAlgoSchema = { [algoName: string]: IForm }; // Map<string, IForm>
+
 export enum UCRule {
     uc_supset = 0,
     maxP = 1,
