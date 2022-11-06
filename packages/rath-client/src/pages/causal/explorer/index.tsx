@@ -2,6 +2,7 @@ import { DefaultButton, Slider, Toggle } from "@fluentui/react";
 import produce from "immer";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
+import useErrorBoundary from "../../../hooks/use-error-boundary";
 import type { IFieldMeta } from "../../../interfaces";
 import ExplorerMainView from "./explorerMainView";
 import FlowAnalyzer, { NodeWithScore } from "./flowAnalyzer";
@@ -186,9 +187,22 @@ const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix, onNodeSelected }) 
         }
     }, [mode, focus, handleChange, value]);
 
+    const ErrorBoundary = useErrorBoundary((err, info) => {
+        console.error(err ?? info);
+        return <div style={{
+            flexGrow: 0,
+            flexShrink: 0,
+            display: 'flex',
+            width: '100%',
+            height: '30vh',
+            border: '1px solid #8888',
+        }} />;
+        // return <p>{info}</p>;
+    }, [fields, value, mode === 'explore' ? focus : -1, cutThreshold]);
+
     return (
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
-            <Tools>
+            <Tools onClick={e => e.stopPropagation()}>
                 <DefaultButton onClick={() => setModifiedMatrix(data)}>
                     Reset
                 </DefaultButton>
@@ -229,13 +243,16 @@ const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix, onNodeSelected }) 
                     }}
                 />
             </MainView>
-            <FlowAnalyzer
-                fields={fields}
-                data={value}
-                index={mode === 'explore' ? focus : -1}
-                cutThreshold={cutThreshold}
-                onUpdate={onNodeSelected}
-            />
+            <ErrorBoundary>
+                <FlowAnalyzer
+                    fields={fields}
+                    data={value}
+                    index={mode === 'explore' ? focus : -1}
+                    cutThreshold={cutThreshold}
+                    onClickNode={handleClickCircle}
+                    onUpdate={onNodeSelected}
+                />
+            </ErrorBoundary>
         </Container>
     );
 };

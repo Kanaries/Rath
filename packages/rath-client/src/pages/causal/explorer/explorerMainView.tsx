@@ -40,7 +40,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
             width: '60%',
         }} />;
         // return <p>{info}</p>;
-    }, [fields, value, mode, cutThreshold, onClickNode, focus]);
+    }, [fields, value, cutThreshold]);
 
     return (
         <Container {...props} ref={ref}>

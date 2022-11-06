@@ -58,8 +58,8 @@ const MAX_RADIUS = 0.38;
 const MIN_STROKE_WIDTH = 0.04;
 const MAX_STROKE_WIDTH = 0.09;
 
-const DAGView = forwardRef<HTMLDivElement, DAGViewProps>(({
-    fields, value, onClickNode, focus, cutThreshold, mode, ...props },
+const DAGView = forwardRef<HTMLDivElement, DAGViewProps>((
+    { fields, value, onClickNode, focus, cutThreshold, mode, ...props },
     ref
 ) => {
     const [data] = useMemo(() => {
@@ -113,7 +113,7 @@ const DAGView = forwardRef<HTMLDivElement, DAGViewProps>(({
             });
         }
         for (const link of normalizedLinks) {
-            if (link.score > 0 && link.score >= cutThreshold) {
+            if (link.score > 0.001 && link.score >= cutThreshold) {
                 mergeFlows(flows, {
                     id: `${link.target}`,
                     parentIds: [`${link.source}`],

@@ -35,6 +35,7 @@ export interface FlowAnalyzerProps {
         composedCause: readonly Readonly<NodeWithScore>[],
         composedEffect: readonly Readonly<NodeWithScore>[],
     ) => void;
+    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
 }
 
 export type Flow = {
@@ -60,12 +61,22 @@ const SVGGroup = styled.div`
     border: 1px solid #8888;
     > svg {
         flex: 1;
+        & text {
+            user-select: none;
+        }
+        & *:not(circle) {
+            pointer-events: none;
+        }
+        & circle {
+            pointer-events: all;
+            cursor: pointer;
+        }
     }
 `;
 
 const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
-const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold, onUpdate }) => {
+const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold, onUpdate, onClickNode }) => {
     const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
 
     const normalizedLinks = useMemo(() => {
@@ -117,7 +128,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
                 const nextLinks: typeof links = [];
                 for (const link of links) {
                     if (link.causeId === source) {
-                        if (link.score > 0 && link.score >= cutThreshold) {
+                        if (link.score > 0.001 && link.score >= cutThreshold) {
                             mergeFlows(flows, {
                                 id: `${link.effectId}`,
                                 parentIds: [`${source}`],
@@ -148,7 +159,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
                 const nextLinks: typeof links = [];
                 for (const link of links) {
                     if (link.effectId === source) {
-                        if (link.score > 0 && link.score >= cutThreshold) {
+                        if (link.score > 0.001 && link.score >= cutThreshold) {
                             mergeFlows(flows, {
                                 id: `${source}`,
                                 parentIds: [`${link.causeId}`],
@@ -293,17 +304,21 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
                 <svg key={i} viewBox={`0 0 ${tree.size.height} ${tree.size.width}`} strokeLinecap="round" strokeLinejoin="round">
                     <defs>
                         <marker id="flow-arrow" viewBox="0 -5 10 10" refX={32} refY="0" markerWidth={3} markerHeight={3} orient="auto">
-                            <path fill="none" stroke="#9c94bb" strokeWidth={2} d="M0,-5L10,0L0,5" />
+                            <path fill="none" stroke="#463782" strokeWidth={2} d="M0,-5L10,0L0,5" />
                         </marker>
                     </defs>
-                    {tree.links.map((link, i) => (
+                    {tree.links.map((link, i, { length }) => (
                         <path
                             key={i}
                             d={line(link.points.map(p => ({ x: p.y, y: p.x }))) ?? ''}
                             fill="none"
-                            stroke="#9c94bb"
+                            stroke="#441ce3"
                             strokeWidth={0.03}
                             markerEnd="url(#flow-arrow)"
+                            opacity={0.25}
+                            style={{
+                                filter: `hue-rotate(${180 * i / length}deg)`,
+                            }}
                         />
                     ))}
                     {tree.nodes.map((node, i) => {
@@ -311,7 +326,19 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
                         const f = fields[idx];
                         return (
                             <g key={i} transform={`translate(${node.y ?? 0},${node.x ?? 0})`}>
-                                <circle r={0.2} fill={idx === index ? "#995ccf" : "#463782"} stroke="none" />
+                                <circle
+                                    r={0.2}
+                                    fill={idx === index ? "#995ccf" : "#463782"}
+                                    stroke="none"
+                                    strokeWidth="0"
+                                    style={{ cursor: index === idx ? 'default' : 'pointer' }}
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        if (index !== idx) {
+                                            onClickNode?.({ nodeId: idx });
+                                        }
+                                    }}
+                                />
                                 <text fill="white" stroke="#463782" strokeWidth={0.001} fontWeight="bold" fontSize={0.05} textAnchor="middle" >
                                     {f.name ?? f.fid}
                                 </text>

@@ -44,6 +44,7 @@ export type ForceViewProps = Omit<StyledComponentProps<'div', {}, {
     cutThreshold: number;
     mode: "explore" | "edit";
     focus: number | null;
+    /** 这个其实没有实现，现在 canvas 里没有绑定点 */
     onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
 }, never>, 'onChange'>;
 
