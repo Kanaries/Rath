@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo } from "react";
 import {
     dagStratify,
     sugiyama,
@@ -18,11 +18,23 @@ import { deepcopy } from "../../../utils";
 import type { DiagramGraphData } from ".";
 
 
+export type NodeWithScore = {
+    field: Readonly<IFieldMeta>;
+    score: number;
+};
+
 export interface FlowAnalyzerProps {
     fields: readonly Readonly<IFieldMeta>[];
     data: DiagramGraphData;
     index: number;
     cutThreshold: number;
+    onUpdate: (
+        node: Readonly<IFieldMeta> | null,
+        simpleCause: readonly Readonly<NodeWithScore>[],
+        simpleEffect: readonly Readonly<NodeWithScore>[],
+        composedCause: readonly Readonly<NodeWithScore>[],
+        composedEffect: readonly Readonly<NodeWithScore>[],
+    ) => void;
 }
 
 export type Flow = {
@@ -53,18 +65,46 @@ const SVGGroup = styled.div`
 
 const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
-const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold }) => {
+const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold, onUpdate }) => {
     const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
 
     const normalizedLinks = useMemo(() => {
         const max = data.links.reduce<number>((m, d) => m > d.score ? m : d.score, 0);
-        return data.links.map(link => ({
-            ...link,
-            score: link.score / (max || 1),
-        }));
+        return data.links.map(link => {
+            const relativeBasis = data.links.reduce<number>((sum, l) => {
+                if (l.effectId === link.effectId) {
+                    return sum + l.score;
+                }
+                return sum;
+            }, 0);
+            return {
+                ...link,
+                score: link.score / (max || 1),
+                relativeBasis,
+            };
+        });
     }, [data.links]);
 
-    const flowsAsDestination = useMemo<Flow[]>(() => {
+    const getPathScore = useCallback((effectIdx: number) => {
+        const scores = new Map<number, number>();
+        const walk = (rootIdx: number, weight: number, flags = new Map<number, 1>()) => {
+            if (flags.has(rootIdx)) {
+                return;
+            }
+            flags.set(rootIdx, 1);
+            const paths = data.links.filter(link => link.effectId === rootIdx);
+            for (const path of paths) {
+                const nodeIdx = path.causeId;
+                const value = path.score * weight;
+                scores.set(nodeIdx, (scores.get(nodeIdx) ?? 0) + value);
+                walk(nodeIdx, value, flags);
+            }
+        };
+        walk(effectIdx, 1);
+        return (causeIdx: number) => scores.get(causeIdx);
+    }, [data.links]);
+
+    const flowsAsOrigin = useMemo<Flow[]>(() => {
         if (field) {
             let links = normalizedLinks.map(link => link);
             const ready = [index];
@@ -95,7 +135,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
         return [];
     }, [normalizedLinks, field, index, cutThreshold]);
 
-    const flowsAsOrigin = useMemo<Flow[]>(() => {
+    const flowsAsDestination = useMemo<Flow[]>(() => {
         if (field) {
             let links = normalizedLinks.map(link => link);
             const ready = [index];
@@ -130,7 +170,58 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
         return [];
     }, [normalizedLinks, field, index, cutThreshold]);
 
-    // console.log(flowsAsDestination, flowsAsOrigin);
+    useEffect(() => {
+        if (field) {
+            const getCauseScore = getPathScore(index);
+            const [simpleCause, composedCause] = flowsAsDestination.reduce<[NodeWithScore[], NodeWithScore[]]>(([simple, composed], flow) => {
+                const effectId = parseInt(flow.id, 10);
+                const target = fields[effectId];
+                for (const causeId of flow.parentIds.map(id => parseInt(id, 10))) {
+                    const source = fields[causeId];
+                    const score = getCauseScore(causeId);
+                    if (score) {
+                        if (target.fid === field.fid) {
+                            simple.push({
+                                field: source,
+                                score,
+                            });
+                        } else if (!composed.some(f => f.field.fid === source.fid)) {
+                            composed.push({
+                                field: source,
+                                score,
+                            });
+                        }
+                    }
+                }
+                return [simple, composed];
+            }, [[], []]);
+            const [simpleEffect, composedEffect] = flowsAsOrigin.reduce<[NodeWithScore[], NodeWithScore[]]>(([simple, composed], flow) => {
+                const effectId = parseInt(flow.id, 10);
+                const target = fields[effectId];
+                for (const causeId of flow.parentIds.map(id => parseInt(id, 10))) {
+                    const source = fields[causeId];
+                    const score = getPathScore(effectId)(index);
+                    if (score) {
+                        if (source.fid === field.fid) {
+                            simple.push({
+                                field: target,
+                                score,
+                            });
+                        } else if (!composed.some(f => f.field.fid === target.fid)) {
+                            composed.push({
+                                field: target,
+                                score,
+                            });
+                        }
+                    }
+                }
+                return [simple, composed];
+            }, [[], []]);
+            onUpdate(field, simpleCause, simpleEffect, composedCause, composedEffect);
+        } else {
+            onUpdate(null, [], [], [], []);
+        }
+    }, [onUpdate, fields, field, flowsAsDestination, flowsAsOrigin, getPathScore, index]);
 
     const combinedFlows = useMemo(() => {
         const flows = deepcopy(flowsAsDestination) as typeof flowsAsDestination;

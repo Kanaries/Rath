@@ -4,7 +4,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
 import ExplorerMainView from "./explorerMainView";
-import FlowAnalyzer from "./flowAnalyzer";
+import FlowAnalyzer, { NodeWithScore } from "./flowAnalyzer";
 
 
 export type CausalNode = {
@@ -25,6 +25,13 @@ export interface DiagramGraphData {
 export interface ExplorerProps {
     fields: readonly Readonly<IFieldMeta>[];
     compareMatrix: readonly (readonly number[])[];
+    onNodeSelected: (
+        node: Readonly<IFieldMeta> | null,
+        simpleCause: readonly Readonly<NodeWithScore>[],
+        simpleEffect: readonly Readonly<NodeWithScore>[],
+        composedCause: readonly Readonly<NodeWithScore>[],
+        composedEffect: readonly Readonly<NodeWithScore>[],
+    ) => void;
 }
 
 const sNormalize = (matrix: ExplorerProps['compareMatrix']): number[][] => {
@@ -86,7 +93,7 @@ const MainView = styled.div`
     }
 `;
 
-const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix }) => {
+const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix, onNodeSelected }) => {
     const [cutThreshold, setCutThreshold] = useState(0.05);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
@@ -227,6 +234,7 @@ const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix }) => {
                 data={value}
                 index={mode === 'explore' ? focus : -1}
                 cutThreshold={cutThreshold}
+                onUpdate={onNodeSelected}
             />
         </Container>
     );
