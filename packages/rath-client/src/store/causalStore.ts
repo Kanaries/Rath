@@ -91,7 +91,6 @@ export class CausalStore {
         });
     }
     public switchCausalAlgorithm(algorithm: string) {
-        console.log("switchCausalAlgorithm", algorithm, this.causalAlgorithmForm)
         if (this.causalAlgorithmForm[algorithm] !== undefined) {
             this.causalAlgorithm = algorithm;
             // this.causalParams[algorithm] = // makeFormInitParams(this.causalAlgorithmForm[algorithm]);
