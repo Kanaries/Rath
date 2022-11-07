@@ -1,9 +1,11 @@
 import { IDropdownOption } from '@fluentui/react';
+import { resultItem } from '@fluentui/react/lib/components/FloatingPicker/PeoplePicker/PeoplePicker.scss';
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { notify } from '../components/error';
 import { IFieldMeta, IRow } from '../interfaces';
 import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM, IAlgoSchema, CAUSAL_ALGORITHM_OPTIONS, IForm } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
+import datasetOptions from '../pages/dataSource/selection/database/config';
 // import { encodeDiscrete } from "../pages/causal/utils";
 import { DataSourceStore } from './dataSourceStore';
 
@@ -29,6 +31,7 @@ export class CausalStore {
     public igMatrix: number[][] = [];
     public igCondMatrix: number[][] = [];
     public causalStrength: number[][] = [];
+    public causalFields: IFieldMeta[];
     public computing: boolean = false;
     public showSettings: boolean = false;
     public focusNodeIndex: number = 0;
@@ -67,7 +70,7 @@ export class CausalStore {
         }
         this._fetchedCausalAlgorithmForm = schema;
         this._causalAlgorithmOptions = Object.entries(schema).map(([key, form]) => {
-            return { key: key, text: `${key}: ${form.description}` } as IDropdownOption
+            return { key: key, text: `${key}: ${form.title}` } as IDropdownOption
         })
         let firstAlgorithm = Object.entries(schema)[0]
         this.causalAlgorithm = firstAlgorithm[0];
@@ -79,11 +82,13 @@ export class CausalStore {
     private dataSourceStore: DataSourceStore;
     constructor(dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore;
+        this.causalFields = dataSourceStore.fieldMetas;
         this.causalAlgorithm = ICausalAlgorithm.PC;
         this.causalParams[ICausalAlgorithm.PC] = makeFormInitParams(PC_PARAMS_FORM);
         this.updateCausalAlgorithmList();
         makeAutoObservable(this, {
             causalStrength: observable.ref,
+            causalFields: observable.ref,
             igMatrix: observable.ref,
             igCondMatrix: observable.ref,
             // @ts-ignore
@@ -157,6 +162,7 @@ export class CausalStore {
             if (result.success) {
                 runInAction(() => {
                     this.causalStrength = result.data;
+                    this.causalFields = (result?.fields?.length > 0) ? result.fields : fields;
                 });
             } else {
                 throw new Error(result.message);

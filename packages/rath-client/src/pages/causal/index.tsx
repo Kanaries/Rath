@@ -12,7 +12,7 @@ const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
-    const { igMatrix, causalStrength, computing } = causalStore;
+    const { igMatrix, causalStrength, causalFields, computing } = causalStore;
 
     useEffect(() => {
         causalStore.computeIGMatrix(cleanedData, fieldMetas);
@@ -78,14 +78,14 @@ const CausalPage: React.FC = () => {
                     <div>
                         {cleanedData.length > 0 &&
                             causalStrength.length > 0 &&
-                            causalStrength.length === fieldMetas.length &&
+                            causalStrength.length === causalFields.length &&
                             !computing && (
                                 <RelationMatrixHeatMap
                                     
                                     // absolute
-                                    fields={fieldMetas}
+                                    fields={causalFields}
                                     data={causalStrength}
-                                    onSelect={onFieldGroupSelect}
+                                    // onSelect={onFieldGroupSelect}
                                 />
                             )}
                         {computing && <Spinner label="computings" />}

@@ -43,6 +43,7 @@ const Params: React.FC = (props) => {
                     }}
                     onRenderLabel={makeRenderLabelHandler('The algorithm to use.')}
                 />
+                <div>{ causalStore.causalAlgorithmForm[causalAlgorithm].description }</div>
                 <DynamicForm
                     form={causalAlgorithmForm[causalAlgorithm as string]!}
                     values={toJS(causalParams[causalAlgorithm])}
