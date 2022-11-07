@@ -1,4 +1,4 @@
-import { forwardRef, useMemo } from "react";
+import { forwardRef, MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { line as d3Line, curveCatmullRom } from 'd3-shape';
 import {
     dagStratify,
@@ -176,8 +176,30 @@ const DAGView = forwardRef<HTMLDivElement, DAGViewProps>((
         });
     }, [dag, data]);
 
+    const draggingSource = useMemo(() => mode === 'edit' && typeof focus === 'number' ? focus : null, [mode, focus]);
+    const [cursorPos, setCursorPos] = useState<[number, number]>([NaN, NaN]);
+
+    useEffect(() => setCursorPos([NaN, NaN]), [draggingSource]);
+
+    const handleMouseMove = useCallback((e: MouseEvent<HTMLDivElement>) => {
+        if (draggingSource === null) {
+            return;
+        }
+        const target = e.target as HTMLDivElement;
+        const { left, top } = target.getBoundingClientRect();
+        const x = e.clientX - left;
+        const y = e.clientY - top;
+        setCursorPos([x, y]);
+    }, [draggingSource, cursorPos]);
+
+    const focusedNode = dag.nodes.find(node => {parseInt(node.data.id, 10)});
+
     return (
-        <Container {...props} ref={ref}>
+        <Container
+            {...props}
+            ref={ref}
+            onMouseMove={handleMouseMove}
+        >
             <svg
                 viewBox={`0 0 ${dag.size.width} ${dag.size.height}`}
                 strokeLinecap="round"
@@ -197,6 +219,14 @@ const DAGView = forwardRef<HTMLDivElement, DAGViewProps>((
                         }}
                     />
                 ))}
+                {/* {Number.isFinite(cursorPos[0]) && Number.isFinite(cursorPos[1]) && focus !== null && (
+                    <path
+                        d={line([{ x: dag.nodes[focus].x ?? 0, y: dag.nodes[focus].y ?? 0 }, { x: cursorPos[0], y: cursorPos[1] }]) ?? ''}
+                        fill="none"
+                        stroke="#9b3dff"
+                        strokeWidth={MAX_STROKE_WIDTH}
+                    />
+                )} */}
                 {dag.nodes.map((node, i) => {
                     const idx = parseInt(node.data.id, 10);
                     const f = fields[idx];

@@ -7,7 +7,7 @@ import Explorer from './explorer';
 import CrossFilter from './crossFilter';
 import Params from './params';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
-import RelationTree from './tree';
+// import RelationTree from './tree';
 import { NodeWithScore } from './explorer/flowAnalyzer';
 import { BgKnowledge } from './config';
 import LaTiaoConsole from '../dataSource/LaTiaoConsole';
@@ -317,7 +317,7 @@ const CausalPage: React.FC = () => {
                         {computing && <Spinner label="computings" />}
                     </div>
                 </div>
-                <div>
+                {/* <div>
                     {cleanedData.length > 0 &&
                         causalStrength.length > 0 &&
                         causalStrength.length === fieldMetas.length &&
@@ -331,7 +331,7 @@ const CausalPage: React.FC = () => {
                                 }}
                             />
                         )}
-                </div>
+                </div> */}
                 <div>
                     {cleanedData.length > 0 &&
                         causalStrength.length > 0 &&

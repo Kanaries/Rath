@@ -44,7 +44,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
 
     return (
         <Container {...props} ref={ref}>
-            <ForceView
+            {/* <ForceView
                 fields={fields}
                 value={value}
                 onClickNode={onClickNode}
@@ -56,7 +56,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     flexShrink: 1,
                     width: '40%',
                 }}
-            />
+            /> */}
             <ErrorBoundary>
                 <DAGView
                     fields={fields}
@@ -68,7 +68,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     style={{
                         flexGrow: 1,
                         flexShrink: 1,
-                        width: '60%',
+                        width: '100%',
                     }}
                 />
             </ErrorBoundary>

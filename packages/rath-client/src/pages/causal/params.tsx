@@ -44,7 +44,7 @@ const Params: React.FC<{ focusFields: string[]; precondition: BgKnowledge[] }> =
                     }}
                     onRenderLabel={makeRenderLabelHandler('The algorithm to use.')}
                 />
-                <div>{ causalStore.causalAlgorithmForm[causalAlgorithm].description }</div>
+                <pre>{ causalStore.causalAlgorithmForm[causalAlgorithm].description }</pre>
                 <DynamicForm
                     form={causalAlgorithmForm[causalAlgorithm as string]!}
                     values={toJS(causalParams[causalAlgorithm])}

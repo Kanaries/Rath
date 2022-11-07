@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { vega } from "vega-embed";
 import ReactVega from "../react-vega";
@@ -7,15 +7,20 @@ import ReactVega from "../react-vega";
 const FloatingWindow = styled.div`
   position: fixed;
   z-index: 1048576;
-  opacity: 0.5;
-  left: 1em;
-  top: 1em;
+  opacity: 0.33;
   transition: opacity 80ms;
   :hover {
-    opacity: 0.95;
+    opacity: 0.9;
   }
-  > * {
-    pointer-events: none;
+  font-size: 10px;
+  padding: 0.8em;
+  background-color: #fff;
+  width: 20em;
+  > p {
+    user-select: none;
+    > span {
+      font-weight: 550;
+    }
   }
 `;
 
@@ -45,7 +50,7 @@ interface IPerformanceRecordItem {
 
 const SizeFormatterName = '__performance_window_size_formatter__';
 
-vega.expressionFunction(SizeFormatterName, (size: number): string => {
+const formatSize = (size: number): string => {
   if (size === 0) {
     return '0';
   }
@@ -66,10 +71,16 @@ vega.expressionFunction(SizeFormatterName, (size: number): string => {
   } else {
     return `${num} Bytes`;
   }
-});
+};
+
+vega.expressionFunction(SizeFormatterName, formatSize);
 
 const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindow ({ interval = 2_00, recordLength = 8_000 }) {
   const [data, setData] = useState<IPerformanceRecordItem[]>([]);
+  const [max, setMax] = useState<number>(0);
+  const [pos, setPos] = useState<[number, number]>([30, 30]);
+  const isDraggingRef = useRef(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -83,6 +94,9 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
           { time, memory },
         ];
       });
+      if (memory) {
+        setMax(m => Math.max(m, memory.totalJSHeapSize));
+      }
       timer = setTimeout(update, interval);
     };
 
@@ -96,18 +110,8 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
   }, [interval, recordLength]);
 
   const limitMemory = data.at(-1)?.memory?.jsHeapSizeLimit;
-  const scale = limitMemory ? { domain: [0, limitMemory * 1.04] } : undefined;
-  const ticks = useMemo(() => {
-    if (limitMemory) {
-      const values: number[] = [];
-      for (let size = 0; size <= limitMemory; size += 1024 * 1024 * 1024) {
-        values.push(size);
-      }
-      values.push(limitMemory);
-      return values;
-    }
-    return undefined;
-  }, [limitMemory]);
+  const domainMax = limitMemory ? max * 1.5 >= 0.9 * limitMemory ? limitMemory : max * 1.5 : max * 1.5;
+  const scale = useMemo(() => ({ domain: [0, domainMax * 1.04] }), [domainMax]);
 
   const spec = useMemo(() => {
     return {
@@ -116,23 +120,29 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
       data: {
         name: 'dataSource',
       },
+      background: '#0000',
       layer: [
         {
           mark: {
             type: 'trail',
             tooltip: true,
+            clip: true,
           },
           encoding: {
             x: { field: 'time', type: 'temporal', axis: null },
             y: {
               field: 'memory.jsHeapSizeLimit', type: 'quantitative', scale,
-              axis: { formatType: SizeFormatterName, title: null, values: ticks, tickCount: ticks?.length },
+              axis: { formatType: SizeFormatterName, title: null, tickCount: 6 },
             },
             color: { value: 'rgb(255,0,0)' },
           },
         },
         {
-          mark: 'trail',
+          mark: {
+            type: 'trail',
+            tooltip: true,
+            clip: true,
+          },
           encoding: {
             x: { field: 'time', type: 'temporal', axis: null },
             y: { field: 'memory.totalJSHeapSize', type: 'quantitative' },
@@ -140,7 +150,11 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
           },
         },
         {
-          mark: 'trail',
+          mark: {
+            type: 'trail',
+            tooltip: true,
+            clip: true,
+          },
           encoding: {
             x: { field: 'time', type: 'temporal', axis: null },
             y: { field: 'memory.usedJSHeapSize', type: 'quantitative' },
@@ -150,24 +164,34 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
       ],
       config: { customFormatTypes: true },
     };
-  }, [ticks]);
+  }, [scale]);
+
+  const current = data.at(-1);
+
+  // const handleMouseDown = useCallback(() => )
 
   return (
-    <FloatingWindow>
+    <FloatingWindow
+      ref={ref}
+      style={{
+        left: pos[0],
+        top: pos[1],
+      }}
+    >
       <ReactVega
         dataSource={data}
         actions={false}
         spec={spec}
       />
-      {/* <p>
-        jsHeapSizeLimit: {info?.jsHeapSizeLimit}bytes
+      <p>
+        jsHeapSizeLimit: <span style={{ color: 'inherit' }}>{formatSize(current?.memory?.jsHeapSizeLimit ?? NaN)}</span>
       </p>
       <p>
-        totalJSHeapSize: {info?.totalJSHeapSize}bytes
+        totalJSHeapSize: <span style={{ color: '#d86f0c' }}>{formatSize(current?.memory?.totalJSHeapSize ?? NaN)}</span>
       </p>
       <p>
-        usedJSHeapSize: {info?.usedJSHeapSize}bytes
-      </p> */}
+        usedJSHeapSize: <span style={{ color: '#c99615' }}>{formatSize(current?.memory?.usedJSHeapSize ?? NaN)}</span>
+      </p>
     </FloatingWindow>
   );
 });
