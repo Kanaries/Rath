@@ -3,7 +3,7 @@ import { resultItem } from '@fluentui/react/lib/components/FloatingPicker/People
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { notify } from '../components/error';
 import { IFieldMeta, IRow } from '../interfaces';
-import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM, IAlgoSchema, CAUSAL_ALGORITHM_OPTIONS, IForm } from '../pages/causal/config';
+import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM, IAlgoSchema, CAUSAL_ALGORITHM_OPTIONS, IForm, BgKnowledge } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
 import datasetOptions from '../pages/dataSource/selection/database/config';
 // import { encodeDiscrete } from "../pages/causal/utils";
@@ -25,7 +25,7 @@ import { DataSourceStore } from './dataSourceStore';
 
 enum CausalServerUrl {
     local = 'http://localhost:8000',
-    test = 'http://gateway.kanaries.cn:2080',
+    test = 'http://gateway.kanaries.cn:2080/causal',
 }
 export class CausalStore {
     public igMatrix: number[][] = [];
@@ -78,14 +78,14 @@ export class CausalStore {
             this.causalParams[entry[0]] = makeFormInitParams(entry[1]);
         }
     }
-    private causalServer: CausalServerUrl = CausalServerUrl.local;
+    private causalServer: CausalServerUrl = CausalServerUrl.test; // FIXME:
     private dataSourceStore: DataSourceStore;
     constructor(dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore;
         this.causalFields = dataSourceStore.fieldMetas;
         this.causalAlgorithm = ICausalAlgorithm.PC;
         this.causalParams[ICausalAlgorithm.PC] = makeFormInitParams(PC_PARAMS_FORM);
-        this.updateCausalAlgorithmList();
+        this.updateCausalAlgorithmList(dataSourceStore.fieldMetas);
         makeAutoObservable(this, {
             causalStrength: observable.ref,
             causalFields: observable.ref,
@@ -129,13 +129,17 @@ export class CausalStore {
             this.computing = false;
         });
     }
-    public async updateCausalAlgorithmList() {
+    public async updateCausalAlgorithmList(fields: IFieldMeta[]) {
         try {
             const schema: IAlgoSchema = await fetch(`${this.causalServer}/algo/list`, {
-                method: 'GET',
+                method: 'POST',
+                body: JSON.stringify({
+                    fieldIds: fields.map(f => f.fid),
+                    fieldMetas: fields,
+                }),
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
             }).then(resp => resp.json());
             this.causalAlgorithmForm = schema;
             // for (let [algoName, algoSchema] of schema.entries()) {
@@ -145,7 +149,7 @@ export class CausalStore {
             console.error('[CausalAlgorithmList error]:', error);
         }
     }
-    public async causalDiscovery(dataSource: IRow[], fields: IFieldMeta[], algoName: string) {
+    public async causalDiscovery(dataSource: IRow[], fields: IFieldMeta[], focusFields: string[], precondition: BgKnowledge[], algoName: string) {
         try {
             const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
                 method: 'POST',
@@ -155,6 +159,8 @@ export class CausalStore {
                 body: JSON.stringify({
                     dataSource, // encodeDiscrte(dataSource, fields),
                     fields,
+                    focusedFields: focusFields,
+                    bgKnowledges: precondition,
                     params: this.causalParams[this.causalAlgorithm],
                 }),
             });
@@ -175,8 +181,8 @@ export class CausalStore {
             });
         }
     }
-    public async reRunCausalDiscovery() {
+    public async reRunCausalDiscovery(focusFields: string[], precondition: BgKnowledge[]) {
         const { cleanedData, fieldMetas } = this.dataSourceStore;
-        this.causalDiscovery(cleanedData, fieldMetas, this.causalAlgorithm);
+        this.causalDiscovery(cleanedData, fieldMetas, focusFields, precondition, this.causalAlgorithm);
     }
 }

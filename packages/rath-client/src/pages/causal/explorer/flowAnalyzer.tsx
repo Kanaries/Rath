@@ -13,9 +13,10 @@ import {
 } from 'd3-dag';
 import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
 import styled from "styled-components";
-import type { IFieldMeta } from "../../../interfaces";
+import type { IFieldMeta, IRow } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
 import type { DiagramGraphData } from ".";
+import ColDist from "../crossFilter/colDist";
 
 
 export type NodeWithScore = {
@@ -24,6 +25,7 @@ export type NodeWithScore = {
 };
 
 export interface FlowAnalyzerProps {
+    dataSource: IRow[];
     fields: readonly Readonly<IFieldMeta>[];
     data: DiagramGraphData;
     index: number;
@@ -52,15 +54,20 @@ export const mergeFlows = (flows: Flow[], entering: Flow): void => {
     }
 };
 
+const FLOW_HEIGHT = 300;
+
 const SVGGroup = styled.div`
     flex-grow: 0;
     flex-shrink: 0;
-    display: flex;
     width: 100%;
-    height: 30vh;
     border: 1px solid #8888;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     > svg {
-        flex: 1;
+        width: 100%;
+        height: 25vh;
+        overflow: hidden;
         & text {
             user-select: none;
         }
@@ -72,11 +79,34 @@ const SVGGroup = styled.div`
             cursor: pointer;
         }
     }
+    > div {
+        flex-grow: 0;
+        flex-shrink: 0;
+        display: flex;
+        position: relative;
+        height: ${FLOW_HEIGHT}px;
+        > * {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+        > div {
+            > div {
+                position: absolute;
+                box-sizing: content-box;
+                transform: translate(-50%, -50%);
+                background-color: #463782;
+                border: 2px solid #463782;
+            }
+        }
+    }
 `;
 
 const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
-const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold, onUpdate, onClickNode }) => {
+const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, cutThreshold, onUpdate, onClickNode }) => {
     const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
 
     const normalizedLinks = useMemo(() => {
@@ -273,16 +303,19 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
     //     };
     // }, [flowsAsDestination, layout]);
 
-    // const originTree = useMemo(() => {
-    //     const dag = dagStratify()(flowsAsOrigin);
-    //     return {
-    //         // @ts-ignore
-    //         size: layout(dag),
-    //         steps: dag.size(),
-    //         nodes: dag.descendants(),
-    //         links: dag.links(),
-    //     };
-    // }, [flowsAsOrigin, layout]);
+    const originTree = useMemo(() => {
+        if (flowsAsOrigin.length === 0) {
+            return null;
+        }
+        const dag = dagStratify()(flowsAsOrigin);
+        return {
+            // @ts-ignore
+            size: layout(dag),
+            steps: dag.size(),
+            nodes: dag.descendants(),
+            links: dag.links(),
+        };
+    }, [flowsAsOrigin, layout]);
 
     const combinedTree = useMemo(() => {
         if (combinedFlows.length === 0) {
@@ -299,7 +332,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
     }, [combinedFlows, layout]);
 
     return (
-        <SVGGroup>
+        <SVGGroup onClick={e => e.stopPropagation()}>
             {field ? [combinedTree/*, destinationTree, originTree*/].map((tree, i) => tree ? (
                 <svg key={i} viewBox={`0 0 ${tree.size.height} ${tree.size.width}`} strokeLinecap="round" strokeLinejoin="round">
                     <defs>
@@ -347,6 +380,74 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ fields, data, index, cutThreshold
                     })}
                 </svg>
             ) : null) : null}
+            {originTree ? (
+                <div
+                    style={{
+                        width: `${FLOW_HEIGHT * originTree.size.height / originTree.size.width}px`,
+                    }}
+                >
+                    <svg viewBox={`0 0 ${originTree.size.height} ${originTree.size.width}`} strokeLinecap="round" strokeLinejoin="round">
+                        <defs>
+                            <marker id="flow-arrow" viewBox="0 -5 10 10" refX={32} refY="0" markerWidth={3} markerHeight={3} orient="auto">
+                                <path fill="none" stroke="#463782" strokeWidth={2} d="M0,-5L10,0L0,5" />
+                            </marker>
+                        </defs>
+                        {originTree.links.map((link, i, { length }) => (
+                            <path
+                                key={i}
+                                d={line(link.points.map(p => ({ x: p.y, y: p.x }))) ?? ''}
+                                fill="none"
+                                stroke="#441ce3"
+                                strokeWidth={0.03}
+                                markerEnd="url(#flow-arrow)"
+                                opacity={0.25}
+                                style={{
+                                    filter: `hue-rotate(${180 * i / length}deg)`,
+                                }}
+                            />
+                        ))}
+                    </svg>
+                    <div>
+                        {originTree.nodes.map((node, i) => {
+                            const idx = parseInt(node.data.id, 10);
+                            const f = fields[idx];
+                            return (
+                                <div
+                                    key={i}
+                                    style={{
+                                        left: `${(node.y ?? 0) / originTree.size.height * 100}%`,
+                                        top: `${(node.x ?? 0) / originTree.size.width * 100}%`,
+                                        width: `${0.4 * FLOW_HEIGHT / originTree.size.width}px`,
+                                        height: `${0.4 * FLOW_HEIGHT / originTree.size.width}px`,
+                                    }}
+                                >
+                                    <ColDist
+                                        data={dataSource}
+                                        actions={false}
+                                        fid={f.fid}
+                                        name={f.name}
+                                        semanticType={f.semanticType}
+                                        onBrushSignal={() => {}}//(brush: IBrushSignalStore[] | null) => void;
+                                        width={0.4 * FLOW_HEIGHT / originTree.size.width}
+                                        height={0.4 * FLOW_HEIGHT / originTree.size.width}
+                                        axis={null}
+                                    />
+                                    {/* <circle
+                                        r={0.2}
+                                        fill={idx === index ? "#995ccf" : "#463782"}
+                                        stroke="none"
+                                        strokeWidth="0"
+                                        style={{ cursor: 'default', pointerEvents: 'none' }}
+                                    />
+                                    <text fill="white" stroke="#463782" strokeWidth={0.001} fontWeight="bold" fontSize={0.05} textAnchor="middle" >
+                                        {f.name ?? f.fid}
+                                    </text> */}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            ) : <div />}
         </SVGGroup>
     );
 };

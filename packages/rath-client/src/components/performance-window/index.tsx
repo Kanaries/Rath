@@ -109,51 +109,55 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
     return undefined;
   }, [limitMemory]);
 
+  const spec = useMemo(() => {
+    return {
+      width: 90,
+      height: 90,
+      data: {
+        name: 'dataSource',
+      },
+      layer: [
+        {
+          mark: {
+            type: 'trail',
+            tooltip: true,
+          },
+          encoding: {
+            x: { field: 'time', type: 'temporal', axis: null },
+            y: {
+              field: 'memory.jsHeapSizeLimit', type: 'quantitative', scale,
+              axis: { formatType: SizeFormatterName, title: null, values: ticks, tickCount: ticks?.length },
+            },
+            color: { value: 'rgb(255,0,0)' },
+          },
+        },
+        {
+          mark: 'trail',
+          encoding: {
+            x: { field: 'time', type: 'temporal', axis: null },
+            y: { field: 'memory.totalJSHeapSize', type: 'quantitative' },
+            color: { value: 'rgb(245,133,25)' },
+          },
+        },
+        {
+          mark: 'trail',
+          encoding: {
+            x: { field: 'time', type: 'temporal', axis: null },
+            y: { field: 'memory.usedJSHeapSize', type: 'quantitative' },
+            color: { value: 'rgb(251,207,150)' },
+          },
+        },
+      ],
+      config: { customFormatTypes: true },
+    };
+  }, [ticks]);
+
   return (
     <FloatingWindow>
       <ReactVega
         dataSource={data}
         actions={false}
-        spec={{
-          width: 90,
-          height: 90,
-          data: {
-            name: 'dataSource',
-          },
-          layer: [
-            {
-              mark: {
-                type: 'trail',
-                tooltip: true,
-              },
-              encoding: {
-                x: { field: 'time', type: 'temporal', axis: null },
-                y: {
-                  field: 'memory.jsHeapSizeLimit', type: 'quantitative', scale,
-                  axis: { formatType: SizeFormatterName, title: null, values: ticks, tickCount: ticks?.length },
-                },
-                color: { value: 'rgb(255,0,0)' },
-              },
-            },
-            {
-              mark: 'trail',
-              encoding: {
-                x: { field: 'time', type: 'temporal', axis: null },
-                y: { field: 'memory.totalJSHeapSize', type: 'quantitative' },
-                color: { value: 'rgb(245,133,25)' },
-              },
-            },
-            {
-              mark: 'trail',
-              encoding: {
-                x: { field: 'time', type: 'temporal', axis: null },
-                y: { field: 'memory.usedJSHeapSize', type: 'quantitative' },
-                color: { value: 'rgb(251,207,150)' },
-              },
-            },
-          ],
-          config: { customFormatTypes: true },
-        }}
+        spec={spec}
       />
       {/* <p>
         jsHeapSizeLimit: {info?.jsHeapSizeLimit}bytes

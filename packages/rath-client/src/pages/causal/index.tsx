@@ -1,4 +1,4 @@
-import { DefaultButton, Label, PrimaryButton, Spinner, Stack } from '@fluentui/react';
+import { ComboBox, DefaultButton, Label, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IFieldMeta } from '../../interfaces';
@@ -9,12 +9,30 @@ import Params from './params';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 import RelationTree from './tree';
 import { NodeWithScore } from './explorer/flowAnalyzer';
+import { BgKnowledge } from './config';
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
     const { igMatrix, causalStrength, causalFields, computing } = causalStore;
+
+    const [focusFields, setFocusFields] = useState<string[]>([]);
+    const [precondition, setPrecondition] = useState<BgKnowledge[]>([]);
+
+    useEffect(() => {
+        setFocusFields(fieldMetas.filter(f => f.disable !== true).map(f => f.fid));
+        setPrecondition(
+            fieldMetas.reduce<BgKnowledge[]>((list, f) => {
+                
+                return list;
+            }, [])
+        );
+    }, [fieldMetas]);
+
+    useEffect(() => {
+        causalStore.updateCausalAlgorithmList(fieldMetas);
+    }, [causalStore, fieldMetas]);
 
     useEffect(() => {
         causalStore.computeIGMatrix(cleanedData, fieldMetas);
@@ -41,16 +59,16 @@ const CausalPage: React.FC = () => {
         [setFieldGroup, fieldMetas, causalStore]
     );
 
-    const compareMatrix = useMemo(() => {
-        const ans: number[][] = [];
-        for (let i = 0; i < igMatrix.length; i++) {
-            ans.push([]);
-            for (let j = 0; j < igMatrix[i].length; j++) {
-                ans[i].push(igMatrix[i][j] - igMatrix[j][i]);
-            }
-        }
-        return ans;
-    }, [igMatrix]);
+    // const compareMatrix = useMemo(() => {
+    //     const ans: number[][] = [];
+    //     for (let i = 0; i < igMatrix.length; i++) {
+    //         ans.push([]);
+    //         for (let j = 0; j < igMatrix[i].length; j++) {
+    //             ans[i].push(igMatrix[i][j] - igMatrix[j][i]);
+    //         }
+    //     }
+    //     return ans;
+    // }, [igMatrix]);
 
     const handleSubTreeSelected = useCallback((
         node: Readonly<IFieldMeta> | null,
@@ -74,19 +92,53 @@ const CausalPage: React.FC = () => {
         }
     }, []);
 
+    const focusFieldsOption = useMemo(() => fieldMetas.map(f => ({
+        key: f.fid,
+        text: f.name ?? f.fid,
+    })), [fieldMetas]);
+
+    const independencyWeightedCausalStrength = useMemo(() => {
+        return causalStrength.map((row, i) => row.map((d, j) => d * igMatrix[i][j]));
+    }, [igMatrix, causalStrength]);
+
     return (
         <div className="content-container">
             <div className="card">
                 <Label>Causal Analysis</Label>
+                <Stack style={{ marginBlock: '1.6em 3.2em' }}>
+                    <ComboBox
+                        multiSelect
+                        selectedKey={focusFields}
+                        label="Selected Fields"
+                        allowFreeform
+                        options={focusFieldsOption}
+                        onChange={(e, option) => {
+                            if (option) {
+                                const { key, selected } = option;
+                                if (focusFields.includes(key as string) && !selected) {
+                                    setFocusFields(list => list.filter(f => f !== key));
+                                } else if (!focusFields.includes(key as string) && selected) {
+                                    setFocusFields(list => [...list, key as string]);
+                                }
+                            }
+                        }}
+                    />
+                </Stack>
                 <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
                     <DefaultButton text="Clear Group" onClick={() => setFieldGroup([])} />
                     <PrimaryButton
                         text="Causal Discovery"
                         onClick={() => {
-                            causalStore.causalDiscovery(cleanedData, fieldMetas, causalStore.causalAlgorithm);
+                            causalStore.causalDiscovery(
+                                cleanedData,
+                                fieldMetas,
+                                focusFields,
+                                precondition,
+                                causalStore.causalAlgorithm
+                            );
                         }}
                     />
-                    <Params />
+                    <Params focusFields={focusFields} precondition={precondition} />
                 </Stack>
 
                 <div style={{ marginTop: '1em', display: 'flex' }}>
@@ -146,20 +198,15 @@ const CausalPage: React.FC = () => {
                     {cleanedData.length > 0 &&
                         causalStrength.length > 0 &&
                         causalStrength.length === fieldMetas.length &&
+                        causalStrength.length === igMatrix.length &&
                         !computing ? (
                             <Explorer
+                                dataSource={cleanedData}
                                 fields={fieldMetas}
-                                compareMatrix={causalStrength}
+                                compareMatrix={independencyWeightedCausalStrength}
                                 onNodeSelected={handleSubTreeSelected}
                             />
-                        ) : cleanedData.length > 0 && compareMatrix.length > 0 && compareMatrix.length === fieldMetas.length && !computing && (
-                            // FIXME: remove this one
-                            <Explorer
-                                fields={fieldMetas}
-                                compareMatrix={compareMatrix}
-                                onNodeSelected={handleSubTreeSelected}
-                            />
-                        )
+                        ) : null
                     }
                 </div>
                 {/* <div>

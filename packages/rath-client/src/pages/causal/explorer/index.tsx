@@ -3,7 +3,7 @@ import produce from "immer";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import useErrorBoundary from "../../../hooks/use-error-boundary";
-import type { IFieldMeta } from "../../../interfaces";
+import type { IFieldMeta, IRow } from "../../../interfaces";
 import ExplorerMainView from "./explorerMainView";
 import FlowAnalyzer, { NodeWithScore } from "./flowAnalyzer";
 
@@ -24,6 +24,7 @@ export interface DiagramGraphData {
 }
 
 export interface ExplorerProps {
+    dataSource: IRow[];
     fields: readonly Readonly<IFieldMeta>[];
     compareMatrix: readonly (readonly number[])[];
     onNodeSelected: (
@@ -94,7 +95,7 @@ const MainView = styled.div`
     }
 `;
 
-const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix, onNodeSelected }) => {
+const Explorer: FC<ExplorerProps> = ({ dataSource, fields, compareMatrix, onNodeSelected }) => {
     const [cutThreshold, setCutThreshold] = useState(0.05);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
@@ -245,6 +246,7 @@ const Explorer: FC<ExplorerProps> = ({ fields, compareMatrix, onNodeSelected }) 
             </MainView>
             <ErrorBoundary>
                 <FlowAnalyzer
+                    dataSource={dataSource}
                     fields={fields}
                     data={value}
                     index={mode === 'explore' ? focus : -1}
