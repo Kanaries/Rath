@@ -1,12 +1,14 @@
 import { DefaultButton, Label, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
+import Explorer from './explorer';
 import CrossFilter from './crossFilter';
 import Params from './params';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 import RelationTree from './tree';
+import { NodeWithScore } from './explorer/flowAnalyzer';
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
@@ -38,6 +40,40 @@ const CausalPage: React.FC = () => {
         },
         [setFieldGroup, fieldMetas, causalStore]
     );
+
+    const compareMatrix = useMemo(() => {
+        const ans: number[][] = [];
+        for (let i = 0; i < igMatrix.length; i++) {
+            ans.push([]);
+            for (let j = 0; j < igMatrix[i].length; j++) {
+                ans[i].push(igMatrix[i][j] - igMatrix[j][i]);
+            }
+        }
+        return ans;
+    }, [igMatrix]);
+
+    const handleSubTreeSelected = useCallback((
+        node: Readonly<IFieldMeta> | null,
+        simpleCause: readonly Readonly<NodeWithScore>[],
+        simpleEffect: readonly Readonly<NodeWithScore>[],
+        composedCause: readonly Readonly<NodeWithScore>[],
+        composedEffect: readonly Readonly<NodeWithScore>[],
+    ) => {
+        if (node) {
+            const allEffect = composedEffect.reduce<Readonly<NodeWithScore>[]>((list, f) => {
+                if (!list.some(which => which.field.fid === f.field.fid)) {
+                    list.push(f);
+                }
+                return list;
+            }, [...simpleEffect]).sort((a, b) => b.score - a.score);
+            // console.log(allEffect)
+            setFieldGroup([
+                node,
+                ...allEffect.map(f => f.field),
+            ]);
+        }
+    }, []);
+
     return (
         <div className="content-container">
             <div className="card">
@@ -105,6 +141,26 @@ const CausalPage: React.FC = () => {
                                 }}
                             />
                         )}
+                </div>
+                <div>
+                    {cleanedData.length > 0 &&
+                        causalStrength.length > 0 &&
+                        causalStrength.length === fieldMetas.length &&
+                        !computing ? (
+                            <Explorer
+                                fields={fieldMetas}
+                                compareMatrix={causalStrength}
+                                onNodeSelected={handleSubTreeSelected}
+                            />
+                        ) : cleanedData.length > 0 && compareMatrix.length > 0 && compareMatrix.length === fieldMetas.length && !computing && (
+                            // FIXME: remove this one
+                            <Explorer
+                                fields={fieldMetas}
+                                compareMatrix={compareMatrix}
+                                onNodeSelected={handleSubTreeSelected}
+                            />
+                        )
+                    }
                 </div>
                 {/* <div>
                     { !computing && <RelationGraph matrix={causalMatrix} fields={fieldMetas} /> }
