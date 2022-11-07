@@ -12,6 +12,7 @@ import {
     coordQuad,
 } from 'd3-dag';
 import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
+import { Dropdown } from "@fluentui/react";
 import styled from "styled-components";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
@@ -54,7 +55,7 @@ export const mergeFlows = (flows: Flow[], entering: Flow): void => {
     }
 };
 
-const FLOW_HEIGHT = 500;
+const FLOW_HEIGHT = 750;
 
 const SVGGroup = styled.div`
     flex-grow: 0;
@@ -66,7 +67,7 @@ const SVGGroup = styled.div`
     align-items: center;
     > svg {
         width: 100%;
-        height: 40vh;
+        height: 50vh;
         overflow: hidden;
         & text {
             user-select: none;
@@ -79,7 +80,7 @@ const SVGGroup = styled.div`
             cursor: pointer;
         }
     }
-    > div {
+    > div:not(.tools) {
         flex-grow: 0;
         flex-shrink: 0;
         display: flex;
@@ -292,16 +293,16 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             );
     }, [tooManyLinks]);
 
-    // const destinationTree = useMemo(() => {
-    //     const dag = dagStratify()(flowsAsDestination);
-    //     return {
-    //         // @ts-ignore
-    //         size: layout(dag),
-    //         steps: dag.size(),
-    //         nodes: dag.descendants(),
-    //         links: dag.links(),
-    //     };
-    // }, [flowsAsDestination, layout]);
+    const destinationTree = useMemo(() => {
+        const dag = dagStratify()(flowsAsDestination);
+        return {
+            // @ts-ignore
+            size: layout(dag),
+            steps: dag.size(),
+            nodes: dag.descendants(),
+            links: dag.links(),
+        };
+    }, [flowsAsDestination, layout]);
 
     const originTree = useMemo(() => {
         if (flowsAsOrigin.length === 0) {
@@ -330,6 +331,10 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             links: dag.links(),
         };
     }, [combinedFlows, layout]);
+
+    const [mode, setMode] = useState<'cause' | 'effect'>('effect');
+
+    const subtree = useMemo(() => mode === 'cause' ? destinationTree : originTree, [mode, destinationTree, originTree]);
 
     const [brush, setBrush] = useState<IBrushSignalStore[]>([]);
     const [brushIdx, setBrushIdx] = useState<number>(-1);
@@ -383,22 +388,45 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                     })}
                 </svg>
             ) : null) : null}
-            {originTree ? (
+            {field && (
+                <div className="tools" style={{ width: '100%', padding: '1em 4em' }}>
+                    <Dropdown
+                        label="Exploration Mode"
+                        selectedKey={mode}
+                        onChange={(e, option) => {
+                            const key = option?.key as undefined | typeof mode;
+                            if (key) {
+                                setMode(key);
+                            }
+                        }}
+                        options={[
+                            { key: 'cause', text: `How ${field.name ?? field.fid} is effected by other fields` },
+                            { key: 'effect', text: `How ${field.name ?? field.fid} effects other fields` },
+                        ]}
+                        styles={{
+                            root: {
+                                width: '26em',
+                            }
+                        }}
+                    />
+                </div>
+            )}
+            {subtree ? (
                 <div
                     style={{
-                        width: `${FLOW_HEIGHT * originTree.size.height / originTree.size.width}px`,
+                        width: `${FLOW_HEIGHT * subtree.size.height / subtree.size.width}px`,
                     }}
                 >
-                    <svg viewBox={`0 0 ${originTree.size.height} ${originTree.size.width}`} strokeLinecap="round" strokeLinejoin="round">
+                    <svg viewBox={`0 0 ${subtree.size.height + 1} ${subtree.size.width}`} strokeLinecap="round" strokeLinejoin="round">
                         <defs>
                             <marker id="flow-arrow" viewBox="0 -5 10 10" refX={32} refY="0" markerWidth={3} markerHeight={3} orient="auto">
                                 <path fill="none" stroke="#463782" strokeWidth={2} d="M0,-5L10,0L0,5" />
                             </marker>
                         </defs>
-                        {originTree.links.map((link, i, { length }) => (
+                        {subtree.links.map((link, i, { length }) => (
                             <path
                                 key={i}
-                                d={line(link.points.map(p => ({ x: p.y, y: p.x }))) ?? ''}
+                                d={line(link.points.map(p => ({ x: p.y + 0.5, y: p.x }))) ?? ''}
                                 fill="none"
                                 stroke="#441ce3"
                                 strokeWidth={0.03}
@@ -411,17 +439,18 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                         ))}
                     </svg>
                     <div>
-                        {originTree.nodes.map((node, i) => {
+                        {subtree.nodes.map((node, i) => {
                             const idx = parseInt(node.data.id, 10);
                             const f = fields[idx];
                             return (
                                 <div
                                     key={i}
                                     style={{
-                                        left: `${(node.y ?? 0) / originTree.size.height * 100}%`,
-                                        top: `${(node.x ?? 0) / originTree.size.width * 100}%`,
-                                        width: `${0.4 * FLOW_HEIGHT / originTree.size.width}px`,
-                                        height: `${0.4 * FLOW_HEIGHT / originTree.size.width}px`,
+                                        left: `${((node.y ?? 0) + 0.5) / (subtree.size.height + 1) * 100}%`,
+                                        top: `${(node.x ?? 0) / subtree.size.width * 100}%`,
+                                        width: `${0.6 * FLOW_HEIGHT / subtree.size.width}px`,
+                                        height: `${0.6 * FLOW_HEIGHT / subtree.size.width}px`,
+                                        borderColor: index === idx ? '#995ccf' : undefined,
                                     }}
                                 >
                                     <ColDist
@@ -437,8 +466,8 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                             setBrush(brush);
                                             setBrushIdx(i);
                                         }}
-                                        width={0.4 * FLOW_HEIGHT / originTree.size.width}
-                                        height={0.4 * FLOW_HEIGHT / originTree.size.width}
+                                        width={0.6 * FLOW_HEIGHT / subtree.size.width}
+                                        height={0.6 * FLOW_HEIGHT / subtree.size.width}
                                         axis={null}
                                         brush={brushIdx === i ? null : brush}
                                     />
@@ -448,6 +477,14 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                             bottom: '100%',
                                             left: '50%',
                                             transform: 'translate(-50%, -0.4em)',
+                                            cursor: index === idx ? 'default' : 'pointer',
+                                            color: index === idx ? '#995ccf' : '#5da3dc',
+                                            fontWeight: 550,
+                                        }}
+                                        onClick={() => {
+                                            if (index !== idx) {
+                                                onClickNode?.({ nodeId: idx });
+                                            }
                                         }}
                                     >
                                         {f.name ?? f.fid}

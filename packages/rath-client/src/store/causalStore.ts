@@ -151,6 +151,7 @@ export class CausalStore {
     }
     public async causalDiscovery(dataSource: IRow[], fields: IFieldMeta[], focusFields: string[], precondition: BgKnowledge[], algoName: string) {
         try {
+            this.computing = true;
             const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
                 method: 'POST',
                 headers: {
@@ -179,6 +180,8 @@ export class CausalStore {
                 type: 'error',
                 content: `${error}`,
             });
+        } finally {
+            this.computing = false;
         }
     }
     public async reRunCausalDiscovery(focusFields: string[], precondition: BgKnowledge[]) {

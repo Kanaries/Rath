@@ -355,10 +355,8 @@ const CausalPage: React.FC = () => {
                             />
                         ) : null
                     }
+                    {computing && <Spinner label="computings" />}
                 </div>
-                {/* <div>
-                    { !computing && <RelationGraph matrix={causalMatrix} fields={fieldMetas} /> }
-                </div> */}
 
                 <div>
                     {cleanedData.length > 0 && fieldGroup.length > 0 && (
