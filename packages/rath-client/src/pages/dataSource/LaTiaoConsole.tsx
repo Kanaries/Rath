@@ -4,7 +4,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import intl from 'react-intl-universal';
 import { debounceTime, Subject } from 'rxjs';
 import styled from 'styled-components';
-import { IRow, IFieldMeta } from '../../interfaces';
+import { IRow, IFieldMeta, IExtField } from '../../interfaces';
 import { rich } from '../../latiao/ide-helper';
 import createProgram, { resolveFields } from '../../latiao/program';
 import { getOperatorList } from '../../latiao/program/operator';
@@ -686,8 +686,13 @@ const LaTiaoConsole = observer(() => {
                                             resultRef.current,
                                             preview.map(f => ({
                                                 ...f,
+                                                extInfo: f.extInfo ? {
+                                                    extOpt: f.extInfo.extOpt,
+                                                    extInfo: f.extInfo.extInfo,
+                                                    extFrom: f.extInfo.extFrom.map(s => s.slice(1)),    // 里面为了防止 fid 作为保留字前面加了一个下划线所以这里记得去掉
+                                                } : undefined,
                                                 stage: 'settled',
-                                            })),
+                                            }) as IExtField),
                                         );
                                         setOpen(false);
                                         setCode('');

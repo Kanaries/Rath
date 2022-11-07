@@ -26,7 +26,7 @@ export interface DiagramGraphData {
 export interface ExplorerProps {
     dataSource: IRow[];
     fields: readonly Readonly<IFieldMeta>[];
-    compareMatrix: readonly (readonly number[])[];
+    causalMatrix: readonly (readonly number[])[];
     onNodeSelected: (
         node: Readonly<IFieldMeta> | null,
         simpleCause: readonly Readonly<NodeWithScore>[],
@@ -34,9 +34,10 @@ export interface ExplorerProps {
         composedCause: readonly Readonly<NodeWithScore>[],
         composedEffect: readonly Readonly<NodeWithScore>[],
     ) => void;
+    onLinkTogether: (srcIdx: number, tarIdx: number) => void;
 }
 
-const sNormalize = (matrix: ExplorerProps['compareMatrix']): number[][] => {
+const sNormalize = (matrix: ExplorerProps['causalMatrix']): number[][] => {
     return matrix.map(vec => vec.map(n => 2 / (1 + Math.exp(-n)) - 1));
 };
 
@@ -95,11 +96,11 @@ const MainView = styled.div`
     }
 `;
 
-const Explorer: FC<ExplorerProps> = ({ dataSource, fields, compareMatrix, onNodeSelected }) => {
+const Explorer: FC<ExplorerProps> = ({ dataSource, fields, causalMatrix, onNodeSelected, onLinkTogether }) => {
     const [cutThreshold, setCutThreshold] = useState(0.05);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
-    const data = useMemo(() => sNormalize(compareMatrix), [compareMatrix]);
+    const data = useMemo(() => sNormalize(causalMatrix), [causalMatrix]);
 
     const [modifiedMatrix, setModifiedMatrix] = useState(data);
 
@@ -184,9 +185,10 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, compareMatrix, onNode
                     }
                     setFocus(-1);
                 }));
+                onLinkTogether(focus, idx);
             }
         }
-    }, [mode, focus, handleChange, value]);
+    }, [mode, focus, handleChange, value, onLinkTogether]);
 
     const ErrorBoundary = useErrorBoundary((err, info) => {
         console.error(err ?? info);

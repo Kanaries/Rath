@@ -1,4 +1,4 @@
-import { ComboBox, DefaultButton, Label, PrimaryButton, Spinner, Stack } from '@fluentui/react';
+import { ActionButton, ComboBox, DefaultButton, Dropdown, Label, List, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IFieldMeta } from '../../interfaces';
@@ -10,6 +10,7 @@ import RelationMatrixHeatMap from './relationMatrixHeatMap';
 import RelationTree from './tree';
 import { NodeWithScore } from './explorer/flowAnalyzer';
 import { BgKnowledge } from './config';
+import LaTiaoConsole from '../dataSource/LaTiaoConsole';
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
@@ -18,16 +19,26 @@ const CausalPage: React.FC = () => {
     const { igMatrix, causalStrength, causalFields, computing } = causalStore;
 
     const [focusFields, setFocusFields] = useState<string[]>([]);
+    const [editingPrecondition, setEditingPrecondition] = useState<Partial<BgKnowledge>>({ type: 'directed' });
     const [precondition, setPrecondition] = useState<BgKnowledge[]>([]);
 
     useEffect(() => {
         setFocusFields(fieldMetas.filter(f => f.disable !== true).map(f => f.fid));
         setPrecondition(
             fieldMetas.reduce<BgKnowledge[]>((list, f) => {
-                
+                if (f.extInfo) {
+                    for (const from of f.extInfo.extFrom) {
+                        list.push({
+                            src: from,
+                            tar: f.fid,
+                            type: 'directed',
+                        });
+                    }
+                }
                 return list;
             }, [])
         );
+        setEditingPrecondition({ type: 'directed' });
     }, [fieldMetas]);
 
     useEffect(() => {
@@ -98,14 +109,14 @@ const CausalPage: React.FC = () => {
     })), [fieldMetas]);
 
     const independencyWeightedCausalStrength = useMemo(() => {
-        return causalStrength.map((row, i) => row.map((d, j) => d * igMatrix[i][j]));
+        return causalStrength.map((row, i) => row.map((d, j) => -1 * d * Math.sign(igMatrix[i][j])));
     }, [igMatrix, causalStrength]);
 
     return (
         <div className="content-container">
             <div className="card">
                 <Label>Causal Analysis</Label>
-                <Stack style={{ marginBlock: '1.6em 3.2em' }}>
+                <Stack style={{ marginBlock: '1.6em' }}>
                     <ComboBox
                         multiSelect
                         selectedKey={focusFields}
@@ -124,6 +135,132 @@ const CausalPage: React.FC = () => {
                         }}
                     />
                 </Stack>
+                <Stack style={{ marginBlock: '1.6em 3.2em' }}>
+                    <Label>Conditions (Background Knowledge)</Label>
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                        <Label style={{ width: '20%' }}>Add Condition</Label>
+                        <Dropdown
+                            placeholder="Source"
+                            selectedKey={editingPrecondition.src ?? 'none'}
+                            onChange={(e, option) => {
+                                if (!option) {
+                                    return;
+                                }
+                                const fid = option.key as string;
+                                setEditingPrecondition(p => ({
+                                    type: p.type,
+                                    src: fid,
+                                    tar: p.tar === fid ? undefined : p.tar,
+                                }));
+                            }}
+                            options={fieldMetas.map(f => ({
+                                key: f.fid,
+                                text: f.name ?? f.fid,
+                            }))}
+                            styles={{ root: { width: '30%' } }}
+                        />
+                        <Dropdown
+                            placeholder="Direction"
+                            selectedKey={editingPrecondition.type}
+                            onChange={(e, option) => {
+                                if (!option) {
+                                    return;
+                                }
+                                setEditingPrecondition(p => ({
+                                    ...p,
+                                    type: option.key as (typeof p)['type'],
+                                }));
+                            }}
+                            options={[
+                                { key: 'directed', text: '-->' },
+                                { key: 'bidirected', text: '<->' },
+                                { key: 'undirected', text: '---' },
+                            ]}
+                            styles={{ root: { width: '10%' }, caretDownWrapper: { display: 'none' }, title: { padding: '0 8px', textAlign: 'center' } }}
+                        />
+                        <Dropdown
+                            placeholder="Target"
+                            selectedKey={editingPrecondition.tar ?? 'none'}
+                            onChange={(e, option) => {
+                                if (!option) {
+                                    return;
+                                }
+                                const fid = option.key as string;
+                                setEditingPrecondition(p => ({
+                                    type: p.type,
+                                    tar: fid,
+                                    src: p.src === fid ? undefined : p.src,
+                                }));
+                            }}
+                            options={fieldMetas.map(f => ({
+                                key: f.fid,
+                                text: f.name ?? f.fid,
+                            }))}
+                            styles={{ root: { width: '30%' } }}
+                        />
+                        <ActionButton
+                            styles={{
+                                root: {
+                                    width: '10%',
+                                }
+                            }}
+                            iconProps={{
+                                iconName: 'Add',
+                            }}
+                            onClick={() => {
+                                if (editingPrecondition.src && editingPrecondition.tar && editingPrecondition.type && editingPrecondition.src !== editingPrecondition.tar) {
+                                    setEditingPrecondition({ type: editingPrecondition.type });
+                                    setPrecondition(list => [...list, editingPrecondition as BgKnowledge]);
+                                }
+                            }}
+                        />
+                    </div>
+                    <List
+                        items={precondition}
+                        onRenderCell={(item, i) => item ? (
+                            <div data-is-focusable={true} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {fieldMetas.find(f => f.fid === item.src)?.name ?? item.src}
+                                </span>
+                                <span style={{ width: '20%' }}>
+                                    {({
+                                        directed: '----->',
+                                        bidirected: '<---->',
+                                        undirected: '------'
+                                    } as const)[item.type]}
+                                </span>
+                                <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {fieldMetas.find(f => f.fid === item.tar)?.name ?? item.tar}
+                                </span>
+                                <ActionButton
+                                    styles={{
+                                        root: {
+                                            width: '10%',
+                                        }
+                                    }}
+                                    iconProps={{
+                                        iconName: 'Delete',
+                                    }}
+                                    onClick={() => {
+                                        if (typeof i === 'number') {
+                                            setPrecondition(list => {
+                                                const next = [...list];
+                                                next.splice(i, 1);
+                                                return next;
+                                            });
+                                        }
+                                    }}
+                                />
+                            </div>
+                        ) : null}
+                        style={{
+                            border: '1px solid #888',
+                            padding: '1em 2em',
+                            maxHeight: '30vh',
+                            overflow: 'auto',
+                        }}
+                    />
+                </Stack>
                 <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
                     <DefaultButton text="Clear Group" onClick={() => setFieldGroup([])} />
                     <PrimaryButton
@@ -138,6 +275,7 @@ const CausalPage: React.FC = () => {
                             );
                         }}
                     />
+                    <LaTiaoConsole />
                     <Params focusFields={focusFields} precondition={precondition} />
                 </Stack>
 
@@ -203,8 +341,16 @@ const CausalPage: React.FC = () => {
                             <Explorer
                                 dataSource={cleanedData}
                                 fields={fieldMetas}
-                                compareMatrix={independencyWeightedCausalStrength}
+                                causalMatrix={independencyWeightedCausalStrength}
                                 onNodeSelected={handleSubTreeSelected}
+                                onLinkTogether={(srcIdx, tarIdx) => setPrecondition(list => [
+                                    ...list,
+                                    {
+                                        src: fieldMetas[srcIdx].fid,
+                                        tar: fieldMetas[tarIdx].fid,
+                                        type: 'directed',
+                                    },
+                                ])}
                             />
                         ) : null
                     }
