@@ -145,8 +145,8 @@ const DataTable: React.FC = (props) => {
                             width: 'unset',
                             color: 'rgb(0, 120, 212)',
                             backgroundColor: 'rgba(0, 120, 212, 0.02)',
-                            border: '1px solid',
-                            margin: '1em 0 2em',
+                            border: '1px solid rgba(0, 120, 212, 0.5)',
+                            margin: '2px 0 1em 0',
                         },
                     }}
                 >
@@ -163,7 +163,7 @@ const DataTable: React.FC = (props) => {
                         root: {
                             boxSizing: 'border-box',
                             width: 'unset',
-                            margin: '1em 0 2em',
+                            margin: '2px 0 1em 0',
                         },
                     }}
                 >

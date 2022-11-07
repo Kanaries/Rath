@@ -273,6 +273,10 @@
             "set": "value set",
             "submit": "Submit",
             "cancel": "Cancel"
+        },
+        "operations": {
+            "title": "Operations",
+            "selectAll": "Enable All Fields"
         }
     },
     "meta": {

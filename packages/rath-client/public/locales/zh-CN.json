@@ -273,6 +273,10 @@
             "set": "集合",
             "submit": "应用",
             "cancel": "取消"
+        },
+        "operations": {
+            "title": "快捷操作",
+            "selectAll": "选择所有字段"
         }
     },
     "meta": {

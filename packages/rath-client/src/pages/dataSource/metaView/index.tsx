@@ -74,7 +74,7 @@ const MetaView: React.FC = props => {
                     position: 'sticky',
                     top: 0,
                     zIndex: 1,
-                    padding: '22px 1em 1em',
+                    // padding: '22px 1em 1em',
                     backgroundColor: '#fff',
                 }}
             >
@@ -120,7 +120,7 @@ const MetaView: React.FC = props => {
                             width: 'unset',
                             color: 'rgb(0, 120, 212)',
                             backgroundColor: 'rgba(0, 120, 212, 0.02)',
-                            border: '1px solid',
+                            border: '1px solid rgba(0, 120, 212, 0.5)',
                         },
                     }}
                 >
@@ -138,7 +138,7 @@ const MetaView: React.FC = props => {
                     root: {
                         boxSizing: 'border-box',
                         width: 'unset',
-                        margin: '0.4em 1em 1em',
+                        margin: '2px 0 1em 0',
                     },
                 }}
             >

@@ -343,6 +343,11 @@ export class DataSourceStore {
     public setShowFastSelection (show: boolean) {
         this.showFastSelectionModal = show;
     }
+    public setAllMutFieldsDisable (disable: boolean) {
+        for (let i = 0; i < this.mutFields.length; i++) {
+            this.mutFields[i].disable = disable;
+        }
+    }
 
     public setLoading (loading: boolean) {
         this.loading = loading;
