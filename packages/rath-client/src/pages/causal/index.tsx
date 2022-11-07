@@ -16,7 +16,7 @@ const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
-    const { igMatrix, causalStrength, causalFields, computing } = causalStore;
+    const { igMatrix, causalStrength, curAlgo, causalFields, computing } = causalStore;
 
     const [focusFields, setFocusFields] = useState<string[]>([]);
     const [editingPrecondition, setEditingPrecondition] = useState<Partial<BgKnowledge>>({ type: 'directed' });
@@ -46,8 +46,8 @@ const CausalPage: React.FC = () => {
     }, [causalStore, fieldMetas]);
 
     useEffect(() => {
-        causalStore.computeIGMatrix(cleanedData, fieldMetas);
-    }, [fieldMetas, cleanedData, causalStore]);
+        causalStore.computeIGMatrix(cleanedData, focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!));
+    }, [fieldMetas, focusFields, cleanedData, causalStore]);
 
     // useEffect(() => {
     //     causalStore.computeIGCondMatrix(cleanedData, fieldMetas);
@@ -107,10 +107,6 @@ const CausalPage: React.FC = () => {
         key: f.fid,
         text: f.name ?? f.fid,
     })), [fieldMetas]);
-
-    const independencyWeightedCausalStrength = useMemo(() => {
-        return causalStrength.map((row, i) => row.map((d, j) => -1 * d * Math.sign(igMatrix[i][j])));
-    }, [igMatrix, causalStrength]);
 
     return (
         <div className="content-container">
@@ -335,20 +331,22 @@ const CausalPage: React.FC = () => {
                 <div>
                     {cleanedData.length > 0 &&
                         causalStrength.length > 0 &&
-                        causalStrength.length === fieldMetas.length &&
+                        causalStrength.length === focusFields.length &&
                         causalStrength.length === igMatrix.length &&
                         !computing ? (
                             <Explorer
                                 dataSource={cleanedData}
                                 fields={fieldMetas}
-                                causalMatrix={independencyWeightedCausalStrength}
-                                preconditions={precondition }
+                                scoreMatrix={igMatrix}
+                                causalMatrix={causalStrength}
+                                curAlgo={curAlgo}
+                                preconditions={precondition}
                                 onNodeSelected={handleSubTreeSelected}
                                 onLinkTogether={(srcIdx, tarIdx) => setPrecondition(list => [
                                     ...list,
                                     {
-                                        src: fieldMetas[srcIdx].fid,
-                                        tar: fieldMetas[tarIdx].fid,
+                                        src: focusFields[srcIdx],
+                                        tar: focusFields[tarIdx],
                                         type: 'directed',
                                     },
                                 ])}

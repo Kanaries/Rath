@@ -25,6 +25,25 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     preconditions: BgKnowledge[];
 }, never>, 'onChange' | 'ref'>;
 
+const arrows = {
+    undirected: {
+        start: '',
+        end: '',
+    },
+    directed: {
+        start: '',
+        end: 'M 12,0 L 28,8 L 28,-8 Z',
+    },
+    bidirected: {
+        start: 'M 12,0 L 28,8 L 28,-8 Z',
+        end: 'M 12,0 L 28,8 L 28,-8 Z',
+    },
+    'weak directed': {
+        start: '',
+        end: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
+    },
+} as const;
+
 const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     { fields, value, onClickNode, focus, cutThreshold, mode, onLinkTogether, preconditions, ...props },
     ref
@@ -51,6 +70,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 source: link.causeId,
                 target: link.effectId,
                 value: link.score / nodeCauseWeights[link.effectId],
+                type: link.type,
             })).filter(link => link.value >= cutThreshold),
         }, totalScore];
     }, [value, cutThreshold]);
@@ -122,12 +142,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 defaultEdge: {
                   size: 1,
                   color: '#F6BD16',
-                  style: {
-                    endArrow: {
-                      path: 'M 12,0 L 28,8 L 28,-8 Z',
-                      fill: '#e2e2e2',
-                    },
-                  },
                 },
             });
             graph.node(node => ({
@@ -136,11 +150,35 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
             graph.data({
                 nodes: data.nodes.map((node, i) => ({ id: `${node.id}`, description: fields[i].name ?? fields[i].fid })),
                 edges: [
-                    ...data.links.map((link, i) => ({ id: `link_${i}`, source: `${link.source}`, target: `${link.target}` })),
+                    ...data.links.map((link, i) => ({
+                        id: `link_${i}`,
+                        source: `${link.source}`,
+                        target: `${link.target}`,
+                        style: {
+                            startArrow: {
+                                fill: '#F6BD16',
+                                path: arrows[link.type].start,
+                            },
+                            endArrow: {
+                                fill: '#F6BD16',
+                                path: arrows[link.type].end,
+                            },
+                        },
+                    })),
                     ...preconditionsRef.current.map((bk, i) => ({
                         id: `bk_${i}`,
                         source: `${fields.findIndex(f => f.fid === bk.src)}`,
                         target: `${fields.findIndex(f => f.fid === bk.tar)}`,
+                        style: {
+                            startArrow: {
+                                fill: '#F6BD16',
+                                path: arrows[bk.type].start,
+                            },
+                            endArrow: {
+                                fill: '#F6BD16',
+                                path: arrows[bk.type].end,
+                            },
+                        },
                     })),
                 ],
             });

@@ -17,6 +17,7 @@ export type CausalLink = {
     causeId: number;
     effectId: number;
     score: number;
+    type: 'directed' | 'bidirected' | 'undirected' | 'weak directed';
 }
 
 export interface DiagramGraphData {
@@ -27,7 +28,9 @@ export interface DiagramGraphData {
 export interface ExplorerProps {
     dataSource: IRow[];
     fields: readonly Readonly<IFieldMeta>[];
+    scoreMatrix: readonly (readonly number[])[];
     causalMatrix: readonly (readonly number[])[];
+    curAlgo: string;
     preconditions: BgKnowledge[];
     onNodeSelected: (
         node: Readonly<IFieldMeta> | null,
@@ -99,11 +102,13 @@ const MainView = styled.div`
     }
 `;
 
-const Explorer: FC<ExplorerProps> = ({ dataSource, fields, causalMatrix, onNodeSelected, onLinkTogether, preconditions }) => {
+const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMatrix, onNodeSelected, onLinkTogether, preconditions, curAlgo }) => {
     const [cutThreshold, setCutThreshold] = useState(0.05);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
-    const data = useMemo(() => sNormalize(causalMatrix), [causalMatrix]);
+    const data = useMemo(() => sNormalize(
+        causalMatrix.map((row, i) => row.map((d, j) => -1 * d * Math.sign(scoreMatrix[i][j])))
+    ), [scoreMatrix, causalMatrix]);
 
     const [modifiedMatrix, setModifiedMatrix] = useState(data);
 
@@ -120,27 +125,174 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, causalMatrix, onNodeS
     const links = useMemo<CausalLink[]>(() => {
         const links: CausalLink[] = [];
 
-        for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
-            for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
-                const weight = modifiedMatrix[i][j];
-                if (weight > 0) {
-                    links.push({
-                        causeId: i,
-                        effectId: j,
-                        score: weight,
-                    });
-                } else if (weight < 0) {
-                    links.push({
-                        causeId: j,
-                        effectId: i,
-                        score: - weight,
-                    });
+        switch (curAlgo) {
+            case 'PC': {
+                // cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicate i –> j;
+                // cg.G.graph[i,j] = cg.G.graph[j,i] = -1 indicate i — j;
+                // cg.G.graph[i,j] = cg.G.graph[j,i] = 1 indicates i <-> j.
+                for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
+                    for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
+                        const weight = modifiedMatrix[i][j];
+                        const forwardFlag = causalMatrix[i][j];
+                        const backwardFlag = causalMatrix[j][i];
+                        if (forwardFlag === 1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'directed',
+                            });
+                        } else if (forwardFlag === -1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'undirected',
+                            });
+                        } else if (forwardFlag === 1 && backwardFlag === 1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'bidirected',
+                            });
+                        }
+                    }
                 }
+                break;
+            }
+            case 'FCI': {
+                // G.graph[j,i]=1 and G.graph[i,j]=-1 indicates i –> j;
+                // G.graph[i,j] = G.graph[j,i] = -1 indicates i — j;
+                // G.graph[i,j] = G.graph[j,i] = 1 indicates i <-> j;
+                // G.graph[j,i]=1 and G.graph[i,j]=2 indicates i o-> j.
+                for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
+                    for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
+                        const weight = modifiedMatrix[i][j];
+                        const forwardFlag = causalMatrix[i][j];
+                        const backwardFlag = causalMatrix[j][i];
+                        if (forwardFlag === 1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'directed',
+                            });
+                        } else if (forwardFlag === -1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'undirected',
+                            });
+                        } else if (forwardFlag === 1 && backwardFlag === 1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'bidirected',
+                            });
+                        } else if (forwardFlag === 1 && backwardFlag === 2) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'weak directed',
+                            });
+                        }
+                    }
+                }
+                break;
+            }
+            case 'CD-NOD': {
+                // cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicate i –> j;
+                // cg.G.graph[i,j] = cg.G.graph[j,i] = -1 indicates i — j;
+                // cg.G.graph[i,j] = cg.G.graph[j,i] = 1 indicates i <-> j.
+                for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
+                    for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
+                        const weight = modifiedMatrix[i][j];
+                        const forwardFlag = causalMatrix[i][j];
+                        const backwardFlag = causalMatrix[j][i];
+                        if (forwardFlag === 1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'directed',
+                            });
+                        } else if (forwardFlag === -1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'undirected',
+                            });
+                        } else if (forwardFlag === 1 && backwardFlag === 1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'bidirected',
+                            });
+                        }
+                    }
+                }
+                break;
+            }
+            case 'GES': {
+                // Record[‘G’].graph[j,i]=1 and Record[‘G’].graph[i,j]=-1 indicate i –> j;
+                // Record[‘G’].graph[i,j] = Record[‘G’].graph[j,i] = -1 indicates i — j.
+                for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
+                    for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
+                        const weight = modifiedMatrix[i][j];
+                        const forwardFlag = causalMatrix[i][j];
+                        const backwardFlag = causalMatrix[j][i];
+                        if (forwardFlag === 1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'directed',
+                            });
+                        } else if (forwardFlag === -1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: Math.abs(weight),
+                                type: 'undirected',
+                            });
+                        }
+                    }
+                }
+                break;
+            }
+            default: {
+                for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
+                    for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
+                        const weight = modifiedMatrix[i][j];
+                        if (weight > 0) {
+                            links.push({
+                                causeId: i,
+                                effectId: j,
+                                score: weight,
+                                type: 'directed',
+                            });
+                        } else if (weight < 0) {
+                            links.push({
+                                causeId: j,
+                                effectId: i,
+                                score: - weight,
+                                type: 'directed',
+                            });
+                        }
+                    }
+                }
+                break;
             }
         }
 
         return links.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
-    }, [modifiedMatrix]);
+    }, [modifiedMatrix, causalMatrix, curAlgo]);
 
     const value = useMemo(() => ({ nodes, links }), [nodes, links]);
 
@@ -178,6 +330,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, causalMatrix, onNodeS
                             causeId: focus,
                             effectId: idx,
                             score: 1,
+                            type: 'directed',
                         });
                     }
                     const idxRev = draft.links.findIndex(

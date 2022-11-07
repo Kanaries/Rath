@@ -31,6 +31,7 @@ export class CausalStore {
     public igMatrix: number[][] = [];
     public igCondMatrix: number[][] = [];
     public causalStrength: number[][] = [];
+    public curAlgo: string = '';
     public causalFields: IFieldMeta[];
     public computing: boolean = false;
     public showSettings: boolean = false;
@@ -169,6 +170,7 @@ export class CausalStore {
             if (result.success) {
                 runInAction(() => {
                     this.causalStrength = result.data;
+                    this.curAlgo = algoName;
                     this.causalFields = (result?.fields?.length > 0) ? result.fields : fields;
                 });
             } else {

@@ -417,7 +417,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                         width: `${FLOW_HEIGHT * subtree.size.height / subtree.size.width}px`,
                     }}
                 >
-                    <svg viewBox={`0 0 ${subtree.size.height + 1} ${subtree.size.width}`} strokeLinecap="round" strokeLinejoin="round">
+                    <svg viewBox={`0 0 ${subtree.size.height + 2} ${subtree.size.width}`} strokeLinecap="round" strokeLinejoin="round">
                         <defs>
                             <marker id="flow-arrow" viewBox="0 -5 10 10" refX={32} refY="0" markerWidth={3} markerHeight={3} orient="auto">
                                 <path fill="none" stroke="#463782" strokeWidth={2} d="M0,-5L10,0L0,5" />
@@ -426,7 +426,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                         {subtree.links.map((link, i, { length }) => (
                             <path
                                 key={i}
-                                d={line(link.points.map(p => ({ x: p.y + 0.5, y: p.x }))) ?? ''}
+                                d={line(link.points.map(p => ({ x: p.y + 1, y: p.x }))) ?? ''}
                                 fill="none"
                                 stroke="#441ce3"
                                 strokeWidth={0.03}
@@ -446,10 +446,10 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                 <div
                                     key={i}
                                     style={{
-                                        left: `${((node.y ?? 0) + 0.5) / (subtree.size.height + 1) * 100}%`,
+                                        left: `${((node.y ?? 0) + 1) / (subtree.size.height + 2) * 100}%`,
                                         top: `${(node.x ?? 0) / subtree.size.width * 100}%`,
-                                        width: `${0.6 * FLOW_HEIGHT / subtree.size.width}px`,
-                                        height: `${0.6 * FLOW_HEIGHT / subtree.size.width}px`,
+                                        width: `${0.4 * FLOW_HEIGHT / subtree.size.width}px`,
+                                        height: `${0.4 * FLOW_HEIGHT / subtree.size.width}px`,
                                         borderColor: index === idx ? '#995ccf' : undefined,
                                     }}
                                 >
@@ -466,8 +466,8 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                             setBrush(brush);
                                             setBrushIdx(i);
                                         }}
-                                        width={0.6 * FLOW_HEIGHT / subtree.size.width}
-                                        height={0.6 * FLOW_HEIGHT / subtree.size.width}
+                                        width={0.4 * FLOW_HEIGHT / subtree.size.width}
+                                        height={0.4 * FLOW_HEIGHT / subtree.size.width}
                                         axis={null}
                                         brush={brushIdx === i ? null : brush}
                                     />
