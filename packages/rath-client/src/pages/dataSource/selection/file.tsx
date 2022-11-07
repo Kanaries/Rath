@@ -5,13 +5,11 @@ import intl from "react-intl-universal";
 import { loadDataFile, SampleKey, useSampleOptions } from "../utils";
 import { dataBackup, logDataImport } from "../../../loggers/dataImport";
 import { IMuteFieldBase, IRow } from "../../../interfaces";
-import { setDataStorage } from "../../../utils/storage";
-
 interface FileDataProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => void;
     onDataLoading: (p: number) => void;
 }
 const FileData: React.FC<FileDataProps> = (props) => {
@@ -71,8 +69,7 @@ const FileData: React.FC<FileDataProps> = (props) => {
                     size: dataSource.length
                 });
                 dataBackup(file);
-                setDataStorage(file.name, fields, dataSource)
-                onDataLoaded(fields, dataSource);
+                onDataLoaded(fields, dataSource, file.name);
             } catch (error) {
                 onLoadingFailed(error)
             }

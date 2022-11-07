@@ -18,6 +18,8 @@ export interface IDBMeta {
     createTime: number;
     editTime: number;
     size: number;
+    rows?: number;
+    fields?: IMuteFieldBase[]
 }
 
 export interface IRathStorage {
@@ -100,13 +102,21 @@ export async function getDataStorageList (): Promise<IDBMeta[]> {
     return values.filter(v => v.type === 'dataset');
 }
 
-export async function getDataStorageById (id: string): Promise<{ fields: IMuteFieldBase[]; dataSource: IRow[]}> {
+export async function getDataStorageById (id: string): Promise<{ fields: IMuteFieldBase[]; dataSource: IRow[] }> {
+    const metas = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.META
+    });
+    const meta: IDBMeta = await metas.getItem(id) as IDBMeta
     const storages = localforage.createInstance({
         name: STORAGE_INSTANCE,
         storeName: STORAGES.DATASOURCE
     });
-    const st = await storages.getItem(id) as string
-    return JSON.parse(st)
+    const data = await storages.getItem(id) as IRow[]
+    return {
+        fields: meta.fields || [],
+        dataSource: data
+    }
 }
 
 export async function deleteDataStorageById (id: string) {
@@ -124,10 +134,7 @@ export async function deleteDataStorageById (id: string) {
 
 export async function setDataStorage(name: string, fields: IMuteFieldBase[], dataSource: IRow[]) {
     const time = Date.now();
-    const dataString = JSON.stringify({
-        fields,
-        dataSource
-    })
+    const dataString = JSON.stringify(dataSource);
     const metas = localforage.createInstance({
         name: STORAGE_INSTANCE,
         storeName: STORAGES.META
@@ -138,13 +145,28 @@ export async function setDataStorage(name: string, fields: IMuteFieldBase[], dat
         type: 'dataset',
         createTime: time,
         editTime: time,
-        size: Math.round(dataString.length / 1024)
+        size: Math.round(dataString.length / 1024),
+        rows: dataSource.length,
+        fields
     } as IDBMeta)
     const storages = localforage.createInstance({
         name: STORAGE_INSTANCE,
         storeName: STORAGES.DATASOURCE
     });
-    storages.setItem(name, dataString);
+    storages.setItem(name, dataSource);
+}
+
+export async function updateDataStorageMeta(name: string, fields: IMuteFieldBase[]) {
+    const metas = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.META
+    });
+    const oldMeta = await metas.getItem(name) as IDBMeta;
+    await metas.setItem(name, {
+        ...oldMeta,
+        fields,
+        editTime: Date.now()
+    } as IDBMeta)
 }
 
 // export async function setStateInStorage(key: string, value: any) {

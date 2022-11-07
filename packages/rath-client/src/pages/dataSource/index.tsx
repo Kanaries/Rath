@@ -16,6 +16,7 @@ import { CleanMethod, IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IR
 import { Card } from '../../components/card';
 import { useCleanMethodList } from '../../hooks';
 import { makeRenderLabelHandler } from '../../components/labelTooltip';
+import { setDataStorage } from '../../utils/storage';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
 import Selection from './selection/index';
@@ -26,6 +27,7 @@ import FastSelection from './fastSelection';
 import ProfilingView from './profilingView';
 import MainActionButton from './baseActions/mainActionButton';
 import DataOperations from './baseActions/dataOperations';
+
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -77,9 +79,12 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     }, [dataSourceStore]);
 
     const onSelectDataLoaded = useCallback(
-        (fields: IMuteFieldBase[], dataSource: IRow[]) => {
-            // dataSourceStore.loadData(fields, dataSource);
+        (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => {
             dataSourceStore.loadDataWithInferMetas(dataSource, fields);
+            if (name) {
+                dataSourceStore.setDatasetId(name);
+                setDataStorage(name, fields, dataSource)
+            }
         },
         [dataSourceStore]
     );

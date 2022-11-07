@@ -20,7 +20,7 @@ interface SelectionProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => void;
     onDataLoading: (p: number) => void;
     setLoadingAnimation: (on: boolean) => void;
 }
@@ -56,7 +56,6 @@ const Selection: React.FC<SelectionProps> = props => {
             <AirTableSource onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
         ),
     };
-
 
     return (
         <Modal containerClassName="vi-callout" onDismiss={onClose} isOpen={show}>

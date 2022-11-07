@@ -1,7 +1,6 @@
 import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { combineLatest, from, Subscription } from "rxjs";
 import * as op from 'rxjs/operators'
-import { IAnalyticType, ISemanticType } from "visual-insights";
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, ICol, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions, IExtField } from "../interfaces";
@@ -11,6 +10,7 @@ import { expandDateTimeService } from "../dev/services";
 import { findRathSafeColumnIndex, colFromIRow, readableWeekday } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
+import { updateDataStorageMeta } from "../utils/storage";
 
 interface IDataMessage {
     type: 'init_data' | 'others';
@@ -67,6 +67,7 @@ export class DataSourceStore {
     public loadingDataProgress: number = 0;
     public dataPrepProgressTag: IDataPrepProgressTag = IDataPrepProgressTag.none;
     private subscriptions: Subscription[] = [];
+    public datasetId: string | null = null;
     constructor() {
         makeAutoObservable(this, {
             rawData: observable.ref,
@@ -288,7 +289,9 @@ export class DataSourceStore {
     public get cleanedData () {
         return this.cleanedDataRef.current
     }
-
+    public setDatasetId (id: string) {
+        this.datasetId = id;
+    }
     public addFilter () {
         const sampleField = this.fieldMetas.find(f => f.semanticType === 'quantitative');
         this.filters = []
@@ -365,22 +368,12 @@ export class DataSourceStore {
         this.cleanMethod = method;
     }
 
-    public updateFieldAnalyticType (type: IAnalyticType, fid: string) {
-        const target = this.mutFields.find(f => f.fid === fid) ?? this.extFields.find(f => f.fid === fid);
-        if (target) {
-            target.analyticType = type;
+    public updateDataMetaInIndexedDB () {
+        if (this.datasetId) {
+            updateDataStorageMeta(this.datasetId, toJS(this.mutFields));
         }
     }
 
-    public updateFieldSemanticType (type: ISemanticType, fid: string) {
-        const target = this.mutFields.find(f => f.fid === fid) ?? this.extFields.find(f => f.fid === fid);
-        if (target) {
-            target.semanticType = type;
-            // 触发fieldsMeta监控可以被执行
-            this.mutFields = [...this.mutFields];
-            this.extFields = [...this.extFields];
-        }
-    }
     // public updateFieldInfo <K extends keyof IRawField> (fieldId: string, fieldPropKey: K, value: IRawField[K]) {
     public updateFieldInfo (fieldId: string, fieldPropKey: string, value: any) {
         // type a = keyof IRawField
@@ -392,6 +385,7 @@ export class DataSourceStore {
             // 触发fieldsMeta监控可以被执行
             this.mutFields = [...this.mutFields];
             this.extFields = [...this.extFields];
+            this.updateDataMetaInIndexedDB();
         }
     }
 
@@ -403,10 +397,6 @@ export class DataSourceStore {
         }))
         this.rawData = rawData
         this.loading = false;
-    }
-
-    public setFieldName (fIndex: number, name: string) {
-        this.mutFields[fIndex].name = name
     }
 
     public exportStore(): IDataSourceStoreStorage {
@@ -486,6 +476,7 @@ export class DataSourceStore {
                     }
                 }
                 this.mutFields = metas;
+                this.updateDataMetaInIndexedDB()
             })
         }
     }
