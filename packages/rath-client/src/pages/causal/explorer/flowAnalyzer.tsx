@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import {
     dagStratify,
     sugiyama,
@@ -15,7 +15,7 @@ import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
 import styled from "styled-components";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
-import ColDist from "../crossFilter/colDist";
+import ColDist, { IBrushSignalStore } from "../crossFilter/colDist";
 import type { DiagramGraphData } from ".";
 
 
@@ -54,7 +54,7 @@ export const mergeFlows = (flows: Flow[], entering: Flow): void => {
     }
 };
 
-const FLOW_HEIGHT = 300;
+const FLOW_HEIGHT = 500;
 
 const SVGGroup = styled.div`
     flex-grow: 0;
@@ -66,7 +66,7 @@ const SVGGroup = styled.div`
     align-items: center;
     > svg {
         width: 100%;
-        height: 25vh;
+        height: 40vh;
         overflow: hidden;
         & text {
             user-select: none;
@@ -331,6 +331,9 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
         };
     }, [combinedFlows, layout]);
 
+    const [brush, setBrush] = useState<IBrushSignalStore[]>([]);
+    const [brushIdx, setBrushIdx] = useState<number>(-1);
+
     return (
         <SVGGroup onClick={e => e.stopPropagation()}>
             {field ? [combinedTree/*, destinationTree, originTree*/].map((tree, i) => tree ? (
@@ -427,21 +430,28 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                         fid={f.fid}
                                         name={f.name}
                                         semanticType={f.semanticType}
-                                        onBrushSignal={() => {}}//(brush: IBrushSignalStore[] | null) => void;
+                                        onBrushSignal={brush => {
+                                            if (!brush) {
+                                                return;
+                                            }
+                                            setBrush(brush);
+                                            setBrushIdx(i);
+                                        }}
                                         width={0.4 * FLOW_HEIGHT / originTree.size.width}
                                         height={0.4 * FLOW_HEIGHT / originTree.size.width}
                                         axis={null}
+                                        brush={brushIdx === i ? null : brush}
                                     />
-                                    {/* <circle
-                                        r={0.2}
-                                        fill={idx === index ? "#995ccf" : "#463782"}
-                                        stroke="none"
-                                        strokeWidth="0"
-                                        style={{ cursor: 'default', pointerEvents: 'none' }}
-                                    />
-                                    <text fill="white" stroke="#463782" strokeWidth={0.001} fontWeight="bold" fontSize={0.05} textAnchor="middle" >
+                                    <label
+                                        style={{
+                                            position: 'absolute',
+                                            bottom: '100%',
+                                            left: '50%',
+                                            transform: 'translate(-50%, -0.4em)',
+                                        }}
+                                    >
                                         {f.name ?? f.fid}
-                                    </text> */}
+                                    </label>
                                 </div>
                             );
                         })}
