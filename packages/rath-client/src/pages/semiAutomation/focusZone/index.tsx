@@ -16,7 +16,7 @@ import MiniFloatCanvas from './miniFloatCanvas';
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
 const FocusZone: React.FC = (props) => {
-    const { semiAutoStore, commonStore, collectionStore } = useGlobalStore();
+    const { semiAutoStore, commonStore, collectionStore, painterStore } = useGlobalStore();
     const { mainVizSetting, mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas } =
         semiAutoStore;
     const explainDiff = useCallback(() => {
@@ -39,10 +39,10 @@ const FocusZone: React.FC = (props) => {
     }, [mainViewSpec, commonStore]);
 
     const paintChart = useCallback(() => {
-        if (mainViewSpec) {
-            commonStore.analysisInPainter(mainViewSpec);
+        if (mainViewSpec && mainView) {
+            painterStore.analysisInPainter(mainViewSpec, mainView);
         }
-    }, [mainViewSpec, commonStore]);
+    }, [mainViewSpec, painterStore, mainView]);
 
     return (
         <MainViewContainer>

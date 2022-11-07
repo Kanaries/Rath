@@ -29,6 +29,7 @@ import { viewSampling } from './sample';
 import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './constants';
 import NeighborAutoLink from './neighborAutoLink';
 import EmptyError from './emptyError';
+import Operations from './operations';
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -53,32 +54,33 @@ enum PIVOT_TAB_KEYS {
 
 const Painter: React.FC = (props) => {
     const container = useRef<HTMLDivElement>(null);
-    const { dataSourceStore, commonStore, painterStore, langStore } = useGlobalStore();
-    const { cleanedData, fieldMetas } = dataSourceStore;
-    const { vizSpec: passSpec } = commonStore;
+    const { dataSourceStore, painterStore, langStore } = useGlobalStore();
+    const { fieldMetas } = dataSourceStore;
+    const { painterView, painterViewData } = painterStore
     const [mutFeatValues, setMutFeatValues] = useState<string[]>(COLOR_CELLS.map((c) => c.id));
     const [mutFeatIndex, setMutFeatIndex] = useState<number>(1);
     const [painterSize, setPainterSize] = useState<number>(0.1);
-    const { viewData, setViewData, maintainViewDataRemove } = useViewData(cleanedData);
+
     const [samplePercent, setSamplePercent] = useState<number>(1);
     const [painterMode, setPainterMode] = useState<PAINTER_MODE>(PAINTER_MODE.COLOR);
     const [pivotKey, setPivotKey] = useState<PIVOT_TAB_KEYS>(PIVOT_TAB_KEYS.SEARCH);
     const [clearAgg, setClearAgg] = useState<boolean>(false);
     const [gwTrigger, setGWTrigger] = useState<boolean>(false);
 
+    const { viewData, setViewData, maintainViewDataRemove } = useViewData(painterViewData);
     const vizSpec = useMemo(() => {
-        if (passSpec === null) return null;
-        if (!clearAgg) return passSpec;
-        return clearAggregation(toJS(passSpec));
-    }, [passSpec, clearAgg])
+        if (painterView.spec === null) return null;
+        if (!clearAgg) return painterView.spec;
+        return clearAggregation(toJS(painterView.spec));
+    }, [painterView.spec, clearAgg])
 
     const initValue = mutFeatValues[0];
 
     const painting = painterMode !== PAINTER_MODE.MOVE;
 
     const clearPainting = useCallback(() => {
-        setViewData(labelingData(cleanedData, initValue));
-    }, [cleanedData, initValue, setViewData]);
+        setViewData(labelingData(painterViewData, initValue));
+    }, [painterViewData, initValue, setViewData]);
 
     const fieldsInView = useMemo<IFieldMeta[]>(() => {
         const res: IFieldMeta[] = [];
@@ -94,10 +96,10 @@ const Painter: React.FC = (props) => {
     }, [fieldMetas, vizSpec]);
 
     useEffect(() => {
-        const size = Math.min(cleanedData.length, Math.round(cleanedData.length * samplePercent));
-        const sampleData = viewSampling(cleanedData, fieldsInView, size);
+        const size = Math.min(painterViewData.length, Math.round(painterViewData.length * samplePercent));
+        const sampleData = viewSampling(painterViewData, fieldsInView, size);
         setViewData(labelingData(sampleData, initValue));
-    }, [cleanedData, fieldMetas, initValue, setViewData, samplePercent, fieldsInView]);
+    }, [painterViewData, fieldMetas, initValue, setViewData, samplePercent, fieldsInView]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const linkNearViz = useCallback(debounceShouldNeverBeUsed(() => {
@@ -333,6 +335,7 @@ const Painter: React.FC = (props) => {
                         e.preventDefault();
                     }}>
                         <div ref={container}></div>
+                        <Operations />
                     </div>
                     <div className="operation-segment">
                         <Stack tokens={{ childrenGap: 18 }}>

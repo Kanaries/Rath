@@ -7,7 +7,7 @@ import { useGlobalStore } from '../../../store';
 
 interface OperationBarProps {}
 const OperationBar: React.FC<OperationBarProps> = props => {
-    const { megaAutoStore, commonStore, collectionStore } = useGlobalStore();
+    const { megaAutoStore, commonStore, collectionStore, painterStore } = useGlobalStore();
     const { taskMode } = commonStore;
     const { mainViewSpec, mainViewPattern } = megaAutoStore;
 
@@ -18,10 +18,10 @@ const OperationBar: React.FC<OperationBarProps> = props => {
     }, [mainViewSpec, commonStore])
 
     const analysisInPainter = useCallback(() => {
-        if (mainViewSpec) {
-            commonStore.analysisInPainter(mainViewSpec)
+        if (mainViewSpec && mainViewPattern) {
+            painterStore.analysisInPainter(mainViewSpec, mainViewPattern)
         }
-    }, [mainViewSpec, commonStore])
+    }, [mainViewSpec, mainViewPattern, painterStore])
 
     const viewExists = !(mainViewPattern === null || mainViewSpec === null);
     let starIconName = 'FavoriteStar';
