@@ -33,8 +33,8 @@ export class MegaAutomationStore {
     private ltsPipeLineStore: LTSPipeLine;
     public specForGraphicWalker: ISpec | undefined = undefined;
     public details: IInsightSpace[] = [];
-    public assoListT1: IVizSpace[] = []
-    public assoListT2: IVizSpace[] = []
+    public assoListT1: IInsightSpace[] = []
+    public assoListT2: IInsightSpace[] = []
     public showAsso: boolean = false;
     public showConstraints: boolean = false;
     public showPreferencePannel: boolean = false;
@@ -181,7 +181,7 @@ export class MegaAutomationStore {
         this.orderBy = orderBy;
         this.emitViewChangeTransaction(this.pageIndex);
     }
-    public jumpToView (viz: IVizSpace) {
+    public jumpToView (viz: IInsightSpace) {
         const { insightSpaces } = this;
         const { dimensions, measures } = viz;
         for (let i = 0; i < insightSpaces.length; i++) {
@@ -327,9 +327,6 @@ export class MegaAutomationStore {
             this.assoListT1 = [];
             this.assoListT2 = [];
             this.initVisualConfigResize();
-            // const spec = await this.ltsPipeLineStore.specify(iSpace);
-            // const viewData = await this.getViewData(iSpace.dimensions, iSpace.measures);
-
         }
     }
     public refreshMainView () {

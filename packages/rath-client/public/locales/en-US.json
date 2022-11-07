@@ -289,6 +289,7 @@
         "hintMain": "Here are some interesting patterns and insights found by RATH. If you are interested in some of them, try to use 'edit charts' to know more details about current view and use 'associate' to explore related insights",
         "summary": "Summary",
         "associate": "Associate",
+        "analysis": "Analysis",
         "asso": {
             "T1": "Associated Measures",
             "T2": "Associated Dimensions",
