@@ -15,8 +15,8 @@ import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
 import styled from "styled-components";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
-import type { DiagramGraphData } from ".";
 import ColDist from "../crossFilter/colDist";
+import type { DiagramGraphData } from ".";
 
 
 export type NodeWithScore = {

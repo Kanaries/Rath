@@ -2,8 +2,10 @@ import { forwardRef } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
 import useErrorBoundary from "../../../hooks/use-error-boundary";
-import DAGView from "./DAGView";
-import ForceView from "./forceView";
+import { BgKnowledge } from "../config";
+// import DAGView from "./DAGView";
+// import ForceView from "./forceView";
+import GraphView from "./graphView";
 import type { DiagramGraphData } from ".";
 
 
@@ -26,10 +28,12 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     mode: 'explore' | 'edit';
     onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
     focus: number | null;
+    onLinkTogether: (srcFid: string, tarFid: string) => void;
+    preconditions: BgKnowledge[];
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
-    fields, value, focus, cutThreshold = 0, mode, onClickNode, ...props },
+    fields, value, focus, cutThreshold = 0, mode, onClickNode, onLinkTogether, preconditions, ...props },
     ref
 ) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
@@ -58,7 +62,22 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                 }}
             /> */}
             <ErrorBoundary>
-                <DAGView
+                <GraphView
+                    fields={fields}
+                    value={value}
+                    mode={mode}
+                    preconditions={preconditions}
+                    cutThreshold={cutThreshold}
+                    onClickNode={onClickNode}
+                    onLinkTogether={onLinkTogether}
+                    focus={focus}
+                    style={{
+                        flexGrow: 1,
+                        flexShrink: 1,
+                        width: '100%',
+                    }}
+                />
+                {/* <DAGView
                     fields={fields}
                     value={value}
                     mode={mode}
@@ -70,7 +89,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                         flexShrink: 1,
                         width: '100%',
                     }}
-                />
+                /> */}
             </ErrorBoundary>
         </Container>
     );

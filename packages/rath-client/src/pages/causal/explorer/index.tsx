@@ -4,6 +4,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import useErrorBoundary from "../../../hooks/use-error-boundary";
 import type { IFieldMeta, IRow } from "../../../interfaces";
+import { BgKnowledge } from "../config";
 import ExplorerMainView from "./explorerMainView";
 import FlowAnalyzer, { NodeWithScore } from "./flowAnalyzer";
 
@@ -27,6 +28,7 @@ export interface ExplorerProps {
     dataSource: IRow[];
     fields: readonly Readonly<IFieldMeta>[];
     causalMatrix: readonly (readonly number[])[];
+    preconditions: BgKnowledge[];
     onNodeSelected: (
         node: Readonly<IFieldMeta> | null,
         simpleCause: readonly Readonly<NodeWithScore>[],
@@ -81,6 +83,7 @@ const MainView = styled.div`
     flex-grow: 0;
     flex-shrink: 0;
     height: 40vh;
+    overflow: hidden;
     display: flex;
     flex-direction: row;
     align-items: stretch;
@@ -96,7 +99,7 @@ const MainView = styled.div`
     }
 `;
 
-const Explorer: FC<ExplorerProps> = ({ dataSource, fields, causalMatrix, onNodeSelected, onLinkTogether }) => {
+const Explorer: FC<ExplorerProps> = ({ dataSource, fields, causalMatrix, onNodeSelected, onLinkTogether, preconditions }) => {
     const [cutThreshold, setCutThreshold] = useState(0.05);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
@@ -203,6 +206,10 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, causalMatrix, onNodeS
         // return <p>{info}</p>;
     }, [fields, value, mode === 'explore' ? focus : -1, cutThreshold]);
 
+    const handleLink = useCallback((srcFid: string, tarFid: string) => {
+        onLinkTogether(fields.findIndex(f => f.fid === srcFid), fields.findIndex(f => f.fid === tarFid));
+    }, [fields, onLinkTogether]);
+
     return (
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools onClick={e => e.stopPropagation()}>
@@ -236,12 +243,14 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, causalMatrix, onNodeS
                 <ExplorerMainView
                     fields={fields}
                     value={value}
+                    preconditions={preconditions}
                     focus={focus === -1 ? null : focus}
                     mode={mode}
                     cutThreshold={cutThreshold}
                     onClickNode={handleClickCircle}
+                    onLinkTogether={handleLink}
                     style={{
-                        width: 'unset',
+                        width: '100%',
                         height: '100%',
                     }}
                 />

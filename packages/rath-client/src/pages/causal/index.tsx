@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
+import LaTiaoConsole from '../dataSource/LaTiaoConsole';
 import Explorer from './explorer';
 import CrossFilter from './crossFilter';
 import Params from './params';
@@ -10,7 +11,6 @@ import RelationMatrixHeatMap from './relationMatrixHeatMap';
 // import RelationTree from './tree';
 import { NodeWithScore } from './explorer/flowAnalyzer';
 import { BgKnowledge } from './config';
-import LaTiaoConsole from '../dataSource/LaTiaoConsole';
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
@@ -342,6 +342,7 @@ const CausalPage: React.FC = () => {
                                 dataSource={cleanedData}
                                 fields={fieldMetas}
                                 causalMatrix={independencyWeightedCausalStrength}
+                                preconditions={precondition }
                                 onNodeSelected={handleSubTreeSelected}
                                 onLinkTogether={(srcIdx, tarIdx) => setPrecondition(list => [
                                     ...list,

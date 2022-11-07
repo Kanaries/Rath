@@ -190,9 +190,9 @@ const DAGView = forwardRef<HTMLDivElement, DAGViewProps>((
         const x = e.clientX - left;
         const y = e.clientY - top;
         setCursorPos([x, y]);
-    }, [draggingSource, cursorPos]);
+    }, [draggingSource]);
 
-    const focusedNode = dag.nodes.find(node => {parseInt(node.data.id, 10)});
+    // const focusedNode = dag.nodes.find(node => {parseInt(node.data.id, 10)});
 
     return (
         <Container
