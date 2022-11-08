@@ -1928,10 +1928,10 @@
   dependencies:
     localforage "^1.10.0"
 
-"@kanaries/graphic-walker@0.2.7":
-  version "0.2.7"
-  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.2.7.tgz#ef8bf9b391d866dfa41d1c895f389bfc3b1bd961"
-  integrity sha512-auqe6DCVQGUuI7vg/VZ27w4V0x+x5LQkjLGaFGFLBBSVPOmM/+i4SZCxhAognwElsLBXGPxR3hCBVDqplJbDKg==
+"@kanaries/graphic-walker@^0.2.8":
+  version "0.2.8"
+  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.2.8.tgz#3294696fdfd7490eaacf2eab491627cd45b3df0f"
+  integrity sha512-fgC5T/TIiNOpK8qxsS3RUjOydrsj2GLXK6FJ+vbwwjxDbZJBqW3RVFp4ioB1FgQtHojMpoiIgpaqHJMThZTwlQ==
   dependencies:
     "@heroicons/react" "^2.0.8"
     "@kanaries/web-data-loader" "0.1.5"
@@ -2771,7 +2771,7 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
-"@types/react-dom@^17.0.1", "@types/react-dom@^17.x":
+"@types/react-dom@^17.0.1":
   version "17.0.18"
   resolved "https://registry.npmmirror.com/@types/react-dom/-/react-dom-17.0.18.tgz#8f7af38f5d9b42f79162eea7492e5a1caff70dc2"
   integrity sha512-rLVtIfbwyur2iFKykP2w0pl/1unw26b5td16d5xMgp7/yjTHomkyxPYChFoCr/FtEX1lN9wY6lFj1qvKdS5kDw==
@@ -2809,7 +2809,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^17", "@types/react@^17.0.2", "@types/react@^17.x":
+"@types/react@*", "@types/react@^17", "@types/react@^17.0.2":
   version "17.0.52"
   resolved "https://registry.npmmirror.com/@types/react/-/react-17.0.52.tgz#10d8b907b5c563ac014a541f289ae8eaa9bf2e9b"
   integrity sha512-vwk8QqVODi0VaZZpDXQCmEmiOuyjEFPY7Ttaw5vjM112LOq37yz1CDJGrRJwA1fYEq4Iitd5rnjd1yWAc/bT+A==
