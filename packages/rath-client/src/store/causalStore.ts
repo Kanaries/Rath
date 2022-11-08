@@ -1,37 +1,20 @@
 import { IDropdownOption } from '@fluentui/react';
-import { resultItem } from '@fluentui/react/lib/components/FloatingPicker/PeoplePicker/PeoplePicker.scss';
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { notify } from '../components/error';
 import { IFieldMeta, IRow } from '../interfaces';
-import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM, IAlgoSchema, CAUSAL_ALGORITHM_OPTIONS, IForm } from '../pages/causal/config';
+import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM, IAlgoSchema, CAUSAL_ALGORITHM_OPTIONS } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
-import datasetOptions from '../pages/dataSource/selection/database/config';
-// import { encodeDiscrete } from "../pages/causal/utils";
 import { DataSourceStore } from './dataSourceStore';
-
-// export interface ICausalParams {
-//     algorithm?: ICausalAlgorithm; // | 'FCI' | 'CDNOD';
-//     alpha?: number; //desired significance level (float) in (0, 1). Default: 0.05.
-//     indep_test?: IndepenenceTest;
-//     stable?: boolean; //run stabilized skeleton discovery if True. Default: True.
-//     uc_rule?: UCRule;
-//     uc_priority?: UCPriority;
-//     mvpc?: boolean;
-//     cat_encode_type?: ICatEncodeType;
-//     keep_origin_cat?: boolean;
-//     quant_encode_type?: IQuantEncodeType;
-//     keep_origin_quant?: boolean;
-// }
 
 enum CausalServerUrl {
     local = 'http://localhost:8000',
     test = 'http://gateway.kanaries.cn:2080',
 }
 export class CausalStore {
-    public igMatrix: number[][] = [];
-    public igCondMatrix: number[][] = [];
-    public causalStrength: number[][] = [];
-    public causalFields: IFieldMeta[];
+    public igMatrix: number[][] = []; // correlation matrix
+    public igCondMatrix: number[][] = []; 
+    public causalStrength: number[][] = []; // causal matrix
+    public causalFields: IFieldMeta[]; //  => id
     public computing: boolean = false;
     public showSettings: boolean = false;
     public focusNodeIndex: number = 0;
@@ -48,7 +31,7 @@ export class CausalStore {
         // quantEncodeType: IQuantEncodeType.none, // encoding for quantitative data
         // keepOriginCat: true,
         // keepOriginQuant: true
-    };
+    }; // save
 
     /** Keep the options synchorized with `CausalStore.causalAlgorithmForm` */
     private _causalAlgorithmOptions: IDropdownOption[] = CAUSAL_ALGORITHM_OPTIONS;
