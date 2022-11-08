@@ -106,9 +106,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
     const [cutThreshold, setCutThreshold] = useState(0);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
-    const data = useMemo(() => sNormalize(
-        causalMatrix.map((row, i) => row.map((d, j) => -1 * d * Math.sign(scoreMatrix[i][j])))
-    ), [scoreMatrix, causalMatrix]);
+    const data = useMemo(() => sNormalize(scoreMatrix), [scoreMatrix]);
 
     const [modifiedMatrix, setModifiedMatrix] = useState(data);
 
@@ -117,9 +115,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
     }, [data]);
 
     const nodes = useMemo<CausalNode[]>(() => {
-        return fields.map((_, i) => ({
-            nodeId: i,
-        }));
+        return fields.map((_, i) => ({ nodeId: i }));
     }, [fields]);
 
     const links = useMemo<CausalLink[]>(() => {
@@ -338,14 +334,22 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
 
     const ErrorBoundary = useErrorBoundary((err, info) => {
         console.error(err ?? info);
-        return <div style={{
-            flexGrow: 0,
-            flexShrink: 0,
-            display: 'flex',
-            width: '100%',
-            height: '30vh',
-            border: '1px solid #8888',
-        }} />;
+        return (
+            <div
+                style={{
+                    flexGrow: 0,
+                    flexShrink: 0,
+                    width: '100%',
+                    padding: '1em 2.5em',
+                    border: '1px solid #8888',
+                }}
+            >
+                <p>
+                    {"Failed to visualize flows as DAG. Click a different node or turn up the link filter."}
+                </p>
+                <small>{err?.message ?? info}</small>
+            </div>
+        );
         // return <p>{info}</p>;
     }, [fields, value, mode === 'explore' ? focus : -1, cutThreshold]);
 

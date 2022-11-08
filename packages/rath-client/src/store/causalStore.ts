@@ -25,7 +25,7 @@ import { DataSourceStore } from './dataSourceStore';
 
 enum CausalServerUrl {
     local = 'http://localhost:8000',
-    test = 'http://wujiaxins-MacBook-Pro.local:8000',
+    test = 'http://gateway.kanaries.cn:2080/causal',
 }
 export class CausalStore {
     public igMatrix: number[][] = [];
