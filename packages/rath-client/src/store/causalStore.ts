@@ -154,6 +154,7 @@ export class CausalStore {
         try {
             this.computing = true;
             this.causalStrength = [];
+            const originFieldsLength = focusFields.length;
             const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
                 method: 'POST',
                 headers: {
@@ -170,9 +171,9 @@ export class CausalStore {
             const result = await res.json();
             if (result.success) {
                 runInAction(() => {
-                    this.causalStrength = result.data;
                     this.curAlgo = algoName;
-                    this.causalFields = (result?.fields?.length > 0) ? result.fields : fields;
+                    this.causalFields = (result?.fields?.length > 0) ? result.fields.slice(0, originFieldsLength) : fields;
+                    this.causalStrength = (result.data as number[][]).slice(0, originFieldsLength).map(row => row.slice(0, originFieldsLength));
                 });
             } else {
                 throw new Error(result.message);

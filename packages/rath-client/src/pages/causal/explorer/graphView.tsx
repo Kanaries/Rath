@@ -111,28 +111,40 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 },
                 animate: true,
                 layout: {
-                    type: 'gForce',
-                    maxIteration: 500,
-                    gatherDiscrete: true,
-                    //nodeSize: 100,
-                    //nodeSpacing: 100,
-                    //gatherDiscreteCenter: [500, 100],
-                    descreteGravity: 200,
-                    linkDistanceFunc: (e: any) => {
-                        if (e.source === '0') return 10;
-                        return 1;
-                    },
-                    getMass: (d: any) => {
-                        if (d.id === '0') return 100;
-                        return 1;
-                    },
-                    // speed: 10,
-                    // maxIteration: 500,
-                    // // for rendering after each iteration
-                    // tick: () => {
-                    //     graph.refreshPositions()
-                    // },
+                  type: 'fruchterman',
+                  gravity: 5,
+                  speed: 10,
+                  // for rendering after each iteration
+                  tick: () => {
+                    graph.refreshPositions()
+                  }
                 },
+                // layout: {
+                //     type: 'gForce',
+                //     gpuEnabled: true,
+                //     maxIteration: 1000,
+                //     // type: 'gForce',
+                //     // maxIteration: 500,
+                //     // gatherDiscrete: true,
+                //     // //nodeSize: 100,
+                //     // //nodeSpacing: 100,
+                //     // //gatherDiscreteCenter: [500, 100],
+                //     // descreteGravity: 200,
+                //     // linkDistanceFunc: (e: any) => {
+                //     //     if (e.source === '0') return 10;
+                //     //     return 1;
+                //     // },
+                //     // getMass: (d: any) => {
+                //     //     if (d.id === '0') return 100;
+                //     //     return 1;
+                //     // },
+                //     // // speed: 10,
+                //     // // maxIteration: 500,
+                //     // // // for rendering after each iteration
+                //     // // tick: () => {
+                //     // //     graph.refreshPositions()
+                //     // // },
+                // },
                 defaultNode: {
                   size: 24,
                   style: {

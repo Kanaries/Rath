@@ -17,7 +17,7 @@ const CausalPage: React.FC = () => {
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
     const { igMatrix, causalStrength, curAlgo, causalFields, computing } = causalStore;
-
+    
     const [focusFields, setFocusFields] = useState<string[]>([]);
     const [editingPrecondition, setEditingPrecondition] = useState<Partial<BgKnowledge>>({ type: 'directed' });
     const [precondition, setPrecondition] = useState<BgKnowledge[]>([]);
@@ -107,6 +107,8 @@ const CausalPage: React.FC = () => {
         key: f.fid,
         text: f.name ?? f.fid,
     })), [fieldMetas]);
+
+    const selectedFields = useMemo(() => focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!).filter(Boolean), [focusFields, fieldMetas]);
 
     return (
         <div className="content-container">
@@ -277,10 +279,10 @@ const CausalPage: React.FC = () => {
 
                 <div style={{ marginTop: '1em', display: 'flex' }}>
                     <div>
-                        {cleanedData.length > 0 && igMatrix.length > 0 && (
+                        {cleanedData.length > 0 && igMatrix.length > 0 && selectedFields.length === igMatrix.length && (
                             <RelationMatrixHeatMap
                                 absolute
-                                fields={fieldMetas}
+                                fields={selectedFields}
                                 data={igMatrix}
                                 onSelect={onFieldGroupSelect}
                             />
@@ -300,7 +302,7 @@ const CausalPage: React.FC = () => {
                     <div>
                         {cleanedData.length > 0 &&
                             causalStrength.length > 0 &&
-                            causalStrength.length === focusFields.length &&
+                            causalStrength.length === causalFields.length &&
                             !computing && (
                                 <RelationMatrixHeatMap
                                     
@@ -331,12 +333,12 @@ const CausalPage: React.FC = () => {
                 <div>
                     {cleanedData.length > 0 &&
                         causalStrength.length > 0 &&
-                        causalStrength.length === focusFields.length &&
+                        causalStrength.length === causalFields.length &&
                         causalStrength.length === igMatrix.length &&
                         !computing ? (
                             <Explorer
                                 dataSource={cleanedData}
-                                fields={fieldMetas}
+                                fields={causalFields}
                                 scoreMatrix={igMatrix}
                                 causalMatrix={causalStrength}
                                 curAlgo={curAlgo}
@@ -345,8 +347,8 @@ const CausalPage: React.FC = () => {
                                 onLinkTogether={(srcIdx, tarIdx) => setPrecondition(list => [
                                     ...list,
                                     {
-                                        src: focusFields[srcIdx],
-                                        tar: focusFields[tarIdx],
+                                        src: causalFields[srcIdx].fid,
+                                        tar: causalFields[tarIdx].fid,
                                         type: 'directed',
                                     },
                                 ])}

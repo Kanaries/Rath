@@ -103,7 +103,7 @@ const MainView = styled.div`
 `;
 
 const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMatrix, onNodeSelected, onLinkTogether, preconditions, curAlgo }) => {
-    const [cutThreshold, setCutThreshold] = useState(0.05);
+    const [cutThreshold, setCutThreshold] = useState(0);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
     const data = useMemo(() => sNormalize(
@@ -144,6 +144,13 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                                 score: Math.abs(weight),
                                 type: 'directed',
                             });
+                        } else if (forwardFlag === 1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: j,
+                                effectId: i,
+                                score: Math.abs(weight),
+                                type: 'directed',
+                            });
                         } else if (forwardFlag === -1 && backwardFlag === -1) {
                             links.push({
                                 causeId: i,
@@ -177,6 +184,13 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                             links.push({
                                 causeId: i,
                                 effectId: j,
+                                score: Math.abs(weight),
+                                type: 'directed',
+                            });
+                        } else if (forwardFlag === 1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: j,
+                                effectId: i,
                                 score: Math.abs(weight),
                                 type: 'directed',
                             });
@@ -218,6 +232,13 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                             links.push({
                                 causeId: i,
                                 effectId: j,
+                                score: Math.abs(weight),
+                                type: 'directed',
+                            });
+                        } else if (forwardFlag === 1 && backwardFlag === -1) {
+                            links.push({
+                                causeId: j,
+                                effectId: i,
                                 score: Math.abs(weight),
                                 type: 'directed',
                             });

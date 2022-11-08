@@ -44,7 +44,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
             width: '100%',
         }} />;
         // return <p>{info}</p>;
-    }, [fields, value, cutThreshold]);
+    }, [fields, value, cutThreshold, preconditions]);
 
     return (
         <Container {...props} ref={ref}>

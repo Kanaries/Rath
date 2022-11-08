@@ -8,7 +8,7 @@ const FloatingWindow = styled.div`
   position: fixed;
   z-index: 1048576;
   opacity: 0.33;
-  transition: opacity 80ms;
+  transition: opacity 200ms;
   :hover {
     opacity: 0.9;
   }
@@ -75,12 +75,13 @@ const formatSize = (size: number): string => {
 
 vega.expressionFunction(SizeFormatterName, formatSize);
 
-const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindow ({ interval = 2_00, recordLength = 8_000 }) {
+const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindow ({ interval = 4_00, recordLength = 30_000 }) {
   const [data, setData] = useState<IPerformanceRecordItem[]>([]);
   const [max, setMax] = useState<number>(0);
   const [pos, setPos] = useState<[number, number]>([30, 30]);
   const isDraggingRef = useRef(false);
   const ref = useRef<HTMLDivElement>(null);
+  const [receiveEvents, setReceiveEvents] = useState(true);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -115,8 +116,8 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
 
   const spec = useMemo(() => {
     return {
-      width: 90,
-      height: 90,
+      width: 120,
+      height: 80,
       data: {
         name: 'dataSource',
       },
@@ -169,13 +170,31 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
   const current = data.at(-1);
 
   // const handleMouseDown = useCallback(() => )
+  const handleClick = useCallback(() => {
+    setReceiveEvents(false);
+  }, []);
+
+  useEffect(() => {
+    if (!receiveEvents) {
+      const recall = setTimeout(() => {
+        setReceiveEvents(true);
+      }, 4_000);
+
+      return () => {
+        clearTimeout(recall);
+      };
+    }
+  }, [receiveEvents]);
 
   return (
     <FloatingWindow
       ref={ref}
+      onClick={handleClick}
       style={{
         left: pos[0],
         top: pos[1],
+        pointerEvents: receiveEvents ? 'all' : 'none',
+        opacity: receiveEvents ? undefined : 0.05,
       }}
     >
       <ReactVega
