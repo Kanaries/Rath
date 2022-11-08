@@ -13,7 +13,7 @@ import {
     coordQuad,
 } from 'd3-dag';
 import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
-import { Dropdown } from "@fluentui/react";
+import { Dropdown, Slider } from "@fluentui/react";
 import styled from "styled-components";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
@@ -112,6 +112,8 @@ const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.
 const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, cutThreshold, onUpdate, onClickNode }) => {
     const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
 
+    const [limit, setLimit] = useState(10);
+
     const normalizedLinks = useMemo(() => {
         const nodeCauseWeights = data.nodes.map(() => 0);
         const nodeEffectWeights = data.nodes.map(() => 0);
@@ -124,8 +126,16 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             effectId: link.effectId,
             score: link.score / nodeCauseWeights[link.effectId],
             type: link.type,
-        })).filter(link => link.score >= cutThreshold);
-    }, [data, cutThreshold]);
+        }));
+    }, [data]);
+
+    const linksCount = normalizedLinks.length;
+
+    const linksInView = useMemo(() => {
+        return normalizedLinks.filter(link => link.score >= cutThreshold).sort(
+            (a, b) => b.score - a.score
+        ).slice(0, limit);
+    }, [normalizedLinks, cutThreshold, limit]);
 
     const getPathScore = useCallback((effectIdx: number) => {
         const scores = new Map<number, number>();
@@ -148,7 +158,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
 
     const flowsAsOrigin = useMemo<Flow[]>(() => {
         if (field) {
-            let links = normalizedLinks.map(link => link);
+            let links = linksInView.map(link => link);
             const ready = [index];
             const flows: Flow[] = [{
                 id: `${index}`,
@@ -213,11 +223,11 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             return flows;
         }
         return [];
-    }, [normalizedLinks, field, index]);
+    }, [linksInView, field, index]);
 
     const flowsAsDestination = useMemo<Flow[]>(() => {
         if (field) {
-            let links = normalizedLinks.map(link => link);
+            let links = linksInView.map(link => link);
             const ready = [index];
             const flows: Flow[] = [{
                 id: `${index}`,
@@ -282,7 +292,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             return flows;
         }
         return [];
-    }, [normalizedLinks, field, index, cutThreshold]);
+    }, [linksInView, field, index, cutThreshold]);
 
     useEffect(() => {
         if (field) {
@@ -366,6 +376,9 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
     }, [tooManyLinks]);
 
     const destinationTree = useMemo(() => {
+        if (flowsAsDestination.length === 0) {
+            return null;
+        }
         const dag = dagStratify()(flowsAsDestination);
         return {
             // @ts-ignore
@@ -505,6 +518,13 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             ) : null) : null}
             {field && (
                 <div className="tools" style={{ width: '100%', padding: '1em 4em' }}>
+                    <Slider
+                        label="Display Limit"
+                        min={1}
+                        max={Math.max(linksCount, limit)}
+                        value={limit}
+                        onChange={value => setLimit(value)}
+                    />
                     <Dropdown
                         label="Exploration Mode"
                         selectedKey={mode}

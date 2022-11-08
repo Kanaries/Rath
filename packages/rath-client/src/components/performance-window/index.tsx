@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { vega } from "vega-embed";
 import ReactVega from "../react-vega";
@@ -170,7 +170,8 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
   const current = data.at(-1);
 
   // const handleMouseDown = useCallback(() => )
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     setReceiveEvents(false);
   }, []);
 

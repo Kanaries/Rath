@@ -20,6 +20,8 @@ import { NodeWithScore } from './explorer/flowAnalyzer';
 import type { BgKnowledge } from './config';
 import { FilterCell } from './filters';
 
+const VIZ_SUBSET_LIMIT = 2_000;
+
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
@@ -47,6 +49,12 @@ const CausalPage: React.FC = () => {
     const dataSubset = useMemo(() => {
         return applyFilters(dataSource, filters);
     }, [dataSource, filters]);
+    const vizSampleData = useMemo(() => {
+        if (dataSubset.length < VIZ_SUBSET_LIMIT) {
+            return dataSubset;
+        }
+        return baseDemoSample(dataSubset, VIZ_SUBSET_LIMIT);
+    }, [dataSubset]);
 
     useEffect(() => {
         if (sampleRate !== appliedSampleRate) {
@@ -61,7 +69,9 @@ const CausalPage: React.FC = () => {
     }, [sampleRate, appliedSampleRate]);
 
     useEffect(() => {
-        setFocusFields(fieldMetas.filter(f => f.disable !== true).map(f => f.fid));
+        setFocusFields(
+            fieldMetas.filter(f => f.disable !== true).slice(0, 10).map(f => f.fid) // 默认只使用前 10 个
+        );
         setPrecondition(
             fieldMetas.reduce<BgKnowledge[]>((list, f) => {
                 if (f.extInfo) {
@@ -235,7 +245,7 @@ const CausalPage: React.FC = () => {
                         })}
                     </div>
                 </Stack>
-                <Stack style={{ marginBlock: '1.6em' }}>
+                <Stack style={{ marginBlock: '1.6em', alignItems: 'flex-end' }} horizontal >
                     <ComboBox
                         multiSelect
                         selectedKey={focusFields}
@@ -252,7 +262,22 @@ const CausalPage: React.FC = () => {
                                 }
                             }
                         }}
+                        styles={{
+                            container: {
+                                flexGrow: 1,
+                                flexShrink: 1,
+                            },
+                        }}
                     />
+                    <DefaultButton onClick={() => setFocusFields(fieldMetas.filter(f => f.disable !== true).map(f => f.fid))}>
+                        Select All
+                    </DefaultButton>
+                    <DefaultButton onClick={() => setFocusFields(fieldMetas.filter(f => f.disable !== true).slice(0, 10).map(f => f.fid))} >
+                        Select First 10 Columns
+                    </DefaultButton>
+                    <DefaultButton onClick={() => setFocusFields([])} >
+                        Clear All
+                    </DefaultButton>
                 </Stack>
                 <Stack style={{ marginBlock: '1.6em 3.2em' }}>
                     <Label>Conditions (Background Knowledge)</Label>
@@ -480,8 +505,8 @@ const CausalPage: React.FC = () => {
                 </div>
 
                 <div>
-                    {dataSubset.length > 0 && fieldGroup.length > 0 && (
-                        <CrossFilter fields={fieldGroup} dataSource={dataSubset} />
+                    {vizSampleData.length > 0 && fieldGroup.length > 0 && (
+                        <CrossFilter fields={fieldGroup} dataSource={vizSampleData} />
                     )}
                 </div>
                 <SemiEmbed fields={fieldGroup} />
