@@ -69,7 +69,10 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                                 select: { type: 'interval', encodings: ['x'] },
                             },
                         ],
-                        mark: semanticType === 'temporal' ? 'area' : 'bar',
+                        mark: {
+                            type: semanticType === 'temporal' ? 'area' : 'bar',
+                            tooltip: true,
+                        },
                         encoding: {
                             x: {
                                 field: fid,
@@ -84,7 +87,10 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                     },
                     {
                         transform: [{ filter: { param: BRUSH_SIGNAL_NAME } }],
-                        mark: semanticType === 'temporal' ? 'area' : 'bar',
+                        mark: {
+                            type: semanticType === 'temporal' ? 'area' : 'bar',
+                            tooltip: true,
+                        },
                         encoding: {
                             x: {
                                 field: fid,
@@ -126,7 +132,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                 // console.log(res.view.getState());
             });
         }
-    }, [fid, semanticType, dataSize, name, axis]);
+    }, [fid, semanticType, dataSize, name, axis, width, height]);
 
     useEffect(() => {
         if (view.current) {

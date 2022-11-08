@@ -350,7 +350,6 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                 <small>{err?.message ?? info}</small>
             </div>
         );
-        // return <p>{info}</p>;
     }, [fields, value, mode === 'explore' ? focus : -1, cutThreshold]);
 
     const handleLink = useCallback((srcFid: string, tarFid: string) => {
