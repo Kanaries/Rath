@@ -3,14 +3,15 @@ import localforage from 'localforage';
 import { RESULT_STORAGE_SPLITOR } from '../constants';
 import { IMuteFieldBase, IRow } from '../interfaces';
 
-export const STORAGE_INSTANCE = 'rath_storage_instance'
+export const STORAGE_INSTANCE = 'rath_storage_instance';
 
 const STORAGES = {
     DATASOURCE: 'datasource',
     WORKSPACE: 'workspace',
     META: 'meta',
-    STATE: 'state'
-}
+    STATE: 'state',
+    CONFIG: 'config',
+};
 
 export interface IDBMeta {
     id: string;
@@ -177,6 +178,23 @@ export async function updateDataStorageMeta(name: string, fields: IMuteFieldBase
         fields,
         editTime: Date.now()
     } as IDBMeta)
+}
+
+export async function updateDataConfig(name: string, value: any) {
+    const metas = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.CONFIG,
+    });
+    await metas.setItem(name, JSON.stringify(value));
+}
+
+export async function getDataConfig(name: string) {
+    const metas = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.CONFIG,
+    });
+    const ds = (await metas.getItem(name)) as string;
+    return ds;
 }
 
 // export async function setStateInStorage(key: string, value: any) {

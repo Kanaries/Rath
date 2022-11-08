@@ -49,6 +49,7 @@
         "painter": "数据绘板",
         "collection": "收藏夹",
         "dashboard": "报表",
+        "globalConfig": "全局配置",
         "causal": "因果分析"
     },
     "preference": {
@@ -74,6 +75,7 @@
         }
     },
     "function": {
+        "startConfig": "配置",
         "confirm": "确认",
         "cancel": "取消",
         "analysis": {
@@ -104,7 +106,8 @@
             }
         },
         "save": {
-            "title": "保存"
+            "title": "保存",
+            "save": "保存中..."
         },
         "upload": "上传文件"
     },

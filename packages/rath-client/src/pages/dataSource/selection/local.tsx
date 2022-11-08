@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import styled from 'styled-components';
-import { IconButton } from '@fluentui/react';
+import { IconButton, Spinner, SpinnerSize } from '@fluentui/react';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { deleteDataStorageById, getDataStorageById, getDataStorageList, IDBMeta } from '../../../utils/storage';
 
+import { notify } from '../../../components/error';
 
 const LocalCont = styled.div`
     .items-container{
@@ -50,6 +51,7 @@ interface LocalDataProps {
 }
 const Local: React.FC<LocalDataProps> = props => {
     const { onDataLoaded, onLoadingFailed, onClose } = props;
+    const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
     const [localDataList, setLocalDataList] = useState<IDBMeta[]>([]);
     useEffect(() => {
         getDataStorageList().then((dataList) => {
@@ -65,6 +67,7 @@ const Local: React.FC<LocalDataProps> = props => {
         <h1>History</h1>
         <p>total: {localDataList.length} datasets. {formatSize(totalSize * 1024)}</p>
         <div style={{ maxHeight: '500px', overflowY: 'auto'}}>
+        {deleteLoading && <Spinner size={SpinnerSize.small} />}
             {
                 localDataList.map(local => <DataItem key={local.id}>
                     <div className="desc-container">
@@ -87,11 +90,27 @@ const Local: React.FC<LocalDataProps> = props => {
                             title="Delete"
                             iconProps={{ iconName: 'delete', color: 'red' }}
                             onClick={() => {
-                                deleteDataStorageById(local.id).then(res => {
-                                    getDataStorageList().then((dataList) => {
-                                        setLocalDataList(dataList);
+                                setDeleteLoading(true);
+                                deleteDataStorageById(local.id)
+                                    .then(() => {
+                                        notify({
+                                            title: 'Success',
+                                            content: `${local.name} delete success`,
+                                            type: 'success',
+                                        });
+                                        setDeleteLoading(false);
+                                        getDataStorageList().then((dataList) => {
+                                            setLocalDataList(dataList);
+                                        });
                                     })
-                                })
+                                    .catch((err) => {
+                                        setDeleteLoading(false);
+                                        notify({
+                                            title: 'Fail',
+                                            content: `${local.name} delete fail`,
+                                            type: 'error',
+                                        });
+                                    });
                             }}
                         />
                     </div>

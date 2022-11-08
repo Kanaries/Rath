@@ -43,7 +43,7 @@ const UserSettings: React.FC = () => {
                     text={commonStore.navMode === 'text' ? intl.get('preference.title') : ''}
                     iconProps={{ iconName: 'PlayerSettings' }}
                     onClick={() => {
-                        commonStore.setShowAnalysisConfig(true);
+                        commonStore.setAppKey('globalConfig');
                     }}
                 ></ActionButton>
             </div>
