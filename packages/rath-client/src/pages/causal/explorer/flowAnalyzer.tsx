@@ -301,7 +301,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             return flows;
         }
         return [];
-    }, [linksInView, field, index, cutThreshold]);
+    }, [linksInView, field, index]);
 
     useEffect(() => {
         if (field) {

@@ -192,7 +192,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                             },
                         },
                     })),
-                    ...preconditionsRef.current.map((bk, i) => ({
+                    ...(mode === 'edit' ? preconditionsRef.current.map((bk, i) => ({
                         id: `bk_${i}`,
                         source: `${fields.findIndex(f => f.fid === bk.src)}`,
                         target: `${fields.findIndex(f => f.fid === bk.tar)}`,
@@ -206,7 +206,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                                 path: arrowsForBK[bk.type].end,
                             },
                         },
-                    })),
+                    })) : []),
                 ],
             });
             graph.render();

@@ -67,7 +67,7 @@ const CausalPage: React.FC = () => {
         // console.log({sampleSize});
         return baseDemoSample(cleanedData, sampleSize);
         // return viewSampling(cleanedData, selectedFields, sampleSize); // FIXME: 用这个，但是有问题只能得到 0 / full ？
-    }, [cleanedData, selectedFields, appliedSampleRate]);
+    }, [cleanedData/*, selectedFields*/, appliedSampleRate]);
     const dataSubset = useMemo(() => {
         return applyFilters(dataSource, filters);
     }, [dataSource, filters]);
