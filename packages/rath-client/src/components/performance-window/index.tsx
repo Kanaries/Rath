@@ -61,7 +61,7 @@ const formatSize = (size: number): string => {
       num /= 1024;
       if (num > 1024 * 1.2) {
         num /= 1024;
-        return `${num.toFixed(1)} GB`;
+        return `${num.toFixed(2)} GB`;
       } else {
         return `${num.toFixed(1)} MB`;
       }
@@ -92,7 +92,14 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
       setData(list => {
         return [
           ...list.filter(item => time - item.time <= recordLength),
-          { time, memory },
+          {
+            time,
+            memory: memory ? {
+              jsHeapSizeLimit: memory.jsHeapSizeLimit,
+              totalJSHeapSize: memory.totalJSHeapSize,
+              usedJSHeapSize: memory.usedJSHeapSize,
+            } : undefined,
+          },
         ];
       });
       if (memory) {
