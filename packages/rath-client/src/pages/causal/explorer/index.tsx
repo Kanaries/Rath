@@ -51,9 +51,6 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     margin-block: 4em;
-    border: 1px solid #8888;
-    padding-block: 1.6em;
-    padding-inline: 2em;
 `;
 
 const Tools = styled.div`

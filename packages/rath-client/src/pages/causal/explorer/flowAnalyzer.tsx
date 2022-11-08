@@ -457,7 +457,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
     return (
         <SVGGroup onClick={e => e.stopPropagation()}>
             {field ? [combinedTree/*, destinationTree, originTree*/].map((tree, i) => tree ? (
-                <svg key={i} viewBox={`0 0 ${w} ${h}`} strokeLinecap="round" strokeLinejoin="round">
+                <svg key={i} viewBox={`0 0 ${tree.size.height + 1} ${tree.size.width + 1}`} strokeLinecap="round" strokeLinejoin="round">
                     <defs>
                         <marker id="flow-arrow" viewBox="0 -5 10 10" refX={32} refY="0" markerWidth={3} markerHeight={3} orient="auto">
                             <path fill="none" stroke="#463782" strokeWidth={2} d="M0,-5L10,0L0,5" />
