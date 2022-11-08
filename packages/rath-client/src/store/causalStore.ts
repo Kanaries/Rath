@@ -14,18 +14,6 @@ enum CausalServerUrl {
 export class CausalStore {
     public igMatrix: number[][] = [];
     public igCondMatrix: number[][] = [];
-    public lastResult: Readonly<{
-        /** Name of algorithm applied that responds this result */
-        algoName: string;
-        /** Fields sent to api as payload, representing the focused fields, the size of it is N */
-        inputFields: IFieldMeta[];
-        /** An (N x N) matrix of flags representing the links between any two nodes */
-        causalStrength: number[][];
-        /** Fields received from algorithm, the starting N items are equals to `inputFields`, and then there may have some extra trailing fields built during the process, the size of it is C (C >= N) */
-        concatFields: IFieldMeta[];
-        /** An (C x C) matrix of flags representing the links between any two concat fields */
-        concatStrength: number[][];
-    }> | null = null;
     public computing: boolean = false;
     public showSettings: boolean = false;
     public focusNodeIndex: number = 0;
@@ -33,6 +21,10 @@ export class CausalStore {
     public causalAlgorithm: string = ICausalAlgorithm.PC;
     public userModelKeys: string[] = [];
     public showSemi: boolean = false;
+    /** Fields received from algorithm, the starting N items are equals to `inputFields`, and then there may have some extra trailing fields built during the process, the size of it is C (C >= N) */
+    public causalFields: IFieldMeta[] = [];
+    /** An (N x N) matrix of flags representing the links between any two nodes */
+    public causalStrength: number[][] = [];
     /** asserts algorithm in keys of `causalStore.causalAlgorithmForm`. */
     public causalParams: { [algo: string]: { [key: string]: any } } = {
         // alpha: 0.05,
@@ -75,7 +67,9 @@ export class CausalStore {
             this.causalParams[entry[0]] = makeFormInitParams(entry[1]);
         }
     }
-    private causalServer: CausalServerUrl = CausalServerUrl.test; // FIXME:
+    private causalServer = decodeURIComponent(
+        new URL(window.location.href).searchParams.get('causalServer') ?? ''
+    ) || CausalServerUrl.test; // FIXME:
     private dataSourceStore: DataSourceStore;
     constructor(dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore;
@@ -83,7 +77,8 @@ export class CausalStore {
         this.causalParams[ICausalAlgorithm.PC] = makeFormInitParams(PC_PARAMS_FORM);
         this.updateCausalAlgorithmList(dataSourceStore.fieldMetas);
         makeAutoObservable(this, {
-            lastResult: observable.ref,
+            causalFields: observable.ref,
+            causalStrength: observable.ref,
             igMatrix: observable.ref,
             igCondMatrix: observable.ref,
             // @ts-ignore
@@ -94,8 +89,15 @@ export class CausalStore {
         if (this.causalAlgorithmForm[algorithm] !== undefined) {
             this.causalAlgorithm = algorithm;
             // this.causalParams[algorithm] = // makeFormInitParams(this.causalAlgorithmForm[algorithm]);
+            return true;
         } else {
             console.error(`[switchCausalAlgorithm error]: algorithm ${algorithm} not known.`)
+            return false;
+        }
+    }
+    public updateCausalAlgoAndParams(algorithm: string, params: CausalStore['causalParams']) {
+        if (this.switchCausalAlgorithm(algorithm)) {
+            this.causalParams[algorithm] = params;
         }
     }
     public updateCausalParamsValue(key: string, value: any) {
@@ -194,7 +196,8 @@ export class CausalStore {
         }
         try {
             this.computing = true;
-            this.lastResult = null;
+            this.causalFields = [];
+            this.causalStrength = [];
             const originFieldsLength = inputFields.length;
             const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
                 method: 'POST',
@@ -212,13 +215,8 @@ export class CausalStore {
             const result = await res.json();
             if (result.success) {
                 runInAction(() => {
-                    this.lastResult = {
-                        algoName: algoName,
-                        inputFields: inputFields,
-                        concatFields: (result?.fields ?? []) as IFieldMeta[],
-                        causalStrength: (result.data as number[][]).slice(0, originFieldsLength).map(row => row.slice(0, originFieldsLength)),
-                        concatStrength: result.data as number[][],
-                    };
+                    this.causalFields = inputFields;
+                    this.causalStrength = (result.data as number[][]).slice(0, originFieldsLength).map(row => row.slice(0, originFieldsLength));
                 });
             } else {
                 throw new Error(result.message);

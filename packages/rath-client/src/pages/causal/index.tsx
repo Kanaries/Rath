@@ -26,7 +26,7 @@ const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
-    const { igMatrix, lastResult, computing } = causalStore;
+    const { igMatrix, causalFields, causalStrength, computing } = causalStore;
     
     const [focusFields, setFocusFields] = useState<string[]>([]);
     const [editingPrecondition, setEditingPrecondition] = useState<Partial<ModifiableBgKnowledge>>({ type: 'must-link' });
@@ -211,7 +211,7 @@ const CausalPage: React.FC = () => {
         // };
     }, [fieldGroup]);
 
-    const exploringFields = igMatrix.length === lastResult?.causalStrength.length ? lastResult.inputFields : selectedFields;
+    const exploringFields = igMatrix.length === causalStrength.length ? causalFields : selectedFields;
 
     return (
         <div className="content-container">
@@ -468,15 +468,15 @@ const CausalPage: React.FC = () => {
                         {computing && <Spinner label="computings" />}
                     </div> */}
                     <div>
-                        {dataSubset.length > 0 && lastResult?.causalStrength.length &&
-                            !computing && (
+                        {dataSubset.length > 0 && causalStrength.length && causalStrength.length === causalFields.length &&
+                            !computing ? (
                                 <RelationMatrixHeatMap
                                     // absolute
-                                    fields={lastResult.inputFields}
-                                    data={lastResult.causalStrength}
+                                    fields={causalFields}
+                                    data={causalStrength}
                                     // onSelect={onFieldGroupSelect}
                                 />
-                            )}
+                            ) : null}
                         {computing && <Spinner label="computings" />}
                     </div>
                 </div>
@@ -502,7 +502,6 @@ const CausalPage: React.FC = () => {
                                 dataSource={dataSubset}
                                 fields={exploringFields}
                                 scoreMatrix={igMatrix}
-                                causalResult={lastResult}
                                 preconditions={modifiablePrecondition}
                                 onNodeSelected={handleSubTreeSelected}
                                 onLinkTogether={(srcIdx, tarIdx) => setModifiablePrecondition(list => [
