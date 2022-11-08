@@ -189,7 +189,7 @@ const CausalPage: React.FC = () => {
         // };
     }, [fieldGroup]);
 
-    const gwEditedRef = useRef(false);
+    const exploringFields = igMatrix.length === causalStrength.length ? causalFields : selectedFields;
 
     return (
         <div className="content-container">
@@ -477,14 +477,11 @@ const CausalPage: React.FC = () => {
                         )}
                 </div> */}
                 <div>
-                    {dataSubset.length > 0 &&
-                        causalStrength.length > 0 &&
-                        causalStrength.length === causalFields.length &&
-                        causalStrength.length === igMatrix.length &&
+                    {
                         !computing ? (
                             <Explorer
                                 dataSource={dataSubset}
-                                fields={causalFields}
+                                fields={exploringFields}
                                 scoreMatrix={igMatrix}
                                 causalMatrix={causalStrength}
                                 curAlgo={curAlgo}
@@ -493,8 +490,8 @@ const CausalPage: React.FC = () => {
                                 onLinkTogether={(srcIdx, tarIdx) => setPrecondition(list => [
                                     ...list,
                                     {
-                                        src: causalFields[srcIdx].fid,
-                                        tar: causalFields[tarIdx].fid,
+                                        src: exploringFields[srcIdx].fid,
+                                        tar: exploringFields[tarIdx].fid,
                                         type: 'directed',
                                     },
                                 ])}
@@ -511,13 +508,14 @@ const CausalPage: React.FC = () => {
                 </div>
                 <SemiEmbed fields={fieldGroup} />
                 <div>
+                    {/* 小心这里的内存占用 */}
                     <GraphicWalker
-                        dataSource={dataSubset}
+                        dataSource={vizSampleData}
                         rawFields={fieldMetas}
                         hideDataSourceConfig
-                        spec={gwEditedRef.current ? undefined : initialSpec}
+                        spec={initialSpec}
                         i18nLang={langStore.lang}
-                        keepAlive
+                        keepAlive={false}
                     />
                 </div>
             </div>
