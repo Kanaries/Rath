@@ -10,11 +10,12 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect, useState } from 'react';
 import { makeRenderLabelHandler } from '../../components/labelTooltip';
+import { IRow } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { BgKnowledge, CAUSAL_ALGORITHM_FORM, CAUSAL_ALGORITHM_OPTIONS, ICausalAlgorithm } from './config';
 import DynamicForm from './dynamicForm';
 
-const Params: React.FC<{ focusFields: string[]; precondition: BgKnowledge[] }> = ({ focusFields, precondition }) => {
+const Params: React.FC<{ dataSource: IRow[], focusFields: string[]; precondition: BgKnowledge[] }> = ({ focusFields, precondition, dataSource }) => {
     const { causalStore } = useGlobalStore();
     const { causalAlgorithm, causalParams, showSettings } = causalStore;
     const { causalAlgorithmForm, causalAlgorithmOptions } = causalStore;
@@ -56,7 +57,7 @@ const Params: React.FC<{ focusFields: string[]; precondition: BgKnowledge[] }> =
                     style={{ marginTop: '10px' }}
                     text="Run"
                     onClick={() => {
-                        causalStore.reRunCausalDiscovery(focusFields, precondition);
+                        causalStore.reRunCausalDiscovery(dataSource, focusFields, precondition);
                         causalStore.toggleSettings(false);
                     }}
                 />

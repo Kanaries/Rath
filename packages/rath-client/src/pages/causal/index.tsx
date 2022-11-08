@@ -1,10 +1,11 @@
-import { ActionButton, ComboBox, DefaultButton, Dropdown, Label, List, PrimaryButton, Spinner, Stack } from '@fluentui/react';
+import { ActionButton, ComboBox, DefaultButton, Dropdown, Label, List, PrimaryButton, Slider, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import type { Specification } from 'visual-insights';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
+import { viewSampling } from '../painter/sample';
 import LaTiaoConsole from '../dataSource/LaTiaoConsole';
 import Explorer from './explorer';
 import SemiEmbed from '../semiAutomation/semiEmbed';
@@ -13,7 +14,7 @@ import Params from './params';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 // import RelationTree from './tree';
 import { NodeWithScore } from './explorer/flowAnalyzer';
-import { BgKnowledge } from './config';
+import type { BgKnowledge } from './config';
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
@@ -24,6 +25,31 @@ const CausalPage: React.FC = () => {
     const [focusFields, setFocusFields] = useState<string[]>([]);
     const [editingPrecondition, setEditingPrecondition] = useState<Partial<BgKnowledge>>({ type: 'directed' });
     const [precondition, setPrecondition] = useState<BgKnowledge[]>([]);
+
+    const selectedFields = useMemo(() => focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!).filter(Boolean), [focusFields, fieldMetas]);
+
+    const [sampleRate, setSampleRate] = useState(1);
+    const [appliedSampleRate, setAppliedSampleRate] = useState(sampleRate);
+    const dataSource = useMemo(() => {
+        if (appliedSampleRate >= 1) {
+            return cleanedData;
+        }
+        const sampleSize = Math.round(cleanedData.length * appliedSampleRate);
+        // console.log({sampleSize});
+        return viewSampling(cleanedData, selectedFields, sampleSize);
+    }, [cleanedData, selectedFields, appliedSampleRate]);
+
+    useEffect(() => {
+        if (sampleRate !== appliedSampleRate) {
+            const delayedTask = setTimeout(() => {
+                setAppliedSampleRate(sampleRate);
+            }, 1_000);
+    
+            return () => {
+                clearTimeout(delayedTask);
+            };
+        }
+    }, [sampleRate, appliedSampleRate]);
 
     useEffect(() => {
         setFocusFields(fieldMetas.filter(f => f.disable !== true).map(f => f.fid));
@@ -49,12 +75,12 @@ const CausalPage: React.FC = () => {
     }, [causalStore, fieldMetas]);
 
     useEffect(() => {
-        causalStore.computeIGMatrix(cleanedData, focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!));
-    }, [fieldMetas, focusFields, cleanedData, causalStore]);
+        causalStore.computeIGMatrix(dataSource, focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!));
+    }, [fieldMetas, focusFields, dataSource, causalStore]);
 
     // useEffect(() => {
-    //     causalStore.computeIGCondMatrix(cleanedData, fieldMetas);
-    // }, [fieldMetas, cleanedData, causalStore]);
+    //     causalStore.computeIGCondMatrix(dataSource, fieldMetas);
+    // }, [fieldMetas, dataSource, causalStore]);
 
     const onFieldGroupSelect = useCallback(
         (xFid: string, yFid: string) => {
@@ -111,8 +137,6 @@ const CausalPage: React.FC = () => {
         text: f.name ?? f.fid,
     })), [fieldMetas]);
 
-    const selectedFields = useMemo(() => focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!).filter(Boolean), [focusFields, fieldMetas]);
-
     const initialSpec = useMemo<Specification>(() => {
         const [discreteChannel, concreteChannel] = fieldGroup.reduce<[IFieldMeta[], IFieldMeta[]]>(([discrete, concrete], f, i) => {
             if (i === 0 || f.semanticType === 'quantitative' || f.semanticType === 'temporal') {
@@ -152,6 +176,18 @@ const CausalPage: React.FC = () => {
         <div className="content-container">
             <div className="card">
                 <Label>Causal Analysis</Label>
+                <Stack style={{ marginBlock: '1.6em' }}>
+                    <Slider
+                        label={`Sample Rate (origin size = ${cleanedData.length} rows, sample size = ${dataSource.length} rows)`}
+                        min={0.01}
+                        max={1}
+                        step={0.01}
+                        value={sampleRate}
+                        showValue
+                        onChange={val => setSampleRate(val)}
+                    />
+                    {sampleRate !== appliedSampleRate && <Spinner label="Synchronizing settings..." />}
+                </Stack>
                 <Stack style={{ marginBlock: '1.6em' }}>
                     <ComboBox
                         multiSelect
@@ -303,7 +339,7 @@ const CausalPage: React.FC = () => {
                         text="Causal Discovery"
                         onClick={() => {
                             causalStore.causalDiscovery(
-                                cleanedData,
+                                dataSource,
                                 fieldMetas,
                                 focusFields,
                                 precondition,
@@ -312,12 +348,12 @@ const CausalPage: React.FC = () => {
                         }}
                     />
                     <LaTiaoConsole />
-                    <Params focusFields={focusFields} precondition={precondition} />
+                    <Params dataSource={dataSource} focusFields={focusFields} precondition={precondition} />
                 </Stack>
 
                 <div style={{ marginTop: '1em', display: 'flex' }}>
                     <div>
-                        {cleanedData.length > 0 && igMatrix.length > 0 && selectedFields.length === igMatrix.length && (
+                        {dataSource.length > 0 && igMatrix.length > 0 && selectedFields.length === igMatrix.length && (
                             <RelationMatrixHeatMap
                                 absolute
                                 fields={selectedFields}
@@ -327,7 +363,7 @@ const CausalPage: React.FC = () => {
                         )}
                     </div>
                     {/* <div>
-                        {cleanedData.length > 0 && !computing && (
+                        {dataSource.length > 0 && !computing && (
                             <RelationMatrixHeatMap
                                 absolute
                                 fields={fieldMetas}
@@ -338,7 +374,7 @@ const CausalPage: React.FC = () => {
                         {computing && <Spinner label="computings" />}
                     </div> */}
                     <div>
-                        {cleanedData.length > 0 &&
+                        {dataSource.length > 0 &&
                             causalStrength.length > 0 &&
                             causalStrength.length === causalFields.length &&
                             !computing && (
@@ -354,7 +390,7 @@ const CausalPage: React.FC = () => {
                     </div>
                 </div>
                 {/* <div>
-                    {cleanedData.length > 0 &&
+                    {dataSource.length > 0 &&
                         causalStrength.length > 0 &&
                         causalStrength.length === fieldMetas.length &&
                         !computing && (
@@ -369,13 +405,13 @@ const CausalPage: React.FC = () => {
                         )}
                 </div> */}
                 <div>
-                    {cleanedData.length > 0 &&
+                    {dataSource.length > 0 &&
                         causalStrength.length > 0 &&
                         causalStrength.length === causalFields.length &&
                         causalStrength.length === igMatrix.length &&
                         !computing ? (
                             <Explorer
-                                dataSource={cleanedData}
+                                dataSource={dataSource}
                                 fields={causalFields}
                                 scoreMatrix={igMatrix}
                                 causalMatrix={causalStrength}
@@ -397,14 +433,14 @@ const CausalPage: React.FC = () => {
                 </div>
 
                 <div>
-                    {cleanedData.length > 0 && fieldGroup.length > 0 && (
-                        <CrossFilter fields={fieldGroup} dataSource={cleanedData} />
+                    {dataSource.length > 0 && fieldGroup.length > 0 && (
+                        <CrossFilter fields={fieldGroup} dataSource={dataSource} />
                     )}
                 </div>
                 <SemiEmbed fields={fieldGroup} />
                 <div>
                     <GraphicWalker
-                        dataSource={cleanedData}
+                        dataSource={dataSource}
                         rawFields={fieldMetas}
                         hideDataSourceConfig
                         spec={gwEditedRef.current ? undefined : initialSpec}

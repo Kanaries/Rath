@@ -189,8 +189,8 @@ export class CausalStore {
             this.computing = false;
         }
     }
-    public async reRunCausalDiscovery(focusFields: string[], precondition: BgKnowledge[]) {
-        const { cleanedData, fieldMetas } = this.dataSourceStore;
-        this.causalDiscovery(cleanedData, fieldMetas, focusFields, precondition, this.causalAlgorithm);
+    public async reRunCausalDiscovery(dataSource: IRow[], focusFields: string[], precondition: BgKnowledge[]) {
+        const { fieldMetas } = this.dataSourceStore;
+        this.causalDiscovery(dataSource, fieldMetas, focusFields, precondition, this.causalAlgorithm);
     }
 }
