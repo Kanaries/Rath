@@ -1,3 +1,4 @@
+import { IFieldMeta } from '@kanaries/loa';
 import localforage from 'localforage';
 import { RESULT_STORAGE_SPLITOR } from '../constants';
 import { IMuteFieldBase, IRow } from '../interfaces';
@@ -19,7 +20,16 @@ export interface IDBMeta {
     editTime: number;
     size: number;
     rows?: number;
-    fields?: IMuteFieldBase[]
+    fields?: IMuteFieldBase[];
+    metas?: IFieldMeta[];
+    causal?: {
+        corMatrix: number[][];
+        causalMatrix: number[][];
+        fieldIds: string[];
+        params: {
+            [key: string]: any
+        }
+    }
 }
 
 export interface IRathStorage {
