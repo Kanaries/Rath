@@ -138,7 +138,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 },
             })) : []),
         ],
-    }), [data, mode, preconditions]);
+    }), [data, mode, preconditions, fields]);
 
     useEffect(() => {
         const { current: container } = containerRef;
