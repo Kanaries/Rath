@@ -300,7 +300,7 @@ const CausalPage: React.FC = () => {
                     <div>
                         {cleanedData.length > 0 &&
                             causalStrength.length > 0 &&
-                            causalStrength.length === causalFields.length &&
+                            causalStrength.length === focusFields.length &&
                             !computing && (
                                 <RelationMatrixHeatMap
                                     

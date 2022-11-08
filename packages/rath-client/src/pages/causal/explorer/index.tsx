@@ -125,7 +125,9 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
     const links = useMemo<CausalLink[]>(() => {
         const links: CausalLink[] = [];
 
+        /* eslint no-fallthrough: ["error", { "allowEmptyCase": true }] */
         switch (curAlgo) {
+            case 'CD-NOD':
             case 'PC': {
                 // cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicate i –> j;
                 // cg.G.graph[i,j] = cg.G.graph[j,i] = -1 indicate i — j;
@@ -135,7 +137,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                         const weight = modifiedMatrix[i][j];
                         const forwardFlag = causalMatrix[i][j];
                         const backwardFlag = causalMatrix[j][i];
-                        if (forwardFlag === 1 && backwardFlag === -1) {
+                        if (backwardFlag === 1 && forwardFlag === -1) {
                             links.push({
                                 causeId: i,
                                 effectId: j,
@@ -171,7 +173,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                         const weight = modifiedMatrix[i][j];
                         const forwardFlag = causalMatrix[i][j];
                         const backwardFlag = causalMatrix[j][i];
-                        if (forwardFlag === 1 && backwardFlag === -1) {
+                        if (backwardFlag === 1 && forwardFlag === -1) {
                             links.push({
                                 causeId: i,
                                 effectId: j,
@@ -204,41 +206,6 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                 }
                 break;
             }
-            case 'CD-NOD': {
-                // cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicate i –> j;
-                // cg.G.graph[i,j] = cg.G.graph[j,i] = -1 indicates i — j;
-                // cg.G.graph[i,j] = cg.G.graph[j,i] = 1 indicates i <-> j.
-                for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
-                    for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
-                        const weight = modifiedMatrix[i][j];
-                        const forwardFlag = causalMatrix[i][j];
-                        const backwardFlag = causalMatrix[j][i];
-                        if (forwardFlag === 1 && backwardFlag === -1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'directed',
-                            });
-                        } else if (forwardFlag === -1 && backwardFlag === -1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'undirected',
-                            });
-                        } else if (forwardFlag === 1 && backwardFlag === 1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'bidirected',
-                            });
-                        }
-                    }
-                }
-                break;
-            }
             case 'GES': {
                 // Record[‘G’].graph[j,i]=1 and Record[‘G’].graph[i,j]=-1 indicate i –> j;
                 // Record[‘G’].graph[i,j] = Record[‘G’].graph[j,i] = -1 indicates i — j.
@@ -247,7 +214,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                         const weight = modifiedMatrix[i][j];
                         const forwardFlag = causalMatrix[i][j];
                         const backwardFlag = causalMatrix[j][i];
-                        if (forwardFlag === 1 && backwardFlag === -1) {
+                        if (backwardFlag === 1 && forwardFlag === -1) {
                             links.push({
                                 causeId: i,
                                 effectId: j,
@@ -266,27 +233,29 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                 }
                 break;
             }
-            default: {
-                for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
-                    for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
+            case 'ExactSearch': {
+                // Estimated DAG.
+                for (let i = 0; i < modifiedMatrix.length; i += 1) {
+                    for (let j = 0; j < modifiedMatrix.length; j += 1) {
+                        if (i === j) {
+                            continue;
+                        }
                         const weight = modifiedMatrix[i][j];
-                        if (weight > 0) {
+                        const linked = causalMatrix[i][j] === 1;
+                        if (linked) {
                             links.push({
                                 causeId: i,
                                 effectId: j,
-                                score: weight,
-                                type: 'directed',
-                            });
-                        } else if (weight < 0) {
-                            links.push({
-                                causeId: j,
-                                effectId: i,
-                                score: - weight,
+                                score: Math.abs(weight),
                                 type: 'directed',
                             });
                         }
                     }
                 }
+                break;
+            }
+            default: {
+                console.warn(`Unknown algo: ${curAlgo}`);
                 break;
             }
         }

@@ -41,7 +41,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
         return <div style={{
             flexGrow: 1,
             flexShrink: 1,
-            width: '60%',
+            width: '100%',
         }} />;
         // return <p>{info}</p>;
     }, [fields, value, cutThreshold]);

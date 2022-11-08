@@ -25,7 +25,7 @@ import { DataSourceStore } from './dataSourceStore';
 
 enum CausalServerUrl {
     local = 'http://localhost:8000',
-    test = 'http://gateway.kanaries.cn:2080/causal',
+    test = 'http://wujiaxins-MacBook-Pro.local:8000',
 }
 export class CausalStore {
     public igMatrix: number[][] = [];
@@ -153,6 +153,7 @@ export class CausalStore {
     public async causalDiscovery(dataSource: IRow[], fields: IFieldMeta[], focusFields: string[], precondition: BgKnowledge[], algoName: string) {
         try {
             this.computing = true;
+            this.causalStrength = [];
             const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
                 method: 'POST',
                 headers: {
