@@ -35,9 +35,16 @@ interface ColDistProps {
     semanticType: ISemanticType;
     onBrushSignal: (brush: IBrushSignalStore[] | null) => void;
     brush?: null | IBrushSignalStore[];
+    /** @default 200 */
+    width?: number;
+    /** @default 200 */
+    height?: number;
+    /** @default true */
+    actions?: boolean;
+    axis?: null;
 }
 const ColDist: React.FC<ColDistProps> = (props) => {
-    const { data, fid, semanticType, onBrushSignal, brush, name } = props;
+    const { data, fid, semanticType, onBrushSignal, brush, name, width = 200, height = 200, actions = true, axis } = props;
     const container = useRef<HTMLDivElement>(null);
     const view = useRef<View | null>(null);
     const dataSize = data.length;
@@ -48,8 +55,12 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                     values: data,
                     name: 'dataSource',
                 },
-                width: 200,
-                height: 200,
+                width,
+                height,
+                autosize: {
+                    type: 'fit',
+                    contains: 'padding',
+                },
                 layer: [
                     {
                         params: [
@@ -58,34 +69,42 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                                 select: { type: 'interval', encodings: ['x'] },
                             },
                         ],
-                        mark: semanticType === 'temporal' ? 'area' : 'bar',
+                        mark: {
+                            type: semanticType === 'temporal' ? 'area' : 'bar',
+                            tooltip: true,
+                        },
                         encoding: {
                             x: {
                                 field: fid,
                                 title: name || fid,
                                 bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
                                 type: semanticType,
+                                axis,
                             },
-                            y: { aggregate: 'count' },
+                            y: { aggregate: 'count', axis },
                             color: { value: 'gray' },
                         },
                     },
                     {
                         transform: [{ filter: { param: BRUSH_SIGNAL_NAME } }],
-                        mark: semanticType === 'temporal' ? 'area' : 'bar',
+                        mark: {
+                            type: semanticType === 'temporal' ? 'area' : 'bar',
+                            tooltip: true,
+                        },
                         encoding: {
                             x: {
                                 field: fid,
                                 title: name || fid,
                                 bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
                                 type: semanticType,
+                                axis,
                             },
-                            y: { aggregate: 'count' },
+                            y: { aggregate: 'count', axis },
                             color: { value: '#531dab' },
                         },
                     },
                 ],
-            }).then((res) => {
+            }, { actions }).then((res) => {
                 view.current = res.view;
                 const handler = (name: string, value: any) => {
                     if (onBrushSignal) {
@@ -113,7 +132,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                 // console.log(res.view.getState());
             });
         }
-    }, [fid, semanticType, dataSize, name]);
+    }, [fid, semanticType, dataSize, name, axis, width, height]);
 
     useEffect(() => {
         if (view.current) {

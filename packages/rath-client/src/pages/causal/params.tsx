@@ -8,13 +8,14 @@ import {
 } from '@fluentui/react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeRenderLabelHandler } from '../../components/labelTooltip';
+import { IRow } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import { CAUSAL_ALGORITHM_FORM, CAUSAL_ALGORITHM_OPTIONS, ICausalAlgorithm } from './config';
+import { BgKnowledge, CAUSAL_ALGORITHM_FORM, CAUSAL_ALGORITHM_OPTIONS, ICausalAlgorithm } from './config';
 import DynamicForm from './dynamicForm';
 
-const Params: React.FC = (props) => {
+const Params: React.FC<{ dataSource: IRow[], focusFields: string[]; precondition: BgKnowledge[] }> = ({ focusFields, precondition, dataSource }) => {
     const { causalStore } = useGlobalStore();
     const { causalAlgorithm, causalParams, showSettings } = causalStore;
     const { causalAlgorithmForm, causalAlgorithmOptions } = causalStore;
@@ -34,6 +35,7 @@ const Params: React.FC = (props) => {
             >
                 
                 <Label>Settings</Label>
+                
                 <Dropdown
                     label="Algorithm"
                     options={causalAlgorithmOptions}
@@ -43,7 +45,7 @@ const Params: React.FC = (props) => {
                     }}
                     onRenderLabel={makeRenderLabelHandler('The algorithm to use.')}
                 />
-                <div>{ causalStore.causalAlgorithmForm[causalAlgorithm].description }</div>
+                <pre>{ causalStore.causalAlgorithmForm[causalAlgorithm].description }</pre>
                 <DynamicForm
                     form={causalAlgorithmForm[causalAlgorithm as string]!}
                     values={toJS(causalParams[causalAlgorithm])}
@@ -55,7 +57,7 @@ const Params: React.FC = (props) => {
                     style={{ marginTop: '10px' }}
                     text="Run"
                     onClick={() => {
-                        causalStore.reRunCausalDiscovery();
+                        causalStore.reRunCausalDiscovery(dataSource, focusFields, precondition);
                         causalStore.toggleSettings(false);
                     }}
                 />

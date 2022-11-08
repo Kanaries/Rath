@@ -18,6 +18,7 @@ import Painter from './pages/painter';
 import Collection from './pages/collection';
 import Dashboard from './pages/dashboard';
 import CausalPage from './pages/causal';
+import PerformanceWindow from './components/performance-window';
 
 function App() {
     const { langStore, commonStore } = useGlobalStore();
@@ -37,6 +38,11 @@ function App() {
             </div>
         );
     }
+
+    const showPerformanceWindow = (new URL(window.location.href).searchParams.get('perf') ?? (
+        JSON.stringify(process.env.NODE_ENV !== 'production')
+    )) === 'true';
+
     return (
         <div>
             <div className="main-app-container">
@@ -60,6 +66,7 @@ function App() {
                     <CrInfo />
                 </div>
             </div>
+            {showPerformanceWindow && <PerformanceWindow />}
         </div>
     );
 }
