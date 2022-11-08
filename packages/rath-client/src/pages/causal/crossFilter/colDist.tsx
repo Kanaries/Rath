@@ -1,26 +1,9 @@
-import { IFilter, ISemanticType } from '@kanaries/loa';
+import { ISemanticType } from '@kanaries/loa';
 import React, { useEffect, useRef } from 'react';
 import { View } from 'vega';
 import embed from 'vega-embed';
 import { IRow } from '../../../interfaces';
 import { throttle } from '../../../utils';
-
-function brush2Filter(brush: { [key: string]: any[] }, semanticType: ISemanticType, fid: string): IFilter | null {
-    if (brush[fid] === undefined) {
-        return null;
-    }
-    if (semanticType === 'quantitative' || semanticType === 'temporal')
-        return {
-            type: 'range',
-            fid,
-            range: brush[fid] as [number, number],
-        };
-    return {
-        fid,
-        type: 'set',
-        values: brush[fid],
-    };
-}
 
 export const BRUSH_SIGNAL_NAME = 'brush';
 export interface IBrushSignalStore {
@@ -44,7 +27,7 @@ interface ColDistProps {
     axis?: null;
 }
 const ColDist: React.FC<ColDistProps> = (props) => {
-    const { data, fid, semanticType, onBrushSignal, brush, name, width = 200, height = 200, actions = true, axis } = props;
+    const { data, fid, semanticType, onBrushSignal, brush, name, width = 200, height = 200, actions = false, axis } = props;
     const container = useRef<HTMLDivElement>(null);
     const view = useRef<View | null>(null);
     const dataSize = data.length;
@@ -132,7 +115,8 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                 // console.log(res.view.getState());
             });
         }
-    }, [fid, semanticType, dataSize, name, axis, width, height]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fid, semanticType, dataSize, name, axis, width, height, actions]);
 
     useEffect(() => {
         if (view.current) {

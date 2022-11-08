@@ -10,15 +10,15 @@ import { useGlobalStore } from '../../store';
 import { viewSampling, baseDemoSample } from '../painter/sample';
 import FilterCreationPill from '../../components/filterCreationPill';
 import LaTiaoConsole from '../dataSource/LaTiaoConsole';
-import Explorer from './explorer';
 import SemiEmbed from '../semiAutomation/semiEmbed';
+import Explorer from './explorer';
 import CrossFilter from './crossFilter';
 import Params from './params';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
-// import RelationTree from './tree';
 import { NodeWithScore } from './explorer/flowAnalyzer';
 import type { BgKnowledge, ModifiableBgKnowledge } from './config';
 import { FilterCell } from './filters';
+import ModelStorage from './modelStorage';
 
 const VIZ_SUBSET_LIMIT = 2_000;
 
@@ -440,6 +440,7 @@ const CausalPage: React.FC = () => {
                             );
                         }}
                     />
+                    <ModelStorage />
                     <LaTiaoConsole />
                     <Params dataSource={dataSubset} focusFields={focusFields} precondition={precondition} />
                 </Stack>
@@ -517,7 +518,7 @@ const CausalPage: React.FC = () => {
                     }
                     {computing && <Spinner label="computings" />}
                 </div>
-
+                <hr style={{ margin: '1em' }} />
                 <div>
                     {vizSampleData.length > 0 && fieldGroup.length > 0 && (
                         <CrossFilter fields={fieldGroup} dataSource={vizSampleData} />

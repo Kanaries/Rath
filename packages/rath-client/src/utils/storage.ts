@@ -9,6 +9,7 @@ const STORAGES = {
     DATASOURCE: 'datasource',
     WORKSPACE: 'workspace',
     META: 'meta',
+    MODEL: 'model',
     STATE: 'state'
 }
 
@@ -21,11 +22,15 @@ export interface IDBMeta {
     size: number;
     rows?: number;
     fields?: IMuteFieldBase[];
-    metas?: IFieldMeta[];
-    causal?: {
+}
+
+export interface IModel {
+    metas: IFieldMeta[];
+    causal: {
         corMatrix: number[][];
         causalMatrix: number[][];
         fieldIds: string[];
+        algorithm: string;
         params: {
             [key: string]: any
         }
@@ -177,6 +182,38 @@ export async function updateDataStorageMeta(name: string, fields: IMuteFieldBase
         fields,
         editTime: Date.now()
     } as IDBMeta)
+}
+
+export async function setModelStorage (name: string, model: IModel) {
+    const modelBucket = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.MODEL
+    })
+    await modelBucket.setItem(name, model);
+}
+
+export async function deleteModelStorage (name: string, model: IModel) {
+    const modelBucket = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.MODEL
+    })
+    await modelBucket.removeItem(name);
+}
+
+export async function getModelStorage (name: string): Promise<IModel> {
+    const modelBucket = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.MODEL
+    })
+    return await modelBucket.getItem(name) as IModel;
+}
+
+export async function getModelStorageList (): Promise<string[]> {
+    const modelBucket = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.MODEL
+    })
+    return await modelBucket.keys();
 }
 
 // export async function setStateInStorage(key: string, value: any) {
