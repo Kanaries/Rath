@@ -16,7 +16,20 @@ export interface IForm {
     items: IFormItem[];
     description?: string;
 }
-export type IAlgoSchema = { [algoName: string]: IForm }; // Map<string, IForm>
+export type IAlgoSchema = {
+    [algoName: string]: {
+        title: string;
+        items: IFormItem[];
+        description?: string;
+        message?: string;
+    };
+};
+
+export type BgKnowledge = {
+    src: string;
+    tar: string;
+    type: 'directed' | 'bidirected' | 'undirected';
+};
 
 export enum UCRule {
     uc_supset = 0,
