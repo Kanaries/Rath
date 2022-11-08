@@ -119,6 +119,9 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
     }, [fields]);
 
     const links = useMemo<CausalLink[]>(() => {
+        if (causalStrength.length === 0) {
+            return [];
+        }
         if (causalStrength.length !== modifiedMatrix.length) {
             console.warn(`lengths of matrixes do not match`);
             return [];
