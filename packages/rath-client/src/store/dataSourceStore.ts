@@ -74,6 +74,7 @@ export class DataSourceStore {
             cookedDataSource: observable.ref,
             cookedMeasures: observable.ref,
             fieldsWithExtSug: observable.ref,
+            extFields: observable.shallow,
             // @ts-expect-error private field
             subscriptions: false,
             cleanedDataRef: false,
@@ -122,10 +123,13 @@ export class DataSourceStore {
         const fieldMetas$ = combineLatest([originFieldMetas$, fieldsNames$]).pipe(
             op.map(([originFieldMetas, fieldNames]) => {
                 return originFieldMetas.map((m, index) => {
+                    const ext = this.extFields.find(f => f.fid === m.fid);
+
                     return {
                         ...m,
-                        stage: this.extFields.find(f => f.fid === m.fid)?.stage,
-                        name: this.extFields.find(f => f.fid === m.fid)?.name ?? fieldNames[index]
+                        extInfo: ext?.extInfo,
+                        stage: ext?.stage,
+                        name: ext?.name ?? fieldNames[index]
                     }
                 })
             }),
