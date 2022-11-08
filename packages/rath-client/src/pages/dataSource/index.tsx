@@ -199,7 +199,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         itemIcon="BarChartVerticalFilter"
                     />
                 </Pivot>
-                <DataOperations />
+                {rawData.length > 0 && <DataOperations />}
                 {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
                 {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
                 {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}

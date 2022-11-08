@@ -27,9 +27,13 @@ const FocusZone: React.FC = (props) => {
 
     const appendFieldHandler = useCallback(
         (fid: string) => {
-            semiAutoStore.addMainViewField(fid);
+            if (mainView === null) {
+                semiAutoStore.initMainViewWithSingleField(fid);
+            } else {
+                semiAutoStore.addMainViewField(fid);
+            }
         },
-        [semiAutoStore]
+        [semiAutoStore, mainView]
     );
 
     const editChart = useCallback(() => {
