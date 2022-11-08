@@ -82,6 +82,8 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
   const isDraggingRef = useRef(false);
   const ref = useRef<HTMLDivElement>(null);
   const [receiveEvents, setReceiveEvents] = useState(true);
+  const recentlyMaxRef = useRef(0);
+  recentlyMaxRef.current = data.reduce<number>((m, d) => Math.max(m, d.memory?.totalJSHeapSize ?? 0), 0);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -103,7 +105,7 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
         ];
       });
       if (memory) {
-        setMax(m => Math.max(m, memory.totalJSHeapSize));
+        setMax(m => Math.max(m * 0.9 + recentlyMaxRef.current * 0.1, memory.totalJSHeapSize));
       }
       timer = setTimeout(update, interval);
     };

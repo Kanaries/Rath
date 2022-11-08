@@ -1,10 +1,12 @@
 import { DefaultButton, Slider, Toggle } from "@fluentui/react";
 import produce from "immer";
+import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import useErrorBoundary from "../../../hooks/use-error-boundary";
 import type { IFieldMeta, IRow } from "../../../interfaces";
-import { BgKnowledge } from "../config";
+import type { CausalStore } from "../../../store/causalStore";
+import type { ModifiableBgKnowledge } from "../config";
 import ExplorerMainView from "./explorerMainView";
 import FlowAnalyzer, { NodeWithScore } from "./flowAnalyzer";
 
@@ -29,9 +31,8 @@ export interface ExplorerProps {
     dataSource: IRow[];
     fields: readonly Readonly<IFieldMeta>[];
     scoreMatrix: readonly (readonly number[])[];
-    causalMatrix: readonly (readonly number[])[];
-    curAlgo: string;
-    preconditions: BgKnowledge[];
+    causalResult: CausalStore['lastResult'];
+    preconditions: ModifiableBgKnowledge[];
     onNodeSelected: (
         node: Readonly<IFieldMeta> | null,
         simpleCause: readonly Readonly<NodeWithScore>[],
@@ -42,7 +43,7 @@ export interface ExplorerProps {
     onLinkTogether: (srcIdx: number, tarIdx: number) => void;
 }
 
-const sNormalize = (matrix: ExplorerProps['causalMatrix']): number[][] => {
+const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
     return matrix.map(vec => vec.map(n => 2 / (1 + Math.exp(-n)) - 1));
 };
 
@@ -99,7 +100,7 @@ const MainView = styled.div`
     }
 `;
 
-const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMatrix, onNodeSelected, onLinkTogether, preconditions, curAlgo }) => {
+const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalResult, onNodeSelected, onLinkTogether, preconditions }) => {
     const [cutThreshold, setCutThreshold] = useState(0);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
@@ -116,10 +117,21 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
     }, [fields]);
 
     const links = useMemo<CausalLink[]>(() => {
+        if (!causalResult) {
+            return [];
+        }
+
+        const { algoName, causalStrength } = causalResult;
+
+        if (causalStrength.length !== modifiedMatrix.length) {
+            console.warn(`lengths of matrixes do not match`);
+            return [];
+        }
+
         const links: CausalLink[] = [];
 
         /* eslint no-fallthrough: ["error", { "allowEmptyCase": true }] */
-        switch (curAlgo) {
+        switch (algoName) {
             case 'CD-NOD':
             case 'PC': {
                 // cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicate i –> j;
@@ -128,8 +140,8 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                 for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
                     for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
                         const weight = modifiedMatrix[i][j];
-                        const forwardFlag = causalMatrix[i][j];
-                        const backwardFlag = causalMatrix[j][i];
+                        const forwardFlag = causalStrength[i][j];
+                        const backwardFlag = causalStrength[j][i];
                         if (backwardFlag === 1 && forwardFlag === -1) {
                             links.push({
                                 causeId: i,
@@ -171,8 +183,8 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                 for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
                     for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
                         const weight = modifiedMatrix[i][j];
-                        const forwardFlag = causalMatrix[i][j];
-                        const backwardFlag = causalMatrix[j][i];
+                        const forwardFlag = causalStrength[i][j];
+                        const backwardFlag = causalStrength[j][i];
                         if (backwardFlag === 1 && forwardFlag === -1) {
                             links.push({
                                 causeId: i,
@@ -219,8 +231,8 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                 for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
                     for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
                         const weight = modifiedMatrix[i][j];
-                        const forwardFlag = causalMatrix[i][j];
-                        const backwardFlag = causalMatrix[j][i];
+                        const forwardFlag = causalStrength[i][j];
+                        const backwardFlag = causalStrength[j][i];
                         if (backwardFlag === 1 && forwardFlag === -1) {
                             links.push({
                                 causeId: i,
@@ -255,7 +267,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                             continue;
                         }
                         const weight = modifiedMatrix[i][j];
-                        const linked = causalMatrix[i][j] === 1;
+                        const linked = causalStrength[i][j] === 1;
                         if (linked) {
                             links.push({
                                 causeId: i,
@@ -269,13 +281,13 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
                 break;
             }
             default: {
-                console.warn(`Unknown algo: ${curAlgo}`);
+                console.warn(`Unknown algo: ${algoName}`);
                 break;
             }
         }
 
         return links.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
-    }, [modifiedMatrix, causalMatrix, curAlgo]);
+    }, [modifiedMatrix, causalResult]);
 
     const value = useMemo(() => ({ nodes, links }), [nodes, links]);
 
@@ -330,7 +342,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
     }, [mode, focus, handleChange, value, onLinkTogether]);
 
     const ErrorBoundary = useErrorBoundary((err, info) => {
-        console.error(err ?? info);
+        // console.error(err ?? info);
         return (
             <div
                 style={{
@@ -414,4 +426,4 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalMa
 };
 
 
-export default Explorer;
+export default observer(Explorer);

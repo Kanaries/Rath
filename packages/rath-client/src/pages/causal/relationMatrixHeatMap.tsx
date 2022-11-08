@@ -1,10 +1,11 @@
+import type { DeepReadonly } from '@kanaries/graphic-walker/dist/interfaces';
 import React, { useEffect, useMemo, useRef } from 'react';
 import embed from 'vega-embed';
 import { IFieldMeta, IRow } from '../../interfaces';
 
 interface Props {
-    data: number[][];
-    fields: IFieldMeta[];
+    data: DeepReadonly<number[][]>;
+    fields: DeepReadonly<IFieldMeta[]>;
     absolute?: boolean;
     onSelect?: (xFieldId: string, yFieldId: string) => void;
 }

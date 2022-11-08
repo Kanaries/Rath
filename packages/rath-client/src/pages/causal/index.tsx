@@ -17,7 +17,7 @@ import Params from './params';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 // import RelationTree from './tree';
 import { NodeWithScore } from './explorer/flowAnalyzer';
-import type { BgKnowledge } from './config';
+import type { BgKnowledge, ModifiableBgKnowledge } from './config';
 import { FilterCell } from './filters';
 
 const VIZ_SUBSET_LIMIT = 2_000;
@@ -26,13 +26,35 @@ const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
-    const { igMatrix, causalStrength, curAlgo, causalFields, computing } = causalStore;
+    const { igMatrix, lastResult, computing } = causalStore;
     
     const [focusFields, setFocusFields] = useState<string[]>([]);
-    const [editingPrecondition, setEditingPrecondition] = useState<Partial<BgKnowledge>>({ type: 'directed' });
-    const [precondition, setPrecondition] = useState<BgKnowledge[]>([]);
+    const [editingPrecondition, setEditingPrecondition] = useState<Partial<ModifiableBgKnowledge>>({ type: 'must-link' });
+    const [modifiablePrecondition, setModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
 
     const selectedFields = useMemo(() => focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!).filter(Boolean), [focusFields, fieldMetas]);
+
+    const precondition = useMemo<BgKnowledge[]>(() => {
+        if (computing || igMatrix.length !== selectedFields.length) {
+            return [];
+        }
+        return modifiablePrecondition.reduce<BgKnowledge[]>((list, decl) => {
+            const srcIdx = selectedFields.findIndex(f => f.fid === decl.src);
+            const tarIdx = selectedFields.findIndex(f => f.fid === decl.tar);
+
+            if (srcIdx !== -1 && tarIdx !== -1) {
+                list.push({
+                    src: decl.src,
+                    tar: decl.tar,
+                    type: decl.type === 'must-link' ? 1
+                        : decl.type === 'must-not-link' ? -1
+                        : (igMatrix[srcIdx][tarIdx] + 1) / 2,   // TODO: 暂时定为一半
+                });
+            }
+
+            return list;
+        }, []);
+    }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
 
     const [sampleRate, setSampleRate] = useState(1);
     const [appliedSampleRate, setAppliedSampleRate] = useState(sampleRate);
@@ -72,21 +94,21 @@ const CausalPage: React.FC = () => {
         setFocusFields(
             fieldMetas.filter(f => f.disable !== true).slice(0, 10).map(f => f.fid) // 默认只使用前 10 个
         );
-        setPrecondition(
-            fieldMetas.reduce<BgKnowledge[]>((list, f) => {
+        setModifiablePrecondition(
+            fieldMetas.reduce<ModifiableBgKnowledge[]>((list, f) => {
                 if (f.extInfo) {
                     for (const from of f.extInfo.extFrom) {
                         list.push({
                             src: from,
                             tar: f.fid,
-                            type: 'directed',
+                            type: 'must-link',
                         });
                     }
                 }
                 return list;
             }, [])
         );
-        setEditingPrecondition({ type: 'directed' });
+        setEditingPrecondition({ type: 'must-link' });
     }, [fieldMetas]);
 
     useEffect(() => {
@@ -94,8 +116,8 @@ const CausalPage: React.FC = () => {
     }, [causalStore, fieldMetas]);
 
     useEffect(() => {
-        causalStore.computeIGMatrix(dataSubset, focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!));
-    }, [fieldMetas, focusFields, dataSubset, causalStore]);
+        causalStore.computeIGMatrix(dataSubset, selectedFields);
+    }, [selectedFields, dataSubset, causalStore]);
 
     // useEffect(() => {
     //     causalStore.computeIGCondMatrix(dataSubset, fieldMetas);
@@ -189,7 +211,7 @@ const CausalPage: React.FC = () => {
         // };
     }, [fieldGroup]);
 
-    const exploringFields = igMatrix.length === causalStrength.length ? causalFields : selectedFields;
+    const exploringFields = igMatrix.length === lastResult?.causalStrength.length ? lastResult.inputFields : selectedFields;
 
     return (
         <div className="content-container">
@@ -297,7 +319,7 @@ const CausalPage: React.FC = () => {
                                     tar: p.tar === fid ? undefined : p.tar,
                                 }));
                             }}
-                            options={fieldMetas.map(f => ({
+                            options={selectedFields.map(f => ({
                                 key: f.fid,
                                 text: f.name ?? f.fid,
                             }))}
@@ -316,9 +338,9 @@ const CausalPage: React.FC = () => {
                                 }));
                             }}
                             options={[
-                                { key: 'directed', text: '-->' },
-                                { key: 'bidirected', text: '<->' },
-                                { key: 'undirected', text: '---' },
+                                { key: 'must-link', text: 'True' },
+                                { key: 'must-not-link', text: 'False' },
+                                { key: 'prefer-link', text: 'Prefer True' },
                             ]}
                             styles={{ root: { width: '10%' }, caretDownWrapper: { display: 'none' }, title: { padding: '0 8px', textAlign: 'center' } }}
                         />
@@ -336,7 +358,7 @@ const CausalPage: React.FC = () => {
                                     src: p.src === fid ? undefined : p.src,
                                 }));
                             }}
-                            options={fieldMetas.map(f => ({
+                            options={selectedFields.map(f => ({
                                 key: f.fid,
                                 text: f.name ?? f.fid,
                             }))}
@@ -354,13 +376,13 @@ const CausalPage: React.FC = () => {
                             onClick={() => {
                                 if (editingPrecondition.src && editingPrecondition.tar && editingPrecondition.type && editingPrecondition.src !== editingPrecondition.tar) {
                                     setEditingPrecondition({ type: editingPrecondition.type });
-                                    setPrecondition(list => [...list, editingPrecondition as BgKnowledge]);
+                                    setModifiablePrecondition(list => [...list, editingPrecondition as ModifiableBgKnowledge]);
                                 }
                             }}
                         />
                     </div>
                     <List
-                        items={precondition}
+                        items={modifiablePrecondition}
                         onRenderCell={(item, i) => item ? (
                             <div data-is-focusable={true} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                 <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -368,9 +390,9 @@ const CausalPage: React.FC = () => {
                                 </span>
                                 <span style={{ width: '20%' }}>
                                     {({
-                                        directed: '----->',
-                                        bidirected: '<---->',
-                                        undirected: '------'
+                                        'must-link': 'must link',
+                                        'must-not-link': 'must not link',
+                                        'prefer-link': 'prefer to link'
                                     } as const)[item.type]}
                                 </span>
                                 <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -387,7 +409,7 @@ const CausalPage: React.FC = () => {
                                     }}
                                     onClick={() => {
                                         if (typeof i === 'number') {
-                                            setPrecondition(list => {
+                                            setModifiablePrecondition(list => {
                                                 const next = [...list];
                                                 next.splice(i, 1);
                                                 return next;
@@ -414,8 +436,7 @@ const CausalPage: React.FC = () => {
                                 dataSubset,
                                 fieldMetas,
                                 focusFields,
-                                precondition,
-                                causalStore.causalAlgorithm
+                                precondition
                             );
                         }}
                     />
@@ -446,15 +467,12 @@ const CausalPage: React.FC = () => {
                         {computing && <Spinner label="computings" />}
                     </div> */}
                     <div>
-                        {dataSubset.length > 0 &&
-                            causalStrength.length > 0 &&
-                            causalStrength.length === causalFields.length &&
+                        {dataSubset.length > 0 && lastResult?.causalStrength.length &&
                             !computing && (
                                 <RelationMatrixHeatMap
-                                    
                                     // absolute
-                                    fields={causalFields}
-                                    data={causalStrength}
+                                    fields={lastResult.inputFields}
+                                    data={lastResult.causalStrength}
                                     // onSelect={onFieldGroupSelect}
                                 />
                             )}
@@ -483,16 +501,15 @@ const CausalPage: React.FC = () => {
                                 dataSource={dataSubset}
                                 fields={exploringFields}
                                 scoreMatrix={igMatrix}
-                                causalMatrix={causalStrength}
-                                curAlgo={curAlgo}
-                                preconditions={precondition}
+                                causalResult={lastResult}
+                                preconditions={modifiablePrecondition}
                                 onNodeSelected={handleSubTreeSelected}
-                                onLinkTogether={(srcIdx, tarIdx) => setPrecondition(list => [
+                                onLinkTogether={(srcIdx, tarIdx) => setModifiablePrecondition(list => [
                                     ...list,
                                     {
                                         src: exploringFields[srcIdx].fid,
                                         tar: exploringFields[tarIdx].fid,
-                                        type: 'directed',
+                                        type: 'must-link',
                                     },
                                 ])}
                             />
