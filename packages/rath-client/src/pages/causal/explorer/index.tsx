@@ -5,7 +5,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import useErrorBoundary from "../../../hooks/use-error-boundary";
 import type { IFieldMeta, IRow } from "../../../interfaces";
-import type { CausalStore } from "../../../store/causalStore";
+import { useGlobalStore } from "../../../store";
 import type { ModifiableBgKnowledge } from "../config";
 import ExplorerMainView from "./explorerMainView";
 import FlowAnalyzer, { NodeWithScore } from "./flowAnalyzer";
@@ -31,7 +31,6 @@ export interface ExplorerProps {
     dataSource: IRow[];
     fields: readonly Readonly<IFieldMeta>[];
     scoreMatrix: readonly (readonly number[])[];
-    causalResult: CausalStore['lastResult'];
     preconditions: ModifiableBgKnowledge[];
     onNodeSelected: (
         node: Readonly<IFieldMeta> | null,
@@ -100,7 +99,10 @@ const MainView = styled.div`
     }
 `;
 
-const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalResult, onNodeSelected, onLinkTogether, preconditions }) => {
+const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSelected, onLinkTogether, preconditions }) => {
+    const { causalStore } = useGlobalStore();
+    const { causalAlgorithm, causalStrength } = causalStore;
+
     const [cutThreshold, setCutThreshold] = useState(0);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
@@ -117,12 +119,6 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalRe
     }, [fields]);
 
     const links = useMemo<CausalLink[]>(() => {
-        if (!causalResult) {
-            return [];
-        }
-
-        const { algoName, causalStrength } = causalResult;
-
         if (causalStrength.length !== modifiedMatrix.length) {
             console.warn(`lengths of matrixes do not match`);
             return [];
@@ -131,7 +127,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalRe
         const links: CausalLink[] = [];
 
         /* eslint no-fallthrough: ["error", { "allowEmptyCase": true }] */
-        switch (algoName) {
+        switch (causalAlgorithm) {
             case 'CD-NOD':
             case 'PC': {
                 // cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicate i –> j;
@@ -281,13 +277,13 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, causalRe
                 break;
             }
             default: {
-                console.warn(`Unknown algo: ${algoName}`);
+                console.warn(`Unknown algo: ${causalAlgorithm}`);
                 break;
             }
         }
 
         return links.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
-    }, [modifiedMatrix, causalResult]);
+    }, [modifiedMatrix, causalAlgorithm, causalStrength]);
 
     const value = useMemo(() => ({ nodes, links }), [nodes, links]);
 

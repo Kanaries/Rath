@@ -6,9 +6,10 @@ import {
     PanelType,
     PrimaryButton,
 } from '@fluentui/react';
+import produce from 'immer';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { makeRenderLabelHandler } from '../../components/labelTooltip';
 import { IRow } from '../../interfaces';
 import { useGlobalStore } from '../../store';
@@ -17,8 +18,33 @@ import DynamicForm from './dynamicForm';
 
 const Params: React.FC<{ dataSource: IRow[], focusFields: string[]; precondition: BgKnowledge[] }> = ({ focusFields, precondition, dataSource }) => {
     const { causalStore } = useGlobalStore();
-    const { causalAlgorithm, causalParams, showSettings } = causalStore;
-    const { causalAlgorithmForm, causalAlgorithmOptions } = causalStore;
+    const { causalAlgorithm, causalParams, showSettings, causalAlgorithmForm, causalAlgorithmOptions } = causalStore;
+
+    const [algoName, setAlgoName] = useState(causalAlgorithm);
+    const [params, setParams] = useState<{ [algo: string]: { [key: string]: any } }>(causalParams[causalAlgorithm]);
+
+    useEffect(() => {
+        setAlgoName(causalAlgorithm);
+    }, [causalAlgorithm, showSettings]);
+
+    useEffect(() => {
+        setParams(causalParams[causalAlgorithm]);
+    }, [causalParams, showSettings]);
+
+    const form = useMemo(() => causalAlgorithmForm[algoName], [causalAlgorithmForm, algoName]);
+
+    const updateParam = (key: string, value: any) => {
+        setParams(p => produce(toJS(p), draft => {
+            draft[key] = value;
+        }));
+    };
+
+    const saveParamsAndRun = () => {
+        causalStore.updateCausalAlgoAndParams(algoName, params);
+        causalStore.reRunCausalDiscovery(dataSource, focusFields, precondition);
+        causalStore.toggleSettings(false);
+    };
+
     return (
         <div>
             <IconButton
@@ -33,33 +59,26 @@ const Params: React.FC<{ dataSource: IRow[], focusFields: string[]; precondition
                     causalStore.toggleSettings(false);
                 }}
             >
-                
                 <Label>Settings</Label>
-                
                 <Dropdown
                     label="Algorithm"
                     options={causalAlgorithmOptions}
-                    selectedKey={causalAlgorithm}
+                    selectedKey={algoName}
                     onChange={(e, o) => {
-                        o && causalStore.switchCausalAlgorithm(o.key as string);
+                        o && setAlgoName(o.key as string);
                     }}
                     onRenderLabel={makeRenderLabelHandler('The algorithm to use.')}
                 />
-                <pre>{ causalStore.causalAlgorithmForm[causalAlgorithm].description }</pre>
+                <pre>{ form.description }</pre>
                 <DynamicForm
-                    form={causalAlgorithmForm[causalAlgorithm as string]!}
-                    values={toJS(causalParams[causalAlgorithm])}
-                    onChange={(key, value) => {
-                        causalStore.updateCausalParamsValue(key as any, value);
-                    }}
+                    form={form}
+                    values={toJS(params)}
+                    onChange={updateParam}
                 />
                 <PrimaryButton
                     style={{ marginTop: '10px' }}
                     text="Run"
-                    onClick={() => {
-                        causalStore.reRunCausalDiscovery(dataSource, focusFields, precondition);
-                        causalStore.toggleSettings(false);
-                    }}
+                    onClick={saveParamsAndRun}
                 />
             </Panel>
         </div>

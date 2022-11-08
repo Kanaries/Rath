@@ -270,7 +270,13 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 setSize([width, height]);
             };
             const ro = new ResizeObserver(cb);
-            const ito = new IntersectionObserver(cb);   // 防止因为卡顿获取到错误的高度
+            const icb: IntersectionObserverCallback = ([entry]) => {
+                if (entry.intersectionRatio > 0) {
+                    cb();
+                    ito.disconnect();
+                }
+            };
+            const ito = new IntersectionObserver(icb);   // 防止因为卡顿获取到错误的高度
             ro.observe(container);
             ito.observe(container);
             return () => {
