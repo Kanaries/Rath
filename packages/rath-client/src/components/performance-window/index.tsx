@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { vega } from "vega-embed";
 import ReactVega from "../react-vega";
@@ -61,7 +61,7 @@ const formatSize = (size: number): string => {
       num /= 1024;
       if (num > 1024 * 1.2) {
         num /= 1024;
-        return `${num.toFixed(1)} GB`;
+        return `${num.toFixed(2)} GB`;
       } else {
         return `${num.toFixed(1)} MB`;
       }
@@ -82,6 +82,8 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
   const isDraggingRef = useRef(false);
   const ref = useRef<HTMLDivElement>(null);
   const [receiveEvents, setReceiveEvents] = useState(true);
+  const recentlyMaxRef = useRef(0);
+  recentlyMaxRef.current = data.reduce<number>((m, d) => Math.max(m, d.memory?.totalJSHeapSize ?? 0), 0);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -92,11 +94,18 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
       setData(list => {
         return [
           ...list.filter(item => time - item.time <= recordLength),
-          { time, memory },
+          {
+            time,
+            memory: memory ? {
+              jsHeapSizeLimit: memory.jsHeapSizeLimit,
+              totalJSHeapSize: memory.totalJSHeapSize,
+              usedJSHeapSize: memory.usedJSHeapSize,
+            } : undefined,
+          },
         ];
       });
       if (memory) {
-        setMax(m => Math.max(m, memory.totalJSHeapSize));
+        setMax(m => Math.max(m * 0.9 + recentlyMaxRef.current * 0.1, memory.totalJSHeapSize));
       }
       timer = setTimeout(update, interval);
     };
@@ -170,7 +179,8 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
   const current = data.at(-1);
 
   // const handleMouseDown = useCallback(() => )
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     setReceiveEvents(false);
   }, []);
 

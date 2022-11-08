@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import G6 from "@antv/g6";
 import type { IFieldMeta } from "../../../interfaces";
-import { BgKnowledge } from "../config";
+import type { ModifiableBgKnowledge } from "../config";
 import type { DiagramGraphData } from ".";
 
 
@@ -22,7 +22,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     focus: number | null;
     onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
-    preconditions: BgKnowledge[];
+    preconditions: ModifiableBgKnowledge[];
 }, never>, 'onChange' | 'ref'>;
 
 const arrows = {
@@ -40,6 +40,21 @@ const arrows = {
     },
     'weak directed': {
         start: '',
+        end: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
+    },
+} as const;
+
+const arrowsForBK = {
+    'must-link': {
+        start: 'M 12,0 L 28,8 L 28,-8 Z',
+        end: 'M 12,0 L 28,8 L 28,-8 Z',
+    },
+    'must-not-link': {
+        start: 'M 14,6 L 26,-6 M 14,-6 L 26,6',
+        end: 'M 14,6 L 26,-6 M 14,-6 L 26,6',
+    },
+    'prefer-link': {
+        start: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
         end: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
     },
 } as const;
@@ -184,11 +199,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                         style: {
                             startArrow: {
                                 fill: '#F6BD16',
-                                path: arrows[bk.type].start,
+                                path: arrowsForBK[bk.type].start,
                             },
                             endArrow: {
                                 fill: '#F6BD16',
-                                path: arrows[bk.type].end,
+                                path: arrowsForBK[bk.type].end,
                             },
                         },
                     })),
@@ -255,9 +270,12 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 setSize([width, height]);
             };
             const ro = new ResizeObserver(cb);
+            const ito = new IntersectionObserver(cb);   // 防止因为卡顿获取到错误的高度
             ro.observe(container);
+            ito.observe(container);
             return () => {
                 ro.disconnect();
+                ito.disconnect();
             };
         }
     }, []);

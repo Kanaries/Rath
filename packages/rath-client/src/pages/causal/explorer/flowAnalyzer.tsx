@@ -13,7 +13,7 @@ import {
     coordQuad,
 } from 'd3-dag';
 import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
-import { Dropdown } from "@fluentui/react";
+import { Dropdown, Slider } from "@fluentui/react";
 import styled from "styled-components";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
@@ -81,7 +81,7 @@ const SVGGroup = styled.div`
             cursor: pointer;
         }
     }
-    > div:not(.tools) {
+    > div:not(.tools):not(.msg) {
         flex-grow: 0;
         flex-shrink: 0;
         display: flex;
@@ -105,12 +105,23 @@ const SVGGroup = styled.div`
             }
         }
     }
+    > div.msg {
+        padding: 2em;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: static;
+        color: #a87c40;
+    }
 `;
 
 const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
 const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, cutThreshold, onUpdate, onClickNode }) => {
     const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
+
+    const [limit, setLimit] = useState(10);
 
     const normalizedLinks = useMemo(() => {
         const nodeCauseWeights = data.nodes.map(() => 0);
@@ -124,8 +135,16 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             effectId: link.effectId,
             score: link.score / nodeCauseWeights[link.effectId],
             type: link.type,
-        })).filter(link => link.score >= cutThreshold);
-    }, [data, cutThreshold]);
+        }));
+    }, [data]);
+
+    const linksCount = normalizedLinks.length;
+
+    const linksInView = useMemo(() => {
+        return normalizedLinks.filter(link => link.score >= cutThreshold).sort(
+            (a, b) => b.score - a.score
+        ).slice(0, limit);
+    }, [normalizedLinks, cutThreshold, limit]);
 
     const getPathScore = useCallback((effectIdx: number) => {
         const scores = new Map<number, number>();
@@ -148,7 +167,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
 
     const flowsAsOrigin = useMemo<Flow[]>(() => {
         if (field) {
-            let links = normalizedLinks.map(link => link);
+            let links = linksInView.map(link => link);
             const ready = [index];
             const flows: Flow[] = [{
                 id: `${index}`,
@@ -213,11 +232,11 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             return flows;
         }
         return [];
-    }, [normalizedLinks, field, index]);
+    }, [linksInView, field, index]);
 
     const flowsAsDestination = useMemo<Flow[]>(() => {
         if (field) {
-            let links = normalizedLinks.map(link => link);
+            let links = linksInView.map(link => link);
             const ready = [index];
             const flows: Flow[] = [{
                 id: `${index}`,
@@ -282,7 +301,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             return flows;
         }
         return [];
-    }, [normalizedLinks, field, index, cutThreshold]);
+    }, [linksInView, field, index, cutThreshold]);
 
     useEffect(() => {
         if (field) {
@@ -365,48 +384,65 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             );
     }, [tooManyLinks]);
 
-    const destinationTree = useMemo(() => {
-        const dag = dagStratify()(flowsAsDestination);
-        return {
-            // @ts-ignore
-            size: layout(dag),
-            steps: dag.size(),
-            nodes: dag.descendants(),
-            links: dag.links(),
-        };
+    const [destinationTree, destTreeMsg] = useMemo(() => {
+        if (flowsAsDestination.length === 0) {
+            return [null, null];
+        }
+        try {
+            const dag = dagStratify()(flowsAsDestination);
+            return [{
+                // @ts-ignore
+                size: layout(dag),
+                steps: dag.size(),
+                nodes: dag.descendants(),
+                links: dag.links(),
+            }, null];
+        } catch (error) {
+            return [null, `${error}`];
+        }
     }, [flowsAsDestination, layout]);
 
-    const originTree = useMemo(() => {
+    const [originTree, oriTreeMsg] = useMemo(() => {
         if (flowsAsOrigin.length === 0) {
-            return null;
+            return [null, null];
         }
-        const dag = dagStratify()(flowsAsOrigin);
-        return {
-            // @ts-ignore
-            size: layout(dag),
-            steps: dag.size(),
-            nodes: dag.descendants(),
-            links: dag.links(),
-        };
+        try {
+            const dag = dagStratify()(flowsAsOrigin);
+            return [{
+                // @ts-ignore
+                size: layout(dag),
+                steps: dag.size(),
+                nodes: dag.descendants(),
+                links: dag.links(),
+            }, null];
+        } catch (error) {
+            return [null, `${error}`];
+        }
     }, [flowsAsOrigin, layout]);
 
-    const combinedTree = useMemo(() => {
+    const [combinedTree, cbnTreeMsg] = useMemo(() => {
         if (combinedFlows.length === 0) {
-            return null;
+            return [null, null];
         }
-        const dag = dagStratify()(combinedFlows);
-        return {
-            // @ts-ignore
-            size: layout(dag),
-            steps: dag.size(),
-            nodes: dag.descendants(),
-            links: dag.links(),
-        };
+        try {
+            const dag = dagStratify()(combinedFlows);
+            return [{
+                // @ts-ignore
+                size: layout(dag),
+                steps: dag.size(),
+                nodes: dag.descendants(),
+                links: dag.links(),
+            }, null];
+        } catch (error) {
+            console.warn(error);
+            return [null, null];
+        }
     }, [combinedFlows, layout]);
 
     const [mode, setMode] = useState<'cause' | 'effect'>('effect');
 
     const subtree = useMemo(() => mode === 'cause' ? destinationTree : originTree, [mode, destinationTree, originTree]);
+    const subtreeMsg = useMemo(() => mode === 'cause' ? destTreeMsg : oriTreeMsg, [mode, destTreeMsg, oriTreeMsg]);
 
     const [brush, setBrush] = useState<IBrushSignalStore[]>([]);
     const [brushIdx, setBrushIdx] = useState<number>(-1);
@@ -502,9 +538,22 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                         );
                     })}
                 </svg>
-            ) : null) : null}
+            ) : (
+                <div className="msg" style={{ height: '50vh' }}>
+                    <p>{'Cannot display corresponding subset because it is not a directed acyclic graph.'}</p>
+                    <p>{'Try to click on a different node, turn up the link filter above or turn down the display limit.'}</p>
+                    <small>{cbnTreeMsg}</small>
+                </div>
+            )) : null}
             {field && (
                 <div className="tools" style={{ width: '100%', padding: '1em 4em' }}>
+                    <Slider
+                        label="Display Limit"
+                        min={1}
+                        max={Math.max(linksCount, limit)}
+                        value={limit}
+                        onChange={value => setLimit(value)}
+                    />
                     <Dropdown
                         label="Exploration Mode"
                         selectedKey={mode}
@@ -524,91 +573,99 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                             }
                         }}
                     />
-                    {subtree ? null : (
+                    {combinedTree && !subtree ? (
                         <p>Click a node to explore.</p>
-                    )}
+                    ) : null}
                 </div>
             )}
-            {subtree ? (
-                <div ref={ref}>
-                    <svg viewBox={`0 0 ${w} ${h}`} strokeLinecap="round" strokeLinejoin="round">
-                        <defs>
-                            <marker id="flow-arrow" viewBox="0 -5 10 10" refX={32} refY="0" markerWidth={3} markerHeight={3} orient="auto">
-                                <path fill="none" stroke="#463782" strokeWidth={2} d="M0,-5L10,0L0,5" />
-                            </marker>
-                        </defs>
-                        {subtree.links.map((link, i, { length }) => (
-                            <path
-                                key={i}
-                                d={line(link.points.map(p => ({ x: p.y + 0.5, y: p.x + 0.5 }))) ?? ''}
-                                fill="none"
-                                stroke="#441ce3"
-                                strokeWidth={0.03}
-                                markerEnd="url(#flow-arrow)"
-                                opacity={0.25}
-                                style={{
-                                    filter: `hue-rotate(${180 * i / length}deg)`,
-                                }}
-                            />
-                        ))}
-                    </svg>
-                    <div>
-                        {subtree.nodes.map((node, i) => {
-                            const idx = parseInt(node.data.id, 10);
-                            const f = fields[idx];
-                            return (
-                                <div
+            {field ? (
+                subtree ? (
+                    <div ref={ref}>
+                        <svg viewBox={`0 0 ${w} ${h}`} strokeLinecap="round" strokeLinejoin="round">
+                            <defs>
+                                <marker id="flow-arrow" viewBox="0 -5 10 10" refX={32} refY="0" markerWidth={3} markerHeight={3} orient="auto">
+                                    <path fill="none" stroke="#463782" strokeWidth={2} d="M0,-5L10,0L0,5" />
+                                </marker>
+                            </defs>
+                            {subtree.links.map((link, i, { length }) => (
+                                <path
                                     key={i}
+                                    d={line(link.points.map(p => ({ x: p.y + 0.5, y: p.x + 0.5 }))) ?? ''}
+                                    fill="none"
+                                    stroke="#441ce3"
+                                    strokeWidth={0.03}
+                                    markerEnd="url(#flow-arrow)"
+                                    opacity={0.25}
                                     style={{
-                                        left: `${fx(node.y ?? 0)}px`,
-                                        top: `${fy(node.x ?? 0)}px`,
-                                        width: `${fSize(0.6)}px`,
-                                        height: `${fSize(0.6)}px`,
-                                        borderColor: index === idx ? '#995ccf' : undefined,
+                                        filter: `hue-rotate(${180 * i / length}deg)`,
                                     }}
-                                >
-                                    <ColDist
-                                        data={dataSource}
-                                        actions={false}
-                                        fid={f.fid}
-                                        name={f.name}
-                                        semanticType={f.semanticType}
-                                        onBrushSignal={brush => {
-                                            if (!brush) {
-                                                return;
-                                            }
-                                            setBrush(brush);
-                                            setBrushIdx(i);
-                                        }}
-                                        width={fSize(0.6)}
-                                        height={fSize(0.6)}
-                                        axis={null}
-                                        brush={brushIdx === i ? null : brush}
-                                    />
-                                    <label
+                                />
+                            ))}
+                        </svg>
+                        <div>
+                            {subtree.nodes.map((node, i) => {
+                                const idx = parseInt(node.data.id, 10);
+                                const f = fields[idx];
+                                return (
+                                    <div
+                                        key={i}
                                         style={{
-                                            position: 'absolute',
-                                            bottom: '100%',
-                                            left: '50%',
-                                            transform: 'translate(-50%, -0.4em)',
-                                            cursor: index === idx ? 'default' : 'pointer',
-                                            color: index === idx ? '#995ccf' : '#5da3dc',
-                                            fontWeight: 550,
-                                        }}
-                                        onClick={() => {
-                                            if (index !== idx) {
-                                                onClickNode?.({ nodeId: idx });
-                                            }
+                                            left: `${fx(node.y ?? 0)}px`,
+                                            top: `${fy(node.x ?? 0)}px`,
+                                            width: `${fSize(0.6)}px`,
+                                            height: `${fSize(0.6)}px`,
+                                            borderColor: index === idx ? '#995ccf' : undefined,
                                         }}
                                     >
-                                        {f.name ?? f.fid}
-                                    </label>
-                                </div>
-                            );
-                        })}
+                                        <ColDist
+                                            data={dataSource}
+                                            actions={false}
+                                            fid={f.fid}
+                                            name={f.name}
+                                            semanticType={f.semanticType}
+                                            onBrushSignal={brush => {
+                                                if (!brush) {
+                                                    return;
+                                                }
+                                                setBrush(brush);
+                                                setBrushIdx(i);
+                                            }}
+                                            width={fSize(0.6)}
+                                            height={fSize(0.6)}
+                                            axis={null}
+                                            brush={brushIdx === i ? null : brush}
+                                        />
+                                        <label
+                                            style={{
+                                                position: 'absolute',
+                                                bottom: '100%',
+                                                left: '50%',
+                                                transform: 'translate(-50%, -0.4em)',
+                                                cursor: index === idx ? 'default' : 'pointer',
+                                                color: index === idx ? '#995ccf' : '#5da3dc',
+                                                fontWeight: 550,
+                                            }}
+                                            onClick={() => {
+                                                if (index !== idx) {
+                                                    onClickNode?.({ nodeId: idx });
+                                                }
+                                            }}
+                                        >
+                                            {f.name ?? f.fid}
+                                        </label>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
-            ) : <div />}
+                ) : (
+                    <div className="msg">
+                        <p>{'Cannot display the group because it is not a directed acyclic graph.'}</p>
+                        <p>{'Try to click on a different node, adjust the link filter or display limit, or change the exploration mode.'}</p>
+                        <small>{subtreeMsg}</small>
+                    </div>
+                )
+            ) : null}
         </SVGGroup>
     );
 };

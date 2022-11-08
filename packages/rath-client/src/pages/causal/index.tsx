@@ -2,10 +2,13 @@ import { ActionButton, ComboBox, DefaultButton, Dropdown, Label, List, PrimaryBu
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
+import { applyFilters } from '@kanaries/loa';
+import produce from 'immer';
 import type { Specification } from 'visual-insights';
-import { IFieldMeta } from '../../interfaces';
+import { IFieldMeta, IFilter } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import { viewSampling } from '../painter/sample';
+import { viewSampling, baseDemoSample } from '../painter/sample';
+import FilterCreationPill from '../../components/filterCreationPill';
 import LaTiaoConsole from '../dataSource/LaTiaoConsole';
 import Explorer from './explorer';
 import SemiEmbed from '../semiAutomation/semiEmbed';
@@ -14,30 +17,66 @@ import Params from './params';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 // import RelationTree from './tree';
 import { NodeWithScore } from './explorer/flowAnalyzer';
-import type { BgKnowledge } from './config';
+import type { BgKnowledge, ModifiableBgKnowledge } from './config';
+import { FilterCell } from './filters';
+
+const VIZ_SUBSET_LIMIT = 2_000;
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
-    const { igMatrix, causalStrength, curAlgo, causalFields, computing } = causalStore;
+    const { igMatrix, lastResult, computing } = causalStore;
     
     const [focusFields, setFocusFields] = useState<string[]>([]);
-    const [editingPrecondition, setEditingPrecondition] = useState<Partial<BgKnowledge>>({ type: 'directed' });
-    const [precondition, setPrecondition] = useState<BgKnowledge[]>([]);
+    const [editingPrecondition, setEditingPrecondition] = useState<Partial<ModifiableBgKnowledge>>({ type: 'must-link' });
+    const [modifiablePrecondition, setModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
 
     const selectedFields = useMemo(() => focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!).filter(Boolean), [focusFields, fieldMetas]);
 
+    const precondition = useMemo<BgKnowledge[]>(() => {
+        if (computing || igMatrix.length !== selectedFields.length) {
+            return [];
+        }
+        return modifiablePrecondition.reduce<BgKnowledge[]>((list, decl) => {
+            const srcIdx = selectedFields.findIndex(f => f.fid === decl.src);
+            const tarIdx = selectedFields.findIndex(f => f.fid === decl.tar);
+
+            if (srcIdx !== -1 && tarIdx !== -1) {
+                list.push({
+                    src: decl.src,
+                    tar: decl.tar,
+                    type: decl.type === 'must-link' ? 1
+                        : decl.type === 'must-not-link' ? -1
+                        : (igMatrix[srcIdx][tarIdx] + 1) / 2,   // TODO: 暂时定为一半
+                });
+            }
+
+            return list;
+        }, []);
+    }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
+
     const [sampleRate, setSampleRate] = useState(1);
     const [appliedSampleRate, setAppliedSampleRate] = useState(sampleRate);
+    const [filters, setFilters] = useState<IFilter[]>([]);
     const dataSource = useMemo(() => {
         if (appliedSampleRate >= 1) {
             return cleanedData;
         }
         const sampleSize = Math.round(cleanedData.length * appliedSampleRate);
         // console.log({sampleSize});
-        return viewSampling(cleanedData, selectedFields, sampleSize);
+        return baseDemoSample(cleanedData, sampleSize);
+        // return viewSampling(cleanedData, selectedFields, sampleSize); // FIXME: 用这个，但是有问题只能得到 0 / full ？
     }, [cleanedData, selectedFields, appliedSampleRate]);
+    const dataSubset = useMemo(() => {
+        return applyFilters(dataSource, filters);
+    }, [dataSource, filters]);
+    const vizSampleData = useMemo(() => {
+        if (dataSubset.length < VIZ_SUBSET_LIMIT) {
+            return dataSubset;
+        }
+        return baseDemoSample(dataSubset, VIZ_SUBSET_LIMIT);
+    }, [dataSubset]);
 
     useEffect(() => {
         if (sampleRate !== appliedSampleRate) {
@@ -52,22 +91,24 @@ const CausalPage: React.FC = () => {
     }, [sampleRate, appliedSampleRate]);
 
     useEffect(() => {
-        setFocusFields(fieldMetas.filter(f => f.disable !== true).map(f => f.fid));
-        setPrecondition(
-            fieldMetas.reduce<BgKnowledge[]>((list, f) => {
+        setFocusFields(
+            fieldMetas.filter(f => f.disable !== true).slice(0, 10).map(f => f.fid) // 默认只使用前 10 个
+        );
+        setModifiablePrecondition(
+            fieldMetas.reduce<ModifiableBgKnowledge[]>((list, f) => {
                 if (f.extInfo) {
                     for (const from of f.extInfo.extFrom) {
                         list.push({
                             src: from,
                             tar: f.fid,
-                            type: 'directed',
+                            type: 'must-link',
                         });
                     }
                 }
                 return list;
             }, [])
         );
-        setEditingPrecondition({ type: 'directed' });
+        setEditingPrecondition({ type: 'must-link' });
     }, [fieldMetas]);
 
     useEffect(() => {
@@ -75,12 +116,12 @@ const CausalPage: React.FC = () => {
     }, [causalStore, fieldMetas]);
 
     useEffect(() => {
-        causalStore.computeIGMatrix(dataSource, focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!));
-    }, [fieldMetas, focusFields, dataSource, causalStore]);
+        causalStore.computeIGMatrix(dataSubset, selectedFields);
+    }, [selectedFields, dataSubset, causalStore]);
 
     // useEffect(() => {
-    //     causalStore.computeIGCondMatrix(dataSource, fieldMetas);
-    // }, [fieldMetas, dataSource, causalStore]);
+    //     causalStore.computeIGCondMatrix(dataSubset, fieldMetas);
+    // }, [fieldMetas, dataSubset, causalStore]);
 
     const onFieldGroupSelect = useCallback(
         (xFid: string, yFid: string) => {
@@ -170,7 +211,7 @@ const CausalPage: React.FC = () => {
         // };
     }, [fieldGroup]);
 
-    const gwEditedRef = useRef(false);
+    const exploringFields = igMatrix.length === lastResult?.causalStrength.length ? lastResult.inputFields : selectedFields;
 
     return (
         <div className="content-container">
@@ -189,10 +230,48 @@ const CausalPage: React.FC = () => {
                     {sampleRate !== appliedSampleRate && <Spinner label="Synchronizing settings..." />}
                 </Stack>
                 <Stack style={{ marginBlock: '1.6em' }}>
+                    <Label>
+                        {`Filters ${filters.length ? `(subset size: ${dataSubset.length} rows)` : '(no filters applied)'}`}
+                    </Label>
+                    <div
+                        style={{
+                            display: 'flex',
+                            paddingBlock: '0.5em',
+                        }}
+                    >
+                        <FilterCreationPill
+                            fields={fieldMetas}
+                            onFilterSubmit={(_, filter) => setFilters(list => [...list, filter])}
+                        />
+                    </div>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            overflow: 'auto hidden',
+                            marginTop: '1em',
+                            padding: '0.8em',
+                            border: '1px solid #8884',
+                        }}
+                    >
+                        {filters.map((filter, i) => {
+                            const field = fieldMetas.find(f => f.fid === filter.fid);
+
+                            return field ? (
+                                <FilterCell key={i} field={field} data={filter} remove={() => setFilters(list => {
+                                    return produce(list, draft => {
+                                        draft.splice(i, 1);
+                                    });
+                                })} />
+                            ) : null;
+                        })}
+                    </div>
+                </Stack>
+                <Stack style={{ marginBlock: '1.6em', alignItems: 'flex-end' }} horizontal >
                     <ComboBox
                         multiSelect
                         selectedKey={focusFields}
-                        label="Selected Fields"
+                        label="Fields to Analyze"
                         allowFreeform
                         options={focusFieldsOption}
                         onChange={(e, option) => {
@@ -205,7 +284,22 @@ const CausalPage: React.FC = () => {
                                 }
                             }
                         }}
+                        styles={{
+                            container: {
+                                flexGrow: 1,
+                                flexShrink: 1,
+                            },
+                        }}
                     />
+                    <DefaultButton onClick={() => setFocusFields(fieldMetas.filter(f => f.disable !== true).map(f => f.fid))}>
+                        Select All
+                    </DefaultButton>
+                    <DefaultButton onClick={() => setFocusFields(fieldMetas.filter(f => f.disable !== true).slice(0, 10).map(f => f.fid))} >
+                        Select First 10 Columns
+                    </DefaultButton>
+                    <DefaultButton onClick={() => setFocusFields([])} >
+                        Clear All
+                    </DefaultButton>
                 </Stack>
                 <Stack style={{ marginBlock: '1.6em 3.2em' }}>
                     <Label>Conditions (Background Knowledge)</Label>
@@ -225,7 +319,7 @@ const CausalPage: React.FC = () => {
                                     tar: p.tar === fid ? undefined : p.tar,
                                 }));
                             }}
-                            options={fieldMetas.map(f => ({
+                            options={selectedFields.map(f => ({
                                 key: f.fid,
                                 text: f.name ?? f.fid,
                             }))}
@@ -244,9 +338,9 @@ const CausalPage: React.FC = () => {
                                 }));
                             }}
                             options={[
-                                { key: 'directed', text: '-->' },
-                                { key: 'bidirected', text: '<->' },
-                                { key: 'undirected', text: '---' },
+                                { key: 'must-link', text: 'True' },
+                                { key: 'must-not-link', text: 'False' },
+                                { key: 'prefer-link', text: 'Prefer True' },
                             ]}
                             styles={{ root: { width: '10%' }, caretDownWrapper: { display: 'none' }, title: { padding: '0 8px', textAlign: 'center' } }}
                         />
@@ -264,7 +358,7 @@ const CausalPage: React.FC = () => {
                                     src: p.src === fid ? undefined : p.src,
                                 }));
                             }}
-                            options={fieldMetas.map(f => ({
+                            options={selectedFields.map(f => ({
                                 key: f.fid,
                                 text: f.name ?? f.fid,
                             }))}
@@ -282,13 +376,13 @@ const CausalPage: React.FC = () => {
                             onClick={() => {
                                 if (editingPrecondition.src && editingPrecondition.tar && editingPrecondition.type && editingPrecondition.src !== editingPrecondition.tar) {
                                     setEditingPrecondition({ type: editingPrecondition.type });
-                                    setPrecondition(list => [...list, editingPrecondition as BgKnowledge]);
+                                    setModifiablePrecondition(list => [...list, editingPrecondition as ModifiableBgKnowledge]);
                                 }
                             }}
                         />
                     </div>
                     <List
-                        items={precondition}
+                        items={modifiablePrecondition}
                         onRenderCell={(item, i) => item ? (
                             <div data-is-focusable={true} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                 <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -296,9 +390,9 @@ const CausalPage: React.FC = () => {
                                 </span>
                                 <span style={{ width: '20%' }}>
                                     {({
-                                        directed: '----->',
-                                        bidirected: '<---->',
-                                        undirected: '------'
+                                        'must-link': 'must link',
+                                        'must-not-link': 'must not link',
+                                        'prefer-link': 'prefer to link'
                                     } as const)[item.type]}
                                 </span>
                                 <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -315,7 +409,7 @@ const CausalPage: React.FC = () => {
                                     }}
                                     onClick={() => {
                                         if (typeof i === 'number') {
-                                            setPrecondition(list => {
+                                            setModifiablePrecondition(list => {
                                                 const next = [...list];
                                                 next.splice(i, 1);
                                                 return next;
@@ -339,21 +433,20 @@ const CausalPage: React.FC = () => {
                         text="Causal Discovery"
                         onClick={() => {
                             causalStore.causalDiscovery(
-                                dataSource,
+                                dataSubset,
                                 fieldMetas,
                                 focusFields,
-                                precondition,
-                                causalStore.causalAlgorithm
+                                precondition
                             );
                         }}
                     />
                     <LaTiaoConsole />
-                    <Params dataSource={dataSource} focusFields={focusFields} precondition={precondition} />
+                    <Params dataSource={dataSubset} focusFields={focusFields} precondition={precondition} />
                 </Stack>
 
                 <div style={{ marginTop: '1em', display: 'flex' }}>
                     <div>
-                        {dataSource.length > 0 && igMatrix.length > 0 && selectedFields.length === igMatrix.length && (
+                        {dataSubset.length > 0 && igMatrix.length > 0 && selectedFields.length === igMatrix.length && (
                             <RelationMatrixHeatMap
                                 absolute
                                 fields={selectedFields}
@@ -363,7 +456,7 @@ const CausalPage: React.FC = () => {
                         )}
                     </div>
                     {/* <div>
-                        {dataSource.length > 0 && !computing && (
+                        {dataSubset.length > 0 && !computing && (
                             <RelationMatrixHeatMap
                                 absolute
                                 fields={fieldMetas}
@@ -374,15 +467,12 @@ const CausalPage: React.FC = () => {
                         {computing && <Spinner label="computings" />}
                     </div> */}
                     <div>
-                        {dataSource.length > 0 &&
-                            causalStrength.length > 0 &&
-                            causalStrength.length === causalFields.length &&
+                        {dataSubset.length > 0 && lastResult?.causalStrength.length &&
                             !computing && (
                                 <RelationMatrixHeatMap
-                                    
                                     // absolute
-                                    fields={causalFields}
-                                    data={causalStrength}
+                                    fields={lastResult.inputFields}
+                                    data={lastResult.causalStrength}
                                     // onSelect={onFieldGroupSelect}
                                 />
                             )}
@@ -390,7 +480,7 @@ const CausalPage: React.FC = () => {
                     </div>
                 </div>
                 {/* <div>
-                    {dataSource.length > 0 &&
+                    {dataSubset.length > 0 &&
                         causalStrength.length > 0 &&
                         causalStrength.length === fieldMetas.length &&
                         !computing && (
@@ -405,25 +495,21 @@ const CausalPage: React.FC = () => {
                         )}
                 </div> */}
                 <div>
-                    {dataSource.length > 0 &&
-                        causalStrength.length > 0 &&
-                        causalStrength.length === causalFields.length &&
-                        causalStrength.length === igMatrix.length &&
+                    {
                         !computing ? (
                             <Explorer
-                                dataSource={dataSource}
-                                fields={causalFields}
+                                dataSource={dataSubset}
+                                fields={exploringFields}
                                 scoreMatrix={igMatrix}
-                                causalMatrix={causalStrength}
-                                curAlgo={curAlgo}
-                                preconditions={precondition}
+                                causalResult={lastResult}
+                                preconditions={modifiablePrecondition}
                                 onNodeSelected={handleSubTreeSelected}
-                                onLinkTogether={(srcIdx, tarIdx) => setPrecondition(list => [
+                                onLinkTogether={(srcIdx, tarIdx) => setModifiablePrecondition(list => [
                                     ...list,
                                     {
-                                        src: causalFields[srcIdx].fid,
-                                        tar: causalFields[tarIdx].fid,
-                                        type: 'directed',
+                                        src: exploringFields[srcIdx].fid,
+                                        tar: exploringFields[tarIdx].fid,
+                                        type: 'must-link',
                                     },
                                 ])}
                             />
@@ -433,19 +519,20 @@ const CausalPage: React.FC = () => {
                 </div>
 
                 <div>
-                    {dataSource.length > 0 && fieldGroup.length > 0 && (
-                        <CrossFilter fields={fieldGroup} dataSource={dataSource} />
+                    {vizSampleData.length > 0 && fieldGroup.length > 0 && (
+                        <CrossFilter fields={fieldGroup} dataSource={vizSampleData} />
                     )}
                 </div>
                 <SemiEmbed fields={fieldGroup} />
                 <div>
+                    {/* 小心这里的内存占用 */}
                     <GraphicWalker
-                        dataSource={dataSource}
+                        dataSource={vizSampleData}
                         rawFields={fieldMetas}
                         hideDataSourceConfig
-                        spec={gwEditedRef.current ? undefined : initialSpec}
+                        spec={initialSpec}
                         i18nLang={langStore.lang}
-                        keepAlive
+                        keepAlive={false}
                     />
                 </div>
             </div>

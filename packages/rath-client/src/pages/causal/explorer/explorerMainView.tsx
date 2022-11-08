@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
 import useErrorBoundary from "../../../hooks/use-error-boundary";
-import { BgKnowledge } from "../config";
+import type { ModifiableBgKnowledge } from "../config";
 // import DAGView from "./DAGView";
 // import ForceView from "./forceView";
 import GraphView from "./graphView";
@@ -29,7 +29,7 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
     focus: number | null;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
-    preconditions: BgKnowledge[];
+    preconditions: ModifiableBgKnowledge[];
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
@@ -37,7 +37,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     ref
 ) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
-        console.error(err ?? info);
+        // console.error(err ?? info);
         return <div style={{
             flexGrow: 1,
             flexShrink: 1,

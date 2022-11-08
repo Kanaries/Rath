@@ -1,25 +1,34 @@
-import { IDropdownOption } from '@fluentui/react';
+import type { IDropdownOption } from '@fluentui/react';
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { notify } from '../components/error';
-import { IFieldMeta, IRow } from '../interfaces';
+import type { IFieldMeta, IRow } from '../interfaces';
 import { CAUSAL_ALGORITHM_FORM, ICausalAlgorithm, makeFormInitParams, PC_PARAMS_FORM, IAlgoSchema, CAUSAL_ALGORITHM_OPTIONS, BgKnowledge } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
 import { DataSourceStore } from './dataSourceStore';
 
 enum CausalServerUrl {
     local = 'http://localhost:8000',
-    // test = 'http://gateway.kanaries.cn:2080/causal',
-    test = 'http://wujiaxins-MacBook-Pro.local:8000',//FIXME:
+    test = 'http://gateway.kanaries.cn:2080/causal',
 }
 export class CausalStore {
     public igMatrix: number[][] = [];
     public igCondMatrix: number[][] = [];
-    public causalStrength: number[][] = [];
-    public curAlgo: string = '';
-    public causalFields: IFieldMeta[];
+    public lastResult: Readonly<{
+        /** Name of algorithm applied that responds this result */
+        algoName: string;
+        /** Fields sent to api as payload, representing the focused fields, the size of it is N */
+        inputFields: IFieldMeta[];
+        /** An (N x N) matrix of flags representing the links between any two nodes */
+        causalStrength: number[][];
+        /** Fields received from algorithm, the starting N items are equals to `inputFields`, and then there may have some extra trailing fields built during the process, the size of it is C (C >= N) */
+        concatFields: IFieldMeta[];
+        /** An (C x C) matrix of flags representing the links between any two concat fields */
+        concatStrength: number[][];
+    }> | null = null;
     public computing: boolean = false;
     public showSettings: boolean = false;
     public focusNodeIndex: number = 0;
+    /** Name of algorithm selected to be used in next call, modified in the settings panel */
     public causalAlgorithm: string = ICausalAlgorithm.PC;
     /** asserts algorithm in keys of `causalStore.causalAlgorithmForm`. */
     public causalParams: { [algo: string]: { [key: string]: any } } = {
@@ -67,13 +76,11 @@ export class CausalStore {
     private dataSourceStore: DataSourceStore;
     constructor(dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore;
-        this.causalFields = dataSourceStore.fieldMetas;
         this.causalAlgorithm = ICausalAlgorithm.PC;
         this.causalParams[ICausalAlgorithm.PC] = makeFormInitParams(PC_PARAMS_FORM);
         this.updateCausalAlgorithmList(dataSourceStore.fieldMetas);
         makeAutoObservable(this, {
-            causalStrength: observable.ref,
-            causalFields: observable.ref,
+            lastResult: observable.ref,
             igMatrix: observable.ref,
             igCondMatrix: observable.ref,
             // @ts-ignore
@@ -134,11 +141,21 @@ export class CausalStore {
             console.error('[CausalAlgorithmList error]:', error);
         }
     }
-    public async causalDiscovery(dataSource: IRow[], fields: IFieldMeta[], focusFields: string[], precondition: BgKnowledge[], algoName: string) {
+    public async causalDiscovery(dataSource: IRow[], fields: IFieldMeta[], focusFields: string[], precondition: BgKnowledge[]) {
+        const algoName = this.causalAlgorithm;
+        const inputFields = focusFields.map(fid => fields.find(f => f.fid === fid)! ?? fid);
+        if (inputFields.some(f => typeof f === 'string')) {
+            notify({
+                title: 'Causal Discovery Error',
+                type: 'error',
+                content: `Fields ${inputFields.filter(f => typeof f === 'string').join(', ')} not found`,
+            });
+            return;
+        }
         try {
             this.computing = true;
-            this.causalStrength = [];
-            const originFieldsLength = focusFields.length;
+            this.lastResult = null;
+            const originFieldsLength = inputFields.length;
             const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
                 method: 'POST',
                 headers: {
@@ -149,15 +166,19 @@ export class CausalStore {
                     fields,
                     focusedFields: focusFields,
                     bgKnowledges: precondition,
-                    params: this.causalParams[this.causalAlgorithm],
+                    params: this.causalParams[algoName],
                 }),
             });
             const result = await res.json();
             if (result.success) {
                 runInAction(() => {
-                    this.curAlgo = algoName;
-                    this.causalFields = (result?.fields?.length > 0) ? result.fields.slice(0, originFieldsLength) : fields;
-                    this.causalStrength = (result.data as number[][]).slice(0, originFieldsLength).map(row => row.slice(0, originFieldsLength));
+                    this.lastResult = {
+                        algoName: algoName,
+                        inputFields: inputFields,
+                        concatFields: (result?.fields ?? []) as IFieldMeta[],
+                        causalStrength: (result.data as number[][]).slice(0, originFieldsLength).map(row => row.slice(0, originFieldsLength)),
+                        concatStrength: result.data as number[][],
+                    };
                 });
             } else {
                 throw new Error(result.message);
@@ -174,6 +195,6 @@ export class CausalStore {
     }
     public async reRunCausalDiscovery(dataSource: IRow[], focusFields: string[], precondition: BgKnowledge[]) {
         const { fieldMetas } = this.dataSourceStore;
-        this.causalDiscovery(dataSource, fieldMetas, focusFields, precondition, this.causalAlgorithm);
+        this.causalDiscovery(dataSource, fieldMetas, focusFields, precondition);
     }
 }

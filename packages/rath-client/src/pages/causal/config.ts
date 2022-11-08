@@ -25,10 +25,25 @@ export type IAlgoSchema = {
     };
 };
 
+/**
+ * a number match { -1 | [0, 1] }
+ * 
+ * -1 for not connected: src ---X--> tar
+ * 1 for must connect: src -------> tar
+ * others for confidence level.
+ */
+export type BgConfidenceLevel = number;
+
 export type BgKnowledge = {
     src: string;
     tar: string;
-    type: 'directed' | 'bidirected' | 'undirected';
+    type: BgConfidenceLevel;
+};
+
+export type ModifiableBgKnowledge = {
+    src: BgKnowledge['src'];
+    tar: BgKnowledge['tar'];
+    type: 'must-link' | 'must-not-link' | 'prefer-link';
 };
 
 export enum UCRule {
