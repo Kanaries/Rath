@@ -2201,10 +2201,10 @@
   dependencies:
     localforage "^1.10.0"
 
-"@kanaries/graphic-walker@0.2.7":
-  version "0.2.7"
-  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.2.7.tgz#ef8bf9b391d866dfa41d1c895f389bfc3b1bd961"
-  integrity sha512-auqe6DCVQGUuI7vg/VZ27w4V0x+x5LQkjLGaFGFLBBSVPOmM/+i4SZCxhAognwElsLBXGPxR3hCBVDqplJbDKg==
+"@kanaries/graphic-walker@^0.2.8":
+  version "0.2.8"
+  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.2.8.tgz#3294696fdfd7490eaacf2eab491627cd45b3df0f"
+  integrity sha512-fgC5T/TIiNOpK8qxsS3RUjOydrsj2GLXK6FJ+vbwwjxDbZJBqW3RVFp4ioB1FgQtHojMpoiIgpaqHJMThZTwlQ==
   dependencies:
     "@heroicons/react" "^2.0.8"
     "@kanaries/web-data-loader" "0.1.5"

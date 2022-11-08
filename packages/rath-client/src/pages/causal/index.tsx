@@ -1,6 +1,8 @@
 import { ActionButton, ComboBox, DefaultButton, Dropdown, Label, List, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GraphicWalker } from '@kanaries/graphic-walker';
+import type { Specification } from 'visual-insights';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import LaTiaoConsole from '../dataSource/LaTiaoConsole';
@@ -14,7 +16,7 @@ import { NodeWithScore } from './explorer/flowAnalyzer';
 import { BgKnowledge } from './config';
 
 const CausalPage: React.FC = () => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
+    const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
     const { igMatrix, causalStrength, curAlgo, causalFields, computing } = causalStore;
@@ -110,6 +112,41 @@ const CausalPage: React.FC = () => {
     })), [fieldMetas]);
 
     const selectedFields = useMemo(() => focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!).filter(Boolean), [focusFields, fieldMetas]);
+
+    const initialSpec = useMemo<Specification>(() => {
+        const [discreteChannel, concreteChannel] = fieldGroup.reduce<[IFieldMeta[], IFieldMeta[]]>(([discrete, concrete], f, i) => {
+            if (i === 0 || f.semanticType === 'quantitative' || f.semanticType === 'temporal') {
+                concrete.push(f);
+            } else {
+                discrete.push(f);
+            }
+            return [discrete, concrete];
+        }, [[], []]);
+        return fieldGroup.length ? {
+            position: concreteChannel.map(f => f.fid),
+            color: discreteChannel[0] ? [discreteChannel[0].fid] : [],
+            size: discreteChannel[1] ? [discreteChannel[1].fid] : [],
+            opacity: discreteChannel[2] ? [discreteChannel[2].fid] : [],
+        } : {};
+        // 散点图（分布矩阵）
+        // TODO: Graphic Walker 支持受控状态
+        // 多变量直方图现在存在支持问题：
+        // 1. GraphicWalker 解析 Specification 的规则导致不能叠加在 Column 上。
+        // 2. 不应该默认聚合。
+        // ----
+        // 多变量直方图
+        // TODO: GraphicWalker 支持 Vega bin
+        // 多变量直方图现在存在支持问题：
+        // 1. GraphicWalker 不支持 vega bin，Specification 也传不了 bin。
+        // 2. GraphicWalker 解析 Specification 的规则导致不能叠加在 Column 上。
+        // return {
+        //     geomType: fieldGroup.map(f => f.semanticType === 'temporal' ? 'area' : 'interval'),
+        //     position: ['gw_count_fid'],
+        //     facets: fieldGroup.map(f => f.fid),
+        // };
+    }, [fieldGroup]);
+
+    const gwEditedRef = useRef(false);
 
     return (
         <div className="content-container">
@@ -365,6 +402,16 @@ const CausalPage: React.FC = () => {
                     )}
                 </div>
                 <SemiEmbed fields={fieldGroup} />
+                <div>
+                    <GraphicWalker
+                        dataSource={cleanedData}
+                        rawFields={fieldMetas}
+                        hideDataSourceConfig
+                        spec={gwEditedRef.current ? undefined : initialSpec}
+                        i18nLang={langStore.lang}
+                        keepAlive
+                    />
+                </div>
             </div>
         </div>
     );
