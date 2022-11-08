@@ -2,9 +2,7 @@ import produce from "immer";
 import { IFieldMeta, IInsightVizView, IResizeMode, IVegaSubset } from "../../interfaces";
 import { applySizeConfig } from "../../queries/base/utils";
 
-export function adviceVisSize(spec: IVegaSubset, fields: IFieldMeta[]) {
-    let width = 260;
-    let height = 260;
+export function adviceVisSize(spec: IVegaSubset, fields: IFieldMeta[], width: number | undefined = 260, height: number | undefined = 260): IVegaSubset {
     let fixed = false;
     if (spec.encoding.x) {
         const targetField = fields.find(f => f.fid === spec.encoding.x?.field);

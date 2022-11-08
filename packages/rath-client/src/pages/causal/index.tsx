@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useState } from 'react';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
+import SemiEmbed from '../semiAutomation/semiEmbed';
 import CrossFilter from './crossFilter';
 import Params from './params';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
@@ -115,6 +116,7 @@ const CausalPage: React.FC = () => {
                         <CrossFilter fields={fieldGroup} dataSource={cleanedData} />
                     )}
                 </div>
+                <SemiEmbed fields={fieldGroup} />
             </div>
         </div>
     );
