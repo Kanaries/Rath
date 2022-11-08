@@ -11,7 +11,7 @@ import FilterCreationPill from '../../../components/filterCreationPill';
 import Narrative from '../narrative';
 import MainCanvas from '../focusZone/mainCanvas';
 import MiniFloatCanvas from '../focusZone/miniFloatCanvas';
-import { adviceVisSize, changeVisSize } from '../../collection/utils';
+import { adviceVisSize } from '../../collection/utils';
 
 const BUTTON_STYLE = { marginRight: '6px', marginTop: '6px' };
 
@@ -94,7 +94,7 @@ const LiteFocusZone: React.FC = (props) => {
                 </Stack>
                 <div>
                     {mainView && mainViewSpec && (
-                        <MainCanvas view={mainView} spec={changeVisSize(adviceVisSize(mainViewSpec, fieldMetas), 280, 280)} />
+                        <MainCanvas view={mainView} spec={adviceVisSize(mainViewSpec, fieldMetas)} />
                     )}
                 </div>
                 {mainVizSetting.nlg && (
