@@ -15,13 +15,10 @@ import {
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
-import { applyFilters } from '@kanaries/loa';
-import styled from 'styled-components';
 import produce from 'immer';
 import type { Specification } from 'visual-insights';
-import { IFieldMeta, IFilter } from '../../interfaces';
+import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import { baseDemoSample } from '../painter/sample';
 import FilterCreationPill from '../../components/filterCreationPill';
 import LaTiaoConsole from '../dataSource/LaTiaoConsole';
 import SemiEmbed from '../semiAutomation/semiEmbed';
@@ -33,26 +30,14 @@ import type { BgKnowledge, ModifiableBgKnowledge } from './config';
 import { FilterCell } from './filters';
 import ModelStorage from './modelStorage';
 import MatrixPanel, { MATRIX_TYPE } from './matrixPanel';
-
-const VIZ_SUBSET_LIMIT = 2_000;
-
-const InnerCard = styled.div`
-    .card-header {
-        font-size: 1.2em;
-    }
-    .card-line {
-        margin: 8px 0px;
-    }
-    border: 1px solid #e3e2e2;
-    margin: 8px 0px;
-    padding: 8px;
-    overflow: auto;
-`
+import { useInteractFieldGroups } from './hooks/interactFieldGroup';
+import { useDataViews } from './hooks/dataViews';
+import { InnerCard } from './components';
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
-    const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
+    const { fieldGroup, setFieldGroup, appendFields2Group, clearFieldGroup } = useInteractFieldGroups(fieldMetas);
     const [showSemiClue, setShowSemiClue] = useState(false);
     const [customAnalysisMode, setCustomAnalysisMode] = useState<'crossFilter' | 'graphicWalker'>('crossFilter');
     const { igMatrix, causalFields, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
@@ -86,40 +71,16 @@ const CausalPage: React.FC = () => {
             return list;
         }, []);
     }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
-
-    const [sampleRate, setSampleRate] = useState(1);
-    const [appliedSampleRate, setAppliedSampleRate] = useState(sampleRate);
-    const [filters, setFilters] = useState<IFilter[]>([]);
-    const dataSource = useMemo(() => {
-        if (appliedSampleRate >= 1) {
-            return cleanedData;
-        }
-        const sampleSize = Math.round(cleanedData.length * appliedSampleRate);
-        // console.log({sampleSize});
-        return baseDemoSample(cleanedData, sampleSize);
-        // return viewSampling(cleanedData, selectedFields, sampleSize); // FIXME: 用这个，但是有问题只能得到 0 / full ？
-    }, [cleanedData /*, selectedFields*/, appliedSampleRate]);
-    const dataSubset = useMemo(() => {
-        return applyFilters(dataSource, filters);
-    }, [dataSource, filters]);
-    const vizSampleData = useMemo(() => {
-        if (dataSubset.length < VIZ_SUBSET_LIMIT) {
-            return dataSubset;
-        }
-        return baseDemoSample(dataSubset, VIZ_SUBSET_LIMIT);
-    }, [dataSubset]);
-
-    useEffect(() => {
-        if (sampleRate !== appliedSampleRate) {
-            const delayedTask = setTimeout(() => {
-                setAppliedSampleRate(sampleRate);
-            }, 1_000);
-
-            return () => {
-                clearTimeout(delayedTask);
-            };
-        }
-    }, [sampleRate, appliedSampleRate]);
+    const {
+        vizSampleData,
+        dataSubset,
+        sampleRate,
+        setSampleRate,
+        appliedSampleRate,
+        filters,
+        setFilters,
+        sampleSize
+    } = useDataViews(cleanedData)
 
     useEffect(() => {
         causalStore.setFocusFieldIds(
@@ -186,18 +147,9 @@ const CausalPage: React.FC = () => {
     const onFieldGroupSelect = useCallback(
         (xFid: string, yFid: string) => {
             causalStore.setFocusNodeIndex(fieldMetas.findIndex((f) => f.fid === xFid));
-            setFieldGroup((group) => {
-                const nextGroup = [...group];
-                if (!nextGroup.find((f) => f.fid === xFid)) {
-                    nextGroup.push(fieldMetas.find((f) => f.fid === xFid)!);
-                }
-                if (!nextGroup.find((f) => f.fid === yFid)) {
-                    nextGroup.push(fieldMetas.find((f) => f.fid === yFid)!);
-                }
-                return nextGroup;
-            });
+            appendFields2Group([xFid, yFid]);
         },
-        [setFieldGroup, fieldMetas, causalStore]
+        [appendFields2Group, causalStore, fieldMetas]
     );
 
     const handleSubTreeSelected = useCallback(
@@ -224,7 +176,7 @@ const CausalPage: React.FC = () => {
                 setFieldGroup([node, ...allEffect.map((f) => f.field)]);
             }
         },
-        []
+        [setFieldGroup]
     );
 
     const focusFieldsOption = useMemo(
@@ -285,7 +237,7 @@ const CausalPage: React.FC = () => {
                     <hr className="card-line" />
                     <Stack style={{ marginBlock: '1.6em' }}>
                         <Slider
-                            label={`采样率 (原始大小 = ${cleanedData.length} 行, 样本量 = ${dataSource.length} 行)`}
+                            label={`采样率 (原始大小 = ${cleanedData.length} 行, 样本量 = ${sampleSize} 行)`}
                             min={0.01}
                             max={1}
                             step={0.01}
@@ -317,7 +269,7 @@ const CausalPage: React.FC = () => {
                                 overflow: 'auto hidden',
                                 marginTop: '1em',
                                 padding: '0.8em',
-                                border: '1px solid #8884',
+                                border: '1px solid #e3e2e2',
                             }}
                         >
                             {filters.map((filter, i) => {
@@ -560,14 +512,14 @@ const CausalPage: React.FC = () => {
                     onCompute={(matKey) => {
                         switch (matKey) {
                             case MATRIX_TYPE.conditionalMutualInfo:
-                                causalStore.computeIGCondMatrix(dataSource, selectedFields);
+                                causalStore.computeIGCondMatrix(dataSubset, selectedFields);
                                 break;
                             case MATRIX_TYPE.causal:
-                                causalStore.causalDiscovery(dataSource, precondition);
+                                causalStore.causalDiscovery(dataSubset, precondition);
                                 break;
                             case MATRIX_TYPE.mutualInfo:
                             default:
-                                causalStore.computeIGMatrix(dataSource, selectedFields);
+                                causalStore.computeIGMatrix(dataSubset, selectedFields);
                                 break;
                         }
                     }}
@@ -588,13 +540,15 @@ const CausalPage: React.FC = () => {
                                         tar: exploringFields[tarIdx].fid,
                                         type: 'must-link',
                                     },
-                                ])}
-                                onRemoveLink={(srcIdx, tarIdx) => setModifiablePrecondition(list => {
-                                    return list.filter(link => !(link.src === srcIdx && link.tar === tarIdx));
-                                })}
-                            />
-                        ) : null
-                    }
+                                ])
+                            }
+                            onRemoveLink={(srcIdx, tarIdx) =>
+                                setModifiablePrecondition((list) => {
+                                    return list.filter((link) => !(link.src === srcIdx && link.tar === tarIdx));
+                                })
+                            }
+                        />
+                    ) : null}
                     {computing && <Spinner label="computing" />}
                 </div>
             </div>
@@ -622,7 +576,7 @@ const CausalPage: React.FC = () => {
                             iconProps={{ iconName: 'Delete' }}
                             text="清除选择字段"
                             disabled={fieldGroup.length === 0}
-                            onClick={() => setFieldGroup([])}
+                            onClick={clearFieldGroup}
                         />
                     )}
                 </Stack>
