@@ -13,9 +13,10 @@ import {
     IColumn,
     DetailsList,
     SelectionMode,
+    Toggle,
 } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import { IPattern } from '@kanaries/loa';
 import produce from 'immer';
@@ -151,8 +152,12 @@ const CausalPage: React.FC = () => {
         ];
     }, [selectedFields, igMatrix]);
 
+    const [shouldInitPreconditions, setShouldInitPreconditions] = useState(true);
+    const shouldInitPreconditionsRef = useRef(shouldInitPreconditions);
+    shouldInitPreconditionsRef.current = shouldInitPreconditions;
+
     useEffect(() => {
-        setModifiablePrecondition(getGeneratedPreconditionsFromIGMat());
+        setModifiablePrecondition(shouldInitPreconditionsRef.current ? getGeneratedPreconditionsFromIGMat() : []);
     }, [getGeneratedPreconditionsFromIGMat]);
 
     useEffect(() => {
@@ -496,7 +501,7 @@ const CausalPage: React.FC = () => {
                             }}
                         />
                         <DefaultButton
-                            style={{ fontSize: '0.8rem' }}
+                            style={{ fontSize: '0.8rem', margin: '0 0.5em' }}
                             onClick={() =>
                                 causalStore.setFocusFieldIds(
                                     fieldMetas.filter((f) => f.disable !== true).map((f) => f.fid)
@@ -506,7 +511,7 @@ const CausalPage: React.FC = () => {
                             全部选择
                         </DefaultButton>
                         <DefaultButton
-                            style={{ fontSize: '0.8rem' }}
+                            style={{ fontSize: '0.8rem', margin: '0' }}
                             onClick={() =>
                                 causalStore.setFocusFieldIds(
                                     fieldMetas
@@ -518,7 +523,7 @@ const CausalPage: React.FC = () => {
                         >
                             选择前十条（默认）
                         </DefaultButton>
-                        <DefaultButton style={{ fontSize: '0.8rem' }} onClick={() => causalStore.setFocusFieldIds([])}>
+                        <DefaultButton style={{ fontSize: '0.8rem', margin: '0 0.5em' }} onClick={() => causalStore.setFocusFieldIds([])}>
                             清空选择
                         </DefaultButton>
                     </Stack>
@@ -527,22 +532,14 @@ const CausalPage: React.FC = () => {
                     <h1 className="card-header">领域/背景知识</h1>
                     <hr className="card-line" />
                     <Stack tokens={{ childrenGap: 12 }}>
-                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                            <PrimaryButton
-                                onClick={() => setModifiablePrecondition(getGeneratedPreconditionsFromIGMat())}
-                            >
-                                相关性分析
-                            </PrimaryButton>
-                            <div
-                                style={{
-                                    flex: 1,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    margin: '0 2em',
-                                    borderLeft: '1px solid #888a',
-                                    paddingLeft: '2em',
-                                }}
-                            >
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <Toggle
+                                label="使用关联信息初始化"
+                                checked={shouldInitPreconditions}
+                                inlineLabel
+                                onChange={(_, checked) => setShouldInitPreconditions(checked ?? false)}
+                            />
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <Label style={{ width: '20%' }}>添加影响关系</Label>
                                 <Dropdown
                                     placeholder="Source"
@@ -562,7 +559,7 @@ const CausalPage: React.FC = () => {
                                         key: f.fid,
                                         text: f.name ?? f.fid,
                                     }))}
-                                    styles={{ root: { width: '30%' } }}
+                                    styles={{ root: { width: '28%', margin: '0 1%' } }}
                                 />
                                 <Dropdown
                                     placeholder="Direction"
@@ -601,7 +598,7 @@ const CausalPage: React.FC = () => {
                                         key: f.fid,
                                         text: f.name ?? f.fid,
                                     }))}
-                                    styles={{ root: { width: '30%' } }}
+                                    styles={{ root: { width: '28%', margin: '0 1%' } }}
                                 />
                                 <ActionButton
                                     styles={{

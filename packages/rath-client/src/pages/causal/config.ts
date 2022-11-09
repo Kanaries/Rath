@@ -90,9 +90,9 @@ export enum IQuantEncodeType {
 }
 
 export const CAUSAL_ALGORITHM_OPTIONS: IDropdownOption[] = [
-    { key: ICausalAlgorithm.PC, text: ICausalAlgorithm.PC },
-    { key: ICausalAlgorithm.FCI, text: ICausalAlgorithm.FCI },
-    { key: ICausalAlgorithm.CONOD, text: ICausalAlgorithm.CONOD },
+    // { key: ICausalAlgorithm.PC, text: ICausalAlgorithm.PC },
+    // { key: ICausalAlgorithm.FCI, text: ICausalAlgorithm.FCI },
+    // { key: ICausalAlgorithm.CONOD, text: ICausalAlgorithm.CONOD },
 ];
 
 export const PC_PARAMS_FORM: IForm = PC_PARAMS as IForm;

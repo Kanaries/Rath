@@ -86,33 +86,30 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
             </Stack>
 
             <div>
-                {selectedKey === MATRIX_TYPE.mutualInfo && showMatrix(fields, igMatrix, computing) && (
-                    <RelationMatrixHeatMap
-                        mark={markType}
-                        absolute
-                        fields={fields}
-                        data={igMatrix}
-                        onSelect={onMatrixPointClick}
-                    />
-                )}
-                {selectedKey === MATRIX_TYPE.conditionalMutualInfo && showMatrix(fields, igCondMatrix, computing) && (
-                    <RelationMatrixHeatMap
-                        mark={markType}
-                        absolute
-                        fields={fields}
-                        data={igCondMatrix}
-                        onSelect={onMatrixPointClick}
-                    />
-                )}
-                {selectedKey === MATRIX_TYPE.causal && showMatrix(fields, causalStrength, computing) && (
-                    <RelationMatrixHeatMap
-                        mark={markType}
-                        fields={fields}
-                        data={causalStrength}
-                        onSelect={onMatrixPointClick}
-                    />
-                )}
-                {computing && <Spinner label="computing" />}
+            {selectedKey === MATRIX_TYPE.mutualInfo && showMatrix(fields, igMatrix, computing) && (
+                <RelationMatrixHeatMap
+                    absolute
+                    fields={fields}
+                    data={igMatrix}
+                    onSelect={onMatrixPointClick}
+                />
+            )}
+            {selectedKey === MATRIX_TYPE.conditionalMutualInfo && showMatrix(fields, igCondMatrix, computing) && (
+                <RelationMatrixHeatMap
+                    absolute
+                    fields={fields}
+                    data={igCondMatrix}
+                    onSelect={onMatrixPointClick}
+                />
+            )}
+            {selectedKey === MATRIX_TYPE.causal && showMatrix(fields, causalStrength, computing) && (
+                <RelationMatrixHeatMap
+                    fields={fields}
+                    data={causalStrength}
+                    onSelect={onMatrixPointClick}
+                />
+            )}
+            {computing && <Spinner label="computing" />}
             </div>
         </Cont>
     );

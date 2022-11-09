@@ -146,38 +146,41 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     const dataRef = useRef<GraphData>({});
     dataRef.current = useMemo(() => ({
         nodes: data.nodes.map((node, i) => ({ id: `${node.id}`, description: fields[i].name ?? fields[i].fid })),
-        edges: [
-            ...data.links.map((link, i) => ({
-                id: `link_${i}`,
-                source: `${link.source}`,
-                target: `${link.target}`,
-                style: {
-                    startArrow: {
-                        fill: '#F6BD16',
-                        path: arrows[link.type].start,
-                    },
-                    endArrow: {
-                        fill: '#F6BD16',
-                        path: arrows[link.type].end,
-                    },
+        edges: mode === 'explore' ? data.links.map((link, i) => ({
+            id: `link_${i}`,
+            source: `${link.source}`,
+            target: `${link.target}`,
+            style: {
+                startArrow: {
+                    fill: '#F6BD16',
+                    path: arrows[link.type].start,
                 },
-            })),
-            ...(mode === 'edit' ? preconditions.map((bk, i) => ({
-                id: `bk_${i}`,
-                source: `${fields.findIndex(f => f.fid === bk.src)}`,
-                target: `${fields.findIndex(f => f.fid === bk.tar)}`,
-                style: {
-                    startArrow: {
-                        fill: '#F6BD16',
-                        path: arrowsForBK[bk.type].start,
-                    },
-                    endArrow: {
-                        fill: '#F6BD16',
-                        path: arrowsForBK[bk.type].end,
-                    },
+                endArrow: {
+                    fill: '#F6BD16',
+                    path: arrows[link.type].end,
                 },
-            })) : []),
-        ],
+            },
+        })) : preconditions.map((bk, i) => ({
+            id: `bk_${i}`,
+            source: `${fields.findIndex(f => f.fid === bk.src)}`,
+            target: `${fields.findIndex(f => f.fid === bk.tar)}`,
+            style: {
+                lineWidth: 2,
+                startArrow: {
+                    fill: '#F6BD16',
+                    path: arrowsForBK[bk.type].start,
+                },
+                endArrow: {
+                    fill: '#F6BD16',
+                    path: arrowsForBK[bk.type].end,
+                },
+            },
+            edgeStateStyles: {
+                active: {
+                    lineWidth: 2,
+                },
+            },
+        })),
     }), [data, mode, preconditions, fields]);
 
     const widthRef = useRef(width);
