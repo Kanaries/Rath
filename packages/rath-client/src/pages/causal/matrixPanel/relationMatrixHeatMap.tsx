@@ -1,7 +1,7 @@
 import type { DeepReadonly } from '@kanaries/graphic-walker/dist/interfaces';
 import React, { useEffect, useMemo, useRef } from 'react';
 import embed from 'vega-embed';
-import { IFieldMeta, IRow } from '../../interfaces';
+import { IFieldMeta, IRow } from '../../../interfaces';
 
 interface Props {
     data: DeepReadonly<number[][]>;
@@ -42,7 +42,7 @@ const RelationMatrixHeatMap: React.FC<Props> = (props) => {
                 config: {
                     axis: { grid: true, tickBand: 'extent' },
                 },
-            }).then(res => {
+            }, { actions: false }).then(res => {
                 res.view.addEventListener('click', (event, item) => {
                     if (item && item.datum) {
                         onSelect && onSelect(item.datum.X_FID, item.datum.Y_FID);

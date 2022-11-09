@@ -33,14 +33,14 @@ const SemiEmbed: React.FC<IProps> = (props) => {
                 iconProps={{
                     iconName: 'Lightbulb',
                 }}
-                text="Explore Clues"
+                text="线索发现"
                 onClick={() => {
                     toggleShow && toggleShow(!show);
                 }}
             />
             <Panel
                 type={PanelType.medium}
-                headerText="Clues"
+                headerText="线索"
                 isOpen={show}
                 isBlocking={false}
                 onDismiss={() => {

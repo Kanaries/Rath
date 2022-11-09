@@ -14,7 +14,7 @@ function conditionalMic (condField: IFieldMeta, xField: IFieldMeta, yField: IFie
     for (let i = 0; i < uniqueCondValues.length - 1; i++) {
         const cond = uniqueCondValues[i];
         const filteredDataSource = dataSource.filter(row => row[condField.fid] === cond);
-        if (filteredDataSource.length < 16) continue
+        if (filteredDataSource.length < 40) continue
         let score = 0;
         const X = filteredDataSource.map(row => row[xField.fid]);
         const Y = filteredDataSource.map(row => row[yField.fid]);
@@ -140,20 +140,22 @@ function conditionaExtremelMic (condField: IFieldMeta, xField: IFieldMeta, yFiel
 }
 
 export function getFieldRelationCheckedMatrix (mat: number[][], fields: IFieldMeta[], dataSource: IRow[]) {
-    let ans: number[][] = new Array(mat.length).fill(0).map(() => new Array(mat.length).fill(1));
+    // console.log('start')
+    let ans: number[][] = new Array(mat.length).fill(0).map(() => new Array(mat.length).fill(0));
     for (let i = 0; i < mat.length; i++) {
         for (let j = 0; j < mat[i].length; j++) {
+            let c = 0;
             for (let k = 0; k < fields.length; k++) {
                 // ans[i][j] = mat[i][j]
                 if (i === j || i === k || j === k) continue;
-                const score1 = conditionaExtremelMic(fields[k], fields[i], fields[j], dataSource);
-                // const score2 = conditionalMic(fields[k], fields[j], fields[i], dataSource);
-                // ans[i][j] += score1;
-                if (Math.abs(score1) < Math.abs(ans[i][j])) {
-                    ans[i][j] = score1;
-                }
+                // const score = conditionaExtremelMic(fields[k], fields[i], fields[j], dataSource);
+                const score = conditionalMic(fields[k], fields[j], fields[i], dataSource);
+                ans[i][j] += score;
+                // if (Math.abs(score) < Math.abs(ans[i][j])) {
+                //     ans[i][j] = score;
+                // }
                 // ans[i][j] = Math.min(ans[i][j], score1);
-                // c++;
+                c++;
                 // if ((mat[i][j] > 0.5 || mat[j][i] > 0.5) && mat[k][i] > 0.5 && mat[k][j] > 0.5) {
                 //     const score = conditionalMic(fields[k], fields[i], fields[j], dataSource);
                 //     ans[i][j] = ans[j][i] = Math.max(score, ans[i][j], ans[j][i]);
@@ -162,7 +164,7 @@ export function getFieldRelationCheckedMatrix (mat: number[][], fields: IFieldMe
                 //     // }
                 // }
             }
-            // ans[i][j] /= c;
+            ans[i][j] /= c;
         }
     }
     // console.log(JSON.stringify(ans, null, 2))

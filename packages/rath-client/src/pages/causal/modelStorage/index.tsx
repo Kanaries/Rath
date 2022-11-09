@@ -18,7 +18,7 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
     return (
         <Fragment>
             <DefaultButton
-                text="Save Causal Model"
+                text="保存因果模型"
                 iconProps={{ iconName: 'Save' }}
                 onClick={() => {
                     causalStore
@@ -40,7 +40,7 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
                 }}
             />
             <DefaultButton
-                text="Load Causal Model"
+                text="导入因果模型"
                 iconProps={{ iconName: 'CloudDownload' }}
                 onClick={() => {
                     setShowModels(true);
@@ -55,9 +55,9 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
             >
                 <ModalInnerContainer>
                     <Stack tokens={{ childrenGap: 10 }}>
-                        <Label>History Models</Label>
+                        <Label>我的模型</Label>
                         <ChoiceGroup
-                            label="models"
+                            label="模型列表"
                             value={selectedModelKey}
                             options={userModelKeys.map((key) => {
                                 return {
@@ -71,7 +71,7 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
                         />
                         <PrimaryButton
                             disabled={selectedModelKey === undefined}
-                            text="Load"
+                            text="使用"
                             onClick={() => {
                                 if (selectedModelKey) {
                                     causalStore.fetchCausalModel(selectedModelKey);

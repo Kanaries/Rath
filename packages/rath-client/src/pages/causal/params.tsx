@@ -13,7 +13,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { makeRenderLabelHandler } from '../../components/labelTooltip';
 import { IRow } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import { BgKnowledge, CAUSAL_ALGORITHM_FORM, CAUSAL_ALGORITHM_OPTIONS, ICausalAlgorithm } from './config';
+import { BgKnowledge } from './config';
 import DynamicForm from './dynamicForm';
 
 const Params: React.FC<{ dataSource: IRow[], focusFields: string[]; precondition: BgKnowledge[] }> = ({ focusFields, precondition, dataSource }) => {
@@ -41,7 +41,7 @@ const Params: React.FC<{ dataSource: IRow[], focusFields: string[]; precondition
 
     const saveParamsAndRun = () => {
         causalStore.updateCausalAlgoAndParams(algoName, params);
-        causalStore.reRunCausalDiscovery(dataSource, focusFields, precondition);
+        causalStore.reRunCausalDiscovery(dataSource, precondition);
         causalStore.toggleSettings(false);
     };
 

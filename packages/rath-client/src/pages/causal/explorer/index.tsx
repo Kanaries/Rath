@@ -50,7 +50,6 @@ const Container = styled.div`
     width: 100%;
     display: flex;
     flex-direction: column;
-    margin-block: 4em;
 `;
 
 const Tools = styled.div`
@@ -59,10 +58,9 @@ const Tools = styled.div`
     flex-shrink: 0;
     display: flex;
     flex-direction: row;
-    border: 1px solid #8888;
-    margin-block: 1em;
-    padding-block: 1.8em;
-    padding-inline: 2em;
+    border: 1px solid #e3e2e2;
+    margin: 8px 0px 0px 0px;
+    padding: 8px 1em;
     align-items: center;
     > *:not(button) {
         height: 100%;
@@ -88,10 +86,9 @@ const MainView = styled.div`
     flex-direction: row;
     align-items: stretch;
     justify-content: stretch;
-    border: 1px solid #8888;
-    margin-block: 1em;
-    padding-block: 1.8em;
-    padding-inline: 2em;
+    border: 1px solid #e3e2e2;
+    margin: 8px 0px;
+    padding: 1em;
     > * {
         height: 100%;
         flex-grow: 1;
@@ -349,7 +346,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     flexShrink: 0,
                     width: '100%',
                     padding: '1em 2.5em',
-                    border: '1px solid #8888',
+                    border: '1px solid #e3e2e2',
                 }}
             >
                 <p>
@@ -376,6 +373,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
                     onText="On"
                     offText="Off"
+                    inlineLabel
                 />
                 <Slider
                     label="Link Filter"

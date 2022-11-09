@@ -50,6 +50,7 @@ const IconMap = {
     [PIVOT_KEYS.dashBoardDesigner]: 'SizeLegacy',
     [PIVOT_KEYS.collection]: 'Heart',
     [PIVOT_KEYS.dashboard]: 'CRMReport',
+    [PIVOT_KEYS.causal]: 'Relationship'
 } as {
     [key: string]: string
 }

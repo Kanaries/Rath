@@ -62,7 +62,7 @@ const SVGGroup = styled.div`
     flex-grow: 0;
     flex-shrink: 0;
     width: 100%;
-    border: 1px solid #8888;
+    border: 1px solid #e3e2e2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -546,7 +546,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                 </div>
             )) : null}
             {field && (
-                <div className="tools" style={{ width: '100%', padding: '1em 4em' }}>
+                <div className="tools" style={{ width: '100%', padding: '1em' }}>
                     <Slider
                         label="Display Limit"
                         min={1}
