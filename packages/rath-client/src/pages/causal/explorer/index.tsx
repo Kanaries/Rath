@@ -1,4 +1,4 @@
-import { DefaultButton, Slider, Toggle } from "@fluentui/react";
+import { Slider, Toggle } from "@fluentui/react";
 import produce from "immer";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
@@ -129,7 +129,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
 
         /* eslint no-fallthrough: ["error", { "allowEmptyCase": true }] */
         switch (causalAlgorithm) {
-            case 'CD-NOD':
+            case 'CD_NOD':
             case 'PC': {
                 // cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicate i –> j;
                 // cg.G.graph[i,j] = cg.G.graph[j,i] = -1 indicate i — j;
@@ -372,7 +372,8 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     Reset
                 </DefaultButton> */}
                 <Toggle
-                    label="Modify Background Knowledge"
+                    // label="Modify Constraints"
+                    label="编辑约束"
                     checked={mode === 'edit'}
                     onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
                     onText="On"
