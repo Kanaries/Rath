@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
-import G6 from "@antv/g6";
+import G6, { Graph, GraphData } from "@antv/g6";
 import type { IFieldMeta } from "../../../interfaces";
 import type { ModifiableBgKnowledge } from "../config";
 import type { DiagramGraphData } from ".";
@@ -94,9 +94,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
 
     const [size, setSize] = useState<[number, number]>([0, 0]);
 
-    const preconditionsRef = useRef(preconditions);
-    preconditionsRef.current = preconditions;
-
     const handleNodeClickRef = useRef(onClickNode);
     handleNodeClickRef.current = onClickNode;
 
@@ -104,6 +101,44 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     handleLinkRef.current = onLinkTogether;
 
     const updateSelected = useRef((idx: number) => {});
+
+    const graphRef = useRef<Graph>();
+    const dataRef = useRef<GraphData>({});
+    dataRef.current = useMemo(() => ({
+        nodes: data.nodes.map((node, i) => ({ id: `${node.id}`, description: fields[i].name ?? fields[i].fid })),
+        edges: [
+            ...data.links.map((link, i) => ({
+                id: `link_${i}`,
+                source: `${link.source}`,
+                target: `${link.target}`,
+                style: {
+                    startArrow: {
+                        fill: '#F6BD16',
+                        path: arrows[link.type].start,
+                    },
+                    endArrow: {
+                        fill: '#F6BD16',
+                        path: arrows[link.type].end,
+                    },
+                },
+            })),
+            ...(mode === 'edit' ? preconditions.map((bk, i) => ({
+                id: `bk_${i}`,
+                source: `${fields.findIndex(f => f.fid === bk.src)}`,
+                target: `${fields.findIndex(f => f.fid === bk.tar)}`,
+                style: {
+                    startArrow: {
+                        fill: '#F6BD16',
+                        path: arrowsForBK[bk.type].start,
+                    },
+                    endArrow: {
+                        fill: '#F6BD16',
+                        path: arrowsForBK[bk.type].end,
+                    },
+                },
+            })) : []),
+        ],
+    }), [data, mode, preconditions, fields]);
 
     useEffect(() => {
         const { current: container } = containerRef;
@@ -174,41 +209,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
             graph.node(node => ({
                 label: node.description ?? node.id,
             }));
-            graph.data({
-                nodes: data.nodes.map((node, i) => ({ id: `${node.id}`, description: fields[i].name ?? fields[i].fid })),
-                edges: [
-                    ...data.links.map((link, i) => ({
-                        id: `link_${i}`,
-                        source: `${link.source}`,
-                        target: `${link.target}`,
-                        style: {
-                            startArrow: {
-                                fill: '#F6BD16',
-                                path: arrows[link.type].start,
-                            },
-                            endArrow: {
-                                fill: '#F6BD16',
-                                path: arrows[link.type].end,
-                            },
-                        },
-                    })),
-                    ...preconditionsRef.current.map((bk, i) => ({
-                        id: `bk_${i}`,
-                        source: `${fields.findIndex(f => f.fid === bk.src)}`,
-                        target: `${fields.findIndex(f => f.fid === bk.tar)}`,
-                        style: {
-                            startArrow: {
-                                fill: '#F6BD16',
-                                path: arrowsForBK[bk.type].start,
-                            },
-                            endArrow: {
-                                fill: '#F6BD16',
-                                path: arrowsForBK[bk.type].end,
-                            },
-                        },
-                    })),
-                ],
-            });
+            graph.data(dataRef.current);
             graph.render();
 
             graph.on('aftercreateedge', (e: any) => {
@@ -249,12 +250,21 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 graph.setItemState(`${idx}`, 'selected', true);
             };
 
+            graphRef.current = graph;
+
             return () => {
-                // graph.destroy();
+                graphRef.current = undefined;
                 container.innerHTML = '';
             };
         }
-    }, [data, size, mode, fields]);
+    }, [size, mode, fields, preconditions]);
+
+    useEffect(() => {
+        const { current: container } = containerRef;
+        if (container && graphRef.current) {
+            graphRef.current.changeData(dataRef.current);
+        }
+    }, [data]);
 
     useEffect(() => {
         if (focus !== null) {

@@ -67,7 +67,7 @@ const CausalPage: React.FC = () => {
         // console.log({sampleSize});
         return baseDemoSample(cleanedData, sampleSize);
         // return viewSampling(cleanedData, selectedFields, sampleSize); // FIXME: 用这个，但是有问题只能得到 0 / full ？
-    }, [cleanedData, selectedFields, appliedSampleRate]);
+    }, [cleanedData/*, selectedFields*/, appliedSampleRate]);
     const dataSubset = useMemo(() => {
         return applyFilters(dataSource, filters);
     }, [dataSource, filters]);
@@ -94,8 +94,38 @@ const CausalPage: React.FC = () => {
         setFocusFields(
             fieldMetas.filter(f => f.disable !== true).slice(0, 10).map(f => f.fid) // 默认只使用前 10 个
         );
-        setModifiablePrecondition(
-            fieldMetas.reduce<ModifiableBgKnowledge[]>((list, f) => {
+        setEditingPrecondition({ type: 'must-link' });
+    }, [fieldMetas]);
+
+    const getGeneratedPreconditionsFromIGMat = useCallback(() => {
+        const initLinks: ModifiableBgKnowledge[] = [];
+        const mat = igMatrix;
+        // TODO: 临时定的阈值
+        const thresholdFalse = 0.01;
+        const thresholdPrefer = 0.1;
+        if (mat.length === selectedFields.length) {
+            for (let i = 0; i < mat.length - 1; i += 1) {
+                for (let j = i + 1; j < mat.length; j += 1) {
+                    const wf = mat[i][j];
+                    const wb = mat[j][i];
+                    if (wf + wb < thresholdFalse) {
+                        initLinks.push({
+                            src: selectedFields[i].fid,
+                            tar: selectedFields[j].fid,
+                            type: 'must-not-link',
+                        });
+                    } else if (Math.max(wf, wb) >= thresholdPrefer) {
+                        initLinks.push({
+                            src: selectedFields[i].fid,
+                            tar: selectedFields[j].fid,
+                            type: 'prefer-link',
+                        });
+                    }
+                }
+            }
+        }
+        return [
+            ...selectedFields.reduce<ModifiableBgKnowledge[]>((list, f) => {
                 if (f.extInfo) {
                     for (const from of f.extInfo.extFrom) {
                         list.push({
@@ -106,10 +136,14 @@ const CausalPage: React.FC = () => {
                     }
                 }
                 return list;
-            }, [])
-        );
-        setEditingPrecondition({ type: 'must-link' });
-    }, [fieldMetas]);
+            }, []),
+            ...initLinks,
+        ];
+    }, [selectedFields, igMatrix]);
+
+    useEffect(() => {
+        setModifiablePrecondition(getGeneratedPreconditionsFromIGMat());
+    }, [getGeneratedPreconditionsFromIGMat]);
 
     useEffect(() => {
         causalStore.updateCausalAlgorithmList(fieldMetas);
@@ -303,6 +337,13 @@ const CausalPage: React.FC = () => {
                 </Stack>
                 <Stack style={{ marginBlock: '1.6em 3.2em' }}>
                     <Label>Conditions (Background Knowledge)</Label>
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                        <PrimaryButton
+                            onClick={() => setModifiablePrecondition(getGeneratedPreconditionsFromIGMat())}
+                        >
+                            Auto Initialize
+                        </PrimaryButton>
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                         <Label style={{ width: '20%' }}>Add Condition</Label>
                         <Dropdown

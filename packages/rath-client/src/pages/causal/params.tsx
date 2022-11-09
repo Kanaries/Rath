@@ -28,8 +28,8 @@ const Params: React.FC<{ dataSource: IRow[], focusFields: string[]; precondition
     }, [causalAlgorithm, showSettings]);
 
     useEffect(() => {
-        setParams(causalParams[causalAlgorithm]);
-    }, [causalParams, showSettings]);
+        setParams(causalParams[algoName]);
+    }, [causalParams, algoName, showSettings]);
 
     const form = useMemo(() => causalAlgorithmForm[algoName], [causalAlgorithmForm, algoName]);
 
@@ -72,7 +72,7 @@ const Params: React.FC<{ dataSource: IRow[], focusFields: string[]; precondition
                 <pre>{ form.description }</pre>
                 <DynamicForm
                     form={form}
-                    values={toJS(params)}
+                    values={params}
                     onChange={updateParam}
                 />
                 <PrimaryButton
