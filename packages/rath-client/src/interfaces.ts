@@ -39,7 +39,7 @@ export interface IFieldExtInfoBaseDateTime extends IFieldExtInfoBase {
 
 interface IFieldExtInfoBaseLaTiao extends IFieldExtInfoBase {
     extOpt: `LaTiao.$${string}`;
-    extInfo: '';
+    extInfo: any;
 }
 
 type FieldExtInfoBase = (

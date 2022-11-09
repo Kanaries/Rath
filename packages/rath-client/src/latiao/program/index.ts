@@ -18,6 +18,8 @@ import '../implement/$normalize';
 import '../implement/$concat';
 import '../implement/$log';
 import '../implement/$clean';
+import '../implement/regex';
+import '../implement/$partition';
 
 
 export type Context = {
