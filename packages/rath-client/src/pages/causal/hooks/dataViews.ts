@@ -33,7 +33,7 @@ export function useDataViews (originData: IRow[]) {
         if (sampleRate !== appliedSampleRate) {
             const delayedTask = setTimeout(() => {
                 setAppliedSampleRate(sampleRate);
-            }, 1_000);
+            }, 500);
 
             return () => {
                 clearTimeout(delayedTask);

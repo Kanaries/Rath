@@ -4,7 +4,6 @@ import {
     DefaultButton,
     Dropdown,
     Label,
-    List,
     Pivot,
     PivotItem,
     PrimaryButton,
@@ -356,7 +355,8 @@ const CausalPage: React.FC = () => {
                 minWidth: 0,
             }
         ];
-    }, [precondition]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <div className="content-container">
@@ -370,7 +370,7 @@ const CausalPage: React.FC = () => {
                     </Stack>
                     <Stack style={{ marginBlock: '0.8em' }}>
                         <Slider
-                            label={`采样率 (原始大小 = ${cleanedData.length} 行, 样本量 = ${sampleSize} 行)`}
+                            label="采样率"
                             min={0.01}
                             max={1}
                             step={0.01}
@@ -398,7 +398,7 @@ const CausalPage: React.FC = () => {
                         />
                         <small style={{ padding: '0.2em 0', color: '#666', display: 'flex', alignItems: 'center' }}>
                             {`原始大小: ${cleanedData.length} 行，样本量: `}
-                            {sampleRate !== appliedSampleRate ? <Spinner style={{ display: 'inline-block', transform: 'scale(0.9)', margin: '-50% 0.6em' }} /> : `${dataSource.length} 行`}
+                            {sampleRate !== appliedSampleRate ? <Spinner style={{ display: 'inline-block', transform: 'scale(0.9)', margin: '-50% 0.6em' }} /> : `${sampleSize} 行`}
                         </small>
                     </Stack>
                     <Stack style={{ marginTop: '0.3em' }}>
