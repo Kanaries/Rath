@@ -6,7 +6,7 @@ import type { ModifiableBgKnowledge } from "../config";
 import type { DiagramGraphData } from ".";
 
 
-const GRAPH_HEIGHT = 300;
+const GRAPH_HEIGHT = 400;
 
 const G6_EDGE_SELECT = 'edge_select';
 
@@ -97,8 +97,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     { fields, value, onClickNode, focus, cutThreshold, mode, onLinkTogether, onRemoveLink, preconditions, ...props },
     ref
 ) => {
+    const [forceUpdateFlag, setForceUpdateFlag] = useState(Date.now());
+
     const [data] = useMemo(() => {
         let totalScore = 0;
+        const pos = forceUpdateFlag;
         const nodeCauseWeights = value.nodes.map(() => 0);
         const nodeEffectWeights = value.nodes.map(() => 0);
         value.links.forEach(link => {
@@ -121,8 +124,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 value: link.score / nodeCauseWeights[link.effectId],
                 type: link.type,
             })).filter(link => link.value >= cutThreshold),
-        }, totalScore];
-    }, [value, cutThreshold]);
+        }, totalScore, pos];
+    }, [value, cutThreshold, forceUpdateFlag]);
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -321,6 +324,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     useEffect(() => {
         if (graphRef.current) {
             graphRef.current.changeSize(width, GRAPH_HEIGHT);
+            graphRef.current.render();
         }
     }, [width]);
 
@@ -328,6 +332,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
         const { current: container } = containerRef;
         if (container && graphRef.current) {
             graphRef.current.changeData(dataRef.current);
+            graphRef.current.render();
         }
     }, [data]);
 
@@ -357,6 +362,10 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
             {...props}
             ref={ref}
             onClick={e => e.stopPropagation()}
+            onDoubleClick={e => {
+                e.stopPropagation();
+                setForceUpdateFlag(Date.now());
+            }}
         >
             <div ref={containerRef} />
             {/* {edgeSelected && <p className="msg">Press Backspace key to remove this edge.</p>} */}

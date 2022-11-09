@@ -81,7 +81,7 @@ const MainView = styled.div`
     width: 100%;
     flex-grow: 0;
     flex-shrink: 0;
-    height: 46vh;
+    /* height: 46vh; */
     overflow: hidden;
     display: flex;
     flex-direction: row;
@@ -89,7 +89,7 @@ const MainView = styled.div`
     justify-content: stretch;
     border: 1px solid #e3e2e2;
     margin: 8px 0px;
-    padding: 1em;
+    /* padding: 1em; */
     > * {
         height: 100%;
         flex-grow: 1;
