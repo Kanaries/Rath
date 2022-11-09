@@ -6,6 +6,8 @@ import type { ModifiableBgKnowledge } from "../config";
 import type { DiagramGraphData } from ".";
 
 
+const GRAPH_HEIGHT = 300;
+
 const G6_EDGE_SELECT = 'edge_select';
 
 G6.registerBehavior(G6_EDGE_SELECT, {
@@ -124,7 +126,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const [size, setSize] = useState<[number, number]>([0, 0]);
+    const [width, setWidth] = useState(0);
 
     const handleNodeClickRef = useRef(onClickNode);
     handleNodeClickRef.current = onClickNode;
@@ -175,8 +177,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
         ],
     }), [data, mode, preconditions, fields]);
 
-    const sizeRef = useRef(size);
-    sizeRef.current = size;
+    const widthRef = useRef(width);
+    widthRef.current = width;
 
     const [edgeSelected, setEdgeSelected] = useState(false);
 
@@ -185,8 +187,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
         if (container) {
             const graph = new G6.Graph({
                 container,
-                width: sizeRef.current[0],
-                height: sizeRef.current[1],
+                width: widthRef.current,
+                height: GRAPH_HEIGHT,
                 linkCenter: true,
                 modes: {
                     default: mode === 'edit' ? ['drag-canvas', 'drag-node', 'create-edge', G6_EDGE_SELECT] : ['drag-canvas', 'drag-node', 'click-select'],
@@ -318,9 +320,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
 
     useEffect(() => {
         if (graphRef.current) {
-            graphRef.current.changeSize(size[0], size[1]);
+            graphRef.current.changeSize(width, GRAPH_HEIGHT);
         }
-    }, [size]);
+    }, [width]);
 
     useEffect(() => {
         const { current: container } = containerRef;
@@ -339,22 +341,13 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
         const { current: container } = containerRef;
         if (container) {
             const cb = () => {
-                const { width, height } = container.getBoundingClientRect();
-                setSize([width, height]);
+                const { width: w } = container.getBoundingClientRect();
+                setWidth(w);
             };
             const ro = new ResizeObserver(cb);
-            const icb: IntersectionObserverCallback = ([entry]) => {
-                if (entry.intersectionRatio > 0) {
-                    cb();
-                    ito.disconnect();
-                }
-            };
-            const ito = new IntersectionObserver(icb);   // 防止因为卡顿获取到错误的高度
             ro.observe(container);
-            ito.observe(container);
             return () => {
                 ro.disconnect();
-                ito.disconnect();
             };
         }
     }, []);
@@ -366,7 +359,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
             onClick={e => e.stopPropagation()}
         >
             <div ref={containerRef} />
-            {edgeSelected && <p className="msg">Press Backspace key to remove this edge.</p>}
+            {/* {edgeSelected && <p className="msg">Press Backspace key to remove this edge.</p>} */}
+            {edgeSelected && <p className="msg">按下 Backspace 键删除这条关系</p>}
         </Container>
     );
 });
