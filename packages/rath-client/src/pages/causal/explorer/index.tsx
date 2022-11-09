@@ -40,6 +40,7 @@ export interface ExplorerProps {
         composedEffect: readonly Readonly<NodeWithScore>[],
     ) => void;
     onLinkTogether: (srcIdx: number, tarIdx: number) => void;
+    onRemoveLink: (srcFid: string, tarFid: string) => void;
 }
 
 const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
@@ -82,7 +83,7 @@ const MainView = styled.div`
     width: 100%;
     flex-grow: 0;
     flex-shrink: 0;
-    height: 40vh;
+    height: 46vh;
     overflow: hidden;
     display: flex;
     flex-direction: row;
@@ -90,7 +91,6 @@ const MainView = styled.div`
     justify-content: stretch;
     border: 1px solid #8888;
     margin-block: 1em;
-    padding-block: 1.8em;
     padding-inline: 2em;
     > * {
         height: 100%;
@@ -99,7 +99,7 @@ const MainView = styled.div`
     }
 `;
 
-const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSelected, onLinkTogether, preconditions }) => {
+const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSelected, onLinkTogether, onRemoveLink, preconditions }) => {
     const { causalStore } = useGlobalStore();
     const { causalAlgorithm, causalStrength } = causalStore;
 
@@ -361,17 +361,20 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
     }, [fields, value, mode === 'explore' ? focus : -1, cutThreshold]);
 
     const handleLink = useCallback((srcFid: string, tarFid: string) => {
+        if (srcFid === tarFid) {
+            return;
+        }
         onLinkTogether(fields.findIndex(f => f.fid === srcFid), fields.findIndex(f => f.fid === tarFid));
     }, [fields, onLinkTogether]);
 
     return (
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools onClick={e => e.stopPropagation()}>
-                <DefaultButton onClick={() => setModifiedMatrix(data)}>
+                {/* <DefaultButton onClick={() => setModifiedMatrix(data)}>
                     Reset
-                </DefaultButton>
+                </DefaultButton> */}
                 <Toggle
-                    label="Enable Edit"
+                    label="Modify Background Knowledge"
                     checked={mode === 'edit'}
                     onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
                     onText="On"
@@ -403,6 +406,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     cutThreshold={cutThreshold}
                     onClickNode={handleClickCircle}
                     onLinkTogether={handleLink}
+                    onRemoveLink={onRemoveLink}
                     style={{
                         width: '100%',
                         height: '100%',

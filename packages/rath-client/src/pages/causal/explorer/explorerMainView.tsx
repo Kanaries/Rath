@@ -29,11 +29,12 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
     focus: number | null;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
+    onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
-    fields, value, focus, cutThreshold = 0, mode, onClickNode, onLinkTogether, preconditions, ...props },
+    fields, value, focus, cutThreshold = 0, mode, onClickNode, onLinkTogether, onRemoveLink, preconditions, ...props },
     ref
 ) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
@@ -70,6 +71,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     cutThreshold={cutThreshold}
                     onClickNode={onClickNode}
                     onLinkTogether={onLinkTogether}
+                    onRemoveLink={onRemoveLink}
                     focus={focus}
                     style={{
                         flexGrow: 1,

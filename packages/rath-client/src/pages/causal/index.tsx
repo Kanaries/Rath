@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import { applyFilters } from '@kanaries/loa';
+import styled from 'styled-components';
 import produce from 'immer';
 import type { Specification } from 'visual-insights';
 import { IFieldMeta, IFilter } from '../../interfaces';
@@ -21,6 +22,17 @@ import type { BgKnowledge, ModifiableBgKnowledge } from './config';
 import { FilterCell } from './filters';
 
 const VIZ_SUBSET_LIMIT = 2_000;
+
+const Block = styled.div`
+    border: 1px solid #8884;
+    margin-block: 2em;
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    > header:first-child {
+        font-weight: 550;
+    }
+`;
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
@@ -250,224 +262,228 @@ const CausalPage: React.FC = () => {
     return (
         <div className="content-container">
             <div className="card">
-                <Label>Causal Analysis</Label>
-                <Stack style={{ marginBlock: '1.6em' }}>
-                    <Slider
-                        label={`Sample Rate (origin size = ${cleanedData.length} rows, sample size = ${dataSource.length} rows)`}
-                        min={0.01}
-                        max={1}
-                        step={0.01}
-                        value={sampleRate}
-                        showValue
-                        onChange={val => setSampleRate(val)}
-                    />
-                    {sampleRate !== appliedSampleRate && <Spinner label="Synchronizing settings..." />}
-                </Stack>
-                <Stack style={{ marginBlock: '1.6em' }}>
-                    <Label>
-                        {`Filters ${filters.length ? `(subset size: ${dataSubset.length} rows)` : '(no filters applied)'}`}
-                    </Label>
-                    <div
-                        style={{
-                            display: 'flex',
-                            paddingBlock: '0.5em',
-                        }}
-                    >
-                        <FilterCreationPill
-                            fields={fieldMetas}
-                            onFilterSubmit={(_, filter) => setFilters(list => [...list, filter])}
+                <Label style={{ fontSize: '1.3rem' }} >Causal Analysis</Label>
+                <Block>
+                    <header>Dataset Console</header>
+                    <Stack style={{ marginBlock: '1.6em' }}>
+                        <Slider
+                            label={`Sample Rate (origin size = ${cleanedData.length} rows, sample size = ${dataSource.length} rows)`}
+                            min={0.01}
+                            max={1}
+                            step={0.01}
+                            value={sampleRate}
+                            showValue
+                            onChange={val => setSampleRate(val)}
                         />
-                    </div>
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            overflow: 'auto hidden',
-                            marginTop: '1em',
-                            padding: '0.8em',
-                            border: '1px solid #8884',
-                        }}
-                    >
-                        {filters.map((filter, i) => {
-                            const field = fieldMetas.find(f => f.fid === filter.fid);
-
-                            return field ? (
-                                <FilterCell key={i} field={field} data={filter} remove={() => setFilters(list => {
-                                    return produce(list, draft => {
-                                        draft.splice(i, 1);
-                                    });
-                                })} />
-                            ) : null;
-                        })}
-                    </div>
-                </Stack>
-                <Stack style={{ marginBlock: '1.6em', alignItems: 'flex-end' }} horizontal >
-                    <ComboBox
-                        multiSelect
-                        selectedKey={focusFields}
-                        label="Fields to Analyze"
-                        allowFreeform
-                        options={focusFieldsOption}
-                        onChange={(e, option) => {
-                            if (option) {
-                                const { key, selected } = option;
-                                if (focusFields.includes(key as string) && !selected) {
-                                    setFocusFields(list => list.filter(f => f !== key));
-                                } else if (!focusFields.includes(key as string) && selected) {
-                                    setFocusFields(list => [...list, key as string]);
-                                }
-                            }
-                        }}
-                        styles={{
-                            container: {
-                                flexGrow: 1,
-                                flexShrink: 1,
-                            },
-                        }}
-                    />
-                    <DefaultButton onClick={() => setFocusFields(fieldMetas.filter(f => f.disable !== true).map(f => f.fid))}>
-                        Select All
-                    </DefaultButton>
-                    <DefaultButton onClick={() => setFocusFields(fieldMetas.filter(f => f.disable !== true).slice(0, 10).map(f => f.fid))} >
-                        Select First 10 Columns
-                    </DefaultButton>
-                    <DefaultButton onClick={() => setFocusFields([])} >
-                        Clear All
-                    </DefaultButton>
-                </Stack>
-                <Stack style={{ marginBlock: '1.6em 3.2em' }}>
-                    <Label>Conditions (Background Knowledge)</Label>
-                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <PrimaryButton
-                            onClick={() => setModifiablePrecondition(getGeneratedPreconditionsFromIGMat())}
+                        {sampleRate !== appliedSampleRate && <Spinner label="Synchronizing settings..." />}
+                    </Stack>
+                    <Stack style={{ marginTop: '0.3em' }}>
+                        <Label>
+                            {`Filters ${filters.length ? `(subset size: ${dataSubset.length} rows)` : '(no filters applied)'}`}
+                        </Label>
+                        <div
+                            style={{
+                                display: 'flex',
+                                paddingBlock: '0.5em',
+                            }}
                         >
-                            Auto Initialize
-                        </PrimaryButton>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <Label style={{ width: '20%' }}>Add Condition</Label>
-                        <Dropdown
-                            placeholder="Source"
-                            selectedKey={editingPrecondition.src ?? 'none'}
-                            onChange={(e, option) => {
-                                if (!option) {
-                                    return;
-                                }
-                                const fid = option.key as string;
-                                setEditingPrecondition(p => ({
-                                    type: p.type,
-                                    src: fid,
-                                    tar: p.tar === fid ? undefined : p.tar,
-                                }));
+                            <FilterCreationPill
+                                fields={fieldMetas}
+                                onFilterSubmit={(_, filter) => setFilters(list => [...list, filter])}
+                            />
+                        </div>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                overflow: 'auto hidden',
+                                marginTop: '1em',
                             }}
-                            options={selectedFields.map(f => ({
-                                key: f.fid,
-                                text: f.name ?? f.fid,
-                            }))}
-                            styles={{ root: { width: '30%' } }}
-                        />
-                        <Dropdown
-                            placeholder="Direction"
-                            selectedKey={editingPrecondition.type}
+                        >
+                            {filters.map((filter, i) => {
+                                const field = fieldMetas.find(f => f.fid === filter.fid);
+
+                                return field ? (
+                                    <FilterCell key={i} field={field} data={filter} remove={() => setFilters(list => {
+                                        return produce(list, draft => {
+                                            draft.splice(i, 1);
+                                        });
+                                    })} />
+                                ) : null;
+                            })}
+                        </div>
+                    </Stack>
+                </Block>
+                <Block>
+                    <header>Analysis Objective</header>
+                    <Stack style={{ marginBlock: '1.6em', alignItems: 'flex-end' }} horizontal >
+                        <ComboBox
+                            multiSelect
+                            selectedKey={focusFields}
+                            label="Fields to Analyze"
+                            allowFreeform
+                            options={focusFieldsOption}
                             onChange={(e, option) => {
-                                if (!option) {
-                                    return;
+                                if (option) {
+                                    const { key, selected } = option;
+                                    if (focusFields.includes(key as string) && !selected) {
+                                        setFocusFields(list => list.filter(f => f !== key));
+                                    } else if (!focusFields.includes(key as string) && selected) {
+                                        setFocusFields(list => [...list, key as string]);
+                                    }
                                 }
-                                setEditingPrecondition(p => ({
-                                    ...p,
-                                    type: option.key as (typeof p)['type'],
-                                }));
                             }}
-                            options={[
-                                { key: 'must-link', text: 'True' },
-                                { key: 'must-not-link', text: 'False' },
-                                { key: 'prefer-link', text: 'Prefer True' },
-                            ]}
-                            styles={{ root: { width: '10%' }, caretDownWrapper: { display: 'none' }, title: { padding: '0 8px', textAlign: 'center' } }}
-                        />
-                        <Dropdown
-                            placeholder="Target"
-                            selectedKey={editingPrecondition.tar ?? 'none'}
-                            onChange={(e, option) => {
-                                if (!option) {
-                                    return;
-                                }
-                                const fid = option.key as string;
-                                setEditingPrecondition(p => ({
-                                    type: p.type,
-                                    tar: fid,
-                                    src: p.src === fid ? undefined : p.src,
-                                }));
-                            }}
-                            options={selectedFields.map(f => ({
-                                key: f.fid,
-                                text: f.name ?? f.fid,
-                            }))}
-                            styles={{ root: { width: '30%' } }}
-                        />
-                        <ActionButton
                             styles={{
-                                root: {
-                                    width: '10%',
-                                }
-                            }}
-                            iconProps={{
-                                iconName: 'Add',
-                            }}
-                            onClick={() => {
-                                if (editingPrecondition.src && editingPrecondition.tar && editingPrecondition.type && editingPrecondition.src !== editingPrecondition.tar) {
-                                    setEditingPrecondition({ type: editingPrecondition.type });
-                                    setModifiablePrecondition(list => [...list, editingPrecondition as ModifiableBgKnowledge]);
-                                }
+                                container: {
+                                    flexGrow: 1,
+                                    flexShrink: 1,
+                                },
                             }}
                         />
-                    </div>
-                    <List
-                        items={modifiablePrecondition}
-                        onRenderCell={(item, i) => item ? (
-                            <div data-is-focusable={true} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {fieldMetas.find(f => f.fid === item.src)?.name ?? item.src}
-                                </span>
-                                <span style={{ width: '20%' }}>
-                                    {({
-                                        'must-link': 'must link',
-                                        'must-not-link': 'must not link',
-                                        'prefer-link': 'prefer to link'
-                                    } as const)[item.type]}
-                                </span>
-                                <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {fieldMetas.find(f => f.fid === item.tar)?.name ?? item.tar}
-                                </span>
-                                <ActionButton
-                                    styles={{
-                                        root: {
-                                            width: '10%',
-                                        }
-                                    }}
-                                    iconProps={{
-                                        iconName: 'Delete',
-                                    }}
-                                    onClick={() => {
-                                        if (typeof i === 'number') {
-                                            setModifiablePrecondition(list => {
-                                                const next = [...list];
-                                                next.splice(i, 1);
-                                                return next;
-                                            });
-                                        }
-                                    }}
-                                />
-                            </div>
-                        ) : null}
-                        style={{
-                            border: '1px solid #888',
-                            padding: '1em 2em',
-                            maxHeight: '30vh',
-                            overflow: 'auto',
-                        }}
-                    />
-                </Stack>
+                        <DefaultButton onClick={() => setFocusFields(fieldMetas.filter(f => f.disable !== true).map(f => f.fid))}>
+                            Select All
+                        </DefaultButton>
+                        <DefaultButton onClick={() => setFocusFields(fieldMetas.filter(f => f.disable !== true).slice(0, 10).map(f => f.fid))} >
+                            Select First 10 Columns
+                        </DefaultButton>
+                        <DefaultButton onClick={() => setFocusFields([])} >
+                            Clear All
+                        </DefaultButton>
+                    </Stack>
+                    <Stack>
+                        <Label>Conditions (Background Knowledge)</Label>
+                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                            <PrimaryButton
+                                onClick={() => setModifiablePrecondition(getGeneratedPreconditionsFromIGMat())}
+                            >
+                                Auto Initialize
+                            </PrimaryButton>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBlock: '1.2em 1em' }}>
+                            <Label style={{ width: '20%' }}>Add Condition</Label>
+                            <Dropdown
+                                placeholder="Source"
+                                selectedKey={editingPrecondition.src ?? 'none'}
+                                onChange={(e, option) => {
+                                    if (!option) {
+                                        return;
+                                    }
+                                    const fid = option.key as string;
+                                    setEditingPrecondition(p => ({
+                                        type: p.type,
+                                        src: fid,
+                                        tar: p.tar === fid ? undefined : p.tar,
+                                    }));
+                                }}
+                                options={selectedFields.map(f => ({
+                                    key: f.fid,
+                                    text: f.name ?? f.fid,
+                                }))}
+                                styles={{ root: { width: '30%' } }}
+                            />
+                            <Dropdown
+                                placeholder="Direction"
+                                selectedKey={editingPrecondition.type}
+                                onChange={(e, option) => {
+                                    if (!option) {
+                                        return;
+                                    }
+                                    setEditingPrecondition(p => ({
+                                        ...p,
+                                        type: option.key as (typeof p)['type'],
+                                    }));
+                                }}
+                                options={[
+                                    { key: 'must-link', text: 'must link' },
+                                    { key: 'must-not-link', text: 'must not link' },
+                                    { key: 'prefer-link', text: 'prefer to link' },
+                                ]}
+                                styles={{ root: { width: '10%' }, caretDownWrapper: { display: 'none' }, title: { padding: '0 8px', textAlign: 'center' } }}
+                            />
+                            <Dropdown
+                                placeholder="Target"
+                                selectedKey={editingPrecondition.tar ?? 'none'}
+                                onChange={(e, option) => {
+                                    if (!option) {
+                                        return;
+                                    }
+                                    const fid = option.key as string;
+                                    setEditingPrecondition(p => ({
+                                        type: p.type,
+                                        tar: fid,
+                                        src: p.src === fid ? undefined : p.src,
+                                    }));
+                                }}
+                                options={selectedFields.map(f => ({
+                                    key: f.fid,
+                                    text: f.name ?? f.fid,
+                                }))}
+                                styles={{ root: { width: '30%' } }}
+                            />
+                            <ActionButton
+                                styles={{
+                                    root: {
+                                        width: '10%',
+                                    }
+                                }}
+                                iconProps={{
+                                    iconName: 'Add',
+                                }}
+                                onClick={() => {
+                                    if (editingPrecondition.src && editingPrecondition.tar && editingPrecondition.type && editingPrecondition.src !== editingPrecondition.tar) {
+                                        setEditingPrecondition({ type: editingPrecondition.type });
+                                        setModifiablePrecondition(list => [...list, editingPrecondition as ModifiableBgKnowledge]);
+                                    }
+                                }}
+                            />
+                        </div>
+                        <List
+                            items={modifiablePrecondition}
+                            onRenderCell={(item, i) => item ? (
+                                <div data-is-focusable={true} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                    <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {fieldMetas.find(f => f.fid === item.src)?.name ?? item.src}
+                                    </span>
+                                    <span style={{ width: '20%' }}>
+                                        {({
+                                            'must-link': 'must link',
+                                            'must-not-link': 'must not link',
+                                            'prefer-link': 'prefer to link'
+                                        } as const)[item.type]}
+                                    </span>
+                                    <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {fieldMetas.find(f => f.fid === item.tar)?.name ?? item.tar}
+                                    </span>
+                                    <ActionButton
+                                        styles={{
+                                            root: {
+                                                width: '10%',
+                                            }
+                                        }}
+                                        iconProps={{
+                                            iconName: 'Delete',
+                                        }}
+                                        onClick={() => {
+                                            if (typeof i === 'number') {
+                                                setModifiablePrecondition(list => {
+                                                    const next = [...list];
+                                                    next.splice(i, 1);
+                                                    return next;
+                                                });
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            ) : null}
+                            style={{
+                                border: '1px solid #888',
+                                padding: '1em 2em',
+                                maxHeight: '30vh',
+                                overflow: 'auto',
+                            }}
+                        />
+                    </Stack>
+                </Block>
                 <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
                     <DefaultButton text="Clear Group" onClick={() => setFieldGroup([])} />
                     <PrimaryButton
@@ -552,6 +568,9 @@ const CausalPage: React.FC = () => {
                                         type: 'must-link',
                                     },
                                 ])}
+                                onRemoveLink={(srcIdx, tarIdx) => setModifiablePrecondition(list => {
+                                    return list.filter(link => !(link.src === srcIdx && link.tar === tarIdx));
+                                })}
                             />
                         ) : null
                     }
