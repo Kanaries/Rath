@@ -13,7 +13,7 @@ const VizCard = styled.div`
     border: 1px solid #ccc;
     margin: 5px;
     padding: 5px;
-    .action-bar{
+    .action-bar {
         margin-bottom: 5px;
     }
 `;
@@ -23,9 +23,10 @@ interface CrossFilterProps {
     dataSource: IRow[];
     onVizEdit?: (fid: string) => void;
     onVizClue?: (fid: string) => void;
+    onVizDelete?: (fid: string) => void;
 }
 const CrossFilter: React.FC<CrossFilterProps> = (props) => {
-    const { fields, dataSource, onVizClue, onVizEdit } = props;
+    const { fields, dataSource, onVizClue, onVizEdit, onVizDelete } = props;
     // const [brushes, setBrushes] = useState<(IBrush | null)[]>(fields.map((f) => null));
     const [brushSignal, setBrushSignal] = useState<IBrushSignalStore[] | null>(null);
     // const [filters, setFilters] = useState<(IFilter | null)[]>(fields.map((f) => null))
@@ -41,20 +42,27 @@ const CrossFilter: React.FC<CrossFilterProps> = (props) => {
                 return (
                     <VizCard key={field.fid}>
                         <div className="action-bar">
-                            {
-                                onVizEdit && <IconButton
-                                    text='Edit'
+                            {onVizEdit && (
+                                <IconButton
+                                    text="Edit"
                                     iconProps={{ iconName: 'Edit' }}
                                     onClick={() => onVizEdit(field.fid)}
                                 />
-                            }
-                            {
-                                onVizClue && <IconButton
-                                text="Clues"
-                                iconProps={{ iconName: 'Lightbulb' }}
-                                onClick={() => onVizClue(field.fid)}
-                            />
-                            }
+                            )}
+                            {onVizClue && (
+                                <IconButton
+                                    text="Clues"
+                                    iconProps={{ iconName: 'Lightbulb' }}
+                                    onClick={() => onVizClue(field.fid)}
+                                />
+                            )}
+                            {onVizDelete && (
+                                <IconButton
+                                    text="Delete"
+                                    iconProps={{ iconName: 'Delete' }}
+                                    onClick={() => onVizDelete(field.fid)}
+                                />
+                            )}
                         </div>
                         <ColDist
                             data={dataSource}

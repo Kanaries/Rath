@@ -1,31 +1,28 @@
 import { ActionButton, Panel, PanelType } from '@fluentui/react';
+import { IPattern } from '@kanaries/loa';
 import { runInAction } from 'mobx';
 import React, { useEffect } from 'react';
-import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import LiteFocusZone from './liteFocusZone';
 import LitePredictZone from './litePredictZone';
 
 interface IProps {
-    fields?: IFieldMeta[];
     show?: boolean;
     toggleShow?: (show: boolean) => void;
+    view: IPattern | null;
 }
 const SemiEmbed: React.FC<IProps> = (props) => {
-    const { fields = [], show, toggleShow } = props;
+    const { show, toggleShow, view } = props;
     const { semiAutoStore } = useGlobalStore();
     useEffect(() => {
-        if (show && fields.length > 0) {
+        if (show && view && view.fields.length > 0) {
             runInAction(() => {
                 semiAutoStore.clearMainView();
-                semiAutoStore.updateMainView({
-                    fields,
-                    imp: 0,
-                });
+                semiAutoStore.updateMainView(view);
                 // semiAutoStore.addMainViewField(focusVarId);
             });
         }
-    }, [fields, show, semiAutoStore]);
+    }, [view, show, semiAutoStore]);
 
     return (
         <div>

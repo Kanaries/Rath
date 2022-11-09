@@ -16,7 +16,7 @@ import { getModelStorage, getModelStorageList, setModelStorage } from '../utils/
 import { DataSourceStore } from './dataSourceStore';
 
 enum CausalServerUrl {
-    local = 'http://localhost:8000',
+    local = 'http://localhost:8001',
     // test = 'http://gateway.kanaries.cn:2080/causal',
     test = 'http://dev02-thinkpad-t14-gen-2a.local:2281',
 }

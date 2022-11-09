@@ -17,6 +17,7 @@ import {
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
+import { IPattern } from '@kanaries/loa';
 import produce from 'immer';
 import type { Specification } from 'visual-insights';
 import { IFieldMeta } from '../../interfaces';
@@ -41,6 +42,7 @@ const CausalPage: React.FC = () => {
     const { fieldMetas, cleanedData } = dataSourceStore;
     const { fieldGroup, setFieldGroup, appendFields2Group, clearFieldGroup } = useInteractFieldGroups(fieldMetas);
     const [showSemiClue, setShowSemiClue] = useState(false);
+    const [clueView, setClueView] = useState<IPattern | null>(null);
     const [customAnalysisMode, setCustomAnalysisMode] = useState<'crossFilter' | 'graphicWalker'>('crossFilter');
     const { igMatrix, causalFields, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
 
@@ -73,16 +75,20 @@ const CausalPage: React.FC = () => {
             return list;
         }, []);
     }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
-    const {
-        vizSampleData,
-        dataSubset,
-        sampleRate,
-        setSampleRate,
-        appliedSampleRate,
-        filters,
-        setFilters,
-        sampleSize
-    } = useDataViews(cleanedData)
+    const { vizSampleData, dataSubset, sampleRate, setSampleRate, appliedSampleRate, filters, setFilters, sampleSize } =
+        useDataViews(cleanedData);
+
+    useEffect(() => {
+        if (fieldGroup.length > 0) {
+            setClueView({
+                fields: [...fieldGroup],
+                filters: [...filters],
+                imp: 0,
+            });
+        } else {
+            setClueView(null);
+        }
+    }, [fieldGroup, filters]);
 
     useEffect(() => {
         causalStore.setFocusFieldIds(
@@ -100,7 +106,7 @@ const CausalPage: React.FC = () => {
         // TODO: 临时定的阈值
         const thresholdFalse = 0.01;
         const thresholdPrefer = 0.1;
-        const thresholdMayContainLinearlyIndependency = 0.8;    // 线性相关不能反映成因果
+        const thresholdMayContainLinearlyIndependency = 0.8; // 线性相关不能反映成因果
         if (mat.length === selectedFields.length) {
             for (let i = 0; i < mat.length - 1; i += 1) {
                 for (let j = i + 1; j < mat.length; j += 1) {
@@ -242,26 +248,27 @@ const CausalPage: React.FC = () => {
             {
                 key: 'delete-btn',
                 name: '',
-                onRender: (item, index) => typeof index === 'number' ? (
-                    <ActionButton
-                        styles={{
-                            root: {
-                                height: 'unset',
-                                transform: 'scale(0.8)',
-                            }
-                        }}
-                        iconProps={{
-                            iconName: 'Clear',
-                        }}
-                        onClick={() => {
-                            setModifiablePrecondition(list => {
-                                const next = [...list];
-                                next.splice(index, 1);
-                                return next;
-                            });
-                        }}
-                    />
-                ) : null,
+                onRender: (item, index) =>
+                    typeof index === 'number' ? (
+                        <ActionButton
+                            styles={{
+                                root: {
+                                    height: 'unset',
+                                    transform: 'scale(0.8)',
+                                },
+                            }}
+                            iconProps={{
+                                iconName: 'Clear',
+                            }}
+                            onClick={() => {
+                                setModifiablePrecondition((list) => {
+                                    const next = [...list];
+                                    next.splice(index, 1);
+                                    return next;
+                                });
+                            }}
+                        />
+                    ) : null,
                 minWidth: 30,
                 maxWidth: 30,
                 onRenderHeader: () => (
@@ -270,7 +277,7 @@ const CausalPage: React.FC = () => {
                             root: {
                                 height: 'unset',
                                 transform: 'scale(0.8)',
-                            }
+                            },
                         }}
                         iconProps={{
                             iconName: 'Delete',
@@ -283,10 +290,10 @@ const CausalPage: React.FC = () => {
             },
             {
                 key: 'src',
-                name: '因素',//'Source',
-                onRender: item => (
+                name: '因素', //'Source',
+                onRender: (item) => (
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {fieldMetas.find(f => f.fid === item.src)?.name ?? item.src}
+                        {fieldMetas.find((f) => f.fid === item.src)?.name ?? item.src}
                     </span>
                 ),
                 minWidth: 160,
@@ -294,60 +301,63 @@ const CausalPage: React.FC = () => {
             },
             {
                 key: 'type',
-                name: '影响约束',//'Constraint',
-                onRender: (item: ModifiableBgKnowledge, index) => typeof index === 'number' ? (
-                    <Dropdown
-                        selectedKey={item.type}
-                        // options={[
-                        //     { key: 'must-link', text: 'must link' },
-                        //     { key: 'must-not-link', text: 'must not link' },
-                        //     { key: 'prefer-link', text: 'prefer to link' },
-                        // ]}
-                        options={[
-                            { key: 'must-link', text: '一定相连' },
-                            { key: 'must-not-link', text: '一定不相连' },
-                            { key: 'prefer-link', text: '有相连倾向' },
-                        ]}
-                        onChange={(e, option) => {
-                            if (!option) {
-                                return;
-                            }
-                            const linkType = option.key as typeof item.type;
-                            setModifiablePrecondition(p => produce(p, draft => {
-                                draft[index].type = linkType;
-                            }));
-                        }}
-                        styles={{
-                            title: {
-                                fontSize: '0.8rem',
-                                lineHeight: '1.8em',
-                                height: '1.8em',
-                                padding: '0 2.8em 0 0.8em',
-                                border: 'none',
-                                borderBottom: '1px solid #8888'
-                            },
-                            caretDownWrapper: {
-                                fontSize: '0.8rem',
-                                lineHeight: '1.8em',
-                                height: '1.8em',
-                            },
-                            caretDown: {
-                                fontSize: '0.8rem',
-                                lineHeight: '1.8em',
-                                height: '1.8em',
-                            },
-                        }}
-                    />
-                ) : null,
+                name: '影响约束', //'Constraint',
+                onRender: (item: ModifiableBgKnowledge, index) =>
+                    typeof index === 'number' ? (
+                        <Dropdown
+                            selectedKey={item.type}
+                            // options={[
+                            //     { key: 'must-link', text: 'must link' },
+                            //     { key: 'must-not-link', text: 'must not link' },
+                            //     { key: 'prefer-link', text: 'prefer to link' },
+                            // ]}
+                            options={[
+                                { key: 'must-link', text: '一定相连' },
+                                { key: 'must-not-link', text: '一定不相连' },
+                                { key: 'prefer-link', text: '有相连倾向' },
+                            ]}
+                            onChange={(e, option) => {
+                                if (!option) {
+                                    return;
+                                }
+                                const linkType = option.key as typeof item.type;
+                                setModifiablePrecondition((p) =>
+                                    produce(p, (draft) => {
+                                        draft[index].type = linkType;
+                                    })
+                                );
+                            }}
+                            styles={{
+                                title: {
+                                    fontSize: '0.8rem',
+                                    lineHeight: '1.8em',
+                                    height: '1.8em',
+                                    padding: '0 2.8em 0 0.8em',
+                                    border: 'none',
+                                    borderBottom: '1px solid #8888',
+                                },
+                                caretDownWrapper: {
+                                    fontSize: '0.8rem',
+                                    lineHeight: '1.8em',
+                                    height: '1.8em',
+                                },
+                                caretDown: {
+                                    fontSize: '0.8rem',
+                                    lineHeight: '1.8em',
+                                    height: '1.8em',
+                                },
+                            }}
+                        />
+                    ) : null,
                 minWidth: 140,
                 maxWidth: 140,
             },
             {
                 key: 'tar',
-                name: '因素',//'Target',
-                onRender: item => (
+                name: '因素', //'Target',
+                onRender: (item) => (
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {fieldMetas.find(f => f.fid === item.src)?.name ?? item.src}
+                        {fieldMetas.find((f) => f.fid === item.src)?.name ?? item.src}
                     </span>
                 ),
                 minWidth: 160,
@@ -358,9 +368,9 @@ const CausalPage: React.FC = () => {
                 name: '',
                 onRender: () => <div />,
                 minWidth: 0,
-            }
+            },
         ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -381,8 +391,8 @@ const CausalPage: React.FC = () => {
                             step={0.01}
                             value={sampleRate}
                             showValue
-                            onChange={val => setSampleRate(val)}
-                            valueFormat={val => `${(val * 100).toFixed(0)}%`}
+                            onChange={(val) => setSampleRate(val)}
+                            valueFormat={(val) => `${(val * 100).toFixed(0)}%`}
                             styles={{
                                 root: {
                                     flexGrow: 0,
@@ -403,14 +413,18 @@ const CausalPage: React.FC = () => {
                         />
                         <small style={{ padding: '0.2em 0', color: '#666', display: 'flex', alignItems: 'center' }}>
                             {`原始大小: ${cleanedData.length} 行，样本量: `}
-                            {sampleRate !== appliedSampleRate ? <Spinner style={{ display: 'inline-block', transform: 'scale(0.9)', margin: '-50% 0.6em' }} /> : `${sampleSize} 行`}
+                            {sampleRate !== appliedSampleRate ? (
+                                <Spinner
+                                    style={{ display: 'inline-block', transform: 'scale(0.9)', margin: '-50% 0.6em' }}
+                                />
+                            ) : (
+                                `${sampleSize} 行`
+                            )}
                         </small>
                     </Stack>
                     <Stack style={{ marginTop: '0.3em' }}>
                         <Label style={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
-                            <span>
-                                筛选器
-                            </span>
+                            <span>筛选器</span>
                             <div
                                 style={{
                                     display: 'flex',
@@ -419,7 +433,7 @@ const CausalPage: React.FC = () => {
                             >
                                 <FilterCreationPill
                                     fields={fieldMetas}
-                                    onFilterSubmit={(_, filter) => setFilters(list => [...list, filter])}
+                                    onFilterSubmit={(_, filter) => setFilters((list) => [...list, filter])}
                                 />
                             </div>
                         </Label>
@@ -433,14 +447,21 @@ const CausalPage: React.FC = () => {
                                 }}
                             >
                                 {filters.map((filter, i) => {
-                                    const field = fieldMetas.find(f => f.fid === filter.fid);
+                                    const field = fieldMetas.find((f) => f.fid === filter.fid);
 
                                     return field ? (
-                                        <FilterCell key={i} field={field} data={filter} remove={() => setFilters(list => {
-                                            return produce(list, draft => {
-                                                draft.splice(i, 1);
-                                            });
-                                        })} />
+                                        <FilterCell
+                                            key={i}
+                                            field={field}
+                                            data={filter}
+                                            remove={() =>
+                                                setFilters((list) => {
+                                                    return produce(list, (draft) => {
+                                                        draft.splice(i, 1);
+                                                    });
+                                                })
+                                            }
+                                        />
                                     ) : null;
                                 })}
                             </div>
@@ -512,7 +533,16 @@ const CausalPage: React.FC = () => {
                             >
                                 相关性分析
                             </PrimaryButton>
-                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', margin: '0 2em', borderLeft: '1px solid #888a', paddingLeft: '2em' }}>
+                            <div
+                                style={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    margin: '0 2em',
+                                    borderLeft: '1px solid #888a',
+                                    paddingLeft: '2em',
+                                }}
+                            >
                                 <Label style={{ width: '20%' }}>添加影响关系</Label>
                                 <Dropdown
                                     placeholder="Source"
@@ -522,13 +552,13 @@ const CausalPage: React.FC = () => {
                                             return;
                                         }
                                         const fid = option.key as string;
-                                        setEditingPrecondition(p => ({
+                                        setEditingPrecondition((p) => ({
                                             type: p.type,
                                             src: fid,
                                             tar: p.tar === fid ? undefined : p.tar,
                                         }));
                                     }}
-                                    options={selectedFields.map(f => ({
+                                    options={selectedFields.map((f) => ({
                                         key: f.fid,
                                         text: f.name ?? f.fid,
                                     }))}
@@ -541,9 +571,9 @@ const CausalPage: React.FC = () => {
                                         if (!option) {
                                             return;
                                         }
-                                        setEditingPrecondition(p => ({
+                                        setEditingPrecondition((p) => ({
                                             ...p,
-                                            type: option.key as (typeof p)['type'],
+                                            type: option.key as typeof p['type'],
                                         }));
                                     }}
                                     options={[
@@ -561,13 +591,13 @@ const CausalPage: React.FC = () => {
                                             return;
                                         }
                                         const fid = option.key as string;
-                                        setEditingPrecondition(p => ({
+                                        setEditingPrecondition((p) => ({
                                             type: p.type,
                                             tar: fid,
                                             src: p.src === fid ? undefined : p.src,
                                         }));
                                     }}
-                                    options={selectedFields.map(f => ({
+                                    options={selectedFields.map((f) => ({
                                         key: f.fid,
                                         text: f.name ?? f.fid,
                                     }))}
@@ -577,15 +607,23 @@ const CausalPage: React.FC = () => {
                                     styles={{
                                         root: {
                                             width: '10%',
-                                        }
+                                        },
                                     }}
                                     iconProps={{
                                         iconName: 'Add',
                                     }}
                                     onClick={() => {
-                                        if (editingPrecondition.src && editingPrecondition.tar && editingPrecondition.type && editingPrecondition.src !== editingPrecondition.tar) {
+                                        if (
+                                            editingPrecondition.src &&
+                                            editingPrecondition.tar &&
+                                            editingPrecondition.type &&
+                                            editingPrecondition.src !== editingPrecondition.tar
+                                        ) {
                                             setEditingPrecondition({ type: editingPrecondition.type });
-                                            setModifiablePrecondition(list => [...list, editingPrecondition as ModifiableBgKnowledge]);
+                                            setModifiablePrecondition((list) => [
+                                                ...list,
+                                                editingPrecondition as ModifiableBgKnowledge,
+                                            ]);
                                         }
                                     }}
                                 />
@@ -603,7 +641,7 @@ const CausalPage: React.FC = () => {
                                     overflow: 'auto',
                                     whiteSpace: 'nowrap',
                                     fontSize: '0.8rem',
-                                }
+                                },
                             }}
                         />
                     </Stack>
@@ -672,7 +710,7 @@ const CausalPage: React.FC = () => {
                 </Pivot>
                 <Stack horizontal>
                     <SemiEmbed
-                        fields={fieldGroup}
+                        view={clueView}
                         show={showSemiClue}
                         toggleShow={() => {
                             setShowSemiClue((v) => !v);
@@ -681,14 +719,31 @@ const CausalPage: React.FC = () => {
                     {customAnalysisMode === 'crossFilter' && (
                         <ActionButton
                             iconProps={{ iconName: 'Delete' }}
-                            text="清除选择字段"
+                            text="清除全部选择字段"
                             disabled={fieldGroup.length === 0}
                             onClick={clearFieldGroup}
                         />
                     )}
                 </Stack>
                 {customAnalysisMode === 'crossFilter' && vizSampleData.length > 0 && fieldGroup.length > 0 && (
-                    <CrossFilter fields={fieldGroup} dataSource={vizSampleData} />
+                    <CrossFilter
+                        fields={fieldGroup}
+                        dataSource={vizSampleData}
+                        onVizClue={(fid) => {
+                            const field = selectedFields.find((f) => f.fid === fid);
+                            if (field) {
+                                setClueView({
+                                    fields: [field],
+                                    filters: [...filters],
+                                    imp: 0,
+                                });
+                                setShowSemiClue(true);
+                            }
+                        }}
+                        onVizDelete={(fid) => {
+                            setFieldGroup((list) => list.filter((f) => f.fid !== fid));
+                        }}
+                    />
                 )}
                 {/* 小心这里的内存占用 */}
                 {customAnalysisMode === 'graphicWalker' && (

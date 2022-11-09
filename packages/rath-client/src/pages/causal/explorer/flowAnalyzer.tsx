@@ -641,7 +641,6 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                             }}
                                             width={fSize(0.6)}
                                             height={fSize(0.6)}
-                                            axis={null}
                                             brush={brushIdx === i ? null : brush}
                                         />
                                         <label
