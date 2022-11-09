@@ -657,7 +657,6 @@ const CausalPage: React.FC = () => {
                             }
                         />
                     ) : null}
-                    {computing && <Spinner label="computing" />}
                 </div>
             </div>
             <div className="card">
