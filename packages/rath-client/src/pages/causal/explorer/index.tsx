@@ -381,7 +381,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     inlineLabel
                 />
                 <Slider
-                    label="Link Filter"
+                    label="按权重筛选"
                     min={0}
                     max={1}
                     step={0.01}

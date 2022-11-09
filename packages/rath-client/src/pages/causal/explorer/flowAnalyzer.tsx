@@ -540,22 +540,26 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                 </svg>
             ) : (
                 <div className="msg" style={{ height: '50vh' }}>
-                    <p>{'Cannot display corresponding subset because it is not a directed acyclic graph.'}</p>
-                    <p>{'Try to click on a different node, turn up the link filter above or turn down the display limit.'}</p>
+                    <p>{'选中结点的关联路径不是一张有向无环图。'}</p>
+                    {/* <p>{'Cannot display corresponding subset because it is not a directed acyclic graph.'}</p> */}
+                    <p>{'尝试查看其他的结点、调大权重筛选或调小显示上限。'}</p>
+                    {/* <p>{'Try to click on a different node, turn up the link filter above or turn down the display limit.'}</p> */}
                     <small>{cbnTreeMsg}</small>
                 </div>
             )) : null}
             {field && (
                 <div className="tools" style={{ width: '100%', padding: '1em' }}>
                     <Slider
-                        label="Display Limit"
+                        // label="Display Limit"
+                        label="显示上限"
                         min={1}
                         max={Math.max(linksCount, limit)}
                         value={limit}
                         onChange={value => setLimit(value)}
                     />
                     <Dropdown
-                        label="Exploration Mode"
+                        // label="Exploration Mode"
+                        label="探索模式"
                         selectedKey={mode}
                         onChange={(e, option) => {
                             const key = option?.key as undefined | typeof mode;
@@ -564,9 +568,13 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                             }
                         }}
                         options={[
-                            { key: 'cause', text: `How ${field.name ?? field.fid} is effected by other fields` },
-                            { key: 'effect', text: `How ${field.name ?? field.fid} effects other fields` },
+                            { key: 'cause', text: `${field.name ?? field.fid} 如何被其他因素影响` },
+                            { key: 'effect', text: `${field.name ?? field.fid} 如何影响其他因素` },
                         ]}
+                        // options={[
+                        //     { key: 'cause', text: `How ${field.name ?? field.fid} is effected by other fields` },
+                        //     { key: 'effect', text: `How ${field.name ?? field.fid} effects other fields` },
+                        // ]}
                         styles={{
                             root: {
                                 width: '26em',
@@ -574,7 +582,8 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                         }}
                     />
                     {combinedTree && !subtree ? (
-                        <p>Click a node to explore.</p>
+                        // <p>Click on a node to explore.</p>
+                        <p>点击一个结点以在有向图结构上探索。</p>
                     ) : null}
                 </div>
             )}
@@ -660,8 +669,10 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                     </div>
                 ) : (
                     <div className="msg">
-                        <p>{'Cannot display the group because it is not a directed acyclic graph.'}</p>
-                        <p>{'Try to click on a different node, adjust the link filter or display limit, or change the exploration mode.'}</p>
+                        <p>{'选中的组可能包含环结构。'}</p>
+                        {/* <p>{'Cannot display the group because it is not a directed acyclic graph.'}</p> */}
+                        <p>{'尝试查看其他的结点、调整权重筛选、显示上限，或切换探索模式。'}</p>
+                        {/* <p>{'Try to click on a different node, adjust the link filter or display limit, or change the exploration mode.'}</p> */}
                         <small>{subtreeMsg}</small>
                     </div>
                 )

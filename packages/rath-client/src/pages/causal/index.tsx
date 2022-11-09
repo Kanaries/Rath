@@ -283,7 +283,7 @@ const CausalPage: React.FC = () => {
             },
             {
                 key: 'src',
-                name: 'Source',
+                name: '因素',//'Source',
                 onRender: item => (
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {fieldMetas.find(f => f.fid === item.src)?.name ?? item.src}
@@ -294,14 +294,19 @@ const CausalPage: React.FC = () => {
             },
             {
                 key: 'type',
-                name: 'Constraint',
+                name: '影响约束',//'Constraint',
                 onRender: (item: ModifiableBgKnowledge, index) => typeof index === 'number' ? (
                     <Dropdown
                         selectedKey={item.type}
+                        // options={[
+                        //     { key: 'must-link', text: 'must link' },
+                        //     { key: 'must-not-link', text: 'must not link' },
+                        //     { key: 'prefer-link', text: 'prefer to link' },
+                        // ]}
                         options={[
-                            { key: 'must-link', text: 'must link' },
-                            { key: 'must-not-link', text: 'must not link' },
-                            { key: 'prefer-link', text: 'prefer to link' },
+                            { key: 'must-link', text: '一定相连' },
+                            { key: 'must-not-link', text: '一定不相连' },
+                            { key: 'prefer-link', text: '有相连倾向' },
                         ]}
                         onChange={(e, option) => {
                             if (!option) {
@@ -339,7 +344,7 @@ const CausalPage: React.FC = () => {
             },
             {
                 key: 'tar',
-                name: 'Target',
+                name: '因素',//'Target',
                 onRender: item => (
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {fieldMetas.find(f => f.fid === item.src)?.name ?? item.src}
