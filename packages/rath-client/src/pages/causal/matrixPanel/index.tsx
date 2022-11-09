@@ -20,9 +20,9 @@ export enum MATRIX_TYPE {
 }
 
 const MATRIX_PIVOT_LIST = [
-    { itemKey: MATRIX_TYPE.mutualInfo, text: 'Mutual Info', taskLabel: 'Compute' },
-    { itemKey: MATRIX_TYPE.conditionalMutualInfo, text: 'Conditional Mutual Info', taskLabel: 'Compute' },
-    { itemKey: MATRIX_TYPE.causal, text: 'Causal Discovery', taskLabel: 'Causal Discover' },
+    { itemKey: MATRIX_TYPE.mutualInfo, text: '关联信息' || 'Mutual Info', taskLabel: '计算' || 'Compute' },
+    { itemKey: MATRIX_TYPE.conditionalMutualInfo, text: '条件关联信息' || 'Conditional Mutual Info', taskLabel: '计算' || 'Compute' },
+    { itemKey: MATRIX_TYPE.causal, text: '因果发现' || 'Causal Discovery', taskLabel: '因果发现' || 'Causal Discover' },
 ];
 function showMatrix (causalFields: IFieldMeta[], mat: number[][], computing?: boolean): boolean {
     return causalFields.length > 0 && mat.length > 0 && causalFields.length === mat.length && !computing;
@@ -82,7 +82,7 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
                 <RelationMatrixHeatMap
                     absolute
                     fields={fields}
-                    data={igCondMatrix}
+                    data={causalStrength}
                     onSelect={onMatrixPointClick}
                 />
             )}
