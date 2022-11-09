@@ -16,8 +16,8 @@ import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import { applyFilters } from '@kanaries/loa';
-import produce from 'immer';
 import styled from 'styled-components';
+import produce from 'immer';
 import type { Specification } from 'visual-insights';
 import { IFieldMeta, IFilter } from '../../interfaces';
 import { useGlobalStore } from '../../store';
@@ -47,7 +47,7 @@ const InnerCard = styled.div`
     margin: 8px 0px;
     padding: 8px;
     overflow: auto;
-`;
+`
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
@@ -588,11 +588,14 @@ const CausalPage: React.FC = () => {
                                         tar: exploringFields[tarIdx].fid,
                                         type: 'must-link',
                                     },
-                                ])
-                            }
-                        />
-                    ) : null}
-                    {computing && <Spinner label="computings" />}
+                                ])}
+                                onRemoveLink={(srcIdx, tarIdx) => setModifiablePrecondition(list => {
+                                    return list.filter(link => !(link.src === srcIdx && link.tar === tarIdx));
+                                })}
+                            />
+                        ) : null
+                    }
+                    {computing && <Spinner label="computing" />}
                 </div>
             </div>
             <div className="card">

@@ -6,11 +6,42 @@ import type { ModifiableBgKnowledge } from "../config";
 import type { DiagramGraphData } from ".";
 
 
+const G6_EDGE_SELECT = 'edge_select';
+
+G6.registerBehavior(G6_EDGE_SELECT, {
+    getEvents() {
+        return {
+            'edge:click': 'onEdgeClick',
+        };
+    },
+    onEdgeClick(e: any) {
+        const graph = this.graph as Graph;
+        const item = e.item;
+        if (item.hasState('active')) {
+            graph.setItemState(item, 'active', false);
+            return;
+        }
+        graph.findAllByState('edge', 'active').forEach(node => {
+            graph.setItemState(node, 'active', false);
+        });
+        graph.setItemState(item, 'active', true);
+    },
+});
+
 const Container = styled.div`
     overflow: hidden;
+    position: relative;
     > div {
         width: 100%;
         height: 100%;
+    }
+    & .msg {
+        position: absolute;
+        left: 1em;
+        top: 2em;
+        font-size: 10px;
+        user-select: none;
+        pointer-events: none;
     }
 `;
 
@@ -22,6 +53,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     focus: number | null;
     onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
+    onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
 }, never>, 'onChange' | 'ref'>;
 
@@ -60,7 +92,7 @@ const arrowsForBK = {
 } as const;
 
 const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
-    { fields, value, onClickNode, focus, cutThreshold, mode, onLinkTogether, preconditions, ...props },
+    { fields, value, onClickNode, focus, cutThreshold, mode, onLinkTogether, onRemoveLink, preconditions, ...props },
     ref
 ) => {
     const [data] = useMemo(() => {
@@ -99,6 +131,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
 
     const handleLinkRef = useRef(onLinkTogether);
     handleLinkRef.current = onLinkTogether;
+
+    const handleRemoveLinkRef = useRef(onRemoveLink);
+    handleRemoveLinkRef.current = onRemoveLink;
 
     const updateSelected = useRef((idx: number) => {});
 
@@ -140,24 +175,21 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
         ],
     }), [data, mode, preconditions, fields]);
 
+    const sizeRef = useRef(size);
+    sizeRef.current = size;
+
+    const [edgeSelected, setEdgeSelected] = useState(false);
+
     useEffect(() => {
         const { current: container } = containerRef;
         if (container) {
             const graph = new G6.Graph({
                 container,
-                width: size[0],
-                height: size[1],
+                width: sizeRef.current[0],
+                height: sizeRef.current[1],
                 linkCenter: true,
                 modes: {
-                    default: mode === 'edit' ? ['drag-canvas', 'drag-node', 'create-edge'] : ['drag-canvas', 'drag-node', 'click-select'],
-                    altSelect: [
-                        {
-                            type: 'click-select',
-                            trigger: 'alt',
-                            multiple: false,
-                        },
-                        'drag-node',
-                    ],
+                    default: mode === 'edit' ? ['drag-canvas', 'drag-node', 'create-edge', G6_EDGE_SELECT] : ['drag-canvas', 'drag-node', 'click-select'],
                 },
                 animate: true,
                 layout: {
@@ -238,6 +270,31 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 }
             });
 
+            graph.on('keydown', e => {
+                if (e.key === 'Backspace') {
+                    // delete selected link
+                    const [selectedEdge] = graph.findAllByState('edge', 'active');
+                    if (selectedEdge) {
+                        const src = (selectedEdge._cfg?.source as any)?._cfg.id;
+                        const tar = (selectedEdge._cfg?.target as any)?._cfg.id;
+                        if (src && tar) {
+                            const srcF = fields[parseInt(src, 10)];
+                            const tarF = fields[parseInt(tar, 10)];
+                            handleRemoveLinkRef.current(srcF.fid, tarF.fid);
+                        }
+                    }
+                }
+            });
+
+            graph.on('click', () => {
+                setTimeout(() => {
+                    const [selectedEdge] = graph.findAllByState('edge', 'active');
+                    setEdgeSelected(Boolean(selectedEdge));
+                }, 1);
+            });
+
+            setEdgeSelected(false);
+
             updateSelected.current = idx => {
                 const prevSelected = graph.findAllByState('node', 'selected')[0]?._cfg?.id;
                 const prevSelectedIdx = prevSelected ? parseInt(prevSelected, 10) : null;
@@ -257,7 +314,13 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 container.innerHTML = '';
             };
         }
-    }, [size, mode, fields, preconditions]);
+    }, [mode, fields, preconditions]);
+
+    useEffect(() => {
+        if (graphRef.current) {
+            graphRef.current.changeSize(size[0], size[1]);
+        }
+    }, [size]);
 
     useEffect(() => {
         const { current: container } = containerRef;
@@ -303,6 +366,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
             onClick={e => e.stopPropagation()}
         >
             <div ref={containerRef} />
+            {edgeSelected && <p className="msg">Press Backspace key to remove this edge.</p>}
         </Container>
     );
 });

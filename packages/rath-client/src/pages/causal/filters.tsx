@@ -13,12 +13,12 @@ interface FieldCellProps {
 const Cell = styled.div`
     user-select: none;
     font-size: 0.8rem;
-    margin: 0.8em 0;
+    margin: 0.2em 0;
     padding: 0.6em 1.2em;
     padding-right: 4em;
     /* border: 1px solid #8888; */
     box-shadow: 0 0.8px 1.8px 0 rgb(0 0 0 / 26%), 0 0.3px 0.9px 0 rgb(0 0 0 / 22%);
-    margin-left: 2em;
+    margin-right: 2em;
     position: relative;
     > div {
         padding: 0.2em 0;
