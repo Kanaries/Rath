@@ -1,5 +1,6 @@
 import React from 'react';
 import intl from 'react-intl-universal';
+import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../../store';
 import PattSegment from './pattSegment';
 import FeatSegment from './featSegment';
@@ -32,4 +33,4 @@ const PredictZone: React.FC = (props) => {
     );
 };
 
-export default PredictZone;
+export default observer(PredictZone);
