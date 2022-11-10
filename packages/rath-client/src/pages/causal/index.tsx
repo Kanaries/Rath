@@ -6,7 +6,6 @@ import {
     Label,
     Pivot,
     PivotItem,
-    PrimaryButton,
     Slider,
     Spinner,
     Stack,
@@ -204,10 +203,11 @@ const CausalPage: React.FC = () => {
                     )
                     .sort((a, b) => b.score - a.score);
                 // console.log(allEffect)
-                setFieldGroup([node, ...allEffect.map((f) => f.field)]);
+                // setFieldGroup([node, ...allEffect.map((f) => f.field)]);
+                appendFields2Group([node.fid, ...allEffect.map((f) => f.field.fid)])
             }
         },
-        [setFieldGroup]
+        [appendFields2Group]
     );
 
     const focusFieldsOption = useMemo(

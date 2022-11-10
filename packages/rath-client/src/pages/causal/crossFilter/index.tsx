@@ -29,13 +29,13 @@ const CrossFilter: React.FC<CrossFilterProps> = (props) => {
     const { fields, dataSource, onVizClue, onVizEdit, onVizDelete } = props;
     // const [brushes, setBrushes] = useState<(IBrush | null)[]>(fields.map((f) => null));
     const [brushSignal, setBrushSignal] = useState<IBrushSignalStore[] | null>(null);
-    // const [filters, setFilters] = useState<(IFilter | null)[]>(fields.map((f) => null))
-    const [asFilter, setAsFilter] = useState<boolean[]>(fields.map((f) => false));
+    const [brushIndex, setBrushIndex] = useState<number>(-1)
     // const [mergedBrushes, setMergedBrushes] = useState<({ [key: string]: any[] } | null)[]>(fields.map((f) => null));
     useEffect(() => {
         setBrushSignal(null);
-        setAsFilter(fields.map((f) => false));
+        setBrushIndex(-1)
     }, [fields]);
+
     return (
         <VizContainer>
             {fields.map((field, index) => {
@@ -70,23 +70,14 @@ const CrossFilter: React.FC<CrossFilterProps> = (props) => {
                             semanticType={field.semanticType}
                             onBrushSignal={(props) => {
                                 if (props === null) {
-                                    setAsFilter((arr) => {
-                                        const nextArr = [...arr];
-                                        nextArr[index] = false;
-                                        return nextArr;
-                                    });
-                                    setBrushSignal(null);
+                                    return;
                                 } else {
-                                    setAsFilter((arr) => {
-                                        const nextArr = [...arr];
-                                        nextArr[index] = true;
-                                        return nextArr;
-                                    });
+                                    setBrushIndex(index);
                                     setBrushSignal([...props]);
                                 }
                             }}
                             name={field.name}
-                            brush={asFilter[index] ? null : brushSignal}
+                            brush={index === brushIndex ? null : brushSignal}
                         />
                     </VizCard>
                 );
