@@ -24,6 +24,8 @@ interface ColDistProps {
     height?: number;
     /** @default true */
     actions?: boolean;
+    /** @default false */
+    onlyTicks?: boolean;
 }
 const DEFAULT_AXIS: any = {
     labelLimit: 52,
@@ -31,7 +33,7 @@ const DEFAULT_AXIS: any = {
     ticks: false,
 };
 const ColDist: React.FC<ColDistProps> = (props) => {
-    const { data, fid, semanticType, onBrushSignal, brush, name, width = 200, height = 200, actions = false } = props;
+    const { data, fid, semanticType, onBrushSignal, brush, name, width = 200, height = 200, actions = false, onlyTicks = false } = props;
     const container = useRef<HTMLDivElement>(null);
     const view = useRef<View | null>(null);
     const dataSize = data.length;
@@ -66,9 +68,14 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                                 title: name || fid,
                                 bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
                                 type: semanticType,
-                                axis: DEFAULT_AXIS,
+                                axis: onlyTicks ? {
+                                    title: null,
+                                } : DEFAULT_AXIS,
                             },
-                            y: { aggregate: 'count', axis: DEFAULT_AXIS },
+                            y: {
+                                aggregate: 'count',
+                                axis: onlyTicks ? null : DEFAULT_AXIS,
+                            },
                             color: { value: 'gray' },
                         },
                     },
@@ -84,7 +91,9 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                                 title: name || fid,
                                 bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
                                 type: semanticType,
-                                axis: DEFAULT_AXIS
+                                axis: onlyTicks ? {
+                                    title: null,
+                                } : DEFAULT_AXIS
                             },
                             y: { aggregate: 'count', axis: DEFAULT_AXIS },
                             color: { value: '#531dab' },
@@ -110,7 +119,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
             });
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fid, semanticType, dataSize, name, width, height, actions]);
+    }, [fid, semanticType, dataSize, name, width, height, actions, onlyTicks]);
 
     useEffect(() => {
         if (view.current) {

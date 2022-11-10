@@ -621,8 +621,8 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                         style={{
                                             left: `${fx(node.y ?? 0)}px`,
                                             top: `${fy(node.x ?? 0)}px`,
-                                            width: `${fSize(0.6)}px`,
-                                            height: `${fSize(0.6)}px`,
+                                            width: `${fSize(0.8)}px`,
+                                            height: `${fSize(0.8)}px`,
                                             borderColor: index === idx ? '#995ccf' : undefined,
                                         }}
                                     >
@@ -632,6 +632,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                             fid={f.fid}
                                             name={f.name}
                                             semanticType={f.semanticType}
+                                            onlyTicks
                                             onBrushSignal={brush => {
                                                 if (!brush) {
                                                     return;
@@ -639,8 +640,8 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                                 setBrush(brush);
                                                 setBrushIdx(i);
                                             }}
-                                            width={fSize(0.6)}
-                                            height={fSize(0.6)}
+                                            width={fSize(0.8)}
+                                            height={fSize(0.8)}
                                             brush={brushIdx === i ? null : brush}
                                         />
                                         <label
