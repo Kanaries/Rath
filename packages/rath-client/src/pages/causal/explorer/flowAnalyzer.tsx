@@ -622,7 +622,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                             left: `${fx(node.y ?? 0)}px`,
                                             top: `${fy(node.x ?? 0)}px`,
                                             width: `${fSize(0.8)}px`,
-                                            height: `${fSize(0.8)}px`,
+                                            height: `${fSize(0.9)}px`,
                                             borderColor: index === idx ? '#995ccf' : undefined,
                                         }}
                                     >
@@ -641,7 +641,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                                 setBrushIdx(i);
                                             }}
                                             width={fSize(0.8)}
-                                            height={fSize(0.8)}
+                                            height={fSize(0.9)}
                                             brush={brushIdx === i ? null : brush}
                                         />
                                         <label
@@ -649,10 +649,11 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                                 position: 'absolute',
                                                 bottom: '100%',
                                                 left: '50%',
-                                                transform: 'translate(-50%, -0.4em)',
+                                                transform: 'translateX(-50%)',
                                                 cursor: index === idx ? 'default' : 'pointer',
                                                 color: index === idx ? '#995ccf' : '#5da3dc',
                                                 fontWeight: 550,
+                                                filter: 'drop-shadow(0 0 2px #fff)',
                                             }}
                                             onClick={() => {
                                                 if (index !== idx) {

@@ -39,6 +39,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
     const dataSize = data.length;
     useEffect(() => {
         if (container.current) {
+            const shouldXLabelsDisplayFull = semanticType === 'quantitative';
             embed(container.current, {
                 data: {
                     values: data,
@@ -93,6 +94,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                                 type: semanticType,
                                 axis: onlyTicks ? {
                                     title: null,
+                                    labelLimit: shouldXLabelsDisplayFull ? undefined : height * 0.4,
                                 } : DEFAULT_AXIS
                             },
                             y: { aggregate: 'count', axis: DEFAULT_AXIS },
