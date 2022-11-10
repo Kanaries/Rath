@@ -362,7 +362,7 @@ const CausalPage: React.FC = () => {
                 name: '因素', //'Target',
                 onRender: (item) => (
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {fieldMetas.find((f) => f.fid === item.src)?.name ?? item.src}
+                        {fieldMetas.find((f) => f.fid === item.tar)?.name ?? item.tar}
                     </span>
                 ),
                 minWidth: 160,
