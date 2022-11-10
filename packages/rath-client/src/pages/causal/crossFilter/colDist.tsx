@@ -50,75 +50,71 @@ const ColDist: React.FC<ColDistProps> = (props) => {
     const dataSize = data.length;
     useEffect(() => {
         if (container.current) {
-            embed(
-                container.current,
-                {
-                    data: {
-                        values: data,
-                        name: 'dataSource',
-                    },
-                    width,
-                    height,
-                    autosize: {
-                        type: 'fit',
-                        contains: 'padding',
-                    },
-                    layer: [
-                        {
-                            params: [
-                                {
-                                    name: BRUSH_SIGNAL_NAME,
-                                    select: { type: 'interval', encodings: ['x'] },
-                                },
-                            ],
-                            mark: {
-                                type: semanticType === 'temporal' ? 'area' : 'bar',
-                                tooltip: true,
-                            },
-                            encoding: {
-                                x: {
-                                    field: fid,
-                                    title: name || fid,
-                                    bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
-                                    type: semanticType,
-                                    axis: onlyTicks
-                                        ? {
-                                              title: null,
-                                          }
-                                        : DEFAULT_AXIS,
-                                },
-                                y: {
-                                    aggregate: 'count',
-                                    axis: onlyTicks ? null : DEFAULT_AXIS,
-                                },
-                                color: { value: 'gray' },
-                            },
-                        },
-                        {
-                            transform: [{ filter: { param: BRUSH_SIGNAL_NAME } }],
-                            mark: {
-                                type: semanticType === 'temporal' ? 'area' : 'bar',
-                                tooltip: true,
-                            },
-                            encoding: {
-                                x: {
-                                    field: fid,
-                                    title: name || fid,
-                                    bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
-                                    type: semanticType,
-                                    axis: onlyTicks
-                                        ? {
-                                              title: null,
-                                          }
-                                        : DEFAULT_AXIS,
-                                },
-                                y: { aggregate: 'count', axis: DEFAULT_AXIS },
-                                color: { value: '#531dab' },
-                            },
-                        },
-                    ],
+            const shouldXLabelsDisplayFull = semanticType === 'quantitative';
+            embed(container.current, {
+                data: {
+                    values: data,
+                    name: 'dataSource',
                 },
-                { actions }
+                width,
+                height,
+                autosize: {
+                    type: 'fit',
+                    contains: 'padding',
+                },
+                layer: [
+                    {
+                        params: [
+                            {
+                                name: BRUSH_SIGNAL_NAME,
+                                select: { type: 'interval', encodings: ['x'] },
+                            },
+                        ],
+                        mark: {
+                            type: semanticType === 'temporal' ? 'area' : 'bar',
+                            tooltip: true,
+                        },
+                        encoding: {
+                            x: {
+                                field: fid,
+                                title: name || fid,
+                                bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
+                                type: semanticType,
+                                axis: onlyTicks ? {
+                                    title: null,
+                                } : DEFAULT_AXIS,
+                            },
+                            y: {
+                                aggregate: 'count',
+                                axis: onlyTicks ? null : DEFAULT_AXIS,
+                            },
+                            color: { value: 'gray' },
+                        },
+                    },
+                    {
+                        transform: [{ filter: { param: BRUSH_SIGNAL_NAME } }],
+                        mark: {
+                            type: semanticType === 'temporal' ? 'area' : 'bar',
+                            tooltip: true,
+                        },
+                        encoding: {
+                            x: {
+                                field: fid,
+                                title: name || fid,
+                                bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
+                                type: semanticType,
+                                axis: onlyTicks ? {
+                                    title: null,
+                                    labelLimit: shouldXLabelsDisplayFull ? undefined : height * 0.4,
+                                } : DEFAULT_AXIS
+                            },
+                            y: { aggregate: 'count', axis: DEFAULT_AXIS },
+                            color: { value: '#531dab' },
+                        },
+                    },
+                ],
+            },
+                { actions: false }
             ).then((res) => {
                 view.current = res.view;
                 const handler = (name: string, value: any) => {

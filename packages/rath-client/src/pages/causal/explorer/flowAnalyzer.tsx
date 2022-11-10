@@ -106,7 +106,7 @@ const SVGGroup = styled.div`
         }
     }
     > div.msg {
-        padding: 2em;
+        padding: 0.8em 2em 1.6em;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -492,6 +492,18 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
 
     return (
         <SVGGroup onClick={e => e.stopPropagation()}>
+            {field && (
+                <div className="tools" style={{ width: '100%', padding: '1em' }}>
+                    <Slider
+                        // label="Display Limit"
+                        label="显示上限"
+                        min={1}
+                        max={Math.max(linksCount, limit)}
+                        value={limit}
+                        onChange={value => setLimit(value)}
+                    />
+                </div>
+            )}
             {field ? [combinedTree/*, destinationTree, originTree*/].map((tree, i) => tree ? (
                 <svg key={i} viewBox={`0 0 ${tree.size.height + 1} ${tree.size.width + 1}`} strokeLinecap="round" strokeLinejoin="round">
                     <defs>
@@ -539,7 +551,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                     })}
                 </svg>
             ) : (
-                <div className="msg" style={{ height: '50vh' }}>
+                <div className="msg">
                     <p>{'选中结点的关联路径不是一张有向无环图。'}</p>
                     {/* <p>{'Cannot display corresponding subset because it is not a directed acyclic graph.'}</p> */}
                     <p>{'尝试查看其他的结点、调大权重筛选或调小显示上限。'}</p>
@@ -549,14 +561,6 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             )) : null}
             {field && (
                 <div className="tools" style={{ width: '100%', padding: '1em' }}>
-                    <Slider
-                        // label="Display Limit"
-                        label="显示上限"
-                        min={1}
-                        max={Math.max(linksCount, limit)}
-                        value={limit}
-                        onChange={value => setLimit(value)}
-                    />
                     <Dropdown
                         // label="Exploration Mode"
                         label="探索模式"
@@ -622,8 +626,9 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                             left: `${fx(node.y ?? 0)}px`,
                                             top: `${fy(node.x ?? 0)}px`,
                                             width: `${fSize(0.8)}px`,
-                                            height: `${fSize(0.8)}px`,
+                                            height: `${fSize(0.9)}px`,
                                             borderColor: index === idx ? '#995ccf' : undefined,
+                                            zIndex: Math.floor(node.x ?? 0),
                                         }}
                                     >
                                         <ColDist
@@ -641,7 +646,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                                 setBrushIdx(i);
                                             }}
                                             width={fSize(0.8)}
-                                            height={fSize(0.8)}
+                                            height={fSize(0.9)}
                                             brush={brushIdx === i ? null : brush}
                                         />
                                         <label
@@ -649,10 +654,12 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                                 position: 'absolute',
                                                 bottom: '100%',
                                                 left: '50%',
-                                                transform: 'translate(-50%, -0.4em)',
+                                                transform: 'translateX(-50%)',
                                                 cursor: index === idx ? 'default' : 'pointer',
                                                 color: index === idx ? '#995ccf' : '#5da3dc',
                                                 fontWeight: 550,
+                                                backgroundImage: 'linear-gradient(to bottom, #fff4, #fffa, #fffc, #fff6)',
+                                                padding: '0 0.4em',
                                             }}
                                             onClick={() => {
                                                 if (index !== idx) {
