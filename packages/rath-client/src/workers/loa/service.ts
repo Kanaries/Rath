@@ -38,8 +38,8 @@ function featureSelection (dataSource: IRow[], fields: IFieldMeta[], props: IPat
     return ans;
 }
 
-function featureForComparison (dataSouce: IRow[], fields: IFieldMeta[], props: [IPattern, IPattern]) {
-    const core = new NextVICore(dataSouce, fields);
+function featureForComparison (dataSource: IRow[], fields: IFieldMeta[], props: [IPattern, IPattern]) {
+    const core = new NextVICore(dataSource, fields);
     const ans = core.fewatureSelectionForSecondPatternWithSpecifiedViews(props[0], props[1])
     return ans;
 }

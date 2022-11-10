@@ -8,7 +8,6 @@ import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
 
-
 const FeatSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
     const { featSpecList, featViews, mainVizSetting, dataSource, autoAsso, hasMainView, fieldMetas } = semiAutoStore;
