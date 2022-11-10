@@ -10,13 +10,13 @@ const PredictZone: React.FC = (props) => {
     const { featViews, pattViews, filterViews } = semiAutoStore;
     return (
         <div>
-            {featViews.views.length > 0 && (
+            {pattViews.views.length > 0 && (
                 <div className="pure-card">
                     <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.patterns')}</h1>
                     <PattSegment />
                 </div>
             )}
-            {pattViews.views.length > 0 && (
+            {featViews.views.length > 0 && (
                 <div className="pure-card">
                     <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.features')}</h1>
                     <FeatSegment />
