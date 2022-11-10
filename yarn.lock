@@ -1954,10 +1954,10 @@
     vega-lite "^5.2.0"
     visual-insights "0.7.15"
 
-"@kanaries/loa@^0.0.15":
-  version "0.0.15"
-  resolved "https://registry.npmmirror.com/@kanaries/loa/-/loa-0.0.15.tgz#a9b40838317302f1fd6826dc475d9344aea5c953"
-  integrity sha512-YWEkvNDenIvIw3MjpsN/W231WZmJOxdA7ZolbU88ZmhbsowF4iNRtXF9h5l0ZfFKEhv4eEvXn0CwyXffOA16RQ==
+"@kanaries/loa@^0.0.16":
+  version "0.0.16"
+  resolved "https://registry.npmmirror.com/@kanaries/loa/-/loa-0.0.16.tgz#53af7fd1d8c8f21063b5bfed1f5eda296ab8dd6f"
+  integrity sha512-kI0xme/oz5i0LjTfaurwnjelOf1ux93DHpoaL83sXWRd3/ElS7FbWvvv9sZ/EejhPGe79f4bWbi9R//M3KZjtw==
 
 "@kanaries/web-data-loader@0.1.5":
   version "0.1.5"
