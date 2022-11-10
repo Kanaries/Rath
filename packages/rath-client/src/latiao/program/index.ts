@@ -20,6 +20,7 @@ import '../implement/$log';
 import '../implement/$clean';
 import '../implement/regex';
 import '../implement/$partition';
+import '../implement/$map';
 
 
 export type Context = {
