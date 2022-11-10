@@ -201,13 +201,14 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 },
                 animate: true,
                 layout: {
-                  type: 'fruchterman',
-                  gravity: 5,
-                  speed: 10,
-                  // for rendering after each iteration
-                  tick: () => {
-                    graph.refreshPositions()
-                  }
+                    type: 'fruchterman',
+                    gravity: 5,
+                    speed: 5,
+                    center: [widthRef.current / 2, GRAPH_HEIGHT / 2],
+                    // for rendering after each iteration
+                    tick: () => {
+                        graph.refreshPositions()
+                    }
                 },
                 // layout: {
                 //     type: 'gForce',
@@ -327,6 +328,16 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     useEffect(() => {
         if (graphRef.current) {
             graphRef.current.changeSize(width, GRAPH_HEIGHT);
+            graphRef.current.updateLayout({
+                type: 'fruchterman',
+                gravity: 5,
+                speed: 5,
+                center: [widthRef.current / 2, GRAPH_HEIGHT / 2],
+                // for rendering after each iteration
+                tick: () => {
+                    graphRef.current?.refreshPositions();
+                }
+            });
             graphRef.current.render();
         }
     }, [width]);

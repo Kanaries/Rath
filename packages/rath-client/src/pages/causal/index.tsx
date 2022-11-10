@@ -105,27 +105,29 @@ const CausalPage: React.FC = () => {
         const initLinks: ModifiableBgKnowledge[] = [];
         const mat = igMatrix;
         // TODO: 临时定的阈值
-        const thresholdFalse = 0.01;
-        const thresholdPrefer = 0.1;
-        const thresholdMayContainLinearlyIndependency = 0.8; // 线性相关不能反映成因果
+        const thresholdFalse = 0.005;
+        const thresholdPrefer = [0.1, 0.5];
+        const thresholdMayContainLinearlyIndependency = 0.99; // 线性相关不能反映成因果
         if (mat.length === selectedFields.length) {
-            for (let i = 0; i < mat.length - 1; i += 1) {
-                for (let j = i + 1; j < mat.length; j += 1) {
+            for (let i = 0; i < mat.length; i += 1) {
+                for (let j = 0; j < mat.length; j += 1) {
+                    if (i === j) {
+                        continue;
+                    }
                     const wf = mat[i][j];
-                    const wb = mat[j][i];
-                    if (Math.max(wf, wb) >= thresholdMayContainLinearlyIndependency) {
+                    if (wf >= thresholdMayContainLinearlyIndependency) {
                         initLinks.push({
                             src: selectedFields[i].fid,
                             tar: selectedFields[j].fid,
                             type: 'must-not-link',
                         });
-                    } else if (wf + wb < thresholdFalse) {
+                    } else if (wf < thresholdFalse) {
                         initLinks.push({
                             src: selectedFields[i].fid,
                             tar: selectedFields[j].fid,
                             type: 'must-not-link',
                         });
-                    } else if (Math.max(wf, wb) >= thresholdPrefer) {
+                    } else if (wf >= thresholdPrefer[0] && wf <= thresholdPrefer[1]) {
                         initLinks.push({
                             src: selectedFields[i].fid,
                             tar: selectedFields[j].fid,
@@ -159,6 +161,15 @@ const CausalPage: React.FC = () => {
     useEffect(() => {
         setModifiablePrecondition(shouldInitPreconditionsRef.current ? getGeneratedPreconditionsFromIGMat() : []);
     }, [getGeneratedPreconditionsFromIGMat]);
+
+    const modifiablePreconditionRef = useRef(modifiablePrecondition);
+    modifiablePreconditionRef.current = modifiablePrecondition;
+
+    useEffect(() => {
+        if (shouldInitPreconditions && modifiablePreconditionRef.current.length === 0) {
+            setModifiablePrecondition(getGeneratedPreconditionsFromIGMat());
+        }
+    }, [shouldInitPreconditions, getGeneratedPreconditionsFromIGMat]);
 
     useEffect(() => {
         causalStore.updateCausalAlgorithmList(fieldMetas);
