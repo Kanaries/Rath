@@ -27,7 +27,7 @@ const TableInnerStyle = {
 
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
-    const { filteredData: rawData, fieldsWithExtSug: fields } = dataSourceStore;
+    const { filteredData, fieldsWithExtSug: fields } = dataSourceStore;
 
     const fieldsCanExpand = fields.filter(
         f => f.extSuggestions.length > 0,
@@ -176,7 +176,7 @@ const DataTable: React.FC = (props) => {
                 columns.length > 0 && <CustomBaseTable
                 useVirtual={true}
                 getRowProps={rowPropsCallback}
-                style={TableInnerStyle} dataSource={rawData} columns={columns} />
+                style={TableInnerStyle} dataSource={filteredData} columns={columns} />
             }
         </div>
     );

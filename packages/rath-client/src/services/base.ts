@@ -23,6 +23,7 @@ import { MessageProps } from '../workers/engine/service';
 
 import { CleanMethod, ICol, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from '../interfaces';
 import { ILoaProps } from '../workers/loa/service';
+import { IteratorStorage } from '../utils/iteStorage';
 
 interface SuccessResult<T> {
     success: true;
@@ -134,8 +135,14 @@ export async function cleanDataService(props: CleanServiceProps): Promise<IRow[]
     return data;
 }
 
-export interface FilterServiceProps {
+export type FilterServiceProps = {
+    dataStorageType: 'memory';
     dataSource: IRow[];
+    extData: Map<string, ICol<any>>;
+    filters: IFilter[];
+} | {
+    dataStorageType: 'db';
+    dataStorage: IteratorStorage;
     extData: Map<string, ICol<any>>;
     filters: IFilter[];
 }
@@ -243,28 +250,5 @@ export async function loaEngineService<R = any>(
     } catch (error) {
         console.error(error);
         throw error;
-    }
-}
-
-interface ExtendDataProps {
-    dataSource: IRow[];
-    fields: IRawField[];
-}
-export async function extendDataService(props: ExtendDataProps): Promise<ExtendDataProps> {
-    const res = await fetch('https://9fw5jekyz8.execute-api.ap-northeast-1.amazonaws.com/default/extension', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(props),
-    });
-    if (res.status !== 200) {
-        throw new Error(`[Extension API Error]status code = ${res.status}; ${res.statusText}`);
-    }
-    const result = await res.json();
-    if (result.success) {
-        return result.data as ExtendDataProps;
-    } else {
-        throw new Error(result.message);
     }
 }

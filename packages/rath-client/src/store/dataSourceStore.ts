@@ -4,12 +4,13 @@ import * as op from 'rxjs/operators'
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, ICol, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions, IExtField } from "../interfaces";
-import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
+import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
 import { findRathSafeColumnIndex, colFromIRow, readableWeekday } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
+import { IteratorStorage } from "../utils/iteStorage";
 import { updateDataStorageMeta } from "../utils/storage";
 
 interface IDataMessage {
@@ -32,11 +33,12 @@ interface IDataSourceStoreStorage {
 }
 
 export class DataSourceStore {
+    public dataVersionCode: number = -1;
     /**
      * raw data is fetched and parsed data or uploaded data without any other changes.
      * computed value `dataSource` will be calculated
      */
-    public rawData: IRow[] = [];
+    public rawDataStorage: IteratorStorage;
     public extData = new Map<string, ICol<any>>();
     /**
      * fields contains fields with `dimension` or `measure` type.
@@ -69,8 +71,10 @@ export class DataSourceStore {
     private subscriptions: Subscription[] = [];
     public datasetId: string | null = null;
     constructor() {
+        this.rawDataStorage = new IteratorStorage({
+            itemKey: 'rawData',
+        });
         makeAutoObservable(this, {
-            rawData: observable.ref,
             cookedDataSource: observable.ref,
             cookedMeasures: observable.ref,
             fieldsWithExtSug: observable.ref,
@@ -80,17 +84,20 @@ export class DataSourceStore {
             cleanedDataRef: false,
             filteredDataRef: false,
             fieldMetasRef: false,
+            rawDataStorage: false,
         });
+        // console.log(this.rawData, this.extFields)
         const fields$ = from(toStream(() => this.fieldsAndPreview, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
-        const rawData$ = from(toStream(() => this.rawData, false));
+        const dataVersionCode$ = from(toStream(() => this.dataVersionCode, false));
         const extData$ = from(toStream(() => this.extData, true));
         const filters$ = from(toStream(() => this.filters, true))
         // const filteredData$ = from(toStream(() => this.filteredData, true));
-        const filteredData$ = combineLatest([rawData$, extData$, filters$]).pipe(
-            op.map(([dataSource, extData, filters]) => {
+        const filteredData$ = combineLatest([dataVersionCode$, extData$, filters$]).pipe(
+            op.map(([code, extData, filters]) => {
                 return from(filterDataService({
-                    dataSource,
+                    dataStorageType: 'db',
+                    dataStorage: this.rawDataStorage,
                     extData: toJS(extData),
                     filters: toJS(filters)
                 }))
@@ -148,7 +155,7 @@ export class DataSourceStore {
                 this.setShowDataImportSelection(false);
             }
         })
-        this.subscriptions.push(rawData$.subscribe(() => {
+        this.subscriptions.push(dataVersionCode$.subscribe(() => {
             runInAction(() => {
                 this.dataPrepProgressTag = IDataPrepProgressTag.filter;
             })
@@ -183,7 +190,11 @@ export class DataSourceStore {
             suggestExt(undefined, fieldMetaAndPreviews);
         })
     }
-
+    public get rawDataSize () {
+        // make rawDataSize reactive
+        if (this.dataVersionCode === -1) return 0;
+        return this.rawDataStorage.length;
+    }
     public get allFields() {
         return this.mutFields.concat(this.extFields)
     }
@@ -320,26 +331,28 @@ export class DataSourceStore {
         }
         this.filters = [...this.filters]
     }
-    public createBatchFilterByQts (fieldIdList: string[], qts: [number, number][]) {
-        const { rawData } = this;
-
-        for (let i = 0; i < fieldIdList.length; i++) {
-            // let domain = getRange();
-            let range = getQuantiles(rawData.map(r => Number(r[fieldIdList[i]])), qts[i]) as [number, number]; 
-            // if (this.filters.find())
-            const filterIndex = this.filters.findIndex(f => f.fid === fieldIdList[i])
-            const newFilter: IFilter = {
-                fid: fieldIdList[i],
-                type: 'range',
-                range
+    public async createBatchFilterByQts (fieldIdList: string[], qts: [number, number][]) {
+        const { rawDataStorage } = this;
+        const data = await rawDataStorage.getAll();
+        runInAction(() => {
+            for (let i = 0; i < fieldIdList.length; i++) {
+                // let domain = getRange();
+                let range = getQuantiles(data.map(r => Number(r[fieldIdList[i]])), qts[i]) as [number, number]; 
+                // if (this.filters.find())
+                const filterIndex = this.filters.findIndex(f => f.fid === fieldIdList[i])
+                const newFilter: IFilter = {
+                    fid: fieldIdList[i],
+                    type: 'range',
+                    range
+                }
+                if (filterIndex > -1) {
+                    this.filters.splice(filterIndex, 1, newFilter)
+                } else {
+                    this.filters.push(newFilter)
+                }
             }
-            if (filterIndex > -1) {
-                this.filters.splice(filterIndex, 1, newFilter)
-            } else {
-                this.filters.push(newFilter)
-            }
-        }
-        this.filters = [...this.filters]
+            this.filters = [...this.filters]
+        })
     }
 
     public setLoadingDataProgress (p: number) {
@@ -393,20 +406,28 @@ export class DataSourceStore {
         }
     }
 
-    public loadData (fields: IRawField[], rawData: IRow[]) {
+    public async loadData (fields: IRawField[], rawData: IRow[]) {
         this.mutFields = fields.map(f => ({
             ...f,
             name: f.name ? f.name : f.fid,
             disable: false
         }))
-        this.rawData = rawData
-        this.loading = false;
+        await this.rawDataStorage.setAll(rawData);
+        runInAction(() => {
+            this.dataVersionCode = this.rawDataStorage.versionCode;
+            this.loading = false;
+        })
     }
 
+    /**
+     * @deprecated
+     * @returns 
+     */
     public exportStore(): IDataSourceStoreStorage {
-        const { rawData, mutFields, cookedDataSource, cookedDimensions, cookedMeasures, cleanMethod, fieldMetas } = this;
+        const { mutFields, cookedDataSource, cookedDimensions, cookedMeasures, cleanMethod, fieldMetas } = this;
+        // FIXME: rawData
         return {
-            rawData,
+            rawData: [],
             mutFields,
             cookedDataSource,
             cookedDimensions,
@@ -425,9 +446,12 @@ export class DataSourceStore {
             }))
         }
     }
-
+    /**
+     * @deprecated
+     * @param state 
+     */
     public importStore(state: IDataSourceStoreStorage) {
-        this.rawData = state.rawData;
+        // this.rawData = state.rawData;
         this.mutFields = state.mutFields;
         this.cookedDataSource = state.cookedDataSource;
         this.cookedDimensions = state.cookedDimensions;
@@ -437,40 +461,13 @@ export class DataSourceStore {
         this.fieldMetasRef.current = state.fieldMetas
     } 
 
-    public async extendData () {
-        // TODO: IRawField增加了extInfo?: IFieldExtInfoBase属性，此处应在新增字段的时候补充详细信息
-        try {
-            const { fields, cleanedData } = this;
-            const res = await extendDataService({
-                dataSource: cleanedData,
-                fields
-            })
-            const finalFields = await inferMetaService({
-                dataSource: res.dataSource,
-                fields: res.fields.filter(f => Boolean(f.pfid)).map(f => ({
-                    ...f,
-                    semanticType: '?'
-                }))
-            })
-            runInAction(() => {
-                this.rawData = res.dataSource;
-                this.mutFields = fields.concat(finalFields)
-            })
-        } catch (error) {
-            notify({
-                title: 'Extension API Error',
-                type: 'error',
-                content: `[extension]${error}`
-            })
-        }
-    }
-
     public async loadDataWithInferMetas (dataSource: IRow[], fields: IMuteFieldBase[]) {
         if (fields.length > 0 && dataSource.length > 0) {
             const metas = await inferMetaService({ dataSource, fields })
+            await this.rawDataStorage.setAll(dataSource)
             runInAction(() => {
-                this.rawData = dataSource;
                 this.loading = false;
+                this.dataVersionCode = this.rawDataStorage.versionCode;
                 this.showDataImportSelection = false;
                 // 如果除了安全维度，数据集本身就有维度
                 if (metas.filter(f => f.analyticType === 'dimension').length > 1) {
@@ -493,14 +490,16 @@ export class DataSourceStore {
      */
     public async expandDateTime() {
         try {
-            let { mutFields, rawData } = this;
+            let { mutFields } = this;
             mutFields = mutFields.map(f => toJS(f))
+            const data = await this.rawDataStorage.getAll();
             const res = await expandDateTimeService({
-                dataSource: rawData,
+                dataSource: data,
                 fields: mutFields
             })
+            await this.rawDataStorage.setAll(res.dataSource)
             runInAction(() => {
-                this.rawData = res.dataSource;
+                this.dataVersionCode = this.rawDataStorage.versionCode;
                 this.mutFields = res.fields
             })
         } catch (error) {
@@ -575,10 +574,11 @@ export class DataSourceStore {
         }
 
         try {
-            let { allFields, rawData } = this;
+            let { allFields } = this;
             allFields = allFields.filter(f => f.fid === fid).map(f => toJS(f))
+            const data = await this.rawDataStorage.getAll();
             const res = await expandDateTimeService({
-                dataSource: rawData,
+                dataSource: data,
                 fields: allFields
             })
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -597,35 +597,6 @@ export class DataSourceStore {
                 title: 'Expand DateTime API Error',
                 type: 'error',
                 content: `[extension]${error}`
-            })
-        }
-    }
-
-    /**
-     * @deprecated use `dataSourceStore.addExtFieldsFromRows` to avoid changes of rawData.
-     */
-    public mergeExtended(data: readonly IRow[], fields: IFieldMeta[]) {
-        try {
-            let { cleanedData } = this;
-            // console.log(
-            //     'mergeExtended',
-            //     cleanedData.map((row, i) => Object.assign({}, data[i], row)),
-            //     fields,
-            // );
-
-            runInAction(() => {
-                this.rawData = cleanedData.map((row, i) => Object.assign({}, data[i], row));
-                this.mutFields = [
-                    ...this.mutFields,
-                    ...fields,
-                ];
-            })
-        } catch (error) {
-            console.error(error)
-            notify({
-                title: 'mergeExtended Error',
-                type: 'error',
-                content: `[merge]${error}`
             })
         }
     }

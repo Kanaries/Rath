@@ -9,6 +9,7 @@ import { IFilter } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import RangeSelection from './rangeSelection';
 import SetSelection from './setSelection';
+import { getOriginalRange } from './originalRange';
 
 interface FieldFilterProps {
     fid: string;
@@ -22,7 +23,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
 
     const meta = dataSourceStore.fieldMetas.find(fm => fm.fid === fid);
 
-    const { rawData } = dataSourceStore;
+    const { rawDataStorage, dataVersionCode } = dataSourceStore;
 
     const [filter, setFilter] = useState<IFilter>((meta && meta.semanticType === 'quantitative') ? {
         fid,
@@ -34,20 +35,20 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
         values: []
     })
 
+    const [fieldRange, setFieldRange] = useState<[number, number]>([0, 0])
     const filterType = filter.type;
-
-    const fieldValues = useMemo<number[]>(() => {
-        if (filterType === 'range') {
-            return rawData.map(r => {
-                try {
-                    return parseFloat(r[fid]);
-                } catch {
-                    return NaN;
-                }
+    useEffect(() => {
+        if (dataVersionCode === -1) {
+            setFieldRange([0, 0]);
+        } else if (filterType !== 'range') {
+            setFieldRange([0, 0]);
+        } else {
+            getOriginalRange(rawDataStorage, fid).then(r => {
+                setFieldRange(r)
             })
         }
-        return []
-    }, [rawData, fid, filterType]);
+    }, [fid, filterType, rawDataStorage, dataVersionCode])
+
 
     const selection = useMemo(() => {
         return new Selection({
@@ -87,18 +88,6 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
             return nextF
         })
     }, [])
-
-    const fieldRange = useMemo<[number, number]>(() => {
-        if (fieldValues.length === 0) return [0, 0]
-        let _min = Infinity;
-        let _max = -Infinity;
-        for (const v of fieldValues) {
-            if (Number.isNaN(v)) continue;
-            if (v > _max) _max = v;
-            if (v < _min) _min = v;
-        }
-        return [_min, _max].every(Number.isFinite) ? [_min, _max] : [0, 0];
-    }, [fieldValues])
 
     useEffect(() => {
         if (filterType === 'range') {
