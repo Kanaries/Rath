@@ -12,8 +12,8 @@ import MatrixPanel, { MATRIX_TYPE } from './matrixPanel';
 import { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import { useDataViews } from './hooks/dataViews';
 import DatasetPanel from './datasetPanel';
-import PreconditionTable from './preconditionTable';
 import ManualAnalyzer from './manualAnalyzer';
+import PreconditionPanel from './preconditionPanel';
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
@@ -96,7 +96,7 @@ const CausalPage: React.FC = () => {
             <div className="card">
                 <h1 style={{ fontSize: '1.6em', fontWeight: 500 }}>因果分析</h1>
                 <DatasetPanel />
-                <PreconditionTable
+                <PreconditionPanel
                     modifiablePrecondition={modifiablePrecondition}
                     setModifiablePrecondition={setModifiablePrecondition}
                 />
