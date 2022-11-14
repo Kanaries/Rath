@@ -23,7 +23,7 @@ import type { Specification } from 'visual-insights';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import FilterCreationPill from '../../components/filterCreationPill';
-import LaTiaoConsole from '../dataSource/LaTiaoConsole';
+import LaTiaoConsole from '../../components/latiaoConsole/index';
 import SemiEmbed from '../semiAutomation/semiEmbed';
 import Explorer from './explorer';
 import CrossFilter from './crossFilter';
