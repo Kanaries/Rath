@@ -17,6 +17,28 @@ import ProgressiveDashboard from './pages/progressiveDashboard';
 import Painter from './pages/painter';
 import Collection from './pages/collection';
 import Dashboard from './pages/dashboard';
+import LoginInfo from './pages/loginInfo';
+import Account from './pages/loginInfo/account';
+import Info from './pages/loginInfo/info';
+import Setup from './pages/loginInfo/setup';
+
+export enum PreferencesType {
+    Account = 'Account',
+    Info = 'Info',
+    Setup = 'Set Up',
+}
+export interface PreferencesListType {
+    key: PreferencesType;
+    name: PreferencesType;
+    icon: string;
+    element: () => JSX.Element;
+}
+
+const preferencesList: PreferencesListType[] = [
+    { key: PreferencesType.Account, name: PreferencesType.Account, icon: 'Home', element: () => <Account /> },
+    { key: PreferencesType.Info, name: PreferencesType.Info, icon: 'Info', element: () => <Info /> },
+    { key: PreferencesType.Setup, name: PreferencesType.Setup, icon: 'Settings', element: () => <Setup /> },
+];
 
 function App() {
     const { langStore, commonStore } = useGlobalStore();
@@ -39,8 +61,13 @@ function App() {
     return (
         <div>
             <div className="main-app-container">
-                <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '20px' }}>
-                    <AppNav />
+                <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '3px' }}>
+                    <LoginInfo
+                        element={() => {
+                            return <AppNav />;
+                        }}
+                        preferencesList={preferencesList}
+                    />
                 </div>
                 <div className="main-app-content">
                     <div className="message-container">

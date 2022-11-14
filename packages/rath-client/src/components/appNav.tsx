@@ -1,34 +1,36 @@
 import React, { useCallback } from 'react';
 import { Nav, INavLinkGroup } from '@fluentui/react';
-import { observer } from 'mobx-react-lite'
+import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
 
 import { PIVOT_KEYS } from '../constants';
 import { useGlobalStore } from '../store';
-import UserSetting from './userSettings'
+import UserSetting from './userSettings';
 
 const NavContainer = styled.div`
     height: 100%;
     /* display: relative; */
     position: relative;
     /* flex-direction: vertical; */
-    .nav-footer{
-        position: absolute;
-        bottom: 12px;
-        padding: 1em;
+    display: flex;
+    flex-direction: column;
+    .nav-footer {
+        /* position: absolute; */
+        bottom: 0px;
+        /* padding-left: 1em; */
     }
     padding-left: 10px;
-    .text-red{
-        color: #e94726
+    .text-red {
+        color: #e94726;
     }
-    .text-yellow{
-        color: rgb(237, 167, 15)
+    .text-yellow {
+        color: rgb(237, 167, 15);
     }
-    .text-gray{
-        color: rgb(103, 109, 108)
+    .text-gray {
+        color: rgb(103, 109, 108);
     }
-`
+`;
 
 const LogoBar = styled.div`
     display: flex;
@@ -38,7 +40,7 @@ const LogoBar = styled.div`
         margin-left: 12px;
         font-size: 1.6em;
     }
-`
+`;
 
 const IconMap = {
     [PIVOT_KEYS.megaAuto]: 'Robot',
@@ -51,40 +53,44 @@ const IconMap = {
     [PIVOT_KEYS.collection]: 'Heart',
     [PIVOT_KEYS.dashboard]: 'CRMReport',
 } as {
-    [key: string]: string
-}
+    [key: string]: string;
+};
 
-function getIcon (k: string): string {
-    return IconMap[k] || 'Settings'
+function getIcon(k: string): string {
+    return IconMap[k] || 'Settings';
 }
 
 interface AppNavProps {}
-const AppNav: React.FC<AppNavProps> = props => {
-    const { commonStore } = useGlobalStore()
+const AppNav: React.FC<AppNavProps> = (props) => {
+    const { commonStore } = useGlobalStore();
 
     const { appKey, navMode } = commonStore;
 
-    const getLinks = useCallback((pivotKeys: string[]) => {
-        return pivotKeys.map(p => {
-            return {
-                url: `#${p}`,
-                key: p,
-                name: navMode === 'text' ? intl.get(`menu.${p}`) : '',
-                forceAnchor: true,
-                iconProps: {iconName: getIcon(p) },
-                // iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
-                onClick (e: any) {
-                    e.preventDefault();
-                    commonStore.setAppKey(p)
-                }
-            }
-        })
-    }, [commonStore, navMode])
+    const getLinks = useCallback(
+        (pivotKeys: string[]) => {
+            return pivotKeys.map((p) => {
+                return {
+                    url: `#${p}`,
+                    key: p,
+                    name: navMode === 'text' ? intl.get(`menu.${p}`) : '',
+                    forceAnchor: true,
+                    iconProps: { iconName: getIcon(p) },
+                    // iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
+                    onClick(e: any) {
+                        e.preventDefault();
+                        commonStore.setAppKey(p);
+                    },
+                };
+            });
+        },
+        [commonStore, navMode]
+    );
 
     const groups: INavLinkGroup[] = [
         {
             links: [
-                ...getLinks([PIVOT_KEYS.dataSource,
+                ...getLinks([
+                    PIVOT_KEYS.dataSource,
                     PIVOT_KEYS.editor,
                     PIVOT_KEYS.semiAuto,
                     PIVOT_KEYS.megaAuto,
@@ -98,20 +104,22 @@ const AppNav: React.FC<AppNavProps> = props => {
                     name: navMode === 'text' ? intl.get('menu.devCollection') : '',
                     isExpanded: false,
                     forceAnchor: true,
-                    onClick (e: any) { e.preventDefault() },
+                    onClick(e: any) {
+                        e.preventDefault();
+                    },
                     links: getLinks([
                         // PIVOT_KEYS.noteBook,
                         // PIVOT_KEYS.gallery,
                         // PIVOT_KEYS.explainer,
                         // PIVOT_KEYS.dashBoard,
-                        PIVOT_KEYS.dashBoardDesigner
-                    ])
+                        PIVOT_KEYS.dashBoardDesigner,
+                    ]),
                 },
                 {
                     url: '/',
                     name: navMode === 'text' ? intl.get('common.home') : '',
                     // iconProps: navMode === 'icon' ? {iconName: 'Home'} : undefined,
-                    iconProps: {iconName: 'Home'}
+                    iconProps: { iconName: 'Home' },
                 },
                 ...getLinks([PIVOT_KEYS.support]),
                 // ...pivotList.map(item => {
@@ -126,31 +134,35 @@ const AppNav: React.FC<AppNavProps> = props => {
                 //         }
                 //     }
                 // })
-            ]
-        }
-    ]
-    return <NavContainer>
-        <LogoBar>
-            <a
-                // onClick={() => { window.location.reload(false); }}
-                href="https://kanaries.cn/"
-            >
-                <img
-                    style={{ width: '38px', marginTop: '4px' }}
-                    src="./assets/kanaries-lite.png"
-                    alt="rath"
-                />
-            </a>
-            {navMode === 'text' && <h1><span>R</span><span className='text-red'>A</span><span className='text-yellow'>T</span><span>H</span></h1>}
-        </LogoBar>
-        <Nav
-            selectedKey={appKey}
-            groups={groups}
-        />
-        <div className="nav-footer">
-            <UserSetting />
-        </div>
-    </NavContainer>
-}
+            ],
+        },
+    ];
+    return (
+        <NavContainer>
+            <LogoBar>
+                <a
+                    // onClick={() => { window.location.reload(false); }}
+                    href="https://kanaries.cn/"
+                >
+                    <img style={{ width: '38px', marginTop: '4px' }} src="./assets/kanaries-lite.png" alt="rath" />
+                </a>
+                {navMode === 'text' && (
+                    <h1>
+                        <span>R</span>
+                        <span className="text-red">A</span>
+                        <span className="text-yellow">T</span>
+                        <span>H</span>
+                    </h1>
+                )}
+            </LogoBar>
+            <div className="flex-1">
+                <Nav selectedKey={appKey} groups={groups} />
+            </div>
+            <div className="nav-footer">
+                <UserSetting />
+            </div>
+        </NavContainer>
+    );
+};
 
 export default observer(AppNav);
