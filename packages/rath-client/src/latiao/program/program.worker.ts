@@ -6,7 +6,6 @@ import parse from "./parse";
 import exec from './exec';
 import type { FieldToken, FieldType } from "./token";
 import type { LaTiaoProgramContext, CreateLaTiaoProgramProps, CreateLaTiaoProgramResult, ILaTiaoColumn, LaTiaoDataType, LaTiaoErrorLocation, Static, ExecuteLaTiaoProgramResult, LaTiaoProgramProps } from "./types";
-import type { Context } from ".";
 
 
 const programStores = new Map<number, LaTiaoProgramContext>();
@@ -35,10 +34,10 @@ const createProgram = (data: CreateLaTiaoProgramProps['data']): (
       throw new LaTiaoNameError(`Cannot find column "${colId}"`, loc);
     };
 
-    const col = async <
+    const col = (async <
       T extends FieldType = FieldType,
       D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
-    >(field: FieldToken<T>, loc?: ConstructorParameters<typeof LaTiaoError>[1]): Promise<Static<D>> => {
+    >(field: Static<FieldToken<T>>, loc?: LaTiaoErrorLocation): Promise<Static<D>> => {
       const { fid: colId } = field;
       const fieldAsOrigin = originData.find(col => col.info.token.fid === colId);
       if (fieldAsOrigin) {
@@ -49,7 +48,7 @@ const createProgram = (data: CreateLaTiaoProgramProps['data']): (
         return fieldAsTemp.data as Static<D>;
       }
       throw new LaTiaoNameError(`Cannot find column "${colId}"`, loc);
-    };
+    }) as LaTiaoProgramContext['col'];
 
     const cols = async <
       T extends FieldType[] = FieldType[],
@@ -58,7 +57,7 @@ const createProgram = (data: CreateLaTiaoProgramProps['data']): (
       } = {
         [index in keyof T]: T extends 'collection' ? string[] : number[]
       },
-    >(fields: { [index in keyof T]: FieldToken<T[index]> }, loc?: ConstructorParameters<typeof LaTiaoError>[1]): Promise<Static<D>> => {
+    >(fields: Static<{ [index in keyof T]: FieldToken<T[index]> }>, loc?: LaTiaoErrorLocation): Promise<Static<D>> => {
       const res = await Promise.all(fields.map(f => context.col(f, loc)));
       return res as Static<D>;
     };
@@ -122,34 +121,12 @@ const execute = async (programId: number, source: string): Promise<(
     if (!context) {
       throw new Error(`Program id not found: ${programId}`);
     }
-    // TODO: deprecate out-dated context interface
-    const contextV1: Context = {
-      originFields: {
-        type: 'RATH.FIELD_LIST',
-        tuple: context.originData.map(col => ({
-          ...col.info.token,
-          type: `RATH.FIELD::${col.info.token.mode}`,
-        }) as FieldToken<FieldType>),
-      },
-      tempFields: {
-        type: 'RATH.FIELD_LIST',
-        tuple: context.tempData.map(col => ({
-          ...col.info.token,
-          type: `RATH.FIELD::${col.info.token.mode}`,
-        }) as FieldToken<FieldType>),
-      },
-      resolveFid: context.resolveColId as Context['resolveFid'],
-      size: context.rowCount,
-      col: context.col,
-      cols: context.cols,
-      write: context.write,
-    };
-    const ast = parse(source, contextV1);
+    const ast = parse(source, context);
 
-    const expArr = await exec(ast, contextV1);
+    const expArr = await exec(ast, context);
 
-    const enter = expArr.map(fid => contextV1.resolveFid(fid));
-    const data = await contextV1.cols(enter);
+    const enter = expArr.map(fid => context.resolveColId(fid));
+    const data = await context.cols(enter);
 
     return {
       success: true,

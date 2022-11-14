@@ -1,5 +1,6 @@
 import type { IFieldMeta } from '../../interfaces';
 import type { OperatorName } from './operator';
+import type { Static } from './types';
 
 
 export type DateObjectDimension = 'Y' | 'M' | 'W' | 'D' | 'h' | 'm' | 's';
@@ -26,7 +27,7 @@ interface IToken {
 export interface OpToken extends IToken {
   type: 'OP';
   op: OperatorName;
-  args: Token[];
+  args: Static<Token[]>;
   output: Exclude<TokenType, 'OP'>;
   exports: false | string;
 }

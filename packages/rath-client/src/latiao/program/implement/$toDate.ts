@@ -7,7 +7,7 @@ import type { DateObjectDimension, DateToken, FieldListToken, FieldToken } from 
 import { $DateToField } from './date-slice';
 
 
-const parseDateTime = (col: string[] | number[]): number[] => {
+const parseDateTime = (col: readonly string[] | readonly number[]): number[] => {
   return col.map(d => dayjs(d).toDate().getTime());
 };
 

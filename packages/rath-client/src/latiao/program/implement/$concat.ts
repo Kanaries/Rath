@@ -28,7 +28,7 @@ subscribeOperator<[], 'RATH.FIELD::collection', 'RATH.FIELD::collection'>({
 
     const concat: string[] = [];
 
-    for (let i = 0; i < context.size; i += 1) {
+    for (let i = 0; i < context.rowCount; i += 1) {
       const content = cols.map(col => col[i]).join(',');
       concat.push(content);
     }
@@ -63,7 +63,7 @@ subscribeOperator<['JS.string'], 'RATH.FIELD::collection', 'RATH.FIELD::collecti
 
     const concat: string[] = [];
 
-    for (let i = 0; i < context.size; i += 1) {
+    for (let i = 0; i < context.rowCount; i += 1) {
       const content = cols.map(col => col[i]).join(separator.value);
       concat.push(content);
     }

@@ -22,7 +22,7 @@ subscribeOperator<['RATH.FIELD::set']>({
       out: false,
     };
 
-    const col = (await context.col(context.resolveFid(source.fid))) as number[];
+    const col = (await context.col(context.resolveColId(source.fid))) as number[];
     
     const sorted = col.map((d, i) => ({
       value: d,
@@ -35,7 +35,7 @@ subscribeOperator<['RATH.FIELD::set']>({
       order.set(index, i + 1);
     });
     
-    context.write(field, new Array<0>(context.size).fill(0).map((_, i) => order.get(i) as number));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map((_, i) => order.get(i) as number));
 
     return field;
   },
@@ -59,7 +59,7 @@ subscribeOperator<['RATH.FIELD::group']>({
       out: false,
     };
 
-    const col = (await context.col(context.resolveFid(source.fid))) as number[];
+    const col = (await context.col(context.resolveColId(source.fid))) as number[];
     
     const sorted = col.map((d, i) => ({
       value: d,
@@ -72,7 +72,7 @@ subscribeOperator<['RATH.FIELD::group']>({
       order.set(index, i + 1);
     });
     
-    context.write(field, new Array<0>(context.size).fill(0).map((_, i) => order.get(i) as number));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map((_, i) => order.get(i) as number));
 
     return field;
   },
@@ -96,7 +96,7 @@ subscribeOperator<['RATH.FIELD::collection']>({
       out: false,
     };
 
-    const col = (await context.col(context.resolveFid(source.fid))) as string[];
+    const col = (await context.col(context.resolveColId(source.fid))) as string[];
     
     const sorted = col.map((d, i) => ({
       value: d,
@@ -109,7 +109,7 @@ subscribeOperator<['RATH.FIELD::collection']>({
       order.set(index, i + 1);
     });
     
-    context.write(field, new Array<0>(context.size).fill(0).map((_, i) => order.get(i) as number));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map((_, i) => order.get(i) as number));
 
     return field;
   },

@@ -2,41 +2,24 @@ import type { IRow } from 'visual-insights';
 import type { IRawField } from '../../interfaces';
 import { workerService } from '../../services/base';
 import { LaTiaoError } from './error';
-import type { FieldListToken, FieldToken, FieldType } from './token';
+import type { FieldToken } from './token';
 // @ts-ignore
 import LTWorker from './program.worker?worker';
 
-import type { CreateLaTiaoProgramProps, CreateLaTiaoProgramResult, DestroyLaTiaoProgramProps, ExecuteLaTiaoProgramProps, ExecuteLaTiaoProgramResult, ILaTiaoColumn, LaTiaoDataType } from './types';
+import type {
+  CreateLaTiaoProgramProps,
+  CreateLaTiaoProgramResult,
+  DestroyLaTiaoProgramProps,
+  ExecuteLaTiaoProgramProps,
+  ExecuteLaTiaoProgramResult,
+  ILaTiaoColumn,
+  LaTiaoDataType,
+  Static,
+} from './types';
 
 
 // @ts-ignore
 const programWorker = new LTWorker() as Worker;
-
-export type Context = {
-  originFields: FieldListToken;
-  tempFields: FieldListToken;
-  resolveFid: (fid: string, loc?: ConstructorParameters<typeof LaTiaoError>[1]) => FieldToken;
-  size: number;
-  col: <
-    T extends FieldType = FieldType,
-    D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
-  >(field: FieldToken<T>, loc?: ConstructorParameters<typeof LaTiaoError>[1]) => Promise<D>;
-  cols: <
-    T extends FieldType[] = FieldType[],
-    D extends {
-      [index in keyof T]: T extends 'collection' ? string[] : number[]
-    } = {
-      [index in keyof T]: T extends 'collection' ? string[] : number[]
-    },
-  >(fields: { [index in keyof T]: FieldToken<T[index]> }, loc?: ConstructorParameters<typeof LaTiaoError>[1]) => Promise<D>;
-  write: <
-    T extends FieldType = FieldType,
-    D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
-  >(
-    field: FieldToken<T>,
-    data: D,
-  ) => void;
-};
 
 export type Program = {
   run: (source: string) => Promise<number>;
@@ -47,7 +30,7 @@ export type Program = {
 export const createProgram = (
   data: Readonly<IRow[]>,
   fields: Omit<FieldToken, 'type'>[],
-  load: (fields: readonly FieldToken[], data: readonly (readonly number[] | readonly string[])[]) => void,
+  load: (fields: Static<FieldToken[]>, data: Static<(number[] | string[])[]>) => void,
 ): Program => {
   let programId: number | undefined = undefined;
   let errHandler: (err: LaTiaoError) => void = err => {
@@ -127,7 +110,7 @@ export const createProgram = (
   return program;
 };
 
-export const resolveFields = (tokens: readonly FieldToken[]): IRawField[] => {
+export const resolveFields = (tokens: Static<FieldToken[]>): IRawField[] => {
   return tokens.map<IRawField>(token => ({
     fid: token.fid,
     name: token.name,
@@ -142,8 +125,6 @@ export const resolveFields = (tokens: readonly FieldToken[]): IRawField[] => {
     geoRole: 'none',
   }));
 };
-
-// (window as any)['createProgram'] = createProgram;
 
 
 export default createProgram;

@@ -38,7 +38,7 @@ export interface IFieldExtInfoBaseDateTime extends IFieldExtInfoBase {
 }
 
 interface IFieldExtInfoBaseLaTiao extends IFieldExtInfoBase {
-    extOpt: `LaTiao.$${string}`;
+    extOpt: `LaTiao.$${string}` | 'dateTimeExpand';
     extInfo: any;
 }
 

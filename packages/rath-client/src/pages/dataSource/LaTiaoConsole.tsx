@@ -8,6 +8,7 @@ import { IRow, IFieldMeta, IExtField } from '../../interfaces';
 import { rich } from '../../latiao/ide-helper';
 import createProgram, { resolveFields } from '../../latiao/program';
 import { getOperatorList } from '../../latiao/program/operator';
+import { Static } from '../../latiao/program/types';
 import { computeFieldMetaService } from '../../services';
 import { useGlobalStore } from '../../store';
 import DistributionChart from './metaView/distChart';
@@ -315,7 +316,7 @@ const LaTiaoConsole = observer(() => {
     const auto$ = useMemo(() => new Subject<string>(), []);
     const serviceRef = useRef<ReturnType<typeof computeFieldMetaService>>();
     const resultRef = useRef<IRow[]>();
-    const [preview, setPreview] = useState<IFieldMeta[]>([]);
+    const [preview, setPreview] = useState<Static<IFieldMeta[]>>([]);
 
     const program = useMemo(() => {
         const fields = mutFields.map<Parameters<typeof createProgram>[1][0]>(f => {
@@ -650,7 +651,7 @@ const LaTiaoConsole = observer(() => {
                                                     ) : meta.fid}
                                                 </header>
                                                 <DistributionChart
-                                                    dataSource={meta.distribution}
+                                                    dataSource={meta.distribution as unknown as IRow[]}
                                                     x="memberName"
                                                     y="count"
                                                     height={70}

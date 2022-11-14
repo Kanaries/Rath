@@ -27,7 +27,7 @@ subscribeOperator({
 
     const [col1, col2] = await context.cols([a, b]);
     
-    context.write(field, new Array<0>(context.size).fill(0).map((_, i) => col1[i] + col2[i]));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map((_, i) => col1[i] + col2[i]));
 
     return field;
   },
@@ -106,7 +106,7 @@ subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
       out: false,
     };
 
-    context.write(field, new Array<0>(context.size).fill(0).map(_ => a + b));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map(_ => a + b));
 
     return field;
   },
@@ -135,7 +135,7 @@ subscribeOperator({
 
     const [col1, col2] = await context.cols([a, b]);
     
-    context.write(field, new Array<0>(context.size).fill(0).map((_, i) => col1[i] - col2[i]));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map((_, i) => col1[i] - col2[i]));
 
     return field;
   },
@@ -214,7 +214,7 @@ subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
       out: false,
     };
 
-    context.write(field, new Array<0>(context.size).fill(0).map(_ => a - b));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map(_ => a - b));
 
     return field;
   },
@@ -243,7 +243,7 @@ subscribeOperator({
 
     const [col1, col2] = await context.cols([a, b]);
     
-    context.write(field, new Array<0>(context.size).fill(0).map((_, i) => col1[i] * col2[i]));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map((_, i) => col1[i] * col2[i]));
 
     return field;
   },
@@ -322,7 +322,7 @@ subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
       out: false,
     };
 
-    context.write(field, new Array<0>(context.size).fill(0).map(_ => a * b));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map(_ => a * b));
 
     return field;
   },
@@ -351,7 +351,7 @@ subscribeOperator({
 
     const [col1, col2] = await context.cols([a, b]);
     
-    context.write(field, new Array<0>(context.size).fill(0).map((_, i) => col1[i] / col2[i]));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map((_, i) => col1[i] / col2[i]));
 
     return field;
   },
@@ -430,7 +430,7 @@ subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
       out: false,
     };
 
-    context.write(field, new Array<0>(context.size).fill(0).map(_ => a / b));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map(_ => a / b));
 
     return field;
   },

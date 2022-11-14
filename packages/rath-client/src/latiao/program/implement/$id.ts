@@ -21,7 +21,7 @@ subscribeOperator({
       out: false,
     };
     
-    context.write(field, new Array<0>(context.size).fill(0).map((_, i) => i + 1));
+    context.write(field, new Array<0>(context.rowCount).fill(0).map((_, i) => i + 1));
 
     return field;
   },

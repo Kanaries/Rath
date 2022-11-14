@@ -55,9 +55,9 @@ export interface CreateLaTiaoProgramResult {
 export interface ExecuteLaTiaoProgramResult {
   data: Static<ILaTiaoColumn<LaTiaoDataType>[]>;
   /** @deprecated */
-  enter: FieldToken<FieldType>[];
+  enter: Static<FieldToken<FieldType>[]>;
   /** @deprecated */
-  columns: readonly (number[] | string[])[];
+  columns: Static<(number[] | string[])[]>;
 }
 
 export type LaTiaoErrorLocation = ConstructorParameters<typeof LaTiaoError>[1];
@@ -71,7 +71,7 @@ export type LaTiaoProgramContext = {
   readonly col: <
     T extends FieldType = FieldType,
     D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
-  >(field: FieldToken<T>, loc?: LaTiaoErrorLocation) => Promise<Static<D>>;
+  >(field: Static<FieldToken<T>>, loc?: LaTiaoErrorLocation) => Promise<Static<D>>;
   readonly cols: <
     T extends FieldType[] = FieldType[],
     D extends {
@@ -79,7 +79,7 @@ export type LaTiaoProgramContext = {
     } = {
       [index in keyof T]: T extends 'collection' ? string[] : number[]
     },
-  >(fields: { [index in keyof T]: FieldToken<T[index]> }, loc?: LaTiaoErrorLocation) => Promise<Static<D>>;
+  >(fields: Static<{ [index in keyof T]: FieldToken<T[index]> }>, loc?: LaTiaoErrorLocation) => Promise<Static<D>>;
   readonly write: <
     T extends FieldType = FieldType,
     D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
