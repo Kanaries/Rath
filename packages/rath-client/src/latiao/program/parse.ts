@@ -1,5 +1,5 @@
 import { parse as p } from '@babel/parser';
-import { validDateSlice } from '../implement/date-slice';
+import { validDateSlice } from './implement/date-slice';
 import { LaTiaoSyntaxError, LaTiaoTypeError } from './error';
 import { getOperator } from './operator';
 import type { OpToken, Token, TokenType } from './token';

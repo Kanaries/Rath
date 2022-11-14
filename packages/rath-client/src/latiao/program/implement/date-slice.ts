@@ -1,5 +1,5 @@
-import { LaTiaoTypeError } from '../program/error';
-import type { DateObjectDimension, DateToken, FieldToken } from '../program/token';
+import { LaTiaoTypeError } from '../error';
+import type { DateObjectDimension, DateToken, FieldToken } from '../token';
 
 
 export const $DateToField = (date: DateToken): FieldToken => {

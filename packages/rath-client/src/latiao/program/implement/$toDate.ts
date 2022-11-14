@@ -1,31 +1,14 @@
 import { nanoid } from 'nanoid';
-import { expandDateTimeService } from '../../dev/services';
-import type { IFieldExtInfoBaseDateTime, IRow } from '../../interfaces';
-import { resolveFields } from '../program';
-import { subscribeOperator } from '../program/operator';
-import { resolveDependencies } from '../program/parse';
-import type { DateObjectDimension, DateToken, FieldListToken, FieldToken } from '../program/token';
+import dayjs from 'dayjs';
+import type { IFieldExtInfoBaseDateTime } from '../../../interfaces';
+import { subscribeOperator } from '../operator';
+import { resolveDependencies } from '../parse';
+import type { DateObjectDimension, DateToken, FieldListToken, FieldToken } from '../token';
 import { $DateToField } from './date-slice';
 
 
-const parseDateTime = async (field: FieldToken, col: string[] | number[]): Promise<number[]> => {
-  const data: IRow[] = [];
-  const f = resolveFields([field])[0];
-
-  for (const d of col) {
-    data.push({ [f.fid]: d });
-  }
-
-  const res = await expandDateTimeService({
-    dataSource: data,
-    fields: [f],
-  });
-
-  const which = res.fields.find(f => f.extInfo?.extOpt === 'dateTimeExpand' && f.extInfo?.extInfo === 'utime')?.fid;
-
-  const utime = which ? res.dataSource.map(row => row[which] as number) : col.map(_ => NaN);
-
-  return utime;
+const parseDateTime = (col: string[] | number[]): number[] => {
+  return col.map(d => dayjs(d).toDate().getTime());
 };
 
 subscribeOperator({
@@ -48,7 +31,7 @@ subscribeOperator({
 
     const col = await context.col(source);
 
-    const utime = await parseDateTime(field, col);
+    const utime = parseDateTime(col);
 
     context.write(field, utime);
 
@@ -83,7 +66,7 @@ subscribeOperator({
 
     const col = await context.col(source);
 
-    const utime = await parseDateTime(field, col);
+    const utime = parseDateTime(col);
 
     context.write(field, utime);
 
@@ -118,7 +101,7 @@ subscribeOperator({
 
     const col = await context.col(source);
 
-    const utime = await parseDateTime(field, col);
+    const utime = parseDateTime(col);
 
     context.write(field, utime);
 
@@ -173,9 +156,9 @@ subscribeOperator({
 
     const col = await context.col(data);
 
-    await parseDateTime(field, col);
+    const dt = parseDateTime(col);
     
-    context.write(field, col.map(d => new Date(d).getTime() >= 0 ? '0' : '1'));
+    context.write(field, dt.map(d => Number.isFinite(d) && d >= 0 ? '1' : '0'));
 
     return field;
   },

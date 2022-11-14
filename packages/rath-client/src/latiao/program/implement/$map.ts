@@ -1,7 +1,8 @@
+/* eslint-disable no-new-func */
 import { nanoid } from 'nanoid';
-import { subscribeOperator } from '../program/operator';
-import { resolveDependencies } from '../program/parse';
-import type { FieldToken } from '../program/token';
+import { subscribeOperator } from '../operator';
+import { resolveDependencies } from '../parse';
+import type { FieldToken } from '../token';
 
 
 subscribeOperator<['RATH.FIELD::group', 'JS.string'], 'RATH.FIELD::group'>({

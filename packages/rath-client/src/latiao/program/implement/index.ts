@@ -1,0 +1,17 @@
+// setup
+import './$set';
+import './$group';
+import './$nominal';
+import './$binary';
+import './$id';
+import './$order';
+import './$isNaN';
+import './$isZero';
+import './$normalize';
+import './$concat';
+import './$log';
+import './$clean';
+import './regex';
+import './$partition';
+import './$map';
+import './$toDate';

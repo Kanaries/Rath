@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
-import { subscribeOperator } from '../program/operator';
-import { resolveDependencies } from '../program/parse';
-import type { FieldToken } from '../program/token';
+import { subscribeOperator } from '../operator';
+import { resolveDependencies } from '../parse';
+import type { FieldToken } from '../token';
 
 
 subscribeOperator<['RATH.FIELD::collection', 'JS.string'], 'RATH.FIELD::collection'>({

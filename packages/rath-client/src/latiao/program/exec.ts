@@ -1,4 +1,4 @@
-import { $DateToField } from '../implement/date-slice';
+import { $DateToField } from './implement/date-slice';
 import { getOperator } from './operator';
 import type { DateToken, FieldListToken, FieldToken, OpToken, Token } from './token';
 import type { Context } from '.';

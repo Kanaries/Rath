@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
-import { subscribeOperator } from '../program/operator';
-import type { FieldToken } from '../program/token';
+import { subscribeOperator } from '../operator';
+import type { FieldToken } from '../token';
 
 
 subscribeOperator({
