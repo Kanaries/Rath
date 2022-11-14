@@ -6,14 +6,14 @@ import type { FieldToken } from '../token';
 
 subscribeOperator({
   name: '$log',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `log(${source.name})`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$log',
         extFrom: resolveDependencies([source.fid], context),
@@ -32,14 +32,14 @@ subscribeOperator({
 
 subscribeOperator({
   name: '$log1p',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `log1p(${source.name})`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$log',
         extFrom: resolveDependencies([source.fid], context),
@@ -56,16 +56,16 @@ subscribeOperator({
   },
 });
 
-subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['RATH.FIELD::vec', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$log',
-  args: ['RATH.FIELD::group', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'JS.number'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source, { value: base }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `log ${base} (${source.name})`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$log',
         extFrom: resolveDependencies([source.fid], context),
@@ -84,14 +84,14 @@ subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
 
 subscribeOperator({
   name: '$log2',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `log2(${source.name})`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$log2',
         extFrom: resolveDependencies([source.fid], context),
@@ -110,14 +110,14 @@ subscribeOperator({
 
 subscribeOperator({
   name: '$log10',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `log10(${source.name})`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$log10',
         extFrom: resolveDependencies([source.fid], context),

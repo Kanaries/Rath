@@ -41,9 +41,9 @@ subscribeOperator<['RATH.FIELD::set']>({
   },
 });
 
-subscribeOperator<['RATH.FIELD::group']>({
+subscribeOperator<['RATH.FIELD::vec']>({
   name: '$order',
-  args: ['RATH.FIELD::group'],
+  args: ['RATH.FIELD::vec'],
   returns: 'RATH.FIELD::set',
   exec: async (context, [source]) => {
     const field: FieldToken<'set'> = {
@@ -78,9 +78,9 @@ subscribeOperator<['RATH.FIELD::group']>({
   },
 });
 
-subscribeOperator<['RATH.FIELD::collection']>({
+subscribeOperator<['RATH.FIELD::text']>({
   name: '$dict',
-  args: ['RATH.FIELD::collection'],
+  args: ['RATH.FIELD::text'],
   returns: 'RATH.FIELD::set',
   exec: async (context, [source]) => {
     const field: FieldToken<'set'> = {

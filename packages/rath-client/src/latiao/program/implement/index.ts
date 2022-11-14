@@ -1,7 +1,8 @@
 // setup
 import './$set';
-import './$group';
-import './$nominal';
+import './$vec';
+import './$text';
+import './$bool';
 import './$binary';
 import './$id';
 import './$order';
@@ -14,4 +15,5 @@ import './$clean';
 import './regex';
 import './$partition';
 import './$map';
+import './$test';
 import './$toDate';

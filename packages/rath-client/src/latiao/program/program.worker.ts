@@ -5,7 +5,7 @@ import './implement/index';
 import parse from "./parse";
 import exec from './exec';
 import type { FieldToken, FieldType } from "./token";
-import type { LaTiaoProgramContext, CreateLaTiaoProgramProps, CreateLaTiaoProgramResult, ILaTiaoColumn, LaTiaoDataType, LaTiaoErrorLocation, Static, ExecuteLaTiaoProgramResult, LaTiaoProgramProps } from "./types";
+import type { LaTiaoProgramContext, CreateLaTiaoProgramProps, CreateLaTiaoProgramResult, ILaTiaoColumn, LaTiaoErrorLocation, Static, ExecuteLaTiaoProgramResult, LaTiaoProgramProps } from "./types";
 
 
 const programStores = new Map<number, LaTiaoProgramContext>();
@@ -19,7 +19,7 @@ const createProgram = (data: CreateLaTiaoProgramProps['data']): (
     const programId = programCount++;
 
     const originData = data;
-    const tempData: ILaTiaoColumn<LaTiaoDataType>[] = [];
+    const tempData: ILaTiaoColumn<FieldType>[] = [];
     const rowCount = data[0]?.data.length ?? 0;
 
     const resolveColId = (colId: string, loc: LaTiaoErrorLocation): Static<FieldToken> => {
@@ -62,9 +62,9 @@ const createProgram = (data: CreateLaTiaoProgramProps['data']): (
       return res as Static<D>;
     };
 
-    const write = <
+    const write = (<
       T extends FieldType = FieldType,
-      D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
+      D extends T extends 'collection' ? string[] : T extends 'bool' ? (0 | 1)[] : number[] = T extends 'collection' ? string[] : T extends 'bool' ? (0 | 1)[] : number[],
     >(
       field: FieldToken<T>,
       data: D,
@@ -76,7 +76,7 @@ const createProgram = (data: CreateLaTiaoProgramProps['data']): (
         info: { token: field },
         data,
       });
-    };
+    }) as LaTiaoProgramContext['write'];
 
     let reportError = (err: LaTiaoError): void => {
       throw err;

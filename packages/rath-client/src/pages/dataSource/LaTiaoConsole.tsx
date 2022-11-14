@@ -323,11 +323,11 @@ const LaTiaoConsole = observer(() => {
             return {
                 fid: `_${f.fid}`,
                 name: f.name ?? f.fid,
-                mode: typeof mergedData[0]?.[f.fid] === 'string' ? 'collection' : ({
-                    nominal: 'collection',
+                mode: typeof mergedData[0]?.[f.fid] === 'string' ? 'text' : ({
+                    nominal: 'text',
                     ordinal: 'set',
-                    quantitative: 'group',
-                    temporal: 'group',
+                    quantitative: 'vec',
+                    temporal: 'vec',
                 } as const)[f.semanticType],
                 out: f.name ?? f.fid,
             };

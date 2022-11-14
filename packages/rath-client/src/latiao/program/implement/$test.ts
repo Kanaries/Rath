@@ -5,18 +5,18 @@ import { resolveDependencies } from '../parse';
 import type { FieldToken } from '../token';
 
 
-subscribeOperator<['RATH.FIELD::vec', 'JS.string'], 'RATH.FIELD::vec'>({
-  name: '$map',
+subscribeOperator<['RATH.FIELD::vec', 'JS.string'], 'RATH.FIELD::bool'>({
+  name: '$test',
   args: ['RATH.FIELD::vec', 'JS.string'],
-  returns: 'RATH.FIELD::vec',
+  returns: 'RATH.FIELD::bool',
   exec: async (context, [source, { value: projectSource }]) => {
-    const field: FieldToken<'vec'> = {
-      type: 'RATH.FIELD::vec',
+    const field: FieldToken<'bool'> = {
+      type: 'RATH.FIELD::bool',
       fid: nanoid(),
-      name: `${source.name} mapped by ${projectSource}`,
-      mode: 'vec',
+      name: `${source.name} tested by ${projectSource}`,
+      mode: 'bool',
       extInfo: {
-        extOpt: 'LaTiao.$map',
+        extOpt: 'LaTiao.$test',
         extFrom: resolveDependencies([source.fid], context),
         extInfo: {
           projector: projectSource,
@@ -26,29 +26,28 @@ subscribeOperator<['RATH.FIELD::vec', 'JS.string'], 'RATH.FIELD::vec'>({
     };
 
     const origin = await context.col(source) as number[];
-    const project = new Function('d', 'i', `return ${projectSource}`) as (d: number, i: number) => any;
+    const project = new Function('d', 'i', `return Boolean(${projectSource}) ? 1 : 0`) as (d: number, i: number) => 0 | 1;
 
     context.write(field, origin.map((d, i) => {
-      const t = project(d, i);
-      return typeof t === 'number' ? t : NaN;
+      return project(d, i);
     }));
 
     return field;
   },
 });
 
-subscribeOperator<['RATH.FIELD::set', 'JS.string'], 'RATH.FIELD::set'>({
-  name: '$map',
+subscribeOperator<['RATH.FIELD::set', 'JS.string'], 'RATH.FIELD::bool'>({
+  name: '$test',
   args: ['RATH.FIELD::set', 'JS.string'],
-  returns: 'RATH.FIELD::set',
+  returns: 'RATH.FIELD::bool',
   exec: async (context, [source, { value: projectSource }]) => {
-    const field: FieldToken<'set'> = {
-      type: 'RATH.FIELD::set',
+    const field: FieldToken<'bool'> = {
+      type: 'RATH.FIELD::bool',
       fid: nanoid(),
-      name: `${source.name} mapped by ${projectSource}`,
-      mode: 'set',
+      name: `${source.name} tested by ${projectSource}`,
+      mode: 'bool',
       extInfo: {
-        extOpt: 'LaTiao.$map',
+        extOpt: 'LaTiao.$test',
         extFrom: resolveDependencies([source.fid], context),
         extInfo: {
           projector: projectSource,
@@ -58,29 +57,28 @@ subscribeOperator<['RATH.FIELD::set', 'JS.string'], 'RATH.FIELD::set'>({
     };
 
     const origin = await context.col(source) as number[];
-    const project = new Function('d', 'i', `return ${projectSource}`) as (d: number, i: number) => any;
+    const project = new Function('d', 'i', `return Boolean(${projectSource}) ? 1 : 0`) as (d: number, i: number) => 0 | 1;
 
     context.write(field, origin.map((d, i) => {
-      const t = project(d, i);
-      return typeof t === 'number' ? t : NaN;
+      return project(d, i);
     }));
 
     return field;
   },
 });
 
-subscribeOperator<['RATH.FIELD::text', 'JS.string'], 'RATH.FIELD::text'>({
-  name: '$map',
+subscribeOperator<['RATH.FIELD::text', 'JS.string'], 'RATH.FIELD::bool'>({
+  name: '$test',
   args: ['RATH.FIELD::text', 'JS.string'],
-  returns: 'RATH.FIELD::text',
+  returns: 'RATH.FIELD::bool',
   exec: async (context, [source, { value: projectSource }]) => {
-    const field: FieldToken<'text'> = {
-      type: 'RATH.FIELD::text',
+    const field: FieldToken<'bool'> = {
+      type: 'RATH.FIELD::bool',
       fid: nanoid(),
-      name: `${source.name} mapped by ${projectSource}`,
-      mode: 'text',
+      name: `${source.name} tested by ${projectSource}`,
+      mode: 'bool',
       extInfo: {
-        extOpt: 'LaTiao.$map',
+        extOpt: 'LaTiao.$test',
         extFrom: resolveDependencies([source.fid], context),
         extInfo: {
           projector: projectSource,
@@ -90,11 +88,10 @@ subscribeOperator<['RATH.FIELD::text', 'JS.string'], 'RATH.FIELD::text'>({
     };
 
     const origin = await context.col(source) as string[];
-    const project = new Function('d', 'i', `return ${projectSource}`) as (d: string, i: number) => any;
+    const project = new Function('d', 'i', `return Boolean(${projectSource}) ? 1 : 0`) as (d: string, i: number) => 0 | 1;
 
     context.write(field, origin.map((d, i) => {
-      const t = project(d, i);
-      return typeof t === 'string' ? t : '';
+      return project(d, i);
     }));
 
     return field;

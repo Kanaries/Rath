@@ -2,7 +2,7 @@ import type { IRow } from 'visual-insights';
 import type { IRawField } from '../../interfaces';
 import { workerService } from '../../services/base';
 import { LaTiaoError } from './error';
-import type { FieldToken } from './token';
+import type { FieldToken, FieldType } from './token';
 // @ts-ignore
 import LTWorker from './program.worker?worker';
 
@@ -13,7 +13,6 @@ import type {
   ExecuteLaTiaoProgramProps,
   ExecuteLaTiaoProgramResult,
   ILaTiaoColumn,
-  LaTiaoDataType,
   Static,
 } from './types';
 
@@ -76,7 +75,7 @@ export const createProgram = (
     },
   };
 
-  const columns: ILaTiaoColumn<LaTiaoDataType>[] = [];
+  const columns: ILaTiaoColumn<FieldType>[] = [];
 
   for (const f of fields) {
     const header: CreateLaTiaoProgramProps['data'][number]['info'] = {
@@ -85,7 +84,7 @@ export const createProgram = (
         type: `RATH.FIELD::${f.mode}`,
       },
     };
-    const col = data.map(row => (f.mode === 'collection' ? String : Number)(row[f.fid])) as number[] | string[];
+    const col = data.map(row => (f.mode === 'text' ? String : f.mode === 'bool' ? ((d: any) => d ? 1 : 0) : Number)(row[f.fid])) as number[] | string[] | (0 | 1)[];
     columns.push({
       info: header,
       data: col,
@@ -114,13 +113,14 @@ export const resolveFields = (tokens: Static<FieldToken[]>): IRawField[] => {
   return tokens.map<IRawField>(token => ({
     fid: token.fid,
     name: token.name,
-    analyticType: token.extInfo?.extOpt === 'dateTimeExpand' ? 'dimension' : token.mode === 'group' ? 'measure' : 'dimension',
+    analyticType: token.extInfo?.extOpt === 'dateTimeExpand' ? 'dimension' : token.mode === 'vec' ? 'measure' : 'dimension',
     semanticType: token.extInfo?.extOpt === 'dateTimeExpand' ? (
       token.extInfo.extInfo === 'utime' ? 'temporal' : token.extInfo.extInfo === '$y' ? 'quantitative' : 'ordinal'
     ) : ({
+      bool: 'nominal',
+      vec: 'quantitative',
       set: 'ordinal',
-      group: 'quantitative',
-      collection: 'nominal',
+      text: 'nominal',
     } as const)[token.mode],
     geoRole: 'none',
   }));

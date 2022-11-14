@@ -6,9 +6,10 @@ import type { Static } from './types';
 export type DateObjectDimension = 'Y' | 'M' | 'W' | 'D' | 'h' | 'm' | 's';
 
 export type FieldType = (
+  | 'bool'        // numeric, 0 (false) or 1 (true)
+  | 'vec'         // number set supporting operation
   | 'set'         // number set not supporting operation
-  | 'group'       // number set supporting operation
-  | 'collection'  // string set
+  | 'text'        // string set
 );
 
 export type TokenType = (

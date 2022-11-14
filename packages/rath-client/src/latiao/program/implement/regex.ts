@@ -4,16 +4,16 @@ import { resolveDependencies } from '../parse';
 import type { FieldToken } from '../token';
 
 
-subscribeOperator<['RATH.FIELD::collection', 'JS.string'], 'RATH.FIELD::collection'>({
+subscribeOperator<['RATH.FIELD::text', 'JS.string'], 'RATH.FIELD::text'>({
   name: '$match',
-  args: ['RATH.FIELD::collection', 'JS.string'],
-  returns: 'RATH.FIELD::collection',
+  args: ['RATH.FIELD::text', 'JS.string'],
+  returns: 'RATH.FIELD::text',
   exec: async (context, [f, pattern]) => {
-    const field: FieldToken<'collection'> = {
-      type: 'RATH.FIELD::collection',
+    const field: FieldToken<'text'> = {
+      type: 'RATH.FIELD::text',
       fid: nanoid(),
       name: `Pattern matched {${f.name}}`,
-      mode: 'collection',
+      mode: 'text',
       extInfo: {
         extOpt: 'LaTiao.$match',
         extFrom: resolveDependencies([f.fid], context),
@@ -32,16 +32,16 @@ subscribeOperator<['RATH.FIELD::collection', 'JS.string'], 'RATH.FIELD::collecti
   },
 });
 
-subscribeOperator<['RATH.FIELD::collection', 'JS.string', 'JS.string'], 'RATH.FIELD::collection'>({
+subscribeOperator<['RATH.FIELD::text', 'JS.string', 'JS.string'], 'RATH.FIELD::text'>({
   name: '$replace',
-  args: ['RATH.FIELD::collection', 'JS.string', 'JS.string'],
-  returns: 'RATH.FIELD::collection',
+  args: ['RATH.FIELD::text', 'JS.string', 'JS.string'],
+  returns: 'RATH.FIELD::text',
   exec: async (context, [f, pattern, newStr]) => {
-    const field: FieldToken<'collection'> = {
-      type: 'RATH.FIELD::collection',
+    const field: FieldToken<'text'> = {
+      type: 'RATH.FIELD::text',
       fid: nanoid(),
       name: `Pattern replaced {${f.name}}`,
-      mode: 'collection',
+      mode: 'text',
       extInfo: {
         extOpt: 'LaTiao.$replace',
         extFrom: resolveDependencies([f.fid], context),

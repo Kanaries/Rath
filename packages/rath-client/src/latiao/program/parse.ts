@@ -226,7 +226,7 @@ const resolveSlice = (exp: SliceExpression, context: LaTiaoProgramContext, out: 
         type: 'JS.string',
         value: sliceKey,
       }],
-      output: sliceKey.length === 1 ? 'RATH.FIELD::group' : 'RATH.FIELD_LIST',
+      output: sliceKey.length === 1 ? 'RATH.FIELD::vec' : 'RATH.FIELD_LIST',
       exports: false,
     };
 
@@ -256,7 +256,7 @@ const resolveBinOp = (exp: BinOpExpression, context: LaTiaoProgramContext, out: 
         type: 'OP',
         op: '$__add',
         args: [left, right],
-        output: 'RATH.FIELD::group',
+        output: 'RATH.FIELD::vec',
         exports: false,
       };
     }
@@ -265,7 +265,7 @@ const resolveBinOp = (exp: BinOpExpression, context: LaTiaoProgramContext, out: 
         type: 'OP',
         op: '$__minus',
         args: [left, right],
-        output: 'RATH.FIELD::group',
+        output: 'RATH.FIELD::vec',
         exports: false,
       };
     }
@@ -274,7 +274,7 @@ const resolveBinOp = (exp: BinOpExpression, context: LaTiaoProgramContext, out: 
         type: 'OP',
         op: '$__multiply',
         args: [left, right],
-        output: 'RATH.FIELD::group',
+        output: 'RATH.FIELD::vec',
         exports: false,
       };
     }
@@ -283,7 +283,7 @@ const resolveBinOp = (exp: BinOpExpression, context: LaTiaoProgramContext, out: 
         type: 'OP',
         op: '$__divide',
         args: [left, right],
-        output: 'RATH.FIELD::group',
+        output: 'RATH.FIELD::vec',
         exports: false,
       };
     }

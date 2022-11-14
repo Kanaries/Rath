@@ -6,14 +6,14 @@ import type { FieldToken } from '../token';
 
 subscribeOperator({
   name: '$inset',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${source.name} Scaled to -1 ~ +1`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$inset',
         extFrom: resolveDependencies([source.fid], context),
@@ -39,14 +39,14 @@ subscribeOperator({
 
 subscribeOperator({
   name: '$bound',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${source.name} Scaled to 0 ~ 1`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$bound',
         extFrom: resolveDependencies([source.fid], context),
@@ -72,14 +72,14 @@ subscribeOperator({
 
 subscribeOperator({
   name: '$normalize',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `Normalized ${source.name}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$normalize',
         extFrom: resolveDependencies([source.fid], context),
@@ -103,14 +103,14 @@ subscribeOperator({
 
 subscribeOperator({
   name: '$ReLU',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `ReLU(${source.name})`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$ReLU',
         extFrom: resolveDependencies([source.fid], context),
@@ -129,14 +129,14 @@ subscribeOperator({
 
 subscribeOperator({
   name: '$sigmoid',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `S(${source.name})`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$sigmoid',
         extFrom: resolveDependencies([source.fid], context),

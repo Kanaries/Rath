@@ -5,16 +5,16 @@ import { resolveDependencies } from '../parse';
 import type { FieldListToken, FieldToken } from '../token';
 
 
-subscribeOperator<['RATH.FIELD::group', 'JS.string'], 'RATH.FIELD_LIST'>({
+subscribeOperator<['RATH.FIELD::vec', 'JS.string'], 'RATH.FIELD_LIST'>({
   name: '$partition',
-  args: ['RATH.FIELD::group', 'JS.string'],
+  args: ['RATH.FIELD::vec', 'JS.string'],
   returns: 'RATH.FIELD_LIST',
   exec: async (context, [source, { value: predicateSource }]) => {
-    const fieldTrue: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const fieldTrue: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${source.name} where ${predicateSource}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$partition',
         extFrom: resolveDependencies([source.fid], context),
@@ -26,11 +26,11 @@ subscribeOperator<['RATH.FIELD::group', 'JS.string'], 'RATH.FIELD_LIST'>({
       out: false,
     };
 
-    const fieldFalse: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const fieldFalse: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${source.name} where not ${predicateSource}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$partition',
         extFrom: resolveDependencies([source.fid], context),
@@ -109,16 +109,16 @@ subscribeOperator<['RATH.FIELD::set', 'JS.string'], 'RATH.FIELD_LIST'>({
   },
 });
 
-subscribeOperator<['RATH.FIELD::collection', 'JS.string'], 'RATH.FIELD_LIST'>({
+subscribeOperator<['RATH.FIELD::text', 'JS.string'], 'RATH.FIELD_LIST'>({
   name: '$partition',
-  args: ['RATH.FIELD::collection', 'JS.string'],
+  args: ['RATH.FIELD::text', 'JS.string'],
   returns: 'RATH.FIELD_LIST',
   exec: async (context, [source, { value: predicateSource }]) => {
-    const fieldTrue: FieldToken<'collection'> = {
-      type: 'RATH.FIELD::collection',
+    const fieldTrue: FieldToken<'text'> = {
+      type: 'RATH.FIELD::text',
       fid: nanoid(),
       name: `${source.name} where ${predicateSource}`,
-      mode: 'collection',
+      mode: 'text',
       extInfo: {
         extOpt: 'LaTiao.$partition',
         extFrom: resolveDependencies([source.fid], context),
@@ -130,11 +130,11 @@ subscribeOperator<['RATH.FIELD::collection', 'JS.string'], 'RATH.FIELD_LIST'>({
       out: false,
     };
 
-    const fieldFalse: FieldToken<'collection'> = {
-      type: 'RATH.FIELD::collection',
+    const fieldFalse: FieldToken<'text'> = {
+      type: 'RATH.FIELD::text',
       fid: nanoid(),
       name: `${source.name} where not ${predicateSource}`,
-      mode: 'collection',
+      mode: 'text',
       extInfo: {
         extOpt: 'LaTiao.$partition',
         extFrom: resolveDependencies([source.fid], context),

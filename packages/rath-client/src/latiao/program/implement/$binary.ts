@@ -9,14 +9,14 @@ import type { FieldToken } from '../token';
 subscribeOperator({
   name: '$__add',
   secret: true,
-  args: ['RATH.FIELD::group', 'RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [a, b]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} + ${b.name || b.fid}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$add',
         extFrom: resolveDependencies([a.fid, b.fid], context),
@@ -33,17 +33,17 @@ subscribeOperator({
   },
 });
 
-subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['RATH.FIELD::vec', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$__add',
   secret: true,
-  args: ['RATH.FIELD::group', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'JS.number'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [a, { value: num }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} + ${num}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$add',
         extFrom: resolveDependencies([a.fid], context),
@@ -60,17 +60,17 @@ subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
   },
 });
 
-subscribeOperator<['JS.number', 'RATH.FIELD::group'], 'RATH.FIELD::group'>({
+subscribeOperator<['JS.number', 'RATH.FIELD::vec'], 'RATH.FIELD::vec'>({
   name: '$__add',
   secret: true,
-  args: ['JS.number', 'RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['JS.number', 'RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [{ value: num }, a]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} + ${num}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$add',
         extFrom: resolveDependencies([a.fid], context),
@@ -87,17 +87,17 @@ subscribeOperator<['JS.number', 'RATH.FIELD::group'], 'RATH.FIELD::group'>({
   },
 });
 
-subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$__add',
   secret: true,
   args: ['JS.number', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [{ value: a }, { value: b }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a} + ${b}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$add',
         extFrom: [],
@@ -117,14 +117,14 @@ subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
 subscribeOperator({
   name: '$__minus',
   secret: true,
-  args: ['RATH.FIELD::group', 'RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [a, b]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} - ${b.name || b.fid}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$minus',
         extFrom: resolveDependencies([a.fid, b.fid], context),
@@ -141,17 +141,17 @@ subscribeOperator({
   },
 });
 
-subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['RATH.FIELD::vec', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$__minus',
   secret: true,
-  args: ['RATH.FIELD::group', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'JS.number'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [a, { value: num }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} - ${num}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$minus',
         extFrom: resolveDependencies([a.fid], context),
@@ -168,17 +168,17 @@ subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
   },
 });
 
-subscribeOperator<['JS.number', 'RATH.FIELD::group'], 'RATH.FIELD::group'>({
+subscribeOperator<['JS.number', 'RATH.FIELD::vec'], 'RATH.FIELD::vec'>({
   name: '$__minus',
   secret: true,
-  args: ['JS.number', 'RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['JS.number', 'RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [{ value: num }, a]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} - ${num}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$minus',
         extFrom: resolveDependencies([a.fid], context),
@@ -195,17 +195,17 @@ subscribeOperator<['JS.number', 'RATH.FIELD::group'], 'RATH.FIELD::group'>({
   },
 });
 
-subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$__minus',
   secret: true,
   args: ['JS.number', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [{ value: a }, { value: b }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a} - ${b}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$minus',
         extFrom: [],
@@ -225,14 +225,14 @@ subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
 subscribeOperator({
   name: '$__multiply',
   secret: true,
-  args: ['RATH.FIELD::group', 'RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [a, b]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} * ${b.name || b.fid}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$multiply',
         extFrom: resolveDependencies([a.fid, b.fid], context),
@@ -249,17 +249,17 @@ subscribeOperator({
   },
 });
 
-subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['RATH.FIELD::vec', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$__multiply',
   secret: true,
-  args: ['RATH.FIELD::group', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'JS.number'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [a, { value: num }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} * ${num}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$multiply',
         extFrom: resolveDependencies([a.fid], context),
@@ -276,17 +276,17 @@ subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
   },
 });
 
-subscribeOperator<['JS.number', 'RATH.FIELD::group'], 'RATH.FIELD::group'>({
+subscribeOperator<['JS.number', 'RATH.FIELD::vec'], 'RATH.FIELD::vec'>({
   name: '$__multiply',
   secret: true,
-  args: ['JS.number', 'RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['JS.number', 'RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [{ value: num }, a]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} * ${num}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$multiply',
         extFrom: resolveDependencies([a.fid], context),
@@ -303,17 +303,17 @@ subscribeOperator<['JS.number', 'RATH.FIELD::group'], 'RATH.FIELD::group'>({
   },
 });
 
-subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$__multiply',
   secret: true,
   args: ['JS.number', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [{ value: a }, { value: b }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a} * ${b}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$multiply',
         extFrom: [],
@@ -333,14 +333,14 @@ subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
 subscribeOperator({
   name: '$__divide',
   secret: true,
-  args: ['RATH.FIELD::group', 'RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [a, b]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} / ${b.name || b.fid}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$divide',
         extFrom: resolveDependencies([a.fid, b.fid], context),
@@ -357,17 +357,17 @@ subscribeOperator({
   },
 });
 
-subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['RATH.FIELD::vec', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$__divide',
   secret: true,
-  args: ['RATH.FIELD::group', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'JS.number'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [a, { value: num }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} / ${num}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$divide',
         extFrom: resolveDependencies([a.fid], context),
@@ -384,17 +384,17 @@ subscribeOperator<['RATH.FIELD::group', 'JS.number'], 'RATH.FIELD::group'>({
   },
 });
 
-subscribeOperator<['JS.number', 'RATH.FIELD::group'], 'RATH.FIELD::group'>({
+subscribeOperator<['JS.number', 'RATH.FIELD::vec'], 'RATH.FIELD::vec'>({
   name: '$__divide',
   secret: true,
-  args: ['JS.number', 'RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['JS.number', 'RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [{ value: num }, a]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a.name || a.fid} / ${num}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$divide',
         extFrom: resolveDependencies([a.fid], context),
@@ -411,17 +411,17 @@ subscribeOperator<['JS.number', 'RATH.FIELD::group'], 'RATH.FIELD::group'>({
   },
 });
 
-subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['JS.number', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$__divide',
   secret: true,
   args: ['JS.number', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [{ value: a }, { value: b }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `${a} / ${b}`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$divide',
         extFrom: [],

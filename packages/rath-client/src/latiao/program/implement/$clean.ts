@@ -6,14 +6,14 @@ import type { FieldToken } from '../token';
 
 subscribeOperator({
   name: '$zeroFill',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `Cleaned ${source.name} (zero fill)`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$zeroFill',
         extFrom: resolveDependencies([source.fid], context),
@@ -32,14 +32,14 @@ subscribeOperator({
 
 subscribeOperator({
   name: '$meanFill',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `Cleaned ${source.name} (mean fill)`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$meanFill',
         extFrom: resolveDependencies([source.fid], context),
@@ -58,16 +58,16 @@ subscribeOperator({
   },
 });
 
-subscribeOperator<['RATH.FIELD::group', 'JS.number', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['RATH.FIELD::vec', 'JS.number', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$nearestClip',
-  args: ['RATH.FIELD::group', 'JS.number', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'JS.number', 'JS.number'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source, { value: min }, { value: max }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `Cleaned ${source.name} (${min} ~ ${max} nearest)`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$nearestClip',
         extFrom: resolveDependencies([source.fid], context),
@@ -86,16 +86,16 @@ subscribeOperator<['RATH.FIELD::group', 'JS.number', 'JS.number'], 'RATH.FIELD::
   },
 });
 
-subscribeOperator<['RATH.FIELD::group', 'JS.number', 'JS.number'], 'RATH.FIELD::group'>({
+subscribeOperator<['RATH.FIELD::vec', 'JS.number', 'JS.number'], 'RATH.FIELD::vec'>({
   name: '$meanClip',
-  args: ['RATH.FIELD::group', 'JS.number', 'JS.number'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec', 'JS.number', 'JS.number'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source, { value: min }, { value: max }]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `Cleaned ${source.name} (${min} ~ ${max} mean)`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$meanClip',
         extFrom: resolveDependencies([source.fid], context),
@@ -116,16 +116,16 @@ subscribeOperator<['RATH.FIELD::group', 'JS.number', 'JS.number'], 'RATH.FIELD::
   },
 });
 
-subscribeOperator<['RATH.FIELD::group'], 'RATH.FIELD::group'>({
+subscribeOperator<['RATH.FIELD::vec'], 'RATH.FIELD::vec'>({
   name: '$boxClip',
-  args: ['RATH.FIELD::group'],
-  returns: 'RATH.FIELD::group',
+  args: ['RATH.FIELD::vec'],
+  returns: 'RATH.FIELD::vec',
   exec: async (context, [source]) => {
-    const field: FieldToken<'group'> = {
-      type: 'RATH.FIELD::group',
+    const field: FieldToken<'vec'> = {
+      type: 'RATH.FIELD::vec',
       fid: nanoid(),
       name: `Cleaned ${source.name} (boxClip)`,
-      mode: 'group',
+      mode: 'vec',
       extInfo: {
         extOpt: 'LaTiao.$boxClip',
         extFrom: resolveDependencies([source.fid], context),

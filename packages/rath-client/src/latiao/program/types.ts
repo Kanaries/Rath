@@ -6,29 +6,27 @@ export type Static<T> = T extends Record<keyof any, any> ? {
   readonly [index in keyof T]: Static<T[index]>;
 } : T;
 
-export type LaTiaoDataType = 'group' | 'set' | 'text' | 'boolean';
-
-type LaTiaoJSType<T extends LaTiaoDataType> = {
-  group: number;
+type LaTiaoJSType<T extends FieldType> = {
+  bool: 0 | 1;
+  vec: number;
   set: number;
   text: string;
-  boolean: 0 | 1;
 }[T];
 
-type LaTiaoColumnData<T extends LaTiaoDataType> = Static<LaTiaoJSType<T>[]>;
+type LaTiaoColumnData<T extends FieldType> = Static<LaTiaoJSType<T>[]>;
 
-export interface ILaTiaoColumnInfo<T extends LaTiaoDataType> {
-  token: FieldToken<T extends 'boolean' | 'text' ? 'collection' : T>;
+export interface ILaTiaoColumnInfo<T extends FieldType> {
+  token: FieldToken<T>;
 }
 
-export interface ILaTiaoColumn<T extends LaTiaoDataType> {
+export interface ILaTiaoColumn<T extends FieldType> {
   info: Static<ILaTiaoColumnInfo<T>>;
   data: Static<LaTiaoColumnData<T>>;
 }
 
 export type CreateLaTiaoProgramProps = {
   task: 'createProgram';
-  data: Static<ILaTiaoColumn<LaTiaoDataType>[]>;
+  data: Static<ILaTiaoColumn<FieldType>[]>;
 };
 
 export type ExecuteLaTiaoProgramProps = {
@@ -53,7 +51,7 @@ export interface CreateLaTiaoProgramResult {
 }
 
 export interface ExecuteLaTiaoProgramResult {
-  data: Static<ILaTiaoColumn<LaTiaoDataType>[]>;
+  data: Static<ILaTiaoColumn<FieldType>[]>;
   /** @deprecated */
   enter: Static<FieldToken<FieldType>[]>;
   /** @deprecated */
@@ -70,19 +68,19 @@ export type LaTiaoProgramContext = {
   readonly resolveColId: (colId: string, loc?: LaTiaoErrorLocation) => Static<FieldToken>;
   readonly col: <
     T extends FieldType = FieldType,
-    D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
+    D extends T extends 'text' ? string[] : T extends 'bool' ? (0 | 1)[] : number[] = T extends 'text' ? string[] : T extends 'bool' ? (0 | 1)[] : number[],
   >(field: Static<FieldToken<T>>, loc?: LaTiaoErrorLocation) => Promise<Static<D>>;
   readonly cols: <
     T extends FieldType[] = FieldType[],
     D extends {
-      [index in keyof T]: T extends 'collection' ? string[] : number[]
+      [index in keyof T]: T extends 'text' ? string[] : T extends 'bool' ? (0 | 1)[] : number[]
     } = {
-      [index in keyof T]: T extends 'collection' ? string[] : number[]
+      [index in keyof T]: T extends 'text' ? string[] : T extends 'bool' ? (0 | 1)[] : number[]
     },
   >(fields: Static<{ [index in keyof T]: FieldToken<T[index]> }>, loc?: LaTiaoErrorLocation) => Promise<Static<D>>;
   readonly write: <
     T extends FieldType = FieldType,
-    D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
+    D extends T extends 'text' ? string[] : T extends 'bool' ? (0 | 1)[] : number[] = T extends 'text' ? string[] : T extends 'bool' ? (0 | 1)[] : number[],
   >(
     field: FieldToken<T>,
     data: D,
