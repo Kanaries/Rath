@@ -8,16 +8,16 @@ import LaTiaoModal from './modal';
 
 const LaTiaoConsole = observer(() => {
     const { dataSourceStore } = useGlobalStore();
-    const { rawData } = dataSourceStore;
+    const { rawDataMetaInfo } = dataSourceStore;
     const [open, setOpen] = useState(false);
 
     return (
         <Fragment>
             <CommandButton
                 text={intl.get('dataSource.extend.manual')}
-                disabled={rawData.length === 0}
+                disabled={rawDataMetaInfo.length === 0}
                 iconProps={{ iconName: 'AppIconDefaultAdd' }}
-                onClick={() => rawData.length && setOpen(true)}
+                onClick={() => rawDataMetaInfo.length && setOpen(true)}
             />
             {open && (
                 <LaTiaoModal close={() => setOpen(false)} />

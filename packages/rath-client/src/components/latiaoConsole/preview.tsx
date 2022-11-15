@@ -53,7 +53,7 @@ export interface LaTiaoPreviewProps {
 
 const LaTiaoPreview = observer<LaTiaoPreviewProps>(({ preview, result, close, clearInput }) => {
     const { dataSourceStore } = useGlobalStore();
-    const { rawData } = dataSourceStore;
+    const { rawDataMetaInfo } = dataSourceStore;
 
     return (
         <Container>
@@ -98,11 +98,11 @@ const LaTiaoPreview = observer<LaTiaoPreviewProps>(({ preview, result, close, cl
                         if (preview.length === 0 || !result) {
                             return;
                         }
-                        if (result.length !== rawData.length) {
+                        if (result.length !== rawDataMetaInfo.length) {
                             console.error(
                                 'Lengths do not match:',
                                 result.length,
-                                rawData.length,
+                                rawDataMetaInfo.length,
                             );
 
                             return;
