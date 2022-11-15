@@ -6,23 +6,34 @@ import { timer } from './timer';
 
 const filterService = (e) => {
     try {
-        const { dataSource, dataStorage, dataStorageType, extData, filters } = e.data;
+        const { dataSource, dataStorage, computationMode, extData, filters, resultStorage } = e.data;
 
-        if (dataStorageType === 'memory') {
+        if (computationMode === 'inline') {
             const res = applyFilters(dataSource, extData, filters);
             self.postMessage({
                 success: true,
-                data: res,
+                data: {
+                    rows: res,
+                    versionCode: 0
+                },
             });
-        } else if (dataStorageType === 'db') {
+        } else if (computationMode === 'offline') {
             const storage = new IteratorStorage(dataStorage)
+            const resSto = new IteratorStorage(resultStorage)
             storage.getAll().then(data => {
-                const res = applyFilters(data, extData, filters);
+                return applyFilters(data, extData, filters);
+            }).then(data => {
+                return resSto.setAll(data);
+            }).then(() => {
                 self.postMessage({
                     success: true,
-                    data: res,
+                    data: {
+                        rows: [],
+                        versionCode: resSto.versionCode
+                    },
                 });
-            }).catch(err => {
+            })
+            .catch(err => {
                 self.postMessage({
                     success: false,
                     error: `[filter data]${err}\n${err.stack}`,

@@ -50,4 +50,5 @@ export const STORAGES = {
     MODEL: 'model',
     STATE: 'state',
     ITERATOR: 'iterator',
+    ITERATOR_META: 'iterator_meta',
 }

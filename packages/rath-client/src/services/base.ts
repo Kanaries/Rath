@@ -113,10 +113,16 @@ export async function inferMetaService(props: InferMetaServiceProps): Promise<IR
     return metas;
 }
 
-export interface CleanServiceProps {
+export type CleanServiceProps = {
+    computationMode: 'inline' | 'offline';
     dataSource: IRow[];
     fields: IMuteFieldBase[];
     method: CleanMethod;
+} | {
+    computationMode: 'offline';
+    fields: IMuteFieldBase[];
+    method: CleanMethod;
+    storage: IteratorStorage;
 }
 export async function cleanDataService(props: CleanServiceProps): Promise<IRow[]> {
     let data: IRow[] = [];
@@ -136,24 +142,28 @@ export async function cleanDataService(props: CleanServiceProps): Promise<IRow[]
 }
 
 export type FilterServiceProps = {
-    dataStorageType: 'memory';
+    computationMode: 'inline';
     dataSource: IRow[];
     extData: Map<string, ICol<any>>;
     filters: IFilter[];
 } | {
-    dataStorageType: 'db';
+    computationMode: 'offline';
     dataStorage: IteratorStorage;
+    resultStorage: IteratorStorage;
     extData: Map<string, ICol<any>>;
     filters: IFilter[];
 }
 /**
  * Merge `extData` with `dataSource` and filter data at the same time
  */
-export async function filterDataService(props: FilterServiceProps): Promise<IRow[]> {
-    let data: IRow[] = [];
+export async function filterDataService(props: FilterServiceProps): Promise<{rows: IRow[]; versionCode: number}> {
+    let data: {rows: IRow[]; versionCode: number} = {
+        rows: [],
+        versionCode: -1
+    };
     try {
         const worker = new FilterWorker();
-        const result = await workerService<IRow[], FilterServiceProps>(worker, props);
+        const result = await workerService<{rows: IRow[]; versionCode: number}, FilterServiceProps>(worker, props);
         if (result.success) {
             data = result.data;
         } else {

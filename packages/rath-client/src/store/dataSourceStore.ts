@@ -1,5 +1,5 @@
 import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
-import { combineLatest, from, Subscription } from "rxjs";
+import { combineLatest, from, Observable, Subscription } from "rxjs";
 import * as op from 'rxjs/operators'
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
@@ -10,7 +10,7 @@ import { expandDateTimeService } from "../dev/services";
 import { findRathSafeColumnIndex, colFromIRow, readableWeekday } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
-import { IteratorStorage } from "../utils/iteStorage";
+import { IteratorStorage, IteratorStorageMetaInfo } from "../utils/iteStorage";
 import { updateDataStorageMeta } from "../utils/storage";
 
 interface IDataMessage {
@@ -33,12 +33,16 @@ interface IDataSourceStoreStorage {
 }
 
 export class DataSourceStore {
-    public dataVersionCode: number = -1;
+    public rawDataMetaInfo: IteratorStorageMetaInfo = {
+        versionCode: -1,
+        length: 0,
+    };
     /**
      * raw data is fetched and parsed data or uploaded data without any other changes.
      * computed value `dataSource` will be calculated
      */
     public rawDataStorage: IteratorStorage;
+    public filteredDataStorage: IteratorStorage;
     public extData = new Map<string, ICol<any>>();
     /**
      * fields contains fields with `dimension` or `measure` type.
@@ -65,15 +69,15 @@ export class DataSourceStore {
     public showFastSelectionModal: boolean = false;
     private fieldMetasRef: StreamListener<IFieldMeta[]>;
     private cleanedDataRef: StreamListener<IRow[]>;
-    private filteredDataRef: StreamListener<IRow[]>;
+    // private filteredDataRef: StreamListener<IRow[]>;
+    private filteredDataMetaInfoRef: StreamListener<IteratorStorageMetaInfo>;
     public loadingDataProgress: number = 0;
     public dataPrepProgressTag: IDataPrepProgressTag = IDataPrepProgressTag.none;
     private subscriptions: Subscription[] = [];
     public datasetId: string | null = null;
     constructor() {
-        this.rawDataStorage = new IteratorStorage({
-            itemKey: 'rawData',
-        });
+        this.rawDataStorage = new IteratorStorage({ itemKey: 'rawData' });
+        this.filteredDataStorage = new IteratorStorage({ itemKey: 'filteredData' });
         makeAutoObservable(this, {
             cookedDataSource: observable.ref,
             cookedMeasures: observable.ref,
@@ -82,34 +86,50 @@ export class DataSourceStore {
             // @ts-expect-error private field
             subscriptions: false,
             cleanedDataRef: false,
-            filteredDataRef: false,
+            // filteredDataRef: false,
             fieldMetasRef: false,
             rawDataStorage: false,
+            filteredDataStorage: false,
         });
-        // console.log(this.rawData, this.extFields)
         const fields$ = from(toStream(() => this.fieldsAndPreview, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
-        const dataVersionCode$ = from(toStream(() => this.dataVersionCode, false));
+        const rawDataMetaInfo$ = from(toStream(() => this.rawDataMetaInfo, false));
         const extData$ = from(toStream(() => this.extData, true));
         const filters$ = from(toStream(() => this.filters, true))
         // const filteredData$ = from(toStream(() => this.filteredData, true));
-        const filteredData$ = combineLatest([dataVersionCode$, extData$, filters$]).pipe(
-            op.map(([code, extData, filters]) => {
+        // const filteredData$ = combineLatest([dataVersionCode$, extData$, filters$]).pipe(
+        //     op.map(([code, extData, filters]) => {
+        //         return from(filterDataService({
+        //             dataStorageType: 'db',
+        //             dataStorage: this.rawDataStorage,
+        //             extData: toJS(extData),
+        //             filters: toJS(filters)
+        //         }))
+        //     }),
+        //     op.switchAll(),
+        //     op.share()
+        // )
+        const filteredDataMetaInfo$: Observable<IteratorStorageMetaInfo> = combineLatest([rawDataMetaInfo$, extData$, filters$]).pipe(
+            op.map(([info, extData, filters]) => {
                 return from(filterDataService({
-                    dataStorageType: 'db',
+                    computationMode: 'offline',
                     dataStorage: this.rawDataStorage,
+                    resultStorage: this.filteredDataStorage,
                     extData: toJS(extData),
                     filters: toJS(filters)
+                }).then(r => {
+                    return this.filteredDataStorage.syncMetaInfoFromStorage();
                 }))
             }),
             op.switchAll(),
             op.share()
         )
         const cleanMethod$ = from(toStream(() => this.cleanMethod, true));
-        const cleanedData$ = combineLatest([filteredData$, cleanMethod$, fields$]).pipe(
-            op.map(([data, method, fields]) => {
+        const cleanedData$ = combineLatest([filteredDataMetaInfo$, cleanMethod$, fields$]).pipe(
+            op.map(([info, method, fields]) => {
                 return from(cleanDataService({
-                    dataSource: data,
+                    computationMode: 'offline',
+                    storage: this.filteredDataStorage,
                     fields: fields.map(f => toJS(f)),
                     method: method
                 }))
@@ -142,7 +162,10 @@ export class DataSourceStore {
             }),
             op.share()
         )
-        this.filteredDataRef = fromStream(filteredData$, [])
+        this.filteredDataMetaInfoRef = fromStream(filteredDataMetaInfo$, {
+            versionCode: -1,
+            length: 0
+        })
         this.fieldMetasRef = fromStream(fieldMetas$, [])
         this.cleanedDataRef = fromStream(cleanedData$, []);
         window.addEventListener('message', (ev) => {
@@ -155,12 +178,12 @@ export class DataSourceStore {
                 this.setShowDataImportSelection(false);
             }
         })
-        this.subscriptions.push(dataVersionCode$.subscribe(() => {
+        this.subscriptions.push(rawDataMetaInfo$.subscribe(() => {
             runInAction(() => {
                 this.dataPrepProgressTag = IDataPrepProgressTag.filter;
             })
         }))
-        this.subscriptions.push(filteredData$.subscribe(() => {
+        this.subscriptions.push(filteredDataMetaInfo$.subscribe(() => {
             runInAction(() => {
                 this.dataPrepProgressTag = IDataPrepProgressTag.clean
             })
@@ -190,10 +213,8 @@ export class DataSourceStore {
             suggestExt(undefined, fieldMetaAndPreviews);
         })
     }
-    public get rawDataSize () {
-        // make rawDataSize reactive
-        if (this.dataVersionCode === -1) return 0;
-        return this.rawDataStorage.length;
+    public get filteredDataMetaInfo (): IteratorStorageMetaInfo {
+        return this.filteredDataMetaInfoRef.current;
     }
     public get allFields() {
         return this.mutFields.concat(this.extFields)
@@ -281,24 +302,6 @@ export class DataSourceStore {
         // -1: 放款一个标准，到底层的时候允许是小样本
         const size = Math.min(3 - 1, valueCountsList.length)
         return size * Math.log2(m)
-    }
-
-    public get filteredData () {
-        return this.filteredDataRef.current
-        // const { rawData, filters } = this;
-        // const ans: IRow[] = [];
-        // if (filters.length === 0) return rawData;
-        // const effectFilters = filters.filter(f => !f.disable);
-        // for (let i = 0; i < rawData.length; i++) {
-        //     const row = rawData[i];
-        //     let keep = effectFilters.every(f => {
-        //         if (f.type === 'range') return f.range[0] <= row[f.fid] && row[f.fid] <= f.range[1];
-        //         if (f.type === 'set') return f.values.includes(row[f.fid]);
-        //         return false;
-        //     })
-        //     if (keep) ans.push(row);
-        // }
-        // return ans
     }
 
     public get cleanedData () {
@@ -414,7 +417,7 @@ export class DataSourceStore {
         }))
         await this.rawDataStorage.setAll(rawData);
         runInAction(() => {
-            this.dataVersionCode = this.rawDataStorage.versionCode;
+            this.rawDataMetaInfo = this.rawDataStorage.metaInfo;
             this.loading = false;
         })
     }
@@ -467,7 +470,7 @@ export class DataSourceStore {
             await this.rawDataStorage.setAll(dataSource)
             runInAction(() => {
                 this.loading = false;
-                this.dataVersionCode = this.rawDataStorage.versionCode;
+                this.rawDataMetaInfo = this.rawDataStorage.metaInfo;
                 this.showDataImportSelection = false;
                 // 如果除了安全维度，数据集本身就有维度
                 if (metas.filter(f => f.analyticType === 'dimension').length > 1) {
@@ -499,7 +502,7 @@ export class DataSourceStore {
             })
             await this.rawDataStorage.setAll(res.dataSource)
             runInAction(() => {
-                this.dataVersionCode = this.rawDataStorage.versionCode;
+                this.rawDataMetaInfo = this.rawDataStorage.metaInfo;
                 this.mutFields = res.fields
             })
         } catch (error) {

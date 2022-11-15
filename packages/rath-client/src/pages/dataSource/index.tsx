@@ -28,7 +28,6 @@ import ProfilingView from './profilingView';
 import MainActionButton from './baseActions/mainActionButton';
 import DataOperations from './baseActions/dataOperations';
 
-
 const MARGIN_LEFT = { marginLeft: '1em' };
 
 interface DataSourceBoardProps {}
@@ -39,17 +38,16 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     const {
         cleanedData,
         cleanMethod,
-        rawDataSize,
-        filteredData,
+        rawDataMetaInfo,
+        filteredDataMetaInfo,
         loading,
         showDataImportSelection,
         dataPreviewMode,
         dataPrepProgressTag,
     } = dataSourceStore;
-
     useEffect(() => {
         // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
-        if (rawDataSize === 0) {
+        if (rawDataMetaInfo.length === 0) {
             dataSourceStore.setShowDataImportSelection(true);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,7 +81,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             dataSourceStore.loadDataWithInferMetas(dataSource, fields);
             if (name) {
                 dataSourceStore.setDatasetId(name);
-                setDataStorage(name, fields, dataSource)
+                setDataStorage(name, fields, dataSource);
             }
         },
         [dataSourceStore]
@@ -123,7 +121,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 <FastSelection />
                 <Stack horizontal>
                     <MainActionButton />
-                    {dataImportButton(intl.get('dataSource.importData.buttonName'), rawDataSize === 0)}
+                    {dataImportButton(intl.get('dataSource.importData.buttonName'), rawDataMetaInfo.length === 0)}
                     <IconButton
                         style={MARGIN_LEFT}
                         title={intl.get('function.importStorage.title')}
@@ -155,7 +153,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
                 </Stack>
-                {rawDataSize > 0 && <Advice />}
+                {rawDataMetaInfo.length > 0 && <Advice />}
                 {dataPrepProgressTag !== IDataPrepProgressTag.none && <ProgressIndicator label={dataPrepProgressTag} />}
                 <Stack horizontal verticalAlign="end" style={{ margin: '1em 0px' }}>
                     <Dropdown
@@ -171,8 +169,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 </Stack>
                 <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
                     {intl.get('dataSource.rowsInViews', {
-                        origin: rawDataSize,
-                        select: filteredData.length,
+                        origin: rawDataMetaInfo.length,
+                        select: filteredDataMetaInfo.length,
                         clean: cleanedData.length,
                     })}
                 </i>
@@ -199,7 +197,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         itemIcon="BarChartVerticalFilter"
                     />
                 </Pivot>
-                {rawDataSize > 0 && <DataOperations />}
+                {rawDataMetaInfo.length > 0 && <DataOperations />}
                 {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
                 {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
                 {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}

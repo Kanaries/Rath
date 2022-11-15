@@ -23,7 +23,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
 
     const meta = dataSourceStore.fieldMetas.find(fm => fm.fid === fid);
 
-    const { rawDataStorage, dataVersionCode } = dataSourceStore;
+    const { rawDataStorage, rawDataMetaInfo } = dataSourceStore;
 
     const [filter, setFilter] = useState<IFilter>((meta && meta.semanticType === 'quantitative') ? {
         fid,
@@ -38,7 +38,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
     const [fieldRange, setFieldRange] = useState<[number, number]>([0, 0])
     const filterType = filter.type;
     useEffect(() => {
-        if (dataVersionCode === -1) {
+        if (rawDataMetaInfo.versionCode === -1) {
             setFieldRange([0, 0]);
         } else if (filterType !== 'range') {
             setFieldRange([0, 0]);
@@ -47,7 +47,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                 setFieldRange(r)
             })
         }
-    }, [fid, filterType, rawDataStorage, dataVersionCode])
+    }, [fid, filterType, rawDataStorage, rawDataMetaInfo.versionCode])
 
 
     const selection = useMemo(() => {

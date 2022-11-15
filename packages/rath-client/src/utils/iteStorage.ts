@@ -6,45 +6,74 @@ export interface IteratorStorageProps {
     storageName?: string;
     dbName?: string;
     itemKey: string;
+    versionCode?: number;
+    metaStorageName?: string;
+    metaInfo?: IteratorStorageMetaInfo;
+}
+
+export interface IteratorStorageMetaInfo {
+    versionCode: number;
+    length: number;
 }
 export class IteratorStorage {
-    public length: number = 0;
     public storageName: string = '';
+    public metaStorageName: string = '';
     public dbName: string = '';
     public itemKey: string = '';
-    public versionCode: number = -1;
-    constructor (props: IteratorStorageProps) {
-        const { storageName = STORAGES.ITERATOR, dbName = STORAGE_INSTANCE, itemKey } = props;
+    public metaInfo: IteratorStorageMetaInfo;
+    constructor(props: IteratorStorageProps) {
+        const {
+            storageName = STORAGES.ITERATOR,
+            metaStorageName = STORAGES.ITERATOR_META,
+            dbName = STORAGE_INSTANCE,
+            itemKey,
+            metaInfo = {
+                versionCode: -1,
+                length: 0
+            }
+        } = props;
         this.storageName = storageName;
         this.dbName = dbName;
         this.itemKey = itemKey;
+        this.metaStorageName = metaStorageName;
+        this.metaInfo = metaInfo
     }
-    public async setAll (items: IRow[]) {
-        const storages = localforage.createInstance({
+    public async setAll(items: IRow[]) {
+        const storage = localforage.createInstance({
             name: this.dbName,
-            storeName: this.storageName
+            storeName: this.storageName,
         });
-        this.length = items.length;
-        this.versionCode++;
-        storages.setItem(this.itemKey, items);
+        await storage.setItem(this.itemKey, items);
+        const metaInfo = await this.syncMetaInfoFromStorage();
+        await this.updateMetaInfo({
+            versionCode: metaInfo.versionCode + 1,
+            length: items.length
+        })
     }
-    public async getAll (): Promise<IRow[]> {
+    public async getAll(): Promise<IRow[]> {
         const storages = localforage.createInstance({
             name: this.dbName,
-            storeName: this.storageName
+            storeName: this.storageName,
         });
         return storages.getItem(this.itemKey) as Promise<IRow[]>;
     }
-    public exportConfig () {
-        return {
-            storageName: this.storageName,
-            dbName: this.dbName,
-            itemKey: this.itemKey
+    public async syncMetaInfoFromStorage() {
+        const metaStorage = localforage.createInstance({
+            name: this.dbName,
+            storeName: this.metaStorageName,
+        });
+        const metaInfo = await metaStorage.getItem(this.itemKey) as IteratorStorageMetaInfo;
+        if (metaInfo) {
+            this.metaInfo = metaInfo;
         }
+        return this.metaInfo;
     }
-    public importConfig (config: IteratorStorageProps) {
-        this.storageName = config.storageName || STORAGES.ITERATOR;
-        this.dbName = config.dbName || STORAGE_INSTANCE;
-        this.itemKey = config.itemKey;
+    public async updateMetaInfo(metaInfo: IteratorStorageMetaInfo) {
+        const metaStorage = localforage.createInstance({
+            name: this.dbName,
+            storeName: this.metaStorageName,
+        });
+        await metaStorage.setItem(this.itemKey, metaInfo);
+        this.metaInfo = metaInfo;
     }
 }
