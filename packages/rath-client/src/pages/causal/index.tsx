@@ -47,7 +47,8 @@ const CausalPage: React.FC = () => {
             return list;
         }, []);
     }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
-    const { dataSubset } = useDataViews(cleanedData);
+    const dataContext = useDataViews(cleanedData);
+    const { dataSubset } = dataContext;
 
     useEffect(() => {
         causalStore.updateCausalAlgorithmList(fieldMetas);
@@ -95,7 +96,7 @@ const CausalPage: React.FC = () => {
         <div className="content-container">
             <div className="card">
                 <h1 style={{ fontSize: '1.6em', fontWeight: 500 }}>因果分析</h1>
-                <DatasetPanel />
+                <DatasetPanel context={dataContext} />
                 <PreconditionPanel
                     modifiablePrecondition={modifiablePrecondition}
                     setModifiablePrecondition={setModifiablePrecondition}
@@ -150,7 +151,7 @@ const CausalPage: React.FC = () => {
                     ) : null}
                 </div>
             </div>
-            <ManualAnalyzer />
+            <ManualAnalyzer context={dataContext} />
         </div>
     );
 };

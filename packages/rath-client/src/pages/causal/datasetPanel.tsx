@@ -13,15 +13,19 @@ import { useGlobalStore } from '../../store';
 import FilterCreationPill from '../../components/filterCreationPill';
 import LaTiaoConsole from '../../components/latiaoConsole/index';
 import { FilterCell } from './filters';
-import { useDataViews } from './hooks/dataViews';
+import type { useDataViews } from './hooks/dataViews';
 import { InnerCard } from './components';
 
-const DatasetPanel: React.FC = () => {
+export interface DatasetPanelProps {
+    context: ReturnType<typeof useDataViews>;
+}
+
+const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const { focusFieldIds } = causalStore;
 
-    const { dataSubset, sampleRate, setSampleRate, appliedSampleRate, filters, setFilters, sampleSize } = useDataViews(cleanedData);
+    const { dataSubset, sampleRate, setSampleRate, appliedSampleRate, filters, setFilters, sampleSize } = context;
 
     useEffect(() => {
         causalStore.setFocusFieldIds(

@@ -4,7 +4,9 @@ import { IRow } from "../../../interfaces";
 import { baseDemoSample } from "../../painter/sample";
 
 const VIZ_SUBSET_LIMIT = 2_000;
+const SAMPLE_UPDATE_DELAY = 500;
 
+/** 这是一个局部状态，不要在 causal page 以外的任何组件使用它 */
 export function useDataViews (originData: IRow[]) {
     const [sampleRate, setSampleRate] = useState(1);
     const [appliedSampleRate, setAppliedSampleRate] = useState(sampleRate);
@@ -33,7 +35,7 @@ export function useDataViews (originData: IRow[]) {
         if (sampleRate !== appliedSampleRate) {
             const delayedTask = setTimeout(() => {
                 setAppliedSampleRate(sampleRate);
-            }, 500);
+            }, SAMPLE_UPDATE_DELAY);
 
             return () => {
                 clearTimeout(delayedTask);
