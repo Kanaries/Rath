@@ -10,17 +10,6 @@ export function batchMutInRange (mutData: IRow, field: string, range: [number, n
     }
 }
 
-export function getFreqMap (values: any[]): Map<any, number> {
-    const counter: Map<any, number> = new Map();
-    for (let val of values) {
-        if (!counter.has(val)) {
-            counter.set(val, 0)
-        }
-        counter.set(val, counter.get(val)! + 1)
-    }
-    return counter
-}
-
 interface BatchMutInCircleProps {
     mutData: IRow;
     fields: [string, string];
