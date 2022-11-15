@@ -2813,11 +2813,6 @@
     "@types/keygrip" "*"
     "@types/node" "*"
 
-"@types/d3-force@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.npmmirror.com/@types/d3-force/-/d3-force-3.0.3.tgz#76cb20d04ae798afede1ea6e41750763ff5a9c82"
-  integrity sha512-z8GteGVfkWJMKsx6hwC3SiTSLspL98VNpmvLpEFJQpZPq6xpA1I8HNBDNSpukfK0Vb0l64zGFhzunLgEAcBWSA==
-
 "@types/d3-path@*":
   version "3.0.0"
   resolved "https://registry.npmmirror.com/@types/d3-path/-/d3-path-3.0.0.tgz#939e3a784ae4f80b1fde8098b91af1776ff1312b"

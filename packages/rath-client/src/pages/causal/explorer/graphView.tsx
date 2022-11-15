@@ -1,6 +1,7 @@
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import G6, { Graph, GraphData } from "@antv/g6";
+import { ActionButton } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { ModifiableBgKnowledge } from "../config";
 import type { DiagramGraphData } from ".";
@@ -92,6 +93,49 @@ const arrowsForBK = {
         end: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
     },
 } as const;
+
+/** 调试用的，不需要的时候干掉 */
+type ExportableGraphData = {
+    nodes: { id: string }[];
+    edges: { source: string; target: string }[];
+};
+/** 调试用的，不需要的时候干掉 */
+const ExportGraphButton: React.FC<{ data: DiagramGraphData; fields: readonly Readonly<IFieldMeta>[] }> = ({ data, fields }) => {
+    const value = useMemo<File>(() => {
+        const graph: ExportableGraphData = {
+            nodes: fields.map(f => ({ id: f.fid })),
+            edges: [],
+        };
+        for (const link of data.links) {
+            const source = fields[link.causeId].fid;
+            const target = fields[link.effectId].fid;
+            graph.edges.push({ source, target });
+            if (link.type === 'bidirected' || link.type === 'undirected') {
+                graph.edges.push({ source: target, target: source });
+            }
+        }
+        return new File([JSON.stringify(graph, undefined, 2)], `test - ${new Date().toLocaleString()}.json`);
+    }, [data, fields]);
+    const dataUrlRef = useRef('');
+    useEffect(() => {
+        dataUrlRef.current = URL.createObjectURL(value);
+        return () => {
+            URL.revokeObjectURL(dataUrlRef.current);
+        };
+    }, [value]);
+    const handleExport = useCallback(() => {
+        const a = document.createElement('a');
+        a.href = dataUrlRef.current;
+        a.download = value.name;
+        a.click();
+        a.remove();
+    }, [value.name]);
+    return (
+        <ActionButton iconProps={{ iconName: 'Download' }} onClick={handleExport} style={{ position: 'absolute', bottom: 0 }}>
+            导出为图
+        </ActionButton>
+    );
+};
 
 const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     { fields, value, onClickNode, focus, cutThreshold, mode, onLinkTogether, onRemoveLink, preconditions, ...props },
@@ -210,32 +254,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                         graph.refreshPositions()
                     }
                 },
-                // layout: {
-                //     type: 'gForce',
-                //     gpuEnabled: true,
-                //     maxIteration: 1000,
-                //     // type: 'gForce',
-                //     // maxIteration: 500,
-                //     // gatherDiscrete: true,
-                //     // //nodeSize: 100,
-                //     // //nodeSpacing: 100,
-                //     // //gatherDiscreteCenter: [500, 100],
-                //     // descreteGravity: 200,
-                //     // linkDistanceFunc: (e: any) => {
-                //     //     if (e.source === '0') return 10;
-                //     //     return 1;
-                //     // },
-                //     // getMass: (d: any) => {
-                //     //     if (d.id === '0') return 100;
-                //     //     return 1;
-                //     // },
-                //     // // speed: 10,
-                //     // // maxIteration: 500,
-                //     // // // for rendering after each iteration
-                //     // // tick: () => {
-                //     // //     graph.refreshPositions()
-                //     // // },
-                // },
                 defaultNode: {
                   size: 24,
                   style: {
@@ -384,6 +402,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
             <div ref={containerRef} />
             {/* {edgeSelected && <p className="msg">Press Backspace key to remove this edge.</p>} */}
             {edgeSelected && <p className="msg">按下 Backspace 键删除这条关系</p>}
+            <ExportGraphButton fields={fields} data={value} />
         </Container>
     );
 });
