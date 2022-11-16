@@ -18,7 +18,8 @@ import PreconditionPanel from './preconditionPanel';
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
-    const { appendFields2Group } = useInteractFieldGroups(fieldMetas);
+    const interactFieldGroups = useInteractFieldGroups(fieldMetas);
+    const { appendFields2Group } = interactFieldGroups;
     const { igMatrix, causalFields, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
 
     const [modifiablePrecondition, setModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
@@ -71,20 +72,19 @@ const CausalPage: React.FC = () => {
             composedEffect: readonly Readonly<NodeWithScore>[]
         ) => {
             if (node) {
-                const allEffect = composedEffect
-                    .reduce<Readonly<NodeWithScore>[]>(
-                        (list, f) => {
-                            if (!list.some((which) => which.field.fid === f.field.fid)) {
-                                list.push(f);
-                            }
-                            return list;
-                        },
-                        [...simpleEffect]
-                    )
-                    .sort((a, b) => b.score - a.score);
-                // console.log(allEffect)
-                // setFieldGroup([node, ...allEffect.map((f) => f.field)]);
-                appendFields2Group([node.fid, ...allEffect.map((f) => f.field.fid)])
+                appendFields2Group([node.fid]);
+                // const allEffect = composedEffect
+                //     .reduce<Readonly<NodeWithScore>[]>(
+                //         (list, f) => {
+                //             if (!list.some((which) => which.field.fid === f.field.fid)) {
+                //                 list.push(f);
+                //             }
+                //             return list;
+                //         },
+                //         [...simpleEffect]
+                //     )
+                //     .sort((a, b) => b.score - a.score);
+                // console.log(allEffect);
             }
         },
         [appendFields2Group]
@@ -151,7 +151,7 @@ const CausalPage: React.FC = () => {
                     ) : null}
                 </div>
             </div>
-            <ManualAnalyzer context={dataContext} />
+            <ManualAnalyzer context={dataContext} interactFieldGroups={interactFieldGroups} />
         </div>
     );
 };
