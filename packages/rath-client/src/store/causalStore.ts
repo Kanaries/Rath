@@ -234,7 +234,7 @@ export class CausalStore {
             });
             const result = await res.json();
             if (result.success) {
-                const causalMatrix = (result.data as number[][])
+                const causalMatrix = (result.data.orig_matrix as number[][])
                     .slice(0, originFieldsLength)
                     .map((row) => row.slice(0, originFieldsLength));
                 this.setCausalResult(inputFields, causalMatrix);
