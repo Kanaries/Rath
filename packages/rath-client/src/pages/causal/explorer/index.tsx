@@ -6,6 +6,7 @@ import styled from "styled-components";
 import useErrorBoundary from "../../../hooks/use-error-boundary";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { useGlobalStore } from "../../../store";
+import { CausalLinkDirection } from "../../../utils/resolve-causal";
 import type { ModifiableBgKnowledge } from "../config";
 import ExplorerMainView from "./explorerMainView";
 import FlowAnalyzer, { NodeWithScore } from "./flowAnalyzer";
@@ -99,7 +100,7 @@ const MainView = styled.div`
 
 const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSelected, onLinkTogether, onRemoveLink, preconditions }) => {
     const { causalStore } = useGlobalStore();
-    const { causalAlgorithm, causalStrength } = causalStore;
+    const { causalStrength } = causalStore;
 
     const [cutThreshold, setCutThreshold] = useState(0);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
@@ -127,164 +128,74 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
 
         const links: CausalLink[] = [];
 
-        /* eslint no-fallthrough: ["error", { "allowEmptyCase": true }] */
-        switch (causalAlgorithm) {
-            case 'CD_NOD':
-            case 'PC': {
-                // cg.G.graph[j,i]=1 and cg.G.graph[i,j]=-1 indicate i –> j;
-                // cg.G.graph[i,j] = cg.G.graph[j,i] = -1 indicate i — j;
-                // cg.G.graph[i,j] = cg.G.graph[j,i] = 1 indicates i <-> j.
-                for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
-                    for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
-                        const weight = modifiedMatrix[i][j];
-                        const forwardFlag = causalStrength[i][j];
-                        const backwardFlag = causalStrength[j][i];
-                        if (backwardFlag === 1 && forwardFlag === -1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'directed',
-                            });
-                        } else if (forwardFlag === 1 && backwardFlag === -1) {
-                            links.push({
-                                causeId: j,
-                                effectId: i,
-                                score: Math.abs(weight),
-                                type: 'directed',
-                            });
-                        } else if (forwardFlag === -1 && backwardFlag === -1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'undirected',
-                            });
-                        } else if (forwardFlag === 1 && backwardFlag === 1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'bidirected',
-                            });
-                        }
+        for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
+            for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
+                const weight = Math.abs(modifiedMatrix[i][j]);
+                const direction = causalStrength[i][j];
+                switch (direction) {
+                    case CausalLinkDirection.none: {
+                        break;
+                    }
+                    case CausalLinkDirection.directed: {
+                        links.push({
+                            causeId: i,
+                            effectId: j,
+                            score: weight,
+                            type: 'directed',
+                        });
+                        break;
+                    }
+                    case CausalLinkDirection.reversed: {
+                        links.push({
+                            causeId: j,
+                            effectId: i,
+                            score: weight,
+                            type: 'directed',
+                        });
+                        break;
+                    }
+                    case CausalLinkDirection.weakDirected: {
+                        links.push({
+                            causeId: i,
+                            effectId: j,
+                            score: weight,
+                            type: 'weak directed',
+                        });
+                        break;
+                    }
+                    case CausalLinkDirection.weakReversed: {
+                        links.push({
+                            causeId: j,
+                            effectId: i,
+                            score: weight,
+                            type: 'weak directed',
+                        });
+                        break;
+                    }
+                    case CausalLinkDirection.undirected: {
+                        links.push({
+                            causeId: i,
+                            effectId: j,
+                            score: weight,
+                            type: 'undirected',
+                        });
+                        break;
+                    }
+                    case CausalLinkDirection.bidirected: {
+                        links.push({
+                            causeId: i,
+                            effectId: j,
+                            score: weight,
+                            type: 'bidirected',
+                        });
+                        break;
                     }
                 }
-                break;
-            }
-            case 'FCI': {
-                // G.graph[j,i]=1 and G.graph[i,j]=-1 indicates i –> j;
-                // G.graph[i,j] = G.graph[j,i] = -1 indicates i — j;
-                // G.graph[i,j] = G.graph[j,i] = 1 indicates i <-> j;
-                // G.graph[j,i]=1 and G.graph[i,j]=2 indicates i o-> j.
-                for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
-                    for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
-                        const weight = modifiedMatrix[i][j];
-                        const forwardFlag = causalStrength[i][j];
-                        const backwardFlag = causalStrength[j][i];
-                        if (backwardFlag === 1 && forwardFlag === -1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'directed',
-                            });
-                        } else if (forwardFlag === 1 && backwardFlag === -1) {
-                            links.push({
-                                causeId: j,
-                                effectId: i,
-                                score: Math.abs(weight),
-                                type: 'directed',
-                            });
-                        } else if (forwardFlag === -1 && backwardFlag === -1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'undirected',
-                            });
-                        } else if (forwardFlag === 1 && backwardFlag === 1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'bidirected',
-                            });
-                        } else if (forwardFlag === 1 && backwardFlag === 2) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'weak directed',
-                            });
-                        }
-                    }
-                }
-                break;
-            }
-            case 'GES': {
-                // Record[‘G’].graph[j,i]=1 and Record[‘G’].graph[i,j]=-1 indicate i –> j;
-                // Record[‘G’].graph[i,j] = Record[‘G’].graph[j,i] = -1 indicates i — j.
-                for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
-                    for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
-                        const weight = modifiedMatrix[i][j];
-                        const forwardFlag = causalStrength[i][j];
-                        const backwardFlag = causalStrength[j][i];
-                        if (backwardFlag === 1 && forwardFlag === -1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'directed',
-                            });
-                        } else if (forwardFlag === 1 && backwardFlag === -1) {
-                            links.push({
-                                causeId: j,
-                                effectId: i,
-                                score: Math.abs(weight),
-                                type: 'directed',
-                            });
-                        } else if (forwardFlag === -1 && backwardFlag === -1) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'undirected',
-                            });
-                        }
-                    }
-                }
-                break;
-            }
-            case 'ExactSearch': {
-                // Estimated DAG.
-                for (let i = 0; i < modifiedMatrix.length; i += 1) {
-                    for (let j = 0; j < modifiedMatrix.length; j += 1) {
-                        if (i === j) {
-                            continue;
-                        }
-                        const weight = modifiedMatrix[i][j];
-                        const linked = causalStrength[i][j] === 1;
-                        if (linked) {
-                            links.push({
-                                causeId: i,
-                                effectId: j,
-                                score: Math.abs(weight),
-                                type: 'directed',
-                            });
-                        }
-                    }
-                }
-                break;
-            }
-            default: {
-                console.warn(`Unknown algo: ${causalAlgorithm}`);
-                break;
             }
         }
 
         return links.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
-    }, [modifiedMatrix, causalAlgorithm, causalStrength]);
+    }, [modifiedMatrix, causalStrength]);
 
     const value = useMemo(() => ({ nodes, links }), [nodes, links]);
 

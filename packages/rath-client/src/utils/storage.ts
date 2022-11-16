@@ -2,6 +2,7 @@ import { IFieldMeta } from '@kanaries/loa';
 import localforage from 'localforage';
 import { RESULT_STORAGE_SPLITOR } from '../constants';
 import { IMuteFieldBase, IRow } from '../interfaces';
+import type { CausalLinkDirection } from './resolve-causal';
 
 export const STORAGE_INSTANCE = 'rath_storage_instance'
 
@@ -28,7 +29,7 @@ export interface IModel {
     metas: IFieldMeta[];
     causal: {
         corMatrix: number[][];
-        causalMatrix: number[][];
+        causalMatrix: CausalLinkDirection[][];
         fieldIds: string[];
         algorithm: string;
         params: {

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { IFieldMeta, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
+import DirectionMatrix from './directionMatrix';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 
 const Cont = styled.div`
@@ -31,7 +32,7 @@ const MATRIX_PIVOT_LIST = [
 
 const MARK_LABELS = [
     { key: 'circle', text: '圆形' || 'Circle' },
-    { key: 'rect', text: '矩形' },
+    { key: 'square', text: '矩形' },
 ];
 
 function showMatrix(causalFields: IFieldMeta[], mat: number[][], computing?: boolean): boolean {
@@ -47,7 +48,7 @@ interface MatrixPanelProps {
 const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
     const { onMatrixPointClick, fields, onCompute, dataSource } = props;
     const [selectedKey, setSelectedKey] = useState(MATRIX_TYPE.mutualInfo);
-    const [markType, setMarkType] = useState<'circle' | 'rect'>('circle');
+    const [markType, setMarkType] = useState<'circle' | 'square'>('circle');
     const { causalStore } = useGlobalStore();
     const { computing, igCondMatrix, igMatrix, causalStrength } = causalStore;
 
@@ -80,7 +81,7 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
                     options={MARK_LABELS}
                     selectedKey={markType}
                     onChange={(e, op) => {
-                        op && setMarkType(op.key as 'circle' | 'rect');
+                        op && setMarkType(op.key as 'circle' | 'square');
                     }}
                 />
             </Stack>
@@ -88,6 +89,7 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
             <div>
             {selectedKey === MATRIX_TYPE.mutualInfo && showMatrix(fields, igMatrix, computing) && (
                 <RelationMatrixHeatMap
+                    mark={markType}
                     absolute
                     fields={fields}
                     data={igMatrix}
@@ -96,6 +98,7 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
             )}
             {selectedKey === MATRIX_TYPE.conditionalMutualInfo && showMatrix(fields, igCondMatrix, computing) && (
                 <RelationMatrixHeatMap
+                    mark={markType}
                     absolute
                     fields={fields}
                     data={igCondMatrix}
@@ -103,7 +106,8 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
                 />
             )}
             {selectedKey === MATRIX_TYPE.causal && showMatrix(fields, causalStrength, computing) && (
-                <RelationMatrixHeatMap
+                <DirectionMatrix
+                    mark={markType}
                     fields={fields}
                     data={causalStrength}
                     onSelect={onMatrixPointClick}
