@@ -211,6 +211,8 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
     // console.log(fields, links);
     const [focus, setFocus] = useState(-1);
 
+    const showFlowAnalyzer = new URL(window.location.href).searchParams.get('flowAnalyzer') === '1';
+
     const handleClickCircle = useCallback((node: Readonly<CausalNode>) => {
         const idx = node.nodeId;
         if (mode === 'explore') {
@@ -324,17 +326,19 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     }}
                 />
             </MainView>
-            <ErrorBoundary>
-                <FlowAnalyzer
-                    dataSource={dataSource}
-                    fields={fields}
-                    data={value}
-                    index={mode === 'explore' ? focus : -1}
-                    cutThreshold={cutThreshold}
-                    onClickNode={handleClickCircle}
-                    onUpdate={onNodeSelected}
-                />
-            </ErrorBoundary>
+            {showFlowAnalyzer && (
+                <ErrorBoundary>
+                    <FlowAnalyzer
+                        dataSource={dataSource}
+                        fields={fields}
+                        data={value}
+                        index={mode === 'explore' ? focus : -1}
+                        cutThreshold={cutThreshold}
+                        onClickNode={handleClickCircle}
+                        onUpdate={onNodeSelected}
+                    />
+                </ErrorBoundary>
+            )}
         </Container>
     );
 };
