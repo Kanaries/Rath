@@ -238,7 +238,7 @@ export class CausalStore {
                 const resultMatrix = (result.data as number[][])
                     .slice(0, originFieldsLength)
                     .map((row) => row.slice(0, originFieldsLength));
-                const causalMatrix = resolveCausal(resultMatrix, algoName);
+                const causalMatrix = resolveCausal(resultMatrix);
                 this.setCausalResult(inputFields, causalMatrix);
             } else {
                 throw new Error(result.message);
