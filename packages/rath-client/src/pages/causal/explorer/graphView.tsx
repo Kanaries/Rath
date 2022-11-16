@@ -80,20 +80,34 @@ const arrows = {
     },
 } as const;
 
-const arrowsForBK = {
-    'must-link': {
-        start: 'M 12,0 L 28,8 L 28,-8 Z',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+G6.registerEdge(
+    'forbidden-edge',
+    {
+        afterDraw(cfg, group: any) {
+            // 获取图形组中的第一个图形，在这里就是边的路径图形
+            const shape = group.get('children')[0];
+            // 获取路径图形的中点坐标
+            const midPoint = shape.getPoint(0.5);
+            group.addShape('path', {
+                attrs: {
+                    width: 10,
+                    height: 10,
+                    stroke: '#f00',
+                    lineWidth: 2,
+                    path: [
+                        ['M', midPoint.x + 8, midPoint.y + 8],
+                        ['L', midPoint.x - 8, midPoint.y - 8],
+                        ['M', midPoint.x - 8, midPoint.y + 8],
+                        ['L', midPoint.x + 8, midPoint.y - 8],
+                    ],
+                },
+                name: 'forbidden-mark',
+            });
+        },
+        update: undefined,
     },
-    'must-not-link': {
-        start: 'M 14,6 L 26,-6 M 14,-6 L 26,6',
-        end: 'M 14,6 L 26,-6 M 14,-6 L 26,6',
-    },
-    'prefer-link': {
-        start: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
-        end: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
-    },
-} as const;
+    'line',
+);
 
 /** 调试用的，不需要的时候干掉 */
 type ExportableGraphData = {
@@ -230,11 +244,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 lineWidth: 2,
                 startArrow: {
                     fill: '#F6BD16',
-                    path: arrowsForBK[bk.type].start,
+                    path: '',
                 },
                 endArrow: {
                     fill: '#F6BD16',
-                    path: arrowsForBK[bk.type].end,
+                    path: 'M 12,0 L 28,8 L 28,-8 Z',
                 },
             },
             edgeStateStyles: {
@@ -242,6 +256,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                     lineWidth: 2,
                 },
             },
+            type: bk.type === 'must-not-link' ? 'forbidden-edge' : undefined,
         })),
     }), [data, mode, preconditions, fields, selectedSubtree, focus]);
 
@@ -253,13 +268,35 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     useEffect(() => {
         const { current: container } = containerRef;
         if (container) {
+            let createEdgeFrom = -1;
             const graph = new G6.Graph({
                 container,
                 width: widthRef.current,
                 height: GRAPH_HEIGHT,
                 linkCenter: true,
                 modes: {
-                    default: mode === 'edit' ? ['drag-canvas', 'drag-node', 'create-edge', G6_EDGE_SELECT] : ['drag-canvas', 'drag-node', 'click-select'],
+                    default: mode === 'edit' ? ['drag-canvas', {
+                        type: 'create-edge',
+                        trigger: 'drag',
+                        shouldBegin(e) {
+                            const source = e.item?._cfg?.id;
+                            if (source) {
+                                createEdgeFrom = parseInt(source, 10);
+                            }
+                            return true;
+                        },
+                        shouldEnd(e) {
+                            const target = e.item?._cfg?.id;
+                            if (target) {
+                                const origin = fields[createEdgeFrom];
+                                const destination = fields[parseInt(target, 10)];
+                                if (origin.fid !== destination.fid) {
+                                    handleLinkRef.current(origin.fid, destination.fid);
+                                }
+                            }
+                            return false;
+                        },
+                    }, G6_EDGE_SELECT] : ['drag-canvas', 'drag-node', 'click-select'],
                 },
                 animate: true,
                 layout: {
@@ -288,23 +325,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
             }));
             graph.data(dataRef.current);
             graph.render();
-
-            graph.on('aftercreateedge', (e: any) => {
-                const edge = e.edge._cfg;
-                const source = fields[parseInt(edge.source._cfg.id, 10)];
-                const target = fields[parseInt(edge.target._cfg.id, 10)];
-                handleLinkRef.current(source.fid, target.fid);
-                const edges = graph.save().edges;
-                G6.Util.processParallelEdges(edges);
-                graph.getEdges().forEach((edge, i) => {
-                    graph.updateItem(edge, {
-                        // @ts-ignore
-                        curveOffset: edges[i].curveOffset,
-                        // @ts-ignore
-                        curvePosition: edges[i].curvePosition,
-                    });
-                });
-            });
 
             graph.on('nodeselectchange', (e: any) => {
                 const selected = e.selectedItems.nodes[0]?._cfg.id;
@@ -359,7 +379,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 container.innerHTML = '';
             };
         }
-    }, [mode, fields, preconditions]);
+    }, [mode, fields]);
 
     useEffect(() => {
         if (graphRef.current) {
@@ -380,11 +400,23 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
 
     useEffect(() => {
         const { current: container } = containerRef;
-        if (container && graphRef.current) {
-            graphRef.current.changeData(dataRef.current);
-            graphRef.current.render();
+        const { current: graph } = graphRef;
+        if (container && graph) {
+            graph.data(dataRef.current);
+            // const edges = graph.save().edges;
+            // G6.Util.processParallelEdges(edges);
+            // graph.getEdges().forEach((edge, i) => {
+            //     graph.updateItem(edge, {
+            //         // @ts-ignore
+            //         curveOffset: edges[i].curveOffset,
+            //         // @ts-ignore
+            //         curvePosition: edges[i].curvePosition,
+            //     });
+            // });
+            // console.log({edges})
+            graph.render();
         }
-    }, [data, selectedSubtree]);
+    }, [data, preconditions, selectedSubtree]);
 
     useEffect(() => {
         if (focus !== null) {

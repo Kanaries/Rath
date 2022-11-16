@@ -79,12 +79,10 @@ const PreconditionTable: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                             // options={[
                             //     { key: 'must-link', text: 'must link' },
                             //     { key: 'must-not-link', text: 'must not link' },
-                            //     { key: 'prefer-link', text: 'prefer to link' },
                             // ]}
                             options={[
                                 { key: 'must-link', text: '一定相连' },
                                 { key: 'must-not-link', text: '一定不相连' },
-                                { key: 'prefer-link', text: '有相连倾向' },
                             ]}
                             onChange={(e, option) => {
                                 if (!option) {

@@ -43,7 +43,7 @@ export type BgKnowledge = {
 export type ModifiableBgKnowledge = {
     src: BgKnowledge['src'];
     tar: BgKnowledge['tar'];
-    type: 'must-link' | 'must-not-link' | 'prefer-link';
+    type: 'must-link' | 'must-not-link';
 };
 
 export enum UCRule {

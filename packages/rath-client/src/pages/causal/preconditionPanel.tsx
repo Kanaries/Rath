@@ -35,7 +35,6 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
         const mat = igMatrix;
         // TODO: 临时定的阈值
         const thresholdFalse = 0.005;
-        const thresholdPrefer = [0.1, 0.5];
         const thresholdMayContainLinearlyIndependency = 0.99; // 线性相关不能反映成因果
         if (mat.length === selectedFields.length) {
             for (let i = 0; i < mat.length; i += 1) {
@@ -55,12 +54,6 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                             src: selectedFields[i].fid,
                             tar: selectedFields[j].fid,
                             type: 'must-not-link',
-                        });
-                    } else if (wf >= thresholdPrefer[0] && wf <= thresholdPrefer[1]) {
-                        initLinks.push({
-                            src: selectedFields[i].fid,
-                            tar: selectedFields[j].fid,
-                            type: 'prefer-link',
                         });
                     }
                 }
@@ -149,7 +142,6 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                             options={[
                                 { key: 'must-link', text: '一定相连' },
                                 { key: 'must-not-link', text: '一定不相连' },
-                                { key: 'prefer-link', text: '有相连倾向' },
                             ]}
                             styles={{ root: { width: '20%' }, title: { textAlign: 'center' } }}
                         />
