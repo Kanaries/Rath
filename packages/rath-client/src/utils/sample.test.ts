@@ -35,7 +35,31 @@ const gaussRand = (count: number, mu: number, sigma: number): number[] => {
             x = v2 * Math.sqrt(-2 * Math.log(s) / s);
         }
         flag = !flag;
-        return x;
+        return mu + x * sigma;
+    });
+};
+
+const halfGaussRand = (count: number, mu: number, sigma: number): number[] => {
+    let v1 = 0;
+    let v2 = 0;
+    let s = 0;
+    let flag = true;
+    return new Array<0>(count).fill(0).map<number>(_ => {
+        let x = 0;
+        if (flag) {
+            do {
+                let u1 = Math.random();
+                let u2 = Math.random();
+                v1 = 2 * u1 - 1;
+                v2 = 2 * u2 - 1;
+                s = v1 * v1 + v2 * v2;
+            } while (s >= 1 || s === 0);
+            x = v1 * Math.sqrt(-2 * Math.log(s) / s);
+        } else {
+            x = v2 * Math.sqrt(-2 * Math.log(s) / s);
+        }
+        flag = !flag;
+        return mu + Math.abs(x) * sigma;
     });
 };
 
@@ -45,31 +69,66 @@ const createRandomData = (nCols: number = 10, nRows: number = 1_000): { fields: 
 
     for (let i = 0; i < nCols; i += 1) {
         const fid = `${i}:${_lorem(1)}`;
-        const col = gaussRand(nRows, 0, 1);
-        const [min, max] = col.reduce<[number, number]>(([min, max], d) => {
-            return [
-                Math.min(min, d),
-                Math.max(max, d),
-            ];
-        }, [Infinity, -Infinity]);
-        fields.push({
-            fid,
-            name: _lorem(2),
-            analyticType: 'measure',
-            semanticType: 'quantitative',
-            geoRole: 'none',
-            // @ts-ignore
-            features: { min, max },
-        });
-        for (let j = 0; j < nRows; j += 1) {
-            data[j][fid] = col[j];
+        if (Math.random() < 0.3) {
+            const col = halfGaussRand(nRows, 0, Math.random() * 10);
+            const [min, max] = col.reduce<[number, number]>(([min, max], d) => {
+                return [
+                    Math.min(min, d),
+                    Math.max(max, d),
+                ];
+            }, [Infinity, -Infinity]);
+            fields.push({
+                fid,
+                name: _lorem(2),
+                analyticType: 'measure',
+                semanticType: 'quantitative',
+                geoRole: 'none',
+                // @ts-ignore
+                features: { min, max },
+            });
+            for (let j = 0; j < nRows; j += 1) {
+                data[j][fid] = col[j];
+            }
+        } else if (Math.random() < 0.7) {
+            const col = gaussRand(nRows, Math.random() * 10, Math.random() * 3);
+            const [min, max] = col.reduce<[number, number]>(([min, max], d) => {
+                return [
+                    Math.min(min, d),
+                    Math.max(max, d),
+                ];
+            }, [Infinity, -Infinity]);
+            fields.push({
+                fid,
+                name: _lorem(2),
+                analyticType: 'measure',
+                semanticType: 'quantitative',
+                geoRole: 'none',
+                // @ts-ignore
+                features: { min, max },
+            });
+            for (let j = 0; j < nRows; j += 1) {
+                data[j][fid] = col[j];
+            }
+        } else {
+            fields.push({
+                fid,
+                name: _lorem(2),
+                analyticType: 'measure',
+                semanticType: 'nominal',
+                geoRole: 'none',
+                // @ts-ignore
+                features: {},
+            });
+            for (let j = 0; j < nRows; j += 1) {
+                data[j][fid] = LOREM_IPSUM[Math.floor(LOREM_IPSUM.length * Math.random())];
+            }
         }
     }
 
     return { fields, data };
 };
 
-describe('function viewSampling', () => {
+describe('function focusedSample', () => {
     it('Sample size test (full set)', () => {
         const { data: fullSet, fields } = createRandomData(8, 100);
         const sampleRate = 1;
@@ -93,6 +152,13 @@ describe('function viewSampling', () => {
 
         expect(sample.length).toBe(0);
     });
+    it('Sample size test (negative)', () => {
+        const { data: fullSet, fields } = createRandomData(8, 100);
+        const sampleSize = -2;
+        const sample = focusedSample(fullSet, fields, sampleSize);
+
+        expect(sample.length).toBe(0);
+    });
     it('Sample size test (small set, more than half)', () => {
         const { data: fullSet, fields } = createRandomData(6, 64);
         const sampleRate = 0.8;
@@ -110,7 +176,7 @@ describe('function viewSampling', () => {
         expect(sample.length).toBe(sampleSize);
     });
     it('Sample size test (large set, more than half)', () => {
-        const { data: fullSet, fields } = createRandomData(12, 1_536);
+        const { data: fullSet, fields } = createRandomData(18, 40_000);
         const sampleRate = 0.8;
         const sampleSize = Math.floor(fullSet.length * sampleRate);
         const sample = focusedSample(fullSet, fields, sampleSize);
@@ -118,7 +184,7 @@ describe('function viewSampling', () => {
         expect(sample.length).toBe(sampleSize);
     });
     it('Sample size test (large set, less than half)', () => {
-        const { data: fullSet, fields } = createRandomData(12, 1_536);
+        const { data: fullSet, fields } = createRandomData(18, 40_000);
         const sampleRate = 0.2;
         const sampleSize = Math.floor(fullSet.length * sampleRate);
         const sample = focusedSample(fullSet, fields, sampleSize);

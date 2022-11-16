@@ -17,12 +17,8 @@ export function useDataViews (originData: IRow[]) {
     const [filters, setFilters] = useState<IFilter[]>([]);
     const sampleSize = Math.round(originData.length * appliedSampleRate);
     const dataSource = useMemo(() => {
-        if (appliedSampleRate >= 1) {
-            return originData;
-        }
-        const sampleSize = Math.round(originData.length * appliedSampleRate);
         return focusedSample(originData, selectedFields, sampleSize).map(i => originData[i]);
-    }, [originData, selectedFields, appliedSampleRate]);
+    }, [originData, selectedFields, sampleSize]);
     const dataSubset = useMemo(() => {
         return applyFilters(dataSource, filters);
     }, [dataSource, filters]);
