@@ -420,6 +420,8 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
         }
     }, [flowsAsOrigin, layout]);
 
+    const showFlowAnalyzer = new URL(window.location.href).searchParams.get('flowAnalyzer') === '1';
+
     const [combinedTree, cbnTreeMsg] = useMemo(() => {
         if (combinedFlows.length === 0) {
             return [null, null];
@@ -434,10 +436,12 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                 links: dag.links(),
             }, null];
         } catch (error) {
-            console.warn(error);
+            if (showFlowAnalyzer) {
+                console.warn(error);
+            }
             return [null, null];
         }
-    }, [combinedFlows, layout]);
+    }, [combinedFlows, layout, showFlowAnalyzer]);
 
     const [mode, setMode] = useState<'cause' | 'effect'>('effect');
 
@@ -490,7 +494,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
         }
     }, [subtree]);
 
-    return (
+    return showFlowAnalyzer ? (
         <SVGGroup onClick={e => e.stopPropagation()}>
             {field && (
                 <div className="tools" style={{ width: '100%', padding: '1em' }}>
@@ -685,7 +689,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                 )
             ) : null}
         </SVGGroup>
-    );
+    ) : null;
 };
 
 

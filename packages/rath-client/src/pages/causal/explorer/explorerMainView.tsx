@@ -22,6 +22,7 @@ const Container = styled.div`
 
 export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     fields: readonly Readonly<IFieldMeta>[];
+    selectedSubtree: readonly string[];
     value: Readonly<DiagramGraphData>;
     /** @default 0 */
     cutThreshold?: number;
@@ -34,7 +35,7 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
-    fields, value, focus, cutThreshold = 0, mode, onClickNode, onLinkTogether, onRemoveLink, preconditions, ...props },
+    fields, selectedSubtree, value, focus, cutThreshold = 0, mode, onClickNode, onLinkTogether, onRemoveLink, preconditions, ...props },
     ref
 ) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
@@ -65,6 +66,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
             <ErrorBoundary>
                 <GraphView
                     fields={fields}
+                    selectedSubtree={selectedSubtree}
                     value={value}
                     mode={mode}
                     preconditions={preconditions}

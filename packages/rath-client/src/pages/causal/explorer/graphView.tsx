@@ -50,6 +50,7 @@ const Container = styled.div`
 
 export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     fields: readonly Readonly<IFieldMeta>[];
+    selectedSubtree: readonly string[];
     value: Readonly<DiagramGraphData>;
     cutThreshold: number;
     mode: 'explore' | 'edit';
@@ -138,7 +139,7 @@ const ExportGraphButton: React.FC<{ data: DiagramGraphData; fields: readonly Rea
 };
 
 const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
-    { fields, value, onClickNode, focus, cutThreshold, mode, onLinkTogether, onRemoveLink, preconditions, ...props },
+    { fields, selectedSubtree, value, onClickNode, focus, cutThreshold, mode, onLinkTogether, onRemoveLink, preconditions, ...props },
     ref
 ) => {
     const [forceUpdateFlag, setForceUpdateFlag] = useState(Date.now());
@@ -189,22 +190,39 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     const graphRef = useRef<Graph>();
     const dataRef = useRef<GraphData>({});
     dataRef.current = useMemo(() => ({
-        nodes: data.nodes.map((node, i) => ({ id: `${node.id}`, description: fields[i].name ?? fields[i].fid })),
-        edges: mode === 'explore' ? data.links.map((link, i) => ({
-            id: `link_${i}`,
-            source: `${link.source}`,
-            target: `${link.target}`,
-            style: {
-                startArrow: {
-                    fill: '#F6BD16',
-                    path: arrows[link.type].start,
+        nodes: data.nodes.map((node, i) => {
+            const isInSubtree = selectedSubtree.includes(fields[node.id].fid);
+            return {
+                id: `${node.id}`,
+                description: fields[i].name ?? fields[i].fid,
+                style: {
+                    lineWidth: i === focus ? 3 : isInSubtree ? 2 : 1,
+                    opacity: i === focus || isInSubtree ? 1 : focus === null ? 1 : 0.4,
                 },
-                endArrow: {
-                    fill: '#F6BD16',
-                    path: arrows[link.type].end,
+            };
+        }),
+        edges: mode === 'explore' ? data.links.map((link, i) => {
+            const isInSubtree = focus !== null && [fields[link.source].fid, fields[link.target].fid].every(fid => {
+                return [fields[focus].fid].concat(selectedSubtree).includes(fid);
+            });
+            return {
+                id: `link_${i}`,
+                source: `${link.source}`,
+                target: `${link.target}`,
+                style: {
+                    lineWidth: isInSubtree ? 1.5 : 1,
+                    opacity: focus === null ? 0.9 : isInSubtree ? 1 : 0.2,
+                    startArrow: {
+                        fill: '#F6BD16',
+                        path: arrows[link.type].start,
+                    },
+                    endArrow: {
+                        fill: '#F6BD16',
+                        path: arrows[link.type].end,
+                    },
                 },
-            },
-        })) : preconditions.map((bk, i) => ({
+            };
+        }) : preconditions.map((bk, i) => ({
             id: `bk_${i}`,
             source: `${fields.findIndex(f => f.fid === bk.src)}`,
             target: `${fields.findIndex(f => f.fid === bk.tar)}`,
@@ -225,7 +243,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 },
             },
         })),
-    }), [data, mode, preconditions, fields]);
+    }), [data, mode, preconditions, fields, selectedSubtree, focus]);
 
     const widthRef = useRef(width);
     widthRef.current = width;
@@ -255,14 +273,14 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                     }
                 },
                 defaultNode: {
-                  size: 24,
-                  style: {
-                    lineWidth: 2,
-                  },
+                    size: 24,
+                    style: {
+                        lineWidth: 2,
+                    },
                 },
                 defaultEdge: {
-                  size: 1,
-                  color: '#F6BD16',
+                    size: 1,
+                    color: '#F6BD16',
                 },
             });
             graph.node(node => ({
@@ -366,7 +384,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
             graphRef.current.changeData(dataRef.current);
             graphRef.current.render();
         }
-    }, [data]);
+    }, [data, selectedSubtree]);
 
     useEffect(() => {
         if (focus !== null) {

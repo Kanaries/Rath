@@ -1,7 +1,7 @@
 import { Slider, Toggle } from "@fluentui/react";
 import produce from "immer";
 import { observer } from "mobx-react-lite";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import useErrorBoundary from "../../../hooks/use-error-boundary";
 import type { IFieldMeta, IRow } from "../../../interfaces";
@@ -211,8 +211,6 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
     // console.log(fields, links);
     const [focus, setFocus] = useState(-1);
 
-    const showFlowAnalyzer = new URL(window.location.href).searchParams.get('flowAnalyzer') === '1';
-
     const handleClickCircle = useCallback((node: Readonly<CausalNode>) => {
         const idx = node.nodeId;
         if (mode === 'explore') {
@@ -278,6 +276,25 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
         onLinkTogether(fields.findIndex(f => f.fid === srcFid), fields.findIndex(f => f.fid === tarFid));
     }, [fields, onLinkTogether]);
 
+    const [selectedSubtree, setSelectedSubtree] = useState<string[]>([]);
+
+    const onNodeSelectedRef = useRef(onNodeSelected);
+    onNodeSelectedRef.current = onNodeSelected;
+
+    const handleNodeSelect = useCallback<typeof onNodeSelected>((node, simpleCause, simpleEffect, composedCause, composedEffect) => {
+        onNodeSelectedRef.current(node, simpleCause, simpleEffect, composedCause, composedEffect);
+        const shallowSubtree = simpleEffect.reduce<Readonly<NodeWithScore>[]>(
+            (list, f) => {
+                if (!list.some((which) => which.field.fid === f.field.fid)) {
+                    list.push(f);
+                }
+                return list;
+            },
+            [...simpleCause]
+        );
+        setSelectedSubtree(shallowSubtree.map(node => node.field.fid));
+    }, []);
+
     return (
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools onClick={e => e.stopPropagation()}>
@@ -312,6 +329,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
             <MainView>
                 <ExplorerMainView
                     fields={fields}
+                    selectedSubtree={selectedSubtree}
                     value={value}
                     preconditions={preconditions}
                     focus={focus === -1 ? null : focus}
@@ -326,19 +344,17 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     }}
                 />
             </MainView>
-            {showFlowAnalyzer && (
-                <ErrorBoundary>
-                    <FlowAnalyzer
-                        dataSource={dataSource}
-                        fields={fields}
-                        data={value}
-                        index={mode === 'explore' ? focus : -1}
-                        cutThreshold={cutThreshold}
-                        onClickNode={handleClickCircle}
-                        onUpdate={onNodeSelected}
-                    />
-                </ErrorBoundary>
-            )}
+            <ErrorBoundary>
+                <FlowAnalyzer
+                    dataSource={dataSource}
+                    fields={fields}
+                    data={value}
+                    index={mode === 'explore' ? focus : -1}
+                    cutThreshold={cutThreshold}
+                    onClickNode={handleClickCircle}
+                    onUpdate={handleNodeSelect}
+                />
+            </ErrorBoundary>
         </Container>
     );
 };
