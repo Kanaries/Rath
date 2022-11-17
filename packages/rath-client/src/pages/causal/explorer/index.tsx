@@ -257,6 +257,11 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
     const [limit, setLimit] = useState(10);
     const [autoLayout, setAutoLayout] = useState(true);
 
+    const forceLayout = useCallback(() => {
+        setAutoLayout(true);
+        forceRelayoutRef.current();
+    }, []);
+
     return (
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools onClick={e => e.stopPropagation()}>
@@ -266,7 +271,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                         flexShrink: 0,
                         flexBasis: 'max-content',
                     }}
-                    onClick={forceRelayoutRef.current}
+                    onClick={forceLayout}
                 >
                     还原布局
                 </ActionButton>
