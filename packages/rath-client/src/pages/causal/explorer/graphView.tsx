@@ -1,35 +1,13 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
-import G6, { Graph, GraphData, GraphOptions } from "@antv/g6";
+import { Graph } from "@antv/g6";
 import { ActionButton } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { ModifiableBgKnowledge } from "../config";
+import { useGraphOptions, useRenderData } from "./graph-utils";
+import { useReactiveGraph } from "./graph-helper";
 import type { DiagramGraphData } from ".";
 
-
-const GRAPH_HEIGHT = 400;
-
-const G6_EDGE_SELECT = 'edge_select';
-
-G6.registerBehavior(G6_EDGE_SELECT, {
-    getEvents() {
-        return {
-            'edge:click': 'onEdgeClick',
-        };
-    },
-    onEdgeClick(e: any) {
-        const graph = this.graph as Graph;
-        const item = e.item;
-        if (item.hasState('active')) {
-            graph.setItemState(item, 'active', false);
-            return;
-        }
-        graph.findAllByState('edge', 'active').forEach(node => {
-            graph.setItemState(node, 'active', false);
-        });
-        graph.setItemState(item, 'active', true);
-    },
-});
 
 const Container = styled.div`
     overflow: hidden;
@@ -60,54 +38,6 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
 }, never>, 'onChange' | 'ref'>;
-
-const arrows = {
-    undirected: {
-        start: '',
-        end: '',
-    },
-    directed: {
-        start: '',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
-    },
-    bidirected: {
-        start: 'M 12,0 L 28,8 L 28,-8 Z',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
-    },
-    'weak directed': {
-        start: '',
-        end: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
-    },
-} as const;
-
-G6.registerEdge(
-    'forbidden-edge',
-    {
-        afterDraw(cfg, group: any) {
-            // 获取图形组中的第一个图形，在这里就是边的路径图形
-            const shape = group.get('children')[0];
-            // 获取路径图形的中点坐标
-            const midPoint = shape.getPoint(0.5);
-            group.addShape('path', {
-                attrs: {
-                    width: 10,
-                    height: 10,
-                    stroke: '#f00',
-                    lineWidth: 2,
-                    path: [
-                        ['M', midPoint.x + 8, midPoint.y + 8],
-                        ['L', midPoint.x - 8, midPoint.y - 8],
-                        ['M', midPoint.x - 8, midPoint.y + 8],
-                        ['L', midPoint.x + 8, midPoint.y - 8],
-                    ],
-                },
-                name: 'forbidden-mark',
-            });
-        },
-        update: undefined,
-    },
-    'line',
-);
 
 /** 调试用的，不需要的时候干掉 */
 type ExportableGraphData = {
@@ -187,254 +117,33 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     }, [value, cutThreshold, forceUpdateFlag]);
 
     const containerRef = useRef<HTMLDivElement>(null);
-
     const [width, setWidth] = useState(0);
 
-    const handleNodeClickRef = useRef(onClickNode);
-    handleNodeClickRef.current = onClickNode;
-
-    const handleLinkRef = useRef(onLinkTogether);
-    handleLinkRef.current = onLinkTogether;
-
-    const handleRemoveLinkRef = useRef(onRemoveLink);
-    handleRemoveLinkRef.current = onRemoveLink;
-
-    const updateSelected = useRef<(idx: number) => void>(() => {});
+    const updateSelectedRef = useRef<(idx: number) => void>(() => {});
 
     const [edgeSelected, setEdgeSelected] = useState(false);
 
-    const widthRef = useRef(width);
-    widthRef.current = width;
-
     const graphRef = useRef<Graph>();
-    const renderData = useMemo(() => ({
-        nodes: data.nodes.map((node, i) => {
-            const isInSubtree = selectedSubtree.includes(fields[node.id].fid);
-            return {
-                id: `${node.id}`,
-                description: fields[i].name ?? fields[i].fid,
-                style: {
-                    lineWidth: i === focus ? 3 : isInSubtree ? 2 : 1,
-                    opacity: i === focus || isInSubtree ? 1 : focus === null ? 1 : 0.4,
-                },
-            };
-        }),
-        edges: mode === 'explore' ? data.links.map((link, i) => {
-            const isInSubtree = focus !== null && [fields[link.source].fid, fields[link.target].fid].every(fid => {
-                return [fields[focus].fid].concat(selectedSubtree).includes(fid);
-            });
-            return {
-                id: `link_${i}`,
-                source: `${link.source}`,
-                target: `${link.target}`,
-                style: {
-                    lineWidth: isInSubtree ? 1.5 : 1,
-                    opacity: focus === null ? 0.9 : isInSubtree ? 1 : 0.2,
-                    startArrow: {
-                        fill: '#F6BD16',
-                        path: arrows[link.type].start,
-                    },
-                    endArrow: {
-                        fill: '#F6BD16',
-                        path: arrows[link.type].end,
-                    },
-                },
-            };
-        }) : preconditions.map((bk, i) => ({
-            id: `bk_${i}`,
-            source: `${fields.findIndex(f => f.fid === bk.src)}`,
-            target: `${fields.findIndex(f => f.fid === bk.tar)}`,
-            style: {
-                lineWidth: 2,
-                startArrow: {
-                    fill: '#F6BD16',
-                    path: '',
-                },
-                endArrow: {
-                    fill: '#F6BD16',
-                    path: 'M 12,0 L 28,8 L 28,-8 Z',
-                },
-            },
-            edgeStateStyles: {
-                active: {
-                    lineWidth: 2,
-                },
-            },
-            type: bk.type === 'must-not-link' ? 'forbidden-edge' : undefined,
-        })),
-    }), [data, mode, preconditions, fields, selectedSubtree, focus]);
-    const dataRef = useRef<GraphData>({});
-    dataRef.current = renderData;
+    const renderData = useRenderData(data, mode, preconditions, fields, selectedSubtree, focus);
+    const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, setEdgeSelected);
 
-    const cfg = useMemo<Omit<GraphOptions, 'container'>>(() => {
-        let createEdgeFrom = -1;
-        const cfg: Omit<GraphOptions, 'container'> = {
-            width: widthRef.current,
-            height: GRAPH_HEIGHT,
-            linkCenter: true,
-            modes: {
-                default: mode === 'edit' ? ['drag-canvas', {
-                    type: 'create-edge',
-                    trigger: 'drag',
-                    shouldBegin(e) {
-                        const source = e.item?._cfg?.id;
-                        if (source) {
-                            createEdgeFrom = parseInt(source, 10);
-                        }
-                        return true;
-                    },
-                    shouldEnd(e) {
-                        if (createEdgeFrom === -1) {
-                            return false;
-                        }
-                        const target = e.item?._cfg?.id;
-                        if (target) {
-                            const origin = fields[createEdgeFrom];
-                            const destination = fields[parseInt(target, 10)];
-                            if (origin.fid !== destination.fid) {
-                                handleLinkRef.current(origin.fid, destination.fid);
-                            }
-                        }
-                        createEdgeFrom = -1;
-                        return false;
-                    },
-                }, G6_EDGE_SELECT, 'zoom-canvas'] : ['drag-canvas', 'drag-node', 'click-select', 'zoom-canvas'],
-            },
-            animate: true,
-            layout: {
-                type: 'fruchterman',
-                gravity: 5,
-                speed: 5,
-                center: [widthRef.current / 2, GRAPH_HEIGHT / 2],
-                // for rendering after each iteration
-                tick: () => {
-                    graphRef.current?.refreshPositions();
-                }
-            },
-            defaultNode: {
-                size: 24,
-                style: {
-                    lineWidth: 2,
-                },
-            },
-            defaultEdge: {
-                size: 1,
-                color: '#F6BD16',
-            },
-        };
-        setEdgeSelected(false);
-        return cfg;
-    }, [fields, mode]);
-    const cfgRef = useRef(cfg);
-    cfgRef.current = cfg;
-
-    useEffect(() => {
-        const { current: container } = containerRef;
-        const { current: cfg } = cfgRef;
-        if (container && cfg) {
-            const graph = new G6.Graph({
-                ...cfg,
-                container,
-            });
-            graph.node(node => ({
-                label: node.description ?? node.id,
-            }));
-            graph.data(dataRef.current);
-            graph.render();
-
-            graph.on('nodeselectchange', (e: any) => {
-                const selected = e.selectedItems.nodes[0]?._cfg.id;
-                const idx = selected === undefined ? null : parseInt(selected, 10);
-
-                if (idx !== null) {
-                    handleNodeClickRef.current?.({ nodeId: idx });
-                }
-            });
-
-            graph.on('keydown', e => {
-                if (e.key === 'Backspace') {
-                    // delete selected link
-                    const [selectedEdge] = graph.findAllByState('edge', 'active');
-                    if (selectedEdge) {
-                        const src = (selectedEdge._cfg?.source as any)?._cfg.id;
-                        const tar = (selectedEdge._cfg?.target as any)?._cfg.id;
-                        if (src && tar) {
-                            const srcF = fields[parseInt(src, 10)];
-                            const tarF = fields[parseInt(tar, 10)];
-                            handleRemoveLinkRef.current(srcF.fid, tarF.fid);
-                        }
-                    }
-                }
-            });
-
-            graph.on('click', () => {
-                setTimeout(() => {
-                    const [selectedEdge] = graph.findAllByState('edge', 'active');
-                    setEdgeSelected(Boolean(selectedEdge));
-                }, 1);
-            });
-
-            setEdgeSelected(false);
-
-            updateSelected.current = idx => {
-                const prevSelected = graph.findAllByState('node', 'selected')[0]?._cfg?.id;
-                const prevSelectedIdx = prevSelected ? parseInt(prevSelected, 10) : null;
-
-                if (prevSelectedIdx === idx) {
-                    return;
-                } else if (prevSelectedIdx !== null) {
-                    graph.setItemState(`${prevSelectedIdx}`, 'selected', false);
-                }
-                graph.setItemState(`${idx}`, 'selected', true);
-            };
-
-            graphRef.current = graph;
-
-            return () => {
-                graphRef.current = undefined;
-                container.innerHTML = '';
-            };
-        }
-    }, [mode, fields]);
-
-    useEffect(() => {
-        if (graphRef.current) {
-            graphRef.current.changeSize(width, GRAPH_HEIGHT);
-            graphRef.current.updateLayout({
-                type: 'fruchterman',
-                gravity: 5,
-                speed: 5,
-                center: [widthRef.current / 2, GRAPH_HEIGHT / 2],
-                // for rendering after each iteration
-                tick: () => {
-                    graphRef.current?.refreshPositions();
-                }
-            });
-            graphRef.current.render();
-        }
-    }, [width]);
-
-    useEffect(() => {
-        const { current: cfg } = cfgRef;
-        const { current: graph } = graphRef;
-        if (cfg && graph) {
-            graph.updateLayout(cfg);
-            graph.refresh();
-        }
-    }, [cfg]);
-
-    useEffect(() => {
-        const { current: container } = containerRef;
-        const { current: graph } = graphRef;
-        if (container && graph) {
-            graph.changeData(renderData);
-            graph.refresh();
-        }
-    }, [renderData]);
+    useReactiveGraph(
+        containerRef,
+        width,
+        graphRef,
+        cfg,
+        renderData,
+        mode,
+        onClickNode,
+        fields,
+        onRemoveLink,
+        setEdgeSelected,
+        updateSelectedRef
+    );
 
     useEffect(() => {
         if (focus !== null) {
-            updateSelected.current(focus);
+            updateSelectedRef.current(focus);
         }
     }, [focus]);
 

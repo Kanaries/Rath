@@ -1,5 +1,4 @@
 import { Slider, Toggle } from "@fluentui/react";
-import produce from "immer";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
@@ -107,12 +106,6 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
     
     const data = useMemo(() => sNormalize(scoreMatrix), [scoreMatrix]);
 
-    const [modifiedMatrix, setModifiedMatrix] = useState(data);
-
-    useEffect(() => {
-        setModifiedMatrix(data);
-    }, [data]);
-
     const nodes = useMemo<CausalNode[]>(() => {
         return fields.map((_, i) => ({ nodeId: i }));
     }, [fields]);
@@ -121,16 +114,16 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
         if (causalStrength.length === 0) {
             return [];
         }
-        if (causalStrength.length !== modifiedMatrix.length) {
+        if (causalStrength.length !== data.length) {
             console.warn(`lengths of matrixes do not match`);
             return [];
         }
 
         const links: CausalLink[] = [];
 
-        for (let i = 0; i < modifiedMatrix.length - 1; i += 1) {
-            for (let j = i + 1; j < modifiedMatrix.length; j += 1) {
-                const weight = Math.abs(modifiedMatrix[i][j]);
+        for (let i = 0; i < data.length - 1; i += 1) {
+            for (let j = i + 1; j < data.length; j += 1) {
+                const weight = Math.abs(data[i][j]);
                 const direction = causalStrength[i][j];
                 switch (direction) {
                     case CausalLinkDirection.none: {
@@ -195,59 +188,18 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
         }
 
         return links.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
-    }, [modifiedMatrix, causalStrength]);
+    }, [data, causalStrength]);
 
     const value = useMemo(() => ({ nodes, links }), [nodes, links]);
 
-    const handleChange = useCallback((d: Readonly<DiagramGraphData>) => {
-        const matrix = data.map(vec => vec.map(d => d));
-        for (const link of d.links) {
-            matrix[link.causeId][link.effectId] = link.score;
-            matrix[link.effectId][link.causeId] = -link.score;
-        }
-        setModifiedMatrix(matrix);
-    }, [data]);
-
-    // console.log(fields, links);
     const [focus, setFocus] = useState(-1);
 
     const handleClickCircle = useCallback((node: Readonly<CausalNode>) => {
         const idx = node.nodeId;
         if (mode === 'explore') {
             setFocus(idx === focus ? -1 : idx);
-        } else {
-            if (focus === -1) {
-                setFocus(idx);
-            } else if (idx === focus) {
-                setFocus(-1);
-            } else {
-                // link
-                handleChange(produce(value, draft => {
-                    const idxMe = draft.links.findIndex(
-                        link => link.causeId === focus && link.effectId === idx
-                    );
-                    if (idxMe !== -1) {
-                        draft.links[idxMe].score = 1;
-                    } else {
-                        draft.links.push({
-                            causeId: focus,
-                            effectId: idx,
-                            score: 1,
-                            type: 'directed',
-                        });
-                    }
-                    const idxRev = draft.links.findIndex(
-                        link => link.effectId === focus && link.causeId === idx
-                    );
-                    if (idxRev !== -1) {
-                        draft.links[idxRev].score = -1;
-                    }
-                    setFocus(-1);
-                }));
-                onLinkTogether(focus, idx);
-            }
         }
-    }, [mode, focus, handleChange, value, onLinkTogether]);
+    }, [mode, focus]);
 
     const ErrorBoundary = useErrorBoundary((err, info) => {
         // console.error(err ?? info);
@@ -295,12 +247,14 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
         setSelectedSubtree(shallowSubtree.map(node => node.field.fid));
     }, []);
 
+    useEffect(() => {
+        setFocus(-1);
+        onNodeSelectedRef.current(null, [], [], [], []);
+    }, [mode]);
+
     return (
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools onClick={e => e.stopPropagation()}>
-                {/* <DefaultButton onClick={() => setModifiedMatrix(data)}>
-                    Reset
-                </DefaultButton> */}
                 <Toggle
                     // label="Modify Constraints"
                     label="编辑约束"
