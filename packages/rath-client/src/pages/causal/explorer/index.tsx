@@ -1,4 +1,4 @@
-import { Slider, Toggle } from "@fluentui/react";
+import { ActionButton, Slider, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
@@ -247,6 +247,8 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
         setSelectedSubtree(shallowSubtree.map(node => node.field.fid));
     }, []);
 
+    const forceRelayoutRef = useRef<() => void>(() => {});
+
     useEffect(() => {
         setFocus(-1);
         onNodeSelectedRef.current(null, [], [], [], []);
@@ -255,6 +257,16 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
     return (
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools onClick={e => e.stopPropagation()}>
+                <ActionButton
+                    style={{
+                        flexGrow: 0,
+                        flexShrink: 0,
+                        flexBasis: 'max-content',
+                    }}
+                    onClick={forceRelayoutRef.current}
+                >
+                    还原布局
+                </ActionButton>
                 <Toggle
                     // label="Modify Constraints"
                     label="编辑约束"
@@ -284,6 +296,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                 <ExplorerMainView
                     fields={fields}
                     selectedSubtree={selectedSubtree}
+                    forceRelayoutRef={forceRelayoutRef}
                     value={value}
                     preconditions={preconditions}
                     focus={focus === -1 ? null : focus}

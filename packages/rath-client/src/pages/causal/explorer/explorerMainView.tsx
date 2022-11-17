@@ -32,12 +32,23 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     onLinkTogether: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
+    forceRelayoutRef: React.MutableRefObject<() => void>;
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
-    fields, selectedSubtree, value, focus, cutThreshold = 0, mode, onClickNode, onLinkTogether, onRemoveLink, preconditions, ...props },
-    ref
-) => {
+    fields,
+    selectedSubtree,
+    value,
+    focus,
+    cutThreshold = 0,
+    mode,
+    onClickNode,
+    onLinkTogether,
+    onRemoveLink,
+    preconditions,
+    forceRelayoutRef,
+    ...props
+}, ref) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
         // console.error(err ?? info);
         return <div style={{
@@ -67,6 +78,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                 <GraphView
                     fields={fields}
                     selectedSubtree={selectedSubtree}
+                    forceRelayoutRef={forceRelayoutRef}
                     value={value}
                     mode={mode}
                     preconditions={preconditions}

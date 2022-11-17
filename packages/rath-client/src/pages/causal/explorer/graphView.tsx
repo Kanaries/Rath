@@ -37,6 +37,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     onLinkTogether: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
+    forceRelayoutRef: React.MutableRefObject<() => void>;
 }, never>, 'onChange' | 'ref'>;
 
 /** 调试用的，不需要的时候干掉 */
@@ -82,10 +83,20 @@ const ExportGraphButton: React.FC<{ data: DiagramGraphData; fields: readonly Rea
     );
 };
 
-const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
-    { fields, selectedSubtree, value, onClickNode, focus, cutThreshold, mode, onLinkTogether, onRemoveLink, preconditions, ...props },
-    ref
-) => {
+const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
+    fields,
+    selectedSubtree,
+    value,
+    onClickNode,
+    focus,
+    cutThreshold,
+    mode,
+    onLinkTogether,
+    onRemoveLink,
+    preconditions,
+    forceRelayoutRef,
+    ...props
+}, ref) => {
     const [forceUpdateFlag, setForceUpdateFlag] = useState(Date.now());
 
     const [data] = useMemo(() => {
@@ -127,6 +138,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     const renderData = useRenderData(data, mode, preconditions, fields, selectedSubtree, focus);
     const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, setEdgeSelected);
 
+    const [forceRelayoutFlag, setForceRelayoutFlag] = useState<0 | 1>(0);
+
     useReactiveGraph(
         containerRef,
         width,
@@ -138,8 +151,16 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
         fields,
         onRemoveLink,
         setEdgeSelected,
-        updateSelectedRef
+        updateSelectedRef,
+        forceRelayoutFlag,
     );
+
+    useEffect(() => {
+        forceRelayoutRef.current = () => setForceRelayoutFlag(flag => flag === 0 ? 1 : 0);
+        return () => {
+            forceRelayoutRef.current = () => {};
+        };
+    }, [forceRelayoutRef]);
 
     useEffect(() => {
         if (focus !== null) {

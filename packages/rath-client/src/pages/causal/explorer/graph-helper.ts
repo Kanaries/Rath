@@ -17,6 +17,7 @@ export const useReactiveGraph = (
     handleRemoveLink: (srcFid: string, tarFid: string) => void,
     setEdgeSelected: (status: boolean) => void,
     updateSelectedRef: MutableRefObject<(idx: number) => void>,
+    forceRelayoutFlag: 0 | 1,
 ) => {
     const cfgRef = useRef(options);
     cfgRef.current = options;
@@ -116,6 +117,14 @@ export const useReactiveGraph = (
             graphRef.current.render();
         }
     }, [width, graphRef]);
+
+    useEffect(() => {
+        const { current: graph } = graphRef;
+        if (graph) {
+            graph.data(dataRef.current);
+            graph.render();
+        }
+    }, [forceRelayoutFlag, graphRef]);
 
     useEffect(() => {
         const { current: graph } = graphRef;
