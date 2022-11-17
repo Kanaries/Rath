@@ -254,6 +254,8 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
         onNodeSelectedRef.current(null, [], [], [], []);
     }, [mode]);
 
+    const [limit, setLimit] = useState(10);
+
     return (
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools onClick={e => e.stopPropagation()}>
@@ -269,12 +271,20 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                 </ActionButton>
                 <Toggle
                     // label="Modify Constraints"
-                    label="编辑约束"
+                    label="启用编辑"
                     checked={mode === 'edit'}
                     onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
                     onText="On"
                     offText="Off"
                     inlineLabel
+                />
+                <Slider
+                    // label="Display Limit"
+                    label="显示上限"
+                    min={1}
+                    max={Math.max(links.length, limit)}
+                    value={limit}
+                    onChange={value => setLimit(value)}
                 />
                 <Slider
                     label="按权重筛选"
@@ -298,6 +308,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     selectedSubtree={selectedSubtree}
                     forceRelayoutRef={forceRelayoutRef}
                     value={value}
+                    limit={limit}
                     preconditions={preconditions}
                     focus={focus === -1 ? null : focus}
                     mode={mode}
@@ -316,6 +327,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     dataSource={dataSource}
                     fields={fields}
                     data={value}
+                    limit={limit}
                     index={mode === 'explore' ? focus : -1}
                     cutThreshold={cutThreshold}
                     onClickNode={handleClickCircle}

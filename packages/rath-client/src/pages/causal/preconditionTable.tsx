@@ -81,8 +81,10 @@ const PreconditionTable: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                             //     { key: 'must-not-link', text: 'must not link' },
                             // ]}
                             options={[
-                                { key: 'must-link', text: '一定相连' },
-                                { key: 'must-not-link', text: '一定不相连' },
+                                { key: 'directed-must-link', text: '单向一定影响' },
+                                { key: 'directed-must-not-link', text: '单向一定不影响' },
+                                { key: 'must-link', text: '至少在一个方向存在影响' },
+                                { key: 'must-not-link', text: '在任意方向一定不影响' },
                             ]}
                             onChange={(e, option) => {
                                 if (!option) {
@@ -117,8 +119,8 @@ const PreconditionTable: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                             }}
                         />
                     ) : null,
-                minWidth: 140,
-                maxWidth: 140,
+                minWidth: 200,
+                maxWidth: 200,
             },
             {
                 key: 'tar',

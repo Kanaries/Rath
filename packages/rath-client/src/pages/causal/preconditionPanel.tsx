@@ -30,6 +30,21 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
         setEditingPrecondition({ type: 'must-link' });
     }, [fieldMetas, causalStore]);
 
+    const getGeneratedPreconditionsFromExtInfo = useCallback(() => {
+        return selectedFields.reduce<ModifiableBgKnowledge[]>((list, f) => {
+            if (f.extInfo) {
+                for (const from of f.extInfo.extFrom) {
+                    list.push({
+                        src: from,
+                        tar: f.fid,
+                        type: 'directed-must-link',
+                    });
+                }
+            }
+            return list;
+        }, []);
+    }, [selectedFields]);
+
     const getGeneratedPreconditionsFromIGMat = useCallback(() => {
         const initLinks: ModifiableBgKnowledge[] = [];
         const mat = igMatrix;
@@ -47,33 +62,19 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                         initLinks.push({
                             src: selectedFields[i].fid,
                             tar: selectedFields[j].fid,
-                            type: 'must-not-link',
+                            type: 'directed-must-not-link',
                         });
                     } else if (wf < thresholdFalse) {
                         initLinks.push({
                             src: selectedFields[i].fid,
                             tar: selectedFields[j].fid,
-                            type: 'must-not-link',
+                            type: 'directed-must-not-link',
                         });
                     }
                 }
             }
         }
-        return [
-            ...selectedFields.reduce<ModifiableBgKnowledge[]>((list, f) => {
-                if (f.extInfo) {
-                    for (const from of f.extInfo.extFrom) {
-                        list.push({
-                            src: from,
-                            tar: f.fid,
-                            type: 'must-link',
-                        });
-                    }
-                }
-                return list;
-            }, []),
-            ...initLinks,
-        ];
+        return initLinks;
     }, [selectedFields, igMatrix]);
 
     const [shouldInitPreconditions, setShouldInitPreconditions] = useState(false);
@@ -81,17 +82,23 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
     shouldInitPreconditionsRef.current = shouldInitPreconditions;
 
     useEffect(() => {
-        setModifiablePrecondition(shouldInitPreconditionsRef.current ? getGeneratedPreconditionsFromIGMat() : []);
-    }, [getGeneratedPreconditionsFromIGMat, setModifiablePrecondition]);
+        setModifiablePrecondition(
+            getGeneratedPreconditionsFromExtInfo().concat(
+                shouldInitPreconditionsRef.current ? getGeneratedPreconditionsFromIGMat() : []
+            )
+        );
+    }, [getGeneratedPreconditionsFromExtInfo, getGeneratedPreconditionsFromIGMat, setModifiablePrecondition]);
 
     const modifiablePreconditionRef = useRef(modifiablePrecondition);
     modifiablePreconditionRef.current = modifiablePrecondition;
 
     useEffect(() => {
         if (shouldInitPreconditions && modifiablePreconditionRef.current.length === 0) {
-            setModifiablePrecondition(getGeneratedPreconditionsFromIGMat());
+            setModifiablePrecondition(
+                getGeneratedPreconditionsFromExtInfo().concat(getGeneratedPreconditionsFromIGMat())
+            );
         }
-    }, [shouldInitPreconditions, getGeneratedPreconditionsFromIGMat, setModifiablePrecondition]);
+    }, [shouldInitPreconditions, getGeneratedPreconditionsFromExtInfo, getGeneratedPreconditionsFromIGMat, setModifiablePrecondition]);
 
     return (
         <InnerCard>
@@ -140,8 +147,10 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                                 }));
                             }}
                             options={[
-                                { key: 'must-link', text: '一定相连' },
-                                { key: 'must-not-link', text: '一定不相连' },
+                                { key: 'directed-must-link', text: '单向一定影响' },
+                                { key: 'directed-must-not-link', text: '单向一定不影响' },
+                                { key: 'must-link', text: '至少在一个方向存在影响' },
+                                { key: 'must-not-link', text: '在任意方向一定不影响' },
                             ]}
                             styles={{ root: { width: '20%' }, title: { textAlign: 'center' } }}
                         />

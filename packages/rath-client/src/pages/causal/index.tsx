@@ -5,7 +5,6 @@ import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import Explorer from './explorer';
 import Params from './params';
-import { NodeWithScore } from './explorer/flowAnalyzer';
 import type { BgKnowledge, ModifiableBgKnowledge } from './config';
 import ModelStorage from './modelStorage';
 import MatrixPanel, { MATRIX_TYPE } from './matrixPanel';
@@ -22,7 +21,29 @@ const CausalPage: React.FC = () => {
     const { appendFields2Group } = interactFieldGroups;
     const { igMatrix, causalFields, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
 
-    const [modifiablePrecondition, setModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
+    const [modifiablePrecondition, __unsafeSetModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
+
+    const setModifiablePrecondition = useCallback((next: ModifiableBgKnowledge[] | ((prev: ModifiableBgKnowledge[]) => ModifiableBgKnowledge[])) => {
+        __unsafeSetModifiablePrecondition(prev => {
+            const list = typeof next === 'function' ? next(prev) : next;
+            return list.reduce<ModifiableBgKnowledge[]>((links, link) => {
+                if (link.src === link.type) {
+                    // 禁止自环边
+                    return links;
+                }
+                const overloadIdx = links.findIndex(
+                    which => [which.src, which.tar].every(node => [link.src, link.tar].includes(node))
+                );
+                if (overloadIdx !== -1) {
+                    const temp = links.map(l => l);
+                    temp.splice(overloadIdx, 1, link);
+                    return temp;
+                } else {
+                    return links.concat([link]);
+                }
+            }, []);
+        });
+    }, []);
 
     const precondition = useMemo<BgKnowledge[]>(() => {
         if (computing || igMatrix.length !== selectedFields.length) {
@@ -33,16 +54,23 @@ const CausalPage: React.FC = () => {
             const tarIdx = selectedFields.findIndex((f) => f.fid === decl.tar);
 
             if (srcIdx !== -1 && tarIdx !== -1) {
-                list.push({
-                    src: decl.src,
-                    tar: decl.tar,
-                    type:
-                        decl.type === 'must-link'
-                            ? 1
-                            : decl.type === 'must-not-link'
-                            ? -1
-                            : (igMatrix[srcIdx][tarIdx] + 1) / 2, // TODO: 暂时定为一半
-                });
+                if (decl.type === 'directed-must-link' || decl.type === 'directed-must-not-link') {
+                    list.push({
+                        src: decl.src,
+                        tar: decl.tar,
+                        type: decl.type === 'directed-must-link' ? 1 : -1,
+                    });
+                } else {
+                    list.push({
+                        src: decl.src,
+                        tar: decl.tar,
+                        type: decl.type === 'must-link' ? 1 : -1,
+                    }, {
+                        src: decl.tar,
+                        tar: decl.src,
+                        type: decl.type === 'must-link' ? 1 : -1,
+                    });
+                }
             }
 
             return list;
@@ -63,34 +91,25 @@ const CausalPage: React.FC = () => {
         [appendFields2Group, causalStore, fieldMetas]
     );
 
-    const handleSubTreeSelected = useCallback(
-        (
-            node: Readonly<IFieldMeta> | null,
-            simpleCause: readonly Readonly<NodeWithScore>[],
-            simpleEffect: readonly Readonly<NodeWithScore>[],
-            composedCause: readonly Readonly<NodeWithScore>[],
-            composedEffect: readonly Readonly<NodeWithScore>[]
-        ) => {
+    const handleSubTreeSelected = useCallback((node: Readonly<IFieldMeta> | null) => {
             if (node) {
                 appendFields2Group([node.fid]);
-                // const allEffect = composedEffect
-                //     .reduce<Readonly<NodeWithScore>[]>(
-                //         (list, f) => {
-                //             if (!list.some((which) => which.field.fid === f.field.fid)) {
-                //                 list.push(f);
-                //             }
-                //             return list;
-                //         },
-                //         [...simpleEffect]
-                //     )
-                //     .sort((a, b) => b.score - a.score);
-                // console.log(allEffect);
             }
         },
         [appendFields2Group]
     );
 
     const exploringFields = igMatrix.length === causalStrength.length ? causalFields : selectedFields;
+
+    const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number) => {
+        setModifiablePrecondition((list) => {
+            return list.concat([{
+                src: exploringFields[srcIdx].fid,
+                tar: exploringFields[tarIdx].fid,
+                type: 'directed-must-link',
+            }]);
+        });
+    }, [exploringFields, setModifiablePrecondition]);
 
     return (
         <div className="content-container">
@@ -132,16 +151,7 @@ const CausalPage: React.FC = () => {
                             scoreMatrix={igMatrix}
                             preconditions={modifiablePrecondition}
                             onNodeSelected={handleSubTreeSelected}
-                            onLinkTogether={(srcIdx, tarIdx) =>
-                                setModifiablePrecondition((list) => [
-                                    ...list,
-                                    {
-                                        src: exploringFields[srcIdx].fid,
-                                        tar: exploringFields[tarIdx].fid,
-                                        type: 'must-link',
-                                    },
-                                ])
-                            }
+                            onLinkTogether={handleLinkTogether}
                             onRemoveLink={(srcIdx, tarIdx) =>
                                 setModifiablePrecondition((list) => {
                                     return list.filter((link) => !(link.src === srcIdx && link.tar === tarIdx));

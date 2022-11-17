@@ -31,6 +31,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     selectedSubtree: readonly string[];
     value: Readonly<DiagramGraphData>;
     cutThreshold: number;
+    limit: number;
     mode: 'explore' | 'edit';
     focus: number | null;
     onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
@@ -90,6 +91,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     onClickNode,
     focus,
     cutThreshold,
+    limit,
     mode,
     onLinkTogether,
     onRemoveLink,
@@ -123,9 +125,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                 target: link.effectId,
                 value: link.score / nodeCauseWeights[link.effectId],
                 type: link.type,
-            })).filter(link => link.value >= cutThreshold),
+            })).filter(link => link.value >= cutThreshold).sort((a, b) => b.value - a.value).slice(0, limit),
         }, totalScore, pos];
-    }, [value, cutThreshold, forceUpdateFlag]);
+    }, [value, cutThreshold, forceUpdateFlag, limit]);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -135,7 +137,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const [edgeSelected, setEdgeSelected] = useState(false);
 
     const graphRef = useRef<Graph>();
-    const renderData = useRenderData(data, mode, preconditions, fields, selectedSubtree, focus);
+    const renderData = useRenderData(data, mode, preconditions, fields);
     const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, setEdgeSelected);
 
     const [forceRelayoutFlag, setForceRelayoutFlag] = useState<0 | 1>(0);
@@ -153,6 +155,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         setEdgeSelected,
         updateSelectedRef,
         forceRelayoutFlag,
+        focus,
+        selectedSubtree,
     );
 
     useEffect(() => {

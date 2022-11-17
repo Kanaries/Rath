@@ -18,6 +18,8 @@ export const useReactiveGraph = (
     setEdgeSelected: (status: boolean) => void,
     updateSelectedRef: MutableRefObject<(idx: number) => void>,
     forceRelayoutFlag: 0 | 1,
+    focus: number | null,
+    selectedSubtree: readonly string[],
 ) => {
     const cfgRef = useRef(options);
     cfgRef.current = options;
@@ -88,8 +90,9 @@ export const useReactiveGraph = (
                     return;
                 } else if (prevSelectedIdx !== null) {
                     graph.setItemState(`${prevSelectedIdx}`, 'selected', false);
+                } else if (idx !== -1) {
+                    graph.setItemState(`${idx}`, 'selected', true);
                 }
-                graph.setItemState(`${idx}`, 'selected', true);
             };
 
             graphRef.current = graph;
@@ -150,4 +153,45 @@ export const useReactiveGraph = (
         }
         setEdgeSelectedRef.current(false);
     }, [mode, graphRef]);
+
+    useEffect(() => {
+        const { current: graph } = graphRef;
+        if (graph) {
+            graph.getNodes().forEach(node => {
+                const id = (() => {
+                    try {
+                        return parseInt(node._cfg?.id ?? '-1', 10);
+                    } catch {
+                        return -1;
+                    }
+                })();
+                const isFocused = id === focus;
+                graph.setItemState(node, 'focused', isFocused);
+                const isInSubtree = selectedSubtree.includes(fieldsRef.current[id]?.fid);
+                graph.setItemState(node, 'highlighted', isInSubtree);
+                graph.setItemState(node, 'faded', focus !== null && !isFocused && !isInSubtree);
+            });
+            graph.getEdges().forEach(edge => {
+                const sourceIdx = (() => {
+                    try {
+                        return parseInt((edge._cfg?.source as any)?._cfg?.id ?? '-1', 10);
+                    } catch {
+                        return -1;
+                    }
+                })();
+                const targetIdx = (() => {
+                    try {
+                        return parseInt((edge._cfg?.target as any)?._cfg?.id ?? '-1', 10);
+                    } catch {
+                        return -1;
+                    }
+                })();
+                const isInSubtree = focus !== null && [fieldsRef.current[sourceIdx]?.fid, fieldsRef.current[targetIdx]?.fid].every(fid => {
+                    return [fieldsRef.current[focus]?.fid].concat(selectedSubtree).includes(fid);
+                });
+                graph.setItemState(edge, 'highlighted', isInSubtree);
+                graph.setItemState(edge, 'faded', focus !== null && !isInSubtree);
+            });
+        }
+    }, [graphRef, focus, selectedSubtree]);
 };

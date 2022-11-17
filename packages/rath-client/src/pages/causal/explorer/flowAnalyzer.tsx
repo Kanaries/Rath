@@ -13,7 +13,7 @@ import {
     coordQuad,
 } from 'd3-dag';
 import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
-import { Dropdown, Slider } from "@fluentui/react";
+import { Dropdown } from "@fluentui/react";
 import styled from "styled-components";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
@@ -40,6 +40,7 @@ export interface FlowAnalyzerProps {
         composedEffect: readonly Readonly<NodeWithScore>[],
     ) => void;
     onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+    limit: number;
 }
 
 export type Flow = {
@@ -118,10 +119,8 @@ const SVGGroup = styled.div`
 
 const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
-const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, cutThreshold, onUpdate, onClickNode }) => {
+const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, cutThreshold, onUpdate, onClickNode, limit }) => {
     const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
-
-    const [limit, setLimit] = useState(10);
 
     const normalizedLinks = useMemo(() => {
         const nodeCauseWeights = data.nodes.map(() => 0);
@@ -137,8 +136,6 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             type: link.type,
         }));
     }, [data]);
-
-    const linksCount = normalizedLinks.length;
 
     const linksInView = useMemo(() => {
         return normalizedLinks.filter(link => link.score >= cutThreshold).sort(
@@ -496,18 +493,6 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
 
     return showFlowAnalyzer ? (
         <SVGGroup onClick={e => e.stopPropagation()}>
-            {field && (
-                <div className="tools" style={{ width: '100%', padding: '1em' }}>
-                    <Slider
-                        // label="Display Limit"
-                        label="显示上限"
-                        min={1}
-                        max={Math.max(linksCount, limit)}
-                        value={limit}
-                        onChange={value => setLimit(value)}
-                    />
-                </div>
-            )}
             {field ? [combinedTree/*, destinationTree, originTree*/].map((tree, i) => tree ? (
                 <svg key={i} viewBox={`0 0 ${tree.size.height + 1} ${tree.size.width + 1}`} strokeLinecap="round" strokeLinejoin="round">
                     <defs>

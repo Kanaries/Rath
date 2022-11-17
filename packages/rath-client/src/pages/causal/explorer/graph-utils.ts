@@ -26,6 +26,29 @@ const arrows = {
     },
 } as const;
 
+const bkArrows = {
+    "must-link": {
+        fill: '#0027b4',
+        start: '',
+        end: '',
+    },
+    "must-not-link": {
+        fill: '#c50f1f',
+        start: '',
+        end: '',
+    },
+    "directed-must-link": {
+        fill: '#0027b4',
+        start: '',
+        end: 'M 12,0 L 28,8 L 28,-8 Z',
+    },
+    "directed-must-not-link": {
+        fill: '#c50f1f',
+        start: '',
+        end: 'M 12,0 L 28,8 L 28,-8 Z',
+    },
+} as const;
+
 const G6_EDGE_SELECT = 'edge_select';
 
 G6.registerBehavior(G6_EDGE_SELECT, {
@@ -60,7 +83,7 @@ G6.registerEdge(
                 attrs: {
                     width: 10,
                     height: 10,
-                    stroke: '#f00',
+                    stroke: '#c50f1f',
                     lineWidth: 2,
                     path: [
                         ['M', midPoint.x + 8, midPoint.y + 8],
@@ -82,32 +105,20 @@ export const useRenderData = (
     mode: "explore" | "edit",
     preconditions: readonly ModifiableBgKnowledge[],
     fields: readonly Readonly<IFieldMeta>[],
-    selectedSubtree: readonly string[],
-    focus: number | null,
 ) => {
     return useMemo<GraphData>(() => ({
         nodes: data.nodes.map((node, i) => {
-            const isInSubtree = selectedSubtree.includes(fields[node.id].fid);
             return {
                 id: `${node.id}`,
                 description: fields[i].name ?? fields[i].fid,
-                style: {
-                    lineWidth: i === focus ? 3 : isInSubtree ? 2 : 1,
-                    opacity: i === focus || isInSubtree ? 1 : focus === null ? 1 : 0.4,
-                },
             };
         }),
         edges: mode === 'explore' ? data.links.map((link, i) => {
-            const isInSubtree = focus !== null && [fields[link.source].fid, fields[link.target].fid].every(fid => {
-                return [fields[focus].fid].concat(selectedSubtree).includes(fid);
-            });
             return {
                 id: `link_${i}`,
                 source: `${link.source}`,
                 target: `${link.target}`,
                 style: {
-                    lineWidth: isInSubtree ? 1.5 : 1,
-                    opacity: focus === null ? 0.9 : isInSubtree ? 1 : 0.2,
                     startArrow: {
                         fill: '#F6BD16',
                         path: arrows[link.type].start,
@@ -125,13 +136,16 @@ export const useRenderData = (
             style: {
                 lineWidth: 2,
                 lineAppendWidth: 5,
+                stroke: bkArrows[bk.type].fill,
                 startArrow: {
-                    fill: '#F6BD16',
-                    path: '',
+                    fill: bkArrows[bk.type].fill,
+                    stroke: bkArrows[bk.type].fill,
+                    path: bkArrows[bk.type].start,
                 },
                 endArrow: {
-                    fill: '#F6BD16',
-                    path: 'M 12,0 L 28,8 L 28,-8 Z',
+                    fill: bkArrows[bk.type].fill,
+                    stroke: bkArrows[bk.type].fill,
+                    path: bkArrows[bk.type].end,
                 },
             },
             edgeStateStyles: {
@@ -139,9 +153,9 @@ export const useRenderData = (
                     lineWidth: 2,
                 },
             },
-            type: bk.type === 'must-not-link' ? 'forbidden-edge' : undefined,
+            type: bk.type === 'must-not-link' || bk.type === 'directed-must-not-link' ? 'forbidden-edge' : undefined,
         })),
-    }), [data, mode, preconditions, fields, selectedSubtree, focus]);
+    }), [data, mode, preconditions, fields]);
 };
 
 export const useGraphOptions = (
@@ -198,9 +212,9 @@ export const useGraphOptions = (
             animate: true,
             layout: {
                 type: 'fruchterman',
-                // gravity: 5,
-                // speed: 5,
-                // center: [widthRef.current / 2, GRAPH_HEIGHT / 2],
+                // https://antv-g6.gitee.io/zh/docs/api/graphLayout/fruchterman#layoutcfggpuenabled
+                gpuEnabled: true,
+                speed: 1,
                 // for rendering after each iteration
                 tick: () => {
                     graphRef.current?.refreshPositions();
@@ -212,9 +226,32 @@ export const useGraphOptions = (
                     lineWidth: 2,
                 },
             },
+            nodeStateStyles: {
+                focused: {
+                    lineWidth: 3,
+                    opacity: 1,
+                },
+                highlighted: {
+                    lineWidth: 2.5,
+                    opacity: 1,
+                },
+                faded: {
+                    opacity: 0.4,
+                },
+            },
             defaultEdge: {
                 size: 1,
                 color: '#F6BD16',
+                opacity: 0.9,
+            },
+            edgeStateStyles: {
+                highlighted: {
+                    lineWidth: 1.5,
+                    opacity: 1,
+                },
+                faded: {
+                    opacity: 0.2,
+                },
             },
         };
         setEdgeSelectedRef.current(false);

@@ -26,6 +26,7 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     value: Readonly<DiagramGraphData>;
     /** @default 0 */
     cutThreshold?: number;
+    limit: number;
     mode: 'explore' | 'edit';
     onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
     focus: number | null;
@@ -42,6 +43,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     focus,
     cutThreshold = 0,
     mode,
+    limit,
     onClickNode,
     onLinkTogether,
     onRemoveLink,
@@ -80,6 +82,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     selectedSubtree={selectedSubtree}
                     forceRelayoutRef={forceRelayoutRef}
                     value={value}
+                    limit={limit}
                     mode={mode}
                     preconditions={preconditions}
                     cutThreshold={cutThreshold}
