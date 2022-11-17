@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Icon } from '@fluentui/react';
-import React, { useState } from 'react';
 import styled from 'styled-components';
+import intl from 'react-intl-universal';
 import { PreferencesListType, PreferencesType } from '../../App';
 
 const LoginInfoListDiv = styled.div`
@@ -18,12 +19,12 @@ const LoginInfoListDiv = styled.div`
         .none-key {
             background-color: white;
         }
-        p{
-          padding-left: 20px;
+        p {
+            padding-left: 20px;
         }
     }
     > div:last-child {
-        padding: 10px 10px 0 10px;
+        padding: 0px 10px 0 10px;
         border-left: 1px solid #ccc;
     }
 `;
@@ -35,6 +36,7 @@ const LoginInfoList = (props: { infoList: PreferencesListType[] }) => {
             <div>
                 {infoList.map((item) => (
                     <p
+                        key={item.key}
                         className={`${
                             item.key === infoListKey ? 'bg-blue-600 text-white' : 'text-black hover:bg-gray-200'
                         } w-full h-8 mb-2 flex items-center rounded-full py-3 px-6 cursor-pointer`}
@@ -42,7 +44,7 @@ const LoginInfoList = (props: { infoList: PreferencesListType[] }) => {
                             setInfoListKey(item.key);
                         }}
                     >
-                        <Icon iconName={item.icon} className="mr-2" /> {item.name}
+                        <Icon iconName={item.icon} className="mr-2" /> {intl.get(`login.${item.name}`)}
                     </p>
                 ))}
             </div>

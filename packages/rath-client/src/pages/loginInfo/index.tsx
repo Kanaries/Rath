@@ -1,7 +1,10 @@
+import { useState } from 'react';
+import intl from 'react-intl-universal';
+import { observer } from 'mobx-react-lite';
 import { Dialog, Icon } from '@fluentui/react';
-import React, { useState } from 'react';
 import styled from 'styled-components';
 import { PreferencesListType } from '../../App';
+import { useGlobalStore } from '../../store';
 import LoginInfoList from './loginInfo';
 interface loginInfoProps {
     preferencesList: PreferencesListType[];
@@ -15,11 +18,20 @@ const LoginInfoDiv = styled.div`
     > div:first-child {
         flex: 1;
     }
+    .user {
+        white-space: nowrap;
+        max-width: 164px;
+        overflow-x: auto;
+    }
+    .user::-webkit-scrollbar {
+        display: none;
+    }
 `;
 
 const LoginInfo = (props: loginInfoProps) => {
     const { preferencesList, element } = props;
-
+    const { commonStore } = useGlobalStore();
+    const { userName, navMode } = commonStore;
     const [loginHidden, setLoginHidden] = useState(true);
     return (
         <LoginInfoDiv>
@@ -38,7 +50,7 @@ const LoginInfo = (props: loginInfoProps) => {
                     onDismiss={() => {
                         setLoginHidden(true);
                     }}
-                    dialogContentProps={{ title: 'Preferences' }}
+                    dialogContentProps={{ title: intl.get('login.preferences') }}
                     minWidth={550}
                 >
                     <LoginInfoList infoList={preferencesList} />
@@ -47,13 +59,15 @@ const LoginInfo = (props: loginInfoProps) => {
                     <div>
                         <Icon iconName="Contact" className="mr-2" />
                     </div>
-                    <div className="ml-3">
-                        <p className="text-sm font-medium text-white">{'visitor'}</p>
-                    </div>
+                    {navMode === 'text' && (
+                        <div className="ml-3">
+                            <p className="text-sm font-medium user">{userName || intl.get('login.clickLogin')}</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </LoginInfoDiv>
     );
 };
 
-export default LoginInfo;
+export default observer(LoginInfo);

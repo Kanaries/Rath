@@ -1,290 +1,139 @@
-import { DefaultButton, PrimaryButton, TextField } from '@fluentui/react';
-import React, { useState } from 'react';
-
+import { useState } from 'react';
 import styled from 'styled-components';
-const AccountInfo = styled.div`
-    width: 100%;
-    height: 100%;
-`;
+import intl from 'react-intl-universal';
+import { Pivot, PivotItem, PrimaryButton, TextField } from '@fluentui/react';
+import { useGlobalStore } from '../../store';
+import { IAccessMethod } from '../../interfaces';
+import PhoneAuth from './access/phoneAuth';
+import EmailAuth from './access/emailAuth';
+import PasswordLogin from './access/passwordLogin';
+
 const AccountDiv = styled.div`
     > div {
         width: 100%;
-        height: 30px;
         display: flex;
+        flex-direction: column;
         align-items: center;
         margin-bottom: 20px;
         padding-left: 10px;
         padding-top: 10px;
-        > span:first-child {
-            display: inline-block;
-            width: 120px;
+        .label {
+            font-weight: 600;
+            font-size: 14px;
+            color: rgb(50, 49, 48);
+            font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont,
+                Roboto, 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
-        > span:last-child {
-            display: inline-block;
-            flex: 1;
+        .account {
+            width: 100%;
+            > span {
+                width: 100%;
+            }
+            > span:first-child {
+                display: flex;
+                justify-content: space-between;
+                height: 35px;
+                line-height: 35px;
+                margin-bottom: 3px;
+            }
+            > span:last-child {
+                height: 35px;
+                line-height: 35px;
+            }
         }
-    }
-    .replace {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        .phone {
+            width: 100%;
+        }
+        .email {
+            width: 100%;
+        }
     }
 `;
 
-const LoginDiv = styled.div`
-    width: 100%;
-    height: 100%;
-    position: relative;
-    > div:last-child {
-        width: 100%;
-        text-align: right;
-    }
-    .get-cert-code {
-        margin-top: 10px;
-        text-align: right;
-    }
-
-    .action {
-        position: absolute;
-        bottom: 0;
-    }
-`;
-
-enum LoginStatusType {
-    account = 'account',
-    phone = 'phone',
-    email = 'email',
-}
+const PIVOT_LIST = [
+    {
+        headerText: 'phoneCert',
+        itemKey: IAccessMethod.PHONE,
+        element: (onSuccessLogin: () => void) => <PhoneAuth onSuccessLogin={onSuccessLogin} />,
+    },
+    {
+        headerText: 'emailCert',
+        itemKey: IAccessMethod.EMAIL,
+        element: (onSuccessLogin: () => void) => <EmailAuth onSuccessLogin={onSuccessLogin} />,
+    },
+    {
+        headerText: 'passwordLog',
+        itemKey: IAccessMethod.PASSWORD,
+        element: (onSuccessLogin: () => void) => <PasswordLogin onSuccessLogin={onSuccessLogin} />,
+    },
+];
 
 function Account() {
-    const [userName, setUserName] = useState<string>('');
-    const [userNameInfo, setUserNameInfo] = useState<{ username: string; password: string }>({
-        username: '',
-        password: '',
-    });
-    const [phoneNumber, setPhoneNumber] = useState<string>('');
-    const [phoneNumberInfo, setPhoneNumberInfo] = useState<{ phoneNumber: string; certCode: string }>({
-        phoneNumber: '',
-        certCode: '',
-    });
-    const [emailAddress, setEmailAddress] = useState<string>('');
-    const [emailAddressInfo, setEmailAddressInfo] = useState<{ emailAddress: string; certCode: string }>({
-        emailAddress: '',
-        certCode: '',
-    });
-    const [isLoginStatus, setIsLoginStatus] = useState<LoginStatusType | null>(null);
+    const [isLoginStatus, setIsLoginStatus] = useState<boolean>(false);
+    const [globalSwitch, setGlobalSwitch] = useState(true);
+    const { commonStore } = useGlobalStore();
+    const { userName, info } = commonStore;
+    // const pivots = PIVOT_LIST.map((p) => ({
+    //     // ...p,
+    //     key: p.itemKey,
+    //     name: t(`access.${p.itemKey}.title`),
+    // }));
+
     return (
-        <AccountInfo>
-            {isLoginStatus === LoginStatusType.account && (
-                <LoginDiv>
-                    <TextField
-                        label="account"
-                        required
-                        onChange={(e, data) => {
-                            data &&
-                                setUserNameInfo({
-                                    ...userNameInfo,
-                                    username: data,
-                                });
-                        }}
-                    ></TextField>
-                    <TextField
-                        label="password"
-                        required
-                        onChange={(e, data) => {
-                            data &&
-                                setUserNameInfo({
-                                    ...userNameInfo,
-                                    password: data,
-                                });
-                        }}
-                    ></TextField>
-                    <div className="mt-2 action">
-                        <DefaultButton
-                            className="ml-2"
-                            onClick={() => {
-                                setIsLoginStatus(null);
-                            }}
-                        >
-                            Return
-                        </DefaultButton>
-                        <PrimaryButton
-                            className="ml-2"
-                            onClick={() => {
-                                setUserName(userNameInfo.username);
-                                setIsLoginStatus(null);
-                            }}
-                        >
-                            Action
-                        </PrimaryButton>
+        <AccountDiv>
+            {isLoginStatus ? (
+                <div>
+                    <div className="mb-4">
+                        <Pivot>
+                            {PIVOT_LIST.map((item) => (
+                                <PivotItem key={item.itemKey} headerText={intl.get(`login.${item.headerText}`)}>
+                                    {item.element(() => {
+                                        setIsLoginStatus(false);
+                                        commonStore.getPersonalInfo();
+                                    })}
+                                </PivotItem>
+                            ))}
+                        </Pivot>
                     </div>
-                </LoginDiv>
-            )}
-            {isLoginStatus === LoginStatusType.phone && (
-                <LoginDiv>
-                    <TextField
-                        label="Phone Number"
-                        required
-                        onChange={(e, data) => {
-                            data &&
-                                setPhoneNumberInfo({
-                                    ...phoneNumberInfo,
-                                    phoneNumber: data,
-                                });
-                        }}
-                    ></TextField>
-                    <div>
-                        <TextField
-                            label="Cert Code"
-                            required
-                            onChange={(e, data) => {
-                                data &&
-                                    setPhoneNumberInfo({
-                                        ...phoneNumberInfo,
-                                        certCode: data,
-                                    });
-                            }}
-                        ></TextField>
-                        <div className="get-cert-code">
-                            <PrimaryButton>获取验证码</PrimaryButton>
-                        </div>
-                    </div>
-                    <div className="mt-2 action">
-                        <DefaultButton
-                            className="ml-2"
-                            onClick={() => {
-                                setIsLoginStatus(null);
-                            }}
-                        >
-                            Return
-                        </DefaultButton>
-                        <PrimaryButton
-                            className="ml-2"
-                            onClick={() => {
-                                setPhoneNumber(phoneNumberInfo.phoneNumber);
-                                setIsLoginStatus(null);
-                            }}
-                        >
-                            Action
-                        </PrimaryButton>
-                    </div>
-                </LoginDiv>
-            )}
-            {isLoginStatus === LoginStatusType.email && (
-                <LoginDiv>
-                    <TextField
-                        label="Email Address"
-                        required
-                        onChange={(e, data) => {
-                            data &&
-                                setEmailAddressInfo({
-                                    ...emailAddressInfo,
-                                    emailAddress: data,
-                                });
-                        }}
-                    ></TextField>
-                    <div>
-                        <TextField
-                            label="Cert Code"
-                            required
-                            onChange={(e, data) => {
-                                data &&
-                                    setEmailAddressInfo({
-                                        ...emailAddressInfo,
-                                        certCode: data,
-                                    });
-                            }}
-                        ></TextField>
-                        <div className="get-cert-code">
-                            <PrimaryButton>获取验证码</PrimaryButton>
-                        </div>
-                    </div>
-                    <div className="mt-2 action">
-                        <DefaultButton
-                            className="ml-2"
-                            onClick={() => {
-                                setIsLoginStatus(null);
-                            }}
-                        >
-                            Return
-                        </DefaultButton>
-                        <PrimaryButton
-                            className="ml-2"
-                            onClick={() => {
-                                setEmailAddress(emailAddressInfo.emailAddress);
-                                setIsLoginStatus(null);
-                            }}
-                        >
-                            Action
-                        </PrimaryButton>
-                    </div>
-                </LoginDiv>
-            )}
-            {isLoginStatus === null && (
-                <AccountDiv>
-                    <div>
-                        <span>Account:</span>
+                </div>
+            ) : (
+                <div>
+                    <div className="account">
                         <span>
+                            <span className="label">Account</span>
                             {userName ? (
-                                <span className="replace">
-                                    {userName} <PrimaryButton className="ml-2">Sign up</PrimaryButton>
-                                </span>
+                                <PrimaryButton
+                                    className="ml-2"
+                                    onClick={() => {
+                                        commonStore.commitLogout().then(() => {
+                                            window.location.reload();
+                                        });
+                                    }}
+                                >
+                                    {intl.get('login.signOut')}
+                                </PrimaryButton>
                             ) : (
-                                <PrimaryButton onClick={() => [setIsLoginStatus(LoginStatusType.account)]}>
-                                    Sign in
+                                <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>
+                                    {intl.get('login.signIn')}
                                 </PrimaryButton>
                             )}
                         </span>
+                        {userName && <TextField value={userName || ''} disabled={globalSwitch} />}
                     </div>
                     {userName && (
-                        <div>
-                            <span>Phone Number:</span>
-                            <span>
-                                {phoneNumber ? (
-                                    <span className="replace">
-                                        {phoneNumber}{' '}
-                                        <PrimaryButton
-                                            className="ml-2"
-                                            onClick={() => {
-                                                setIsLoginStatus(LoginStatusType.phone);
-                                            }}
-                                        >
-                                            更换手机号
-                                        </PrimaryButton>
-                                    </span>
-                                ) : (
-                                    <PrimaryButton onClick={() => [setIsLoginStatus(LoginStatusType.phone)]}>
-                                        绑定手机号
-                                    </PrimaryButton>
-                                )}
-                            </span>
+                        <div className="phone">
+                            <TextField label="Phone" value={info.phone} disabled={globalSwitch} />
                         </div>
                     )}
                     {userName && (
-                        <div>
-                            <span>Email Address:</span>
-                            <span>
-                                {emailAddress ? (
-                                    <span className="replace">
-                                        {emailAddress}{' '}
-                                        <PrimaryButton
-                                            className="ml-2"
-                                            onClick={() => [setIsLoginStatus(LoginStatusType.email)]}
-                                        >
-                                            更换邮箱
-                                        </PrimaryButton>
-                                    </span>
-                                ) : (
-                                    <PrimaryButton onClick={() => [setIsLoginStatus(LoginStatusType.email)]}>
-                                        绑定邮箱
-                                    </PrimaryButton>
-                                )}
-                            </span>
+                        <div className="email">
+                            <TextField label="Email" value={info.email} disabled={globalSwitch} />
                         </div>
                     )}
-                </AccountDiv>
+                </div>
             )}
-        </AccountInfo>
+        </AccountDiv>
     );
 }
 

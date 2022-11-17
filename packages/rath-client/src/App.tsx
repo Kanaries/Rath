@@ -21,11 +21,13 @@ import LoginInfo from './pages/loginInfo';
 import Account from './pages/loginInfo/account';
 import Info from './pages/loginInfo/info';
 import Setup from './pages/loginInfo/setup';
+import Header from './pages/loginInfo/header';
 
 export enum PreferencesType {
-    Account = 'Account',
-    Info = 'Info',
-    Setup = 'Set Up',
+    Account = 'account',
+    Info = 'info',
+    Setting = 'setting',
+    Header = 'header'
 }
 export interface PreferencesListType {
     key: PreferencesType;
@@ -36,8 +38,9 @@ export interface PreferencesListType {
 
 const preferencesList: PreferencesListType[] = [
     { key: PreferencesType.Account, name: PreferencesType.Account, icon: 'Home', element: () => <Account /> },
-    { key: PreferencesType.Info, name: PreferencesType.Info, icon: 'Info', element: () => <Info /> },
-    { key: PreferencesType.Setup, name: PreferencesType.Setup, icon: 'Settings', element: () => <Setup /> },
+    // { key: PreferencesType.Info, name: PreferencesType.Info, icon: 'Info', element: () => <Info /> },
+    // { key: PreferencesType.Header, name: PreferencesType.Header, icon: 'Contact', element: () => <Header /> },
+    { key: PreferencesType.Setting, name: PreferencesType.Setting, icon: 'Settings', element: () => <Setup /> },
 ];
 
 function App() {
@@ -46,6 +49,11 @@ function App() {
 
     useEffect(() => {
         initRathWorker(commonStore.computationEngine);
+        commonStore.updateAuthStatus().then((res) => {
+            if (res) {
+                commonStore.getPersonalInfo();
+            }
+        });
         return () => {
             destroyRathWorker();
         };

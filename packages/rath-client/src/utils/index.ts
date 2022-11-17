@@ -6,6 +6,9 @@ import * as FileLoader from './fileParser';
 import * as Transform from './transform';
 import { getRange } from './stat';
 import deepcopy from './deepcopy';
+import Cookies from 'js-cookie';
+
+const AUTH_COOKIE_KEY = 'userAuthed';
 
 interface IFieldId { fid: string }
 export function colFromIRow(from: readonly IRow[], fields?: string[] | IFieldId[]): Map<string, ICol<any>> {
@@ -179,4 +182,29 @@ export {
   deepcopy,
   Transform,
   getRange
+}
+
+export function setLoginCookie(userName: string) {
+    Cookies.set(AUTH_COOKIE_KEY, userName, { expires: 1 });
+}
+export function checkLoginCookie() {
+    const userName = Cookies.get(AUTH_COOKIE_KEY);
+    if (userName && userName !== '') {
+        return userName;
+    }
+    return null;
+}
+
+export function clearLoginCookie() {
+    Cookies.remove(AUTH_COOKIE_KEY);
+}
+
+export function getServerUrl(path: string) {
+    const baseURL = new URL(window.location.href);
+    const DATA_SERVER_URL =
+        baseURL.searchParams.get('main_service') || localStorage.getItem('main_service') || window.location.href;
+    // const devSpecURL = new URL(w|| window.location.href)
+    const url = new URL(DATA_SERVER_URL);
+    url.pathname = path;
+    return url.toString();
 }

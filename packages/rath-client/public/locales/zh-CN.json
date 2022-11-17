@@ -413,5 +413,35 @@
         "shortDays": ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
         "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
         "shortMonths": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
+    },
+    "login": {
+        "clickLogin": "点击登录",
+        "haveSent": "已发送",
+        "signIn": "登录",
+        "signOut": "登出",
+        "preferences": "个人信息",
+        "phoneCert": "手机验证",
+        "emailCert": "邮箱验证",
+        "passwordLog": "密码登录",
+        "account": "账号",
+        "header": "头像",
+        "info": "信息",
+        "setting": "设置",
+        "login": "登录",
+        "loginAndRegister": "注册/登录",
+        "getCertCode": "获取验证码",
+        "phone": {
+            "phoneNo": "手机号码",
+            "certCode": "验证码"
+        },
+        "email": { 
+            "title": "邮箱地址",
+            "certCode": "验证码",
+            "errEmail": "不支持此类邮箱"
+        },
+        "password": {
+            "userName": "用户名",
+            "password": "密码"
+        }
     }
 }
