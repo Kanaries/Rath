@@ -39,6 +39,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
+    autoLayout: boolean;
 }, never>, 'onChange' | 'ref'>;
 
 /** 调试用的，不需要的时候干掉 */
@@ -97,6 +98,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     onRemoveLink,
     preconditions,
     forceRelayoutRef,
+    autoLayout,
     ...props
 }, ref) => {
     const [forceUpdateFlag, setForceUpdateFlag] = useState(Date.now());
@@ -139,6 +141,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const graphRef = useRef<Graph>();
     const renderData = useRenderData(data, mode, preconditions, fields);
     const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, setEdgeSelected);
+    const cfgRef = useRef(cfg);
+    cfgRef.current = cfg;
 
     const [forceRelayoutFlag, setForceRelayoutFlag] = useState<0 | 1>(0);
 
@@ -158,6 +162,17 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         focus,
         selectedSubtree,
     );
+
+    useEffect(() => {
+        const { current: graph } = graphRef;
+        if (graph) {
+            graph.stopAnimate();
+            graph.destroyLayout();
+            if (autoLayout) {
+                graph.updateLayout(cfgRef.current.layout);
+            }
+        }
+    }, [autoLayout]);
 
     useEffect(() => {
         forceRelayoutRef.current = () => setForceRelayoutFlag(flag => flag === 0 ? 1 : 0);

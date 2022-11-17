@@ -34,6 +34,7 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
+    autoLayout: boolean;
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
@@ -49,6 +50,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     onRemoveLink,
     preconditions,
     forceRelayoutRef,
+    autoLayout,
     ...props
 }, ref) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
@@ -90,6 +92,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     onLinkTogether={onLinkTogether}
                     onRemoveLink={onRemoveLink}
                     focus={focus}
+                    autoLayout={autoLayout}
                     style={{
                         flexGrow: 1,
                         flexShrink: 1,

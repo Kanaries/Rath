@@ -255,6 +255,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
     }, [mode]);
 
     const [limit, setLimit] = useState(10);
+    const [autoLayout, setAutoLayout] = useState(true);
 
     return (
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
@@ -274,6 +275,14 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     label="启用编辑"
                     checked={mode === 'edit'}
                     onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
+                    onText="On"
+                    offText="Off"
+                    inlineLabel
+                />
+                <Toggle
+                    label="自动布局"
+                    checked={autoLayout}
+                    onChange={(_, checked) => setAutoLayout(Boolean(checked))}
                     onText="On"
                     offText="Off"
                     inlineLabel
@@ -316,6 +325,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     onClickNode={handleClickCircle}
                     onLinkTogether={handleLink}
                     onRemoveLink={onRemoveLink}
+                    autoLayout={autoLayout}
                     style={{
                         width: '100%',
                         height: '100%',
