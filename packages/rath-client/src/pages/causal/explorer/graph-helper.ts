@@ -186,7 +186,11 @@ export const useReactiveGraph = (
                         return -1;
                     }
                 })();
-                const isInSubtree = focus !== null && [fieldsRef.current[sourceIdx]?.fid, fieldsRef.current[targetIdx]?.fid].every(fid => {
+                const isInSubtree = focus !== null && [
+                    fieldsRef.current[sourceIdx]?.fid, fieldsRef.current[targetIdx]?.fid
+                ].includes(fieldsRef.current[focus]?.fid) && [
+                    fieldsRef.current[sourceIdx]?.fid, fieldsRef.current[targetIdx]?.fid
+                ].every(fid => {
                     return [fieldsRef.current[focus]?.fid].concat(selectedSubtree).includes(fid);
                 });
                 graph.setItemState(edge, 'highlighted', isInSubtree);
