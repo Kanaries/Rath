@@ -11,32 +11,28 @@ export enum CausalLinkDirection {
     bidirected = 4,
 }
 
-const CausalLinkDirectionNames: Record<CausalLinkDirection, string> = {
-    [CausalLinkDirection.none]: intl.get('causal_direction.none'),
-    [CausalLinkDirection.directed]: intl.get('causal_direction.directed'),
-    [CausalLinkDirection.reversed]: intl.get('causal_direction.reversed'),
-    [CausalLinkDirection.weakDirected]: intl.get('causal_direction.weakDirected'),
-    [CausalLinkDirection.weakReversed]: intl.get('causal_direction.weakReversed'),
-    [CausalLinkDirection.undirected]: intl.get('causal_direction.undirected'),
-    [CausalLinkDirection.bidirected]: intl.get('causal_direction.bidirected'),
-};
-
-const CausalLinkDirectionDesc: Record<CausalLinkDirection, string> = {
-    [CausalLinkDirection.none]: intl.get('causal_direction_desc.none'),
-    [CausalLinkDirection.directed]: intl.get('causal_direction_desc.directed'),
-    [CausalLinkDirection.reversed]: intl.get('causal_direction_desc.reversed'),
-    [CausalLinkDirection.weakDirected]: intl.get('causal_direction_desc.weakDirected'),
-    [CausalLinkDirection.weakReversed]: intl.get('causal_direction_desc.weakReversed'),
-    [CausalLinkDirection.undirected]: intl.get('causal_direction_desc.undirected'),
-    [CausalLinkDirection.bidirected]: intl.get('causal_direction_desc.bidirected'),
-};
-
 export const stringifyDirection = (value: CausalLinkDirection): string => {
-    return CausalLinkDirectionNames[value];
+    return {
+        [CausalLinkDirection.none]: intl.get('causal_direction.none'),
+        [CausalLinkDirection.directed]: intl.get('causal_direction.directed'),
+        [CausalLinkDirection.reversed]: intl.get('causal_direction.reversed'),
+        [CausalLinkDirection.weakDirected]: intl.get('causal_direction.weakDirected'),
+        [CausalLinkDirection.weakReversed]: intl.get('causal_direction.weakReversed'),
+        [CausalLinkDirection.undirected]: intl.get('causal_direction.undirected'),
+        [CausalLinkDirection.bidirected]: intl.get('causal_direction.bidirected'),
+    }[value];
 };
 
 export const describeDirection = (value: CausalLinkDirection): string => {
-    return CausalLinkDirectionDesc[value];
+    return {
+        [CausalLinkDirection.none]: intl.get('causal_direction_desc.none'),
+        [CausalLinkDirection.directed]: intl.get('causal_direction_desc.directed'),
+        [CausalLinkDirection.reversed]: intl.get('causal_direction_desc.reversed'),
+        [CausalLinkDirection.weakDirected]: intl.get('causal_direction_desc.weakDirected'),
+        [CausalLinkDirection.weakReversed]: intl.get('causal_direction_desc.weakReversed'),
+        [CausalLinkDirection.undirected]: intl.get('causal_direction_desc.undirected'),
+        [CausalLinkDirection.bidirected]: intl.get('causal_direction_desc.bidirected'),
+    }[value];
 };
 
 const resolveCausal = (resultMatrix: readonly (readonly number[])[]): CausalLinkDirection[][] => {

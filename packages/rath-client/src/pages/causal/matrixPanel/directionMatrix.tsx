@@ -65,13 +65,12 @@ const tooltipProps: ITooltipProps = {
     ),
 };
 
-const linkTypeName = intl.get('causal_direction._');
-
 const DirectionMatrix: React.FC<Props> = (props) => {
     const { data, fields, onSelect, mark } = props;
     const selectHandlerRef = useRef(onSelect);
     selectHandlerRef.current = onSelect;
     const container = useRef<HTMLDivElement>(null);
+    const linkTypeName = intl.get('causal_direction._');
     const values = useMemo<IRow[]>(() => {
         const ans: IRow[] = [];
         for (let i = 0; i < data.length; i++) {
@@ -98,7 +97,7 @@ const DirectionMatrix: React.FC<Props> = (props) => {
             }
         }
         return ans;
-    }, [data, fields]);
+    }, [data, fields, linkTypeName]);
     useEffect(() => {
         if (container.current) {
             embed(container.current, {
@@ -123,7 +122,7 @@ const DirectionMatrix: React.FC<Props> = (props) => {
                 })
             });
         }
-    }, [values, mark]);
+    }, [values, mark, linkTypeName]);
 
     return (
         <Container>
