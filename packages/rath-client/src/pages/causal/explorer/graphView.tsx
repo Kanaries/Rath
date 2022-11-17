@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
-import G6, { Graph, GraphData } from "@antv/g6";
+import G6, { Graph, GraphData, GraphOptions } from "@antv/g6";
 import { ActionButton } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { ModifiableBgKnowledge } from "../config";
@@ -199,11 +199,15 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     const handleRemoveLinkRef = useRef(onRemoveLink);
     handleRemoveLinkRef.current = onRemoveLink;
 
-    const updateSelected = useRef((idx: number) => {});
+    const updateSelected = useRef<(idx: number) => void>(() => {});
+
+    const [edgeSelected, setEdgeSelected] = useState(false);
+
+    const widthRef = useRef(width);
+    widthRef.current = width;
 
     const graphRef = useRef<Graph>();
-    const dataRef = useRef<GraphData>({});
-    dataRef.current = useMemo(() => ({
+    const renderData = useMemo(() => ({
         nodes: data.nodes.map((node, i) => {
             const isInSubtree = selectedSubtree.includes(fields[node.id].fid);
             return {
@@ -259,66 +263,78 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
             type: bk.type === 'must-not-link' ? 'forbidden-edge' : undefined,
         })),
     }), [data, mode, preconditions, fields, selectedSubtree, focus]);
+    const dataRef = useRef<GraphData>({});
+    dataRef.current = renderData;
 
-    const widthRef = useRef(width);
-    widthRef.current = width;
-
-    const [edgeSelected, setEdgeSelected] = useState(false);
+    const cfg = useMemo<Omit<GraphOptions, 'container'>>(() => {
+        let createEdgeFrom = -1;
+        const cfg: Omit<GraphOptions, 'container'> = {
+            width: widthRef.current,
+            height: GRAPH_HEIGHT,
+            linkCenter: true,
+            modes: {
+                default: mode === 'edit' ? ['drag-canvas', {
+                    type: 'create-edge',
+                    trigger: 'drag',
+                    shouldBegin(e) {
+                        const source = e.item?._cfg?.id;
+                        if (source) {
+                            createEdgeFrom = parseInt(source, 10);
+                        }
+                        return true;
+                    },
+                    shouldEnd(e) {
+                        if (createEdgeFrom === -1) {
+                            return false;
+                        }
+                        const target = e.item?._cfg?.id;
+                        if (target) {
+                            const origin = fields[createEdgeFrom];
+                            const destination = fields[parseInt(target, 10)];
+                            if (origin.fid !== destination.fid) {
+                                handleLinkRef.current(origin.fid, destination.fid);
+                            }
+                        }
+                        createEdgeFrom = -1;
+                        return false;
+                    },
+                }, G6_EDGE_SELECT, 'zoom-canvas'] : ['drag-canvas', 'drag-node', 'click-select', 'zoom-canvas'],
+            },
+            animate: true,
+            layout: {
+                type: 'fruchterman',
+                gravity: 5,
+                speed: 5,
+                center: [widthRef.current / 2, GRAPH_HEIGHT / 2],
+                // for rendering after each iteration
+                tick: () => {
+                    graphRef.current?.refreshPositions();
+                }
+            },
+            defaultNode: {
+                size: 24,
+                style: {
+                    lineWidth: 2,
+                },
+            },
+            defaultEdge: {
+                size: 1,
+                color: '#F6BD16',
+            },
+        };
+        setEdgeSelected(false);
+        return cfg;
+    }, [fields, mode]);
+    const cfgRef = useRef(cfg);
+    cfgRef.current = cfg;
 
     useEffect(() => {
         const { current: container } = containerRef;
-        if (container) {
-            let createEdgeFrom = -1;
+        const { current: cfg } = cfgRef;
+        if (container && cfg) {
             const graph = new G6.Graph({
+                ...cfg,
                 container,
-                width: widthRef.current,
-                height: GRAPH_HEIGHT,
-                linkCenter: true,
-                modes: {
-                    default: mode === 'edit' ? ['drag-canvas', {
-                        type: 'create-edge',
-                        trigger: 'drag',
-                        shouldBegin(e) {
-                            const source = e.item?._cfg?.id;
-                            if (source) {
-                                createEdgeFrom = parseInt(source, 10);
-                            }
-                            return true;
-                        },
-                        shouldEnd(e) {
-                            const target = e.item?._cfg?.id;
-                            if (target) {
-                                const origin = fields[createEdgeFrom];
-                                const destination = fields[parseInt(target, 10)];
-                                if (origin.fid !== destination.fid) {
-                                    handleLinkRef.current(origin.fid, destination.fid);
-                                }
-                            }
-                            return false;
-                        },
-                    }, G6_EDGE_SELECT] : ['drag-canvas', 'drag-node', 'click-select'],
-                },
-                animate: true,
-                layout: {
-                    type: 'fruchterman',
-                    gravity: 5,
-                    speed: 5,
-                    center: [widthRef.current / 2, GRAPH_HEIGHT / 2],
-                    // for rendering after each iteration
-                    tick: () => {
-                        graph.refreshPositions()
-                    }
-                },
-                defaultNode: {
-                    size: 24,
-                    style: {
-                        lineWidth: 2,
-                    },
-                },
-                defaultEdge: {
-                    size: 1,
-                    color: '#F6BD16',
-                },
             });
             graph.node(node => ({
                 label: node.description ?? node.id,
@@ -399,24 +415,22 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
     }, [width]);
 
     useEffect(() => {
+        const { current: cfg } = cfgRef;
+        const { current: graph } = graphRef;
+        if (cfg && graph) {
+            graph.updateLayout(cfg);
+            graph.refresh();
+        }
+    }, [cfg]);
+
+    useEffect(() => {
         const { current: container } = containerRef;
         const { current: graph } = graphRef;
         if (container && graph) {
-            graph.data(dataRef.current);
-            // const edges = graph.save().edges;
-            // G6.Util.processParallelEdges(edges);
-            // graph.getEdges().forEach((edge, i) => {
-            //     graph.updateItem(edge, {
-            //         // @ts-ignore
-            //         curveOffset: edges[i].curveOffset,
-            //         // @ts-ignore
-            //         curvePosition: edges[i].curvePosition,
-            //     });
-            // });
-            // console.log({edges})
-            graph.render();
+            graph.changeData(renderData);
+            graph.refresh();
         }
-    }, [data, preconditions, selectedSubtree]);
+    }, [renderData]);
 
     useEffect(() => {
         if (focus !== null) {

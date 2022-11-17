@@ -76,7 +76,7 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
         ];
     }, [selectedFields, igMatrix]);
 
-    const [shouldInitPreconditions, setShouldInitPreconditions] = useState(true);
+    const [shouldInitPreconditions, setShouldInitPreconditions] = useState(false);
     const shouldInitPreconditionsRef = useRef(shouldInitPreconditions);
     shouldInitPreconditionsRef.current = shouldInitPreconditions;
 
