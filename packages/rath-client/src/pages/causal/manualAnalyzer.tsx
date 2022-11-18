@@ -8,17 +8,18 @@ import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import SemiEmbed from '../semiAutomation/semiEmbed';
 import CrossFilter from './crossFilter';
-import { useInteractFieldGroups } from './hooks/interactFieldGroup';
+import type { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import type { useDataViews } from './hooks/dataViews';
 
 export interface ManualAnalyzerProps {
     context: ReturnType<typeof useDataViews>;
+    interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
 }
 
-const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context }) => {
+const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldGroups }) => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { fieldGroup, setFieldGroup, clearFieldGroup } = useInteractFieldGroups(fieldMetas);
+    const { fieldGroup, setFieldGroup, clearFieldGroup } = interactFieldGroups;
     const [showSemiClue, setShowSemiClue] = useState(false);
     const [clueView, setClueView] = useState<IPattern | null>(null);
     const [customAnalysisMode, setCustomAnalysisMode] = useState<'crossFilter' | 'graphicWalker'>('crossFilter');

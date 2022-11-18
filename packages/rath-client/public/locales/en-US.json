@@ -428,6 +428,25 @@
             "$partition": "Separates each value by boolean expression into two new column."
         }
     },
+    "causal_direction": {
+        "_": "Type of Link",
+        "none": "irrelevant to",
+        "directed": "direct to",
+        "reversed": "directed from",
+        "weakDirected": "direct to (weak)",
+        "weakReversed": "directed from (weak)",
+        "undirected": "relative without direction with",
+        "bidirected": "bidirected with"
+    },
+    "causal_direction_desc": {
+        "none": "A is irrelevant to B.",
+        "directed": "A influences B.",
+        "reversed": "A is influenced by B.",
+        "weakDirected": "In some cases, A influences B.",
+        "weakReversed": "In some cases, A is influenced by B.",
+        "undirected": "A is relevant to B, but the direction is not decided.",
+        "bidirected": "Both A and B influences each other."
+    },
     "time_format": {
         "dateTime": "%x, %X",
         "date": "%-m/%-d/%Y",

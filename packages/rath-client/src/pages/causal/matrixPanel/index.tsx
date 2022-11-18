@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { IFieldMeta, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
+import DirectionMatrix from './directionMatrix';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 
 const Cont = styled.div`
@@ -12,6 +13,11 @@ const Cont = styled.div`
     padding: 8px;
     overflow: auto;
 `;
+
+export enum VIEW_TYPE {
+    matrix = 'matrix',
+    diagram = 'diagram',
+}
 
 export enum MATRIX_TYPE {
     mutualInfo = 'mutual_info',
@@ -29,9 +35,14 @@ const MATRIX_PIVOT_LIST = [
     { itemKey: MATRIX_TYPE.causal, text: '因果发现' || 'Causal Discovery', taskLabel: '因果发现' || 'Causal Discover', iconName: 'Relationship' },
 ];
 
+const VIEW_LABELS = [
+    { key: 'matrix', text: '矩阵' },
+    { key: 'diagram', text: '完全部分有向无环图（CPDAG）' },
+];
+
 const MARK_LABELS = [
     { key: 'circle', text: '圆形' || 'Circle' },
-    { key: 'rect', text: '矩形' },
+    { key: 'square', text: '矩形' },
 ];
 
 function showMatrix(causalFields: IFieldMeta[], mat: number[][], computing?: boolean): boolean {
@@ -43,11 +54,13 @@ interface MatrixPanelProps {
     fields: IFieldMeta[];
     dataSource: IRow[];
     onCompute: (type: MATRIX_TYPE) => void;
+    diagram?: JSX.Element;
 }
 const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
-    const { onMatrixPointClick, fields, onCompute, dataSource } = props;
+    const { onMatrixPointClick, fields, onCompute, dataSource, diagram } = props;
+    const [viewType, setViewType] = useState<VIEW_TYPE>(VIEW_TYPE.matrix);
     const [selectedKey, setSelectedKey] = useState(MATRIX_TYPE.mutualInfo);
-    const [markType, setMarkType] = useState<'circle' | 'rect'>('circle');
+    const [markType, setMarkType] = useState<'circle' | 'square'>('circle');
     const { causalStore } = useGlobalStore();
     const { computing, igCondMatrix, igMatrix, causalStrength } = causalStore;
 
@@ -61,7 +74,10 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
                 style={{ marginBottom: '1em' }}
                 selectedKey={selectedKey}
                 onLinkClick={(item) => {
-                    item && setSelectedKey(item.props.itemKey as MATRIX_TYPE);
+                    if (item) {
+                        setSelectedKey(item.props.itemKey as MATRIX_TYPE);
+                        setViewType(item.props.itemKey === MATRIX_TYPE.causal ? VIEW_TYPE.diagram : VIEW_TYPE.matrix);
+                    }
                 }}
             >
                 {MATRIX_PIVOT_LIST.map((item) => {
@@ -76,18 +92,54 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
                     }}
                     iconProps={{ iconName: 'Rerun' }}
                 />
-                <Dropdown
-                    options={MARK_LABELS}
-                    selectedKey={markType}
-                    onChange={(e, op) => {
-                        op && setMarkType(op.key as 'circle' | 'rect');
-                    }}
-                />
+                {selectedKey === MATRIX_TYPE.causal && (
+                    <Dropdown
+                        options={VIEW_LABELS}
+                        label="视图"
+                        selectedKey={viewType}
+                        onChange={(e, op) => {
+                            op && setViewType(op.key as VIEW_TYPE);
+                        }}
+                        style={{
+                            width: '250px',
+                        }}
+                        styles={{
+                            root: {
+                                display: 'flex',
+                                flexDirection: 'row',
+                            },
+                            label: {
+                                margin: '0 1em',
+                            },
+                        }}
+                    />
+                )}
+                {viewType === VIEW_TYPE.matrix && (
+                    <Dropdown
+                        options={MARK_LABELS}
+                        label="标记"
+                        selectedKey={markType}
+                        onChange={(e, op) => {
+                            op && setMarkType(op.key as 'circle' | 'square');
+                        }}
+                        styles={{
+                            root: {
+                                display: 'flex',
+                                flexDirection: 'row',
+                                margin: '0 1em',
+                            },
+                            label: {
+                                margin: '0 1em',
+                            },
+                        }}
+                    />
+                )}
             </Stack>
 
             <div>
             {selectedKey === MATRIX_TYPE.mutualInfo && showMatrix(fields, igMatrix, computing) && (
                 <RelationMatrixHeatMap
+                    mark={markType}
                     absolute
                     fields={fields}
                     data={igMatrix}
@@ -96,6 +148,7 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
             )}
             {selectedKey === MATRIX_TYPE.conditionalMutualInfo && showMatrix(fields, igCondMatrix, computing) && (
                 <RelationMatrixHeatMap
+                    mark={markType}
                     absolute
                     fields={fields}
                     data={igCondMatrix}
@@ -103,11 +156,16 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
                 />
             )}
             {selectedKey === MATRIX_TYPE.causal && showMatrix(fields, causalStrength, computing) && (
-                <RelationMatrixHeatMap
-                    fields={fields}
-                    data={causalStrength}
-                    onSelect={onMatrixPointClick}
-                />
+                viewType === VIEW_TYPE.diagram ? (
+                    diagram
+                ) : (
+                    <DirectionMatrix
+                        mark={markType}
+                        fields={fields}
+                        data={causalStrength}
+                        onSelect={onMatrixPointClick}
+                    />
+                )
             )}
             {computing && <Spinner label="computing" />}
             </div>

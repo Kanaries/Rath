@@ -1,5 +1,5 @@
 import { IconButton } from '@fluentui/react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { IFieldMeta, IRow } from '../../../interfaces';
 import ColDist, { IBrushSignalStore } from './colDist';
@@ -36,6 +36,15 @@ const CrossFilter: React.FC<CrossFilterProps> = (props) => {
         setBrushIndex(-1)
     }, [fields]);
 
+    const handleFilter = useCallback((index: number, data: IBrushSignalStore[] | null) => {
+        if (data === null) {
+            return;
+        } else {
+            setBrushIndex(index);
+            setBrushSignal([...data]);
+        }
+    }, []);
+
     return (
         <VizContainer>
             {fields.map((field, index) => {
@@ -69,12 +78,7 @@ const CrossFilter: React.FC<CrossFilterProps> = (props) => {
                             fid={field.fid}
                             semanticType={field.semanticType}
                             onBrushSignal={(props) => {
-                                if (props === null) {
-                                    return;
-                                } else {
-                                    setBrushIndex(index);
-                                    setBrushSignal([...props]);
-                                }
+                                handleFilter(index, props);
                             }}
                             name={field.name}
                             brush={index === brushIndex ? null : brushSignal}

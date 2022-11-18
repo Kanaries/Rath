@@ -5,7 +5,7 @@ import embed from 'vega-embed';
 import { IRow } from '../../../interfaces';
 import { throttle } from '../../../utils';
 
-export const BRUSH_SIGNAL_NAME = 'brush';
+export const SELECT_SIGNAL_NAME = '__select__';
 export interface IBrushSignalStore {
     fields: any[];
     unit: string;
@@ -48,6 +48,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
     const container = useRef<HTMLDivElement>(null);
     const view = useRef<View | null>(null);
     const dataSize = data.length;
+    const filterType = semanticType === 'quantitative' || semanticType === 'temporal' ? 'interval' : 'point';
     useEffect(() => {
         if (container.current) {
             const shouldXLabelsDisplayFull = semanticType === 'quantitative';
@@ -66,8 +67,8 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                     {
                         params: [
                             {
-                                name: BRUSH_SIGNAL_NAME,
-                                select: { type: 'interval', encodings: ['x'] },
+                                name: SELECT_SIGNAL_NAME,
+                                select: { type: filterType, encodings: ['x'] },
                             },
                         ],
                         mark: {
@@ -78,7 +79,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                             x: {
                                 field: fid,
                                 title: name || fid,
-                                bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
+                                bin: semanticType === 'quantitative' || semanticType === 'temporal' ? { maxbins: 20 } : undefined,
                                 type: semanticType,
                                 axis: onlyTicks ? {
                                     title: null,
@@ -92,7 +93,9 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                         },
                     },
                     {
-                        transform: [{ filter: { param: BRUSH_SIGNAL_NAME } }],
+                        transform: [
+                            { filter: { param: SELECT_SIGNAL_NAME } },
+                        ],
                         mark: {
                             type: semanticType === 'temporal' ? 'area' : 'bar',
                             tooltip: true,
@@ -101,7 +104,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                             x: {
                                 field: fid,
                                 title: name || fid,
-                                bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
+                                bin: semanticType === 'quantitative' || semanticType === 'temporal' ? { maxbins: 20 } : undefined,
                                 type: semanticType,
                                 axis: onlyTicks ? {
                                     title: null,
@@ -120,8 +123,8 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                 const handler = (name: string, value: any) => {
                     if (onBrushSignal) {
                         const state = res.view.getState();
-                        if (state.data[`${BRUSH_SIGNAL_NAME}_store`]) {
-                            onBrushSignal(state.data[`${BRUSH_SIGNAL_NAME}_store`]);
+                        if (state.data[`${SELECT_SIGNAL_NAME}_store`]) {
+                            onBrushSignal(state.data[`${SELECT_SIGNAL_NAME}_store`]);
                         } else {
                             onBrushSignal(null);
                         }
@@ -129,11 +132,11 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                 };
                 const t = Math.round((dataSize / 1000) * 32);
                 const throttleHandler = throttle(handler, t);
-                res.view.addSignalListener(BRUSH_SIGNAL_NAME, throttleHandler);
+                res.view.addSignalListener(SELECT_SIGNAL_NAME, throttleHandler);
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fid, semanticType, dataSize, name, width, height, actions, onlyTicks]);
+    }, [fid, semanticType, dataSize, name, width, height, actions, onlyTicks, filterType]);
 
     useEffect(() => {
         if (view.current) {
@@ -149,7 +152,7 @@ const ColDist: React.FC<ColDistProps> = (props) => {
 
     useEffect(() => {
         if (view.current) {
-            const k = `${BRUSH_SIGNAL_NAME}_store`;
+            const k = `${SELECT_SIGNAL_NAME}_store`;
             if (brush !== null) {
                 view.current.setState({ data: { [k]: brush } });
             }

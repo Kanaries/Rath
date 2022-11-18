@@ -428,6 +428,25 @@
             "$partition": "构造一个二元映射将字段按规则拆解到两个新的字段。"
         }
     },
+    "causal_direction": {
+        "_": "连接类型",
+        "none": "无关",
+        "directed": "导向",
+        "reversed": "被导向",
+        "weakDirected": "导向（弱关系）",
+        "weakReversed": "被导向（弱关系）",
+        "undirected": "无向相关",
+        "bidirected": "双向相关"
+    },
+    "causal_direction_desc": {
+        "none": "A 与 B 不相关。",
+        "directed": "A 对 B 有影响。",
+        "reversed": "A 被 B 影响。",
+        "weakDirected": "在部分子集合中，A 对 B 有影响。",
+        "weakReversed": "在部分子集合中，A 被 B 影响。",
+        "undirected": "A 与 B 相关，但影响方向不确定。",
+        "bidirected": "A 与 B 相互作用。"
+    },
     "time_format": {
         "dateTime": "%x %A %X",
         "date": "%Y年%-m月%-d日",

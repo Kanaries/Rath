@@ -5,7 +5,6 @@ import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import Explorer from './explorer';
 import Params from './params';
-import { NodeWithScore } from './explorer/flowAnalyzer';
 import type { BgKnowledge, ModifiableBgKnowledge } from './config';
 import ModelStorage from './modelStorage';
 import MatrixPanel, { MATRIX_TYPE } from './matrixPanel';
@@ -13,15 +12,39 @@ import { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import { useDataViews } from './hooks/dataViews';
 import DatasetPanel from './datasetPanel';
 import ManualAnalyzer from './manualAnalyzer';
-import PreconditionPanel from './preconditionPanel';
+import PreconditionPanel from './precondition/preconditionPanel';
+import type { GraphNodeAttributes } from './explorer/graph-utils';
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
-    const { appendFields2Group } = useInteractFieldGroups(fieldMetas);
+    const interactFieldGroups = useInteractFieldGroups(fieldMetas);
+    const { appendFields2Group } = interactFieldGroups;
     const { igMatrix, causalFields, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
 
-    const [modifiablePrecondition, setModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
+    const [modifiablePrecondition, __unsafeSetModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
+
+    const setModifiablePrecondition = useCallback((next: ModifiableBgKnowledge[] | ((prev: ModifiableBgKnowledge[]) => ModifiableBgKnowledge[])) => {
+        __unsafeSetModifiablePrecondition(prev => {
+            const list = typeof next === 'function' ? next(prev) : next;
+            return list.reduce<ModifiableBgKnowledge[]>((links, link) => {
+                if (link.src === link.type) {
+                    // 禁止自环边
+                    return links;
+                }
+                const overloadIdx = links.findIndex(
+                    which => [which.src, which.tar].every(node => [link.src, link.tar].includes(node))
+                );
+                if (overloadIdx !== -1) {
+                    const temp = links.map(l => l);
+                    temp.splice(overloadIdx, 1, link);
+                    return temp;
+                } else {
+                    return links.concat([link]);
+                }
+            }, []);
+        });
+    }, []);
 
     const precondition = useMemo<BgKnowledge[]>(() => {
         if (computing || igMatrix.length !== selectedFields.length) {
@@ -32,16 +55,23 @@ const CausalPage: React.FC = () => {
             const tarIdx = selectedFields.findIndex((f) => f.fid === decl.tar);
 
             if (srcIdx !== -1 && tarIdx !== -1) {
-                list.push({
-                    src: decl.src,
-                    tar: decl.tar,
-                    type:
-                        decl.type === 'must-link'
-                            ? 1
-                            : decl.type === 'must-not-link'
-                            ? -1
-                            : (igMatrix[srcIdx][tarIdx] + 1) / 2, // TODO: 暂时定为一半
-                });
+                if (decl.type === 'directed-must-link' || decl.type === 'directed-must-not-link') {
+                    list.push({
+                        src: decl.src,
+                        tar: decl.tar,
+                        type: decl.type === 'directed-must-link' ? 1 : -1,
+                    });
+                } else {
+                    list.push({
+                        src: decl.src,
+                        tar: decl.tar,
+                        type: decl.type === 'must-link' ? 1 : -1,
+                    }, {
+                        src: decl.tar,
+                        tar: decl.src,
+                        type: decl.type === 'must-link' ? 1 : -1,
+                    });
+                }
             }
 
             return list;
@@ -62,35 +92,35 @@ const CausalPage: React.FC = () => {
         [appendFields2Group, causalStore, fieldMetas]
     );
 
-    const handleSubTreeSelected = useCallback(
-        (
-            node: Readonly<IFieldMeta> | null,
-            simpleCause: readonly Readonly<NodeWithScore>[],
-            simpleEffect: readonly Readonly<NodeWithScore>[],
-            composedCause: readonly Readonly<NodeWithScore>[],
-            composedEffect: readonly Readonly<NodeWithScore>[]
-        ) => {
+    const handleSubTreeSelected = useCallback((node: Readonly<IFieldMeta> | null) => {
             if (node) {
-                const allEffect = composedEffect
-                    .reduce<Readonly<NodeWithScore>[]>(
-                        (list, f) => {
-                            if (!list.some((which) => which.field.fid === f.field.fid)) {
-                                list.push(f);
-                            }
-                            return list;
-                        },
-                        [...simpleEffect]
-                    )
-                    .sort((a, b) => b.score - a.score);
-                // console.log(allEffect)
-                // setFieldGroup([node, ...allEffect.map((f) => f.field)]);
-                appendFields2Group([node.fid, ...allEffect.map((f) => f.field.fid)])
+                appendFields2Group([node.fid]);
             }
         },
         [appendFields2Group]
     );
 
     const exploringFields = igMatrix.length === causalStrength.length ? causalFields : selectedFields;
+
+    const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number) => {
+        setModifiablePrecondition((list) => {
+            return list.concat([{
+                src: exploringFields[srcIdx].fid,
+                tar: exploringFields[tarIdx].fid,
+                type: 'directed-must-link',
+            }]);
+        });
+    }, [exploringFields, setModifiablePrecondition]);
+
+    // 结点可以 project 一些字段信息
+    const renderNode = useCallback((node: Readonly<IFieldMeta>): GraphNodeAttributes | undefined => {
+        const value = 2 / (1 + Math.exp(-1 * node.features.entropy / 2)) - 1;
+        return {
+            style: {
+                stroke: `rgb(${Math.floor(95 * (1 - value))},${Math.floor(149 * (1 - value))},255)`,
+            },
+        };
+    }, []);
 
     return (
         <div className="content-container">
@@ -123,35 +153,25 @@ const CausalPage: React.FC = () => {
                                 break;
                         }
                     }}
-                />
-                <div>
-                    {!computing ? (
+                    diagram={(
                         <Explorer
                             dataSource={dataSubset}
                             fields={exploringFields}
                             scoreMatrix={igMatrix}
                             preconditions={modifiablePrecondition}
                             onNodeSelected={handleSubTreeSelected}
-                            onLinkTogether={(srcIdx, tarIdx) =>
-                                setModifiablePrecondition((list) => [
-                                    ...list,
-                                    {
-                                        src: exploringFields[srcIdx].fid,
-                                        tar: exploringFields[tarIdx].fid,
-                                        type: 'must-link',
-                                    },
-                                ])
-                            }
+                            onLinkTogether={handleLinkTogether}
+                            renderNode={renderNode}
                             onRemoveLink={(srcIdx, tarIdx) =>
                                 setModifiablePrecondition((list) => {
                                     return list.filter((link) => !(link.src === srcIdx && link.tar === tarIdx));
                                 })
                             }
                         />
-                    ) : null}
-                </div>
+                    )}
+                />
             </div>
-            <ManualAnalyzer context={dataContext} />
+            <ManualAnalyzer context={dataContext} interactFieldGroups={interactFieldGroups} />
         </div>
     );
 };
