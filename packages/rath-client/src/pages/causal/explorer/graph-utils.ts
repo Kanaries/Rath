@@ -5,7 +5,7 @@ import type { IFieldMeta } from "../../../interfaces";
 import type { CausalLink } from ".";
 
 
-export const GRAPH_HEIGHT = 400;
+export const GRAPH_HEIGHT = 600;
 
 const arrows = {
     undirected: {

@@ -142,8 +142,23 @@ const CausalPage: React.FC = () => {
                                 break;
                         }
                     }}
+                    diagram={(
+                        <Explorer
+                            dataSource={dataSubset}
+                            fields={exploringFields}
+                            scoreMatrix={igMatrix}
+                            preconditions={modifiablePrecondition}
+                            onNodeSelected={handleSubTreeSelected}
+                            onLinkTogether={handleLinkTogether}
+                            onRemoveLink={(srcIdx, tarIdx) =>
+                                setModifiablePrecondition((list) => {
+                                    return list.filter((link) => !(link.src === srcIdx && link.tar === tarIdx));
+                                })
+                            }
+                        />
+                    )}
                 />
-                <div>
+                {/* <div>
                     {!computing ? (
                         <Explorer
                             dataSource={dataSubset}
@@ -159,7 +174,7 @@ const CausalPage: React.FC = () => {
                             }
                         />
                     ) : null}
-                </div>
+                </div> */}
             </div>
             <ManualAnalyzer context={dataContext} interactFieldGroups={interactFieldGroups} />
         </div>

@@ -1,4 +1,4 @@
-import { ActionButton, Slider, Toggle } from "@fluentui/react";
+import { DefaultButton, Slider, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
@@ -50,37 +50,33 @@ const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
 const Container = styled.div`
     width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: stretch;
 `;
 
 const Tools = styled.div`
-    width: 100%;
+    width: 250px;
     flex-grow: 0;
     flex-shrink: 0;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     border: 1px solid #e3e2e2;
-    margin: 8px 0px 0px 0px;
-    padding: 8px 1em;
-    align-items: center;
-    > *:not(button) {
-        height: 100%;
-        flex-grow: 1;
-        flex-shrink: 1;
-        margin-block: 0;
-        :not(:last-child) {
-            margin-inline-end: 1em;
-        }
+    border-right: none;
+    padding: 1em 1em;
+    align-items: flex-start;
+    > * {
+        flex-grow: 0;
+        flex-shrink: 0;
+        margin: 1em 0;
     }
-    > button {
-        margin-right: 2em;
+    > *:not(:first-child) {
+        width: 100%;
     }
 `;
 
 const MainView = styled.div`
-    width: 100%;
-    flex-grow: 0;
-    flex-shrink: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
     /* height: 46vh; */
     overflow: hidden;
     display: flex;
@@ -88,7 +84,6 @@ const MainView = styled.div`
     align-items: stretch;
     justify-content: stretch;
     border: 1px solid #e3e2e2;
-    margin: 8px 0px;
     /* padding: 1em; */
     > * {
         height: 100%;
@@ -265,16 +260,17 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
     return (
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools onClick={e => e.stopPropagation()}>
-                <ActionButton
+                <DefaultButton
                     style={{
                         flexGrow: 0,
                         flexShrink: 0,
                         flexBasis: 'max-content',
+                        padding: '0.4em 0',
                     }}
                     onClick={forceLayout}
                 >
                     还原布局
-                </ActionButton>
+                </DefaultButton>
                 <Toggle
                     // label="Modify Constraints"
                     label="启用编辑"
@@ -294,7 +290,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                 />
                 <Slider
                     // label="Display Limit"
-                    label="显示上限"
+                    label="边显示上限"
                     min={1}
                     max={Math.max(links.length, limit)}
                     value={limit}
@@ -308,12 +304,6 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     value={cutThreshold}
                     showValue
                     onChange={d => setCutThreshold(d)}
-                    styles={{
-                        root: {
-                            flexGrow: 1,
-                            flexShrink: 1,
-                        },
-                    }}
                 />
             </Tools>
             <MainView>

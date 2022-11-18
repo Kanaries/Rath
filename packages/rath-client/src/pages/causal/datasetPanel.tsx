@@ -49,7 +49,8 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
         <InnerCard>
             <h1 className="card-header">数据集配置</h1>
             <hr className="card-line" />
-            <Stack style={{ marginBlock: '0.6em -0.6em' }}>
+            <Stack style={{ marginBlock: '0.6em -0.6em', alignItems: 'center' }} horizontal>
+                <Label style={{ marginRight: '1em' }}>数据增强</Label>
                 <LaTiaoConsole />
             </Stack>
             <Stack style={{ marginBlock: '0.8em' }}>
