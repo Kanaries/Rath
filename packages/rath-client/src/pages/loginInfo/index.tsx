@@ -31,7 +31,7 @@ const LoginInfoDiv = styled.div`
 const LoginInfo = (props: loginInfoProps) => {
     const { preferencesList, element } = props;
     const { commonStore } = useGlobalStore();
-    const { userName, navMode } = commonStore;
+    const { userName, navMode, avatarUrl, info } = commonStore;
     const [loginHidden, setLoginHidden] = useState(true);
     return (
         <LoginInfoDiv>
@@ -57,10 +57,14 @@ const LoginInfo = (props: loginInfoProps) => {
                 </Dialog>
                 <div className="flex items-center">
                     <div>
-                        <Icon iconName="Contact" className="mr-2" />
+                        {userName && (info.avatar || avatarUrl) ? (
+                            <img src={info.avatar || avatarUrl} alt="头像" style={{ width: 24, height: 24 }} />
+                        ) : (
+                            <Icon iconName="Contact" className="mr-2" />
+                        )}
                     </div>
                     {navMode === 'text' && (
-                        <div className="ml-3">
+                        <div className="ml-2">
                             <p className="text-sm font-medium user">{userName || intl.get('login.clickLogin')}</p>
                         </div>
                     )}

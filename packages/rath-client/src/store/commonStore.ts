@@ -1,13 +1,13 @@
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Specification } from 'visual-insights';
-import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
-import { IAccessPageKeys, ITaskTestMode, IVegaSubset } from '../interfaces';
-import { clearLoginCookie, getServerUrl, setLoginCookie } from '../utils';
+import { AVATAR_IMG_LIST, COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
+import { IAccessPageKeys, IAVATAR_TYPES, ITaskTestMode, IVegaSubset } from '../interfaces';
+import { clearLoginCookie, getAvatarURL, getServerUrl, setLoginCookie } from '../utils';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
 import { transVegaSubset2Schema } from '../utils/transform';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
-import { commitLoginService, liteAuthService } from './fetch';
+import { commitLoginService } from './fetch';
 
 export type ErrorType = 'error' | 'info' | 'success';
 const TASK_TEST_MODE_COOKIE_KEY = 'task_test_mode';
@@ -33,8 +33,10 @@ interface IUserInfo {
     email: string;
     eduEmail: string;
     phone: string;
+    avatar: string;
 }
 
+const avatar_storage_key = 'avatar_storage_key';
 export class CommonStore {
     public appKey: string = PIVOT_KEYS.dataSource;
     public computationEngine: string = COMPUTATION_ENGINE.webworker;
@@ -54,7 +56,10 @@ export class CommonStore {
         eduEmail: '',
         email: '',
         phone: '',
+        avatar: '',
     };
+    public avatarType: IAVATAR_TYPES = IAVATAR_TYPES.default;
+    public avatarKey: string = localStorage.getItem(avatar_storage_key) || AVATAR_IMG_LIST[0];
     constructor() {
         this.login = {
             userName: '',
@@ -76,6 +81,15 @@ export class CommonStore {
         makeAutoObservable(this, {
             graphicWalkerSpec: observable.ref,
             vizSpec: observable.ref,
+        });
+    }
+    public get avatarUrl(): string {
+        const { avatarKey, avatarType, info } = this;
+        return getAvatarURL({
+            avatarKey,
+            avatarType,
+            email: info.email,
+            size: 'small',
         });
     }
     public setAppKey(key: string) {
@@ -130,6 +144,12 @@ export class CommonStore {
         this.exploreMode = mode;
     }
 
+    public setAvatarConfig(at: IAVATAR_TYPES, ak: string) {
+        this.avatarType = at;
+        this.avatarKey = ak;
+        localStorage.setItem(avatar_storage_key, ak);
+    }
+
     public updateForm(formKey: IAccessPageKeys, fieldKey: keyof ILoginForm | keyof ISignUpForm, value: string) {
         if (fieldKey in this[formKey]) {
             // @ts-ignore
@@ -138,19 +158,38 @@ export class CommonStore {
     }
 
     public async liteAuth(certMethod: 'email' | 'phone') {
-        try {
-            const { certCode, phone, email } = this.signup;
-            const res = await liteAuthService({
+        const url = getServerUrl('/api/liteAuth');
+        const { certCode, phone, email } = this.signup;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
                 certCode,
                 certMethod,
                 certAddress: certMethod === 'email' ? email : phone,
+            }),
+        });
+        const result = await res.json();
+        if (result.success) {
+            notify({
+                type: 'success',
+                content: 'Login succeeded',
+                title: 'Success',
             });
             runInAction(() => {
-                this.userName = res.userName;
+                this.userName = result.data;
             });
-            return res;
-        } catch (error) {
-            // console.log(error);
+            return result.data;
+        } else {
+            notify({
+                type: 'error',
+                content: result.message,
+                title: 'Error',
+            });
+            throw new Error(`${result.message}`);
         }
     }
 
@@ -178,6 +217,7 @@ export class CommonStore {
             const res = await fetch(url, {
                 method: 'GET',
             });
+            console.log(res, 'Res');
             if (res) {
                 clearLoginCookie();
                 runInAction(() => {
@@ -235,6 +275,43 @@ export class CommonStore {
                 title: '[/api/ce/personal]',
                 type: 'error',
                 content: error.toString(),
+            });
+        }
+    }
+
+    public async customAvatar(value: { file?: File; isDefaultAvatar?: boolean }) {
+        try {
+            const url = getServerUrl('/api/ce/avatar');
+            const res = await request.post<{ file?: File; isDefaultAvatar?: boolean }, { avatarURL: string }>(
+                url,
+                value
+            );
+            if (res) {
+                this.info.avatar = res.avatarURL;
+            }
+        } catch (error) {
+            notify({
+                title: 'Error',
+                type: 'error',
+                content: `[/api/ce/avatar] ${error}`,
+            });
+        }
+    }
+
+    public async getAvatarImgUrl() {
+        const url = getServerUrl('/api/ce/avatar');
+        try {
+            const result = await request.get<{}, { avatarURL: string }>(url);
+            if (result !== null) {
+                runInAction(() => {
+                    this.info.avatar = result.avatarURL;
+                });
+            }
+        } catch (error: any) {
+            notify({
+                title: 'Error',
+                type: 'error',
+                content: `/api/ce/avatar ${error}`,
             });
         }
     }

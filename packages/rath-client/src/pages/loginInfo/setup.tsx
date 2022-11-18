@@ -1,9 +1,9 @@
 import React from 'react';
-import { useGlobalStore } from '../../store';
-import DropdownSelect from '../../components/dropDownSelect';
 import { IDropdownOption } from '@fluentui/react';
-import { SUPPORT_LANG } from '../../locales';
 import styled from 'styled-components';
+import DropdownSelect from '../../components/dropDownSelect';
+import { SUPPORT_LANG } from '../../locales';
+import { useGlobalStore } from '../../store';
 
 const langOptions: IDropdownOption[] = SUPPORT_LANG.map((lang) => ({
     key: lang.value,

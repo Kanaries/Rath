@@ -1,4 +1,10 @@
 import { IECStatus } from './interfaces';
+import { fixedLengthNumbers } from './utils';
+
+export const AVATAR_IMG_LIST = fixedLengthNumbers(new Array(18).fill(0).map((_, i) => i + 1))
+    .map(n => `avatar-B-${n}.png`);
+
+export const DEFAULT_AVATAR_URL_PREFIX = 'https://foghorn-assets.s3.ap-northeast-1.amazonaws.com/avatar/';
 
 export const RATH_INDEX_COLUMN_KEY = '__rath_index_col_key__';
 

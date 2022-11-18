@@ -106,9 +106,7 @@ function Account() {
                                 <PrimaryButton
                                     className="ml-2"
                                     onClick={() => {
-                                        commonStore.commitLogout().then(() => {
-                                            window.location.reload();
-                                        });
+                                        commonStore.commitLogout()
                                     }}
                                 >
                                     {intl.get('login.signOut')}

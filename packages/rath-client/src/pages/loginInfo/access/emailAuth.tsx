@@ -61,31 +61,11 @@ const EmailAuth: React.FC<EmailAuthProps> = (props) => {
                 <PrimaryButton
                     disabled={!emailIsValid || !originSupportEmail || signup.certCode.length !== 6}
                     onClick={() => {
-                        commonStore
-                            .liteAuth('email')
-                            .then((res) => {
-                                if (res.success) {
-                                    notify({
-                                        title: 'Success',
-                                        type: 'success',
-                                        content: 'Success',
-                                    });
-                                    onSuccessLogin();
-                                } else {
-                                    notify({
-                                        title: 'Error',
-                                        type: 'error',
-                                        content: `[error]${res.message}`,
-                                    });
-                                }
-                            })
-                            .catch((err) => {
-                                notify({
-                                    title: 'Error',
-                                    type: 'error',
-                                    content: `[error]${err}`,
-                                });
-                            });
+                        commonStore.liteAuth('email').then((res) => {
+                            if (res) {
+                                onSuccessLogin();
+                            }
+                        });
                     }}
                 >
                     {intl.get('login.loginAndRegister')}

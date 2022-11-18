@@ -430,6 +430,8 @@
         "login": "Login",
         "loginAndRegister": "login/Register",
         "getCertCode": "Send Cert Code",
+        "upload": "Upload custom avatar",
+        "AvatarImage": "Avatar Image",
         "phone": {
             "phoneNo": "Phone NO.",
             "certCode": "Cert Code"

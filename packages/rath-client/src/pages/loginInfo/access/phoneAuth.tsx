@@ -59,31 +59,11 @@ const PhoneAuth: React.FC<PhoneAuthProps> = (props) => {
                 <PrimaryButton
                     disabled={!phoneIsValid || signup.certCode.length !== 6}
                     onClick={() => {
-                        commonStore
-                            .liteAuth('phone')
-                            .then((res) => {
-                                if (res.success) {
-                                    onSuccessLogin();
-                                    notify({
-                                        title: 'Success',
-                                        type: 'success',
-                                        content: 'Success',
-                                    });
-                                } else {
-                                    notify({
-                                        title: 'Error',
-                                        type: 'error',
-                                        content: `${res.message}`,
-                                    });
-                                }
-                            })
-                            .catch((err) => {
-                                notify({
-                                    title: 'Error',
-                                    type: 'error',
-                                    content: `[error]${err}`,
-                                });
-                            });
+                        commonStore.liteAuth('phone').then((res) => {
+                            if (res) {
+                                onSuccessLogin();
+                            }
+                        });
                     }}
                 >
                     {intl.get('login.loginAndRegister')}

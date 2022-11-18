@@ -430,6 +430,8 @@
         "login": "登录",
         "loginAndRegister": "注册/登录",
         "getCertCode": "获取验证码",
+        "upload": "上传自定义头像",
+        "AvatarImage": "头像",
         "phone": {
             "phoneNo": "手机号码",
             "certCode": "验证码"

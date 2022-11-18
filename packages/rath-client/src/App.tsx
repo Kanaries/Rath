@@ -39,7 +39,7 @@ export interface PreferencesListType {
 const preferencesList: PreferencesListType[] = [
     { key: PreferencesType.Account, name: PreferencesType.Account, icon: 'Home', element: () => <Account /> },
     // { key: PreferencesType.Info, name: PreferencesType.Info, icon: 'Info', element: () => <Info /> },
-    // { key: PreferencesType.Header, name: PreferencesType.Header, icon: 'Contact', element: () => <Header /> },
+    { key: PreferencesType.Header, name: PreferencesType.Header, icon: 'Contact', element: () => <Header /> },
     { key: PreferencesType.Setting, name: PreferencesType.Setting, icon: 'Settings', element: () => <Setup /> },
 ];
 
@@ -52,6 +52,7 @@ function App() {
         commonStore.updateAuthStatus().then((res) => {
             if (res) {
                 commonStore.getPersonalInfo();
+                commonStore.getAvatarImgUrl()
             }
         });
         return () => {
