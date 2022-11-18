@@ -2,8 +2,8 @@ import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
-import { runInAction } from "mobx";
 import type { IFilter } from "../../../interfaces";
+import { useGlobalStore } from "../../../store";
 import { CardProviderProps } from "./card";
 import MoveHandler from "./components/move-handler";
 import ResizeHandler from "./components/resize-handler";
@@ -32,22 +32,23 @@ const DragBox = styled.div<{ canDrop: boolean }>`
 const CardEditor: FC<CardProviderProps> = ({
     item, index, children, transformCoord, draftRef, canDrop, isSizeValid, operators, onFocus, focused, ratio,
 }) => {
+    const { dashboardStore } = useGlobalStore();
     const { moveCard, resizeCard } = operators;
 
     const { chart } = item.content;
 
     useEffect(() => {
         if (chart) {
-            runInAction(() => {
+            dashboardStore.runInAction(() => {
                 chart.highlighter = [];
             });
             return () => {
-                runInAction(() => {
+                dashboardStore.runInAction(() => {
                     chart.highlighter = [];
                 });
             };
         }
-    }, [chart]);
+    }, [chart, dashboardStore]);
 
     const handleClick = useCallback(() => {
         onFocus?.();
@@ -162,11 +163,11 @@ const CardEditor: FC<CardProviderProps> = ({
 
     const handleFilter = useCallback((filters: Readonly<IFilter[]>) => {
         if (chart) {
-            runInAction(() => {
+            dashboardStore.runInAction(() => {
                 chart.selectors = [...filters];
             });
         }
-    }, [chart]);
+    }, [chart, dashboardStore]);
 
     const { removeCard } = operators;
 
