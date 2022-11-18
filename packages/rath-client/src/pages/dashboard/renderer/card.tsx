@@ -64,7 +64,7 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
     box-sizing: border-box;
     user-select: none;
     position: absolute;
-    backdrop-filter: blur(100vmax);
+    background-color: #fff;
     border: calc(1px * var(--ratio)) solid transparent;
     padding: calc(var(--padding) * var(--ratio));
     ${({ appearance }) => ({
