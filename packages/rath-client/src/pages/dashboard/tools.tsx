@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useCallback, forwardRef } from 'react';
 import { IconButton } from '@fluentui/react';
 import { Divider } from '@material-ui/core';
-import type { DashboardItem } from '../../store/dashboardStore';
+import type { DashboardCard } from '../../store/dashboardStore';
 
 
 const ToolGroup = styled.div`
@@ -20,7 +20,7 @@ const ToolGroup = styled.div`
 `;
 
 interface ToolsProps {
-    items: DashboardItem[];
+    items: DashboardCard[];
     clearPage: () => void;
 }
 

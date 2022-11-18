@@ -62,29 +62,6 @@ export interface DashboardCardState extends DashboardCard {
     }>;
 }
 
-/**
- * @deprecated use `DashboardCard` instead
- */
-export type DashboardItem = {
-    viewId: string;
-    layout: {
-        x: number;
-        y: number;
-        w: number;
-        h: number;
-    };
-    chartSize: {
-        w: number;
-        h: number;
-    };
-    filter: {
-        enabled: false;
-    } | {
-        enabled: true;
-        data: IFilter[];
-    };
-};
-
 export interface DashboardDocument {
     version: number;
     info: {
@@ -102,8 +79,6 @@ export interface DashboardDocument {
             filter: IFilter;
         }[];
     };
-    /** @deprecated use `cards` instead */
-    items: DashboardItem[];
     /** All cards defined in the dashboard */
     cards: DashboardCardState[];
     config: {
@@ -155,48 +130,13 @@ export default class DashboardStore {
     public name: string;
     public description: string;
     public pages: DashboardDocument[];
-    /** @deprecated */
-    public cursor: number;
 
     constructor() {
         makeAutoObservable(this);
         this.name = 'My Dashboard List';
         this.description = '';
         this.pages = [];
-        this.cursor = 0;
-        // FIXME: remove this call
         this.newPage();
-    }
-
-    /** @deprecated */
-    public addItem(item: DashboardItem) {
-        this.pages[this.cursor].items.push(item);
-    }
-
-    /** @deprecated */
-    public setItem(index: number, item: DashboardItem) {
-        this.pages[this.cursor].items[index] = item;
-    }
-
-    /** @deprecated */
-    public removeItem(index: number) {
-        this.pages[this.cursor].items.splice(index, 1);
-    }
-
-    /** @deprecated */
-    public addFilter(field: IFieldMeta, filter: IFilter) {
-        this.pages[this.cursor].data.filters.push({ field, filter });
-    }
-
-    /** @deprecated */
-    public deleteFilter(index: number) {
-        this.pages[this.cursor].data.filters.splice(index, 1);
-    }
-
-    /** @deprecated */
-    public clearPage() {
-        this.pages[this.cursor].items = [];
-        this.pages[this.cursor].cards = [];
     }
 
     public newPage() {
@@ -213,7 +153,6 @@ export default class DashboardStore {
                 source: 'context dataset', // TODO: get name from data source
                 filters: [],
             },
-            items: [],
             cards: [],
             config: {
                 size: {
@@ -223,17 +162,6 @@ export default class DashboardStore {
                 filters: [],
             },
         });
-        this.cursor = this.pages.length - 1;
-    }
-
-    /** @deprecated */
-    public setCursor(index: number) {
-        this.cursor = index;
-    }
-
-    /** @deprecated */
-    public get page() {
-        return this.pages[this.cursor];
     }
 
     protected copyPage(index: number) {
