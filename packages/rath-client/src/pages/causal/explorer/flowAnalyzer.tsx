@@ -27,6 +27,7 @@ export type NodeWithScore = {
 };
 
 export interface FlowAnalyzerProps {
+    display: boolean;
     dataSource: IRow[];
     fields: readonly Readonly<IFieldMeta>[];
     data: DiagramGraphData;
@@ -63,7 +64,9 @@ const SVGGroup = styled.div`
     flex-grow: 0;
     flex-shrink: 0;
     width: 100%;
+    min-height: 50px;
     border: 1px solid #e3e2e2;
+    border-top: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -119,7 +122,7 @@ const SVGGroup = styled.div`
 
 const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
-const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, cutThreshold, onUpdate, onClickNode, limit }) => {
+const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ display, dataSource, fields, data, index, cutThreshold, onUpdate, onClickNode, limit }) => {
     const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
 
     const normalizedLinks = useMemo(() => {
@@ -417,8 +420,6 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
         }
     }, [flowsAsOrigin, layout]);
 
-    const showFlowAnalyzer = new URL(window.location.href).searchParams.get('flowAnalyzer') === '1';
-
     const [combinedTree, cbnTreeMsg] = useMemo(() => {
         if (combinedFlows.length === 0) {
             return [null, null];
@@ -433,12 +434,12 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                 links: dag.links(),
             }, null];
         } catch (error) {
-            if (showFlowAnalyzer) {
+            if (display) {
                 console.warn(error);
             }
             return [null, null];
         }
-    }, [combinedFlows, layout, showFlowAnalyzer]);
+    }, [combinedFlows, layout, display]);
 
     const [mode, setMode] = useState<'cause' | 'effect'>('effect');
 
@@ -491,7 +492,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
         }
     }, [subtree]);
 
-    return showFlowAnalyzer ? (
+    return display ? (
         <SVGGroup onClick={e => e.stopPropagation()}>
             {field ? [combinedTree/*, destinationTree, originTree*/].map((tree, i) => tree ? (
                 <svg key={i} viewBox={`0 0 ${tree.size.height + 1} ${tree.size.width + 1}`} strokeLinecap="round" strokeLinejoin="round">

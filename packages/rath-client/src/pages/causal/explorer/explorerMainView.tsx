@@ -29,7 +29,8 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     cutThreshold?: number;
     limit: number;
     mode: 'explore' | 'edit';
-    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+    onClickNode?: (node: DiagramGraphData['nodes'][number] | null) => void;
+    toggleFlowAnalyzer?: () => void;
     focus: number | null;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
@@ -54,6 +55,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     forceRelayoutRef,
     autoLayout,
     renderNode,
+    toggleFlowAnalyzer,
     ...props
 }, ref) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
@@ -92,6 +94,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     preconditions={preconditions}
                     cutThreshold={cutThreshold}
                     onClickNode={onClickNode}
+                    toggleFlowAnalyzer={toggleFlowAnalyzer ?? (() => {})}
                     onLinkTogether={onLinkTogether}
                     onRemoveLink={onRemoveLink}
                     focus={focus}

@@ -34,7 +34,8 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     limit: number;
     mode: 'explore' | 'edit';
     focus: number | null;
-    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+    onClickNode?: (node: DiagramGraphData['nodes'][number] | null) => void;
+    toggleFlowAnalyzer: () => void;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
@@ -101,13 +102,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     forceRelayoutRef,
     autoLayout,
     renderNode,
+    toggleFlowAnalyzer,
     ...props
 }, ref) => {
-    const [forceUpdateFlag, setForceUpdateFlag] = useState(Date.now());
-
     const [data] = useMemo(() => {
         let totalScore = 0;
-        const pos = forceUpdateFlag;
         const nodeCauseWeights = value.nodes.map(() => 0);
         const nodeEffectWeights = value.nodes.map(() => 0);
         value.links.forEach(link => {
@@ -130,8 +129,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                 value: link.score / nodeCauseWeights[link.effectId],
                 type: link.type,
             })).filter(link => link.value >= cutThreshold).sort((a, b) => b.value - a.value).slice(0, limit),
-        }, totalScore, pos];
-    }, [value, cutThreshold, forceUpdateFlag, limit]);
+        }, totalScore];
+    }, [value, cutThreshold, limit]);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -208,10 +207,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         <Container
             {...props}
             ref={ref}
-            onClick={e => e.stopPropagation()}
-            onDoubleClick={e => {
+            onClick={e => {
+                if (e.shiftKey) {
+                    toggleFlowAnalyzer();
+                }
                 e.stopPropagation();
-                setForceUpdateFlag(Date.now());
             }}
         >
             <div ref={containerRef} />

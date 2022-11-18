@@ -199,13 +199,21 @@ const Explorer: FC<ExplorerProps> = ({
     const value = useMemo(() => ({ nodes, links }), [nodes, links]);
 
     const [focus, setFocus] = useState(-1);
+    const [showFlowAnalyzer, setShowFlowAnalyzer] = useState(false);
 
-    const handleClickCircle = useCallback((node: Readonly<CausalNode>) => {
+    const handleClickCircle = useCallback((node: Readonly<CausalNode> | null) => {
+        if (!node) {
+            return setFocus(-1);
+        }
         const idx = node.nodeId;
         if (mode === 'explore') {
             setFocus(idx === focus ? -1 : idx);
         }
     }, [mode, focus]);
+
+    const toggleFlowAnalyzer = useCallback(() => {
+        setShowFlowAnalyzer(display => !display);
+    }, []);
 
     const ErrorBoundary = useErrorBoundary((err, info) => {
         // console.error(err ?? info);
@@ -268,7 +276,7 @@ const Explorer: FC<ExplorerProps> = ({
         forceRelayoutRef.current();
     }, []);
 
-    return (
+    return (<>
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools onClick={e => e.stopPropagation()}>
                 <DefaultButton
@@ -329,6 +337,7 @@ const Explorer: FC<ExplorerProps> = ({
                     mode={mode}
                     cutThreshold={cutThreshold}
                     onClickNode={handleClickCircle}
+                    toggleFlowAnalyzer={toggleFlowAnalyzer}
                     onLinkTogether={handleLink}
                     onRemoveLink={onRemoveLink}
                     autoLayout={autoLayout}
@@ -339,20 +348,21 @@ const Explorer: FC<ExplorerProps> = ({
                     }}
                 />
             </MainView>
-            <ErrorBoundary>
-                <FlowAnalyzer
-                    dataSource={dataSource}
-                    fields={fields}
-                    data={value}
-                    limit={limit}
-                    index={mode === 'explore' ? focus : -1}
-                    cutThreshold={cutThreshold}
-                    onClickNode={handleClickCircle}
-                    onUpdate={handleNodeSelect}
-                />
-            </ErrorBoundary>
         </Container>
-    );
+        <ErrorBoundary>
+            <FlowAnalyzer
+                display={showFlowAnalyzer}
+                dataSource={dataSource}
+                fields={fields}
+                data={value}
+                limit={limit}
+                index={mode === 'explore' ? focus : -1}
+                cutThreshold={cutThreshold}
+                onClickNode={handleClickCircle}
+                onUpdate={handleNodeSelect}
+            />
+        </ErrorBoundary>
+    </>);
 };
 
 

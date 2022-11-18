@@ -12,7 +12,7 @@ export const useReactiveGraph = (
     options: ReturnType<typeof useGraphOptions>,
     data: ReturnType<typeof useRenderData>,
     mode: "explore" | "edit",
-    handleNodeClick: ((node: DiagramGraphData['nodes'][number]) => void) | undefined,
+    handleNodeClick: ((node: DiagramGraphData['nodes'][number] | null) => void) | undefined,
     fields: readonly IFieldMeta[],
     handleRemoveLink: (srcFid: string, tarFid: string) => void,
     setEdgeSelected: (status: boolean) => void,
@@ -52,9 +52,7 @@ export const useReactiveGraph = (
                 const selected = e.selectedItems.nodes[0]?._cfg.id;
                 const idx = selected === undefined ? null : parseInt(selected, 10);
 
-                if (idx !== null) {
-                    handleNodeClickRef.current?.({ nodeId: idx });
-                }
+                handleNodeClickRef.current?.(idx === null ? null : { nodeId: idx });
             });
 
             graph.on('keydown', e => {
