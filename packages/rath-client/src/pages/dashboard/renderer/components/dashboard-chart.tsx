@@ -88,7 +88,9 @@ const DashboardChart: FC<DashboardChartProps> = ({
 
     const spec = useMemo(() => {
         return {
-            data: item.subset.data,
+            data: {
+                name: 'dataSource',
+            },
             layer: [{
                 params: onFilter && new Array<typeof item.subset.mark>(
                     'bar', 'arc', 'point', 'circle', 'rect'
