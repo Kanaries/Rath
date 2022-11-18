@@ -4,7 +4,7 @@ import { Graph } from "@antv/g6";
 import { ActionButton } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { ModifiableBgKnowledge } from "../config";
-import { useGraphOptions, useRenderData } from "./graph-utils";
+import { GraphNodeAttributes, useGraphOptions, useRenderData } from "./graph-utils";
 import { useReactiveGraph } from "./graph-helper";
 import type { DiagramGraphData } from ".";
 
@@ -40,6 +40,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
+    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
 }, never>, 'onChange' | 'ref'>;
 
 /** 调试用的，不需要的时候干掉 */
@@ -99,6 +100,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     preconditions,
     forceRelayoutRef,
     autoLayout,
+    renderNode,
     ...props
 }, ref) => {
     const [forceUpdateFlag, setForceUpdateFlag] = useState(Date.now());
@@ -139,7 +141,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const [edgeSelected, setEdgeSelected] = useState(false);
 
     const graphRef = useRef<Graph>();
-    const renderData = useRenderData(data, mode, preconditions, fields);
+    const renderData = useRenderData(data, mode, preconditions, fields, renderNode);
     const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, setEdgeSelected);
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;

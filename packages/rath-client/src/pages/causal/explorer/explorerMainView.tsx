@@ -6,6 +6,7 @@ import type { ModifiableBgKnowledge } from "../config";
 // import DAGView from "./DAGView";
 // import ForceView from "./forceView";
 import GraphView from "./graphView";
+import type { GraphNodeAttributes } from "./graph-utils";
 import type { DiagramGraphData } from ".";
 
 
@@ -35,6 +36,7 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
+    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
@@ -51,6 +53,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     preconditions,
     forceRelayoutRef,
     autoLayout,
+    renderNode,
     ...props
 }, ref) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
@@ -93,6 +96,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     onRemoveLink={onRemoveLink}
                     focus={focus}
                     autoLayout={autoLayout}
+                    renderNode={renderNode}
                     style={{
                         flexGrow: 1,
                         flexShrink: 1,

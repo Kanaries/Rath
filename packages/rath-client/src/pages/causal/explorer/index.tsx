@@ -9,6 +9,7 @@ import { CausalLinkDirection } from "../../../utils/resolve-causal";
 import type { ModifiableBgKnowledge } from "../config";
 import ExplorerMainView from "./explorerMainView";
 import FlowAnalyzer, { NodeWithScore } from "./flowAnalyzer";
+import type { GraphNodeAttributes } from "./graph-utils";
 
 
 export type CausalNode = {
@@ -41,6 +42,7 @@ export interface ExplorerProps {
     ) => void;
     onLinkTogether: (srcIdx: number, tarIdx: number) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
+    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
 }
 
 const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
@@ -92,7 +94,16 @@ const MainView = styled.div`
     }
 `;
 
-const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSelected, onLinkTogether, onRemoveLink, preconditions }) => {
+const Explorer: FC<ExplorerProps> = ({
+    dataSource,
+    fields,
+    scoreMatrix,
+    onNodeSelected,
+    onLinkTogether,
+    onRemoveLink,
+    preconditions,
+    renderNode,
+}) => {
     const { causalStore } = useGlobalStore();
     const { causalStrength } = causalStore;
 
@@ -321,6 +332,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     onLinkTogether={handleLink}
                     onRemoveLink={onRemoveLink}
                     autoLayout={autoLayout}
+                    renderNode={renderNode}
                     style={{
                         width: '100%',
                         height: '100%',

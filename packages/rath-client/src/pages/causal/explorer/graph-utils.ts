@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, CSSProperties } from "react";
 import G6, { Graph, GraphData, GraphOptions } from "@antv/g6";
 import type { ModifiableBgKnowledge } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
@@ -6,6 +6,28 @@ import type { CausalLink } from ".";
 
 
 export const GRAPH_HEIGHT = 600;
+
+export type GraphNodeAttributes<
+    T extends 'circle' | 'rect' | 'ellipse' | 'diamond' | 'triangle' | 'star' | 'image' | 'modelRect' | 'donut' = 'circle'
+> = Partial<{
+    /** https://antv-g6.gitee.io/zh/docs/manual/middle/elements/nodes/defaultNode#%E5%86%85%E7%BD%AE%E8%8A%82%E7%82%B9%E7%B1%BB%E5%9E%8B%E8%AF%B4%E6%98%8E */
+    type: T;
+    style: Partial<{
+        size: T extends 'circle' ? number : never;
+        label: T extends 'circle' ? string : never;
+        fill: string;
+        stroke: string;
+        lineWidth: number;
+        lineDash: number[];
+        shadowColor: string;
+        shadowBlur: number;
+        shadowOffsetX: number;
+        shadowOffsetY: number;
+        opacity: number;
+        fillOpacity: number;
+        cursor: CSSProperties['cursor'];
+    }>;
+}>;
 
 const arrows = {
     undirected: {
@@ -105,12 +127,14 @@ export const useRenderData = (
     mode: "explore" | "edit",
     preconditions: readonly ModifiableBgKnowledge[],
     fields: readonly Readonly<IFieldMeta>[],
+    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
 ) => {
     return useMemo<GraphData>(() => ({
         nodes: data.nodes.map((node, i) => {
             return {
                 id: `${node.id}`,
                 description: fields[i].name ?? fields[i].fid,
+                ...renderNode?.(fields[i]),
             };
         }),
         edges: mode === 'explore' ? data.links.map((link, i) => {
@@ -155,7 +179,7 @@ export const useRenderData = (
             },
             type: bk.type === 'must-not-link' || bk.type === 'directed-must-not-link' ? 'forbidden-edge' : undefined,
         })),
-    }), [data, mode, preconditions, fields]);
+    }), [data, mode, preconditions, fields, renderNode]);
 };
 
 export const useGraphOptions = (

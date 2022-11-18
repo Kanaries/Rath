@@ -13,6 +13,7 @@ import { useDataViews } from './hooks/dataViews';
 import DatasetPanel from './datasetPanel';
 import ManualAnalyzer from './manualAnalyzer';
 import PreconditionPanel from './precondition/preconditionPanel';
+import type { GraphNodeAttributes } from './explorer/graph-utils';
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
@@ -111,6 +112,16 @@ const CausalPage: React.FC = () => {
         });
     }, [exploringFields, setModifiablePrecondition]);
 
+    // 结点可以 project 一些字段信息
+    const renderNode = useCallback((node: Readonly<IFieldMeta>): GraphNodeAttributes | undefined => {
+        const value = 2 / (1 + Math.exp(-1 * node.features.entropy / 2)) - 1;
+        return {
+            style: {
+                stroke: `rgb(${Math.floor(95 * (1 - value))},${Math.floor(149 * (1 - value))},255)`,
+            },
+        };
+    }, []);
+
     return (
         <div className="content-container">
             <div className="card">
@@ -150,6 +161,7 @@ const CausalPage: React.FC = () => {
                             preconditions={modifiablePrecondition}
                             onNodeSelected={handleSubTreeSelected}
                             onLinkTogether={handleLinkTogether}
+                            renderNode={renderNode}
                             onRemoveLink={(srcIdx, tarIdx) =>
                                 setModifiablePrecondition((list) => {
                                     return list.filter((link) => !(link.src === srcIdx && link.tar === tarIdx));
@@ -158,23 +170,6 @@ const CausalPage: React.FC = () => {
                         />
                     )}
                 />
-                {/* <div>
-                    {!computing ? (
-                        <Explorer
-                            dataSource={dataSubset}
-                            fields={exploringFields}
-                            scoreMatrix={igMatrix}
-                            preconditions={modifiablePrecondition}
-                            onNodeSelected={handleSubTreeSelected}
-                            onLinkTogether={handleLinkTogether}
-                            onRemoveLink={(srcIdx, tarIdx) =>
-                                setModifiablePrecondition((list) => {
-                                    return list.filter((link) => !(link.src === srcIdx && link.tar === tarIdx));
-                                })
-                            }
-                        />
-                    ) : null}
-                </div> */}
             </div>
             <ManualAnalyzer context={dataContext} interactFieldGroups={interactFieldGroups} />
         </div>
