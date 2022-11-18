@@ -43,6 +43,7 @@ export interface ExplorerProps {
     onLinkTogether: (srcIdx: number, tarIdx: number) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
+    synchronizePredictionsUsingCausalResult: () => void;
 }
 
 const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
@@ -103,6 +104,7 @@ const Explorer: FC<ExplorerProps> = ({
     onRemoveLink,
     preconditions,
     renderNode,
+    synchronizePredictionsUsingCausalResult,
 }) => {
     const { causalStore } = useGlobalStore();
     const { causalStrength } = causalStore;
@@ -275,6 +277,12 @@ const Explorer: FC<ExplorerProps> = ({
         setAutoLayout(true);
         forceRelayoutRef.current();
     }, []);
+
+    useEffect(() => {
+        if (mode === 'edit') {
+            synchronizePredictionsUsingCausalResult();
+        }
+    }, [mode, synchronizePredictionsUsingCausalResult]);
 
     return (<>
         <Container onClick={() => focus !== -1 && setFocus(-1)}>

@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
+import { resolvePreconditionsFromCausal } from '../../utils/resolve-causal';
 import Explorer from './explorer';
 import Params from './params';
 import type { BgKnowledge, ModifiableBgKnowledge } from './config';
@@ -122,6 +123,10 @@ const CausalPage: React.FC = () => {
         };
     }, []);
 
+    const synchronizePredictionsUsingCausalResult = useCallback(() => {
+        setModifiablePrecondition(resolvePreconditionsFromCausal(causalStrength, fieldMetas));
+    }, [setModifiablePrecondition, causalStrength, fieldMetas]);
+
     return (
         <div className="content-container">
             <div className="card">
@@ -167,6 +172,7 @@ const CausalPage: React.FC = () => {
                                     return list.filter((link) => !(link.src === srcIdx && link.tar === tarIdx));
                                 })
                             }
+                            synchronizePredictionsUsingCausalResult={synchronizePredictionsUsingCausalResult}
                         />
                     )}
                 />

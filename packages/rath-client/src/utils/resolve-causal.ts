@@ -1,4 +1,6 @@
 import intl from 'react-intl-universal';
+import type { IFieldMeta } from '../interfaces';
+import type { ModifiableBgKnowledge } from '../pages/causal/config';
 
 
 export enum CausalLinkDirection {
@@ -69,6 +71,50 @@ const resolveCausal = (resultMatrix: readonly (readonly number[])[]): CausalLink
     }
 
     return matrix;
+};
+
+export const resolvePreconditionsFromCausal = (
+    causalMatrix: readonly (readonly CausalLinkDirection[])[],
+    fields: readonly IFieldMeta[],
+): ModifiableBgKnowledge[] => {
+    const preconditions: ModifiableBgKnowledge[] = [];
+
+    for (let i = 0; i < causalMatrix.length - 1; i += 1) {
+        for (let j = i + 1; j < causalMatrix.length; j += 1) {
+            const flag = causalMatrix[i][j];
+            const a = fields[i].fid;
+            const b = fields[j].fid;
+            switch (flag) {
+                case CausalLinkDirection.directed: {
+                    preconditions.push({
+                        src: a,
+                        tar: b,
+                        type: 'directed-must-link',
+                    });
+                    break;
+                }
+                case CausalLinkDirection.reversed: {
+                    preconditions.push({
+                        src: b,
+                        tar: a,
+                        type: 'directed-must-link',
+                    });
+                    break;
+                }
+                case CausalLinkDirection.undirected:
+                case CausalLinkDirection.bidirected: {
+                    preconditions.push({
+                        src: a,
+                        tar: b,
+                        type: 'must-link',
+                    });
+                    break;
+                }
+            }
+        }
+    }
+
+    return preconditions;
 };
 
 
