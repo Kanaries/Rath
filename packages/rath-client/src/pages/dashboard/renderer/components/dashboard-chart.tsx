@@ -1,5 +1,4 @@
 import { applyFilters } from '@kanaries/loa';
-import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { FC, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
@@ -31,7 +30,7 @@ const highlightSelectorPredicateName = '__dashboard_chart_item_highlighted';
 const DashboardChart: FC<DashboardChartProps> = ({
     item, filters, highlighters, ratio, onFilter, sampleSize,
 }) => {
-    const { dataSourceStore } = useGlobalStore();
+    const { dataSourceStore, dashboardStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
     const fields = useMemo(() => {
         return Object.values(item.subset.encoding).filter(Boolean).reduce<typeof fieldMetas>((list, encoding) => {
@@ -214,7 +213,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
         if (container) {
             const cb = () => {
                 const { width, height } = container.getBoundingClientRect();
-                runInAction(() => {
+                dashboardStore.runInAction(() => {
                     item.size = {
                         w: width,
                         h: height,
@@ -225,7 +224,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
             ro.observe(container);
             return () => ro.disconnect();
         }
-    }, [item]);
+    }, [item, dashboardStore]);
 
     const fontSize = ratio * 3.3;
 

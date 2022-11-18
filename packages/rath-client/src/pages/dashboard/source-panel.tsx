@@ -1,5 +1,4 @@
 import { applyFilters } from "@kanaries/loa";
-import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
@@ -28,7 +27,7 @@ const Container = styled.div`
 const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
     const { filters } = page.data;
 
-    const { collectionStore, dataSourceStore } = useGlobalStore();
+    const { collectionStore, dataSourceStore, dashboardStore } = useGlobalStore();
     const { collectionList } = collectionStore;
     const { cleanedData } = dataSourceStore;
     
@@ -39,7 +38,7 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
 
     const apply = useCallback((view: IInsightVizView) => {
         if (card) {
-            runInAction(() => {
+            dashboardStore.runInAction(() => {
                 const data = deepcopy(view) as typeof view;
                 card.content.chart = {
                     subset: data.spec,
@@ -55,7 +54,7 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
                 card.content.text = data.desc;
             });
         }
-    }, [card]);
+    }, [card, dashboardStore]);
 
     // console.log(JSON.parse(JSON.stringify(card)));
     const [width, setWidth] = useState(0);

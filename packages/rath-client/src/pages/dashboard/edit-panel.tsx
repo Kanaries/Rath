@@ -1,6 +1,6 @@
 import { Dropdown, DropdownMenuItemType, IDropdownOption, TextField, Toggle } from "@fluentui/react";
 import produce from "immer";
-import { runInAction, toJS } from "mobx";
+import { toJS } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useMemo } from "react";
 import styled from "styled-components";
@@ -169,7 +169,7 @@ const MarkTypes = [
 ] as const;
 
 const EditPanel: FC<DashboardPanelProps> = ({ card }) => {
-    const { dataSourceStore } = useGlobalStore();
+    const { dataSourceStore, dashboardStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { chart = {
         subset: {
@@ -190,15 +190,13 @@ const EditPanel: FC<DashboardPanelProps> = ({ card }) => {
                 <Dropdown
                     label="Mark"
                     selectedKey={(mark as undefined | { type: typeof mark & string })?.type}
-                    onChange={(_, item) => card && item && runInAction(() => {
+                    onChange={(_, item) => card && item && dashboardStore.runInAction(() => {
                         const key = item.key as typeof MarkTypes[number];
-                        runInAction(() => {
-                            card.content.chart = produce(toJS(chart), draft => {
-                                draft.subset.mark = {
-                                    type: key,
-                                    tooltip: true,
-                                };
-                            });
+                        card.content.chart = produce(toJS(chart), draft => {
+                            draft.subset.mark = {
+                                type: key,
+                                tooltip: true,
+                            };
                         });
                     })}
                     options={MarkTypes.map(key => ({
@@ -213,15 +211,13 @@ const EditPanel: FC<DashboardPanelProps> = ({ card }) => {
                     id={key}
                     data={encoding ?? {}}
                     fieldsMeta={fieldMetas}
-                    onChange={val => card && chart && runInAction(() => {
-                        runInAction(() => {
-                            card.content.chart = produce(toJS(chart), draft => {
-                                if (val) {
-                                    draft.subset.encoding[key] = val;
-                                } else {
-                                    delete draft.subset.encoding[key];
-                                }
-                            });
+                    onChange={val => card && dashboardStore.runInAction(() => {
+                        card.content.chart = produce(toJS(chart), draft => {
+                            if (val) {
+                                draft.subset.encoding[key] = val;
+                            } else {
+                                delete draft.subset.encoding[key];
+                            }
                         });
                     })}
                 />

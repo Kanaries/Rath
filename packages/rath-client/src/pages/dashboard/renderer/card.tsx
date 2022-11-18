@@ -105,18 +105,15 @@ const CardBox = styled.div<{ direction: 'column' | 'row'; appearance: DashboardC
     & .title {
         font-size: calc(16px * var(--ratio));
         flex-grow: ${layoutOption.title.flex};
-        flex-shrink: ${layoutOption.title.flex ? 999 / layoutOption.title.flex : 0};
         flex-basis: max-content;
     }
     & .text {
         font-size: calc(13px * var(--ratio));
         flex-grow: ${layoutOption.text.flex};
-        flex-shrink: ${999 / (layoutOption.text.flex || 1)};
         flex-basis: ${layoutOption.text.prefer}%;
     }
     & .chart {
         flex-grow: ${layoutOption.chart.flex};
-        flex-shrink: ${999 / (layoutOption.chart.flex || 1)};
         flex-basis: ${layoutOption.chart.prefer}%;
         overflow: hidden;
         :not(:first-child) {

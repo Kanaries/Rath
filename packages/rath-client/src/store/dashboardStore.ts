@@ -264,4 +264,12 @@ export default class DashboardStore {
         });
     }
 
+    /**
+     * 涉及到适合使用 mobx runInAction 处理的场景，改写为这个方法，以方便在这个 store 中进行追踪
+     * @param updater change any state in store as an action
+     */
+    public runInAction(updater: () => void): void {
+        updater();
+    }
+
 }
