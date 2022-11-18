@@ -23,8 +23,8 @@ const EncodingFieldContainer = styled.div`
     margin: 0.5em 0.8em;
     border: 1px solid transparent;
     padding: 0.6em 1.2em;
-    box-shadow: 0 3.2px 7.2px 0 rgb(0 0 0 / 7%), 0 0.6px 1.8px 0 rgb(0 0 0 / 5%),
-            inset 0 3.2px 7.2px 0 rgb(0 0 0 / 7%), 0 0.6px 1.8px 0 rgb(0 0 0 / 5%);
+    box-shadow: 0 3.2px 7.2px 0 rgb(0 0 0 / 5%), 0 0.6px 1.8px 0 rgb(0 0 0 / 3%),
+            inset 0 3.2px 7.2px 0 rgb(0 0 0 / 2%), 0 0.6px 1.8px 0 rgb(0 0 0 / 1%);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -171,40 +171,47 @@ const MarkTypes = [
 const EditPanel: FC<DashboardPanelProps> = ({ card }) => {
     const { dataSourceStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { chart } = card?.content ?? {};
+    const { chart = {
+        subset: {
+            mark: { type: 'point' },
+            encoding: {},
+        },
+        filters: [],
+        selectors: [],
+        highlighter: [],
+        size: { w: 0, h: 0 },
+    } as NonNullable<NonNullable<DashboardPanelProps['card']>['content']['chart']> } = card?.content ?? {};
     const { subset } = chart ?? {};
     const { encoding, mark } = subset ?? {};
 
     return (
         <Container>
-            {subset && (
-                <EncodingFieldContainer>
-                    <Dropdown
-                        label="Mark"
-                        selectedKey={(mark as undefined | { type: typeof mark & string })?.type}
-                        onChange={(_, item) => card && chart && item && runInAction(() => {
-                            const key = item.key as typeof MarkTypes[number];
-                            runInAction(() => {
-                                card.content.chart = produce(toJS(chart), draft => {
-                                    draft.subset.mark = {
-                                        type: key,
-                                        tooltip: true,
-                                    };
-                                });
+            <EncodingFieldContainer>
+                <Dropdown
+                    label="Mark"
+                    selectedKey={(mark as undefined | { type: typeof mark & string })?.type}
+                    onChange={(_, item) => card && item && runInAction(() => {
+                        const key = item.key as typeof MarkTypes[number];
+                        runInAction(() => {
+                            card.content.chart = produce(toJS(chart), draft => {
+                                draft.subset.mark = {
+                                    type: key,
+                                    tooltip: true,
+                                };
                             });
-                        })}
-                        options={MarkTypes.map(key => ({
-                            key,
-                            text: key,
-                        }))}
-                    />
-                </EncodingFieldContainer>
-            )}
-            {encoding && EncodingKeys.map(key => (
+                        });
+                    })}
+                    options={MarkTypes.map(key => ({
+                        key,
+                        text: key,
+                    }))}
+                />
+            </EncodingFieldContainer>
+            {EncodingKeys.map(key => (
                 <EncodingField
                     key={key}
                     id={key}
-                    data={encoding}
+                    data={encoding ?? {}}
                     fieldsMeta={fieldMetas}
                     onChange={val => card && chart && runInAction(() => {
                         runInAction(() => {
