@@ -1,9 +1,9 @@
 import { ActionButton, ChoiceGroup, IChoiceGroupOption, Stack, Text, TextField } from "@fluentui/react";
-import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useState } from "react";
 import styled from "styled-components";
 import { DashboardCardAppearance, DashboardCardInsetLayout, DashboardCardState, DashboardDocument, DashboardDocumentOperators } from "../../store/dashboardStore";
+import { useGlobalStore } from "../../store";
 import SourcePanel from "./source-panel";
 import FilterList from './filter-list';
 import EditPanel from "./edit-panel";
@@ -116,6 +116,7 @@ const CardAlignName: Readonly<Record<DashboardCardInsetLayout, string>> = {
 };
 
 const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sampleSize }) => {
+    const { dashboardStore } = useGlobalStore();
     const [tab, setTab] = useState<typeof SupportedTabs[number]>('collection');
 
     const themeOptions = useCallback((mode: 'single' | 'global') => CardThemes.map<IChoiceGroupOption>(thm => ({
@@ -125,7 +126,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
             const applyToAll = () => {
                 const key = option?.key ?? '';
                 if ((CardThemes as string[]).includes(key)) {
-                    runInAction(() => {
+                    dashboardStore.runInAction(() => {
                         page.cards.forEach(c => c.config.appearance = key as DashboardCardAppearance);
                     });
                 }
@@ -143,7 +144,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                 </ActionButton>
             ) : null;
         },
-    })), [page]);
+    })), [page, dashboardStore]);
 
     const layoutOptions = useCallback((mode: 'single' | 'global') => CardAlignTypes.map<IChoiceGroupOption>(alg => ({
         key: CardAlignName[alg],
@@ -156,7 +157,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                     Row: DashboardCardInsetLayout.Row,
                 }[option?.key ?? ''];
                 if (typeof key === 'number') {
-                    runInAction(() => {
+                    dashboardStore.runInAction(() => {
                         page.cards.forEach(c => c.config.align = key);
                     });
                 }
@@ -174,7 +175,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                 </ActionButton>
             ) : null;
         },
-    })), [page]);
+    })), [page, dashboardStore]);
 
     return (
         <Panel onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
@@ -187,14 +188,14 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                         <TextField
                             label="Title"
                             value={card.content.title ?? ''}
-                            onChange={(_, d) => runInAction(() => {
+                            onChange={(_, d) => dashboardStore.runInAction(() => {
                                 card.content.title = d || undefined;
                             })}
                         />
                         <TextField
                             label="Description"
                             value={card.content.text ?? ''}
-                            onChange={(_, d) => runInAction(() => {
+                            onChange={(_, d) => dashboardStore.runInAction(() => {
                                 card.content.text = d || undefined;
                             })}
                             multiline
@@ -205,7 +206,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                             label="Theme"
                             selectedKey={card.config.appearance}
                             options={themeOptions('single')}
-                            onChange={(_, option) => runInAction(() => {
+                            onChange={(_, option) => dashboardStore.runInAction(() => {
                                 const key = option?.key ?? '';
                                 if ((CardThemes as string[]).includes(key)) {
                                     card.config.appearance = key as DashboardCardAppearance;
@@ -216,7 +217,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                             label="Layout"
                             selectedKey={CardAlignName[card.config.align]}
                             options={layoutOptions('single')}
-                            onChange={(_, option) => runInAction(() => {
+                            onChange={(_, option) => dashboardStore.runInAction(() => {
                                 const key = {
                                     Auto: DashboardCardInsetLayout.Auto,
                                     Column: DashboardCardInsetLayout.Column,
