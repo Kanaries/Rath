@@ -262,11 +262,9 @@ export default class DashboardStore {
     }
     protected setPageName(index: number, name: string) {
         this.pages[index].info.name = name;
-        this.pages[index].info.lastModifyTime = Date.now();
     }
     protected setPageDesc(index: number, desc: string) {
         this.pages[index].info.description = desc;
-        this.pages[index].info.lastModifyTime = Date.now();
     }
     protected addPageCard(index: number, layout: DashboardCard['layout']) {
         return this.pages[index].cards.push({
