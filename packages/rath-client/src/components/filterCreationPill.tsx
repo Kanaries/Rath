@@ -33,8 +33,9 @@ interface FilterCreationPillProps {
     onFilterSubmit: (field: IFieldMeta, filter: IFilter) => void;
     onRenderPill?: (text: string, handleClick: () => void) => void;
 }
+const DefaultPill: FilterCreationPillProps['onRenderPill'] = (text, handleClick) => <BasePillPlaceholder text={text} onClick={handleClick} />;
 const FilterCreationPill: React.FC<FilterCreationPillProps> = (props) => {
-    const { fields, onFilterSubmit, onRenderPill = (text, handleClick) => <BasePillPlaceholder text={text} onClick={handleClick} /> } = props;
+    const { fields, onFilterSubmit, onRenderPill = DefaultPill } = props;
     const container = useRef<HTMLDivElement>(null);
     const [show, setShow] = useState(false);
     const [filter, setFilter] = useState<IFilter>({
