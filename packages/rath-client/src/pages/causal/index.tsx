@@ -12,7 +12,7 @@ import { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import { useDataViews } from './hooks/dataViews';
 import DatasetPanel from './datasetPanel';
 import ManualAnalyzer from './manualAnalyzer';
-import PreconditionPanel from './preconditionPanel';
+import PreconditionPanel from './precondition/preconditionPanel';
 
 const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();

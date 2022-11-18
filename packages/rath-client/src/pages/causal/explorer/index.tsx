@@ -269,7 +269,7 @@ const Explorer: FC<ExplorerProps> = ({ dataSource, fields, scoreMatrix, onNodeSe
                     }}
                     onClick={forceLayout}
                 >
-                    还原布局
+                    修正布局
                 </DefaultButton>
                 <Toggle
                     // label="Modify Constraints"
