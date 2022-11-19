@@ -21,7 +21,7 @@ type GraphData = {
 const ExportGraphButton: React.FC<Props> = ({ data, fields }) => {
     const value = useMemo<File>(() => {
         const graph: GraphData = {
-            nodes: fields.map(f => ({ id: f.fid })),
+            nodes: fields.map(f => ({ id: f.name || f.fid, name: f.name || f.fid })),
             edges: [],
         };
         for (let i = 0; i < data.length; i++) {
@@ -30,8 +30,8 @@ const ExportGraphButton: React.FC<Props> = ({ data, fields }) => {
                     continue;
                 } else if (data[i][j]) {
                     graph.edges.push({
-                        source: fields[i].fid,
-                        target: fields[j].fid,
+                        source: fields[i].name || fields[i].fid,
+                        target: fields[j].name || fields[j].fid,
                     });
                 }
             }

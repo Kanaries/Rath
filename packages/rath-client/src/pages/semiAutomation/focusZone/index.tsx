@@ -17,7 +17,7 @@ const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
 const FocusZone: React.FC = (props) => {
     const { semiAutoStore, commonStore, collectionStore, painterStore } = useGlobalStore();
-    const { mainVizSetting, mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas } =
+    const { mainVizSetting, mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas, neighborKeys } =
         semiAutoStore;
     const explainDiff = useCallback(() => {
         if (mainView && compareView) {
@@ -65,6 +65,10 @@ const FocusZone: React.FC = (props) => {
                 {mainView &&
                     mainView.fields.map((f: IFieldMeta) => (
                         <ViewField
+                            onDoubleClick={() => {
+                                semiAutoStore.setNeighborKeys(neighborKeys.includes(f.fid) ? [] : [f.fid]);
+                            }}
+                            mode={neighborKeys.includes(f.fid) ? 'wildcard' : 'real'}
                             key={f.fid}
                             type={f.analyticType}
                             text={f.name || f.fid}

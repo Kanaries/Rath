@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { IFieldMeta, IRow } from "../../interfaces";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function conditionalMic (condField: IFieldMeta, xField: IFieldMeta, yField: IFieldMeta, dataSource: IRow[]) {
+export function conditionalMic (condField: IFieldMeta, xField: IFieldMeta, yField: IFieldMeta, dataSource: IRow[]) {
     let condValues: any[] = dataSource.map(row => row[condField.fid])
     if (condField.semanticType === 'quantitative') {
         condValues = binMap(condValues);
@@ -42,7 +42,7 @@ function conditionalMic (condField: IFieldMeta, xField: IFieldMeta, yField: IFie
     if (true) {
         const cond = new Set(uniqueCondValues.slice(0, -1));
         const filteredDataSource = dataSource.filter(row => !cond.has(row[condField.fid]));
-        if (filteredDataSource.length > 16) {
+        if (filteredDataSource.length > 40) {
             let score = 0;
             const X = filteredDataSource.map(row => row[xField.fid]);
             const Y = filteredDataSource.map(row => row[yField.fid]);
@@ -110,7 +110,7 @@ function conditionaExtremelMic (condField: IFieldMeta, xField: IFieldMeta, yFiel
     if (true) {
         const cond = new Set(uniqueCondValues.slice(0, -1));
         const filteredDataSource = dataSource.filter(row => !cond.has(row[condField.fid]));
-        if (filteredDataSource.length > 16) {
+        if (filteredDataSource.length > 40) {
             let score = 0;
             const X = filteredDataSource.map(row => row[xField.fid]);
             const Y = filteredDataSource.map(row => row[yField.fid]);
@@ -144,18 +144,20 @@ export function getFieldRelationCheckedMatrix (mat: number[][], fields: IFieldMe
     let ans: number[][] = new Array(mat.length).fill(0).map(() => new Array(mat.length).fill(0));
     for (let i = 0; i < mat.length; i++) {
         for (let j = 0; j < mat[i].length; j++) {
-            let c = 0;
             for (let k = 0; k < fields.length; k++) {
-                // ans[i][j] = mat[i][j]
+                ans[i][j] = mat[i][j]
                 if (i === j || i === k || j === k) continue;
-                // const score = conditionaExtremelMic(fields[k], fields[i], fields[j], dataSource);
-                const score = conditionalMic(fields[k], fields[j], fields[i], dataSource);
-                ans[i][j] += score;
+                const score1 = conditionaExtremelMic(fields[k], fields[i], fields[j], dataSource);
+                if (score1 < 0.05) {
+                    ans[i][j] = 0;
+                    break;
+                }
+                ans[i][j] = Math.max(ans[i][j], score1)
+                // ans[i][j] = ans[j][i] = Math.min(ans[i][j], ans[j][i], score1, score2);
                 // if (Math.abs(score) < Math.abs(ans[i][j])) {
                 //     ans[i][j] = score;
                 // }
                 // ans[i][j] = Math.min(ans[i][j], score1);
-                c++;
                 // if ((mat[i][j] > 0.5 || mat[j][i] > 0.5) && mat[k][i] > 0.5 && mat[k][j] > 0.5) {
                 //     const score = conditionalMic(fields[k], fields[i], fields[j], dataSource);
                 //     ans[i][j] = ans[j][i] = Math.max(score, ans[i][j], ans[j][i]);
@@ -164,7 +166,17 @@ export function getFieldRelationCheckedMatrix (mat: number[][], fields: IFieldMe
                 //     // }
                 // }
             }
-            ans[i][j] /= c;
+        }
+    }
+    for (let i = 0 ; i < ans.length; i++) {
+        for (let j = 0; j < ans.length; j++) {
+            if (ans[i][j] > 0 && ans[j][i] > 0) {
+                if (ans[i][j] - ans[j][i] > 0.2) {
+                    ans[j][i] = 0
+                } else if (ans[j][i] - ans[i][j] > 0.2) {
+                    ans[i][j] = 0
+                }
+            }
         }
     }
     // console.log(JSON.stringify(ans, null, 2))
@@ -194,6 +206,36 @@ export function encodeDiscrete (dataSource: IRow[], fields: IFieldMeta[]): IRow[
             }
         }
         ans.push(newRow);
+    }
+    return ans;
+}
+
+export function skeletonPC (mat: number[][], alpha: number): number[][] {
+    const ans: number[][] = new Array(mat.length).fill(0).map(() => new Array(mat.length).fill(0));
+    for (let i = 0; i < mat.length; i++) {
+        for (let j = 0; j < mat[i].length; j++) {
+            if (mat[i][j] > alpha) {
+                ans[i][j] = 1;
+            }
+        }
+    }
+    return ans;
+}
+
+export function extendCPDAG (mat: number[][], O: Map<number, number[]>) {
+    const ans: number[][] = new Array(mat.length).fill(0).map(() => new Array(mat.length).fill(0));
+    for (let i = 0; i < mat.length; i++) {
+        for (let j = 0; j < mat[i].length; j++) {
+            ans[i][j] = mat[i][j];
+        }
+    }
+    for (let [, value] of O) {
+        for (let i = 0; i < value.length; i++) {
+            for (let j = 0; j < value.length; j++) {
+                if (i === j) continue;
+                ans[value[i]][value[j]] = 1;
+            }
+        }
     }
     return ans;
 }

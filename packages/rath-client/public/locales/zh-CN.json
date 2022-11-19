@@ -339,6 +339,7 @@
             "relateFeatures": "关联特征",
             "explainDiff": "差异性分析",
             "pointInterests": "拆分",
+            "neighbors": "相邻视图",
             "pin": "深入分析",
             "compare": "比对分析",
             "vizsys": {
@@ -350,7 +351,8 @@
             "associate": {
                 "patterns": "联想规律",
                 "features": "联想维度",
-                "filters": "推荐子集"
+                "filters": "推荐子集",
+                "neighbors": "推荐相邻视图"
             }
         }
     },

@@ -335,10 +335,11 @@
     "semiAuto": {
         "main": {
             "mainView": "Main View",
-            "relatePatterns": "associate patterns",
-            "relateFeatures": "associate features",
+            "relatePatterns": "related patterns",
+            "relateFeatures": "related features",
             "explainDiff": "explain diff",
-            "pointInterests": "split",
+            "pointInterests": "related subsets",
+            "neighbors": "neighbor views",
             "pin": "pin",
             "compare": "compare",
             "vizsys": {
@@ -350,7 +351,8 @@
             "associate": {
                 "patterns": "Associated Patterns",
                 "features": "Associated Features",
-                "filters": "Associated Subsets"
+                "filters": "Associated Subsets",
+                "neighbors": "Associated Neighbors"
             }
         }
     },
