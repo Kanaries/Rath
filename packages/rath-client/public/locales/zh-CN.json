@@ -353,6 +353,12 @@
                 "features": "联想维度",
                 "filters": "推荐子集",
                 "neighbors": "推荐相邻视图"
+            },
+            "associateShorthand": {
+                "patterns": "规律",
+                "features": "特征",
+                "filters": "子集",
+                "neighbors": "邻近视图"
             }
         }
     },

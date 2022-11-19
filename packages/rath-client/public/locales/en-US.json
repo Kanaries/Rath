@@ -353,6 +353,12 @@
                 "features": "Associated Features",
                 "filters": "Associated Subsets",
                 "neighbors": "Associated Neighbors"
+            },
+            "associateShorthand": {
+                "patterns": "Patterns",
+                "features": "Features",
+                "filters": "Subsets",
+                "neighbors": "Neighbors"
             }
         }
     },
