@@ -28,7 +28,7 @@ export class PainterStore {
         this.dataSourceStore = dataSourceStore;
         this.semiAutoStore = semiAutoStore;
         makeAutoObservable(this, {
-            painterView: observable.shallow,
+            painterView: observable.ref,
             // @ts-ignore
             commonStore: false,
             dataSourceStore: false,
@@ -50,8 +50,10 @@ export class PainterStore {
         }
     }
     public analysisInPainter(spec: IVegaSubset, pattern: IPattern) {
-        this.painterView.dataView = pattern;
-        this.painterView.spec = spec;
+        this.painterView = {
+            dataView: toJS(pattern),
+            spec: toJS(spec),
+        }
         this.commonStore.setAppKey(PIVOT_KEYS.painter);
     }
     public setPaintingForTrigger(state: boolean) {
@@ -70,8 +72,9 @@ export class PainterStore {
     public updateViewSpec() {
         if (this.painterView.dataView !== null) {
             const { mainVizSetting, settings } = this.semiAutoStore;
-            const mainView = toJS(this.painterView.dataView);
-            this.painterView.spec =
+            const mainView = this.painterView.dataView;
+            this.painterView = produce(this.painterView, (draft) => {
+                draft.spec =
                 settings.vizAlgo === 'lite'
                     ? distVis({
                           resizeMode: mainVizSetting.resize.mode,
@@ -94,33 +97,39 @@ export class PainterStore {
                           excludeScaleZero: mainVizSetting.excludeScaleZero,
                           specifiedEncodes: mainView.encodes,
                       });
+            })
         }
     }
     public addMainViewField(fieldId: string) {
         if (this.painterView.dataView === null) return;
         const targetFieldIndex = this.fieldMetas.findIndex((f) => f.fid === fieldId);
-        this.painterView.dataView = produce(this.painterView.dataView, (draft) => {
-            draft.fields.push(this.fieldMetas[targetFieldIndex]);
+        this.painterView = produce(this.painterView, (draft) => {
+            draft.dataView!.fields.push(this.fieldMetas[targetFieldIndex]);
         });
+        this.updateViewSpec()
     }
     public removeMainViewFilter(filterFieldId: string) {
         if (!this.painterView.dataView?.filters) return;
-        this.painterView.dataView = produce(this.painterView.dataView, (draft) => {
-            draft.filters = draft.filters!.filter((f) => f.fid !== filterFieldId);
+        this.painterView = produce(this.painterView, (draft) => {
+            draft.dataView!.filters = draft.dataView!.filters!.filter((f) => f.fid !== filterFieldId);
         });
+        this.updateViewSpec();
     }
     public addMainViewFilter(filter: IFilter) {
         if (!this.painterView.dataView) return;
-        if (typeof this.painterView.dataView.filters === 'undefined') this.painterView.dataView.filters = [];
-        this.painterView.dataView = produce(this.painterView.dataView, (draft) => {
-            draft.filters!.push(filter);
+        // if (typeof this.painterView.dataView.filters === 'undefined') this.painterView.dataView.filters = [];
+        this.painterView = produce(this.painterView, (draft) => {
+            if (typeof draft.dataView!.filters === 'undefined') draft.dataView!.filters = [];
+            draft.dataView!.filters!.push(filter);
         });
+        this.updateViewSpec();
     }
     public removeMainViewField(fieldId: string) {
         if (this.painterView.dataView === null) return;
         const targetFieldIndex = this.painterView.dataView.fields.findIndex((f) => f.fid === fieldId);
-        this.painterView.dataView = produce(this.painterView.dataView, (draft) => {
-            draft.fields.splice(targetFieldIndex, 1);
+        this.painterView = produce(this.painterView, (draft) => {
+            draft.dataView!.fields.splice(targetFieldIndex, 1);
         });
+        this.updateViewSpec();
     }
 }

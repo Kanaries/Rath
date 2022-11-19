@@ -159,6 +159,9 @@ const Painter: React.FC = (props) => {
                 const yField = painterSpec.encoding.y.field;
                 const xFieldType = painterSpec.encoding.x.type as ISemanticType;
                 const yFieldType = painterSpec.encoding.y.type as ISemanticType;
+                const limitFields: string[] = [];
+                if (painterSpec.encoding.column) limitFields.push(painterSpec.encoding.column.field);
+                if (painterSpec.encoding.row) limitFields.push(painterSpec.encoding.row.field);
                 if (xFieldType === 'quantitative' && yFieldType === 'quantitative') {
                     const xRange = getRange(viewData.map((r) => r[xField]));
                     const yRange = getRange(viewData.map((r) => r[yField]));
@@ -176,7 +179,9 @@ const Painter: React.FC = (props) => {
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
+                                datum: item.datum,
                                 painterMode,
+                                limitFields
                             });
                             if (painterMode === PAINTER_MODE.COLOR) {
                                 linkNearViz();
