@@ -1,35 +1,13 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
-import G6, { Graph, GraphData } from "@antv/g6";
+import { Graph } from "@antv/g6";
 import { ActionButton } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { ModifiableBgKnowledge } from "../config";
+import { GraphNodeAttributes, useGraphOptions, useRenderData } from "./graph-utils";
+import { useReactiveGraph } from "./graph-helper";
 import type { DiagramGraphData } from ".";
 
-
-const GRAPH_HEIGHT = 400;
-
-const G6_EDGE_SELECT = 'edge_select';
-
-G6.registerBehavior(G6_EDGE_SELECT, {
-    getEvents() {
-        return {
-            'edge:click': 'onEdgeClick',
-        };
-    },
-    onEdgeClick(e: any) {
-        const graph = this.graph as Graph;
-        const item = e.item;
-        if (item.hasState('active')) {
-            graph.setItemState(item, 'active', false);
-            return;
-        }
-        graph.findAllByState('edge', 'active').forEach(node => {
-            graph.setItemState(node, 'active', false);
-        });
-        graph.setItemState(item, 'active', true);
-    },
-});
 
 const Container = styled.div`
     overflow: hidden;
@@ -50,49 +28,21 @@ const Container = styled.div`
 
 export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     fields: readonly Readonly<IFieldMeta>[];
+    selectedSubtree: readonly string[];
     value: Readonly<DiagramGraphData>;
     cutThreshold: number;
+    limit: number;
     mode: 'explore' | 'edit';
     focus: number | null;
-    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+    onClickNode?: (node: DiagramGraphData['nodes'][number] | null) => void;
+    toggleFlowAnalyzer: () => void;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
+    forceRelayoutRef: React.MutableRefObject<() => void>;
+    autoLayout: boolean;
+    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
 }, never>, 'onChange' | 'ref'>;
-
-const arrows = {
-    undirected: {
-        start: '',
-        end: '',
-    },
-    directed: {
-        start: '',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
-    },
-    bidirected: {
-        start: 'M 12,0 L 28,8 L 28,-8 Z',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
-    },
-    'weak directed': {
-        start: '',
-        end: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
-    },
-} as const;
-
-const arrowsForBK = {
-    'must-link': {
-        start: 'M 12,0 L 28,8 L 28,-8 Z',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
-    },
-    'must-not-link': {
-        start: 'M 14,6 L 26,-6 M 14,-6 L 26,6',
-        end: 'M 14,6 L 26,-6 M 14,-6 L 26,6',
-    },
-    'prefer-link': {
-        start: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
-        end: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
-    },
-} as const;
 
 /** 调试用的，不需要的时候干掉 */
 type ExportableGraphData = {
@@ -137,15 +87,26 @@ const ExportGraphButton: React.FC<{ data: DiagramGraphData; fields: readonly Rea
     );
 };
 
-const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
-    { fields, value, onClickNode, focus, cutThreshold, mode, onLinkTogether, onRemoveLink, preconditions, ...props },
-    ref
-) => {
-    const [forceUpdateFlag, setForceUpdateFlag] = useState(Date.now());
-
+const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
+    fields,
+    selectedSubtree,
+    value,
+    onClickNode,
+    focus,
+    cutThreshold,
+    limit,
+    mode,
+    onLinkTogether,
+    onRemoveLink,
+    preconditions,
+    forceRelayoutRef,
+    autoLayout,
+    renderNode,
+    toggleFlowAnalyzer,
+    ...props
+}, ref) => {
     const [data] = useMemo(() => {
         let totalScore = 0;
-        const pos = forceUpdateFlag;
         const nodeCauseWeights = value.nodes.map(() => 0);
         const nodeEffectWeights = value.nodes.map(() => 0);
         value.links.forEach(link => {
@@ -167,210 +128,63 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 target: link.effectId,
                 value: link.score / nodeCauseWeights[link.effectId],
                 type: link.type,
-            })).filter(link => link.value >= cutThreshold),
-        }, totalScore, pos];
-    }, [value, cutThreshold, forceUpdateFlag]);
+            })).filter(link => link.value >= cutThreshold).sort((a, b) => b.value - a.value).slice(0, limit),
+        }, totalScore];
+    }, [value, cutThreshold, limit]);
 
     const containerRef = useRef<HTMLDivElement>(null);
-
     const [width, setWidth] = useState(0);
 
-    const handleNodeClickRef = useRef(onClickNode);
-    handleNodeClickRef.current = onClickNode;
-
-    const handleLinkRef = useRef(onLinkTogether);
-    handleLinkRef.current = onLinkTogether;
-
-    const handleRemoveLinkRef = useRef(onRemoveLink);
-    handleRemoveLinkRef.current = onRemoveLink;
-
-    const updateSelected = useRef((idx: number) => {});
-
-    const graphRef = useRef<Graph>();
-    const dataRef = useRef<GraphData>({});
-    dataRef.current = useMemo(() => ({
-        nodes: data.nodes.map((node, i) => ({ id: `${node.id}`, description: fields[i].name ?? fields[i].fid })),
-        edges: mode === 'explore' ? data.links.map((link, i) => ({
-            id: `link_${i}`,
-            source: `${link.source}`,
-            target: `${link.target}`,
-            style: {
-                startArrow: {
-                    fill: '#F6BD16',
-                    path: arrows[link.type].start,
-                },
-                endArrow: {
-                    fill: '#F6BD16',
-                    path: arrows[link.type].end,
-                },
-            },
-        })) : preconditions.map((bk, i) => ({
-            id: `bk_${i}`,
-            source: `${fields.findIndex(f => f.fid === bk.src)}`,
-            target: `${fields.findIndex(f => f.fid === bk.tar)}`,
-            style: {
-                lineWidth: 2,
-                startArrow: {
-                    fill: '#F6BD16',
-                    path: arrowsForBK[bk.type].start,
-                },
-                endArrow: {
-                    fill: '#F6BD16',
-                    path: arrowsForBK[bk.type].end,
-                },
-            },
-            edgeStateStyles: {
-                active: {
-                    lineWidth: 2,
-                },
-            },
-        })),
-    }), [data, mode, preconditions, fields]);
-
-    const widthRef = useRef(width);
-    widthRef.current = width;
+    const updateSelectedRef = useRef<(idx: number) => void>(() => {});
 
     const [edgeSelected, setEdgeSelected] = useState(false);
 
-    useEffect(() => {
-        const { current: container } = containerRef;
-        if (container) {
-            const graph = new G6.Graph({
-                container,
-                width: widthRef.current,
-                height: GRAPH_HEIGHT,
-                linkCenter: true,
-                modes: {
-                    default: mode === 'edit' ? ['drag-canvas', 'drag-node', 'create-edge', G6_EDGE_SELECT] : ['drag-canvas', 'drag-node', 'click-select'],
-                },
-                animate: true,
-                layout: {
-                    type: 'fruchterman',
-                    gravity: 5,
-                    speed: 5,
-                    center: [widthRef.current / 2, GRAPH_HEIGHT / 2],
-                    // for rendering after each iteration
-                    tick: () => {
-                        graph.refreshPositions()
-                    }
-                },
-                defaultNode: {
-                  size: 24,
-                  style: {
-                    lineWidth: 2,
-                  },
-                },
-                defaultEdge: {
-                  size: 1,
-                  color: '#F6BD16',
-                },
-            });
-            graph.node(node => ({
-                label: node.description ?? node.id,
-            }));
-            graph.data(dataRef.current);
-            graph.render();
+    const graphRef = useRef<Graph>();
+    const renderData = useRenderData(data, mode, preconditions, fields, renderNode);
+    const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, setEdgeSelected);
+    const cfgRef = useRef(cfg);
+    cfgRef.current = cfg;
 
-            graph.on('aftercreateedge', (e: any) => {
-                const edge = e.edge._cfg;
-                const source = fields[parseInt(edge.source._cfg.id, 10)];
-                const target = fields[parseInt(edge.target._cfg.id, 10)];
-                handleLinkRef.current(source.fid, target.fid);
-                const edges = graph.save().edges;
-                G6.Util.processParallelEdges(edges);
-                graph.getEdges().forEach((edge, i) => {
-                    graph.updateItem(edge, {
-                        // @ts-ignore
-                        curveOffset: edges[i].curveOffset,
-                        // @ts-ignore
-                        curvePosition: edges[i].curvePosition,
-                    });
-                });
-            });
+    const [forceRelayoutFlag, setForceRelayoutFlag] = useState<0 | 1>(0);
 
-            graph.on('nodeselectchange', (e: any) => {
-                const selected = e.selectedItems.nodes[0]?._cfg.id;
-                const idx = selected === undefined ? null : parseInt(selected, 10);
-
-                if (idx !== null) {
-                    handleNodeClickRef.current?.({ nodeId: idx });
-                }
-            });
-
-            graph.on('keydown', e => {
-                if (e.key === 'Backspace') {
-                    // delete selected link
-                    const [selectedEdge] = graph.findAllByState('edge', 'active');
-                    if (selectedEdge) {
-                        const src = (selectedEdge._cfg?.source as any)?._cfg.id;
-                        const tar = (selectedEdge._cfg?.target as any)?._cfg.id;
-                        if (src && tar) {
-                            const srcF = fields[parseInt(src, 10)];
-                            const tarF = fields[parseInt(tar, 10)];
-                            handleRemoveLinkRef.current(srcF.fid, tarF.fid);
-                        }
-                    }
-                }
-            });
-
-            graph.on('click', () => {
-                setTimeout(() => {
-                    const [selectedEdge] = graph.findAllByState('edge', 'active');
-                    setEdgeSelected(Boolean(selectedEdge));
-                }, 1);
-            });
-
-            setEdgeSelected(false);
-
-            updateSelected.current = idx => {
-                const prevSelected = graph.findAllByState('node', 'selected')[0]?._cfg?.id;
-                const prevSelectedIdx = prevSelected ? parseInt(prevSelected, 10) : null;
-
-                if (prevSelectedIdx === idx) {
-                    return;
-                } else if (prevSelectedIdx !== null) {
-                    graph.setItemState(`${prevSelectedIdx}`, 'selected', false);
-                }
-                graph.setItemState(`${idx}`, 'selected', true);
-            };
-
-            graphRef.current = graph;
-
-            return () => {
-                graphRef.current = undefined;
-                container.innerHTML = '';
-            };
-        }
-    }, [mode, fields, preconditions]);
+    useReactiveGraph(
+        containerRef,
+        width,
+        graphRef,
+        cfg,
+        renderData,
+        mode,
+        onClickNode,
+        fields,
+        onRemoveLink,
+        setEdgeSelected,
+        updateSelectedRef,
+        forceRelayoutFlag,
+        focus,
+        selectedSubtree,
+    );
 
     useEffect(() => {
-        if (graphRef.current) {
-            graphRef.current.changeSize(width, GRAPH_HEIGHT);
-            graphRef.current.updateLayout({
-                type: 'fruchterman',
-                gravity: 5,
-                speed: 5,
-                center: [widthRef.current / 2, GRAPH_HEIGHT / 2],
-                // for rendering after each iteration
-                tick: () => {
-                    graphRef.current?.refreshPositions();
-                }
-            });
-            graphRef.current.render();
+        const { current: graph } = graphRef;
+        if (graph) {
+            graph.stopAnimate();
+            graph.destroyLayout();
+            if (autoLayout) {
+                graph.updateLayout(cfgRef.current.layout);
+            }
         }
-    }, [width]);
+    }, [autoLayout]);
 
     useEffect(() => {
-        const { current: container } = containerRef;
-        if (container && graphRef.current) {
-            graphRef.current.changeData(dataRef.current);
-            graphRef.current.render();
-        }
-    }, [data]);
+        forceRelayoutRef.current = () => setForceRelayoutFlag(flag => flag === 0 ? 1 : 0);
+        return () => {
+            forceRelayoutRef.current = () => {};
+        };
+    }, [forceRelayoutRef]);
 
     useEffect(() => {
         if (focus !== null) {
-            updateSelected.current(focus);
+            updateSelectedRef.current(focus);
         }
     }, [focus]);
 
@@ -393,10 +207,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
         <Container
             {...props}
             ref={ref}
-            onClick={e => e.stopPropagation()}
-            onDoubleClick={e => {
+            onClick={e => {
+                if (e.shiftKey) {
+                    toggleFlowAnalyzer();
+                }
                 e.stopPropagation();
-                setForceUpdateFlag(Date.now());
             }}
         >
             <div ref={containerRef} />

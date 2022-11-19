@@ -6,6 +6,7 @@ import type { ModifiableBgKnowledge } from "../config";
 // import DAGView from "./DAGView";
 // import ForceView from "./forceView";
 import GraphView from "./graphView";
+import type { GraphNodeAttributes } from "./graph-utils";
 import type { DiagramGraphData } from ".";
 
 
@@ -22,21 +23,41 @@ const Container = styled.div`
 
 export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     fields: readonly Readonly<IFieldMeta>[];
+    selectedSubtree: readonly string[];
     value: Readonly<DiagramGraphData>;
     /** @default 0 */
     cutThreshold?: number;
+    limit: number;
     mode: 'explore' | 'edit';
-    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+    onClickNode?: (node: DiagramGraphData['nodes'][number] | null) => void;
+    toggleFlowAnalyzer?: () => void;
     focus: number | null;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
+    forceRelayoutRef: React.MutableRefObject<() => void>;
+    autoLayout: boolean;
+    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
-    fields, value, focus, cutThreshold = 0, mode, onClickNode, onLinkTogether, onRemoveLink, preconditions, ...props },
-    ref
-) => {
+    fields,
+    selectedSubtree,
+    value,
+    focus,
+    cutThreshold = 0,
+    mode,
+    limit,
+    onClickNode,
+    onLinkTogether,
+    onRemoveLink,
+    preconditions,
+    forceRelayoutRef,
+    autoLayout,
+    renderNode,
+    toggleFlowAnalyzer,
+    ...props
+}, ref) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
         // console.error(err ?? info);
         return <div style={{
@@ -65,14 +86,20 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
             <ErrorBoundary>
                 <GraphView
                     fields={fields}
+                    selectedSubtree={selectedSubtree}
+                    forceRelayoutRef={forceRelayoutRef}
                     value={value}
+                    limit={limit}
                     mode={mode}
                     preconditions={preconditions}
                     cutThreshold={cutThreshold}
                     onClickNode={onClickNode}
+                    toggleFlowAnalyzer={toggleFlowAnalyzer ?? (() => {})}
                     onLinkTogether={onLinkTogether}
                     onRemoveLink={onRemoveLink}
                     focus={focus}
+                    autoLayout={autoLayout}
+                    renderNode={renderNode}
                     style={{
                         flexGrow: 1,
                         flexShrink: 1,

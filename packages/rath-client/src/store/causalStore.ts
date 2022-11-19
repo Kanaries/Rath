@@ -12,6 +12,7 @@ import {
     BgKnowledge,
 } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
+import resolveCausal, { CausalLinkDirection } from '../utils/resolve-causal';
 import { getModelStorage, getModelStorageList, setModelStorage } from '../utils/storage';
 import { DataSourceStore } from './dataSourceStore';
 
@@ -34,7 +35,7 @@ export class CausalStore {
     /** Fields received from algorithm, the starting N items are equals to `inputFields`, and then there may have some extra trailing fields built during the process, the size of it is C (C >= N) */
     public causalFields: IFieldMeta[] = [];
     /** An (N x N) matrix of flags representing the links between any two nodes */
-    public causalStrength: number[][] = [];
+    public causalStrength: CausalLinkDirection[][] = [];
     /** asserts algorithm in keys of `causalStore.causalAlgorithmForm`. */
     public causalParams: { [algo: string]: { [key: string]: any } } = {
         // alpha: 0.05,
@@ -197,7 +198,7 @@ export class CausalStore {
             console.error('[CausalAlgorithmList error]:', error);
         }
     }
-    public setCausalResult(causalFields: IFieldMeta[], causalMatrix: number[][]) {
+    public setCausalResult(causalFields: IFieldMeta[], causalMatrix: CausalLinkDirection[][]) {
         this.causalFields = causalFields;
         this.causalStrength = causalMatrix;
     }
@@ -234,9 +235,10 @@ export class CausalStore {
             });
             const result = await res.json();
             if (result.success) {
-                const causalMatrix = (result.data.orig_matrix as number[][])
+                const resultMatrix = (result.data.matrix as number[][])
                     .slice(0, originFieldsLength)
                     .map((row) => row.slice(0, originFieldsLength));
+                const causalMatrix = resolveCausal(resultMatrix);
                 this.setCausalResult(inputFields, causalMatrix);
             } else {
                 throw new Error(result.message);

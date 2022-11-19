@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
 import { IFieldMeta } from "../../../interfaces";
+
+/** 这是一个局部状态，不要在 causal page 以外的任何组件使用它 */
 export function useInteractFieldGroups (fieldMetas: IFieldMeta[]) {
     const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
     const appendFields2Group = useCallback(
