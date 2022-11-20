@@ -1,3 +1,4 @@
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useGlobalStore } from '../../../store';
@@ -10,7 +11,7 @@ const PainterOperations: React.FC = (props) => {
         <div style={{ margin: '1em 0em'}}>
             {painterView.dataView && (
                 <DataViewLiteEditor
-                    view={painterView.dataView}
+                    view={toJS(painterView.dataView)}
                     globalFields={dataSourceStore.fieldMetas}
                     onAddViewField={(fid) => {
                         painterStore.addMainViewField(fid);

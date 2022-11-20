@@ -40,3 +40,15 @@ export const RESULT_STORAGE_SPLITOR = '\n===RATH_STORAGE_SPLITOR===\n';
 export const STORAGE_FILE_SUFFIX = 'krs';
 
 export const EDITOR_URL = 'https://kanaries.cn/vega-editor/';
+
+export const STORAGE_INSTANCE = 'rath_storage_instance'
+
+export const STORAGES = {
+    DATASOURCE: 'datasource',
+    WORKSPACE: 'workspace',
+    META: 'meta',
+    MODEL: 'model',
+    STATE: 'state',
+    ITERATOR: 'iterator',
+    ITERATOR_META: 'iterator_meta',
+}

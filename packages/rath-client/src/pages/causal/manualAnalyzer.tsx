@@ -96,6 +96,7 @@ const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldG
                     toggleShow={() => {
                         setShowSemiClue((v) => !v);
                     }}
+                    neighborKeys={clueView ? clueView.fields.slice(0, 1).map(f => f.fid) : []}
                 />
                 {customAnalysisMode === 'crossFilter' && (
                     <ActionButton

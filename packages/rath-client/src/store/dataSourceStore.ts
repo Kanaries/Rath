@@ -1,16 +1,19 @@
 import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
-import { combineLatest, from, Subscription } from "rxjs";
+import { combineLatest, from, Observable, Subscription } from "rxjs";
+import { getFreqRange } from "@kanaries/loa";
 import * as op from 'rxjs/operators'
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, ICol, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions, IExtField } from "../interfaces";
-import { cleanDataService, extendDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
+import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
 import { findRathSafeColumnIndex, colFromIRow, readableWeekday } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
+import { IteratorStorage, IteratorStorageMetaInfo } from "../utils/iteStorage";
 import { updateDataStorageMeta } from "../utils/storage";
+import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
 
 interface IDataMessage {
     type: 'init_data' | 'others';
@@ -32,11 +35,16 @@ interface IDataSourceStoreStorage {
 }
 
 export class DataSourceStore {
+    public rawDataMetaInfo: IteratorStorageMetaInfo = {
+        versionCode: -1,
+        length: 0,
+    };
     /**
      * raw data is fetched and parsed data or uploaded data without any other changes.
      * computed value `dataSource` will be calculated
      */
-    public rawData: IRow[] = [];
+    public rawDataStorage: IteratorStorage;
+    public filteredDataStorage: IteratorStorage;
     public extData = new Map<string, ICol<any>>();
     /**
      * fields contains fields with `dimension` or `measure` type.
@@ -63,14 +71,16 @@ export class DataSourceStore {
     public showFastSelectionModal: boolean = false;
     private fieldMetasRef: StreamListener<IFieldMeta[]>;
     private cleanedDataRef: StreamListener<IRow[]>;
-    private filteredDataRef: StreamListener<IRow[]>;
+    // private filteredDataRef: StreamListener<IRow[]>;
+    private filteredDataMetaInfoRef: StreamListener<IteratorStorageMetaInfo>;
     public loadingDataProgress: number = 0;
     public dataPrepProgressTag: IDataPrepProgressTag = IDataPrepProgressTag.none;
     private subscriptions: Subscription[] = [];
     public datasetId: string | null = null;
     constructor() {
+        this.rawDataStorage = new IteratorStorage({ itemKey: 'rawData' });
+        this.filteredDataStorage = new IteratorStorage({ itemKey: 'filteredData' });
         makeAutoObservable(this, {
-            rawData: observable.ref,
             cookedDataSource: observable.ref,
             cookedMeasures: observable.ref,
             fieldsWithExtSug: observable.ref,
@@ -78,31 +88,50 @@ export class DataSourceStore {
             // @ts-expect-error private field
             subscriptions: false,
             cleanedDataRef: false,
-            filteredDataRef: false,
+            // filteredDataRef: false,
             fieldMetasRef: false,
+            rawDataStorage: false,
+            filteredDataStorage: false,
         });
         const fields$ = from(toStream(() => this.fieldsAndPreview, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
-        const rawData$ = from(toStream(() => this.rawData, false));
+        const rawDataMetaInfo$ = from(toStream(() => this.rawDataMetaInfo, false));
         const extData$ = from(toStream(() => this.extData, true));
         const filters$ = from(toStream(() => this.filters, true))
         // const filteredData$ = from(toStream(() => this.filteredData, true));
-        const filteredData$ = combineLatest([rawData$, extData$, filters$]).pipe(
-            op.map(([dataSource, extData, filters]) => {
+        // const filteredData$ = combineLatest([dataVersionCode$, extData$, filters$]).pipe(
+        //     op.map(([code, extData, filters]) => {
+        //         return from(filterDataService({
+        //             dataStorageType: 'db',
+        //             dataStorage: this.rawDataStorage,
+        //             extData: toJS(extData),
+        //             filters: toJS(filters)
+        //         }))
+        //     }),
+        //     op.switchAll(),
+        //     op.share()
+        // )
+        const filteredDataMetaInfo$: Observable<IteratorStorageMetaInfo> = combineLatest([rawDataMetaInfo$, extData$, filters$]).pipe(
+            op.map(([info, extData, filters]) => {
                 return from(filterDataService({
-                    dataSource,
+                    computationMode: 'offline',
+                    dataStorage: this.rawDataStorage,
+                    resultStorage: this.filteredDataStorage,
                     extData: toJS(extData),
                     filters: toJS(filters)
+                }).then(r => {
+                    return this.filteredDataStorage.syncMetaInfoFromStorage();
                 }))
             }),
             op.switchAll(),
             op.share()
         )
         const cleanMethod$ = from(toStream(() => this.cleanMethod, true));
-        const cleanedData$ = combineLatest([filteredData$, cleanMethod$, fields$]).pipe(
-            op.map(([data, method, fields]) => {
+        const cleanedData$ = combineLatest([filteredDataMetaInfo$, cleanMethod$, fields$]).pipe(
+            op.map(([info, method, fields]) => {
                 return from(cleanDataService({
-                    dataSource: data,
+                    computationMode: 'offline',
+                    storage: this.filteredDataStorage,
                     fields: fields.map(f => toJS(f)),
                     method: method
                 }))
@@ -135,7 +164,10 @@ export class DataSourceStore {
             }),
             op.share()
         )
-        this.filteredDataRef = fromStream(filteredData$, [])
+        this.filteredDataMetaInfoRef = fromStream(filteredDataMetaInfo$, {
+            versionCode: -1,
+            length: 0
+        })
         this.fieldMetasRef = fromStream(fieldMetas$, [])
         this.cleanedDataRef = fromStream(cleanedData$, []);
         window.addEventListener('message', (ev) => {
@@ -148,12 +180,12 @@ export class DataSourceStore {
                 this.setShowDataImportSelection(false);
             }
         })
-        this.subscriptions.push(rawData$.subscribe(() => {
+        this.subscriptions.push(rawDataMetaInfo$.subscribe(() => {
             runInAction(() => {
                 this.dataPrepProgressTag = IDataPrepProgressTag.filter;
             })
         }))
-        this.subscriptions.push(filteredData$.subscribe(() => {
+        this.subscriptions.push(filteredDataMetaInfo$.subscribe(() => {
             runInAction(() => {
                 this.dataPrepProgressTag = IDataPrepProgressTag.clean
             })
@@ -183,7 +215,9 @@ export class DataSourceStore {
             suggestExt(undefined, fieldMetaAndPreviews);
         })
     }
-
+    public get filteredDataMetaInfo (): IteratorStorageMetaInfo {
+        return this.filteredDataMetaInfoRef.current;
+    }
     public get allFields() {
         return this.mutFields.concat(this.extFields)
     }
@@ -272,24 +306,6 @@ export class DataSourceStore {
         return size * Math.log2(m)
     }
 
-    public get filteredData () {
-        return this.filteredDataRef.current
-        // const { rawData, filters } = this;
-        // const ans: IRow[] = [];
-        // if (filters.length === 0) return rawData;
-        // const effectFilters = filters.filter(f => !f.disable);
-        // for (let i = 0; i < rawData.length; i++) {
-        //     const row = rawData[i];
-        //     let keep = effectFilters.every(f => {
-        //         if (f.type === 'range') return f.range[0] <= row[f.fid] && row[f.fid] <= f.range[1];
-        //         if (f.type === 'set') return f.values.includes(row[f.fid]);
-        //         return false;
-        //     })
-        //     if (keep) ans.push(row);
-        // }
-        // return ans
-    }
-
     public get cleanedData () {
         return this.cleanedDataRef.current
     }
@@ -320,26 +336,28 @@ export class DataSourceStore {
         }
         this.filters = [...this.filters]
     }
-    public createBatchFilterByQts (fieldIdList: string[], qts: [number, number][]) {
-        const { rawData } = this;
-
-        for (let i = 0; i < fieldIdList.length; i++) {
-            // let domain = getRange();
-            let range = getQuantiles(rawData.map(r => Number(r[fieldIdList[i]])), qts[i]) as [number, number]; 
-            // if (this.filters.find())
-            const filterIndex = this.filters.findIndex(f => f.fid === fieldIdList[i])
-            const newFilter: IFilter = {
-                fid: fieldIdList[i],
-                type: 'range',
-                range
+    public async createBatchFilterByQts (fieldIdList: string[], qts: [number, number][]) {
+        const { rawDataStorage } = this;
+        const data = await rawDataStorage.getAll();
+        runInAction(() => {
+            for (let i = 0; i < fieldIdList.length; i++) {
+                // let domain = getRange();
+                let range = getQuantiles(data.map(r => Number(r[fieldIdList[i]])), qts[i]) as [number, number]; 
+                // if (this.filters.find())
+                const filterIndex = this.filters.findIndex(f => f.fid === fieldIdList[i])
+                const newFilter: IFilter = {
+                    fid: fieldIdList[i],
+                    type: 'range',
+                    range
+                }
+                if (filterIndex > -1) {
+                    this.filters.splice(filterIndex, 1, newFilter)
+                } else {
+                    this.filters.push(newFilter)
+                }
             }
-            if (filterIndex > -1) {
-                this.filters.splice(filterIndex, 1, newFilter)
-            } else {
-                this.filters.push(newFilter)
-            }
-        }
-        this.filters = [...this.filters]
+            this.filters = [...this.filters]
+        })
     }
 
     public setLoadingDataProgress (p: number) {
@@ -393,20 +411,28 @@ export class DataSourceStore {
         }
     }
 
-    public loadData (fields: IRawField[], rawData: IRow[]) {
+    public async loadData (fields: IRawField[], rawData: IRow[]) {
         this.mutFields = fields.map(f => ({
             ...f,
             name: f.name ? f.name : f.fid,
             disable: false
         }))
-        this.rawData = rawData
-        this.loading = false;
+        await this.rawDataStorage.setAll(rawData);
+        runInAction(() => {
+            this.rawDataMetaInfo = this.rawDataStorage.metaInfo;
+            this.loading = false;
+        })
     }
 
+    /**
+     * @deprecated
+     * @returns 
+     */
     public exportStore(): IDataSourceStoreStorage {
-        const { rawData, mutFields, cookedDataSource, cookedDimensions, cookedMeasures, cleanMethod, fieldMetas } = this;
+        const { mutFields, cookedDataSource, cookedDimensions, cookedMeasures, cleanMethod, fieldMetas } = this;
+        // FIXME: rawData
         return {
-            rawData,
+            rawData: [],
             mutFields,
             cookedDataSource,
             cookedDimensions,
@@ -425,9 +451,12 @@ export class DataSourceStore {
             }))
         }
     }
-
+    /**
+     * @deprecated
+     * @param state 
+     */
     public importStore(state: IDataSourceStoreStorage) {
-        this.rawData = state.rawData;
+        // this.rawData = state.rawData;
         this.mutFields = state.mutFields;
         this.cookedDataSource = state.cookedDataSource;
         this.cookedDimensions = state.cookedDimensions;
@@ -437,40 +466,13 @@ export class DataSourceStore {
         this.fieldMetasRef.current = state.fieldMetas
     } 
 
-    public async extendData () {
-        // TODO: IRawField增加了extInfo?: IFieldExtInfoBase属性，此处应在新增字段的时候补充详细信息
-        try {
-            const { fields, cleanedData } = this;
-            const res = await extendDataService({
-                dataSource: cleanedData,
-                fields
-            })
-            const finalFields = await inferMetaService({
-                dataSource: res.dataSource,
-                fields: res.fields.filter(f => Boolean(f.pfid)).map(f => ({
-                    ...f,
-                    semanticType: '?'
-                }))
-            })
-            runInAction(() => {
-                this.rawData = res.dataSource;
-                this.mutFields = fields.concat(finalFields)
-            })
-        } catch (error) {
-            notify({
-                title: 'Extension API Error',
-                type: 'error',
-                content: `[extension]${error}`
-            })
-        }
-    }
-
     public async loadDataWithInferMetas (dataSource: IRow[], fields: IMuteFieldBase[]) {
         if (fields.length > 0 && dataSource.length > 0) {
             const metas = await inferMetaService({ dataSource, fields })
+            await this.rawDataStorage.setAll(dataSource)
             runInAction(() => {
-                this.rawData = dataSource;
                 this.loading = false;
+                this.rawDataMetaInfo = this.rawDataStorage.metaInfo;
                 this.showDataImportSelection = false;
                 // 如果除了安全维度，数据集本身就有维度
                 if (metas.filter(f => f.analyticType === 'dimension').length > 1) {
@@ -493,14 +495,16 @@ export class DataSourceStore {
      */
     public async expandDateTime() {
         try {
-            let { mutFields, rawData } = this;
+            let { mutFields } = this;
             mutFields = mutFields.map(f => toJS(f))
+            const data = await this.rawDataStorage.getAll();
             const res = await expandDateTimeService({
-                dataSource: rawData,
+                dataSource: data,
                 fields: mutFields
             })
+            await this.rawDataStorage.setAll(res.dataSource)
             runInAction(() => {
-                this.rawData = res.dataSource;
+                this.rawDataMetaInfo = this.rawDataStorage.metaInfo;
                 this.mutFields = res.fields
             })
         } catch (error) {
@@ -548,6 +552,48 @@ export class DataSourceStore {
                     });
                 }
             }
+            if (f.semanticType === 'nominal') {
+                const alreadyExpandedAsOneHot = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$oneHot'
+                ));
+                if (!alreadyExpandedAsOneHot) {
+                    suggestions.push({
+                        score: 3,
+                        type: 'oneHot',
+                        apply: () => this.expandNominalOneHot(f.fid),
+                    })
+                }
+                const alreadyExpandedAsWordTF = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$wordTF'
+                ));
+                if (!alreadyExpandedAsWordTF) {
+                    suggestions.push({
+                        score: 9,
+                        type: 'wordTF',
+                        apply: () => this.expandWordTF(f.fid),
+                    })
+                }
+                const alreadyExpandedAsWordTFIDF = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$wordTFIDF'
+                ));
+                if (!alreadyExpandedAsWordTFIDF) {
+                    suggestions.push({
+                        score: 6,
+                        type: 'wordTFIDF',
+                        apply: () => this.expandWordTFIDF(f.fid),
+                    })
+                }
+                const alreadyExpandedAsReGroupByFreq = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$reGroupByFreq'
+                ));
+                if (!alreadyExpandedAsReGroupByFreq) {
+                    suggestions.push({
+                        score: 5,
+                        type: 'reGroupByFreq',
+                        apply: () => this.expandReGroupByFreq(f.fid),
+                    })
+                }
+            }
 
             return {
                 ...f,
@@ -575,10 +621,11 @@ export class DataSourceStore {
         }
 
         try {
-            let { allFields, rawData } = this;
+            let { allFields } = this;
             allFields = allFields.filter(f => f.fid === fid).map(f => toJS(f))
+            const data = await this.rawDataStorage.getAll();
             const res = await expandDateTimeService({
-                dataSource: rawData,
+                dataSource: data,
                 fields: allFields
             })
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -600,34 +647,157 @@ export class DataSourceStore {
             })
         }
     }
-
-    /**
-     * @deprecated use `dataSourceStore.addExtFieldsFromRows` to avoid changes of rawData.
-     */
-    public mergeExtended(data: readonly IRow[], fields: IFieldMeta[]) {
-        try {
-            let { cleanedData } = this;
-            // console.log(
-            //     'mergeExtended',
-            //     cleanedData.map((row, i) => Object.assign({}, data[i], row)),
-            //     fields,
-            // );
-
-            runInAction(() => {
-                this.rawData = cleanedData.map((row, i) => Object.assign({}, data[i], row));
-                this.mutFields = [
-                    ...this.mutFields,
-                    ...fields,
-                ];
+    public async expandWordTFIDF (fid: string) {
+        const data = await this.rawDataStorage.getAll();
+        const values: string[] = data.map(d => `${d[fid]}`);
+        const wordsInRow = values.map(v => v.split(/[\s,.]+/));
+        const tfidf = termFrequency_inverseDocumentFrequency(wordsInRow).map((docInfo) => {
+            return Array.from(docInfo.entries()).sort((a, b) => b[1] - a[1]).map(([word, score]) => {
+                return {
+                    word,
+                    score,
+                }
             })
-        } catch (error) {
-            console.error(error)
-            notify({
-                title: 'mergeExtended Error',
-                type: 'error',
-                content: `[merge]${error}`
-            })
+        });
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (originField) {
+            const newField: IRawField = {
+                fid: `${fid}.wordTFIDF`,
+                name: `${originField.name}.word_tf_idf`,
+                semanticType: 'nominal',
+                analyticType: 'dimension',
+                extInfo: {
+                    extFrom: [fid],
+                    extOpt: 'LaTiao.$wordTFIDF',
+                    extInfo: {}
+                },
+                geoRole: 'none'
+            }
+            const newData = data.map((d, index) => {
+                const tfidfInfo = tfidf[index];
+                const word = tfidfInfo.slice(0, 1).map(r => r.word).join('_');
+                return {
+                    ...d,
+                    [newField.fid]: word,
+                }
+            });
+            this.addExtFieldsFromRows(newData, [newField].map(f => ({
+                ...f,
+                stage: 'preview',
+            })));
         }
+    }
+    public async expandWordTF (fid: string) {
+        const data = await this.rawDataStorage.getAll();
+        const values: string[] = data.map(d => `${d[fid]}`);
+        const wordsInRow = values.map(v => v.split(/[\s,.]+/));
+        const tf = termFrequency(wordsInRow).map((docInfo) => {
+            return Array.from(docInfo.entries()).sort((a, b) => b[1] - a[1]).map(([word, score]) => {
+                return {
+                    word,
+                    score,
+                }
+            })
+        });
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (originField) {
+            const newField: IRawField = {
+                fid: `${fid}.wordTF`,
+                name: `${originField.name}.word_tf`,
+                semanticType: 'nominal',
+                analyticType: 'dimension',
+                extInfo: {
+                    extFrom: [fid],
+                    extOpt: 'LaTiao.$wordTF',
+                    extInfo: {}
+                },
+                geoRole: 'none'
+            }
+            const newData = data.map((d, index) => {
+                const tfInfo = tf[index];
+                const word = tfInfo.slice(0, 1).map(r => r.word).join('_');
+                return {
+                    ...d,
+                    [newField.fid]: word,
+                }
+            });
+            this.addExtFieldsFromRows(newData, [newField].map(f => ({
+                ...f,
+                stage: 'preview',
+            })));
+        }
+    }
+    public async expandReGroupByFreq (fid: string) {
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField) {
+            return;
+        }
+        const data = await this.rawDataStorage.getAll();
+        const topUniqueValues = getFreqRange(data.map(r => r[fid]));
+        const valuePool = new Set(topUniqueValues.map(r => r[0]).slice(0, topUniqueValues.length - 1))
+        const newField: IRawField = {
+            fid: `${fid}.reGroupByFreq`,
+            name: `${originField.name || fid}.reGroupByFreq`,
+            semanticType: 'nominal',
+            analyticType: 'dimension',
+            extInfo: {
+                extFrom: [fid],
+                extOpt: 'LaTiao.$reGroupByFreq',
+                extInfo: {}
+            },
+            geoRole: 'none'
+        }
+        const newData = data.map((d) => {
+            const value = d[fid];
+            return {
+                ...d,
+                [newField.fid]: valuePool.has(value) ? value : 'others',
+            }
+        })
+        this.addExtFieldsFromRows(newData, [newField].map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
+    }
+    public async expandNominalOneHot(fid: string) {
+        const data = await this.rawDataStorage.getAll();
+        const values = data.map(d => d[fid]);
+        const limitSize = 8;
+        const topKValues = getFreqRange(values).slice(0, limitSize);
+        const valueSet = new Set(topKValues.map(f => f[0]));
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField)return;
+        const newFields: IRawField[] = topKValues.map((v, i) => {
+            return {
+                fid: `${fid}.ex${i}`,
+                name: `${originField.name || originField.fid}.${v[0].replace(/[\s,.]+/g, '_')}`,
+                semanticType: 'nominal',
+                analyticType: 'dimension',
+                extInfo: {
+                    extFrom: [fid],
+                    extOpt: 'LaTiao.$oneHot',
+                    extInfo: {}
+                },
+                geoRole: 'none'
+            } as IRawField})
+        const sizeWithOutOthers = Math.min(limitSize - 1, topKValues.length);
+        if (sizeWithOutOthers < newFields.length) {
+            newFields[newFields.length - 1].name = `${originField.name || originField.fid}.others`;
+        }
+        const newData = data.map(d => ({ ...d}));
+        
+        for (let i = 0; i < newData.length; i++) {
+            for (let j = 0; j < sizeWithOutOthers; j++) {
+                newData[i][newFields[j].fid] = newData[i][fid] === topKValues[j][0] ? 1 : 0;
+            }
+            if (sizeWithOutOthers < newFields.length) {
+                newData[i][newFields[newFields.length - 1].fid] = valueSet.has(newData[i][fid]) ? 0 : 1;
+            }
+        }
+        this.addExtFieldsFromRows(newData, newFields.map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
     }
 
     /**

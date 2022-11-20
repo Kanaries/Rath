@@ -54,6 +54,7 @@ enum PIVOT_TAB_KEYS {
 
 const Painter: React.FC = (props) => {
     const container = useRef<HTMLDivElement>(null);
+    const isPainting = useRef(false);
     const { dataSourceStore, painterStore, langStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { painterView, painterViewData } = painterStore
@@ -159,12 +160,17 @@ const Painter: React.FC = (props) => {
                 const yField = painterSpec.encoding.y.field;
                 const xFieldType = painterSpec.encoding.x.type as ISemanticType;
                 const yFieldType = painterSpec.encoding.y.type as ISemanticType;
+                const limitFields: string[] = [];
+                if (painterSpec.encoding.column) limitFields.push(painterSpec.encoding.column.field);
+                if (painterSpec.encoding.row) limitFields.push(painterSpec.encoding.row.field);
                 if (xFieldType === 'quantitative' && yFieldType === 'quantitative') {
                     const xRange = getRange(viewData.map((r) => r[xField]));
                     const yRange = getRange(viewData.map((r) => r[yField]));
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         e.stopPropagation();
                         e.preventDefault();
+                        // @ts-ignore
+                        if (!isPainting.current && e.vegaType !== 'touchmove') return;
                         if (painting && item && item.datum) {
                             const { mutIndices, mutValues } = batchMutInCircle({
                                 mutData: viewData,
@@ -176,7 +182,9 @@ const Painter: React.FC = (props) => {
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
+                                datum: item.datum,
                                 painterMode,
+                                limitFields
                             });
                             if (painterMode === PAINTER_MODE.COLOR) {
                                 linkNearViz();
@@ -200,13 +208,21 @@ const Painter: React.FC = (props) => {
                             }
                         }
                     };
-                    res.view.addEventListener('mouseover', hdr);
+                    res.view.addEventListener('mousedown', () => {
+                        isPainting.current = true;
+                    });
+                    res.view.addEventListener('mouseup', () => {
+                        isPainting.current = false;
+                    });
+                    res.view.addEventListener('mousemove', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 } else if (xFieldType !== 'quantitative' && yFieldType === 'quantitative') {
                     const yRange = getRange(viewData.map((r) => r[yField]));
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         e.stopPropagation();
                         e.preventDefault();
+                        // @ts-ignore
+                        if (!isPainting.current && e.vegaType !== 'touchmove') return;
                         if (painting && item && item.datum) {
                             const { mutIndices, mutValues } = batchMutInCatRange({
                                 mutData: viewData,
@@ -240,12 +256,20 @@ const Painter: React.FC = (props) => {
                             }
                         }
                     };
-                    res.view.addEventListener('mouseover', hdr);
+                    res.view.addEventListener('mousedown', () => {
+                        isPainting.current = true;
+                    });
+                    res.view.addEventListener('mouseup', () => {
+                        isPainting.current = false;
+                    });
+                    res.view.addEventListener('mousemove', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 } else if (yFieldType !== 'quantitative' && xFieldType === 'quantitative') {
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         e.stopPropagation();
                         e.preventDefault();
+                        // @ts-ignore
+                        if (!isPainting.current && e.vegaType !== 'touchmove') return;
                         if (painting && item && item.datum) {
                             const xRange = getRange(viewData.map((r) => r[xField]));
                             const { mutIndices, mutValues } = batchMutInCatRange({
@@ -280,7 +304,13 @@ const Painter: React.FC = (props) => {
                             }
                         }
                     };
-                    res.view.addEventListener('mouseover', hdr);
+                    res.view.addEventListener('mousedown', () => {
+                        isPainting.current = true;
+                    });
+                    res.view.addEventListener('mouseup', () => {
+                        isPainting.current = false;
+                    });
+                    res.view.addEventListener('mousemove', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 }
                 res.view.resize();

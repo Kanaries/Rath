@@ -23,6 +23,7 @@ import { MessageProps } from '../workers/engine/service';
 
 import { CleanMethod, ICol, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from '../interfaces';
 import { ILoaProps } from '../workers/loa/service';
+import { IteratorStorage } from '../utils/iteStorage';
 
 interface SuccessResult<T> {
     success: true;
@@ -112,10 +113,16 @@ export async function inferMetaService(props: InferMetaServiceProps): Promise<IR
     return metas;
 }
 
-export interface CleanServiceProps {
+export type CleanServiceProps = {
+    computationMode: 'inline' | 'offline';
     dataSource: IRow[];
     fields: IMuteFieldBase[];
     method: CleanMethod;
+} | {
+    computationMode: 'offline';
+    fields: IMuteFieldBase[];
+    method: CleanMethod;
+    storage: IteratorStorage;
 }
 export async function cleanDataService(props: CleanServiceProps): Promise<IRow[]> {
     let data: IRow[] = [];
@@ -134,19 +141,29 @@ export async function cleanDataService(props: CleanServiceProps): Promise<IRow[]
     return data;
 }
 
-export interface FilterServiceProps {
+export type FilterServiceProps = {
+    computationMode: 'inline';
     dataSource: IRow[];
+    extData: Map<string, ICol<any>>;
+    filters: IFilter[];
+} | {
+    computationMode: 'offline';
+    dataStorage: IteratorStorage;
+    resultStorage: IteratorStorage;
     extData: Map<string, ICol<any>>;
     filters: IFilter[];
 }
 /**
  * Merge `extData` with `dataSource` and filter data at the same time
  */
-export async function filterDataService(props: FilterServiceProps): Promise<IRow[]> {
-    let data: IRow[] = [];
+export async function filterDataService(props: FilterServiceProps): Promise<{rows: IRow[]; versionCode: number}> {
+    let data: {rows: IRow[]; versionCode: number} = {
+        rows: [],
+        versionCode: -1
+    };
     try {
         const worker = new FilterWorker();
-        const result = await workerService<IRow[], FilterServiceProps>(worker, props);
+        const result = await workerService<{rows: IRow[]; versionCode: number}, FilterServiceProps>(worker, props);
         if (result.success) {
             data = result.data;
         } else {
@@ -243,28 +260,5 @@ export async function loaEngineService<R = any>(
     } catch (error) {
         console.error(error);
         throw error;
-    }
-}
-
-interface ExtendDataProps {
-    dataSource: IRow[];
-    fields: IRawField[];
-}
-export async function extendDataService(props: ExtendDataProps): Promise<ExtendDataProps> {
-    const res = await fetch('https://9fw5jekyz8.execute-api.ap-northeast-1.amazonaws.com/default/extension', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(props),
-    });
-    if (res.status !== 200) {
-        throw new Error(`[Extension API Error]status code = ${res.status}; ${res.statusText}`);
-    }
-    const result = await res.json();
-    if (result.success) {
-        return result.data as ExtendDataProps;
-    } else {
-        throw new Error(result.message);
     }
 }

@@ -16,7 +16,7 @@ export interface IMainVizSetting {
     excludeScaleZero: boolean;
 }
 
-export type IRenderViewKey = 'pattViews' | 'featViews' | 'filterViews';
+export type IRenderViewKey = 'pattViews' | 'featViews' | 'filterViews' | 'neighborViews';
 
 export interface IAssoViews {
     views: IPattern[];

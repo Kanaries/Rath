@@ -5,12 +5,19 @@ import { useGlobalStore } from '../../../store';
 import PattSegment from './pattSegment';
 import FeatSegment from './featSegment';
 import FilterSegment from './filterSegment';
+import NeighborSegment from './neighborSegment';
 
 const PredictZone: React.FC = (props) => {
     const { semiAutoStore } = useGlobalStore();
-    const { featViews, pattViews, filterViews } = semiAutoStore;
+    const { featViews, pattViews, filterViews, neighborViews } = semiAutoStore;
     return (
         <div>
+            {neighborViews.views.length > 0 && (
+                <div className="pure-card">
+                    <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.neighbors')}</h1>
+                    <NeighborSegment />
+                </div>
+            )}
             {pattViews.views.length > 0 && (
                 <div className="pure-card">
                     <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.patterns')}</h1>

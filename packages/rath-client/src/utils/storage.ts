@@ -1,18 +1,8 @@
-import { IFieldMeta } from '@kanaries/loa';
 import localforage from 'localforage';
-import { RESULT_STORAGE_SPLITOR } from '../constants';
-import { IMuteFieldBase, IRow } from '../interfaces';
+
+import { RESULT_STORAGE_SPLITOR, STORAGES, STORAGE_INSTANCE } from '../constants';
+import { IFieldMeta, IMuteFieldBase, IRow } from '../interfaces';
 import type { CausalLinkDirection } from './resolve-causal';
-
-export const STORAGE_INSTANCE = 'rath_storage_instance'
-
-const STORAGES = {
-    DATASOURCE: 'datasource',
-    WORKSPACE: 'workspace',
-    META: 'meta',
-    MODEL: 'model',
-    STATE: 'state'
-}
 
 export interface IDBMeta {
     id: string;

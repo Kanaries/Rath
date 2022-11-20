@@ -19,7 +19,9 @@ interface BatchMutInCircleProps {
     b: number;
     key: string;
     value: any;
+    datum: IRow;
     indexKey: string;
+    limitFields: string[];
     painterMode?: PAINTER_MODE
 }
 export function batchMutInCircle (props: BatchMutInCircleProps) {
@@ -33,12 +35,26 @@ export function batchMutInCircle (props: BatchMutInCircleProps) {
         key,
         value,
         indexKey,
-        painterMode = PAINTER_MODE.COLOR
+        datum,
+        painterMode = PAINTER_MODE.COLOR,
+        limitFields = []
     } = props;
     const mutIndices = new Set();
     const mutValues: IRow[] = [];
+    const limitValueMap: Map<any, any> = new Map();
+    for (let lf of limitFields) {
+        limitValueMap.set(lf, datum[lf]);
+    }
     for (let i = 0; i < mutData.length; i++) {
         if (((mutData[i][fields[0]] - point[0]) ** 2) / (a ** 2) + ((mutData[i][fields[1]] - point[1]) ** 2) / (b ** 2) <= (r ** 2)) {
+            let drop = false;
+            for (let lf of limitFields) {
+                if (limitValueMap.get(lf) !== mutData[i][lf]) {
+                    drop = true;
+                    break;
+                }
+            }
+            if (drop) continue;
             if (painterMode === PAINTER_MODE.COLOR) {
                 if (mutData[i][key] !== value) {
                     mutData[i][key] = value;

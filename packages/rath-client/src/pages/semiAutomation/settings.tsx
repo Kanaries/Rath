@@ -33,14 +33,17 @@ const PatternSetting: React.FC = () => {
         />
         <hr style={{ marginTop: '1em'}} />
         <Label>Auto Prediction</Label>
-        <Toggle checked={autoAsso.featViews} onText="Auto" offText="Manual" label="Feat" onChange={(e, checked) => {
+        <Toggle checked={autoAsso.featViews} onText="Auto" offText="Manual" label="features" onChange={(e, checked) => {
             semiAutoStore.updateAutoAssoConfig('featViews', Boolean(checked))
         }} />
-        <Toggle checked={autoAsso.pattViews} onText="Auto" offText="Manual" label="Patt" onChange={(e, checked) => {
+        <Toggle checked={autoAsso.pattViews} onText="Auto" offText="Manual" label="patterns" onChange={(e, checked) => {
             semiAutoStore.updateAutoAssoConfig('pattViews', Boolean(checked))
         }} />
-        <Toggle checked={autoAsso.filterViews} onText="Auto" offText="Manual" label="Subspace" onChange={(e, checked) => {
+        <Toggle checked={autoAsso.filterViews} onText="Auto" offText="Manual" label="subsets" onChange={(e, checked) => {
             semiAutoStore.updateAutoAssoConfig('filterViews', Boolean(checked))
+        }} />
+        <Toggle checked={autoAsso.neighborViews} onText="Auto" offText="Manual" label="neighbors" onChange={(e, checked) => {
+            semiAutoStore.updateAutoAssoConfig('neighborViews', Boolean(checked))
         }} />
         <hr />
         <OperationBar />

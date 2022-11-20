@@ -10,19 +10,21 @@ interface IProps {
     show?: boolean;
     toggleShow?: (show: boolean) => void;
     view: IPattern | null;
+    neighborKeys?: string[];
 }
 const SemiEmbed: React.FC<IProps> = (props) => {
-    const { show, toggleShow, view } = props;
+    const { show, toggleShow, view, neighborKeys = [] } = props;
     const { semiAutoStore } = useGlobalStore();
     useEffect(() => {
         if (show && view && view.fields.length > 0) {
             runInAction(() => {
                 semiAutoStore.clearMainView();
                 semiAutoStore.updateMainView(view);
+                semiAutoStore.setNeighborKeys(neighborKeys);
                 // semiAutoStore.addMainViewField(focusVarId);
             });
         }
-    }, [view, show, semiAutoStore]);
+    }, [view, show, semiAutoStore, neighborKeys]);
 
     return (
         <div>
