@@ -1,5 +1,6 @@
 import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { combineLatest, from, Observable, Subscription } from "rxjs";
+import { getFreqRange } from "@kanaries/loa";
 import * as op from 'rxjs/operators'
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
@@ -12,6 +13,7 @@ import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
 import { IteratorStorage, IteratorStorageMetaInfo } from "../utils/iteStorage";
 import { updateDataStorageMeta } from "../utils/storage";
+import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
 
 interface IDataMessage {
     type: 'init_data' | 'others';
@@ -550,6 +552,48 @@ export class DataSourceStore {
                     });
                 }
             }
+            if (f.semanticType === 'nominal') {
+                const alreadyExpandedAsOneHot = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$oneHot'
+                ));
+                if (!alreadyExpandedAsOneHot) {
+                    suggestions.push({
+                        score: 3,
+                        type: 'oneHot',
+                        apply: () => this.expandNominalOneHot(f.fid),
+                    })
+                }
+                const alreadyExpandedAsWordTF = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$wordTF'
+                ));
+                if (!alreadyExpandedAsWordTF) {
+                    suggestions.push({
+                        score: 9,
+                        type: 'wordTF',
+                        apply: () => this.expandWordTF(f.fid),
+                    })
+                }
+                const alreadyExpandedAsWordTFIDF = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$wordTFIDF'
+                ));
+                if (!alreadyExpandedAsWordTFIDF) {
+                    suggestions.push({
+                        score: 6,
+                        type: 'wordTFIDF',
+                        apply: () => this.expandWordTFIDF(f.fid),
+                    })
+                }
+                const alreadyExpandedAsReGroupByFreq = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$reGroupByFreq'
+                ));
+                if (!alreadyExpandedAsReGroupByFreq) {
+                    suggestions.push({
+                        score: 5,
+                        type: 'reGroupByFreq',
+                        apply: () => this.expandReGroupByFreq(f.fid),
+                    })
+                }
+            }
 
             return {
                 ...f,
@@ -602,6 +646,152 @@ export class DataSourceStore {
                 content: `[extension]${error}`
             })
         }
+    }
+    public async expandWordTFIDF (fid: string) {
+        const data = await this.rawDataStorage.getAll();
+        const values: string[] = data.map(d => `${d[fid]}`);
+        const wordsInRow = values.map(v => v.split(/[\s,.]+/));
+        const tfidf = termFrequency_inverseDocumentFrequency(wordsInRow).map((docInfo) => {
+            return Array.from(docInfo.entries()).sort((a, b) => b[1] - a[1]).map(([word, score]) => {
+                return {
+                    word,
+                    score,
+                }
+            })
+        });
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (originField) {
+            const newField: IRawField = {
+                fid: `${fid}.wordTFIDF`,
+                name: `${originField.name}.word_tf_idf`,
+                semanticType: 'nominal',
+                analyticType: 'dimension',
+                extInfo: {
+                    extFrom: [fid],
+                    extOpt: 'LaTiao.$wordTFIDF',
+                    extInfo: {}
+                },
+                geoRole: 'none'
+            }
+            const newData = data.map((d, index) => {
+                const tfidfInfo = tfidf[index];
+                const word = tfidfInfo.slice(0, 1).map(r => r.word).join('_');
+                return {
+                    ...d,
+                    [newField.fid]: word,
+                }
+            });
+            this.addExtFieldsFromRows(newData, [newField].map(f => ({
+                ...f,
+                stage: 'preview',
+            })));
+        }
+    }
+    public async expandWordTF (fid: string) {
+        const data = await this.rawDataStorage.getAll();
+        const values: string[] = data.map(d => `${d[fid]}`);
+        const wordsInRow = values.map(v => v.split(/[\s,.]+/));
+        const tf = termFrequency(wordsInRow).map((docInfo) => {
+            return Array.from(docInfo.entries()).sort((a, b) => b[1] - a[1]).map(([word, score]) => {
+                return {
+                    word,
+                    score,
+                }
+            })
+        });
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (originField) {
+            const newField: IRawField = {
+                fid: `${fid}.wordTF`,
+                name: `${originField.name}.word_tf`,
+                semanticType: 'nominal',
+                analyticType: 'dimension',
+                extInfo: {
+                    extFrom: [fid],
+                    extOpt: 'LaTiao.$wordTF',
+                    extInfo: {}
+                },
+                geoRole: 'none'
+            }
+            const newData = data.map((d, index) => {
+                const tfInfo = tf[index];
+                const word = tfInfo.slice(0, 1).map(r => r.word).join('_');
+                return {
+                    ...d,
+                    [newField.fid]: word,
+                }
+            });
+            this.addExtFieldsFromRows(newData, [newField].map(f => ({
+                ...f,
+                stage: 'preview',
+            })));
+        }
+    }
+    public async expandReGroupByFreq (fid: string) {
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField) {
+            return;
+        }
+        const data = await this.rawDataStorage.getAll();
+        const topUniqueValues = getFreqRange(data.map(r => r[fid]));
+        const valuePool = new Set(topUniqueValues.map(r => r[0]).slice(0, topUniqueValues.length - 1))
+        const newField: IRawField = {
+            fid: `${fid}.reGroupByFreq`,
+            name: `${originField.name || fid}.reGroupByFreq`,
+            semanticType: 'nominal',
+            analyticType: 'dimension',
+            extInfo: {
+                extFrom: [fid],
+                extOpt: 'LaTiao.$reGroupByFreq',
+                extInfo: {}
+            },
+            geoRole: 'none'
+        }
+        const newData = data.map((d) => {
+            const value = d[fid];
+            return {
+                ...d,
+                [newField.fid]: valuePool.has(value) ? value : 'others',
+            }
+        })
+        this.addExtFieldsFromRows(newData, [newField].map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
+    }
+    public async expandNominalOneHot(fid: string) {
+        const data = await this.rawDataStorage.getAll();
+        const values = data.map(d => d[fid]);
+        const limitSize = 8;
+        const topKValues = getFreqRange(values).slice(0, limitSize);
+        const valueSet = new Set(topKValues.map(f => f[0]));
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField)return;
+        const newFields: IRawField[] = topKValues.map((v, i) => {
+            return {
+                fid: `${fid}.ex${i}`,
+                name: `${originField.name || originField.fid}.${v[0].replace(/[\s,.]+/g, '_')}`,
+                semanticType: 'nominal',
+                analyticType: 'dimension',
+                extInfo: {
+                    extFrom: [fid],
+                    extOpt: 'LaTiao.$oneHot',
+                    extInfo: {}
+                },
+                geoRole: 'none'
+            } as IRawField})
+        newFields[newFields.length - 1].name = 'others';
+        const newData = data.map(d => ({ ...d}));
+        for (let i = 0; i < newData.length; i++) {
+            for (let j = 0; j < newFields.length - 1; j++) {
+                newData[i][newFields[j].fid] = newData[i][fid] === topKValues[j][0] ? 1 : 0;
+            }
+            newData[i][newFields[newFields.length - 1].fid] = valueSet.has(newData[i][fid]) ? 0 : 1;
+        }
+        this.addExtFieldsFromRows(newData, newFields.map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
     }
 
     /**

@@ -260,7 +260,11 @@
             "cancel": "Cancel",
             "auto": "Extend Suggestions",
             "suggestion": {
-                "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months."
+                "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months.",
+                "oneHot": "One-hot encoding for categorical fields.|One-hot encoding is a way to represent categorical variables as binary vectors. It allows the representation of categorical data to be more expressive.",
+                "wordTFIDF": "Extract words from text fields(score: tf-idf).|TF-IDF is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus.",
+                "wordTF": "Extract words from text fields(score: tf).| Use the term with top frequency in docs.",
+                "reGroupByFreq": "Re-Group By frequency.|Re-group the field by frequency, keep the top frequency value."
             }
         },
         "filter": {
