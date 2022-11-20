@@ -54,6 +54,7 @@ enum PIVOT_TAB_KEYS {
 
 const Painter: React.FC = (props) => {
     const container = useRef<HTMLDivElement>(null);
+    const isPainting = useRef(false);
     const { dataSourceStore, painterStore, langStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { painterView, painterViewData } = painterStore
@@ -168,6 +169,8 @@ const Painter: React.FC = (props) => {
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         e.stopPropagation();
                         e.preventDefault();
+                        // @ts-ignore
+                        if (!isPainting.current && e.vegaType !== 'touchmove') return;
                         if (painting && item && item.datum) {
                             const { mutIndices, mutValues } = batchMutInCircle({
                                 mutData: viewData,
@@ -205,13 +208,21 @@ const Painter: React.FC = (props) => {
                             }
                         }
                     };
-                    res.view.addEventListener('mouseover', hdr);
+                    res.view.addEventListener('mousedown', () => {
+                        isPainting.current = true;
+                    });
+                    res.view.addEventListener('mouseup', () => {
+                        isPainting.current = false;
+                    });
+                    res.view.addEventListener('mousemove', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 } else if (xFieldType !== 'quantitative' && yFieldType === 'quantitative') {
                     const yRange = getRange(viewData.map((r) => r[yField]));
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         e.stopPropagation();
                         e.preventDefault();
+                        // @ts-ignore
+                        if (!isPainting.current && e.vegaType !== 'touchmove') return;
                         if (painting && item && item.datum) {
                             const { mutIndices, mutValues } = batchMutInCatRange({
                                 mutData: viewData,
@@ -245,12 +256,20 @@ const Painter: React.FC = (props) => {
                             }
                         }
                     };
-                    res.view.addEventListener('mouseover', hdr);
+                    res.view.addEventListener('mousedown', () => {
+                        isPainting.current = true;
+                    });
+                    res.view.addEventListener('mouseup', () => {
+                        isPainting.current = false;
+                    });
+                    res.view.addEventListener('mousemove', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 } else if (yFieldType !== 'quantitative' && xFieldType === 'quantitative') {
                     const hdr = (e: ScenegraphEvent, item: Item<any> | null | undefined) => {
                         e.stopPropagation();
                         e.preventDefault();
+                        // @ts-ignore
+                        if (!isPainting.current && e.vegaType !== 'touchmove') return;
                         if (painting && item && item.datum) {
                             const xRange = getRange(viewData.map((r) => r[xField]));
                             const { mutIndices, mutValues } = batchMutInCatRange({
@@ -285,7 +304,13 @@ const Painter: React.FC = (props) => {
                             }
                         }
                     };
-                    res.view.addEventListener('mouseover', hdr);
+                    res.view.addEventListener('mousedown', () => {
+                        isPainting.current = true;
+                    });
+                    res.view.addEventListener('mouseup', () => {
+                        isPainting.current = false;
+                    });
+                    res.view.addEventListener('mousemove', hdr);
                     res.view.addEventListener('touchmove', hdr);
                 }
                 res.view.resize();
