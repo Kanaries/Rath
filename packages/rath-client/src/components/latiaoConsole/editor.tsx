@@ -1,6 +1,6 @@
 import { TextField } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { forwardRef, useEffect, useMemo, useRef } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import intl from 'react-intl-universal';
 import { debounceTime, Subject } from 'rxjs';
 import styled from 'styled-components';
@@ -86,7 +86,14 @@ const LaTiaoEditor = observer(forwardRef<HTMLDivElement, LaTiaoEditorProps>(({
     code, setCode, position, autocomplete, moveHintCursorPrev, moveHintCursorNext, setPreview, setErrMsg,
 }, ref) => {
     const { dataSourceStore } = useGlobalStore();
-    const { rawData, extData, fields: mutFields } = dataSourceStore;
+    const { rawDataMetaInfo, extData, fields: mutFields } = dataSourceStore;
+    const [rawData, setRawData] = useState<IRow[]>([]);
+
+    useEffect(() => {
+        if (rawDataMetaInfo.versionCode > -1) {
+            dataSourceStore.rawDataStorage.getAll().then(setRawData);
+        }
+    }, [rawDataMetaInfo.versionCode, dataSourceStore.rawDataStorage]);
 
     const mergedData = useMemo(() => {
         return rawData.map((row, i) => Object.fromEntries(
