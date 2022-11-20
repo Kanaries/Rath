@@ -780,13 +780,19 @@ export class DataSourceStore {
                 },
                 geoRole: 'none'
             } as IRawField})
-        newFields[newFields.length - 1].name = 'others';
+        const sizeWithOutOthers = Math.min(limitSize - 1, topKValues.length);
+        if (sizeWithOutOthers < newFields.length) {
+            newFields[newFields.length - 1].name = `${originField.name || originField.fid}.others`;
+        }
         const newData = data.map(d => ({ ...d}));
+        
         for (let i = 0; i < newData.length; i++) {
-            for (let j = 0; j < newFields.length - 1; j++) {
+            for (let j = 0; j < sizeWithOutOthers; j++) {
                 newData[i][newFields[j].fid] = newData[i][fid] === topKValues[j][0] ? 1 : 0;
             }
-            newData[i][newFields[newFields.length - 1].fid] = valueSet.has(newData[i][fid]) ? 0 : 1;
+            if (sizeWithOutOthers < newFields.length) {
+                newData[i][newFields[newFields.length - 1].fid] = valueSet.has(newData[i][fid]) ? 0 : 1;
+            }
         }
         this.addExtFieldsFromRows(newData, newFields.map(f => ({
             ...f,
