@@ -33,7 +33,7 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     toggleFlowAnalyzer?: () => void;
     focus: number | null;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
-    onRemoveLink: (srcFid: string, tarFid: string) => void;
+    onRevertLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
@@ -50,7 +50,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     limit,
     onClickNode,
     onLinkTogether,
-    onRemoveLink,
+    onRevertLink,
     preconditions,
     forceRelayoutRef,
     autoLayout,
@@ -96,7 +96,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     onClickNode={onClickNode}
                     toggleFlowAnalyzer={toggleFlowAnalyzer ?? (() => {})}
                     onLinkTogether={onLinkTogether}
-                    onRemoveLink={onRemoveLink}
+                    onRevertLink={onRevertLink}
                     focus={focus}
                     autoLayout={autoLayout}
                     renderNode={renderNode}

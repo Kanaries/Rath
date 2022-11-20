@@ -1,6 +1,7 @@
 import { Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import produce from 'immer';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { resolvePreconditionsFromCausal } from '../../utils/resolve-causal';
@@ -135,6 +136,7 @@ const CausalPage: React.FC = () => {
                 <PreconditionPanel
                     modifiablePrecondition={modifiablePrecondition}
                     setModifiablePrecondition={setModifiablePrecondition}
+                    renderNode={renderNode}
                 />
                 <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
                     <ModelStorage />
@@ -167,9 +169,21 @@ const CausalPage: React.FC = () => {
                             onNodeSelected={handleSubTreeSelected}
                             onLinkTogether={handleLinkTogether}
                             renderNode={renderNode}
-                            onRemoveLink={(srcIdx, tarIdx) =>
+                            onRevertLink={(srcIdx, tarIdx) =>
                                 setModifiablePrecondition((list) => {
-                                    return list.filter((link) => !(link.src === srcIdx && link.tar === tarIdx));
+                                    return list.map((link) => {
+                                        if (link.src === srcIdx && link.tar === tarIdx) {
+                                            return produce(link, draft => {
+                                                draft.type = ({
+                                                    "must-link": 'must-not-link',
+                                                    "must-not-link": 'must-link',
+                                                    "directed-must-link": 'directed-must-not-link',
+                                                    "directed-must-not-link": 'directed-must-link',
+                                                } as const)[draft.type];
+                                            });
+                                        }
+                                        return link;
+                                    });
                                 })
                             }
                             synchronizePredictionsUsingCausalResult={synchronizePredictionsUsingCausalResult}

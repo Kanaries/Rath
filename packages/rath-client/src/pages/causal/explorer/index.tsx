@@ -41,7 +41,7 @@ export interface ExplorerProps {
         composedEffect: readonly Readonly<NodeWithScore>[],
     ) => void;
     onLinkTogether: (srcIdx: number, tarIdx: number) => void;
-    onRemoveLink: (srcFid: string, tarFid: string) => void;
+    onRevertLink: (srcFid: string, tarFid: string) => void;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
     synchronizePredictionsUsingCausalResult: () => void;
 }
@@ -101,7 +101,7 @@ const Explorer: FC<ExplorerProps> = ({
     scoreMatrix,
     onNodeSelected,
     onLinkTogether,
-    onRemoveLink,
+    onRevertLink,
     preconditions,
     renderNode,
     synchronizePredictionsUsingCausalResult,
@@ -347,7 +347,7 @@ const Explorer: FC<ExplorerProps> = ({
                     onClickNode={handleClickCircle}
                     toggleFlowAnalyzer={toggleFlowAnalyzer}
                     onLinkTogether={handleLink}
-                    onRemoveLink={onRemoveLink}
+                    onRevertLink={onRevertLink}
                     autoLayout={autoLayout}
                     renderNode={renderNode}
                     style={{

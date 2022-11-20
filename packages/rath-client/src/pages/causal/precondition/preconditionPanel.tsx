@@ -4,7 +4,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useGlobalStore } from '../../../store';
 import type { ModifiableBgKnowledge } from '../config';
 import { InnerCard } from '../components';
+import type { IFieldMeta } from '../../../interfaces';
+import type { GraphNodeAttributes } from '../explorer/graph-utils';
 import PreconditionTable from './preconditionTable';
+import PreconditionGraph from './preconditionGraph';
 
 
 const EditModes = [{
@@ -25,9 +28,12 @@ type EditMode = (typeof EditModes)[number]['itemKey'];
 export interface PreconditionPanelProps {
     modifiablePrecondition: ModifiableBgKnowledge[];
     setModifiablePrecondition: (precondition: ModifiableBgKnowledge[] | ((prev: ModifiableBgKnowledge[]) => ModifiableBgKnowledge[])) => void;
+    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
 }
 
-const PreconditionPanel: React.FC<PreconditionPanelProps> = ({ modifiablePrecondition, setModifiablePrecondition }) => {
+const PreconditionPanel: React.FC<PreconditionPanelProps> = ({
+    modifiablePrecondition, setModifiablePrecondition, renderNode,
+}) => {
     const { causalStore } = useGlobalStore();
     const { igMatrix, selectedFields } = causalStore;
 
@@ -127,12 +133,19 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                 })}
             </Pivot>
             {{
-                diagram: null,
+                diagram: (
+                    <PreconditionGraph
+                        modifiablePrecondition={modifiablePrecondition}
+                        setModifiablePrecondition={setModifiablePrecondition}
+                        renderNode={renderNode}
+                    />
+                ),
                 matrix: null,
                 table: (
                     <PreconditionTable
                         modifiablePrecondition={modifiablePrecondition}
                         setModifiablePrecondition={setModifiablePrecondition}
+                        renderNode={renderNode}
                     />
                 ),
             }[editMode]}

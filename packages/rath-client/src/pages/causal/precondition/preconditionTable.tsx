@@ -16,8 +16,7 @@ import type { PreconditionPanelProps } from './preconditionPanel';
 
 
 const PreconditionTable: React.FC<PreconditionPanelProps> = ({ modifiablePrecondition, setModifiablePrecondition }) => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
-    const { fieldMetas } = dataSourceStore;
+    const { causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
 
     const [editingPrecondition, setEditingPrecondition] = useState<Partial<ModifiableBgKnowledge>>({
@@ -26,7 +25,7 @@ const PreconditionTable: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
 
     useEffect(() => {
         setEditingPrecondition({ type: 'must-link' });
-    }, [fieldMetas]);
+    }, [selectedFields]);
 
     const preconditionTableCols = useMemo<IColumn[]>(() => {
         return [
@@ -74,7 +73,7 @@ const PreconditionTable: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                 name: '因素', //'Source',
                 onRender: (item) => (
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {fieldMetas.find((f) => f.fid === item.src)?.name ?? item.src}
+                        {selectedFields.find((f) => f.fid === item.src)?.name ?? item.src}
                     </span>
                 ),
                 minWidth: 160,
@@ -138,7 +137,7 @@ const PreconditionTable: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                 name: '因素', //'Target',
                 onRender: item => (
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {fieldMetas.find((f) => f.fid === item.tar)?.name ?? item.tar}
+                        {selectedFields.find((f) => f.fid === item.tar)?.name ?? item.tar}
                     </span>
                 ),
                 minWidth: 160,
@@ -151,7 +150,7 @@ const PreconditionTable: React.FC<PreconditionPanelProps> = ({ modifiablePrecond
                 minWidth: 0,
             },
         ];
-    }, [fieldMetas, setModifiablePrecondition]);
+    }, [selectedFields, setModifiablePrecondition]);
 
     return (
         <Stack tokens={{ childrenGap: 12 }}>

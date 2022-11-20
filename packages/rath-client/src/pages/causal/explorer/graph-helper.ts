@@ -15,8 +15,8 @@ export const useReactiveGraph = (
     handleNodeClick: ((node: DiagramGraphData['nodes'][number] | null) => void) | undefined,
     fields: readonly IFieldMeta[],
     handleRemoveLink: (srcFid: string, tarFid: string) => void,
-    setEdgeSelected: (status: boolean) => void,
-    updateSelectedRef: MutableRefObject<(idx: number) => void>,
+    setEdgeSelected: ((status: boolean) => void) | undefined,
+    updateSelectedRef: MutableRefObject<(idx: number) => void> | undefined,
     forceRelayoutFlag: 0 | 1,
     focus: number | null,
     selectedSubtree: readonly string[],
@@ -74,24 +74,26 @@ export const useReactiveGraph = (
             graph.on('click', () => {
                 setTimeout(() => {
                     const [selectedEdge] = graph.findAllByState('edge', 'active');
-                    setEdgeSelectedRef.current(Boolean(selectedEdge));
+                    setEdgeSelectedRef.current?.(Boolean(selectedEdge));
                 }, 1);
             });
 
-            setEdgeSelectedRef.current(false);
+            setEdgeSelectedRef.current?.(false);
 
-            updateSelectedRef.current = idx => {
-                const prevSelected = graph.findAllByState('node', 'selected')[0]?._cfg?.id;
-                const prevSelectedIdx = prevSelected ? parseInt(prevSelected, 10) : null;
-
-                if (prevSelectedIdx === idx) {
-                    return;
-                } else if (prevSelectedIdx !== null) {
-                    graph.setItemState(`${prevSelectedIdx}`, 'selected', false);
-                } else if (idx !== -1) {
-                    graph.setItemState(`${idx}`, 'selected', true);
-                }
-            };
+            if (updateSelectedRef) {
+                updateSelectedRef.current = idx => {
+                    const prevSelected = graph.findAllByState('node', 'selected')[0]?._cfg?.id;
+                    const prevSelectedIdx = prevSelected ? parseInt(prevSelected, 10) : null;
+    
+                    if (prevSelectedIdx === idx) {
+                        return;
+                    } else if (prevSelectedIdx !== null) {
+                        graph.setItemState(`${prevSelectedIdx}`, 'selected', false);
+                    } else if (idx !== -1) {
+                        graph.setItemState(`${idx}`, 'selected', true);
+                    }
+                };
+            }
 
             graphRef.current = graph;
 
@@ -149,7 +151,7 @@ export const useReactiveGraph = (
         if (graph) {
             graph.setMode(mode);
         }
-        setEdgeSelectedRef.current(false);
+        setEdgeSelectedRef.current?.(false);
     }, [mode, graphRef]);
 
     useEffect(() => {

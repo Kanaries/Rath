@@ -187,7 +187,7 @@ export const useGraphOptions = (
     fields: readonly Readonly<IFieldMeta>[],
     handleLink: (srcFid: string, tarFid: string) => void,
     graphRef: { current: Graph | undefined },
-    setEdgeSelected: (status: boolean) => void,
+    setEdgeSelected: ((status: boolean) => void) | undefined,
 ) => {
     const widthRef = useRef(width);
     widthRef.current = width;
@@ -279,7 +279,7 @@ export const useGraphOptions = (
                 },
             },
         };
-        setEdgeSelectedRef.current(false);
+        setEdgeSelectedRef.current?.(false);
         return cfg;
     }, [graphRef]);
 };

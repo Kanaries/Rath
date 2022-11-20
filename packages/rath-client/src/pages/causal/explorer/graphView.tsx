@@ -37,7 +37,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     onClickNode?: (node: DiagramGraphData['nodes'][number] | null) => void;
     toggleFlowAnalyzer: () => void;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
-    onRemoveLink: (srcFid: string, tarFid: string) => void;
+    onRevertLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
@@ -97,7 +97,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     limit,
     mode,
     onLinkTogether,
-    onRemoveLink,
+    onRevertLink,
     preconditions,
     forceRelayoutRef,
     autoLayout,
@@ -137,11 +137,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
 
     const updateSelectedRef = useRef<(idx: number) => void>(() => {});
 
-    const [edgeSelected, setEdgeSelected] = useState(false);
-
     const graphRef = useRef<Graph>();
     const renderData = useRenderData(data, mode, preconditions, fields, renderNode);
-    const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, setEdgeSelected);
+    const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, undefined);
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
 
@@ -156,8 +154,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         mode,
         onClickNode,
         fields,
-        onRemoveLink,
-        setEdgeSelected,
+        onRevertLink,
+        undefined,
         updateSelectedRef,
         forceRelayoutFlag,
         focus,
@@ -216,7 +214,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         >
             <div ref={containerRef} />
             {/* {edgeSelected && <p className="msg">Press Backspace key to remove this edge.</p>} */}
-            {edgeSelected && <p className="msg">按下 Backspace 键删除这条关系</p>}
             <ExportGraphButton fields={fields} data={value} />
         </Container>
     );
