@@ -16,6 +16,16 @@ enum VIEW_MODE {
     LIST = 'list',
 }
 
+enum COLLECT_CONFIG {
+    TITLE = 'title',
+    DESC = 'desc',
+}
+
+const collectionConfig = [
+    { key: COLLECT_CONFIG.TITLE, title: COLLECT_CONFIG.TITLE },
+    { key: COLLECT_CONFIG.DESC, title: COLLECT_CONFIG.DESC },
+];
+
 const Collection: React.FC = (props) => {
     const { collectionStore, dataSourceStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
@@ -99,8 +109,8 @@ const Collection: React.FC = (props) => {
                                                 }
                                                 return item;
                                             });
-                                            dismissPanel()
-                                            collectionStore.addConfigCollectionList(newCollectionList)
+                                            dismissPanel();
+                                            collectionStore.addConfigCollectionList(newCollectionList);
                                         }}
                                     >
                                         Submit
@@ -110,26 +120,19 @@ const Collection: React.FC = (props) => {
                         }}
                         isFooterAtBottom
                     >
-                        <TextField
-                            label="title"
-                            value={configValue.title || ''}
-                            onChange={(e, data) => {
-                                setConfigValue({
-                                    ...configValue,
-                                    title: data,
-                                });
-                            }}
-                        ></TextField>
-                        <TextField
-                            label="desc"
-                            value={configValue.desc || ''}
-                            onChange={(e, data) => {
-                                setConfigValue({
-                                    ...configValue,
-                                    desc: data,
-                                });
-                            }}
-                        ></TextField>
+                        {collectionConfig.map((item) => (
+                            <TextField
+                                key={item.key}
+                                label={item.title}
+                                value={configValue[item.key] || ''}
+                                onChange={(e, data) => {
+                                    setConfigValue({
+                                        ...configValue,
+                                        [item.key]: data,
+                                    });
+                                }}
+                            />
+                        ))}
                     </Panel>
                     {viewMode === VIEW_MODE.CARD && (
                         <CardView
