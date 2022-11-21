@@ -80,8 +80,11 @@ export class CausalStore {
         }
     }
     private causalServer =
-        decodeURIComponent(new URL(window.location.href).searchParams.get('causalServer') ?? '') ||
+        decodeURIComponent(new URL(window.location.href).searchParams.get('causalServer') ?? '').replace(/\/$/, '') ||
         CausalServerUrl.test; // FIXME:
+    public get apiPrefix() {
+        return this.causalServer;
+    }
     private dataSourceStore: DataSourceStore;
     constructor(dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore;
@@ -203,7 +206,7 @@ export class CausalStore {
         this.causalFields = causalFields;
         this.causalStrength = causalMatrix;
     }
-    public async causalDiscovery(dataSource: IRow[], /** @deprecated */ precondition: BgKnowledge[], preconditionPage: BgKnowledgePagLink[]) {
+    public async causalDiscovery(dataSource: IRow[], /** @deprecated */ precondition: BgKnowledge[], preconditionPag: BgKnowledgePagLink[]) {
         const fields = this.dataSourceStore.fieldMetas;
         const focusFieldIds = this.focusFieldIds;
         const algoName = this.causalAlgorithm;
@@ -231,7 +234,7 @@ export class CausalStore {
                     fields,
                     focusedFields: focusFieldIds,
                     bgKnowledges: precondition,
-                    bgKnowledgesPag: preconditionPage,
+                    bgKnowledgesPag: preconditionPag,
                     params: this.causalParams[algoName],
                 }),
             });
@@ -259,7 +262,7 @@ export class CausalStore {
             this.computing = false;
         }
     }
-    public async reRunCausalDiscovery(dataSource: IRow[], precondition: BgKnowledge[], preconditionPage: BgKnowledgePagLink[]) {
-        this.causalDiscovery(dataSource, precondition, preconditionPage);
+    public async reRunCausalDiscovery(dataSource: IRow[], precondition: BgKnowledge[], preconditionPag: BgKnowledgePagLink[]) {
+        this.causalDiscovery(dataSource, precondition, preconditionPag);
     }
 }

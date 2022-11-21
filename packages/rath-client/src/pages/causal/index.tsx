@@ -192,6 +192,7 @@ const CausalPage: React.FC = () => {
                 <h1 style={{ fontSize: '1.6em', fontWeight: 500 }}>因果分析</h1>
                 <DatasetPanel context={dataContext} />
                 <PreconditionPanel
+                    context={dataContext}
                     modifiablePrecondition={modifiablePrecondition}
                     setModifiablePrecondition={setModifiablePrecondition}
                     renderNode={renderNode}

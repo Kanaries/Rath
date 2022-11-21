@@ -5,6 +5,7 @@ import type { ModifiableBgKnowledge } from '../config';
 import { InnerCard } from '../components';
 import type { IFieldMeta } from '../../../interfaces';
 import type { GraphNodeAttributes } from '../explorer/graph-utils';
+import type { useDataViews } from '../hooks/dataViews';
 import PreconditionTable from './preconditionTable';
 import PreconditionGraph from './preconditionGraph';
 import PreconditionBatch from './preconditionBatch';
@@ -26,13 +27,14 @@ const EditModes = [{
 
 type EditMode = (typeof EditModes)[number]['itemKey'];
 export interface PreconditionPanelProps {
+    context: ReturnType<typeof useDataViews>;
     modifiablePrecondition: ModifiableBgKnowledge[];
     setModifiablePrecondition: (precondition: ModifiableBgKnowledge[] | ((prev: ModifiableBgKnowledge[]) => ModifiableBgKnowledge[])) => void;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
 }
 
 const PreconditionPanel: React.FC<PreconditionPanelProps> = ({
-    modifiablePrecondition, setModifiablePrecondition, renderNode,
+    context, modifiablePrecondition, setModifiablePrecondition, renderNode,
 }) => {
     const [editMode, setEditMode] = useState<EditMode>('diagram');
 
@@ -41,6 +43,7 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({
             <h1 className="card-header">领域/背景知识</h1>
             <hr className="card-line" />
             <PreconditionBatch
+                context={context}
                 modifiablePrecondition={modifiablePrecondition}
                 setModifiablePrecondition={setModifiablePrecondition}
                 renderNode={renderNode}
@@ -68,6 +71,7 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({
             {{
                 diagram: (
                     <PreconditionGraph
+                        context={context}
                         modifiablePrecondition={modifiablePrecondition}
                         setModifiablePrecondition={setModifiablePrecondition}
                         renderNode={renderNode}
@@ -76,6 +80,7 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({
                 matrix: null,
                 table: (
                     <PreconditionTable
+                        context={context}
                         modifiablePrecondition={modifiablePrecondition}
                         setModifiablePrecondition={setModifiablePrecondition}
                         renderNode={renderNode}

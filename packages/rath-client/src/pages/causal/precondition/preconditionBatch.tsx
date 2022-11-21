@@ -1,12 +1,13 @@
 import { DefaultButton } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import produce from 'immer';
 import { useGlobalStore } from '../../../store';
 import type { ModifiableBgKnowledge } from '../config';
 import type { PreconditionPanelProps } from './preconditionPanel';
 import PreconditionGraph from './preconditionGraph';
+import { getGeneratedPreconditionsFromAutoDetection, getGeneratedPreconditionsFromExtInfo } from './utils';
 
 
 const Container = styled.div`
@@ -34,7 +35,17 @@ const Mask = styled.div`
         box-shadow: 0 10px 8px rgba(0, 0, 0, 0.05), 0 4px 3px rgba(0, 0, 0, 0.01);
         background-color: #fff;
         padding: 2em;
-        width: 600px;
+        > div.container {
+            width: 600px;
+            height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            > * {
+                width: 100%;
+                height: 100%;
+            }
+        }
     }
 `;
 
@@ -47,20 +58,20 @@ enum BatchUpdateMode {
 const dropdownOptions: { key: BatchUpdateMode; text: string }[] = [
     {
         key: BatchUpdateMode.OVERWRITE_ONLY,
-        text: '仅更新',//BatchUpdateMode.OVERWRITE_ONLY,
+        text: '更新并替换',//BatchUpdateMode.OVERWRITE_ONLY,
     },
     {
         key: BatchUpdateMode.FILL_ONLY,
-        text: '仅补充',//BatchUpdateMode.FILL_ONLY,
+        text: '补充不替换',//BatchUpdateMode.FILL_ONLY,
     },
     {
         key: BatchUpdateMode.FULLY_REPLACE,
-        text: '全覆盖',//BatchUpdateMode.FULLY_REPLACE,
+        text: '全部覆盖',//BatchUpdateMode.FULLY_REPLACE,
     },
 ];
 
 const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
-    modifiablePrecondition, setModifiablePrecondition, renderNode,
+    context, modifiablePrecondition, setModifiablePrecondition, renderNode,
 }) => {
     const { causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
@@ -68,6 +79,7 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
     const [preview, setPreview] = useState<ModifiableBgKnowledge[] | null>(null);
     const isPending = displayPreview && preview === null;
     const [mode, setMode] = useState(BatchUpdateMode.OVERWRITE_ONLY);
+    const { dataSubset } = context;
 
     const updatePreview = useMemo<typeof setModifiablePrecondition>(() => {
         if (displayPreview) {
@@ -76,23 +88,33 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
         return () => {};
     }, [displayPreview]);
 
-    const getGeneratedPreconditionsFromExtInfo = useCallback(() => {
-        setPreview(
-            selectedFields.reduce<ModifiableBgKnowledge[]>((list, f) => {
-                if (f.extInfo) {
-                    for (const from of f.extInfo.extFrom) {
-                        list.push({
-                            src: from,
-                            tar: f.fid,
-                            type: 'directed-must-link',
-                        });
-                    }
-                }
-                return list;
-            }, [])
-        );
+    const generatePreconditionsFromExtInfo = useCallback(() => {
+        setPreview(getGeneratedPreconditionsFromExtInfo(selectedFields));
         setDisplayPreview(true);
     }, [selectedFields]);
+
+    const pendingRef = useRef<Promise<unknown>>();
+    useEffect(() => {
+        if (!displayPreview) {
+            pendingRef.current = undefined;
+        }
+    }, [displayPreview]);
+    const generatePreconditionsFromAutoDetection = useCallback(() => {
+        const p = getGeneratedPreconditionsFromAutoDetection(dataSubset, selectedFields.map(f => f.fid));
+        pendingRef.current = p;
+        p.then(res => {
+            if (p === pendingRef.current) {
+                setPreview(res);
+                pendingRef.current = undefined;
+            }
+        }).catch(err => {
+            if (p === pendingRef.current) {
+                setPreview([]);
+            }
+            console.warn(err);
+        });
+        setDisplayPreview(true);
+    }, [selectedFields, dataSubset]);
 
     const handleClear = useCallback(() => {
         setModifiablePrecondition([]);
@@ -139,6 +161,7 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
     
     const handleSubmit = useCallback(() => {
         setModifiablePrecondition(submittable);
+        setDisplayPreview(false);
     }, [setModifiablePrecondition, submittable]);
 
     const handleCancel = useCallback(() => {
@@ -153,29 +176,32 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
                 <DefaultButton onClick={handleClear}>
                     全部删除
                 </DefaultButton>
-                <DefaultButton onClick={getGeneratedPreconditionsFromExtInfo}>
+                <DefaultButton onClick={generatePreconditionsFromExtInfo}>
                     使用扩展字段计算图
                 </DefaultButton>
                 <DefaultButton>
                     从文件导入
                 </DefaultButton>
-                <DefaultButton>
+                <DefaultButton onClick={generatePreconditionsFromAutoDetection}>
                     自动识别
                 </DefaultButton>
             </Container>
-            {/* 预览 TODO: 做弹窗 */}
             {displayPreview && (
                 <Mask>
                     <div>
-                        {isPending ? (
-                            <p>loading...</p>
-                        ) : (
-                            <PreconditionGraph
-                                modifiablePrecondition={submittable}
-                                setModifiablePrecondition={updatePreview}
-                                renderNode={renderNode}
-                            />
-                        )}
+                        <header>预览</header>
+                        <div className="container">
+                            {isPending ? (
+                                <p>loading...</p>
+                            ) : (
+                                <PreconditionGraph
+                                    context={context}
+                                    modifiablePrecondition={submittable}
+                                    setModifiablePrecondition={updatePreview}
+                                    renderNode={renderNode}
+                                />
+                            )}
+                        </div>
                         <DefaultButton
                             text={dropdownOptions.find(opt => opt.key === mode)?.text ?? '确定'}
                             onClick={handleSubmit}
