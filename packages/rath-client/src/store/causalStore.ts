@@ -13,7 +13,7 @@ import {
     BgKnowledgePagLink,
 } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
-import resolveCausal, { CausalLinkDirection, findUnmatchedCausalResults } from '../utils/resolve-causal';
+import resolveCausal, { CausalLinkDirection, findUnmatchedCausalResults, stringifyDirection } from '../utils/resolve-causal';
 import { getModelStorage, getModelStorageList, setModelStorage } from '../utils/storage';
 import { DataSourceStore } from './dataSourceStore';
 
@@ -244,9 +244,26 @@ export class CausalStore {
                     .slice(0, originFieldsLength)
                     .map((row) => row.slice(0, originFieldsLength));
                 const causalMatrix = resolveCausal(resultMatrix);
-                const unmatched = findUnmatchedCausalResults(fields, precondition, causalMatrix);
-                if (unmatched.length > 0) {
-                    console.warn('unmatched', unmatched);
+                const unmatched = findUnmatchedCausalResults(fields, preconditionPag, causalMatrix);
+                if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
+                    for (const info of unmatched) {
+                        notify({
+                            title: 'Causal Result Not Matching',
+                            type: 'error',
+                            content: `Conflict in edge "${info.srcFid} -> ${info.tarFid}":\n`
+                                + `  Expected: ${
+                                    typeof info.expected === 'object'
+                                        ? ('not' in info.expected
+                                            ? `not ${stringifyDirection(info.expected.not)}`
+                                            : `one of ${info.expected.oneOf.map(
+                                                direction => stringifyDirection(direction)
+                                            ).join(', ')}`
+                                        )
+                                        : stringifyDirection(info.expected)
+                                }\n`
+                                + `  Received: ${stringifyDirection(info.received)}`,
+                        });
+                    }
                 }
                 this.setCausalResult(inputFields, causalMatrix);
             } else {
