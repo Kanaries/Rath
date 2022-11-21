@@ -20,6 +20,24 @@ const CollectContainer = styled.div`
         border-radius: 1em;
         padding: 1em;
         margin: 0.5em;
+        cursor: pointer;
+    }
+    .collect-title {
+        width: 100%;
+        font-size: 1.125rem;
+        display: flex;
+        justify-content: center;
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+    .c-desc {
+        > div:first-child {
+            /* w-full text-gray-700 text-sm */
+            width: 100%;
+            color: rgba(55, 65, 81);
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
     }
 `;
 
@@ -48,13 +66,13 @@ const CardView: React.FC<CardViewProps> = (props) => {
             <CollectContainer>
                 {views.slice(pageIndex * VIEW_NUM_IN_PAGE, (pageIndex + 1) * VIEW_NUM_IN_PAGE).map((item, i) => (
                     <div
-                        className="chart-container cursor-pointer"
+                        className="chart-container"
                         key={item.viewId}
                         onClick={() => {
                             onConfig(item);
                         }}
                     >
-                        <div className="w-full flex justify-center text-lg font-bold mb-2">{item.title}</div>
+                        <div className="collent-title">{item.title}</div>
                         <div className="c-vis">
                             <VisErrorBoundary>
                                 <ReactVega
@@ -65,7 +83,7 @@ const CardView: React.FC<CardViewProps> = (props) => {
                             </VisErrorBoundary>
                         </div>
                         <div className="c-desc">
-                            <div className="w-full text-gray-700 text-sm">{item.desc}</div>
+                            <div>{item.desc}</div>
                             <ViewInfo metas={metas} fields={item.fields} filters={item.filters} />
                         </div>
                     </div>
