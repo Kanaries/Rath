@@ -1,9 +1,11 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import { Graph } from "@antv/g6";
+import { observer } from "mobx-react-lite";
 import { ActionButton } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { ModifiableBgKnowledge } from "../config";
+import { useGlobalStore } from "../../../store";
 import { GraphNodeAttributes, useGraphOptions, useRenderData } from "./graph-utils";
 import { useReactiveGraph } from "./graph-helper";
 import type { DiagramGraphData } from ".";
@@ -27,17 +29,16 @@ const Container = styled.div`
 `;
 
 export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
-    fields: readonly Readonly<IFieldMeta>[];
     selectedSubtree: readonly string[];
     value: Readonly<DiagramGraphData>;
     cutThreshold: number;
     limit: number;
     mode: 'explore' | 'edit';
     focus: number | null;
-    onClickNode?: (node: DiagramGraphData['nodes'][number] | null) => void;
+    onClickNode?: (fid: string | null) => void;
     toggleFlowAnalyzer: () => void;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
-    onRemoveLink: (srcFid: string, tarFid: string) => void;
+    onRevertLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
@@ -88,7 +89,6 @@ const ExportGraphButton: React.FC<{ data: DiagramGraphData; fields: readonly Rea
 };
 
 const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
-    fields,
     selectedSubtree,
     value,
     onClickNode,
@@ -97,7 +97,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     limit,
     mode,
     onLinkTogether,
-    onRemoveLink,
+    onRevertLink,
     preconditions,
     forceRelayoutRef,
     autoLayout,
@@ -105,6 +105,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     toggleFlowAnalyzer,
     ...props
 }, ref) => {
+    const { causalStore } = useGlobalStore();
+    const { selectedFields: fields } = causalStore;
+
     const [data] = useMemo(() => {
         let totalScore = 0;
         const nodeCauseWeights = value.nodes.map(() => 0);
@@ -137,15 +140,19 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
 
     const updateSelectedRef = useRef<(idx: number) => void>(() => {});
 
-    const [edgeSelected, setEdgeSelected] = useState(false);
-
     const graphRef = useRef<Graph>();
     const renderData = useRenderData(data, mode, preconditions, fields, renderNode);
-    const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, setEdgeSelected);
+    const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, undefined);
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
 
     const [forceRelayoutFlag, setForceRelayoutFlag] = useState<0 | 1>(0);
+
+    const handleEdgeClick = useCallback((edge: { srcFid: string; tarFid: string; } | null) => {
+        if (edge) {
+            onRevertLink(edge.srcFid, edge.tarFid);
+        }
+    }, [onRevertLink]);
 
     useReactiveGraph(
         containerRef,
@@ -155,9 +162,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         renderData,
         mode,
         onClickNode,
+        handleEdgeClick,
         fields,
-        onRemoveLink,
-        setEdgeSelected,
         updateSelectedRef,
         forceRelayoutFlag,
         focus,
@@ -215,12 +221,10 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
             }}
         >
             <div ref={containerRef} />
-            {/* {edgeSelected && <p className="msg">Press Backspace key to remove this edge.</p>} */}
-            {edgeSelected && <p className="msg">按下 Backspace 键删除这条关系</p>}
             <ExportGraphButton fields={fields} data={value} />
         </Container>
     );
 });
 
 
-export default GraphView;
+export default observer(GraphView);

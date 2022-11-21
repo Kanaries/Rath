@@ -22,18 +22,17 @@ const Container = styled.div`
 `;
 
 export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
-    fields: readonly Readonly<IFieldMeta>[];
     selectedSubtree: readonly string[];
     value: Readonly<DiagramGraphData>;
     /** @default 0 */
     cutThreshold?: number;
     limit: number;
     mode: 'explore' | 'edit';
-    onClickNode?: (node: DiagramGraphData['nodes'][number] | null) => void;
+    onClickNode?: (fid: string | null) => void;
     toggleFlowAnalyzer?: () => void;
     focus: number | null;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
-    onRemoveLink: (srcFid: string, tarFid: string) => void;
+    onRevertLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
@@ -41,7 +40,6 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
-    fields,
     selectedSubtree,
     value,
     focus,
@@ -50,7 +48,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     limit,
     onClickNode,
     onLinkTogether,
-    onRemoveLink,
+    onRevertLink,
     preconditions,
     forceRelayoutRef,
     autoLayout,
@@ -66,7 +64,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
             width: '100%',
         }} />;
         // return <p>{info}</p>;
-    }, [fields, value, cutThreshold, preconditions]);
+    }, [value, cutThreshold, preconditions]);
 
     return (
         <Container {...props} ref={ref}>
@@ -85,7 +83,6 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
             /> */}
             <ErrorBoundary>
                 <GraphView
-                    fields={fields}
                     selectedSubtree={selectedSubtree}
                     forceRelayoutRef={forceRelayoutRef}
                     value={value}
@@ -96,7 +93,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     onClickNode={onClickNode}
                     toggleFlowAnalyzer={toggleFlowAnalyzer ?? (() => {})}
                     onLinkTogether={onLinkTogether}
-                    onRemoveLink={onRemoveLink}
+                    onRevertLink={onRevertLink}
                     focus={focus}
                     autoLayout={autoLayout}
                     renderNode={renderNode}

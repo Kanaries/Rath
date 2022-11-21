@@ -71,30 +71,10 @@ const bkArrows = {
     },
 } as const;
 
-const G6_EDGE_SELECT = 'edge_select';
-
-G6.registerBehavior(G6_EDGE_SELECT, {
-    getEvents() {
-        return {
-            'edge:click': 'onEdgeClick',
-        };
-    },
-    onEdgeClick(e: any) {
-        const graph = this.graph as Graph;
-        const item = e.item;
-        if (item.hasState('active')) {
-            graph.setItemState(item, 'active', false);
-            return;
-        }
-        graph.findAllByState('edge', 'active').forEach(node => {
-            graph.setItemState(node, 'active', false);
-        });
-        graph.setItemState(item, 'active', true);
-    },
-});
+export const ForbiddenEdgeType = 'forbidden-edge';
 
 G6.registerEdge(
-    'forbidden-edge',
+    ForbiddenEdgeType,
     {
         afterDraw(cfg, group: any) {
             // 获取图形组中的第一个图形，在这里就是边的路径图形
@@ -177,7 +157,7 @@ export const useRenderData = (
                     lineWidth: 2,
                 },
             },
-            type: bk.type === 'must-not-link' || bk.type === 'directed-must-not-link' ? 'forbidden-edge' : undefined,
+            type: bk.type === 'must-not-link' || bk.type === 'directed-must-not-link' ? ForbiddenEdgeType : undefined,
         })),
     }), [data, mode, preconditions, fields, renderNode]);
 };
@@ -187,7 +167,7 @@ export const useGraphOptions = (
     fields: readonly Readonly<IFieldMeta>[],
     handleLink: (srcFid: string, tarFid: string) => void,
     graphRef: { current: Graph | undefined },
-    setEdgeSelected: (status: boolean) => void,
+    setEdgeSelected: ((status: boolean) => void) | undefined,
 ) => {
     const widthRef = useRef(width);
     widthRef.current = width;
@@ -205,7 +185,7 @@ export const useGraphOptions = (
             height: GRAPH_HEIGHT,
             linkCenter: true,
             modes: {
-                explore: ['drag-canvas', 'drag-node', 'click-select', 'zoom-canvas'],
+                explore: ['drag-canvas', 'drag-node', 'zoom-canvas'],
                 edit: ['drag-canvas', {
                     type: 'create-edge',
                     trigger: 'drag',
@@ -231,7 +211,7 @@ export const useGraphOptions = (
                         createEdgeFrom = -1;
                         return false;
                     },
-                }, G6_EDGE_SELECT, 'zoom-canvas'],
+                }],
             },
             animate: true,
             layout: {
@@ -279,7 +259,7 @@ export const useGraphOptions = (
                 },
             },
         };
-        setEdgeSelectedRef.current(false);
+        setEdgeSelectedRef.current?.(false);
         return cfg;
     }, [graphRef]);
 };

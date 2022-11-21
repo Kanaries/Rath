@@ -14,10 +14,12 @@ import {
 } from 'd3-dag';
 import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
 import { Dropdown } from "@fluentui/react";
+import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
 import ColDist, { IBrushSignalStore } from "../crossFilter/colDist";
+import { useGlobalStore } from "../../../store";
 import type { DiagramGraphData } from ".";
 
 
@@ -29,7 +31,6 @@ export type NodeWithScore = {
 export interface FlowAnalyzerProps {
     display: boolean;
     dataSource: IRow[];
-    fields: readonly Readonly<IFieldMeta>[];
     data: DiagramGraphData;
     index: number;
     cutThreshold: number;
@@ -40,7 +41,7 @@ export interface FlowAnalyzerProps {
         composedCause: readonly Readonly<NodeWithScore>[],
         composedEffect: readonly Readonly<NodeWithScore>[],
     ) => void;
-    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+    onClickNode?: (fid: string | null) => void;
     limit: number;
 }
 
@@ -122,7 +123,9 @@ const SVGGroup = styled.div`
 
 const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
-const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ display, dataSource, fields, data, index, cutThreshold, onUpdate, onClickNode, limit }) => {
+const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ display, dataSource, data, index, cutThreshold, onUpdate, onClickNode, limit }) => {
+    const { causalStore } = useGlobalStore();
+    const { selectedFields: fields } = causalStore;
     const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
 
     const normalizedLinks = useMemo(() => {
@@ -529,7 +532,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ display, dataSource, fields, data
                                     onClick={e => {
                                         e.stopPropagation();
                                         if (index !== idx) {
-                                            onClickNode?.({ nodeId: idx });
+                                            onClickNode?.(fields[idx].fid);
                                         }
                                     }}
                                 />
@@ -653,7 +656,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ display, dataSource, fields, data
                                             }}
                                             onClick={() => {
                                                 if (index !== idx) {
-                                                    onClickNode?.({ nodeId: idx });
+                                                    onClickNode?.(fields[idx].fid);
                                                 }
                                             }}
                                         >
@@ -679,4 +682,4 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ display, dataSource, fields, data
 };
 
 
-export default FlowAnalyzer;
+export default observer(FlowAnalyzer);
