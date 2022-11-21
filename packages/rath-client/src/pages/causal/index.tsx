@@ -7,7 +7,7 @@ import { useGlobalStore } from '../../store';
 import { resolvePreconditionsFromCausal } from '../../utils/resolve-causal';
 import Explorer from './explorer';
 import Params from './params';
-import type { BgKnowledge, ModifiableBgKnowledge } from './config';
+import { BgKnowledge, BgKnowledgePagLink, ModifiableBgKnowledge, PAG_NODE } from './config';
 import ModelStorage from './modelStorage';
 import MatrixPanel, { MATRIX_TYPE } from './matrixPanel';
 import { useInteractFieldGroups } from './hooks/interactFieldGroup';
@@ -48,6 +48,7 @@ const CausalPage: React.FC = () => {
         });
     }, []);
 
+    /** @deprecated */
     const precondition = useMemo<BgKnowledge[]>(() => {
         if (computing || igMatrix.length !== selectedFields.length) {
             return [];
@@ -79,6 +80,63 @@ const CausalPage: React.FC = () => {
             return list;
         }, []);
     }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
+
+    const preconditionPag = useMemo<BgKnowledgePagLink[]>(() => {
+        if (computing || igMatrix.length !== selectedFields.length) {
+            return [];
+        }
+        return modifiablePrecondition.reduce<BgKnowledgePagLink[]>((list, decl) => {
+            const srcIdx = selectedFields.findIndex((f) => f.fid === decl.src);
+            const tarIdx = selectedFields.findIndex((f) => f.fid === decl.tar);
+
+            if (srcIdx !== -1 && tarIdx !== -1) {
+                switch (decl.type) {
+                    case 'must-link': {
+                        list.push({
+                            src: decl.src,
+                            tar: decl.tar,
+                            src_type: PAG_NODE.CIRCLE,
+                            tar_type: PAG_NODE.CIRCLE,
+                        });
+                        break;
+                    }
+                    case 'must-not-link': {
+                        list.push({
+                            src: decl.src,
+                            tar: decl.tar,
+                            src_type: PAG_NODE.EMPTY,
+                            tar_type: PAG_NODE.EMPTY,
+                        });
+                        break;
+                    }
+                    case 'directed-must-link': {
+                        list.push({
+                            src: decl.src,
+                            tar: decl.tar,
+                            src_type: PAG_NODE.BLANK,
+                            tar_type: PAG_NODE.ARROW,
+                        });
+                        break;
+                    }
+                    case 'directed-must-not-link': {
+                        list.push({
+                            src: decl.src,
+                            tar: decl.tar,
+                            src_type: PAG_NODE.EMPTY,
+                            tar_type: PAG_NODE.ARROW,
+                        });
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+
+            return list;
+        }, []);
+    }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
+
     const dataContext = useDataViews(cleanedData);
     const { dataSubset } = dataContext;
 
@@ -140,7 +198,7 @@ const CausalPage: React.FC = () => {
                 />
                 <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
                     <ModelStorage />
-                    <Params dataSource={dataSubset} focusFields={focusFieldIds} precondition={precondition} />
+                    <Params dataSource={dataSubset} focusFields={focusFieldIds} bgKnowledge={preconditionPag} precondition={precondition} />
                 </Stack>
                 <MatrixPanel
                     fields={selectedFields}
@@ -152,7 +210,7 @@ const CausalPage: React.FC = () => {
                                 causalStore.computeIGCondMatrix(dataSubset, selectedFields);
                                 break;
                             case MATRIX_TYPE.causal:
-                                causalStore.causalDiscovery(dataSubset, precondition);
+                                causalStore.causalDiscovery(dataSubset, precondition, preconditionPag);
                                 break;
                             case MATRIX_TYPE.mutualInfo:
                             default:

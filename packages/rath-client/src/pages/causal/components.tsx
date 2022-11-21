@@ -11,4 +11,9 @@ export const InnerCard = styled.div`
     margin: 8px 0px;
     padding: 8px;
     overflow: auto;
+    > h2 {
+        & + * {
+            margin-bottom: 2em;
+        }
+    }
 `;

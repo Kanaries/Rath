@@ -1,6 +1,6 @@
 import intl from 'react-intl-universal';
 import type { IFieldMeta } from '../interfaces';
-import type { ModifiableBgKnowledge } from '../pages/causal/config';
+import type { BgKnowledge, ModifiableBgKnowledge } from '../pages/causal/config';
 
 
 export enum CausalLinkDirection {
@@ -115,6 +115,131 @@ export const resolvePreconditionsFromCausal = (
     }
 
     return preconditions;
+};
+
+export interface ICausalDiff {
+    srcFid: string;
+    tarFid: string;
+    expected: CausalLinkDirection;
+    received: CausalLinkDirection;
+}
+
+export const findUnmatchedCausalResults = (
+    fields: readonly IFieldMeta[],
+    preconditions: readonly Readonly<BgKnowledge>[],
+    causalMatrix: readonly (readonly CausalLinkDirection[])[]
+): Readonly<ICausalDiff>[] => {
+    const diffs: ICausalDiff[] = [];
+
+    // TODO:
+    // for (const precondition of preconditions) {
+    //     const srcIdx = fields.findIndex(f => f.fid === precondition.src);
+    //     const tarIdx = fields.findIndex(f => f.fid === precondition.tar);
+    //     const result = causalMatrix[srcIdx][tarIdx];
+    //     switch (precondition.type) {
+    //         case "directed-must-link": {
+    //             if (result !== CausalLinkDirection.directed) {
+    //                 diffs.push({
+    //                     srcFid: precondition.src,
+    //                     tarFid: precondition.tar,
+    //                     expected: CausalLinkDirection.directed,
+    //                     received: result,
+    //                 });
+    //             }
+    //             break;
+    //         }
+    //         case "directed-must-not-link": {
+    //             if (
+    //                 result !== CausalLinkDirection.none &&
+    //                 result !== CausalLinkDirection.reversed &&
+    //                 result !== CausalLinkDirection.weakReversed
+    //             ) {
+    //                 diffs.push({
+    //                     srcFid: precondition.src,
+    //                     tarFid: precondition.tar,
+    //                     expected: CausalLinkDirection.directed,
+    //                     received: result,
+    //                 });
+    //             }
+    //             break;
+    //         }
+    //         case "must-link": {
+    //             if (result === CausalLinkDirection.none) {
+    //                 diffs.push({
+    //                     srcFid: precondition.src,
+    //                     tarFid: precondition.tar,
+    //                     expected: CausalLinkDirection.directed,
+    //                     received: result,
+    //                 });
+    //             }
+    //             break;
+    //         }
+    //         case "must-not-link": {
+    //             if (result !== CausalLinkDirection.none) {
+    //                 diffs.push({
+    //                     srcFid: precondition.src,
+    //                     tarFid: precondition.tar,
+    //                     expected: CausalLinkDirection.directed,
+    //                     received: result,
+    //                 });
+    //             }
+    //             break;
+    //         }
+    //         default: {
+    //             break;
+    //         }
+    //     }
+    // }
+
+    return diffs;
+};
+
+/**
+ * 这个方法后续可以用于对比两轮不同数据子集的运行结果的颠覆型差异（不会匹配增量型差异）.
+ */
+export const diffCausalResults = (
+    fields: readonly IFieldMeta[],
+    prevMatrix: readonly (readonly CausalLinkDirection[])[],
+    nextMatrix: readonly (readonly CausalLinkDirection[])[]
+): Readonly<ICausalDiff>[] => {
+    const diffs: ICausalDiff[] = [];
+    
+    for (let i = 0; i < prevMatrix.length - 1; i += 1) {
+        for (let j = i + 1; j < prevMatrix.length; j += 1) {
+            const prev = prevMatrix[i][j];
+            const next = nextMatrix[i][j];
+            switch (prev) {
+                case CausalLinkDirection.none: {
+                    break;
+                }
+                case CausalLinkDirection.reversed:
+                case CausalLinkDirection.weakReversed: {
+                    if (next !== prev) {
+                        diffs.push({
+                            srcFid: fields[j].fid,
+                            tarFid: fields[i].fid,
+                            expected: prevMatrix[j][i],
+                            received: nextMatrix[j][i],
+                        });
+                    }
+                    break;
+                }
+                default: {
+                    if (next !== prev) {
+                        diffs.push({
+                            srcFid: fields[i].fid,
+                            tarFid: fields[j].fid,
+                            expected: prev,
+                            received: next,
+                        });
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    return diffs;
 };
 
 

@@ -10,9 +10,10 @@ import {
     IAlgoSchema,
     CAUSAL_ALGORITHM_OPTIONS,
     BgKnowledge,
+    BgKnowledgePagLink,
 } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
-import resolveCausal, { CausalLinkDirection } from '../utils/resolve-causal';
+import resolveCausal, { CausalLinkDirection, findUnmatchedCausalResults } from '../utils/resolve-causal';
 import { getModelStorage, getModelStorageList, setModelStorage } from '../utils/storage';
 import { DataSourceStore } from './dataSourceStore';
 
@@ -202,7 +203,7 @@ export class CausalStore {
         this.causalFields = causalFields;
         this.causalStrength = causalMatrix;
     }
-    public async causalDiscovery(dataSource: IRow[], precondition: BgKnowledge[]) {
+    public async causalDiscovery(dataSource: IRow[], /** @deprecated */ precondition: BgKnowledge[], preconditionPage: BgKnowledgePagLink[]) {
         const fields = this.dataSourceStore.fieldMetas;
         const focusFieldIds = this.focusFieldIds;
         const algoName = this.causalAlgorithm;
@@ -230,6 +231,7 @@ export class CausalStore {
                     fields,
                     focusedFields: focusFieldIds,
                     bgKnowledges: precondition,
+                    bgKnowledgesPag: preconditionPage,
                     params: this.causalParams[algoName],
                 }),
             });
@@ -239,6 +241,10 @@ export class CausalStore {
                     .slice(0, originFieldsLength)
                     .map((row) => row.slice(0, originFieldsLength));
                 const causalMatrix = resolveCausal(resultMatrix);
+                const unmatched = findUnmatchedCausalResults(fields, precondition, causalMatrix);
+                if (unmatched.length > 0) {
+                    console.warn('unmatched', unmatched);
+                }
                 this.setCausalResult(inputFields, causalMatrix);
             } else {
                 throw new Error(result.message);
@@ -253,7 +259,7 @@ export class CausalStore {
             this.computing = false;
         }
     }
-    public async reRunCausalDiscovery(dataSource: IRow[], precondition: BgKnowledge[]) {
-        this.causalDiscovery(dataSource, precondition);
+    public async reRunCausalDiscovery(dataSource: IRow[], precondition: BgKnowledge[], preconditionPage: BgKnowledgePagLink[]) {
+        this.causalDiscovery(dataSource, precondition, preconditionPage);
     }
 }

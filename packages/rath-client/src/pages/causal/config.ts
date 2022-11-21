@@ -28,7 +28,7 @@ export type IAlgoSchema = {
 /**
  * a number match { -1 | [0, 1] }
  * 
- * -1 for not connected: src ---X--> tar
+ * -1 for not connected: src ---x--> tar
  * 1 for must connect: src -------> tar
  * others for confidence level.
  */
@@ -38,6 +38,20 @@ export type BgKnowledge = {
     src: string;
     tar: string;
     type: BgConfidenceLevel;
+};
+
+export enum PAG_NODE {
+    BLANK = -1,
+    EMPTY = 0,
+    ARROW = 1,
+    CIRCLE = 2,
+}
+
+export type BgKnowledgePagLink = {
+    src: string;
+    tar: string;
+    src_type: PAG_NODE;
+    tar_type: PAG_NODE;
 };
 
 export type ModifiableBgKnowledge = {
