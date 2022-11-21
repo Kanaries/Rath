@@ -105,13 +105,14 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
         p.then(res => {
             if (p === pendingRef.current) {
                 setPreview(res);
-                pendingRef.current = undefined;
             }
         }).catch(err => {
             if (p === pendingRef.current) {
                 setPreview([]);
             }
             console.warn(err);
+        }).finally(() => {
+            pendingRef.current = undefined;
         });
         setDisplayPreview(true);
     }, [selectedFields, dataSubset]);
@@ -162,6 +163,7 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
     const handleSubmit = useCallback(() => {
         setModifiablePrecondition(submittable);
         setDisplayPreview(false);
+        setPreview(null);
     }, [setModifiablePrecondition, submittable]);
 
     const handleCancel = useCallback(() => {
