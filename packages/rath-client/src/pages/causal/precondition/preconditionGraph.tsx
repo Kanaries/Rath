@@ -28,14 +28,13 @@ const Container = styled.div`
 const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
     modifiablePrecondition, setModifiablePrecondition, renderNode,
 }) => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
-    const { fieldMetas } = dataSourceStore;
+    const { causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
 
-    const nodes = useMemo(() => fieldMetas.map((f, i) => ({ id: i, fid: f.fid })), [fieldMetas]);
+    const nodes = useMemo(() => selectedFields.map((f, i) => ({ id: i, fid: f.fid })), [selectedFields]);
     const data = useMemo<{
         nodes: { id: number }[];
         links: { source: number; target: number; type: CausalLink['type'] }[];
@@ -62,7 +61,7 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
     }, [setModifiablePrecondition]);
 
     const graphRef = useRef<Graph>();
-    const renderData = useRenderData(data, 'edit', modifiablePrecondition, fieldMetas, renderNode);
+    const renderData = useRenderData(data, 'edit', modifiablePrecondition, selectedFields, renderNode);
     const cfg = useGraphOptions(width, selectedFields, onLinkTogether, graphRef, undefined);
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
