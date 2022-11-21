@@ -163,7 +163,6 @@ const CausalPage: React.FC = () => {
                     diagram={(
                         <Explorer
                             dataSource={dataSubset}
-                            fields={exploringFields}
                             scoreMatrix={igMatrix}
                             preconditions={modifiablePrecondition}
                             onNodeSelected={handleSubTreeSelected}

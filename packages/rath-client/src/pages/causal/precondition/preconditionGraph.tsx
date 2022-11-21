@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Graph } from '@antv/g6';
 import produce from 'immer';
+import { DefaultButton } from '@fluentui/react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
 import type { CausalLink } from '../explorer';
@@ -12,6 +13,16 @@ import type { PreconditionPanelProps } from './preconditionPanel';
 
 const Container = styled.div`
     height: 600px;
+    position: relative;
+    > div {
+        width: 100%;
+        height: 100%;
+    }
+    > button {
+        position: absolute;
+        bottom: 1em;
+        left: 1em;
+    }
 `;
 
 const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
@@ -42,8 +53,12 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
             });
         }));
     }, [setModifiablePrecondition]);
-    const onRemoveLink = useCallback((srcFid: string, tarFid: string) => {
-        setModifiablePrecondition(list => list.filter(link => [link.src, link.tar].some(fid => ![srcFid, tarFid].includes(fid))));
+    const onRemoveLink = useCallback((edge: { srcFid: string; tarFid: string; } | null) => {
+        if (edge) {
+            setModifiablePrecondition(
+                list => list.filter(link => [link.src, link.tar].some(fid => ![edge.srcFid, edge.tarFid].includes(fid)))
+            );
+        }
     }, [setModifiablePrecondition]);
 
     const graphRef = useRef<Graph>();
@@ -62,9 +77,8 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
         renderData,
         'edit',
         undefined,
-        selectedFields,
         onRemoveLink,
-        undefined,
+        selectedFields,
         undefined,
         forceUpdateFlag,
         null,
@@ -86,20 +100,21 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
         }
     }, []);
 
-    useEffect(() => {
-        let timer: NodeJS.Timeout;
-        const updater = () => {
-            setUpdateFlag(flag => flag ? 0 : 1);
-            timer = setTimeout(updater, 2_000);
-        };
-        timer = setTimeout(updater, 2_000);
-        return () => {
-            clearTimeout(timer);
-        };
-    }, []);
-
     return (
-        <Container ref={containerRef} />
+        <Container>
+            <div ref={containerRef} />
+            <DefaultButton
+                style={{
+                    flexGrow: 0,
+                    flexShrink: 0,
+                    flexBasis: 'max-content',
+                    padding: '0.4em 0',
+                }}
+                onClick={() => setUpdateFlag(flag => flag ? 0 : 1)}
+            >
+                修正布局
+            </DefaultButton>
+        </Container>
     );
 };
 

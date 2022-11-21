@@ -2,7 +2,6 @@ import { RefObject, useEffect, useRef, MutableRefObject } from "react";
 import G6, { Graph } from "@antv/g6";
 import type { IFieldMeta } from "../../../interfaces";
 import { GRAPH_HEIGHT, useGraphOptions, useRenderData } from "./graph-utils";
-import type { DiagramGraphData } from ".";
 
 
 export const useReactiveGraph = (
@@ -12,10 +11,9 @@ export const useReactiveGraph = (
     options: ReturnType<typeof useGraphOptions>,
     data: ReturnType<typeof useRenderData>,
     mode: "explore" | "edit",
-    handleNodeClick: ((node: DiagramGraphData['nodes'][number] | null) => void) | undefined,
+    handleNodeClick: ((fid: string | null) => void) | undefined,
+    handleEdgeClick: ((edge: { srcFid: string, tarFid: string } | null) => void) | undefined,
     fields: readonly IFieldMeta[],
-    handleRemoveLink: (srcFid: string, tarFid: string) => void,
-    setEdgeSelected: ((status: boolean) => void) | undefined,
     updateSelectedRef: MutableRefObject<(idx: number) => void> | undefined,
     forceRelayoutFlag: 0 | 1,
     focus: number | null,
@@ -29,10 +27,8 @@ export const useReactiveGraph = (
     handleNodeClickRef.current = handleNodeClick;
     const fieldsRef = useRef(fields);
     fieldsRef.current = fields;
-    const handleRemoveLinkRef = useRef(handleRemoveLink);
-    handleRemoveLinkRef.current = handleRemoveLink;
-    const setEdgeSelectedRef = useRef(setEdgeSelected);
-    setEdgeSelectedRef.current = setEdgeSelected;
+    const handleEdgeClickRef = useRef(handleEdgeClick);
+    handleEdgeClickRef.current = handleEdgeClick;
 
     useEffect(() => {
         const { current: container } = containerRef;
@@ -48,49 +44,35 @@ export const useReactiveGraph = (
             graph.data(dataRef.current);
             graph.render();
 
-            graph.on('nodeselectchange', (e: any) => {
-                const selected = e.selectedItems.nodes[0]?._cfg.id;
-                const idx = selected === undefined ? null : parseInt(selected, 10);
-
-                handleNodeClickRef.current?.(idx === null ? null : { nodeId: idx });
+            graph.on('node:click', (e: any) => {
+                const nodeId = e.item._cfg.id;
+                if (typeof nodeId === 'string') {
+                    const idx = parseInt(nodeId, 10);
+                    handleNodeClickRef.current?.(fieldsRef.current[idx].fid);
+                } else {
+                    handleNodeClickRef.current?.(null);
+                }
             });
 
-            graph.on('keydown', e => {
-                if (e.key === 'Backspace') {
-                    // delete selected link
-                    const [selectedEdge] = graph.findAllByState('edge', 'active');
-                    if (selectedEdge) {
-                        const src = (selectedEdge._cfg?.source as any)?._cfg.id;
-                        const tar = (selectedEdge._cfg?.target as any)?._cfg.id;
-                        if (src && tar) {
-                            const srcF = fieldsRef.current[parseInt(src, 10)];
-                            const tarF = fieldsRef.current[parseInt(tar, 10)];
-                            handleRemoveLinkRef.current(srcF.fid, tarF.fid);
-                        }
+            graph.on('edge:click', (e: any) => {
+                const edge = e.item;
+                if (edge) {
+                    const src = (edge._cfg?.source as any)?._cfg.id;
+                    const tar = (edge._cfg?.target as any)?._cfg.id;
+                    if (src && tar) {
+                        const srcF = fieldsRef.current[parseInt(src, 10)];
+                        const tarF = fieldsRef.current[parseInt(tar, 10)];
+                        handleEdgeClickRef.current?.({ srcFid: srcF.fid, tarFid: tarF.fid });
+                    } else {
+                        handleEdgeClickRef.current?.(null);
                     }
                 }
             });
 
-            graph.on('click', () => {
-                setTimeout(() => {
-                    const [selectedEdge] = graph.findAllByState('edge', 'active');
-                    setEdgeSelectedRef.current?.(Boolean(selectedEdge));
-                }, 1);
-            });
-
-            setEdgeSelectedRef.current?.(false);
-
             if (updateSelectedRef) {
                 updateSelectedRef.current = idx => {
-                    const prevSelected = graph.findAllByState('node', 'selected')[0]?._cfg?.id;
-                    const prevSelectedIdx = prevSelected ? parseInt(prevSelected, 10) : null;
-    
-                    if (prevSelectedIdx === idx) {
-                        return;
-                    } else if (prevSelectedIdx !== null) {
-                        graph.setItemState(`${prevSelectedIdx}`, 'selected', false);
-                    } else if (idx !== -1) {
-                        graph.setItemState(`${idx}`, 'selected', true);
+                    if (idx === -1) {
+                        handleNodeClickRef.current?.(null);
                     }
                 };
             }
@@ -151,7 +133,6 @@ export const useReactiveGraph = (
         if (graph) {
             graph.setMode(mode);
         }
-        setEdgeSelectedRef.current?.(false);
     }, [mode, graphRef]);
 
     useEffect(() => {

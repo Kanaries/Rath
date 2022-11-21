@@ -30,7 +30,6 @@ export interface DiagramGraphData {
 
 export interface ExplorerProps {
     dataSource: IRow[];
-    fields: readonly Readonly<IFieldMeta>[];
     scoreMatrix: readonly (readonly number[])[];
     preconditions: ModifiableBgKnowledge[];
     onNodeSelected: (
@@ -97,7 +96,6 @@ const MainView = styled.div`
 
 const Explorer: FC<ExplorerProps> = ({
     dataSource,
-    fields,
     scoreMatrix,
     onNodeSelected,
     onLinkTogether,
@@ -107,7 +105,7 @@ const Explorer: FC<ExplorerProps> = ({
     synchronizePredictionsUsingCausalResult,
 }) => {
     const { causalStore } = useGlobalStore();
-    const { causalStrength } = causalStore;
+    const { causalStrength, selectedFields } = causalStore;
 
     const [cutThreshold, setCutThreshold] = useState(0);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
@@ -115,8 +113,8 @@ const Explorer: FC<ExplorerProps> = ({
     const data = useMemo(() => sNormalize(scoreMatrix), [scoreMatrix]);
 
     const nodes = useMemo<CausalNode[]>(() => {
-        return fields.map((_, i) => ({ nodeId: i }));
-    }, [fields]);
+        return selectedFields.map((_, i) => ({ nodeId: i }));
+    }, [selectedFields]);
 
     const links = useMemo<CausalLink[]>(() => {
         if (causalStrength.length === 0) {
@@ -203,15 +201,15 @@ const Explorer: FC<ExplorerProps> = ({
     const [focus, setFocus] = useState(-1);
     const [showFlowAnalyzer, setShowFlowAnalyzer] = useState(false);
 
-    const handleClickCircle = useCallback((node: Readonly<CausalNode> | null) => {
-        if (!node) {
+    const handleClickCircle = useCallback((fid: string | null) => {
+        if (fid === null) {
             return setFocus(-1);
         }
-        const idx = node.nodeId;
+        const idx = selectedFields.findIndex(f => f.fid === fid);
         if (mode === 'explore') {
             setFocus(idx === focus ? -1 : idx);
         }
-    }, [mode, focus]);
+    }, [mode, focus, selectedFields]);
 
     const toggleFlowAnalyzer = useCallback(() => {
         setShowFlowAnalyzer(display => !display);
@@ -235,14 +233,14 @@ const Explorer: FC<ExplorerProps> = ({
                 <small>{err?.message ?? info}</small>
             </div>
         );
-    }, [fields, value, mode === 'explore' ? focus : -1, cutThreshold]);
+    }, [selectedFields, value, mode === 'explore' ? focus : -1, cutThreshold]);
 
     const handleLink = useCallback((srcFid: string, tarFid: string) => {
         if (srcFid === tarFid) {
             return;
         }
-        onLinkTogether(fields.findIndex(f => f.fid === srcFid), fields.findIndex(f => f.fid === tarFid));
-    }, [fields, onLinkTogether]);
+        onLinkTogether(selectedFields.findIndex(f => f.fid === srcFid), selectedFields.findIndex(f => f.fid === tarFid));
+    }, [selectedFields, onLinkTogether]);
 
     const [selectedSubtree, setSelectedSubtree] = useState<string[]>([]);
 
@@ -335,7 +333,6 @@ const Explorer: FC<ExplorerProps> = ({
             </Tools>
             <MainView>
                 <ExplorerMainView
-                    fields={fields}
                     selectedSubtree={selectedSubtree}
                     forceRelayoutRef={forceRelayoutRef}
                     value={value}
@@ -361,7 +358,6 @@ const Explorer: FC<ExplorerProps> = ({
             <FlowAnalyzer
                 display={showFlowAnalyzer}
                 dataSource={dataSource}
-                fields={fields}
                 data={value}
                 limit={limit}
                 index={mode === 'explore' ? focus : -1}
