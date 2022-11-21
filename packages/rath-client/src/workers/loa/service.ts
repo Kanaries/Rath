@@ -69,11 +69,13 @@ class TestCore extends NextVICore {
                 if (card.neighbors.length > 0) {
                     newFieldCorrelation2View /= card.neighbors.length;
                 }
-                for (let viewField of viewFields) {
-                    const score = getFieldRelation(viewData, field, viewField);
-                    totalScore += score;
+                if (viewFields.length > 0) {
+                    for (let viewField of viewFields) {
+                        const score = getFieldRelation(viewData, field, viewField);
+                        totalScore += score;
+                    }
+                    totalScore /= viewFields.length;
                 }
-                totalScore /= viewFields.length;
                 fieldsWithScore.push({
                     field: field,
                     score1: newFieldCorrelation2View,
@@ -82,10 +84,10 @@ class TestCore extends NextVICore {
             }
             // TODO: 考虑字段的semantic 与 analyticType 都可以作为近邻的相似度评分
             fieldsWithScore.sort((a, b) => {
-                if (b.score1 > a.score1) return -1;
-                if (b.score1 < a.score1) return 1;
-                if (b.score2 > a.score2) return -1;
-                if (b.score2 < a.score2) return 1;
+                if (b.score1 > a.score1) return 1;
+                if (b.score1 < a.score1) return -1;
+                if (b.score2 > a.score2) return 1;
+                if (b.score2 < a.score2) return -1;
                 return 0;
             });
             for (let ansField of fieldsWithScore) {
