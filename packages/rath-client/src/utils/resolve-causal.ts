@@ -10,6 +10,7 @@ export enum CausalLinkDirection {
     weakDirected = 2,
     weakReversed = -2,
     undirected = 3,
+    weakUndirected = -3,
     bidirected = 4,
 }
 
@@ -21,6 +22,7 @@ export const stringifyDirection = (value: CausalLinkDirection): string => {
         [CausalLinkDirection.weakDirected]: intl.get('causal_direction.weakDirected'),
         [CausalLinkDirection.weakReversed]: intl.get('causal_direction.weakReversed'),
         [CausalLinkDirection.undirected]: intl.get('causal_direction.undirected'),
+        [CausalLinkDirection.weakUndirected]: intl.get('causal_direction.weakUndirected'),
         [CausalLinkDirection.bidirected]: intl.get('causal_direction.bidirected'),
     }[value];
 };
@@ -33,6 +35,7 @@ export const describeDirection = (value: CausalLinkDirection): string => {
         [CausalLinkDirection.weakDirected]: intl.get('causal_direction_desc.weakDirected'),
         [CausalLinkDirection.weakReversed]: intl.get('causal_direction_desc.weakReversed'),
         [CausalLinkDirection.undirected]: intl.get('causal_direction_desc.undirected'),
+        [CausalLinkDirection.weakUndirected]: intl.get('causal_direction_desc.weakUndirected'),
         [CausalLinkDirection.bidirected]: intl.get('causal_direction_desc.bidirected'),
     }[value];
 };
@@ -66,6 +69,9 @@ const resolveCausal = (resultMatrix: readonly (readonly number[])[]): CausalLink
             } else if (forwardFlag === 1 && backwardFlag === 2) {
                 matrix[i][j] = CausalLinkDirection.weakReversed;
                 matrix[j][i] = CausalLinkDirection.weakDirected;
+            } else if (backwardFlag === 2 && forwardFlag === 2) {
+                matrix[i][j] = CausalLinkDirection.weakUndirected;
+                matrix[j][i] = CausalLinkDirection.weakUndirected;
             }
         }
     }
@@ -108,6 +114,9 @@ export const resolvePreconditionsFromCausal = (
                         tar: b,
                         type: 'must-link',
                     });
+                    break;
+                }
+                default: {
                     break;
                 }
             }
@@ -227,7 +236,7 @@ export const diffCausalResults = (
                 }
                 case CausalLinkDirection.reversed:
                 case CausalLinkDirection.weakReversed: {
-                    if (next !== prev) {
+                    if (nextMatrix[j][i] !== prevMatrix[j][i]) {
                         diffs.push({
                             srcFid: fields[j].fid,
                             tarFid: fields[i].fid,

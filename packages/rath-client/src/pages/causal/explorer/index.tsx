@@ -20,7 +20,7 @@ export type CausalLink = {
     causeId: number;
     effectId: number;
     score: number;
-    type: 'directed' | 'bidirected' | 'undirected' | 'weak directed';
+    type: 'directed' | 'bidirected' | 'undirected' | 'weak directed' | 'weak undirected';
 }
 
 export interface DiagramGraphData {
@@ -180,6 +180,15 @@ const Explorer: FC<ExplorerProps> = ({
                         });
                         break;
                     }
+                    case CausalLinkDirection.weakUndirected: {
+                        links.push({
+                            causeId: i,
+                            effectId: j,
+                            score: weight,
+                            type: 'weak undirected',
+                        });
+                        break;
+                    }
                     case CausalLinkDirection.bidirected: {
                         links.push({
                             causeId: i,
@@ -187,6 +196,9 @@ const Explorer: FC<ExplorerProps> = ({
                             score: weight,
                             type: 'bidirected',
                         });
+                        break;
+                    }
+                    default: {
                         break;
                     }
                 }

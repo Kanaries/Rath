@@ -448,6 +448,7 @@
         "weakDirected": "导向（弱关系）",
         "weakReversed": "被导向（弱关系）",
         "undirected": "无向相关",
+        "weakUndirected": "无向相关（弱关系）",
         "bidirected": "双向相关"
     },
     "causal_direction_desc": {
@@ -457,6 +458,7 @@
         "weakDirected": "在部分子集合中，A 对 B 有影响。",
         "weakReversed": "在部分子集合中，A 被 B 影响。",
         "undirected": "A 与 B 相关，但影响方向不确定。",
+        "weakUndirected": "在不同的部分子集合中，A 与 B 有不同方向的影响关系。",
         "bidirected": "A 与 B 相互作用。"
     },
     "time_format": {

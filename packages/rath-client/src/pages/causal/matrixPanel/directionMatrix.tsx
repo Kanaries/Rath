@@ -91,6 +91,7 @@ const DirectionMatrix: React.FC<Props> = (props) => {
                         [CausalLinkDirection.weakDirected]: 0.5,
                         [CausalLinkDirection.weakReversed]: -0.5,
                         [CausalLinkDirection.undirected]: 0,
+                        [CausalLinkDirection.weakUndirected]: 0,
                         [CausalLinkDirection.bidirected]: 1,
                     }[value],
                 });

@@ -448,6 +448,7 @@
         "weakDirected": "direct to (weak)",
         "weakReversed": "directed from (weak)",
         "undirected": "relative without direction with",
+        "weakUndirected": "relative without direction with (weak)",
         "bidirected": "bidirected with"
     },
     "causal_direction_desc": {
@@ -457,6 +458,7 @@
         "weakDirected": "In some cases, A influences B.",
         "weakReversed": "In some cases, A is influenced by B.",
         "undirected": "A is relevant to B, but the direction is not decided.",
+        "weakUndirected": "In different cases, A or B is relevant to the other one.",
         "bidirected": "Both A and B influences each other."
     },
     "time_format": {
