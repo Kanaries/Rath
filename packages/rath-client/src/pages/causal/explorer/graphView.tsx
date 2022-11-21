@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "r
 import styled, { StyledComponentProps } from "styled-components";
 import { Graph } from "@antv/g6";
 import { observer } from "mobx-react-lite";
-import { ActionButton } from "@fluentui/react";
+import { ActionButton, Dropdown } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { ModifiableBgKnowledge } from "../config";
 import { useGlobalStore } from "../../../store";
@@ -14,17 +14,15 @@ import type { DiagramGraphData } from ".";
 const Container = styled.div`
     overflow: hidden;
     position: relative;
-    > div {
+    > div.container {
         width: 100%;
         height: 100%;
     }
-    & .msg {
+    > div.tools {
         position: absolute;
         left: 1em;
-        top: 2em;
-        font-size: 10px;
-        user-select: none;
-        pointer-events: none;
+        top: 1em;
+        padding: 0.8em;
     }
 `;
 
@@ -37,7 +35,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     focus: number | null;
     onClickNode?: (fid: string | null) => void;
     toggleFlowAnalyzer: () => void;
-    onLinkTogether: (srcFid: string, tarFid: string) => void;
+    onLinkTogether: (srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
@@ -140,9 +138,15 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
 
     const updateSelectedRef = useRef<(idx: number) => void>(() => {});
 
+    const [createEdgeMode, setCreateEdgeMode] = useState<ModifiableBgKnowledge['type']>('directed-must-link');
+
+    const handleLinkTogether = useCallback((srcFid: string, tarFid: string) => {
+        onLinkTogether(srcFid, tarFid, createEdgeMode);
+    }, [createEdgeMode, onLinkTogether]);
+
     const graphRef = useRef<Graph>();
     const renderData = useRenderData(data, mode, preconditions, fields, renderNode);
-    const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, undefined);
+    const cfg = useGraphOptions(width, fields, handleLinkTogether, graphRef, undefined);
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
 
@@ -220,7 +224,48 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                 e.stopPropagation();
             }}
         >
-            <div ref={containerRef} />
+            <div className="container" ref={containerRef} />
+            {mode === 'edit' && (
+                <div className="tools">
+                    <Dropdown
+                        label="连接类型"
+                        selectedKey={createEdgeMode}
+                        options={[
+                            { key: 'directed-must-link', text: '单向一定影响' },
+                            { key: 'directed-must-not-link', text: '单向一定不影响' },
+                            { key: 'must-link', text: '至少在一个方向存在影响' },
+                            { key: 'must-not-link', text: '在任意方向一定不影响' },
+                        ]}
+                        onChange={(_e, option) => {
+                            if (!option) {
+                                return;
+                            }
+                            const linkType = option.key as typeof createEdgeMode;
+                            setCreateEdgeMode(linkType);
+                        }}
+                        styles={{
+                            title: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                                padding: '0 2.8em 0 0.8em',
+                                border: 'none',
+                                borderBottom: '1px solid #8888',
+                            },
+                            caretDownWrapper: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                            },
+                            caretDown: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                            },
+                        }}
+                    />
+                </div>
+            )}
             <ExportGraphButton fields={fields} data={value} />
         </Container>
     );

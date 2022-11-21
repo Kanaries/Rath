@@ -31,7 +31,7 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     onClickNode?: (fid: string | null) => void;
     toggleFlowAnalyzer?: () => void;
     focus: number | null;
-    onLinkTogether: (srcFid: string, tarFid: string) => void;
+    onLinkTogether: (srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;

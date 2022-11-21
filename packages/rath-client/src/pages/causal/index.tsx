@@ -22,7 +22,7 @@ const CausalPage: React.FC = () => {
     const { fieldMetas, cleanedData } = dataSourceStore;
     const interactFieldGroups = useInteractFieldGroups(fieldMetas);
     const { appendFields2Group } = interactFieldGroups;
-    const { igMatrix, causalFields, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
+    const { igMatrix, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
 
     const [modifiablePrecondition, __unsafeSetModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
 
@@ -160,17 +160,15 @@ const CausalPage: React.FC = () => {
         [appendFields2Group]
     );
 
-    const exploringFields = igMatrix.length === causalStrength.length ? causalFields : selectedFields;
-
-    const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number) => {
+    const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number, type: ModifiableBgKnowledge['type']) => {
         setModifiablePrecondition((list) => {
             return list.concat([{
-                src: exploringFields[srcIdx].fid,
-                tar: exploringFields[tarIdx].fid,
-                type: 'directed-must-link',
+                src: selectedFields[srcIdx].fid,
+                tar: selectedFields[tarIdx].fid,
+                type,
             }]);
         });
-    }, [exploringFields, setModifiablePrecondition]);
+    }, [selectedFields, setModifiablePrecondition]);
 
     // 结点可以 project 一些字段信息
     const renderNode = useCallback((node: Readonly<IFieldMeta>): GraphNodeAttributes | undefined => {
