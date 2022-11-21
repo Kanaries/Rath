@@ -1,6 +1,6 @@
 import intl from 'react-intl-universal';
 import type { IFieldMeta } from '../interfaces';
-import type { BgKnowledge, ModifiableBgKnowledge } from '../pages/causal/config';
+import { BgKnowledgePagLink, ModifiableBgKnowledge, PAG_NODE } from '../pages/causal/config';
 
 
 export enum CausalLinkDirection {
@@ -120,76 +120,89 @@ export const resolvePreconditionsFromCausal = (
 export interface ICausalDiff {
     srcFid: string;
     tarFid: string;
-    expected: CausalLinkDirection;
+    expected: CausalLinkDirection | { not: CausalLinkDirection } | { oneOf: CausalLinkDirection[] };
     received: CausalLinkDirection;
 }
 
 export const findUnmatchedCausalResults = (
     fields: readonly IFieldMeta[],
-    preconditions: readonly Readonly<BgKnowledge>[],
+    preconditions: readonly Readonly<BgKnowledgePagLink>[],
     causalMatrix: readonly (readonly CausalLinkDirection[])[]
 ): Readonly<ICausalDiff>[] => {
     const diffs: ICausalDiff[] = [];
 
-    // TODO:
-    // for (const precondition of preconditions) {
-    //     const srcIdx = fields.findIndex(f => f.fid === precondition.src);
-    //     const tarIdx = fields.findIndex(f => f.fid === precondition.tar);
-    //     const result = causalMatrix[srcIdx][tarIdx];
-    //     switch (precondition.type) {
-    //         case "directed-must-link": {
-    //             if (result !== CausalLinkDirection.directed) {
-    //                 diffs.push({
-    //                     srcFid: precondition.src,
-    //                     tarFid: precondition.tar,
-    //                     expected: CausalLinkDirection.directed,
-    //                     received: result,
-    //                 });
-    //             }
-    //             break;
-    //         }
-    //         case "directed-must-not-link": {
-    //             if (
-    //                 result !== CausalLinkDirection.none &&
-    //                 result !== CausalLinkDirection.reversed &&
-    //                 result !== CausalLinkDirection.weakReversed
-    //             ) {
-    //                 diffs.push({
-    //                     srcFid: precondition.src,
-    //                     tarFid: precondition.tar,
-    //                     expected: CausalLinkDirection.directed,
-    //                     received: result,
-    //                 });
-    //             }
-    //             break;
-    //         }
-    //         case "must-link": {
-    //             if (result === CausalLinkDirection.none) {
-    //                 diffs.push({
-    //                     srcFid: precondition.src,
-    //                     tarFid: precondition.tar,
-    //                     expected: CausalLinkDirection.directed,
-    //                     received: result,
-    //                 });
-    //             }
-    //             break;
-    //         }
-    //         case "must-not-link": {
-    //             if (result !== CausalLinkDirection.none) {
-    //                 diffs.push({
-    //                     srcFid: precondition.src,
-    //                     tarFid: precondition.tar,
-    //                     expected: CausalLinkDirection.directed,
-    //                     received: result,
-    //                 });
-    //             }
-    //             break;
-    //         }
-    //         default: {
-    //             break;
-    //         }
-    //     }
-    // }
+    for (const precondition of preconditions) {
+        const srcIdx = fields.findIndex(f => f.fid === precondition.src);
+        const tarIdx = fields.findIndex(f => f.fid === precondition.tar);
+        if (srcIdx === -1 || tarIdx === -1) {
+            continue;
+        }
+        const result = causalMatrix[srcIdx][tarIdx];
+        switch (`${precondition.src_type},${precondition.tar_type}`) {
+            case `${PAG_NODE.CIRCLE},${PAG_NODE.CIRCLE}`: {
+                // must-link
+                if (result === CausalLinkDirection.none) {
+                    diffs.push({
+                        srcFid: fields[srcIdx].fid,
+                        tarFid: fields[tarIdx].fid,
+                        expected: { not: CausalLinkDirection.none },
+                        received: result,
+                    });
+                }
+                break;
+            }
+            case `${PAG_NODE.EMPTY},${PAG_NODE.EMPTY}`: {
+                // must-not-link
+                if (result !== CausalLinkDirection.none) {
+                    diffs.push({
+                        srcFid: fields[srcIdx].fid,
+                        tarFid: fields[tarIdx].fid,
+                        expected: CausalLinkDirection.none,
+                        received: result,
+                    });
+                }
+                break;
+            }
+            case `${PAG_NODE.BLANK},${PAG_NODE.ARROW}`: {
+                // directed-must-link
+                const expected = [
+                    CausalLinkDirection.directed,
+                    CausalLinkDirection.undirected,
+                    CausalLinkDirection.bidirected,
+                    CausalLinkDirection.weakDirected,
+                ];
+                if (!expected.includes(result)) {
+                    diffs.push({
+                        srcFid: fields[srcIdx].fid,
+                        tarFid: fields[tarIdx].fid,
+                        expected: { oneOf: expected },
+                        received: result,
+                    });
+                }
+                break;
+            }
+            case `${PAG_NODE.EMPTY},${PAG_NODE.ARROW}`: {
+                // directed-must-not-link
+                const expected = [
+                    CausalLinkDirection.none,
+                    CausalLinkDirection.reversed,
+                    CausalLinkDirection.weakReversed,
+                ];
+                if (!expected.includes(result)) {
+                    diffs.push({
+                        srcFid: fields[srcIdx].fid,
+                        tarFid: fields[tarIdx].fid,
+                        expected: { oneOf: expected },
+                        received: result,
+                    });
+                }
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
 
     return diffs;
 };
