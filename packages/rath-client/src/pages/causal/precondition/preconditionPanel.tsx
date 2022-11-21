@@ -1,31 +1,14 @@
-import { Pivot, PivotItem } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useState } from 'react';
+import React from 'react';
 import type { ModifiableBgKnowledge } from '../config';
 import { InnerCard } from '../components';
 import type { IFieldMeta } from '../../../interfaces';
 import type { GraphNodeAttributes } from '../explorer/graph-utils';
 import type { useDataViews } from '../hooks/dataViews';
-import PreconditionTable from './preconditionTable';
-import PreconditionGraph from './preconditionGraph';
 import PreconditionBatch from './preconditionBatch';
+import PreconditionEditor from './preconditionEditor';
 
 
-const EditModes = [{
-    itemKey: 'diagram',
-    text: '图',
-    iconName: 'BranchPullRequest',
-}, {
-    itemKey: 'matrix',
-    text: '矩阵',
-    iconName: 'GridViewSmall',
-}, {
-    itemKey: 'table',
-    text: '表',
-    iconName: 'BulletedListText',
-}] as const;
-
-type EditMode = (typeof EditModes)[number]['itemKey'];
 export interface PreconditionPanelProps {
     context: ReturnType<typeof useDataViews>;
     modifiablePrecondition: ModifiableBgKnowledge[];
@@ -36,8 +19,6 @@ export interface PreconditionPanelProps {
 const PreconditionPanel: React.FC<PreconditionPanelProps> = ({
     context, modifiablePrecondition, setModifiablePrecondition, renderNode,
 }) => {
-    const [editMode, setEditMode] = useState<EditMode>('diagram');
-
     return (
         <InnerCard>
             <h1 className="card-header">领域/背景知识</h1>
@@ -54,39 +35,12 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({
                 inlineLabel
                 onChange={(_, checked) => setShouldInitPreconditions(checked ?? false)}
             /> */}
-            <h2>编辑视图</h2>
-            <Pivot
-                style={{ marginBottom: '1em' }}
-                selectedKey={editMode}
-                onLinkClick={(item) => {
-                    if (item) {
-                        setEditMode(item.props.itemKey as EditMode);
-                    }
-                }}
-            >
-                {EditModes.map((item) => {
-                    return <PivotItem key={item.itemKey} headerText={item.text} itemKey={item.itemKey} itemIcon={item.iconName} />;
-                })}
-            </Pivot>
-            {{
-                diagram: (
-                    <PreconditionGraph
-                        context={context}
-                        modifiablePrecondition={modifiablePrecondition}
-                        setModifiablePrecondition={setModifiablePrecondition}
-                        renderNode={renderNode}
-                    />
-                ),
-                matrix: null,
-                table: (
-                    <PreconditionTable
-                        context={context}
-                        modifiablePrecondition={modifiablePrecondition}
-                        setModifiablePrecondition={setModifiablePrecondition}
-                        renderNode={renderNode}
-                    />
-                ),
-            }[editMode]}
+            <PreconditionEditor
+                context={context}
+                modifiablePrecondition={modifiablePrecondition}
+                setModifiablePrecondition={setModifiablePrecondition}
+                renderNode={renderNode}
+            />
         </InnerCard>
     );
 };
