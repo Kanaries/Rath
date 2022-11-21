@@ -281,14 +281,20 @@ export class CommonStore {
 
     public async customAvatar(value: { file?: File; isDefaultAvatar?: boolean }) {
         try {
+            const { file } = value;
+            const data = new FormData();
+            file && data.append('file', file);
             const url = getServerUrl('/api/ce/avatar');
-            const res = await request.post<{ file?: File; isDefaultAvatar?: boolean }, { avatarURL: string }>(
-                url,
-                value
-            );
-            if (res) {
-                this.info.avatar = res.avatarURL;
+            const res = await fetch(url, {
+                method: 'POST',
+                credentials: 'include',
+                body: file ? data : JSON.stringify(value),
+            });
+            const result = await res.json();
+            if (result.success) {
+                this.info.avatar = result.data.avatarURL;
             }
+            return result.success;
         } catch (error) {
             notify({
                 title: 'Error',

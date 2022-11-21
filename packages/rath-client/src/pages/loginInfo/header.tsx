@@ -95,7 +95,11 @@ const Header: React.FC<AvatarConfigProps> = (props) => {
     return (
         <div>
             <Label>{intl.get('login.AvatarImage')}</Label>
-            <img src={info.avatar || avatarUrl} alt="avatar[头像]" />
+            <img
+                src={info.avatar || avatarUrl}
+                alt="avatar[头像]"
+                style={{ width: 150, height: 150, borderRadius: '50%' }}
+            />
             <ActionButton
                 iconProps={{ iconName: 'EditPhoto' }}
                 onClick={() => {
@@ -143,7 +147,8 @@ const Header: React.FC<AvatarConfigProps> = (props) => {
                             ))}
                         </DefaultDiv>
                     )}
-                    {avatarType === IAVATAR_TYPES.gravatar && (
+                    {/* 暂不开放 */}
+                    {/* {avatarType === IAVATAR_TYPES.gravatar && (
                         <div className="m-2" style={{ height: '24rem' }}>
                             {imgUrl ? (
                                 <Corp imgUrl={imgUrl} onChangeFileImg={onChangeFileImg} />
@@ -172,7 +177,7 @@ const Header: React.FC<AvatarConfigProps> = (props) => {
                                 </ImgUploadDiv>
                             )}
                         </div>
-                    )}
+                    )} */}
                     <div className="p-2 m-2">
                         <PrimaryButton
                             onClick={() => {

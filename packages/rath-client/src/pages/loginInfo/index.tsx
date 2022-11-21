@@ -58,7 +58,11 @@ const LoginInfo = (props: loginInfoProps) => {
                 <div className="flex items-center">
                     <div>
                         {userName && (info.avatar || avatarUrl) ? (
-                            <img src={info.avatar || avatarUrl} alt="头像" style={{ width: 24, height: 24 }} />
+                            <img
+                                src={info.avatar || avatarUrl}
+                                alt="头像"
+                                style={{ width: 24, height: 24, borderRadius: '50%' }}
+                            />
                         ) : (
                             <Icon iconName="Contact" className="mr-2" />
                         )}
