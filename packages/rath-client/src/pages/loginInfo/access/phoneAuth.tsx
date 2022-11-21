@@ -5,7 +5,6 @@ import { observer } from 'mobx-react-lite';
 import { PrimaryButton, TextField } from '@fluentui/react';
 import ActionTextField from '../../../components/actionTextField';
 import { IAccessPageKeys } from '../../../interfaces';
-import { notify } from '../../../components/error';
 import { useGlobalStore } from '../../../store';
 import { useCertPhone } from '../../../hooks';
 import { validPhone } from './valueCheck';

@@ -1,12 +1,12 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { ActionButton, ChoiceGroup, Icon, Label, Modal, PrimaryButton } from '@fluentui/react';
+import React, { useState } from 'react';
+import { ActionButton, ChoiceGroup, Label, Modal, PrimaryButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
 import { getDefaultAvatarURL } from '../../utils';
 import { AVATAR_IMG_LIST } from '../../constants';
 import { IAVATAR_TYPES } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import Corp from '../../components/imgCorp';
+// import Corp from '../../components/imgCorp';
 // enum HeaderList {
 //     upload = 'Upload',
 //     default = 'Default',
@@ -22,28 +22,28 @@ import Corp from '../../components/imgCorp';
 // ];
 interface AvatarConfigProps {}
 
-const ImgUploadDiv = styled.div`
-    height: 100%;
-    width: 800px;
-    .upload-btn {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        box-sizing: border-box;
-        display: block;
-        border: 2px dashed rgba(209, 213, 219);
-        border-radius: 0.5rem;
-        text-align: center;
-    }
-    .upload-btn:hover {
-        border-color: rgba(156, 163, 175);
-    }
-    .add {
-        font-size: 20px;
-        font-weight: 700;
-        color: rgba(107, 114, 128);
-    }
-`;
+// const ImgUploadDiv = styled.div`
+//     height: 100%;
+//     width: 800px;
+//     .upload-btn {
+//         width: 100%;
+//         height: 100%;
+//         position: relative;
+//         box-sizing: border-box;
+//         display: block;
+//         border: 2px dashed rgba(209, 213, 219);
+//         border-radius: 0.5rem;
+//         text-align: center;
+//     }
+//     .upload-btn:hover {
+//         border-color: rgba(156, 163, 175);
+//     }
+//     .add {
+//         font-size: 20px;
+//         font-weight: 700;
+//         color: rgba(107, 114, 128);
+//     }
+// `;
 
 const DefaultDiv = styled.div`
     width: 800px;
@@ -76,22 +76,22 @@ const DefaultDiv = styled.div`
 const Header: React.FC<AvatarConfigProps> = (props) => {
     const { commonStore } = useGlobalStore();
     const { avatarKey: initAvatarKey, avatarType: initAvatarType, info, avatarUrl } = commonStore;
-    const fileRef = useRef<HTMLInputElement>(null);
+    // const fileRef = useRef<HTMLInputElement>(null);
     const [show, setShow] = useState<boolean>(false);
     const [avatarKey, setAvatarKey] = useState<string>(initAvatarKey);
     const [avatarType, setAvatarType] = useState<IAVATAR_TYPES>(initAvatarType);
-    const [imgUrl, setImgUrl] = useState('');
-    const [imgFile, setImgFile] = useState<File | null>(null);
+    // const [imgUrl, setImgUrl] = useState('');
+    // const [imgFile, setImgFile] = useState<File | null>(null);
 
-    const createDataset = useCallback(async (e) => {
-        if (fileRef.current && fileRef.current.files) {
-            setImgUrl(window.URL.createObjectURL(fileRef.current?.files[0]));
-        }
-    }, []);
+    // const createDataset = useCallback(async (e) => {
+    //     if (fileRef.current && fileRef.current.files) {
+    //         setImgUrl(window.URL.createObjectURL(fileRef.current?.files[0]));
+    //     }
+    // }, []);
 
-    const onChangeFileImg = (file: React.SetStateAction<File | null>) => {
-        setImgFile(file);
-    };
+    // const onChangeFileImg = (file: React.SetStateAction<File | null>) => {
+    //     setImgFile(file);
+    // };
     return (
         <div>
             <Label>{intl.get('login.AvatarImage')}</Label>
@@ -142,7 +142,7 @@ const Header: React.FC<AvatarConfigProps> = (props) => {
                                         setAvatarKey(localAvatarKey);
                                     }}
                                 >
-                                    <img src={getDefaultAvatarURL(localAvatarKey, 'small')} />
+                                    <img src={getDefaultAvatarURL(localAvatarKey, 'small')} alt=''/>
                                 </div>
                             ))}
                         </DefaultDiv>
@@ -184,9 +184,9 @@ const Header: React.FC<AvatarConfigProps> = (props) => {
                                 if (avatarType === IAVATAR_TYPES.default) {
                                     commonStore.setAvatarConfig(avatarType, avatarKey);
                                 }
-                                if (avatarType === IAVATAR_TYPES.gravatar) {
-                                    imgFile && commonStore.customAvatar({ file: imgFile });
-                                }
+                                // if (avatarType === IAVATAR_TYPES.gravatar) {
+                                //     imgFile && commonStore.customAvatar({ file: imgFile });
+                                // }
                                 setShow(false);
                             }}
                         >

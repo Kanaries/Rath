@@ -71,7 +71,7 @@ const PIVOT_LIST = [
 
 function Account() {
     const [isLoginStatus, setIsLoginStatus] = useState<boolean>(false);
-    const [globalSwitch, setGlobalSwitch] = useState(true);
+    // const [globalSwitch, setGlobalSwitch] = useState(true);
     const { commonStore } = useGlobalStore();
     const { userName, info } = commonStore;
     // const pivots = PIVOT_LIST.map((p) => ({
@@ -117,16 +117,16 @@ function Account() {
                                 </PrimaryButton>
                             )}
                         </span>
-                        {userName && <TextField value={userName || ''} disabled={globalSwitch} />}
+                        {userName && <TextField value={userName || ''} disabled={true} />}
                     </div>
                     {userName && (
                         <div className="phone">
-                            <TextField label="Phone" value={info.phone} disabled={globalSwitch} />
+                            <TextField label="Phone" value={info.phone} disabled={true} />
                         </div>
                     )}
                     {userName && (
                         <div className="email">
-                            <TextField label="Email" value={info.email} disabled={globalSwitch} />
+                            <TextField label="Email" value={info.email} disabled={true} />
                         </div>
                     )}
                 </div>
