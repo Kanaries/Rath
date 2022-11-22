@@ -34,7 +34,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                         field: dimension.fid,
                         title: `${dimension.name || dimension.fid}`,
                         type: dimension.semanticType,
-                        // bin: dimension.semanticType === 'quantitative',
+                        bin: dimension.semanticType === 'quantitative',
                     },
                 },
             } as const;
@@ -49,7 +49,40 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                     name: 'dataSource',
                     values: data,
                 },
-                layer: [
+                layer: dimension.semanticType === 'quantitative' ? [
+                    {
+                        mark: commonEncodings.mark,
+                        encoding: {
+                            x: commonEncodings.encoding.x,
+                            y: {
+                                field: mainField.fid,
+                                aggregate: mainFieldAggregation ?? 'count',
+                                title: `${mainFieldAggregation ?? 'count'}(${mainField.name || mainField.fid})`,
+                                type: mainField.semanticType,
+                            },
+                            color: { value: 'gray' },
+                        },
+                    },
+                    {
+                        transform: [
+                            { filter: `datum.${SelectedFlag} != 0` },
+                        ],
+                        mark: {
+                            ...commonEncodings.mark,
+                            size: 5,
+                        },
+                        encoding: {
+                            x: commonEncodings.encoding.x,
+                            y: {
+                                field: mainField.fid,
+                                aggregate: mainFieldAggregation ?? 'count',
+                                title: `subset:${mainFieldAggregation ?? 'count'}(${mainField.name || mainField.fid})`,
+                                type: mainField.semanticType,
+                            },
+                            color: { value: 'orange' },
+                        },
+                    },
+                ] : [
                     {
                         transform: [
                             {

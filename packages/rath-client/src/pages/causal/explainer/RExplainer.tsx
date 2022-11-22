@@ -46,7 +46,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
 
     useEffect(() => {
         setSubspaces(null);
-    }, [mainField]);
+    }, [mainField, aggr]);
 
     const [irResult, setIrResult] = useState<IRInsightExplainResult['causalEffects']>([]);
     const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('worker');
@@ -86,7 +86,11 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
         pendingRef.current = p;
         p.then(res => {
             if (pendingRef.current === p) {
-                setIrResult(res.causalEffects);
+                setIrResult(
+                    res.causalEffects.filter(
+                        item => Number.isFinite(item.responsibility) && item.responsibility !== 0
+                    ).sort((a, b) => b.responsibility - a.responsibility)
+                );
             }
         }).finally(() => {
             pendingRef.current = undefined;
@@ -97,7 +101,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
         if (!subspaces) {
             return sample;
         }
-        const indexName = '__01234_admin_root_pas_null__';
+        const indexName = '__this_is_the_index_of_the_row__';
         const data = sample.map((row, i) => ({ ...row, [indexName]: i }));
         const indicesA = applyFilters(data, subspaces[0].predicates).map(row => row[indexName]) as number[];
         const indicesB = diffMode === 'two-group'
