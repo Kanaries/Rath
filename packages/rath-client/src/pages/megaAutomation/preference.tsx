@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
     PrimaryButton,
@@ -26,10 +26,6 @@ const PreferencePanel: React.FC = () => {
 
     const { nlg } = visualConfig;
 
-    useEffect(()=>{
-        megaAutoStore.getConfigurePersistence()
-    },[])
-
     const orderOptions: IDropdownOption[] = Object.values(EXPLORE_VIEW_ORDER).map((or) => ({
         text: intl.get(`megaAuto.orderBy.${or}`),
         key: or,
@@ -56,7 +52,6 @@ const PreferencePanel: React.FC = () => {
         runInAction(() => {
             megaAutoStore.setShowPreferencePannel(false);
             megaAutoStore.refreshMainViewSpec();
-            megaAutoStore.configurePersistence()
         })
     }, [megaAutoStore])
 

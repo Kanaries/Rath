@@ -1,41 +1,12 @@
 import { observer } from 'mobx-react-lite';
-import { ChoiceGroup, IChoiceGroupOption, Label, Panel, Toggle, DefaultButton, PrimaryButton } from '@fluentui/react';
-import React, { useMemo, useEffect } from 'react';
+import { ChoiceGroup, IChoiceGroupOption, Label, Panel, Toggle } from '@fluentui/react';
+import React, { useMemo } from 'react';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../store';
 import OperationBar from './operationBar';
 
 const PatternSetting: React.FC = () => {
     const { semiAutoStore } = useGlobalStore();
-
-    useEffect(() => {
-        semiAutoStore.getConfigurePersistence();
-    }, []);
-
-    const onRenderFooterContent = React.useCallback(
-        () => (
-            <div className='flex flex-end'>
-                <DefaultButton
-                    onClick={() => {
-                        semiAutoStore.setShowSettings(false);
-                    }}
-                >
-                    Cancel
-                </DefaultButton>
-                <PrimaryButton
-                className='ml-2'
-                    onClick={() => {
-                        semiAutoStore.configurePersistence();
-                        semiAutoStore.setShowSettings(false);
-                    }}
-                >
-                    Save
-                </PrimaryButton>
-            </div>
-        ),
-        []
-    );
-
     const options = useMemo<IChoiceGroupOption[]>(() => {
         return [
             { text: intl.get('semiAuto.main.vizsys.lite'), key: 'lite' },
@@ -50,7 +21,6 @@ const PatternSetting: React.FC = () => {
         onDismiss={() => {
             semiAutoStore.setShowSettings(false);
         }}
-        onRenderFooterContent={onRenderFooterContent}
         >
         <hr />
         <ChoiceGroup
