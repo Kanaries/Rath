@@ -1,16 +1,17 @@
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { Dropdown } from '@fluentui/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGlobalStore } from '../../../store';
 import type { useInteractFieldGroups } from '../hooks/interactFieldGroup';
 import type { useDataViews } from '../hooks/dataViews';
 import type { IFieldMeta, IFilter } from '../../../interfaces';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../workers/insight/r-insight.worker';
+import { applyFilters } from '../../../workers/engine/filter';
 import { RInsightService } from '../../../services/r-insight';
 import type { PagLink } from '../config';
 import ChartItem from './explainChart';
-// import DiffChart from './diffChart';
+import DiffChart from './diffChart';
 
 
 const Container = styled.div``;
@@ -95,6 +96,19 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
             pendingRef.current = undefined;
         });
     }, [aggr, mainField, sample, selectedFields, subspaces, edges, serviceMode]);
+
+    const selectedSet = useMemo(() => {
+        if (!subspaces) {
+            return sample;
+        }
+        const indexName = '__01234_admin_root_pas_null__';
+        const data = sample.map((row, i) => ({ ...row, [indexName]: i }));
+        const indicesA = applyFilters(data, new Map(), subspaces[0].predicates).map(row => row[indexName]) as number[];
+        const indicesB = diffMode === 'two-group'
+            ? applyFilters(data, new Map(), subspaces[1].predicates).map(row => row[indexName]) as number[]
+            : [];
+        return sample.map((row, i) => ({ ...row, [SelectedFlag]: indicesB.includes(i) ? 2 : indicesA.includes(i) ? 1 : 0 }));
+    }, [subspaces, sample, diffMode]);
 
     const handleFilter = useCallback((filter: IFilter | null) => {
         switch (diffMode) {
@@ -196,21 +210,20 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                         irResult.map(res => (
                             <div key={res.src}>
                                 <ChartItem
-                                    data={sample}
-                                    mainField={mainField}
-                                    mainFieldAggregation={aggr}
-                                    indexKey={res.tar}
-                                    interactive={false}
-                                />
-                                {/* <DiffChart
                                     data={selectedSet}
                                     mainField={mainField}
                                     mainFieldAggregation={aggr}
-                                    indexKey={res.fields[1]}
+                                    indexKey={res.src}
+                                    interactive={false}
+                                />
+                                <DiffChart
+                                    data={selectedSet}
+                                    mainField={mainField}
+                                    mainFieldAggregation={aggr}
                                     mode={diffMode}
-                                /> */}
+                                />
                                 <p>
-                                    {`选择区间内 ${res.src} 与 ${res.tar} 表现出影响。评分：${res.responsibility}。`}
+                                    {`选择区间内 ${res.src} 与 ${mainField.name || mainField.fid} 表现出影响。评分：${res.responsibility}。`}
                                 </p>
                             </div>
                         ))

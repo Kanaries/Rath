@@ -118,7 +118,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({ data, mainField, mainFieldA
                         if (state) {
                             switch (filterType) {
                                 case 'interval': {
-                                    const range = getRange(state.values[0]);
+                                    const range = getRange(state.values[0].map((d: unknown) => typeof d === 'object' ? (d as Date).getTime() : Number(d)));
                                     signalChange$.next({
                                         type: 'range',
                                         fid: typeof indexKey === 'string' ? indexKey : indexKey.fid,

@@ -14,12 +14,12 @@ const xHash = (data: IRow[], field: IFieldMeta): [number[], number[]] => {
         case 'quantitative': {
             const col = data.map(row => Number(row[field.fid]));
             const [min, max] = getRange(col.filter(Number.isFinite));
-            return [col, col.map(d => Math.max((d - min) * MAX_BIN / (max - min), MAX_BIN))];
+            return [col, col.map(d => Math.floor(Math.min((d - min) * MAX_BIN / (max - min), MAX_BIN - 1)))];
         }
         case 'temporal': {
             const col = data.map(row => dayjs(row[field.fid]).toDate().getTime());
             const [min, max] = getRange(col.filter(Number.isFinite));
-            return [col, col.map(d => Math.max((d - min) * MAX_BIN / (max - min), MAX_BIN))];
+            return [col, col.map(d => Math.floor(Math.min((d - min) * MAX_BIN / (max - min), MAX_BIN - 1)))];
         }
         default: {
             const col = data.map(row => row[field.fid]);

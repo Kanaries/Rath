@@ -1,7 +1,6 @@
 /* eslint no-restricted-globals: 0 */
 import type { IRow, IFilter, IFieldMeta } from "../../interfaces";
 import type { PagLink } from "../../pages/causal/config";
-import { timer } from '../timer';
 import { insightExplain } from "./utils";
 
 
@@ -62,4 +61,4 @@ const RInsightService = (e: MessageEvent<IRInsightExplainProps>) => {
 }
 
 
-self.addEventListener('message', timer(RInsightService), false);
+self.addEventListener('message', RInsightService, false);
