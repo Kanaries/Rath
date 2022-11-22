@@ -9,7 +9,6 @@ import { IFilter } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import RangeSelection from './rangeSelection';
 import SetSelection from './setSelection';
-import { notify } from '../error';
 import { getOriginalRange } from './originalRange';
 
 interface FieldFilterProps {
@@ -61,18 +60,6 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
     }, [])
 
     const submitFilter = useCallback(() => {
-        if (meta?.semanticType === 'temporal' && filter.type === 'range') {
-            const result = filter.range.every((item) => item > 10000);
-            if (!result) {
-                notify({
-                    type: 'error',
-                    title: 'Time filtering failed',
-                    content: 'Please select the time correctly',
-                });
-                return;
-            }
-        }
-
         if (filter.type === 'range') {
             dataSourceStore.setFilter(filter);
         } else {
@@ -138,15 +125,8 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                     <ChoiceGroup
                         label={intl.get('dataSource.filter.key')}
                         options={[
-                            {
-                                key: 'range',
-                                text: intl.get('dataSource.filter.range'),
-                                disabled:
-                                    meta?.semanticType === 'quantitative' || meta?.semanticType === 'temporal'
-                                        ? false
-                                        : true,
-                            },
-                            { key: 'set', text: intl.get('dataSource.filter.set') },
+                            { key: 'range', text: intl.get('dataSource.filter.range') },
+                            { key: 'set', text: intl.get('dataSource.filter.set')}
                         ]}
                         selectedKey={filter.type}
                         onChange={(ev, op) => {
@@ -174,7 +154,6 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                 }
                 {
                     filter.type === 'range' && meta && <RangeSelection
-                        filterType={meta.semanticType}
                         range={fieldRange}
                         left={filter.range[0]}
                         right={filter.range[1]}

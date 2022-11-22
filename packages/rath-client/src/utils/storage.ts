@@ -1,4 +1,5 @@
 import localforage from 'localforage';
+
 import { RESULT_STORAGE_SPLITOR, STORAGES, STORAGE_INSTANCE } from '../constants';
 import { IFieldMeta, IMuteFieldBase, IRow } from '../interfaces';
 import type { CausalLinkDirection } from './resolve-causal';
