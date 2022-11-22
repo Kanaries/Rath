@@ -80,7 +80,7 @@ export class CommonStore {
         this.taskMode = taskMode as ITaskTestMode;
         this.graphicWalkerSpec = {};
         makeAutoObservable(this, {
-            graphicWalkerSpec: observable.ref
+            graphicWalkerSpec: observable.ref,
             vizSpec: observable.ref,
         });
     }

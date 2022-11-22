@@ -3,10 +3,8 @@ import Cookies from 'js-cookie';
 import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visual-insights';
 import { DEFAULT_AVATAR_URL_PREFIX, RATH_INDEX_COLUMN_KEY } from '../constants';
 import { IFieldMeta, IFilter } from '@kanaries/loa';
-import { IRow, ICol, IVegaSubset } from '../interfaces';
-import { RATH_INDEX_COLUMN_KEY } from '../constants';
+import { IRow, ICol, IVegaSubset,IAVATAR_TYPES } from '../interfaces';
 import { isDateTimeArray } from '../dev/workers/engine/dateTimeExpand';
-import { IRow, ICol, IAVATAR_TYPES } from '../interfaces';
 import * as FileLoader from './fileParser';
 import * as Transform from './transform';
 import { getRange } from './stat';
@@ -244,6 +242,7 @@ export function getAvatarURL(props: AvatarProps) {
   } else {
       return `https://www.gravatar.com/avatar/${md5(props.email.toLowerCase()).toString()}`;
   }
+}
 
 export interface ISearchInfoBase {
   fields: IFieldMeta[];
