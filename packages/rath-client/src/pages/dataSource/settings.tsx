@@ -1,6 +1,6 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Dropdown, IDropdownOption, Panel, PrimaryButton, DefaultButton } from '@fluentui/react';
+import { Dropdown, IDropdownOption, Panel } from '@fluentui/react';
 import { ICubeStorageManageMode } from 'visual-insights';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../store';
@@ -13,34 +13,6 @@ import { ITaskTestMode } from '../../interfaces';
 const AnalysisSettings: React.FC = props => {
     const { ltsPipeLineStore, commonStore } = useGlobalStore();
 
-    useEffect(() => {
-        commonStore.getConfigurePersistence();
-    }, []);
-
-    const onRenderFooterContent = React.useCallback(
-        () => (
-            <div className="flex flex-end">
-                <DefaultButton
-                    onClick={() => {
-                        commonStore.setShowAnalysisConfig(false);
-                    }}
-                >
-                    Cancel
-                </DefaultButton>
-                <PrimaryButton
-                    className="ml-2"
-                    onClick={() => {
-                        commonStore.configurePersistence();
-                        commonStore.setShowAnalysisConfig(false);
-                    }}
-                >
-                    Save
-                </PrimaryButton>
-            </div>
-        ),
-        []
-    );
-    
     const options = useMemo<IDropdownOption[]>(() => {
         return [
             {
@@ -73,8 +45,7 @@ const AnalysisSettings: React.FC = props => {
     ]
     return <Panel isOpen={commonStore.showAnalysisConfig}
         headerText={intl.get('config.analysisConfig')}
-        onDismiss={() => {commonStore.setShowAnalysisConfig(false) }}
-        onRenderFooterContent={onRenderFooterContent}>
+        onDismiss={() => {commonStore.setShowAnalysisConfig(false) }}>
         <Dropdown options={options}
             style={{ minWidth: '180px', marginRight: '1em' }}
             label={intl.get('config.cubeStorageManageMode.title')}

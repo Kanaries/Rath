@@ -16,10 +16,7 @@ export function applyFilters (dataSource: IRow[],
     for (let i = 0; i < dataSource.length; i++) {
         const row = dataSource[i];
         let keep = effectFilters.every(f => {
-            if (f.type === 'range') {
-                const rowLength = typeof row[f.fid] === 'string' ? new Date(row[f.fid]).getTime() : row[f.fid];
-                return f.range[0] <= rowLength && rowLength <= f.range[1];
-            }
+            if (f.type === 'range') return f.range[0] <= row[f.fid] && row[f.fid] <= f.range[1];
             if (f.type === 'set') return f.values.includes(row[f.fid]);
             return false;
         })

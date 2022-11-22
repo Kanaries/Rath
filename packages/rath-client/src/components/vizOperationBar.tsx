@@ -66,7 +66,7 @@ const VizOperationBar: React.FC<VizOperationBarProps> = props => {
         </Stack.Item>
         <Stack.Item>
             <Dropdown selectedKey={resizeMode}
-                style={{ minWidth: '120px' }}
+                style={{ width: '120px' }}
                 label={intl.get('megaAuto.operation.resize')}
                 options={resizeModeList}
                 onChange={(e, op) => {

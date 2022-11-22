@@ -7,7 +7,7 @@ import { distVis } from '../queries/distVis';
 import { labDistVis } from '../queries/labdistVis';
 import { rathEngineService } from '../services/index';
 import { isSetEqual } from '../utils';
-import { getDataConfig, RathStorageDump, updateDataConfig } from '../utils/storage';
+import { RathStorageDump } from '../utils/storage';
 import { LTSPipeLine } from './pipeLineStore/lts';
 
 
@@ -395,23 +395,5 @@ export class MegaAutomationStore {
             console.error(error)
             return []
         }
-    }
-    public async configurePersistence() {
-        const dataSourcematic = {
-            visualConfig: this.visualConfig,
-            nlgThreshold: this.nlgThreshold,
-            vizMode: this.vizMode,
-        };
-        updateDataConfig('megaAuto', dataSourcematic);
-    }
-    public async getConfigurePersistence() {
-        getDataConfig('megaAuto').then((res) => {
-            if (res) {
-                const result = JSON.parse(res);
-                this.visualConfig = result.visualConfig;
-                this.nlgThreshold = result.nlgThreshold;
-                this.vizMode = result.vizMode;
-            }
-        });
     }
 }

@@ -50,7 +50,6 @@
         "painter": "Data Painter",
         "collection": "Collection",
         "dashboard": "Dashboard",
-        "globalConfig": "Global configuration",
         "causal": "Causal"
     },
     "preference": {
@@ -76,7 +75,6 @@
         }
     },
     "function": {
-        "startConfig": "Configure",
         "confirm": "Confirm",
         "cancel": "Cancel",
         "analysis": {
@@ -107,8 +105,7 @@
             }
         },
         "save": {
-            "title": "Save",
-            "save": "Saving..."
+            "title": "Save"
         },
         "upload": "Upload"
     },
