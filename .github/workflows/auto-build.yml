@@ -18,7 +18,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn install
       - run: yarn workspace rath-client build
-      - uses: actions/checkout@master
       - uses: manyuanrong/setup-ossutil@master
         with:
           endpoint: ${{ secrets.ALIOSS_ENDPOINT }}
