@@ -1,10 +1,8 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
     PrimaryButton,
     Stack,
-    Panel,
-    PanelType,
     Slider,
     Dropdown,
     IDropdownOption,
@@ -19,16 +17,27 @@ import { runInAction } from 'mobx';
 import { useGlobalStore } from '../../store';
 import { EXPLORE_VIEW_ORDER } from '../../store/megaAutomation';
 import { IResizeMode } from '../../interfaces';
+import styled from 'styled-components';
+import { notify } from '../../components/error';
 
-const PreferencePanel: React.FC = () => {
+const MegaAutoDiv = styled.div`
+    padding: 1rem 0.5rem;
+    .save-btn {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: flex-end;
+    }
+`;
+
+const MegaAutoSetting = (props: { onSave: (check: boolean) => void }) => {
     const { megaAutoStore } = useGlobalStore();
-    const { visualConfig, showPreferencePannel, nlgThreshold, vizMode } = megaAutoStore;
-
+    const { visualConfig, nlgThreshold, vizMode } = megaAutoStore;
     const { nlg } = visualConfig;
 
-    useEffect(()=>{
-        megaAutoStore.getConfigurePersistence()
-    },[])
+    const { onSave } = props;
+    useEffect(() => {
+        megaAutoStore.getConfigurePersistence();
+    }, []);
 
     const orderOptions: IDropdownOption[] = Object.values(EXPLORE_VIEW_ORDER).map((or) => ({
         text: intl.get(`megaAuto.orderBy.${or}`),
@@ -48,23 +57,20 @@ const PreferencePanel: React.FC = () => {
         ];
     }, []);
 
-    const closeVisualPannel = useCallback(() => {
-        megaAutoStore.setShowPreferencePannel(false);
-    }, [megaAutoStore]);
-
     const submitChange = useCallback(() => {
+        onSave(true);
         runInAction(() => {
-            megaAutoStore.setShowPreferencePannel(false);
             megaAutoStore.refreshMainViewSpec();
-            megaAutoStore.configurePersistence()
-        })
-    }, [megaAutoStore])
-
-    const onRenderFooterContent = () => (
-        <div>
-            <PrimaryButton onClick={submitChange}>{intl.get('function.confirm')}</PrimaryButton>
-        </div>
-    );
+            megaAutoStore.configurePersistence().then(() => {
+                notify({
+                    title: 'Save Success',
+                    type: 'success',
+                    content: `Configuration Item Saved Successfully`,
+                });
+                onSave(false);
+            });
+        });
+    }, [megaAutoStore]);
 
     const vizModeOptions = useMemo<IChoiceGroupOption[]>(() => {
         return [
@@ -74,14 +80,7 @@ const PreferencePanel: React.FC = () => {
     }, []);
 
     return (
-        <Panel
-            isOpen={showPreferencePannel}
-            type={PanelType.smallFixedFar}
-            onDismiss={closeVisualPannel}
-            headerText={intl.get('preference.config')}
-            closeButtonAriaLabel="Close"
-            onRenderFooterContent={onRenderFooterContent}
-        >
+        <MegaAutoDiv>
             <Stack.Item>
                 <ChoiceGroup
                     label={intl.get('semiAuto.main.vizsys.title')}
@@ -92,7 +91,8 @@ const PreferencePanel: React.FC = () => {
                     options={vizModeOptions}
                 />
             </Stack.Item>
-            <Stack.Item>
+            <hr style={{ marginTop: '1em' }} />
+            <Stack.Item style={{ margin: '10px 0' }}>
                 <Dropdown
                     style={{ minWidth: '120px' }}
                     selectedKey={megaAutoStore.orderBy}
@@ -103,6 +103,7 @@ const PreferencePanel: React.FC = () => {
                     }}
                 />
             </Stack.Item>
+            <hr style={{ marginTop: '1em' }} />
             <Stack tokens={{ childrenGap: 10 }}>
                 <Stack.Item>
                     <Toggle
@@ -163,6 +164,7 @@ const PreferencePanel: React.FC = () => {
                         }}
                     />
                 </Stack.Item>
+                <hr style={{ marginTop: '1em' }} />
                 <Stack.Item>
                     <Dropdown
                         selectedKey={visualConfig.resize}
@@ -233,8 +235,11 @@ const PreferencePanel: React.FC = () => {
                     </Stack.Item>
                 )}
             </Stack>
-        </Panel>
+            <div className="save-btn">
+                <PrimaryButton onClick={submitChange}>{intl.get('function.confirm')}</PrimaryButton>
+            </div>
+        </MegaAutoDiv>
     );
 };
 
-export default observer(PreferencePanel);
+export default observer(MegaAutoSetting);

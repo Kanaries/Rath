@@ -8,6 +8,7 @@ import { labDistVis } from "../../queries/labdistVis";
 import { loaEngineService } from "../../services/index";
 import { DataSourceStore } from "../dataSourceStore";
 import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoViews } from "./localTypes";
+import { getDataConfig, updateDataConfig } from '../../utils/storage';
 
 const RENDER_BATCH_SIZE = 5;
 
@@ -503,5 +504,25 @@ export class SemiAutomationStore {
             console.error(error);
             this.featViews.computing = false
         }
+    }
+
+    public async configurePersistence() {
+        const semiAutomatic = {
+            mainVizSetting: this.mainVizSetting,
+            settings: this.settings,
+            autoAsso: this.autoAsso,
+        };
+        updateDataConfig('semiauto', semiAutomatic);
+    }
+
+    public async getConfigurePersistence() {
+        getDataConfig('semiauto').then((res) => {
+            if (res) {
+                const result=JSON.parse(res)
+                this.mainVizSetting = result.mainVizSetting;
+                this.settings = result.settings;
+                this.autoAsso = result.autoAsso;
+            }
+        });
     }
 }

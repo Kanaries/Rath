@@ -19,6 +19,7 @@ import Collection from './pages/collection';
 import Dashboard from './pages/dashboard';
 import CausalPage from './pages/causal';
 import PerformanceWindow from './components/performance-window';
+import GlobalConfig from './pages/globalConfig';
 
 function App() {
     const { langStore, commonStore } = useGlobalStore();
@@ -63,6 +64,7 @@ function App() {
                     {appKey === PIVOT_KEYS.collection && <Collection />}
                     {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
                     {appKey === PIVOT_KEYS.causal && <CausalPage />}
+                    {appKey === PIVOT_KEYS.globalConfig && <GlobalConfig />}
                     <CrInfo />
                 </div>
             </div>
