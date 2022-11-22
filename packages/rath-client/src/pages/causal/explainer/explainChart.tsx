@@ -16,11 +16,14 @@ interface ExplainChartProps {
     indexKey: IFieldMeta | string;
     interactive: boolean;
     handleFilter?: (filter: IFilter | null) => void;
+    normalize: boolean;
 }
 
 const SELECT_SIGNAL_NAME = '__select__';
 
-const ExplainChart: React.FC<ExplainChartProps> = ({ data, mainField, mainFieldAggregation, indexKey, interactive, handleFilter }) => {
+const ExplainChart: React.FC<ExplainChartProps> = ({
+    data, mainField, mainFieldAggregation, indexKey, interactive, handleFilter, normalize,
+}) => {
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View>();
     const handleFilterRef = useRef(handleFilter);
@@ -36,20 +39,22 @@ const ExplainChart: React.FC<ExplainChartProps> = ({ data, mainField, mainFieldA
         if (container.current) {
             const commonEncodings = {
                 mark: {
-                    type: 'bar',
+                    type: (
+                        typeof indexKey === 'object' && indexKey.semanticType === 'temporal'
+                    ) ? 'area' : 'bar',
                     tooltip: true,
                 },
                 encoding: {
                     x: {
                         field: typeof indexKey === 'string' ? indexKey : indexKey.fid,
-                        bin: typeof indexKey === 'string' ? undefined : (
-                            indexKey.semanticType === 'quantitative' || indexKey.semanticType === 'temporal'
-                        ),
+                        bin: typeof indexKey === 'string' ? undefined : indexKey.semanticType === 'quantitative',
                         type: typeof indexKey === 'string' ? 'quantitative' : indexKey.semanticType,
+                        title: typeof indexKey === 'string' ? indexKey : (indexKey.name || indexKey.fid),
                     },
                     y: {
                         field: mainField.fid,
                         aggregate: mainFieldAggregation ?? undefined,
+                        title: `${mainFieldAggregation}(${mainField.name || mainField.fid})`,
                     },
                 },
             } as const;
@@ -91,7 +96,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({ data, mainField, mainFieldA
                         ...commonEncodings.encoding,
                         y: {
                             ...commonEncodings.encoding.y,
-                            stack: 'normalize',
+                            stack: normalize ? 'normalize' : true,
                         },
                         color: {
                             field: SelectedFlag,
@@ -118,7 +123,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({ data, mainField, mainFieldA
                         if (state) {
                             switch (filterType) {
                                 case 'interval': {
-                                    const range = getRange(state.values[0].map((d: unknown) => typeof d === 'object' ? (d as Date).getTime() : Number(d)));
+                                    const range = getRange(state.values[0]);
                                     signalChange$.next({
                                         type: 'range',
                                         fid: typeof indexKey === 'string' ? indexKey : indexKey.fid,
@@ -155,7 +160,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({ data, mainField, mainFieldA
                 viewRef.current = undefined;
             }
         };
-    }, [mainField, mainFieldAggregation, filterType, interactive, data, indexKey]);
+    }, [mainField, mainFieldAggregation, filterType, interactive, data, indexKey, normalize]);
 
     return <div ref={container} />;
 };

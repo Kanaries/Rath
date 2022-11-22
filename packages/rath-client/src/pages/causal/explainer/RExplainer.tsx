@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
-import { Dropdown } from '@fluentui/react';
+import { Dropdown, Toggle } from '@fluentui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { applyFilters } from '@kanaries/loa';
 import { useGlobalStore } from '../../../store';
 import type { useInteractFieldGroups } from '../hooks/interactFieldGroup';
 import type { useDataViews } from '../hooks/dataViews';
 import type { IFieldMeta, IFilter } from '../../../interfaces';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../workers/insight/r-insight.worker';
-import { applyFilters } from '../../../workers/engine/filter';
 import { RInsightService } from '../../../services/r-insight';
 import type { PagLink } from '../config';
 import ChartItem from './explainChart';
@@ -34,8 +34,9 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
 
     const mainField = fieldGroup.at(-1) ?? null;
     const [indexKey, setIndexKey] = useState<IFieldMeta | null>(null);
-    const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('sum');
+    const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('count');
     const [diffMode, setDiffMode] = useState<"full" | "other" | "two-group">("full");
+    const [normalize, setNormalize] = useState<boolean>(true);
 
     useEffect(() => {
         setIndexKey(fieldMetas.find(f => f.semanticType === 'temporal') ?? null);
@@ -48,11 +49,10 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
     }, [mainField]);
 
     const [irResult, setIrResult] = useState<IRInsightExplainResult['causalEffects']>([]);
-    const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('server');
+    const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('worker');
 
     const pendingRef = useRef<Promise<IRInsightExplainResult>>();
     useEffect(() => {
-        console.log('->', subspaces, mainField)
         if (!subspaces || !mainField) {
             setIrResult([]);
             return;
@@ -75,12 +75,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                     other,
                 },
                 view: {
-                    dimensions: selectedFields.reduce<string[]>((list, f) => {
-                        if (fieldsInSight.has(f.fid)) {
-                            return list;
-                        }
-                        return list.concat([f.fid]);
-                    }, []),
+                    dimensions: [...fieldsInSight].filter(fid => fid !== mainField.fid),
                     measures: [mainField].map(ms => ({
                         fid: ms.fid,
                         op: aggr !== 'count' ? (aggr ?? 'sum') : 'sum',
@@ -104,9 +99,9 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
         }
         const indexName = '__01234_admin_root_pas_null__';
         const data = sample.map((row, i) => ({ ...row, [indexName]: i }));
-        const indicesA = applyFilters(data, new Map(), subspaces[0].predicates).map(row => row[indexName]) as number[];
+        const indicesA = applyFilters(data, subspaces[0].predicates).map(row => row[indexName]) as number[];
         const indicesB = diffMode === 'two-group'
-            ? applyFilters(data, new Map(), subspaces[1].predicates).map(row => row[indexName]) as number[]
+            ? applyFilters(data, subspaces[1].predicates).map(row => row[indexName]) as number[]
             : [];
         return sample.map((row, i) => ({ ...row, [SelectedFlag]: indicesB.includes(i) ? 2 : indicesA.includes(i) ? 1 : 0 }));
     }, [subspaces, sample, diffMode]);
@@ -196,6 +191,11 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                             }
                         }}
                     />
+                    <Toggle
+                        label="Normalize Stack"
+                        checked={normalize}
+                        onChange={(_, checked) => setNormalize(Boolean(checked))}
+                    />
                     {indexKey && (
                         <ChartItem
                             data={sample}
@@ -204,6 +204,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                             mainFieldAggregation={aggr}
                             interactive
                             handleFilter={handleFilter}
+                            normalize={normalize}
                         />
                     )}
                     <header>Why Query</header>
@@ -217,8 +218,9 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                                         data={selectedSet}
                                         mainField={mainField}
                                         mainFieldAggregation={aggr}
-                                        indexKey={dimension.fid}
+                                        indexKey={dimension}
                                         interactive={false}
+                                        normalize={normalize}
                                     />
                                     <DiffChart
                                         data={selectedSet}

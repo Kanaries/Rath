@@ -22,25 +22,23 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
 
     useEffect(() => {
         if (container.current) {
+            const translatedKey = '__target__';
             const commonEncodings = {
                 mark: {
-                    type: 'bar',
+                    type: dimension.semanticType === 'temporal' ? 'area' : 'bar',
                     tooltip: true,
+                    size: 10,
                 },
                 encoding: {
                     x: {
-                        field: dimension,
+                        field: dimension.fid,
                         title: `${dimension.name || dimension.fid}`,
-                    },
-                    y: {
-                        field: mainField.fid,
-                        aggregate: mainFieldAggregation ?? undefined,
-                        title: `${mainFieldAggregation}(${mainField.name || mainField.fid})`,
+                        type: dimension.semanticType,
+                        // bin: dimension.semanticType === 'quantitative',
                     },
                 },
             } as const;
             embed(container.current, {
-                width: 200,
                 height: 200,
                 autosize: {
                     type: 'fit',
@@ -53,24 +51,51 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                 },
                 layer: [
                     {
+                        transform: [
+                            {
+                                aggregate: [{
+                                    field: mainField.fid,
+                                    op: mainFieldAggregation ?? 'count',
+                                    as: translatedKey,
+                                }],
+                                groupby: [dimension.fid],
+                            },
+                        ],
                         mark: commonEncodings.mark,
                         encoding: {
-                            ...commonEncodings.encoding,
+                            x: commonEncodings.encoding.x,
+                            y: {
+                                field: translatedKey,
+                                title: `${mainFieldAggregation ?? 'count'}(${mainField.name || mainField.fid})`,
+                                type: mainField.semanticType,
+                            },
                             color: { value: 'gray' },
                         },
                     },
                     {
                         transform: [
                             { filter: `datum.${SelectedFlag} != 0` },
-                        ],
-                        mark: commonEncodings.mark,
-                        encoding: {
-                            ...commonEncodings.encoding,
-                            color: {
-                                field: SelectedFlag,
-                                type: 'nominal',
-                                legend: null,
+                            {
+                                aggregate: [{
+                                    field: mainField.fid,
+                                    op: mainFieldAggregation ?? 'count',
+                                    as: translatedKey,
+                                }],
+                                groupby: [dimension.fid],
                             },
+                        ],
+                        mark: {
+                            ...commonEncodings.mark,
+                            size: 5,
+                        },
+                        encoding: {
+                            x: commonEncodings.encoding.x,
+                            y: {
+                                field: translatedKey,
+                                title: `subset:${mainFieldAggregation ?? 'count'}(${mainField.name || mainField.fid})`,
+                                type: mainField.semanticType,
+                            },
+                            color: { value: 'orange' },
                         },
                     },
                 ],
@@ -79,6 +104,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                         labelLimit: 30,
                     },
                 },
+                resolve: { scale: { y: 'independent' } },
             }, {
                 editorUrl: EDITOR_URL,
                 timeFormatLocale: intl.get('time_format') as any,
@@ -94,7 +120,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                 viewRef.current = undefined;
             }
         };
-    }, [mainField, mainFieldAggregation, data, mode]);
+    }, [mainField, mainFieldAggregation, data, mode, dimension]);
 
     return <div ref={container} />;
 };

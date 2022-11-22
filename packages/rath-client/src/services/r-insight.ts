@@ -8,7 +8,6 @@ import { workerService } from './base';
 
 export const RInsightService = async (props: IRInsightExplainProps, mode: 'worker' | 'server'): Promise<IRInsightExplainResult> => {
     const { causalStore } = getGlobalStore();
-    console.log('???????', props, mode);
 
     if (mode === 'server') {
         const { apiPrefix } = causalStore;
@@ -30,7 +29,6 @@ export const RInsightService = async (props: IRInsightExplainProps, mode: 'worke
     const result = await workerService<IRInsightExplainResult, IRInsightExplainProps>(worker, props);
     worker.terminate();
     if (result.success) {
-        console.log({result})
         return result.data;
     } else {
         throw new Error('[RInsight worker]' + result.message);

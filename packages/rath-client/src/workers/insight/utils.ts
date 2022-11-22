@@ -1,6 +1,6 @@
 import { applyFilters } from "@kanaries/loa";
 import dayjs from "dayjs";
-import type { IFieldMeta, IRow, IFilter } from "../../interfaces";
+import type { IFieldMeta, IRow } from "../../interfaces";
 import { getRange } from "../../utils";
 import type { IRInsightExplainProps, IRInsightExplainResult } from "./r-insight.worker";
 
@@ -9,17 +9,17 @@ const MAX_BIN = 16;
 
 type AggregateType = 'count' | 'sum' | 'mean';
 
-const xHash = (data: IRow[], field: IFieldMeta): [number[], number[]] => {
+const xHash = (data: IRow[], field: IFieldMeta): number[] => {
     switch (field.semanticType) {
         case 'quantitative': {
             const col = data.map(row => Number(row[field.fid]));
             const [min, max] = getRange(col.filter(Number.isFinite));
-            return [col, col.map(d => Math.floor(Math.min((d - min) * MAX_BIN / (max - min), MAX_BIN - 1)))];
+            return col.map(d => Math.floor(Math.min((d - min) * MAX_BIN / (max - min), MAX_BIN - 1)));
         }
         case 'temporal': {
             const col = data.map(row => dayjs(row[field.fid]).toDate().getTime());
             const [min, max] = getRange(col.filter(Number.isFinite));
-            return [col, col.map(d => Math.floor(Math.min((d - min) * MAX_BIN / (max - min), MAX_BIN - 1)))];
+            return col.map(d => Math.floor(Math.min((d - min) * MAX_BIN / (max - min), MAX_BIN - 1)));
         }
         default: {
             const col = data.map(row => row[field.fid]);
@@ -37,53 +37,69 @@ const xHash = (data: IRow[], field: IFieldMeta): [number[], number[]] => {
                 map.set(projection[i][0], i);
             }
             const projector = (val: string | number) => map.get(val) ?? (MAX_BIN - 1);
-            return [col, col.map(projector)];
+            return col.map(projector);
         }
     }
 };
 
 const indexKey = '__index__';
-const hashTranslatedKey = '__hash_translated__';
 const hashIndexKey = '__hash_index__';
 
-let info: any = null;
+let info: any[] = [];
 
-const xNormalizeAggregated = (data: IRow[], aggregate: AggregateType): number[] => {
+const xNormalizeAggregated = (data: IRow[], field: IFieldMeta, aggregate: AggregateType): number[] => {
     const res = new Array<0>(MAX_BIN).fill(0);
+    const col: number[] = [];
+    if (aggregate !== 'count') {
+        for (const row of data) {
+            const val = row[field.fid];
+            switch (field.semanticType) {
+                case 'quantitative': {
+                    col.push(Number(val));
+                    break;
+                }
+                case 'temporal': {
+                    col.push(dayjs(row[field.fid]).toDate().getTime());
+                    break;
+                }
+                default: {
+                    col.push(val);
+                    break;
+                }
+            }
+        }
+    }
     switch (aggregate) {
         case 'count': {
             for (const row of data) {
                 res[row[hashIndexKey]] += 1;
             }
             for (let i = 0; i < res.length; i += 1) {
-                if (res[i] !== 0) {
-                    res[i] /= data.length;
-                }
+                res[i] /= data.length;
             }
             break;
         }
         case 'sum': {
             let total = 0;
-            for (const row of data) {
-                const i = row[hashIndexKey];
-                const w = row[hashTranslatedKey];
-                res[i] += w;
+            for (let i = 0; i < col.length; i += 1) {
+                const row = data[i];
+                const idx = row[hashIndexKey];
+                const w = col[i];
+                res[idx] += w;
                 total += w;
             }
             for (let i = 0; i < res.length; i += 1) {
-                if (total !== 0) {
-                    res[i] /= total;
-                }
+                res[i] /= total;
             }
             break;
         }
         case 'mean': {
             const count = res.map(() => 0);
-            for (const row of data) {
-                const i = row[hashIndexKey];
-                const w = row[hashTranslatedKey];
-                res[i] += w;
-                count[i] += 1;
+            for (let i = 0; i < col.length; i += 1) {
+                const row = data[i];
+                const idx = row[hashIndexKey];
+                const w = col[i];
+                res[idx] += w;
             }
             let total = 0;
             for (let i = 0; i < res.length; i += 1) {
@@ -113,17 +129,15 @@ const diffGroups = (
     dimension: IFieldMeta,
     measure: { fid: string; aggregate: AggregateType },
 ): number => {
-    const [translated, hashIndices] = xHash(data, dimension);
+    const hashIndices = xHash(data, dimension);
     const hashedData = data.map((row, i) => ({
         ...row,
-        [hashTranslatedKey]: translated[i],
         [hashIndexKey]: hashIndices[i],
     }));
-    // TODO: 只做一次
     const data1 = indices1.map(index => hashedData[index]);
     const data2 = indices2.map(index => hashedData[index]);
-    const group1 = xNormalizeAggregated(data1, measure.aggregate);
-    const group2 = xNormalizeAggregated(data2, measure.aggregate);
+    const group1 = xNormalizeAggregated(data1, dimension, measure.aggregate);
+    const group2 = xNormalizeAggregated(data2, dimension, measure.aggregate);
     const diff = new Array<0>(MAX_BIN).fill(0).reduce<{ loss: number; count: number }>((ctx, _, i) => {
         const a = group1[i];
         const b = group2[i];
@@ -148,27 +162,30 @@ export const insightExplain = (props: IRInsightExplainProps): IRInsightExplainRe
 
     const indexedData = data.map((row, i) => ({ ...row, [indexKey]: i }));
     const indices1 = applyFilters(indexedData, groups.current.predicates).map(row => row[indexKey]);
-    const indices2 = applyFilters(indexedData, groups.current.predicates).map(row => row[indexKey]);
+    info.push({ filters: groups.current.predicates, sample: applyFilters(indexedData, groups.current.predicates) });
+    const indices2 = groups.other.reverted
+        ? indexedData.filter((_, i) => !indices1.includes(i)).map(row => row[indexKey])
+        : applyFilters(indexedData, groups.other.predicates).map(row => row[indexKey]);
 
-    for (const fid of view.dimensions) {
-        const f = fields.find(which => which.fid === fid);
-        if (f) {
-            const responsibility = diffGroups(data, indices1, indices2, f, {
-                fid: fid,
-                aggregate: 'sum',
+    const exploringFields = fields.filter(f => ![...view.dimensions, ...view.measures.map(ms => ms.fid)].includes(f.fid));
+    for (const f of exploringFields) {
+        const target = view.measures[0];
+        const responsibility = diffGroups(data, indices1, indices2, f, {
+            fid: target.fid,
+            aggregate: 'sum',
+        });
+        if (responsibility !== 0) {
+            // @ts-ignore
+            res.causalEffects.push({
+                responsibility,
+                src: f.fid,
+                tar: target.fid,
+                description: {
+                    key: 'unvisualizedDimension',
+                    // @ts-ignore
+                    data: info,
+                },
             });
-            if (responsibility !== 0) {
-                // @ts-ignore
-                res.causalEffects.push({
-                    responsibility,
-                    src: f.fid,
-                    tar: view.measures[0].fid,
-                    description: {
-                        key: 'unvisualizedDimension',
-                        data: info,
-                    },
-                });
-            }
         }
            
         // const edge = edges.find(link => link.src === fid && view.measures.find(ms => ms.fid === link.tar));

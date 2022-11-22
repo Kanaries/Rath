@@ -23,7 +23,7 @@ export interface IRInsightExplainProps {
         other: IRInsightExplainSubspace;
     };
     view: {
-        /** 除了分析目标的其他 fields 的 id */
+        /** 视图上所有 channel 的 fid */
         dimensions: string[];
         /** 分析目标，视图的纵轴：关注的 fields */
         measures: {
