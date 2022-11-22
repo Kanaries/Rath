@@ -21,7 +21,9 @@ const UserSettings: React.FC = () => {
     const { langStore, commonStore } = useGlobalStore();
     const { navMode } = commonStore;
     return (
-        <Container className={navMode === 'icon' ? 'flex-col' : 'flex-row items-center'}>
+        <Container
+            style={navMode === 'icon' ? { flexDirection: 'column' } : { flexDirection: 'row', alignItems: 'center' }}
+        >
             {/* {navMode === 'text' && (
                 <DropdownSelect
                     border
