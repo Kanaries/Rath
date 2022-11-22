@@ -1,28 +1,11 @@
-import { IFilter, ISemanticType } from '@kanaries/loa';
+import { ISemanticType } from '@kanaries/loa';
 import React, { useEffect, useRef } from 'react';
 import { View } from 'vega';
 import embed from 'vega-embed';
 import { IRow } from '../../../interfaces';
 import { throttle } from '../../../utils';
 
-function brush2Filter(brush: { [key: string]: any[] }, semanticType: ISemanticType, fid: string): IFilter | null {
-    if (brush[fid] === undefined) {
-        return null;
-    }
-    if (semanticType === 'quantitative' || semanticType === 'temporal')
-        return {
-            type: 'range',
-            fid,
-            range: brush[fid] as [number, number],
-        };
-    return {
-        fid,
-        type: 'set',
-        values: brush[fid],
-    };
-}
-
-export const BRUSH_SIGNAL_NAME = 'brush';
+export const SELECT_SIGNAL_NAME = '__select__';
 export interface IBrushSignalStore {
     fields: any[];
     unit: string;
@@ -41,15 +24,34 @@ interface ColDistProps {
     height?: number;
     /** @default true */
     actions?: boolean;
-    axis?: null;
+    /** @default false */
+    onlyTicks?: boolean;
 }
+const DEFAULT_AXIS: any = {
+    labelLimit: 52,
+    labelOverlap: 'parity',
+    ticks: false,
+};
 const ColDist: React.FC<ColDistProps> = (props) => {
-    const { data, fid, semanticType, onBrushSignal, brush, name, width = 200, height = 200, actions = true, axis } = props;
+    const {
+        data,
+        fid,
+        semanticType,
+        onBrushSignal,
+        brush,
+        name,
+        width = 200,
+        height = 200,
+        actions = false,
+        onlyTicks = false,
+    } = props;
     const container = useRef<HTMLDivElement>(null);
     const view = useRef<View | null>(null);
     const dataSize = data.length;
+    const filterType = semanticType === 'quantitative' || semanticType === 'temporal' ? 'interval' : 'point';
     useEffect(() => {
         if (container.current) {
+            const shouldXLabelsDisplayFull = semanticType === 'quantitative';
             embed(container.current, {
                 data: {
                     values: data,
@@ -65,8 +67,8 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                     {
                         params: [
                             {
-                                name: BRUSH_SIGNAL_NAME,
-                                select: { type: 'interval', encodings: ['x'] },
+                                name: SELECT_SIGNAL_NAME,
+                                select: { type: filterType, encodings: ['x'] },
                             },
                         ],
                         mark: {
@@ -77,16 +79,23 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                             x: {
                                 field: fid,
                                 title: name || fid,
-                                bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
+                                bin: semanticType === 'quantitative' || semanticType === 'temporal' ? { maxbins: 20 } : undefined,
                                 type: semanticType,
-                                axis,
+                                axis: onlyTicks ? {
+                                    title: null,
+                                } : DEFAULT_AXIS,
                             },
-                            y: { aggregate: 'count', axis },
+                            y: {
+                                aggregate: 'count',
+                                axis: onlyTicks ? null : DEFAULT_AXIS,
+                            },
                             color: { value: 'gray' },
                         },
                     },
                     {
-                        transform: [{ filter: { param: BRUSH_SIGNAL_NAME } }],
+                        transform: [
+                            { filter: { param: SELECT_SIGNAL_NAME } },
+                        ],
                         mark: {
                             type: semanticType === 'temporal' ? 'area' : 'bar',
                             tooltip: true,
@@ -95,44 +104,39 @@ const ColDist: React.FC<ColDistProps> = (props) => {
                             x: {
                                 field: fid,
                                 title: name || fid,
-                                bin: semanticType === 'quantitative' ? { maxbins: 20 } : undefined,
+                                bin: semanticType === 'quantitative' || semanticType === 'temporal' ? { maxbins: 20 } : undefined,
                                 type: semanticType,
-                                axis,
+                                axis: onlyTicks ? {
+                                    title: null,
+                                    labelLimit: shouldXLabelsDisplayFull ? undefined : height * 0.4,
+                                } : DEFAULT_AXIS
                             },
-                            y: { aggregate: 'count', axis },
+                            y: { aggregate: 'count', axis: DEFAULT_AXIS },
                             color: { value: '#531dab' },
                         },
                     },
                 ],
-            }, { actions }).then((res) => {
+            },
+                { actions: false }
+            ).then((res) => {
                 view.current = res.view;
                 const handler = (name: string, value: any) => {
                     if (onBrushSignal) {
                         const state = res.view.getState();
-                        if (state.data[`${BRUSH_SIGNAL_NAME}_store`]) {
-                            onBrushSignal(state.data[`${BRUSH_SIGNAL_NAME}_store`]);
+                        if (state.data[`${SELECT_SIGNAL_NAME}_store`]) {
+                            onBrushSignal(state.data[`${SELECT_SIGNAL_NAME}_store`]);
                         } else {
-                            onBrushSignal(null)
+                            onBrushSignal(null);
                         }
                     }
-
-                    // onFilter && onFilter(brush2Filter(value, semanticType, fid))
-                }
-                const t = Math.round(dataSize / 1000 * 32)
+                };
+                const t = Math.round((dataSize / 1000) * 32);
                 const throttleHandler = throttle(handler, t);
-                res.view.addSignalListener(BRUSH_SIGNAL_NAME, throttleHandler);
-                //@ts-ignore
-                // if (typeof window.viz === 'undefined') {
-                //     // @ts-ignore
-                //     window.viz = {};
-                // }
-
-                // // @ts-ignore
-                // window.viz[fid] = view.current;
-                // console.log(res.view.getState());
+                res.view.addSignalListener(SELECT_SIGNAL_NAME, throttleHandler);
             });
         }
-    }, [fid, semanticType, dataSize, name, axis, width, height]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fid, semanticType, dataSize, name, width, height, actions, onlyTicks, filterType]);
 
     useEffect(() => {
         if (view.current) {
@@ -147,11 +151,13 @@ const ColDist: React.FC<ColDistProps> = (props) => {
     }, [data]);
 
     useEffect(() => {
-        if (view.current && brush) {
-            const k = `${BRUSH_SIGNAL_NAME}_store`
-            view.current.setState({ data: { [k]: brush } });
+        if (view.current) {
+            const k = `${SELECT_SIGNAL_NAME}_store`;
+            if (brush !== null) {
+                view.current.setState({ data: { [k]: brush } });
+            }
         }
-    }, [brush])
+    }, [brush]);
     return <div ref={container}></div>;
 };
 

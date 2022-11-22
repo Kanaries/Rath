@@ -1,53 +1,113 @@
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
-import G6 from "@antv/g6";
+import { Graph } from "@antv/g6";
+import { observer } from "mobx-react-lite";
+import { ActionButton } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
-import { BgKnowledge } from "../config";
+import type { ModifiableBgKnowledge } from "../config";
+import { useGlobalStore } from "../../../store";
+import { GraphNodeAttributes, useGraphOptions, useRenderData } from "./graph-utils";
+import { useReactiveGraph } from "./graph-helper";
 import type { DiagramGraphData } from ".";
 
 
 const Container = styled.div`
     overflow: hidden;
+    position: relative;
     > div {
         width: 100%;
         height: 100%;
     }
+    & .msg {
+        position: absolute;
+        left: 1em;
+        top: 2em;
+        font-size: 10px;
+        user-select: none;
+        pointer-events: none;
+    }
 `;
 
 export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
-    fields: readonly Readonly<IFieldMeta>[];
+    selectedSubtree: readonly string[];
     value: Readonly<DiagramGraphData>;
     cutThreshold: number;
+    limit: number;
     mode: 'explore' | 'edit';
     focus: number | null;
-    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+    onClickNode?: (fid: string | null) => void;
+    toggleFlowAnalyzer: () => void;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
-    preconditions: BgKnowledge[];
+    onRevertLink: (srcFid: string, tarFid: string) => void;
+    preconditions: ModifiableBgKnowledge[];
+    forceRelayoutRef: React.MutableRefObject<() => void>;
+    autoLayout: boolean;
+    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
 }, never>, 'onChange' | 'ref'>;
 
-const arrows = {
-    undirected: {
-        start: '',
-        end: '',
-    },
-    directed: {
-        start: '',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
-    },
-    bidirected: {
-        start: 'M 12,0 L 28,8 L 28,-8 Z',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
-    },
-    'weak directed': {
-        start: '',
-        end: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
-    },
-} as const;
+/** 调试用的，不需要的时候干掉 */
+type ExportableGraphData = {
+    nodes: { id: string }[];
+    edges: { source: string; target: string }[];
+};
+/** 调试用的，不需要的时候干掉 */
+const ExportGraphButton: React.FC<{ data: DiagramGraphData; fields: readonly Readonly<IFieldMeta>[] }> = ({ data, fields }) => {
+    const value = useMemo<File>(() => {
+        const graph: ExportableGraphData = {
+            nodes: fields.map(f => ({ id: f.fid })),
+            edges: [],
+        };
+        for (const link of data.links) {
+            const source = fields[link.causeId].fid;
+            const target = fields[link.effectId].fid;
+            graph.edges.push({ source, target });
+            if (link.type === 'bidirected' || link.type === 'undirected') {
+                graph.edges.push({ source: target, target: source });
+            }
+        }
+        return new File([JSON.stringify(graph, undefined, 2)], `test - ${new Date().toLocaleString()}.json`);
+    }, [data, fields]);
+    const dataUrlRef = useRef('');
+    useEffect(() => {
+        dataUrlRef.current = URL.createObjectURL(value);
+        return () => {
+            URL.revokeObjectURL(dataUrlRef.current);
+        };
+    }, [value]);
+    const handleExport = useCallback(() => {
+        const a = document.createElement('a');
+        a.href = dataUrlRef.current;
+        a.download = value.name;
+        a.click();
+        a.remove();
+    }, [value.name]);
+    return (
+        <ActionButton iconProps={{ iconName: 'Download' }} onClick={handleExport} style={{ position: 'absolute', bottom: 0 }}>
+            导出为图
+        </ActionButton>
+    );
+};
 
-const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
-    { fields, value, onClickNode, focus, cutThreshold, mode, onLinkTogether, preconditions, ...props },
-    ref
-) => {
+const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
+    selectedSubtree,
+    value,
+    onClickNode,
+    focus,
+    cutThreshold,
+    limit,
+    mode,
+    onLinkTogether,
+    onRevertLink,
+    preconditions,
+    forceRelayoutRef,
+    autoLayout,
+    renderNode,
+    toggleFlowAnalyzer,
+    ...props
+}, ref) => {
+    const { causalStore } = useGlobalStore();
+    const { selectedFields: fields } = causalStore;
+
     const [data] = useMemo(() => {
         let totalScore = 0;
         const nodeCauseWeights = value.nodes.map(() => 0);
@@ -71,179 +131,66 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
                 target: link.effectId,
                 value: link.score / nodeCauseWeights[link.effectId],
                 type: link.type,
-            })).filter(link => link.value >= cutThreshold),
+            })).filter(link => link.value >= cutThreshold).sort((a, b) => b.value - a.value).slice(0, limit),
         }, totalScore];
-    }, [value, cutThreshold]);
+    }, [value, cutThreshold, limit]);
 
     const containerRef = useRef<HTMLDivElement>(null);
+    const [width, setWidth] = useState(0);
 
-    const [size, setSize] = useState<[number, number]>([0, 0]);
+    const updateSelectedRef = useRef<(idx: number) => void>(() => {});
 
-    const preconditionsRef = useRef(preconditions);
-    preconditionsRef.current = preconditions;
+    const graphRef = useRef<Graph>();
+    const renderData = useRenderData(data, mode, preconditions, fields, renderNode);
+    const cfg = useGraphOptions(width, fields, onLinkTogether, graphRef, undefined);
+    const cfgRef = useRef(cfg);
+    cfgRef.current = cfg;
 
-    const handleNodeClickRef = useRef(onClickNode);
-    handleNodeClickRef.current = onClickNode;
+    const [forceRelayoutFlag, setForceRelayoutFlag] = useState<0 | 1>(0);
 
-    const handleLinkRef = useRef(onLinkTogether);
-    handleLinkRef.current = onLinkTogether;
+    const handleEdgeClick = useCallback((edge: { srcFid: string; tarFid: string; } | null) => {
+        if (edge) {
+            onRevertLink(edge.srcFid, edge.tarFid);
+        }
+    }, [onRevertLink]);
 
-    const updateSelected = useRef((idx: number) => {});
+    useReactiveGraph(
+        containerRef,
+        width,
+        graphRef,
+        cfg,
+        renderData,
+        mode,
+        onClickNode,
+        handleEdgeClick,
+        fields,
+        updateSelectedRef,
+        forceRelayoutFlag,
+        focus,
+        selectedSubtree,
+    );
 
     useEffect(() => {
-        const { current: container } = containerRef;
-        if (container) {
-            const graph = new G6.Graph({
-                container,
-                width: size[0],
-                height: size[1],
-                linkCenter: true,
-                modes: {
-                    default: mode === 'edit' ? ['drag-canvas', 'drag-node', 'create-edge'] : ['drag-canvas', 'drag-node', 'click-select'],
-                    altSelect: [
-                        {
-                            type: 'click-select',
-                            trigger: 'alt',
-                            multiple: false,
-                        },
-                        'drag-node',
-                    ],
-                },
-                animate: true,
-                layout: {
-                  type: 'fruchterman',
-                  gravity: 5,
-                  speed: 10,
-                  // for rendering after each iteration
-                  tick: () => {
-                    graph.refreshPositions()
-                  }
-                },
-                // layout: {
-                //     type: 'gForce',
-                //     gpuEnabled: true,
-                //     maxIteration: 1000,
-                //     // type: 'gForce',
-                //     // maxIteration: 500,
-                //     // gatherDiscrete: true,
-                //     // //nodeSize: 100,
-                //     // //nodeSpacing: 100,
-                //     // //gatherDiscreteCenter: [500, 100],
-                //     // descreteGravity: 200,
-                //     // linkDistanceFunc: (e: any) => {
-                //     //     if (e.source === '0') return 10;
-                //     //     return 1;
-                //     // },
-                //     // getMass: (d: any) => {
-                //     //     if (d.id === '0') return 100;
-                //     //     return 1;
-                //     // },
-                //     // // speed: 10,
-                //     // // maxIteration: 500,
-                //     // // // for rendering after each iteration
-                //     // // tick: () => {
-                //     // //     graph.refreshPositions()
-                //     // // },
-                // },
-                defaultNode: {
-                  size: 24,
-                  style: {
-                    lineWidth: 2,
-                  },
-                },
-                defaultEdge: {
-                  size: 1,
-                  color: '#F6BD16',
-                },
-            });
-            graph.node(node => ({
-                label: node.description ?? node.id,
-            }));
-            graph.data({
-                nodes: data.nodes.map((node, i) => ({ id: `${node.id}`, description: fields[i].name ?? fields[i].fid })),
-                edges: [
-                    ...data.links.map((link, i) => ({
-                        id: `link_${i}`,
-                        source: `${link.source}`,
-                        target: `${link.target}`,
-                        style: {
-                            startArrow: {
-                                fill: '#F6BD16',
-                                path: arrows[link.type].start,
-                            },
-                            endArrow: {
-                                fill: '#F6BD16',
-                                path: arrows[link.type].end,
-                            },
-                        },
-                    })),
-                    ...preconditionsRef.current.map((bk, i) => ({
-                        id: `bk_${i}`,
-                        source: `${fields.findIndex(f => f.fid === bk.src)}`,
-                        target: `${fields.findIndex(f => f.fid === bk.tar)}`,
-                        style: {
-                            startArrow: {
-                                fill: '#F6BD16',
-                                path: arrows[bk.type].start,
-                            },
-                            endArrow: {
-                                fill: '#F6BD16',
-                                path: arrows[bk.type].end,
-                            },
-                        },
-                    })),
-                ],
-            });
-            graph.render();
-
-            graph.on('aftercreateedge', (e: any) => {
-                const edge = e.edge._cfg;
-                const source = fields[parseInt(edge.source._cfg.id, 10)];
-                const target = fields[parseInt(edge.target._cfg.id, 10)];
-                handleLinkRef.current(source.fid, target.fid);
-                const edges = graph.save().edges;
-                G6.Util.processParallelEdges(edges);
-                graph.getEdges().forEach((edge, i) => {
-                    graph.updateItem(edge, {
-                        // @ts-ignore
-                        curveOffset: edges[i].curveOffset,
-                        // @ts-ignore
-                        curvePosition: edges[i].curvePosition,
-                    });
-                });
-            });
-
-            graph.on('nodeselectchange', (e: any) => {
-                const selected = e.selectedItems.nodes[0]?._cfg.id;
-                const idx = selected === undefined ? null : parseInt(selected, 10);
-
-                if (idx !== null) {
-                    handleNodeClickRef.current?.({ nodeId: idx });
-                }
-            });
-
-            updateSelected.current = idx => {
-                const prevSelected = graph.findAllByState('node', 'selected')[0]?._cfg?.id;
-                const prevSelectedIdx = prevSelected ? parseInt(prevSelected, 10) : null;
-
-                if (prevSelectedIdx === idx) {
-                    return;
-                } else if (prevSelectedIdx !== null) {
-                    graph.setItemState(`${prevSelectedIdx}`, 'selected', false);
-                }
-                graph.setItemState(`${idx}`, 'selected', true);
-            };
-
-            return () => {
-                // graph.destroy();
-                container.innerHTML = '';
-            };
+        const { current: graph } = graphRef;
+        if (graph) {
+            graph.stopAnimate();
+            graph.destroyLayout();
+            if (autoLayout) {
+                graph.updateLayout(cfgRef.current.layout);
+            }
         }
-    }, [data, size, mode, fields]);
+    }, [autoLayout]);
+
+    useEffect(() => {
+        forceRelayoutRef.current = () => setForceRelayoutFlag(flag => flag === 0 ? 1 : 0);
+        return () => {
+            forceRelayoutRef.current = () => {};
+        };
+    }, [forceRelayoutRef]);
 
     useEffect(() => {
         if (focus !== null) {
-            updateSelected.current(focus);
+            updateSelectedRef.current(focus);
         }
     }, [focus]);
 
@@ -251,8 +198,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
         const { current: container } = containerRef;
         if (container) {
             const cb = () => {
-                const { width, height } = container.getBoundingClientRect();
-                setSize([width, height]);
+                const { width: w } = container.getBoundingClientRect();
+                setWidth(w);
             };
             const ro = new ResizeObserver(cb);
             ro.observe(container);
@@ -266,12 +213,18 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>((
         <Container
             {...props}
             ref={ref}
-            onClick={e => e.stopPropagation()}
+            onClick={e => {
+                if (e.shiftKey) {
+                    toggleFlowAnalyzer();
+                }
+                e.stopPropagation();
+            }}
         >
             <div ref={containerRef} />
+            <ExportGraphButton fields={fields} data={value} />
         </Container>
     );
 });
 
 
-export default GraphView;
+export default observer(GraphView);

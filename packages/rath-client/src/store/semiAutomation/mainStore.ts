@@ -19,17 +19,20 @@ export class SemiAutomationStore {
     public pattViews: IAssoViews;
     public featViews: IAssoViews;
     public filterViews: IAssoViews;
+    public neighborViews: IAssoViews;
     private dataSourceStore: DataSourceStore;
     public mainView: IPattern | null = null;
     public compareView: IPattern | null = null;
     public specForGraphicWalker: Specification = {};
     public showMiniFloatView: boolean = false;
+    public neighborKeys: string[] = [];
     public autoAsso: {
         [key in IRenderViewKey]: boolean;
     } = {
         pattViews: true,
         featViews: true,
-        filterViews: true
+        filterViews: true,
+        neighborViews: true
     }
     private reactions: any[] = [];
     constructor (dataSourceStore: DataSourceStore) {
@@ -51,6 +54,7 @@ export class SemiAutomationStore {
         this.pattViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.featViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.filterViews = makeInitAssoViews(RENDER_BATCH_SIZE);
+        this.neighborViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.reactions.push(reaction(() => {
             return {
                 mainView: this.mainView,
@@ -58,7 +62,7 @@ export class SemiAutomationStore {
                 fieldMetas: this.fieldMetas,
                 autoFeat: this.autoAsso.featViews,
                 autoPatt: this.autoAsso.pattViews,
-                autoFilter: this.autoAsso.filterViews
+                autoFilter: this.autoAsso.filterViews,
             }
         }, (props) => {
             const { mainView, autoFeat, autoFilter, autoPatt } = props;
@@ -71,6 +75,24 @@ export class SemiAutomationStore {
                 !autoFilter && this.initRenderViews('filterViews');
             } else {
                 autoPatt && this.initAssociate();
+            }
+        }))
+
+        this.reactions.push(reaction(() => {
+            return {
+                mainView: this.mainView,
+                dataSource: this.dataSource,
+                fieldMetas: this.fieldMetas,
+                autoNeighbor: this.autoAsso.neighborViews,
+                neighborKeys: this.neighborKeys
+            }
+        }, (props) => {
+            const { mainView, autoNeighbor, neighborKeys } = props;
+            if (mainView && neighborKeys.length > 0) {
+                autoNeighbor && this.neighborAssociate();
+                !autoNeighbor && this.initRenderViews('neighborViews');
+            } else {
+                this.initRenderViews('neighborViews');
             }
         }))
 
@@ -87,6 +109,12 @@ export class SemiAutomationStore {
     }
     public setShowSettings (show: boolean) {
         this.showSettings = show;
+    }
+    public setNeighborKeys (keys: string[]) {
+        this.neighborKeys = keys;
+    }
+    public clearNeighborKeys () {
+        this.neighborKeys = [];
     }
     public updateSettings (skey: keyof ISetting, value: any) {
         this.settings[skey] = value;
@@ -168,6 +196,24 @@ export class SemiAutomationStore {
             }))
         }
     }
+    public get neighborSpecList () {
+        const { amount, views } = this.neighborViews;
+        const renderedViews = views.slice(0, amount);
+        if (this.settings.vizAlgo === 'lite') {
+            return renderedViews.map(v => distVis({
+                pattern: v,
+                specifiedEncodes: v.encodes,
+                excludeScaleZero: this.mainVizSetting.excludeScaleZero
+            }))
+        } else {
+            return renderedViews.map(v => labDistVis({
+                pattern: v,
+                dataSource: this.dataSource,
+                specifiedEncodes: v.encodes,
+                excludeScaleZero: this.mainVizSetting.excludeScaleZero
+            }))
+        }
+    }
     public get filterSpecList () {
         // TODO: 这里的设计并不会带来性能上的优化，过去只会被计算一次的整体，现在反而要算的更多。
         // 仅仅对于联想视图比较多的场景会有优化。
@@ -196,6 +242,33 @@ export class SemiAutomationStore {
     public increaseRenderAmount (stateKey: IRenderViewKey) {
         const safeSize = Math.min(this[stateKey].amount + RENDER_BATCH_SIZE, this[stateKey].views.length)
         this.changeRenderAmount(stateKey, safeSize)
+    }
+    public async neighborAssociate () {
+        this.neighborViews.computing = true
+        const { fieldMetas, dataSource, mainView } = this;
+        const neighborKeys = toJS(this.neighborKeys)
+        try {
+            if (mainView === null) throw new Error('mainView is null');
+            const viewFields = mainView.fields.filter(f => !neighborKeys.includes(f.fid));
+            const res = await loaEngineService<IPattern[]>({
+                dataSource,
+                fields: fieldMetas,
+                task: 'neighbors',
+                props: {
+                    fields: [...viewFields, { fid: '*', neighbors: neighborKeys, includeNeighbor: false}],
+                    filters: mainView.filters,
+                }
+            }, 'local')
+            runInAction(() => {
+                this.neighborViews.computing = false;
+                this.neighborViews.views = res;
+                this.neighborViews.amount = RENDER_BATCH_SIZE;
+            })
+            return res;
+        } catch (error) {
+            console.error(error);
+            this.neighborViews.computing = false;
+        }
     }
     public async featAssociate () {
         this.featViews.computing = true

@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import { IRawField } from '../../interfaces';
+import '../program/implement/index';
 import { getOperatorList } from '../program/operator';
 import { validNameRegExp } from '../program/parse';
 

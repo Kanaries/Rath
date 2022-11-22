@@ -1,87 +1,92 @@
-import React, { useEffect, useState } from 'react';
+import { IconButton } from '@fluentui/react';
+import React, { useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { IFieldMeta, IRow } from '../../../interfaces';
 import ColDist, { IBrushSignalStore } from './colDist';
 
-interface Props {
+const VizContainer = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+`;
+
+const VizCard = styled.div`
+    border: 1px solid #ccc;
+    margin: 5px;
+    padding: 5px;
+    .action-bar {
+        margin-bottom: 5px;
+    }
+`;
+
+interface CrossFilterProps {
     fields: IFieldMeta[];
     dataSource: IRow[];
+    onVizEdit?: (fid: string) => void;
+    onVizClue?: (fid: string) => void;
+    onVizDelete?: (fid: string) => void;
 }
-const CrossFilter: React.FC<Props> = (props) => {
-    const { fields, dataSource } = props;
+const CrossFilter: React.FC<CrossFilterProps> = (props) => {
+    const { fields, dataSource, onVizClue, onVizEdit, onVizDelete } = props;
     // const [brushes, setBrushes] = useState<(IBrush | null)[]>(fields.map((f) => null));
     const [brushSignal, setBrushSignal] = useState<IBrushSignalStore[] | null>(null);
-    // const [filters, setFilters] = useState<(IFilter | null)[]>(fields.map((f) => null))
-    const [asFilter, setAsFilter] = useState<boolean[]>(fields.map((f) => false));
+    const [brushIndex, setBrushIndex] = useState<number>(-1)
     // const [mergedBrushes, setMergedBrushes] = useState<({ [key: string]: any[] } | null)[]>(fields.map((f) => null));
     useEffect(() => {
-        // setBrushes(fields.map((f) => null));
-        setBrushSignal(null)
-        setAsFilter(fields.map((f) => false));
-        // setFilters(fields.map((f) => null));
-        // set
+        setBrushSignal(null);
+        setBrushIndex(-1)
     }, [fields]);
-    // const filteredData = useMemo(() => {
-    //     if (filters.every(f => f === null)) return dataSource;
-    //     return applyFilters(dataSource, filters.filter((f) => f !== null) as IFilter[]);
-    // }, [dataSource, filters]);
-    // const mergedBrushes = useMemo(() => {
-    //     return brushes.map((bs, index) => {
-    //         if (asFilter[index]) return brushes[index];
-    //         return mergeBrush(brushes.filter((f, i) => i !== index));
-    //     });
-    // }, [brushes, asFilter]);
-    // console.log(mergedBrushes)
-    // const
+
+    const handleFilter = useCallback((index: number, data: IBrushSignalStore[] | null) => {
+        if (data === null) {
+            return;
+        } else {
+            setBrushIndex(index);
+            setBrushSignal([...data]);
+        }
+    }, []);
+
     return (
-        <div>
+        <VizContainer>
             {fields.map((field, index) => {
                 return (
-                    <ColDist
-                        key={field.fid}
-                        data={dataSource}
-                        // data={asFilter[index] ? dataSource : filteredData}
-                        fid={field.fid}
-                        semanticType={field.semanticType}
-                        // onFilter={(filter) => {
-                        //     setAsFilter((arr) => {
-                        //             const nextArr = [...arr];
-                        //             nextArr[index] = !!filter;
-                        //             return nextArr;
-                        //         });
-                        //     setFilters(filters => produce(filters, (draft) => {
-                        //         draft[index] = filter;
-                        //     }));
-                        // }}
-                        onBrushSignal={(props) => {
-                            // console.log(props)
-                            // setBrushes((bs) => {
-                            //     const next = produce(bs, (draft) => {
-                            //         draft[index] = props;
-                            //     });
-                            //     return next;
-                            // });
-                            if (props === null) {
-                                setAsFilter((arr) => {
-                                    const nextArr = [...arr];
-                                    nextArr[index] = false;
-                                    return nextArr;
-                                });
-                                setBrushSignal(null)
-                            } else {
-                                setAsFilter((arr) => {
-                                    const nextArr = [...arr];
-                                    nextArr[index] = true;
-                                    return nextArr;
-                                });setBrushSignal([ ...props ])
-                            }
-                            
-                        }}
-                        name={field.name}
-                        brush={asFilter[index] ? null : brushSignal}
-                    />
+                    <VizCard key={field.fid}>
+                        <div className="action-bar">
+                            {onVizEdit && (
+                                <IconButton
+                                    text="Edit"
+                                    iconProps={{ iconName: 'Edit' }}
+                                    onClick={() => onVizEdit(field.fid)}
+                                />
+                            )}
+                            {onVizClue && (
+                                <IconButton
+                                    text="Clues"
+                                    iconProps={{ iconName: 'Lightbulb' }}
+                                    onClick={() => onVizClue(field.fid)}
+                                />
+                            )}
+                            {onVizDelete && (
+                                <IconButton
+                                    text="Delete"
+                                    iconProps={{ iconName: 'Delete' }}
+                                    onClick={() => onVizDelete(field.fid)}
+                                />
+                            )}
+                        </div>
+                        <ColDist
+                            data={dataSource}
+                            fid={field.fid}
+                            semanticType={field.semanticType}
+                            onBrushSignal={(props) => {
+                                handleFilter(index, props);
+                            }}
+                            name={field.name}
+                            brush={index === brushIndex ? null : brushSignal}
+                        />
+                    </VizCard>
                 );
             })}
-        </div>
+        </VizContainer>
     );
 };
 

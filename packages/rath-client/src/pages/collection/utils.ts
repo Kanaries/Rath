@@ -1,5 +1,5 @@
 import produce from "immer";
-import { IFieldMeta, IInsightVizView, IResizeMode, IVegaSubset } from "../../interfaces";
+import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
 import { applySizeConfig } from "../../queries/base/utils";
 
 export function adviceVisSize(spec: IVegaSubset, fields: IFieldMeta[], width: number | undefined = 260, height: number | undefined = 260): IVegaSubset {
@@ -49,25 +49,6 @@ export function changeVisSize(spec: IVegaSubset, propsWidth: number, propsHeight
         }
     });
     return nextSpec;
-}
-
-export function searchFilterView (searchContent: string, views: IInsightVizView[]) {
-    const words = searchContent.split(/[\s,;\t]+/)
-    const lookupPattern = new RegExp(`.*${words.map(w => `(${w})`).join('|')}.*`, 'i')
-    return views.filter(view => {
-        for (let field of view.fields) {
-            if (field.name && lookupPattern.test(field.name)) return true;
-            if (lookupPattern.test(field.fid)) return true;
-            if (view.filters && view.filters.length > 0) {
-                for (let filter of view.filters) {
-                    if (filter.type === 'set') {
-                        if (filter.values.some(v => lookupPattern.test(v))) return true;
-                    }
-                }
-            }
-        }
-        return false
-    })
 }
 
 export const VIEW_NUM_IN_PAGE = 8;

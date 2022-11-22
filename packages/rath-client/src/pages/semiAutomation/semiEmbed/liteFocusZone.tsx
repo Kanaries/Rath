@@ -17,7 +17,7 @@ const BUTTON_STYLE = { marginRight: '6px', marginTop: '6px' };
 
 const LiteFocusZone: React.FC = (props) => {
     const { semiAutoStore, commonStore, collectionStore, painterStore } = useGlobalStore();
-    const { mainVizSetting, mainView, showMiniFloatView, mainViewSpec, fieldMetas } = semiAutoStore;
+    const { mainVizSetting, mainView, showMiniFloatView, mainViewSpec, fieldMetas, neighborKeys } = semiAutoStore;
     const [showActions, setShowActions] = useState(false);
     const appendFieldHandler = useCallback(
         (fid: string) => {
@@ -111,9 +111,13 @@ const LiteFocusZone: React.FC = (props) => {
                             <ViewField
                                 key={f.fid}
                                 type={f.analyticType}
+                                mode={neighborKeys.includes(f.fid) ? 'wildcard' : 'real'}
                                 text={f.name || f.fid}
                                 onRemove={() => {
                                     semiAutoStore.removeMainViewField(f.fid);
+                                }}
+                                onDoubleClick={() => {
+                                    semiAutoStore.setNeighborKeys(neighborKeys.includes(f.fid) ? [] : [f.fid]);
                                 }}
                             />
                         ))}

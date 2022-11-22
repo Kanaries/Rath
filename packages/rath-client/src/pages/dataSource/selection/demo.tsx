@@ -11,7 +11,7 @@ interface DemoDataProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => void;
 }
 
 function valueFix (ds: IDatasetBase): IDatasetBase {
@@ -63,7 +63,7 @@ const DemoData: React.FC<DemoDataProps> = props => {
         onStartLoading();
         requestDemoData(dsKey).then(data => {
             const { dataSource, fields } = data;
-            onDataLoaded(fields, dataSource);
+            onDataLoaded(fields, dataSource, 'rdemo_' + dsKey);
             logDataImport({
                 dataType: "Demo",
                 name: dsKey,

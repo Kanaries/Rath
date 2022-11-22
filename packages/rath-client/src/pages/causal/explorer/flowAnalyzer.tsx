@@ -13,11 +13,13 @@ import {
     coordQuad,
 } from 'd3-dag';
 import { line as d3Line/*, curveMonotoneY*/, curveCatmullRom } from 'd3-shape';
-import { Dropdown, Slider } from "@fluentui/react";
+import { Dropdown } from "@fluentui/react";
+import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
 import ColDist, { IBrushSignalStore } from "../crossFilter/colDist";
+import { useGlobalStore } from "../../../store";
 import type { DiagramGraphData } from ".";
 
 
@@ -27,8 +29,8 @@ export type NodeWithScore = {
 };
 
 export interface FlowAnalyzerProps {
+    display: boolean;
     dataSource: IRow[];
-    fields: readonly Readonly<IFieldMeta>[];
     data: DiagramGraphData;
     index: number;
     cutThreshold: number;
@@ -39,7 +41,8 @@ export interface FlowAnalyzerProps {
         composedCause: readonly Readonly<NodeWithScore>[],
         composedEffect: readonly Readonly<NodeWithScore>[],
     ) => void;
-    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+    onClickNode?: (fid: string | null) => void;
+    limit: number;
 }
 
 export type Flow = {
@@ -62,7 +65,9 @@ const SVGGroup = styled.div`
     flex-grow: 0;
     flex-shrink: 0;
     width: 100%;
-    border: 1px solid #8888;
+    min-height: 50px;
+    border: 1px solid #e3e2e2;
+    border-top: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -81,7 +86,7 @@ const SVGGroup = styled.div`
             cursor: pointer;
         }
     }
-    > div:not(.tools) {
+    > div:not(.tools):not(.msg) {
         flex-grow: 0;
         flex-shrink: 0;
         display: flex;
@@ -105,14 +110,23 @@ const SVGGroup = styled.div`
             }
         }
     }
+    > div.msg {
+        padding: 0.8em 2em 1.6em;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: static;
+        color: #a87c40;
+    }
 `;
 
 const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
-const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, cutThreshold, onUpdate, onClickNode }) => {
+const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ display, dataSource, data, index, cutThreshold, onUpdate, onClickNode, limit }) => {
+    const { causalStore } = useGlobalStore();
+    const { selectedFields: fields } = causalStore;
     const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
-
-    const [limit, setLimit] = useState(10);
 
     const normalizedLinks = useMemo(() => {
         const nodeCauseWeights = data.nodes.map(() => 0);
@@ -128,8 +142,6 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             type: link.type,
         }));
     }, [data]);
-
-    const linksCount = normalizedLinks.length;
 
     const linksInView = useMemo(() => {
         return normalizedLinks.filter(link => link.score >= cutThreshold).sort(
@@ -292,7 +304,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             return flows;
         }
         return [];
-    }, [linksInView, field, index, cutThreshold]);
+    }, [linksInView, field, index]);
 
     useEffect(() => {
         if (field) {
@@ -375,51 +387,67 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
             );
     }, [tooManyLinks]);
 
-    const destinationTree = useMemo(() => {
+    const [destinationTree, destTreeMsg] = useMemo(() => {
         if (flowsAsDestination.length === 0) {
-            return null;
+            return [null, null];
         }
-        const dag = dagStratify()(flowsAsDestination);
-        return {
-            // @ts-ignore
-            size: layout(dag),
-            steps: dag.size(),
-            nodes: dag.descendants(),
-            links: dag.links(),
-        };
+        try {
+            const dag = dagStratify()(flowsAsDestination);
+            return [{
+                // @ts-ignore
+                size: layout(dag),
+                steps: dag.size(),
+                nodes: dag.descendants(),
+                links: dag.links(),
+            }, null];
+        } catch (error) {
+            return [null, `${error}`];
+        }
     }, [flowsAsDestination, layout]);
 
-    const originTree = useMemo(() => {
+    const [originTree, oriTreeMsg] = useMemo(() => {
         if (flowsAsOrigin.length === 0) {
-            return null;
+            return [null, null];
         }
-        const dag = dagStratify()(flowsAsOrigin);
-        return {
-            // @ts-ignore
-            size: layout(dag),
-            steps: dag.size(),
-            nodes: dag.descendants(),
-            links: dag.links(),
-        };
+        try {
+            const dag = dagStratify()(flowsAsOrigin);
+            return [{
+                // @ts-ignore
+                size: layout(dag),
+                steps: dag.size(),
+                nodes: dag.descendants(),
+                links: dag.links(),
+            }, null];
+        } catch (error) {
+            return [null, `${error}`];
+        }
     }, [flowsAsOrigin, layout]);
 
-    const combinedTree = useMemo(() => {
+    const [combinedTree, cbnTreeMsg] = useMemo(() => {
         if (combinedFlows.length === 0) {
-            return null;
+            return [null, null];
         }
-        const dag = dagStratify()(combinedFlows);
-        return {
-            // @ts-ignore
-            size: layout(dag),
-            steps: dag.size(),
-            nodes: dag.descendants(),
-            links: dag.links(),
-        };
-    }, [combinedFlows, layout]);
+        try {
+            const dag = dagStratify()(combinedFlows);
+            return [{
+                // @ts-ignore
+                size: layout(dag),
+                steps: dag.size(),
+                nodes: dag.descendants(),
+                links: dag.links(),
+            }, null];
+        } catch (error) {
+            if (display) {
+                console.warn(error);
+            }
+            return [null, null];
+        }
+    }, [combinedFlows, layout, display]);
 
     const [mode, setMode] = useState<'cause' | 'effect'>('effect');
 
     const subtree = useMemo(() => mode === 'cause' ? destinationTree : originTree, [mode, destinationTree, originTree]);
+    const subtreeMsg = useMemo(() => mode === 'cause' ? destTreeMsg : oriTreeMsg, [mode, destTreeMsg, oriTreeMsg]);
 
     const [brush, setBrush] = useState<IBrushSignalStore[]>([]);
     const [brushIdx, setBrushIdx] = useState<number>(-1);
@@ -467,7 +495,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
         }
     }, [subtree]);
 
-    return (
+    return display ? (
         <SVGGroup onClick={e => e.stopPropagation()}>
             {field ? [combinedTree/*, destinationTree, originTree*/].map((tree, i) => tree ? (
                 <svg key={i} viewBox={`0 0 ${tree.size.height + 1} ${tree.size.width + 1}`} strokeLinecap="round" strokeLinejoin="round">
@@ -504,7 +532,7 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                                     onClick={e => {
                                         e.stopPropagation();
                                         if (index !== idx) {
-                                            onClickNode?.({ nodeId: idx });
+                                            onClickNode?.(fields[idx].fid);
                                         }
                                     }}
                                 />
@@ -515,18 +543,20 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                         );
                     })}
                 </svg>
-            ) : null) : null}
+            ) : (
+                <div className="msg">
+                    <p>{'选中结点的关联路径不是一张有向无环图。'}</p>
+                    {/* <p>{'Cannot display corresponding subset because it is not a directed acyclic graph.'}</p> */}
+                    <p>{'尝试查看其他的结点、调大权重筛选或调小显示上限。'}</p>
+                    {/* <p>{'Try to click on a different node, turn up the link filter above or turn down the display limit.'}</p> */}
+                    <small>{cbnTreeMsg}</small>
+                </div>
+            )) : null}
             {field && (
-                <div className="tools" style={{ width: '100%', padding: '1em 4em' }}>
-                    <Slider
-                        label="Display Limit"
-                        min={1}
-                        max={Math.max(linksCount, limit)}
-                        value={limit}
-                        onChange={value => setLimit(value)}
-                    />
+                <div className="tools" style={{ width: '100%', padding: '1em' }}>
                     <Dropdown
-                        label="Exploration Mode"
+                        // label="Exploration Mode"
+                        label="探索模式"
                         selectedKey={mode}
                         onChange={(e, option) => {
                             const key = option?.key as undefined | typeof mode;
@@ -535,103 +565,121 @@ const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ dataSource, fields, data, index, 
                             }
                         }}
                         options={[
-                            { key: 'cause', text: `How ${field.name ?? field.fid} is effected by other fields` },
-                            { key: 'effect', text: `How ${field.name ?? field.fid} effects other fields` },
+                            { key: 'cause', text: `${field.name ?? field.fid} 如何被其他因素影响` },
+                            { key: 'effect', text: `${field.name ?? field.fid} 如何影响其他因素` },
                         ]}
+                        // options={[
+                        //     { key: 'cause', text: `How ${field.name ?? field.fid} is effected by other fields` },
+                        //     { key: 'effect', text: `How ${field.name ?? field.fid} effects other fields` },
+                        // ]}
                         styles={{
                             root: {
                                 width: '26em',
                             }
                         }}
                     />
-                    {subtree ? null : (
-                        <p>Click a node to explore.</p>
-                    )}
+                    {combinedTree && !subtree ? (
+                        // <p>Click on a node to explore.</p>
+                        <p>点击一个结点以在有向图结构上探索。</p>
+                    ) : null}
                 </div>
             )}
-            {subtree ? (
-                <div ref={ref}>
-                    <svg viewBox={`0 0 ${w} ${h}`} strokeLinecap="round" strokeLinejoin="round">
-                        <defs>
-                            <marker id="flow-arrow" viewBox="0 -5 10 10" refX={32} refY="0" markerWidth={3} markerHeight={3} orient="auto">
-                                <path fill="none" stroke="#463782" strokeWidth={2} d="M0,-5L10,0L0,5" />
-                            </marker>
-                        </defs>
-                        {subtree.links.map((link, i, { length }) => (
-                            <path
-                                key={i}
-                                d={line(link.points.map(p => ({ x: p.y + 0.5, y: p.x + 0.5 }))) ?? ''}
-                                fill="none"
-                                stroke="#441ce3"
-                                strokeWidth={0.03}
-                                markerEnd="url(#flow-arrow)"
-                                opacity={0.25}
-                                style={{
-                                    filter: `hue-rotate(${180 * i / length}deg)`,
-                                }}
-                            />
-                        ))}
-                    </svg>
-                    <div>
-                        {subtree.nodes.map((node, i) => {
-                            const idx = parseInt(node.data.id, 10);
-                            const f = fields[idx];
-                            return (
-                                <div
+            {field ? (
+                subtree ? (
+                    <div ref={ref}>
+                        <svg viewBox={`0 0 ${w} ${h}`} strokeLinecap="round" strokeLinejoin="round">
+                            <defs>
+                                <marker id="flow-arrow" viewBox="0 -5 10 10" refX={32} refY="0" markerWidth={3} markerHeight={3} orient="auto">
+                                    <path fill="none" stroke="#463782" strokeWidth={2} d="M0,-5L10,0L0,5" />
+                                </marker>
+                            </defs>
+                            {subtree.links.map((link, i, { length }) => (
+                                <path
                                     key={i}
+                                    d={line(link.points.map(p => ({ x: p.y + 0.5, y: p.x + 0.5 }))) ?? ''}
+                                    fill="none"
+                                    stroke="#441ce3"
+                                    strokeWidth={0.03}
+                                    markerEnd="url(#flow-arrow)"
+                                    opacity={0.25}
                                     style={{
-                                        left: `${fx(node.y ?? 0)}px`,
-                                        top: `${fy(node.x ?? 0)}px`,
-                                        width: `${fSize(0.6)}px`,
-                                        height: `${fSize(0.6)}px`,
-                                        borderColor: index === idx ? '#995ccf' : undefined,
+                                        filter: `hue-rotate(${180 * i / length}deg)`,
                                     }}
-                                >
-                                    <ColDist
-                                        data={dataSource}
-                                        actions={false}
-                                        fid={f.fid}
-                                        name={f.name}
-                                        semanticType={f.semanticType}
-                                        onBrushSignal={brush => {
-                                            if (!brush) {
-                                                return;
-                                            }
-                                            setBrush(brush);
-                                            setBrushIdx(i);
-                                        }}
-                                        width={fSize(0.6)}
-                                        height={fSize(0.6)}
-                                        axis={null}
-                                        brush={brushIdx === i ? null : brush}
-                                    />
-                                    <label
+                                />
+                            ))}
+                        </svg>
+                        <div>
+                            {subtree.nodes.map((node, i) => {
+                                const idx = parseInt(node.data.id, 10);
+                                const f = fields[idx];
+                                return (
+                                    <div
+                                        key={i}
                                         style={{
-                                            position: 'absolute',
-                                            bottom: '100%',
-                                            left: '50%',
-                                            transform: 'translate(-50%, -0.4em)',
-                                            cursor: index === idx ? 'default' : 'pointer',
-                                            color: index === idx ? '#995ccf' : '#5da3dc',
-                                            fontWeight: 550,
-                                        }}
-                                        onClick={() => {
-                                            if (index !== idx) {
-                                                onClickNode?.({ nodeId: idx });
-                                            }
+                                            left: `${fx(node.y ?? 0)}px`,
+                                            top: `${fy(node.x ?? 0)}px`,
+                                            width: `${fSize(0.8)}px`,
+                                            height: `${fSize(0.9)}px`,
+                                            borderColor: index === idx ? '#995ccf' : undefined,
+                                            zIndex: Math.floor(node.x ?? 0),
                                         }}
                                     >
-                                        {f.name ?? f.fid}
-                                    </label>
-                                </div>
-                            );
-                        })}
+                                        <ColDist
+                                            data={dataSource}
+                                            actions={false}
+                                            fid={f.fid}
+                                            name={f.name}
+                                            semanticType={f.semanticType}
+                                            onlyTicks
+                                            onBrushSignal={brush => {
+                                                if (!brush) {
+                                                    return;
+                                                }
+                                                setBrush(brush);
+                                                setBrushIdx(i);
+                                            }}
+                                            width={fSize(0.8)}
+                                            height={fSize(0.9)}
+                                            brush={brushIdx === i ? null : brush}
+                                        />
+                                        <label
+                                            style={{
+                                                position: 'absolute',
+                                                bottom: '100%',
+                                                left: '50%',
+                                                transform: 'translateX(-50%)',
+                                                cursor: index === idx ? 'default' : 'pointer',
+                                                color: index === idx ? '#995ccf' : '#5da3dc',
+                                                fontWeight: 550,
+                                                backgroundImage: 'linear-gradient(to bottom, #fff4, #fffa, #fffc, #fff6)',
+                                                padding: '0 0.4em',
+                                            }}
+                                            onClick={() => {
+                                                if (index !== idx) {
+                                                    onClickNode?.(fields[idx].fid);
+                                                }
+                                            }}
+                                        >
+                                            {f.name ?? f.fid}
+                                        </label>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
-            ) : <div />}
+                ) : (
+                    <div className="msg">
+                        <p>{'选中的组可能包含环结构。'}</p>
+                        {/* <p>{'Cannot display the group because it is not a directed acyclic graph.'}</p> */}
+                        <p>{'尝试查看其他的结点、调整权重筛选、显示上限，或切换探索模式。'}</p>
+                        {/* <p>{'Try to click on a different node, adjust the link filter or display limit, or change the exploration mode.'}</p> */}
+                        <small>{subtreeMsg}</small>
+                    </div>
+                )
+            ) : null}
         </SVGGroup>
-    );
+    ) : null;
 };
 
 
-export default FlowAnalyzer;
+export default observer(FlowAnalyzer);

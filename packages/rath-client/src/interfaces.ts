@@ -38,8 +38,8 @@ export interface IFieldExtInfoBaseDateTime extends IFieldExtInfoBase {
 }
 
 interface IFieldExtInfoBaseLaTiao extends IFieldExtInfoBase {
-    extOpt: `LaTiao.$${string}`;
-    extInfo: '';
+    extOpt: `LaTiao.$${string}` | 'dateTimeExpand';
+    extInfo: any;
 }
 
 type FieldExtInfoBase = (

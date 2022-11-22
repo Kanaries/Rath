@@ -1,4 +1,4 @@
-import { memo, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, MouseEvent as RMouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { vega } from "vega-embed";
 import ReactVega from "../react-vega";
@@ -61,7 +61,7 @@ const formatSize = (size: number): string => {
       num /= 1024;
       if (num > 1024 * 1.2) {
         num /= 1024;
-        return `${num.toFixed(1)} GB`;
+        return `${num.toFixed(2)} GB`;
       } else {
         return `${num.toFixed(1)} MB`;
       }
@@ -79,9 +79,12 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
   const [data, setData] = useState<IPerformanceRecordItem[]>([]);
   const [max, setMax] = useState<number>(0);
   const [pos, setPos] = useState<[number, number]>([30, 30]);
-  const isDraggingRef = useRef(false);
+  const [border, setBorder] = useState<[number, number, number, number]>([0, window.innerWidth, window.innerHeight, 0]);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragOffsetRef = useRef<[number, number]>([0, 0]);
   const ref = useRef<HTMLDivElement>(null);
-  const [receiveEvents, setReceiveEvents] = useState(true);
+  const recentlyMaxRef = useRef(0);
+  recentlyMaxRef.current = data.reduce<number>((m, d) => Math.max(m, d.memory?.totalJSHeapSize ?? 0), 0);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -92,11 +95,18 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
       setData(list => {
         return [
           ...list.filter(item => time - item.time <= recordLength),
-          { time, memory },
+          {
+            time,
+            memory: memory ? {
+              jsHeapSizeLimit: memory.jsHeapSizeLimit,
+              totalJSHeapSize: memory.totalJSHeapSize,
+              usedJSHeapSize: memory.usedJSHeapSize,
+            } : undefined,
+          },
         ];
       });
       if (memory) {
-        setMax(m => Math.max(m, memory.totalJSHeapSize));
+        setMax(m => Math.max(m * 0.9 + recentlyMaxRef.current * 0.1, memory.totalJSHeapSize));
       }
       timer = setTimeout(update, interval);
     };
@@ -169,33 +179,67 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
 
   const current = data.at(-1);
 
-  // const handleMouseDown = useCallback(() => )
-  const handleClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    setReceiveEvents(false);
+  const handleMouseDown = useCallback((e: RMouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    dragOffsetRef.current = [e.clientX - pos[0], e.clientY - pos[1]];
+  }, [pos]);
+
+  useEffect(() => {
+    if (isDragging) {
+      const stopDragging = () => {
+        setIsDragging(false);
+      };
+      const handleMouseMove = (e: MouseEvent) => {
+        if (e.buttons !== 1) {
+          setIsDragging(false);
+        } else if (ref.current) {
+          const { width, height } = ref.current.getBoundingClientRect();
+          const x = Math.max(border[3] - width, Math.min(border[1], e.clientX - dragOffsetRef.current[0]));
+          const y = Math.max(border[0] - height, Math.min(border[2], e.clientY - dragOffsetRef.current[1]));
+          setPos([x, y]);
+        }
+      };
+      document.addEventListener('visibilitychange', stopDragging);
+      document.addEventListener('mouseup', stopDragging);
+      document.addEventListener('mousemove', handleMouseMove);
+      return () => {
+        document.removeEventListener('visibilitychange', stopDragging);
+        document.removeEventListener('mouseup', stopDragging);
+        document.removeEventListener('mousemove', handleMouseMove);
+      };
+    }
+  }, [isDragging, border]);
+
+  useEffect(() => {
+    const cb = () => {
+      setBorder([0, window.innerWidth, window.innerHeight, 0]);
+    };
+    document.addEventListener('resize', cb);
+    return () => {
+      document.removeEventListener('resize', cb);
+    };
   }, []);
 
   useEffect(() => {
-    if (!receiveEvents) {
-      const recall = setTimeout(() => {
-        setReceiveEvents(true);
-      }, 4_000);
-
-      return () => {
-        clearTimeout(recall);
-      };
+    if (ref.current) {
+      const { width, height } = ref.current.getBoundingClientRect();
+      const x = Math.max(border[3] - width, Math.min(border[1], pos[0]));
+      const y = Math.max(border[0] - height, Math.min(border[2], pos[1]));
+      if (x !== pos[0] || y !== pos[1]) {
+        setPos([x, y]);
+      }
     }
-  }, [receiveEvents]);
+  }, [border, pos]);
 
   return (
     <FloatingWindow
       ref={ref}
-      onClick={handleClick}
+      onMouseDown={handleMouseDown}
       style={{
         left: pos[0],
         top: pos[1],
-        pointerEvents: receiveEvents ? 'all' : 'none',
-        opacity: receiveEvents ? undefined : 0.05,
+        cursor: isDragging ? 'grabbing' : 'grab',
+        boxShadow: isDragging ? '0 0 16px #0004' : undefined,
       }}
     >
       <ReactVega
@@ -204,13 +248,14 @@ const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindo
         spec={spec}
       />
       <p>
-        jsHeapSizeLimit: <span style={{ color: 'inherit' }}>{formatSize(current?.memory?.jsHeapSizeLimit ?? NaN)}</span>
+        Limit: <span style={{ color: 'inherit' }}>{formatSize(current?.memory?.jsHeapSizeLimit ?? NaN)}</span>
       </p>
       <p>
-        totalJSHeapSize: <span style={{ color: '#d86f0c' }}>{formatSize(current?.memory?.totalJSHeapSize ?? NaN)}</span>
+        Allocated: <span style={{ color: '#d86f0c' }}>{formatSize(current?.memory?.totalJSHeapSize ?? NaN)}</span>
+        <span>({((current?.memory?.totalJSHeapSize ?? NaN) / (current?.memory?.jsHeapSizeLimit ?? NaN) * 100).toFixed(1)}%)</span>
       </p>
       <p>
-        usedJSHeapSize: <span style={{ color: '#c99615' }}>{formatSize(current?.memory?.usedJSHeapSize ?? NaN)}</span>
+        Used: <span style={{ color: '#c99615' }}>{formatSize(current?.memory?.usedJSHeapSize ?? NaN)}</span>
       </p>
     </FloatingWindow>
   );

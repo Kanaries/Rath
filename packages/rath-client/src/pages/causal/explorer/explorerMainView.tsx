@@ -2,10 +2,11 @@ import { forwardRef } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
 import useErrorBoundary from "../../../hooks/use-error-boundary";
-import { BgKnowledge } from "../config";
+import type { ModifiableBgKnowledge } from "../config";
 // import DAGView from "./DAGView";
 // import ForceView from "./forceView";
 import GraphView from "./graphView";
+import type { GraphNodeAttributes } from "./graph-utils";
 import type { DiagramGraphData } from ".";
 
 
@@ -21,30 +22,49 @@ const Container = styled.div`
 `;
 
 export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
-    fields: readonly Readonly<IFieldMeta>[];
+    selectedSubtree: readonly string[];
     value: Readonly<DiagramGraphData>;
     /** @default 0 */
     cutThreshold?: number;
+    limit: number;
     mode: 'explore' | 'edit';
-    onClickNode?: (node: DiagramGraphData['nodes'][number]) => void;
+    onClickNode?: (fid: string | null) => void;
+    toggleFlowAnalyzer?: () => void;
     focus: number | null;
     onLinkTogether: (srcFid: string, tarFid: string) => void;
-    preconditions: BgKnowledge[];
+    onRevertLink: (srcFid: string, tarFid: string) => void;
+    preconditions: ModifiableBgKnowledge[];
+    forceRelayoutRef: React.MutableRefObject<() => void>;
+    autoLayout: boolean;
+    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
-    fields, value, focus, cutThreshold = 0, mode, onClickNode, onLinkTogether, preconditions, ...props },
-    ref
-) => {
+    selectedSubtree,
+    value,
+    focus,
+    cutThreshold = 0,
+    mode,
+    limit,
+    onClickNode,
+    onLinkTogether,
+    onRevertLink,
+    preconditions,
+    forceRelayoutRef,
+    autoLayout,
+    renderNode,
+    toggleFlowAnalyzer,
+    ...props
+}, ref) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
-        console.error(err ?? info);
+        // console.error(err ?? info);
         return <div style={{
             flexGrow: 1,
             flexShrink: 1,
             width: '100%',
         }} />;
         // return <p>{info}</p>;
-    }, [fields, value, cutThreshold, preconditions]);
+    }, [value, cutThreshold, preconditions]);
 
     return (
         <Container {...props} ref={ref}>
@@ -63,14 +83,20 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
             /> */}
             <ErrorBoundary>
                 <GraphView
-                    fields={fields}
+                    selectedSubtree={selectedSubtree}
+                    forceRelayoutRef={forceRelayoutRef}
                     value={value}
+                    limit={limit}
                     mode={mode}
                     preconditions={preconditions}
                     cutThreshold={cutThreshold}
                     onClickNode={onClickNode}
+                    toggleFlowAnalyzer={toggleFlowAnalyzer ?? (() => {})}
                     onLinkTogether={onLinkTogether}
+                    onRevertLink={onRevertLink}
                     focus={focus}
+                    autoLayout={autoLayout}
+                    renderNode={renderNode}
                     style={{
                         flexGrow: 1,
                         flexShrink: 1,

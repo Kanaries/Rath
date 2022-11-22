@@ -4,7 +4,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../../store';
-import LaTiaoConsole from '../LaTiaoConsole';
+import LaTiaoConsole from '../../../components/latiaoConsole';
 
 const Cont = styled.div`
     /* margin: 1em; */

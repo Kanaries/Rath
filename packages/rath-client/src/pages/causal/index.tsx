@@ -1,526 +1,255 @@
-import { ActionButton, ComboBox, DefaultButton, Dropdown, Label, List, PrimaryButton, Slider, Spinner, Stack } from '@fluentui/react';
+import { Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GraphicWalker } from '@kanaries/graphic-walker';
-import { applyFilters } from '@kanaries/loa';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import produce from 'immer';
-import type { Specification } from 'visual-insights';
-import { IFieldMeta, IFilter } from '../../interfaces';
+import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import { viewSampling, baseDemoSample } from '../painter/sample';
-import FilterCreationPill from '../../components/filterCreationPill';
-import LaTiaoConsole from '../dataSource/LaTiaoConsole';
+import { resolvePreconditionsFromCausal } from '../../utils/resolve-causal';
 import Explorer from './explorer';
-import SemiEmbed from '../semiAutomation/semiEmbed';
-import CrossFilter from './crossFilter';
 import Params from './params';
-import RelationMatrixHeatMap from './relationMatrixHeatMap';
-// import RelationTree from './tree';
-import { NodeWithScore } from './explorer/flowAnalyzer';
-import type { BgKnowledge } from './config';
-import { FilterCell } from './filters';
-
-const VIZ_SUBSET_LIMIT = 2_000;
+import { BgKnowledge, BgKnowledgePagLink, ModifiableBgKnowledge, PAG_NODE } from './config';
+import ModelStorage from './modelStorage';
+import MatrixPanel, { MATRIX_TYPE } from './matrixPanel';
+import { useInteractFieldGroups } from './hooks/interactFieldGroup';
+import { useDataViews } from './hooks/dataViews';
+import DatasetPanel from './datasetPanel';
+import ManualAnalyzer from './manualAnalyzer';
+import PreconditionPanel from './precondition/preconditionPanel';
+import type { GraphNodeAttributes } from './explorer/graph-utils';
 
 const CausalPage: React.FC = () => {
-    const { dataSourceStore, causalStore, langStore } = useGlobalStore();
+    const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
-    const [fieldGroup, setFieldGroup] = useState<IFieldMeta[]>([]);
-    const { igMatrix, causalStrength, curAlgo, causalFields, computing } = causalStore;
-    
-    const [focusFields, setFocusFields] = useState<string[]>([]);
-    const [editingPrecondition, setEditingPrecondition] = useState<Partial<BgKnowledge>>({ type: 'directed' });
-    const [precondition, setPrecondition] = useState<BgKnowledge[]>([]);
+    const interactFieldGroups = useInteractFieldGroups(fieldMetas);
+    const { appendFields2Group } = interactFieldGroups;
+    const { igMatrix, causalFields, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
 
-    const selectedFields = useMemo(() => focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!).filter(Boolean), [focusFields, fieldMetas]);
+    const [modifiablePrecondition, __unsafeSetModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
 
-    const [sampleRate, setSampleRate] = useState(1);
-    const [appliedSampleRate, setAppliedSampleRate] = useState(sampleRate);
-    const [filters, setFilters] = useState<IFilter[]>([]);
-    const dataSource = useMemo(() => {
-        if (appliedSampleRate >= 1) {
-            return cleanedData;
+    const setModifiablePrecondition = useCallback((next: ModifiableBgKnowledge[] | ((prev: ModifiableBgKnowledge[]) => ModifiableBgKnowledge[])) => {
+        __unsafeSetModifiablePrecondition(prev => {
+            const list = typeof next === 'function' ? next(prev) : next;
+            return list.reduce<ModifiableBgKnowledge[]>((links, link) => {
+                if (link.src === link.type) {
+                    // 禁止自环边
+                    return links;
+                }
+                const overloadIdx = links.findIndex(
+                    which => [which.src, which.tar].every(node => [link.src, link.tar].includes(node))
+                );
+                if (overloadIdx !== -1) {
+                    const temp = links.map(l => l);
+                    temp.splice(overloadIdx, 1, link);
+                    return temp;
+                } else {
+                    return links.concat([link]);
+                }
+            }, []);
+        });
+    }, []);
+
+    /** @deprecated */
+    const precondition = useMemo<BgKnowledge[]>(() => {
+        if (computing || igMatrix.length !== selectedFields.length) {
+            return [];
         }
-        const sampleSize = Math.round(cleanedData.length * appliedSampleRate);
-        // console.log({sampleSize});
-        return baseDemoSample(cleanedData, sampleSize);
-        // return viewSampling(cleanedData, selectedFields, sampleSize); // FIXME: 用这个，但是有问题只能得到 0 / full ？
-    }, [cleanedData, selectedFields, appliedSampleRate]);
-    const dataSubset = useMemo(() => {
-        return applyFilters(dataSource, filters);
-    }, [dataSource, filters]);
-    const vizSampleData = useMemo(() => {
-        if (dataSubset.length < VIZ_SUBSET_LIMIT) {
-            return dataSubset;
-        }
-        return baseDemoSample(dataSubset, VIZ_SUBSET_LIMIT);
-    }, [dataSubset]);
+        return modifiablePrecondition.reduce<BgKnowledge[]>((list, decl) => {
+            const srcIdx = selectedFields.findIndex((f) => f.fid === decl.src);
+            const tarIdx = selectedFields.findIndex((f) => f.fid === decl.tar);
 
-    useEffect(() => {
-        if (sampleRate !== appliedSampleRate) {
-            const delayedTask = setTimeout(() => {
-                setAppliedSampleRate(sampleRate);
-            }, 1_000);
-    
-            return () => {
-                clearTimeout(delayedTask);
-            };
-        }
-    }, [sampleRate, appliedSampleRate]);
+            if (srcIdx !== -1 && tarIdx !== -1) {
+                if (decl.type === 'directed-must-link' || decl.type === 'directed-must-not-link') {
+                    list.push({
+                        src: decl.src,
+                        tar: decl.tar,
+                        type: decl.type === 'directed-must-link' ? 1 : -1,
+                    });
+                } else {
+                    list.push({
+                        src: decl.src,
+                        tar: decl.tar,
+                        type: decl.type === 'must-link' ? 1 : -1,
+                    }, {
+                        src: decl.tar,
+                        tar: decl.src,
+                        type: decl.type === 'must-link' ? 1 : -1,
+                    });
+                }
+            }
 
-    useEffect(() => {
-        setFocusFields(
-            fieldMetas.filter(f => f.disable !== true).slice(0, 10).map(f => f.fid) // 默认只使用前 10 个
-        );
-        setPrecondition(
-            fieldMetas.reduce<BgKnowledge[]>((list, f) => {
-                if (f.extInfo) {
-                    for (const from of f.extInfo.extFrom) {
+            return list;
+        }, []);
+    }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
+
+    const preconditionPag = useMemo<BgKnowledgePagLink[]>(() => {
+        if (computing || igMatrix.length !== selectedFields.length) {
+            return [];
+        }
+        return modifiablePrecondition.reduce<BgKnowledgePagLink[]>((list, decl) => {
+            const srcIdx = selectedFields.findIndex((f) => f.fid === decl.src);
+            const tarIdx = selectedFields.findIndex((f) => f.fid === decl.tar);
+
+            if (srcIdx !== -1 && tarIdx !== -1) {
+                switch (decl.type) {
+                    case 'must-link': {
                         list.push({
-                            src: from,
-                            tar: f.fid,
-                            type: 'directed',
+                            src: decl.src,
+                            tar: decl.tar,
+                            src_type: PAG_NODE.CIRCLE,
+                            tar_type: PAG_NODE.CIRCLE,
                         });
+                        break;
+                    }
+                    case 'must-not-link': {
+                        list.push({
+                            src: decl.src,
+                            tar: decl.tar,
+                            src_type: PAG_NODE.EMPTY,
+                            tar_type: PAG_NODE.EMPTY,
+                        });
+                        break;
+                    }
+                    case 'directed-must-link': {
+                        list.push({
+                            src: decl.src,
+                            tar: decl.tar,
+                            src_type: PAG_NODE.BLANK,
+                            tar_type: PAG_NODE.ARROW,
+                        });
+                        break;
+                    }
+                    case 'directed-must-not-link': {
+                        list.push({
+                            src: decl.src,
+                            tar: decl.tar,
+                            src_type: PAG_NODE.EMPTY,
+                            tar_type: PAG_NODE.ARROW,
+                        });
+                        break;
+                    }
+                    default: {
+                        break;
                     }
                 }
-                return list;
-            }, [])
-        );
-        setEditingPrecondition({ type: 'directed' });
-    }, [fieldMetas]);
+            }
+
+            return list;
+        }, []);
+    }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
+
+    const dataContext = useDataViews(cleanedData);
+    const { dataSubset } = dataContext;
 
     useEffect(() => {
         causalStore.updateCausalAlgorithmList(fieldMetas);
     }, [causalStore, fieldMetas]);
 
-    useEffect(() => {
-        causalStore.computeIGMatrix(dataSubset, focusFields.map(fid => fieldMetas.find(f => f.fid === fid)!));
-    }, [fieldMetas, focusFields, dataSubset, causalStore]);
-
-    // useEffect(() => {
-    //     causalStore.computeIGCondMatrix(dataSubset, fieldMetas);
-    // }, [fieldMetas, dataSubset, causalStore]);
-
     const onFieldGroupSelect = useCallback(
         (xFid: string, yFid: string) => {
-            causalStore.setFocusNodeIndex(fieldMetas.findIndex(f => f.fid === xFid));
-            setFieldGroup((group) => {
-                const nextGroup = [...group];
-                if (!nextGroup.find((f) => f.fid === xFid)) {
-                    nextGroup.push(fieldMetas.find((f) => f.fid === xFid)!);
-                }
-                if (!nextGroup.find((f) => f.fid === yFid)) {
-                    nextGroup.push(fieldMetas.find((f) => f.fid === yFid)!);
-                }
-                return nextGroup;
-            });
+            causalStore.setFocusNodeIndex(fieldMetas.findIndex((f) => f.fid === xFid));
+            appendFields2Group([xFid, yFid]);
         },
-        [setFieldGroup, fieldMetas, causalStore]
+        [appendFields2Group, causalStore, fieldMetas]
     );
 
-    // const compareMatrix = useMemo(() => {
-    //     const ans: number[][] = [];
-    //     for (let i = 0; i < igMatrix.length; i++) {
-    //         ans.push([]);
-    //         for (let j = 0; j < igMatrix[i].length; j++) {
-    //             ans[i].push(igMatrix[i][j] - igMatrix[j][i]);
-    //         }
-    //     }
-    //     return ans;
-    // }, [igMatrix]);
+    const handleSubTreeSelected = useCallback((node: Readonly<IFieldMeta> | null) => {
+            if (node) {
+                appendFields2Group([node.fid]);
+            }
+        },
+        [appendFields2Group]
+    );
 
-    const handleSubTreeSelected = useCallback((
-        node: Readonly<IFieldMeta> | null,
-        simpleCause: readonly Readonly<NodeWithScore>[],
-        simpleEffect: readonly Readonly<NodeWithScore>[],
-        composedCause: readonly Readonly<NodeWithScore>[],
-        composedEffect: readonly Readonly<NodeWithScore>[],
-    ) => {
-        if (node) {
-            const allEffect = composedEffect.reduce<Readonly<NodeWithScore>[]>((list, f) => {
-                if (!list.some(which => which.field.fid === f.field.fid)) {
-                    list.push(f);
-                }
-                return list;
-            }, [...simpleEffect]).sort((a, b) => b.score - a.score);
-            // console.log(allEffect)
-            setFieldGroup([
-                node,
-                ...allEffect.map(f => f.field),
-            ]);
-        }
+    const exploringFields = igMatrix.length === causalStrength.length ? causalFields : selectedFields;
+
+    const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number) => {
+        setModifiablePrecondition((list) => {
+            return list.concat([{
+                src: exploringFields[srcIdx].fid,
+                tar: exploringFields[tarIdx].fid,
+                type: 'directed-must-link',
+            }]);
+        });
+    }, [exploringFields, setModifiablePrecondition]);
+
+    // 结点可以 project 一些字段信息
+    const renderNode = useCallback((node: Readonly<IFieldMeta>): GraphNodeAttributes | undefined => {
+        const value = 2 / (1 + Math.exp(-1 * node.features.entropy / 2)) - 1;
+        return {
+            style: {
+                stroke: `rgb(${Math.floor(95 * (1 - value))},${Math.floor(149 * (1 - value))},255)`,
+            },
+        };
     }, []);
 
-    const focusFieldsOption = useMemo(() => fieldMetas.map(f => ({
-        key: f.fid,
-        text: f.name ?? f.fid,
-    })), [fieldMetas]);
-
-    const initialSpec = useMemo<Specification>(() => {
-        const [discreteChannel, concreteChannel] = fieldGroup.reduce<[IFieldMeta[], IFieldMeta[]]>(([discrete, concrete], f, i) => {
-            if (i === 0 || f.semanticType === 'quantitative' || f.semanticType === 'temporal') {
-                concrete.push(f);
-            } else {
-                discrete.push(f);
-            }
-            return [discrete, concrete];
-        }, [[], []]);
-        return fieldGroup.length ? {
-            position: concreteChannel.map(f => f.fid),
-            color: discreteChannel[0] ? [discreteChannel[0].fid] : [],
-            size: discreteChannel[1] ? [discreteChannel[1].fid] : [],
-            opacity: discreteChannel[2] ? [discreteChannel[2].fid] : [],
-        } : {};
-        // 散点图（分布矩阵）
-        // TODO: Graphic Walker 支持受控状态
-        // 多变量直方图现在存在支持问题：
-        // 1. GraphicWalker 解析 Specification 的规则导致不能叠加在 Column 上。
-        // 2. 不应该默认聚合。
-        // ----
-        // 多变量直方图
-        // TODO: GraphicWalker 支持 Vega bin
-        // 多变量直方图现在存在支持问题：
-        // 1. GraphicWalker 不支持 vega bin，Specification 也传不了 bin。
-        // 2. GraphicWalker 解析 Specification 的规则导致不能叠加在 Column 上。
-        // return {
-        //     geomType: fieldGroup.map(f => f.semanticType === 'temporal' ? 'area' : 'interval'),
-        //     position: ['gw_count_fid'],
-        //     facets: fieldGroup.map(f => f.fid),
-        // };
-    }, [fieldGroup]);
-
-    const gwEditedRef = useRef(false);
+    const synchronizePredictionsUsingCausalResult = useCallback(() => {
+        setModifiablePrecondition(resolvePreconditionsFromCausal(causalStrength, fieldMetas));
+    }, [setModifiablePrecondition, causalStrength, fieldMetas]);
 
     return (
         <div className="content-container">
             <div className="card">
-                <Label>Causal Analysis</Label>
-                <Stack style={{ marginBlock: '1.6em' }}>
-                    <Slider
-                        label={`Sample Rate (origin size = ${cleanedData.length} rows, sample size = ${dataSource.length} rows)`}
-                        min={0.01}
-                        max={1}
-                        step={0.01}
-                        value={sampleRate}
-                        showValue
-                        onChange={val => setSampleRate(val)}
-                    />
-                    {sampleRate !== appliedSampleRate && <Spinner label="Synchronizing settings..." />}
+                <h1 style={{ fontSize: '1.6em', fontWeight: 500 }}>因果分析</h1>
+                <DatasetPanel context={dataContext} />
+                <PreconditionPanel
+                    context={dataContext}
+                    modifiablePrecondition={modifiablePrecondition}
+                    setModifiablePrecondition={setModifiablePrecondition}
+                    renderNode={renderNode}
+                />
+                <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
+                    <ModelStorage />
+                    <Params dataSource={dataSubset} focusFields={focusFieldIds} bgKnowledge={preconditionPag} precondition={precondition} />
                 </Stack>
-                <Stack style={{ marginBlock: '1.6em' }}>
-                    <Label>
-                        {`Filters ${filters.length ? `(subset size: ${dataSubset.length} rows)` : '(no filters applied)'}`}
-                    </Label>
-                    <div
-                        style={{
-                            display: 'flex',
-                            paddingBlock: '0.5em',
-                        }}
-                    >
-                        <FilterCreationPill
-                            fields={fieldMetas}
-                            onFilterSubmit={(_, filter) => setFilters(list => [...list, filter])}
-                        />
-                    </div>
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            overflow: 'auto hidden',
-                            marginTop: '1em',
-                            padding: '0.8em',
-                            border: '1px solid #8884',
-                        }}
-                    >
-                        {filters.map((filter, i) => {
-                            const field = fieldMetas.find(f => f.fid === filter.fid);
-
-                            return field ? (
-                                <FilterCell key={i} field={field} data={filter} remove={() => setFilters(list => {
-                                    return produce(list, draft => {
-                                        draft.splice(i, 1);
-                                    });
-                                })} />
-                            ) : null;
-                        })}
-                    </div>
-                </Stack>
-                <Stack style={{ marginBlock: '1.6em', alignItems: 'flex-end' }} horizontal >
-                    <ComboBox
-                        multiSelect
-                        selectedKey={focusFields}
-                        label="Fields to Analyze"
-                        allowFreeform
-                        options={focusFieldsOption}
-                        onChange={(e, option) => {
-                            if (option) {
-                                const { key, selected } = option;
-                                if (focusFields.includes(key as string) && !selected) {
-                                    setFocusFields(list => list.filter(f => f !== key));
-                                } else if (!focusFields.includes(key as string) && selected) {
-                                    setFocusFields(list => [...list, key as string]);
-                                }
-                            }
-                        }}
-                        styles={{
-                            container: {
-                                flexGrow: 1,
-                                flexShrink: 1,
-                            },
-                        }}
-                    />
-                    <DefaultButton onClick={() => setFocusFields(fieldMetas.filter(f => f.disable !== true).map(f => f.fid))}>
-                        Select All
-                    </DefaultButton>
-                    <DefaultButton onClick={() => setFocusFields(fieldMetas.filter(f => f.disable !== true).slice(0, 10).map(f => f.fid))} >
-                        Select First 10 Columns
-                    </DefaultButton>
-                    <DefaultButton onClick={() => setFocusFields([])} >
-                        Clear All
-                    </DefaultButton>
-                </Stack>
-                <Stack style={{ marginBlock: '1.6em 3.2em' }}>
-                    <Label>Conditions (Background Knowledge)</Label>
-                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <Label style={{ width: '20%' }}>Add Condition</Label>
-                        <Dropdown
-                            placeholder="Source"
-                            selectedKey={editingPrecondition.src ?? 'none'}
-                            onChange={(e, option) => {
-                                if (!option) {
-                                    return;
-                                }
-                                const fid = option.key as string;
-                                setEditingPrecondition(p => ({
-                                    type: p.type,
-                                    src: fid,
-                                    tar: p.tar === fid ? undefined : p.tar,
-                                }));
-                            }}
-                            options={fieldMetas.map(f => ({
-                                key: f.fid,
-                                text: f.name ?? f.fid,
-                            }))}
-                            styles={{ root: { width: '30%' } }}
-                        />
-                        <Dropdown
-                            placeholder="Direction"
-                            selectedKey={editingPrecondition.type}
-                            onChange={(e, option) => {
-                                if (!option) {
-                                    return;
-                                }
-                                setEditingPrecondition(p => ({
-                                    ...p,
-                                    type: option.key as (typeof p)['type'],
-                                }));
-                            }}
-                            options={[
-                                { key: 'directed', text: '-->' },
-                                { key: 'bidirected', text: '<->' },
-                                { key: 'undirected', text: '---' },
-                            ]}
-                            styles={{ root: { width: '10%' }, caretDownWrapper: { display: 'none' }, title: { padding: '0 8px', textAlign: 'center' } }}
-                        />
-                        <Dropdown
-                            placeholder="Target"
-                            selectedKey={editingPrecondition.tar ?? 'none'}
-                            onChange={(e, option) => {
-                                if (!option) {
-                                    return;
-                                }
-                                const fid = option.key as string;
-                                setEditingPrecondition(p => ({
-                                    type: p.type,
-                                    tar: fid,
-                                    src: p.src === fid ? undefined : p.src,
-                                }));
-                            }}
-                            options={fieldMetas.map(f => ({
-                                key: f.fid,
-                                text: f.name ?? f.fid,
-                            }))}
-                            styles={{ root: { width: '30%' } }}
-                        />
-                        <ActionButton
-                            styles={{
-                                root: {
-                                    width: '10%',
-                                }
-                            }}
-                            iconProps={{
-                                iconName: 'Add',
-                            }}
-                            onClick={() => {
-                                if (editingPrecondition.src && editingPrecondition.tar && editingPrecondition.type && editingPrecondition.src !== editingPrecondition.tar) {
-                                    setEditingPrecondition({ type: editingPrecondition.type });
-                                    setPrecondition(list => [...list, editingPrecondition as BgKnowledge]);
-                                }
-                            }}
-                        />
-                    </div>
-                    <List
-                        items={precondition}
-                        onRenderCell={(item, i) => item ? (
-                            <div data-is-focusable={true} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {fieldMetas.find(f => f.fid === item.src)?.name ?? item.src}
-                                </span>
-                                <span style={{ width: '20%' }}>
-                                    {({
-                                        directed: '----->',
-                                        bidirected: '<---->',
-                                        undirected: '------'
-                                    } as const)[item.type]}
-                                </span>
-                                <span style={{ width: '30%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {fieldMetas.find(f => f.fid === item.tar)?.name ?? item.tar}
-                                </span>
-                                <ActionButton
-                                    styles={{
-                                        root: {
-                                            width: '10%',
-                                        }
-                                    }}
-                                    iconProps={{
-                                        iconName: 'Delete',
-                                    }}
-                                    onClick={() => {
-                                        if (typeof i === 'number') {
-                                            setPrecondition(list => {
-                                                const next = [...list];
-                                                next.splice(i, 1);
-                                                return next;
+                <MatrixPanel
+                    fields={selectedFields}
+                    dataSource={dataSubset}
+                    onMatrixPointClick={onFieldGroupSelect}
+                    onCompute={(matKey) => {
+                        switch (matKey) {
+                            case MATRIX_TYPE.conditionalMutualInfo:
+                                causalStore.computeIGCondMatrix(dataSubset, selectedFields);
+                                break;
+                            case MATRIX_TYPE.causal:
+                                causalStore.causalDiscovery(dataSubset, precondition, preconditionPag);
+                                break;
+                            case MATRIX_TYPE.mutualInfo:
+                            default:
+                                causalStore.computeIGMatrix(dataSubset, selectedFields);
+                                break;
+                        }
+                    }}
+                    diagram={(
+                        <Explorer
+                            dataSource={dataSubset}
+                            scoreMatrix={igMatrix}
+                            preconditions={modifiablePrecondition}
+                            onNodeSelected={handleSubTreeSelected}
+                            onLinkTogether={handleLinkTogether}
+                            renderNode={renderNode}
+                            onRevertLink={(srcIdx, tarIdx) =>
+                                setModifiablePrecondition((list) => {
+                                    return list.map((link) => {
+                                        if (link.src === srcIdx && link.tar === tarIdx) {
+                                            return produce(link, draft => {
+                                                draft.type = ({
+                                                    "must-link": 'must-not-link',
+                                                    "must-not-link": 'must-link',
+                                                    "directed-must-link": 'directed-must-not-link',
+                                                    "directed-must-not-link": 'directed-must-link',
+                                                } as const)[draft.type];
                                             });
                                         }
-                                    }}
-                                />
-                            </div>
-                        ) : null}
-                        style={{
-                            border: '1px solid #888',
-                            padding: '1em 2em',
-                            maxHeight: '30vh',
-                            overflow: 'auto',
-                        }}
-                    />
-                </Stack>
-                <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
-                    <DefaultButton text="Clear Group" onClick={() => setFieldGroup([])} />
-                    <PrimaryButton
-                        text="Causal Discovery"
-                        onClick={() => {
-                            causalStore.causalDiscovery(
-                                dataSubset,
-                                fieldMetas,
-                                focusFields,
-                                precondition,
-                                causalStore.causalAlgorithm
-                            );
-                        }}
-                    />
-                    <LaTiaoConsole />
-                    <Params dataSource={dataSubset} focusFields={focusFields} precondition={precondition} />
-                </Stack>
-
-                <div style={{ marginTop: '1em', display: 'flex' }}>
-                    <div>
-                        {dataSubset.length > 0 && igMatrix.length > 0 && selectedFields.length === igMatrix.length && (
-                            <RelationMatrixHeatMap
-                                absolute
-                                fields={selectedFields}
-                                data={igMatrix}
-                                onSelect={onFieldGroupSelect}
-                            />
-                        )}
-                    </div>
-                    {/* <div>
-                        {dataSubset.length > 0 && !computing && (
-                            <RelationMatrixHeatMap
-                                absolute
-                                fields={fieldMetas}
-                                data={igCondMatrix}
-                                onSelect={onFieldGroupSelect}
-                            />
-                        )}
-                        {computing && <Spinner label="computings" />}
-                    </div> */}
-                    <div>
-                        {dataSubset.length > 0 &&
-                            causalStrength.length > 0 &&
-                            causalStrength.length === causalFields.length &&
-                            !computing && (
-                                <RelationMatrixHeatMap
-                                    
-                                    // absolute
-                                    fields={causalFields}
-                                    data={causalStrength}
-                                    // onSelect={onFieldGroupSelect}
-                                />
-                            )}
-                        {computing && <Spinner label="computings" />}
-                    </div>
-                </div>
-                {/* <div>
-                    {dataSubset.length > 0 &&
-                        causalStrength.length > 0 &&
-                        causalStrength.length === fieldMetas.length &&
-                        !computing && (
-                            <RelationTree
-                                matrix={causalStrength}
-                                fields={fieldMetas}
-                                focusIndex={causalStore.focusNodeIndex}
-                                onFocusChange={(index) => {
-                                    causalStore.setFocusNodeIndex(index);
-                                }}
-                            />
-                        )}
-                </div> */}
-                <div>
-                    {dataSubset.length > 0 &&
-                        causalStrength.length > 0 &&
-                        causalStrength.length === causalFields.length &&
-                        causalStrength.length === igMatrix.length &&
-                        !computing ? (
-                            <Explorer
-                                dataSource={dataSubset}
-                                fields={causalFields}
-                                scoreMatrix={igMatrix}
-                                causalMatrix={causalStrength}
-                                curAlgo={curAlgo}
-                                preconditions={precondition}
-                                onNodeSelected={handleSubTreeSelected}
-                                onLinkTogether={(srcIdx, tarIdx) => setPrecondition(list => [
-                                    ...list,
-                                    {
-                                        src: causalFields[srcIdx].fid,
-                                        tar: causalFields[tarIdx].fid,
-                                        type: 'directed',
-                                    },
-                                ])}
-                            />
-                        ) : null
-                    }
-                    {computing && <Spinner label="computings" />}
-                </div>
-
-                <div>
-                    {vizSampleData.length > 0 && fieldGroup.length > 0 && (
-                        <CrossFilter fields={fieldGroup} dataSource={vizSampleData} />
+                                        return link;
+                                    });
+                                })
+                            }
+                            synchronizePredictionsUsingCausalResult={synchronizePredictionsUsingCausalResult}
+                        />
                     )}
-                </div>
-                <SemiEmbed fields={fieldGroup} />
-                <div>
-                    <GraphicWalker
-                        dataSource={dataSubset}
-                        rawFields={fieldMetas}
-                        hideDataSourceConfig
-                        spec={gwEditedRef.current ? undefined : initialSpec}
-                        i18nLang={langStore.lang}
-                        keepAlive
-                    />
-                </div>
+                />
             </div>
+            <ManualAnalyzer context={dataContext} interactFieldGroups={interactFieldGroups} />
         </div>
     );
 };

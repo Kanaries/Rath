@@ -1,8 +1,7 @@
-import { IFieldMeta } from '@kanaries/loa';
 import localforage from 'localforage';
-import { RESULT_STORAGE_SPLITOR } from '../constants';
-import { IMuteFieldBase, IRow } from '../interfaces';
-
+import { RESULT_STORAGE_SPLITOR, STORAGES, STORAGE_INSTANCE } from '../constants';
+import { IFieldMeta, IMuteFieldBase, IRow } from '../interfaces';
+import type { CausalLinkDirection } from './resolve-causal';
 export const STORAGE_INSTANCE = 'rath_storage_instance';
 
 const STORAGES = {
@@ -22,11 +21,15 @@ export interface IDBMeta {
     size: number;
     rows?: number;
     fields?: IMuteFieldBase[];
-    metas?: IFieldMeta[];
-    causal?: {
+}
+
+export interface IModel {
+    metas: IFieldMeta[];
+    causal: {
         corMatrix: number[][];
-        causalMatrix: number[][];
+        causalMatrix: CausalLinkDirection[][];
         fieldIds: string[];
+        algorithm: string;
         params: {
             [key: string]: any
         }
@@ -195,6 +198,37 @@ export async function getDataConfig(name: string) {
     });
     const ds = (await metas.getItem(name)) as string;
     return ds;
+
+export async function setModelStorage (name: string, model: IModel) {
+    const modelBucket = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.MODEL
+    })
+    await modelBucket.setItem(name, model);
+}
+
+export async function deleteModelStorage (name: string, model: IModel) {
+    const modelBucket = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.MODEL
+    })
+    await modelBucket.removeItem(name);
+}
+
+export async function getModelStorage (name: string): Promise<IModel> {
+    const modelBucket = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.MODEL
+    })
+    return await modelBucket.getItem(name) as IModel;
+}
+
+export async function getModelStorageList (): Promise<string[]> {
+    const modelBucket = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.MODEL
+    })
+    return await modelBucket.keys();
 }
 
 // export async function setStateInStorage(key: string, value: any) {

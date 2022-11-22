@@ -40,8 +40,8 @@ function App() {
         );
     }
 
-    const showPerformanceWindow = (new URL(window.location.href).searchParams.get('perf') ?? (
-        JSON.stringify(process.env.NODE_ENV !== 'production')
+    const showPerformanceWindow = (new URL(window.location.href).searchParams.get('performance') ?? (
+        JSON.stringify(process.env.NODE_ENV !== 'production') && false  // temporarily banned this feature
     )) === 'true';
 
     return (

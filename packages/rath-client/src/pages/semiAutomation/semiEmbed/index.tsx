@@ -1,30 +1,30 @@
 import { ActionButton, Panel, PanelType } from '@fluentui/react';
+import { IPattern } from '@kanaries/loa';
 import { runInAction } from 'mobx';
-import React, { useEffect, useState } from 'react';
-import { IFieldMeta } from '../../../interfaces';
+import React, { useEffect } from 'react';
 import { useGlobalStore } from '../../../store';
 import LiteFocusZone from './liteFocusZone';
 import LitePredictZone from './litePredictZone';
 
 interface IProps {
-    fields?: IFieldMeta[]
+    show?: boolean;
+    toggleShow?: (show: boolean) => void;
+    view: IPattern | null;
+    neighborKeys?: string[];
 }
 const SemiEmbed: React.FC<IProps> = (props) => {
-    const { fields = [] } = props;
+    const { show, toggleShow, view, neighborKeys = [] } = props;
     const { semiAutoStore } = useGlobalStore();
-    const [show, setShow] = useState(false);
     useEffect(() => {
-        if (show && fields.length > 0) {
+        if (show && view && view.fields.length > 0) {
             runInAction(() => {
                 semiAutoStore.clearMainView();
-                semiAutoStore.updateMainView({
-                    fields,
-                    imp: 0
-                })
+                semiAutoStore.updateMainView(view);
+                semiAutoStore.setNeighborKeys(neighborKeys);
                 // semiAutoStore.addMainViewField(focusVarId);
             });
         }
-    }, [fields, show, semiAutoStore]);
+    }, [view, show, semiAutoStore, neighborKeys]);
 
     return (
         <div>
@@ -32,18 +32,18 @@ const SemiEmbed: React.FC<IProps> = (props) => {
                 iconProps={{
                     iconName: 'Lightbulb',
                 }}
-                text="Explore Clues"
+                text="线索发现"
                 onClick={() => {
-                    setShow((v) => !v);
+                    toggleShow && toggleShow(!show);
                 }}
             />
             <Panel
                 type={PanelType.medium}
-                headerText="Clues"
+                headerText="线索"
                 isOpen={show}
                 isBlocking={false}
                 onDismiss={() => {
-                    setShow(false);
+                    toggleShow && toggleShow(false);
                 }}
             >
                 <LiteFocusZone />

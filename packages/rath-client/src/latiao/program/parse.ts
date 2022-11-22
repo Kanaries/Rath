@@ -1,9 +1,9 @@
 import { parse as p } from '@babel/parser';
-import { validDateSlice } from '../implement/date-slice';
+import { validDateSlice } from './implement/date-slice';
 import { LaTiaoSyntaxError, LaTiaoTypeError } from './error';
 import { getOperator } from './operator';
 import type { OpToken, Token, TokenType } from './token';
-import type { Context } from '.';
+import type { LaTiaoProgramContext, Static } from './types';
 
 
 export type ASTExpression = (ReturnType<typeof p>['program']['body'][0] & {
@@ -103,11 +103,11 @@ export type CallExpression = ReturnType<typeof findEntry>[0] & { type: 'CallExpr
 export type SliceExpression = ReturnType<typeof findEntry>[0] & { type: 'MemberExpression' };
 export type BinOpExpression = ReturnType<typeof findEntry>[0] & { type: 'BinaryExpression' };
 
-const resolveNode = (exp: CallExpression['arguments'][0], context: Context, out: () => void): Token => {
+const resolveNode = (exp: CallExpression['arguments'][0], context: LaTiaoProgramContext, out: () => void): Static<Token> => {
   switch (exp.type) {
     case 'Identifier': {
       const { name } = exp;
-      const field = context.resolveFid(name);
+      const field = context.resolveColId(name);
       
       return field;
     }
@@ -145,7 +145,7 @@ const resolveNode = (exp: CallExpression['arguments'][0], context: Context, out:
   }
 };
 
-const resolveExport = (exp: ExportExpression, context: Context, out: () => void): OpToken => {
+const resolveExport = (exp: ExportExpression, context: LaTiaoProgramContext, out: () => void): OpToken => {
   if (exp.operator !== '=' || exp.left.type !== 'Identifier' || !exp.left.name.startsWith('$')) {
     throw new LaTiaoSyntaxError('Failed to parse', exp);
   }
@@ -193,7 +193,7 @@ const resolveExport = (exp: ExportExpression, context: Context, out: () => void)
   };
 };
 
-const resolveSlice = (exp: SliceExpression, context: Context, out: () => void): OpToken => {
+const resolveSlice = (exp: SliceExpression, context: LaTiaoProgramContext, out: () => void): OpToken => {
   const targetOp = exp.object.type === 'AssignmentExpression' ? resolveExport(exp.object, context, out)
     : exp.object.type === 'CallExpression' ? resolveCall(exp.object, context, out)
     : null;
@@ -226,7 +226,7 @@ const resolveSlice = (exp: SliceExpression, context: Context, out: () => void): 
         type: 'JS.string',
         value: sliceKey,
       }],
-      output: sliceKey.length === 1 ? 'RATH.FIELD::group' : 'RATH.FIELD_LIST',
+      output: sliceKey.length === 1 ? 'RATH.FIELD::vec' : 'RATH.FIELD_LIST',
       exports: false,
     };
 
@@ -239,7 +239,7 @@ const resolveSlice = (exp: SliceExpression, context: Context, out: () => void): 
   );
 };
 
-const resolveBinOp = (exp: BinOpExpression, context: Context, out: () => void): OpToken => {
+const resolveBinOp = (exp: BinOpExpression, context: LaTiaoProgramContext, out: () => void): OpToken => {
   if (exp.left.type === 'PrivateName') {
     throw new LaTiaoSyntaxError(
       'Unexpected token.',
@@ -256,7 +256,7 @@ const resolveBinOp = (exp: BinOpExpression, context: Context, out: () => void): 
         type: 'OP',
         op: '$__add',
         args: [left, right],
-        output: 'RATH.FIELD::group',
+        output: 'RATH.FIELD::vec',
         exports: false,
       };
     }
@@ -265,7 +265,7 @@ const resolveBinOp = (exp: BinOpExpression, context: Context, out: () => void): 
         type: 'OP',
         op: '$__minus',
         args: [left, right],
-        output: 'RATH.FIELD::group',
+        output: 'RATH.FIELD::vec',
         exports: false,
       };
     }
@@ -274,7 +274,7 @@ const resolveBinOp = (exp: BinOpExpression, context: Context, out: () => void): 
         type: 'OP',
         op: '$__multiply',
         args: [left, right],
-        output: 'RATH.FIELD::group',
+        output: 'RATH.FIELD::vec',
         exports: false,
       };
     }
@@ -283,7 +283,7 @@ const resolveBinOp = (exp: BinOpExpression, context: Context, out: () => void): 
         type: 'OP',
         op: '$__divide',
         args: [left, right],
-        output: 'RATH.FIELD::group',
+        output: 'RATH.FIELD::vec',
         exports: false,
       };
     }
@@ -296,7 +296,7 @@ const resolveBinOp = (exp: BinOpExpression, context: Context, out: () => void): 
   }
 };
 
-const resolveCall = (exp: CallExpression, context: Context, out: () => void): OpToken => {
+const resolveCall = (exp: CallExpression, context: LaTiaoProgramContext, out: () => void): OpToken => {
   const opName = exp.callee.type === 'Identifier' ? exp.callee.name : null;
 
   if (!opName || !opName.startsWith('$')) {
@@ -306,7 +306,7 @@ const resolveCall = (exp: CallExpression, context: Context, out: () => void): Op
     );
   }
 
-  const args: Token[] = exp.arguments.map(arg => {
+  const args: Static<Token[]> = exp.arguments.map(arg => {
     return resolveNode(arg, context, out);
   });
 
@@ -325,9 +325,9 @@ const resolveCall = (exp: CallExpression, context: Context, out: () => void): Op
   return op;
 };
 
-export const resolveDependencies = (sources: string[], context: Context): string[] => {
+export const resolveDependencies = (sources: readonly string[], context: LaTiaoProgramContext): string[] => {
   return sources.reduce<string[]>((list, source) => {
-    const field = context.resolveFid(source);
+    const field = context.resolveColId(source);
 
     if (field.out !== false) {
       list.push(source);
@@ -339,7 +339,7 @@ export const resolveDependencies = (sources: string[], context: Context): string
   }, []);
 };
 
-const parse = (source: string, context: Context): OpToken[] => {
+const parse = (source: string, context: LaTiaoProgramContext): OpToken[] => {
   let expCount = 0;
 
   let res = undefined as unknown as ReturnType<typeof p>;
