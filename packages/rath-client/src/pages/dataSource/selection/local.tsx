@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import styled from 'styled-components';
 import { IconButton } from '@fluentui/react';
@@ -29,11 +29,24 @@ const DataItem = styled.div`
     }
 `
 
+function formatSize(size: number) {
+    if (size < 1024) {
+        return `${size}B`;
+    }
+    if (size < 1024 * 1024) {
+        return `${(size / 1024).toFixed(2)}KB`;
+    }
+    if (size < 1024 * 1024 * 1024) {
+        return `${(size / 1024 / 1024).toFixed(2)}MB`;
+    }
+    return `${(size / 1024 / 1024 / 1024).toFixed(2)}GB`;
+}
+
 interface LocalDataProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => void;
 }
 const Local: React.FC<LocalDataProps> = props => {
     const { onDataLoaded, onLoadingFailed, onClose } = props;
@@ -43,14 +56,20 @@ const Local: React.FC<LocalDataProps> = props => {
             setLocalDataList(dataList);
         })
     }, [])
+    const totalSize = useMemo(() => {
+        return localDataList.reduce((acc, cur) => {
+            return acc + cur.size;
+        }, 0)
+    }, [localDataList])
     return <LocalCont>
         <h1>History</h1>
-        <div>
+        <p>total: {localDataList.length} datasets. {formatSize(totalSize * 1024)}</p>
+        <div style={{ maxHeight: '500px', overflowY: 'auto'}}>
             {
                 localDataList.map(local => <DataItem key={local.id}>
                     <div className="desc-container">
                         <h2>{local.name}</h2>
-                        <div>size: {local.size} KB</div>
+                        <div>size: {formatSize(local.size * 1024)}</div>
                         <div>time: {dayjs(local.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
                     </div>
                     <div className="button-container">
@@ -59,7 +78,7 @@ const Local: React.FC<LocalDataProps> = props => {
                             title="Load"
                             onClick={() => {
                                 getDataStorageById(local.id).then(res => {
-                                    onDataLoaded(res.fields, res.dataSource);
+                                    onDataLoaded(res.fields, res.dataSource, local.id);
                                     onClose()
                                 }).catch(onLoadingFailed)
                             }}
@@ -68,7 +87,11 @@ const Local: React.FC<LocalDataProps> = props => {
                             title="Delete"
                             iconProps={{ iconName: 'delete', color: 'red' }}
                             onClick={() => {
-                                deleteDataStorageById(local.id)
+                                deleteDataStorageById(local.id).then(res => {
+                                    getDataStorageList().then((dataList) => {
+                                        setLocalDataList(dataList);
+                                    })
+                                })
                             }}
                         />
                     </div>

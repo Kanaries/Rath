@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, PrimaryButton, Spinner, Stack } from '@fluentui/react';
@@ -7,7 +7,6 @@ import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
-
 
 const FeatSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -19,8 +18,7 @@ const FeatSegment: React.FC = () => {
         semiAutoStore.featAssociate()
     }, [semiAutoStore])
     if (featViews.views.length === 0 && autoAsso.featViews) return <div />
-    return <div className="pure-card">
-        <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.features')}</h1>
+    return <Fragment>
         {
             !autoAsso.featViews && <PrimaryButton
                 text={intl.get('semiAuto.main.relateFeatures')}
@@ -84,7 +82,7 @@ const FeatSegment: React.FC = () => {
             text={intl.get('semiAuto.main.loadMore')}
             onClick={loadMore}
         />
-    </div>
+    </Fragment>
 }
 
 export default observer(FeatSegment);

@@ -1,193 +1,130 @@
 import type { IRow } from 'visual-insights';
 import type { IRawField } from '../../interfaces';
-import { LaTiaoError, LaTiaoNameError } from './error';
-import parse from './parse';
-import type { FieldListToken, FieldToken, FieldType } from './token';
-import exec from './exec';
+import { workerService } from '../../services/base';
+import { LaTiaoError } from './error';
+import type { FieldToken, FieldType } from './token';
+// @ts-ignore
+import LTWorker from './program.worker?worker';
 
-import '../implement/$set';
-import '../implement/$group';
-import '../implement/$nominal';
-import '../implement/$binary';
-import '../implement/$id';
-import '../implement/$order';
-import '../implement/$isNaN';
-import '../implement/$isZero';
-import '../implement/$toDate';
-import '../implement/$normalize';
-import '../implement/$concat';
-import '../implement/$log';
-import '../implement/$clean';
+import type {
+  CreateLaTiaoProgramProps,
+  CreateLaTiaoProgramResult,
+  DestroyLaTiaoProgramProps,
+  ExecuteLaTiaoProgramProps,
+  ExecuteLaTiaoProgramResult,
+  ILaTiaoColumn,
+  Static,
+} from './types';
 
 
-export type Context = {
-  originFields: FieldListToken;
-  tempFields: FieldListToken;
-  resolveFid: (fid: string, loc?: ConstructorParameters<typeof LaTiaoError>[1]) => FieldToken;
-  size: number;
-  col: <
-    T extends FieldType = FieldType,
-    D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
-  >(field: FieldToken<T>, loc?: ConstructorParameters<typeof LaTiaoError>[1]) => Promise<D>;
-  cols: <
-    T extends FieldType[] = FieldType[],
-    D extends {
-      [index in keyof T]: T extends 'collection' ? string[] : number[]
-    } = {
-      [index in keyof T]: T extends 'collection' ? string[] : number[]
-    },
-  >(fields: { [index in keyof T]: FieldToken<T[index]> }, loc?: ConstructorParameters<typeof LaTiaoError>[1]) => Promise<D>;
-  write: <
-    T extends FieldType = FieldType,
-    D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
-  >(
-    field: FieldToken<T>,
-    data: D,
-  ) => void;
-};
+// @ts-ignore
+const programWorker = new LTWorker() as Worker;
 
 export type Program = {
   run: (source: string) => Promise<number>;
   onError: (handler: (err: LaTiaoError) => void) => void;
+  destroy: () => void;
 };
 
 export const createProgram = (
   data: Readonly<IRow[]>,
   fields: Omit<FieldToken, 'type'>[],
-  load: (fields: readonly FieldToken[], data: readonly (readonly number[] | readonly string[])[]) => void,
+  load: (fields: Static<FieldToken[]>, data: Static<(number[] | string[])[]>) => void,
 ): Program => {
-  const originFields: FieldListToken = {
-    type: 'RATH.FIELD_LIST',
-    tuple: fields.map(f => ({
-      ...f,
-      type: `RATH.FIELD::${f.mode}`,
-    })),
-  };
-  const tempFields: FieldListToken = {
-    type: 'RATH.FIELD_LIST',
-    tuple: [],
-  };
-  const originColumns = new Map<string, number[] | string[]>();
-
-  originFields.tuple.forEach(({ fid, mode }) => {
-    const col = data.map(row => (mode === 'collection' ? String : Number)(row[fid])) as number[] | string[];
-
-    originColumns.set(fid, col);
-  });
-
-  const size = data.length;
-
-  let errorHandler = (err: LaTiaoError): void => {
+  let programId: number | undefined = undefined;
+  let errHandler: (err: LaTiaoError) => void = err => {
     throw err;
   };
 
-  return {
+  const program: Program = {
     run: async source => {
+      if (programId === undefined) {
+        throw new Error('Program is not loaded yet.');
+      }
       try {
-        const columns = new Map<string, number[] | string[]>();
-
-        const context: Context = {
-          originFields,
-          tempFields,
-          size,
-          resolveFid: (fid, loc) => {
-            const fieldAsOrigin = originFields.tuple.find(f => f.fid === fid);
-
-            if (fieldAsOrigin) {
-              return fieldAsOrigin;
-            }
-
-            const fieldAsTemp = tempFields.tuple.find(f => f.fid === fid);
-
-            if (fieldAsTemp) {
-              return fieldAsTemp;
-            }
-            
-            throw new LaTiaoNameError(`Cannot find field "${fid}"`, loc);
-          },
-          col: async <
-            T extends FieldType = FieldType,
-            D extends T extends 'collection' ? string[] : number[] = T extends 'collection' ? string[] : number[],
-          >(field: FieldToken<T>, loc?: ConstructorParameters<typeof LaTiaoError>[1]) => {
-            const { fid } = field;
-            const fieldAsOrigin = originFields.tuple.find(f => f.fid === fid);
-
-            if (fieldAsOrigin) {
-              // TODO: async
-              return originColumns.get(fid) as D;
-            }
-
-            const fieldAsTemp = tempFields.tuple.find(f => f.fid === fid);
-
-            if (fieldAsTemp && columns.has(fid)) {
-              // TODO: async
-              return columns.get(fid) as D;
-            }
-            
-            throw new LaTiaoNameError(`Cannot find field "${fid}"`, loc);
-          },
-          cols: async <
-            T extends FieldType[] = FieldType[],
-            D extends {
-              [index in keyof T]: T extends 'collection' ? string[] : number[]
-            } = {
-              [index in keyof T]: T extends 'collection' ? string[] : number[]
-            },
-          >(fields: { [index in keyof T]: FieldToken<T[index]> }, loc?: ConstructorParameters<typeof LaTiaoError>[1]) => {
-            const res = await Promise.all(fields.map(f => context.col(f, loc)));
-
-            return res as D;
-          },
-          write: (field, data) => {
-            if (originColumns.has(field.fid) || columns.has(field.fid)) {
-              throw new LaTiaoNameError(`Field ${field.fid} is already defined.`);
-            }
-            tempFields.tuple.push(field);
-            columns.set(field.fid, data);
-          },
-        };
-        
-        const ast = parse(source, context);
-
-        const expArr = await exec(ast, context);
-
-        const enter = expArr.map(fid => context.resolveFid(fid));
-        const data = await context.cols(enter);
-
-        load(enter, data);
-
-        return 0;
+        const result = await workerService<ExecuteLaTiaoProgramResult, ExecuteLaTiaoProgramProps>(programWorker, {
+          task: 'execute',
+          programId,
+          source,
+        });
+        if (result.success) {
+          load(result.data.enter, result.data.columns);
+          return 0;
+        } else {
+          throw new LaTiaoError(result.message);
+        }
       } catch (error) {
         if (error instanceof LaTiaoError) {
-          errorHandler(error);
-
+          errHandler(error);
           return -1;
-        } else {
-          throw error;
         }
+        throw error;
       }
     },
-    onError: handler => errorHandler = handler,
+    onError: handler => {
+      errHandler = handler;
+    },
+    destroy: () => {
+      if (programId === undefined) {
+        throw new Error('Program is not loaded yet.');
+      }
+      workerService<unknown, DestroyLaTiaoProgramProps>(programWorker, {
+        task: 'destroyProgram',
+        programId,
+      });
+    },
   };
+
+  const columns: ILaTiaoColumn<FieldType>[] = [];
+
+  for (const f of fields) {
+    const header: CreateLaTiaoProgramProps['data'][number]['info'] = {
+      token: {
+        ...f,
+        type: `RATH.FIELD::${f.mode}`,
+      },
+    };
+    const col = data.map(row => (f.mode === 'text' ? String : f.mode === 'bool' ? ((d: any) => d ? 1 : 0) : Number)(row[f.fid])) as number[] | string[] | (0 | 1)[];
+    columns.push({
+      info: header,
+      data: col,
+    });
+  }
+
+  try {
+    workerService<CreateLaTiaoProgramResult, CreateLaTiaoProgramProps>(programWorker, {
+      task: 'createProgram',
+      data: columns,
+    }).then(result => {
+      if (result.success) {
+        programId = result.data.programId;
+      } else {
+        throw new Error(result.message);
+      }
+    });
+  } catch (error) {
+    console.error(error);
+  }
+
+  return program;
 };
 
-export const resolveFields = (tokens: readonly FieldToken[]): IRawField[] => {
+export const resolveFields = (tokens: Static<FieldToken[]>): IRawField[] => {
   return tokens.map<IRawField>(token => ({
     fid: token.fid,
     name: token.name,
-    analyticType: token.extInfo?.extOpt === 'dateTimeExpand' ? 'dimension' : token.mode === 'group' ? 'measure' : 'dimension',
+    analyticType: token.extInfo?.extOpt === 'dateTimeExpand' ? 'dimension' : token.mode === 'vec' ? 'measure' : 'dimension',
     semanticType: token.extInfo?.extOpt === 'dateTimeExpand' ? (
       token.extInfo.extInfo === 'utime' ? 'temporal' : token.extInfo.extInfo === '$y' ? 'quantitative' : 'ordinal'
     ) : ({
+      bool: 'nominal',
+      vec: 'quantitative',
       set: 'ordinal',
-      group: 'quantitative',
-      collection: 'nominal',
+      text: 'nominal',
     } as const)[token.mode],
     geoRole: 'none',
   }));
 };
-
-// (window as any)['createProgram'] = createProgram;
 
 
 export default createProgram;

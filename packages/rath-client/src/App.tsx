@@ -17,6 +17,8 @@ import ProgressiveDashboard from './pages/progressiveDashboard';
 import Painter from './pages/painter';
 import Collection from './pages/collection';
 import Dashboard from './pages/dashboard';
+import CausalPage from './pages/causal';
+import PerformanceWindow from './components/performance-window';
 import LoginInfo from './pages/loginInfo';
 import Account from './pages/loginInfo/account';
 import Info from './pages/loginInfo/info';
@@ -67,6 +69,12 @@ function App() {
             </div>
         );
     }
+
+    const show
+    = (new URL(window.location.href).searchParams.get('performance') ?? (
+        JSON.stringify(process.env.NODE_ENV !== 'production') && false  // temporarily banned this feature
+    )) === 'true';
+
     return (
         <div>
             <div className="main-app-container">
@@ -91,9 +99,11 @@ function App() {
                     {appKey === PIVOT_KEYS.dashBoardDesigner && <ProgressiveDashboard />}
                     {appKey === PIVOT_KEYS.collection && <Collection />}
                     {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
+                    {appKey === PIVOT_KEYS.causal && <CausalPage />}
                     <CrInfo />
                 </div>
             </div>
+            {showPerformanceWindow && <PerformanceWindow />}
         </div>
     );
 }

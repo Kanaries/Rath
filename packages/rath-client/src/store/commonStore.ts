@@ -60,6 +60,7 @@ export class CommonStore {
     };
     public avatarType: IAVATAR_TYPES = IAVATAR_TYPES.default;
     public avatarKey: string = localStorage.getItem(avatar_storage_key) || AVATAR_IMG_LIST[0];
+
     constructor() {
         this.login = {
             userName: '',
@@ -79,7 +80,7 @@ export class CommonStore {
         this.taskMode = taskMode as ITaskTestMode;
         this.graphicWalkerSpec = {};
         makeAutoObservable(this, {
-            graphicWalkerSpec: observable.ref,
+            graphicWalkerSpec: observable.ref
             vizSpec: observable.ref,
         });
     }
@@ -109,7 +110,7 @@ export class CommonStore {
         this.vizSpec = spec;
         this.appKey = PIVOT_KEYS.painter;
     }
-    public setNavMode(mode: 'text' | 'icon') {
+    public setNavMode (mode: 'text' | 'icon') {
         this.navMode = mode;
     }
     public setTaskTestMode(mode: ITaskTestMode) {

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
@@ -18,8 +18,7 @@ const PattSegment: React.FC = () => {
         semiAutoStore.pattAssociate();
     }, [semiAutoStore])
     if (pattViews.views.length === 0 && autoAsso.pattViews) return <div />
-    return <div className="pure-card">
-        <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.patterns')}</h1>
+    return <Fragment>
         {
             !autoAsso.pattViews && <DefaultButton
                 disabled={!hasMainView}
@@ -82,7 +81,7 @@ const PattSegment: React.FC = () => {
             text={intl.get('semiAuto.main.loadMore')}
             onClick={loadMore}
         />
-    </div>
+    </Fragment>
 }
 
 export default observer(PattSegment);

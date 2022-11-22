@@ -40,6 +40,7 @@ export const MainViewContainer = styled.div`
     .vis-container{
         display: flex;
         margin: 6px 0px;
+        overflow-x: auto;
     }
     .fields-container{
         display: flex;

@@ -4,14 +4,13 @@ import { cleanData } from "../../utils/clean";
 
 
 function transformDataTypes (dataSource: IRow[], fields: IRawField[]): IRow[] {
-    return dataSource.map((row) => {
-        let record: IRow = {};
-        fields.forEach((field) => {
-            // if (field.type === 'dimension') {
-            //     record[field.name] = `${row[field.name]}`
-            // } else {
-            //     record[field.name] = Transform.transNumber(row[field.name]);
-            // }
+    const ans: IRow[] = [];
+    let i = 0, j = 0, size = dataSource.length, fieldNum = fields.length;
+    for (i = 0; i < size; i++) {
+        const record: IRow = {};
+        const row = dataSource[i];
+        for (j = 0; j < fieldNum; j++) {
+            const field = fields[j]
             record[field.fid] = row[field.fid]
             if (field.analyticType === 'dimension') {
                 if ((field.semanticType === 'temporal' && field.extInfo?.extOpt !== "dateTimeExpand") ||
@@ -24,9 +23,10 @@ function transformDataTypes (dataSource: IRow[], fields: IRawField[]): IRow[] {
             } else if (field.semanticType === 'ordinal' && !isNaN(Number(row[field.fid]))) {
                 record[field.fid] = Transform.transNumber(row[field.fid]);
             }
-        });
-        return record;
-    });
+        }
+        ans.push(record);
+    }
+    return ans;
   }
   
 export function cleanAndTransformData (dataSource: IRow[], fields: IRawField[], method: CleanMethod): IRow[] {

@@ -9,6 +9,7 @@ import { SemiAutomationStore } from './semiAutomation/mainStore';
 import { PainterStore } from './painterStore'
 import { CollectionStore } from './collectionStore'
 import DashboardStore from './dashboardStore';
+import { CausalStore } from './causalStore';
 export interface StoreCollection {
     langStore: LangStore;
     dataSourceStore: DataSourceStore;
@@ -20,6 +21,7 @@ export interface StoreCollection {
     painterStore: PainterStore;
     collectionStore: CollectionStore;
     dashboardStore: DashboardStore;
+    causalStore: CausalStore;
 }
 
 const langStore = new LangStore();
@@ -29,9 +31,10 @@ const clickHouseStore = new ClickHouseStore();
 const ltsPipeLineStore = new LTSPipeLine(dataSourceStore, commonStore, clickHouseStore);
 const megaAutoStore = new MegaAutomationStore(ltsPipeLineStore);
 const semiAutoStore = new SemiAutomationStore(dataSourceStore);
-const painterStore = new PainterStore();
+const painterStore = new PainterStore(commonStore, dataSourceStore, semiAutoStore);
 const collectionStore = new CollectionStore(dataSourceStore);
 const dashboardStore = new DashboardStore();
+const causalStore = new CausalStore(dataSourceStore);
 
 const storeCol: StoreCollection = {
     commonStore,
@@ -44,6 +47,7 @@ const storeCol: StoreCollection = {
     painterStore,
     collectionStore,
     dashboardStore,
+    causalStore
 }
 
 const StoreContext = React.createContext<StoreCollection>(null!);
