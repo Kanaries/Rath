@@ -47,12 +47,14 @@ export enum PAG_NODE {
     CIRCLE = 2,
 }
 
-export type BgKnowledgePagLink = {
+export interface PagLink {
     src: string;
     tar: string;
     src_type: PAG_NODE;
     tar_type: PAG_NODE;
-};
+}
+
+export type BgKnowledgePagLink = PagLink;
 
 export type ModifiableBgKnowledge = {
     src: BgKnowledge['src'];

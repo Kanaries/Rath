@@ -16,18 +16,18 @@ export function useDataViews (originData: IRow[]) {
     const [appliedSampleRate, setAppliedSampleRate] = useState(sampleRate);
     const [filters, setFilters] = useState<IFilter[]>([]);
     const sampleSize = Math.round(originData.length * appliedSampleRate);
-    const dataSource = useMemo(() => {
-        return focusedSample(originData, selectedFields, sampleSize).map(i => originData[i]);
-    }, [originData, selectedFields, sampleSize]);
-    const dataSubset = useMemo(() => {
-        return applyFilters(dataSource, filters);
-    }, [dataSource, filters]);
+    const filteredData = useMemo(() => {
+        return applyFilters(originData, filters);
+    }, [originData, filters]);
+    const sample = useMemo(() => {
+        return focusedSample(filteredData, selectedFields, sampleSize).map(i => filteredData[i]);
+    }, [filteredData, selectedFields, sampleSize]);
     const vizSampleData = useMemo(() => {
-        if (dataSubset.length < VIZ_SUBSET_LIMIT) {
-            return dataSubset;
+        if (sample.length < VIZ_SUBSET_LIMIT) {
+            return sample;
         }
-        return baseDemoSample(dataSubset, VIZ_SUBSET_LIMIT);
-    }, [dataSubset]);
+        return baseDemoSample(sample, VIZ_SUBSET_LIMIT);
+    }, [sample]);
 
     useEffect(() => {
         if (sampleRate !== appliedSampleRate) {
@@ -42,7 +42,9 @@ export function useDataViews (originData: IRow[]) {
     }, [sampleRate, appliedSampleRate]);
     return {
         vizSampleData,
-        dataSubset,
+        dataSubset: sample,
+        sample,
+        filteredData,
         sampleRate,
         setSampleRate,
         appliedSampleRate,
