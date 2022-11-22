@@ -10,19 +10,22 @@ import SemiEmbed from '../semiAutomation/semiEmbed';
 import CrossFilter from './crossFilter';
 import type { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import type { useDataViews } from './hooks/dataViews';
+import RExplainer from './explainer/RExplainer';
+import type { PagLink } from './config';
 
 export interface ManualAnalyzerProps {
     context: ReturnType<typeof useDataViews>;
     interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
+    edges: PagLink[];
 }
 
-const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldGroups }) => {
+const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldGroups, edges }) => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { fieldGroup, setFieldGroup, clearFieldGroup } = interactFieldGroups;
     const [showSemiClue, setShowSemiClue] = useState(false);
     const [clueView, setClueView] = useState<IPattern | null>(null);
-    const [customAnalysisMode, setCustomAnalysisMode] = useState<'crossFilter' | 'graphicWalker'>('crossFilter');
+    const [customAnalysisMode, setCustomAnalysisMode] = useState<'explainer' | 'crossFilter' | 'graphicWalker'>('explainer');
     const { selectedFields } = causalStore;
 
     const { vizSampleData, filters } = context;
@@ -86,19 +89,22 @@ const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldG
                     item && setCustomAnalysisMode(item.props.itemKey as 'crossFilter' | 'graphicWalker');
                 }}
             >
-                <PivotItem itemKey="crossFilter" headerText="因果验证/探索" />
+                <PivotItem itemKey="explainer" headerText="可解释探索" />
+                <PivotItem itemKey="crossFilter" headerText="因果验证" />
                 <PivotItem itemKey="graphicWalker" headerText="可视化自助分析" />
             </Pivot>
             <Stack horizontal>
-                <SemiEmbed
-                    view={clueView}
-                    show={showSemiClue}
-                    toggleShow={() => {
-                        setShowSemiClue((v) => !v);
-                    }}
-                    neighborKeys={clueView ? clueView.fields.slice(0, 1).map(f => f.fid) : []}
-                />
-                {customAnalysisMode === 'crossFilter' && (
+                {customAnalysisMode !== 'explainer' && (
+                    <SemiEmbed
+                        view={clueView}
+                        show={showSemiClue}
+                        toggleShow={() => {
+                            setShowSemiClue((v) => !v);
+                        }}
+                        neighborKeys={clueView ? clueView.fields.slice(0, 1).map(f => f.fid) : []}
+                    />
+                )}
+                {customAnalysisMode !== 'graphicWalker' && (
                     <ActionButton
                         iconProps={{ iconName: 'Delete' }}
                         text="清除全部选择字段"
@@ -107,6 +113,13 @@ const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldG
                     />
                 )}
             </Stack>
+            {customAnalysisMode === 'explainer' && vizSampleData.length > 0 && fieldGroup.length > 0 && (
+                <RExplainer
+                    context={context}
+                    interactFieldGroups={interactFieldGroups}
+                    edges={edges}
+                />
+            )}
             {customAnalysisMode === 'crossFilter' && vizSampleData.length > 0 && fieldGroup.length > 0 && (
                 <CrossFilter
                     fields={fieldGroup}

@@ -1,6 +1,6 @@
 import intl from 'react-intl-universal';
 import type { IFieldMeta } from '../interfaces';
-import { BgKnowledgePagLink, ModifiableBgKnowledge, PAG_NODE } from '../pages/causal/config';
+import { BgKnowledgePagLink, ModifiableBgKnowledge, PagLink, PAG_NODE } from '../pages/causal/config';
 
 
 export enum CausalLinkDirection {
@@ -262,6 +262,59 @@ export const diffCausalResults = (
     }
 
     return diffs;
+};
+
+export const transformPreconditions = (preconditions: ModifiableBgKnowledge[], fields: IFieldMeta[]): PagLink[] => {
+    return preconditions.reduce<PagLink[]>((list, decl) => {
+        const srcIdx = fields.findIndex((f) => f.fid === decl.src);
+        const tarIdx = fields.findIndex((f) => f.fid === decl.tar);
+
+        if (srcIdx !== -1 && tarIdx !== -1) {
+            switch (decl.type) {
+                case 'must-link': {
+                    list.push({
+                        src: decl.src,
+                        tar: decl.tar,
+                        src_type: PAG_NODE.CIRCLE,
+                        tar_type: PAG_NODE.CIRCLE,
+                    });
+                    break;
+                }
+                case 'must-not-link': {
+                    list.push({
+                        src: decl.src,
+                        tar: decl.tar,
+                        src_type: PAG_NODE.EMPTY,
+                        tar_type: PAG_NODE.EMPTY,
+                    });
+                    break;
+                }
+                case 'directed-must-link': {
+                    list.push({
+                        src: decl.src,
+                        tar: decl.tar,
+                        src_type: PAG_NODE.BLANK,
+                        tar_type: PAG_NODE.ARROW,
+                    });
+                    break;
+                }
+                case 'directed-must-not-link': {
+                    list.push({
+                        src: decl.src,
+                        tar: decl.tar,
+                        src_type: PAG_NODE.EMPTY,
+                        tar_type: PAG_NODE.ARROW,
+                    });
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+
+        return list;
+    }, []);
 };
 
 

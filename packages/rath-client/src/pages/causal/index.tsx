@@ -4,10 +4,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import produce from 'immer';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import { resolvePreconditionsFromCausal } from '../../utils/resolve-causal';
+import { resolvePreconditionsFromCausal, transformPreconditions } from '../../utils/resolve-causal';
 import Explorer from './explorer';
 import Params from './params';
-import { BgKnowledge, BgKnowledgePagLink, ModifiableBgKnowledge, PAG_NODE } from './config';
+import { BgKnowledge, BgKnowledgePagLink, ModifiableBgKnowledge } from './config';
 import ModelStorage from './modelStorage';
 import MatrixPanel, { MATRIX_TYPE } from './matrixPanel';
 import { useInteractFieldGroups } from './hooks/interactFieldGroup';
@@ -22,7 +22,7 @@ const CausalPage: React.FC = () => {
     const { fieldMetas, cleanedData } = dataSourceStore;
     const interactFieldGroups = useInteractFieldGroups(fieldMetas);
     const { appendFields2Group } = interactFieldGroups;
-    const { igMatrix, causalFields, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
+    const { igMatrix, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
 
     const [modifiablePrecondition, __unsafeSetModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
 
@@ -85,56 +85,7 @@ const CausalPage: React.FC = () => {
         if (computing || igMatrix.length !== selectedFields.length) {
             return [];
         }
-        return modifiablePrecondition.reduce<BgKnowledgePagLink[]>((list, decl) => {
-            const srcIdx = selectedFields.findIndex((f) => f.fid === decl.src);
-            const tarIdx = selectedFields.findIndex((f) => f.fid === decl.tar);
-
-            if (srcIdx !== -1 && tarIdx !== -1) {
-                switch (decl.type) {
-                    case 'must-link': {
-                        list.push({
-                            src: decl.src,
-                            tar: decl.tar,
-                            src_type: PAG_NODE.CIRCLE,
-                            tar_type: PAG_NODE.CIRCLE,
-                        });
-                        break;
-                    }
-                    case 'must-not-link': {
-                        list.push({
-                            src: decl.src,
-                            tar: decl.tar,
-                            src_type: PAG_NODE.EMPTY,
-                            tar_type: PAG_NODE.EMPTY,
-                        });
-                        break;
-                    }
-                    case 'directed-must-link': {
-                        list.push({
-                            src: decl.src,
-                            tar: decl.tar,
-                            src_type: PAG_NODE.BLANK,
-                            tar_type: PAG_NODE.ARROW,
-                        });
-                        break;
-                    }
-                    case 'directed-must-not-link': {
-                        list.push({
-                            src: decl.src,
-                            tar: decl.tar,
-                            src_type: PAG_NODE.EMPTY,
-                            tar_type: PAG_NODE.ARROW,
-                        });
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
-            }
-
-            return list;
-        }, []);
+        return transformPreconditions(modifiablePrecondition, selectedFields);
     }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
 
     const dataContext = useDataViews(cleanedData);
@@ -160,17 +111,15 @@ const CausalPage: React.FC = () => {
         [appendFields2Group]
     );
 
-    const exploringFields = igMatrix.length === causalStrength.length ? causalFields : selectedFields;
-
-    const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number) => {
+    const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number, type: ModifiableBgKnowledge['type']) => {
         setModifiablePrecondition((list) => {
             return list.concat([{
-                src: exploringFields[srcIdx].fid,
-                tar: exploringFields[tarIdx].fid,
-                type: 'directed-must-link',
+                src: selectedFields[srcIdx].fid,
+                tar: selectedFields[tarIdx].fid,
+                type,
             }]);
         });
-    }, [exploringFields, setModifiablePrecondition]);
+    }, [selectedFields, setModifiablePrecondition]);
 
     // 结点可以 project 一些字段信息
     const renderNode = useCallback((node: Readonly<IFieldMeta>): GraphNodeAttributes | undefined => {
@@ -185,6 +134,26 @@ const CausalPage: React.FC = () => {
     const synchronizePredictionsUsingCausalResult = useCallback(() => {
         setModifiablePrecondition(resolvePreconditionsFromCausal(causalStrength, fieldMetas));
     }, [setModifiablePrecondition, causalStrength, fieldMetas]);
+
+    const edges = useMemo(() => {
+        const links = resolvePreconditionsFromCausal(causalStrength, fieldMetas).reduce<ModifiableBgKnowledge[]>((list, link) => {
+            if (link.src === link.type) {
+                // 禁止自环边
+                return list;
+            }
+            const overloadIdx = list.findIndex(
+                which => [which.src, which.tar].every(node => [link.src, link.tar].includes(node))
+            );
+            if (overloadIdx !== -1) {
+                const temp = list.map(l => l);
+                temp.splice(overloadIdx, 1, link);
+                return temp;
+            } else {
+                return list.concat([link]);
+            }
+        }, []);
+        return transformPreconditions(links, selectedFields);
+    }, [causalStrength, fieldMetas, selectedFields]);
 
     return (
         <div className="content-container">
@@ -249,7 +218,7 @@ const CausalPage: React.FC = () => {
                     )}
                 />
             </div>
-            <ManualAnalyzer context={dataContext} interactFieldGroups={interactFieldGroups} />
+            <ManualAnalyzer context={dataContext} interactFieldGroups={interactFieldGroups} edges={edges} />
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import { DefaultButton } from '@fluentui/react';
+import { DefaultButton, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -6,8 +6,8 @@ import produce from 'immer';
 import { useGlobalStore } from '../../../store';
 import type { ModifiableBgKnowledge } from '../config';
 import type { PreconditionPanelProps } from './preconditionPanel';
-import PreconditionGraph from './preconditionGraph';
 import { getGeneratedPreconditionsFromAutoDetection, getGeneratedPreconditionsFromExtInfo } from './utils';
+import PreconditionEditor from './preconditionEditor';
 
 
 const Container = styled.div`
@@ -32,18 +32,13 @@ const Mask = styled.div`
     justify-content: center;
     background-color: #fff8;
     > div {
-        box-shadow: 0 10px 8px rgba(0, 0, 0, 0.05), 0 4px 3px rgba(0, 0, 0, 0.01);
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.15), 0 0 8px rgba(0, 0, 0, 0.03);
         background-color: #fff;
         padding: 2em;
         > div.container {
             width: 600px;
-            height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             > * {
                 width: 100%;
-                height: 100%;
             }
         }
     }
@@ -181,8 +176,11 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
                 <DefaultButton onClick={generatePreconditionsFromExtInfo}>
                     使用扩展字段计算图
                 </DefaultButton>
-                <DefaultButton>
-                    从文件导入
+                <DefaultButton disabled>
+                    导入影响关系
+                </DefaultButton>
+                <DefaultButton disabled>
+                    导入因果模型
                 </DefaultButton>
                 <DefaultButton onClick={generatePreconditionsFromAutoDetection}>
                     自动识别
@@ -191,12 +189,12 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
             {displayPreview && (
                 <Mask>
                     <div>
-                        <header>预览</header>
                         <div className="container">
                             {isPending ? (
-                                <p>loading...</p>
+                                <Spinner label="computing" />
                             ) : (
-                                <PreconditionGraph
+                                <PreconditionEditor
+                                    title="预览"
                                     context={context}
                                     modifiablePrecondition={submittable}
                                     setModifiablePrecondition={updatePreview}

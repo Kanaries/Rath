@@ -39,7 +39,7 @@ export interface ExplorerProps {
         composedCause: readonly Readonly<NodeWithScore>[],
         composedEffect: readonly Readonly<NodeWithScore>[],
     ) => void;
-    onLinkTogether: (srcIdx: number, tarIdx: number) => void;
+    onLinkTogether: (srcIdx: number, tarIdx: number, type: ModifiableBgKnowledge['type']) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
     synchronizePredictionsUsingCausalResult: () => void;
@@ -247,11 +247,11 @@ const Explorer: FC<ExplorerProps> = ({
         );
     }, [selectedFields, value, mode === 'explore' ? focus : -1, cutThreshold]);
 
-    const handleLink = useCallback((srcFid: string, tarFid: string) => {
+    const handleLink = useCallback((srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => {
         if (srcFid === tarFid) {
             return;
         }
-        onLinkTogether(selectedFields.findIndex(f => f.fid === srcFid), selectedFields.findIndex(f => f.fid === tarFid));
+        onLinkTogether(selectedFields.findIndex(f => f.fid === srcFid), selectedFields.findIndex(f => f.fid === tarFid), type);
     }, [selectedFields, onLinkTogether]);
 
     const [selectedSubtree, setSelectedSubtree] = useState<string[]>([]);
@@ -333,15 +333,18 @@ const Explorer: FC<ExplorerProps> = ({
                     value={limit}
                     onChange={value => setLimit(value)}
                 />
-                <Slider
-                    label="按权重筛选"
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    value={cutThreshold}
-                    showValue
-                    onChange={d => setCutThreshold(d)}
-                />
+                {/* TODO: 现在没有有意义的权重，暂时隐藏 */}
+                {false && (
+                    <Slider
+                        label="按权重筛选"
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        value={cutThreshold}
+                        showValue
+                        onChange={d => setCutThreshold(d)}
+                    />
+                )}
             </Tools>
             <MainView>
                 <ExplorerMainView

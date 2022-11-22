@@ -1,0 +1,65 @@
+/* eslint no-restricted-globals: 0 */
+import type { IRow, IFilter, IFieldMeta } from "../../interfaces";
+import type { PagLink } from "../../pages/causal/config";
+import { timer } from '../timer';
+import { insightExplain } from "./utils";
+
+
+export interface IRInsightExplainSubspace {
+    predicates: IFilter[];
+    /** @default false 值为 true 时取反 */
+    reverted?: boolean;
+}
+
+export interface IRInsightExplainProps {
+    /** 因果图输入数据子集 */
+    data: IRow[];
+    fields: IFieldMeta[];
+    causalModel: {
+        /** 用户编辑后的因果图 */
+        edges: PagLink[];
+    };
+    groups: {
+        current: IRInsightExplainSubspace;
+        other: IRInsightExplainSubspace;
+    };
+    view: {
+        /** 除了分析目标的其他 fields 的 id */
+        dimensions: string[];
+        /** 分析目标，视图的纵轴：关注的 fields */
+        measures: {
+            fid: string;
+            op: 'sum' | 'mean';
+        }[];
+    };
+}
+
+export interface IRInsightExplainResult {
+    causalEffects: Array<PagLink & {
+        /** 展示的文本 */
+        description?: {
+            /** I18n text key */
+            key: string;
+            /** I18n text data */
+            data?: { [textKey: string]: string | number };
+        };
+        responsibility: number; // [-1, 1]
+    }>;
+}
+
+const RInsightService = (e: MessageEvent<IRInsightExplainProps>) => {
+    try {
+        self.postMessage({
+            success: true,
+            data: insightExplain(e.data),
+        });
+    } catch (error) {
+        self.postMessage({
+            success: false,
+            message: `[RInsight] ${error}`,
+        });
+    }
+}
+
+
+self.addEventListener('message', timer(RInsightService), false);
