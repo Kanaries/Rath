@@ -18,3 +18,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn install
       - run: yarn workspace rath-client build
+      - uses: actions/checkout@master
+      - uses: manyuanrong/setup-ossutil@master
+        with:
+          endpoint: ${{ secrets.ALIOSS_ENDPOINT }}
+          access-key-id: ${{ secrets.ALIOSS_ID }}
+          access-key-secret: ${{ secrets.ALIOSS_SECRET }}
+      - run: ossutil cp -rf packages/rath-client/build oss://${{ALIOSS_BUCKET}}
