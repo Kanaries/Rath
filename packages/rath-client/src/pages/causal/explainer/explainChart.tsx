@@ -29,7 +29,9 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
     const handleFilterRef = useRef(handleFilter);
     handleFilterRef.current = handleFilter;
 
-    const filterType = mainField.semanticType === 'quantitative' || mainField.semanticType === 'temporal' ? 'interval' : 'point';
+    const filterType = typeof indexKey === 'object' && (
+        indexKey.semanticType === 'quantitative' || indexKey.semanticType === 'temporal'
+    ) ? 'interval' : 'point';
 
     useEffect(() => {
         const signalChange$ = new Subject<Parameters<NonNullable<typeof handleFilter>>[0]>();

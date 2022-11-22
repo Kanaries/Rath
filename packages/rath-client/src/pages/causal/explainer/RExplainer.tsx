@@ -136,7 +136,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
         }
     }, [diffMode]);
 
-    console.log({ irResult });
+    // console.log({ irResult });
 
     return (
         <Container>
