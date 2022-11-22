@@ -136,8 +136,15 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                     <ChoiceGroup
                         label={intl.get('dataSource.filter.key')}
                         options={[
-                            { key: 'range', text: intl.get('dataSource.filter.range') },
-                            { key: 'set', text: intl.get('dataSource.filter.set')}
+                            {
+                                key: 'range',
+                                text: intl.get('dataSource.filter.range'),
+                                disabled:
+                                    meta?.semanticType === 'quantitative' || meta?.semanticType === 'temporal'
+                                        ? false
+                                        : true,
+                            },
+                            { key: 'set', text: intl.get('dataSource.filter.set') },
                         ]}
                         selectedKey={filter.type}
                         onChange={(ev, op) => {
@@ -165,6 +172,7 @@ const FieldFilter: React.FC<FieldFilterProps> = props => {
                 }
                 {
                     filter.type === 'range' && meta && <RangeSelection
+                        filterType={meta.semanticType}
                         range={fieldRange}
                         left={filter.range[0]}
                         right={filter.range[1]}
