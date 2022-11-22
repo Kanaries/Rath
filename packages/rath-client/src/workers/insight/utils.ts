@@ -1,7 +1,7 @@
+import { applyFilters } from "@kanaries/loa";
 import dayjs from "dayjs";
 import type { IFieldMeta, IRow, IFilter } from "../../interfaces";
 import { getRange } from "../../utils";
-import { applyFilters } from "../engine/filter";
 import type { IRInsightExplainProps, IRInsightExplainResult } from "./r-insight.worker";
 
 
@@ -42,8 +42,11 @@ const xHash = (data: IRow[], field: IFieldMeta): [number[], number[]] => {
     }
 };
 
+const indexKey = '__index__';
 const hashTranslatedKey = '__hash_translated__';
 const hashIndexKey = '__hash_index__';
+
+let info: any = null;
 
 const xNormalizeAggregated = (data: IRow[], aggregate: AggregateType): number[] => {
     const res = new Array<0>(MAX_BIN).fill(0);
@@ -105,8 +108,8 @@ const xNormalizeAggregated = (data: IRow[], aggregate: AggregateType): number[] 
 
 const diffGroups = (
     data: IRow[],
-    predicate1: IFilter[],
-    predicate2: IFilter[],
+    indices1: number[],
+    indices2: number[],
     dimension: IFieldMeta,
     measure: { fid: string; aggregate: AggregateType },
 ): number => {
@@ -116,8 +119,11 @@ const diffGroups = (
         [hashTranslatedKey]: translated[i],
         [hashIndexKey]: hashIndices[i],
     }));
-    const group1 = xNormalizeAggregated(applyFilters(hashedData, new Map(), predicate1), measure.aggregate);
-    const group2 = xNormalizeAggregated(applyFilters(hashedData, new Map(), predicate2), measure.aggregate);
+    // TODO: 只做一次
+    const data1 = indices1.map(index => hashedData[index]);
+    const data2 = indices2.map(index => hashedData[index]);
+    const group1 = xNormalizeAggregated(data1, measure.aggregate);
+    const group2 = xNormalizeAggregated(data2, measure.aggregate);
     const diff = new Array<0>(MAX_BIN).fill(0).reduce<{ loss: number; count: number }>((ctx, _, i) => {
         const a = group1[i];
         const b = group2[i];
@@ -140,25 +146,48 @@ export const insightExplain = (props: IRInsightExplainProps): IRInsightExplainRe
         causalEffects: [],
     };
 
+    const indexedData = data.map((row, i) => ({ ...row, [indexKey]: i }));
+    const indices1 = applyFilters(indexedData, groups.current.predicates).map(row => row[indexKey]);
+    const indices2 = applyFilters(indexedData, groups.current.predicates).map(row => row[indexKey]);
+
     for (const fid of view.dimensions) {
         const f = fields.find(which => which.fid === fid);
-        const edge = edges.find(link => link.src === fid && view.measures.find(ms => ms.fid === link.tar));
-        if (f && edge) {
-            const measure = view.measures.find(ms => ms.fid === edge.tar)!;
-            const responsibility = diffGroups(data, groups.current.predicates, groups.other.predicates, f, {
-                fid: measure.fid,
-                aggregate: measure.op,
+        if (f) {
+            const responsibility = diffGroups(data, indices1, indices2, f, {
+                fid: fid,
+                aggregate: 'sum',
             });
             if (responsibility !== 0) {
+                // @ts-ignore
                 res.causalEffects.push({
-                    ...edge,
                     responsibility,
+                    src: f.fid,
+                    tar: view.measures[0].fid,
                     description: {
                         key: 'unvisualizedDimension',
+                        data: info,
                     },
                 });
             }
         }
+           
+        // const edge = edges.find(link => link.src === fid && view.measures.find(ms => ms.fid === link.tar));
+        // if (f && edge) {
+        //     const measure = view.measures.find(ms => ms.fid === edge.tar)!;
+        //     const responsibility = diffGroups(data, groups.current.predicates, groups.other.predicates, f, {
+        //         fid: measure.fid,
+        //         aggregate: measure.op,
+        //     });
+        //     if (responsibility !== 0) {
+        //         res.causalEffects.push({
+        //             ...edge,
+        //             responsibility,
+        //             description: {
+        //                 key: 'unvisualizedDimension',
+        //             },
+        //         });
+        //     }
+        // }
     }
 
     res.causalEffects.sort((a, b) => b.responsibility - a.responsibility);

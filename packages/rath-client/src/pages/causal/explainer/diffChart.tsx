@@ -12,10 +12,11 @@ interface DiffChartProps {
     data: IRow[];
     mainField: IFieldMeta;
     mainFieldAggregation: null | 'sum' | 'mean' | 'count';
+    dimension: IFieldMeta;
     mode: 'full' | 'other' | 'two-group';
 }
 
-const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggregation, mode }) => {
+const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggregation, dimension, mode }) => {
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View>();
 
@@ -28,12 +29,13 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                 },
                 encoding: {
                     x: {
-                        field: SelectedFlag,
-                        type: 'ordinal',
+                        field: dimension,
+                        title: `${dimension.name || dimension.fid}`,
                     },
                     y: {
                         field: mainField.fid,
                         aggregate: mainFieldAggregation ?? undefined,
+                        title: `${mainFieldAggregation}(${mainField.name || mainField.fid})`,
                     },
                 },
             } as const;

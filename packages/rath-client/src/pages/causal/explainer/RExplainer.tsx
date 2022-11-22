@@ -52,6 +52,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
 
     const pendingRef = useRef<Promise<IRInsightExplainResult>>();
     useEffect(() => {
+        console.log('->', subspaces, mainField)
         if (!subspaces || !mainField) {
             setIrResult([]);
             return;
@@ -136,7 +137,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
         }
     }, [diffMode]);
 
-    // console.log({ irResult });
+    console.log({ irResult });
 
     return (
         <Container>
@@ -207,26 +208,34 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                     )}
                     <header>Why Query</header>
                     {indexKey && irResult.length > 0 && (
-                        irResult.map(res => (
-                            <div key={res.src}>
-                                <ChartItem
-                                    data={selectedSet}
-                                    mainField={mainField}
-                                    mainFieldAggregation={aggr}
-                                    indexKey={res.src}
-                                    interactive={false}
-                                />
-                                <DiffChart
-                                    data={selectedSet}
-                                    mainField={mainField}
-                                    mainFieldAggregation={aggr}
-                                    mode={diffMode}
-                                />
-                                <p>
-                                    {`选择区间内 ${res.src} 与 ${mainField.name || mainField.fid} 表现出影响。评分：${res.responsibility}。`}
-                                </p>
-                            </div>
-                        ))
+                        irResult.map(res => {
+                            const dimension = fieldMetas.find(f => f.fid === res.src);
+
+                            return dimension && (
+                                <div key={dimension.fid}>
+                                    <ChartItem
+                                        data={selectedSet}
+                                        mainField={mainField}
+                                        mainFieldAggregation={aggr}
+                                        indexKey={dimension.fid}
+                                        interactive={false}
+                                    />
+                                    <DiffChart
+                                        data={selectedSet}
+                                        mainField={mainField}
+                                        mainFieldAggregation={aggr}
+                                        dimension={dimension}
+                                        mode={diffMode}
+                                    />
+                                    <p>
+                                        {`选择区间内 ${
+                                            dimension.name ||
+                                            dimension.fid
+                                        } 与 ${mainField.name || mainField.fid} 表现出影响。评分：${res.responsibility}。`}
+                                    </p>
+                                </div>
+                            );
+                        })
                     )}
                     {/* {indexKey && pccResults.length > 0 && selectedSet && (
                         pccResults.map(res => (
