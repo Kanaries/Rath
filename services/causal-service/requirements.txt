@@ -11,5 +11,5 @@ pygam
 fastapi
 uvicorn[standard]
 gunicorn
-causallearn
+causal-learn
 dowhy

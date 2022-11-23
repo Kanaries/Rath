@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 PORT=8001
 PORT2=2281
 git submodule init && git submodule update
