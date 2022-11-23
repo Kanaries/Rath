@@ -2,9 +2,9 @@ import { SearchBox, IconButton, Panel, TextField, DefaultButton, PrimaryButton }
 import { observer } from 'mobx-react-lite';
 import React, { useMemo, useState } from 'react';
 import intl from 'react-intl-universal';
+import { Sampling } from "visual-insights";
 import { useBoolean } from '@fluentui/react-hooks';
 import { useGlobalStore } from '../../store';
-import { baseDemoSample } from '../painter/sample';
 import { IInsightVizView } from '../../interfaces';
 import { searchFilterView } from '../../utils';
 import { MainCardContainer } from './components';
@@ -41,8 +41,8 @@ const Collection: React.FC = (props) => {
         desc: '',
     });
     const sampleData = useMemo(() => {
-        if (cleanedData.length > 2000) return cleanedData;
-        return baseDemoSample(cleanedData, 2000);
+        if (cleanedData.length <= 2000) return cleanedData;
+        return Sampling.reservoirSampling(cleanedData, 2000);
     }, [cleanedData]);
     const filteredColcList = useMemo<IInsightVizView[]>(() => {
         if (searchContent === '') return collectionList;
