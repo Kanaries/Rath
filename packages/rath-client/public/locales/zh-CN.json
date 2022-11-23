@@ -461,6 +461,16 @@
         "weakUndirected": "在不同的部分子集合中，A 与 B 有不同方向的影响关系。",
         "bidirected": "A 与 B 相互作用。"
     },
+    "RInsight": {
+        "explanation": {
+            "title": {
+                "unvisualizedDimension": "潜在因素"
+            },
+            "desc": {
+                "unvisualizedDimension": "视图中未展现的因素 { dimension } 在选定区间有不同的分布模式，可能对 { mainField } 的分布有影响关系。评分：{ responsibility }。"
+            }
+        }
+    },
     "time_format": {
         "dateTime": "%x %A %X",
         "date": "%Y年%-m月%-d日",

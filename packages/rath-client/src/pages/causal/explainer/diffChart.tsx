@@ -8,6 +8,7 @@ import type { IFieldMeta, IRow } from '../../../interfaces';
 
 
 interface DiffChartProps {
+    title?: string;
     data: IRow[];
     subspaces: [number[], number[]];
     mainField: IFieldMeta;
@@ -19,7 +20,7 @@ interface DiffChartProps {
 const DiffGroup1Key = '__diff_group_1__';
 const DiffGroup2Key = '__diff_group_2__';
 
-const DiffChart: React.FC<DiffChartProps> = ({ data, subspaces, mainField, mainFieldAggregation, dimension, mode }) => {
+const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField, mainFieldAggregation, dimension, mode }) => {
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View>();
 
@@ -61,10 +62,11 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, subspaces, mainField, mainF
                     type: 'fit',
                     contains: 'padding',
                 },
+                title,
                 data: {
                     // @ts-ignore
                     name: 'dataSource',
-                    values: source,//dataRef.current,
+                    values: dataRef.current,
                 },
                 layer: dimension.semanticType === 'quantitative' ? [
                     {
@@ -174,22 +176,22 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, subspaces, mainField, mainF
                 viewRef.current = undefined;
             }
         };
-    }, [mainField, mainFieldAggregation, mode, dimension, source]);
+    }, [mainField, title, mainFieldAggregation, mode, dimension]);
 
-    // useEffect(() => {
-    //     // console.log(data.reduce<[number, number][]>((ctx, {[SelectedFlag]:num}) => {
-    //     //     if (ctx.at(-1)?.[0] !== num) {
-    //     //         ctx.push([num, 1]);
-    //     //     } else {
-    //     //         ctx.at(-1)![1] += 1;
-    //     //     }
-    //     //     return ctx;
-    //     // }, []).map(([k, v]) => `${k}{${v}}`).join(''));
-    //     viewRef.current?.change(
-    //         'dataSource',
-    //         viewRef.current.changeset().remove(() => true).insert(source),
-    //     );
-    // }, [source]);
+    useEffect(() => {
+        // console.log(data.reduce<[number, number][]>((ctx, {[SelectedFlag]:num}) => {
+        //     if (ctx.at(-1)?.[0] !== num) {
+        //         ctx.push([num, 1]);
+        //     } else {
+        //         ctx.at(-1)![1] += 1;
+        //     }
+        //     return ctx;
+        // }, []).map(([k, v]) => `${k}{${v}}`).join(''));
+        viewRef.current?.change(
+            'dataSource',
+            viewRef.current.changeset().remove(() => true).insert(source),
+        );
+    }, [source]);
 
     return <div ref={container} />;
 };

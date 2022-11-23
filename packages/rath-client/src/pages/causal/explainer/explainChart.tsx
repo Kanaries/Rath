@@ -90,7 +90,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                 data: {
                     // @ts-ignore
                     name: 'dataSource',
-                    values: source,//dataRef.current,
+                    values: dataRef.current,
                 },
                 layer: subspace ? [
                     {
@@ -212,14 +212,14 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                 viewRef.current = undefined;
             }
         };
-    }, [title, mainField, mainFieldAggregation, filterType, interactive, indexKey, normalize, subspace, source]);
+    }, [title, mainField, mainFieldAggregation, filterType, interactive, indexKey, normalize, subspace]);
 
-    // useEffect(() => {
-    //     viewRef.current?.change(
-    //         'dataSource',
-    //         viewRef.current.changeset().remove(() => true).insert(source),
-    //     );
-    // }, [source]);
+    useEffect(() => {
+        viewRef.current?.change(
+            'dataSource',
+            viewRef.current.changeset().remove(() => true).insert(source),
+        );
+    }, [source]);
 
     return <div ref={container} />;
 };

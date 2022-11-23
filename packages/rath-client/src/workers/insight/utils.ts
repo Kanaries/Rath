@@ -45,8 +45,6 @@ const xHash = (data: IRow[], field: IFieldMeta): number[] => {
 const indexKey = '__index__';
 const hashIndexKey = '__hash_index__';
 
-let info: any[] = [];
-
 const xNormalizeAggregated = (data: IRow[], field: IFieldMeta, aggregate: AggregateType): number[] => {
     const res = new Array<0>(MAX_BIN).fill(0);
     const col: number[] = [];
@@ -162,7 +160,6 @@ export const insightExplain = (props: IRInsightExplainProps): IRInsightExplainRe
 
     const indexedData = data.map((row, i) => ({ ...row, [indexKey]: i }));
     const indices1 = applyFilters(indexedData, groups.current.predicates).map(row => row[indexKey]);
-    info.push({ filters: groups.current.predicates, sample: applyFilters(indexedData, groups.current.predicates) });
     const indices2 = groups.other.reverted
         ? indexedData.filter((_, i) => !indices1.includes(i)).map(row => row[indexKey])
         : applyFilters(indexedData, groups.other.predicates).map(row => row[indexKey]);
@@ -181,9 +178,8 @@ export const insightExplain = (props: IRInsightExplainProps): IRInsightExplainRe
                 src: f.fid,
                 tar: target.fid,
                 description: {
+                    title: 'unvisualizedDimension',
                     key: 'unvisualizedDimension',
-                    // @ts-ignore
-                    data: info,
                 },
             });
         }
