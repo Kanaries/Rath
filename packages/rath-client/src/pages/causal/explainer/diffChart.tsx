@@ -23,13 +23,16 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, subspaces, mainField, mainF
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View>();
 
+    const subspacesRef = useRef(subspaces);
+    subspacesRef.current = subspaces;
+
     const source = useMemo(() => {
         return data.map((row, i) => ({
             ...row,
-            [DiffGroup1Key]: subspaces[0].includes(i) ? 1 : 0,
-            [DiffGroup2Key]: subspaces[1].includes(i) ? 1 : 0,
+            [DiffGroup1Key]: subspacesRef.current[0].includes(i) ? 1 : 0,
+            [DiffGroup2Key]: subspacesRef.current[1].includes(i) ? 1 : 0,
         }));
-    }, [data, subspaces]);
+    }, [data]);
 
     const dataRef = useRef(source);
     dataRef.current = source;
@@ -61,7 +64,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, subspaces, mainField, mainF
                 data: {
                     // @ts-ignore
                     name: 'dataSource',
-                    values: dataRef.current,
+                    values: source,//dataRef.current,
                 },
                 layer: dimension.semanticType === 'quantitative' ? [
                     {
@@ -171,22 +174,22 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, subspaces, mainField, mainF
                 viewRef.current = undefined;
             }
         };
-    }, [mainField, mainFieldAggregation, mode, dimension]);
+    }, [mainField, mainFieldAggregation, mode, dimension, source]);
 
-    useEffect(() => {
-        // console.log(data.reduce<[number, number][]>((ctx, {[SelectedFlag]:num}) => {
-        //     if (ctx.at(-1)?.[0] !== num) {
-        //         ctx.push([num, 1]);
-        //     } else {
-        //         ctx.at(-1)![1] += 1;
-        //     }
-        //     return ctx;
-        // }, []).map(([k, v]) => `${k}{${v}}`).join(''));
-        viewRef.current?.change(
-            'dataSource',
-            viewRef.current.changeset().remove(() => true).insert(source),
-        );
-    }, [source]);
+    // useEffect(() => {
+    //     // console.log(data.reduce<[number, number][]>((ctx, {[SelectedFlag]:num}) => {
+    //     //     if (ctx.at(-1)?.[0] !== num) {
+    //     //         ctx.push([num, 1]);
+    //     //     } else {
+    //     //         ctx.at(-1)![1] += 1;
+    //     //     }
+    //     //     return ctx;
+    //     // }, []).map(([k, v]) => `${k}{${v}}`).join(''));
+    //     viewRef.current?.change(
+    //         'dataSource',
+    //         viewRef.current.changeset().remove(() => true).insert(source),
+    //     );
+    // }, [source]);
 
     return <div ref={container} />;
 };

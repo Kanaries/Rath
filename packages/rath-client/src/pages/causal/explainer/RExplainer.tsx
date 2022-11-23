@@ -11,7 +11,7 @@ import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../
 import { RInsightService } from '../../../services/r-insight';
 import type { PagLink } from '../config';
 import ChartItem from './explainChart';
-import DiffChart from './diffChart';
+import RInsightView from './RInsightView';
 
 
 const Container = styled.div``;
@@ -36,7 +36,6 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
     const [indexKey, setIndexKey] = useState<IFieldMeta | null>(null);
     const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('count');
     const [diffMode, setDiffMode] = useState<"full" | "other" | "two-group">("full");
-    const [normalize, setNormalize] = useState<boolean>(true);
 
     useEffect(() => {
         setIndexKey(ik => ik ? fieldMetas.find(f => f.fid === ik.fid) ?? null : null);
@@ -48,19 +47,19 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
         setSubspaces(null);
     }, [mainField, aggr]);
 
-    const [irResult, setIrResult] = useState<IRInsightExplainResult['causalEffects']>([]);
+    const [irResult, setIrResult] = useState<IRInsightExplainResult>({ causalEffects: [] });
     const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('worker');
 
     const pendingRef = useRef<Promise<IRInsightExplainResult>>();
 
     const calculate = useCallback(() => {
         if (!subspaces || !mainField) {
-            setIrResult([]);
+            setIrResult({ causalEffects: [] });
             return;
         }
         const [current, other] = subspaces;
         if (!current) {
-            setIrResult([]);
+            setIrResult({ causalEffects: [] });
             return;
         }
         const p = new Promise<IRInsightExplainResult>(resolve => {
@@ -87,11 +86,11 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
         pendingRef.current = p;
         p.then(res => {
             if (pendingRef.current === p) {
-                setIrResult(
-                    res.causalEffects.filter(
+                setIrResult({
+                    causalEffects: res.causalEffects.filter(
                         item => Number.isFinite(item.responsibility) && item.responsibility !== 0
                     ).sort((a, b) => b.responsibility - a.responsibility)
-                );
+                });
             }
         }).finally(() => {
             pendingRef.current = undefined;
@@ -122,7 +121,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
             return setSelectedSet(sample);
         }
         setSelectedSet(
-            sample.map((row, i) => ({ ...row, [SelectedFlag]: indicesB.includes(i) ? 2 : indicesA.includes(i) ? 1 : 0 }))
+            sample.map((row, i) => ({ ...row, [SelectedFlag]: indicesA.includes(i) ? 1 : indicesB.includes(i) ? 2 : 0 }))
         );
         calculate();
     }, [subspaces, sample, indicesA, indicesB, calculate]);
@@ -284,44 +283,14 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                     >
                         Insight
                     </DefaultButton>
-                    <header>Why Query</header>
-                    <Toggle
-                        label="Normalize Stack"
-                        checked={normalize}
-                        onChange={(_, checked) => setNormalize(Boolean(checked))}
+                    <RInsightView
+                        data={selectedSet}
+                        result={irResult}
+                        mainField={mainField}
+                        mainFieldAggregation={aggr}
+                        mode={diffMode}
+                        indices={[indicesA, indicesB]}
                     />
-                    {irResult.length > 0 && (
-                        irResult.map(res => {
-                            const dimension = fieldMetas.find(f => f.fid === res.src);
-
-                            return dimension && (
-                                <div key={dimension.fid}>
-                                    <ChartItem
-                                        data={selectedSet}
-                                        mainField={mainField}
-                                        mainFieldAggregation={aggr}
-                                        indexKey={dimension}
-                                        interactive={false}
-                                        normalize={normalize}
-                                    />
-                                    <DiffChart
-                                        data={selectedSet}
-                                        subspaces={[indicesA, indicesB]}
-                                        mainField={mainField}
-                                        mainFieldAggregation={aggr}
-                                        dimension={dimension}
-                                        mode={diffMode}
-                                    />
-                                    <p>
-                                        {`选择区间内 ${
-                                            dimension.name ||
-                                            dimension.fid
-                                        } 与 ${mainField.name || mainField.fid} 表现出影响。评分：${res.responsibility}。`}
-                                    </p>
-                                </div>
-                            );
-                        })
-                    )}
                 </>
             )}
         </Container>
