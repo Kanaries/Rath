@@ -37,9 +37,11 @@ export interface IRInsightExplainResult {
     causalEffects: Array<PagLink & {
         /** 展示的文本 */
         description?: {
-            /** I18n text key */
+            /** title I18n text key */
+            title: string;
+            /** description I18n text key */
             key: string;
-            /** I18n text data */
+            /** description I18n text data */
             data?: { [textKey: string]: string | number };
         };
         responsibility: number; // [-1, 1]

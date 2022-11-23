@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";
@@ -26,13 +27,16 @@ const Container = styled.div`
     overflow: hidden;
     & *[role=tablist] {
         padding: 0;
-        width: 200px;
+        width: 280px;
+        flex-grow: 0;
+        flex-shrink: 0;
         overflow: hidden auto;
         border-right: 1px solid #8884;
         & *[role=tab] {
             user-select: none;
             cursor: pointer;
             display: flex;
+            align-items: baseline;
             overflow: hidden;
             flex-wrap: wrap;
             padding: 0.5em 1em;
@@ -50,15 +54,22 @@ const Container = styled.div`
                     background-color: unset;
                 }
             }
-            & small {
-                margin: 0 0.5em;
+            & .title {
+                font-size: 80%;
+                margin: 0 0.5em 0 0;
                 padding: 0.12em 0.5em;
                 border-radius: 0.1em;
                 background-color: #8882;
             }
+            & small {
+                margin: 0 0.5em;
+                color: orange;
+            }
         }
     }
     & *[role=tabpanel] {
+        flex-grow: 1;
+        flex-shrink: 1;
         overflow: auto;
         padding: 1em;
     }
@@ -87,6 +98,11 @@ const RInsightView: FC<IRInsightViewProps> = ({ data, result, mainField, mainFie
 
                         return dim && (
                             <div key={dim.fid} onClick={() => setCursor(i)} role="tab" aria-selected={i === cursor}>
+                                {res.description?.title && (
+                                    <span className="title">
+                                        {intl.get(`RInsight.explanation.title.${res.description.title}`)}
+                                    </span>
+                                )}
                                 <span>
                                     {dim.name || dim.fid}
                                 </span>
@@ -102,11 +118,13 @@ const RInsightView: FC<IRInsightViewProps> = ({ data, result, mainField, mainFie
                         <>
                             <Toggle
                                 label="Normalize Stack"
+                                inlineLabel
                                 checked={normalize}
                                 onChange={(_, checked) => setNormalize(Boolean(checked))}
                             />
                             <br />
                             <ExplainChart
+                                title="全局分布"
                                 data={data}
                                 mainField={mainField}
                                 mainFieldAggregation={mainFieldAggregation}
@@ -115,6 +133,7 @@ const RInsightView: FC<IRInsightViewProps> = ({ data, result, mainField, mainFie
                                 normalize={normalize}
                             />
                             <DiffChart
+                                title="对比分布"
                                 data={data}
                                 subspaces={indices}
                                 mainField={mainField}
@@ -122,11 +141,16 @@ const RInsightView: FC<IRInsightViewProps> = ({ data, result, mainField, mainFie
                                 dimension={dimension}
                                 mode={mode}
                             />
-                            <p>
-                                {`选择区间内 ${dimension.name ||
-                                    dimension.fid
-                                } 与 ${mainField.name || mainField.fid} 表现出影响。评分：${view.responsibility}。`}
-                            </p>
+                            {view.description && (
+                                <p>
+                                    {intl.get(`RInsight.explanation.desc.${view.description.key}`, {
+                                        ...view.description.data,
+                                        responsibility: view.responsibility,
+                                        mainField: mainField.name || mainField.fid,
+                                        dimension: dimension.name || dimension.fid,
+                                    })}
+                                </p>
+                            )}
                         </>
                     )}
                 </div>
