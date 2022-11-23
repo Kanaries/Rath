@@ -39,7 +39,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
     const [normalize, setNormalize] = useState<boolean>(true);
 
     useEffect(() => {
-        setIndexKey(fieldMetas.find(f => f.semanticType === 'temporal') ?? null);
+        setIndexKey(ik => ik ? fieldMetas.find(f => f.fid === ik.fid) ?? null : null);
     }, [fieldMetas]);
 
     const [subspaces, setSubspaces] = useState<[IRInsightExplainSubspace, IRInsightExplainSubspace] | null>(null);
@@ -200,13 +200,13 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                     />
                     <Dropdown
                         label="Index Key"
-                        selectedKey={indexKey?.fid}
-                        options={fieldMetas.map(f => ({
+                        selectedKey={indexKey?.fid ?? ''}
+                        options={[{ key: '', text: 'null' }].concat(fieldMetas.map(f => ({
                             key: f.fid,
                             text: f.name ?? f.fid,
-                        }))}
+                        })))}
                         onChange={(_, option) => {
-                            const f = fieldMetas.find(which => which.fid === option?.key);
+                            const f = option?.key ? fieldMetas.find(which => which.fid === option.key) : null;
                             setIndexKey(f ?? null);
                         }}
                     />
@@ -244,18 +244,16 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                             onChange={(_, checked) => setEditingGroupIdx(checked ? 2 : 1)}
                         />
                     )}
-                    {indexKey && (
-                        <ChartItem
-                            data={sample}
-                            indexKey={indexKey}
-                            mainField={mainField}
-                            mainFieldAggregation={aggr}
-                            interactive
-                            handleFilter={handleFilter}
-                            normalize={false}
-                        />
-                    )}
-                    {indexKey && subspaces && (
+                    <ChartItem
+                        data={sample}
+                        indexKey={indexKey}
+                        mainField={mainField}
+                        mainFieldAggregation={aggr}
+                        interactive
+                        handleFilter={handleFilter}
+                        normalize={false}
+                    />
+                    {subspaces && (
                         <>
                             <ChartItem
                                 title="Foreground Group"
@@ -292,7 +290,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                         checked={normalize}
                         onChange={(_, checked) => setNormalize(Boolean(checked))}
                     />
-                    {indexKey && irResult.length > 0 && (
+                    {irResult.length > 0 && (
                         irResult.map(res => {
                             const dimension = fieldMetas.find(f => f.fid === res.src);
 
