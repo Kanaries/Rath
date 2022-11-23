@@ -167,6 +167,7 @@ Please check out the [Contributing to RATH guide](https://kanaries.net/docs/cont
 for guidelines about how to proceed.
 
 Thanks to all contributors :heart:
+
 <a href="https://github.com/kanaries/rath/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=kanaries/rath" />
 </a>
