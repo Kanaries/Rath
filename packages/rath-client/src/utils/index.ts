@@ -211,20 +211,6 @@ export function getServerUrl(path: string) {
     return url.toString();
 }
 
-export function fixedLengthNumbers(nums: number[]): string[] {
-  const max_num = Math.max(...nums);
-  const num_len = Math.floor(Math.log10(max_num) + 1);
-  return nums.map(num => {
-      let ans = num.toString();
-      let fc = ans.length;
-      while(fc < num_len) {
-          fc++;
-          ans = '0' + ans;
-      }
-      return ans;
-  })
-}
-
 export function getDefaultAvatarURL(imgKey: string, size: 'small' | 'large' = 'large') {
   return `${DEFAULT_AVATAR_URL_PREFIX}${size}/${imgKey}`;
 }
