@@ -1,12 +1,16 @@
+import md5 from "crypto-js/md5";
+import Cookies from 'js-cookie';
 import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visual-insights';
+import { DEFAULT_AVATAR_URL_PREFIX, RATH_INDEX_COLUMN_KEY } from '../constants';
 import { IFieldMeta, IFilter } from '@kanaries/loa';
-import { IRow, ICol, IVegaSubset } from '../interfaces';
-import { RATH_INDEX_COLUMN_KEY } from '../constants';
+import { IRow, ICol, IVegaSubset,IAVATAR_TYPES } from '../interfaces';
 import { isDateTimeArray } from '../dev/workers/engine/dateTimeExpand';
 import * as FileLoader from './fileParser';
 import * as Transform from './transform';
 import { getRange } from './stat';
 import deepcopy from './deepcopy';
+
+const AUTH_COOKIE_KEY = 'userAuthed';
 
 interface IFieldId { fid: string }
 export function colFromIRow(from: readonly IRow[], fields?: string[] | IFieldId[]): Map<string, ICol<any>> {
@@ -182,11 +186,70 @@ export {
   getRange
 }
 
+export function setLoginCookie(userName: string) {
+    Cookies.set(AUTH_COOKIE_KEY, userName, { expires: 1 });
+}
+export function checkLoginCookie() {
+    const userName = Cookies.get(AUTH_COOKIE_KEY);
+    if (userName && userName !== '') {
+        return userName;
+    }
+    return null;
+}
+
+export function clearLoginCookie() {
+    Cookies.remove(AUTH_COOKIE_KEY);
+}
+
+export function getServerUrl(path: string) {
+    const baseURL = new URL(window.location.href);
+    const DATA_SERVER_URL =
+        baseURL.searchParams.get('main_service') || localStorage.getItem('main_service') || window.location.href;
+    // const devSpecURL = new URL(w|| window.location.href)
+    const url = new URL(DATA_SERVER_URL);
+    url.pathname = path;
+    return url.toString();
+}
+
+export function fixedLengthNumbers(nums: number[]): string[] {
+  const max_num = Math.max(...nums);
+  const num_len = Math.floor(Math.log10(max_num) + 1);
+  return nums.map(num => {
+      let ans = num.toString();
+      let fc = ans.length;
+      while(fc < num_len) {
+          fc++;
+          ans = '0' + ans;
+      }
+      return ans;
+  })
+}
+
+export function getDefaultAvatarURL(imgKey: string, size: 'small' | 'large' = 'large') {
+  return `${DEFAULT_AVATAR_URL_PREFIX}${size}/${imgKey}`;
+}
+
+type AvatarProps = {
+  avatarType: IAVATAR_TYPES;
+  avatarKey: string;
+  size: 'small' | 'large';
+  email: string;
+}
+
+export function getAvatarURL(props: AvatarProps) {
+  if (props.avatarType === IAVATAR_TYPES.default) {
+      return `${DEFAULT_AVATAR_URL_PREFIX}${props.size}/${props.avatarKey}`
+  } else {
+      return `https://www.gravatar.com/avatar/${md5(props.email.toLowerCase()).toString()}`;
+  }
+}
+
 export interface ISearchInfoBase {
   fields: IFieldMeta[];
   filters?: IFilter[];
   spec?: IVegaSubset | null;
 }
+
 export function searchFilterView<T extends ISearchInfoBase> (searchContent: string, views: T[]) {
   const words = searchContent.split(/[\s,;\t]+/)
   const lookupPattern = new RegExp(`.*${words.map(w => `(${w})`).join('|')}.*`, 'i')

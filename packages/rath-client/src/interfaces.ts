@@ -215,3 +215,25 @@ export enum PAINTER_MODE {
 export interface IDataFrame {
     [key: string]: any[]
 }
+
+export enum IAccessMethod {
+    PHONE = "phone",
+    EMAIL = "email",
+    PASSWORD = "password",
+}
+
+export enum IAccessPageKeys {
+    LOGIN = "login",
+    SIGNUP = "signup",
+}
+
+export interface IResponse<T = void> {
+    success: boolean;
+    data: T;
+    message?: string;
+}
+
+export enum IAVATAR_TYPES {
+    gravatar = 'gravatar',
+    default = 'default'
+}

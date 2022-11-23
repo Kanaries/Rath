@@ -470,5 +470,37 @@
         "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
         "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
         "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    },
+    "login": {
+        "clickLogin": "Click Login",
+        "haveSent": "Alredy Send",
+        "signIn": "Sign In",
+        "signOut": "Sign Out",
+        "preferences": "Preferences",
+        "phoneCert": "Phone",
+        "emailCert": "Email",
+        "passwordLog": "Password",
+        "account": "Account",
+        "header": "Head Portrait",
+        "info": "Info",
+        "setting": "Setting",
+        "login": "Login",
+        "loginAndRegister": "login/Register",
+        "getCertCode": "Send Cert Code",
+        "upload": "Upload custom avatar",
+        "AvatarImage": "Avatar Image",
+        "phone": {
+            "phoneNo": "Phone NO.",
+            "certCode": "Cert Code"
+        },
+        "email": { 
+            "title": "Email",
+            "certCode": "Cert Code",
+            "errEmail": "not support email type"
+        },
+        "password": {
+            "userName": "UsernNme",
+            "password": "Password"
+        }
     }
 }
