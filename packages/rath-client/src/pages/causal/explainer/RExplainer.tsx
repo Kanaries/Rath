@@ -247,7 +247,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                         data={sample}
                         indexKey={indexKey}
                         mainField={mainField}
-                        mainFieldAggregation={aggr}
+                        mainFieldAggregation={null}
                         interactive
                         handleFilter={handleFilter}
                         normalize={false}

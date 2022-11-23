@@ -105,10 +105,49 @@ const xAggregate = (data: IRow[], field: IFieldMeta, aggregate: AggregateType): 
 };
 
 const xNormalize = (col: number[]): number[] => {
-    let [min, max] = getRange(col.filter(val => Number.isFinite(val)));
+    const sum = col.reduce<number>((sum, val) => {
+        if (Number.isFinite(val)) {
+            return sum + Math.abs(val);
+        }
+        return sum;
+    }, 0);
     return col.map(val => {
-        return (val - min) / (max - min);
+        return Math.abs(val) / sum;
     });
+};
+
+const xBin = (...indices: number[][]): { binSize: number; flat: number[] } => {
+    const getFlatBinKey = (keys: number[]) => keys.map(key => `${key}`).join(',');
+    const distribution = new Map<string, number>();
+    const flatBinKeys: string[] = [];
+    for (let i = 0; i < indices[0].length; i += 1) {
+        const keys = indices.map(col => col[i]);
+        const binKey = getFlatBinKey(keys);
+        flatBinKeys.push(binKey);
+        distribution.set(binKey, (distribution.get(binKey) ?? 0) + 1);
+    }
+    const maxBin = (MAX_BIN ** indices.length) / (2 ** (indices.length - 1));
+    const keys: [string, number][] = [];
+    for (const [key, count] of distribution) {
+        keys.push([key, count]);
+    }
+    keys.sort((a, b) => b[1] - a[1]).splice(maxBin - 1, Infinity);
+    const projector = new Map<string, number>();
+    for (const key of keys) {
+        projector.set(key[0], projector.size);
+    }
+    return {
+        binSize: maxBin,
+        flat: flatBinKeys.map(key => projector.get(key) ?? (maxBin - 1)),
+    };
+};
+
+const xFreq = (binSize: number, binned: number[]): number[] => {
+    const res = new Array<number>(binSize).fill(0);
+    for (const key of binned) {
+        res[key] = res[key] + 1;
+    }
+    return res;
 };
 
 const DIFF_IGNORE_THRESHOLD = 0.15;
@@ -118,7 +157,7 @@ const diffGroups = (
     indices1: number[],
     indices2: number[],
     dimension: IFieldMeta,
-    measure: { fid: string; aggregate: AggregateType | null },
+    measure: { field: IFieldMeta; aggregate: AggregateType | null },
 ): number => {
     const hashIndices = xHash(data, dimension);
     const hashedData = data.map((row, i) => ({
@@ -128,7 +167,30 @@ const diffGroups = (
     const data1 = indices1.map(index => hashedData[index]);
     const data2 = indices2.map(index => hashedData[index]);
     if (!measure.aggregate) {
-        return 0;   // TODO: 明细
+        const measureHashIndices1 = xHash(data1, measure.field);
+        const measureHashIndices2 = xHash(data2, measure.field);
+        const col1 = data1.map(d => d[hashIndexKey]);
+        const col2 = data2.map(d => d[hashIndexKey]);
+        const binned1 = xBin(col1, measureHashIndices1);
+        const binned2 = xBin(col2, measureHashIndices2);
+        const freq1 = xFreq(binned1.binSize, binned1.flat);
+        const freq2 = xFreq(binned2.binSize, binned2.flat);
+        const group1 = xNormalize(freq1);
+        const group2 = xNormalize(freq2);
+        const diff = new Array<0>(binned1.binSize).fill(0).reduce<{ loss: number; count: number }>((ctx, _, i) => {
+            const a = group1[i];
+            const b = group2[i];
+            if (a === 0 && b === 0) {
+                return ctx;
+            }
+            const ignoreLoss = Math.abs(1 - (a / b) / b) <= DIFF_IGNORE_THRESHOLD || !Number.isFinite(a) || !Number.isFinite(b);
+            const loss = ignoreLoss ? 0 : Math.sqrt(Math.abs(a - b));
+            return {
+                loss: ctx.loss + loss,
+                count: ctx.count + 1,
+            };
+        }, { loss: 0, count: 0 });
+        return diff.count === 0 ? 0 : diff.loss / diff.count;
     }
     const aggregated1 = xAggregate(data1, dimension, measure.aggregate);
     const aggregated2 = xAggregate(data2, dimension, measure.aggregate);
@@ -147,7 +209,6 @@ const diffGroups = (
             count: ctx.count + 1,
         };
     }, { loss: 0, count: 0 });
-    // console.log(dimension, diff, group1, group2, data1.slice(0, 10).map(d => JSON.stringify(d)), data2.slice(0, 10).map(d => JSON.stringify(d)), aggregated1, aggregated2);
     return diff.count === 0 ? 0 : diff.loss / diff.count;
 };
 
@@ -167,8 +228,12 @@ export const insightExplain = (props: IRInsightExplainProps): IRInsightExplainRe
     const exploringFields = fields.filter(f => ![...view.dimensions, ...view.measures.map(ms => ms.fid)].includes(f.fid));
     for (const f of exploringFields) {
         const target = view.measures[0];
+        const measure = fields.find(which => which.fid === target.fid);
+        if (!measure) {
+            continue;
+        }
         const responsibility = diffGroups(data, indices1, indices2, f, {
-            fid: target.fid,
+            field: measure,
             aggregate: target.op,
         });
         if (responsibility !== 0) {

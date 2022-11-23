@@ -51,22 +51,25 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
         if (container.current) {
             const commonEncodings = {
                 mark: {
-                    type: (
+                    type: mainFieldAggregation ? (
                         indexKey ? indexKey.semanticType === 'temporal' : mainField.semanticType === 'temporal'
-                    ) ? 'area' : 'bar',
+                    ) ? 'area' : 'bar' : 'point',
                     tooltip: true,
                 },
                 encoding: indexKey ? {
                     x: {
                         field: indexKey.fid,
-                        bin: indexKey.semanticType === 'quantitative',
+                        bin: mainFieldAggregation && indexKey.semanticType === 'quantitative',
                         type: indexKey.semanticType,
                         title: indexKey.name || indexKey.fid,
                     },
                     y: {
                         field: mainField.fid,
                         aggregate: mainFieldAggregation ?? undefined,
-                        title: `${mainFieldAggregation}(${mainField.name || mainField.fid})`,
+                        type: mainField.semanticType,
+                        title: mainFieldAggregation
+                            ? `${mainFieldAggregation}(${mainField.name || mainField.fid})`
+                            : mainField.name || mainField.fid,
                     },
                 } : {
                     x: {

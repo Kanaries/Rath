@@ -43,7 +43,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField
             const translatedKey = '__target__';
             const commonEncodings = {
                 mark: {
-                    type: dimension.semanticType === 'temporal' ? 'area' : 'bar',
+                    type: mainFieldAggregation ? dimension.semanticType === 'temporal' ? 'area' : 'bar' : 'point',
                     tooltip: true,
                     size: 10,
                 },
@@ -52,7 +52,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField
                         field: dimension.fid,
                         title: `${dimension.name || dimension.fid}`,
                         type: dimension.semanticType,
-                        bin: dimension.semanticType === 'quantitative',
+                        bin: mainFieldAggregation && dimension.semanticType === 'quantitative',
                     },
                 },
             } as const;
