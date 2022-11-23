@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { applyFilters, IFilter } from '@kanaries/loa'
+import { Sampling } from 'visual-insights'
 import { IRow } from "../../../interfaces";
 import { focusedSample } from "../../../utils/sample";
 import { useGlobalStore } from "../../../store";
-import { baseDemoSample } from "../../painter/sample";
 
 const VIZ_SUBSET_LIMIT = 2_000;
 const SAMPLE_UPDATE_DELAY = 500;
@@ -26,7 +26,7 @@ export function useDataViews (originData: IRow[]) {
         if (sample.length < VIZ_SUBSET_LIMIT) {
             return sample;
         }
-        return baseDemoSample(sample, VIZ_SUBSET_LIMIT);
+        return Sampling.reservoirSampling(sample, VIZ_SUBSET_LIMIT);
     }, [sample]);
 
     useEffect(() => {
