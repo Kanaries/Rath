@@ -59,7 +59,7 @@ export interface TableData<TL extends TableLabels = TableLabels> {
 
 interface DatabaseDataProps {
     onClose: () => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => void;
     setLoadingAnimation: (on: boolean) => void;
 }
 
@@ -181,9 +181,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         if (!preview.value || submitPendingRef.current) {
             return;
         }
-
         submitPendingRef.current = true;
-
         try {
             const { rows, columns } = preview.value;
             const data = await transformRawDataService(
@@ -194,18 +192,18 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 )
             );
             const { dataSource, fields } = data;
+            const name = [database.value, schema.value].filter(
+                Boolean
+            ).join('.')
 
             logDataImport({
                 dataType: `Database/${databaseType}`,
-                name: [database.value, schema.value].filter(
-                    Boolean
-                ).join('.'),
+                name,
                 fields,
                 dataSource: dataSource.slice(0, 10),
                 size: dataSource.length,
             });
-
-            onDataLoaded(fields, dataSource);
+            onDataLoaded(fields, dataSource, name);
 
             onClose();
         } catch (error) {
@@ -214,8 +212,6 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
             submitPendingRef.current = false;
         }
     };
-
-    // console.log(progress);
 
     return <div>
         <CustomConfig ping={ping} loading={loading} />

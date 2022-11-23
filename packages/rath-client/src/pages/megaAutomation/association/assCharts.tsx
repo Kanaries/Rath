@@ -1,22 +1,18 @@
 import React from 'react';
 import { CommandButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
-import { IInsightSpace, Specification } from 'visual-insights';
+import { IInsightSpace } from 'visual-insights';
 import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IRow, PreferencePanelConfig } from '../../../interfaces';
 import ReactVega from '../../../components/react-vega';
 import { distVis } from '../../../queries/distVis';
-export interface IVizSpace extends IInsightSpace {
-    schema: Specification;
-    dataView: IRow[];
-}
 
 interface AssociationProps {
     visualConfig: PreferencePanelConfig;
-    vizList: IVizSpace[];
+    vizList: IInsightSpace[];
     fieldMetas: IFieldMeta[];
     dataSource: IRow[];
-    onSelectView: (viz: IVizSpace) => void;
+    onSelectView: (viz: IInsightSpace) => void;
 }
 const AssociationCharts: React.FC<AssociationProps> = (props) => {
     const { vizList, onSelectView, dataSource, fieldMetas } = props;
@@ -42,8 +38,8 @@ const AssociationCharts: React.FC<AssociationProps> = (props) => {
                             <div>
                                 <CommandButton
                                     iconProps={{ iconName: 'Lightbulb' }}
-                                    text={intl.get('explore.digIn')}
-                                    ariaLabel={intl.get('explore.digIn')}
+                                    text={intl.get('megaAuto.analysis')}
+                                    ariaLabel={intl.get('megaAuto.analysis')}
                                     onClick={() => {
                                         onSelectView(view);
                                     }}

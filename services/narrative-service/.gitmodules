@@ -1,0 +1,3 @@
+[submodule "pyscagnostics"]
+	path = pyscagnostics
+	url = git@github.com:haishiro/pyscagnostics.git

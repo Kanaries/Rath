@@ -1,12 +1,16 @@
 import { LaTiaoError, LaTiaoNameError, LaTiaoTypeError } from './error';
-import type { TokenType, Token, OpToken } from './token';
-import type { Context } from '.';
+import type { TokenType, Token, OpToken, FieldToken, FieldType } from './token';
+import type { LaTiaoProgramContext } from './types';
 
 
 export type OperatorName = `$${string}`;
 
+type MapParameter<T extends TokenType> = (
+  T extends `RATH.FIELD::${infer P}` ? P extends FieldType ? FieldToken<P> : FieldToken : Token & { type: T }
+);
+
 type MapParameters<A extends TokenType[]> = {
-  [index in keyof A]: Token & { type: A[index] };
+  [index in keyof A]: MapParameter<A[index]>;
 };
 
 type MapReturnType<R extends TokenType> = Token & { type: R };
@@ -25,7 +29,7 @@ export type Operator<
   secret?: boolean;
   trailing?: M;
   exec: (
-    context: Context,
+    context: LaTiaoProgramContext,
     args: M extends Exclude<TokenType, 'OP'> ? [...P, ...MapParameters<M[]>] : P,
   ) => Promise<S>;
 };

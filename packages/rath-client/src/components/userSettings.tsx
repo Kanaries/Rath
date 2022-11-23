@@ -14,7 +14,6 @@ const langOptions: IDropdownOption[] = SUPPORT_LANG.map((lang) => ({
 
 const Container = styled.div`
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
 `;
 const UserSettings: React.FC = () => {
@@ -22,7 +21,9 @@ const UserSettings: React.FC = () => {
     const { langStore, commonStore } = useGlobalStore();
     const { navMode } = commonStore;
     return (
-        <Container>
+        <Container
+            style={navMode === 'icon' ? { flexDirection: 'column' } : { flexDirection: 'row', alignItems: 'center' }}
+        >
             {navMode === 'text' && (
                 <DropdownSelect
                     border

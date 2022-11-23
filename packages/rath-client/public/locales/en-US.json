@@ -49,7 +49,8 @@
         "dashBoardDesigner": "Dashboard Designer",
         "painter": "Data Painter",
         "collection": "Collection",
-        "dashboard": "Dashboard"
+        "dashboard": "Dashboard",
+        "causal": "Causal"
     },
     "preference": {
         "title": "preference",
@@ -244,7 +245,7 @@
             "title": "Fast Selection"
         },
         "downloadData": {
-            "title": "Download Data"
+            "title": "export dataset"
         },
         "extend": {
             "title": "Extend Information",
@@ -259,7 +260,11 @@
             "cancel": "Cancel",
             "auto": "Extend Suggestions",
             "suggestion": {
-                "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months."
+                "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months.",
+                "oneHot": "One-hot encoding for categorical fields.|One-hot encoding is a way to represent categorical variables as binary vectors. It allows the representation of categorical data to be more expressive.",
+                "wordTFIDF": "Extract words from text fields(score: tf-idf).|TF-IDF is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus.",
+                "wordTF": "Extract words from text fields(score: tf).| Use the term with top frequency in docs.",
+                "reGroupByFreq": "Re-Group By frequency.|Re-group the field by frequency, keep the top frequency value."
             }
         },
         "filter": {
@@ -272,6 +277,10 @@
             "set": "value set",
             "submit": "Submit",
             "cancel": "Cancel"
+        },
+        "operations": {
+            "title": "Operations",
+            "selectAll": "Enable All Fields"
         }
     },
     "meta": {
@@ -288,6 +297,7 @@
         "hintMain": "Here are some interesting patterns and insights found by RATH. If you are interested in some of them, try to use 'edit charts' to know more details about current view and use 'associate' to explore related insights",
         "summary": "Summary",
         "associate": "Associate",
+        "analysis": "Analysis",
         "asso": {
             "T1": "Associated Measures",
             "T2": "Associated Dimensions",
@@ -329,10 +339,11 @@
     "semiAuto": {
         "main": {
             "mainView": "Main View",
-            "relatePatterns": "associate patterns",
-            "relateFeatures": "associate features",
+            "relatePatterns": "related patterns",
+            "relateFeatures": "related features",
             "explainDiff": "explain diff",
-            "pointInterests": "split",
+            "pointInterests": "related subsets",
+            "neighbors": "neighbor views",
             "pin": "pin",
             "compare": "compare",
             "vizsys": {
@@ -344,7 +355,14 @@
             "associate": {
                 "patterns": "Associated Patterns",
                 "features": "Associated Features",
-                "filters": "Associated Subsets"
+                "filters": "Associated Subsets",
+                "neighbors": "Associated Neighbors"
+            },
+            "associateShorthand": {
+                "patterns": "Patterns",
+                "features": "Features",
+                "filters": "Subsets",
+                "neighbors": "Neighbors"
             }
         }
     },
@@ -390,8 +408,9 @@
         },
         "op": {
             "$set": "Transforms a field to ordinals as a new column.",
-            "$group": "Transforms a field to calculative numbers as a new column.",
-            "$nominal": "Transforms a field to strings as a new column.",
+            "$vec": "Transforms a field to calculative numbers as a new column.",
+            "$text": "Transforms a field to strings as a new column.",
+            "$bool": "Transforms a field to 0 or 1 as a new column.",
             "$id": "Generates an automatically incrementing id field, starting from 1.",
             "$order": "Returns rank index of the data sorted on the target numeric field, starting from 1.",
             "$dict": "Returns rank index of the data sorted on the target string field, starting from 1.",
@@ -401,8 +420,46 @@
             "$isValidDate": "Transforms Date objects to string \"1\" if the Date object is valid, otherwise string \"0\" as a new column.",
             "$normalize": "Normalizes a field as a new column.",
             "$inset": "Scales a field to range -1 ~ +1 as a new column.",
-            "$bound": "Scales a field to range 0 ~ 1 as a new column."
+            "$bound": "Scales a field to range 0 ~ 1 as a new column.",
+            "$log": "Projects a field by x -> log(x) (the base is default to E) as a new column.",
+            "$log2": "Projects a field by x -> log[2](x) as a new column.",
+            "$log1p": "Projects a field by x -> log(x + 1) as a new column.",
+            "$log10": "Projects a field by x -> log[10](x) as a new column.",
+            "$map": "Maps each value to a new value of the same type as a new column.",
+            "$test": "Maps each value to a 0 (false) or 1 (true) as a new column.",
+            "$ReLU": "Projects a field by x -> max(0, x) as a new column.",
+            "$match": "Finds the matched parts of each text content using Regular Expression as a new column.",
+            "$replace": "Replaces the matched parts of each text content with a given string using Regular Expression as a new column.",
+            "$concat": "Concats text contents of all the fields as a new column.",
+            "$sigmoid": "Projects a field by x -> (1 + e^-x)^-1 as a new column.",
+            "$boxClip": "Maps overflowing values (due to boxplot) to the domain as a new column.",
+            "$meanClip": "Maps overflowing values (due to the given domain) to the mean of all the other values as a new column.",
+            "$nearestClip": "Maps overflowing values (due to the given domain) to the domain as a new column.",
+            "$zeroFill": "Maps Infinite or NaN to 0 as a new column.",
+            "$meanFill": "Maps Infinite or NaN to the mean of all the other values as a new column.",
+            "$partition": "Separates each value by boolean expression into two new column."
         }
+    },
+    "causal_direction": {
+        "_": "Type of Link",
+        "none": "irrelevant to",
+        "directed": "direct to",
+        "reversed": "directed from",
+        "weakDirected": "direct to (weak)",
+        "weakReversed": "directed from (weak)",
+        "undirected": "relative without direction with",
+        "weakUndirected": "relative without direction with (weak)",
+        "bidirected": "bidirected with"
+    },
+    "causal_direction_desc": {
+        "none": "A is irrelevant to B.",
+        "directed": "A influences B.",
+        "reversed": "A is influenced by B.",
+        "weakDirected": "In some cases, A influences B.",
+        "weakReversed": "In some cases, A is influenced by B.",
+        "undirected": "A is relevant to B, but the direction is not decided.",
+        "weakUndirected": "In different cases, A or B is relevant to the other one.",
+        "bidirected": "Both A and B influences each other."
     },
     "time_format": {
         "dateTime": "%x, %X",
@@ -413,5 +470,37 @@
         "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
         "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
         "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    },
+    "login": {
+        "clickLogin": "Click Login",
+        "haveSent": "Alredy Send",
+        "signIn": "Sign In",
+        "signOut": "Sign Out",
+        "preferences": "Preferences",
+        "phoneCert": "Phone",
+        "emailCert": "Email",
+        "passwordLog": "Password",
+        "account": "Account",
+        "header": "Head Portrait",
+        "info": "Info",
+        "setting": "Setting",
+        "login": "Login",
+        "loginAndRegister": "login/Register",
+        "getCertCode": "Send Cert Code",
+        "upload": "Upload custom avatar",
+        "AvatarImage": "Avatar Image",
+        "phone": {
+            "phoneNo": "Phone NO.",
+            "certCode": "Cert Code"
+        },
+        "email": { 
+            "title": "Email",
+            "certCode": "Cert Code",
+            "errEmail": "not support email type"
+        },
+        "password": {
+            "userName": "UsernNme",
+            "password": "Password"
+        }
     }
 }

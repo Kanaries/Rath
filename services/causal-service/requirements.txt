@@ -1,0 +1,15 @@
+numpy
+networkx
+pandas
+scipy
+scikit-learn
+statsmodels
+pydot
+matplotlib
+graphviz
+pygam
+fastapi
+uvicorn[standard]
+gunicorn
+causal-learn
+dowhy

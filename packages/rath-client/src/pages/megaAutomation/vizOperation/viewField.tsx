@@ -15,17 +15,18 @@ const COLORS = {
     white: '#fff'
 }
 
-export const Pill = styled.div<{colType: IFieldMeta['analyticType']}>`
+export const Pill = styled.div<{colType: IFieldMeta['analyticType'], mode: 'real' | 'wildcard'}>`
   background-color: ${props => props.colType === 'measure' ? COLORS.white : COLORS.black};
   border-color: ${props => props.colType === 'measure' ? COLORS.black : COLORS.white};
   color: ${props => props.colType === 'measure' ? COLORS.black : COLORS.white};
+  border-style: ${props => props.mode === 'real' ? 'solid' : 'dashed'};
+  opacity: ${props => props.mode === 'real' ? 1 : 0.5};
   -ms-user-select: none;
   -webkit-align-items: center;
   -webkit-user-select: none;
   align-items: center;
   /* border-radius: 10px; */
   border-radius: 10px;
-  border-style: solid;
   border-width: 1px;
   box-sizing: border-box;
   cursor: default;
@@ -76,13 +77,16 @@ export const PillPlaceholder = styled.div`
 interface ViewFieldProps {
     type: IFieldMeta['analyticType'];
     text: string;
+    mode?: 'real' | 'wildcard';
     onRemove?: () => void;
+    onDoubleClick?: () => void;
 }
 const ViewField: React.FC<ViewFieldProps> = props => {
-    return <Pill colType={props.type}>
-        {props.onRemove && <Icon className="cancel-icon" iconName="Cancel" onClick={props.onRemove} />}
+    const { onRemove, text, mode = 'real', type, onDoubleClick } = props;
+    return <Pill mode={mode} colType={type} onDoubleClick={onDoubleClick}>
+        {onRemove && <Icon className="cancel-icon" iconName="Cancel" onClick={onRemove} />}
         {/* <IconButton iconProps={{ iconName: 'Cancel', style: { fontSize: '8px' } }} /> */}
-        {props.text}
+        {text}
     </Pill>
 }
 

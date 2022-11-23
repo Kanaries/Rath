@@ -1,4 +1,4 @@
-import { IECStatus } from './interfaces';
+import type { IECStatus } from './interfaces';
 
 export const RATH_INDEX_COLUMN_KEY = '__rath_index_col_key__';
 
@@ -12,6 +12,7 @@ export const PIVOT_KEYS = {
     painter: 'painter',
     collection: 'collection',
     dashboard: 'dashboard',
+    causal: 'causal',
 } as const;
 
 export const COMPUTATION_ENGINE = {
@@ -39,3 +40,16 @@ export const RESULT_STORAGE_SPLITOR = '\n===RATH_STORAGE_SPLITOR===\n';
 export const STORAGE_FILE_SUFFIX = 'krs';
 
 export const EDITOR_URL = 'https://kanaries.cn/vega-editor/';
+
+export const STORAGE_INSTANCE = 'rath_storage_instance'
+
+export const STORAGES = {
+    DATASOURCE: 'datasource',
+    WORKSPACE: 'workspace',
+    META: 'meta',
+    MODEL: 'model',
+    STATE: 'state',
+    ITERATOR: 'iterator',
+    CONFIG: 'config',
+    ITERATOR_META: 'iterator_meta',
+}

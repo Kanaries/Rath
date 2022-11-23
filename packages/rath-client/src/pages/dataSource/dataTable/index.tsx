@@ -1,4 +1,4 @@
-import React, { useCallback} from "react";
+import React, { useCallback, useEffect, useState} from "react";
 import { ArtColumn, BaseTable, Classes } from "ali-react-table";
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite'
@@ -27,7 +27,17 @@ const TableInnerStyle = {
 
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
-    const { filteredData: rawData, fieldsWithExtSug: fields } = dataSourceStore;
+    const { filteredDataMetaInfo, fieldsWithExtSug: fields, filteredDataStorage } = dataSourceStore;
+    const [filteredData, setFilteredData] = useState<IRow[]>([]);
+    useEffect(() => {
+        if (filteredDataMetaInfo.versionCode === -1) {
+            setFilteredData([]);
+        } else {
+            filteredDataStorage.getAll().then((data) => {
+                setFilteredData(data.slice(0, 1000));
+            })
+        }
+    }, [filteredDataMetaInfo.versionCode, filteredDataStorage])
 
     const fieldsCanExpand = fields.filter(
         f => f.extSuggestions.length > 0,
@@ -145,8 +155,8 @@ const DataTable: React.FC = (props) => {
                             width: 'unset',
                             color: 'rgb(0, 120, 212)',
                             backgroundColor: 'rgba(0, 120, 212, 0.02)',
-                            border: '1px solid',
-                            margin: '1em 0 2em',
+                            border: '1px solid rgba(0, 120, 212, 0.5)',
+                            margin: '2px 0 1em 0',
                         },
                     }}
                 >
@@ -163,7 +173,7 @@ const DataTable: React.FC = (props) => {
                         root: {
                             boxSizing: 'border-box',
                             width: 'unset',
-                            margin: '1em 0 2em',
+                            margin: '2px 0 1em 0',
                         },
                     }}
                 >
@@ -176,7 +186,7 @@ const DataTable: React.FC = (props) => {
                 columns.length > 0 && <CustomBaseTable
                 useVirtual={true}
                 getRowProps={rowPropsCallback}
-                style={TableInnerStyle} dataSource={rawData} columns={columns} />
+                style={TableInnerStyle} dataSource={filteredData} columns={columns} />
             }
         </div>
     );

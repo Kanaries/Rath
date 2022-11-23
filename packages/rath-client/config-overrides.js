@@ -19,6 +19,15 @@ module.exports = function override(config, env) {
         filename: '[contenthash].worker.js'
       },
     },
+  }, {
+    test: /\.worker\.ts$/,
+    use: [{
+      loader: 'worker-loader',
+      options: {
+        inline: 'fallback',
+        filename: '[contenthash].worker.js'
+      },
+    }, 'ts-loader'],
   })
   config.output.globalObject = 'self'
   // config.module = config.module || {};

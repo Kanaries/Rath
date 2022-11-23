@@ -1,12 +1,12 @@
-import { $DateToField } from '../implement/date-slice';
+import { $DateToField } from './implement/date-slice';
 import { getOperator } from './operator';
 import type { DateToken, FieldListToken, FieldToken, OpToken, Token } from './token';
-import type { Context } from '.';
+import type { LaTiaoProgramContext, Static } from './types';
 
 
-const execOp = async (op: OpToken, context: Context, exp: (fid: string) => void): Promise<Exclude<Token, OpToken>> => {
+const execOp = async (op: OpToken, context: LaTiaoProgramContext, exp: (fid: string) => void): Promise<Exclude<Token, OpToken>> => {
   const opt = getOperator(op);
-  const args: Exclude<Token, OpToken>[] = [];
+  const args: Static<Exclude<Token, OpToken>>[] = [];
 
   for await (const arg of op.args) {
     if (arg.type === 'OP') {
@@ -16,6 +16,7 @@ const execOp = async (op: OpToken, context: Context, exp: (fid: string) => void)
     }
   }
 
+  // @ts-expect-error `args` is already validated
   const res = await opt.exec(context, args);
 
   if (op.output.startsWith('RATH.FIELD::') && op.exports !== false) {
@@ -52,7 +53,7 @@ const execOp = async (op: OpToken, context: Context, exp: (fid: string) => void)
   return res;
 };
 
-const exec = async (ast: OpToken[], context: Context): Promise<readonly string[]> => {
+const exec = async (ast: OpToken[], context: LaTiaoProgramContext): Promise<readonly string[]> => {
   const expArr = new Set<string>();
 
   for await (const op of ast) {

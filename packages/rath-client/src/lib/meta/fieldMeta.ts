@@ -21,13 +21,18 @@ export function computeFieldFeatures(values: any[], semanticType: ISemanticType)
         sum = 0,
         qt_25 = 0,
         qt_50 = 0,
-        qt_75 = 0;
+        qt_75 = 0,
+        mean = 0;
 
     if (semanticType === 'quantitative') {
         ent = Statistics.entropy(rangeNormilize(bin(values).filter((v) => v > 0)));
         maxEnt = Math.log2(dist.length);
-        const sum = values.reduce((t, v) => t + v, 0);
-        const mean = sum / values.length;
+        let i = 0;
+        let size = values.length;
+        for (i = 0; i < size; i++) {
+            sum += values[i];
+        }
+        mean = sum / size;
         for (let i = 0; i < values.length; i++) {
             s += (values[i] - mean) ** 2;
         }
@@ -43,7 +48,7 @@ export function computeFieldFeatures(values: any[], semanticType: ISemanticType)
             max: _max,
             min: _min,
             sum: sum,
-            mean: sum / values.length,
+            mean: mean,
             count: values.length,
             stdev: s,
             qt_25,

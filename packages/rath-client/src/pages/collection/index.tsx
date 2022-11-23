@@ -5,10 +5,10 @@ import intl from 'react-intl-universal'
 import { useGlobalStore } from '../../store';
 import { baseDemoSample } from '../painter/sample';
 import { IInsightVizView } from '../../interfaces';
+import { searchFilterView } from '../../utils';
 import { MainCardContainer } from './components';
 import CardView from './collectionView/cardView';
 import ListView from './collectionView/listView';
-import { searchFilterView } from './utils';
 
 enum VIEW_MODE {
     CARD = 'card',

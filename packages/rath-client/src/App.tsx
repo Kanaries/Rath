@@ -17,6 +17,31 @@ import ProgressiveDashboard from './pages/progressiveDashboard';
 import Painter from './pages/painter';
 import Collection from './pages/collection';
 import Dashboard from './pages/dashboard';
+import CausalPage from './pages/causal';
+import PerformanceWindow from './components/performance-window';
+import LoginInfo from './pages/loginInfo';
+import Account from './pages/loginInfo/account';
+import Setup from './pages/loginInfo/setup';
+
+export enum PreferencesType {
+    Account = 'account',
+    Info = 'info',
+    Setting = 'setting',
+    Header = 'header'
+}
+export interface PreferencesListType {
+    key: PreferencesType;
+    name: PreferencesType;
+    icon: string;
+    element: () => JSX.Element;
+}
+
+const preferencesList: PreferencesListType[] = [
+    { key: PreferencesType.Account, name: PreferencesType.Account, icon: 'Home', element: () => <Account /> },
+    // { key: PreferencesType.Info, name: PreferencesType.Info, icon: 'Info', element: () => <Info /> },
+    // { key: PreferencesType.Header, name: PreferencesType.Header, icon: 'Contact', element: () => <Header /> },
+    { key: PreferencesType.Setting, name: PreferencesType.Setting, icon: 'Settings', element: () => <Setup /> },
+];
 
 function App() {
     const { langStore, commonStore } = useGlobalStore();
@@ -24,6 +49,12 @@ function App() {
 
     useEffect(() => {
         initRathWorker(commonStore.computationEngine);
+        commonStore.updateAuthStatus().then((res) => {
+            if (res) {
+                commonStore.getPersonalInfo();
+                commonStore.getAvatarImgUrl()
+            }
+        });
         return () => {
             destroyRathWorker();
         };
@@ -36,11 +67,21 @@ function App() {
             </div>
         );
     }
+
+    const showPerformanceWindow = (new URL(window.location.href).searchParams.get('performance') ?? (
+        JSON.stringify(process.env.NODE_ENV !== 'production') && false  // temporarily banned this feature
+    )) === 'true';
+
     return (
         <div>
             <div className="main-app-container">
-                <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '20px' }}>
-                    <AppNav />
+                <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '3px' }}>
+                    <LoginInfo
+                        element={() => {
+                            return <AppNav />;
+                        }}
+                        preferencesList={preferencesList}
+                    />
                 </div>
                 <div className="main-app-content">
                     <div className="message-container">
@@ -55,9 +96,11 @@ function App() {
                     {appKey === PIVOT_KEYS.dashBoardDesigner && <ProgressiveDashboard />}
                     {appKey === PIVOT_KEYS.collection && <Collection />}
                     {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
+                    {appKey === PIVOT_KEYS.causal && <CausalPage />}
                     <CrInfo />
                 </div>
             </div>
+            {showPerformanceWindow && <PerformanceWindow />}
         </div>
     );
 }

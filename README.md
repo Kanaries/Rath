@@ -90,6 +90,10 @@ Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have
 
 - 🎨 [Data painter](https://kanaries.net/docs/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features.
 
+- :bar_chart: Dashboard: build beautiful interactive data dashboard.
+
+- :construction: Causal Analysis: Provide causal discovery and explainations for complex relation analysis.
+
 - 🎓 Wanna learn more about RATH? Visit our [Free online Courses](https://kanaries.net/docs/rath-academy): Access learning materials, detailed instructions and skill tests for **FREE**!
 
 ## Share with the community

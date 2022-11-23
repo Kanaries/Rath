@@ -1,0 +1,188 @@
+{
+    "title": "PC Parameters",
+    "items": [
+        {
+            "title": "Independence Test",
+            "key": "indep_test",
+            "description": "The independence test to use for causal discovery",
+            "dataType": "string",
+            "renderType": "dropdown",
+            "defaultValue": "chisq",
+            "options": [
+                {
+                    "key": "chisq",
+                    "text": "chi-square"
+                },
+                {
+                    "key": "gsq",
+                    "text": "g-square"
+                },
+                {
+                    "key": "fisherz",
+                    "text": "fisher-z"
+                },
+                {
+                    "key": "kci",
+                    "text": "kci"
+                },
+                {
+                    "key": "mv_fisherz",
+                    "text": "mv-fisherz"
+                }
+            ]
+        },
+        {
+            "title": "Alpha",
+            "key": "alpha",
+            "description": "The maximum number of arrows to follow from a node",
+            "dataType": "number",
+            "renderType": "slider",
+            "defaultValue": 0.05,
+            "range": [
+                0,
+                1
+            ],
+            "step": 0.01
+        },
+        {
+            "title": "Stable",
+            "key": "stable",
+            "description": "Whether to use the stable version of PC",
+            "dataType": "boolean",
+            "renderType": "toggle",
+            "defaultValue": true
+        },
+        {
+            "title": "UC Rule",
+            "key": "uc_rule",
+            "description": "The rule to use for undirected colliders",
+            "dataType": "string",
+            "renderType": "dropdown",
+            "defaultValue": 0,
+            "options": [
+                {
+                    "key": 0,
+                    "text": "uc_supset"
+                },
+                {
+                    "key": 1,
+                    "text": "maxP"
+                },
+                {
+                    "key": 2,
+                    "text": "definiteMaxP"
+                }
+            ]
+        },
+        {
+            "title": "UC Priority",
+            "key": "uc_priority",
+            "description": "The priority to use for undirected colliders",
+            "dataType": "string",
+            "renderType": "dropdown",
+            "defaultValue": -1,
+            "options": [
+                {
+                    "key": -1,
+                    "text": "whatever is default in uc_rule"
+                },
+                {
+                    "key": 0,
+                    "text": "overwrite"
+                },
+                {
+                    "key": 1,
+                    "text": "orient bi-directed"
+                },
+                {
+                    "key": 2,
+                    "text": "prioritize existing colliders"
+                },
+                {
+                    "key": 3,
+                    "text": "prioritize stronger colliders"
+                },
+                {
+                    "key": 4,
+                    "text": "prioritize stronger* colliders"
+                }
+            ]
+        },
+        {
+            "title": "MVPC",
+            "key": "mvpc",
+            "description": "Whether to use MVPC",
+            "dataType": "boolean",
+            "renderType": "toggle",
+            "defaultValue": false
+        },
+        {
+            "title": "Categorical Encoding",
+            "key": "cat_encode_type",
+            "description": "The encoding to use for categorical variables",
+            "dataType": "string",
+            "renderType": "dropdown",
+            "defaultValue": "none",
+            "options": [
+                {
+                    "key": "none",
+                    "text": "no encoding"
+                },
+                {
+                    "key": "binary",
+                    "text": "binary encoding"
+                },
+                {
+                    "key": "one_hot",
+                    "text": "one-hot encoding"
+                },
+                {
+                    "key": "lex",
+                    "text": "lexicographic ranking"
+                }
+            ]
+        },
+        {
+            "title": "Keep Original Categorical Variables",
+            "key": "keep_original_cat",
+            "description": "Whether to keep the original categorical variables",
+            "dataType": "boolean",
+            "renderType": "toggle",
+            "defaultValue": false
+        },
+        {
+            "title": "Quantitative Encoding",
+            "key": "quant_encode_type",
+            "description": "The encoding to use for quantitative variables",
+            "dataType": "string",
+            "renderType": "dropdown",
+            "defaultValue": "none",
+            "options": [
+                {
+                    "key": "none",
+                    "text": "no encoding"
+                },
+                {
+                    "key": "bin",
+                    "text": "binning"
+                },
+                {
+                    "key": "order",
+                    "text": "ranking"
+                },
+                {
+                    "key": "id",
+                    "text": "any index"
+                }
+            ]
+        },
+        {
+            "title": "Keep Original Quantitative Variables",
+            "key": "keep_original_quant",
+            "description": "Whether to keep the original quantitative variables",
+            "dataType": "boolean",
+            "renderType": "toggle",
+            "defaultValue": false
+        }
+    ]
+}

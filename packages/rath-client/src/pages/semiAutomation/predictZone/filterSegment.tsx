@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
@@ -19,8 +19,7 @@ const FilterSegment: React.FC = () => {
         semiAutoStore.filterAssociate();
     }, [semiAutoStore])
     if (filterViews.views.length === 0 && autoAsso.filterViews) return <div />
-    return <div className="pure-card">
-        <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.filters')}</h1>
+    return <Fragment>
         {
             !autoAsso.filterViews && <DefaultButton text={intl.get('semiAuto.main.pointInterests')}
                 iconProps={{ iconName: 'SplitObject' }}
@@ -90,7 +89,7 @@ const FilterSegment: React.FC = () => {
             text={intl.get('semiAuto.main.loadMore')}
             onClick={loadMore}
         />
-    </div>
+    </Fragment>
 }
 
 export default observer(FilterSegment);

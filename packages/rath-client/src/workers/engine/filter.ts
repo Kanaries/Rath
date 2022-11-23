@@ -1,5 +1,9 @@
 import { ICol, IFilter, IRow } from "../../interfaces";
 
+/**
+ * @deprecated
+ * TODO: remove this
+ */
 export function applyFilters (dataSource: IRow[],
     extFields: Map<string, ICol<any>>,
     filters: IFilter[]) {
