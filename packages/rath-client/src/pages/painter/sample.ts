@@ -59,7 +59,9 @@ export function viewSampling (data: IRow[], fields: IFieldMeta[], sampleSize: nu
         }
     }
     for (let [, values] of sampleMap.entries()) {
-        samples.push(...values)
+        for (let val of values) {
+            samples.push(val);
+        }
     }
     return samples
 }

@@ -1,5 +1,7 @@
+import { shallowCopyArray } from "../../utils/deepcopy";
+
 export function getQuantiles(values: number[], percents: number[]) {
-    const sortedValues = [...values].sort((a, b) => a - b);
+    const sortedValues = shallowCopyArray(values).sort((a, b) => a - b);
     const percentIndices = percents.map(p => p * values.length)
     const qts: number[] = [];
     for (let pi of percentIndices) {

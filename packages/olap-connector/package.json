@@ -1,5 +1,5 @@
 {
-  "name": "connectors",
+  "name": "olap-connector",
   "version": "1.0.0",
   "description": "",
   "scripts": {

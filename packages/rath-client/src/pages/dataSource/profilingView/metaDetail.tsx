@@ -1,4 +1,4 @@
-import { Dropdown, IDropdownOption, PrimaryButton, Stack } from '@fluentui/react';
+import { DefaultButton, Dropdown, IDropdownOption, Stack } from '@fluentui/react';
 import { applyFilters, IFilter, IRow } from '@kanaries/loa';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
@@ -10,6 +10,8 @@ import { PIVOT_KEYS } from '../../../constants';
 import { IFieldMeta } from '../../../interfaces';
 import { computeFieldFeatures } from '../../../lib/meta/fieldMeta';
 import { useGlobalStore } from '../../../store';
+import FieldFilter from '../../../components/fieldFilter';
+import { getRange } from '../../../utils';
 import { ANALYTIC_TYPE_CHOICES, SEMANTIC_TYPE_CHOICES } from '../config';
 import DetailTable from './detailTable';
 import FullDistViz from './fullDistViz';
@@ -74,16 +76,18 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
             const _min = field.features.min;
             const _max = field.features.max;
             const step = (_max - _min) / 10;
+            const [slMin, slMax] = getRange(selection);
             ans.push({
                 fid: field.fid,
                 type: 'range',
-                range: [Math.min(...selection) - step / 2, Math.max(...selection) + step / 2],
+                range: [slMin - step / 2, slMax + step / 2],
             });
         } else if (field.semanticType === 'temporal') {
+            const [slMin, slMax] = getRange(selection);
             ans.push({
                 fid: field.fid,
                 type: 'range',
-                range: [Math.min(...selection), Math.max(...selection)],
+                range: [slMin, slMax],
             });
         } else {
             ans.push({
@@ -137,10 +141,10 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
                 semanticType={field.semanticType}
                 onSelect={onSelectionChange}
             />
-            <Stack horizontal tokens={{ childrenGap: 10 }} style={{ marginTop: '1em' }}>
-                <PrimaryButton
+            <Stack horizontal tokens={{ childrenGap: 10 }} style={{ marginTop: '1em' }} verticalAlign="center">
+                <DefaultButton
                     text={intl.get('dataSource.statViewInfo.explore')}
-                    iconProps={{ iconName: 'BarChartVerticalFill' }}
+                    iconProps={{ iconName: 'Lightbulb' }}
                     onClick={() => {
                         runInAction(() => {
                             commonStore.setAppKey(PIVOT_KEYS.semiAuto);
@@ -166,6 +170,7 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
                         option && dataSourceStore.updateFieldInfo(field.fid, 'semanticType', option.key);
                     }}
                 />
+                <FieldFilter fid={field.fid} />
             </Stack>
             <hr style={{ margin: '1em' }} />
             <Stack horizontal tokens={{ childrenGap: '3em' }}>

@@ -40,15 +40,15 @@
     },
     "menu": {
         "dataSource": "数据源",
-        "editor": "自助分析⭐️",
+        "editor": "自助分析",
         "support": "帮助",
         "megaAuto": "全自动分析",
-        "semiAuto": "半自动探索⭐️",
+        "semiAuto": "半自动探索",
         "devCollection": "实验特性(α)",
         "dashBoardDesigner": "智能报表",
-        "painter": "数据绘板🚀",
+        "painter": "数据绘板",
         "collection": "收藏夹",
-        "dashboard": "报表📋"
+        "dashboard": "报表"
     },
     "preference": {
         "title": "个人偏好",
@@ -78,7 +78,7 @@
         "analysis": {
             "start": "开始分析",
             "checkResult": "查看已有结果",
-            "pattern": "半自动化分析",
+            "pattern": "半自动化探索",
             "manual": "自助分析"
         },
         "importStorage": {
@@ -119,9 +119,10 @@
         "charset": "字符集编码",
         "databaseType": "选择数据库",
         "connectUri": "连接 URI",
-        "databaseName": "Database",
+        "databaseName": "数据库",
         "schemaName": "Schema",
-        "tableName": "Table",
+        "tableName": "表",
+        "editName": "编辑名称",
         "preview": "数据预览",
         "query": "SQL 查询",
         "connectorConfig": "连接器设置",

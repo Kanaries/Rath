@@ -69,27 +69,27 @@ export const DBBox = styled.span`
         background-color: #f3f3f3;
     }
 `;
-const Output = styled.div({
-    flexGrow: 1,
-    flexShrink: 1,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    border: '1px solid',
-    borderTop: 'none',
-    marginBottom: '1em',
+const Output = styled.div`
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid;
+    border-top: none;
+    margin-bottom: 1em;
 
-    '> span': {
-        flexGrow: 1,
-        flexShrink: 1,
-        padding: '0 1em',
-        overflow: 'hidden',
+    > span {
+        flex-grow: 1;
+        flex-shrink: 1;
+        padding: 0 1em;
+        overflow: hidden;
         // textOverflow: 'ellipsis',
-        maxWidth: '30vw',
-    },
-});
+        max-width: 30vw;
+    }
+`
 
 const STROKE_RADIUS = 12;
 
