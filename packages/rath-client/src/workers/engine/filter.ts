@@ -7,9 +7,9 @@ export function applyFilters (dataSource: IRow[],
     // const effectFilters = filters.filter(f => !f.disable);
     const effectFilters = filters.filter(f => !f.disable && !extFields.has(f.fid));
     const effectExtFilters = filters.filter(f => !f.disable && extFields.has(f.fid));
-    let extRow: IRow = new Object();
+    let extRow: IRow = {}
     for (let [key, val] of extFields.entries()) {
-        if (val.data.length !== dataSource.length) throw "applyFilter: data lengths not match";
+        if (val.data.length !== dataSource.length) throw new Error("applyFilter: data lengths not match");
         extRow[key] = val.data.at(0);
     }
 
