@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { ActionButton, ChoiceGroup, Label, Modal, PrimaryButton } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
-import { getDefaultAvatarURL } from '../../utils';
-import { AVATAR_IMG_LIST } from '../../constants';
-import { IAVATAR_TYPES } from '../../interfaces';
+import { getDefaultAvatarURL, AVATAR_IMG_LIST, IAVATAR_TYPES } from '../../utils/user';
 import { useGlobalStore } from '../../store';
 // import Corp from '../../components/imgCorp';
 // enum HeaderList {

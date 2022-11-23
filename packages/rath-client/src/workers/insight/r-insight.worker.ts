@@ -28,7 +28,7 @@ export interface IRInsightExplainProps {
         /** 分析目标，视图的纵轴：关注的 fields */
         measures: {
             fid: string;
-            op: 'sum' | 'mean' | 'count';
+            op: 'sum' | 'mean' | 'count' | null;
         }[];
     };
 }

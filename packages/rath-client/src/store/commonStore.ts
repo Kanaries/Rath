@@ -1,8 +1,8 @@
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Specification } from 'visual-insights';
-import { AVATAR_IMG_LIST, COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
-import { IAccessPageKeys, IAVATAR_TYPES, ITaskTestMode, IVegaSubset } from '../interfaces';
-import { clearLoginCookie, getAvatarURL, getServerUrl, setLoginCookie } from '../utils';
+import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
+import { IAccessPageKeys, ITaskTestMode, IVegaSubset } from '../interfaces';
+import { clearLoginCookie, getAvatarURL, getServerUrl, setLoginCookie, AVATAR_IMG_LIST, IAVATAR_TYPES } from '../utils/user';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
 import { transVegaSubset2Schema } from '../utils/transform';
 import { notify } from '../components/error';

@@ -1,4 +1,4 @@
-import { getServerUrl } from '../utils';
+import { getServerUrl } from '../utils/user';
 import { ILoginForm } from './commonStore';
 
 export async function commitLoginService(props: ILoginForm) {

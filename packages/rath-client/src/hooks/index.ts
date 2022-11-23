@@ -3,7 +3,7 @@ import produce, { Draft } from 'immer';
 import intl from 'react-intl-universal';
 import { CleanMethod } from '../interfaces';
 import { notify } from '../components/error';
-import { getServerUrl } from '../utils';
+import { getServerUrl } from '../utils/user';
 import { request } from '../utils/request';
 
 /**

@@ -118,7 +118,7 @@ const diffGroups = (
     indices1: number[],
     indices2: number[],
     dimension: IFieldMeta,
-    measure: { fid: string; aggregate: AggregateType },
+    measure: { fid: string; aggregate: AggregateType | null },
 ): number => {
     const hashIndices = xHash(data, dimension);
     const hashedData = data.map((row, i) => ({
@@ -127,6 +127,9 @@ const diffGroups = (
     }));
     const data1 = indices1.map(index => hashedData[index]);
     const data2 = indices2.map(index => hashedData[index]);
+    if (!measure.aggregate) {
+        return 0;   // TODO: 明细
+    }
     const aggregated1 = xAggregate(data1, dimension, measure.aggregate);
     const aggregated2 = xAggregate(data2, dimension, measure.aggregate);
     const group1 = xNormalize(aggregated1);

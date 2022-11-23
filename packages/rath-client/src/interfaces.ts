@@ -232,8 +232,3 @@ export interface IResponse<T = void> {
     data: T;
     message?: string;
 }
-
-export enum IAVATAR_TYPES {
-    gravatar = 'gravatar',
-    default = 'default'
-}

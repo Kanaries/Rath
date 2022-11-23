@@ -1,16 +1,4 @@
-import { IECStatus } from './interfaces';
-
-export const AVATAR_IMG_LIST: string[] = [];
-new Array(18)
-    .fill(0)
-    .map((_, i) => `avatar-B-${`${i + 1}`.padStart(2, '0')}.png`)
-    .forEach((item) => {
-        AVATAR_IMG_LIST.push(item);
-    });
-// 功能相同，使用下面方式进行export 会导致报错 原因可能是因为表达式的问题 待确认 有懂哥填个坑
-// export const AVATAR_IMG_LIST = fixedLengthNumbers(new Array(18).fill(0).map((_, i) => i + 1)).map(n => `avatar-B-${n}.png`);
-
-export const DEFAULT_AVATAR_URL_PREFIX = 'https://foghorn-assets.s3.ap-northeast-1.amazonaws.com/avatar/';
+import type { IECStatus } from './interfaces';
 
 export const RATH_INDEX_COLUMN_KEY = '__rath_index_col_key__';
 
