@@ -32,7 +32,9 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
     const handleFilterRef = useRef(handleFilter);
     handleFilterRef.current = handleFilter;
 
-    const filterType = indexKey?.semanticType === 'quantitative' || indexKey?.semanticType === 'temporal' ? 'interval' : 'point';
+    const filterType = indexKey ? (
+        indexKey.semanticType === 'quantitative' || indexKey.semanticType === 'temporal' ? 'interval' : 'point'
+    ) : 'point';
 
     const source = useMemo(() => {
         return subspace ? data.map((row, i) => ({ ...row, [SUBSPACE_KEY]: subspace.includes(i) ? 1 : 0 })) : data;
@@ -49,7 +51,9 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
         if (container.current) {
             const commonEncodings = {
                 mark: {
-                    type: indexKey?.semanticType === 'temporal' ? 'area' : 'bar',
+                    type: (
+                        indexKey ? indexKey.semanticType === 'temporal' : mainField.semanticType === 'temporal'
+                    ) ? 'area' : 'bar',
                     tooltip: true,
                 },
                 encoding: indexKey ? {
@@ -65,7 +69,14 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                         title: `${mainFieldAggregation}(${mainField.name || mainField.fid})`,
                     },
                 } : {
-                    y: {},
+                    x: {
+                        field: mainField.fid,
+                        bin: mainField.semanticType === 'quantitative',
+                        title: mainField.name || mainField.fid,
+                    },
+                    y: {
+                        aggregate: 'count',
+                    },
                 },
             } as const;
             embed(container.current, {
@@ -156,8 +167,6 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                                             fid: indexKey.fid,
                                             range,
                                         });
-                                    } else {
-                                        console.log(range);
                                     }
                                     break;
                                 }
@@ -170,7 +179,13 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                                             values: set,
                                         });
                                     } else {
-                                        console.log(set);
+                                        // 分箱的单变量分布
+                                        const range = getRange((set as unknown as [[number, number]])[0]);
+                                        signalChange$.next({
+                                            type: 'range',
+                                            fid: mainField.fid,
+                                            range,
+                                        });
                                     }
                                     break;
                                 }
