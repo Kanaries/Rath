@@ -10,7 +10,7 @@ import type { IFilter } from '../../../../interfaces';
 import { useGlobalStore } from '../../../../store';
 import type { DashboardCardState } from '../../../../store/dashboardStore';
 import { getRange } from '../../../../utils';
-import { viewSampling } from '../../../painter/sample';
+import { viewSampling } from '../../../../lib/stat/sampling';
 
 
 const Container = styled.div``;
