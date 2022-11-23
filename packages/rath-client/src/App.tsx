@@ -21,9 +21,7 @@ import CausalPage from './pages/causal';
 import PerformanceWindow from './components/performance-window';
 import LoginInfo from './pages/loginInfo';
 import Account from './pages/loginInfo/account';
-import Info from './pages/loginInfo/info';
 import Setup from './pages/loginInfo/setup';
-import Header from './pages/loginInfo/header';
 
 export enum PreferencesType {
     Account = 'account',

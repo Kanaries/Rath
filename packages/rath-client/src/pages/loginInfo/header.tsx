@@ -4,7 +4,6 @@ import intl from 'react-intl-universal';
 import styled from 'styled-components';
 import { getDefaultAvatarURL, AVATAR_IMG_LIST, IAVATAR_TYPES } from '../../utils/user';
 import { useGlobalStore } from '../../store';
-// import Corp from '../../components/imgCorp';
 // enum HeaderList {
 //     upload = 'Upload',
 //     default = 'Default',

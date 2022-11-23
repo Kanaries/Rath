@@ -24,7 +24,7 @@ const UserSettings: React.FC = () => {
         <Container
             style={navMode === 'icon' ? { flexDirection: 'column' } : { flexDirection: 'row', alignItems: 'center' }}
         >
-            {/* {navMode === 'text' && (
+            {navMode === 'text' && (
                 <DropdownSelect
                     border
                     value={langStore.lang}
@@ -38,7 +38,7 @@ const UserSettings: React.FC = () => {
                         </option>
                     ))}
                 </DropdownSelect>
-            )} */}
+            )}
             <div ref={target}>
                 <ActionButton
                     text={commonStore.navMode === 'text' ? intl.get('preference.title') : ''}

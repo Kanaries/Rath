@@ -2,7 +2,7 @@ import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Specification } from 'visual-insights';
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
 import { IAccessPageKeys, ITaskTestMode, IVegaSubset } from '../interfaces';
-import { clearLoginCookie, getAvatarURL, getServerUrl, setLoginCookie, AVATAR_IMG_LIST, IAVATAR_TYPES } from '../utils/user';
+import { getAvatarURL, getServerUrl, AVATAR_IMG_LIST, IAVATAR_TYPES } from '../utils/user';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
 import { transVegaSubset2Schema } from '../utils/transform';
 import { notify } from '../components/error';
@@ -187,7 +187,7 @@ export class CommonStore {
         } else {
             notify({
                 type: 'error',
-                content: result.message,
+                content: `${result.message}`,
                 title: 'Error',
             });
             throw new Error(`${result.message}`);
@@ -198,14 +198,12 @@ export class CommonStore {
         try {
             const res = await commitLoginService(this.login);
             if (res) {
-                setLoginCookie(this.login.userName);
                 this.userName = this.login.userName;
             }
             return res;
         } catch (error) {
-            // console.error(error);
             notify({
-                title: '发生错误',
+                title: 'Login error',
                 type: 'error',
                 content: `[/api/login] ${error}`,
             });
@@ -218,23 +216,19 @@ export class CommonStore {
             const res = await fetch(url, {
                 method: 'GET',
             });
-            console.log(res, 'Res');
             if (res) {
-                clearLoginCookie();
                 runInAction(() => {
                     this.userName = null;
                 });
                 notify({
-                    title: '您已登出',
-                    type: 'warning',
-                    content: '您已登出，登出期间无法访问部分产品功能。',
+                    title: 'Logout',
+                    type: 'success',
+                    content: 'Logout success!',
                 });
-            } else {
-                // throw '登出失败';
             }
         } catch (error) {
             notify({
-                title: '发生错误',
+                title: 'logout error',
                 type: 'error',
                 content: `[/api/logout] ${error}`,
             });
