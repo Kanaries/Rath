@@ -10,8 +10,6 @@ import { searchFilterView } from '../../utils';
 import { MainCardContainer } from './components';
 import CardView from './collectionView/cardView';
 import ListView from './collectionView/listView';
-import { searchFilterView } from './utils';
-import { useBoolean } from '@fluentui/react-hooks';
 
 enum VIEW_MODE {
     CARD = 'card',

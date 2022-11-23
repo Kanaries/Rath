@@ -1,4 +1,5 @@
 import { BIN_SIZE, IRow } from "@kanaries/loa";
+import { Sampling } from "visual-insights";
 import type { IFieldMeta } from "../interfaces";
 
 
@@ -70,4 +71,8 @@ export function viewSampling (data: IRow[], fields: IFieldMeta[], sampleSize: nu
         }
     }
     return samples
+}
+
+export function baseDemoSample (data: IRow[], sampleSize: number): IRow[] {
+    return Sampling.reservoirSampling(data, sampleSize)
 }
