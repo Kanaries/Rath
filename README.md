@@ -166,6 +166,11 @@ Our developer community is the backbone of the ongoing RATH project. We sincerel
 Please check out the [Contributing to RATH guide](https://kanaries.net/docs/contribution_guide)
 for guidelines about how to proceed.
 
+Thanks to all contributors :heart:
+<a href="https://github.com/kanaries/rath/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=kanaries/rath" />
+</a>
+
 ## LICENSE (AGPL)
 Rath is an automated data analysis and visualization tool (auto-EDA).
 
