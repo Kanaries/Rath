@@ -29,6 +29,9 @@ module.exports = function override(config, env) {
       },
     }, 'ts-loader'],
   })
+  config.stats = {
+    children: true
+  }
   config.output.globalObject = 'self'
   // config.module = config.module || {};
   // config.module.unknownContextCritical = false
