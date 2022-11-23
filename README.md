@@ -1,12 +1,10 @@
-Welcome to the RATH Project
-
 <div align="center">
   <br>
-  <h1>RATH</h1>
+  <h1 style="font-size:55px">RATH</h1>
   <p align="center">
-    <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="90">
+    <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="120">
    </p>
-  <strong>Your Open Source Augmented Analytics Alternative for Business Intelligence</strong>
+  <strong>Your Open Source Augmented Analytics Business Intelligence Solution</strong>
 </div>
 <br>
 <div id="header" align="center">
@@ -50,7 +48,7 @@ Welcome to the RATH Project
 
 ## Welcome
 
-Welcome to the [RATH Project](https://kanaries.net/). We are so excited to have you as part of our community.
+Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have you as part of our community.
 
 **RATH** is an open-source alternative to Data Analysis and Visualization tools such as Tableau. It automates your Explotoary Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
