@@ -1,18 +1,5 @@
-import { BIN_SIZE, IRow } from "@kanaries/loa";
-import { Sampling } from "visual-insights";
-import type { IFieldMeta } from "../interfaces";
-
-
-export function getFreqMap (values: any[]): Map<any, number> {
-    const counter: Map<any, number> = new Map();
-    for (let val of values) {
-        if (!counter.has(val)) {
-            counter.set(val, 0)
-        }
-        counter.set(val, counter.get(val)! + 1)
-    }
-    return counter
-}
+import { BIN_SIZE, getFreqMap } from "@kanaries/loa";
+import { IFieldMeta, IRow } from "../../interfaces";
 
 function getValueTuple (row: IRow, fields: IFieldMeta[]) {
     let tuple = '';
@@ -71,8 +58,4 @@ export function viewSampling (data: IRow[], fields: IFieldMeta[], sampleSize: nu
         }
     }
     return samples
-}
-
-export function baseDemoSample (data: IRow[], sampleSize: number): IRow[] {
-    return Sampling.reservoirSampling(data, sampleSize)
 }

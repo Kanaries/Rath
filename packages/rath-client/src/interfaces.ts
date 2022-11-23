@@ -178,6 +178,7 @@ export interface IVegaChannel {
     type: ISemanticType;
     aggregate?: string;
     order?: any;
+    bin?: boolean;
     [key: string]: any;
 }
 
@@ -203,6 +204,8 @@ export interface IInsightVizView {
     fields: IFieldMeta[];
     filters: IFilter[];
     score?: number;
+    title?: string;
+    desc?: string;
 }
 
 export enum PAINTER_MODE {

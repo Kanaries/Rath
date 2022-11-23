@@ -31,9 +31,11 @@ const Cont = styled.div`
 interface FilterCreationPillProps {
     fields: IFieldMeta[];
     onFilterSubmit: (field: IFieldMeta, filter: IFilter) => void;
+    onRenderPill?: (text: string, handleClick: () => void) => void;
 }
+const DefaultPill: FilterCreationPillProps['onRenderPill'] = (text, handleClick) => <BasePillPlaceholder text={text} onClick={handleClick} />;
 const FilterCreationPill: React.FC<FilterCreationPillProps> = (props) => {
-    const { fields, onFilterSubmit } = props;
+    const { fields, onFilterSubmit, onRenderPill = DefaultPill } = props;
     const container = useRef<HTMLDivElement>(null);
     const [show, setShow] = useState(false);
     const [filter, setFilter] = useState<IFilter>({
@@ -92,7 +94,7 @@ const FilterCreationPill: React.FC<FilterCreationPillProps> = (props) => {
     };
     return (
         <div ref={container}>
-            <BasePillPlaceholder text={intl.get('common.addFilter')} onClick={toggleShow} />
+            {onRenderPill(intl.get('common.addFilter'), toggleShow)}
             {show && (
                 <Callout
                     target={container}

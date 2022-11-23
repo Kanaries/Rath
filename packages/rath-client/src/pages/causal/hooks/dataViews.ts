@@ -3,7 +3,7 @@ import { applyFilters, IFilter } from '@kanaries/loa'
 import { IRow } from "../../../interfaces";
 import { focusedSample } from "../../../utils/sample";
 import { useGlobalStore } from "../../../store";
-import { baseDemoSample } from "../../painter/sample";
+import { baseDemoSample } from "../../../utils/view-sample";
 
 const VIZ_SUBSET_LIMIT = 2_000;
 const SAMPLE_UPDATE_DELAY = 500;
