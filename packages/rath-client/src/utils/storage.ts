@@ -175,6 +175,23 @@ export async function updateDataStorageMeta(name: string, fields: IMuteFieldBase
     } as IDBMeta)
 }
 
+export async function updateDataConfig(name: string, value: any) {
+    const metas = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.CONFIG,
+    });
+    await metas.setItem(name, JSON.stringify(value));
+}
+
+export async function getDataConfig(name: string) {
+    const metas = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.CONFIG,
+    });
+    const ds = (await metas.getItem(name)) as string;
+    return ds;
+}
+
 export async function setModelStorage (name: string, model: IModel) {
     const modelBucket = localforage.createInstance({
         name: STORAGE_INSTANCE,
