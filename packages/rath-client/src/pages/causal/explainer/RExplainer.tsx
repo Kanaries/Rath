@@ -1,12 +1,12 @@
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
-import { Dropdown, Toggle } from '@fluentui/react';
+import { DefaultButton, Dropdown, Toggle } from '@fluentui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyFilters } from '@kanaries/loa';
 import { useGlobalStore } from '../../../store';
 import type { useInteractFieldGroups } from '../hooks/interactFieldGroup';
 import type { useDataViews } from '../hooks/dataViews';
-import type { IFieldMeta, IFilter } from '../../../interfaces';
+import { IFieldMeta, IFilter, IRow } from '../../../interfaces';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../workers/insight/r-insight.worker';
 import { RInsightService } from '../../../services/r-insight';
 import type { PagLink } from '../config';
@@ -52,7 +52,8 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
     const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('worker');
 
     const pendingRef = useRef<Promise<IRInsightExplainResult>>();
-    useEffect(() => {
+
+    const calculate = useCallback(() => {
         if (!subspaces || !mainField) {
             setIrResult([]);
             return;
@@ -97,18 +98,48 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
         });
     }, [aggr, mainField, sample, selectedFields, subspaces, edges, serviceMode]);
 
-    const selectedSet = useMemo(() => {
+    const [selectedSet, setSelectedSet] = useState<IRow[]>([]);
+
+    const [indicesA, indicesB] = useMemo<[number[], number[]]>(() => {
         if (!subspaces) {
-            return sample;
+            return [[], []];
         }
         const indexName = '__this_is_the_index_of_the_row__';
         const data = sample.map((row, i) => ({ ...row, [indexName]: i }));
         const indicesA = applyFilters(data, subspaces[0].predicates).map(row => row[indexName]) as number[];
+        // console.log('indices');
+        // console.log(indicesA.join(','));
         const indicesB = diffMode === 'two-group'
             ? applyFilters(data, subspaces[1].predicates).map(row => row[indexName]) as number[]
-            : [];
-        return sample.map((row, i) => ({ ...row, [SelectedFlag]: indicesB.includes(i) ? 2 : indicesA.includes(i) ? 1 : 0 }));
+            : diffMode === 'full' ? data.map(row => row[indexName]) as number[] : data.map(row => row[indexName] as number).filter(
+                index => !indicesA.includes(index)
+            );
+        return [indicesA, indicesB];
     }, [subspaces, sample, diffMode]);
+
+    const applySelection = useCallback(() => {
+        if (!subspaces) {
+            return setSelectedSet(sample);
+        }
+        setSelectedSet(
+            sample.map((row, i) => ({ ...row, [SelectedFlag]: indicesB.includes(i) ? 2 : indicesA.includes(i) ? 1 : 0 }))
+        );
+        calculate();
+    }, [subspaces, sample, indicesA, indicesB, calculate]);
+
+    useEffect(() => {
+        if (!subspaces) {
+            setSelectedSet(sample);
+            return;
+        }
+    }, [subspaces, sample]);
+
+    const [editingGroupIdx, setEditingGroupIdx] = useState<1 | 2>(1);
+
+    useEffect(() => {
+        setSubspaces(subspaces => subspaces ? [subspaces[0], { predicates: [] }] : null);
+        setEditingGroupIdx(1);
+    }, [diffMode]);
 
     const handleFilter = useCallback((filter: IFilter | null) => {
         switch (diffMode) {
@@ -130,11 +161,22 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                 break;
             }
             case 'two-group': {
-                console.error('not implemented');
+                setSubspaces(subspaces => {
+                    const next: typeof subspaces = subspaces ? [
+                        subspaces[0], subspaces[1]
+                    ] : [{ predicates: [] }, { predicates: [] }];
+                    next[editingGroupIdx - 1] = {
+                        predicates: filter ? [filter] : [],
+                    };
+                    return next;
+                });
+                break;
+            }
+            default: {
                 break;
             }
         }
-    }, [diffMode]);
+    }, [diffMode, editingGroupIdx]);
 
     // console.log({ irResult });
 
@@ -195,11 +237,13 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                             }
                         }}
                     />
-                    <Toggle
-                        label="Normalize Stack"
-                        checked={normalize}
-                        onChange={(_, checked) => setNormalize(Boolean(checked))}
-                    />
+                    {diffMode === 'two-group' && (
+                        <Toggle
+                            label={`Select ${editingGroupIdx === 2 ? 'Background' : 'Foreground'} Group`}
+                            checked={editingGroupIdx === 2}
+                            onChange={(_, checked) => setEditingGroupIdx(checked ? 2 : 1)}
+                        />
+                    )}
                     {indexKey && (
                         <ChartItem
                             data={sample}
@@ -208,10 +252,46 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                             mainFieldAggregation={aggr}
                             interactive
                             handleFilter={handleFilter}
-                            normalize={normalize}
+                            normalize={false}
                         />
                     )}
+                    {indexKey && subspaces && (
+                        <>
+                            <ChartItem
+                                title="Foreground Group"
+                                data={sample}
+                                indexKey={indexKey}
+                                mainField={mainField}
+                                mainFieldAggregation={aggr}
+                                interactive={false}
+                                subspace={indicesA}
+                                normalize={false}
+                            />
+                            <ChartItem
+                                title="Background Group"
+                                data={sample}
+                                indexKey={indexKey}
+                                mainField={mainField}
+                                mainFieldAggregation={aggr}
+                                interactive={false}
+                                subspace={indicesB}
+                                normalize={false}
+                            />
+                        </>
+                    )}
+                    <br />
+                    <DefaultButton
+                        disabled={!subspaces}
+                        onClick={applySelection}
+                    >
+                        Insight
+                    </DefaultButton>
                     <header>Why Query</header>
+                    <Toggle
+                        label="Normalize Stack"
+                        checked={normalize}
+                        onChange={(_, checked) => setNormalize(Boolean(checked))}
+                    />
                     {indexKey && irResult.length > 0 && (
                         irResult.map(res => {
                             const dimension = fieldMetas.find(f => f.fid === res.src);
@@ -228,6 +308,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                                     />
                                     <DiffChart
                                         data={selectedSet}
+                                        subspaces={[indicesA, indicesB]}
                                         mainField={mainField}
                                         mainFieldAggregation={aggr}
                                         dimension={dimension}
@@ -243,29 +324,6 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                             );
                         })
                     )}
-                    {/* {indexKey && pccResults.length > 0 && selectedSet && (
-                        pccResults.map(res => (
-                            <div key={res.fields[1].fid}>
-                                <ChartItem
-                                    data={selectedSet}
-                                    mainField={mainField}
-                                    mainFieldAggregation={aggr}
-                                    indexKey={res.fields[1]}
-                                    interactive={false}
-                                />
-                                <DiffChart
-                                    data={selectedSet}
-                                    mainField={mainField}
-                                    mainFieldAggregation={aggr}
-                                    indexKey={res.fields[1]}
-                                    mode={diffMode}
-                                />
-                                <p>
-                                    {`选择区间内 ${mainField.name || mainField.fid} 与 ${res.fields[1].name || res.fields[1].fid} 表现出相关性。PCC score: ${res.score}`}
-                                </p>
-                            </div>
-                        ))
-                    )} */}
                 </>
             )}
         </Container>

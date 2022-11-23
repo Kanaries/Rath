@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import type { View } from 'vega';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
@@ -10,28 +10,36 @@ import { getRange } from '../../../utils';
 import { SelectedFlag } from './RExplainer';
 
 interface ExplainChartProps {
+    title?: string;
     data: IRow[];
     mainField: IFieldMeta;
     mainFieldAggregation: null | 'sum' | 'mean' | 'count';
-    indexKey: IFieldMeta | string;
+    indexKey: IFieldMeta | null;
+    subspace?: number[];
     interactive: boolean;
     handleFilter?: (filter: IFilter | null) => void;
     normalize: boolean;
 }
 
 const SELECT_SIGNAL_NAME = '__select__';
+const SUBSPACE_KEY = '__subspace__';
 
 const ExplainChart: React.FC<ExplainChartProps> = ({
-    data, mainField, mainFieldAggregation, indexKey, interactive, handleFilter, normalize,
+    title, data, mainField, mainFieldAggregation, indexKey, subspace, interactive, handleFilter, normalize,
 }) => {
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View>();
     const handleFilterRef = useRef(handleFilter);
     handleFilterRef.current = handleFilter;
 
-    const filterType = typeof indexKey === 'object' && (
-        indexKey.semanticType === 'quantitative' || indexKey.semanticType === 'temporal'
-    ) ? 'interval' : 'point';
+    const filterType = indexKey?.semanticType === 'quantitative' || indexKey?.semanticType === 'temporal' ? 'interval' : 'point';
+
+    const source = useMemo(() => {
+        return subspace ? data.map((row, i) => ({ ...row, [SUBSPACE_KEY]: subspace.includes(i) ? 1 : 0 })) : data;
+    }, [data, subspace]);
+
+    const dataRef = useRef(source);
+    dataRef.current = source;
 
     useEffect(() => {
         const signalChange$ = new Subject<Parameters<NonNullable<typeof handleFilter>>[0]>();
@@ -41,23 +49,23 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
         if (container.current) {
             const commonEncodings = {
                 mark: {
-                    type: (
-                        typeof indexKey === 'object' && indexKey.semanticType === 'temporal'
-                    ) ? 'area' : 'bar',
+                    type: indexKey?.semanticType === 'temporal' ? 'area' : 'bar',
                     tooltip: true,
                 },
-                encoding: {
+                encoding: indexKey ? {
                     x: {
-                        field: typeof indexKey === 'string' ? indexKey : indexKey.fid,
-                        bin: typeof indexKey === 'string' ? undefined : indexKey.semanticType === 'quantitative',
-                        type: typeof indexKey === 'string' ? 'quantitative' : indexKey.semanticType,
-                        title: typeof indexKey === 'string' ? indexKey : (indexKey.name || indexKey.fid),
+                        field: indexKey.fid,
+                        bin: indexKey.semanticType === 'quantitative',
+                        type: indexKey.semanticType,
+                        title: indexKey.name || indexKey.fid,
                     },
                     y: {
                         field: mainField.fid,
                         aggregate: mainFieldAggregation ?? undefined,
                         title: `${mainFieldAggregation}(${mainField.name || mainField.fid})`,
                     },
+                } : {
+                    y: {},
                 },
             } as const;
             embed(container.current, {
@@ -67,12 +75,28 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                     type: 'fit',
                     contains: 'padding',
                 },
+                title,
                 data: {
                     // @ts-ignore
                     name: 'dataSource',
-                    values: data,
+                    values: dataRef.current,
                 },
-                layer: interactive ? [
+                layer: subspace ? [
+                    {
+                        mark: commonEncodings.mark,
+                        encoding: {
+                            ...commonEncodings.encoding,
+                            color: {
+                                field: SUBSPACE_KEY,
+                                type: 'nominal',
+                                legend: null,
+                                scale: {
+                                    domain: [0, 1, 2],
+                                },
+                            },
+                        },
+                    },
+                ] : interactive ? [
                     {
                         params: [
                             {
@@ -126,20 +150,28 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                             switch (filterType) {
                                 case 'interval': {
                                     const range = getRange(state.values[0]);
-                                    signalChange$.next({
-                                        type: 'range',
-                                        fid: typeof indexKey === 'string' ? indexKey : indexKey.fid,
-                                        range,
-                                    });
+                                    if (indexKey) {
+                                        signalChange$.next({
+                                            type: 'range',
+                                            fid: indexKey.fid,
+                                            range,
+                                        });
+                                    } else {
+                                        console.log(range);
+                                    }
                                     break;
                                 }
                                 case 'point': {
                                     const set = state.values as (string | number)[];
-                                    signalChange$.next({
-                                        type: 'set',
-                                        fid: typeof indexKey === 'string' ? indexKey : indexKey.fid,
-                                        values: set,
-                                    });
+                                    if (indexKey) {
+                                        signalChange$.next({
+                                            type: 'set',
+                                            fid: indexKey.fid,
+                                            values: set,
+                                        });
+                                    } else {
+                                        console.log(set);
+                                    }
                                     break;
                                 }
                                 default: {
@@ -162,7 +194,14 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                 viewRef.current = undefined;
             }
         };
-    }, [mainField, mainFieldAggregation, filterType, interactive, data, indexKey, normalize]);
+    }, [title, mainField, mainFieldAggregation, filterType, interactive, indexKey, normalize, subspace]);
+
+    useEffect(() => {
+        viewRef.current?.change(
+            'dataSource',
+            viewRef.current.changeset().remove(() => true).insert(source),
+        );
+    }, [source]);
 
     return <div ref={container} />;
 };

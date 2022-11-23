@@ -1,24 +1,38 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import type { View } from 'vega';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import embed from 'vega-embed';
 import { EDITOR_URL } from '../../../constants';
 import type { IFieldMeta, IRow } from '../../../interfaces';
-import { SelectedFlag } from './RExplainer';
 
 
 interface DiffChartProps {
     data: IRow[];
+    subspaces: [number[], number[]];
     mainField: IFieldMeta;
     mainFieldAggregation: null | 'sum' | 'mean' | 'count';
     dimension: IFieldMeta;
     mode: 'full' | 'other' | 'two-group';
 }
 
-const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggregation, dimension, mode }) => {
+const DiffGroup1Key = '__diff_group_1__';
+const DiffGroup2Key = '__diff_group_2__';
+
+const DiffChart: React.FC<DiffChartProps> = ({ data, subspaces, mainField, mainFieldAggregation, dimension, mode }) => {
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View>();
+
+    const source = useMemo(() => {
+        return data.map((row, i) => ({
+            ...row,
+            [DiffGroup1Key]: subspaces[0].includes(i) ? 1 : 0,
+            [DiffGroup2Key]: subspaces[1].includes(i) ? 1 : 0,
+        }));
+    }, [data, subspaces]);
+
+    const dataRef = useRef(source);
+    dataRef.current = source;
 
     useEffect(() => {
         if (container.current) {
@@ -47,10 +61,13 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                 data: {
                     // @ts-ignore
                     name: 'dataSource',
-                    values: data,
+                    values: dataRef.current,
                 },
                 layer: dimension.semanticType === 'quantitative' ? [
                     {
+                        transform: [
+                            { filter: `datum.${DiffGroup2Key} == 1` },
+                        ],
                         mark: commonEncodings.mark,
                         encoding: {
                             x: commonEncodings.encoding.x,
@@ -65,7 +82,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                     },
                     {
                         transform: [
-                            { filter: `datum.${SelectedFlag} != 0` },
+                            { filter: `datum.${DiffGroup1Key} == 1` },
                         ],
                         mark: {
                             ...commonEncodings.mark,
@@ -85,6 +102,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                 ] : [
                     {
                         transform: [
+                            { filter: `datum.${DiffGroup2Key} == 1` },
                             {
                                 aggregate: [{
                                     field: mainField.fid,
@@ -107,7 +125,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                     },
                     {
                         transform: [
-                            { filter: `datum.${SelectedFlag} != 0` },
+                            { filter: `datum.${DiffGroup1Key} == 1` },
                             {
                                 aggregate: [{
                                     field: mainField.fid,
@@ -153,7 +171,22 @@ const DiffChart: React.FC<DiffChartProps> = ({ data, mainField, mainFieldAggrega
                 viewRef.current = undefined;
             }
         };
-    }, [mainField, mainFieldAggregation, data, mode, dimension]);
+    }, [mainField, mainFieldAggregation, mode, dimension]);
+
+    useEffect(() => {
+        // console.log(data.reduce<[number, number][]>((ctx, {[SelectedFlag]:num}) => {
+        //     if (ctx.at(-1)?.[0] !== num) {
+        //         ctx.push([num, 1]);
+        //     } else {
+        //         ctx.at(-1)![1] += 1;
+        //     }
+        //     return ctx;
+        // }, []).map(([k, v]) => `${k}{${v}}`).join(''));
+        viewRef.current?.change(
+            'dataSource',
+            viewRef.current.changeset().remove(() => true).insert(source),
+        );
+    }, [source]);
 
     return <div ref={container} />;
 };
