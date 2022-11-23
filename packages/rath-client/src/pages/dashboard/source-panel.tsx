@@ -7,7 +7,7 @@ import ReactVega from "../../components/react-vega";
 import VisErrorBoundary from "../../components/visErrorBoundary";
 import type { IInsightVizView } from "../../interfaces";
 import { useGlobalStore } from "../../store";
-import { viewSampling } from "../painter/sample";
+import { viewSampling } from "../../lib/stat/sampling"
 import { DashboardPanelProps } from "./dashboard-panel";
 
 
