@@ -2,11 +2,11 @@ import { IAnalyticType, IDataType, ISemanticType, UnivariateSummary } from 'visu
 import type { IFieldMeta, IFilter } from '@kanaries/loa';
 import type { IRow, ICol, IVegaSubset } from '../interfaces';
 import { isDateTimeArray } from '../dev/workers/engine/dateTimeExpand';
+import { RATH_INDEX_COLUMN_KEY } from '../constants';
 import * as FileLoader from './fileParser';
 import * as Transform from './transform';
 import { getRange } from './stat';
 import deepcopy from './deepcopy';
-import { RATH_INDEX_COLUMN_KEY } from '../constants';
 
 interface IFieldId { fid: string }
 export function colFromIRow(from: readonly IRow[], fields?: string[] | IFieldId[]): Map<string, ICol<any>> {
