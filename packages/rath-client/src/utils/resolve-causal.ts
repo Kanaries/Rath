@@ -79,6 +79,143 @@ const resolveCausal = (resultMatrix: readonly (readonly number[])[]): CausalLink
     return matrix;
 };
 
+export const mergeCausalPag = (
+    resultMatrix: readonly (readonly CausalLinkDirection[])[],
+    conditions: readonly ModifiableBgKnowledge[],
+    fields: readonly IFieldMeta[],
+): PagLink[] => {
+    const links: PagLink[] = [];
+
+    for (let i = 0; i < resultMatrix.length - 1; i += 1) {
+        for (let j = i + 1; j < resultMatrix.length; j += 1) {
+            const flag = resultMatrix[i][j];
+            switch (flag) {
+                case CausalLinkDirection.directed: {
+                    links.push({
+                        src: fields[i].fid,
+                        src_type: PAG_NODE.BLANK,
+                        tar: fields[j].fid,
+                        tar_type: PAG_NODE.ARROW,
+                    });
+                    break;
+                }
+                case CausalLinkDirection.reversed: {
+                    links.push({
+                        src: fields[i].fid,
+                        src_type: PAG_NODE.ARROW,
+                        tar: fields[j].fid,
+                        tar_type: PAG_NODE.BLANK,
+                    });
+                    break;
+                }
+                case CausalLinkDirection.undirected: {
+                    links.push({
+                        src: fields[i].fid,
+                        src_type: PAG_NODE.BLANK,
+                        tar: fields[j].fid,
+                        tar_type: PAG_NODE.BLANK,
+                    });
+                    break;
+                }
+                case CausalLinkDirection.bidirected: {
+                    links.push({
+                        src: fields[i].fid,
+                        src_type: PAG_NODE.ARROW,
+                        tar: fields[j].fid,
+                        tar_type: PAG_NODE.ARROW,
+                    });
+                    break;
+                }
+                case CausalLinkDirection.weakDirected: {
+                    links.push({
+                        src: fields[i].fid,
+                        src_type: PAG_NODE.CIRCLE,
+                        tar: fields[j].fid,
+                        tar_type: PAG_NODE.ARROW,
+                    });
+                    break;
+                }
+                case CausalLinkDirection.weakReversed: {
+                    links.push({
+                        src: fields[i].fid,
+                        src_type: PAG_NODE.ARROW,
+                        tar: fields[j].fid,
+                        tar_type: PAG_NODE.CIRCLE,
+                    });
+                    break;
+                }
+                case CausalLinkDirection.weakUndirected: {
+                    links.push({
+                        src: fields[i].fid,
+                        src_type: PAG_NODE.CIRCLE,
+                        tar: fields[j].fid,
+                        tar_type: PAG_NODE.CIRCLE,
+                    });
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+    }
+
+    const merge = (edge: PagLink) => {
+        const overloadIdx = links.findIndex(link => [link.src, link.tar].every(fid => [edge.src, edge.tar].includes(fid)));
+        if (overloadIdx === -1) {
+            links.push(edge);
+        } else {
+            links.splice(overloadIdx, 1, edge);
+        }
+    };
+
+    for (const edge of conditions) {
+        switch (edge.type) {
+            case 'must-link': {
+                merge({
+                    src: edge.src,
+                    tar: edge.tar,
+                    src_type: PAG_NODE.CIRCLE,
+                    tar_type: PAG_NODE.CIRCLE,
+                });
+                break;
+            }
+            case 'must-not-link': {
+                merge({
+                    src: edge.src,
+                    tar: edge.tar,
+                    src_type: PAG_NODE.EMPTY,
+                    tar_type: PAG_NODE.EMPTY,
+                });
+                break;
+            }
+            case 'directed-must-link': {
+                merge({
+                    src: edge.src,
+                    tar: edge.tar,
+                    src_type: PAG_NODE.BLANK,
+                    tar_type: PAG_NODE.ARROW,
+                });
+                break;
+            }
+            case 'directed-must-not-link': {
+                merge({
+                    src: edge.src,
+                    tar: edge.tar,
+                    src_type: PAG_NODE.EMPTY,
+                    tar_type: PAG_NODE.ARROW,
+                });
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    return links;
+};
+
 export const resolvePreconditionsFromCausal = (
     causalMatrix: readonly (readonly CausalLinkDirection[])[],
     fields: readonly IFieldMeta[],

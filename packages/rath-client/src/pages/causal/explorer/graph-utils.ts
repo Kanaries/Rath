@@ -47,8 +47,8 @@ const arrows = {
         end: 'M 12,0 L 28,8 L 28,-8 Z',
     },
     'weak undirected': {
-        start: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
-        end: 'M 12,0 L 18,6 L 24,0 L 18,-6 Z',
+        start: 'M 12,0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0 Z',
+        end: 'M 12,0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0 Z',
     },
 } as const;
 

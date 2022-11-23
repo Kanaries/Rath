@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import produce from 'immer';
 import { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import { resolvePreconditionsFromCausal, transformPreconditions } from '../../utils/resolve-causal';
+import { mergeCausalPag, resolvePreconditionsFromCausal, transformPreconditions } from '../../utils/resolve-causal';
 import Explorer from './explorer';
 import Params from './params';
 import { BgKnowledge, BgKnowledgePagLink, ModifiableBgKnowledge } from './config';
@@ -30,7 +30,7 @@ const CausalPage: React.FC = () => {
         __unsafeSetModifiablePrecondition(prev => {
             const list = typeof next === 'function' ? next(prev) : next;
             return list.reduce<ModifiableBgKnowledge[]>((links, link) => {
-                if (link.src === link.type) {
+                if (link.src === link.tar) {
                     // 禁止自环边
                     return links;
                 }
@@ -136,24 +136,8 @@ const CausalPage: React.FC = () => {
     }, [setModifiablePrecondition, causalStrength, fieldMetas]);
 
     const edges = useMemo(() => {
-        const links = resolvePreconditionsFromCausal(causalStrength, fieldMetas).reduce<ModifiableBgKnowledge[]>((list, link) => {
-            if (link.src === link.type) {
-                // 禁止自环边
-                return list;
-            }
-            const overloadIdx = list.findIndex(
-                which => [which.src, which.tar].every(node => [link.src, link.tar].includes(node))
-            );
-            if (overloadIdx !== -1) {
-                const temp = list.map(l => l);
-                temp.splice(overloadIdx, 1, link);
-                return temp;
-            } else {
-                return list.concat([link]);
-            }
-        }, []);
-        return transformPreconditions(links, selectedFields);
-    }, [causalStrength, fieldMetas, selectedFields]);
+        return mergeCausalPag(causalStrength, modifiablePrecondition, fieldMetas);
+    }, [causalStrength, fieldMetas, modifiablePrecondition]);
 
     return (
         <div className="content-container">
