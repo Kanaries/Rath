@@ -78,7 +78,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                     dimensions: [...fieldsInSight].filter(fid => fid !== mainField.fid),
                     measures: [mainField].map(ms => ({
                         fid: ms.fid,
-                        op: aggr !== 'count' ? (aggr ?? 'sum') : 'sum',
+                        op: aggr ?? 'sum',
                     })),
                 },
             }, serviceMode).then(resolve);

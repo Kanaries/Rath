@@ -45,7 +45,7 @@ const xHash = (data: IRow[], field: IFieldMeta): number[] => {
 const indexKey = '__index__';
 const hashIndexKey = '__hash_index__';
 
-const xNormalizeAggregated = (data: IRow[], field: IFieldMeta, aggregate: AggregateType): number[] => {
+const xAggregate = (data: IRow[], field: IFieldMeta, aggregate: AggregateType): number[] => {
     const res = new Array<0>(MAX_BIN).fill(0);
     const col: number[] = [];
     if (aggregate !== 'count') {
@@ -72,22 +72,14 @@ const xNormalizeAggregated = (data: IRow[], field: IFieldMeta, aggregate: Aggreg
             for (const row of data) {
                 res[row[hashIndexKey]] += 1;
             }
-            for (let i = 0; i < res.length; i += 1) {
-                res[i] /= data.length;
-            }
             break;
         }
         case 'sum': {
-            let total = 0;
             for (let i = 0; i < col.length; i += 1) {
                 const row = data[i];
                 const idx = row[hashIndexKey];
                 const w = col[i];
                 res[idx] += w;
-                total += w;
-            }
-            for (let i = 0; i < res.length; i += 1) {
-                res[i] /= total;
             }
             break;
         }
@@ -98,18 +90,10 @@ const xNormalizeAggregated = (data: IRow[], field: IFieldMeta, aggregate: Aggreg
                 const idx = row[hashIndexKey];
                 const w = col[i];
                 res[idx] += w;
-            }
-            let total = 0;
-            for (let i = 0; i < res.length; i += 1) {
-                if (count[i] !== 0) {
-                    res[i] /= count[i];
-                    total += res[i];
-                }
+                count[idx] += 1;
             }
             for (let i = 0; i < res.length; i += 1) {
-                if (res[i] !== 0) {
-                    res[i] /= total;
-                }
+                res[i] /= count[i];
             }
             break;
         }
@@ -119,6 +103,15 @@ const xNormalizeAggregated = (data: IRow[], field: IFieldMeta, aggregate: Aggreg
     }
     return res;
 };
+
+const xNormalize = (col: number[]): number[] => {
+    let [min, max] = getRange(col.filter(val => Number.isFinite(val)));
+    return col.map(val => {
+        return (val - min) / (max - min);
+    });
+};
+
+const DIFF_IGNORE_THRESHOLD = 0.15;
 
 const diffGroups = (
     data: IRow[],
@@ -134,21 +127,25 @@ const diffGroups = (
     }));
     const data1 = indices1.map(index => hashedData[index]);
     const data2 = indices2.map(index => hashedData[index]);
-    const group1 = xNormalizeAggregated(data1, dimension, measure.aggregate);
-    const group2 = xNormalizeAggregated(data2, dimension, measure.aggregate);
+    const aggregated1 = xAggregate(data1, dimension, measure.aggregate);
+    const aggregated2 = xAggregate(data2, dimension, measure.aggregate);
+    const group1 = xNormalize(aggregated1);
+    const group2 = xNormalize(aggregated2);
     const diff = new Array<0>(MAX_BIN).fill(0).reduce<{ loss: number; count: number }>((ctx, _, i) => {
         const a = group1[i];
         const b = group2[i];
         if (a === 0 && b === 0) {
             return ctx;
         }
-        const loss = Math.abs(a - b); // TODO: 减小较小误差的影响 - 置信区间？
+        const ignoreLoss = Math.abs(1 - (a / b) / b) <= DIFF_IGNORE_THRESHOLD || !Number.isFinite(a) || !Number.isFinite(b);
+        const loss = ignoreLoss ? 0 : Math.abs(a - b);
         return {
             loss: ctx.loss + loss,
             count: ctx.count + 1,
         };
     }, { loss: 0, count: 0 });
-    return diff.count === 0 ? 1 : diff.loss / diff.count;
+    // console.log(dimension, diff, group1, group2, data1.slice(0, 10).map(d => JSON.stringify(d)), data2.slice(0, 10).map(d => JSON.stringify(d)), aggregated1, aggregated2);
+    return diff.count === 0 ? 0 : diff.loss / diff.count;
 };
 
 export const insightExplain = (props: IRInsightExplainProps): IRInsightExplainResult => {
@@ -169,7 +166,7 @@ export const insightExplain = (props: IRInsightExplainProps): IRInsightExplainRe
         const target = view.measures[0];
         const responsibility = diffGroups(data, indices1, indices2, f, {
             fid: target.fid,
-            aggregate: 'sum',
+            aggregate: target.op,
         });
         if (responsibility !== 0) {
             // @ts-ignore
