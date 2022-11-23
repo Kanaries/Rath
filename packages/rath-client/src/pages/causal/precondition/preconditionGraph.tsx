@@ -62,7 +62,7 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
 
     const graphRef = useRef<Graph>();
     const renderData = useRenderData(data, 'edit', modifiablePrecondition, selectedFields, renderNode);
-    const cfg = useGraphOptions(width, selectedFields, onLinkTogether, graphRef, undefined);
+    const cfg = useGraphOptions(width, selectedFields, onLinkTogether, graphRef);
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
 
@@ -82,6 +82,7 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
         forceUpdateFlag,
         null,
         [],
+        false,
     );
 
     useEffect(() => {

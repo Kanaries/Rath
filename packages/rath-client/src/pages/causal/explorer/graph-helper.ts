@@ -18,6 +18,7 @@ export const useReactiveGraph = (
     forceRelayoutFlag: 0 | 1,
     focus: number | null,
     selectedSubtree: readonly string[],
+    allowZoom: boolean,
 ) => {
     const cfgRef = useRef(options);
     cfgRef.current = options;
@@ -131,9 +132,9 @@ export const useReactiveGraph = (
     useEffect(() => {
         const { current: graph } = graphRef;
         if (graph) {
-            graph.setMode(mode);
+            graph.setMode(`${mode}${allowZoom ? '_zoom' : ''}`);
         }
-    }, [mode, graphRef]);
+    }, [mode, graphRef, allowZoom]);
 
     useEffect(() => {
         const { current: graph } = graphRef;

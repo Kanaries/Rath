@@ -37,6 +37,7 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
+    allowZoom: boolean;
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
@@ -54,6 +55,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     autoLayout,
     renderNode,
     toggleFlowAnalyzer,
+    allowZoom,
     ...props
 }, ref) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
@@ -97,6 +99,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     focus={focus}
                     autoLayout={autoLayout}
                     renderNode={renderNode}
+                    allowZoom={allowZoom}
                     style={{
                         flexGrow: 1,
                         flexShrink: 1,

@@ -110,6 +110,8 @@ const Explorer: FC<ExplorerProps> = ({
     const [cutThreshold, setCutThreshold] = useState(0);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
+    const [allowZoom, setAllowZoom] = useState(false);
+    
     const data = useMemo(() => sNormalize(scoreMatrix), [scoreMatrix]);
 
     const nodes = useMemo<CausalNode[]>(() => {
@@ -309,6 +311,14 @@ const Explorer: FC<ExplorerProps> = ({
                     修正布局
                 </DefaultButton>
                 <Toggle
+                    label="画布缩放"
+                    checked={allowZoom}
+                    onChange={(_, checked) => setAllowZoom(Boolean(checked))}
+                    onText="On"
+                    offText="Off"
+                    inlineLabel
+                />
+                <Toggle
                     // label="Modify Constraints"
                     label="启用编辑"
                     checked={mode === 'edit'}
@@ -362,6 +372,7 @@ const Explorer: FC<ExplorerProps> = ({
                     onRevertLink={onRevertLink}
                     autoLayout={autoLayout}
                     renderNode={renderNode}
+                    allowZoom={allowZoom}
                     style={{
                         width: '100%',
                         height: '100%',

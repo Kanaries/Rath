@@ -41,6 +41,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
+    allowZoom: boolean;
 }, never>, 'onChange' | 'ref'>;
 
 /** 调试用的，不需要的时候干掉 */
@@ -101,6 +102,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     autoLayout,
     renderNode,
     toggleFlowAnalyzer,
+    allowZoom,
     ...props
 }, ref) => {
     const { causalStore } = useGlobalStore();
@@ -146,7 +148,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
 
     const graphRef = useRef<Graph>();
     const renderData = useRenderData(data, mode, preconditions, fields, renderNode);
-    const cfg = useGraphOptions(width, fields, handleLinkTogether, graphRef, undefined);
+    const cfg = useGraphOptions(width, fields, handleLinkTogether, graphRef);
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
 
@@ -172,6 +174,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         forceRelayoutFlag,
         focus,
         selectedSubtree,
+        allowZoom,
     );
 
     useEffect(() => {

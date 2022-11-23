@@ -171,7 +171,6 @@ export const useGraphOptions = (
     fields: readonly Readonly<IFieldMeta>[],
     handleLink: (srcFid: string, tarFid: string) => void,
     graphRef: { current: Graph | undefined },
-    setEdgeSelected: ((status: boolean) => void) | undefined,
 ) => {
     const widthRef = useRef(width);
     widthRef.current = width;
@@ -179,43 +178,45 @@ export const useGraphOptions = (
     fieldsRef.current = fields;
     const handleLinkRef = useRef(handleLink);
     handleLinkRef.current = handleLink;
-    const setEdgeSelectedRef = useRef(setEdgeSelected);
-    setEdgeSelectedRef.current = setEdgeSelected;
 
     return useMemo<Omit<GraphOptions, 'container'>>(() => {
         let createEdgeFrom = -1;
+        const exploreMode = ['drag-canvas', 'drag-node'];
+        const editMode = ['drag-canvas', {
+            type: 'create-edge',
+            trigger: 'drag',
+            shouldBegin(e: any) {
+                const source = e.item?._cfg?.id;
+                if (source) {
+                    createEdgeFrom = parseInt(source, 10);
+                }
+                return true;
+            },
+            shouldEnd(e: any) {
+                if (createEdgeFrom === -1) {
+                    return false;
+                }
+                const target = e.item?._cfg?.id;
+                if (target) {
+                    const origin = fieldsRef.current[createEdgeFrom];
+                    const destination = fieldsRef.current[parseInt(target, 10)];
+                    if (origin.fid !== destination.fid) {
+                        handleLinkRef.current(origin.fid, destination.fid);
+                    }
+                }
+                createEdgeFrom = -1;
+                return false;
+            },
+        }];
         const cfg: Omit<GraphOptions, 'container'> = {
             width: widthRef.current,
             height: GRAPH_HEIGHT,
             linkCenter: true,
             modes: {
-                explore: ['drag-canvas', 'drag-node', 'zoom-canvas'],
-                edit: ['drag-canvas', {
-                    type: 'create-edge',
-                    trigger: 'drag',
-                    shouldBegin(e) {
-                        const source = e.item?._cfg?.id;
-                        if (source) {
-                            createEdgeFrom = parseInt(source, 10);
-                        }
-                        return true;
-                    },
-                    shouldEnd(e) {
-                        if (createEdgeFrom === -1) {
-                            return false;
-                        }
-                        const target = e.item?._cfg?.id;
-                        if (target) {
-                            const origin = fieldsRef.current[createEdgeFrom];
-                            const destination = fieldsRef.current[parseInt(target, 10)];
-                            if (origin.fid !== destination.fid) {
-                                handleLinkRef.current(origin.fid, destination.fid);
-                            }
-                        }
-                        createEdgeFrom = -1;
-                        return false;
-                    },
-                }],
+                explore: exploreMode,
+                explore_zoom: [...exploreMode, 'zoom-canvas'],
+                edit: editMode,
+                edit_zoom: [...exploreMode, 'zoom-canvas'],
             },
             animate: true,
             layout: {
@@ -263,7 +264,6 @@ export const useGraphOptions = (
                 },
             },
         };
-        setEdgeSelectedRef.current?.(false);
         return cfg;
     }, [graphRef]);
 };
