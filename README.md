@@ -1,48 +1,48 @@
 <div align="center">
   <br>
-  <h1 style="font-size:55px">RATH</h1>
   <p align="center">
     <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="120">
    </p>
-  <strong>Your Open Source Augmented Analytics Business Intelligence Solution</strong>
+   <h1 style="font-size:55px">RATH</h1>
+  <strong>Your Open Source Augmented Analytics BI Solution</strong>
 </div>
 <br>
 <div id="header" align="center">
   <div id="badges">
   <a href="https://www.linkedin.com/company/kanaries-data">
-    <img src="https://img.shields.io/badge/LinkedIn-blue?style=for-the-badge&logo=linkedin&logoColor=white" alt="Follow RATH on LinkedIn"/>
+    <img src="https://img.shields.io/badge/LinkedIn-blue?style=flat-square&logo=linkedin&logoColor=white" alt="Follow RATH on LinkedIn"/>
   </a>
   <a href="https://www.youtube.com/@kanaries_data">
-    <img src="https://img.shields.io/badge/YouTube-red?style=for-the-badge&logo=youtube&logoColor=white" alt="Follow RATH on Youtube"/>
+    <img src="https://img.shields.io/badge/YouTube-red?style=flat-square&logo=youtube&logoColor=white" alt="Follow RATH on Youtube"/>
   </a>
   <a href="https://twitter.com/kanaries_data">
-    <img src="https://img.shields.io/badge/Twitter-blue?style=for-the-badge&logo=twitter&logoColor=white" alt="Follow RATH on Twitter"/>
+    <img src="https://img.shields.io/badge/Twitter-blue?style=flat-square&logo=twitter&logoColor=white" alt="Follow RATH on Twitter"/>
   </a>
   <a href="https://medium.com/@kanaries_data">
-    <img src="https://img.shields.io/badge/Medium-grey?style=for-the-badge&logo=medium&logoColor=white" alt="Follow RATH on LinkedIn"/>
+    <img src="https://img.shields.io/badge/Medium-grey?style=flat-square&logo=medium&logoColor=white" alt="Follow RATH on LinkedIn"/>
   </a>
   <a href="https://discord.gg/Z4ngFWXz2U">
-    <img src="https://img.shields.io/badge/Discord-indigo?style=for-the-badge&logo=discord&logoColor=white" alt="Join RATH on Discord"/>
+    <img src="https://img.shields.io/badge/Discord-indigo?style=flat-square&logo=discord&logoColor=white" alt="Join RATH on Discord"/>
   </a>
   <a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg">
-    <img src="https://img.shields.io/badge/Slack-green?style=for-the-badge&logo=slack&logoColor=white" alt="Join RATH on Slack"/>
+    <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join RATH on Slack"/>
   </a> 
   </div>
   <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
-    <img src="https://img.shields.io/badge/license-AGPL-brightgreen" alt="AGPL License">
+    <img src="https://img.shields.io/badge/license-AGPL-brightgreen?style=flat-square" alt="AGPL License">
   </a>
   <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
-    <img src="https://badgen.net/github/stars/kanaries/rath" alt="RATH GitHub Stars">
+    <img src="https://badgen.net/github/stars/kanaries/rath?style=flat-square" alt="RATH GitHub Stars">
   </a>
   <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
-    <img src="https://badgen.net/github/forks/kanaries/rath" alt="RATH GitHub Forks">
+    <img src="https://badgen.net/github/forks/kanaries/rath?style=flat-square" alt="RATH GitHub Forks">
   </a>
     <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
-    <img src="https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build" alt="RATH GitHub Forks">
+    <img src="https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build?style=flat-square" alt="RATH GitHub Forks">
   </a>
   </a>
     <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
-    <img src="https://img.shields.io/npm/v/@kanaries/graphic-walker/latest?label=%40kanaries%2Fgraphic-walker" alt="RATH GitHub Forks">
+    <img src="https://img.shields.io/npm/v/@kanaries/graphic-walker/latest?label=%40kanaries%2Fgraphic-walker&style=flat-square" alt="RATH GitHub Forks">
   </a>
 </div>
 
@@ -50,7 +50,7 @@
 
 Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have you as part of our community.
 
-**RATH** is an open-source alternative to Data Analysis and Visualization tools such as Tableau. It automates your Explotoary Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
+**RATH** is beyond an open-source alternative to Data Analysis and Visualization tools such as Tableau. It automates your Explotoary Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
 **RATH** is an ongoing project, actively being developed and maintained by a group of data scientists, developers and community ethuastists. We are a group of people who are passionate about creating the next generation of data analytic tool.
 
@@ -91,6 +91,16 @@ Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have
 - 🎨 [Data painter](https://kanaries.net/docs/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features.
 
 - 🎓 Wanna learn more about RATH? Visit our [Free online Courses](https://kanaries.net/docs/rath-academy): Access learning materials, detailed instructions and skill tests for **FREE**!
+
+## Share with the community
+
+Please consider sharing your experience or thoughts about [kanaries rath](https://kanaries.net) and the value it provides. It really does help!
+
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-reddit-red?style=flat-square&logo=reddit)](https://reddit.com/submit?url=https://github.com/Kanaries/Rath&title=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-hacker%20news-orange?style=flat-square&logo=ycombinator)](https://news.ycombinator.com/submitlink?u=https://github.com/Kanaries/Rath)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-twitter-03A9F4?style=flat-square&logo=twitter)](https://twitter.com/share?url=https://github.com/Kanaries/Rath&text=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-facebook-1976D2?style=flat-square&logo=facebook)](https://www.facebook.com/sharer/sharer.php?u=https://github.com/Kanaries/Rath)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-linkedin-3949AB?style=flat-square&logo=linkedin)](https://www.linkedin.com/shareArticle?url=https://github.com/Kanaries/Rath&title=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
 
 ## Walkthroughs
 ### View statistics from your data source
