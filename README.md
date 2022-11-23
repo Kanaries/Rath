@@ -1,61 +1,132 @@
-# Rath
+<div align="center">
+  <br>
+  <p align="center">
+    <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="120">
+   </p>
+   <h1 style="font-size:55px">RATH</h1>
+  <strong>Your Open Source Augmented Analytics BI Solution</strong>
+</div>
+<br>
+<div id="header" align="center">
+  <div id="badges">
+  <a href="https://www.linkedin.com/company/kanaries-data">
+    <img src="https://img.shields.io/badge/LinkedIn-blue?style=flat-square&logo=linkedin&logoColor=white" alt="Follow RATH on LinkedIn"/>
+  </a>
+  <a href="https://www.youtube.com/@kanaries_data">
+    <img src="https://img.shields.io/badge/YouTube-red?style=flat-square&logo=youtube&logoColor=white" alt="Follow RATH on Youtube"/>
+  </a>
+  <a href="https://twitter.com/kanaries_data">
+    <img src="https://img.shields.io/badge/Twitter-blue?style=flat-square&logo=twitter&logoColor=white" alt="Follow RATH on Twitter"/>
+  </a>
+  <a href="https://medium.com/@kanaries_data">
+    <img src="https://img.shields.io/badge/Medium-grey?style=flat-square&logo=medium&logoColor=white" alt="Follow RATH on LinkedIn"/>
+  </a>
+  <a href="https://discord.gg/Z4ngFWXz2U">
+    <img src="https://img.shields.io/badge/Discord-indigo?style=flat-square&logo=discord&logoColor=white" alt="Join RATH on Discord"/>
+  </a>
+  <a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg">
+    <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join RATH on Slack"/>
+  </a> 
+  </div>
+  <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+    <img src="https://img.shields.io/badge/license-AGPL-brightgreen?style=flat-square" alt="AGPL License">
+  </a>
+  <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+    <img src="https://badgen.net/github/stars/kanaries/rath?style=flat-square" alt="RATH GitHub Stars">
+  </a>
+  <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+    <img src="https://badgen.net/github/forks/kanaries/rath?style=flat-square" alt="RATH GitHub Forks">
+  </a>
+    <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+    <img src="https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build?style=flat-square" alt="RATH GitHub Forks">
+  </a>
+  </a>
+    <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+    <img src="https://img.shields.io/npm/v/@kanaries/graphic-walker/latest?label=%40kanaries%2Fgraphic-walker&style=flat-square" alt="RATH GitHub Forks">
+  </a>
+</div>
 
-[![kanaries data](https://img.shields.io/twitter/follow/kanaries_data?style=social)](https://twitter.com/kanaries_data)
+## Welcome
 
-![](https://img.shields.io/badge/license-AGPL-brightgreen)
-![](https://img.shields.io/github/stars/kanaries/rath?color=%23ff85c0)
-![](https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build)
-![](https://img.shields.io/npm/v/@kanaries/graphic-walker/latest?label=%40kanaries%2Fgraphic-walker)
+Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have you as part of our community.
 
+**RATH** is beyond an open-source alternative to Data Analysis and Visualization tools such as Tableau. It automates your Explotoary Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
-<img src="https://kanaries.cn/assets/kanaries-logo.png" alt="logo" width="180px" style="" />
+**RATH** is an ongoing project, actively being developed and maintained by a group of data scientists, developers and community ethuastists. We are a group of people who are passionate about creating the next generation of data analytic tool.
 
-RATH is an OpenSource automated data exploration tool that can help you automate discovery patterns and insights and generate charts and dashboards from multi-dimensional data. It uses an AI-enhanced engine to automate the working flow in data analysis. You can regard RATH as a copilot in data analysis.
+💪Join us, let's build it up!💪
 
- It is not only an open source replacement of tableau but a version with more automation power, including auto insights discovery, predictive interaction, and visual recommendation.
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=Kanaries&repo=Rath&theme=radical)](https://github.com/Kanaries/Rath)
 
-+ Try RATH [here](https://rath.kanaries.net)
-+ visit our official website[kanaries website](https://kanaries.net)
-+ [🚀 Quick View of RATH's Exploratory Data Analysis](https://medium.com/@observedobserver/quick-view-of-raths-exploratory-data-analysis-65c71866eca5)
+*Visit our [official website](https://kanaries.net) for more information about the RATH proejct.*
 
-## Introduction
+## Table of contents
 
-Rath is an auto EDA tool (or Augmented Analytic BI), which automates exploring your dataset and discovering interesting patterns and relations, recommending expressiveness and effective visualizations.
+| [Why use RATH?](#why-use-rath) | [Getting started](#getting-started) | [Try RATH now](#try-rath-now) | [Feature highlights](#feature-highlights) | [Walkthroughs](#walkthroughs) | [Developer Documentation](#developer-documentation) | [Community](#community) | [Contributing](#contributing) | [Top commitors](#top-commitors) | [License (AGPL)](#license-agpl) |
 
-Rath provides a different level of automation for different scenarios and users. For instance, the 'MegaAutomation' module provides full automation. Connect your data, and click 'analysis'. Rath will do all the exploration and analysis work for you. Rath will find some insights and patterns in data and generate charts/dashboards for you. The 'SemiAutomation' module is a semi-automation analysis system that can be controlled to focus on your thoughts more. 'Manual Exploration' module is a manual data analysis and visualization tool for whom with specific analysis purpose.
+## Why use RATH?
 
-Rath can auto-generate high-dimensional visualization containing complex patterns, while most other auto-EDA tools only provide simple low-dimensional charts with basic statistics patterns. Its means you can use Rath to explore the data to a deep level and find more insights.
+- Effortlessly automate your Exploratory Data Analysis process with a no-code UI.
+- Generate editable and insightful data visualizations. Freely modify your visualizations with Vega/Vega-lite.
+- Support a variety of database types.
+- Flexible copilot to assist your data exploration journey.
+- Paint your data to explore your datasets directly with Data Painter.
+- Causal discovery and explainer module to help you understand complex data patterns.
+- Open APIs and SDK for embeding requirements.
 
-Here are the main parts of Rath,
+## Get started
 
-### DataSource
-DataSource board is for data uploading, sampling(currently support stream data, which means there is no limit on the size of the file you uploaded), cleaning, and defining fields type(dimensions, measures). In visual insights, we regard dimensions as independent variables or features and measures as dependent variables or targets.
+### Try RATH now
 
-![dataSource-en.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-datasource-01.png)
++ [RATH Cloud](https://rath.kanaries.net/)
++ [Download desktop version](https://kanaries.net/#/products)
 
-![dataSource-filter-en.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/datasource-02.png)
+### Feature highlights
+- 👓 [Data profiling](https://kanaries.net/docs/data-source): overview your data source with one click. You can upload, sample, define dimensions and measures, perform data cleaning and more complicated computing upon your data source. 
 
-### Mega Automation
+- 🤖 [Mega-auto exploration](https://kanaries.net/docs/auto-explore): a fully-automated way to explore your data set and visualize your data with one click. Leave everything to RATH, simply pick the associate view that inspires you the most.
 
-Rath automates exploring your dataset and discovering interesting patterns, and relations, recommending expressiveness and effective visualizations.
-![gallery.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-mega-auto-01.png)
+- 🛠 [Semi-auto exploration](https://kanaries.net/docs/semi-auto-explore): The middle ground between a fully automated Data Exploration and Tableau-like manual exploration. RATH will work as your copilot, learn your interests and uses AI to generate relevant recommendations for you.
 
-If some of the recommendations catch your interest, you can click the associate button, and Rath will associate more related insights for you.
+- 🎨 [Data painter](https://kanaries.net/docs/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features.
 
-![gallery-asso](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-asso-01.png)
+- 🎓 Wanna learn more about RATH? Visit our [Free online Courses](https://kanaries.net/docs/rath-academy): Access learning materials, detailed instructions and skill tests for **FREE**!
 
-If you have some very specific target, you can switch to a manual EDA tool inside Rath called Graphic Walker.
+## Share with the community
 
-### Manual Exploration
-Graphic Walker is a lite tableau/polaris style visual analysis app, which is also based on Wilkinson's Grammer of Graphics. It is used for cases when users have specific analytic targets or want to analyze further results based on the recommended results by Rath's auto insights.
+Please consider sharing your experience or thoughts about [kanaries rath](https://kanaries.net) and the value it provides. It really does help!
 
-![graphic-walker.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-gw-01.png)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-reddit-red?style=flat-square&logo=reddit)](https://reddit.com/submit?url=https://github.com/Kanaries/Rath&title=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-hacker%20news-orange?style=flat-square&logo=ycombinator)](https://news.ycombinator.com/submitlink?u=https://github.com/Kanaries/Rath)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-twitter-03A9F4?style=flat-square&logo=twitter)](https://twitter.com/share?url=https://github.com/Kanaries/Rath&text=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-facebook-1976D2?style=flat-square&logo=facebook)](https://www.facebook.com/sharer/sharer.php?u=https://github.com/Kanaries/Rath)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-linkedin-3949AB?style=flat-square&logo=linkedin)](https://www.linkedin.com/shareArticle?url=https://github.com/Kanaries/Rath&title=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
 
-We use similar visualization specification rules in polaris, which is friendly to users who are familiar with tableau.
+## Walkthroughs
+### View statistics from your data source
+![View statistics from your data source](https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/study-biking-sharing-data-with-rath.webp
+)
+### Configure your dataset
+![Configure your dataset](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/datasource-02.png)
 
-![graphic-waler.png](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-gw-02.png)
+### One-click data analysis with Mega-auto Exploration
+![One-click data analysis with Mega-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-mega-auto-01.png)
 
-Manual Exploration is an independent embedding module. You can use it independently in your own app. See more details in `packages/graphic-walker/README.md`
+### Generate more associate visualizations in Mega-auto Exploration
+![Generate more associate visualizations in Mega-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-asso-01.png)
+
+### Use RATH as the Data Analysis copilot in Semi-auto Exploration
+![Use RATH as the Data Analysis copilot in Semi-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-semi-02.png)
+
+### RATH automatically learns your interest and generate recommendations
+![Use RATH as the Data Analysis copilot in Semi-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-semi-01.png)
+
+### Manually explore your data with a Tableau-like module
+![Use RATH as the Data Analysis copilot in Semi-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-gw-01.png)
+
+![Use RATH as the Data Analysis copilot in Semi-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-gw-02.png)
+
+Manual Exploration is an independent embedding module. You can use it independently in your apps. See more details in `packages/graphic-walker/README.md`
 
 ```bash
 yarn add @kanaries/graphic-walker
@@ -64,63 +135,52 @@ yarn add @kanaries/graphic-walker
 npm i --save @kanaries/graphic-walker
 ```
 
-### SemiAutomation
-Discovery or knowledge build module is a semi-automated data exploration system. It automates step by step and tries to understand what the users are thinking in real-time. Users can tell Rath what they are more interested in and Rath will focus more on the subset user care about.
+## Supported Databases
 
-![semi-auto](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-semi-02.png)
+RATH can query data from any SQL-speaking datastore or data engine (Presto, Trino, Athena, [and more](https://superset.apache.org/docs/databases/installing-database-drivers/)) that has a Python DB-API driver and a SQLAlchemy dialect.
 
-![discovery](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-semi-01.png)
+Here are some of the major database solutions that are supported:
 
+<p align="center">
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/athena.png" alt="Amazon Athena" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/redshift.png" alt="Amazon Redshift" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/spark.png" alt="Apache Spark SQL" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/doris.png" alt="Apache Doris" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/clickhouse.png" alt="Clickhouse" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/hive.png" alt="Apache Hive" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/mysql.svg" alt="MySQL" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/postgresql.png" alt="Postgre SQL" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/impala.png" alt="Apache Impala" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/kylin.png" alt="Apache Kylin" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/oracle.svg" alt="Oracle" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/airtable.png" alt="AirTable" border="0" width="200" height="80"/>
+</p>
 
+If you want to add support for more database types or data engines, feel free to [contact us](https://kanaries.net/docs#contact-us)
 
-### Dashboard
-Generate interactive dashboards for yours. Rath will figure out sets of visualizations of which contents are connected to each other and can be used to analyze a specific problem.
+## Developer Documentation
 
-You can also specify parts of the dashboard, and RATH
-will figure out the best fits for the rest of the dashboard.
+We encourage you to check out our [RATH Docs](https://kanaries.net/docs) for references and guidance. RATH Docs are scripted and maintained by technical writers and editors who collectively follow a standardized [style guide](https://kanaries/docs/documentation-style-guide) to produce clear and consistent documentation.
 
-### Notebook (deprecated)
-Notebook is a board for the user to know what happened in the automatic analysis process and how RATH uses visual-insights. It shows how decisions are made by the application and provide an interactive interface to adjust some of the parameters and operators used by the algorithm.
+## Community
 
-### Explainer (deprecated)
-Explainer uses several insight discovery algorithms to detect what the specific insight type is shown in a visualization recommended. Explainer is an extension of B. Tang's Top K insight paper[4].
+[Kanaries community](https://kanaries.net/community) is a place to have open discussions on features, voice your ideas, or get help with general questions. Get onboard with us through the following channels:
 
+Our developer community is the backbone of the ongoing RATH project. We sincerely welcome you to [join our community](join), participate in the conversation and stay connected with us for the latest updates. Feel free to [contribute to the RATH project](contribution-guide), submit any issues on our GitHub page, or split your grand new ideas in our chats.
 
-You can also use Graphic Walker as a lite tableau style analysis app independently. It can be used as an independent app or an embedding module.
+<img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/> <a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"></a>
+<img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/discord.png" alt="Join our Slack community" width="200"/> <a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"></a>
 
-more details can be found in README.md in graphic-walker folder.
+## Contributing
 
-## Docs
-+ [docs](https://kanaries.net)
+Please check out the [Contributing to RATH guide](https://kanaries.net/docs/contribution_guide)
+for guidelines about how to proceed.
 
+Thanks to all contributors :heart:
 
-
-## Usage
-
-### Try it
-+ on Github Pages(Stable version) [App](https://kanaries.github.io/Rath/)
-+ on Kanaries Website [App](https://kanaries.net/)
-
-### Download Desktop Version
-- [MacOS](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0.dmg)
-- [Windows](https://ch-resources.oss-cn-shanghai.aliyuncs.com/downloads/rath/Kanaries%20Rath-0.1.0-win.zip)
-
-### deploy
-
-Rath now runs all the computation tasks on webworker. For some large datasets, Rath will use indexedDB to avoid too much memory cost of browsers. For larger datasets (>100MB), Rath can put some of its computation to computation engine support SQL query(such as clickhouse). If you are interested in a server version, check the older version or contact us.
-
-#### deploy connector service
-RATH requires a database connector to connect common databases. You need to deploy `apps/connector` and then you can connect a number of common databases as datasource.
-
-#### OLAP Service
-Connector service is used as a pure datasource, RATH fetches the data from the bases and loads them into memory.
-
-For larger datasets, or if you can access a high performance OLAP service (such as a clusters of clickhouse). You can start `packages/connectors` which is a OLAP service connector. Not only will it fecthes data from OLAP, but use it as a computation engine as well. RATH
- will push SQL query to the OLAP services instead of computate those tasks in its own engine.
-
-
-## Documentation
-+ [🚀 Quick View of RATH's Exploratory Data Analysis](https://medium.com/@observedobserver/quick-view-of-raths-exploratory-data-analysis-65c71866eca5)
+<a href="https://github.com/kanaries/rath/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=kanaries/rath" />
+</a>
 
 ## LICENSE (AGPL)
 Rath is an automated data analysis and visualization tool (auto-EDA).
@@ -137,3 +197,10 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+<br>
+<p align="center">
+  <br>
+  <strong>Have fun with data!</strong> ❤️
+</p>
+
+[⬆ Back to Top](#welcome)
