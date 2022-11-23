@@ -4,7 +4,7 @@ Welcome to the RATH Project
   <br>
   <h1>RATH</h1>
   <p align="center">
-    <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="80" height="80">
+    <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="90">
    </p>
   <strong>Your Open Source Augmented Analytics Alternative for Business Intelligence</strong>
 </div>
@@ -52,11 +52,11 @@ Welcome to the RATH Project
 
 Welcome to the [RATH Project](https://kanaries.net/). We are so excited to have you as part of our community.
 
-**RATH** is an open-source alternative to Data Analysis tools such as Tableau. It automates your Explotoary Data Analysis workflow with an AI-enhanced engine by discovering patterns and insights and presents multi-dimensional data visualization.
+**RATH** is an open-source alternative to Data Analysis and Visualization tools such as Tableau. It automates your Explotoary Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
-**RATH** is an ongoing project, actively being developed and maintained by a group of data analysts, developers and community ethuastists. We are a group of people who are passionate about data visualization, data automation and exploratory data analysis (EDA).
+**RATH** is an ongoing project, actively being developed and maintained by a group of data scientists, developers and community ethuastists. We are a group of people who are passionate about creating the next generation of data analytic tool.
 
-💪Join the RATH Project, let's build it up!💪
+💪Join us, let's build it up!💪
 
 [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=Kanaries&repo=Rath&theme=radical)](https://github.com/Kanaries/Rath)
 
@@ -68,12 +68,13 @@ Welcome to the [RATH Project](https://kanaries.net/). We are so excited to have 
 
 ## Why use RATH?
 
-- Effortlessly automate your Exploratory Data Analysis process with a no-code, Tableau-like UI.
+- Effortlessly automate your Exploratory Data Analysis process with a no-code UI.
 - Generate editable and insightful data visualizations. Freely modify your visualizations with Vega/Vega-lite.
 - Support a variety of database types.
-- Flexible copilot to assist your data exploration journey by learning your interests with AI.
+- Flexible copilot to assist your data exploration journey.
 - Paint your data to explore your datasets directly with Data Painter.
-- RESTful API for programmatic RATH integration.
+- Causal discovery and explainer module to help you understand complex data patterns.
+- Open APIs and SDK for embeding requirements.
 
 ## Get started
 
@@ -139,13 +140,12 @@ Here are some of the major database solutions that are supported:
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/doris.png" alt="Apache Doris" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/clickhouse.png" alt="Clickhouse" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/hive.png" alt="Apache Hive" border="0" width="200" height="80"/>
-  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/mysql.png" alt="MySQL" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/mysql.svg" alt="MySQL" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/postgresql.png" alt="Postgre SQL" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/impala.png" alt="Apache Impala" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/kylin.png" alt="Apache Kylin" border="0" width="200" height="80"/>
-  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/oracle.png" alt="Oracle" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/oracle.svg" alt="Oracle" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/airtable.png" alt="AirTable" border="0" width="200" height="80"/>
-  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/olap.png" alt="OLAP" border="0" width="200" height="80"/>
 </p>
 
 If you want to add support for more database types or data engines, feel free to [contact us](https://kanaries.net/docs#contact-us)
@@ -156,7 +156,7 @@ We encourage you to check out our [RATH Docs](https://kanaries.net/docs) for ref
 
 ## Community
 
-[RATH community](https://kanaries.net/community) is a place to have open discussions on features, voice your ideas, or get help with general questions. Get onboard with us through the following channels:
+[Kanaries community](https://kanaries.net/community) is a place to have open discussions on features, voice your ideas, or get help with general questions. Get onboard with us through the following channels:
 
 Our developer community is the backbone of the ongoing RATH project. We sincerely welcome you to [join our community](join), participate in the conversation and stay connected with us for the latest updates. Feel free to [contribute to the RATH project](contribution-guide), submit any issues on our GitHub page, or split your grand new ideas in our chats.
 
