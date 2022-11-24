@@ -77,7 +77,7 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
 
     return (
         <Container ref={ref}>
-            {collectionList.length === 0 && '你的收藏夹是空的'}
+            {collectionList.length === 0 && 'collection is empty'}
             {collectionList.map(item => (
                 <div
                     key={item.viewId}
