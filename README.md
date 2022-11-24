@@ -58,11 +58,11 @@ Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have
 
 [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=Kanaries&repo=Rath&theme=radical)](https://github.com/Kanaries/Rath)
 
-*Visit our [official website](https://kanaries.net) for more information about the RATH proejct.*
+> Visit our [official website](https://kanaries.net) for more information about the RATH proejct.
 
 ## Table of contents
 
-| [Why use RATH?](#why-use-rath) | [Getting started](#getting-started) | [Try RATH now](#try-rath-now) | [Feature highlights](#feature-highlights) | [Walkthroughs](#walkthroughs) | [Developer Documentation](#developer-documentation) | [Community](#community) | [Contributing](#contributing) | [Top commitors](#top-commitors) | [License (AGPL)](#license-agpl) |
+| [Why use RATH?](#why-use-rath) | [Getting started](#get-started) | [Try RATH now](#try-rath-now) | [Feature highlights](#feature-highlights) | [Walkthroughs](#walkthroughs) | [Developer Documentation](#developer-documentation) | [Community](#community) | [Contributing](#contributing) | [License (AGPL)](#license-agpl) |
 
 ## Why use RATH?
 
@@ -152,11 +152,11 @@ Here are some of the major database solutions that are supported:
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/doris.png" alt="Apache Doris" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/clickhouse.png" alt="Clickhouse" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/hive.png" alt="Apache Hive" border="0" width="200" height="80"/>
-  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/mysql.svg" alt="MySQL" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/mysql.png" alt="MySQL" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/postgresql.png" alt="Postgre SQL" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/impala.png" alt="Apache Impala" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/kylin.png" alt="Apache Kylin" border="0" width="200" height="80"/>
-  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/oracle.svg" alt="Oracle" border="0" width="200" height="80"/>
+  <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/oracle.png" alt="Oracle" border="0" width="200" height="80"/>
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/airtable.png" alt="AirTable" border="0" width="200" height="80"/>
 </p>
 
@@ -172,8 +172,8 @@ We encourage you to check out our [RATH Docs](https://kanaries.net/docs) for ref
 
 Our developer community is the backbone of the ongoing RATH project. We sincerely welcome you to [join our community](join), participate in the conversation and stay connected with us for the latest updates. Feel free to [contribute to the RATH project](contribution-guide), submit any issues on our GitHub page, or split your grand new ideas in our chats.
 
-<img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/> <a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"></a>
-<img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/discord.png" alt="Join our Slack community" width="200"/> <a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"></a>
+<a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/></a>
+<a href="https://discord.gg/Z4ngFWXz2U"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/discord.png" alt="Join our Discord community" width="200"/> </a>
 
 ## Contributing
 
