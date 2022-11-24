@@ -104,7 +104,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField
                             color: { value: 'orange' },
                         },
                     },
-                ] : [
+                ] : mainFieldAggregation ? [
                     {
                         transform: [
                             { filter: `datum.${DiffGroup2Key} == 1` },
@@ -149,6 +149,40 @@ const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField
                             y: {
                                 field: translatedKey,
                                 title: `subset:${mainFieldAggregation ?? 'count'}(${mainField.name || mainField.fid})`,
+                                type: mainField.semanticType,
+                            },
+                            color: { value: 'orange' },
+                        },
+                    },
+                ] : [
+                    {
+                        transform: [
+                            { filter: `datum.${DiffGroup2Key} == 1` },
+                        ],
+                        mark: commonEncodings.mark,
+                        encoding: {
+                            x: commonEncodings.encoding.x,
+                            y: {
+                                field: mainField.fid,
+                                title: mainField.name || mainField.fid,
+                                type: mainField.semanticType,
+                            },
+                            color: { value: 'gray' },
+                        },
+                    },
+                    {
+                        transform: [
+                            { filter: `datum.${DiffGroup1Key} == 1` },
+                        ],
+                        mark: {
+                            ...commonEncodings.mark,
+                            size: 5,
+                        },
+                        encoding: {
+                            x: commonEncodings.encoding.x,
+                            y: {
+                                field: mainField.fid,
+                                title: `subset:${mainField.name || mainField.fid}`,
                                 type: mainField.semanticType,
                             },
                             color: { value: 'orange' },
