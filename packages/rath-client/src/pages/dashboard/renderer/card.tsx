@@ -23,6 +23,7 @@ export interface CardProps {
 
 export interface CardProvider {
     content: JSX.Element | null;
+    canvasContent?: JSX.Element | null | undefined;
     onRootMouseDown: (x: number, y: number) => void;
     onDoubleClick: () => void;
     onClick: () => void;
@@ -44,6 +45,19 @@ export const layoutOption = {
     },
 } as const;
 
+export type RefLine = {
+    direction: 'x' | 'y';
+    position: number;
+    reason: (
+        | 'canvas-limit'
+        | 'align-other-card'
+        | 'other-card-size' // TODO: 还没有实现，而且需要额外考虑当前卡片位置
+        | 'card-padding'    // TODO: 还没有实现
+        | 'canvas-padding'  // TODO: 还没有实现
+    )[];
+    score: number;
+};
+
 export interface CardProviderProps {
     children: (provider: Partial<CardProvider>) => JSX.Element;
     transformCoord: (ev: { clientX: number; clientY: number }) => { x: number; y: number };
@@ -56,6 +70,7 @@ export interface CardProviderProps {
     isSizeValid: (w: number, h: number) => boolean;
     operators: Partial<DashboardDocumentOperators & {
         adjustCardSize: (dir: 'n' | 'e' | 's' | 'w') => void;
+        getRefLines: (selfIdx: number) => RefLine[];
     }>;
     ratio: number;
 }
@@ -173,7 +188,7 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
             index={index}
             ratio={ratio}
         >
-            {provider => (
+            {provider => (<>
                 <CardBox
                     onMouseDown={e => {
                         e.stopPropagation();
@@ -215,7 +230,8 @@ const Card: FC<CardProps> = ({ globalFilters, cards, card, editor, transformCoor
                     )}
                     {provider.content}
                 </CardBox>
-            )}
+                {provider.canvasContent}
+            </>)}
         </Provider>
     );
 };

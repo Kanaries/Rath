@@ -2,7 +2,7 @@ import { ActionButton, ChoiceGroup, DefaultButton, IChoiceGroupOption, Pivot, Pi
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useState } from "react";
 import styled from "styled-components";
-import { DashboardCardAppearance, DashboardCardInsetLayout, DashboardCardState, DashboardDocument, DashboardDocumentOperators } from "../../store/dashboardStore";
+import { DashboardCardAppearance/*, DashboardCardInsetLayout*/, DashboardCardState, DashboardDocument, DashboardDocumentOperators } from "../../store/dashboardStore";
 import { useGlobalStore } from "../../store";
 import SourcePanel from "./source-panel";
 import FilterList from './filter-list';
@@ -61,17 +61,17 @@ const CardThemes: readonly DashboardCardAppearance[] = [
     DashboardCardAppearance.Neumorphism,
 ];
 
-const CardAlignTypes: readonly DashboardCardInsetLayout[] = [
-    DashboardCardInsetLayout.Auto,
-    DashboardCardInsetLayout.Column,
-    DashboardCardInsetLayout.Row,
-];
+// const CardAlignTypes: readonly DashboardCardInsetLayout[] = [
+//     DashboardCardInsetLayout.Auto,
+//     DashboardCardInsetLayout.Column,
+//     DashboardCardInsetLayout.Row,
+// ];
 
-const CardAlignName: Readonly<Record<DashboardCardInsetLayout, string>> = {
-    [DashboardCardInsetLayout.Auto]: 'Auto',
-    [DashboardCardInsetLayout.Column]: 'Column',
-    [DashboardCardInsetLayout.Row]: 'Row',
-};
+// const CardAlignName: Readonly<Record<DashboardCardInsetLayout, string>> = {
+//     [DashboardCardInsetLayout.Auto]: 'Auto',
+//     [DashboardCardInsetLayout.Column]: 'Column',
+//     [DashboardCardInsetLayout.Row]: 'Row',
+// };
 
 const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sampleSize }) => {
     const { dashboardStore } = useGlobalStore();

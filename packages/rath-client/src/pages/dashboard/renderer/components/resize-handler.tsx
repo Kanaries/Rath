@@ -19,15 +19,25 @@ const Resizer = styled.div`
     background-color: #ffffff;
 `;
 
-const Adjuster = styled.div`
+// const Adjuster = styled.div`
+//     position: absolute;
+//     width: 8px;
+//     height: 8px;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//     overflow: hidden;
+//     background-color: #888;
+// `;
+
+const Outline = styled.div`
     position: absolute;
-    width: 8px;
-    height: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background-color: #888;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    border: 1.5px solid #8888;
 `;
 
 export interface ResizeHandlerProps {
@@ -37,7 +47,7 @@ export interface ResizeHandlerProps {
     onResize: (x: number, y: number) => void;
     onResizeEnd: (x: number, y: number) => void;
     onResizeCancel: () => void;
-    adjustCardSize?: ( dir: 'n' | 'e' | 's' | 'w') => void;
+    adjustCardSize?: (dir: 'n' | 'e' | 's' | 'w') => void;
 }
 
 const ResizeHandler: FC<ResizeHandlerProps> = ({
@@ -91,8 +101,18 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
 
     return (
         <>
-            <Resizer onMouseDown={handleMouseDown} />
-            {adjustCardSize && (
+            <Outline />
+            <Resizer
+                onMouseDown={handleMouseDown}
+                onDoubleClick={e => {
+                    e.stopPropagation();
+                    adjustCardSize?.('e');
+                    requestAnimationFrame(() => {
+                        adjustCardSize?.('s');
+                    });
+                }}
+            />
+            {/* {adjustCardSize && (
                 <>
                     <Adjuster
                         style={{
@@ -192,7 +212,7 @@ const ResizeHandler: FC<ResizeHandlerProps> = ({
                         }}
                     />
                 </>
-            )}
+            )} */}
         </>
     );
 };
