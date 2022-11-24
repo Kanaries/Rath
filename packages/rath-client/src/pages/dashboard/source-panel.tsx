@@ -50,8 +50,8 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
                     selectors: [],
                     highlighter: [],
                 };
-                card.content.title = data.title;
-                card.content.text = data.desc;
+                card.content.title = data.title || card.content.title;
+                card.content.text = data.desc || card.content.text;
             });
         }
     }, [card, dashboardStore]);

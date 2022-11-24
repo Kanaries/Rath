@@ -1,4 +1,4 @@
-import { ActionButton, ChoiceGroup, IChoiceGroupOption, Stack, Text, TextField } from "@fluentui/react";
+import { ActionButton, ChoiceGroup, DefaultButton, IChoiceGroupOption, Pivot, PivotItem, Stack, Text, TextField } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useState } from "react";
 import styled from "styled-components";
@@ -19,52 +19,10 @@ const Panel = styled.div`
     padding: 1em;
     overflow: auto;
     box-shadow:
-        -9px 1.6px 6.4px 0 rgb(0 0 0 / 5%), -1px 0.3px 0.9px 0 rgb(0 0 0 / 11%),
-        -9px -1.6px 6.4px 0 rgb(0 0 0 / 5%), -1px -0.3px 0.9px 0 rgb(0 0 0 / 11%);
+        -9px 1.6px 6.4px 0 rgb(0 0 0 / 1.5%), -1px 0.7px 0.9px 0 rgb(0 0 0 / 5%),
+        -9px -1.6px 6.4px 0 rgb(0 0 0 / 1.5%), -1px -0.7px 0.9px 0 rgb(0 0 0 / 5%);
+    z-index: 100;
 
-    & *[role=tablist] {
-        display: flex;
-        flex-direction: row;
-        --corner-radius: 0.5em;
-        --border-color: #444;
-        --bgColor: #fff;
-
-        & *[role=tab] {
-            border: 1px solid var(--border-color);
-            border-left: none;
-            user-select: none;
-            line-height: 1.2em;
-            padding: 0.2em calc(1.25em + var(--corner-radius)) 0.4em 0.6em;
-            border-radius: var(--corner-radius) var(--corner-radius) 0 0;
-            position: relative;
-            background-color: var(--bgColor);
-
-            &:first-child, &[aria-selected=true] {
-                border-left: 1px solid var(--border-color);
-            }
-            &:not(:first-child) {
-                margin-left: calc(-2 * var(--corner-radius));
-                padding: 0.2em calc(1.25em + var(--corner-radius)) 0.4em calc(0.6em + var(--corner-radius));
-            }
-            &[aria-selected=false] {
-                cursor: pointer;
-            }
-            &[aria-disabled=true] {
-                opacity: 0.6;
-            }
-            &[aria-selected=true] {
-                border-bottom-color: var(--bgColor);
-                cursor: default;
-            }
-        }
-        ::after {
-            content: "";
-            display: block;
-            flex-grow: 1;
-            flex-shrink: 1;
-            border-bottom: 1px solid var(--border-color);
-        }
-    }
     & *[role=tabpanel] {
         flex-grow: 1;
         flex-shrink: 1;
@@ -146,36 +104,37 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
         },
     })), [page, dashboardStore]);
 
-    const layoutOptions = useCallback((mode: 'single' | 'global') => CardAlignTypes.map<IChoiceGroupOption>(alg => ({
-        key: CardAlignName[alg],
-        text: CardAlignName[alg],
-        onRenderField: (option, origin) => {
-            const applyToAll = () => {
-                const key = {
-                    Auto: DashboardCardInsetLayout.Auto,
-                    Column: DashboardCardInsetLayout.Column,
-                    Row: DashboardCardInsetLayout.Row,
-                }[option?.key ?? ''];
-                if (typeof key === 'number') {
-                    dashboardStore.runInAction(() => {
-                        page.cards.forEach(c => c.config.align = key);
-                    });
-                }
-            };
-            return option ? mode === 'single' ? (
-                <OptionContainer>
-                    {origin?.(option)}
-                    <ActionButton onClick={applyToAll}>
-                        Apply to all
-                    </ActionButton>
-                </OptionContainer>
-            ) : (
-                <ActionButton onClick={applyToAll} style={{ height: 'unset' }}>
-                    {option.text}
-                </ActionButton>
-            ) : null;
-        },
-    })), [page, dashboardStore]);
+    // Temporarily use column layout only
+    // const layoutOptions = useCallback((mode: 'single' | 'global') => CardAlignTypes.map<IChoiceGroupOption>(alg => ({
+    //     key: CardAlignName[alg],
+    //     text: CardAlignName[alg],
+    //     onRenderField: (option, origin) => {
+    //         const applyToAll = () => {
+    //             const key = {
+    //                 Auto: DashboardCardInsetLayout.Auto,
+    //                 Column: DashboardCardInsetLayout.Column,
+    //                 Row: DashboardCardInsetLayout.Row,
+    //             }[option?.key ?? ''];
+    //             if (typeof key === 'number') {
+    //                 dashboardStore.runInAction(() => {
+    //                     page.cards.forEach(c => c.config.align = key);
+    //                 });
+    //             }
+    //         };
+    //         return option ? mode === 'single' ? (
+    //             <OptionContainer>
+    //                 {origin?.(option)}
+    //                 <ActionButton onClick={applyToAll}>
+    //                     Apply to all
+    //                 </ActionButton>
+    //             </OptionContainer>
+    //         ) : (
+    //             <ActionButton onClick={applyToAll} style={{ height: 'unset' }}>
+    //                 {option.text}
+    //             </ActionButton>
+    //         ) : null;
+    //     },
+    // })), [page, dashboardStore]);
 
     return (
         <Panel onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
@@ -213,7 +172,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                                 }
                             })}
                         />
-                        <ChoiceGroup
+                        {/* <ChoiceGroup
                             label="Layout"
                             selectedKey={CardAlignName[card.config.align]}
                             options={layoutOptions('single')}
@@ -227,23 +186,26 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                                     card.config.align = key;
                                 }
                             })}
-                        />
+                        /> */}
                         <Text block variant="xLarge" style={{ margin: '1.5em 0 0.5em' }}>
                             Chart
                         </Text>
-                        <div role="tablist">
-                            {SupportedTabs.map((key, i) => (
-                                <div
-                                    role="tab"
-                                    key={key}
-                                    aria-selected={key === tab}
-                                    onClick={() => key !== tab && setTab(key)}
-                                    style={{ zIndex: key === tab ? SupportedTabs.length + 1 : SupportedTabs.length - i }}
-                                >
-                                    {key}
-                                </div>
+                        <DefaultButton
+                            iconProps={{ iconName: 'Delete' }}
+                            onClick={() => dashboardStore.runInAction(() => {
+                                card.content.chart = undefined;
+                            })}
+                        />
+                        <Pivot
+                            selectedKey={tab}
+                            onLinkClick={(item) => {
+                                item && setTab(item.props.itemKey as typeof tab);
+                            }}
+                        >
+                            {SupportedTabs.map(key => (
+                                <PivotItem key={key} itemKey={key} headerText={key} />
                             ))}
-                        </div>
+                        </Pivot>
                         <div role="tabpanel">
                             {({
                                 collection: <SourcePanel page={page} card={card} operators={operators} sampleSize={sampleSize} />,
@@ -261,10 +223,10 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                             label="Theme"
                             options={themeOptions('global')}
                         />
-                        <ChoiceGroup
+                        {/* <ChoiceGroup
                             label="Layout"
                             options={layoutOptions('global')}
-                        />
+                        /> */}
                         <Text block variant="xLarge" style={{ margin: '1.5em 0 0.5em' }}>
                             Filters
                         </Text>
