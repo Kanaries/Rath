@@ -169,6 +169,7 @@ export const useRenderData = (
 export const useGraphOptions = (
     width: number,
     fields: readonly Readonly<IFieldMeta>[],
+    handleLasso: ((fields: IFieldMeta[]) => void) | undefined,
     handleLink: (srcFid: string, tarFid: string) => void,
     graphRef: { current: Graph | undefined },
 ) => {
@@ -176,12 +177,34 @@ export const useGraphOptions = (
     widthRef.current = width;
     const fieldsRef = useRef(fields);
     fieldsRef.current = fields;
+    const handleLassoRef = useRef(handleLasso);
+    handleLassoRef.current = handleLasso;
     const handleLinkRef = useRef(handleLink);
     handleLinkRef.current = handleLink;
 
     return useMemo<Omit<GraphOptions, 'container'>>(() => {
         let createEdgeFrom = -1;
-        const exploreMode = ['drag-canvas', 'drag-node'];
+        const exploreMode = ['drag-canvas', 'drag-node', {
+            type: 'lasso-select',
+            trigger: 'shift',
+            onSelect(nodes: any, edges: any) {
+                const selected: IFieldMeta[] = [];
+                for (const node of nodes) {
+                    const idx = node._cfg?.id;
+                    if (idx) {
+                        const f = fieldsRef.current[parseInt(idx, 10)];
+                        if (f) {
+                            selected.push(f);
+                        }
+                    }
+                    graphRef.current?.setItemState(node, 'selected', false);
+                }
+                for (const edge of edges) {
+                    graphRef.current?.setItemState(edge, 'selected', false);
+                }
+                handleLassoRef.current?.(selected);
+            },
+        }];
         const editMode = ['drag-canvas', {
             type: 'create-edge',
             trigger: 'drag',

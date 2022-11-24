@@ -43,6 +43,7 @@ export interface ExplorerProps {
     onRevertLink: (srcFid: string, tarFid: string) => void;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
     synchronizePredictionsUsingCausalResult: () => void;
+    handleLasso?: (fields: IFieldMeta[]) => void;
 }
 
 const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
@@ -103,6 +104,7 @@ const Explorer: FC<ExplorerProps> = ({
     preconditions,
     renderNode,
     synchronizePredictionsUsingCausalResult,
+    handleLasso,
 }) => {
     const { causalStore } = useGlobalStore();
     const { causalStrength, selectedFields } = causalStore;
@@ -111,7 +113,6 @@ const Explorer: FC<ExplorerProps> = ({
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
     const [allowZoom, setAllowZoom] = useState(false);
-    const [dragMode, setDragMode] = useState<'drag-canvas' | 'lasso'>('drag-canvas');
     
     const data = useMemo(() => sNormalize(scoreMatrix), [scoreMatrix]);
 
@@ -283,7 +284,7 @@ const Explorer: FC<ExplorerProps> = ({
         onNodeSelectedRef.current(null, [], [], [], []);
     }, [mode]);
 
-    const [limit, setLimit] = useState(10);
+    const [limit, setLimit] = useState(20);
     const [autoLayout, setAutoLayout] = useState(true);
 
     const forceLayout = useCallback(() => {
@@ -340,7 +341,7 @@ const Explorer: FC<ExplorerProps> = ({
                     // label="Display Limit"
                     label="边显示上限"
                     min={1}
-                    max={Math.max(links.length, limit)}
+                    max={Math.max(links.length, limit, 10)}
                     value={limit}
                     onChange={value => setLimit(value)}
                 />
@@ -354,16 +355,6 @@ const Explorer: FC<ExplorerProps> = ({
                         value={cutThreshold}
                         showValue
                         onChange={d => setCutThreshold(d)}
-                    />
-                )}
-                {mode === 'explore' && (
-                    <Toggle
-                        label="拖动交互"
-                        checked={dragMode === 'lasso'}
-                        onChange={(_, checked) => setDragMode(checked ? 'lasso' : 'drag-canvas')}
-                        onText="圈选"
-                        offText="移动画布"
-                        inlineLabel
                     />
                 )}
             </Tools>
@@ -384,7 +375,7 @@ const Explorer: FC<ExplorerProps> = ({
                     autoLayout={autoLayout}
                     renderNode={renderNode}
                     allowZoom={allowZoom}
-                    allowLasso={dragMode === 'lasso'}
+                    handleLasso={handleLasso}
                     style={{
                         width: '100%',
                         height: '100%',

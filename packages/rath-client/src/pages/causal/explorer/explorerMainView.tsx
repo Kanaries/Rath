@@ -38,7 +38,7 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     autoLayout: boolean;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
     allowZoom: boolean;
-    allowLasso: boolean;
+    handleLasso?: (fields: IFieldMeta[]) => void;
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
@@ -57,7 +57,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     renderNode,
     toggleFlowAnalyzer,
     allowZoom,
-    allowLasso,
+    handleLasso,
     ...props
 }, ref) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
@@ -102,7 +102,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     autoLayout={autoLayout}
                     renderNode={renderNode}
                     allowZoom={allowZoom}
-                    allowLasso={allowLasso}
+                    handleLasso={handleLasso}
                     style={{
                         flexGrow: 1,
                         flexShrink: 1,

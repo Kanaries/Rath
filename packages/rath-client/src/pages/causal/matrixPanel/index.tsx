@@ -59,7 +59,7 @@ interface MatrixPanelProps {
 const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
     const { onMatrixPointClick, fields, onCompute, dataSource, diagram } = props;
     const [viewType, setViewType] = useState<VIEW_TYPE>(VIEW_TYPE.matrix);
-    const [selectedKey, setSelectedKey] = useState(MATRIX_TYPE.mutualInfo);
+    const [selectedKey, setSelectedKey] = useState(MATRIX_TYPE.causal);
     const [markType, setMarkType] = useState<'circle' | 'square'>('circle');
     const { causalStore } = useGlobalStore();
     const { computing, igCondMatrix, igMatrix, causalStrength } = causalStore;

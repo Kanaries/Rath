@@ -21,7 +21,7 @@ const CausalPage: React.FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const interactFieldGroups = useInteractFieldGroups(fieldMetas);
-    const { appendFields2Group } = interactFieldGroups;
+    const { appendFields2Group, setFieldGroup } = interactFieldGroups;
     const { igMatrix, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
 
     const [modifiablePrecondition, __unsafeSetModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
@@ -139,6 +139,10 @@ const CausalPage: React.FC = () => {
         return mergeCausalPag(causalStrength, modifiablePrecondition, fieldMetas);
     }, [causalStrength, fieldMetas, modifiablePrecondition]);
 
+    const handleLasso = useCallback((fields: IFieldMeta[]) => {
+        setFieldGroup(fields);
+    }, [setFieldGroup]);
+
     return (
         <div className="content-container">
             <div className="card">
@@ -198,6 +202,7 @@ const CausalPage: React.FC = () => {
                                 })
                             }
                             synchronizePredictionsUsingCausalResult={synchronizePredictionsUsingCausalResult}
+                            handleLasso={handleLasso}
                         />
                     )}
                 />
