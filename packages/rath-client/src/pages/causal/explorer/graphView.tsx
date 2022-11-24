@@ -42,6 +42,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     autoLayout: boolean;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
     allowZoom: boolean;
+    allowLasso: boolean;
 }, never>, 'onChange' | 'ref'>;
 
 /** 调试用的，不需要的时候干掉 */
@@ -103,6 +104,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     renderNode,
     toggleFlowAnalyzer,
     allowZoom,
+    allowLasso,
     ...props
 }, ref) => {
     const { causalStore } = useGlobalStore();

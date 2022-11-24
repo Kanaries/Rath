@@ -111,6 +111,7 @@ const Explorer: FC<ExplorerProps> = ({
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
     const [allowZoom, setAllowZoom] = useState(false);
+    const [dragMode, setDragMode] = useState<'drag-canvas' | 'lasso'>('drag-canvas');
     
     const data = useMemo(() => sNormalize(scoreMatrix), [scoreMatrix]);
 
@@ -318,6 +319,16 @@ const Explorer: FC<ExplorerProps> = ({
                     offText="Off"
                     inlineLabel
                 />
+                {mode === 'explore' && (
+                    <Toggle
+                        label="拖动交互"
+                        checked={dragMode === 'lasso'}
+                        onChange={(_, checked) => setDragMode(checked ? 'lasso' : 'drag-canvas')}
+                        onText="圈选"
+                        offText="移动画布"
+                        inlineLabel
+                    />
+                )}
                 <Toggle
                     // label="Modify Constraints"
                     label="启用编辑"
@@ -373,6 +384,7 @@ const Explorer: FC<ExplorerProps> = ({
                     autoLayout={autoLayout}
                     renderNode={renderNode}
                     allowZoom={allowZoom}
+                    allowLasso={dragMode === 'lasso'}
                     style={{
                         width: '100%',
                         height: '100%',

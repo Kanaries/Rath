@@ -30,7 +30,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
     const { fieldGroup } = interactFieldGroups;
     const { selectedFields } = causalStore;
 
-    const { sample } = context;
+    const { sample, vizSampleData } = context;
 
     const mainField = fieldGroup.at(-1) ?? null;
     const [indexKey, setIndexKey] = useState<IFieldMeta | null>(null);
@@ -88,7 +88,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
             if (pendingRef.current === p) {
                 setIrResult({
                     causalEffects: res.causalEffects.filter(
-                        item => Number.isFinite(item.responsibility) && item.responsibility !== 0
+                        item => Number.isFinite(item.responsibility)// && item.responsibility !== 0
                     ).sort((a, b) => b.responsibility - a.responsibility)
                 });
             }
@@ -115,6 +115,10 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
             );
         return [indicesA, indicesB];
     }, [subspaces, sample, diffMode]);
+
+    useEffect(() => {
+        setIrResult({ causalEffects: [] });
+    }, [indexKey, mainField, sample, subspaces, edges]);
 
     const applySelection = useCallback(() => {
         if (!subspaces) {
@@ -244,10 +248,10 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                         />
                     )}
                     <ChartItem
-                        data={sample}
+                        data={vizSampleData}
                         indexKey={indexKey}
                         mainField={mainField}
-                        mainFieldAggregation={null}
+                        mainFieldAggregation={aggr}
                         interactive
                         handleFilter={handleFilter}
                         normalize={false}
