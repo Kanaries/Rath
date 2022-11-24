@@ -22,9 +22,34 @@ const LoginInfoDiv = styled.div`
         white-space: nowrap;
         max-width: 164px;
         overflow-x: auto;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        font-weight: 500;
     }
     .user::-webkit-scrollbar {
         display: none;
+    }
+    .avatar-img {
+        display: flex;
+        align-items: center;
+    }
+    .hidden-login {
+        /* flex flex-shrink-0 border-t border-indigo-800 p-4 bg-gray-700 cursor-pointer */
+        display: flex;
+        flex-shrink: 0;
+        --tw-border-opacity: 1;
+        border-color: rgb(55 48 163 / var(--tw-border-opacity));
+        border-top-width: 1px;
+        padding: 1rem;
+        --tw-bg-opacity: 1;
+        background-color: rgb(55 65 81 / var(--tw-bg-opacity));
+        cursor: pointer;
+    }
+    .user-name {
+        /* ml-2 */
+        margin-left: 0.5rem;
+        p {
+        }
     }
 `;
 
@@ -37,7 +62,7 @@ const LoginInfo = (props: loginInfoProps) => {
         <LoginInfoDiv>
             <div>{element()}</div>
             <div
-                className="flex flex-shrink-0 border-t border-indigo-800 p-4 bg-gray-700 cursor-pointer"
+                className="hidden-login"
                 onClick={() => {
                     setLoginHidden(false);
                 }}
@@ -55,7 +80,7 @@ const LoginInfo = (props: loginInfoProps) => {
                 >
                     <LoginInfoList infoList={preferencesList} />
                 </Dialog>
-                <div className="flex items-center">
+                <div className="avatar-img">
                     <div>
                         {userName && (info.avatar || avatarUrl) ? (
                             <img
@@ -68,8 +93,8 @@ const LoginInfo = (props: loginInfoProps) => {
                         )}
                     </div>
                     {navMode === 'text' && (
-                        <div className="ml-2">
-                            <p className="text-sm font-medium user">{userName || intl.get('login.clickLogin')}</p>
+                        <div className="user-name">
+                            <p className="user">{userName || intl.get('login.clickLogin')}</p>
                         </div>
                     )}
                 </div>
