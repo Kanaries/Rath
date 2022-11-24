@@ -132,8 +132,8 @@ const CausalPage: React.FC = () => {
     }, []);
 
     const synchronizePredictionsUsingCausalResult = useCallback(() => {
-        setModifiablePrecondition(resolvePreconditionsFromCausal(causalStrength, fieldMetas));
-    }, [setModifiablePrecondition, causalStrength, fieldMetas]);
+        setModifiablePrecondition(resolvePreconditionsFromCausal(causalStrength, selectedFields));
+    }, [setModifiablePrecondition, causalStrength, selectedFields]);
 
     const edges = useMemo(() => {
         return mergeCausalPag(causalStrength, modifiablePrecondition, fieldMetas);

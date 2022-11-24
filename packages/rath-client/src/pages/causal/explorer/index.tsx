@@ -319,16 +319,6 @@ const Explorer: FC<ExplorerProps> = ({
                     offText="Off"
                     inlineLabel
                 />
-                {mode === 'explore' && (
-                    <Toggle
-                        label="拖动交互"
-                        checked={dragMode === 'lasso'}
-                        onChange={(_, checked) => setDragMode(checked ? 'lasso' : 'drag-canvas')}
-                        onText="圈选"
-                        offText="移动画布"
-                        inlineLabel
-                    />
-                )}
                 <Toggle
                     // label="Modify Constraints"
                     label="启用编辑"
@@ -364,6 +354,16 @@ const Explorer: FC<ExplorerProps> = ({
                         value={cutThreshold}
                         showValue
                         onChange={d => setCutThreshold(d)}
+                    />
+                )}
+                {mode === 'explore' && (
+                    <Toggle
+                        label="拖动交互"
+                        checked={dragMode === 'lasso'}
+                        onChange={(_, checked) => setDragMode(checked ? 'lasso' : 'drag-canvas')}
+                        onText="圈选"
+                        offText="移动画布"
+                        inlineLabel
                     />
                 )}
             </Tools>

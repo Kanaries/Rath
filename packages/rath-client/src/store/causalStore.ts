@@ -244,7 +244,7 @@ export class CausalStore {
                     .slice(0, originFieldsLength)
                     .map((row) => row.slice(0, originFieldsLength));
                 const causalMatrix = resolveCausal(resultMatrix);
-                const unmatched = findUnmatchedCausalResults(fields, preconditionPag, causalMatrix);
+                const unmatched = findUnmatchedCausalResults(inputFields, preconditionPag, causalMatrix);
                 if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
                     for (const info of unmatched) {
                         notify({
