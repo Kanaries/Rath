@@ -52,4 +52,5 @@ export const STORAGES = {
     STATE: 'state',
     ITERATOR: 'iterator',
     ITERATOR_META: 'iterator_meta',
+    CONFIG: 'config',
 }

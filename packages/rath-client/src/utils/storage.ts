@@ -2,15 +2,6 @@ import localforage from 'localforage';
 import { RESULT_STORAGE_SPLITOR, STORAGES, STORAGE_INSTANCE } from '../constants';
 import { IFieldMeta, IMuteFieldBase, IRow } from '../interfaces';
 import type { CausalLinkDirection } from './resolve-causal';
-export const STORAGE_INSTANCE = 'rath_storage_instance';
-
-const STORAGES = {
-    DATASOURCE: 'datasource',
-    WORKSPACE: 'workspace',
-    META: 'meta',
-    STATE: 'state',
-    CONFIG: 'config',
-};
 
 export interface IDBMeta {
     id: string;
@@ -198,6 +189,7 @@ export async function getDataConfig(name: string) {
     });
     const ds = (await metas.getItem(name)) as string;
     return ds;
+}
 
 export async function setModelStorage (name: string, model: IModel) {
     const modelBucket = localforage.createInstance({
