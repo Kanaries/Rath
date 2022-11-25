@@ -5,7 +5,7 @@ import type { IFieldMeta } from "../../../interfaces";
 import type { CausalLink } from ".";
 
 
-export const GRAPH_HEIGHT = 600;
+export const GRAPH_HEIGHT = 500;
 
 export type GraphNodeAttributes<
     T extends 'circle' | 'rect' | 'ellipse' | 'diamond' | 'triangle' | 'star' | 'image' | 'modelRect' | 'donut' = 'circle'
@@ -36,19 +36,19 @@ const arrows = {
     },
     directed: {
         start: '',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
     },
     bidirected: {
-        start: 'M 12,0 L 28,8 L 28,-8 Z',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+        start: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
+        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
     },
     'weak directed': {
-        start: 'M 12,0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0 Z',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+        start: 'M 8.4,0 a 5.6,5.6 0 1,0 11.2,0 a 5.6,5.6 0 1,0 -11.2,0 Z',
+        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
     },
     'weak undirected': {
-        start: 'M 12,0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0 Z',
-        end: 'M 12,0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0 Z',
+        start: 'M 8.4,0 a 5.6,5.6 0 1,0 11.2,0 a 5.6,5.6 0 1,0 -11.2,0 Z',
+        end: 'M 8.4,0 a 5.6,5.6 0 1,0 11.2,0 a 5.6,5.6 0 1,0 -11.2,0 Z',
     },
 } as const;
 
@@ -66,12 +66,12 @@ const bkArrows = {
     "directed-must-link": {
         fill: '#0027b4',
         start: '',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
     },
     "directed-must-not-link": {
         fill: '#c50f1f',
         start: '',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
     },
 } as const;
 
@@ -92,10 +92,10 @@ G6.registerEdge(
                     stroke: '#c50f1f',
                     lineWidth: 2,
                     path: [
-                        ['M', midPoint.x + 8, midPoint.y + 8],
-                        ['L', midPoint.x - 8, midPoint.y - 8],
-                        ['M', midPoint.x - 8, midPoint.y + 8],
-                        ['L', midPoint.x + 8, midPoint.y - 8],
+                        ['M', midPoint.x + 6, midPoint.y + 6],
+                        ['L', midPoint.x - 6, midPoint.y - 6],
+                        ['M', midPoint.x - 6, midPoint.y + 6],
+                        ['L', midPoint.x + 6, midPoint.y - 6],
                     ],
                 },
                 name: 'forbidden-mark',
@@ -254,18 +254,18 @@ export const useGraphOptions = (
                 },
             },
             defaultNode: {
-                size: 24,
+                size: 20,
                 style: {
-                    lineWidth: 2,
+                    lineWidth: 1,
                 },
             },
             nodeStateStyles: {
                 focused: {
-                    lineWidth: 3,
+                    lineWidth: 1.5,
                     opacity: 1,
                 },
                 highlighted: {
-                    lineWidth: 2.5,
+                    lineWidth: 1.25,
                     opacity: 1,
                 },
                 faded: {

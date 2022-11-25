@@ -1,15 +1,16 @@
 import { Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import produce from 'immer';
 import styled from 'styled-components';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
-import { resolvePreconditionsFromCausal, transformPreconditions } from '../../../utils/resolve-causal';
+import { mergeCausalPag, resolvePreconditionsFromCausal, transformPreconditions } from '../../../utils/resolve-causal';
 import Explorer from '../explorer';
 import Params from '../params';
 import { BgKnowledge, BgKnowledgePagLink, ModifiableBgKnowledge } from '../config';
 import ModelStorage from '../modelStorage';
+import ManualAnalyzer from '../manualAnalyzer';
 import MatrixPanel, { MATRIX_TYPE } from '../matrixPanel';
 import type { useInteractFieldGroups } from '../hooks/interactFieldGroup';
 import type { useDataViews } from '../hooks/dataViews';
@@ -20,8 +21,19 @@ const Container = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     overflow: hidden;
+    > div {
+        height: 100%;
+        flex-grow: 1;
+        flex-shrink: 1;
+        flex-basis: 0;
+        overflow: auto;
+        padding: 0 1em;
+        :not(:first-child) {
+            border-left: 1px solid #8882;
+        }
+    }
 `;
 
 export interface CausalModalProps {
@@ -112,12 +124,8 @@ const CausalModal: React.FC<CausalModalProps> = ({
 }) => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { focusFieldIds, computing, igMatrix, selectedFields } = causalStore;
+    const { focusFieldIds, computing, igMatrix, selectedFields, causalStrength } = causalStore;
     const { dataSubset } = dataContext;
-
-    useEffect(() => {
-        causalStore.updateCausalAlgorithmList(fieldMetas);
-    }, [causalStore, fieldMetas]);
 
     /** @deprecated FCI 已经迁移到 preconditionPag 参数，等到所有算法更新完可以删掉对应逻辑 */
     const precondition = useMemo<BgKnowledge[]>(() => {
@@ -169,46 +177,62 @@ const CausalModal: React.FC<CausalModalProps> = ({
         [appendFields2Group, causalStore, fieldMetas]
     );
 
+    const resetExploringFieldsRef = useRef(() => interactFieldGroups.clearFieldGroup());
+    resetExploringFieldsRef.current = () => interactFieldGroups.clearFieldGroup();
+
+    useEffect(() => {
+        resetExploringFieldsRef.current();
+    }, [causalStrength]);
+
+    const edges = useMemo(() => {
+        return mergeCausalPag(causalStrength, modifiablePrecondition, fieldMetas);
+    }, [causalStrength, fieldMetas, modifiablePrecondition]);
+
     return (
         <Container>
-            <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
-                <ModelStorage />
-                <Params
-                    dataSource={dataSubset}
-                    focusFields={focusFieldIds}
-                    bgKnowledge={preconditionPag}
-                    precondition={precondition}
-                />
-            </Stack>
-            <MatrixPanel
-                fields={selectedFields}
-                dataSource={dataSubset}
-                onMatrixPointClick={onFieldGroupSelect}
-                onCompute={(matKey) => {
-                    switch (matKey) {
-                        case MATRIX_TYPE.conditionalMutualInfo:
-                            causalStore.computeIGCondMatrix(dataSubset, selectedFields);
-                            break;
-                        case MATRIX_TYPE.causal:
-                            causalStore.causalDiscovery(dataSubset, precondition, preconditionPag);
-                            break;
-                        case MATRIX_TYPE.mutualInfo:
-                        default:
-                            causalStore.computeIGMatrix(dataSubset, selectedFields);
-                            break;
-                    }
-                }}
-                diagram={(
-                    <CausalExplorer
-                        allowEdit
-                        dataContext={dataContext}
-                        modifiablePrecondition={modifiablePrecondition}
-                        setModifiablePrecondition={setModifiablePrecondition}
-                        renderNode={renderNode}
-                        interactFieldGroups={interactFieldGroups}
+            <div>
+                <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
+                    <ModelStorage />
+                    <Params
+                        dataSource={dataSubset}
+                        focusFields={focusFieldIds}
+                        bgKnowledge={preconditionPag}
+                        precondition={precondition}
                     />
-                )}
-            />
+                </Stack>
+                <MatrixPanel
+                    fields={selectedFields}
+                    dataSource={dataSubset}
+                    onMatrixPointClick={onFieldGroupSelect}
+                    onCompute={(matKey) => {
+                        switch (matKey) {
+                            case MATRIX_TYPE.conditionalMutualInfo:
+                                causalStore.computeIGCondMatrix(dataSubset, selectedFields);
+                                break;
+                            case MATRIX_TYPE.causal:
+                                causalStore.causalDiscovery(dataSubset, precondition, preconditionPag);
+                                break;
+                            case MATRIX_TYPE.mutualInfo:
+                            default:
+                                causalStore.computeIGMatrix(dataSubset, selectedFields);
+                                break;
+                        }
+                    }}
+                    diagram={(
+                        <CausalExplorer
+                            allowEdit
+                            dataContext={dataContext}
+                            modifiablePrecondition={modifiablePrecondition}
+                            setModifiablePrecondition={setModifiablePrecondition}
+                            renderNode={renderNode}
+                            interactFieldGroups={interactFieldGroups}
+                        />
+                    )}
+                />
+            </div>
+            <div style={{ flexGrow: 1.4 }}>
+                <ManualAnalyzer context={dataContext} interactFieldGroups={interactFieldGroups} edges={edges} />
+            </div>
         </Container>
     );
 };

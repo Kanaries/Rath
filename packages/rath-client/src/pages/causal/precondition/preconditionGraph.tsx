@@ -124,7 +124,7 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
                     onClick={() => setUpdateFlag(flag => flag ? 0 : 1)}
                     iconProps={{ iconName: 'Repair' }}
                 >
-                    修正布局
+                    刷新布局
                 </DefaultButton>
                 <Dropdown
                     label="连接类型"

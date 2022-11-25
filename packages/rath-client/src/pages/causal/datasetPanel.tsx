@@ -2,7 +2,6 @@ import {
     Checkbox,
     DetailsList,
     IColumn,
-    IconButton,
     Label,
     SelectionMode,
     Slider,
@@ -45,6 +44,17 @@ const TableContainer = styled.div`
             flex-grow: 1;
             flex-shrink: 1;
             overflow: auto auto;
+        }
+    }
+`;
+
+const Row = styled.div<{ selected: boolean }>`
+    > div {
+        background-color: ${({ selected }) => selected ? '#88888816' : undefined};
+        filter: ${({ selected }) => selected ? 'unset' : 'opacity(0.8)'};
+        cursor: pointer;
+        :hover {
+            filter: unset;
         }
     }
 `;
@@ -108,11 +118,7 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                     const field = item as IFieldMeta;
                     const checked = focusFieldIds.includes(field.fid);
                     return (
-                        <IconButton
-                            iconProps={{ iconName: checked ? 'Remove' : 'Add' }}
-                            onClick={() => toggleFocus(field.fid)}
-                            style={{ height: 'unset' }}
-                        />
+                        <Checkbox checked={checked} styles={{ root: { pointerEvents: 'none' } }} />
                     );
                 },
                 isResizable: false,
@@ -124,9 +130,8 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                 name: `因素 (${focusFieldIds.length} / ${totalFieldsRef.current.length})`,
                 onRender: (item) => {
                     const field = item as IFieldMeta;
-                    const checked = focusFieldIdsRef.current.includes(field.fid);
                     return (
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: checked ? 'bold' : 'normal' }}>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {field.name || field.fid}
                         </span>
                     );
@@ -182,7 +187,7 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                 maxWidth: 100,
             },
         ];
-    }, [toggleFocus, focusFieldIds, causalStore]);
+    }, [focusFieldIds, causalStore]);
 
     return (
         <>
@@ -283,6 +288,15 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                     items={fieldMetas}
                     columns={fieldsTableCols}
                     selectionMode={SelectionMode.none}
+                    onRenderRow={(props, defaultRender) => {
+                        const field = props?.item as IFieldMeta;
+                        const checked = focusFieldIds.includes(field.fid);
+                        return (
+                            <Row selected={checked} onClick={() => toggleFocus(field.fid)}>
+                                {defaultRender?.(props)}
+                            </Row>
+                        );
+                    }}
                 />
             </TableContainer>
         </>

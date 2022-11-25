@@ -1,4 +1,4 @@
-import { DefaultButton, Slider, Toggle } from "@fluentui/react";
+import { DefaultButton, Icon, Slider, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
@@ -7,6 +7,7 @@ import type { IFieldMeta, IRow } from "../../../interfaces";
 import { useGlobalStore } from "../../../store";
 import { CausalLinkDirection } from "../../../utils/resolve-causal";
 import type { ModifiableBgKnowledge } from "../config";
+import Floating from "../floating";
 import ExplorerMainView from "./explorerMainView";
 import FlowAnalyzer, { NodeWithScore } from "./flowAnalyzer";
 import type { GraphNodeAttributes } from "./graph-utils";
@@ -56,6 +57,7 @@ const Container = styled.div`
     display: flex;
     flex-direction: row;
     align-items: stretch;
+    position: relative;
 `;
 
 const Tools = styled.div`
@@ -64,14 +66,13 @@ const Tools = styled.div`
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    border: 1px solid #e3e2e2;
-    border-right: none;
     padding: 1em 1em;
     align-items: flex-start;
+    user-select: none;
     > * {
         flex-grow: 0;
         flex-shrink: 0;
-        margin: 1em 0;
+        margin: 0.3em 0;
     }
     > *:not(:first-child) {
         width: 100%;
@@ -306,67 +307,6 @@ const Explorer: FC<ExplorerProps> = ({
 
     return (<>
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
-            <Tools onClick={e => e.stopPropagation()}>
-                <DefaultButton
-                    style={{
-                        flexGrow: 0,
-                        flexShrink: 0,
-                        flexBasis: 'max-content',
-                        padding: '0.4em 0',
-                    }}
-                    iconProps={{ iconName: 'Repair' }}
-                    onClick={forceLayout}
-                >
-                    修正布局
-                </DefaultButton>
-                <Toggle
-                    label="画布缩放"
-                    checked={allowZoom}
-                    onChange={(_, checked) => setAllowZoom(Boolean(checked))}
-                    onText="On"
-                    offText="Off"
-                    inlineLabel
-                />
-                {allowEdit && (
-                    <Toggle
-                        // label="Modify Constraints"
-                        label="启用编辑"
-                        checked={mode === 'edit'}
-                        onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
-                        onText="On"
-                        offText="Off"
-                        inlineLabel
-                    />
-                )}
-                <Toggle
-                    label="自动布局"
-                    checked={autoLayout}
-                    onChange={(_, checked) => setAutoLayout(Boolean(checked))}
-                    onText="On"
-                    offText="Off"
-                    inlineLabel
-                />
-                <Slider
-                    // label="Display Limit"
-                    label="边显示上限"
-                    min={1}
-                    max={Math.max(links.length, limit, 10)}
-                    value={limit}
-                    onChange={value => setLimit(value)}
-                />
-                {/* TODO: 现在没有有意义的权重，暂时隐藏 */}
-                {false && (
-                    <Slider
-                        label="按权重筛选"
-                        min={0}
-                        max={1}
-                        step={0.01}
-                        value={cutThreshold}
-                        showValue
-                        onChange={d => setCutThreshold(d)}
-                    />
-                )}
-            </Tools>
             <MainView>
                 <ExplorerMainView
                     selectedSubtree={selectedSubtree}
@@ -391,6 +331,69 @@ const Explorer: FC<ExplorerProps> = ({
                     }}
                 />
             </MainView>
+            <Floating position="absolute" direction="start" onRenderAside={() => (<Icon iconName="Waffle" />)}>
+                <Tools>
+                    <DefaultButton
+                        style={{
+                            flexGrow: 0,
+                            flexShrink: 0,
+                            flexBasis: 'max-content',
+                            padding: '0.4em 0',
+                        }}
+                        iconProps={{ iconName: 'Repair' }}
+                        onClick={forceLayout}
+                    >
+                        刷新布局
+                    </DefaultButton>
+                    <Toggle
+                        label="画布缩放"
+                        checked={allowZoom}
+                        onChange={(_, checked) => setAllowZoom(Boolean(checked))}
+                        onText="On"
+                        offText="Off"
+                        inlineLabel
+                    />
+                    {allowEdit && (
+                        <Toggle
+                            // label="Modify Constraints"
+                            label="编辑因果关系"
+                            checked={mode === 'edit'}
+                            onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
+                            onText="On"
+                            offText="Off"
+                            inlineLabel
+                        />
+                    )}
+                    <Toggle
+                        label="自动布局"
+                        checked={autoLayout}
+                        onChange={(_, checked) => setAutoLayout(Boolean(checked))}
+                        onText="On"
+                        offText="Off"
+                        inlineLabel
+                    />
+                    <Slider
+                        // label="Display Limit"
+                        label="边显示上限"
+                        min={1}
+                        max={Math.max(links.length, limit, 10)}
+                        value={limit}
+                        onChange={value => setLimit(value)}
+                    />
+                    {/* TODO: 现在没有有意义的权重，暂时隐藏 */}
+                    {false && (
+                        <Slider
+                            label="按权重筛选"
+                            min={0}
+                            max={1}
+                            step={0.01}
+                            value={cutThreshold}
+                            showValue
+                            onChange={d => setCutThreshold(d)}
+                        />
+                    )}
+                </Tools>
+            </Floating>
         </Container>
         <ErrorBoundary>
             <FlowAnalyzer

@@ -6,12 +6,10 @@ import type { useDataViews } from "../hooks/dataViews";
 import type { ModifiableBgKnowledge } from "../config";
 import type { GraphNodeAttributes } from "../explorer/graph-utils";
 import type { IFieldMeta } from "../../../interfaces";
-import { useGlobalStore } from "../../../store";
 import type { useInteractFieldGroups } from "../hooks/interactFieldGroup";
 import CausalDatasetConfig from './datasetConfig';
 import CausalPreconditionConfig from './preconditionConfig';
 import CausalModel from "./causalModel";
-import CausalExploration from './exploration';
 
 
 const Container = styled.div`
@@ -54,9 +52,9 @@ const StepList = styled.div`
     }
 `;
 
-const StepItem = styled.div<{ active: boolean; completed: boolean; inaccessible?: boolean }>`
+const StepItem = styled.div<{ active: boolean; completed: boolean }>`
     padding: 0 1em;
-    cursor: ${({ inaccessible, active }) => active ? 'default' : inaccessible ? 'not-allowed' : 'pointer'};
+    cursor: ${({ active }) => active ? 'default' : 'pointer'};
     font-weight: ${({ active }) => active ? 500 : 400};
     opacity: ${({ active, completed }) => active || completed ? 1 : 0.5};
     :hover {
@@ -77,7 +75,6 @@ export enum CausalStep {
     DATASET_CONFIG = 'dataset_config',
     BG_CONFIG = 'bg_config',
     CAUSAL_MODEL = 'causal_model',
-    EXPLORATION = 'exploration',
 }
 
 export type CausalStepOption = {
@@ -94,18 +91,13 @@ export const CausalSteps: readonly CausalStepOption[] = [
     },
     {
         key: CausalStep.BG_CONFIG,
-        title: '编辑条件约束',
-        help: '基于特定领域或背景知识定义绝对的条件约束，帮助算法在结论不准确的场景下进行决策。',
+        title: '编辑函数依赖',
+        help: '基于特定领域或背景知识定义绝对的函数依赖，帮助算法回避不合理的探索空间，更好进行决策。',
     },
     {
         key: CausalStep.CAUSAL_MODEL,
         title: '因果模型',
-        help: '选择算法进行因果发现，完善因果图。',
-    },
-    {
-        key: CausalStep.EXPLORATION,
-        title: '探索分析',
-        help: '在已确认的因果图上结合可视化探索进行结论验证和进一步分析。（需要运行因果发现完成因果模型）',
+        help: '选择算法进行因果发现，完善因果图。在已确认的因果图上结合可视化探索进行结论验证和进一步分析。（需要运行因果发现完成因果模型）',
     },
 ];
 
@@ -124,8 +116,6 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
     renderNode,
     interactFieldGroups,
 }) {
-    const { causalStore } = useGlobalStore();
-    const { causalStrength, selectedFields } = causalStore;
     const [stepKey, setStepKey] = useState<CausalStep>(CausalStep.DATASET_CONFIG);
     const [showHelp, setShowHelp] = useState<CausalStep>(stepKey);
 
@@ -135,8 +125,6 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
 
     const curStep = useMemo(() => CausalSteps.find(s => s.key === stepKey)!, [stepKey]);
     const hintStep = useMemo(() => CausalSteps.find(s => s.key === showHelp)!, [showHelp]);
-
-    const hasResult = causalStrength.length > 0 && causalStrength.length === selectedFields.length;
 
     const goPreviousStep = useMemo(() => {
         switch (curStep.key) {
@@ -148,9 +136,6 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
             }
             case CausalStep.CAUSAL_MODEL: {
                 return () => setStepKey(CausalStep.BG_CONFIG);
-            }
-            case CausalStep.EXPLORATION: {
-                return () => setStepKey(CausalStep.CAUSAL_MODEL);
             }
             default: {
                 return undefined;
@@ -167,19 +152,13 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
                 return () => setStepKey(CausalStep.CAUSAL_MODEL);
             }
             case CausalStep.CAUSAL_MODEL: {
-                if (hasResult) {
-                    return () => setStepKey(CausalStep.EXPLORATION);
-                }
-                return undefined;
-            }
-            case CausalStep.EXPLORATION: {
                 return undefined;
             }
             default: {
                 return undefined;
             }
         }
-    }, [curStep, hasResult]);
+    }, [curStep]);
 
     return (
         <Container>
@@ -191,17 +170,15 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
                     {CausalSteps.map((step, i, arr) => {
                         const active = step.key === stepKey;
                         const completed = arr.slice(i + 1).some(opt => opt.key === stepKey);
-                        const inaccessible = step.key === CausalStep.EXPLORATION && !hasResult;
                         return (
                             <Fragment key={step.key}>
                                 {i !== 0 && (
-                                    <span>{'-'}</span>
+                                    <span>{'>'}</span>
                                 )}
                                 <StepItem
                                     active={active}
                                     completed={completed}
-                                    inaccessible={inaccessible}
-                                    onClick={() => active || inaccessible || setStepKey(step.key)}
+                                    onClick={() => active || setStepKey(step.key)}
                                     onMouseOver={() => active || setShowHelp(step.key)}
                                     onMouseOut={() => setShowHelp(stepKey)}
                                 >
@@ -233,15 +210,6 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
                     ),
                     [CausalStep.CAUSAL_MODEL]: (
                         <CausalModel
-                            dataContext={dataContext}
-                            modifiablePrecondition={modifiablePrecondition}
-                            setModifiablePrecondition={setModifiablePrecondition}
-                            renderNode={renderNode}
-                            interactFieldGroups={interactFieldGroups}
-                        />
-                    ),
-                    [CausalStep.EXPLORATION]: (
-                        <CausalExploration
                             dataContext={dataContext}
                             modifiablePrecondition={modifiablePrecondition}
                             setModifiablePrecondition={setModifiablePrecondition}

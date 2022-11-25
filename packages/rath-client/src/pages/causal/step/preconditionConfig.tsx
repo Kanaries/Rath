@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react-lite';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { IFieldMeta } from '../../../interfaces';
-import { useGlobalStore } from '../../../store';
 import { ModifiableBgKnowledge } from '../config';
 import type { useDataViews } from '../hooks/dataViews';
 import PreconditionPanel from '../precondition/preconditionPanel';
@@ -21,13 +20,6 @@ const CausalPreconditionConfig: React.FC<CausalPreconditionConfigProps> = ({
     setModifiablePrecondition,
     renderNode,
 }) => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
-    const { fieldMetas } = dataSourceStore;
-
-    useEffect(() => {
-        causalStore.updateCausalAlgorithmList(fieldMetas);
-    }, [causalStore, fieldMetas]);
-
     return (
         <>
             <PreconditionPanel
