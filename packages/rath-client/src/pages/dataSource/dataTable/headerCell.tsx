@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
@@ -135,6 +135,18 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
     const optionsOfBIFieldType = useBIFieldTypeOptions();
     const buttonId = useId('edit-button');
     const canDelete = !isPreview && isExt;
+    const intRef = useRef<number>(-1);
+
+    useEffect(() => {
+        if (focus) {
+            intRef.current = window.setTimeout(() => {
+                setFocus(false);
+            }, 5000)
+        }
+        return () => {
+            clearInterval(intRef.current);
+        }
+    }, [focus])
 
     useEffect(() => {
         setHeaderName(name);
@@ -142,10 +154,12 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
     return (
         <HeaderCellContainer
             isPreview={isPreview}
-            onMouseOver={() => {
+            onMouseOver={(e) => {
+                e.stopPropagation();
                 setFocus(true);
             }}
-            onMouseLeave={() => {
+            onMouseLeave={(e) => {
+                e.stopPropagation();
                 setFocus(false);
             }}
             onTouchStart={() => {
