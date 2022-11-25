@@ -37,15 +37,7 @@ class IRInsightExplainSubspace(BaseModel):
     predicates: List[IFilter]
     reverted: Optional[bool] = Field(default=False)
 
-class IFunctionalDepParam(BaseModel):
-    fid: str
-    type: Optional[str] = Field(default='')
-
-class IFunctionalDep(BaseModel):
-    params: List[IFunctionalDepParam]
-    func: Optional[str] = Field(default='generated', title='Functional Dependency Type', description="To be designed")
-    extInfo: Optional[Any] = Field(default=None)
-
+from common import IFunctionalDep
 class ICausalModel(BaseModel):
     funcDeps: List[IFunctionalDep]
     edges: List[PagLink]

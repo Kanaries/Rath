@@ -34,7 +34,7 @@ app.add_middleware(
 
 class AlgoListRequest(BaseModel, extra=Extra.allow):
     fieldIds: Optional[List[str]] = Field(default=[], title="field Ids")
-    fieldMetas: Optional[List[I.IFieldMeta]] = Field(defulat=[], title="field metas")
+    fieldMetas: Optional[List[I.IFieldMeta]] = Field(default=[], title="field metas")
     
 def inferRender(p: Dict, req: AlgoListRequest) -> Dict:
     res = {}

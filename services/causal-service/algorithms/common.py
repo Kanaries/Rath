@@ -310,12 +310,22 @@ class BgKnowledgePag(BaseModel):
     tar_type: int = Field(default=0, title='PAG endpoint of tar', description=""" """,
     options=getOpts({-1:'', 0:'', 1:'', 2:''}))
 
+class IFunctionalDepParam(BaseModel):
+    fid: str
+    type: Optional[str] = Field(default='')
+
+class IFunctionalDep(BaseModel):
+    params: List[IFunctionalDepParam]
+    func: Optional[str] = Field(default='generated', title='Functional Dependency Type', description="To be designed")
+    extInfo: Optional[Any] = Field(default=None)
+
 class CausalRequest(BaseModel, extra=Extra.allow):
     dataSource: List[IRow]
     fields: List[IFieldMeta]
     focusedFields: List[str] = Field(default=[], description="A subset of fields which we concerned about.")
     bgKnowledges: Optional[List[BgKnowledge]] = Field(default=[], description="Known edges")
     bgKnowledgesPag: Optional[List[BgKnowledgePag]] = Field(default=[], description="Known edges (PAG)")
+    funcDeps: Optional[List[IFunctionalDep]] = Field(default=[], description="")
     params: OptionalParams = Field(default={}, description="optional params", extra=Extra.allow)
 
 class AlgoInterface:
