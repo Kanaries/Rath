@@ -37,9 +37,8 @@ class IRInsightExplainSubspace(BaseModel):
     predicates: List[IFilter]
     reverted: Optional[bool] = Field(default=False)
 
-from common import IFunctionalDep
 class ICausalModel(BaseModel):
-    funcDeps: List[IFunctionalDep]
+    funcDeps: List[common.IFunctionalDep]
     edges: List[PagLink]
     
 class IRInsightSubspaceGroup(BaseModel):
