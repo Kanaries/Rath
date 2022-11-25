@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import type { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import type { ModifiableBgKnowledge } from './config';
+import type { IFunctionalDep, ModifiableBgKnowledge } from './config';
 import { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import { useDataViews } from './hooks/dataViews';
 import type { GraphNodeAttributes } from './explorer/graph-utils';
@@ -59,6 +59,17 @@ const CausalPage: React.FC = () => {
         });
     }, []);
 
+    const [functionalDependencies, __unsafeSetFunctionalDependencies] = useState<IFunctionalDep[]>([]);
+
+    const setFunctionalDependencies = useCallback((next: IFunctionalDep[] | ((prev: IFunctionalDep[]) => IFunctionalDep[])) => {
+        __unsafeSetFunctionalDependencies(prev => {
+            const list = typeof next === 'function' ? next(prev) : next;
+            return list.reduce<IFunctionalDep[]>((deps, dep) => {
+                return deps.concat([dep]);
+            }, []);
+        });
+    }, []);
+
     const dataContext = useDataViews(cleanedData);
 
     useEffect(() => {
@@ -84,6 +95,8 @@ const CausalPage: React.FC = () => {
                     dataContext={dataContext}
                     modifiablePrecondition={modifiablePrecondition}
                     setModifiablePrecondition={setModifiablePrecondition}
+                    functionalDependencies={functionalDependencies}
+                    setFunctionalDependencies={setFunctionalDependencies}
                     renderNode={renderNode}
                     interactFieldGroups={interactFieldGroups}
                 />

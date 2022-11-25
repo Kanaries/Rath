@@ -3,12 +3,12 @@ import { observer } from "mobx-react-lite";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import type { useDataViews } from "../hooks/dataViews";
-import type { ModifiableBgKnowledge } from "../config";
+import type { IFunctionalDep, ModifiableBgKnowledge } from "../config";
 import type { GraphNodeAttributes } from "../explorer/graph-utils";
 import type { IFieldMeta } from "../../../interfaces";
 import type { useInteractFieldGroups } from "../hooks/interactFieldGroup";
 import CausalDatasetConfig from './datasetConfig';
-import CausalPreconditionConfig from './preconditionConfig';
+import CausalFDConfig from './FDConfig';
 import CausalModel from "./causalModel";
 
 
@@ -73,7 +73,7 @@ const StepPanel = styled.div`
 
 export enum CausalStep {
     DATASET_CONFIG = 'dataset_config',
-    BG_CONFIG = 'bg_config',
+    FD_CONFIG = 'fd_config',
     CAUSAL_MODEL = 'causal_model',
 }
 
@@ -90,7 +90,7 @@ export const CausalSteps: readonly CausalStepOption[] = [
         help: '从数据中有针对性地选出合适的数据子集以及分析目标关注的因素集合。',
     },
     {
-        key: CausalStep.BG_CONFIG,
+        key: CausalStep.FD_CONFIG,
         title: '编辑函数依赖',
         help: '基于特定领域或背景知识定义绝对的函数依赖，帮助算法回避不合理的探索空间，更好进行决策。',
     },
@@ -105,6 +105,8 @@ interface CausalStepPagerProps {
     dataContext: ReturnType<typeof useDataViews>;
     modifiablePrecondition: ModifiableBgKnowledge[];
     setModifiablePrecondition: (precondition: ModifiableBgKnowledge[] | ((prev: ModifiableBgKnowledge[]) => ModifiableBgKnowledge[])) => void;
+    functionalDependencies: IFunctionalDep[];
+    setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: IFunctionalDep[]) => IFunctionalDep[])) => void;
     renderNode: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
     interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
 }
@@ -113,6 +115,8 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
     dataContext,
     modifiablePrecondition,
     setModifiablePrecondition,
+    functionalDependencies,
+    setFunctionalDependencies,
     renderNode,
     interactFieldGroups,
 }) {
@@ -131,11 +135,11 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
             case CausalStep.DATASET_CONFIG: {
                 return undefined;
             }
-            case CausalStep.BG_CONFIG: {
+            case CausalStep.FD_CONFIG: {
                 return () => setStepKey(CausalStep.DATASET_CONFIG);
             }
             case CausalStep.CAUSAL_MODEL: {
-                return () => setStepKey(CausalStep.BG_CONFIG);
+                return () => setStepKey(CausalStep.FD_CONFIG);
             }
             default: {
                 return undefined;
@@ -146,9 +150,9 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
     const goNextStep = useMemo(() => {
         switch (curStep.key) {
             case CausalStep.DATASET_CONFIG: {
-                return () => setStepKey(CausalStep.BG_CONFIG);
+                return () => setStepKey(CausalStep.FD_CONFIG);
             }
-            case CausalStep.BG_CONFIG: {
+            case CausalStep.FD_CONFIG: {
                 return () => setStepKey(CausalStep.CAUSAL_MODEL);
             }
             case CausalStep.CAUSAL_MODEL: {
@@ -200,11 +204,11 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
             <StepPanel>
                 {{
                     [CausalStep.DATASET_CONFIG]: <CausalDatasetConfig dataContext={dataContext} />,
-                    [CausalStep.BG_CONFIG]: (
-                        <CausalPreconditionConfig
+                    [CausalStep.FD_CONFIG]: (
+                        <CausalFDConfig
                             dataContext={dataContext}
-                            modifiablePrecondition={modifiablePrecondition}
-                            setModifiablePrecondition={setModifiablePrecondition}
+                            functionalDependencies={functionalDependencies}
+                            setFunctionalDependencies={setFunctionalDependencies}
                             renderNode={renderNode}
                         />
                     ),
@@ -213,6 +217,7 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
                             dataContext={dataContext}
                             modifiablePrecondition={modifiablePrecondition}
                             setModifiablePrecondition={setModifiablePrecondition}
+                            functionalDependencies={functionalDependencies}
                             renderNode={renderNode}
                             interactFieldGroups={interactFieldGroups}
                         />

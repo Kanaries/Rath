@@ -1,6 +1,6 @@
 /* eslint no-restricted-globals: 0 */
 import type { IRow, IFilter, IFieldMeta } from "../../interfaces";
-import type { PagLink } from "../../pages/causal/config";
+import type { IFunctionalDep, PagLink } from "../../pages/causal/config";
 import { insightExplain } from "./utils";
 
 
@@ -15,6 +15,8 @@ export interface IRInsightExplainProps {
     data: IRow[];
     fields: IFieldMeta[];
     causalModel: {
+        /** 函数依赖 */
+        funcDeps: IFunctionalDep[];
         /** 用户编辑后的因果图 */
         edges: PagLink[];
     };

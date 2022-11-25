@@ -11,6 +11,7 @@ import {
     CAUSAL_ALGORITHM_OPTIONS,
     BgKnowledge,
     BgKnowledgePagLink,
+    IFunctionalDep,
 } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
 import resolveCausal, { CausalLinkDirection, findUnmatchedCausalResults, stringifyDirection } from '../utils/resolve-causal';
@@ -206,7 +207,12 @@ export class CausalStore {
         this.causalFields = causalFields;
         this.causalStrength = causalMatrix;
     }
-    public async causalDiscovery(dataSource: IRow[], /** @deprecated */ precondition: BgKnowledge[], preconditionPag: BgKnowledgePagLink[]) {
+    public async causalDiscovery(
+        dataSource: IRow[],
+        /** @deprecated */ precondition: BgKnowledge[],
+        preconditionPag: BgKnowledgePagLink[],
+        funcDeps: IFunctionalDep[],
+    ) {
         const fields = this.dataSourceStore.fieldMetas;
         const focusFieldIds = this.focusFieldIds;
         const algoName = this.causalAlgorithm;
@@ -235,6 +241,7 @@ export class CausalStore {
                     focusedFields: focusFieldIds,
                     bgKnowledges: precondition,
                     bgKnowledgesPag: preconditionPag,
+                    funcDeps,
                     params: this.causalParams[algoName],
                 }),
             });
@@ -279,7 +286,12 @@ export class CausalStore {
             this.computing = false;
         }
     }
-    public async reRunCausalDiscovery(dataSource: IRow[], precondition: BgKnowledge[], preconditionPag: BgKnowledgePagLink[]) {
-        this.causalDiscovery(dataSource, precondition, preconditionPag);
+    public async reRunCausalDiscovery(
+        dataSource: IRow[],
+        /** @deprecated */ precondition: BgKnowledge[],
+        preconditionPag: BgKnowledgePagLink[],
+        funcDeps: IFunctionalDep[],
+    ) {
+        this.causalDiscovery(dataSource, precondition, preconditionPag, funcDeps);
     }
 }

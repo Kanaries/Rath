@@ -1,5 +1,7 @@
 import { IDropdownOption } from "@fluentui/react";
+import type { IFieldMeta } from "../../interfaces";
 import PC_PARAMS from './pc_params.json'
+
 export interface IFormItem{
     title: string;
     key: string;
@@ -61,6 +63,18 @@ export type ModifiableBgKnowledge = {
     tar: BgKnowledge['tar'];
     type: 'must-link' | 'must-not-link' | 'directed-must-link' | 'directed-must-not-link';
 };
+
+export interface IFunctionalDepParam {
+    fid: string;
+    type?: string; // 参数的类型，unused
+}
+
+export interface IFunctionalDep {
+    fid: string;
+    params: IFunctionalDepParam[];
+    func?: string; // 扩展的方式，即extOpt
+    extInfo?: IFieldMeta['extInfo']; // 算子中的额外参数，同IFieldExtInfoBase
+}
 
 export enum UCRule {
     uc_supset = 0,

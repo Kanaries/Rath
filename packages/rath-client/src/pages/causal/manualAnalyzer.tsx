@@ -12,7 +12,7 @@ import CrossFilter from './crossFilter';
 import type { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import type { useDataViews } from './hooks/dataViews';
 import RExplainer from './explainer/RExplainer';
-import type { PagLink } from './config';
+import type { IFunctionalDep, PagLink } from './config';
 
 
 const Container = styled.div`
@@ -30,10 +30,11 @@ const Container = styled.div`
 export interface ManualAnalyzerProps {
     context: ReturnType<typeof useDataViews>;
     interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
+    functionalDependencies: IFunctionalDep[];
     edges: PagLink[];
 }
 
-const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldGroups, edges }) => {
+const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldGroups, functionalDependencies, edges }) => {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { fieldGroup, setFieldGroup, clearFieldGroup } = interactFieldGroups;
@@ -132,6 +133,7 @@ const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldG
                     <RExplainer
                         context={context}
                         interactFieldGroups={interactFieldGroups}
+                        functionalDependencies={functionalDependencies}
                         edges={edges}
                     />
                 )}

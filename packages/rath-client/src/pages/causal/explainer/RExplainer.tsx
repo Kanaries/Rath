@@ -9,7 +9,7 @@ import type { useDataViews } from '../hooks/dataViews';
 import { IFieldMeta, IFilter, IRow } from '../../../interfaces';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../workers/insight/r-insight.worker';
 import { RInsightService } from '../../../services/r-insight';
-import type { PagLink } from '../config';
+import type { IFunctionalDep, PagLink } from '../config';
 import ChartItem from './explainChart';
 import RInsightView from './RInsightView';
 
@@ -19,12 +19,13 @@ const Container = styled.div``;
 export interface RExplainerProps {
     context: ReturnType<typeof useDataViews>;
     interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
+    functionalDependencies: IFunctionalDep[];
     edges: PagLink[];
 }
 
 export const SelectedFlag = '__RExplainer_selected__';
 
-const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, edges }) => {
+const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, functionalDependencies, edges }) => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { fieldGroup } = interactFieldGroups;
@@ -68,6 +69,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                 data: sample,
                 fields: selectedFields,
                 causalModel: {
+                    funcDeps: functionalDependencies,
                     edges,
                 },
                 groups: {
@@ -78,7 +80,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                     dimensions: [...fieldsInSight].filter(fid => fid !== mainField.fid),
                     measures: [mainField].map(ms => ({
                         fid: ms.fid,
-                        op: aggr ?? 'sum',
+                        op: aggr,
                     })),
                 },
             }, serviceMode).then(resolve);
@@ -95,7 +97,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
         }).finally(() => {
             pendingRef.current = undefined;
         });
-    }, [aggr, mainField, sample, selectedFields, subspaces, edges, serviceMode]);
+    }, [aggr, mainField, sample, selectedFields, subspaces, edges, serviceMode, functionalDependencies]);
 
     const [selectedSet, setSelectedSet] = useState<IRow[]>([]);
 
