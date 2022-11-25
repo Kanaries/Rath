@@ -14,6 +14,7 @@ import { getQuantiles } from "../lib/stat";
 import { IteratorStorage, IteratorStorageMetaInfo } from "../utils/iteStorage";
 import { updateDataStorageMeta } from "../utils/storage";
 import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
+import { IsolationForest } from "../lib/outlier/iforest";
 
 interface IDataMessage {
     type: 'init_data' | 'others';
@@ -557,6 +558,18 @@ export class DataSourceStore {
                     });
                 }
             }
+            if (f.semanticType === 'quantitative') {
+                const alreadyExpandedAsOutlier = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$outlier'
+                ));
+                if (!alreadyExpandedAsOutlier) {
+                    suggestions.push({
+                        score: 6,
+                        type: 'outlierIForest',
+                        apply: () => this.expandOutlier(f.fid),
+                    });
+                }
+            }
             if (f.semanticType === 'nominal') {
                 const alreadyExpandedAsOneHot = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$oneHot'
@@ -667,7 +680,7 @@ export class DataSourceStore {
         const originField = this.allFields.find(f => f.fid === fid);
         if (originField) {
             const newField: IRawField = {
-                fid: `${fid}.wordTFIDF`,
+                fid: `${fid}_wordTFIDF`,
                 name: `${originField.name}.word_tf_idf`,
                 semanticType: 'nominal',
                 analyticType: 'dimension',
@@ -707,7 +720,7 @@ export class DataSourceStore {
         const originField = this.allFields.find(f => f.fid === fid);
         if (originField) {
             const newField: IRawField = {
-                fid: `${fid}.wordTF`,
+                fid: `${fid}_wordTF`,
                 name: `${originField.name}.word_tf`,
                 semanticType: 'nominal',
                 analyticType: 'dimension',
@@ -741,7 +754,7 @@ export class DataSourceStore {
         const topUniqueValues = getFreqRange(data.map(r => r[fid]));
         const valuePool = new Set(topUniqueValues.map(r => r[0]).slice(0, topUniqueValues.length - 1))
         const newField: IRawField = {
-            fid: `${fid}.reGroupByFreq`,
+            fid: `${fid}_reGroupByFreq`,
             name: `${originField.name || fid}.reGroupByFreq`,
             semanticType: 'nominal',
             analyticType: 'dimension',
@@ -774,7 +787,7 @@ export class DataSourceStore {
         if (!originField)return;
         const newFields: IRawField[] = topKValues.map((v, i) => {
             return {
-                fid: `${fid}.ex${i}`,
+                fid: `${fid}_ex${i}`,
                 name: `${originField.name || originField.fid}.${v[0].replace(/[\s,.]+/g, '_')}`,
                 semanticType: 'nominal',
                 analyticType: 'dimension',
@@ -800,6 +813,35 @@ export class DataSourceStore {
             }
         }
         this.addExtFieldsFromRows(newData, newFields.map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
+    }
+
+    public async expandOutlier (fid: string) {
+        const data = await this.rawDataStorage.getAll();
+        const values = data.map(d => d[fid]);
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField)return;
+        const newField: IRawField = {
+            fid: `${fid}_outlier_iforest`,
+            name: `${originField.name || originField.fid}.outlierIForest`,
+            semanticType: 'nominal',
+            analyticType: 'dimension',
+            extInfo: {
+                extFrom: [fid],
+                extOpt: 'LaTiao.$outlierIForest',
+                extInfo: {}
+            },
+            geoRole: 'none'
+        }
+        const newData = data.map(d => ({ ...d}));
+        const iForest = new IsolationForest(256, 100, 'auto');
+        const outliers = iForest.fitPredict(values.map(v => [v]));
+        for (let i = 0; i < newData.length; i++) {
+            newData[i][newField.fid] = outliers[i];
+        }
+        this.addExtFieldsFromRows(newData, [newField].map(f => ({
             ...f,
             stage: 'preview',
         })));

@@ -267,7 +267,8 @@
                 "oneHot": "One-hot encoding for categorical fields.|One-hot encoding is a way to represent categorical variables as binary vectors. It allows the representation of categorical data to be more expressive.",
                 "wordTFIDF": "Extract words from text fields(score: tf-idf).|TF-IDF is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus.",
                 "wordTF": "Extract words from text fields(score: tf).| Use the term with top frequency in docs.",
-                "reGroupByFreq": "Re-Group By frequency.|Re-group the field by frequency, keep the top frequency value."
+                "reGroupByFreq": "Re-Group By frequency.|Re-group the field by frequency, keep the top frequency value.",
+                "outlierIForest": "Re-Group By Outlier(Isolation Forest).|Re-group the field by outlier, create outlier group and non-outlier group. Using Isolation Forest as outlier detection algorithm."
             }
         },
         "filter": {
