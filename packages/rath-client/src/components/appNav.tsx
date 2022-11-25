@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Nav, INavLinkGroup } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import { PIVOT_KEYS } from '../constants';
 import { useGlobalStore } from '../store';
+import useHotKey from '../hooks/use-hotkey';
 import UserSetting from './userSettings';
 
 const NavContainer = styled.div`
@@ -57,6 +58,17 @@ const IconMap = {
     [key: string]: string;
 };
 
+const HotKeyMap = {
+    D: PIVOT_KEYS.dataSource,
+    M: PIVOT_KEYS.editor,
+    S: PIVOT_KEYS.semiAuto,
+    A: PIVOT_KEYS.megaAuto,
+    P: PIVOT_KEYS.painter,
+    L: PIVOT_KEYS.collection,
+    B: PIVOT_KEYS.dashboard,
+    C: PIVOT_KEYS.causal,
+} as const;
+
 function getIcon(k: string): string {
     return IconMap[k] || 'Settings';
 }
@@ -67,13 +79,20 @@ const AppNav: React.FC<AppNavProps> = (props) => {
 
     const { appKey, navMode } = commonStore;
 
+    const [altKeyPressed, setAltKeyPressed] = useState(false);
+
     const getLinks = useCallback(
         (pivotKeys: string[]) => {
             return pivotKeys.map((p) => {
+                const hotkeyAccess = altKeyPressed ? Object.entries(HotKeyMap).find(
+                    ([, key]) => key === p
+                )?.[0] ?? null : null;
                 return {
                     url: `#${p}`,
                     key: p,
-                    name: navMode === 'text' ? intl.get(`menu.${p}`) : '',
+                    name: `${navMode === 'text' ? intl.get(`menu.${p}`) : ''}${
+                        hotkeyAccess ? ` (${hotkeyAccess})` : ''
+                    }`,
                     forceAnchor: true,
                     iconProps: { iconName: getIcon(p) },
                     // iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
@@ -84,8 +103,33 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                 };
             });
         },
-        [commonStore, navMode]
+        [commonStore, navMode, altKeyPressed]
     );
+
+    useEffect(() => {
+        const handleKeyDown = (ev: KeyboardEvent) => {
+            if (ev.key === 'Alt') {
+                setAltKeyPressed(true);
+            }
+        };
+        const handleKeyUp = (ev: KeyboardEvent) => {
+            if (ev.key === 'Alt' || !ev.altKey) {
+                setAltKeyPressed(false);
+            }
+        };
+        document.body.addEventListener('keydown', handleKeyDown);
+        document.body.addEventListener('keyup', handleKeyUp);
+        return () => {
+            document.body.removeEventListener('keydown', handleKeyDown);
+            document.body.removeEventListener('keyup', handleKeyUp);
+        };
+    }, []);
+
+    const HotKeyActions = useMemo(() => Object.fromEntries(Object.entries(HotKeyMap).map(([k, appKey]) => [
+        `Alt+${k}`, () => commonStore.setAppKey(appKey)
+    ])), [commonStore]);
+
+    useHotKey(HotKeyActions);
 
     const groups: INavLinkGroup[] = [
         {
@@ -103,7 +147,7 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     url: '#dev-mode',
                     key: intl.get('menu.devCollection'),
                     name: navMode === 'text' ? intl.get('menu.devCollection') : '',
-                    isExpanded: false,
+                    isExpanded: altKeyPressed,
                     forceAnchor: true,
                     onClick(e: any) {
                         e.preventDefault();
@@ -139,6 +183,7 @@ const AppNav: React.FC<AppNavProps> = (props) => {
             ],
         },
     ];
+
     return (
         <NavContainer>
             <LogoBar>

@@ -5,6 +5,7 @@ import { useGlobalStore } from '../../store';
 import { DashboardCard } from '../../store/dashboardStore';
 import DashboardPanel from './dashboard-panel';
 import DashboardRenderer, { transformCoord } from './renderer';
+import type { RefLine } from './renderer/card';
 import { MIN_CARD_SIZE } from './renderer/constant';
 
 
@@ -359,6 +360,82 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r, sampl
         }
     }, [focus, page.cards]);
 
+    const getRefLinesCache = useRef<[number, RefLine[]]>();
+
+    const getRefLines = useCallback((selfIdx: number): RefLine[] => {
+        const cache = getRefLinesCache.current;
+        if (cache?.[0] === selfIdx) {
+            return cache[1];
+        }
+        const lines: RefLine[] = [{
+            direction: 'x',
+            position: 0,
+            reason: ['canvas-limit'],
+            score: 1,
+        }, {
+            direction: 'y',
+            position: 0,
+            reason: ['canvas-limit'],
+            score: 1,
+        }, {
+            direction: 'x',
+            position: page.config.size.w,
+            reason: ['canvas-limit'],
+            score: 1,
+        }, {
+            direction: 'y',
+            position: page.config.size.h,
+            reason: ['canvas-limit'],
+            score: 1,
+        }];
+        const cards = page.cards.filter((_, i) => i !== selfIdx);
+        for (const card of cards) {
+            lines.push({
+                direction: 'x',
+                position: card.layout.x,
+                reason: ['align-other-card'],
+                score: 1,
+            }, {
+                direction: 'y',
+                position: card.layout.y,
+                reason: ['align-other-card'],
+                score: 1,
+            }, {
+                direction: 'x',
+                position: card.layout.x + card.layout.w,
+                reason: ['align-other-card'],
+                score: 1,
+            }, {
+                direction: 'y',
+                position: card.layout.y + card.layout.h,
+                reason: ['align-other-card'],
+                score: 1,
+            });
+        }
+        const res = lines.reduce<RefLine[]>((list, line) => {
+            const same = list.find(which => which.direction === line.direction && which.position === line.position);
+            if (same) {
+                for (const reason of line.reason) {
+                    if (!same.reason.includes(reason)) {
+                        same.reason.push(reason);
+                    }
+                }
+                same.score += line.score;
+            } else {
+                list.push(line);
+            }
+            return list;
+        }, []).sort((a, b) => b.score - a.score);
+        const cacheData: [number, RefLine[]] = [selfIdx, res];
+        getRefLinesCache.current = cacheData;
+        setTimeout(() => {
+            if (getRefLinesCache.current === cacheData) {
+                getRefLinesCache.current = undefined;
+            }
+        }, 1_000);
+        return res;
+    }, [page]);
+
     return (
         <Container onClick={handleClick}>
             <div className="draft">
@@ -381,6 +458,7 @@ const DashboardDraft: FC<DashboardDraftProps> = ({ cursor, mode, ratio: r, sampl
                         operators: {
                             ...operators,
                             adjustCardSize: adjustCardSize.bind({}, index),
+                            getRefLines,
                         },
                     })) : undefined}
                 >

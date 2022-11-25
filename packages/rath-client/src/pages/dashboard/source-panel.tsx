@@ -50,8 +50,8 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
                     selectors: [],
                     highlighter: [],
                 };
-                card.content.title = data.title;
-                card.content.text = data.desc;
+                card.content.title = data.title || card.content.title;
+                card.content.text = data.desc || card.content.text;
             });
         }
     }, [card, dashboardStore]);
@@ -77,7 +77,7 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
 
     return (
         <Container ref={ref}>
-            {collectionList.length === 0 && '你的收藏夹是空的'}
+            {collectionList.length === 0 && 'collection is empty'}
             {collectionList.map(item => (
                 <div
                     key={item.viewId}

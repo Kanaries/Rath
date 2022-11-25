@@ -200,7 +200,7 @@ export default class DashboardStore {
             content: {},
             config: {
                 appearance: DashboardCardAppearance.Transparent,
-                align: DashboardCardInsetLayout.Auto,
+                align: DashboardCardInsetLayout.Column,
             },
         });
     }
