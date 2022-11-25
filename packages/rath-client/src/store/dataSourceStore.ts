@@ -524,7 +524,9 @@ export class DataSourceStore {
     }
 
     protected async getExtSuggestions(): Promise<IFieldMetaWithExtSuggestions[]> {
-        return this.allFields.map(mf => {
+        const fieldWithExtSuggestions: IFieldMetaWithExtSuggestions[] = [];
+        const { allFields } = this;
+        for (let mf of allFields) {
             const meta = this.fieldMetaAndPreviews.find(m => m.fid === mf.fid);
             const dist = meta ? meta.distribution : [];
 
@@ -537,10 +539,11 @@ export class DataSourceStore {
 
             if (f.extInfo) {
                 // 属于扩展得到的字段，不进行推荐
-                return {
+                fieldWithExtSuggestions.push({
                     ...f,
                     extSuggestions: [],
-                };
+                })
+                continue;
             }
 
             const suggestions: FieldExtSuggestion[] = [];
@@ -562,15 +565,17 @@ export class DataSourceStore {
                 const alreadyExpandedAsOutlier = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$outlier'
                 ));
-                if (!alreadyExpandedAsOutlier) {
+                if (!alreadyExpandedAsOutlier && this.canExpandAsOutlier(f.fid)) {
                     suggestions.push({
                         score: 6,
                         type: 'outlierIForest',
                         apply: () => this.expandOutlier(f.fid),
                     });
                 }
+                
             }
             if (f.semanticType === 'nominal') {
+                const mayHaveSentences = await this.canExpandAsWord(f.fid);
                 const alreadyExpandedAsOneHot = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$oneHot'
                 ));
@@ -584,7 +589,7 @@ export class DataSourceStore {
                 const alreadyExpandedAsWordTF = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$wordTF'
                 ));
-                if (!alreadyExpandedAsWordTF) {
+                if (!alreadyExpandedAsWordTF && mayHaveSentences) {
                     suggestions.push({
                         score: 9,
                         type: 'wordTF',
@@ -594,7 +599,7 @@ export class DataSourceStore {
                 const alreadyExpandedAsWordTFIDF = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$wordTFIDF'
                 ));
-                if (!alreadyExpandedAsWordTFIDF) {
+                if (!alreadyExpandedAsWordTFIDF && mayHaveSentences) {
                     suggestions.push({
                         score: 6,
                         type: 'wordTFIDF',
@@ -604,7 +609,7 @@ export class DataSourceStore {
                 const alreadyExpandedAsReGroupByFreq = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$reGroupByFreq'
                 ));
-                if (!alreadyExpandedAsReGroupByFreq) {
+                if (!alreadyExpandedAsReGroupByFreq && this.canExpandAsReGroupByFreq(f.fid)) {
                     suggestions.push({
                         score: 5,
                         type: 'reGroupByFreq',
@@ -612,12 +617,12 @@ export class DataSourceStore {
                     })
                 }
             }
-
-            return {
+            fieldWithExtSuggestions.push({
                 ...f,
-                extSuggestions: suggestions.sort((a, b) => b.score - a.score),
-            };
-        });
+                extSuggestions: suggestions
+            })
+        }
+        return fieldWithExtSuggestions;
     }
 
     public canExpandAsDateTime(fid: string) {
@@ -632,7 +637,62 @@ export class DataSourceStore {
 
         return which.semanticType === 'temporal' && !which.extInfo;
     }
+    public canExpandAsReGroupByFreq(fid: string) {
+        const which = this.mutFields.find(f => f.fid === fid);
+        const expanded = Boolean(this.mutFields.find(
+            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
+        ));
 
+        if (expanded || !which) {
+            return false;
+        }
+        if (which.semanticType !== 'nominal') {
+            return false;
+        }
+        const meta = this.fieldMetas.find(f => f.fid === fid);
+        if (!meta) return false;
+        return meta.features.unique > 8;
+    }
+    public canExpandAsOutlier(fid: string) {
+        const which = this.mutFields.find(f => f.fid === fid);
+        const expanded = Boolean(this.mutFields.find(
+            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'LaTiao.$outlierIForest'
+        ));
+
+        if (expanded || !which) {
+            return false;
+        }
+        if (!(which.semanticType === 'quantitative' && !which.extInfo)) return false;
+        const meta = this.fieldMetas.find(f => f.fid === fid);
+        if (!meta) return false;
+        return Number(meta.features.max) - Number(meta.features.min) > (Number(meta.features.qt_75) - Number(meta.features.qt_25)) * 3.5;
+    }
+
+    public async canExpandAsWord (fid: string) {
+        const which = this.mutFields.find(f => f.fid === fid);
+        const expanded = Boolean(this.mutFields.find(
+            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
+        ));
+
+        if (expanded || !which) {
+            return false;
+        }
+
+        if (!(which.semanticType === 'nominal' && !which.extInfo)) return false;
+        const data = await this.rawDataStorage.getAll();
+        if (data.length < 10) return false;
+        let rowHasWords = 0;
+        const reg = /.*[\s,.]+.*/
+        for (let row of data) {
+            if (typeof row[fid] === 'string') {
+                if (reg.test(row[fid])) {
+                    rowHasWords++;
+                }
+            }
+        }
+        return rowHasWords / data.length > 0.5;
+    }
+    
     public async expandSingleDateTime(fid: string) {
         if (!this.canExpandAsDateTime(fid)) {
             return;
