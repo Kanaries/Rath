@@ -12,6 +12,7 @@ import { LiveContainer } from '../metaView/metaList';
 import FieldExtSuggestions from '../../../components/fieldExtend/suggestions';
 import { getGlobalStore } from '../../../store';
 import { PIVOT_KEYS } from '../../../constants';
+import StatTable from './liteStatTable';
 
 const HeaderCellContainer = styled.div<{ isPreview: boolean }>`
     .bottom-bar {
@@ -40,6 +41,8 @@ const HeaderCellContainer = styled.div<{ isPreview: boolean }>`
         min-height: 50px;
     }
     .viz-container {
+        height: 150px;
+        overflow: hidden;
     }
     .dim {
         background-color: #1890ff;
@@ -128,6 +131,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
     const { name, code, meta, disable, isPreview, onChange, extSuggestions, isExt } = props;
     const [showNameEditor, setShowNameEditor] = useState<boolean>(false);
     const [headerName, setHeaderName] = useState<string>(name);
+    const [focus, setFocus] = useState<boolean>(false);
     const optionsOfBIFieldType = useBIFieldTypeOptions();
     const buttonId = useId('edit-button');
     const canDelete = !isPreview && isExt;
@@ -136,7 +140,18 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
         setHeaderName(name);
     }, [name]);
     return (
-        <HeaderCellContainer isPreview={isPreview}>
+        <HeaderCellContainer
+            isPreview={isPreview}
+            onMouseOver={() => {
+                setFocus(true);
+            }}
+            onMouseLeave={() => {
+                setFocus(false);
+            }}
+            onTouchStart={() => {
+                setFocus((v) => !v);
+            }}
+        >
             <div className="info-container">
                 <div className="header-row">
                     <h3 className="header">
@@ -148,14 +163,16 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                     {isPreview || (
                         <>
                             <div className="edit-icon">
-                                <IconButton
-                                    title={intl.get('dataSource.editName')}
-                                    id={buttonId}
-                                    iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
-                                    onClick={() => {
-                                        setShowNameEditor(true);
-                                    }}
-                                />
+                                {focus && (
+                                    <IconButton
+                                        title={intl.get('dataSource.editName')}
+                                        id={buttonId}
+                                        iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
+                                        onClick={() => {
+                                            setShowNameEditor(true);
+                                        }}
+                                    />
+                                )}
                                 {meta && (
                                     <IconButton
                                         title={intl.get('dataSource.statViewInfo.explore')}
@@ -229,7 +246,21 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                         </div>
                     </Callout>
                 )}
+            </div>
+            <div className="viz-container">
                 {meta && (
+                    <DistributionChart
+                        dataSource={meta.distribution}
+                        x="memberName"
+                        y="count"
+                        analyticType={meta.analyticType}
+                        semanticType={meta.semanticType}
+                    />
+                )}
+            </div>
+            <div>
+
+            {meta && focus && (
                     <DropdownSelect
                         aria-readonly
                         value={meta.semanticType}
@@ -246,7 +277,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                         ))}
                     </DropdownSelect>
                 )}
-                {
+                {meta && focus && (
                     <DropdownSelect
                         value={meta?.analyticType}
                         onChange={(e) => {
@@ -262,33 +293,20 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                             </option>
                         ))}
                     </DropdownSelect>
-                }
-                <div className="checkbox-container">
-                    <label>{intl.get('dataSource.useField')}</label>
-                    <input
-                        checked={!disable}
-                        type="checkbox"
-                        onChange={(e) => {
-                            onChange && onChange(code, 'disable', !e.target.checked);
-                        }}
-                    />
-                </div>
-            </div>
-            <div className="viz-container">
-                {meta && (
-                    <DistributionChart
-                        dataSource={meta.distribution}
-                        x="memberName"
-                        y="count"
-                        analyticType={meta.analyticType}
-                        semanticType={meta.semanticType}
-                    />
+                )}
+                {meta && focus && (
+                    <div className="checkbox-container">
+                        <label>{intl.get('dataSource.useField')}</label>
+                        <input
+                            checked={!disable}
+                            type="checkbox"
+                            onChange={(e) => {
+                                onChange && onChange(code, 'disable', !e.target.checked);
+                            }}
+                        />
+                    </div>
                 )}
             </div>
-            {/* <Checkbox label="use" checked={!disable} onChange={(e, isChecked) => {
-                onChange && onChange(code, 'disable', !isChecked)
-            }} /> */}
-            {/* {meta && <DistributionMiniChart dataSource={meta ? meta.distribution : []} x="memberName" y="count" fieldType={meta?.semanticType || 'nominal'} />} */}
 
             <div
                 className={`bottom-bar ${
@@ -323,6 +341,9 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                     ''
                 )}
             </div>
+            {
+                meta && !focus && <StatTable features={meta.features} semanticType={meta.semanticType}  />
+            }
         </HeaderCellContainer>
     );
 };
