@@ -4,19 +4,18 @@ import {
     PrimaryButton,
     Stack,
     DefaultButton,
-    Dropdown,
     IconButton,
     ProgressIndicator,
     Pivot,
     PivotItem,
+    MessageBar,
 } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
-import { CleanMethod, IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
+import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
 import { Card } from '../../components/card';
-import { useCleanMethodList } from '../../hooks';
-import { makeRenderLabelHandler } from '../../components/labelTooltip';
 import { setDataStorage } from '../../utils/storage';
+import { BorderCard } from '../../components/borderCard';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
 import Selection from './selection/index';
@@ -37,7 +36,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
     const {
         cleanedData,
-        cleanMethod,
         rawDataMetaInfo,
         filteredDataMetaInfo,
         loading,
@@ -52,8 +50,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dataSourceStore]);
-
-    const cleanMethodListLang = useCleanMethodList();
 
     const dataImportButton = useCallback(
         (text: string, dataSourceIsEmpty: boolean) => {
@@ -153,9 +149,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
                 </Stack>
-                {rawDataMetaInfo.length > 0 && <Advice />}
                 {dataPrepProgressTag !== IDataPrepProgressTag.none && <ProgressIndicator label={dataPrepProgressTag} />}
-                <Stack horizontal verticalAlign="end" style={{ margin: '1em 0px' }}>
+                {/* <Stack horizontal verticalAlign="end" style={{ margin: '1em 0px' }}>
                     <Dropdown
                         styles={{ root: { minWidth: '180px' } }}
                         selectedKey={cleanMethod}
@@ -166,14 +161,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         }}
                         onRenderLabel={makeRenderLabelHandler(intl.get('dataSource.tip'))}
                     />
-                </Stack>
-                <i style={{ fontSize: 12, fontWeight: 300, color: '#595959' }}>
-                    {intl.get('dataSource.rowsInViews', {
-                        origin: rawDataMetaInfo.length,
-                        select: filteredDataMetaInfo.length,
-                        clean: cleanedData.length,
-                    })}
-                </i>
+                </Stack> */}
+                <hr style={{ margin: '1em 0em'}} />
                 <Pivot
                     style={{ marginBottom: '6px' }}
                     selectedKey={dataPreviewMode}
@@ -197,10 +186,20 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         itemIcon="BarChartVerticalFilter"
                     />
                 </Pivot>
-                {rawDataMetaInfo.length > 0 && <DataOperations />}
-                {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
-                {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
-                {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}
+                <BorderCard>
+                    {rawDataMetaInfo.length > 0 && <DataOperations />}
+                    <MessageBar>
+                        {intl.get('dataSource.rowsInViews', {
+                            origin: rawDataMetaInfo.length,
+                            select: filteredDataMetaInfo.length,
+                            clean: cleanedData.length,
+                        })}
+                    </MessageBar>
+                    {rawDataMetaInfo.length > 0 && <Advice />}
+                    {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
+                    {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
+                    {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}
+                </BorderCard>
             </Card>
         </div>
     );

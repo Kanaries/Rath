@@ -3,7 +3,7 @@ import embed, { vega, Result } from 'vega-embed';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
 import intl from 'react-intl-universal';
 import { IRow } from '../../../interfaces';
-import { getRange } from '../../../utils';
+import { getRange, getVegaTimeFormatRules } from '../../../utils';
 import { shallowCopyArray } from '../../../utils/deepcopy';
 
 const DATA_NAME = 'dataSource';
@@ -116,7 +116,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 }
             }, {
                 actions: false,
-                timeFormatLocale: intl.get('time_format') as any
+                timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any
             }).then(res => {
                 setView(res.view);
                 return res

@@ -3,6 +3,7 @@ import { View } from 'vega';
 import intl from 'react-intl-universal';
 import embed, { vega } from 'vega-embed';
 import { EDITOR_URL } from '../constants';
+import { getVegaTimeFormatRules } from '../utils';
 
 interface ReactVegaProps {
     dataSource: any[];
@@ -33,7 +34,7 @@ const ReactVega: React.FC<ReactVegaProps> = (props) => {
             sspec.data.values = dataSource;
             embed(container.current, sspec, {
                 editorUrl: EDITOR_URL,
-                timeFormatLocale: intl.get('time_format') as any,
+                timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
                 actions,
             }).then((res) => {
                 const view = res.view;

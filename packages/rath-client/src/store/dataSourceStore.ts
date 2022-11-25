@@ -14,6 +14,7 @@ import { getQuantiles } from "../lib/stat";
 import { IteratorStorage, IteratorStorageMetaInfo } from "../utils/iteStorage";
 import { updateDataStorageMeta } from "../utils/storage";
 import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
+import { IsolationForest } from "../lib/outlier/iforest";
 
 interface IDataMessage {
     type: 'init_data' | 'others';
@@ -451,6 +452,11 @@ export class DataSourceStore {
             }))
         }
     }
+
+    public exportCleanData () {
+        const { cleanedData } = this;
+        return cleanedData;
+    }
     /**
      * @deprecated
      * @param state 
@@ -518,7 +524,9 @@ export class DataSourceStore {
     }
 
     protected async getExtSuggestions(): Promise<IFieldMetaWithExtSuggestions[]> {
-        return this.allFields.map(mf => {
+        const fieldWithExtSuggestions: IFieldMetaWithExtSuggestions[] = [];
+        const { allFields } = this;
+        for (let mf of allFields) {
             const meta = this.fieldMetaAndPreviews.find(m => m.fid === mf.fid);
             const dist = meta ? meta.distribution : [];
 
@@ -531,10 +539,11 @@ export class DataSourceStore {
 
             if (f.extInfo) {
                 // 属于扩展得到的字段，不进行推荐
-                return {
+                fieldWithExtSuggestions.push({
                     ...f,
                     extSuggestions: [],
-                };
+                })
+                continue;
             }
 
             const suggestions: FieldExtSuggestion[] = [];
@@ -552,7 +561,21 @@ export class DataSourceStore {
                     });
                 }
             }
+            if (f.semanticType === 'quantitative') {
+                const alreadyExpandedAsOutlier = Boolean(this.allFields.find(
+                    which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$outlier'
+                ));
+                if (!alreadyExpandedAsOutlier && this.canExpandAsOutlier(f.fid)) {
+                    suggestions.push({
+                        score: 6,
+                        type: 'outlierIForest',
+                        apply: () => this.expandOutlier(f.fid),
+                    });
+                }
+                
+            }
             if (f.semanticType === 'nominal') {
+                const mayHaveSentences = await this.canExpandAsWord(f.fid);
                 const alreadyExpandedAsOneHot = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$oneHot'
                 ));
@@ -566,7 +589,7 @@ export class DataSourceStore {
                 const alreadyExpandedAsWordTF = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$wordTF'
                 ));
-                if (!alreadyExpandedAsWordTF) {
+                if (!alreadyExpandedAsWordTF && mayHaveSentences) {
                     suggestions.push({
                         score: 9,
                         type: 'wordTF',
@@ -576,7 +599,7 @@ export class DataSourceStore {
                 const alreadyExpandedAsWordTFIDF = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$wordTFIDF'
                 ));
-                if (!alreadyExpandedAsWordTFIDF) {
+                if (!alreadyExpandedAsWordTFIDF && mayHaveSentences) {
                     suggestions.push({
                         score: 6,
                         type: 'wordTFIDF',
@@ -586,7 +609,7 @@ export class DataSourceStore {
                 const alreadyExpandedAsReGroupByFreq = Boolean(this.allFields.find(
                     which => which.extInfo?.extFrom.includes(f.fid) && which.extInfo.extOpt === 'LaTiao.$reGroupByFreq'
                 ));
-                if (!alreadyExpandedAsReGroupByFreq) {
+                if (!alreadyExpandedAsReGroupByFreq && this.canExpandAsReGroupByFreq(f.fid)) {
                     suggestions.push({
                         score: 5,
                         type: 'reGroupByFreq',
@@ -594,12 +617,12 @@ export class DataSourceStore {
                     })
                 }
             }
-
-            return {
+            fieldWithExtSuggestions.push({
                 ...f,
-                extSuggestions: suggestions.sort((a, b) => b.score - a.score),
-            };
-        });
+                extSuggestions: suggestions
+            })
+        }
+        return fieldWithExtSuggestions;
     }
 
     public canExpandAsDateTime(fid: string) {
@@ -614,7 +637,62 @@ export class DataSourceStore {
 
         return which.semanticType === 'temporal' && !which.extInfo;
     }
+    public canExpandAsReGroupByFreq(fid: string) {
+        const which = this.mutFields.find(f => f.fid === fid);
+        const expanded = Boolean(this.mutFields.find(
+            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
+        ));
 
+        if (expanded || !which) {
+            return false;
+        }
+        if (which.semanticType !== 'nominal') {
+            return false;
+        }
+        const meta = this.fieldMetas.find(f => f.fid === fid);
+        if (!meta) return false;
+        return meta.features.unique > 8;
+    }
+    public canExpandAsOutlier(fid: string) {
+        const which = this.mutFields.find(f => f.fid === fid);
+        const expanded = Boolean(this.mutFields.find(
+            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'LaTiao.$outlierIForest'
+        ));
+
+        if (expanded || !which) {
+            return false;
+        }
+        if (!(which.semanticType === 'quantitative' && !which.extInfo)) return false;
+        const meta = this.fieldMetas.find(f => f.fid === fid);
+        if (!meta) return false;
+        return Number(meta.features.max) - Number(meta.features.min) > (Number(meta.features.qt_75) - Number(meta.features.qt_25)) * 3.5;
+    }
+
+    public async canExpandAsWord (fid: string) {
+        const which = this.mutFields.find(f => f.fid === fid);
+        const expanded = Boolean(this.mutFields.find(
+            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
+        ));
+
+        if (expanded || !which) {
+            return false;
+        }
+
+        if (!(which.semanticType === 'nominal' && !which.extInfo)) return false;
+        const data = await this.rawDataStorage.getAll();
+        if (data.length < 10) return false;
+        let rowHasWords = 0;
+        const reg = /.*[\s,.]+.*/
+        for (let row of data) {
+            if (typeof row[fid] === 'string') {
+                if (reg.test(row[fid])) {
+                    rowHasWords++;
+                }
+            }
+        }
+        return rowHasWords / data.length > 0.5;
+    }
+    
     public async expandSingleDateTime(fid: string) {
         if (!this.canExpandAsDateTime(fid)) {
             return;
@@ -662,7 +740,7 @@ export class DataSourceStore {
         const originField = this.allFields.find(f => f.fid === fid);
         if (originField) {
             const newField: IRawField = {
-                fid: `${fid}.wordTFIDF`,
+                fid: `${fid}_wordTFIDF`,
                 name: `${originField.name}.word_tf_idf`,
                 semanticType: 'nominal',
                 analyticType: 'dimension',
@@ -702,7 +780,7 @@ export class DataSourceStore {
         const originField = this.allFields.find(f => f.fid === fid);
         if (originField) {
             const newField: IRawField = {
-                fid: `${fid}.wordTF`,
+                fid: `${fid}_wordTF`,
                 name: `${originField.name}.word_tf`,
                 semanticType: 'nominal',
                 analyticType: 'dimension',
@@ -736,7 +814,7 @@ export class DataSourceStore {
         const topUniqueValues = getFreqRange(data.map(r => r[fid]));
         const valuePool = new Set(topUniqueValues.map(r => r[0]).slice(0, topUniqueValues.length - 1))
         const newField: IRawField = {
-            fid: `${fid}.reGroupByFreq`,
+            fid: `${fid}_reGroupByFreq`,
             name: `${originField.name || fid}.reGroupByFreq`,
             semanticType: 'nominal',
             analyticType: 'dimension',
@@ -769,7 +847,7 @@ export class DataSourceStore {
         if (!originField)return;
         const newFields: IRawField[] = topKValues.map((v, i) => {
             return {
-                fid: `${fid}.ex${i}`,
+                fid: `${fid}_ex${i}`,
                 name: `${originField.name || originField.fid}.${v[0].replace(/[\s,.]+/g, '_')}`,
                 semanticType: 'nominal',
                 analyticType: 'dimension',
@@ -795,6 +873,35 @@ export class DataSourceStore {
             }
         }
         this.addExtFieldsFromRows(newData, newFields.map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
+    }
+
+    public async expandOutlier (fid: string) {
+        const data = await this.rawDataStorage.getAll();
+        const values = data.map(d => d[fid]);
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField)return;
+        const newField: IRawField = {
+            fid: `${fid}_outlier_iforest`,
+            name: `${originField.name || originField.fid}.outlierIForest`,
+            semanticType: 'nominal',
+            analyticType: 'dimension',
+            extInfo: {
+                extFrom: [fid],
+                extOpt: 'LaTiao.$outlierIForest',
+                extInfo: {}
+            },
+            geoRole: 'none'
+        }
+        const newData = data.map(d => ({ ...d}));
+        const iForest = new IsolationForest(256, 100, 'auto');
+        const outliers = iForest.fitPredict(values.map(v => [v]));
+        for (let i = 0; i < newData.length; i++) {
+            newData[i][newField.fid] = outliers[i];
+        }
+        this.addExtFieldsFromRows(newData, [newField].map(f => ({
             ...f,
             stage: 'preview',
         })));
