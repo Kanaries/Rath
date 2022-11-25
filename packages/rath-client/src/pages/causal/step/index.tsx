@@ -195,7 +195,7 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
                         return (
                             <Fragment key={step.key}>
                                 {i !== 0 && (
-                                    <span>{'>'}</span>
+                                    <span>{'-'}</span>
                                 )}
                                 <StepItem
                                     active={active}

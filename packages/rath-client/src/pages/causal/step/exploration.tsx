@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
 import { mergeCausalPag } from '../../../utils/resolve-causal';
@@ -32,6 +32,13 @@ const CausalExploration: React.FC<CausalExplorationProps> = ({
     useEffect(() => {
         causalStore.updateCausalAlgorithmList(fieldMetas);
     }, [causalStore, fieldMetas]);
+
+    const resetExploringFieldsRef = useRef(() => interactFieldGroups.clearFieldGroup());
+    resetExploringFieldsRef.current = () => interactFieldGroups.clearFieldGroup();
+
+    useEffect(() => {
+        resetExploringFieldsRef.current();
+    }, [causalStrength]);
 
     const edges = useMemo(() => {
         return mergeCausalPag(causalStrength, modifiablePrecondition, fieldMetas);

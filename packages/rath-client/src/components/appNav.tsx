@@ -162,7 +162,7 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     ]),
                 },
                 {
-                    url: '/',
+                    url: `${window.location.protocol}//${window.location.host}/${window.location.search}`,
                     name: navMode === 'text' ? intl.get('common.home') : '',
                     // iconProps: navMode === 'icon' ? {iconName: 'Home'} : undefined,
                     iconProps: { iconName: 'Home' },

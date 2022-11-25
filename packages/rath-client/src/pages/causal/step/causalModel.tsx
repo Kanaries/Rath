@@ -112,7 +112,7 @@ const CausalModal: React.FC<CausalModalProps> = ({
 }) => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { focusFieldIds, computing, igMatrix, selectedFields, causalStrength } = causalStore;
+    const { focusFieldIds, computing, igMatrix, selectedFields } = causalStore;
     const { dataSubset } = dataContext;
 
     useEffect(() => {
