@@ -451,6 +451,11 @@ export class DataSourceStore {
             }))
         }
     }
+
+    public exportCleanData () {
+        const { cleanedData } = this;
+        return cleanedData;
+    }
     /**
      * @deprecated
      * @param state 

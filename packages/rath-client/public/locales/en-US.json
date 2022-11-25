@@ -245,7 +245,10 @@
             "title": "Fast Selection"
         },
         "downloadData": {
-            "title": "export dataset"
+            "title": "export data",
+            "downloadCSV": "Download CSV",
+            "downloadJSON": "Download JSON",
+            "downloadJSONMeta": "Download JSON with Meta"
         },
         "extend": {
             "title": "Extend Information",
@@ -280,7 +283,8 @@
         },
         "operations": {
             "title": "Operations",
-            "selectAll": "Enable All Fields"
+            "selectAll": "Enable All Fields",
+            "disableAll": "Disable All Fields"
         }
     },
     "meta": {

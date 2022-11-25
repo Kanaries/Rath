@@ -242,10 +242,13 @@
             "manual": "手动（有明确分析目的）"
         },
         "fastSelection": {
-            "title": "快速筛选/清洗"
+            "title": "快速筛选"
         },
         "downloadData": {
-            "title": "导出数据集"
+            "title": "导出数据",
+            "downloadCSV": "导出CSV",
+            "downloadJSON": "导出JSON",
+            "downloadJSONMeta": "导出JSON(含元数据)"
         },
         "extend": {
             "title": "扩展信息",
@@ -280,7 +283,8 @@
         },
         "operations": {
             "title": "快捷操作",
-            "selectAll": "选择所有字段"
+            "selectAll": "选择所有字段",
+            "disableAll": "禁用所有字段"
         }
     },
     "meta": {
