@@ -78,7 +78,7 @@ vega.expressionFunction(SizeFormatterName, formatSize);
 const PerformanceWindow = memo<PerformanceWindowProps>(function PerformanceWindow ({ interval = 4_00, recordLength = 30_000 }) {
   const [data, setData] = useState<IPerformanceRecordItem[]>([]);
   const [max, setMax] = useState<number>(0);
-  const [pos, setPos] = useState<[number, number]>([30, 30]);
+  const [pos, setPos] = useState<[number, number]>([window.innerWidth - 230, 30]);
   const [border, setBorder] = useState<[number, number, number, number]>([0, window.innerWidth, window.innerHeight, 0]);
   const [isDragging, setIsDragging] = useState(false);
   const dragOffsetRef = useRef<[number, number]>([0, 0]);

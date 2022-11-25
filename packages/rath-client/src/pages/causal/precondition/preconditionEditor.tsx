@@ -11,10 +11,10 @@ const EditModes = [{
     text: '图',
     iconName: 'BranchPullRequest',
 }, {
-    itemKey: 'matrix',
-    text: '矩阵',
-    iconName: 'GridViewSmall',
-}, {
+//     itemKey: 'matrix',           // TODO: 实现矩阵编辑
+//     text: '矩阵',
+//     iconName: 'GridViewSmall',
+// }, {
     itemKey: 'table',
     text: '表',
     iconName: 'BulletedListText',
@@ -29,7 +29,7 @@ const PreconditionEditor: React.FC<PreconditionPanelProps & { title?: string }> 
 
     return (
         <>
-            <h2>{title}</h2>
+            <h3>{title}</h3>
             <Pivot
                 style={{ marginBottom: '1em' }}
                 selectedKey={editMode}

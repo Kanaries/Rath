@@ -2,26 +2,36 @@ import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Graph } from '@antv/g6';
 import produce from 'immer';
-import { DefaultButton } from '@fluentui/react';
+import { DefaultButton, Dropdown } from '@fluentui/react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
 import type { CausalLink } from '../explorer';
 import { useRenderData, useGraphOptions } from '../explorer/graph-utils';
 import { useReactiveGraph } from '../explorer/graph-helper';
+import type { ModifiableBgKnowledge } from '../config';
 import type { PreconditionPanelProps } from './preconditionPanel';
 
 
 const Container = styled.div`
     height: 600px;
     position: relative;
-    > div {
+    > div:first-child {
         width: 100%;
         height: 100%;
     }
-    > button {
+    > .tools {
         position: absolute;
-        bottom: 1em;
-        left: 1em;
+        left: 0;
+        top: 0;
+        padding: 1em;
+        flex-grow: 0;
+        flex-shrink: 0;
+        flex-basis: max-content;
+        font-size: 0.8rem;
+        opacity: 0.7;
+        :hover {
+            opacity: 0.95;
+        }
     }
 `;
 
@@ -43,15 +53,16 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
         links: [],
     }), [nodes]);
 
+    const [createEdgeMode, setCreateEdgeMode] = useState<ModifiableBgKnowledge['type']>('directed-must-link');
     const onLinkTogether = useCallback((srcFid: string, tarFid: string) => {
         setModifiablePrecondition(list => produce(list, draft => {
             draft.push({
                 src: srcFid,
                 tar: tarFid,
-                type: 'directed-must-link',
+                type: createEdgeMode,
             });
         }));
-    }, [setModifiablePrecondition]);
+    }, [setModifiablePrecondition, createEdgeMode]);
     const onRemoveLink = useCallback((edge: { srcFid: string; tarFid: string; } | null) => {
         if (edge) {
             setModifiablePrecondition(
@@ -103,17 +114,57 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
     return (
         <Container>
             <div ref={containerRef} />
-            <DefaultButton
-                style={{
-                    flexGrow: 0,
-                    flexShrink: 0,
-                    flexBasis: 'max-content',
-                    padding: '0.4em 0',
-                }}
-                onClick={() => setUpdateFlag(flag => flag ? 0 : 1)}
-            >
-                修正布局
-            </DefaultButton>
+            <div className="tools">
+                <DefaultButton
+                    style={{
+                        marginBottom: '1em',
+                        padding: '0.4em 0',
+                        height: 'unset',
+                    }}
+                    onClick={() => setUpdateFlag(flag => flag ? 0 : 1)}
+                    iconProps={{ iconName: 'Repair' }}
+                >
+                    修正布局
+                </DefaultButton>
+                <Dropdown
+                    label="连接类型"
+                    selectedKey={createEdgeMode}
+                    options={[
+                        { key: 'directed-must-link', text: '单向一定影响' },
+                        { key: 'directed-must-not-link', text: '单向一定不影响' },
+                        { key: 'must-link', text: '至少在一个方向存在影响' },
+                        { key: 'must-not-link', text: '在任意方向一定不影响' },
+                    ]}
+                    onChange={(_e, option) => {
+                        if (!option) {
+                            return;
+                        }
+                        const linkType = option.key as typeof createEdgeMode;
+                        setCreateEdgeMode(linkType);
+                    }}
+                    styles={{
+                        title: {
+                            fontSize: '0.8rem',
+                            lineHeight: '1.8em',
+                            minWidth: '18em',
+                            height: '1.8em',
+                            padding: '0 2.8em 0 0.8em',
+                            border: 'none',
+                            borderBottom: '1px solid #8888',
+                        },
+                        caretDownWrapper: {
+                            fontSize: '0.8rem',
+                            lineHeight: '1.8em',
+                            height: '1.8em',
+                        },
+                        caretDown: {
+                            fontSize: '0.8rem',
+                            lineHeight: '1.8em',
+                            height: '1.8em',
+                        },
+                    }}
+                />
+            </div>
         </Container>
     );
 };

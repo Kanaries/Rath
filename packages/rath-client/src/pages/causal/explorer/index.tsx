@@ -29,6 +29,7 @@ export interface DiagramGraphData {
 }
 
 export interface ExplorerProps {
+    allowEdit: boolean;
     dataSource: IRow[];
     scoreMatrix: readonly (readonly number[])[];
     preconditions: ModifiableBgKnowledge[];
@@ -96,6 +97,7 @@ const MainView = styled.div`
 `;
 
 const Explorer: FC<ExplorerProps> = ({
+    allowEdit,
     dataSource,
     scoreMatrix,
     onNodeSelected,
@@ -298,6 +300,10 @@ const Explorer: FC<ExplorerProps> = ({
         }
     }, [mode, synchronizePredictionsUsingCausalResult]);
 
+    useEffect(() => {
+        setMode('explore');
+    }, [allowEdit]);
+
     return (<>
         <Container onClick={() => focus !== -1 && setFocus(-1)}>
             <Tools onClick={e => e.stopPropagation()}>
@@ -308,6 +314,7 @@ const Explorer: FC<ExplorerProps> = ({
                         flexBasis: 'max-content',
                         padding: '0.4em 0',
                     }}
+                    iconProps={{ iconName: 'Repair' }}
                     onClick={forceLayout}
                 >
                     修正布局
@@ -320,15 +327,17 @@ const Explorer: FC<ExplorerProps> = ({
                     offText="Off"
                     inlineLabel
                 />
-                <Toggle
-                    // label="Modify Constraints"
-                    label="启用编辑"
-                    checked={mode === 'edit'}
-                    onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
-                    onText="On"
-                    offText="Off"
-                    inlineLabel
-                />
+                {allowEdit && (
+                    <Toggle
+                        // label="Modify Constraints"
+                        label="启用编辑"
+                        checked={mode === 'edit'}
+                        onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
+                        onText="On"
+                        offText="Off"
+                        inlineLabel
+                    />
+                )}
                 <Toggle
                     label="自动布局"
                     checked={autoLayout}

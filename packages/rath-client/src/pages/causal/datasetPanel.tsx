@@ -1,20 +1,55 @@
 import {
-    ComboBox,
-    DefaultButton,
+    Checkbox,
+    DetailsList,
+    IColumn,
+    IconButton,
     Label,
+    SelectionMode,
     Slider,
     Spinner,
     Stack,
 } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useMemo } from 'react';
+import styled from 'styled-components';
+import React, { useCallback, useMemo, useRef } from 'react';
 import produce from 'immer';
 import { useGlobalStore } from '../../store';
 import FilterCreationPill from '../../components/filterCreationPill';
 import LaTiaoConsole from '../../components/latiaoConsole/index';
+import type { IFieldMeta } from '../../interfaces';
 import { FilterCell } from './filters';
 import type { useDataViews } from './hooks/dataViews';
-import { InnerCard } from './components';
+
+
+const TableContainer = styled.div`
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    > * {
+        height: 100%;
+        > * {
+            height: 100%;
+        }
+    }
+    & [role=grid] {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: auto hidden;
+        > *:first-child {
+            flex-grow: 0;
+            flex-shrink: 0;
+        overflow: auto hidden;
+        }
+        > *:last-child {
+            flex-grow: 1;
+            flex-shrink: 1;
+            overflow: auto auto;
+        }
+    }
+`;
+
+const SelectedKey = 'selected';
 
 export interface DatasetPanelProps {
     context: ReturnType<typeof useDataViews>;
@@ -24,31 +59,133 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const { focusFieldIds } = causalStore;
+    const totalFieldsRef = useRef(fieldMetas);
+    totalFieldsRef.current = fieldMetas;
 
     const { dataSubset, sampleRate, setSampleRate, appliedSampleRate, filters, setFilters, sampleSize } = context;
 
-    useEffect(() => {
-        causalStore.setFocusFieldIds(
-            fieldMetas
-                .filter((f) => f.disable !== true)
-                .slice(0, 10)
-                .map((f) => f.fid)
-        ); // 默认只使用前 10 个)
-    }, [fieldMetas, causalStore]);
+    const focusFieldIdsRef = useRef(focusFieldIds);
+    focusFieldIdsRef.current = focusFieldIds;
 
-    const focusFieldsOption = useMemo(
-        () =>
-            fieldMetas.map((f) => ({
-                key: f.fid,
-                text: f.name ?? f.fid,
-            })),
-        [fieldMetas]
-    );
+    const toggleFocus = useCallback((fid: string) => {
+        causalStore.setFocusFieldIds(produce(focusFieldIdsRef.current, draft => {
+            const idx = draft.findIndex(key => fid === key);
+            if (idx !== -1) {
+                draft.splice(idx, 1);
+            } else {
+                draft.push(fid);
+            }
+        }));
+    }, [causalStore]);
+
+    const fieldsTableCols = useMemo<IColumn[]>(() => {
+        return [
+            {
+                key: SelectedKey,
+                name: '',
+                onRenderHeader: () => {
+                    const handleClick = (_: unknown, checked?: boolean | undefined) => {
+                        if (checked) {
+                            causalStore.setFocusFieldIds(totalFieldsRef.current.map(f => f.fid));
+                        } else {
+                            causalStore.setFocusFieldIds([]);
+                        }
+                    };
+                    return (
+                        <Checkbox
+                            checked={focusFieldIds.length === totalFieldsRef.current.length}
+                            indeterminate={focusFieldIds.length > 0 && focusFieldIds.length < totalFieldsRef.current.length}
+                            onChange={handleClick}
+                            styles={{
+                                root: {
+                                    padding: '11px 0 0',
+                                },
+                            }}
+                        />
+                    );
+                },
+                onRender: (item) => {
+                    const field = item as IFieldMeta;
+                    const checked = focusFieldIds.includes(field.fid);
+                    return (
+                        <IconButton
+                            iconProps={{ iconName: checked ? 'Remove' : 'Add' }}
+                            onClick={() => toggleFocus(field.fid)}
+                            style={{ height: 'unset' }}
+                        />
+                    );
+                },
+                isResizable: false,
+                minWidth: 20,
+                maxWidth: 20,
+            },
+            {
+                key: 'name',
+                name: `因素 (${focusFieldIds.length} / ${totalFieldsRef.current.length})`,
+                onRender: (item) => {
+                    const field = item as IFieldMeta;
+                    const checked = focusFieldIdsRef.current.includes(field.fid);
+                    return (
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: checked ? 'bold' : 'normal' }}>
+                            {field.name || field.fid}
+                        </span>
+                    );
+                },
+                minWidth: 160,
+                maxWidth: 160,
+            },
+            {
+                key: 'extInfo',
+                name: '扩展来源',
+                onRender: (item) => {
+                    const field = item as IFieldMeta;
+                    const { extInfo } = field;
+                    const sources = extInfo?.extFrom.map(
+                        fid => totalFieldsRef.current.find(f => f.fid === fid) ?? fid
+                    ).map(f => typeof f === 'string' ? f : (f.name || f.fid)) ?? [];
+
+                    return (
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {extInfo ? `[${extInfo.extOpt}] from ${sources.join(', ')} (${extInfo.extInfo})` : ''}
+                        </span>
+                    );
+                },
+                minWidth: 240,
+                maxWidth: 240,
+            },
+            {
+                key: 'unique',
+                name: '唯一值数量',
+                onRender: (item) => {
+                    const field = item as IFieldMeta;
+                    return (
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {field.features.unique}
+                        </span>
+                    );
+                },
+                minWidth: 100,
+                maxWidth: 100,
+            },
+            {
+                key: 'entropy',
+                name: '熵',
+                onRender: (item) => {
+                    const field = item as IFieldMeta;
+                    return (
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {field.features.entropy}
+                        </span>
+                    );
+                },
+                minWidth: 100,
+                maxWidth: 100,
+            },
+        ];
+    }, [toggleFocus, focusFieldIds, causalStore]);
 
     return (
-        <InnerCard>
-            <h1 className="card-header">数据集配置</h1>
-            <hr className="card-line" />
+        <>
             <Stack style={{ marginBlock: '0.6em -0.6em', alignItems: 'center' }} horizontal>
                 <Label style={{ marginRight: '1em' }}>数据增强</Label>
                 <LaTiaoConsole />
@@ -140,59 +277,15 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                     {`${filters.length ? `筛选后子集大小: ${dataSubset.length} 行` : '(无筛选项)'}`}
                 </small>
             </Stack>
-            <Stack style={{ marginBlock: '1.6em', alignItems: 'flex-end' }} horizontal>
-                <ComboBox
-                    multiSelect
-                    selectedKey={focusFieldIds}
-                    label="需要分析的字段"
-                    allowFreeform
-                    options={focusFieldsOption}
-                    onChange={(e, option) => {
-                        if (option) {
-                            const { key, selected } = option;
-                            if (focusFieldIds.includes(key as string) && !selected) {
-                                // setFocusFields((list) => list.filter((f) => f !== key));
-                                causalStore.setFocusFieldIds(focusFieldIds.filter((f) => f !== key));
-                            } else if (!focusFieldIds.includes(key as string) && selected) {
-                                causalStore.setFocusFieldIds([...focusFieldIds, key as string]);
-                            }
-                        }
-                    }}
-                    styles={{
-                        container: {
-                            flexGrow: 1,
-                            flexShrink: 1,
-                        },
-                    }}
+            <Label>需要分析的字段</Label>
+            <TableContainer>
+                <DetailsList
+                    items={fieldMetas}
+                    columns={fieldsTableCols}
+                    selectionMode={SelectionMode.none}
                 />
-                <DefaultButton
-                    style={{ fontSize: '0.8rem', margin: '0 0.5em' }}
-                    onClick={() =>
-                        causalStore.setFocusFieldIds(
-                            fieldMetas.filter((f) => f.disable !== true).map((f) => f.fid)
-                        )
-                    }
-                >
-                    全部选择
-                </DefaultButton>
-                <DefaultButton
-                    style={{ fontSize: '0.8rem', margin: '0' }}
-                    onClick={() =>
-                        causalStore.setFocusFieldIds(
-                            fieldMetas
-                                .filter((f) => f.disable !== true)
-                                .slice(0, 10)
-                                .map((f) => f.fid)
-                        )
-                    }
-                >
-                    选择前十条（默认）
-                </DefaultButton>
-                <DefaultButton style={{ fontSize: '0.8rem', margin: '0 0.5em' }} onClick={() => causalStore.setFocusFieldIds([])}>
-                    清空选择
-                </DefaultButton>
-            </Stack>
-        </InnerCard>
+            </TableContainer>
+        </>
     );
 };
 

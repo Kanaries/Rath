@@ -1,13 +1,26 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import styled from 'styled-components';
 import type { ModifiableBgKnowledge } from '../config';
-import { InnerCard } from '../components';
 import type { IFieldMeta } from '../../../interfaces';
 import type { GraphNodeAttributes } from '../explorer/graph-utils';
 import type { useDataViews } from '../hooks/dataViews';
 import PreconditionBatch from './preconditionBatch';
 import PreconditionEditor from './preconditionEditor';
 
+
+const Container = styled.div`
+    overflow: hidden auto;
+    padding: 0.4em 1.6em;
+    & h3 {
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.4em 0;
+        :not(:first-child) {
+            margin-top: 0.4em;
+        }
+    }
+`;
 
 export interface PreconditionPanelProps {
     context: ReturnType<typeof useDataViews>;
@@ -20,28 +33,20 @@ const PreconditionPanel: React.FC<PreconditionPanelProps> = ({
     context, modifiablePrecondition, setModifiablePrecondition, renderNode,
 }) => {
     return (
-        <InnerCard>
-            <h1 className="card-header">领域/背景知识</h1>
-            <hr className="card-line" />
+        <Container>
             <PreconditionBatch
                 context={context}
                 modifiablePrecondition={modifiablePrecondition}
                 setModifiablePrecondition={setModifiablePrecondition}
                 renderNode={renderNode}
             />
-            {/* <Toggle
-                label="使用关联信息初始化"
-                checked={shouldInitPreconditions}
-                inlineLabel
-                onChange={(_, checked) => setShouldInitPreconditions(checked ?? false)}
-            /> */}
             <PreconditionEditor
                 context={context}
                 modifiablePrecondition={modifiablePrecondition}
                 setModifiablePrecondition={setModifiablePrecondition}
                 renderNode={renderNode}
             />
-        </InnerCard>
+        </Container>
     );
 };
 

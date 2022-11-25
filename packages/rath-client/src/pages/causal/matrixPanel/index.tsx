@@ -8,10 +8,19 @@ import DirectionMatrix from './directionMatrix';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 
 const Cont = styled.div`
-    border: 1px solid #e3e2e2;
+    /* border: 1px solid #e3e2e2; */
+    flex-grow: 1;
+    flex-shrink: 1;
     margin: 8px 0px;
     padding: 8px;
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    > div:last-child {
+        flex-grow: 1;
+        flex-shrink: 1;
+        overflow: auto;
+    }
 `;
 
 export enum VIEW_TYPE {
@@ -58,7 +67,7 @@ interface MatrixPanelProps {
 }
 const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
     const { onMatrixPointClick, fields, onCompute, dataSource, diagram } = props;
-    const [viewType, setViewType] = useState<VIEW_TYPE>(VIEW_TYPE.matrix);
+    const [viewType, setViewType] = useState<VIEW_TYPE>(VIEW_TYPE.diagram);
     const [selectedKey, setSelectedKey] = useState(MATRIX_TYPE.causal);
     const [markType, setMarkType] = useState<'circle' | 'square'>('circle');
     const { causalStore } = useGlobalStore();

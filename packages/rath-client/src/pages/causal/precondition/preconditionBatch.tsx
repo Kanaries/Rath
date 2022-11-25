@@ -1,4 +1,4 @@
-import { DefaultButton, Spinner } from '@fluentui/react';
+import { DefaultButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -11,7 +11,6 @@ import PreconditionEditor from './preconditionEditor';
 
 
 const Container = styled.div`
-    padding: 1em 0 0.4em;
     > button {
         margin: 0 1em;
         :first-child {
@@ -168,7 +167,7 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
 
     return (
         <>
-            <h2>批量修改</h2>
+            <h3>快捷操作</h3>
             <Container>
                 <DefaultButton onClick={handleClear}>
                     全部删除
@@ -202,24 +201,26 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
                                 />
                             )}
                         </div>
-                        <DefaultButton
-                            text={dropdownOptions.find(opt => opt.key === mode)?.text ?? '确定'}
-                            onClick={handleSubmit}
-                            primary
-                            split
-                            menuProps={{
-                                items: dropdownOptions,
-                                onItemClick: (_e, item) => {
-                                    if (item) {
-                                        setMode(item.key as BatchUpdateMode);
-                                    }
-                                },
-                            }}
-                        />
-                        <DefaultButton
-                            text="取消"
-                            onClick={handleCancel}
-                        />
+                        <Stack tokens={{ childrenGap: 20 }} horizontal style={{ justifyContent: 'center' }}>
+                            <DefaultButton
+                                text={dropdownOptions.find(opt => opt.key === mode)?.text ?? '确定'}
+                                onClick={handleSubmit}
+                                primary
+                                split
+                                menuProps={{
+                                    items: dropdownOptions,
+                                    onItemClick: (_e, item) => {
+                                        if (item) {
+                                            setMode(item.key as BatchUpdateMode);
+                                        }
+                                    },
+                                }}
+                            />
+                            <DefaultButton
+                                text="取消"
+                                onClick={handleCancel}
+                            />
+                        </Stack>
                     </div>
                 </Mask>
             )}
