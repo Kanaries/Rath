@@ -477,6 +477,7 @@
         }
     },
     "time_format": {
+        "langKey": "zh-CN",
         "dateTime": "%x %A %X",
         "date": "%Y年%-m月%-d日",
         "time": "%H:%M:%S",

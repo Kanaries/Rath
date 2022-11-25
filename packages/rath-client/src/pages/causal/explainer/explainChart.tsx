@@ -6,7 +6,7 @@ import embed from 'vega-embed';
 import { Subject, throttleTime } from 'rxjs';
 import { EDITOR_URL } from '../../../constants';
 import type { IFieldMeta, IRow, IFilter } from '../../../interfaces';
-import { getRange } from '../../../utils';
+import { getRange, getVegaTimeFormatRules } from '../../../utils';
 import { SelectedFlag } from './RExplainer';
 
 interface ExplainChartProps {
@@ -155,7 +155,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                 },
             }, {
                 editorUrl: EDITOR_URL,
-                timeFormatLocale: intl.get('time_format') as any,
+                timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
                 actions: true,
             }).then((res) => {
                 const view = res.view;

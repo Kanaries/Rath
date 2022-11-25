@@ -467,6 +467,7 @@
         "bidirected": "Both A and B influences each other."
     },
     "time_format": {
+        "langKey": "en-US",
         "dateTime": "%x, %X",
         "date": "%-m/%-d/%Y",
         "time": "%-I:%M:%S %p",
