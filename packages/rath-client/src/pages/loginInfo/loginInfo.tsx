@@ -27,6 +27,25 @@ const LoginInfoListDiv = styled.div`
         padding: 0px 10px 0 10px;
         border-left: 1px solid #ccc;
     }
+    .login-info {
+        /* w-full h-8 mb-2 flex items-center rounded-full py-3 px-6 cursor-pointer */
+        width: 100%;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+    .check {
+        --tw-bg-opacity: 1;
+        background-color: rgb(37 99 235 / var(--tw-bg-opacity));
+        color: white;
+    }
+    .none-check {
+        color: black;
+    }
+    .none-check:hover {
+        --tw-bg-opacity: 1;
+        background-color: rgb(229 231 235 / var(--tw-bg-opacity));
+    }
 `;
 const LoginInfoList = (props: { infoList: PreferencesListType[] }) => {
     const { infoList } = props;
@@ -37,9 +56,7 @@ const LoginInfoList = (props: { infoList: PreferencesListType[] }) => {
                 {infoList.map((item) => (
                     <p
                         key={item.key}
-                        className={`${
-                            item.key === infoListKey ? 'bg-blue-600 text-white' : 'text-black hover:bg-gray-200'
-                        } w-full h-8 mb-2 flex items-center rounded-full py-3 px-6 cursor-pointer`}
+                        className={`${item.key === infoListKey ? 'check' : 'none-check'} login-info`}
                         onClick={() => {
                             setInfoListKey(item.key);
                         }}
@@ -48,7 +65,7 @@ const LoginInfoList = (props: { infoList: PreferencesListType[] }) => {
                     </p>
                 ))}
             </div>
-            <div className="flex-1">{infoList.filter((item) => item.key === infoListKey)[0].element()}</div>
+            <div style={{ flex: 1 }}>{infoList.filter((item) => item.key === infoListKey)[0].element()}</div>
         </LoginInfoListDiv>
     );
 };

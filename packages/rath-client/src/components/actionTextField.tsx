@@ -38,8 +38,8 @@ const ActionTextField: React.FC<ActionTextFieldProps> = (props) => {
     const { label, placeholder, buttonLabel, value, isDisable, onButtonClick, onChange } = props;
     return (
         <ActionButton>
-            <label className="block text-gray-700">{label}</label>
-            <div className="flex">
+            <label>{label}</label>
+            <div>
                 <div>
                     <TextField
                         value={value}
@@ -50,7 +50,7 @@ const ActionTextField: React.FC<ActionTextFieldProps> = (props) => {
                     />
                 </div>
                 <div>
-                    <PrimaryButton className="w-full" disabled={isDisable} onClick={onButtonClick}>
+                    <PrimaryButton style={{ width: '100%' }} disabled={isDisable} onClick={onButtonClick}>
                         {buttonLabel}
                     </PrimaryButton>
                 </div>
