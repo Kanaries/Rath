@@ -4,8 +4,8 @@ import { getGlobalStore } from "../../store";
 
 
 export const PredictAlgorithms = [
-    { key: 'decisionTree', text: '决策树' },
-    { key: 'randomForest', text: '随机森林' },
+    { key: 'decisionTree', text: '决策树（Decision Tree）' },
+    { key: 'randomForest', text: '随机森林（Random Forest）' },
     { key: 'gradientBoosting', text: '梯度增强（Gradient Boosting）' },
     { key: 'adaBoost', text: '自适应增强（AdaBoost）' },
 ] as const;
@@ -33,6 +33,7 @@ export interface IPredictProps {
     };
     /** same length to dataSource */
     trainTestSplitIndices: TrainTestSplitFlag[];
+    mode: 'classification' | 'regression';
 }
 
 export type PredictResultItem = {
@@ -47,7 +48,7 @@ export interface IPredictResult {
     result: PredictResultItem[];
 }
 
-const PredictApiPath = 'api/classification';
+const PredictApiPath = 'api/train_test';
 
 export const execPredict = async (props: IPredictProps): Promise<IPredictResult | null> => {
     try {
@@ -58,7 +59,7 @@ export const execPredict = async (props: IPredictProps): Promise<IPredictResult 
         // }[flag])).join(''), props.trainTestSplitIndices.length)
         const { causalStore } = getGlobalStore();
         const { apiPrefix } = causalStore;
-        const res = await fetch(`${apiPrefix}/${PredictApiPath}`, {
+        const res = await fetch(`${'http://192.168.31.220:5533' || apiPrefix}/${PredictApiPath}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

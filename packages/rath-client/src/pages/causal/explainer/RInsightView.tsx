@@ -8,6 +8,7 @@ import { useGlobalStore } from "../../../store";
 import type { IRInsightExplainResult } from "../../../workers/insight/r-insight.worker";
 import DiffChart from "./diffChart";
 import ExplainChart from "./explainChart";
+import VisText from './visText';
 
 
 export interface IRInsightViewProps {
@@ -142,14 +143,15 @@ const RInsightView: FC<IRInsightViewProps> = ({ data, result, mainField, mainFie
                                 mode={mode}
                             />
                             {view.description && (
-                                <p>
+                                // @ts-ignore
+                                <VisText>
                                     {intl.get(`RInsight.explanation.desc.${view.description.key}`, {
                                         ...view.description.data,
                                         responsibility: view.responsibility,
                                         mainField: mainField.name || mainField.fid,
                                         dimension: dimension.name || dimension.fid,
                                     })}
-                                </p>
+                                </VisText>
                             )}
                         </>
                     )}

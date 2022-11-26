@@ -6,7 +6,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import styled from "styled-components";
 import type { IFieldMeta } from "../../interfaces";
 import { useGlobalStore } from "../../store";
-import { execPredict, IPredictResult, PredictAlgorithm, PredictAlgorithms, TrainTestSplitFlag } from "./predict";
+import { execPredict, IPredictProps, IPredictResult, PredictAlgorithm, PredictAlgorithms, TrainTestSplitFlag } from "./predict";
 
 
 const Container = styled.div`
@@ -65,6 +65,7 @@ const PredictPanel = forwardRef<{
         targets: [],
     });
     const [algo, setAlgo] = useState<PredictAlgorithm>('decisionTree');
+    const [mode, setMode] = useState<IPredictProps['mode']>('classification');
 
     useImperativeHandle(ref, () => ({
         updateInput: input => setPredictInput(input),
@@ -220,6 +221,7 @@ const PredictPanel = forwardRef<{
                 targets: predictInput.targets.map(f => f.fid),
             },
             trainTestSplitIndices: trainTestSplitIndicesRef.current,
+            mode,
         });
         pendingRef.current = task;
         task.then(res => {
@@ -244,7 +246,7 @@ const PredictPanel = forwardRef<{
             pendingRef.current = undefined;
             setRunning(false);
         });
-    }, [predictInput, algo]);
+    }, [predictInput, algo, mode]);
 
     const sortedResults = useMemo(() => {
         return results.slice(0).sort((a, b) => b.completeTime - a.completeTime);
@@ -404,8 +406,20 @@ const PredictPanel = forwardRef<{
                 onClick={running ? undefined : handleClickExec}
                 onRenderIcon={() => running ? <Spinner style={{ transform: 'scale(0.75)' }} /> : <Icon iconName="Play" />}
                 style={{ width: 'max-content', flexGrow: 0, flexShrink: 0 }}
+                split
+                menuProps={{
+                    items: [
+                        { key: 'classification', text: '分类' },
+                        { key: 'regression', text: '回归' },
+                    ],
+                    onItemClick: (_e, item) => {
+                        if (item) {
+                            setMode(item.key as typeof mode);
+                        }
+                    },
+                }}
             >
-                预测
+                {`${mode}预测`}
             </DefaultButton>
             <Pivot
                 selectedKey={tab}

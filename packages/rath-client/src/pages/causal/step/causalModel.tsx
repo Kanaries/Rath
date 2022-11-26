@@ -1,6 +1,6 @@
 import { Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { RefObject, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 import produce from 'immer';
 import styled from 'styled-components';
 import { IFieldMeta } from '../../../interfaces';
