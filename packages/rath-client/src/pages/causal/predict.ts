@@ -58,7 +58,7 @@ export const execPredict = async (props: IPredictProps): Promise<IPredictResult 
         // }[flag])).join(''), props.trainTestSplitIndices.length)
         const { causalStore } = getGlobalStore();
         const { apiPrefix } = causalStore;
-        const res = await fetch(`${'http://192.168.31.220:5533' || apiPrefix}/${PredictApiPath}`, {
+        const res = await fetch(`${apiPrefix}/${PredictApiPath}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

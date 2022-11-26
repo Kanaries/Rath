@@ -1,4 +1,4 @@
-import { DefaultButton, Icon } from "@fluentui/react";
+import { DefaultButton, Icon, IconButton } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
@@ -60,6 +60,14 @@ const StepItem = styled.div<{ active: boolean; completed: boolean }>`
     :hover {
         opacity: ${({ active, completed }) => active || completed ? 1 : 0.75};
     }
+    position: relative;
+`;
+
+const Badge = styled.div`
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: translate(50%, -30%);
 `;
 
 const StepPanel = styled.div`
@@ -130,6 +138,8 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
     const curStep = useMemo(() => CausalSteps.find(s => s.key === stepKey)!, [stepKey]);
     const hintStep = useMemo(() => CausalSteps.find(s => s.key === showHelp)!, [showHelp]);
 
+    const [skipFDEdit, setSkipFDEdit] = useState(true);
+
     const goPreviousStep = useMemo(() => {
         switch (curStep.key) {
             case CausalStep.DATASET_CONFIG: {
@@ -150,7 +160,7 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
     const goNextStep = useMemo(() => {
         switch (curStep.key) {
             case CausalStep.DATASET_CONFIG: {
-                return () => setStepKey(CausalStep.FD_CONFIG);
+                return () => setStepKey(skipFDEdit ? CausalStep.CAUSAL_MODEL : CausalStep.FD_CONFIG);
             }
             case CausalStep.FD_CONFIG: {
                 return () => setStepKey(CausalStep.CAUSAL_MODEL);
@@ -162,7 +172,7 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
                 return undefined;
             }
         }
-    }, [curStep]);
+    }, [curStep, skipFDEdit]);
 
     return (
         <Container>
@@ -186,14 +196,28 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
                                     onMouseOver={() => active || setShowHelp(step.key)}
                                     onMouseOut={() => setShowHelp(stepKey)}
                                 >
-                                    {step.title}
+                                    <span>{step.title}</span>
+                                    {step.key === CausalStep.FD_CONFIG && (
+                                        <Badge>
+                                            <IconButton
+                                                title="Bypass"
+                                                iconProps={{ iconName: "DoubleChevronRight", style: { fontWeight: 'bold' } }}
+                                                onClick={e => {
+                                                    e.stopPropagation();
+                                                    setSkipFDEdit(!skipFDEdit);
+                                                }}
+                                                aria-checked={skipFDEdit}
+                                                styles={{ root: { transform: 'scale(0.6)', background: skipFDEdit ? undefined : 'linear-gradient(135deg, transparent 47%, #000 47%, #000 53%, transparent 53%)', border: '1px solid', borderRadius: '50%' } }}
+                                            />
+                                        </Badge>
+                                    )}
                                 </StepItem>
                             </Fragment>
                         );
                     })}
                 </StepList>
                 <DefaultButton primary disabled={!goNextStep} onClick={goNextStep} iconProps={{ iconName: 'Next' }}>
-                    下一步
+                    继续
                 </DefaultButton>
             </StepHeader>
             <StepHint isCurrentStep={hintStep.key === stepKey}>
