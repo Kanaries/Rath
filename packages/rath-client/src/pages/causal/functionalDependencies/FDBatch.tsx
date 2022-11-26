@@ -1,4 +1,4 @@
-import { DefaultButton, Spinner, Stack } from '@fluentui/react';
+import { ActionButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -9,15 +9,6 @@ import type { FDPanelProps } from './FDPanel';
 import { getGeneratedFDFromAutoDetection, getGeneratedFDFromExtInfo } from './utils';
 import FDEditor from './FDEditor';
 
-
-const Container = styled.div`
-    > button {
-        margin: 0 1em;
-        :first-child {
-            margin: 0 2em 0 0;
-        }
-    }
-`;
 
 const Mask = styled.div`
     position: fixed;
@@ -184,23 +175,23 @@ const FDBatch: React.FC<FDPanelProps> = ({
     return (
         <>
             <h3>快捷操作</h3>
-            <Container>
-                <DefaultButton onClick={handleClear}>
+            <Stack tokens={{ childrenGap: 10 }} horizontal>
+                <ActionButton iconProps={{ iconName: 'Delete' }} onClick={handleClear}>
                     全部删除
-                </DefaultButton>
-                <DefaultButton onClick={generateFDFromExtInfo}>
+                </ActionButton>
+                <ActionButton iconProps={{ iconName: 'EngineeringGroup' || 'BranchSearch' }} onClick={generateFDFromExtInfo}>
                     使用扩展字段计算图
-                </DefaultButton>
-                <DefaultButton disabled>
+                </ActionButton>
+                <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
                     导入影响关系
-                </DefaultButton>
-                <DefaultButton disabled>
+                </ActionButton>
+                <ActionButton iconProps={{ iconName: 'FileTemplate' }} disabled>
                     导入因果模型
-                </DefaultButton>
-                <DefaultButton disabled onClick={undefined && generateFDFromAutoDetection}>
+                </ActionButton>
+                <ActionButton iconProps={{ iconName: 'HintText' }} disabled onClick={undefined && generateFDFromAutoDetection}>
                     自动识别
-                </DefaultButton>
-            </Container>
+                </ActionButton>
+            </Stack>
             {displayPreview && (
                 <Mask>
                     <div>

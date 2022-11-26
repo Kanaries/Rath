@@ -1,11 +1,12 @@
 import { Checkbox, DefaultButton, DetailsList, Dropdown, IColumn, Icon, Label, Pivot, PivotItem, SelectionMode, Spinner } from "@fluentui/react";
 import produce from "immer";
 import { observer } from "mobx-react-lite";
+import { nanoid } from "nanoid";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import { IFieldMeta } from "../../interfaces";
+import type { IFieldMeta } from "../../interfaces";
 import { useGlobalStore } from "../../store";
-import { execPredict, IPredictResult, PredictAlgorithm, PredictAlgorithms } from "./predict";
+import { execPredict, IPredictResult, PredictAlgorithm, PredictAlgorithms, TrainTestSplitFlag } from "./predict";
 
 
 const Container = styled.div`
@@ -20,6 +21,7 @@ const Container = styled.div`
         display: flex;
         flex-direction: column;
         padding: 0.5em;
+        overflow: auto;
         > * {
             flex-grow: 0;
             flex-shrink: 0;
@@ -28,8 +30,8 @@ const Container = styled.div`
 `;
 
 const TableContainer = styled.div`
-    flex-grow: 1;
-    flex-shrink: 1;
+    flex-grow: 0;
+    flex-shrink: 0;
     overflow: auto;
 `;
 
@@ -45,6 +47,11 @@ const Row = styled.div<{ selected: 'attribution' | 'target' | false }>`
         }
     }
 `;
+
+// FIXME: 防止切到别的流程时预测结果被清空，先在全局存一下，决定好要不要保留 && 状态应该存哪里以后及时迁走
+const predictCache: {
+    id: string; algo: PredictAlgorithm; startTime: number; completeTime: number; data: IPredictResult;
+}[] = [];
 
 const PredictPanel: FC = () => {
     const { causalStore, dataSourceStore } = useGlobalStore();
@@ -164,26 +171,49 @@ const PredictPanel: FC = () => {
     allFieldsRef.current = fieldMetas;
 
     const [results, setResults] = useState<{
-        algo: PredictAlgorithm; startTime: number; completeTime: number; data: IPredictResult;
+        id: string; algo: PredictAlgorithm; startTime: number; completeTime: number; data: IPredictResult;
     }[]>([]);
 
+    // FIXME: 防止切到别的流程时预测结果被清空，先在全局存一下，决定好要不要保留 && 状态应该存哪里以后及时迁走
     useEffect(() => {
-        setResults([]);
+        setResults(predictCache);
+        return () => {
+            setResults(res => {
+                predictCache.splice(0, Infinity, ...res);
+                return [];
+            });
+        };
     }, [cleanedData, fieldMetas]);
 
     const [tab, setTab] = useState<'config' | 'result'>('config');
+
+    const trainTestSplitIndices = useMemo<TrainTestSplitFlag[]>(() => {
+        const TRAIN_RATE = 0.2;
+        const indices = cleanedData.map((_, i) => i);
+        const trainSetIndices = new Map<number, 1>();
+        const trainSetTargetSize = Math.floor(cleanedData.length * TRAIN_RATE);
+        while (trainSetIndices.size < trainSetTargetSize && indices.length) {
+            const [index] = indices.splice(Math.floor(indices.length * Math.random()), 1);
+            trainSetIndices.set(index, 1);
+        }
+        return cleanedData.map((_, i) => trainSetIndices.has(i) ? TrainTestSplitFlag.train : TrainTestSplitFlag.test);
+    }, [cleanedData]);
+
+    const trainTestSplitIndicesRef = useRef(trainTestSplitIndices);
+    trainTestSplitIndicesRef.current = trainTestSplitIndices;
 
     const handleClickExec = useCallback(() => {
         const startTime = Date.now();
         setRunning(true);
         const task = execPredict({
             dataSource: dataSourceRef.current,
+            fields: allFieldsRef.current,
             model: {
                 algorithm: algo,
                 features: predictInput.features.map(f => f.fid),
-                target: predictInput.targets.map(f => f.fid),
+                targets: predictInput.targets.map(f => f.fid),
             },
-            fields: allFieldsRef.current,
+            trainTestSplitIndices: trainTestSplitIndicesRef.current,
         });
         pendingRef.current = task;
         task.then(res => {
@@ -191,6 +221,7 @@ const PredictPanel: FC = () => {
                 const completeTime = Date.now();
                 setResults(list => {
                     const record = {
+                        id: nanoid(8),
                         algo,
                         startTime,
                         completeTime,
@@ -213,8 +244,56 @@ const PredictPanel: FC = () => {
         return results.slice(0).sort((a, b) => b.completeTime - a.completeTime);
     }, [results]);
 
+    const [comparison, setComparison] = useState<null | [string] | [string, string]>(null);
+
+    useEffect(() => {
+        setComparison(group => {
+            if (!group) {
+                return null;
+            }
+            const next = group.filter(id => results.some(rec => rec.id === id));
+            if (next.length === 0) {
+                return null;
+            }
+            return next as [string] | [string, string];
+        });
+    }, [results]);
+
     const resultTableCols = useMemo<IColumn[]>(() => {
         return [
+            {
+                key: 'selected',
+                name: '对比',
+                onRender: (item) => {
+                    const record = item as typeof sortedResults[number];
+                    const selected = (comparison ?? [] as string[]).includes(record.id);
+                    return (
+                        <Checkbox
+                            checked={selected}
+                            onChange={(_, checked) => {
+                                if (checked) {
+                                    setComparison(group => {
+                                        if (group === null) {
+                                            return [record.id];
+                                        }
+                                        return [group[0], record.id];
+                                    });
+                                } else if (selected) {
+                                    setComparison(group => {
+                                        if (group?.some(id => id === record.id)) {
+                                            return group.length === 1 ? null : group.filter(id => id !== record.id) as [string];
+                                        }
+                                        return null;
+                                    });
+                                }
+                            }}
+                        />
+                    );
+                },
+                isResizable: false,
+                minWidth: 30,
+                maxWidth: 30,
+            },
             {
                 key: 'index',
                 name: '运行次数',
@@ -279,20 +358,36 @@ const PredictPanel: FC = () => {
                     );
                 },
             },
-            {
-                key: 'raw',
-                name: 'raw',
-                minWidth: 200,
-                onRender(item) {
-                    const record = item as typeof sortedResults[number];
-                    const info = record.data.result.map(([index, value]) => `${index} -> ${value};`).join('\n');
-                    return (
-                        <span title={info}>{info}</span>
-                    );
-                },
-            },
         ];
-    }, [sortedResults]);
+    }, [sortedResults, comparison]);
+
+    const diff = useMemo(() => {
+        if (comparison?.length === 2) {
+            const before = sortedResults.find(res => res.id === comparison[0]);
+            const after = sortedResults.find(res => res.id === comparison[1]);
+            if (before && after) {
+                const temp: unknown[] = [];
+                for (let i = 0; i < before.data.result.length; i += 1) {
+                    const row = dataSourceRef.current[before.data.result[i][0]];
+                    const prev = before.data.result[i][1];
+                    const next = after.data.result[i][1];
+                    if (next === 1 && prev === 0) {
+                        temp.push(Object.fromEntries(Object.entries(row).map(([k, v]) => [
+                            allFieldsRef.current.find(f => f.fid === k)?.name ?? k,
+                            v,
+                        ])));
+                    }
+                }
+                return temp;
+            }
+        }
+    }, [sortedResults, comparison]);
+
+    useEffect(() => {
+        if (diff) {
+            console.table(diff);
+        }
+    }, [diff]);
 
     return (
         <Container>
@@ -302,7 +397,7 @@ const PredictPanel: FC = () => {
                 disabled={!canExecute || running}
                 onClick={running ? undefined : handleClickExec}
                 onRenderIcon={() => running ? <Spinner style={{ transform: 'scale(0.75)' }} /> : <Icon iconName="Play" />}
-                style={{ width: 'max-content' }}
+                style={{ width: 'max-content', flexGrow: 0, flexShrink: 0 }}
             >
                 预测
             </DefaultButton>
@@ -361,7 +456,7 @@ const PredictPanel: FC = () => {
                             >
                                 清空记录
                             </DefaultButton>
-                            <TableContainer style={{ flexGrow: 1, flexShrink: 1 }}>
+                            <TableContainer>
                                 <DetailsList
                                     items={sortedResults}
                                     columns={resultTableCols}
