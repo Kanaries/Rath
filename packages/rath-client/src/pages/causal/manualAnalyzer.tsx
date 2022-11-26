@@ -1,6 +1,6 @@
 import { ActionButton, Pivot, PivotItem, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import type { IPattern } from '@kanaries/loa';
 import styled from 'styled-components';
@@ -14,6 +14,7 @@ import type { useDataViews } from './hooks/dataViews';
 import RExplainer from './explainer/RExplainer';
 import type { IFunctionalDep, PagLink } from './config';
 import PredictPanel from './predictPanel';
+import type { ExplorerProps } from './explorer';
 
 
 const Container = styled.div`
@@ -37,6 +38,7 @@ export interface ManualAnalyzerProps {
     interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
     functionalDependencies: IFunctionalDep[];
     edges: PagLink[];
+
 }
 
 const CustomAnalysisModes = [
@@ -48,7 +50,9 @@ const CustomAnalysisModes = [
 
 type CustomAnalysisMode = typeof CustomAnalysisModes[number]['key'];
 
-const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldGroups, functionalDependencies, edges }) => {
+const ManualAnalyzer = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelected'] }, ManualAnalyzerProps>(function ManualAnalyzer (
+    { context, interactFieldGroups, functionalDependencies, edges }, ref
+) {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { fieldGroup, setFieldGroup, clearFieldGroup } = interactFieldGroups;
@@ -109,6 +113,22 @@ const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldG
         // };
     }, [fieldGroup]);
 
+    const predictPanelRef = useRef<{ updateInput?: (input: {
+        features: Readonly<IFieldMeta>[]; targets: Readonly<IFieldMeta>[]
+    }) => void }>({});
+
+    useImperativeHandle(ref, () => ({
+        onSubtreeSelected: (node, simpleCause) => {
+            if (customAnalysisMode === 'predict' && node && simpleCause.length > 0) {
+                const features = simpleCause.map(cause => cause.field);
+                predictPanelRef.current.updateInput?.({
+                    features,
+                    targets: [node],
+                });
+            }
+        },
+    }));
+
     return (
         <Container>
             <Pivot
@@ -145,7 +165,7 @@ const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldG
             <div className="body">
                 {{
                     predict: (
-                        <PredictPanel />
+                        <PredictPanel ref={predictPanelRef} />
                     ),
                     explainer: vizSampleData.length > 0 && fieldGroup.length > 0 && (
                         <RExplainer
@@ -190,6 +210,6 @@ const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldG
             </div>
         </Container>
     );
-};
+});
 
 export default observer(ManualAnalyzer);

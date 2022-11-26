@@ -1,12 +1,12 @@
 import { Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { RefObject, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import produce from 'immer';
 import styled from 'styled-components';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { mergeCausalPag, resolvePreconditionsFromCausal, transformPreconditions } from '../../../utils/resolve-causal';
-import Explorer from '../explorer';
+import Explorer, { ExplorerProps } from '../explorer';
 import Params from '../params';
 import type { BgKnowledge, BgKnowledgePagLink, IFunctionalDep, ModifiableBgKnowledge } from '../config';
 import ModelStorage from '../modelStorage';
@@ -45,14 +45,18 @@ export interface CausalModalProps {
     interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
 }
 
-export const CausalExplorer = observer<CausalModalProps & { allowEdit: boolean }>(function CausalExplorer ({
+export const CausalExplorer = observer<
+    Omit<CausalModalProps, 'functionalDependencies'> & {
+        allowEdit: boolean; listenerRef?: RefObject<{ onSubtreeSelected?: ExplorerProps['onNodeSelected'] }>;
+    }
+>(function CausalExplorer ({
     allowEdit,
     dataContext,
     modifiablePrecondition,
     setModifiablePrecondition,
-    functionalDependencies,
     renderNode,
     interactFieldGroups,
+    listenerRef,
 }) {
     const { causalStore } = useGlobalStore();
     const { igMatrix, selectedFields, causalStrength } = causalStore;
@@ -63,12 +67,15 @@ export const CausalExplorer = observer<CausalModalProps & { allowEdit: boolean }
         setFieldGroup(fields);
     }, [setFieldGroup]);
 
-    const handleSubTreeSelected = useCallback((node: Readonly<IFieldMeta> | null) => {
+    const handleSubTreeSelected = useCallback<ExplorerProps['onNodeSelected']>((
+        node, simpleCause, simpleEffect, composedCause, composedEffect,
+    ) => {
             if (node) {
                 appendFields2Group([node.fid]);
             }
+            listenerRef?.current?.onSubtreeSelected?.(node, simpleCause, simpleEffect, composedCause, composedEffect);
         },
-        [appendFields2Group]
+        [appendFields2Group, listenerRef]
     );
 
     const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number, type: ModifiableBgKnowledge['type']) => {
@@ -191,6 +198,8 @@ const CausalModal: React.FC<CausalModalProps> = ({
         return mergeCausalPag(causalStrength, modifiablePrecondition, fieldMetas);
     }, [causalStrength, fieldMetas, modifiablePrecondition]);
 
+    const listenerRef = useRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelected'] }>({});
+
     return (
         <Container>
             <div>
@@ -228,15 +237,21 @@ const CausalModal: React.FC<CausalModalProps> = ({
                             dataContext={dataContext}
                             modifiablePrecondition={modifiablePrecondition}
                             setModifiablePrecondition={setModifiablePrecondition}
-                            functionalDependencies={functionalDependencies}
                             renderNode={renderNode}
                             interactFieldGroups={interactFieldGroups}
+                            listenerRef={listenerRef}
                         />
                     )}
                 />
             </div>
             <div style={{ flexGrow: 1.4, display: 'flex', flexDirection: 'column' }}>
-                <ManualAnalyzer context={dataContext} functionalDependencies={functionalDependencies} interactFieldGroups={interactFieldGroups} edges={edges} />
+                <ManualAnalyzer
+                    context={dataContext}
+                    functionalDependencies={functionalDependencies}
+                    interactFieldGroups={interactFieldGroups}
+                    edges={edges}
+                    ref={listenerRef}
+                />
             </div>
         </Container>
     );

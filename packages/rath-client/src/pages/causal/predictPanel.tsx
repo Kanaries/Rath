@@ -2,7 +2,7 @@ import { Checkbox, DefaultButton, DetailsList, Dropdown, IColumn, Icon, Label, P
 import produce from "immer";
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import type { IFieldMeta } from "../../interfaces";
 import { useGlobalStore } from "../../store";
@@ -53,7 +53,9 @@ const predictCache: {
     id: string; algo: PredictAlgorithm; startTime: number; completeTime: number; data: IPredictResult;
 }[] = [];
 
-const PredictPanel: FC = () => {
+const PredictPanel = forwardRef<{
+    updateInput?: (input: { features: IFieldMeta[]; targets: IFieldMeta[] }) => void;
+}, {}>(function PredictPanel (_, ref) {
     const { causalStore, dataSourceStore } = useGlobalStore();
     const { selectedFields } = causalStore;
     const { cleanedData, fieldMetas } = dataSourceStore;
@@ -63,6 +65,10 @@ const PredictPanel: FC = () => {
         targets: [],
     });
     const [algo, setAlgo] = useState<PredictAlgorithm>('decisionTree');
+
+    useImperativeHandle(ref, () => ({
+        updateInput: input => setPredictInput(input),
+    }));
 
     useEffect(() => {
         setPredictInput(before => {
@@ -469,7 +475,7 @@ const PredictPanel: FC = () => {
             </div>
         </Container>
     );
-};
+});
 
 
 export default observer(PredictPanel);
