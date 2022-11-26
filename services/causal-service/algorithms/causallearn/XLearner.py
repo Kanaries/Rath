@@ -144,6 +144,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     topo = toposort(adj)
     
     fake_knowledge = BackgroundKnowledge()
+    skeleton_knowledge = set()
     for t in topo[::-1]:
         mxvcnt, y = 0, -1
         for a in anc[t]:
@@ -156,6 +157,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
         # S.append((attr_id[t], attr_id[y]))
         # fake_knowledge.add_required_by_node(FDNodes[t], FDNodes[y])
         fake_knowledge.add_required_by_node(FDNodes[y], FDNodes[t])
+        skeleton_knowledge.add((attr_id[y], attr_id[t]))
         # remove X and connected edges from G_FD
         G_fd.remove(attr_id[t])
         for a in anc[t]:
@@ -175,26 +177,36 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
         node = FCI.GraphNode(f"X{i + 1}")
         node.add_attribute("id", i)
         nodes.append(node)
+        
     for i in range(FDgraph.graph.shape[0]):
         for j in range(i):
-            if FDgraph.graph[i, j] == -1 or FDgraph.graph[j, i] == -1:
+            if FDgraph.graph[i, j] == -1:
                 x, y = attr_id[i], attr_id[j]
-                fake_knowledge.add_required_by_node(nodes[x], nodes[y])
-                fake_knowledge.add_required_by_node(nodes[y], nodes[x])
-            # TODO: 区分方向
+                skeleton_knowledge.add((x, y))
+            # if FDgraph.graph[i, j] == -1:
+            #     fake_knowledge.add_required_by_node(node[x], node[y])
+            # if FDgraph.graph[j, i] == -1:
+            #     fake_knowledge.add_required_by_node(node[y], node[x])
     
     print("fake_knowledge =", fake_knowledge)
-    for k in fake_knowledge.required_rules_specs:
-        print(k[0].get_all_attributes(), k[1].get_all_attributes())
+    print(skeleton_knowledge)
+    # for k in fake_knowledge.required_rules_specs:
+    #     print(k[0].get_all_attributes(), k[1].get_all_attributes())
+    
+    for funcDep in functional_dependencies:
+        for p in funcDep.params:
+            background_knowledge.add_required_by_node(nodes[f_ind[p.fid]], nodes[f_ind[funcDep.fid]])
 
     # FAS (“Fast Adjacency Search”) is the adjacency search of the PC algorithm, used as a first step for the FCI algorithm.
     graph, sep_sets = FCI.fas(dataset, nodes, independence_test_method=independence_test_method, alpha=alpha,
-                          knowledge=fake_knowledge, depth=depth, verbose=verbose)
+                          knowledge=background_knowledge, depth=depth, verbose=verbose)
+    for u, v in skeleton_knowledge:
+        print(u, v)
+        graph.add_edge(FCI.Edge(nodes[u], nodes[v], FCI.Endpoint.TAIL, FCI.Endpoint.TAIL))
+        # graph[u, v] = graph[v, u] = -1
     
     print("global fas graph =", graph)
     print({u: s for u, s in sep_sets.items() if len(s)})
-    for k in fake_knowledge.required_rules_specs:
-        background_knowledge.add_required_by_node(k[0], k[1])
     # return graph, sep_sets
     # forbid_knowledge = BackgroundKnowledge()
     # for (u, v) in background_knowledge.forbidden_rules_specs:
@@ -266,7 +278,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     graph.set_pag(True)
 
     edges = FCI.get_color_edges(graph)
-
+    
     return graph, edges
 
 
