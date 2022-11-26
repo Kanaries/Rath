@@ -170,11 +170,15 @@ const FDBatch: React.FC<FDPanelProps> = ({
 
     const submitRef = useRef(setFunctionalDependencies);
     submitRef.current = setFunctionalDependencies;
+    const fdRef = useRef(functionalDependencies);
+    fdRef.current = functionalDependencies;
     useEffect(() => {
-        requestAnimationFrame(() => {
-            const fds = getGeneratedFDFromExtInfo(selectedFields);
-            submitRef.current(fds);
-        });
+        setTimeout(() => {
+            if (fdRef.current.length === 0) {
+                const fds = getGeneratedFDFromExtInfo(selectedFields);
+                submitRef.current(fds);
+            }
+        }, 400);
     }, [selectedFields]);
 
     return (
