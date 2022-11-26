@@ -8,9 +8,6 @@ from regression.regression import regression
 from transform import makeTrainingData
 
 app = Flask(__name__)
-CORS(app)
-
-app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 def controlSplitTrainTest (X, y, split_states: 'list[int]'):
@@ -38,13 +35,13 @@ def mockSplitIndices (size: int, ratio: float):
             indices.append(0)
     return indices
 
-@app.get('/api/ping')
+@app.route('/api/ping', methods=['GET'])
 def ping():
     return {
         "success": True
     }
 
-@app.post("/api/train_test")
+@app.route("/api/train_test", methods=['POST'])
 def runClassificationModel():
     try:
         dataset = json.loads(request.data)
