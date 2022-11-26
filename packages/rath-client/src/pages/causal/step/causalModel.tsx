@@ -235,7 +235,7 @@ const CausalModal: React.FC<CausalModalProps> = ({
                     )}
                 />
             </div>
-            <div style={{ flexGrow: 1.4 }}>
+            <div style={{ flexGrow: 1.4, display: 'flex', flexDirection: 'column' }}>
                 <ManualAnalyzer context={dataContext} functionalDependencies={functionalDependencies} interactFieldGroups={interactFieldGroups} edges={edges} />
             </div>
         </Container>
