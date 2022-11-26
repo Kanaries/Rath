@@ -36,7 +36,7 @@ const LoginInfoListDiv = styled.div`
     }
     .check {
         --tw-bg-opacity: 1;
-        background-color: rgb(37 99 235 / var(--tw-bg-opacity));
+        background-color: #0078d4;//rgb(37 99 235 / var(--tw-bg-opacity));
         color: white;
     }
     .none-check {

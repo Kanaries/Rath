@@ -74,7 +74,7 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
     }
     padding: 1em;
     padding-top: ${({ isPreview }) => (isPreview ? '2.2em' : '1em')};
-    margin: 1em;
+    margin: 1em 0em;
     box-shadow: 0 1.6px 3.6px 0 rgb(0 0 0 / 13%), 0 0.3px 0.9px 0 rgb(0 0 0 / 11%);
     border-radius: 8px;
     .flex-container {

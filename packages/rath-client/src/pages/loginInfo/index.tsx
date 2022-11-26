@@ -37,12 +37,8 @@ const LoginInfoDiv = styled.div`
         /* flex flex-shrink-0 border-t border-indigo-800 p-4 bg-gray-700 cursor-pointer */
         display: flex;
         flex-shrink: 0;
-        --tw-border-opacity: 1;
-        border-color: rgb(55 48 163 / var(--tw-border-opacity));
         border-top-width: 1px;
         padding: 1rem;
-        --tw-bg-opacity: 1;
-        background-color: rgb(55 65 81 / var(--tw-bg-opacity));
         cursor: pointer;
     }
     .user-name {

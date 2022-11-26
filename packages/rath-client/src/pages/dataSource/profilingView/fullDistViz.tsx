@@ -4,6 +4,7 @@ import embed, { Result, vega } from 'vega-embed';
 import intl from 'react-intl-universal';
 import { IRow } from '../../../interfaces';
 import { shallowCopyArray } from '../../../utils/deepcopy';
+import { getVegaTimeFormatRules } from '../../../utils';
 const DATA_NAME = 'dataSource';
 const DEFAULT_BIN_SIZE = 10;
 function fl2bins(data: IRow[], valueField: string, ctField: string, binSize: number | undefined = DEFAULT_BIN_SIZE) {
@@ -118,7 +119,7 @@ const FullDistViz: React.FC<FullDistVizProps> = (props) => {
                 }
             }, {
                 actions: false,
-                timeFormatLocale: intl.get('time_format') as any
+                timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any
             }).then(res => {
                 setView(res.view);
                 res.view.addSignalListener('brush', (name, value) => {

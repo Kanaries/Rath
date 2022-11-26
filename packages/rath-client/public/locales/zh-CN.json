@@ -242,10 +242,13 @@
             "manual": "手动（有明确分析目的）"
         },
         "fastSelection": {
-            "title": "快速筛选/清洗"
+            "title": "快速筛选"
         },
         "downloadData": {
-            "title": "导出数据集"
+            "title": "导出数据",
+            "downloadCSV": "导出CSV",
+            "downloadJSON": "导出JSON",
+            "downloadJSONMeta": "导出JSON(含元数据)"
         },
         "extend": {
             "title": "扩展信息",
@@ -264,7 +267,8 @@
                 "oneHot": "独热编码(one-hot encoding)|独热编码可以将类别型数据转换为多个数值型数据，方便进行相关性分析。",
                 "wordTFIDF": "按文档的词频与逆向文件频率提取类别(tf-idf)。|tf-idf是一种统计方法，用以评估一字词对于一个文件集或一个语料库中的其中一份文件的重要程度",
                 "wordTF": "按文档词频提取类别。|按照词汇在整个文档中的出现频率，选择出现频率最高的词汇作为新的类别字段",
-                "reGroupByFreq": "按照类别出现频率重新分组。|按照类别出现频率重新分组，可以将出现频率较低的类别合并为一个类别，方便进行相关性分析。"
+                "reGroupByFreq": "按照类别出现频率重新分组。|按照类别出现频率重新分组，可以将出现频率较低的类别合并为一个类别，方便进行相关性分析。",
+                "outlierIForest": "按异常检测(孤立森林)划分组。| 将偏离值预期的异常值单独分为一组，其余的分在一组当中。使用孤立森林评判异常情况。"
             }
         },
         "filter": {
@@ -280,7 +284,8 @@
         },
         "operations": {
             "title": "快捷操作",
-            "selectAll": "选择所有字段"
+            "selectAll": "选择所有字段",
+            "disableAll": "禁用所有字段"
         }
     },
     "meta": {
@@ -472,6 +477,7 @@
         }
     },
     "time_format": {
+        "langKey": "zh-CN",
         "dateTime": "%x %A %X",
         "date": "%Y年%-m月%-d日",
         "time": "%H:%M:%S",

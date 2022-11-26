@@ -154,8 +154,8 @@ const DataTable: React.FC = (props) => {
                             boxSizing: 'border-box',
                             width: 'unset',
                             color: 'rgb(0, 120, 212)',
-                            backgroundColor: 'rgba(0, 120, 212, 0.02)',
-                            border: '1px solid rgba(0, 120, 212, 0.5)',
+                            backgroundColor: 'rgba(0, 120, 212, 0.12)',
+                            // border: '1px solid rgba(0, 120, 212, 0.5)',
                             margin: '2px 0 1em 0',
                         },
                     }}
