@@ -315,6 +315,7 @@ class IFunctionalDepParam(BaseModel):
     type: Optional[str] = Field(default='')
 
 class IFunctionalDep(BaseModel):
+    fid: str
     params: List[IFunctionalDepParam]
     func: Optional[str] = Field(default='generated', title='Functional Dependency Type', description="To be designed")
     extInfo: Optional[Any] = Field(default=None)
