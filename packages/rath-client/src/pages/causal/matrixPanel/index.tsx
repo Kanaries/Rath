@@ -96,11 +96,23 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
             <Stack style={{ marginBottom: '1em' }} tokens={{ childrenGap: 10 }}>
                 <PrimaryButton
                     text={MATRIX_PIVOT_LIST.find((item) => item.itemKey === selectedKey)?.taskLabel}
+                    onRenderText={(props, defaultRenderer) => {
+                        return (
+                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} >
+                                {computing && <Spinner style={{ transform: 'scale(0.75)' }} />}
+                                {defaultRenderer?.(props)}
+                            </div>
+                        );
+                    }}
+                    disabled={computing}
                     onClick={() => {
+                        if (computing) {
+                            return;
+                        }
                         onCompute(selectedKey);
                     }}
-                    iconProps={{ iconName: 'Rerun' }}
-                    style={{ width: 'max-content' }}
+                    iconProps={computing ? undefined : { iconName: 'Rerun' }}
+                    style={{ width: 'max-content', transition: 'width 400ms' }}
                 />
                 {selectedKey === MATRIX_TYPE.causal && (
                     <Dropdown
@@ -166,7 +178,7 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
             )}
             {selectedKey === MATRIX_TYPE.causal && (
                 viewType === VIEW_TYPE.diagram ? (
-                    diagram
+                    computing || diagram
                 ) : showMatrix(fields, causalStrength, computing) && (
                     <DirectionMatrix
                         mark={markType}

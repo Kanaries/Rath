@@ -34,7 +34,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
 
     const filterType = indexKey ? (
         indexKey.semanticType === 'quantitative' || indexKey.semanticType === 'temporal' ? 'interval' : 'point'
-    ) : 'interval';
+    ) : mainField.semanticType === 'quantitative' || mainField.semanticType === 'temporal' ? 'interval' : 'point';
 
     const source = useMemo(() => {
         return subspace ? data.map((row, i) => ({ ...row, [SUBSPACE_KEY]: subspace.includes(i) ? 1 : 0 })) : data;
@@ -181,13 +181,6 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                                             fid: indexKey.fid,
                                             range,
                                         });
-                                    } else {
-                                        // 分箱的单变量分布
-                                        signalChange$.next({
-                                            type: 'range',
-                                            fid: mainField.fid,
-                                            range,
-                                        });
                                     }
                                     break;
                                 }
@@ -197,6 +190,13 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                                         signalChange$.next({
                                             type: 'set',
                                             fid: indexKey.fid,
+                                            values: set,
+                                        });
+                                    } else {
+                                        // 分箱的单变量分布
+                                        signalChange$.next({
+                                            type: 'set',
+                                            fid: mainField.fid,
                                             values: set,
                                         });
                                     }
