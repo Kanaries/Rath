@@ -41,7 +41,7 @@ const DataOperations: React.FC = () => {
     }, [dataSourceStore]);
     const exportDataAsCSV = useCallback(() => {
         const data = dataSourceStore.exportCleanData();
-        const fields = dataSourceStore.fieldMetas.map((f) => f.name || f.fid);
+        const fields = dataSourceStore.fieldMetas;
         const content = rows2csv(data, fields);
         downloadFileWithContent(content, 'dataset.csv');
     }, [dataSourceStore]);

@@ -161,12 +161,6 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                         PIVOT_KEYS.dashBoardDesigner,
                     ]),
                 },
-                {
-                    url: '/',
-                    name: navMode === 'text' ? intl.get('common.home') : '',
-                    // iconProps: navMode === 'icon' ? {iconName: 'Home'} : undefined,
-                    iconProps: { iconName: 'Home' },
-                },
                 ...getLinks([PIVOT_KEYS.support]),
                 // ...pivotList.map(item => {
                 //     return {
