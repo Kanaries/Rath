@@ -139,7 +139,7 @@ export const useReactiveGraph = (
     useEffect(() => {
         const { current: graph } = graphRef;
         if (graph) {
-            const focusedNode = graph.getNodes().find(node => {
+            graph.getNodes().forEach(node => {
                 const id = (() => {
                     try {
                         return parseInt(node._cfg?.id ?? '-1', 10);
@@ -147,22 +147,9 @@ export const useReactiveGraph = (
                         return -1;
                     }
                 })();
-                return id === focus;
-            });
-            const subtree = focusedNode ? graph.getNeighbors(focusedNode).map(node => {
-                const idx = (() => {
-                    try {
-                        return parseInt(node._cfg?.id ?? '-1', 10);
-                    } catch {
-                        return -1;
-                    }
-                })();
-                return fieldsRef.current[idx]?.fid;
-            }) : [];
-            graph.getNodes().forEach(node => {
-                const isFocused = node === focusedNode;
+                const isFocused = id === focus;
                 graph.setItemState(node, 'focused', isFocused);
-                const isInSubtree = focusedNode ? graph.getNeighbors(focusedNode).some(neighbor => neighbor === node) : false;
+                const isInSubtree = selectedSubtree.includes(fieldsRef.current[id]?.fid);
                 graph.setItemState(node, 'highlighted', isInSubtree);
                 graph.setItemState(node, 'faded', focus !== null && !isFocused && !isInSubtree);
             });
@@ -186,14 +173,7 @@ export const useReactiveGraph = (
                 ].includes(fieldsRef.current[focus]?.fid) && [
                     fieldsRef.current[sourceIdx]?.fid, fieldsRef.current[targetIdx]?.fid
                 ].every(fid => {
-                    return [fieldsRef.current[focus]?.fid].concat(subtree).includes(fid);
-                });
-                graph.updateItem(edge, {
-                    labelCfg: {
-                        style: {
-                            opacity: isInSubtree ? 1 : 0,
-                        },
-                    },
+                    return [fieldsRef.current[focus]?.fid].concat(selectedSubtree).includes(fid);
                 });
                 graph.setItemState(edge, 'highlighted', isInSubtree);
                 graph.setItemState(edge, 'faded', focus !== null && !isInSubtree);

@@ -46,7 +46,7 @@ const MATRIX_PIVOT_LIST = [
 
 const VIEW_LABELS = [
     { key: 'matrix', text: '矩阵' },
-    { key: 'diagram', text: '图（PAG）' },
+    { key: 'diagram', text: '完全部分有向无环图（CPDAG）' },
 ];
 
 const MARK_LABELS = [

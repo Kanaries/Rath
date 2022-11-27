@@ -131,9 +131,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
             links: value.links.map(link => ({
                 source: link.causeId,
                 target: link.effectId,
-                score: link.score / nodeCauseWeights[link.effectId],
+                value: link.score / nodeCauseWeights[link.effectId],
                 type: link.type,
-            })).filter(link => link.score >= cutThreshold).sort((a, b) => b.score - a.score).slice(0, limit),
+            })).filter(link => link.value >= cutThreshold).sort((a, b) => b.value - a.value).slice(0, limit),
         }, totalScore];
     }, [value, cutThreshold, limit]);
 

@@ -81,25 +81,9 @@ const CausalPage: FC = () => {
     // 结点可以 project 一些字段信息
     const renderNode = useCallback((node: Readonly<IFieldMeta>): GraphNodeAttributes | undefined => {
         const value = 2 / (1 + Math.exp(-1 * node.features.entropy / 2)) - 1;
-        const rgb = `${
-            Math.floor(57 * value + 206 * (1 - value))
-        },${
-            Math.floor(59 * value + 110 * (1 - value))
-        },${
-            Math.floor(121 * value + 189 * (1 - value))
-        }`;
-        const fill = `rgb(${
-            Math.floor(200 + 55 * (57 * value + 206 * (1 - value) / 255))
-        },${
-            Math.floor(200 + 55 * (59 * value + 110 * (1 - value) / 255))
-        },${
-            Math.floor(200 + 55 * (121 * value + 189 * (1 - value) / 255))
-        })`;
         return {
             style: {
-                fill,
-                stroke: `rgba(${rgb},0.67)`,
-                lineWidth: 1.6,
+                stroke: `rgb(${Math.floor(95 * (1 - value))},${Math.floor(149 * (1 - value))},255)`,
             },
         };
     }, []);
