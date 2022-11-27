@@ -289,14 +289,23 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, f
                     >
                         Insight
                     </DefaultButton>
-                    <RInsightView
-                        data={selectedSet}
-                        result={irResult}
-                        mainField={mainField}
-                        mainFieldAggregation={aggr}
-                        mode={diffMode}
-                        indices={[indicesA, indicesB]}
-                    />
+                    {subspaces && (
+                        <RInsightView
+                            data={selectedSet}
+                            result={irResult}
+                            mainField={mainField}
+                            mainFieldAggregation={aggr}
+                            entryDimension={indexKey}
+                            mode={diffMode}
+                            subspaces={subspaces}
+                            indices={[indicesA, indicesB]}
+                            functionalDependencies={functionalDependencies}
+                            aggr={aggr}
+                            serviceMode={serviceMode}
+                            context={context}
+                            edges={edges}
+                        />
+                    )}
                 </>
             )}
         </Container>
