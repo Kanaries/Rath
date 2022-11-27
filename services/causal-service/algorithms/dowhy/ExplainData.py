@@ -54,8 +54,9 @@ def constructPAG(fields, causal_model: IDoWhy.ICausalModel):
         if e.src_type == 1:
             e.src, e.tar = e.tar, e.src
             e.src_type, e.tar_type = e.tar_type, e.src_type
-        e.src, e.tar, e.src_type, e.tar_type
-        g_gml += f"\nedge[source \"{e.src}\" target \"{e.tar}\"]"
+        if e.src_type == -1 and e.tar_type == 1:
+            e.src, e.tar, e.src_type, e.tar_type
+            g_gml += f"\nedge[source \"{e.src}\" target \"{e.tar}\"]"
         # k.src_type, k.tar_type
     g_gml += "]"
     print("gml=", g_gml)
@@ -118,8 +119,8 @@ class ExplainDataSession(RathSession):
         self.estimate = self.model.estimate_effect(
             self.estimand,
             methods[method],
-            target_units=lambda df: inferDiff(satCurrent, satOther), # satisfy(self.dataSource, groups.current), satisfy(df, groups.other)),
-            # evaluate_effect_strength=True,
+            # target_units=lambda df: inferDiff(satCurrent, satOther), # satisfy(self.dataSource, groups.current), satisfy(df, groups.other)),
+            evaluate_effect_strength=True,
             )
         # TODO: params
         print(self.estimate)
@@ -164,6 +165,14 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
     dimensions, measures = view.dimensions, view.measures
     
     print("transData =", transData)
+    for dep in props.causalModel.funcDeps:
+        pass
+    f_ind = {f.fid: i for i, f in enumerate(fields)}
+    adj = [[] for i in range(len(fields))]
+    for e in props.causalModel.edges:
+        u, v = f_ind[e.src], f_ind[e.tar]
+        adj[u].append({'tar': v, 'src_type': e.src_type, 'tar_type': e.tar_type})
+        adj[v].append({'tar': u, 'src_type': e.tar_type, 'tar_type': e.src_type})
     
     inCurrent, inOther = satisfy(dataSource, groups.current), satisfy(dataSource, groups.other)
     hasDiffGroups = (inCurrent != inOther).any()
@@ -172,98 +181,124 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
     graph = constructPAG(fields, causalModel)
     print('treat:', treatment)
     results = []
+    
+    def testModel(results, model):
+        # model.view_model()
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        methods = {
+            'psm': 'backdoor.propensity_score_matching',
+            'pss': 'backdoor.propensity_score_stratification',
+            'psw': 'backdoor.propensity_score_weighting',
+            'lr': 'backdoor.linear_regression',
+            'glm': 'backdoor.generalized_linear_model',
+            'iv': 'iv.instrumental_variable',
+            'iv/rd': 'iv.regression_discontinuity'
+        }
+        tmp = lambda df: satisfy(df, groups.current)
+        satCurrent, satOther = satisfy(dataSource, groups.current), satisfy(dataSource, groups.other)
+        method = 'lr'
+        if methods[method].startswith('backdoor.propensity_score_'):
+            for treat in model._treatment:
+                filters = [f for f in groups.current.predicates if f.fid == treat]
+                tmp = IDoWhy.IRInsightExplainSubspace(predicates=filters)
+                model._data = model._data.assign(**{treat: satisfy(transData, tmp) })
+        estimate = model.estimate_effect(
+            estimand,
+            methods[method],
+            target_units=lambda df: inferDiff(satCurrent, satOther), # satisfy(self.dataSource, groups.current), satisfy(df, groups.other)),
+            # evaluate_effect_strength=True,
+            )
+        results.append(IDoWhy.LinkInfo(
+            src=f.fid,
+            tar=measures[0].fid,
+            src_type=2,
+            tar_type=1,
+            description=IDoWhy.LinkInfoDescription(key='', data={'estimate': str(estimate)}),
+            responsibility=significance_value(estimate.value, var=1.)
+        ))
+        # TODO: params
+        if estimate.value > 0:
+            print("f===========", f.fid)
+            print("target_units=\n", dataSource[tmp(transData)])
+            print('unobserved f = ', f, '\n', estimate)
+    
+    for e in adj[f_ind[measures[0].fid]]:
+        if e['src_type'] in [-1, 2]:
+            # TODO:
+            pass
+    
+    # General: use origin graph 
+    # Fallback: without graph, any variable can be used as common_cause
     for f in fields:
         if f.fid not in dimensions and f.fid not in [f.fid for f in measures]:
             # common_causes = [f.fid]
             # effect_modifiers = [f.fid]
             effect_modifiers = [f.fid]
+            # TODO: if edges in graph
             model = dowhy.CausalModel(
                 data=transData,
                 # treatment=[d for d in dimensions if flipped or not compare(current.get(d, None), other.get(d, None))],
+                common_causes=[f.fid],
                 treatment=treatment,
                 outcome=[measures[0].fid],
-                graph=graph,
-                effect_modifiers=effect_modifiers,
+                # instruments=[], # Z, causes of treatment, no confounding for the effect of Z on outcome
+                # effect_modifiers=effect_modifiers, # causes of outcome other than treatment
+                # graph=graph,
                 identify_vars=True
             )
-            # model.view_model()
-            estimand = model.identify_effect(proceed_when_unidentifiable=True)
-            methods = {
-                'psm': 'backdoor.propensity_score_matching',
-                'pss': 'backdoor.propensity_score_stratification',
-                'psw': 'backdoor.propensity_score_weighting',
-                'lr': 'backdoor.linear_regression',
-                'glm': 'backdoor.generalized_linear_model',
-                'iv': 'iv.instrumental_variable',
-                'iv/rd': 'iv.regression_discontinuity'
-            }
-            tmp = lambda df: satisfy(df, groups.current)
-            satCurrent, satOther = satisfy(dataSource, groups.current), satisfy(dataSource, groups.other)
-            method = 'lr'
-            if methods[method].startswith('backdoor.propensity_score_'):
-                for treat in model._treatment:
-                    filters = [f for f in groups.current.predicates if f.fid == treat]
-                    tmp = IDoWhy.IRInsightExplainSubspace(predicates=filters)
-                    model._data = model._data.assign(**{treat: satisfy(transData, tmp) })
-            estimate = model.estimate_effect(
-                estimand,
-                methods[method],
-                target_units=lambda df: inferDiff(satCurrent, satOther), # satisfy(self.dataSource, groups.current), satisfy(df, groups.other)),
-                # evaluate_effect_strength=True,
-                )
-            results.append(IDoWhy.LinkInfo(
-                src=f.fid,
-                tar=measures[0].fid,
-                src_type=2,
-                tar_type=1,
-                description=IDoWhy.LinkInfoDescription(key='', data={'estimate': str(estimate)}),
-                responsibility=estimate.value
-            ))
-            # TODO: params
-            if estimate.value > 0:
-                print("f===========", f.fid)
-                print("target_units=\n", dataSource[tmp(transData)])
-                print('unobserved f = ', f, '\n', estimate)
+            testModel(results, model)
     
-    return IDoWhy.IRInsightExplainResult(
-        causalEffects=results
-    )
-    
-def ExplainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsightExplainResult]:
-    return explainData(props)
+    return results
 
+def significance_value(x: float, var: float=1.):
+    import scipy.stats as st
+    """
+        x (float): X - EX
+        var (float): σ(X)
+    """
+    print("x = ", x)
+    print("norm cdf =", st.norm.cdf(abs(x)))
+    return 2 * st.norm.cdf(abs(x), scale=var) - 1
+
+def ExplainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsightExplainResult]:
     session = ExplainDataSession(props.data, props.fields)
     session.g_gml = constructPAG(props.fields, props.causalModel)
     session.updateModel(props.view.dimensions, props.view.measures, props.groups)
     session.identitifyEstimand()
     session.estimateEffect(props.groups)
     results = []
-    descrip_data = {
-        'data': inferInfo(session),
-        'target estimand': session.estimate.target_estimand.__str__(),
-        'realized estimand': session.estimate.realized_estimand_expr,
-        'target units': session.estimate.estimator.target_units_tostr() if hasattr(session.estimate, "estimator") else None,
-        'mean value of estimation': session.estimate.value,
-        'effect estimates': session.estimate.cate_estimates if hasattr(session.estimate, "cate_estimates") else None,
-    }
-    if hasattr(session.estimate, "estimator"):
-        if session.estimate.estimator._significance_test:
-            descrip_data['p-value'] = session.estimate.test_stat_significance()
-            # session.estimate.estimator.signif_results_tostr(session.estimate.test_stat_significance())
-        if session.estimate.estimator._confidence_intervals:
-            descrip_data['confidence interval'], [session.estimate.estimator.confidence_level,
-                                                            session.estimate.get_confidence_intervals()]
-    if session.estimate.conditional_estimates is not None:
-        descrip_data['conditional estimates'] = str(session.estimate.conditional_estimates)
-    if session.estimate.effect_strength is not None:
-        descrip_data['change in outcome attributable to treatment'] = session.estimate.effect_strength["fraction-effect"]
-    print("descrip_data=", descrip_data)
-    results.append(IDoWhy.LinkInfo(
-        src=props.view.dimensions[0], tar=props.view.measures[0].fid, src_type=-1, tar_type=1,
-        description=IDoWhy.LinkInfoDescription(key='', data=descrip_data)
-    ))
+    try:
+        descrip_data = {
+            'data': inferInfo(session),
+            'target estimand': session.estimate.target_estimand.__str__(),
+            'realized estimand': session.estimate.realized_estimand_expr,
+            'target units': session.estimate.estimator.target_units_tostr() if hasattr(session.estimate, "estimator") else None,
+            'mean value of estimation': session.estimate.value,
+            'effect estimates': session.estimate.cate_estimates if hasattr(session.estimate, "cate_estimates") else None,
+        }
+        if hasattr(session.estimate, "estimator"):
+            if session.estimate.estimator._significance_test:
+                descrip_data['p-value'] = session.estimate.test_stat_significance()
+                # session.estimate.estimator.signif_results_tostr(session.estimate.test_stat_significance())
+            if session.estimate.estimator._confidence_intervals:
+                descrip_data['confidence interval'], [session.estimate.estimator.confidence_level,
+                                                                session.estimate.get_confidence_intervals()]
+        if session.estimate.conditional_estimates is not None:
+            descrip_data['conditional estimates'] = str(session.estimate.conditional_estimates)
+        if session.estimate.effect_strength is not None:
+            descrip_data['change in outcome attributable to treatment'] = session.estimate.effect_strength["fraction-effect"]
+        print("descrip_data=", descrip_data)
+        descrip_data['desc_by'] = 'ExplainData'
+        results.append(IDoWhy.LinkInfo(
+            src=props.view.dimensions[0], tar=props.view.measures[0].fid, src_type=-1, tar_type=1,
+            description=IDoWhy.LinkInfoDescription(key='', data=descrip_data),
+            responsibility=significance_value(session.estimate.value, var=1.)
+        ))
+    except Exception as e:
+        print(str(e), file=sys.stderr)
     
-    results = []
+    results.extend(explainData(props))
+    # print("results =", results)
     
     return IDoWhy.IRInsightExplainResult(
         causalEffects=results

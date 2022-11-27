@@ -66,7 +66,7 @@ class LinkInfoDescription(BaseModel):
     
 class LinkInfo(PagLink):
     description: Optional[LinkInfoDescription]
-    responsibility: Optional[float] = Field(ge=-1, le=1)
+    responsibility: Optional[float] = Field(ge=0, le=1)
     
 class IRInsightExplainResult(BaseModel, extra=Extra.allow):
     causalEffects: List[LinkInfo]

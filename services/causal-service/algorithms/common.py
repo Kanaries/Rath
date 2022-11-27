@@ -195,7 +195,7 @@ def encodeCat(origin: pd.Series, fact: pd.Series, encodeType: str) -> pd.DataFra
     return pd.DataFrame(fact)
 
 def encodeQuant(x: pd.Series, encodeType: str) -> pd.DataFrame:
-    n, eps = 16, 1e-5
+    n, eps = 10, 1e-5
     if encodeType == 'bin': # encodeType.bin:
         width = x.max() - x.min()
         if width == 0: return pd.DataFrame(x)

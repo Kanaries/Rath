@@ -300,7 +300,7 @@ class XLearnerParams(OptionalParams, title="XLearn"):
     # edges: list. Contains graph’s edges properties. If edge.properties have the Property ‘dd’, then there is no latent confounder. Otherwise, there might be latent confounders. If edge.properties have the Property ‘nl’, then it is definitely direct. Otherwise, it is possibly direct.
     # """
     independence_test_method: Optional[str] = Field(
-        default='fisherz', title="独立性检验", #"Independence Test",
+        default='gsq', title="独立性检验", #"Independence Test",
         description="Independence test method function.  Default: ‘fisherz’",
         options=getOpts(IDepTestItems),
     )
