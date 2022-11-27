@@ -48,6 +48,11 @@ const Row = styled.div<{ selected: 'attribution' | 'target' | false }>`
     }
 `;
 
+const ModeOptions = [
+    { key: 'classification', text: '分类' },
+    { key: 'regression', text: '回归' },
+] as const;
+
 // FIXME: 防止切到别的流程时预测结果被清空，先在全局存一下，决定好要不要保留 && 状态应该存哪里以后及时迁走
 const predictCache: {
     id: string; algo: PredictAlgorithm; startTime: number; completeTime: number; data: IPredictResult;
@@ -405,13 +410,10 @@ const PredictPanel = forwardRef<{
                 disabled={!canExecute || running}
                 onClick={running ? undefined : handleClickExec}
                 onRenderIcon={() => running ? <Spinner style={{ transform: 'scale(0.75)' }} /> : <Icon iconName="Play" />}
-                style={{ width: 'max-content', flexGrow: 0, flexShrink: 0 }}
+                style={{ width: 'max-content', flexGrow: 0, flexShrink: 0, marginLeft: '0.6em' }}
                 split
                 menuProps={{
-                    items: [
-                        { key: 'classification', text: '分类' },
-                        { key: 'regression', text: '回归' },
-                    ],
+                    items: ModeOptions.map(opt => opt),
                     onItemClick: (_e, item) => {
                         if (item) {
                             setMode(item.key as typeof mode);
@@ -419,13 +421,14 @@ const PredictPanel = forwardRef<{
                     },
                 }}
             >
-                {`${mode}预测`}
+                {`${ModeOptions.find(m => m.key === mode)?.text}预测`}
             </DefaultButton>
             <Pivot
                 selectedKey={tab}
                 onLinkClick={(item) => {
                     item && setTab(item.props.itemKey as typeof tab);
                 }}
+                style={{ marginTop: '0.5em' }}
             >
                 <PivotItem itemKey="config" headerText="模型设置" />
                 <PivotItem itemKey="result" headerText="预测结果" />

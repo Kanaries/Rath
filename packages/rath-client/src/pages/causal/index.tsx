@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
@@ -8,6 +8,7 @@ import { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import { useDataViews } from './hooks/dataViews';
 import type { GraphNodeAttributes } from './explorer/graph-utils';
 import { CausalStepPager } from './step';
+import { getGeneratedFDFromExtInfo } from './functionalDependencies/utils';
 
 
 const Main = styled.div`
@@ -21,9 +22,10 @@ const Main = styled.div`
     }
 `;
 
-const CausalPage: React.FC = () => {
+const CausalPage: FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
+    const { selectedFields } = causalStore;
     const interactFieldGroups = useInteractFieldGroups(fieldMetas);
 
     useEffect(() => {
@@ -85,6 +87,19 @@ const CausalPage: React.FC = () => {
             },
         };
     }, []);
+
+    const submitRef = useRef(setFunctionalDependencies);
+    submitRef.current = setFunctionalDependencies;
+    const fdRef = useRef(functionalDependencies);
+    fdRef.current = functionalDependencies;
+    useEffect(() => {
+        setTimeout(() => {
+            if (fdRef.current.length === 0) {
+                const fds = getGeneratedFDFromExtInfo(selectedFields);
+                submitRef.current(fds);
+            }
+        }, 400);
+    }, [selectedFields]);
 
     return (
         <div className="content-container">

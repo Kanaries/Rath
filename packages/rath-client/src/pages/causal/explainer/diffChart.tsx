@@ -199,7 +199,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField
             }, {
                 editorUrl: EDITOR_URL,
                 timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
-                actions: true,
+                actions: false,
             }).then((res) => {
                 const view = res.view;
                 viewRef.current = view;
