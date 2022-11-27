@@ -164,7 +164,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
             }, {
                 editorUrl: EDITOR_URL,
                 timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
-                actions: true,
+                actions: false,
             }).then((res) => {
                 const view = res.view;
                 viewRef.current = view;
