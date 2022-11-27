@@ -159,19 +159,6 @@ const FDBatch: React.FC<FDPanelProps> = ({
         setDisplayPreview(false);
     }, []);
 
-    const submitRef = useRef(setFunctionalDependencies);
-    submitRef.current = setFunctionalDependencies;
-    const fdRef = useRef(functionalDependencies);
-    fdRef.current = functionalDependencies;
-    useEffect(() => {
-        setTimeout(() => {
-            if (fdRef.current.length === 0) {
-                const fds = getGeneratedFDFromExtInfo(selectedFields);
-                submitRef.current(fds);
-            }
-        }, 400);
-    }, [selectedFields]);
-
     return (
         <>
             <h3>快捷操作</h3>
