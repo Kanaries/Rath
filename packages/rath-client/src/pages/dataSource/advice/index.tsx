@@ -33,10 +33,7 @@ const Advice: React.FC = props => {
         {
             !hasOriginalDimensionInData && <MessageBar className="row"
                 isMultiline={false}
-                actions={<div>
-                    <MessageBarButton onClick={onForceAnalysis}>{intl.get('dataSource.advice.forceAnalysis')}</MessageBarButton>
-                </div>}
-                messageBarType={MessageBarType.blocked}>
+                messageBarType={MessageBarType.warning}>
                     {intl.get('dataSource.advice.lackDimension')}
                 </MessageBar>
         }

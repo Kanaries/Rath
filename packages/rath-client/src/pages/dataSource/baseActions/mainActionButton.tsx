@@ -8,7 +8,7 @@ import { useGlobalStore } from '../../../store';
 export const useActionModes = function () {
     const { dataSourceStore, commonStore, ltsPipeLineStore, megaAutoStore } = useGlobalStore();
     const { exploreMode, taskMode } = commonStore;
-    const { staisfyAnalysisCondition, fieldMetas } = dataSourceStore;
+    const { satisfyAnalysisCondition, fieldMetas } = dataSourceStore;
     const startMegaAutoAnalysis = useCallback(() => {
         ltsPipeLineStore.startTask(taskMode).then(() => {
             megaAutoStore.emitViewChangeTransaction(0);
@@ -51,6 +51,13 @@ export const useActionModes = function () {
                         commonStore.setAppKey(PIVOT_KEYS.editor);
                     },
                 },
+                {
+                    key: 'function.analysis.causal',
+                    text: intl.get('function.analysis.causal'),
+                    onClick: () => {
+                        commonStore.setAppKey(PIVOT_KEYS.causal);
+                    }
+                }
             ],
         };
     }, [startMegaAutoAnalysis, onCheckResults, startSemiAutoAnalysis, commonStore]);
@@ -70,17 +77,17 @@ export const useActionModes = function () {
     return useObserver(() => ({
         startMode,
         analysisOptions,
-        staisfyAnalysisCondition,
+        satisfyAnalysisCondition,
     }));
 };
 
 const MainActionButton: React.FC = () => {
-    const { staisfyAnalysisCondition, startMode, analysisOptions } = useActionModes();
+    const { satisfyAnalysisCondition, startMode, analysisOptions } = useActionModes();
 
     return (
         <PrimaryButton
             split
-            disabled={!staisfyAnalysisCondition}
+            disabled={!satisfyAnalysisCondition}
             iconProps={{ iconName: 'Financial' }}
             text={intl.get(`${startMode.key}`)}
             menuProps={analysisOptions}
