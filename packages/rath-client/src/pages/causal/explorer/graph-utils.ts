@@ -107,7 +107,7 @@ G6.registerEdge(
 );
 
 export const useRenderData = (
-    data: { nodes: { id: number }[]; links: { source: number; target: number; type: CausalLink['type'] }[] },
+    data: { nodes: { id: number }[]; links: { source: number; target: number; type: CausalLink['type']; score?: number }[] },
     mode: "explore" | "edit",
     preconditions: readonly ModifiableBgKnowledge[],
     fields: readonly Readonly<IFieldMeta>[],
@@ -119,6 +119,10 @@ export const useRenderData = (
                 id: `${node.id}`,
                 description: fields[i].name ?? fields[i].fid,
                 ...renderNode?.(fields[i]),
+                style: {
+                    stroke: 'rgb(57,59,121)',
+                    ...renderNode?.(fields[i])?.style,
+                },
             };
         }),
         edges: mode === 'explore' ? data.links.map((link, i) => {
@@ -127,13 +131,21 @@ export const useRenderData = (
                 source: `${link.source}`,
                 target: `${link.target}`,
                 style: {
+                    stroke: '#b5cf6b',
                     startArrow: {
-                        fill: '#F6BD16',
+                        fill: '#fff',
                         path: arrows[link.type].start,
                     },
                     endArrow: {
-                        fill: '#F6BD16',
+                        fill: '#fff',
                         path: arrows[link.type].end,
+                    },
+                    lineWidth: typeof link.score === 'number' ? 1 + link.score * 3 : undefined,
+                },
+                label: typeof link.score === 'number' ? `${link.score.toPrecision(2)}` : undefined,
+                labelCfg: {
+                    style: {
+                        opacity: 0,
                     },
                 },
             };
@@ -279,7 +291,6 @@ export const useGraphOptions = (
             },
             edgeStateStyles: {
                 highlighted: {
-                    lineWidth: 1.5,
                     opacity: 1,
                 },
                 faded: {
