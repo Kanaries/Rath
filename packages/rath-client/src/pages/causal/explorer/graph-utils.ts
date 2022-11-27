@@ -119,9 +119,6 @@ export const useRenderData = (
                 id: `${node.id}`,
                 description: fields[i].name ?? fields[i].fid,
                 ...renderNode?.(fields[i]),
-                style: {
-                    ...renderNode?.(fields[i])?.style,
-                },
             };
         }),
         edges: mode === 'explore' ? data.links.map((link, i) => {
@@ -131,12 +128,14 @@ export const useRenderData = (
                 target: `${link.target}`,
                 style: {
                     startArrow: {
+                        fill: '#F6BD16',
                         path: arrows[link.type].start,
                     },
                     endArrow: {
+                        fill: '#F6BD16',
                         path: arrows[link.type].end,
                     },
-                    lineWidth: typeof link.score === 'number' ? 1 + link.score * 3 : undefined,
+                    lineWidth: typeof link.score === 'number' ? 1 + link.score * 2 : undefined,
                 },
                 label: typeof link.score === 'number' ? `${link.score.toPrecision(2)}` : undefined,
                 labelCfg: {
