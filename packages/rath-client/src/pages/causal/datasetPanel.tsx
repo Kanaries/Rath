@@ -12,6 +12,7 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import React, { useCallback, useMemo, useRef } from 'react';
 import produce from 'immer';
+import intl from 'react-intl-universal'
 import { useGlobalStore } from '../../store';
 import FilterCreationPill from '../../components/filterCreationPill';
 import LaTiaoConsole from '../../components/latiaoConsole/index';
@@ -155,7 +156,7 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                         </span>
                     );
                 },
-                minWidth: 240,
+                minWidth: 100,
                 maxWidth: 240,
             },
             {
@@ -173,13 +174,56 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                 maxWidth: 100,
             },
             {
-                key: 'entropy',
-                name: '熵',
+                key: 'semanticType',
+                name: '类型',
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {field.features.entropy}
+                            {/* {field.features.entropy} */}
+                            {intl.get(`common.semanticType.${field.semanticType}`)}
+                        </span>
+                    );
+                },
+                minWidth: 100,
+                maxWidth: 100,
+            },
+            {
+                key: 'mean',
+                name: '均值',
+                onRender: (item) => {
+                    const field = item as IFieldMeta;
+                    return (
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {field.features.mean}
+                        </span>
+                    );
+                },
+                minWidth: 100,
+                maxWidth: 100,
+            },
+            {
+                key: 'std',
+                name: '标准差',
+                onRender: (item) => {
+                    const field = item as IFieldMeta;
+                    return (
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {field.features.stdev}
+                        </span>
+                    );
+                },
+                minWidth: 100,
+                maxWidth: 100,
+            },
+            {
+                key: 'median',
+                name: '中位数',
+                onRender: (item) => {
+                    const field = item as IFieldMeta;
+                    return (
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {field.features.qt_25}
                         </span>
                     );
                 },
