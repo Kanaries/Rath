@@ -43,6 +43,7 @@ export interface ExplorerProps {
     ) => void;
     onLinkTogether: (srcIdx: number, tarIdx: number, type: ModifiableBgKnowledge['type']) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
+    onRemoveLink: (srcFid: string, tarFid: string) => void;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
     synchronizePredictionsUsingCausalResult: () => void;
     handleLasso?: (fields: IFieldMeta[]) => void;
@@ -104,6 +105,7 @@ const Explorer: FC<ExplorerProps> = ({
     onNodeSelected,
     onLinkTogether,
     onRevertLink,
+    onRemoveLink,
     preconditions,
     renderNode,
     synchronizePredictionsUsingCausalResult,
@@ -321,6 +323,7 @@ const Explorer: FC<ExplorerProps> = ({
                     toggleFlowAnalyzer={toggleFlowAnalyzer}
                     onLinkTogether={handleLink}
                     onRevertLink={onRevertLink}
+                    onRemoveLink={onRemoveLink}
                     autoLayout={autoLayout}
                     renderNode={renderNode}
                     allowZoom={allowZoom}

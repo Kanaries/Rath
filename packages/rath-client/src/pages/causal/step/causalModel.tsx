@@ -88,6 +88,28 @@ export const CausalExplorer = observer<
         });
     }, [selectedFields, setModifiablePrecondition]);
 
+    const handleRevertLink = useCallback((srcFid: string, tarFid: string) => setModifiablePrecondition((list) => {
+        return list.map((link) => {
+            if (link.src === srcFid && link.tar === tarFid) {
+                return produce(link, draft => {
+                    draft.type = ({
+                        "must-link": 'must-not-link',
+                        "must-not-link": 'must-link',
+                        "directed-must-link": 'directed-must-not-link',
+                        "directed-must-not-link": 'directed-must-link',
+                    } as const)[draft.type];
+                });
+            }
+            return link;
+        });
+    }), [setModifiablePrecondition]);
+
+    const handleRemoveLink = useCallback((srcFid: string, tarFid: string) => setModifiablePrecondition((list) => {
+        return list.filter((link) => {
+            return !(link.src === srcFid && link.tar === tarFid);
+        });
+    }), [setModifiablePrecondition]);
+
     const synchronizePredictionsUsingCausalResult = useCallback(() => {
         setModifiablePrecondition(resolvePreconditionsFromCausal(causalStrength, selectedFields));
     }, [setModifiablePrecondition, causalStrength, selectedFields]);
@@ -101,23 +123,8 @@ export const CausalExplorer = observer<
             onNodeSelected={handleSubTreeSelected}
             onLinkTogether={handleLinkTogether}
             renderNode={renderNode}
-            onRevertLink={(srcIdx, tarIdx) =>
-                setModifiablePrecondition((list) => {
-                    return list.map((link) => {
-                        if (link.src === srcIdx && link.tar === tarIdx) {
-                            return produce(link, draft => {
-                                draft.type = ({
-                                    "must-link": 'must-not-link',
-                                    "must-not-link": 'must-link',
-                                    "directed-must-link": 'directed-must-not-link',
-                                    "directed-must-not-link": 'directed-must-link',
-                                } as const)[draft.type];
-                            });
-                        }
-                        return link;
-                    });
-                })
-            }
+            onRevertLink={handleRevertLink}
+            onRemoveLink={handleRemoveLink}
             synchronizePredictionsUsingCausalResult={synchronizePredictionsUsingCausalResult}
             handleLasso={handleLasso}
         />

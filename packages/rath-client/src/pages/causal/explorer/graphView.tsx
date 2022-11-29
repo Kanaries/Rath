@@ -37,6 +37,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     toggleFlowAnalyzer: () => void;
     onLinkTogether: (srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
+    onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
@@ -98,6 +99,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     mode,
     onLinkTogether,
     onRevertLink,
+    onRemoveLink,
     preconditions,
     forceRelayoutRef,
     autoLayout,
@@ -155,12 +157,24 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     cfgRef.current = cfg;
 
     const [forceRelayoutFlag, setForceRelayoutFlag] = useState<0 | 1>(0);
+    
+    const [clickEdgeMode, setClickEdgeMode] = useState<'delete' | 'forbid'>('forbid');
 
     const handleEdgeClick = useCallback((edge: { srcFid: string; tarFid: string; } | null) => {
         if (edge) {
-            onRevertLink(edge.srcFid, edge.tarFid);
+            switch (clickEdgeMode) {
+                case 'delete': {
+                    return onRemoveLink(edge.srcFid, edge.tarFid);
+                }
+                case 'forbid': {
+                    return onRevertLink(edge.srcFid, edge.tarFid);
+                }
+                default: {
+                    break;
+                }
+            }
         }
-    }, [onRevertLink]);
+    }, [onRevertLink, onRemoveLink, clickEdgeMode]);
 
     useReactiveGraph(
         containerRef,
@@ -247,6 +261,41 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                             }
                             const linkType = option.key as typeof createEdgeMode;
                             setCreateEdgeMode(linkType);
+                        }}
+                        styles={{
+                            title: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                                padding: '0 2.8em 0 0.8em',
+                                border: 'none',
+                                borderBottom: '1px solid #8888',
+                            },
+                            caretDownWrapper: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                            },
+                            caretDown: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                            },
+                        }}
+                    />
+                    <Dropdown
+                        label="单击连接行为"
+                        selectedKey={clickEdgeMode}
+                        options={[
+                            { key: 'forbid', text: '禁用此连接' },
+                            { key: 'delete', text: '删除约束' },
+                        ]}
+                        onChange={(_e, option) => {
+                            if (!option) {
+                                return;
+                            }
+                            const behaviorType = option.key as typeof clickEdgeMode;
+                            setClickEdgeMode(behaviorType);
                         }}
                         styles={{
                             title: {

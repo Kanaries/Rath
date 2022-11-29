@@ -253,11 +253,15 @@ export class CausalStore {
                 const causalMatrix = resolveCausal(resultMatrix);
                 const unmatched = findUnmatchedCausalResults(inputFields, preconditionPag, causalMatrix);
                 if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
+                    const getFieldName = (fid: string) => {
+                        const field = inputFields.find(f => f.fid === fid);
+                        return field?.name ?? fid;
+                    };
                     for (const info of unmatched) {
                         notify({
                             title: 'Causal Result Not Matching',
                             type: 'error',
-                            content: `Conflict in edge "${info.srcFid} -> ${info.tarFid}":\n`
+                            content: `Conflict in edge "${getFieldName(info.srcFid)} -> ${getFieldName(info.tarFid)}":\n`
                                 + `  Expected: ${
                                     typeof info.expected === 'object'
                                         ? ('not' in info.expected
