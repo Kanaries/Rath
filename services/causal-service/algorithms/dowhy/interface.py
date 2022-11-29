@@ -38,6 +38,7 @@ class IRInsightExplainSubspace(BaseModel):
     reverted: Optional[bool] = Field(default=False)
 
 class ICausalModel(BaseModel):
+    funcDeps: List[common.IFunctionalDep]
     edges: List[PagLink]
     
 class IRInsightSubspaceGroup(BaseModel):
@@ -65,7 +66,7 @@ class LinkInfoDescription(BaseModel):
     
 class LinkInfo(PagLink):
     description: Optional[LinkInfoDescription]
-    responsibility: Optional[float] = Field(ge=-1, le=1)
+    responsibility: Optional[float] = Field(ge=0, le=1)
     
 class IRInsightExplainResult(BaseModel, extra=Extra.allow):
     causalEffects: List[LinkInfo]

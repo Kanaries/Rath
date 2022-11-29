@@ -17,16 +17,16 @@ from .dowhy.Explainer import Explainer
 from .FuncDepTest import FuncDepTest
 
 DICT: Dict[str, typing.Type[Any]] = {
-    'FCI': FCI,
+    'XLearner': XLearner,
     'CD_NOD': CD_NOD,
-    'GES': GES,
     'PC': PC,
+    'FCI': FCI,
+    'GES': GES,
     'ExactSearch': ExactSearch,
     'GIN': GIN,
     'GRaSP': GRaSP,
     'CAM_UV': CAM_UV,
     'RCD': RCD,
-    'XLearner': XLearner,
     'FuncDepTest': FuncDepTest,
     'Explainer': Explainer
 }

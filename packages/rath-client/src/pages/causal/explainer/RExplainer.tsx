@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
-import { DefaultButton, Dropdown, Toggle } from '@fluentui/react';
+import { DefaultButton, Dropdown, Stack, Toggle } from '@fluentui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyFilters } from '@kanaries/loa';
 import { useGlobalStore } from '../../../store';
@@ -9,7 +9,7 @@ import type { useDataViews } from '../hooks/dataViews';
 import { IFieldMeta, IFilter, IRow } from '../../../interfaces';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../workers/insight/r-insight.worker';
 import { RInsightService } from '../../../services/r-insight';
-import type { PagLink } from '../config';
+import type { IFunctionalDep, PagLink } from '../config';
 import ChartItem from './explainChart';
 import RInsightView from './RInsightView';
 
@@ -19,18 +19,19 @@ const Container = styled.div``;
 export interface RExplainerProps {
     context: ReturnType<typeof useDataViews>;
     interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
+    functionalDependencies: IFunctionalDep[];
     edges: PagLink[];
 }
 
 export const SelectedFlag = '__RExplainer_selected__';
 
-const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, edges }) => {
+const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, functionalDependencies, edges }) => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { fieldGroup } = interactFieldGroups;
     const { selectedFields } = causalStore;
 
-    const { sample } = context;
+    const { sample, vizSampleData } = context;
 
     const mainField = fieldGroup.at(-1) ?? null;
     const [indexKey, setIndexKey] = useState<IFieldMeta | null>(null);
@@ -68,6 +69,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                 data: sample,
                 fields: selectedFields,
                 causalModel: {
+                    funcDeps: functionalDependencies,
                     edges,
                 },
                 groups: {
@@ -78,7 +80,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                     dimensions: [...fieldsInSight].filter(fid => fid !== mainField.fid),
                     measures: [mainField].map(ms => ({
                         fid: ms.fid,
-                        op: aggr ?? 'sum',
+                        op: aggr,
                     })),
                 },
             }, serviceMode).then(resolve);
@@ -88,14 +90,14 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
             if (pendingRef.current === p) {
                 setIrResult({
                     causalEffects: res.causalEffects.filter(
-                        item => Number.isFinite(item.responsibility) && item.responsibility !== 0
+                        item => Number.isFinite(item.responsibility)// && item.responsibility !== 0
                     ).sort((a, b) => b.responsibility - a.responsibility)
                 });
             }
         }).finally(() => {
             pendingRef.current = undefined;
         });
-    }, [aggr, mainField, sample, selectedFields, subspaces, edges, serviceMode]);
+    }, [aggr, mainField, sample, selectedFields, subspaces, edges, serviceMode, functionalDependencies]);
 
     const [selectedSet, setSelectedSet] = useState<IRow[]>([]);
 
@@ -115,6 +117,10 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
             );
         return [indicesA, indicesB];
     }, [subspaces, sample, diffMode]);
+
+    useEffect(() => {
+        setIrResult({ causalEffects: [] });
+    }, [indexKey, mainField, sample, subspaces, edges]);
 
     const applySelection = useCallback(() => {
         if (!subspaces) {
@@ -183,59 +189,67 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
         <Container>
             {mainField && (
                 <>
-                    <header>Main Field</header>
-                    <Dropdown
-                        label="Service"
-                        selectedKey={serviceMode}
-                        options={[
-                            { key: 'worker', text: 'worker' },
-                            { key: 'server', text: 'server' },
-                        ]}
-                        onChange={(_, option) => {
-                            if (option?.key) {
-                                setServiceMode(option.key as typeof serviceMode);
-                            }
-                        }}
-                    />
-                    <Dropdown
-                        label="Index Key"
-                        selectedKey={indexKey?.fid ?? ''}
-                        options={[{ key: '', text: 'null' }].concat(fieldMetas.map(f => ({
-                            key: f.fid,
-                            text: f.name ?? f.fid,
-                        })))}
-                        onChange={(_, option) => {
-                            const f = option?.key ? fieldMetas.find(which => which.fid === option.key) : null;
-                            setIndexKey(f ?? null);
-                        }}
-                    />
-                    <Dropdown
-                        label="Aggregation Type"
-                        selectedKey={aggr}
-                        options={[
-                            { key: '', text: 'None' },
-                            { key: 'sum', text: 'SUM' },
-                            { key: 'mean', text: 'MEAN' },
-                            { key: 'count', text: 'COUNT' },
-                        ]}
-                        onChange={(_, option) => {
-                            setAggr((option?.key as typeof aggr) ?? null);
-                        }}
-                    />
-                    <Dropdown
-                        label="Diff Mode"
-                        selectedKey={diffMode}
-                        options={[
-                            { key: 'full', text: 'Full' },
-                            { key: 'other', text: 'Other' },
-                            { key: 'two-group', text: 'Two Groups' },
-                        ]}
-                        onChange={(_, option) => {
-                            if (option?.key) {
-                                setDiffMode(option.key as typeof diffMode);
-                            }
-                        }}
-                    />
+                    <header>{'探索目标' || 'Main Field'}</header>
+                    <Stack tokens={{ childrenGap: 20 }} horizontal style={{ alignItems: 'flex-end' }}>
+                        <Dropdown
+                            label="运行环境"//"Service"
+                            selectedKey={serviceMode}
+                            options={[
+                                { key: 'worker', text: 'worker' },
+                                { key: 'server', text: 'server' },
+                            ]}
+                            onChange={(_, option) => {
+                                if (option?.key) {
+                                    setServiceMode(option.key as typeof serviceMode);
+                                }
+                            }}
+                            style={{ width: '7em' }}
+                        />
+                        <Dropdown
+                            label="对照选择"//"Diff Mode"
+                            selectedKey={diffMode}
+                            options={[
+                                { key: 'full', text: '数据全集' || 'Full' },
+                                { key: 'other', text: '数据补集' || 'Other' },
+                                { key: 'two-group', text: '自选两个集合' || 'Two Groups' },
+                            ]}
+                            onChange={(_, option) => {
+                                if (option?.key) {
+                                    setDiffMode(option.key as typeof diffMode);
+                                }
+                            }}
+                            style={{ width: '12em' }}
+                        />
+                    </Stack>
+                    <Stack tokens={{ childrenGap: 20 }} horizontal style={{ alignItems: 'flex-end' }}>
+                        <Dropdown
+                            label="基准因素"//"Index Key"
+                            selectedKey={indexKey?.fid ?? ''}
+                            options={[{ key: '', text: '无' || 'null' }].concat(fieldMetas.map(f => ({
+                                key: f.fid,
+                                text: f.name ?? f.fid,
+                            })))}
+                            onChange={(_, option) => {
+                                const f = option?.key ? fieldMetas.find(which => which.fid === option.key) : null;
+                                setIndexKey(f ?? null);
+                            }}
+                            style={{ width: '12em' }}
+                        />
+                        <Dropdown
+                            label="聚合类型"//"Aggregation Type"
+                            selectedKey={aggr}
+                            options={[
+                                { key: '', text: '无（明细）' || 'None' },
+                                { key: 'sum', text: '总和' || 'SUM' },
+                                { key: 'mean', text: '均值' || 'MEAN' },
+                                { key: 'count', text: '计数' || 'COUNT' },
+                            ]}
+                            onChange={(_, option) => {
+                                setAggr((option?.key as typeof aggr) ?? null);
+                            }}
+                            style={{ width: '8em' }}
+                        />
+                    </Stack>
                     {diffMode === 'two-group' && (
                         <Toggle
                             label={`Select ${editingGroupIdx === 2 ? 'Background' : 'Foreground'} Group`}
@@ -243,19 +257,21 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                             onChange={(_, checked) => setEditingGroupIdx(checked ? 2 : 1)}
                         />
                     )}
+                    <br />
                     <ChartItem
-                        data={sample}
+                        data={vizSampleData}
                         indexKey={indexKey}
                         mainField={mainField}
-                        mainFieldAggregation={null}
+                        mainFieldAggregation={aggr}
                         interactive
                         handleFilter={handleFilter}
                         normalize={false}
                     />
+                    <br />
                     {subspaces && (
                         <>
                             <ChartItem
-                                title="Foreground Group"
+                                title="对照组"//"Foreground Group"
                                 data={sample}
                                 indexKey={indexKey}
                                 mainField={mainField}
@@ -265,7 +281,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                                 normalize={false}
                             />
                             <ChartItem
-                                title="Background Group"
+                                title="实验组"//"Background Group"
                                 data={sample}
                                 indexKey={indexKey}
                                 mainField={mainField}
@@ -281,16 +297,25 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, e
                         disabled={!subspaces}
                         onClick={applySelection}
                     >
-                        Insight
+                        {'发现' || 'Insight'}
                     </DefaultButton>
-                    <RInsightView
-                        data={selectedSet}
-                        result={irResult}
-                        mainField={mainField}
-                        mainFieldAggregation={aggr}
-                        mode={diffMode}
-                        indices={[indicesA, indicesB]}
-                    />
+                    {subspaces && (
+                        <RInsightView
+                            data={selectedSet}
+                            result={irResult}
+                            mainField={mainField}
+                            mainFieldAggregation={aggr}
+                            entryDimension={indexKey}
+                            mode={diffMode}
+                            subspaces={subspaces}
+                            indices={[indicesA, indicesB]}
+                            functionalDependencies={functionalDependencies}
+                            aggr={aggr}
+                            serviceMode={serviceMode}
+                            context={context}
+                            edges={edges}
+                        />
+                    )}
                 </>
             )}
         </Container>

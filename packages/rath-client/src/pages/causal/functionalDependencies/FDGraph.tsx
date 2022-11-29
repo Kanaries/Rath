@@ -2,14 +2,14 @@ import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Graph } from '@antv/g6';
 import produce from 'immer';
-import { DefaultButton, Dropdown } from '@fluentui/react';
+import { DefaultButton } from '@fluentui/react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
 import type { CausalLink } from '../explorer';
 import { useRenderData, useGraphOptions } from '../explorer/graph-utils';
 import { useReactiveGraph } from '../explorer/graph-helper';
 import type { ModifiableBgKnowledge } from '../config';
-import type { PreconditionPanelProps } from './preconditionPanel';
+import type { FDPanelProps } from './FDPanel';
 
 
 const Container = styled.div`
@@ -35,8 +35,8 @@ const Container = styled.div`
     }
 `;
 
-const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
-    modifiablePrecondition, setModifiablePrecondition, renderNode,
+const FDGraph: React.FC<FDPanelProps> = ({
+    functionalDependencies, setFunctionalDependencies, renderNode,
 }) => {
     const { causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
@@ -53,26 +53,62 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
         links: [],
     }), [nodes]);
 
-    const [createEdgeMode, setCreateEdgeMode] = useState<ModifiableBgKnowledge['type']>('directed-must-link');
     const onLinkTogether = useCallback((srcFid: string, tarFid: string) => {
-        setModifiablePrecondition(list => produce(list, draft => {
-            draft.push({
-                src: srcFid,
-                tar: tarFid,
-                type: createEdgeMode,
-            });
+        setFunctionalDependencies(list => produce(list, draft => {
+            const linked = draft.find(fd => fd.fid === tarFid);
+            if (linked && !linked.params.some(prm => prm.fid === srcFid)) {
+                linked.params.push({ fid: srcFid });
+                if (!linked.func) {
+                    linked.func = '<user-defined>';
+                } else if (linked.func !== '<user-defined>') {
+                    linked.func = '<mixed>';
+                }
+            } else {
+                draft.push({
+                    fid: tarFid,
+                    params: [{
+                        fid: srcFid,
+                    }],
+                    func: '<user-defined>',
+                });
+            }
         }));
-    }, [setModifiablePrecondition, createEdgeMode]);
+    }, [setFunctionalDependencies]);
+
     const onRemoveLink = useCallback((edge: { srcFid: string; tarFid: string; } | null) => {
         if (edge) {
-            setModifiablePrecondition(
-                list => list.filter(link => [link.src, link.tar].some(fid => ![edge.srcFid, edge.tarFid].includes(fid)))
-            );
+            setFunctionalDependencies(list => produce(list, draft => {
+                const linkedIdx = draft.findIndex(fd => fd.fid === edge.tarFid && fd.params.some(prm => prm.fid === edge.srcFid));
+                if (linkedIdx !== -1) {
+                    const linked = draft[linkedIdx];
+                    if (linked.params.length > 1) {
+                        linked.params = linked.params.filter(prm => prm.fid !== edge.srcFid);
+                        if (linked.func !== '<user-defined>') {
+                            linked.func = '<mixed>';
+                        }
+                    } else {
+                        draft.splice(linkedIdx, 1);
+                    }
+                }
+            }));
         }
-    }, [setModifiablePrecondition]);
+    }, [setFunctionalDependencies]);
+
+    const conditions = useMemo<ModifiableBgKnowledge[]>(() => {
+        return functionalDependencies.reduce<ModifiableBgKnowledge[]>((list, fd) => {
+            for (const from of fd.params) {
+                list.push({
+                    src: from.fid,
+                    tar: fd.fid,
+                    type: 'directed-must-link',
+                });
+            }
+            return list;
+        }, []);
+    }, [functionalDependencies]);
 
     const graphRef = useRef<Graph>();
-    const renderData = useRenderData(data, 'edit', modifiablePrecondition, selectedFields, renderNode);
+    const renderData = useRenderData(data, 'edit', conditions, selectedFields, renderNode);
     const cfg = useGraphOptions(width, selectedFields, undefined, onLinkTogether, graphRef);
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
@@ -126,47 +162,9 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
                 >
                     刷新布局
                 </DefaultButton>
-                <Dropdown
-                    label="连接类型"
-                    selectedKey={createEdgeMode}
-                    options={[
-                        { key: 'directed-must-link', text: '单向一定影响' },
-                        { key: 'directed-must-not-link', text: '单向一定不影响' },
-                        { key: 'must-link', text: '至少在一个方向存在影响' },
-                        { key: 'must-not-link', text: '在任意方向一定不影响' },
-                    ]}
-                    onChange={(_e, option) => {
-                        if (!option) {
-                            return;
-                        }
-                        const linkType = option.key as typeof createEdgeMode;
-                        setCreateEdgeMode(linkType);
-                    }}
-                    styles={{
-                        title: {
-                            fontSize: '0.8rem',
-                            lineHeight: '1.8em',
-                            minWidth: '18em',
-                            height: '1.8em',
-                            padding: '0 2.8em 0 0.8em',
-                            border: 'none',
-                            borderBottom: '1px solid #8888',
-                        },
-                        caretDownWrapper: {
-                            fontSize: '0.8rem',
-                            lineHeight: '1.8em',
-                            height: '1.8em',
-                        },
-                        caretDown: {
-                            fontSize: '0.8rem',
-                            lineHeight: '1.8em',
-                            height: '1.8em',
-                        },
-                    }}
-                />
             </div>
         </Container>
     );
 };
 
-export default observer(PreconditionGraph);
+export default observer(FDGraph);

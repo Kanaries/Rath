@@ -1,11 +1,12 @@
 import { applyFilters } from "@kanaries/loa";
 import dayjs from "dayjs";
+import { cramersV } from "visual-insights/build/esm/statistics";
 import type { IFieldMeta, IRow } from "../../interfaces";
 import { getRange } from "../../utils";
 import type { IRInsightExplainProps, IRInsightExplainResult } from "./r-insight.worker";
 
 
-const MAX_BIN = 16;
+const MAX_BIN = 48; // some enum may includes too many items, e.g. hour
 
 type AggregateType = 'count' | 'sum' | 'mean';
 
@@ -150,7 +151,7 @@ const xFreq = (binSize: number, binned: number[]): number[] => {
     return res;
 };
 
-const DIFF_IGNORE_THRESHOLD = 0.15;
+const DIFF_IGNORE_THRESHOLD = 0.075;
 
 const diffGroups = (
     data: IRow[],
@@ -177,40 +178,31 @@ const diffGroups = (
         const freq2 = xFreq(binned2.binSize, binned2.flat);
         const group1 = xNormalize(freq1);
         const group2 = xNormalize(freq2);
-        const diff = new Array<0>(binned1.binSize).fill(0).reduce<{ loss: number; count: number }>((ctx, _, i) => {
+        const diff = new Array<0>(binned1.binSize).fill(0).reduce<number>((score, _, i) => {
             const a = group1[i];
             const b = group2[i];
-            if (a === 0 && b === 0) {
-                return ctx;
-            }
-            const ignoreLoss = Math.abs(1 - (a / b) / b) <= DIFF_IGNORE_THRESHOLD || !Number.isFinite(a) || !Number.isFinite(b);
-            const loss = ignoreLoss ? 0 : Math.sqrt(Math.abs(a - b));
-            return {
-                loss: ctx.loss + loss,
-                count: ctx.count + 1,
-            };
-        }, { loss: 0, count: 0 });
-        return diff.count === 0 ? 0 : diff.loss / diff.count;
+            const ignoreLoss = b !== 0 && Math.abs(1 - (a / b) / b) <= DIFF_IGNORE_THRESHOLD;
+            const loss = ignoreLoss ? 0 : Math.abs(a - b) / 2;
+            return score + loss;
+        }, 0);
+        return diff;
     }
-    const aggregated1 = xAggregate(data1, dimension, measure.aggregate);
-    const aggregated2 = xAggregate(data2, dimension, measure.aggregate);
+    const aggregated1 = xAggregate(data1, measure.field, measure.aggregate);
+    const aggregated2 = xAggregate(data2, measure.field, measure.aggregate);
     const group1 = xNormalize(aggregated1);
     const group2 = xNormalize(aggregated2);
-    const diff = new Array<0>(MAX_BIN).fill(0).reduce<{ loss: number; count: number }>((ctx, _, i) => {
+    const diff = new Array<0>(MAX_BIN).fill(0).reduce<number>((score, _, i) => {
         const a = group1[i];
         const b = group2[i];
-        if (a === 0 && b === 0) {
-            return ctx;
-        }
-        const ignoreLoss = Math.abs(1 - (a / b) / b) <= DIFF_IGNORE_THRESHOLD || !Number.isFinite(a) || !Number.isFinite(b);
-        const loss = ignoreLoss ? 0 : Math.abs(a - b);
-        return {
-            loss: ctx.loss + loss,
-            count: ctx.count + 1,
-        };
-    }, { loss: 0, count: 0 });
-    return diff.count === 0 ? 0 : diff.loss / diff.count;
+        const ignoreLoss = b !== 0 && Math.abs(1 - (a / b) / b) <= DIFF_IGNORE_THRESHOLD;
+        const loss = ignoreLoss ? 0 : Math.abs(a - b) / 2;
+        return score + loss;
+    }, 0);
+    // console.log(dimension.name, aggregated1, aggregated2, group1, group2, diff);
+    return diff;
 };
+
+const RELATION_THRESHOLD = 0.7;
 
 export const insightExplain = (props: IRInsightExplainProps): IRInsightExplainResult => {
     const { data, fields, causalModel: { edges }, groups, view } = props;
@@ -227,16 +219,19 @@ export const insightExplain = (props: IRInsightExplainProps): IRInsightExplainRe
 
     const exploringFields = fields.filter(f => ![...view.dimensions, ...view.measures.map(ms => ms.fid)].includes(f.fid));
     for (const f of exploringFields) {
-        const target = view.measures[0];
-        const measure = fields.find(which => which.fid === target.fid);
-        if (!measure) {
-            continue;
-        }
-        const responsibility = diffGroups(data, indices1, indices2, f, {
-            field: measure,
-            aggregate: target.op,
-        });
-        if (responsibility !== 0) {
+        for (const target of view.measures) {
+            const measure = fields.find(which => which.fid === target.fid);
+            if (!measure) {
+                continue;
+            }
+            if (view.dimensions.some(dim => cramersV(data, dim, f.fid) >= RELATION_THRESHOLD)) {
+                continue;
+            }
+            const responsibility = diffGroups(data, indices1, indices2, f, {
+                field: measure,
+                aggregate: target.op,
+            });
+    
             // @ts-ignore
             res.causalEffects.push({
                 responsibility,

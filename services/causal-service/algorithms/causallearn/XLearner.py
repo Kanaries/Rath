@@ -19,7 +19,7 @@ from causallearn.utils.PCUtils.BackgroundKnowledgeOrientUtils import orient_by_b
 
 def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha: float = 0.05, depth: int = -1,
         max_path_length: int = -1, verbose: bool = False, background_knowledge: BackgroundKnowledge | None = None,
-        **kwargs) -> Tuple[FCI.Graph, List[FCI.Edge]]:
+        functional_dependencies: List[common.IFunctionalDep]=[], f_ind={}, fields=[], **kwargs) -> Tuple[FCI.Graph, List[FCI.Edge]]:
     """
     Parameters
     ----------
@@ -36,6 +36,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     max_path_length: the maximum length of any discriminating path, or -1 if unlimited.
     verbose: True is verbose output should be printed or logged
     background_knowledge: background knowledge
+    functional_dependencies: functional dependencies
 
     Returns
     -------
@@ -89,48 +90,82 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     anc = []
     S = []
     G_fd = set()
-    for (u, v) in background_knowledge.required_rules_specs:
-        src, dest = NodeId.get(u.get_name(), None), NodeId.get(v.get_name(), None)
-        if src is None:
-            src = NodeId[u.get_name()] = cur_id
-            FDNodes.append(u)
-            G_fd.add(u.get_attribute('id'))
-            adj.append(set())
-            anc.append(set())
-            attr_id.append(u.get_attribute('id'))
-            cur_id += 1
-        if dest is None:
-            dest = NodeId[v.get_name()] = cur_id
-            FDNodes.append(v)
-            G_fd.add(v.get_attribute('id'))
-            adj.append(set())
-            anc.append(set())
-            attr_id.append(v.get_attribute('id'))
-            cur_id += 1
-        adj[src].add(dest)
-        anc[dest].add(src)
+    # for (u, v) in background_knowledge.required_rules_specs:
+    #     src, dest = NodeId.get(u.get_name(), None), NodeId.get(v.get_name(), None)
+    #     if src is None:
+    #         src = NodeId[u.get_name()] = cur_id
+    #         FDNodes.append(u)
+    #         G_fd.add(u.get_attribute('id'))
+    #         adj.append(set())
+    #         anc.append(set())
+    #         attr_id.append(u.get_attribute('id'))
+    #         cur_id += 1
+    #     if dest is None:
+    #         dest = NodeId[v.get_name()] = cur_id
+    #         FDNodes.append(v)
+    #         G_fd.add(v.get_attribute('id'))
+    #         adj.append(set())
+    #         anc.append(set())
+    #         attr_id.append(v.get_attribute('id'))
+    #         cur_id += 1
+    #     adj[src].add(dest)
+    #     anc[dest].add(src)
+    """
+    NodeId: Dict[int, int] 原始图中对应点的局域编号
+    FDNode: List[int]: 在Gfd中的causallearn格式的graphnodes，全局编号
+    attr_id: Gfd中每个点在原始图中对应的点编号
+    adj, anc: Gfd的邻接表
+    G_fd: Gfd中的点集，原图编号
+    """
+    for dep in functional_dependencies:
+        if len(dep.params) == 1: # TODO: dep.fid depends only on dep.params[0]:
+            param, f = dep.params[0].fid, dep.fid
+            u, v = f_ind[dep.params[0].fid], f_ind[dep.fid]
+            src, dest = NodeId.get(u, None), NodeId.get(v, None)
+            if src is None:
+                src = NodeId[u] = cur_id
+                node = FCI.GraphNode(f"X{u+1}")
+                node.add_attribute('id', u)
+                G_fd.add(u), adj.append(set()), anc.append(set()), FDNodes.append(node)
+                attr_id.append(u)
+                cur_id += 1
+            if dest is None:
+                dest = NodeId[v] = cur_id
+                node = FCI.GraphNode(f"X{v+1}")
+                node.add_attribute('id', v)
+                G_fd.add(v), adj.append(set()), anc.append(set()), FDNodes.append(node)
+                attr_id.append(v)
+                cur_id += 1
+            adj[src].add(dest)
+            anc[dest].add(src)
+        else:
+            # TODO: should be treated the same as bgKnowledge
+            pass
     topo = toposort(adj)
     
     fake_knowledge = BackgroundKnowledge()
+    skeleton_knowledge = set()
     for t in topo[::-1]:
         mxvcnt, y = 0, -1
         for a in anc[t]:
+            print("a = ", a, attr_id[a])
             vcnt = np.unique(dataset[:, attr_id[a]]).size
             if vcnt > mxvcnt:
                 y = a
                 mxvcnt = vcnt
         if y == -1: continue
         # S.append((attr_id[t], attr_id[y]))
-        fake_knowledge.add_required_by_node(FDNodes[t], FDNodes[y])
+        # fake_knowledge.add_required_by_node(FDNodes[t], FDNodes[y])
         fake_knowledge.add_required_by_node(FDNodes[y], FDNodes[t])
+        skeleton_knowledge.add((attr_id[y], attr_id[t]))
         # remove X and connected edges from G_FD
         G_fd.remove(attr_id[t])
         for a in anc[t]:
             adj[a].remove(t)
     GfdNodes = []
-    for i in G_fd:
-        node = FCI.GraphNode(f"X{i + 1}")
-        node.add_attribute("id", i)
+    for i, v in enumerate(G_fd):
+        node = FCI.GraphNode(f"X{v + 1}")
+        node.add_attribute("id", v)
         GfdNodes.append(node)
     FDgraph, FD_sep_sets = FCI.fas(dataset, GfdNodes, independence_test_method=independence_test_method, alpha=alpha,
                           knowledge=None, depth=depth, verbose=verbose)
@@ -142,17 +177,35 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
         node = FCI.GraphNode(f"X{i + 1}")
         node.add_attribute("id", i)
         nodes.append(node)
+        
     for i in range(FDgraph.graph.shape[0]):
         for j in range(i):
-            if FDgraph.graph[i, j] == 1 or FDgraph.graph[j, i] == 1:
+            if FDgraph.graph[i, j] == -1:
                 x, y = attr_id[i], attr_id[j]
-                fake_knowledge.add_required_by_node(nodes[x], nodes[y])
-                fake_knowledge.add_required_by_node(nodes[y], nodes[x])
+                skeleton_knowledge.add((x, y))
+            # if FDgraph.graph[i, j] == -1:
+            #     fake_knowledge.add_required_by_node(node[x], node[y])
+            # if FDgraph.graph[j, i] == -1:
+            #     fake_knowledge.add_required_by_node(node[y], node[x])
+    
+    print("fake_knowledge =", fake_knowledge)
+    print(skeleton_knowledge)
+    # for k in fake_knowledge.required_rules_specs:
+    #     print(k[0].get_all_attributes(), k[1].get_all_attributes())
+    
+    for funcDep in functional_dependencies:
+        for p in funcDep.params:
+            background_knowledge.add_required_by_node(nodes[f_ind[p.fid]], nodes[f_ind[funcDep.fid]])
 
     # FAS (“Fast Adjacency Search”) is the adjacency search of the PC algorithm, used as a first step for the FCI algorithm.
     graph, sep_sets = FCI.fas(dataset, nodes, independence_test_method=independence_test_method, alpha=alpha,
-                          knowledge=fake_knowledge, depth=depth, verbose=verbose)
+                          knowledge=background_knowledge, depth=depth, verbose=verbose)
+    for u, v in skeleton_knowledge:
+        print(u, v)
+        graph.add_edge(FCI.Edge(nodes[u], nodes[v], FCI.Endpoint.TAIL, FCI.Endpoint.TAIL))
+        # graph[u, v] = graph[v, u] = -1
     
+    print("global fas graph =", graph)
     print({u: s for u, s in sep_sets.items() if len(s)})
     # return graph, sep_sets
     # forbid_knowledge = BackgroundKnowledge()
@@ -225,7 +278,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     graph.set_pag(True)
 
     edges = FCI.get_color_edges(graph)
-
+    
     return graph, edges
 
 
@@ -247,7 +300,7 @@ class XLearnerParams(OptionalParams, title="XLearn"):
     # edges: list. Contains graph’s edges properties. If edge.properties have the Property ‘dd’, then there is no latent confounder. Otherwise, there might be latent confounders. If edge.properties have the Property ‘nl’, then it is definitely direct. Otherwise, it is possibly direct.
     # """
     independence_test_method: Optional[str] = Field(
-        default='fisherz', title="独立性检验", #"Independence Test",
+        default='gsq', title="独立性检验", #"Independence Test",
         description="Independence test method function.  Default: ‘fisherz’",
         options=getOpts(IDepTestItems),
     )
@@ -283,7 +336,7 @@ class XLearner(AlgoInterface):
         return self.bk
     
     
-    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
+    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], funcDeps: common.IFunctionalDep = [],  **kwargs):
         # TODO: new knowledges
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
@@ -291,9 +344,10 @@ class XLearner(AlgoInterface):
         self.G, self.edges = fci(array, **params.__dict__, background_knowledge=None, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
         
         # if bgKnowledges and len(bgKnowledges) > 0:
-        bk = self.constructBgKnowledge(bgKnowledges=bgKnowledges if bgKnowledges else [], f_ind={fid: i for i, fid in enumerate(focusedFields)})
+        f_ind = {fid: i for i, fid in enumerate(focusedFields)}
+        bk = self.constructBgKnowledge(bgKnowledges=bgKnowledges if bgKnowledges else [], f_ind=f_ind)
             
-        self.G, self.edges = xlearn(array, **params.__dict__, background_knowledge=bk, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
+        self.G, self.edges = xlearn(array, **params.__dict__, background_knowledge=bk, functional_dependencies=funcDeps, f_ind=f_ind, fields=focusedFields, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
         l = self.G.graph.tolist()
         return {
             'data': l,

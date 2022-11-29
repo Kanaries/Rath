@@ -13,10 +13,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { makeRenderLabelHandler } from '../../components/labelTooltip';
 import { IRow } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import type { BgKnowledge, BgKnowledgePagLink } from './config';
+import type { BgKnowledge, BgKnowledgePagLink, IFunctionalDep } from './config';
 import DynamicForm from './dynamicForm';
 
-const Params: React.FC<{ dataSource: IRow[], focusFields: string[]; bgKnowledge: BgKnowledgePagLink[]; /** @deprecated */precondition: BgKnowledge[] }> = ({ precondition, bgKnowledge, dataSource }) => {
+const Params: React.FC<{
+    dataSource: IRow[];
+    focusFields: string[];
+    bgKnowledge: BgKnowledgePagLink[];
+    /** @deprecated */precondition: BgKnowledge[];
+    funcDeps: IFunctionalDep[];
+}> = ({ precondition, bgKnowledge, dataSource, funcDeps }) => {
     const { causalStore } = useGlobalStore();
     const { causalAlgorithm, causalParams, showSettings, causalAlgorithmForm, causalAlgorithmOptions } = causalStore;
 
@@ -41,7 +47,7 @@ const Params: React.FC<{ dataSource: IRow[], focusFields: string[]; bgKnowledge:
 
     const saveParamsAndRun = () => {
         causalStore.updateCausalAlgoAndParams(algoName, params);
-        causalStore.reRunCausalDiscovery(dataSource, precondition, bgKnowledge);
+        causalStore.reRunCausalDiscovery(dataSource, precondition, bgKnowledge, funcDeps);
         causalStore.toggleSettings(false);
     };
 

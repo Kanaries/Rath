@@ -37,10 +37,12 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     toggleFlowAnalyzer: () => void;
     onLinkTogether: (srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
+    onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
+    handleLasso?: (fields: IFieldMeta[]) => void;
     allowZoom: boolean;
 }, never>, 'onChange' | 'ref'>;
 
@@ -97,12 +99,14 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     mode,
     onLinkTogether,
     onRevertLink,
+    onRemoveLink,
     preconditions,
     forceRelayoutRef,
     autoLayout,
     renderNode,
     toggleFlowAnalyzer,
     allowZoom,
+    handleLasso,
     ...props
 }, ref) => {
     const { causalStore } = useGlobalStore();
@@ -129,9 +133,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
             links: value.links.map(link => ({
                 source: link.causeId,
                 target: link.effectId,
-                value: link.score / nodeCauseWeights[link.effectId],
+                score: link.score / nodeCauseWeights[link.effectId],
                 type: link.type,
-            })).filter(link => link.value >= cutThreshold).sort((a, b) => b.value - a.value).slice(0, limit),
+            })).filter(link => link.score >= cutThreshold).sort((a, b) => b.score - a.score).slice(0, limit),
         }, totalScore];
     }, [value, cutThreshold, limit]);
 
@@ -148,17 +152,29 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
 
     const graphRef = useRef<Graph>();
     const renderData = useRenderData(data, mode, preconditions, fields, renderNode);
-    const cfg = useGraphOptions(width, fields, handleLinkTogether, graphRef);
+    const cfg = useGraphOptions(width, fields, handleLasso, handleLinkTogether, graphRef);
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
 
     const [forceRelayoutFlag, setForceRelayoutFlag] = useState<0 | 1>(0);
+    
+    const [clickEdgeMode, setClickEdgeMode] = useState<'delete' | 'forbid'>('forbid');
 
     const handleEdgeClick = useCallback((edge: { srcFid: string; tarFid: string; } | null) => {
         if (edge) {
-            onRevertLink(edge.srcFid, edge.tarFid);
+            switch (clickEdgeMode) {
+                case 'delete': {
+                    return onRemoveLink(edge.srcFid, edge.tarFid);
+                }
+                case 'forbid': {
+                    return onRevertLink(edge.srcFid, edge.tarFid);
+                }
+                default: {
+                    break;
+                }
+            }
         }
-    }, [onRevertLink]);
+    }, [onRevertLink, onRemoveLink, clickEdgeMode]);
 
     useReactiveGraph(
         containerRef,
@@ -245,6 +261,41 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                             }
                             const linkType = option.key as typeof createEdgeMode;
                             setCreateEdgeMode(linkType);
+                        }}
+                        styles={{
+                            title: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                                padding: '0 2.8em 0 0.8em',
+                                border: 'none',
+                                borderBottom: '1px solid #8888',
+                            },
+                            caretDownWrapper: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                            },
+                            caretDown: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                            },
+                        }}
+                    />
+                    <Dropdown
+                        label="单击连接行为"
+                        selectedKey={clickEdgeMode}
+                        options={[
+                            { key: 'forbid', text: '禁用此连接' },
+                            { key: 'delete', text: '删除约束' },
+                        ]}
+                        onChange={(_e, option) => {
+                            if (!option) {
+                                return;
+                            }
+                            const behaviorType = option.key as typeof clickEdgeMode;
+                            setClickEdgeMode(behaviorType);
                         }}
                         styles={{
                             title: {

@@ -274,11 +274,8 @@ export class DataSourceStore {
         return true;
     }
 
-    public get staisfyAnalysisCondition (): boolean {
-        if (this.cleanedData.length === 0 || this.measures.length === 0 || this.dimensions.length === 0) {
-            return false;
-        }
-        if (!this.hasOriginalDimensionInData) {
+    public get satisfyAnalysisCondition (): boolean {
+        if (this.cleanedData.length === 0 || this.measures.length === 0) {
             return false;
         }
         return true;

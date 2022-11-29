@@ -11,6 +11,7 @@ import {
     CAUSAL_ALGORITHM_OPTIONS,
     BgKnowledge,
     BgKnowledgePagLink,
+    IFunctionalDep,
 } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
 import resolveCausal, { CausalLinkDirection, findUnmatchedCausalResults, stringifyDirection } from '../utils/resolve-causal';
@@ -206,7 +207,12 @@ export class CausalStore {
         this.causalFields = causalFields;
         this.causalStrength = causalMatrix;
     }
-    public async causalDiscovery(dataSource: IRow[], /** @deprecated */ precondition: BgKnowledge[], preconditionPag: BgKnowledgePagLink[]) {
+    public async causalDiscovery(
+        dataSource: IRow[],
+        /** @deprecated */ precondition: BgKnowledge[],
+        preconditionPag: BgKnowledgePagLink[],
+        funcDeps: IFunctionalDep[],
+    ) {
         const fields = this.dataSourceStore.fieldMetas;
         const focusFieldIds = this.focusFieldIds;
         const algoName = this.causalAlgorithm;
@@ -235,6 +241,7 @@ export class CausalStore {
                     focusedFields: focusFieldIds,
                     bgKnowledges: precondition,
                     bgKnowledgesPag: preconditionPag,
+                    funcDeps,
                     params: this.causalParams[algoName],
                 }),
             });
@@ -244,13 +251,17 @@ export class CausalStore {
                     .slice(0, originFieldsLength)
                     .map((row) => row.slice(0, originFieldsLength));
                 const causalMatrix = resolveCausal(resultMatrix);
-                const unmatched = findUnmatchedCausalResults(fields, preconditionPag, causalMatrix);
+                const unmatched = findUnmatchedCausalResults(inputFields, preconditionPag, causalMatrix);
                 if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
+                    const getFieldName = (fid: string) => {
+                        const field = inputFields.find(f => f.fid === fid);
+                        return field?.name ?? fid;
+                    };
                     for (const info of unmatched) {
                         notify({
                             title: 'Causal Result Not Matching',
                             type: 'error',
-                            content: `Conflict in edge "${info.srcFid} -> ${info.tarFid}":\n`
+                            content: `Conflict in edge "${getFieldName(info.srcFid)} -> ${getFieldName(info.tarFid)}":\n`
                                 + `  Expected: ${
                                     typeof info.expected === 'object'
                                         ? ('not' in info.expected
@@ -279,7 +290,12 @@ export class CausalStore {
             this.computing = false;
         }
     }
-    public async reRunCausalDiscovery(dataSource: IRow[], precondition: BgKnowledge[], preconditionPag: BgKnowledgePagLink[]) {
-        this.causalDiscovery(dataSource, precondition, preconditionPag);
+    public async reRunCausalDiscovery(
+        dataSource: IRow[],
+        /** @deprecated */ precondition: BgKnowledge[],
+        preconditionPag: BgKnowledgePagLink[],
+        funcDeps: IFunctionalDep[],
+    ) {
+        this.causalDiscovery(dataSource, precondition, preconditionPag, funcDeps);
     }
 }

@@ -1,31 +1,64 @@
 import { ActionButton, Pivot, PivotItem, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
-import { IPattern } from '@kanaries/loa';
+import type { IPattern } from '@kanaries/loa';
+import styled from 'styled-components';
 import type { Specification } from 'visual-insights';
-import { IFieldMeta } from '../../interfaces';
+import type { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import SemiEmbed from '../semiAutomation/semiEmbed';
 import CrossFilter from './crossFilter';
 import type { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import type { useDataViews } from './hooks/dataViews';
 import RExplainer from './explainer/RExplainer';
-import type { PagLink } from './config';
+import type { IFunctionalDep, PagLink } from './config';
+import PredictPanel from './predictPanel';
+import type { ExplorerProps } from './explorer';
+
+
+const Container = styled.div`
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    & .body {
+        flex-grow: 1;
+        flex-shrink: 1;
+        overflow: auto;
+        margin-top: 1em;
+        display: flex;
+        flex-direction: column;
+    }
+`;
 
 export interface ManualAnalyzerProps {
     context: ReturnType<typeof useDataViews>;
     interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
+    functionalDependencies: IFunctionalDep[];
     edges: PagLink[];
+
 }
 
-const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldGroups, edges }) => {
+const CustomAnalysisModes = [
+    { key: 'crossFilter', text: '因果验证' },
+    { key: 'explainer', text: '可解释探索' },
+    { key: 'graphicWalker', text: '可视化自助分析' },
+    { key: 'predict', text: '模型预测' },
+] as const;
+
+type CustomAnalysisMode = typeof CustomAnalysisModes[number]['key'];
+
+const ManualAnalyzer = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelected'] }, ManualAnalyzerProps>(function ManualAnalyzer (
+    { context, interactFieldGroups, functionalDependencies, edges }, ref
+) {
     const { dataSourceStore, causalStore, langStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { fieldGroup, setFieldGroup, clearFieldGroup } = interactFieldGroups;
     const [showSemiClue, setShowSemiClue] = useState(false);
     const [clueView, setClueView] = useState<IPattern | null>(null);
-    const [customAnalysisMode, setCustomAnalysisMode] = useState<'explainer' | 'crossFilter' | 'graphicWalker'>('explainer');
+    const [customAnalysisMode, setCustomAnalysisMode] = useState<CustomAnalysisMode>('crossFilter');
     const { selectedFields } = causalStore;
 
     const { vizSampleData, filters } = context;
@@ -80,21 +113,37 @@ const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldG
         // };
     }, [fieldGroup]);
 
+    const predictPanelRef = useRef<{ updateInput?: (input: {
+        features: Readonly<IFieldMeta>[]; targets: Readonly<IFieldMeta>[]
+    }) => void }>({});
+
+    useImperativeHandle(ref, () => ({
+        onSubtreeSelected: (node, simpleCause) => {
+            if (customAnalysisMode === 'predict' && node && simpleCause.length > 0) {
+                const features = simpleCause.map(cause => cause.field);
+                predictPanelRef.current.updateInput?.({
+                    features,
+                    targets: [node],
+                });
+            }
+        },
+    }));
+
     return (
-        <div className="card">
+        <Container>
             <Pivot
-                style={{ marginBottom: '1em' }}
+                style={{ marginBottom: '0.4em' }}
                 selectedKey={customAnalysisMode}
                 onLinkClick={(item) => {
-                    item && setCustomAnalysisMode(item.props.itemKey as 'crossFilter' | 'graphicWalker');
+                    item && setCustomAnalysisMode(item.props.itemKey as CustomAnalysisMode);
                 }}
             >
-                <PivotItem itemKey="explainer" headerText="可解释探索" />
-                <PivotItem itemKey="crossFilter" headerText="因果验证" />
-                <PivotItem itemKey="graphicWalker" headerText="可视化自助分析" />
+                {CustomAnalysisModes.map(mode => (
+                    <PivotItem key={mode.key} itemKey={mode.key} headerText={mode.text} />
+                ))}
             </Pivot>
             <Stack horizontal>
-                {customAnalysisMode !== 'explainer' && (
+                {new Array<CustomAnalysisMode>('crossFilter', 'graphicWalker').includes(customAnalysisMode) && (
                     <SemiEmbed
                         view={clueView}
                         show={showSemiClue}
@@ -104,7 +153,7 @@ const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldG
                         neighborKeys={clueView ? clueView.fields.slice(0, 1).map(f => f.fid) : []}
                     />
                 )}
-                {customAnalysisMode !== 'graphicWalker' && (
+                {new Array<CustomAnalysisMode>('crossFilter', 'explainer').includes(customAnalysisMode) && (
                     <ActionButton
                         iconProps={{ iconName: 'Delete' }}
                         text="清除全部选择字段"
@@ -113,46 +162,54 @@ const ManualAnalyzer: React.FC<ManualAnalyzerProps> = ({ context, interactFieldG
                     />
                 )}
             </Stack>
-            {customAnalysisMode === 'explainer' && vizSampleData.length > 0 && fieldGroup.length > 0 && (
-                <RExplainer
-                    context={context}
-                    interactFieldGroups={interactFieldGroups}
-                    edges={edges}
-                />
-            )}
-            {customAnalysisMode === 'crossFilter' && vizSampleData.length > 0 && fieldGroup.length > 0 && (
-                <CrossFilter
-                    fields={fieldGroup}
-                    dataSource={vizSampleData}
-                    onVizClue={(fid) => {
-                        const field = selectedFields.find((f) => f.fid === fid);
-                        if (field) {
-                            setClueView({
-                                fields: [field],
-                                filters: [...filters],
-                                imp: 0,
-                            });
-                            setShowSemiClue(true);
-                        }
-                    }}
-                    onVizDelete={(fid) => {
-                        setFieldGroup((list) => list.filter((f) => f.fid !== fid));
-                    }}
-                />
-            )}
-            {/* 小心这里的内存占用 */}
-            {customAnalysisMode === 'graphicWalker' && (
-                <GraphicWalker
-                    dataSource={vizSampleData}
-                    rawFields={fieldMetas}
-                    hideDataSourceConfig
-                    spec={initialSpec}
-                    i18nLang={langStore.lang}
-                    keepAlive={false}
-                />
-            )}
-        </div>
+            <div className="body">
+                {{
+                    predict: (
+                        <PredictPanel ref={predictPanelRef} />
+                    ),
+                    explainer: vizSampleData.length > 0 && fieldGroup.length > 0 && (
+                        <RExplainer
+                            context={context}
+                            interactFieldGroups={interactFieldGroups}
+                            functionalDependencies={functionalDependencies}
+                            edges={edges}
+                        />
+                    ),
+                    crossFilter: vizSampleData.length > 0 && fieldGroup.length > 0 && (
+                        <CrossFilter
+                            fields={fieldGroup}
+                            dataSource={vizSampleData}
+                            onVizClue={(fid) => {
+                                const field = selectedFields.find((f) => f.fid === fid);
+                                if (field) {
+                                    setClueView({
+                                        fields: [field],
+                                        filters: [...filters],
+                                        imp: 0,
+                                    });
+                                    setShowSemiClue(true);
+                                }
+                            }}
+                            onVizDelete={(fid) => {
+                                setFieldGroup((list) => list.filter((f) => f.fid !== fid));
+                            }}
+                        />
+                    ),
+                    graphicWalker: (
+                        /* 小心这里的内存占用 */
+                        <GraphicWalker
+                            dataSource={vizSampleData}
+                            rawFields={fieldMetas}
+                            hideDataSourceConfig
+                            spec={initialSpec}
+                            i18nLang={langStore.lang}
+                            keepAlive={false}
+                        />
+                    ),
+                }[customAnalysisMode]}
+            </div>
+        </Container>
     );
-};
+});
 
 export default observer(ManualAnalyzer);

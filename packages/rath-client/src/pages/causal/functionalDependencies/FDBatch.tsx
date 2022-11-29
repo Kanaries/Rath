@@ -1,23 +1,14 @@
-import { DefaultButton, Spinner, Stack } from '@fluentui/react';
+import { ActionButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import produce from 'immer';
 import { useGlobalStore } from '../../../store';
-import type { ModifiableBgKnowledge } from '../config';
-import type { PreconditionPanelProps } from './preconditionPanel';
-import { getGeneratedPreconditionsFromAutoDetection, getGeneratedPreconditionsFromExtInfo } from './utils';
-import PreconditionEditor from './preconditionEditor';
+import type { IFunctionalDep } from '../config';
+import type { FDPanelProps } from './FDPanel';
+import { getGeneratedFDFromAutoDetection, getGeneratedFDFromExtInfo } from './utils';
+import FDEditor from './FDEditor';
 
-
-const Container = styled.div`
-    > button {
-        margin: 0 1em;
-        :first-child {
-            margin: 0 2em 0 0;
-        }
-    }
-`;
 
 const Mask = styled.div`
     position: fixed;
@@ -64,26 +55,26 @@ const dropdownOptions: { key: BatchUpdateMode; text: string }[] = [
     },
 ];
 
-const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
-    context, modifiablePrecondition, setModifiablePrecondition, renderNode,
+const FDBatch: React.FC<FDPanelProps> = ({
+    context, functionalDependencies, setFunctionalDependencies, renderNode,
 }) => {
     const { causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
     const [displayPreview, setDisplayPreview] = useState(false);
-    const [preview, setPreview] = useState<ModifiableBgKnowledge[] | null>(null);
+    const [preview, setPreview] = useState<IFunctionalDep[] | null>(null);
     const isPending = displayPreview && preview === null;
     const [mode, setMode] = useState(BatchUpdateMode.OVERWRITE_ONLY);
     const { dataSubset } = context;
 
-    const updatePreview = useMemo<typeof setModifiablePrecondition>(() => {
+    const updatePreview = useMemo<typeof setFunctionalDependencies>(() => {
         if (displayPreview) {
-            return setPreview as typeof setModifiablePrecondition;
+            return setPreview as typeof setFunctionalDependencies;
         }
         return () => {};
     }, [displayPreview]);
 
-    const generatePreconditionsFromExtInfo = useCallback(() => {
-        setPreview(getGeneratedPreconditionsFromExtInfo(selectedFields));
+    const generateFDFromExtInfo = useCallback(() => {
+        setPreview(getGeneratedFDFromExtInfo(selectedFields));
         setDisplayPreview(true);
     }, [selectedFields]);
 
@@ -93,8 +84,8 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
             pendingRef.current = undefined;
         }
     }, [displayPreview]);
-    const generatePreconditionsFromAutoDetection = useCallback(() => {
-        const p = getGeneratedPreconditionsFromAutoDetection(dataSubset, selectedFields.map(f => f.fid));
+    const generateFDFromAutoDetection = useCallback(() => {
+        const p = getGeneratedFDFromAutoDetection(dataSubset, selectedFields.map(f => f.fid));
         pendingRef.current = p;
         p.then(res => {
             if (p === pendingRef.current) {
@@ -112,53 +103,56 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
     }, [selectedFields, dataSubset]);
 
     const handleClear = useCallback(() => {
-        setModifiablePrecondition([]);
-    }, [setModifiablePrecondition]);
+        setFunctionalDependencies([]);
+    }, [setFunctionalDependencies]);
 
-    const submittable = useMemo<ModifiableBgKnowledge[]>(() => {
+    const submittable = useMemo<IFunctionalDep[]>(() => {
         if (preview) {
             switch (mode) {
                 case BatchUpdateMode.OVERWRITE_ONLY: {
-                    return preview.reduce<ModifiableBgKnowledge[]>((links, link) => {
-                        const overloadIdx = links.findIndex(
-                            which => [which.src, which.tar].every(node => [link.src, link.tar].includes(node))
-                        );
+                    return preview.reduce<IFunctionalDep[]>((deps, dep) => {
+                        const overloadIdx = deps.findIndex(which => which.fid === dep.fid);
                         if (overloadIdx !== -1) {
-                            return produce(links, draft => {
-                                draft.splice(overloadIdx, 1, link);
+                            return produce(deps, draft => {
+                                draft.splice(overloadIdx, 1, dep);
                             });
                         }
-                        return links.concat([link]);
-                    }, modifiablePrecondition);
+                        return deps.concat([dep]);
+                    }, functionalDependencies);
                 }
                 case BatchUpdateMode.FILL_ONLY: {
-                    return preview.reduce<ModifiableBgKnowledge[]>((links, link) => {
-                        const alreadyDefined = links.find(
-                            which => [which.src, which.tar].every(node => [link.src, link.tar].includes(node))
-                        );
-                        if (!alreadyDefined) {
-                            return links.concat([link]);
+                    return preview.reduce<IFunctionalDep[]>((deps, dep) => {
+                        const overloadIdx = deps.findIndex(which => which.fid === dep.fid);
+                        if (overloadIdx !== -1) {
+                            return produce(deps, draft => {
+                                const overload = draft[overloadIdx];
+                                for (const prm of dep.params) {
+                                    if (!overload.params.some(p => p.fid === prm.fid)) {
+                                        overload.params.push(prm);
+                                    }
+                                }
+                            });
                         }
-                        return links;
-                    }, modifiablePrecondition);
+                        return deps;
+                    }, functionalDependencies);
                 }
                 case BatchUpdateMode.FULLY_REPLACE: {
                     return preview;
                 }
                 default: {
-                    return modifiablePrecondition;
+                    return functionalDependencies;
                 }
             }
         } else {
-            return modifiablePrecondition;
+            return functionalDependencies;
         }
-    }, [preview, modifiablePrecondition, mode]);
+    }, [preview, functionalDependencies, mode]);
     
     const handleSubmit = useCallback(() => {
-        setModifiablePrecondition(submittable);
+        setFunctionalDependencies(submittable);
         setDisplayPreview(false);
         setPreview(null);
-    }, [setModifiablePrecondition, submittable]);
+    }, [setFunctionalDependencies, submittable]);
 
     const handleCancel = useCallback(() => {
         setPreview(null);
@@ -168,23 +162,23 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
     return (
         <>
             <h3>快捷操作</h3>
-            <Container>
-                <DefaultButton onClick={handleClear}>
+            <Stack tokens={{ childrenGap: 10 }} horizontal>
+                <ActionButton iconProps={{ iconName: 'Delete' }} onClick={handleClear}>
                     全部删除
-                </DefaultButton>
-                <DefaultButton onClick={generatePreconditionsFromExtInfo}>
+                </ActionButton>
+                <ActionButton iconProps={{ iconName: 'EngineeringGroup' || 'BranchSearch' }} onClick={generateFDFromExtInfo}>
                     使用扩展字段计算图
-                </DefaultButton>
-                <DefaultButton disabled>
+                </ActionButton>
+                <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
                     导入影响关系
-                </DefaultButton>
-                <DefaultButton disabled>
+                </ActionButton>
+                <ActionButton iconProps={{ iconName: 'FileTemplate' }} disabled>
                     导入因果模型
-                </DefaultButton>
-                <DefaultButton onClick={generatePreconditionsFromAutoDetection}>
+                </ActionButton>
+                <ActionButton iconProps={{ iconName: 'HintText' }} disabled onClick={undefined && generateFDFromAutoDetection}>
                     自动识别
-                </DefaultButton>
-            </Container>
+                </ActionButton>
+            </Stack>
             {displayPreview && (
                 <Mask>
                     <div>
@@ -192,11 +186,11 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
                             {isPending ? (
                                 <Spinner label="computing" />
                             ) : (
-                                <PreconditionEditor
+                                <FDEditor
                                     title="预览"
                                     context={context}
-                                    modifiablePrecondition={submittable}
-                                    setModifiablePrecondition={updatePreview}
+                                    functionalDependencies={submittable}
+                                    setFunctionalDependencies={updatePreview}
                                     renderNode={renderNode}
                                 />
                             )}
@@ -228,4 +222,4 @@ const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
     );
 };
 
-export default observer(PreconditionBatch);
+export default observer(FDBatch);

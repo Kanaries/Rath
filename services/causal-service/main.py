@@ -34,7 +34,7 @@ app.add_middleware(
 
 class AlgoListRequest(BaseModel, extra=Extra.allow):
     fieldIds: Optional[List[str]] = Field(default=[], title="field Ids")
-    fieldMetas: Optional[List[I.IFieldMeta]] = Field(defulat=[], title="field metas")
+    fieldMetas: Optional[List[I.IFieldMeta]] = Field(default=[], title="field metas")
     
 def inferRender(p: Dict, req: AlgoListRequest) -> Dict:
     res = {}
@@ -154,7 +154,7 @@ def causal(algoName: str, item: algorithms.CausalRequest, response: Response) ->
     try:
         method: I.AlgoInterface = algorithms.DICT.get(algoName)(item.dataSource, item.fields, item.params)
         print("causal", item.params, item.focusedFields, item.bgKnowledges)
-        data = method.calc(item.params, item.focusedFields, item.bgKnowledges, bgKnowledgesPag=item.bgKnowledgesPag)
+        data = method.calc(item.params, item.focusedFields, item.bgKnowledges, bgKnowledgesPag=item.bgKnowledgesPag, funcDeps=item.funcDeps)
         response_data = I.CausalAlgorithmData(
             orig_matrix=data.get('data'),
             matrix=data.get('matrix', data.get('data')),

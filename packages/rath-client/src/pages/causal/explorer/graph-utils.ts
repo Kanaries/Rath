@@ -5,7 +5,7 @@ import type { IFieldMeta } from "../../../interfaces";
 import type { CausalLink } from ".";
 
 
-export const GRAPH_HEIGHT = 600;
+export const GRAPH_HEIGHT = 500;
 
 export type GraphNodeAttributes<
     T extends 'circle' | 'rect' | 'ellipse' | 'diamond' | 'triangle' | 'star' | 'image' | 'modelRect' | 'donut' = 'circle'
@@ -36,19 +36,19 @@ const arrows = {
     },
     directed: {
         start: '',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
     },
     bidirected: {
-        start: 'M 12,0 L 28,8 L 28,-8 Z',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+        start: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
+        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
     },
     'weak directed': {
-        start: 'M 12,0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0 Z',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+        start: 'M 8.4,0 a 5.6,5.6 0 1,0 11.2,0 a 5.6,5.6 0 1,0 -11.2,0 Z',
+        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
     },
     'weak undirected': {
-        start: 'M 12,0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0 Z',
-        end: 'M 12,0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0 Z',
+        start: 'M 8.4,0 a 5.6,5.6 0 1,0 11.2,0 a 5.6,5.6 0 1,0 -11.2,0 Z',
+        end: 'M 8.4,0 a 5.6,5.6 0 1,0 11.2,0 a 5.6,5.6 0 1,0 -11.2,0 Z',
     },
 } as const;
 
@@ -66,12 +66,12 @@ const bkArrows = {
     "directed-must-link": {
         fill: '#0027b4',
         start: '',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
     },
     "directed-must-not-link": {
         fill: '#c50f1f',
         start: '',
-        end: 'M 12,0 L 28,8 L 28,-8 Z',
+        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
     },
 } as const;
 
@@ -92,10 +92,10 @@ G6.registerEdge(
                     stroke: '#c50f1f',
                     lineWidth: 2,
                     path: [
-                        ['M', midPoint.x + 8, midPoint.y + 8],
-                        ['L', midPoint.x - 8, midPoint.y - 8],
-                        ['M', midPoint.x - 8, midPoint.y + 8],
-                        ['L', midPoint.x + 8, midPoint.y - 8],
+                        ['M', midPoint.x + 6, midPoint.y + 6],
+                        ['L', midPoint.x - 6, midPoint.y - 6],
+                        ['M', midPoint.x - 6, midPoint.y + 6],
+                        ['L', midPoint.x + 6, midPoint.y - 6],
                     ],
                 },
                 name: 'forbidden-mark',
@@ -107,7 +107,7 @@ G6.registerEdge(
 );
 
 export const useRenderData = (
-    data: { nodes: { id: number }[]; links: { source: number; target: number; type: CausalLink['type'] }[] },
+    data: { nodes: { id: number }[]; links: { source: number; target: number; type: CausalLink['type']; score?: number }[] },
     mode: "explore" | "edit",
     preconditions: readonly ModifiableBgKnowledge[],
     fields: readonly Readonly<IFieldMeta>[],
@@ -134,6 +134,13 @@ export const useRenderData = (
                     endArrow: {
                         fill: '#F6BD16',
                         path: arrows[link.type].end,
+                    },
+                    lineWidth: typeof link.score === 'number' ? 1 + link.score * 2 : undefined,
+                },
+                label: typeof link.score === 'number' ? `${link.score.toPrecision(2)}` : undefined,
+                labelCfg: {
+                    style: {
+                        opacity: 0,
                     },
                 },
             };
@@ -169,6 +176,7 @@ export const useRenderData = (
 export const useGraphOptions = (
     width: number,
     fields: readonly Readonly<IFieldMeta>[],
+    handleLasso: ((fields: IFieldMeta[]) => void) | undefined,
     handleLink: (srcFid: string, tarFid: string) => void,
     graphRef: { current: Graph | undefined },
 ) => {
@@ -176,12 +184,34 @@ export const useGraphOptions = (
     widthRef.current = width;
     const fieldsRef = useRef(fields);
     fieldsRef.current = fields;
+    const handleLassoRef = useRef(handleLasso);
+    handleLassoRef.current = handleLasso;
     const handleLinkRef = useRef(handleLink);
     handleLinkRef.current = handleLink;
 
     return useMemo<Omit<GraphOptions, 'container'>>(() => {
         let createEdgeFrom = -1;
-        const exploreMode = ['drag-canvas', 'drag-node'];
+        const exploreMode = ['drag-canvas', 'drag-node', {
+            type: 'lasso-select',
+            trigger: 'shift',
+            onSelect(nodes: any, edges: any) {
+                const selected: IFieldMeta[] = [];
+                for (const node of nodes) {
+                    const idx = node._cfg?.id;
+                    if (idx) {
+                        const f = fieldsRef.current[parseInt(idx, 10)];
+                        if (f) {
+                            selected.push(f);
+                        }
+                    }
+                    graphRef.current?.setItemState(node, 'selected', false);
+                }
+                for (const edge of edges) {
+                    graphRef.current?.setItemState(edge, 'selected', false);
+                }
+                handleLassoRef.current?.(selected);
+            },
+        }];
         const editMode = ['drag-canvas', {
             type: 'create-edge',
             trigger: 'drag',
@@ -231,18 +261,18 @@ export const useGraphOptions = (
                 },
             },
             defaultNode: {
-                size: 24,
+                size: 20,
                 style: {
-                    lineWidth: 2,
+                    lineWidth: 1,
                 },
             },
             nodeStateStyles: {
                 focused: {
-                    lineWidth: 3,
+                    lineWidth: 1.5,
                     opacity: 1,
                 },
                 highlighted: {
-                    lineWidth: 2.5,
+                    lineWidth: 1.25,
                     opacity: 1,
                 },
                 faded: {
@@ -256,7 +286,6 @@ export const useGraphOptions = (
             },
             edgeStateStyles: {
                 highlighted: {
-                    lineWidth: 1.5,
                     opacity: 1,
                 },
                 faded: {

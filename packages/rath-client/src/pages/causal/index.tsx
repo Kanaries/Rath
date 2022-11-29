@@ -1,28 +1,41 @@
-import { Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import produce from 'immer';
-import { IFieldMeta } from '../../interfaces';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import styled from 'styled-components';
+import type { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import { mergeCausalPag, resolvePreconditionsFromCausal, transformPreconditions } from '../../utils/resolve-causal';
-import Explorer from './explorer';
-import Params from './params';
-import { BgKnowledge, BgKnowledgePagLink, ModifiableBgKnowledge } from './config';
-import ModelStorage from './modelStorage';
-import MatrixPanel, { MATRIX_TYPE } from './matrixPanel';
+import type { IFunctionalDep, ModifiableBgKnowledge } from './config';
 import { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import { useDataViews } from './hooks/dataViews';
-import DatasetPanel from './datasetPanel';
-import ManualAnalyzer from './manualAnalyzer';
-import PreconditionPanel from './precondition/preconditionPanel';
 import type { GraphNodeAttributes } from './explorer/graph-utils';
+import { CausalStepPager } from './step';
+import { getGeneratedFDFromExtInfo } from './functionalDependencies/utils';
 
-const CausalPage: React.FC = () => {
+
+const Main = styled.div`
+    height: calc(100vh - 70px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    > h1 {
+        flex-grow: 0;
+        flex-shrink: 0;
+    }
+`;
+
+const CausalPage: FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
+    const { selectedFields } = causalStore;
     const interactFieldGroups = useInteractFieldGroups(fieldMetas);
-    const { appendFields2Group } = interactFieldGroups;
-    const { igMatrix, causalStrength, computing, selectedFields, focusFieldIds } = causalStore;
+
+    useEffect(() => {
+        causalStore.setFocusFieldIds(
+            fieldMetas
+                .filter((f) => f.disable !== true)
+                .slice(0, 10)
+                .map((f) => f.fid)
+        ); // 默认只使用前 10 个)
+    }, [fieldMetas, causalStore]);
 
     const [modifiablePrecondition, __unsafeSetModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
 
@@ -48,78 +61,22 @@ const CausalPage: React.FC = () => {
         });
     }, []);
 
-    /** @deprecated */
-    const precondition = useMemo<BgKnowledge[]>(() => {
-        if (computing || igMatrix.length !== selectedFields.length) {
-            return [];
-        }
-        return modifiablePrecondition.reduce<BgKnowledge[]>((list, decl) => {
-            const srcIdx = selectedFields.findIndex((f) => f.fid === decl.src);
-            const tarIdx = selectedFields.findIndex((f) => f.fid === decl.tar);
+    const [functionalDependencies, __unsafeSetFunctionalDependencies] = useState<IFunctionalDep[]>([]);
 
-            if (srcIdx !== -1 && tarIdx !== -1) {
-                if (decl.type === 'directed-must-link' || decl.type === 'directed-must-not-link') {
-                    list.push({
-                        src: decl.src,
-                        tar: decl.tar,
-                        type: decl.type === 'directed-must-link' ? 1 : -1,
-                    });
-                } else {
-                    list.push({
-                        src: decl.src,
-                        tar: decl.tar,
-                        type: decl.type === 'must-link' ? 1 : -1,
-                    }, {
-                        src: decl.tar,
-                        tar: decl.src,
-                        type: decl.type === 'must-link' ? 1 : -1,
-                    });
-                }
-            }
-
-            return list;
-        }, []);
-    }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
-
-    const preconditionPag = useMemo<BgKnowledgePagLink[]>(() => {
-        if (computing || igMatrix.length !== selectedFields.length) {
-            return [];
-        }
-        return transformPreconditions(modifiablePrecondition, selectedFields);
-    }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
+    const setFunctionalDependencies = useCallback((next: IFunctionalDep[] | ((prev: IFunctionalDep[]) => IFunctionalDep[])) => {
+        __unsafeSetFunctionalDependencies(prev => {
+            const list = typeof next === 'function' ? next(prev) : next;
+            return list.reduce<IFunctionalDep[]>((deps, dep) => {
+                return deps.concat([dep]);
+            }, []);
+        });
+    }, []);
 
     const dataContext = useDataViews(cleanedData);
-    const { dataSubset } = dataContext;
 
     useEffect(() => {
         causalStore.updateCausalAlgorithmList(fieldMetas);
     }, [causalStore, fieldMetas]);
-
-    const onFieldGroupSelect = useCallback(
-        (xFid: string, yFid: string) => {
-            causalStore.setFocusNodeIndex(fieldMetas.findIndex((f) => f.fid === xFid));
-            appendFields2Group([xFid, yFid]);
-        },
-        [appendFields2Group, causalStore, fieldMetas]
-    );
-
-    const handleSubTreeSelected = useCallback((node: Readonly<IFieldMeta> | null) => {
-            if (node) {
-                appendFields2Group([node.fid]);
-            }
-        },
-        [appendFields2Group]
-    );
-
-    const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number, type: ModifiableBgKnowledge['type']) => {
-        setModifiablePrecondition((list) => {
-            return list.concat([{
-                src: selectedFields[srcIdx].fid,
-                tar: selectedFields[tarIdx].fid,
-                type,
-            }]);
-        });
-    }, [selectedFields, setModifiablePrecondition]);
 
     // 结点可以 project 一些字段信息
     const renderNode = useCallback((node: Readonly<IFieldMeta>): GraphNodeAttributes | undefined => {
@@ -131,78 +88,34 @@ const CausalPage: React.FC = () => {
         };
     }, []);
 
-    const synchronizePredictionsUsingCausalResult = useCallback(() => {
-        setModifiablePrecondition(resolvePreconditionsFromCausal(causalStrength, fieldMetas));
-    }, [setModifiablePrecondition, causalStrength, fieldMetas]);
-
-    const edges = useMemo(() => {
-        return mergeCausalPag(causalStrength, modifiablePrecondition, fieldMetas);
-    }, [causalStrength, fieldMetas, modifiablePrecondition]);
+    const submitRef = useRef(setFunctionalDependencies);
+    submitRef.current = setFunctionalDependencies;
+    const fdRef = useRef(functionalDependencies);
+    fdRef.current = functionalDependencies;
+    useEffect(() => {
+        setTimeout(() => {
+            if (fdRef.current.length === 0) {
+                const fds = getGeneratedFDFromExtInfo(selectedFields);
+                submitRef.current(fds);
+            }
+        }, 400);
+    }, [selectedFields]);
 
     return (
         <div className="content-container">
-            <div className="card">
-                <h1 style={{ fontSize: '1.6em', fontWeight: 500 }}>因果分析</h1>
-                <DatasetPanel context={dataContext} />
-                <PreconditionPanel
-                    context={dataContext}
+            <Main className="card">
+                <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>因果分析</h1>
+                <hr className="card-line" />
+                <CausalStepPager
+                    dataContext={dataContext}
                     modifiablePrecondition={modifiablePrecondition}
                     setModifiablePrecondition={setModifiablePrecondition}
+                    functionalDependencies={functionalDependencies}
+                    setFunctionalDependencies={setFunctionalDependencies}
                     renderNode={renderNode}
+                    interactFieldGroups={interactFieldGroups}
                 />
-                <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
-                    <ModelStorage />
-                    <Params dataSource={dataSubset} focusFields={focusFieldIds} bgKnowledge={preconditionPag} precondition={precondition} />
-                </Stack>
-                <MatrixPanel
-                    fields={selectedFields}
-                    dataSource={dataSubset}
-                    onMatrixPointClick={onFieldGroupSelect}
-                    onCompute={(matKey) => {
-                        switch (matKey) {
-                            case MATRIX_TYPE.conditionalMutualInfo:
-                                causalStore.computeIGCondMatrix(dataSubset, selectedFields);
-                                break;
-                            case MATRIX_TYPE.causal:
-                                causalStore.causalDiscovery(dataSubset, precondition, preconditionPag);
-                                break;
-                            case MATRIX_TYPE.mutualInfo:
-                            default:
-                                causalStore.computeIGMatrix(dataSubset, selectedFields);
-                                break;
-                        }
-                    }}
-                    diagram={(
-                        <Explorer
-                            dataSource={dataSubset}
-                            scoreMatrix={igMatrix}
-                            preconditions={modifiablePrecondition}
-                            onNodeSelected={handleSubTreeSelected}
-                            onLinkTogether={handleLinkTogether}
-                            renderNode={renderNode}
-                            onRevertLink={(srcIdx, tarIdx) =>
-                                setModifiablePrecondition((list) => {
-                                    return list.map((link) => {
-                                        if (link.src === srcIdx && link.tar === tarIdx) {
-                                            return produce(link, draft => {
-                                                draft.type = ({
-                                                    "must-link": 'must-not-link',
-                                                    "must-not-link": 'must-link',
-                                                    "directed-must-link": 'directed-must-not-link',
-                                                    "directed-must-not-link": 'directed-must-link',
-                                                } as const)[draft.type];
-                                            });
-                                        }
-                                        return link;
-                                    });
-                                })
-                            }
-                            synchronizePredictionsUsingCausalResult={synchronizePredictionsUsingCausalResult}
-                        />
-                    )}
-                />
-            </div>
-            <ManualAnalyzer context={dataContext} interactFieldGroups={interactFieldGroups} edges={edges} />
+            </Main>
         </div>
     );
 };

@@ -81,7 +81,8 @@
             "start": "Start Analysis",
             "checkResult": "Check Existed Results",
             "pattern": "Semi-auto Exploration",
-            "manual": "Manual Exploration"
+            "manual": "Manual Exploration",
+            "causal": "Causal Analysis"
         },
         "importStorage": {
             "title": "Import History Storage",
@@ -171,8 +172,8 @@
         },
         "advice": {
             "lackData": "Lack of Data",
-            "lackDimension": "There should includes dimensions in the datasource.",
-            "lackMeasure": "There should includes measures in the datasource",
+            "lackDimension": "It seems you don't have dimensions in your dataset. (part of functions of mega-automation maybe influenced.)",
+            "lackMeasure": "It seems you don't have measures in your dataset. (part of functions of mega-automation maybe influenced.)",
             "smallSample": "The sample size is not big enough, which may influence the reliability of recommandation.",
             "forceAnalysis": "Force Analysis"
         },

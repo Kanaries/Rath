@@ -80,7 +80,8 @@
             "start": "开始分析",
             "checkResult": "查看已有结果",
             "pattern": "半自动化探索",
-            "manual": "自助分析"
+            "manual": "自助分析",
+            "causal": "因果分析"
         },
         "importStorage": {
             "title": "导入历史分析",
@@ -170,8 +171,8 @@
         },
         "advice": {
             "lackData": "缺少有效数据",
-            "lackDimension": "数据集中缺少维度，无法进行完整的分析任务。",
-            "lackMeasure": "数据集中缺少度量，无法进行完整的分析任务。",
+            "lackDimension": "数据集中缺少维度。（全自动化分析模块部分能力会受到影响）",
+            "lackMeasure": "数据集中缺少度量，（全自动化分析模块会受到影响，可以尝试使用其他模块）",
             "smallSample": "数据集中样本数量低于预期，可能会对推荐结果的一般性造成影响。（小样本问题）",
             "forceAnalysis": "强制分析"
         },
@@ -472,7 +473,7 @@
                 "unvisualizedDimension": "潜在因素"
             },
             "desc": {
-                "unvisualizedDimension": "视图中未展现的因素 { dimension } 在选定区间有不同的分布模式，可能对 { mainField } 的分布有影响关系。评分：{ responsibility }。"
+                "unvisualizedDimension": "视图中未展现的因素 field({ dimension }) 在选定区间有不同的分布模式，可能对 field.noEvents({ mainField }) 的分布有影响关系。评分：score({ responsibility })。"
             }
         }
     },

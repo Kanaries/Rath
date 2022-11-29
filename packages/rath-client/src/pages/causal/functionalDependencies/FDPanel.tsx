@@ -1,12 +1,12 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import styled from 'styled-components';
-import type { ModifiableBgKnowledge } from '../config';
+import type { IFunctionalDep } from '../config';
 import type { IFieldMeta } from '../../../interfaces';
 import type { GraphNodeAttributes } from '../explorer/graph-utils';
 import type { useDataViews } from '../hooks/dataViews';
-import PreconditionBatch from './preconditionBatch';
-import PreconditionEditor from './preconditionEditor';
+import FDBatch from './FDBatch';
+import FDEditor from './FDEditor';
 
 
 const Container = styled.div`
@@ -22,32 +22,32 @@ const Container = styled.div`
     }
 `;
 
-export interface PreconditionPanelProps {
+export interface FDPanelProps {
     context: ReturnType<typeof useDataViews>;
-    modifiablePrecondition: ModifiableBgKnowledge[];
-    setModifiablePrecondition: (precondition: ModifiableBgKnowledge[] | ((prev: ModifiableBgKnowledge[]) => ModifiableBgKnowledge[])) => void;
+    functionalDependencies: IFunctionalDep[];
+    setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: IFunctionalDep[]) => IFunctionalDep[])) => void;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
 }
 
-const PreconditionPanel: React.FC<PreconditionPanelProps> = ({
-    context, modifiablePrecondition, setModifiablePrecondition, renderNode,
+const FDPanel: React.FC<FDPanelProps> = ({
+    context, functionalDependencies, setFunctionalDependencies, renderNode,
 }) => {
     return (
         <Container>
-            <PreconditionBatch
+            <FDBatch
                 context={context}
-                modifiablePrecondition={modifiablePrecondition}
-                setModifiablePrecondition={setModifiablePrecondition}
+                functionalDependencies={functionalDependencies}
+                setFunctionalDependencies={setFunctionalDependencies}
                 renderNode={renderNode}
             />
-            <PreconditionEditor
+            <FDEditor
                 context={context}
-                modifiablePrecondition={modifiablePrecondition}
-                setModifiablePrecondition={setModifiablePrecondition}
+                functionalDependencies={functionalDependencies}
+                setFunctionalDependencies={setFunctionalDependencies}
                 renderNode={renderNode}
             />
         </Container>
     );
 };
 
-export default observer(PreconditionPanel);
+export default observer(FDPanel);

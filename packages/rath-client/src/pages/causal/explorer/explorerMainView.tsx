@@ -33,11 +33,13 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     focus: number | null;
     onLinkTogether: (srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
+    onRemoveLink: (srcFid: string, tarFid: string) => void;
     preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
     allowZoom: boolean;
+    handleLasso?: (fields: IFieldMeta[]) => void;
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
@@ -50,12 +52,14 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     onClickNode,
     onLinkTogether,
     onRevertLink,
+    onRemoveLink,
     preconditions,
     forceRelayoutRef,
     autoLayout,
     renderNode,
     toggleFlowAnalyzer,
     allowZoom,
+    handleLasso,
     ...props
 }, ref) => {
     const ErrorBoundary = useErrorBoundary((err, info) => {
@@ -96,10 +100,12 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                     toggleFlowAnalyzer={toggleFlowAnalyzer ?? (() => {})}
                     onLinkTogether={onLinkTogether}
                     onRevertLink={onRevertLink}
+                    onRemoveLink={onRemoveLink}
                     focus={focus}
                     autoLayout={autoLayout}
                     renderNode={renderNode}
                     allowZoom={allowZoom}
+                    handleLasso={handleLasso}
                     style={{
                         flexGrow: 1,
                         flexShrink: 1,
