@@ -1,8 +1,6 @@
 name: "Run TODO to Issue"
 on:
     push:
-        branches:
-            - master
     workflow_dispatch:
         inputs:
             MANUAL_COMMIT_REF:
@@ -18,8 +16,6 @@ jobs:
             - uses: "actions/checkout@v3"
             - name: "TODO to Issue"
               uses: "alstr/todo-to-issue-action@master"
-              with:
-                  AUTO_ASSIGN: true
               env:
                   MANUAL_COMMIT_REF: ${{ inputs.MANUAL_COMMIT_REF }}
                   MANUAL_BASE_REF: ${{ inputs.MANUAL_BASE_REF }}
