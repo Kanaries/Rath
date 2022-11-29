@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require('electron')
+// TODO: test todo bot
 const path = require('path');
 // const app_path = path.resolve(__dirname, './build/index.html')
 // console.log(app_path)
