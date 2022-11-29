@@ -3,6 +3,7 @@ import { ActionButton, Icon, Toggle, TooltipHost } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, Fragment, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import { useId } from '@fluentui/react-hooks';
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { useGlobalStore } from "../../../store";
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from "../../../workers/insight/r-insight.worker";
@@ -12,7 +13,6 @@ import type { useDataViews } from '../hooks/dataViews';
 import DiffChart from "./diffChart";
 import ExplainChart from "./explainChart";
 import VisText, { IVisTextProps } from './visText';
-import { useId } from '@fluentui/react-hooks';
 
 
 export interface IRInsightViewProps {

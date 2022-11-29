@@ -42,8 +42,8 @@ export interface ManualAnalyzerProps {
 }
 
 const CustomAnalysisModes = [
-    { key: 'explainer', text: '可解释探索' },
     { key: 'crossFilter', text: '因果验证' },
+    { key: 'explainer', text: '可解释探索' },
     { key: 'graphicWalker', text: '可视化自助分析' },
     { key: 'predict', text: '模型预测' },
 ] as const;
@@ -58,7 +58,7 @@ const ManualAnalyzer = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSel
     const { fieldGroup, setFieldGroup, clearFieldGroup } = interactFieldGroups;
     const [showSemiClue, setShowSemiClue] = useState(false);
     const [clueView, setClueView] = useState<IPattern | null>(null);
-    const [customAnalysisMode, setCustomAnalysisMode] = useState<CustomAnalysisMode>('explainer');
+    const [customAnalysisMode, setCustomAnalysisMode] = useState<CustomAnalysisMode>('crossFilter');
     const { selectedFields } = causalStore;
 
     const { vizSampleData, filters } = context;

@@ -398,6 +398,8 @@ const PredictPanel = forwardRef<{
 
     useEffect(() => {
         if (diff) {
+            // TODO: 在界面上实现一个 diff view，代替这个 console
+            // eslint-disable-next-line no-console
             console.table(diff);
         }
     }, [diff]);

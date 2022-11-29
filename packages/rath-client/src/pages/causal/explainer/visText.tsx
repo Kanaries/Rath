@@ -105,7 +105,7 @@ const VisText = forwardRef<RefType[AllowedDOMType], IVisTextProps<AllowedDOMType
                 {list.map((item, i) => <Fragment key={i}>{item}</Fragment>)}
             </>
         );
-    }, [children]);
+    }, [children, context]);
 
     return createElement(as, { ...props, ref }, (
         <>
