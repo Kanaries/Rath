@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, Extra
 import traceback
+from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 
 IRow = Dict[str, object]
 IDataSource = List[IRow]
@@ -241,7 +242,7 @@ def trans(df: pd.DataFrame, fields: List[IFieldMeta], params: OptionalParams):
                 for col in list(newcode.columns):
                     res_fields.append(IFieldMeta(fid=col, name=f.name+(col.replace(f.fid, '', 1)), semanticType='ordinal'))
                 # print(df.shape, res.shape)
-        elif f.semanticType == 'temporal':  # TODO: [fix] use extended temporal
+        elif f.semanticType == 'temporal':
             if df[f.fid].dtype in [np.dtype('O'), object, str, pd.CategoricalDtype]:
                 code = (pd.to_datetime(df[f.fid]) - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s')
                 # res[f.fid] = code
@@ -324,7 +325,7 @@ class CausalRequest(BaseModel, extra=Extra.allow):
     dataSource: List[IRow]
     fields: List[IFieldMeta]
     focusedFields: List[str] = Field(default=[], description="A subset of fields which we concerned about.")
-    bgKnowledges: Optional[List[BgKnowledge]] = Field(default=[], description="Known edges")
+    # bgKnowledges: Optional[List[BgKnowledge]] = Field(default=[], description="Known edges")
     bgKnowledgesPag: Optional[List[BgKnowledgePag]] = Field(default=[], description="Known edges (PAG)")
     funcDeps: Optional[List[IFunctionalDep]] = Field(default=[], description="")
     params: OptionalParams = Field(default={}, description="optional params", extra=Extra.allow)
@@ -338,6 +339,26 @@ class AlgoInterface:
         self.dataSource, self.origin_fields = pd.DataFrame(dataSource), fields
         self.fields = [*fields]
         # self.data, self.fields = transDataSource(dataSource, fields, params)
+    
+    def constructBgKnowledgePag(self, bgKnowledgesPag: Optional[List[BgKnowledgePag]] = [], f_ind: Dict[str, int] = {}):
+        from causallearn.graph.GraphNode import GraphNode
+        node = [GraphNode(f"X{i+1}") for i in range(len(self.fields))]
+        self.bk = BackgroundKnowledge()
+        for k in bgKnowledgesPag:
+            if k.src_type == -1 and k.tar_type == 1:
+                self.bk.add_required_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
+            elif k.src_type == 1 and k.tar_type == -1:
+                self.bk.add_required_by_node(node[f_ind[k.tar]], node[f_ind[k.src]])
+            if k.src_type == 0:
+                self.bk.add_forbidden_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
+            if k.tar_type == 0:
+                self.bk.add_forbidden_by_node(node[f_ind[k.tar]], node[f_ind[k.src]])
+            # if k.type > common.bgKnowledge_threshold[1]:
+            #     self.bk.add_required_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
+            # elif k.type < common.bgKnowledge_threshold[0]:
+            #     self.bk.add_forbidden_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
+        return self.bk
+        
     
     def transFocusedFields(self, focusedFields):
         res = []

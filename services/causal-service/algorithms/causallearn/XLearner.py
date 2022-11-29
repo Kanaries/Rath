@@ -118,7 +118,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     G_fd: Gfd中的点集，原图编号
     """
     for dep in functional_dependencies:
-        if len(dep.params) == 1: # TODO: [feat] dep.fid depends only on dep.params[0]:
+        if len(dep.params) == 1:
             param, f = dep.params[0].fid, dep.fid
             u, v = f_ind[dep.params[0].fid], f_ind[dep.fid]
             src, dest = NodeId.get(u, None), NodeId.get(v, None)
@@ -139,7 +139,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
             adj[src].add(dest)
             anc[dest].add(src)
         else:
-            # TODO: [feat] should be treated the same as bgKnowledge
+            # TODO: depends on more than one params: should be treated the same as bgKnowledge
             pass
     topo = toposort(adj)
     
@@ -335,8 +335,7 @@ class XLearner(AlgoInterface):
                 self.bk.add_forbidden_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
         return self.bk
     
-    
-    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], funcDeps: common.IFunctionalDep = [],  **kwargs):
+    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], funcDeps: common.IFunctionalDep = [],  **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
         print(array, array.min(), array.max())
@@ -344,7 +343,7 @@ class XLearner(AlgoInterface):
         
         # if bgKnowledges and len(bgKnowledges) > 0:
         f_ind = {fid: i for i, fid in enumerate(focusedFields)}
-        bk = self.constructBgKnowledge(bgKnowledges=bgKnowledges if bgKnowledges else [], f_ind=f_ind)
+        bk = self.constructBgKnowledgePag(bgKnowledgesPag=bgKnowledgesPag if bgKnowledgesPag else [], f_ind=f_ind)
             
         self.G, self.edges = xlearn(array, **params.__dict__, background_knowledge=bk, functional_dependencies=funcDeps, f_ind=f_ind, fields=focusedFields, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
         l = self.G.graph.tolist()

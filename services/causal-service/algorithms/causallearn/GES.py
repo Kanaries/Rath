@@ -8,7 +8,7 @@ import algorithms.common as common
 
 from causallearn.search.ScoreBased.GES import ges
 
-class GESParams(OptionalParams, title="GES Algorithm"):
+class GESParams(OptionalParams, title="GES Algorithm(暂不支持背景知识)"):
     """
     Record[‘G’]: 
         Record[‘G’].graph[j,i]=1 and Record[‘G’].graph[i,j]=-1 表示 i –> j;
@@ -43,7 +43,7 @@ class GES(AlgoInterface):
     def __init__(self, dataSource: List[IRow], fields: List[IFieldMeta], params: Optional[ParamType] = ParamType()):
         super(GES, self).__init__(dataSource=dataSource, fields=fields, params=params)
         
-    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
+    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         common.checkLinearCorr(array)
         self.Record = ges(array, score_func=params.score_func, maxP=params.maxP if params.maxP else None)

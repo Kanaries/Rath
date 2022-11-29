@@ -122,6 +122,7 @@ class ExplainDataSession(RathSession):
             # target_units=lambda df: inferDiff(satCurrent, satOther), # satisfy(self.dataSource, groups.current), satisfy(df, groups.other)),
             evaluate_effect_strength=True,
             )
+        # TOBEDONE: param
         print(self.estimate)
 
 def inferInfo(session: ExplainDataSession):
@@ -215,15 +216,11 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
             description=IDoWhy.LinkInfoDescription(key='', data={'estimate': str(estimate)}),
             responsibility=significance_value(estimate.value, var=1.)
         ))
+        # TOBEDONE: more params
         if estimate.value > 0:
             print("f===========", f.fid)
             print("target_units=\n", dataSource[tmp(transData)])
             print('unobserved f = ', f, '\n', estimate)
-    
-    for e in adj[f_ind[measures[0].fid]]:
-        if e['src_type'] in [-1, 2]:
-            # TODO:
-            pass
     
     # General: use origin graph 
     # Fallback: without graph, any variable can be used as common_cause
@@ -232,7 +229,7 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
             # common_causes = [f.fid]
             # effect_modifiers = [f.fid]
             effect_modifiers = [f.fid]
-            # TODO: if edges in graph
+            # TODO: only if edges in causal graph: 
             model = dowhy.CausalModel(
                 data=transData,
                 # treatment=[d for d in dimensions if flipped or not compare(current.get(d, None), other.get(d, None))],

@@ -8,7 +8,7 @@ import algorithms.common as common
 from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 from causallearn.search.PermutationBased.GRaSP import grasp
 
-class GRaSPParams(OptionalParams, title="GRaSP Algorithm"):
+class GRaSPParams(OptionalParams, title="GRaSP Algorithm(暂不支持背景知识)"):
     """Greedy relaxation of the sparsest permutation (GRaSP) algorithm.
     G: PAG
     """
@@ -35,7 +35,7 @@ class GRaSP(AlgoInterface):
     def __init__(self, dataSource: List[IRow], fields: List[IFieldMeta], params: Optional[ParamType] = ParamType()):
         super(GRaSP, self).__init__(dataSource=dataSource, fields=fields, params=params)
         
-    def constructBgKnowledge(self, bgKnowledges: Optional[List[common.BgKnowledge]] = [], f_ind: Dict[str, int] = {}):
+    def constructBgKnowledge(self, bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], f_ind: Dict[str, int] = {}):
         node = self.cg.G.get_nodes()
         # self.bk = BackgroundKnowledge()
         # for k in bgKnowledges:

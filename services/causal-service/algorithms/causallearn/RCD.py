@@ -12,7 +12,7 @@ from causallearn.graph.Node import Node
 
 from causallearn.search.FCMBased import lingam
 
-class RCDParams(OptionalParams, title="RCD Algorithm"):
+class RCDParams(OptionalParams, title="RCD Algorithm(暂不支持背景知识)"):
     max_explanatory_num: Optional[int] = Field(
         default=2, title="推导因果关系的最大变量数",
         description="Maximum number of explanatory variables.",
@@ -46,7 +46,7 @@ class RCD(AlgoInterface):
     def __init__(self, dataSource: List[IRow], fields: List[IFieldMeta], params: Optional[ParamType] = ParamType()):
         super(RCD, self).__init__(dataSource=dataSource, fields=fields, params=params)
         
-    def constructBgKnowledge(self, bgKnowledges: Optional[List[common.BgKnowledge]] = [], f_ind: Dict[str, int] = {}):
+    def constructBgKnowledge(self, bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], f_ind: Dict[str, int] = {}):
         node = self.cg.G.get_nodes()
         # self.bk = BackgroundKnowledge()
         # for k in bgKnowledges:
@@ -56,7 +56,7 @@ class RCD(AlgoInterface):
         #         self.bk.add_forbidden_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
         # return self.bk
         
-    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
+    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
         params.__dict__['cache_path'] = None # '/tmp/causal/pc.json'

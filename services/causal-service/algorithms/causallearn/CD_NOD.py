@@ -80,7 +80,7 @@ class CD_NOD(AlgoInterface):
                 self.bk.add_forbidden_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
         return self.bk
     
-    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
+    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
         # if params.c_indx == '$field':
         #     if params.c_indx_field not in focusedFields:
         #         raise f"$field {params.c_indx_field} not existed"
@@ -105,9 +105,9 @@ class CD_NOD(AlgoInterface):
         self.cg = cdnod(array, **args, background_knowledge=None, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
         fields = [ *[f for f in self.focusedFields if f.fid != params.c_indx], c_indx_field ]
         
-        if bgKnowledges and len(bgKnowledges) > 0:
+        if bgKnowledgesPag and len(bgKnowledgesPag) > 0:
             f_ind = {f.fid: i for (i, f) in enumerate(fields)}
-            bk = self.constructBgKnowledge(bgKnowledges=bgKnowledges, f_ind=f_ind)
+            bk = self.constructBgKnowledgePag(bgKnowledgesPag=bgKnowledgesPag, f_ind=f_ind)
             self.cg = cdnod(array, **args, background_knowledge=bk, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
         
         l = self.cg.G.graph.tolist()

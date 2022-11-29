@@ -20,7 +20,7 @@ DICT: Dict[str, typing.Type[Any]] = {
     'XLearner': XLearner,
     'CD_NOD': CD_NOD,
     'PC': PC,
-    'FCI': FCI,
+    # 'FCI': FCI,
     'GES': GES,
     'ExactSearch': ExactSearch,
     'GIN': GIN,

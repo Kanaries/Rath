@@ -10,7 +10,7 @@ import numpy as np
 from causallearn.search.HiddenCausal.GIN.GIN import GIN as gin
 from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 
-class GINParams(OptionalParams, title="GIN Algorithm"):
+class GINParams(OptionalParams, title="GIN Algorithm(暂不支持背景知识)"):
     """
     G: GeneralGraph. Causal graph.
     K: list. Causal Order.
@@ -42,7 +42,7 @@ class GIN(AlgoInterface):
         #         self.bk.add_forbidden_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
         # return self.bk
         
-    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
+    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
         params.__dict__['cache_path'] = None # '/tmp/causal/pc.json'

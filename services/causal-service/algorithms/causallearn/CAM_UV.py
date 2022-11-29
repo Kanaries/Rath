@@ -5,13 +5,12 @@ from pydantic import Field
 from algorithms.common import getOpts, IDepTestItems, ICatEncodeType, IQuantEncodeType, UCPriorityItems, UCRuleItems, AlgoInterface, IRow, IDataSource, IFieldMeta, IFields
 from algorithms.common import transDataSource, OptionalParams, ScoreFunctions
 import algorithms.common as common
-from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 
 from causallearn.search.FCMBased.lingam import CAMUV
 from causallearn.graph.GeneralGraph import GeneralGraph
 from causallearn.graph.Node import Node
 
-class CAM_UVParams(OptionalParams, title="CAM-UV Algorithm"):
+class CAM_UVParams(OptionalParams, title="CAM-UV Algorithm(暂不支持背景知识)"):
     alpha: Optional[float] = Field(
         default=0.05, title="显著性阈值", # "Alpha",
         description="desired significance level (float) in (0, 1). Default: 0.05.",
@@ -28,8 +27,9 @@ class CAM_UV(AlgoInterface):
     def __init__(self, dataSource: List[IRow], fields: List[IFieldMeta], params: Optional[ParamType] = ParamType()):
         super(CAM_UV, self).__init__(dataSource=dataSource, fields=fields, params=params)
         
-    def constructBgKnowledge(self, bgKnowledges: Optional[List[common.BgKnowledge]] = [], f_ind: Dict[str, int] = {}):
-        node = self.cg.G.get_nodes()
+    def constructBgKnowledge(self, bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], f_ind: Dict[str, int] = {}):
+        import causallearn.graph.GraphNode as GraphNode
+        node = [GraphNode(f"X{i+1}") for i in range(len(self.fields))]
         # self.bk = BackgroundKnowledge()
         # for k in bgKnowledges:
         #     if k.type > common.bgKnowledge_threshold[1]:
@@ -38,7 +38,7 @@ class CAM_UV(AlgoInterface):
         #         self.bk.add_forbidden_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
         # return self.bk
         
-    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
+    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
         params.__dict__['cache_path'] = None # '/tmp/causal/pc.json'

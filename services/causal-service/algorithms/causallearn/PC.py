@@ -67,7 +67,7 @@ class PC(AlgoInterface):
                 self.bk.add_forbidden_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
         return self.bk
         
-    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
+    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
         print("fields=", self.fields)
@@ -78,9 +78,9 @@ class PC(AlgoInterface):
         # self.cg = pc(array, params.alpha, params.indep_test, params.stable, params.uc_rule, params.uc_priority, params.mvpc, cache_path=self.__class__.cache_path)
         self.cg = pc(array, **params.__dict__, background_knowledge=None, verbose=self.__class__.verbose)
         
-        if bgKnowledges and len(bgKnowledges) > 0:
+        if bgKnowledgesPag and len(bgKnowledgesPag) > 0:
             f_ind = {fid: i for i, fid in enumerate(focusedFields)}
-            bk = self.constructBgKnowledge(bgKnowledges=bgKnowledges, f_ind=f_ind)
+            bk = self.constructBgKnowledgePag(bgKnowledgesPag=bgKnowledgesPag, f_ind=f_ind)
             self.cg = pc(array, **params.__dict__, background_knowledge=bk, verbose=self.__class__.verbose)
     
         l = self.cg.G.graph.tolist()

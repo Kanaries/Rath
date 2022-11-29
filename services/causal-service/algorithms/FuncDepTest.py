@@ -43,7 +43,7 @@ class FuncDepTest(common.AlgoInterface):
         print("FuncDepTest", fields, params)
         super(FuncDepTest, self).__init__(dataSource=dataSource, fields=fields, params=params)
         
-    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = []):
+    def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = []):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         d = len(focusedFields)
         import itertools, numpy as np
