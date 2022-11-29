@@ -46,7 +46,6 @@ class GRaSP(AlgoInterface):
         # return self.bk
         
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
-        # TODO: new knowledges
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
         params.__dict__['cache_path'] = None # '/tmp/causal/pc.json'

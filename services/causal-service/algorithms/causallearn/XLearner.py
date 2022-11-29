@@ -118,7 +118,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     G_fd: Gfd中的点集，原图编号
     """
     for dep in functional_dependencies:
-        if len(dep.params) == 1: # TODO: dep.fid depends only on dep.params[0]:
+        if len(dep.params) == 1: # TODO: [feat] dep.fid depends only on dep.params[0]:
             param, f = dep.params[0].fid, dep.fid
             u, v = f_ind[dep.params[0].fid], f_ind[dep.fid]
             src, dest = NodeId.get(u, None), NodeId.get(v, None)
@@ -139,7 +139,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
             adj[src].add(dest)
             anc[dest].add(src)
         else:
-            # TODO: should be treated the same as bgKnowledge
+            # TODO: [feat] should be treated the same as bgKnowledge
             pass
     topo = toposort(adj)
     
@@ -337,7 +337,6 @@ class XLearner(AlgoInterface):
     
     
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], funcDeps: common.IFunctionalDep = [],  **kwargs):
-        # TODO: new knowledges
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
         print(array, array.min(), array.max())

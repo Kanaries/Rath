@@ -93,7 +93,8 @@ export class MegaAutomationStore {
             cloneSpaces.sort((a, b) => {
                 let cardOfA = 0;
                 let cardOfB = 0;
-                // TODO: This is an non-accurate cardinalitity estimate.
+                // TODO: [fix] This is an non-accurate cardinalitity estimate.
+                // Hao Chen, 11 months ago   (January 1st, 2022 1:27 PM) 
                 // should get the correct number from OLAP query.
                 // but it cost time.(need a discussion.)
                 for (let dim of a.dimensions) {

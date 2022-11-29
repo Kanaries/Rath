@@ -96,13 +96,15 @@ const ManualAnalyzer = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSel
               }
             : {};
         // 散点图（分布矩阵）
-        // TODO: Graphic Walker 支持受控状态
+        // TODO: [feat] Graphic Walker 支持受控状态
+        // by kyusho, 2 weeks ago
         // 多变量直方图现在存在支持问题：
         // 1. GraphicWalker 解析 Specification 的规则导致不能叠加在 Column 上。
         // 2. 不应该默认聚合。
         // ----
         // 多变量直方图
-        // TODO: GraphicWalker 支持 Vega bin
+        // TODO: [feat] GraphicWalker 支持 Vega bin
+        // kyusho, 2 weeks ago
         // 多变量直方图现在存在支持问题：
         // 1. GraphicWalker 不支持 vega bin，Specification 也传不了 bin。
         // 2. GraphicWalker 解析 Specification 的规则导致不能叠加在 Column 上。

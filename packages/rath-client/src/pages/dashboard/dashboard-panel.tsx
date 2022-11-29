@@ -210,7 +210,8 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                             {({
                                 collection: <SourcePanel page={page} card={card} operators={operators} sampleSize={sampleSize} />,
                                 editor: <EditPanel page={page} card={card} operators={operators} sampleSize={sampleSize} />,
-                                loa: null,      // TODO:
+                                loa: null,      // TODO: [fix] LOA panel
+                                // kyusho, 4 weeks ago   (November 3rd, 2022 3:15 PM
                             } as const)[tab]}
                         </div>
                     </>

@@ -64,7 +64,8 @@ export function inferMeta (props: { dataSource: IRow[]; fields: IMuteFieldBase[]
             semanticType = semanticType === 'quantitative' ? 'ordinal' : semanticType
         }
         const disable: boolean = field.disable === '?' ? inferDisable(dataSource, field.fid) : Boolean(field.disable);
-        // TODO: 临时处理逻辑。后续可视化部分扩展好了，这部分要消除掉。（使用dist图表就可以解决）
+        // TODO: [fix] 临时处理逻辑。后续可视化部分扩展好了，这部分要消除掉。（使用dist图表就可以解决）
+        // Hao Chen, 9 months ago   (March 8th, 2022 7:29 PM)
         if (analyticType === 'measure' && semanticType === 'ordinal') {
             semanticType = 'quantitative'
         }

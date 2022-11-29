@@ -48,7 +48,7 @@ function isASCII(str: string) {
 
 function inferAnalyticType(dataSource: IRow[], fid: string): IAnalyticType {
     return dataSource.every((row) => {
-        // TODO: 推断逻辑抽象一下
+        // TODO: [refactor] 推断逻辑抽象一下
         return !isNaN(Number(row[fid])) || row[fid] === undefined;
     })
         ? 'measure'

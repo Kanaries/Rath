@@ -248,8 +248,8 @@ const UnknownDateTimeInfo: DateTimeInfo = {}
 type InfoArrayType = keyof DateTimeInfoArray
 export type DateTimeInfoType = keyof DateTimeInfo
 export function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
-    // TODO: Polyfills: 中文格式等
-    // TODO: assume the same dateTime format or support different format in one column
+    // TODO: [refactor] Polyfills: 中文格式等
+    // TODO: [feat] assume the same dateTime format or support different format in one column
     let infoArray = {} as DateTimeInfoArray
     let reg_id: number | undefined, max_cnt = 0;
     for (let i = 0; i < analyzer.rules.length; ++i) {
@@ -259,7 +259,7 @@ export function parseDateTimeArray(dateTime: string[]): DateTimeInfoArray {
             max_cnt = cnt
         }
     }
-    // TODO: 推荐多种不同选择
+    // TODO: [feat] 推荐多种不同选择
     for (let i = 0; i < dateTime.length; ++i) {
         let info = parseDateTime(dateTime[i], max_cnt > 0 ? reg_id : undefined)
         Object.keys(info).forEach(key => {

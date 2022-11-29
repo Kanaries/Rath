@@ -53,7 +53,8 @@ class TestCore extends NextVICore {
             fields: [...viewFields],
             filters: view.filters,
         };
-        // TODO: dfc for multi view wildcards
+        // TODO: [feat] dfc for multi view wildcards
+        // jojocys, last week   (November 19th, 2022 4:38 PM) 
         for (let card of viewWildCards) {
             const fieldsWithScore: { field: IFieldMeta; score1: number; score2: number }[] = [];
             for (let field of fields) {
@@ -82,7 +83,8 @@ class TestCore extends NextVICore {
                     score2: totalScore,
                 });
             }
-            // TODO: 考虑字段的semantic 与 analyticType 都可以作为近邻的相似度评分
+            // TODO: [feat] 考虑字段的semantic 与 analyticType 都可以作为近邻的相似度评分
+            // jojocys, last week   (November 19th, 2022 4:38 PM) 
             fieldsWithScore.sort((a, b) => {
                 if (b.score1 > a.score1) return 1;
                 if (b.score1 < a.score1) return -1;

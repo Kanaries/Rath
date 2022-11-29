@@ -2,7 +2,8 @@ import { ICol, IFilter, IRow } from "../../interfaces";
 
 /**
  * @deprecated
- * TODO: remove this
+ * TODO: [refactor] remove this
+ * kyusho, 7 days ago   (November 22nd, 2022 11:46 PM) 
  */
 export function applyFilters (dataSource: IRow[],
     extFields: Map<string, ICol<any>>,

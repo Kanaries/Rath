@@ -44,7 +44,6 @@ class GES(AlgoInterface):
         super(GES, self).__init__(dataSource=dataSource, fields=fields, params=params)
         
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
-        # TODO: new knowledges
         array = self.selectArray(focusedFields=focusedFields, params=params)
         common.checkLinearCorr(array)
         self.Record = ges(array, score_func=params.score_func, maxP=params.maxP if params.maxP else None)

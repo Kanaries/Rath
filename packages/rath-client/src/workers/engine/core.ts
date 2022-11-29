@@ -168,7 +168,8 @@ export class RathEngine extends VIEngine {
     }
     public async scanDetail(viewSpace: ViewSpace) {
         const context = this;
-        // @ts-ignore TODO: FIX this in visual insights
+        // @ts-ignore TODO: [fix] FIX this in visual insights
+        // Hao Chen, 14 months ago   (September 28th, 2021 11:18 PM) 
         const { cube, fieldDictonary } = context;
         const { dimensions, measures } = viewSpace;
         const insightSpaces: IInsightSpace[] = []
@@ -230,7 +231,8 @@ export class RathEngine extends VIEngine {
             
         //     for (let mea of viewSpace.measures) {
         //         const distList = localDist.map(r => ({
-        //             // TODO: 讨论是否应当直接使用count
+        //             // TODO: [discuss]讨论是否应当直接使用count
+        //              Hao Chen, 11 months ago   (December 26th, 2021 2:35 AM) 
         //             // props: 节省计算量
         //             // cons: 强依赖于cube必须去计算count
         //             ...r,
@@ -443,7 +445,8 @@ export class RathEngine extends VIEngine {
                 }
                 const totalCount = fieldDictonary.get(mea)!.features.size;
                 const distList = localDist.map(r => ({
-                    // TODO: 讨论是否应当直接使用count
+                    // TODO: [discuss] 讨论是否应当直接使用count
+                    // Hao Chen, 9 months ago   (March 14th, 2022 7:03 PM) 
                     // props: 节省计算量
                     // cons: 强依赖于cube必须去计算count
                     freq: r[mea].reduce((total: number, value: number) => total + value, 0),

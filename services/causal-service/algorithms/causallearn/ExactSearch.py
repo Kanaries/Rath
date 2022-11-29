@@ -58,7 +58,6 @@ class ExactSearch(AlgoInterface):
                 include_graph[f_ind[bg.src], f_ind[bg.tar]] = True
         return super_graph, include_graph
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
-        # TODO: new knowledges
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
         f_ind = {f: i for i, f in enumerate(focusedFields)}

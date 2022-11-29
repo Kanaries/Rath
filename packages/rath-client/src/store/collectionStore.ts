@@ -65,7 +65,8 @@ export class CollectionStore {
     }
     public collectionContains (fields: IFieldMeta[], spec: IVegaSubset, filters: IFilter[] | undefined = []) {
         // FIXME
-        // TODO
+        // TODO: 这里还需要filter的信息，才能保证图表的唯一性。
+        // observedobserver, 2 months ago   (October 14th, 2022 9:40 PM) 
         // 这里还需要filter的信息，才能保证图表的唯一性。
         const vizCode = encodeViewKey(fields, spec, filters);
         return this.vizHash.has(vizCode)

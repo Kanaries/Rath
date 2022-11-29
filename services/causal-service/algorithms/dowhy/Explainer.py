@@ -30,7 +30,6 @@ class Explainer(common.AlgoInterface):
         super(Explainer, self).__init__(dataSource=dataSource, fields=fields, params=params)
         
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = []):
-        # TODO: new knowledges
         # array = self.selectArray(focusedFields=focusedFields, params=params)
         self.data = self.dataSource[focusedFields]
         print(self.data, focusedFields, bgKnowledgesPag)

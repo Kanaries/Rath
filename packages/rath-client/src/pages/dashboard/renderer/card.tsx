@@ -51,9 +51,10 @@ export type RefLine = {
     reason: (
         | 'canvas-limit'
         | 'align-other-card'
-        | 'other-card-size' // TODO: 还没有实现，而且需要额外考虑当前卡片位置
-        | 'card-padding'    // TODO: 还没有实现
-        | 'canvas-padding'  // TODO: 还没有实现
+        | 'other-card-size' // TODO: [feat] 还没有实现，other-card-size 而且需要额外考虑当前卡片位置
+        | 'card-padding'    // TODO: [feat] 还没有实现 card-padding
+        | 'canvas-padding'  // TODO: [feat] 还没有实现 canvas-padding
+        //  kyusho, 5 days ago   (November 24th, 2022 5:31 PM) 
     )[];
     score: number;
 };

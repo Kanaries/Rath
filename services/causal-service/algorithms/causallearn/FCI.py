@@ -72,7 +72,6 @@ class FCI(AlgoInterface):
     
     
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
-        # TODO: new knowledges
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
         print(array, array.min(), array.max())

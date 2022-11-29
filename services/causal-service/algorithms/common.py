@@ -241,7 +241,7 @@ def trans(df: pd.DataFrame, fields: List[IFieldMeta], params: OptionalParams):
                 for col in list(newcode.columns):
                     res_fields.append(IFieldMeta(fid=col, name=f.name+(col.replace(f.fid, '', 1)), semanticType='ordinal'))
                 # print(df.shape, res.shape)
-        elif f.semanticType == 'temporal':  # TODO: use extended temporal
+        elif f.semanticType == 'temporal':  # TODO: [fix] use extended temporal
             if df[f.fid].dtype in [np.dtype('O'), object, str, pd.CategoricalDtype]:
                 code = (pd.to_datetime(df[f.fid]) - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s')
                 # res[f.fid] = code

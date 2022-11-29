@@ -122,7 +122,6 @@ class ExplainDataSession(RathSession):
             # target_units=lambda df: inferDiff(satCurrent, satOther), # satisfy(self.dataSource, groups.current), satisfy(df, groups.other)),
             evaluate_effect_strength=True,
             )
-        # TODO: params
         print(self.estimate)
 
 def inferInfo(session: ExplainDataSession):
@@ -216,7 +215,6 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
             description=IDoWhy.LinkInfoDescription(key='', data={'estimate': str(estimate)}),
             responsibility=significance_value(estimate.value, var=1.)
         ))
-        # TODO: params
         if estimate.value > 0:
             print("f===========", f.fid)
             print("target_units=\n", dataSource[tmp(transData)])

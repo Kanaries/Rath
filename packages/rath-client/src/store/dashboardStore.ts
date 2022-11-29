@@ -114,7 +114,8 @@ export default class DashboardStore {
     public static readonly rendererVersion = 1;
 
     protected static writeDocumentObjectBlob(data: DashboardDocument): Blob {
-        // TODO: optimize
+        // TODO: [enhance] optimize 
+        // kyusho, 4 weeks ago   (November 1st, 2022 10:50 AM) 
         const part = JSON.stringify(data);
         const file = new Blob([ part ], { type: 'text/plain' });
         return file;
@@ -122,7 +123,8 @@ export default class DashboardStore {
 
     protected static async readObjectBlob(blob: Blob): Promise<DashboardDocument> {
         const text = await blob.text();
-        // TODO: optimize
+        // TODO: [enhance] optimize
+        // kyusho, 4 weeks ago   (November 1st, 2022 10:50 AM) 
         const data = JSON.parse(text) as DashboardDocument;
         return data;
     }
@@ -150,7 +152,8 @@ export default class DashboardStore {
                 lastModifyTime: now,
             },
             data: {
-                source: 'context dataset', // TODO: get name from data source
+                source: 'context dataset', // TODO: [fix] get name from data source
+                // kyusho, 4 weeks ago   (October 31st, 2022 8:51 PM) 
                 filters: [],
             },
             cards: [],

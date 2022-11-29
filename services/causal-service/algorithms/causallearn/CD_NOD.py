@@ -81,7 +81,6 @@ class CD_NOD(AlgoInterface):
         return self.bk
     
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
-        # TODO: new knowledges
         # if params.c_indx == '$field':
         #     if params.c_indx_field not in focusedFields:
         #         raise f"$field {params.c_indx_field} not existed"

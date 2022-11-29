@@ -1,4 +1,5 @@
-// todo replace the deepcopy with a safe and faster one.
+// TODO: [fix] replace the deepcopy with a safe and faster one.
+// ObservedObserver, 3 years ago   (October 11th, 2019 1:04 PM) 
 export default function deepcopy<T = any>(dataSource: T): T {
   return JSON.parse(JSON.stringify(dataSource))
 }

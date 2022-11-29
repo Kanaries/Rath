@@ -57,20 +57,19 @@ export const useCleanMethodList = function (): typeof cleanMethodList {
 
 async function sendCertMail(email: string) {
     const url = getServerUrl('/api/sendMailCert');
-    // TODO: email格式检查
+    // TODO: [feat] email format check
     const res = await request.post<{ email: string }, string>(url, { email });
     if (res) {
-        // console.log("邮件发送成功");
+        // console.log("mail sent success");
     }
     return res;
 }
 
 async function sendCertPhone(phone: string) {
     const url = getServerUrl('/api/sendPhoneCert');
-    // TODO: email格式检查
     const res = await request.post<{ phone: string }, string>(url, { phone });
     if (res) {
-        // console.log("短信发送成功");
+        // console.log("message sent success");
     }
     return res;
 }

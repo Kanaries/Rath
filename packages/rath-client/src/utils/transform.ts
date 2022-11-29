@@ -12,7 +12,8 @@ export function transNumber(num: any): number | null {
     return Number(num)
 }
 
-// todo: Sync time rules in visual-insights
+// todo: [refactor] Sync time rules in visual-insights
+// Hao Chen, 10 months ago   (January 25th, 2022 10:22 PM) 
 // const TIME_RULES: RegExp[] = [
 //     /^[0-9]{2,4}[-/][0-9]{1,2}([-/][0-9]{1,2})?$/, // YYYY-MM-DD
 //     /^[0-9]{1,2}[-/][0-9]{1,2}[-/][0-9]{2,4}$/, // MM-DD-YYYY
