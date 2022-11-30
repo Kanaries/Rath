@@ -67,9 +67,11 @@ export interface DatasetPanelProps {
 }
 
 const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
-    const { dataSourceStore, __deprecatedCausalStore: causalStore } = useGlobalStore();
+    const { dataSourceStore, __deprecatedCausalStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
-    const { focusFieldIds } = causalStore;
+    const { fields } = causalStore.dataset;
+    const { focusFieldIds } = __deprecatedCausalStore;
+
     const totalFieldsRef = useRef(fieldMetas);
     totalFieldsRef.current = fieldMetas;
 
@@ -78,8 +80,25 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
     const focusFieldIdsRef = useRef(focusFieldIds);
     focusFieldIdsRef.current = focusFieldIds;
 
+    const fieldsRef = useRef(fields);
+    fieldsRef.current = fields;
+
     const toggleFocus = useCallback((fid: string) => {
-        causalStore.setFocusFieldIds(produce(focusFieldIdsRef.current, draft => {
+        const prevIndices = focusFieldIdsRef.current.map(
+            _fid => totalFieldsRef.current.findIndex(f => f.fid === _fid)
+        ).filter(idx => idx !== -1);
+        causalStore.dataset.selectFields(produce(prevIndices, draft => {
+            const idx = totalFieldsRef.current.findIndex(f => f.fid === fid);
+            if (idx !== -1) {
+                const i = draft.findIndex(which => which === idx);
+                if (i !== -1) {
+                    draft.splice(i, 1);
+                } else {
+                    draft.push(idx);
+                }
+            }
+        }));
+        __deprecatedCausalStore.setFocusFieldIds(produce(focusFieldIdsRef.current, draft => {
             const idx = draft.findIndex(key => fid === key);
             if (idx !== -1) {
                 draft.splice(idx, 1);
@@ -87,7 +106,7 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                 draft.push(fid);
             }
         }));
-    }, [causalStore]);
+    }, [__deprecatedCausalStore, causalStore]);
 
     const fieldsTableCols = useMemo<IColumn[]>(() => {
         return [
@@ -97,9 +116,9 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                 onRenderHeader: () => {
                     const handleClick = (_: unknown, checked?: boolean | undefined) => {
                         if (checked) {
-                            causalStore.setFocusFieldIds(totalFieldsRef.current.map(f => f.fid));
+                            __deprecatedCausalStore.setFocusFieldIds(totalFieldsRef.current.map(f => f.fid));
                         } else {
-                            causalStore.setFocusFieldIds([]);
+                            __deprecatedCausalStore.setFocusFieldIds([]);
                         }
                     };
                     return (
@@ -231,7 +250,7 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                 maxWidth: 100,
             },
         ];
-    }, [focusFieldIds, causalStore]);
+    }, [focusFieldIds, __deprecatedCausalStore]);
 
     return (
         <>
