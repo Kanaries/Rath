@@ -7,11 +7,11 @@ import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { useCausalViewContext } from '../../../store/causalStore/viewStore';
 import { mergeCausalPag, resolvePreconditionsFromCausal, transformPreconditions } from '../../../utils/resolve-causal';
-import Explorer, { ExplorerProps } from '../explorer';
+import Explorer from '../explorer';
 import Params from '../params';
 import type { BgKnowledge, BgKnowledgePagLink, IFunctionalDep, ModifiableBgKnowledge } from '../config';
 import ModelStorage from '../modelStorage';
-import Exploration from '../exploration';
+import Exploration, { Subtree } from '../exploration';
 import MatrixPanel, { MATRIX_TYPE } from '../matrixPanel';
 import type { useDataViews } from '../hooks/dataViews';
 import type { GraphNodeAttributes } from '../explorer/graph-utils';
@@ -46,11 +46,11 @@ export interface CausalModalProps {
 
 export const CausalExplorer = observer<
     Omit<CausalModalProps, 'functionalDependencies'> & {
-        allowEdit: boolean; listenerRef?: RefObject<{ onSubtreeSelected?: ExplorerProps['onNodeSelected'] }>;
+        allowEdit: boolean;
+        listenerRef?: RefObject<{ onSubtreeSelected?: (subtree: Subtree | null) => void }>;
     }
 >(function CausalExplorer ({
     allowEdit,
-    dataContext,
     modifiablePrecondition,
     setModifiablePrecondition,
     renderNode,
@@ -58,7 +58,6 @@ export const CausalExplorer = observer<
 }) {
     const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { igMatrix, selectedFields, causalStrength } = causalStore;
-    const { dataSubset } = dataContext;
 
     const viewContext = useCausalViewContext();
 
@@ -68,13 +67,9 @@ export const CausalExplorer = observer<
         }
     }, [viewContext]);
 
-    const handleSubTreeSelected = useCallback<ExplorerProps['onNodeSelected']>((
-        node, simpleCause, simpleEffect, composedCause, composedEffect,
-    ) => {
-            listenerRef?.current?.onSubtreeSelected?.(node, simpleCause, simpleEffect, composedCause, composedEffect);
-        },
-        [listenerRef]
-    );
+    const handleSubTreeSelected = useCallback((subtree: Subtree | null) => {
+        listenerRef?.current?.onSubtreeSelected?.(subtree);
+    }, [listenerRef]);
 
     const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number, type: ModifiableBgKnowledge['type']) => {
         setModifiablePrecondition((list) => {
@@ -115,16 +110,15 @@ export const CausalExplorer = observer<
     return (
         <Explorer
             allowEdit={allowEdit}
-            dataSource={dataSubset}
             scoreMatrix={igMatrix}
             preconditions={modifiablePrecondition}
-            onNodeSelected={handleSubTreeSelected}
             onLinkTogether={handleLinkTogether}
             renderNode={renderNode}
             onRevertLink={handleRevertLink}
             onRemoveLink={handleRemoveLink}
             synchronizePredictionsUsingCausalResult={synchronizePredictionsUsingCausalResult}
             handleLasso={handleLasso}
+            handleSubTreeSelected={handleSubTreeSelected}
         />
     );
 });
@@ -201,7 +195,7 @@ const CausalModal: React.FC<CausalModalProps> = ({
         return mergeCausalPag(causalStrength, modifiablePrecondition, fieldMetas);
     }, [causalStrength, fieldMetas, modifiablePrecondition]);
 
-    const listenerRef = useRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelected'] }>({});
+    const listenerRef = useRef<{ onSubtreeSelected?: (subtree: Subtree | null) => void }>({});
 
     return (
         <Container>

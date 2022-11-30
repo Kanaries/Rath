@@ -26,15 +26,19 @@ const AutoVis: FC<IAutoVisProps> = () => {
         }
     }, [viewContext]);
 
+    const {
+        graphNodeSelectionMode = NodeSelectionMode.NONE, selectedField = null, selectedFieldGroup = []
+    } = viewContext ?? {};
+
     const fields = useMemo(() => {
-        if (!viewContext || viewContext.graphNodeSelectionMode === NodeSelectionMode.NONE) {
+        if (graphNodeSelectionMode === NodeSelectionMode.NONE) {
             return [];
-        } else if (viewContext.graphNodeSelectionMode === NodeSelectionMode.SINGLE) {
-            return viewContext.selectedField ? [viewContext.selectedField] : [];
+        } else if (graphNodeSelectionMode === NodeSelectionMode.SINGLE) {
+            return selectedField ? [selectedField] : [];
         } else {
-            return viewContext.selectedFieldGroup;
+            return selectedFieldGroup;
         }
-    }, [viewContext]);
+    }, [graphNodeSelectionMode, selectedField, selectedFieldGroup]);
 
     const [fieldIndex, setFieldIndex] = useState(0);
     useEffect(() => {

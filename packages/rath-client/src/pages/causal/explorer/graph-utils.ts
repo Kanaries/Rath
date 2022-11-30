@@ -284,6 +284,9 @@ export const useGraphOptions = (
                 highlighted: {
                     opacity: 1,
                 },
+                semiHighlighted: {
+                    opacity: 0.4,
+                },
                 faded: {
                     opacity: 0.12,
                 },

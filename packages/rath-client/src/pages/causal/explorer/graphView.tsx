@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import { ActionButton, Dropdown } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { ModifiableBgKnowledge } from "../config";
+import type { Subtree } from "../exploration";
 import { useGlobalStore } from "../../../store";
 import { GraphNodeAttributes, useGraphOptions, useRenderData } from "./graph-utils";
 import { useReactiveGraph } from "./graph-helper";
@@ -27,13 +28,11 @@ const Container = styled.div`
 `;
 
 export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
-    selectedSubtree: readonly string[];
     value: Readonly<DiagramGraphData>;
     cutThreshold: number;
     limit: number;
     mode: 'explore' | 'edit';
     onClickNode?: (fid: string | null) => void;
-    toggleFlowAnalyzer: () => void;
     onLinkTogether: (srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
@@ -42,6 +41,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     autoLayout: boolean;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
     handleLasso?: (fields: IFieldMeta[]) => void;
+    handleSubTreeSelected?: (subtree: Subtree | null) => void;
     allowZoom: boolean;
 }, never>, 'onChange' | 'ref'>;
 
@@ -89,7 +89,6 @@ const ExportGraphButton: React.FC<{ data: DiagramGraphData; fields: readonly Rea
 };
 
 const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
-    selectedSubtree,
     value,
     onClickNode,
     cutThreshold,
@@ -102,9 +101,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     forceRelayoutRef,
     autoLayout,
     renderNode,
-    toggleFlowAnalyzer,
     allowZoom,
     handleLasso,
+    handleSubTreeSelected,
     ...props
 }, ref) => {
     const { __deprecatedCausalStore: causalStore } = useGlobalStore();
@@ -184,6 +183,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         fields,
         forceRelayoutFlag,
         allowZoom,
+        handleSubTreeSelected,
     );
 
     useEffect(() => {
@@ -223,12 +223,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         <Container
             {...props}
             ref={ref}
-            onClick={e => {
-                if (e.shiftKey) {
-                    toggleFlowAnalyzer();
-                }
-                e.stopPropagation();
-            }}
         >
             <div className="container" ref={containerRef} />
             {mode === 'edit' && (

@@ -9,8 +9,7 @@ import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import SemiEmbed from '../../semiAutomation/semiEmbed';
 import type { useDataViews } from '../hooks/dataViews';
-import type { IFunctionalDep, PagLink } from '../config';
-import type { ExplorerProps } from '../explorer';
+import { IFunctionalDep, PagLink, PAG_NODE } from '../config';
 import { ExplorationKey, ExplorationOptions, useCausalViewContext } from '../../../store/causalStore/viewStore';
 import CrossFilter from './crossFilter';
 import PredictPanel from './predictPanel';
@@ -40,7 +39,18 @@ export interface ManualAnalyzerProps {
     edges: PagLink[];
 }
 
-const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelected'] }, ManualAnalyzerProps>(function ManualAnalyzer (
+export interface Subtree {
+    node: IFieldMeta;
+    neighbors: {
+        field: IFieldMeta;
+        rootType: PAG_NODE;
+        neighborType: PAG_NODE;
+    }[];
+}
+
+const Exploration = forwardRef<{
+    onSubtreeSelected?: (subtree: Subtree | null) => void;
+}, ManualAnalyzerProps>(function ManualAnalyzer (
     { context, functionalDependencies, edges }, ref
 ) {
     const { dataSourceStore, __deprecatedCausalStore, langStore } = useGlobalStore();
@@ -111,12 +121,16 @@ const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelect
     }) => void }>({});
 
     useImperativeHandle(ref, () => ({
-        onSubtreeSelected: (node, simpleCause) => {
-            if (viewContext?.explorationKey === 'predict' && node && simpleCause.length > 0) {
-                const features = simpleCause.map(cause => cause.field);
+        onSubtreeSelected: (subtree) => {
+            if (viewContext?.explorationKey === 'predict' && subtree && subtree.neighbors.length > 0) {
+                const features = subtree.neighbors.filter(neighbor => {
+                    return !(
+                        [PAG_NODE.BLANK, PAG_NODE.CIRCLE].includes(neighbor.rootType) && neighbor.neighborType === PAG_NODE.ARROW
+                    );
+                }).map(cause => cause.field);
                 predictPanelRef.current.updateInput?.({
                     features,
-                    targets: [node],
+                    targets: [subtree.node],
                 });
             }
         },

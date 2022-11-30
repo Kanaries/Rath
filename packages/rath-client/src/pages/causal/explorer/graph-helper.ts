@@ -1,6 +1,8 @@
 import { RefObject, useEffect, useRef, MutableRefObject } from "react";
 import G6, { Graph, INode } from "@antv/g6";
-import { useCausalViewContext } from "../../../store/causalStore/viewStore";
+import { NodeSelectionMode, useCausalViewContext } from "../../../store/causalStore/viewStore";
+import type { Subtree } from "../exploration";
+import { PAG_NODE } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
 import { GRAPH_HEIGHT, useGraphOptions, useRenderData } from "./graph-utils";
 
@@ -17,6 +19,7 @@ export const useReactiveGraph = (
     fields: readonly IFieldMeta[],
     forceRelayoutFlag: 0 | 1,
     allowZoom: boolean,
+    handleSubtreeSelected?: (subtree: Subtree | null) => void | undefined,
 ) => {
     const cfgRef = useRef(options);
     cfgRef.current = options;
@@ -28,9 +31,14 @@ export const useReactiveGraph = (
     fieldsRef.current = fields;
     const handleEdgeClickRef = useRef(handleEdgeClick);
     handleEdgeClickRef.current = handleEdgeClick;
+    const handleSubtreeSelectedRef = useRef(handleSubtreeSelected);
+    handleSubtreeSelectedRef.current = handleSubtreeSelected;
 
     const viewContext = useCausalViewContext();
-    const { selectedFieldGroup = [] } = viewContext ?? {};
+    const { selectedFieldGroup = [], graphNodeSelectionMode = NodeSelectionMode.NONE } = viewContext ?? {};
+
+    const graphNodeSelectionModeRef = useRef(graphNodeSelectionMode);
+    graphNodeSelectionModeRef.current = graphNodeSelectionMode;
 
     useEffect(() => {
         const { current: container } = containerRef;
@@ -161,8 +169,27 @@ export const useReactiveGraph = (
                 })();
                 return fieldsRef.current[idx]?.fid;
             });
+            const subtreeFields = subtreeFidArr.reduce<IFieldMeta[]>((list, fid) => {
+                const f = fieldsRef.current.find(which => which.fid === fid);
+                if (f) {
+                    return list.concat([f]);
+                }
+                return list;
+            }, []);
+            const subtreeRoot = (
+                graphNodeSelectionModeRef.current === NodeSelectionMode.SINGLE && selectedFieldGroup.length === 1
+             ) ? selectedFieldGroup[0] : null;
+            handleSubtreeSelectedRef.current?.(subtreeRoot ? {
+                node: subtreeRoot,
+                neighbors: subtreeFields.map(node => ({
+                    field: fieldsRef.current.find(f => f.fid === node.fid)!,
+                    // FIXME: 查询这条边上的节点状态
+                    rootType: PAG_NODE.EMPTY,
+                    neighborType: PAG_NODE.EMPTY,
+                })),
+            } : null);
             graph.getNodes().forEach(node => {
-                const isFocused = focusedNodes.some(item => item === node); // TODO: check 一下是否 work
+                const isFocused = focusedNodes.some(item => item === node);
                 graph.setItemState(node, 'focused', isFocused);
                 const isInSubtree = isFocused ? false : subtreeNodes.some(neighbor => neighbor === node);
                 graph.setItemState(node, 'highlighted', isInSubtree);
@@ -197,15 +224,17 @@ export const useReactiveGraph = (
                 const nodesInSubtree = [
                     fieldsRef.current[sourceIdx]?.fid, fieldsRef.current[targetIdx]?.fid
                 ].filter(fid => typeof fid === 'string' && subtreeFidArr.some(f => f === fid));
-                const isInSubtree = nodesSelected.length + nodesInSubtree.length === 2;
+                const isInSubtree = nodesSelected.length === 2;
+                const isHalfInSubtree = nodesSelected.length === 1 && nodesInSubtree.length === 1;
                 graph.updateItem(edge, {
                     labelCfg: {
                         style: {
-                            opacity: isInSubtree ? 1 : 0,
+                            opacity: isInSubtree ? 1 : isHalfInSubtree ? 0.6 : 0,
                         },
                     },
                 });
                 graph.setItemState(edge, 'highlighted', isInSubtree);
+                graph.setItemState(edge, 'semiHighlighted', isHalfInSubtree);
                 graph.setItemState(edge, 'faded', selectedFieldGroup.length !== 0 && !isInSubtree);
             });
         }

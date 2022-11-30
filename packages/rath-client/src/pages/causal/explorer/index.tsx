@@ -2,15 +2,14 @@ import { DefaultButton, Icon, Slider, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import useErrorBoundary from "../../../hooks/use-error-boundary";
-import type { IFieldMeta, IRow } from "../../../interfaces";
+import type { IFieldMeta } from "../../../interfaces";
 import { useGlobalStore } from "../../../store";
 import { useCausalViewContext } from "../../../store/causalStore/viewStore";
 import { CausalLinkDirection } from "../../../utils/resolve-causal";
 import type { ModifiableBgKnowledge } from "../config";
+import type { Subtree } from "../exploration";
 import Floating from "../floating";
 import ExplorerMainView from "./explorerMainView";
-import FlowAnalyzer, { NodeWithScore } from "./flowAnalyzer";
 import type { GraphNodeAttributes } from "./graph-utils";
 
 
@@ -32,22 +31,15 @@ export interface DiagramGraphData {
 
 export interface ExplorerProps {
     allowEdit: boolean;
-    dataSource: IRow[];
     scoreMatrix: readonly (readonly number[])[];
     preconditions: ModifiableBgKnowledge[];
-    onNodeSelected: (
-        node: Readonly<IFieldMeta> | null,
-        simpleCause: readonly Readonly<NodeWithScore>[],
-        simpleEffect: readonly Readonly<NodeWithScore>[],
-        composedCause: readonly Readonly<NodeWithScore>[],
-        composedEffect: readonly Readonly<NodeWithScore>[],
-    ) => void;
     onLinkTogether: (srcIdx: number, tarIdx: number, type: ModifiableBgKnowledge['type']) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
     synchronizePredictionsUsingCausalResult: () => void;
     handleLasso?: (fields: IFieldMeta[]) => void;
+    handleSubTreeSelected?: (subtree: Subtree | null) => void;
 }
 
 const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
@@ -101,9 +93,7 @@ const MainView = styled.div`
 
 const Explorer: FC<ExplorerProps> = ({
     allowEdit,
-    dataSource,
     scoreMatrix,
-    onNodeSelected,
     onLinkTogether,
     onRevertLink,
     onRemoveLink,
@@ -111,6 +101,7 @@ const Explorer: FC<ExplorerProps> = ({
     renderNode,
     synchronizePredictionsUsingCausalResult,
     handleLasso,
+    handleSubTreeSelected,
 }) => {
     const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { causalStrength, selectedFields } = causalStore;
@@ -220,11 +211,7 @@ const Explorer: FC<ExplorerProps> = ({
 
     const value = useMemo(() => ({ nodes, links }), [nodes, links]);
 
-    const [showFlowAnalyzer, setShowFlowAnalyzer] = useState(false);
-
     const viewContext = useCausalViewContext();
-
-    const { selectedField = null } = viewContext ?? {};
 
     const handleClickCircle = useCallback((fid: string | null) => {
         if (fid === null) {
@@ -235,30 +222,6 @@ const Explorer: FC<ExplorerProps> = ({
         }
     }, [mode, viewContext]);
 
-    const toggleFlowAnalyzer = useCallback(() => {
-        setShowFlowAnalyzer(display => !display);
-    }, []);
-
-    const ErrorBoundary = useErrorBoundary((err, info) => {
-        // console.error(err ?? info);
-        return (
-            <div
-                style={{
-                    flexGrow: 0,
-                    flexShrink: 0,
-                    width: '100%',
-                    padding: '1em 2.5em',
-                    border: '1px solid #e3e2e2',
-                }}
-            >
-                <p>
-                    {"Failed to visualize flows as DAG. Click a different node or turn up the link filter."}
-                </p>
-                <small>{err?.message ?? info}</small>
-            </div>
-        );
-    }, [selectedFields, value, selectedField, cutThreshold]);
-
     const handleLink = useCallback((srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => {
         if (srcFid === tarFid) {
             return;
@@ -266,30 +229,10 @@ const Explorer: FC<ExplorerProps> = ({
         onLinkTogether(selectedFields.findIndex(f => f.fid === srcFid), selectedFields.findIndex(f => f.fid === tarFid), type);
     }, [selectedFields, onLinkTogether]);
 
-    const [selectedSubtree, setSelectedSubtree] = useState<string[]>([]);
-
-    const onNodeSelectedRef = useRef(onNodeSelected);
-    onNodeSelectedRef.current = onNodeSelected;
-
-    const handleNodeSelect = useCallback<typeof onNodeSelected>((node, simpleCause, simpleEffect, composedCause, composedEffect) => {
-        onNodeSelectedRef.current(node, simpleCause, simpleEffect, composedCause, composedEffect);
-        const shallowSubtree = simpleEffect.reduce<Readonly<NodeWithScore>[]>(
-            (list, f) => {
-                if (!list.some((which) => which.field.fid === f.field.fid)) {
-                    list.push(f);
-                }
-                return list;
-            },
-            [...simpleCause]
-        );
-        setSelectedSubtree(shallowSubtree.map(node => node.field.fid));
-    }, []);
-
     const forceRelayoutRef = useRef<() => void>(() => {});
 
     useEffect(() => {
         viewContext?.clearSelected();
-        onNodeSelectedRef.current(null, [], [], [], []);
     }, [mode, viewContext]);
 
     const [limit, setLimit] = useState(20);
@@ -311,10 +254,9 @@ const Explorer: FC<ExplorerProps> = ({
     }, [allowEdit]);
 
     return (<>
-        <Container onClick={() => viewContext?.clearSelected()}>
+        <Container>
             <MainView>
                 <ExplorerMainView
-                    selectedSubtree={selectedSubtree}
                     forceRelayoutRef={forceRelayoutRef}
                     value={value}
                     limit={limit}
@@ -322,7 +264,6 @@ const Explorer: FC<ExplorerProps> = ({
                     mode={mode}
                     cutThreshold={cutThreshold}
                     onClickNode={handleClickCircle}
-                    toggleFlowAnalyzer={toggleFlowAnalyzer}
                     onLinkTogether={handleLink}
                     onRevertLink={onRevertLink}
                     onRemoveLink={onRemoveLink}
@@ -330,6 +271,7 @@ const Explorer: FC<ExplorerProps> = ({
                     renderNode={renderNode}
                     allowZoom={allowZoom}
                     handleLasso={handleLasso}
+                    handleSubTreeSelected={handleSubTreeSelected}
                     style={{
                         width: '100%',
                         height: '100%',
@@ -400,18 +342,6 @@ const Explorer: FC<ExplorerProps> = ({
                 </Tools>
             </Floating>
         </Container>
-        <ErrorBoundary>
-            <FlowAnalyzer
-                display={showFlowAnalyzer}
-                dataSource={dataSource}
-                data={value}
-                limit={limit}
-                index={mode === 'explore' ? selectedFields.findIndex(f => f.fid === selectedField?.fid) : -1}
-                cutThreshold={cutThreshold}
-                onClickNode={handleClickCircle}
-                onUpdate={handleNodeSelect}
-            />
-        </ErrorBoundary>
     </>);
 };
 
