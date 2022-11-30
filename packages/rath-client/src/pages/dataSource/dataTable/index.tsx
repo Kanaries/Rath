@@ -6,6 +6,7 @@ import { MessageBar, MessageBarType } from "@fluentui/react";
 import intl from 'react-intl-universal';
 import { useGlobalStore } from "../../../store";
 import type { IRow } from "../../../interfaces";
+import { initPatterns } from "../../../lib/textPattern/init";
 import HeaderCell from "./headerCell";
 
 
@@ -29,6 +30,13 @@ const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
     const { filteredDataMetaInfo, fieldsWithExtSug: fields, filteredDataStorage } = dataSourceStore;
     const [filteredData, setFilteredData] = useState<IRow[]>([]);
+    const [textPattern, setTextPattern] = useState<{
+        fid: string;
+        ph: RegExp;
+        pe: RegExp;
+        selection: RegExp;
+        pattern: RegExp;
+    } | undefined>();
     useEffect(() => {
         if (filteredDataMetaInfo.versionCode === -1) {
             setFilteredData([]);
@@ -92,12 +100,37 @@ const DataTable: React.FC = (props) => {
             }
         }
     }
+    const onTextSelect = (fid: string, fullText: string) => {
+        const sl = document.getSelection();
+        // const fullText = sl?.focusNode?.nodeValue;
+        const selectedText = sl?.toString();
+        if (fullText && selectedText) {
+            // console.log({
+            //     fullText,
+            //     selectedText,
+            //     sl
+            // })
+            const startIndex = fullText.indexOf(selectedText);
+            const endIndex = startIndex + selectedText.length;
+            const res = initPatterns([{
+                str: fullText,
+                startIndex: startIndex,
+                endIndex: endIndex,
+            }])
+            if (res) {
+                setTextPattern({
+                    fid,
+                    ...res
+                });
+            }
+        }
+    }
 
     const columns: ArtColumn[] = displayList.map((f, i) => {
         const fm = (fields[i] && fields[i].fid === displayList[i].fid) ? fields[i] : fields.find(m => m.fid === f.fid);
         const suggestions = fields.find(_f => _f.fid === f.fid)?.extSuggestions ?? [];
 
-        return {
+        const col: ArtColumn = {
                 name: f.name || f.fid,
                 code: f.fid,
                 width: 220,
@@ -113,16 +146,46 @@ const DataTable: React.FC = (props) => {
                         isPreview={f.stage === 'preview'}
                     />
                 ),
-                // render (value: any, record: any, rowIndex: number) {
-                //     return <div contentEditable onInput={
-                //         (e) => {
-                //             const val = e.currentTarget.textContent
-                //             console.log(val)
-                //         }
-                    
-                //     }>{value}</div>
-                // }
             };
+            if (textPattern && textPattern.fid === f.fid) {
+                col.render = (value: any) => {
+                    const { ph, pe, selection, pattern } = textPattern;
+                    const text: string = value?.toString() ?? '';
+                    const match = pattern.exec(value)
+                    // console.log({ match, text, value, pattern, ph, pe, selection })
+                    if (match) {
+                        // @ts-ignore
+                        const matched = match.groups['selection'];
+                        if (!matched) return;
+                        const start = text.indexOf(matched);
+                        const end = start + matched.length;
+                        const before = text.slice(0, start);
+                        const after = text.slice(end);
+                        
+                        return (
+                            <span onMouseUp={() => {
+                                onTextSelect(f.fid, `${value}`)
+                            }}>
+                                {before}
+                                <span style={{ backgroundColor: '#FFC107' }}>
+                                    {matched}
+                                </span>
+                                {after}
+                            </span>
+                        );
+                    }
+                    return text;
+                }
+            } else {
+                col.render = (value: any) => {
+                    return <span onMouseUp={() => {
+                        onTextSelect(f.fid, `${value}`)
+                    }}>
+                        {value}
+                    </span>
+                }
+            }
+            return col;
     })
 
     const rowPropsCallback = useCallback((record: IRow) => {
