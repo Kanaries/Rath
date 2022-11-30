@@ -2,7 +2,7 @@ import { Icon } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { createElement, forwardRef, ForwardRefExoticComponent, Fragment, PropsWithoutRef, RefAttributes, useMemo } from "react";
 import styled, { StyledComponentProps } from "styled-components";
-import type { IFieldMeta } from "../../../interfaces";
+import type { IFieldMeta } from "../../../../interfaces";
 
 
 type AllowedDOMType = 'div' | 'p' | 'pre' | 'span' | 'output';

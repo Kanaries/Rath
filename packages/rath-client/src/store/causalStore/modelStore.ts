@@ -34,10 +34,7 @@ export type CausalModelAssertion = CausalModelNodeAssertion | CausalModelEdgeAss
 
 export default class CausalModelStore {
 
-    protected _destroy: () => void;
-    public get destroy() {
-        return this._destroy;
-    }
+    public readonly destroy: () => void;
 
     public functionalDependencies: readonly IFunctionalDep[] = [];
     public generatedFDFromExtInfo: readonly IFunctionalDep[] = [];
@@ -123,7 +120,7 @@ export default class CausalModelStore {
             mergedPag: observable.ref,
         });
 
-        this._destroy = () => {
+        this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());
             rxReactions.forEach(subscription => subscription.unsubscribe());
         };

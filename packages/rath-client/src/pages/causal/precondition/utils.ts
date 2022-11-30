@@ -27,7 +27,7 @@ export const getGeneratedPreconditionsFromAutoDetection = async (
     fields: string[],
 ): Promise<ModifiableBgKnowledge[]> => {
     try {
-        const { causalStore, dataSourceStore } = getGlobalStore();
+        const { __deprecatedCausalStore: causalStore, dataSourceStore } = getGlobalStore();
         const { apiPrefix } = causalStore;
         const { fieldMetas } = dataSourceStore;
         const res = await fetch(`${apiPrefix}/${AutoDetectionApiPath}`, {

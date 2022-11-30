@@ -58,7 +58,7 @@ const dropdownOptions: { key: BatchUpdateMode; text: string }[] = [
 const FDBatch: React.FC<FDPanelProps> = ({
     context, functionalDependencies, setFunctionalDependencies, renderNode,
 }) => {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
     const [displayPreview, setDisplayPreview] = useState(false);
     const [preview, setPreview] = useState<IFunctionalDep[] | null>(null);

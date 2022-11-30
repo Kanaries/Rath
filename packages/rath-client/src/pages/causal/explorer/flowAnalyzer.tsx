@@ -18,7 +18,7 @@ import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { deepcopy } from "../../../utils";
-import ColDist, { IBrushSignalStore } from "../crossFilter/colDist";
+import ColDist, { IBrushSignalStore } from "../exploration/crossFilter/colDist";
 import { useGlobalStore } from "../../../store";
 import type { DiagramGraphData } from ".";
 
@@ -124,7 +124,7 @@ const SVGGroup = styled.div`
 const line = d3Line<{ x: number; y: number }>().curve(curveCatmullRom).x(d => d.x).y(d => d.y);
 
 const FlowAnalyzer: FC<FlowAnalyzerProps> = ({ display, dataSource, data, index, cutThreshold, onUpdate, onClickNode, limit }) => {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { selectedFields: fields } = causalStore;
     const field = useMemo<IFieldMeta | undefined>(() => fields[index], [fields, index]);
 

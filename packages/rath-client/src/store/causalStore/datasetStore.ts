@@ -44,10 +44,7 @@ export default class CausalDatasetStore {
     /** Rows used to render sub charts */
     public visSample: readonly IRow[] = [];
 
-    protected _destroy: () => void;
-    public get destroy() {
-        return this._destroy;
-    }
+    public readonly destroy: () => void;
 
     constructor(dataSourceStore: DataSourceStore) {
         const allFields$ = new Subject<IFieldMeta[]>();
@@ -149,7 +146,7 @@ export default class CausalDatasetStore {
             destroy: false,
         });
 
-        this._destroy = () => {
+        this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());
             rxReactions.forEach(subscription => subscription.unsubscribe());
         };

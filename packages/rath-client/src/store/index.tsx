@@ -9,7 +9,8 @@ import { SemiAutomationStore } from './semiAutomation/mainStore';
 import { PainterStore } from './painterStore'
 import { CollectionStore } from './collectionStore'
 import DashboardStore from './dashboardStore';
-import { CausalStore } from './causalStore-old';
+import { CausalStore as DeprecatedCausalStore } from './causalStore-old';
+import CausalStore from './causalStore/mainStore';
 export interface StoreCollection {
     langStore: LangStore;
     dataSourceStore: DataSourceStore;
@@ -21,6 +22,8 @@ export interface StoreCollection {
     painterStore: PainterStore;
     collectionStore: CollectionStore;
     dashboardStore: DashboardStore;
+    /** @deprecated */
+    __deprecatedCausalStore: DeprecatedCausalStore;
     causalStore: CausalStore;
 }
 
@@ -34,6 +37,7 @@ const semiAutoStore = new SemiAutomationStore(dataSourceStore);
 const painterStore = new PainterStore(commonStore, dataSourceStore, semiAutoStore);
 const collectionStore = new CollectionStore(dataSourceStore);
 const dashboardStore = new DashboardStore();
+const __deprecatedCausalStore = new DeprecatedCausalStore(dataSourceStore);
 const causalStore = new CausalStore(dataSourceStore);
 
 const storeCol: StoreCollection = {
@@ -47,7 +51,8 @@ const storeCol: StoreCollection = {
     painterStore,
     collectionStore,
     dashboardStore,
-    causalStore
+    __deprecatedCausalStore,
+    causalStore,
 }
 
 const StoreContext = React.createContext<StoreCollection>(null!);

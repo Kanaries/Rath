@@ -16,7 +16,7 @@ import type { PreconditionPanelProps } from './preconditionPanel';
 
 
 const PreconditionTable: React.FC<PreconditionPanelProps> = ({ modifiablePrecondition, setModifiablePrecondition }) => {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
 
     const [editingPrecondition, setEditingPrecondition] = useState<Partial<ModifiableBgKnowledge>>({

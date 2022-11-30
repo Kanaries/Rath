@@ -10,7 +10,7 @@ const SAMPLE_UPDATE_DELAY = 500;
 
 /** 这是一个局部状态，不要在 causal page 以外的任何组件使用它 */
 export function useDataViews (originData: IRow[]) {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
     const [sampleRate, setSampleRate] = useState(1);
     const [appliedSampleRate, setAppliedSampleRate] = useState(sampleRate);

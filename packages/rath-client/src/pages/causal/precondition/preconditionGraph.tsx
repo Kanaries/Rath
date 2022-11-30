@@ -38,7 +38,7 @@ const Container = styled.div`
 const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
     modifiablePrecondition, setModifiablePrecondition, renderNode,
 }) => {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
 
     const containerRef = useRef<HTMLDivElement>(null);

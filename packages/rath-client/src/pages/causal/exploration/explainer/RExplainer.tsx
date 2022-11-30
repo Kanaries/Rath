@@ -3,13 +3,13 @@ import styled from 'styled-components';
 import { DefaultButton, Dropdown, Stack, Toggle } from '@fluentui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyFilters } from '@kanaries/loa';
-import { useGlobalStore } from '../../../store';
-import type { useInteractFieldGroups } from '../hooks/interactFieldGroup';
-import type { useDataViews } from '../hooks/dataViews';
-import { IFieldMeta, IFilter, IRow } from '../../../interfaces';
-import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../workers/insight/r-insight.worker';
-import { RInsightService } from '../../../services/r-insight';
-import type { IFunctionalDep, PagLink } from '../config';
+import { useGlobalStore } from '../../../../store';
+import type { useInteractFieldGroups } from '../../hooks/interactFieldGroup';
+import type { useDataViews } from '../../hooks/dataViews';
+import { IFieldMeta, IFilter, IRow } from '../../../../interfaces';
+import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../../workers/insight/r-insight.worker';
+import { RInsightService } from '../../../../services/r-insight';
+import type { IFunctionalDep, PagLink } from '../../config';
 import ChartItem from './explainChart';
 import RInsightView from './RInsightView';
 
@@ -26,7 +26,7 @@ export interface RExplainerProps {
 export const SelectedFlag = '__RExplainer_selected__';
 
 const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, functionalDependencies, edges }) => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
+    const { dataSourceStore, __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { fieldGroup } = interactFieldGroups;
     const { selectedFields } = causalStore;

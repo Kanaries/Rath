@@ -4,9 +4,9 @@ import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import type { IFieldMeta } from "../../interfaces";
-import { useGlobalStore } from "../../store";
-import { execPredict, IPredictProps, IPredictResult, PredictAlgorithm, PredictAlgorithms, TrainTestSplitFlag } from "./predict";
+import type { IFieldMeta } from "../../../interfaces";
+import { useGlobalStore } from "../../../store";
+import { execPredict, IPredictProps, IPredictResult, PredictAlgorithm, PredictAlgorithms, TrainTestSplitFlag } from "../predict";
 
 
 const Container = styled.div`
@@ -61,7 +61,7 @@ const predictCache: {
 const PredictPanel = forwardRef<{
     updateInput?: (input: { features: IFieldMeta[]; targets: IFieldMeta[] }) => void;
 }, {}>(function PredictPanel (_, ref) {
-    const { causalStore, dataSourceStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore, dataSourceStore } = useGlobalStore();
     const { selectedFields } = causalStore;
     const { cleanedData, fieldMetas } = dataSourceStore;
 

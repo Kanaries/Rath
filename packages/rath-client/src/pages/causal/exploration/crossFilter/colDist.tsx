@@ -2,8 +2,8 @@ import { ISemanticType } from '@kanaries/loa';
 import React, { useEffect, useRef } from 'react';
 import { View } from 'vega';
 import embed from 'vega-embed';
-import { IRow } from '../../../interfaces';
-import { throttle } from '../../../utils';
+import { IRow } from '../../../../interfaces';
+import { throttle } from '../../../../utils';
 
 export const SELECT_SIGNAL_NAME = '__select__';
 export interface IBrushSignalStore {

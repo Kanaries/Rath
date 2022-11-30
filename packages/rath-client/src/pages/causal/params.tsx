@@ -23,7 +23,7 @@ const Params: React.FC<{
     /** @deprecated */precondition: BgKnowledge[];
     funcDeps: IFunctionalDep[];
 }> = ({ precondition, bgKnowledge, dataSource, funcDeps }) => {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { causalAlgorithm, causalParams, showSettings, causalAlgorithmForm, causalAlgorithmOptions } = causalStore;
 
     const [algoName, setAlgoName] = useState(causalAlgorithm);

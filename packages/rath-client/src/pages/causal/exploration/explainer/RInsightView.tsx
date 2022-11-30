@@ -4,12 +4,12 @@ import { observer } from "mobx-react-lite";
 import { FC, Fragment, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { useId } from '@fluentui/react-hooks';
-import type { IFieldMeta, IRow } from "../../../interfaces";
-import { useGlobalStore } from "../../../store";
-import type { IRInsightExplainResult, IRInsightExplainSubspace } from "../../../workers/insight/r-insight.worker";
-import { RInsightService } from '../../../services/r-insight';
-import type { IFunctionalDep, PagLink } from '../config';
-import type { useDataViews } from '../hooks/dataViews';
+import type { IFieldMeta, IRow } from "../../../../interfaces";
+import { useGlobalStore } from "../../../../store";
+import type { IRInsightExplainResult, IRInsightExplainSubspace } from "../../../../workers/insight/r-insight.worker";
+import { RInsightService } from '../../../../services/r-insight';
+import type { IFunctionalDep, PagLink } from '../../config';
+import type { useDataViews } from '../../hooks/dataViews';
 import DiffChart from "./diffChart";
 import ExplainChart from "./explainChart";
 import VisText, { IVisTextProps } from './visText';
@@ -141,7 +141,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
     mode, indices, subspaces, context, functionalDependencies, edges,
     aggr, serviceMode,
 }) => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
+    const { dataSourceStore, __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { selectedFields } = causalStore;
     const [normalize, setNormalize] = useState<boolean>(true);

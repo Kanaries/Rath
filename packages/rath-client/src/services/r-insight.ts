@@ -7,7 +7,7 @@ import { workerService } from './base';
 
 
 export const RInsightService = async (props: IRInsightExplainProps, mode: 'worker' | 'server'): Promise<IRInsightExplainResult> => {
-    const { causalStore } = getGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = getGlobalStore();
 
     if (mode === 'server') {
         const { apiPrefix } = causalStore;

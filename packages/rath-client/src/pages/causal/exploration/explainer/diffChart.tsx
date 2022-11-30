@@ -3,9 +3,9 @@ import type { View } from 'vega';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import embed from 'vega-embed';
-import { EDITOR_URL } from '../../../constants';
-import type { IFieldMeta, IRow } from '../../../interfaces';
-import { getVegaTimeFormatRules } from '../../../utils';
+import { EDITOR_URL } from '../../../../constants';
+import type { IFieldMeta, IRow } from '../../../../interfaces';
+import { getVegaTimeFormatRules } from '../../../../utils';
 
 
 interface DiffChartProps {

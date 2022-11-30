@@ -38,7 +38,7 @@ const Container = styled.div`
 const FDGraph: React.FC<FDPanelProps> = ({
     functionalDependencies, setFunctionalDependencies, renderNode,
 }) => {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
 
     const containerRef = useRef<HTMLDivElement>(null);

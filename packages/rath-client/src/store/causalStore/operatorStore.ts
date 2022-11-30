@@ -49,10 +49,7 @@ export default class CausalOperatorStore {
         }
     }
 
-    protected _destroy: () => void;
-    public get destroy() {
-        return this._destroy;
-    }
+    public readonly destroy: () => void;
 
     constructor(dataSourceStore: DataSourceStore) {
         const allFields$ = new Subject<IFieldMeta[]>();
@@ -99,7 +96,7 @@ export default class CausalOperatorStore {
             destroy: false,
         });
 
-        this._destroy = () => {
+        this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());
             rxReactions.forEach(subscription => subscription.unsubscribe());
         };

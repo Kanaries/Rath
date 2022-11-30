@@ -111,7 +111,7 @@ const Explorer: FC<ExplorerProps> = ({
     synchronizePredictionsUsingCausalResult,
     handleLasso,
 }) => {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { causalStrength, selectedFields } = causalStore;
 
     const [cutThreshold, setCutThreshold] = useState(0);

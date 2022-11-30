@@ -1,7 +1,7 @@
 import { IconButton } from '@fluentui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { IFieldMeta, IRow } from '../../../interfaces';
+import { IFieldMeta, IRow } from '../../../../interfaces';
 import ColDist, { IBrushSignalStore } from './colDist';
 
 const VizContainer = styled.div`

@@ -67,7 +67,7 @@ const dropdownOptions: { key: BatchUpdateMode; text: string }[] = [
 const PreconditionBatch: React.FC<PreconditionPanelProps> = ({
     context, modifiablePrecondition, setModifiablePrecondition, renderNode,
 }) => {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { selectedFields } = causalStore;
     const [displayPreview, setDisplayPreview] = useState(false);
     const [preview, setPreview] = useState<ModifiableBgKnowledge[] | null>(null);

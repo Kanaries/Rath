@@ -10,7 +10,7 @@ import Explorer, { ExplorerProps } from '../explorer';
 import Params from '../params';
 import type { BgKnowledge, BgKnowledgePagLink, IFunctionalDep, ModifiableBgKnowledge } from '../config';
 import ModelStorage from '../modelStorage';
-import ManualAnalyzer from '../manualAnalyzer';
+import Exploration from '../exploration';
 import MatrixPanel, { MATRIX_TYPE } from '../matrixPanel';
 import type { useInteractFieldGroups } from '../hooks/interactFieldGroup';
 import type { useDataViews } from '../hooks/dataViews';
@@ -58,7 +58,7 @@ export const CausalExplorer = observer<
     interactFieldGroups,
     listenerRef,
 }) {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { igMatrix, selectedFields, causalStrength } = causalStore;
     const { dataSubset } = dataContext;
     const { appendFields2Group, setFieldGroup } = interactFieldGroups;
@@ -139,7 +139,7 @@ const CausalModal: React.FC<CausalModalProps> = ({
     functionalDependencies,
     interactFieldGroups,
 }) => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
+    const { dataSourceStore, __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const { focusFieldIds, computing, igMatrix, selectedFields, causalStrength } = causalStore;
     const { dataSubset } = dataContext;
@@ -252,7 +252,7 @@ const CausalModal: React.FC<CausalModalProps> = ({
                 />
             </div>
             <div style={{ flexGrow: 1.4, display: 'flex', flexDirection: 'column' }}>
-                <ManualAnalyzer
+                <Exploration
                     context={dataContext}
                     functionalDependencies={functionalDependencies}
                     interactFieldGroups={interactFieldGroups}

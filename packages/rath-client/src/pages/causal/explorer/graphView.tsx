@@ -109,7 +109,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     handleLasso,
     ...props
 }, ref) => {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { selectedFields: fields } = causalStore;
 
     const [data] = useMemo(() => {

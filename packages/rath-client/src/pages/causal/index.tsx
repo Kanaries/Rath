@@ -24,21 +24,21 @@ const Main = styled.div`
 `;
 
 const CausalPage: FC = () => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
+    const { dataSourceStore, __deprecatedCausalStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
-    const { selectedFields } = causalStore;
+    const { selectedFields } = __deprecatedCausalStore;
     const interactFieldGroups = useInteractFieldGroups(fieldMetas);
 
-    const ViewContextProvider = useCausalViewProvider(dataSourceStore);
+    const ViewContextProvider = useCausalViewProvider(causalStore);
 
     useEffect(() => {
-        causalStore.setFocusFieldIds(
+        __deprecatedCausalStore.setFocusFieldIds(
             fieldMetas
                 .filter((f) => f.disable !== true)
                 .slice(0, 10)
                 .map((f) => f.fid)
         ); // 默认只使用前 10 个)
-    }, [fieldMetas, causalStore]);
+    }, [fieldMetas, __deprecatedCausalStore]);
 
     const [modifiablePrecondition, __unsafeSetModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
 
@@ -78,8 +78,8 @@ const CausalPage: FC = () => {
     const dataContext = useDataViews(cleanedData);
 
     useEffect(() => {
-        causalStore.updateCausalAlgorithmList(fieldMetas);
-    }, [causalStore, fieldMetas]);
+        __deprecatedCausalStore.updateCausalAlgorithmList(fieldMetas);
+    }, [__deprecatedCausalStore, fieldMetas]);
 
     // 结点可以 project 一些字段信息
     const renderNode = useCallback((node: Readonly<IFieldMeta>): GraphNodeAttributes | undefined => {

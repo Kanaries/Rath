@@ -11,7 +11,7 @@ const ModalInnerContainer = styled.div`
 
 interface ModelStorageProps {}
 const ModelStorage: React.FC<ModelStorageProps> = (props) => {
-    const { causalStore } = useGlobalStore();
+    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { userModelKeys } = causalStore;
     const [selectedModelKey, setSelectedModelKey] = useState<string | undefined>(undefined);
     const [showModels, setShowModels] = useState<boolean>(false);

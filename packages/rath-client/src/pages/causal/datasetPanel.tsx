@@ -67,7 +67,7 @@ export interface DatasetPanelProps {
 }
 
 const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
+    const { dataSourceStore, __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const { focusFieldIds } = causalStore;
     const totalFieldsRef = useRef(fieldMetas);
