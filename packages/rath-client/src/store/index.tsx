@@ -9,7 +9,7 @@ import { SemiAutomationStore } from './semiAutomation/mainStore';
 import { PainterStore } from './painterStore'
 import { CollectionStore } from './collectionStore'
 import DashboardStore from './dashboardStore';
-import { CausalStore } from './causalStore';
+import { CausalStore } from './causalStore-old';
 export interface StoreCollection {
     langStore: LangStore;
     dataSourceStore: DataSourceStore;

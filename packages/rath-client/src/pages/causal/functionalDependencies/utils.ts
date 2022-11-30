@@ -19,6 +19,10 @@ export const getGeneratedPreconditionsFromExtInfo = (fields: IFieldMeta[]): Modi
     }, []);
 };
 
+/**
+ * @deprecated in store
+ * get `CausalModelStore.generatedFDFromExtInfo` instead
+ */
 export const getGeneratedFDFromExtInfo = (fields: IFieldMeta[]): IFunctionalDep[] => {
     return fields.reduce<IFunctionalDep[]>((list, f) => {
         if (f.extInfo) {

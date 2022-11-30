@@ -23,6 +23,7 @@ enum CausalServerUrl {
     // test = 'http://gateway.kanaries.cn:2080/causal',
     test = 'http://dev02-thinkpad-t14-gen-2a.local:2281',
 }
+/** @deprecated */
 export class CausalStore {
     public igMatrix: number[][] = [];
     public igCondMatrix: number[][] = [];

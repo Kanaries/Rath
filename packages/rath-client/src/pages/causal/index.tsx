@@ -3,6 +3,7 @@ import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
+import { useCausalViewProvider } from '../../store/causalStore/viewStore';
 import type { IFunctionalDep, ModifiableBgKnowledge } from './config';
 import { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import { useDataViews } from './hooks/dataViews';
@@ -27,6 +28,8 @@ const CausalPage: FC = () => {
     const { fieldMetas, cleanedData } = dataSourceStore;
     const { selectedFields } = causalStore;
     const interactFieldGroups = useInteractFieldGroups(fieldMetas);
+
+    const ViewContextProvider = useCausalViewProvider(dataSourceStore);
 
     useEffect(() => {
         causalStore.setFocusFieldIds(
@@ -103,19 +106,21 @@ const CausalPage: FC = () => {
 
     return (
         <div className="content-container">
-            <Main className="card">
-                <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>因果分析</h1>
-                <hr className="card-line" />
-                <CausalStepPager
-                    dataContext={dataContext}
-                    modifiablePrecondition={modifiablePrecondition}
-                    setModifiablePrecondition={setModifiablePrecondition}
-                    functionalDependencies={functionalDependencies}
-                    setFunctionalDependencies={setFunctionalDependencies}
-                    renderNode={renderNode}
-                    interactFieldGroups={interactFieldGroups}
-                />
-            </Main>
+            <ViewContextProvider>
+                <Main className="card">
+                    <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>因果分析</h1>
+                    <hr className="card-line" />
+                    <CausalStepPager
+                        dataContext={dataContext}
+                        modifiablePrecondition={modifiablePrecondition}
+                        setModifiablePrecondition={setModifiablePrecondition}
+                        functionalDependencies={functionalDependencies}
+                        setFunctionalDependencies={setFunctionalDependencies}
+                        renderNode={renderNode}
+                        interactFieldGroups={interactFieldGroups}
+                    />
+                </Main>
+            </ViewContextProvider>
         </div>
     );
 };
