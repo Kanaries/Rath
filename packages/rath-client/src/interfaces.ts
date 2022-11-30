@@ -235,3 +235,11 @@ export interface IResponse<T = void> {
     data: T;
     message?: string;
 }
+
+export interface IRawFeatures {
+    fid: string;
+    valid: number;
+    unique: number;
+    missing: number;
+    mismatch: number;
+}

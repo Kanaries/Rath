@@ -16,10 +16,17 @@ export const AVATAR_IMG_LIST: string[] = new Array(18)
 
 export const DEFAULT_AVATAR_URL_PREFIX = 'https://foghorn-assets.s3.ap-northeast-1.amazonaws.com/avatar/';
 
-export function getServerUrl(path: string) {
+export function getMainServiceUrl(path: string) {
     const baseURL = new URL(window.location.href);
+    let default_service = 'kanaries.cn'
+    if (/.*kanaries\.net$/.test(baseURL.hostname)) {
+        default_service = 'kanaries.net'
+    } else if (/.*kanaries\.cn$/.test(baseURL.hostname)) {
+        default_service = 'kanaries.cn'
+    }
+    default_service = `${baseURL.protocol}//${default_service}`
     const DATA_SERVER_URL =
-        baseURL.searchParams.get('main_service') || localStorage.getItem('main_service') || window.location.href;
+        baseURL.searchParams.get('main_service') || localStorage.getItem('main_service') || default_service;
     // const devSpecURL = new URL(w|| window.location.href)
     const url = new URL(DATA_SERVER_URL);
     url.pathname = path;
