@@ -5,7 +5,6 @@ import type { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { useCausalViewProvider } from '../../store/causalStore/viewStore';
 import type { IFunctionalDep, ModifiableBgKnowledge } from './config';
-import { useInteractFieldGroups } from './hooks/interactFieldGroup';
 import { useDataViews } from './hooks/dataViews';
 import type { GraphNodeAttributes } from './explorer/graph-utils';
 import { CausalStepPager } from './step';
@@ -27,7 +26,6 @@ const CausalPage: FC = () => {
     const { dataSourceStore, __deprecatedCausalStore, causalStore } = useGlobalStore();
     const { fieldMetas, cleanedData } = dataSourceStore;
     const { selectedFields } = __deprecatedCausalStore;
-    const interactFieldGroups = useInteractFieldGroups(fieldMetas);
 
     const ViewContextProvider = useCausalViewProvider(causalStore);
 
@@ -117,7 +115,6 @@ const CausalPage: FC = () => {
                         functionalDependencies={functionalDependencies}
                         setFunctionalDependencies={setFunctionalDependencies}
                         renderNode={renderNode}
-                        interactFieldGroups={interactFieldGroups}
                     />
                 </Main>
             </ViewContextProvider>

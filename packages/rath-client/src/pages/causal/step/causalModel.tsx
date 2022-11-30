@@ -1,10 +1,11 @@
 import { Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { RefObject, useCallback, useMemo, useRef } from 'react';
 import produce from 'immer';
 import styled from 'styled-components';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
+import { useCausalViewContext } from '../../../store/causalStore/viewStore';
 import { mergeCausalPag, resolvePreconditionsFromCausal, transformPreconditions } from '../../../utils/resolve-causal';
 import Explorer, { ExplorerProps } from '../explorer';
 import Params from '../params';
@@ -12,7 +13,6 @@ import type { BgKnowledge, BgKnowledgePagLink, IFunctionalDep, ModifiableBgKnowl
 import ModelStorage from '../modelStorage';
 import Exploration from '../exploration';
 import MatrixPanel, { MATRIX_TYPE } from '../matrixPanel';
-import type { useInteractFieldGroups } from '../hooks/interactFieldGroup';
 import type { useDataViews } from '../hooks/dataViews';
 import type { GraphNodeAttributes } from '../explorer/graph-utils';
 
@@ -42,7 +42,6 @@ export interface CausalModalProps {
     setModifiablePrecondition: (precondition: ModifiableBgKnowledge[] | ((prev: ModifiableBgKnowledge[]) => ModifiableBgKnowledge[])) => void;
     functionalDependencies: IFunctionalDep[];
     renderNode: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
-    interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
 }
 
 export const CausalExplorer = observer<
@@ -55,27 +54,26 @@ export const CausalExplorer = observer<
     modifiablePrecondition,
     setModifiablePrecondition,
     renderNode,
-    interactFieldGroups,
     listenerRef,
 }) {
     const { __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { igMatrix, selectedFields, causalStrength } = causalStore;
     const { dataSubset } = dataContext;
-    const { appendFields2Group, setFieldGroup } = interactFieldGroups;
+
+    const viewContext = useCausalViewContext();
 
     const handleLasso = useCallback((fields: IFieldMeta[]) => {
-        setFieldGroup(fields);
-    }, [setFieldGroup]);
+        for (const f of fields) {
+            viewContext?.toggleNodeSelected(f.fid);
+        }
+    }, [viewContext]);
 
     const handleSubTreeSelected = useCallback<ExplorerProps['onNodeSelected']>((
         node, simpleCause, simpleEffect, composedCause, composedEffect,
     ) => {
-            if (node) {
-                appendFields2Group([node.fid]);
-            }
             listenerRef?.current?.onSubtreeSelected?.(node, simpleCause, simpleEffect, composedCause, composedEffect);
         },
-        [appendFields2Group, listenerRef]
+        [listenerRef]
     );
 
     const handleLinkTogether = useCallback((srcIdx: number, tarIdx: number, type: ModifiableBgKnowledge['type']) => {
@@ -137,7 +135,6 @@ const CausalModal: React.FC<CausalModalProps> = ({
     setModifiablePrecondition,
     renderNode,
     functionalDependencies,
-    interactFieldGroups,
 }) => {
     const { dataSourceStore, __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
@@ -184,7 +181,13 @@ const CausalModal: React.FC<CausalModalProps> = ({
         return transformPreconditions(modifiablePrecondition, selectedFields);
     }, [igMatrix, modifiablePrecondition, selectedFields, computing]);
     
-    const { appendFields2Group } = interactFieldGroups;
+    const viewContext = useCausalViewContext();
+
+    const appendFields2Group = useCallback((fidArr: string[]) => {
+        for (const fid of fidArr) {
+            viewContext?.toggleNodeSelected(fid);
+        }
+    }, [viewContext]);
 
     const onFieldGroupSelect = useCallback(
         (xFid: string, yFid: string) => {
@@ -193,13 +196,6 @@ const CausalModal: React.FC<CausalModalProps> = ({
         },
         [appendFields2Group, causalStore, fieldMetas]
     );
-
-    const resetExploringFieldsRef = useRef(() => interactFieldGroups.clearFieldGroup());
-    resetExploringFieldsRef.current = () => interactFieldGroups.clearFieldGroup();
-
-    useEffect(() => {
-        resetExploringFieldsRef.current();
-    }, [causalStrength]);
 
     const edges = useMemo(() => {
         return mergeCausalPag(causalStrength, modifiablePrecondition, fieldMetas);
@@ -245,7 +241,6 @@ const CausalModal: React.FC<CausalModalProps> = ({
                             modifiablePrecondition={modifiablePrecondition}
                             setModifiablePrecondition={setModifiablePrecondition}
                             renderNode={renderNode}
-                            interactFieldGroups={interactFieldGroups}
                             listenerRef={listenerRef}
                         />
                     )}
@@ -255,7 +250,6 @@ const CausalModal: React.FC<CausalModalProps> = ({
                 <Exploration
                     context={dataContext}
                     functionalDependencies={functionalDependencies}
-                    interactFieldGroups={interactFieldGroups}
                     edges={edges}
                     ref={listenerRef}
                 />

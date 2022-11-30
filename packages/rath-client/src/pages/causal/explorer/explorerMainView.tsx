@@ -1,10 +1,7 @@
 import { forwardRef } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
-import useErrorBoundary from "../../../hooks/use-error-boundary";
 import type { ModifiableBgKnowledge } from "../config";
-// import DAGView from "./DAGView";
-// import ForceView from "./forceView";
 import GraphView from "./graphView";
 import type { GraphNodeAttributes } from "./graph-utils";
 import type { DiagramGraphData } from ".";
@@ -30,7 +27,6 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     mode: 'explore' | 'edit';
     onClickNode?: (fid: string | null) => void;
     toggleFlowAnalyzer?: () => void;
-    focus: number | null;
     onLinkTogether: (srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
@@ -45,7 +41,6 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     selectedSubtree,
     value,
-    focus,
     cutThreshold = 0,
     mode,
     limit,
@@ -62,70 +57,31 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     handleLasso,
     ...props
 }, ref) => {
-    const ErrorBoundary = useErrorBoundary((err, info) => {
-        // console.error(err ?? info);
-        return <div style={{
-            flexGrow: 1,
-            flexShrink: 1,
-            width: '100%',
-        }} />;
-        // return <p>{info}</p>;
-    }, [value, cutThreshold, preconditions]);
-
     return (
         <Container {...props} ref={ref}>
-            {/* <ForceView
-                fields={fields}
+            <GraphView
+                selectedSubtree={selectedSubtree}
+                forceRelayoutRef={forceRelayoutRef}
                 value={value}
-                onClickNode={onClickNode}
-                focus={focus}
+                limit={limit}
                 mode={mode}
+                preconditions={preconditions}
                 cutThreshold={cutThreshold}
+                onClickNode={onClickNode}
+                toggleFlowAnalyzer={toggleFlowAnalyzer ?? (() => {})}
+                onLinkTogether={onLinkTogether}
+                onRevertLink={onRevertLink}
+                onRemoveLink={onRemoveLink}
+                autoLayout={autoLayout}
+                renderNode={renderNode}
+                allowZoom={allowZoom}
+                handleLasso={handleLasso}
                 style={{
                     flexGrow: 1,
                     flexShrink: 1,
-                    width: '40%',
+                    width: '100%',
                 }}
-            /> */}
-            <ErrorBoundary>
-                <GraphView
-                    selectedSubtree={selectedSubtree}
-                    forceRelayoutRef={forceRelayoutRef}
-                    value={value}
-                    limit={limit}
-                    mode={mode}
-                    preconditions={preconditions}
-                    cutThreshold={cutThreshold}
-                    onClickNode={onClickNode}
-                    toggleFlowAnalyzer={toggleFlowAnalyzer ?? (() => {})}
-                    onLinkTogether={onLinkTogether}
-                    onRevertLink={onRevertLink}
-                    onRemoveLink={onRemoveLink}
-                    focus={focus}
-                    autoLayout={autoLayout}
-                    renderNode={renderNode}
-                    allowZoom={allowZoom}
-                    handleLasso={handleLasso}
-                    style={{
-                        flexGrow: 1,
-                        flexShrink: 1,
-                        width: '100%',
-                    }}
-                />
-                {/* <DAGView
-                    fields={fields}
-                    value={value}
-                    mode={mode}
-                    cutThreshold={cutThreshold}
-                    onClickNode={onClickNode}
-                    focus={focus}
-                    style={{
-                        flexGrow: 1,
-                        flexShrink: 1,
-                        width: '100%',
-                    }}
-                /> */}
-            </ErrorBoundary>
+            />
         </Container>
     );
 });

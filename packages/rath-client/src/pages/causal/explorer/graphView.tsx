@@ -32,7 +32,6 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     cutThreshold: number;
     limit: number;
     mode: 'explore' | 'edit';
-    focus: number | null;
     onClickNode?: (fid: string | null) => void;
     toggleFlowAnalyzer: () => void;
     onLinkTogether: (srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => void;
@@ -93,7 +92,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     selectedSubtree,
     value,
     onClickNode,
-    focus,
     cutThreshold,
     limit,
     mode,
@@ -142,8 +140,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
 
-    const updateSelectedRef = useRef<(idx: number) => void>(() => {});
-
     const [createEdgeMode, setCreateEdgeMode] = useState<ModifiableBgKnowledge['type']>('directed-must-link');
 
     const handleLinkTogether = useCallback((srcFid: string, tarFid: string) => {
@@ -186,10 +182,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         onClickNode,
         handleEdgeClick,
         fields,
-        updateSelectedRef,
         forceRelayoutFlag,
-        focus,
-        selectedSubtree,
         allowZoom,
     );
 
@@ -210,12 +203,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
             forceRelayoutRef.current = () => {};
         };
     }, [forceRelayoutRef]);
-
-    useEffect(() => {
-        if (focus !== null) {
-            updateSelectedRef.current(focus);
-        }
-    }, [focus]);
 
     useEffect(() => {
         const { current: container } = containerRef;

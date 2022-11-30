@@ -163,11 +163,6 @@ export const useRenderData = (
                     path: bkArrows[bk.type].end,
                 },
             },
-            edgeStateStyles: {
-                active: {
-                    lineWidth: 2,
-                },
-            },
             type: bk.type === 'must-not-link' || bk.type === 'directed-must-not-link' ? ForbiddenEdgeType : undefined,
         })),
     }), [data, mode, preconditions, fields, renderNode]);
@@ -270,13 +265,14 @@ export const useGraphOptions = (
                 focused: {
                     lineWidth: 1.5,
                     opacity: 1,
+                    shadowColor: '#F6BD16',
+                    shadowBlur: 8,
                 },
                 highlighted: {
-                    lineWidth: 1.25,
-                    opacity: 1,
+                    opacity: 0.4,
                 },
                 faded: {
-                    opacity: 0.4,
+                    opacity: 0.2,
                 },
             },
             defaultEdge: {
@@ -289,7 +285,7 @@ export const useGraphOptions = (
                     opacity: 1,
                 },
                 faded: {
-                    opacity: 0.2,
+                    opacity: 0.12,
                 },
             },
         };

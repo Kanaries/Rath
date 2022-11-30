@@ -89,10 +89,7 @@ const PreconditionGraph: React.FC<PreconditionPanelProps> = ({
         undefined,
         onRemoveLink,
         selectedFields,
-        undefined,
         forceUpdateFlag,
-        null,
-        [],
         false,
     );
 

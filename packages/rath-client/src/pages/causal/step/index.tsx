@@ -6,7 +6,6 @@ import type { useDataViews } from "../hooks/dataViews";
 import type { IFunctionalDep, ModifiableBgKnowledge } from "../config";
 import type { GraphNodeAttributes } from "../explorer/graph-utils";
 import type { IFieldMeta } from "../../../interfaces";
-import type { useInteractFieldGroups } from "../hooks/interactFieldGroup";
 import CausalDatasetConfig from './datasetConfig';
 import CausalFDConfig from './FDConfig';
 import CausalModel from "./causalModel";
@@ -116,7 +115,6 @@ interface CausalStepPagerProps {
     functionalDependencies: IFunctionalDep[];
     setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: IFunctionalDep[]) => IFunctionalDep[])) => void;
     renderNode: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
-    interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
 }
 
 export const CausalStepPager = observer<CausalStepPagerProps>(function CausalStepPager ({
@@ -126,7 +124,6 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
     functionalDependencies,
     setFunctionalDependencies,
     renderNode,
-    interactFieldGroups,
 }) {
     const [stepKey, setStepKey] = useState<CausalStep>(CausalStep.DATASET_CONFIG);
     const [showHelp, setShowHelp] = useState<CausalStep>(stepKey);
@@ -243,7 +240,6 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
                             setModifiablePrecondition={setModifiablePrecondition}
                             functionalDependencies={functionalDependencies}
                             renderNode={renderNode}
-                            interactFieldGroups={interactFieldGroups}
                         />
                     ),
                 }[curStep.key]}

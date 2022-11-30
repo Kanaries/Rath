@@ -1,6 +1,6 @@
 import { ActionButton, Pivot, PivotItem, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import type { IPattern } from '@kanaries/loa';
 import styled from 'styled-components';
@@ -8,7 +8,6 @@ import type { Specification } from 'visual-insights';
 import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import SemiEmbed from '../../semiAutomation/semiEmbed';
-import type { useInteractFieldGroups } from '../hooks/interactFieldGroup';
 import type { useDataViews } from '../hooks/dataViews';
 import type { IFunctionalDep, PagLink } from '../config';
 import type { ExplorerProps } from '../explorer';
@@ -37,39 +36,38 @@ const Container = styled.div`
 
 export interface ManualAnalyzerProps {
     context: ReturnType<typeof useDataViews>;
-    interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
     functionalDependencies: IFunctionalDep[];
     edges: PagLink[];
 }
 
 const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelected'] }, ManualAnalyzerProps>(function ManualAnalyzer (
-    { context, interactFieldGroups, functionalDependencies, edges }, ref
+    { context, functionalDependencies, edges }, ref
 ) {
     const { dataSourceStore, __deprecatedCausalStore, langStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { fieldGroup, setFieldGroup, clearFieldGroup } = interactFieldGroups;
     const [showSemiClue, setShowSemiClue] = useState(false);
     const [clueView, setClueView] = useState<IPattern | null>(null);
     const { selectedFields } = __deprecatedCausalStore;
 
-    const view = useCausalViewContext();
+    const viewContext = useCausalViewContext();
+    const { selectedFieldGroup = [] } = viewContext ?? {};
 
     const { vizSampleData, filters } = context;
 
     useEffect(() => {
-        if (fieldGroup.length > 0) {
+        if (selectedFieldGroup.length > 0) {
             setClueView({
-                fields: [...fieldGroup],
+                fields: [...selectedFieldGroup],
                 filters: [...filters],
                 imp: 0,
             });
         } else {
             setClueView(null);
         }
-    }, [fieldGroup, filters]);
+    }, [selectedFieldGroup, filters]);
 
     const initialSpec = useMemo<Specification>(() => {
-        const [discreteChannel, concreteChannel] = fieldGroup.reduce<[IFieldMeta[], IFieldMeta[]]>(
+        const [discreteChannel, concreteChannel] = selectedFieldGroup.reduce<[IFieldMeta[], IFieldMeta[]]>(
             ([discrete, concrete], f, i) => {
                 if (i === 0 || f.semanticType === 'quantitative' || f.semanticType === 'temporal') {
                     concrete.push(f);
@@ -80,7 +78,7 @@ const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelect
             },
             [[], []]
         );
-        return fieldGroup.length
+        return selectedFieldGroup.length
             ? {
                   position: concreteChannel.map((f) => f.fid),
                   color: discreteChannel[0] ? [discreteChannel[0].fid] : [],
@@ -106,7 +104,7 @@ const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelect
         //     position: ['gw_count_fid'],
         //     facets: fieldGroup.map(f => f.fid),
         // };
-    }, [fieldGroup]);
+    }, [selectedFieldGroup]);
 
     const predictPanelRef = useRef<{ updateInput?: (input: {
         features: Readonly<IFieldMeta>[]; targets: Readonly<IFieldMeta>[]
@@ -114,7 +112,7 @@ const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelect
 
     useImperativeHandle(ref, () => ({
         onSubtreeSelected: (node, simpleCause) => {
-            if (view?.explorationKey === 'predict' && node && simpleCause.length > 0) {
+            if (viewContext?.explorationKey === 'predict' && node && simpleCause.length > 0) {
                 const features = simpleCause.map(cause => cause.field);
                 predictPanelRef.current.updateInput?.({
                     features,
@@ -124,13 +122,21 @@ const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelect
         },
     }));
 
-    return view ? (
+    const clearFieldGroup = useCallback(() => {
+        viewContext?.clearSelected();
+    }, [viewContext]);
+
+    const removeSelectedField = useCallback((fid: string) => {
+        viewContext?.toggleNodeSelected(fid);
+    }, [viewContext]);
+
+    return viewContext && (
         <Container>
             <Pivot
                 style={{ marginBottom: '0.4em' }}
-                selectedKey={view.explorationKey}
+                selectedKey={viewContext.explorationKey}
                 onLinkClick={(item) => {
-                    item && view.setExplorationKey(item.props.itemKey as ExplorationKey);
+                    item && viewContext.setExplorationKey(item.props.itemKey as ExplorationKey);
                 }}
             >
                 {ExplorationOptions.map(mode => (
@@ -138,7 +144,7 @@ const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelect
                 ))}
             </Pivot>
             <Stack horizontal>
-                {[ExplorationKey.CROSS_FILTER, ExplorationKey.GRAPHIC_WALKER].includes(view.explorationKey) && (
+                {[ExplorationKey.CROSS_FILTER, ExplorationKey.GRAPHIC_WALKER].includes(viewContext.explorationKey) && (
                     <SemiEmbed
                         view={clueView}
                         show={showSemiClue}
@@ -148,11 +154,11 @@ const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelect
                         neighborKeys={clueView ? clueView.fields.slice(0, 1).map(f => f.fid) : []}
                     />
                 )}
-                {[ExplorationKey.AUTO_VIS, ExplorationKey.CROSS_FILTER, ExplorationKey.CAUSAL_INSIGHT].includes(view.explorationKey) && (
+                {[ExplorationKey.AUTO_VIS, ExplorationKey.CROSS_FILTER, ExplorationKey.CAUSAL_INSIGHT].includes(viewContext.explorationKey) && (
                     <ActionButton
                         iconProps={{ iconName: 'Delete' }}
                         text="清除全部选择字段"
-                        disabled={fieldGroup.length === 0}
+                        disabled={selectedFieldGroup.length === 0}
                         onClick={clearFieldGroup}
                     />
                 )}
@@ -160,11 +166,11 @@ const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelect
             <div className="body">
                 {{
                     [ExplorationKey.AUTO_VIS]: (
-                        <AutoVis interactFieldGroups={interactFieldGroups} />
+                        <AutoVis />
                     ),
-                    [ExplorationKey.CROSS_FILTER]: vizSampleData.length > 0 && fieldGroup.length > 0 && (
+                    [ExplorationKey.CROSS_FILTER]: vizSampleData.length > 0 && selectedFieldGroup.length > 0 && (
                         <CrossFilter
-                            fields={fieldGroup}
+                            fields={selectedFieldGroup}
                             dataSource={vizSampleData}
                             onVizClue={(fid) => {
                                 const field = selectedFields.find((f) => f.fid === fid);
@@ -177,15 +183,12 @@ const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelect
                                     setShowSemiClue(true);
                                 }
                             }}
-                            onVizDelete={(fid) => {
-                                setFieldGroup((list) => list.filter((f) => f.fid !== fid));
-                            }}
+                            onVizDelete={removeSelectedField}
                         />
                     ),
-                    [ExplorationKey.CAUSAL_INSIGHT]: vizSampleData.length > 0 && fieldGroup.length > 0 && (
+                    [ExplorationKey.CAUSAL_INSIGHT]: vizSampleData.length > 0 && (
                         <RExplainer
                             context={context}
-                            interactFieldGroups={interactFieldGroups}
                             functionalDependencies={functionalDependencies}
                             edges={edges}
                         />
@@ -204,10 +207,10 @@ const Exploration = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelect
                     [ExplorationKey.PREDICT]: (
                         <PredictPanel ref={predictPanelRef} />
                     ),
-                }[view.explorationKey]}
+                }[viewContext.explorationKey]}
             </div>
         </Container>
-    ) : null;
+    );
 });
 
 export default observer(Exploration);

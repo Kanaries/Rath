@@ -125,10 +125,7 @@ const FDGraph: React.FC<FDPanelProps> = ({
         undefined,
         onRemoveLink,
         selectedFields,
-        undefined,
         forceUpdateFlag,
-        null,
-        [],
         false,
     );
 

@@ -4,7 +4,7 @@ import { DefaultButton, Dropdown, Stack, Toggle } from '@fluentui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyFilters } from '@kanaries/loa';
 import { useGlobalStore } from '../../../../store';
-import type { useInteractFieldGroups } from '../../hooks/interactFieldGroup';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 import type { useDataViews } from '../../hooks/dataViews';
 import { IFieldMeta, IFilter, IRow } from '../../../../interfaces';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../../workers/insight/r-insight.worker';
@@ -18,22 +18,22 @@ const Container = styled.div``;
 
 export interface RExplainerProps {
     context: ReturnType<typeof useDataViews>;
-    interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
     functionalDependencies: IFunctionalDep[];
     edges: PagLink[];
 }
 
 export const SelectedFlag = '__RExplainer_selected__';
 
-const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, functionalDependencies, edges }) => {
+const RExplainer: React.FC<RExplainerProps> = ({ context, functionalDependencies, edges }) => {
     const { dataSourceStore, __deprecatedCausalStore: causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { fieldGroup } = interactFieldGroups;
+    const viewContext = useCausalViewContext();
+    const { selectedFieldGroup = [] } = viewContext ?? {};
     const { selectedFields } = causalStore;
 
     const { sample, vizSampleData } = context;
 
-    const mainField = fieldGroup.at(-1) ?? null;
+    const mainField = selectedFieldGroup.at(-1) ?? null;
     const [indexKey, setIndexKey] = useState<IFieldMeta | null>(null);
     const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('count');
     const [diffMode, setDiffMode] = useState<"full" | "other" | "two-group">("full");

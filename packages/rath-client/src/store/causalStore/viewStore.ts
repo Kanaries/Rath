@@ -1,5 +1,8 @@
-import { makeAutoObservable, reaction } from "mobx";
+import produce from "immer";
+import { makeAutoObservable, observable, reaction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
+import { Subject, withLatestFrom } from "rxjs";
+import type { IFieldMeta } from "../../interfaces";
 import type CausalStore from "./mainStore";
 
 
@@ -28,9 +31,10 @@ export const ExplorationOptions = [
 class CausalViewStore {
 
     public explorationKey = ExplorationKey.AUTO_VIS;
-    public graphNodeSelectionMode = NodeSelectionMode.NONE;
+    public graphNodeSelectionMode = NodeSelectionMode.SINGLE;
 
-    protected _selectedNodes: readonly string[] = [];
+    protected selectedFidArr$ = new Subject<readonly string[]>();
+    protected _selectedNodes: readonly IFieldMeta[] = [];
     public get selectedFieldGroup() {
         return this._selectedNodes.slice(0);
     }
@@ -41,17 +45,27 @@ class CausalViewStore {
     public readonly destroy: () => void;
 
     constructor(causalStore: CausalStore) {
+        const fields$ = new Subject<readonly IFieldMeta[]>();
+
         const mobxReactions = [
+            reaction(() => causalStore.fields, fields => {
+                fields$.next(fields);
+                this.selectedFidArr$.next([]);
+            }),
             reaction(() => causalStore.model.mergedPag, () => {
-                this._selectedNodes = [];
+                this.selectedFidArr$.next([]);
             }),
             reaction(() => this.explorationKey, explorationKey => {
                 switch (explorationKey) {
-                    case ExplorationKey.AUTO_VIS:
+                    case ExplorationKey.AUTO_VIS: {
+                        if (this.graphNodeSelectionMode === NodeSelectionMode.NONE) {
+                            this.graphNodeSelectionMode = NodeSelectionMode.SINGLE;
+                        }
+                        break;
+                    }
                     case ExplorationKey.CAUSAL_INSIGHT:
                     case ExplorationKey.PREDICT: {
                         this.graphNodeSelectionMode = NodeSelectionMode.SINGLE;
-                        this._selectedNodes = this._selectedNodes.slice(0, 1);
                         break;
                     }
                     case ExplorationKey.CROSS_FILTER: {
@@ -60,16 +74,52 @@ class CausalViewStore {
                     }
                     default: {
                         this.graphNodeSelectionMode = NodeSelectionMode.NONE;
+                    }
+                }
+            }),
+            reaction(() => this.graphNodeSelectionMode, graphNodeSelectionMode => {
+                switch (graphNodeSelectionMode) {
+                    case NodeSelectionMode.SINGLE: {
+                        this._selectedNodes = this._selectedNodes.slice(this._selectedNodes.length - 1);
+                        break;
+                    }
+                    case NodeSelectionMode.MULTIPLE: {
+                        break;
+                    }
+                    default: {
                         this._selectedNodes = [];
+                        break;
                     }
                 }
             }),
         ];
 
-        makeAutoObservable(this);
+        const rxReactions = [
+            this.selectedFidArr$.pipe(
+                withLatestFrom(fields$)
+            ).subscribe(([fidArr, fields]) => {
+                this._selectedNodes = fidArr.reduce<IFieldMeta[]>((nodes, fid) => {
+                    const f = fields.find(which => which.fid === fid);
+                    if (f) {
+                        return nodes.concat([f]);
+                    } else {
+                        console.warn(`Select node warning: cannot find field ${fid}.`, fields);
+                    }
+                    return nodes;
+                }, []);
+            }),
+        ];
+
+        fields$.next(causalStore.fields);
+
+        makeAutoObservable(this, {
+            // @ts-expect-error non-public field
+            _selectedNodes: observable.ref,
+        });
 
         this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());
+            rxReactions.forEach(subscription => subscription.unsubscribe());
         };
     }
 
@@ -79,6 +129,39 @@ class CausalViewStore {
 
     public setNodeSelectionMode(selectionMode: NodeSelectionMode) {
         this.graphNodeSelectionMode = selectionMode;
+    }
+
+    public toggleNodeSelected(fid: string) {
+        switch (this.graphNodeSelectionMode) {
+            case NodeSelectionMode.SINGLE: {
+                if (this.selectedField?.fid === fid) {
+                    this.selectedFidArr$.next([]);
+                    return false;
+                } else {
+                    this.selectedFidArr$.next([fid]);
+                    return true;
+                }
+            }
+            case NodeSelectionMode.MULTIPLE: {
+                const selectedFidArr = this.selectedFieldGroup.map(f => f.fid);
+                this.selectedFidArr$.next(produce(selectedFidArr, draft => {
+                    const matchedIndex = draft.findIndex(f => f === fid);
+                    if (matchedIndex !== -1) {
+                        draft.splice(matchedIndex, 1);
+                    } else {
+                        draft.push(fid);
+                    }
+                }));
+                break;
+            }
+            default: {
+                return undefined;
+            }
+        }
+    }
+
+    public clearSelected() {
+        this.selectedFidArr$.next([]);
     }
 
 }

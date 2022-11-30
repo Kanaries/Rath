@@ -81,10 +81,8 @@ export default class CausalDatasetStore {
             }),
 
             // compute `fields`
-            this.fieldIndices$.pipe(
-                withLatestFrom(allFields$)
-            ).subscribe(([fieldIndices, allFields]) => {
-                fields$.next(fieldIndices.map(index => allFields[index]));
+            this.fieldIndices$.subscribe((fieldIndices) => {
+                fields$.next(fieldIndices.map(index => this.allFields[index]));
             }),
 
             // bind `fields` with observer

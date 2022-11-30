@@ -5,6 +5,7 @@ import styled from "styled-components";
 import useErrorBoundary from "../../../hooks/use-error-boundary";
 import type { IFieldMeta, IRow } from "../../../interfaces";
 import { useGlobalStore } from "../../../store";
+import { useCausalViewContext } from "../../../store/causalStore/viewStore";
 import { CausalLinkDirection } from "../../../utils/resolve-causal";
 import type { ModifiableBgKnowledge } from "../config";
 import Floating from "../floating";
@@ -219,18 +220,20 @@ const Explorer: FC<ExplorerProps> = ({
 
     const value = useMemo(() => ({ nodes, links }), [nodes, links]);
 
-    const [focus, setFocus] = useState(-1);
     const [showFlowAnalyzer, setShowFlowAnalyzer] = useState(false);
+
+    const viewContext = useCausalViewContext();
+
+    const { selectedField = null } = viewContext ?? {};
 
     const handleClickCircle = useCallback((fid: string | null) => {
         if (fid === null) {
-            return setFocus(-1);
+            return viewContext?.clearSelected();
         }
-        const idx = selectedFields.findIndex(f => f.fid === fid);
         if (mode === 'explore') {
-            setFocus(idx === focus ? -1 : idx);
+            viewContext?.toggleNodeSelected(fid);
         }
-    }, [mode, focus, selectedFields]);
+    }, [mode, viewContext]);
 
     const toggleFlowAnalyzer = useCallback(() => {
         setShowFlowAnalyzer(display => !display);
@@ -254,7 +257,7 @@ const Explorer: FC<ExplorerProps> = ({
                 <small>{err?.message ?? info}</small>
             </div>
         );
-    }, [selectedFields, value, mode === 'explore' ? focus : -1, cutThreshold]);
+    }, [selectedFields, value, selectedField, cutThreshold]);
 
     const handleLink = useCallback((srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => {
         if (srcFid === tarFid) {
@@ -285,9 +288,9 @@ const Explorer: FC<ExplorerProps> = ({
     const forceRelayoutRef = useRef<() => void>(() => {});
 
     useEffect(() => {
-        setFocus(-1);
+        viewContext?.clearSelected();
         onNodeSelectedRef.current(null, [], [], [], []);
-    }, [mode]);
+    }, [mode, viewContext]);
 
     const [limit, setLimit] = useState(20);
     const [autoLayout, setAutoLayout] = useState(true);
@@ -308,7 +311,7 @@ const Explorer: FC<ExplorerProps> = ({
     }, [allowEdit]);
 
     return (<>
-        <Container onClick={() => focus !== -1 && setFocus(-1)}>
+        <Container onClick={() => viewContext?.clearSelected()}>
             <MainView>
                 <ExplorerMainView
                     selectedSubtree={selectedSubtree}
@@ -316,7 +319,6 @@ const Explorer: FC<ExplorerProps> = ({
                     value={value}
                     limit={limit}
                     preconditions={preconditions}
-                    focus={focus === -1 ? null : focus}
                     mode={mode}
                     cutThreshold={cutThreshold}
                     onClickNode={handleClickCircle}
@@ -404,7 +406,7 @@ const Explorer: FC<ExplorerProps> = ({
                 dataSource={dataSource}
                 data={value}
                 limit={limit}
-                index={mode === 'explore' ? focus : -1}
+                index={mode === 'explore' ? selectedFields.findIndex(f => f.fid === selectedField?.fid) : -1}
                 cutThreshold={cutThreshold}
                 onClickNode={handleClickCircle}
                 onUpdate={handleNodeSelect}
