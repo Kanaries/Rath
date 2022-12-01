@@ -1,8 +1,8 @@
 import { Dropdown, Pivot, PivotItem, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import styled from 'styled-components';
-import { IFieldMeta, IRow } from '../../../interfaces';
+import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import DirectionMatrix from './directionMatrix';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
@@ -54,28 +54,25 @@ const MARK_LABELS = [
     { key: 'square', text: '矩形' },
 ];
 
-function showMatrix(causalFields: IFieldMeta[], mat: number[][], computing?: boolean): boolean {
+function showMatrix(causalFields: readonly IFieldMeta[], mat: readonly (readonly number[])[], computing: boolean): boolean {
     return causalFields.length > 0 && mat.length > 0 && causalFields.length === mat.length && !computing;
 }
 
 interface MatrixPanelProps {
     onMatrixPointClick?: (xFid: string, yFid: string) => void;
-    fields: IFieldMeta[];
-    dataSource: IRow[];
     onCompute: (type: MATRIX_TYPE) => void;
     diagram?: JSX.Element;
 }
-const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
-    const { onMatrixPointClick, fields, onCompute, dataSource, diagram } = props;
+const MatrixPanel: FC<MatrixPanelProps> = (props) => {
+    const { onMatrixPointClick, onCompute, diagram } = props;
     const [viewType, setViewType] = useState<VIEW_TYPE>(VIEW_TYPE.diagram);
     const [selectedKey, setSelectedKey] = useState(MATRIX_TYPE.causal);
     const [markType, setMarkType] = useState<'circle' | 'square'>('circle');
-    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
-    const { computing, igCondMatrix, igMatrix, causalStrength } = causalStore;
-
-    useEffect(() => {
-        causalStore.computeIGMatrix(dataSource, fields);
-    }, [dataSource, fields, causalStore]);
+    const { __deprecatedCausalStore, causalStore } = useGlobalStore();
+    const { igCondMatrix } = __deprecatedCausalStore;
+    const { fields } = causalStore;
+    const { mutualMatrix, causalityRaw } = causalStore.model;
+    const { busy } = causalStore.operator;
 
     return (
         <Cont>
@@ -99,19 +96,19 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
                     onRenderText={(props, defaultRenderer) => {
                         return (
                             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} >
-                                {computing && <Spinner style={{ transform: 'scale(0.75)' }} />}
+                                {busy && <Spinner style={{ transform: 'scale(0.75)' }} />}
                                 {defaultRenderer?.(props)}
                             </div>
                         );
                     }}
-                    disabled={computing}
+                    disabled={busy}
                     onClick={() => {
-                        if (computing) {
+                        if (busy) {
                             return;
                         }
                         onCompute(selectedKey);
                     }}
-                    iconProps={computing ? undefined : { iconName: 'Rerun' }}
+                    iconProps={busy ? undefined : { iconName: 'Rerun' }}
                     style={{ width: 'max-content', transition: 'width 400ms' }}
                 />
                 {selectedKey === MATRIX_TYPE.causal && (
@@ -158,16 +155,16 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
             </Stack>
 
             <div>
-            {selectedKey === MATRIX_TYPE.mutualInfo && showMatrix(fields, igMatrix, computing) && (
+            {selectedKey === MATRIX_TYPE.mutualInfo && mutualMatrix && showMatrix(fields, mutualMatrix, busy) && (
                 <RelationMatrixHeatMap
                     mark={markType}
                     absolute
                     fields={fields}
-                    data={igMatrix}
+                    data={mutualMatrix}
                     onSelect={onMatrixPointClick}
                 />
             )}
-            {selectedKey === MATRIX_TYPE.conditionalMutualInfo && showMatrix(fields, igCondMatrix, computing) && (
+            {selectedKey === MATRIX_TYPE.conditionalMutualInfo && showMatrix(fields, igCondMatrix, busy) && (
                 <RelationMatrixHeatMap
                     mark={markType}
                     absolute
@@ -178,17 +175,17 @@ const MatrixPanel: React.FC<MatrixPanelProps> = (props) => {
             )}
             {selectedKey === MATRIX_TYPE.causal && (
                 viewType === VIEW_TYPE.diagram ? (
-                    computing || diagram
-                ) : showMatrix(fields, causalStrength, computing) && (
+                    busy || diagram
+                ) : causalityRaw && showMatrix(fields, causalityRaw, busy) && (
                     <DirectionMatrix
                         mark={markType}
                         fields={fields}
-                        data={causalStrength}
+                        data={causalityRaw}
                         onSelect={onMatrixPointClick}
                     />
                 )
             )}
-            {computing && <Spinner label="computing" />}
+            {busy && <Spinner label="computing" />}
             </div>
         </Cont>
     );

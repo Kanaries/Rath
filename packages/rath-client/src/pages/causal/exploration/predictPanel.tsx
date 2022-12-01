@@ -61,8 +61,8 @@ const predictCache: {
 const PredictPanel = forwardRef<{
     updateInput?: (input: { features: IFieldMeta[]; targets: IFieldMeta[] }) => void;
 }, {}>(function PredictPanel (_, ref) {
-    const { __deprecatedCausalStore: causalStore, dataSourceStore } = useGlobalStore();
-    const { selectedFields } = causalStore;
+    const { causalStore, dataSourceStore } = useGlobalStore();
+    const { fields } = causalStore;
     const { cleanedData, fieldMetas } = dataSourceStore;
 
     const [predictInput, setPredictInput] = useState<{ features: IFieldMeta[]; targets: IFieldMeta[] }>({
@@ -80,16 +80,16 @@ const PredictPanel = forwardRef<{
         setPredictInput(before => {
             if (before.features.length || before.targets.length) {
                 return {
-                    features: selectedFields.filter(f => before.features.some(feat => feat.fid === f.fid)),
-                    targets: selectedFields.filter(f => before.targets.some(tar => tar.fid === f.fid)),
+                    features: fields.filter(f => before.features.some(feat => feat.fid === f.fid)),
+                    targets: fields.filter(f => before.targets.some(tar => tar.fid === f.fid)),
                 };
             }
             return {
-                features: selectedFields.slice(1).map(f => f),
-                targets: selectedFields.slice(0, 1),
+                features: fields.slice(1).map(f => f),
+                targets: fields.slice(0, 1),
             };
         });
-    }, [selectedFields]);
+    }, [fields]);
 
     const [running, setRunning] = useState(false);
 
@@ -97,7 +97,7 @@ const PredictPanel = forwardRef<{
         return [
             {
                 key: 'selectedAsFeature',
-                name: `特征 (${predictInput.features.length} / ${selectedFields.length})`,
+                name: `特征 (${predictInput.features.length} / ${fields.length})`,
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     const checked = predictInput.features.some(f => f.fid === field.fid);
@@ -126,7 +126,7 @@ const PredictPanel = forwardRef<{
             },
             {
                 key: 'selectedAsTarget',
-                name: `目标 (${predictInput.targets.length} / ${selectedFields.length})`,
+                name: `目标 (${predictInput.targets.length} / ${fields.length})`,
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     const checked = predictInput.targets.some(f => f.fid === field.fid);
@@ -167,7 +167,7 @@ const PredictPanel = forwardRef<{
                 minWidth: 120,
             },
         ];
-    }, [selectedFields, predictInput, running]);
+    }, [fields, predictInput, running]);
 
     const canExecute = predictInput.features.length > 0 && predictInput.targets.length > 0;
     const pendingRef = useRef<Promise<unknown>>();
@@ -454,7 +454,7 @@ const PredictPanel = forwardRef<{
                             <Label style={{ marginTop: '1em' }}>分析空间</Label>
                             <TableContainer>
                                 <DetailsList
-                                    items={selectedFields}
+                                    items={fields.slice(0)}
                                     columns={fieldsTableCols}
                                     selectionMode={SelectionMode.none}
                                     onRenderRow={(props, defaultRender) => {

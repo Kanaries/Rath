@@ -19,8 +19,8 @@ const VizCard = styled.div`
 `;
 
 interface CrossFilterProps {
-    fields: IFieldMeta[];
-    dataSource: IRow[];
+    fields: readonly IFieldMeta[];
+    dataSource: readonly IRow[];
     onVizEdit?: (fid: string) => void;
     onVizClue?: (fid: string) => void;
     onVizDelete?: (fid: string) => void;

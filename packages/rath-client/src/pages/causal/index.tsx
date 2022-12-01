@@ -1,14 +1,12 @@
 import { observer } from 'mobx-react-lite';
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { useCausalViewProvider } from '../../store/causalStore/viewStore';
-import type { IFunctionalDep, ModifiableBgKnowledge } from './config';
-import { useDataViews } from './hooks/dataViews';
+import type { IFunctionalDep } from './config';
 import type { GraphNodeAttributes } from './explorer/graph-utils';
 import { CausalStepPager } from './step';
-import { getGeneratedFDFromExtInfo } from './functionalDependencies/utils';
 
 
 const Main = styled.div`
@@ -23,44 +21,9 @@ const Main = styled.div`
 `;
 
 const CausalPage: FC = () => {
-    const { dataSourceStore, __deprecatedCausalStore, causalStore } = useGlobalStore();
-    const { fieldMetas, cleanedData } = dataSourceStore;
-    const { selectedFields } = __deprecatedCausalStore;
+    const { causalStore } = useGlobalStore();
 
     const ViewContextProvider = useCausalViewProvider(causalStore);
-
-    useEffect(() => {
-        __deprecatedCausalStore.setFocusFieldIds(
-            fieldMetas
-                .filter((f) => f.disable !== true)
-                .slice(0, 10)
-                .map((f) => f.fid)
-        ); // 默认只使用前 10 个)
-    }, [fieldMetas, __deprecatedCausalStore]);
-
-    const [modifiablePrecondition, __unsafeSetModifiablePrecondition] = useState<ModifiableBgKnowledge[]>([]);
-
-    const setModifiablePrecondition = useCallback((next: ModifiableBgKnowledge[] | ((prev: ModifiableBgKnowledge[]) => ModifiableBgKnowledge[])) => {
-        __unsafeSetModifiablePrecondition(prev => {
-            const list = typeof next === 'function' ? next(prev) : next;
-            return list.reduce<ModifiableBgKnowledge[]>((links, link) => {
-                if (link.src === link.tar) {
-                    // 禁止自环边
-                    return links;
-                }
-                const overloadIdx = links.findIndex(
-                    which => [which.src, which.tar].every(node => [link.src, link.tar].includes(node))
-                );
-                if (overloadIdx !== -1) {
-                    const temp = links.map(l => l);
-                    temp.splice(overloadIdx, 1, link);
-                    return temp;
-                } else {
-                    return links.concat([link]);
-                }
-            }, []);
-        });
-    }, []);
 
     const [functionalDependencies, __unsafeSetFunctionalDependencies] = useState<IFunctionalDep[]>([]);
 
@@ -72,12 +35,6 @@ const CausalPage: FC = () => {
             }, []);
         });
     }, []);
-
-    const dataContext = useDataViews(cleanedData);
-
-    useEffect(() => {
-        __deprecatedCausalStore.updateCausalAlgorithmList(fieldMetas);
-    }, [__deprecatedCausalStore, fieldMetas]);
 
     // 结点可以 project 一些字段信息
     const renderNode = useCallback((node: Readonly<IFieldMeta>): GraphNodeAttributes | undefined => {
@@ -93,14 +50,6 @@ const CausalPage: FC = () => {
     submitRef.current = setFunctionalDependencies;
     const fdRef = useRef(functionalDependencies);
     fdRef.current = functionalDependencies;
-    useEffect(() => {
-        setTimeout(() => {
-            if (fdRef.current.length === 0) {
-                const fds = getGeneratedFDFromExtInfo(selectedFields);
-                submitRef.current(fds);
-            }
-        }, 400);
-    }, [selectedFields]);
 
     return (
         <div className="content-container">
@@ -108,14 +57,7 @@ const CausalPage: FC = () => {
                 <Main className="card">
                     <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>因果分析</h1>
                     <hr className="card-line" />
-                    <CausalStepPager
-                        dataContext={dataContext}
-                        modifiablePrecondition={modifiablePrecondition}
-                        setModifiablePrecondition={setModifiablePrecondition}
-                        functionalDependencies={functionalDependencies}
-                        setFunctionalDependencies={setFunctionalDependencies}
-                        renderNode={renderNode}
-                    />
+                    <CausalStepPager renderNode={renderNode} />
                 </Main>
             </ViewContextProvider>
         </div>

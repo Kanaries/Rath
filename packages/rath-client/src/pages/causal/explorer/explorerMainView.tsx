@@ -1,11 +1,10 @@
 import { forwardRef } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
-import type { ModifiableBgKnowledge } from "../config";
+import type { EdgeAssert } from "../../../store/causalStore/modelStore";
 import type { Subtree } from "../exploration";
 import GraphView from "./graphView";
 import type { GraphNodeAttributes } from "./graph-utils";
-import type { DiagramGraphData } from ".";
 
 
 const Container = styled.div`
@@ -20,16 +19,14 @@ const Container = styled.div`
 `;
 
 export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
-    value: Readonly<DiagramGraphData>;
     /** @default 0 */
     cutThreshold?: number;
     limit: number;
     mode: 'explore' | 'edit';
     onClickNode?: (fid: string | null) => void;
-    onLinkTogether: (srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => void;
+    onLinkTogether: (srcFid: string, tarFid: string, type: EdgeAssert) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
-    preconditions: ModifiableBgKnowledge[];
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
@@ -39,7 +36,6 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
-    value,
     cutThreshold = 0,
     mode,
     limit,
@@ -47,7 +43,6 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     onLinkTogether,
     onRevertLink,
     onRemoveLink,
-    preconditions,
     forceRelayoutRef,
     autoLayout,
     renderNode,
@@ -60,10 +55,8 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
         <Container {...props} ref={ref}>
             <GraphView
                 forceRelayoutRef={forceRelayoutRef}
-                value={value}
                 limit={limit}
                 mode={mode}
-                preconditions={preconditions}
                 cutThreshold={cutThreshold}
                 onClickNode={onClickNode}
                 onLinkTogether={onLinkTogether}

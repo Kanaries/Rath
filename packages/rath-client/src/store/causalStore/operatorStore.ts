@@ -1,10 +1,11 @@
 import type { IDropdownOption } from "@fluentui/react";
-import { makeAutoObservable, reaction } from "mobx";
+import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { distinctUntilChanged, Subject, switchAll } from "rxjs";
 import { getGlobalStore } from "..";
 import { notify } from "../../components/error";
 import type { IFieldMeta, IRow } from "../../interfaces";
 import { IAlgoSchema, IFunctionalDep, makeFormInitParams, PagLink, PAG_NODE } from "../../pages/causal/config";
+import { causalService } from "../../pages/causal/service";
 import type { DataSourceStore } from "../dataSourceStore";
 import { findUnmatchedCausalResults, resolveCausality } from "./pag";
 
@@ -19,10 +20,10 @@ export default class CausalOperatorStore {
     public busy = false;
 
     protected _causalAlgorithmForm: IAlgoSchema = {};
-    protected get causalAlgorithmForm(): IAlgoSchema {
+    public get causalAlgorithmForm(): IAlgoSchema {
         return this._causalAlgorithmForm;
     }
-    protected params: { [algo: string]: { [key: string]: any } } = {};
+    public params: { [algo: string]: { [key: string]: any } } = {};
     protected set causalAlgorithmForm(schema: IAlgoSchema) {
         if (Object.keys(schema).length === 0) {
             console.error('[causalAlgorithmForm]: schema is empty');
@@ -60,15 +61,17 @@ export default class CausalOperatorStore {
                 allFields$.next(fieldMetas);
             }),
             reaction(() => this._causalAlgorithmForm, form => {
-                this._algorithm = null;
-                this.params = {};
-                for (const algoName of Object.keys(form)) {
-                    this.params[algoName] = makeFormInitParams(form[algoName]);
-                }
-                const [firstAlgoName] = Object.keys(form);
-                if (firstAlgoName) {
-                    this._algorithm = firstAlgoName;
-                }
+                runInAction(() => {
+                    this._algorithm = null;
+                    this.params = {};
+                    for (const algoName of Object.keys(form)) {
+                        this.params[algoName] = makeFormInitParams(form[algoName]);
+                    }
+                    const [firstAlgoName] = Object.keys(form);
+                    if (firstAlgoName) {
+                        this._algorithm = firstAlgoName;
+                    }
+                });
             }),
         ];
 
@@ -79,16 +82,18 @@ export default class CausalOperatorStore {
                     return prev.length === next.length && next.every(f => prev.some(which => which.fid === f.fid));
                 }),
             ).subscribe(fields => {
-                this.causalAlgorithmForm = {};
+                runInAction(() => {
+                    this.causalAlgorithmForm = {};
+                });
                 dynamicFormSchema$.next(this.fetchCausalAlgorithmList(fields));
             }),
             // update form
             dynamicFormSchema$.pipe(
                 switchAll()
             ).subscribe(schema => {
-                if (schema) {
-                    this.causalAlgorithmForm = schema;
-                }
+                runInAction(() => {
+                    this.causalAlgorithmForm = schema ?? {};
+                });
             }),
         ];
 
@@ -121,16 +126,21 @@ export default class CausalOperatorStore {
         }
     }
 
+    public async computeMutualMatrix(data: readonly IRow[], fields: readonly IFieldMeta[]): Promise<number[][]> {
+        const res = await causalService({ task: 'ig', dataSource: data, fields });
+        return res;
+    }
+
     public async causalDiscovery(
         data: readonly IRow[],
         fields: readonly IFieldMeta[],
         functionalDependencies: readonly IFunctionalDep[],
         assertions: readonly PagLink[],
-    ): Promise<PagLink[] | null> {
+    ): Promise<{ raw: number[][]; pag: PagLink[] } | null> {
         if (this.busy) {
             return null;
         }
-        let causalPag: PagLink[] | null = null;
+        let causality: { raw: number[][]; pag: PagLink[] } | null = null;
         const { fieldMetas: allFields } = getGlobalStore().dataSourceStore;
         const focusedFields = fields.map(f => {
             return allFields.findIndex(which => which.fid === f.fid);
@@ -146,7 +156,9 @@ export default class CausalOperatorStore {
             return null;
         }
         try {
-            this.busy = true;
+            runInAction(() => {
+                this.busy = true;
+            });
             const originFieldsLength = inputFields.length;
             const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
                 method: 'POST',
@@ -165,10 +177,11 @@ export default class CausalOperatorStore {
             const result = await res.json();
             if (result.success) {
                 const rawMatrix = result.data.matrix as PAG_NODE[][];
-                const resultMatrix = rawMatrix
+                const causalMatrix = rawMatrix
                     .slice(0, originFieldsLength)
                     .map((row) => row.slice(0, originFieldsLength));
-                causalPag = resolveCausality(resultMatrix, inputFields);
+                const causalPag = resolveCausality(causalMatrix, inputFields);
+                causality = { raw: causalMatrix, pag: causalPag };
                 const unmatched = findUnmatchedCausalResults(assertions, causalPag);
                 if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
                     const getFieldName = (fid: string) => {
@@ -195,9 +208,11 @@ export default class CausalOperatorStore {
                 content: `${error}`,
             });
         } finally {
-            this.busy = false;
+            runInAction(() => {
+                this.busy = false;
+            });
         }
-        return causalPag;
+        return causality;
     }
 
     public updateConfig(algoName: string, params: typeof this.params[string]): boolean {

@@ -1,3 +1,4 @@
+import { runInAction } from "mobx";
 import type { DataSourceStore } from "../dataSourceStore";
 import CausalDatasetStore from "./datasetStore";
 import CausalModelStore from "./modelStore";
@@ -27,7 +28,7 @@ export default class CausalStore {
     constructor(dataSourceStore: DataSourceStore) {
         this.dataset = new CausalDatasetStore(dataSourceStore);
         this.operator = new CausalOperatorStore(dataSourceStore);
-        this.model = new CausalModelStore(this.dataset);
+        this.model = new CausalModelStore(this.dataset, this.operator);
     }
 
     public selectFields(...args: Parameters<CausalDatasetStore['selectFields']>) {
@@ -43,14 +44,21 @@ export default class CausalStore {
     }
 
     public async run() {
-        this.model.causality = null;
+        runInAction(() => {
+            this.model.causalityRaw = null;
+            this.model.causality = null;
+        });
         const result = await this.operator.causalDiscovery(
             this.dataset.sample,
             this.dataset.fields,
             this.model.functionalDependencies,
             this.model.assertionsAsPag,
         );
-        this.model.causality = result;
+        runInAction(() => {
+            this.model.causalityRaw = result?.raw ?? null;
+            this.model.causality = result?.pag ?? null;
+        });
+
         return result;
     }
 

@@ -1,37 +1,28 @@
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { DefaultButton, Dropdown, Stack, Toggle } from '@fluentui/react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyFilters } from '@kanaries/loa';
 import { useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
-import type { useDataViews } from '../../hooks/dataViews';
 import { IFieldMeta, IFilter, IRow } from '../../../../interfaces';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../../workers/insight/r-insight.worker';
 import { RInsightService } from '../../../../services/r-insight';
-import type { IFunctionalDep, PagLink } from '../../config';
 import ChartItem from './explainChart';
 import RInsightView from './RInsightView';
 
 
 const Container = styled.div``;
 
-export interface RExplainerProps {
-    context: ReturnType<typeof useDataViews>;
-    functionalDependencies: IFunctionalDep[];
-    edges: PagLink[];
-}
-
 export const SelectedFlag = '__RExplainer_selected__';
 
-const RExplainer: React.FC<RExplainerProps> = ({ context, functionalDependencies, edges }) => {
-    const { dataSourceStore, __deprecatedCausalStore: causalStore } = useGlobalStore();
+const RExplainer: FC = () => {
+    const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const viewContext = useCausalViewContext();
     const { selectedFieldGroup = [] } = viewContext ?? {};
-    const { selectedFields } = causalStore;
-
-    const { sample, vizSampleData } = context;
+    const { fields, sample, visSample } = causalStore.dataset;
+    const { mergedPag, functionalDependencies } = causalStore.model;
 
     const mainField = selectedFieldGroup.at(-1) ?? null;
     const [indexKey, setIndexKey] = useState<IFieldMeta | null>(null);
@@ -67,10 +58,10 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, functionalDependencies
             const fieldsInSight = new Set(current.predicates.map(pdc => pdc.fid).concat([mainField.fid]));
             RInsightService({
                 data: sample,
-                fields: selectedFields,
+                fields,
                 causalModel: {
                     funcDeps: functionalDependencies,
-                    edges,
+                    edges: mergedPag,
                 },
                 groups: {
                     current,
@@ -97,9 +88,9 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, functionalDependencies
         }).finally(() => {
             pendingRef.current = undefined;
         });
-    }, [aggr, mainField, sample, selectedFields, subspaces, edges, serviceMode, functionalDependencies]);
+    }, [aggr, mainField, sample, fields, subspaces, mergedPag, serviceMode, functionalDependencies]);
 
-    const [selectedSet, setSelectedSet] = useState<IRow[]>([]);
+    const [selectedSet, setSelectedSet] = useState<readonly IRow[]>([]);
 
     const [indicesA, indicesB] = useMemo<[number[], number[]]>(() => {
         if (!subspaces) {
@@ -120,7 +111,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, functionalDependencies
 
     useEffect(() => {
         setIrResult({ causalEffects: [] });
-    }, [indexKey, mainField, sample, subspaces, edges]);
+    }, [indexKey, mainField, sample, subspaces, mergedPag]);
 
     const applySelection = useCallback(() => {
         if (!subspaces) {
@@ -259,7 +250,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, functionalDependencies
                     )}
                     <br />
                     <ChartItem
-                        data={vizSampleData}
+                        data={visSample}
                         indexKey={indexKey}
                         mainField={mainField}
                         mainFieldAggregation={aggr}
@@ -309,11 +300,8 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, functionalDependencies
                             mode={diffMode}
                             subspaces={subspaces}
                             indices={[indicesA, indicesB]}
-                            functionalDependencies={functionalDependencies}
                             aggr={aggr}
                             serviceMode={serviceMode}
-                            context={context}
-                            edges={edges}
                         />
                     )}
                 </>

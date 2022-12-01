@@ -8,15 +8,13 @@ import type { IFieldMeta, IRow } from "../../../../interfaces";
 import { useGlobalStore } from "../../../../store";
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from "../../../../workers/insight/r-insight.worker";
 import { RInsightService } from '../../../../services/r-insight';
-import type { IFunctionalDep, PagLink } from '../../config';
-import type { useDataViews } from '../../hooks/dataViews';
 import DiffChart from "./diffChart";
 import ExplainChart from "./explainChart";
 import VisText, { IVisTextProps } from './visText';
 
 
 export interface IRInsightViewProps {
-    data: IRow[];
+    data: readonly IRow[];
     result: IRInsightExplainResult;
     mainField: IFieldMeta;
     mainFieldAggregation: "sum" | "mean" | "count" | null;
@@ -24,9 +22,6 @@ export interface IRInsightViewProps {
     mode: "full" | "other" | "two-group";
     indices: [number[], number[]];
     subspaces: [IRInsightExplainSubspace, IRInsightExplainSubspace];
-    context: ReturnType<typeof useDataViews>;
-    functionalDependencies: IFunctionalDep[];
-    edges: PagLink[];
     aggr: "sum" | "mean" | "count" | null;
     serviceMode: "worker" | "server";
 }
@@ -138,15 +133,14 @@ const ExploreQueue = styled.div`
 
 const RInsightView: FC<IRInsightViewProps> = ({
     data, result, mainField, mainFieldAggregation, entryDimension,
-    mode, indices, subspaces, context, functionalDependencies, edges,
-    aggr, serviceMode,
+    mode, indices, subspaces, aggr, serviceMode,
 }) => {
-    const { dataSourceStore, __deprecatedCausalStore: causalStore } = useGlobalStore();
+    const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { selectedFields } = causalStore;
+    const { fields, sample } = causalStore.dataset;
+    const { mergedPag, functionalDependencies } = causalStore.model;
     const [normalize, setNormalize] = useState<boolean>(true);
     const [cursor, setCursor] = useState(0);
-    const { sample } = context;
 
     const [localIrResult, setLocalIrResult] = useState<{
         addedMeasure: string;
@@ -180,10 +174,10 @@ const RInsightView: FC<IRInsightViewProps> = ({
             );
             RInsightService({
                 data: sample,
-                fields: selectedFields,
+                fields,
                 causalModel: {
                     funcDeps: functionalDependencies,
-                    edges,
+                    edges: mergedPag,
                 },
                 groups: {
                     current,

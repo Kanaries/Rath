@@ -10,7 +10,7 @@ import { getVegaTimeFormatRules } from '../../../../utils';
 
 interface DiffChartProps {
     title?: string;
-    data: IRow[];
+    data: readonly IRow[];
     subspaces: [number[], number[]];
     mainField: IFieldMeta;
     mainFieldAggregation: null | 'sum' | 'mean' | 'count';

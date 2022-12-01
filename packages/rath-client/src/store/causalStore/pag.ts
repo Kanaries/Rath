@@ -1,5 +1,5 @@
 import type { IFieldMeta } from "../../interfaces";
-import { PagLink, PAG_NODE } from "../../pages/causal/config";
+import { IFunctionalDep, PagLink, PAG_NODE } from "../../pages/causal/config";
 import { CausalModelAssertion, NodeAssert, EdgeAssert } from "./modelStore";
 
 
@@ -77,6 +77,21 @@ export const transformAssertionsToPag = (
             }
         }
 
+        return list;
+    }, []);
+};
+
+export const transformFuncDepsToPag = (funcDeps: readonly IFunctionalDep[]): PagLink[] => {
+    return funcDeps.reduce<PagLink[]>((list, funcDep) => {
+        const { fid: tar } = funcDep;
+        for (const { fid: src } of funcDep.params) {
+            list.push({
+                src,
+                tar,
+                src_type: PAG_NODE.BLANK,
+                tar_type: PAG_NODE.ARROW,
+            });
+        }
         return list;
     }, []);
 };

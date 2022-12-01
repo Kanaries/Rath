@@ -8,8 +8,7 @@ import type { Specification } from 'visual-insights';
 import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import SemiEmbed from '../../semiAutomation/semiEmbed';
-import type { useDataViews } from '../hooks/dataViews';
-import { IFunctionalDep, PagLink, PAG_NODE } from '../config';
+import { PAG_NODE } from '../config';
 import { ExplorationKey, ExplorationOptions, useCausalViewContext } from '../../../store/causalStore/viewStore';
 import CrossFilter from './crossFilter';
 import PredictPanel from './predictPanel';
@@ -33,12 +32,6 @@ const Container = styled.div`
     }
 `;
 
-export interface ManualAnalyzerProps {
-    context: ReturnType<typeof useDataViews>;
-    functionalDependencies: IFunctionalDep[];
-    edges: PagLink[];
-}
-
 export interface Subtree {
     node: IFieldMeta;
     neighbors: {
@@ -50,25 +43,21 @@ export interface Subtree {
 
 const Exploration = forwardRef<{
     onSubtreeSelected?: (subtree: Subtree | null) => void;
-}, ManualAnalyzerProps>(function ManualAnalyzer (
-    { context, functionalDependencies, edges }, ref
-) {
-    const { dataSourceStore, __deprecatedCausalStore, langStore } = useGlobalStore();
+}, {}>(function ManualAnalyzer (_, ref) {
+    const { dataSourceStore, langStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
     const [showSemiClue, setShowSemiClue] = useState(false);
     const [clueView, setClueView] = useState<IPattern | null>(null);
-    const { selectedFields } = __deprecatedCausalStore;
+    const { fields, visSample, filters } = causalStore.dataset;
 
     const viewContext = useCausalViewContext();
     const { selectedFieldGroup = [] } = viewContext ?? {};
 
-    const { vizSampleData, filters } = context;
-
     useEffect(() => {
         if (selectedFieldGroup.length > 0) {
             setClueView({
-                fields: [...selectedFieldGroup],
-                filters: [...filters],
+                fields: selectedFieldGroup.slice(0),
+                filters: filters.slice(0),
                 imp: 0,
             });
         } else {
@@ -182,12 +171,12 @@ const Exploration = forwardRef<{
                     [ExplorationKey.AUTO_VIS]: (
                         <AutoVis />
                     ),
-                    [ExplorationKey.CROSS_FILTER]: vizSampleData.length > 0 && selectedFieldGroup.length > 0 && (
+                    [ExplorationKey.CROSS_FILTER]: visSample.length > 0 && selectedFieldGroup.length > 0 && (
                         <CrossFilter
                             fields={selectedFieldGroup}
-                            dataSource={vizSampleData}
+                            dataSource={visSample}
                             onVizClue={(fid) => {
-                                const field = selectedFields.find((f) => f.fid === fid);
+                                const field = fields.find((f) => f.fid === fid);
                                 if (field) {
                                     setClueView({
                                         fields: [field],
@@ -200,17 +189,13 @@ const Exploration = forwardRef<{
                             onVizDelete={removeSelectedField}
                         />
                     ),
-                    [ExplorationKey.CAUSAL_INSIGHT]: vizSampleData.length > 0 && (
-                        <RExplainer
-                            context={context}
-                            functionalDependencies={functionalDependencies}
-                            edges={edges}
-                        />
+                    [ExplorationKey.CAUSAL_INSIGHT]: visSample.length > 0 && (
+                        <RExplainer />
                     ),
                     [ExplorationKey.GRAPHIC_WALKER]: (
                         /* 小心这里的内存占用 */
                         <GraphicWalker
-                            dataSource={vizSampleData}
+                            dataSource={visSample.slice(0)}
                             rawFields={fieldMetas}
                             hideDataSourceConfig
                             spec={initialSpec}

@@ -12,7 +12,7 @@ export interface IBrushSignalStore {
     values: any[];
 }
 interface ColDistProps {
-    data: IRow[];
+    data: readonly IRow[];
     fid: string;
     name?: string;
     semanticType: ISemanticType;

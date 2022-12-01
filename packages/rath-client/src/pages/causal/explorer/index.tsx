@@ -1,12 +1,11 @@
 import { DefaultButton, Icon, Slider, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
 import { useGlobalStore } from "../../../store";
+import type { EdgeAssert } from "../../../store/causalStore/modelStore";
 import { useCausalViewContext } from "../../../store/causalStore/viewStore";
-import { CausalLinkDirection } from "../../../utils/resolve-causal";
-import type { ModifiableBgKnowledge } from "../config";
 import type { Subtree } from "../exploration";
 import Floating from "../floating";
 import ExplorerMainView from "./explorerMainView";
@@ -15,6 +14,7 @@ import type { GraphNodeAttributes } from "./graph-utils";
 
 export type CausalNode = {
     nodeId: number;
+    fid: string;
 }
 
 export type CausalLink = {
@@ -24,27 +24,15 @@ export type CausalLink = {
     type: 'directed' | 'bidirected' | 'undirected' | 'weak directed' | 'weak undirected';
 }
 
-export interface DiagramGraphData {
-    readonly nodes: readonly Readonly<CausalNode>[];
-    readonly links: readonly Readonly<CausalLink>[];
-}
-
 export interface ExplorerProps {
     allowEdit: boolean;
-    scoreMatrix: readonly (readonly number[])[];
-    preconditions: ModifiableBgKnowledge[];
-    onLinkTogether: (srcIdx: number, tarIdx: number, type: ModifiableBgKnowledge['type']) => void;
+    onLinkTogether: (srcFid: string, tarFid: string, type: EdgeAssert) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
-    synchronizePredictionsUsingCausalResult: () => void;
     handleLasso?: (fields: IFieldMeta[]) => void;
     handleSubTreeSelected?: (subtree: Subtree | null) => void;
 }
-
-const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
-    return matrix.map(vec => vec.map(n => 2 / (1 + Math.exp(-n)) - 1));
-};
 
 const Container = styled.div`
     width: 100%;
@@ -93,124 +81,21 @@ const MainView = styled.div`
 
 const Explorer: FC<ExplorerProps> = ({
     allowEdit,
-    scoreMatrix,
     onLinkTogether,
     onRevertLink,
     onRemoveLink,
-    preconditions,
     renderNode,
-    synchronizePredictionsUsingCausalResult,
     handleLasso,
     handleSubTreeSelected,
 }) => {
-    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
-    const { causalStrength, selectedFields } = causalStore;
+    const { causalStore } = useGlobalStore();
+    const { causality } = causalStore.model;
 
     const [cutThreshold, setCutThreshold] = useState(0);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
     const [allowZoom, setAllowZoom] = useState(false);
     
-    const data = useMemo(() => sNormalize(scoreMatrix), [scoreMatrix]);
-
-    const nodes = useMemo<CausalNode[]>(() => {
-        return selectedFields.map((_, i) => ({ nodeId: i }));
-    }, [selectedFields]);
-
-    const links = useMemo<CausalLink[]>(() => {
-        if (causalStrength.length === 0) {
-            return [];
-        }
-        if (causalStrength.length !== data.length) {
-            console.warn(`lengths of matrixes do not match`);
-            return [];
-        }
-
-        const links: CausalLink[] = [];
-
-        for (let i = 0; i < data.length - 1; i += 1) {
-            for (let j = i + 1; j < data.length; j += 1) {
-                const weight = Math.abs(data[i][j]);
-                const direction = causalStrength[i][j];
-                switch (direction) {
-                    case CausalLinkDirection.none: {
-                        break;
-                    }
-                    case CausalLinkDirection.directed: {
-                        links.push({
-                            causeId: i,
-                            effectId: j,
-                            score: weight,
-                            type: 'directed',
-                        });
-                        break;
-                    }
-                    case CausalLinkDirection.reversed: {
-                        links.push({
-                            causeId: j,
-                            effectId: i,
-                            score: weight,
-                            type: 'directed',
-                        });
-                        break;
-                    }
-                    case CausalLinkDirection.weakDirected: {
-                        links.push({
-                            causeId: i,
-                            effectId: j,
-                            score: weight,
-                            type: 'weak directed',
-                        });
-                        break;
-                    }
-                    case CausalLinkDirection.weakReversed: {
-                        links.push({
-                            causeId: j,
-                            effectId: i,
-                            score: weight,
-                            type: 'weak directed',
-                        });
-                        break;
-                    }
-                    case CausalLinkDirection.undirected: {
-                        links.push({
-                            causeId: i,
-                            effectId: j,
-                            score: weight,
-                            type: 'undirected',
-                        });
-                        break;
-                    }
-                    case CausalLinkDirection.weakUndirected: {
-                        links.push({
-                            causeId: i,
-                            effectId: j,
-                            score: weight,
-                            type: 'weak undirected',
-                        });
-                        break;
-                    }
-                    case CausalLinkDirection.bidirected: {
-                        links.push({
-                            causeId: i,
-                            effectId: j,
-                            score: weight,
-                            type: 'bidirected',
-                        });
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
-            }
-        }
-
-        return links.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
-    }, [data, causalStrength]);
-
-    const value = useMemo(() => ({ nodes, links }), [nodes, links]);
-
     const viewContext = useCausalViewContext();
 
     const handleClickCircle = useCallback((fid: string | null) => {
@@ -221,13 +106,6 @@ const Explorer: FC<ExplorerProps> = ({
             viewContext?.toggleNodeSelected(fid);
         }
     }, [mode, viewContext]);
-
-    const handleLink = useCallback((srcFid: string, tarFid: string, type: ModifiableBgKnowledge['type']) => {
-        if (srcFid === tarFid) {
-            return;
-        }
-        onLinkTogether(selectedFields.findIndex(f => f.fid === srcFid), selectedFields.findIndex(f => f.fid === tarFid), type);
-    }, [selectedFields, onLinkTogether]);
 
     const forceRelayoutRef = useRef<() => void>(() => {});
 
@@ -244,12 +122,6 @@ const Explorer: FC<ExplorerProps> = ({
     }, []);
 
     useEffect(() => {
-        if (mode === 'edit') {
-            synchronizePredictionsUsingCausalResult();
-        }
-    }, [mode, synchronizePredictionsUsingCausalResult]);
-
-    useEffect(() => {
         setMode('explore');
     }, [allowEdit]);
 
@@ -258,13 +130,11 @@ const Explorer: FC<ExplorerProps> = ({
             <MainView>
                 <ExplorerMainView
                     forceRelayoutRef={forceRelayoutRef}
-                    value={value}
                     limit={limit}
-                    preconditions={preconditions}
                     mode={mode}
                     cutThreshold={cutThreshold}
                     onClickNode={handleClickCircle}
-                    onLinkTogether={handleLink}
+                    onLinkTogether={onLinkTogether}
                     onRevertLink={onRevertLink}
                     onRemoveLink={onRemoveLink}
                     autoLayout={autoLayout}
@@ -323,7 +193,7 @@ const Explorer: FC<ExplorerProps> = ({
                         // label="Display Limit"
                         label="边显示上限"
                         min={1}
-                        max={Math.max(links.length, limit, 10)}
+                        max={Math.max((causality ?? []).length, limit, 10)}
                         value={limit}
                         onChange={value => setLimit(value)}
                     />

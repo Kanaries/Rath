@@ -1,8 +1,7 @@
 import { useMemo, useRef, CSSProperties } from "react";
 import G6, { Graph, GraphData, GraphOptions } from "@antv/g6";
-import type { ModifiableBgKnowledge } from "../config";
+import { PagLink, PAG_NODE } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
-import type { CausalLink } from ".";
 
 
 export const GRAPH_HEIGHT = 500;
@@ -30,49 +29,10 @@ export type GraphNodeAttributes<
 }>;
 
 const arrows = {
-    undirected: {
-        start: '',
-        end: '',
-    },
-    directed: {
-        start: '',
-        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
-    },
-    bidirected: {
-        start: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
-        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
-    },
-    'weak directed': {
-        start: 'M 8.4,0 a 5.6,5.6 0 1,0 11.2,0 a 5.6,5.6 0 1,0 -11.2,0 Z',
-        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
-    },
-    'weak undirected': {
-        start: 'M 8.4,0 a 5.6,5.6 0 1,0 11.2,0 a 5.6,5.6 0 1,0 -11.2,0 Z',
-        end: 'M 8.4,0 a 5.6,5.6 0 1,0 11.2,0 a 5.6,5.6 0 1,0 -11.2,0 Z',
-    },
-} as const;
-
-const bkArrows = {
-    "must-link": {
-        fill: '#0027b4',
-        start: '',
-        end: '',
-    },
-    "must-not-link": {
-        fill: '#c50f1f',
-        start: '',
-        end: '',
-    },
-    "directed-must-link": {
-        fill: '#0027b4',
-        start: '',
-        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
-    },
-    "directed-must-not-link": {
-        fill: '#c50f1f',
-        start: '',
-        end: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
-    },
+    [PAG_NODE.EMPTY]: '',
+    [PAG_NODE.BLANK]: '',
+    [PAG_NODE.ARROW]: 'M 8.4,0 L 19.6,5.6 L 19.6,-5.6 Z',
+    [PAG_NODE.CIRCLE]: 'M 8.4,0 a 5.6,5.6 0 1,0 11.2,0 a 5.6,5.6 0 1,0 -11.2,0 Z',
 } as const;
 
 export const ForbiddenEdgeType = 'forbidden-edge';
@@ -106,75 +66,108 @@ G6.registerEdge(
     'line',
 );
 
-export const useRenderData = (
-    data: { nodes: { id: number }[]; links: { source: number; target: number; type: CausalLink['type']; score?: number }[] },
-    mode: "explore" | "edit",
-    preconditions: readonly ModifiableBgKnowledge[],
-    fields: readonly Readonly<IFieldMeta>[],
+export interface IRenderDataProps {
+    mode: "explore" | "edit";
+    fields: readonly Readonly<IFieldMeta>[];
+    PAG: readonly PagLink[];
+    /** @default undefined */
+    weights?: Map<string, Map<string, number>> | undefined;
+    /** @default 0 */
+    cutThreshold?: number;
+    /** @default Infinity */
+    limit?: number;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
-) => {
+}
+
+export const useRenderData = ({
+    mode,
+    fields,
+    PAG,
+    weights = undefined,
+    cutThreshold = 0,
+    limit = Infinity,
+    renderNode,
+}: IRenderDataProps) => {
     return useMemo<GraphData>(() => ({
-        nodes: data.nodes.map((node, i) => {
+        nodes: fields.map((f) => {
             return {
-                id: `${node.id}`,
-                description: fields[i].name ?? fields[i].fid,
-                ...renderNode?.(fields[i]),
+                id: `${f.fid}`,
+                description: f.name ?? f.fid,
+                ...renderNode?.(f),
             };
         }),
-        edges: mode === 'explore' ? data.links.map((link, i) => {
+        edges: mode === 'explore' ? PAG.filter(link => {
+            const w = weights?.get(link.src)?.get(link.tar);
+            return w === undefined || w >= cutThreshold;
+        }).slice(0, limit).map((link, i) => {
+            const w = weights?.get(link.src)?.get(link.tar);
+
             return {
                 id: `link_${i}`,
-                source: `${link.source}`,
-                target: `${link.target}`,
+                source: link.src,
+                target: link.tar,
                 style: {
                     startArrow: {
                         fill: '#F6BD16',
-                        path: arrows[link.type].start,
+                        path: arrows[link.src_type],
                     },
                     endArrow: {
                         fill: '#F6BD16',
-                        path: arrows[link.type].end,
+                        path: arrows[link.tar_type],
                     },
-                    lineWidth: typeof link.score === 'number' ? 1 + link.score * 2 : undefined,
+                    lineWidth: typeof w === 'number' ? 1 + w * 2 : undefined,
                 },
-                label: typeof link.score === 'number' ? `${link.score.toPrecision(2)}` : undefined,
+                label: typeof w === 'number' ? `${w.toPrecision(2)}` : undefined,
                 labelCfg: {
                     style: {
                         opacity: 0,
                     },
                 },
             };
-        }) : preconditions.map((bk, i) => ({
-            id: `bk_${i}`,
-            source: `${fields.findIndex(f => f.fid === bk.src)}`,
-            target: `${fields.findIndex(f => f.fid === bk.tar)}`,
-            style: {
-                lineWidth: 2,
-                lineAppendWidth: 5,
-                stroke: bkArrows[bk.type].fill,
-                startArrow: {
-                    fill: bkArrows[bk.type].fill,
-                    stroke: bkArrows[bk.type].fill,
-                    path: bkArrows[bk.type].start,
+        }) : PAG.map((assr, i) => {
+            const isForbiddenType = [assr.src_type, assr.tar_type].includes(PAG_NODE.EMPTY);
+            const color = isForbiddenType ? '#c50f1f' : '#0027b4';
+
+            return {
+                id: `bk_${i}`,
+                source: assr.src,
+                target: assr.tar,
+                style: {
+                    lineWidth: 2,
+                    lineAppendWidth: 5,
+                    stroke: color,
+                    startArrow: {
+                        fill: color,
+                        stroke: color,
+                        path: arrows[assr.src_type],
+                    },
+                    endArrow: {
+                        fill: color,
+                        stroke: color,
+                        path: arrows[assr.tar_type],
+                    },
                 },
-                endArrow: {
-                    fill: bkArrows[bk.type].fill,
-                    stroke: bkArrows[bk.type].fill,
-                    path: bkArrows[bk.type].end,
-                },
-            },
-            type: bk.type === 'must-not-link' || bk.type === 'directed-must-not-link' ? ForbiddenEdgeType : undefined,
-        })),
-    }), [data, mode, preconditions, fields, renderNode]);
+                type: isForbiddenType ? ForbiddenEdgeType : undefined,
+            };
+        }),
+    }), [fields, mode, PAG, limit, renderNode, weights, cutThreshold]);
 };
 
-export const useGraphOptions = (
-    width: number,
-    fields: readonly Readonly<IFieldMeta>[],
-    handleLasso: ((fields: IFieldMeta[]) => void) | undefined,
-    handleLink: (srcFid: string, tarFid: string) => void,
-    graphRef: { current: Graph | undefined },
-) => {
+export interface IGraphOptions {
+    width: number;
+    fields: readonly Readonly<IFieldMeta>[];
+    handleLasso?: ((fields: IFieldMeta[]) => void) | undefined;
+    handleLink?: (srcFid: string, tarFid: string) => void | undefined;
+    graphRef: { current: Graph | undefined };
+}
+
+export const useGraphOptions = ({
+    width,
+    fields,
+    handleLasso,
+    handleLink,
+    graphRef,
+}: IGraphOptions) => {
     const widthRef = useRef(width);
     widthRef.current = width;
     const fieldsRef = useRef(fields);
@@ -226,7 +219,7 @@ export const useGraphOptions = (
                     const origin = fieldsRef.current[createEdgeFrom];
                     const destination = fieldsRef.current[parseInt(target, 10)];
                     if (origin.fid !== destination.fid) {
-                        handleLinkRef.current(origin.fid, destination.fid);
+                        handleLinkRef.current?.(origin.fid, destination.fid);
                     }
                 }
                 createEdgeFrom = -1;

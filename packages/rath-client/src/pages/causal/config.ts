@@ -28,6 +28,7 @@ export type IAlgoSchema = {
 };
 
 /**
+ * @deprecated
  * a number match { -1 | [0, 1] }
  * 
  * -1 for not connected: src ---x--> tar
@@ -36,6 +37,9 @@ export type IAlgoSchema = {
  */
 export type BgConfidenceLevel = number;
 
+/**
+ * @deprecated
+ */
 export type BgKnowledge = {
     src: string;
     tar: string;
@@ -56,8 +60,10 @@ export interface PagLink {
     tar_type: PAG_NODE;
 }
 
+/** @deprecated */
 export type BgKnowledgePagLink = PagLink;
 
+/** @deprecated */
 export type ModifiableBgKnowledge = {
     src: BgKnowledge['src'];
     tar: BgKnowledge['tar'];

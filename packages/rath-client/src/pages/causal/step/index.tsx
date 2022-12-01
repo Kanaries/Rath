@@ -2,8 +2,6 @@ import { DefaultButton, Icon, IconButton } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import type { useDataViews } from "../hooks/dataViews";
-import type { IFunctionalDep, ModifiableBgKnowledge } from "../config";
 import type { GraphNodeAttributes } from "../explorer/graph-utils";
 import type { IFieldMeta } from "../../../interfaces";
 import CausalDatasetConfig from './datasetConfig';
@@ -109,22 +107,10 @@ export const CausalSteps: readonly CausalStepOption[] = [
 ];
 
 interface CausalStepPagerProps {
-    dataContext: ReturnType<typeof useDataViews>;
-    modifiablePrecondition: ModifiableBgKnowledge[];
-    setModifiablePrecondition: (precondition: ModifiableBgKnowledge[] | ((prev: ModifiableBgKnowledge[]) => ModifiableBgKnowledge[])) => void;
-    functionalDependencies: IFunctionalDep[];
-    setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: IFunctionalDep[]) => IFunctionalDep[])) => void;
     renderNode: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
 }
 
-export const CausalStepPager = observer<CausalStepPagerProps>(function CausalStepPager ({
-    dataContext,
-    modifiablePrecondition,
-    setModifiablePrecondition,
-    functionalDependencies,
-    setFunctionalDependencies,
-    renderNode,
-}) {
+export const CausalStepPager = observer<CausalStepPagerProps>(function CausalStepPager ({ renderNode }) {
     const [stepKey, setStepKey] = useState<CausalStep>(CausalStep.DATASET_CONFIG);
     const [showHelp, setShowHelp] = useState<CausalStep>(stepKey);
 
@@ -224,23 +210,12 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
             <hr className="card-line" />
             <StepPanel>
                 {{
-                    [CausalStep.DATASET_CONFIG]: <CausalDatasetConfig dataContext={dataContext} />,
+                    [CausalStep.DATASET_CONFIG]: <CausalDatasetConfig />,
                     [CausalStep.FD_CONFIG]: (
-                        <CausalFDConfig
-                            dataContext={dataContext}
-                            functionalDependencies={functionalDependencies}
-                            setFunctionalDependencies={setFunctionalDependencies}
-                            renderNode={renderNode}
-                        />
+                        <CausalFDConfig renderNode={renderNode} />
                     ),
                     [CausalStep.CAUSAL_MODEL]: (
-                        <CausalModel
-                            dataContext={dataContext}
-                            modifiablePrecondition={modifiablePrecondition}
-                            setModifiablePrecondition={setModifiablePrecondition}
-                            functionalDependencies={functionalDependencies}
-                            renderNode={renderNode}
-                        />
+                        <CausalModel renderNode={renderNode} />
                     ),
                 }[curStep.key]}
             </StepPanel>

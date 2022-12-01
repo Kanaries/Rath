@@ -12,13 +12,13 @@ export interface IRInsightExplainSubspace {
 
 export interface IRInsightExplainProps {
     /** 因果图输入数据子集 */
-    data: IRow[];
-    fields: IFieldMeta[];
+    data: readonly IRow[];
+    fields: readonly IFieldMeta[];
     causalModel: {
         /** 函数依赖 */
-        funcDeps: IFunctionalDep[];
+        funcDeps: readonly IFunctionalDep[];
         /** 用户编辑后的因果图 */
-        edges: PagLink[];
+        edges: readonly PagLink[];
     };
     groups: {
         current: IRInsightExplainSubspace;

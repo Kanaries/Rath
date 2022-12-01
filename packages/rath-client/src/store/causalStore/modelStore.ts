@@ -1,10 +1,11 @@
 import produce from "immer";
-import { makeAutoObservable, observable, reaction } from "mobx";
-import { combineLatest, distinctUntilChanged, map, Subject } from "rxjs";
-import type { IFieldMeta } from "../../interfaces";
+import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
+import { combineLatest, distinctUntilChanged, map, Subject, switchAll } from "rxjs";
+import type { IFieldMeta, IRow } from "../../interfaces";
 import type { IFunctionalDep, PagLink } from "../../pages/causal/config";
 import type CausalDatasetStore from "./datasetStore";
-import { mergePAGs, transformAssertionsToPag, transformTagToAssertions } from "./pag";
+import CausalOperatorStore from "./operatorStore";
+import { mergePAGs, transformAssertionsToPag, transformFuncDepsToPag, transformTagToAssertions } from "./pag";
 
 
 export enum NodeAssert {
@@ -36,8 +37,9 @@ export default class CausalModelStore {
 
     public readonly destroy: () => void;
 
-    public functionalDependencies: readonly IFunctionalDep[] = [];
     public generatedFDFromExtInfo: readonly IFunctionalDep[] = [];
+    public functionalDependencies: readonly IFunctionalDep[] = [];
+    public functionalDependenciesAsPag: readonly PagLink[] = [];
 
     /**
      * Modifiable assertions based on background knowledge of user,
@@ -46,28 +48,45 @@ export default class CausalModelStore {
     public assertions: readonly CausalModelAssertion[] = [];
     public assertionsAsPag: readonly PagLink[] = [];
 
+    public mutualMatrix: readonly (readonly number[])[] | null = null;
+
+    public causalityRaw: readonly (readonly number[])[] | null = null;
     public causality: readonly PagLink[] | null = null;
     /** causality + assertionsAsPag */
     public mergedPag: readonly PagLink[] = [];
 
-    constructor(datasetStore: CausalDatasetStore) {
+    constructor(datasetStore: CausalDatasetStore, operatorStore: CausalOperatorStore) {
+        const data$ = new Subject<readonly IRow[]>();
+        const fields$ = new Subject<readonly IFieldMeta[]>();
         const extFields$ = new Subject<readonly IFieldMeta[]>();
         const causality$ = new Subject<readonly PagLink[]>();
         const assertions$ = new Subject<readonly PagLink[]>();
 
         const mobxReactions = [
             reaction(() => datasetStore.fields, fields => {
-                extFields$.next(fields.filter(f => Boolean(f.extInfo)));
-                this.assertions = [];
-                this.assertionsAsPag = [];
+                fields$.next(fields);
+                runInAction(() => {
+                    this.assertions = [];
+                    this.assertionsAsPag = [];
+                    this.mutualMatrix = null;
+                });
+            }),
+            reaction(() => datasetStore.sample, data => {
+                data$.next(data);
             }),
             reaction(() => this.assertions, assertions => {
-                this.assertionsAsPag = transformAssertionsToPag(assertions, datasetStore.fields);
+                runInAction(() => {
+                    this.assertionsAsPag = transformAssertionsToPag(assertions, datasetStore.fields);
+                });
                 assertions$.next(this.assertionsAsPag);
             }),
-            reaction(() => this.functionalDependencies, () => {
-                this.causality = null;
-                this.mergedPag = [];
+            reaction(() => this.functionalDependencies, funcDeps => {
+                runInAction(() => {
+                    this.functionalDependenciesAsPag = transformFuncDepsToPag(funcDeps);
+                    this.causalityRaw = null;
+                    this.causality = null;
+                    this.mergedPag = [];
+                });
             }),
             reaction(() => this.causality, () => {
                 this.synchronizeAssertionsWithResult();
@@ -76,6 +95,10 @@ export default class CausalModelStore {
         ];
 
         const rxReactions = [
+            // find extInfo in fields
+            fields$.subscribe(fields => {
+                extFields$.next(fields.filter(f => Boolean(f.extInfo)));
+            }),
             // auto update FD using extInfo
             extFields$.pipe(
                 distinctUntilChanged((prev, curr) => {
@@ -97,7 +120,22 @@ export default class CausalModelStore {
                     }, []);
                 }),
             ).subscribe(deps => {
-                this.generatedFDFromExtInfo = deps;
+                runInAction(() => {
+                    this.generatedFDFromExtInfo = deps;
+                });
+            }),
+            // compute mutual matrix
+            // discuss if this should be triggered manually for a big set of fields
+            combineLatest({
+                data: data$,
+                fields: fields$,
+            }).pipe(
+                map(({ data, fields }) => operatorStore.computeMutualMatrix(data, fields)),
+                switchAll()
+            ).subscribe(matrix => {
+                runInAction(() => {
+                    this.mutualMatrix = matrix;
+                });
             }),
             // compute merged pag
             combineLatest({
@@ -106,9 +144,14 @@ export default class CausalModelStore {
             }).pipe(
                 map(({ basis, assertions }) => mergePAGs(basis, assertions))
             ).subscribe(pag => {
-                this.mergedPag = pag;
+                runInAction(() => {
+                    this.mergedPag = pag;
+                });
             }),
         ];
+
+        data$.next(datasetStore.sample);
+        fields$.next(datasetStore.fields);
         
         makeAutoObservable(this, {
             destroy: false,
@@ -116,6 +159,8 @@ export default class CausalModelStore {
             generatedFDFromExtInfo: observable.ref,
             assertions: observable.ref,
             assertionsAsPag: observable.ref,
+            mutualMatrix: observable.ref,
+            causalityRaw: observable.ref,
             causality: observable.ref,
             mergedPag: observable.ref,
         });
@@ -174,7 +219,7 @@ export default class CausalModelStore {
         this.assertions = this.causality ? nodeAssertions.concat(transformTagToAssertions(this.causality)) : [];
     }
 
-    protected addNodeAssertion(fid: string, assertion: NodeAssert): boolean {
+    public addNodeAssertion(fid: string, assertion: NodeAssert): boolean {
         const assertionsWithoutThisNode = this.assertions.filter(decl => {
             if ('fid' in decl) {
                 return decl.fid !== fid;
@@ -188,7 +233,7 @@ export default class CausalModelStore {
         return true;
     }
 
-    protected removeNodeAssertion(fid: string): boolean {
+    public removeNodeAssertion(fid: string): boolean {
         const assertionIndex = this.assertions.findIndex(decl => 'fid' in decl && decl.fid === fid);
         if (assertionIndex === -1) {
             return false;
@@ -199,7 +244,7 @@ export default class CausalModelStore {
         return true;
     }
 
-    protected revertNodeAssertion(fid: string) {
+    public revertNodeAssertion(fid: string) {
         const assertionIndex = this.assertions.findIndex(decl => 'fid' in decl && decl.fid === fid);
         if (assertionIndex === -1) {
             return false;
@@ -214,7 +259,7 @@ export default class CausalModelStore {
         return true;
     }
 
-    protected addEdgeAssertion(sourceFid: string, targetFid: string, assertion: EdgeAssert) {
+    public addEdgeAssertion(sourceFid: string, targetFid: string, assertion: EdgeAssert) {
         if (sourceFid === targetFid && this.assertions.some(decl => 'fid' in decl && [sourceFid, targetFid].includes(decl.fid))) {
             return false;
         }
@@ -228,7 +273,7 @@ export default class CausalModelStore {
         }]);
     }
 
-    protected removeEdgeAssertion(nodes: [string, string]) {
+    public removeEdgeAssertion(nodes: [string, string]) {
         if (nodes[0] === nodes[1]) {
             return false;
         }
@@ -242,7 +287,7 @@ export default class CausalModelStore {
         return true;
     }
 
-    protected revertEdgeAssertion(nodes: [string, string]) {
+    public revertEdgeAssertion(nodes: [string, string]) {
         if (nodes[0] === nodes[1]) {
             return false;
         }

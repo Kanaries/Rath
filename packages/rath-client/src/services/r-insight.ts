@@ -7,11 +7,11 @@ import { workerService } from './base';
 
 
 export const RInsightService = async (props: IRInsightExplainProps, mode: 'worker' | 'server'): Promise<IRInsightExplainResult> => {
-    const { __deprecatedCausalStore: causalStore } = getGlobalStore();
+    const { causalStore } = getGlobalStore();
 
     if (mode === 'server') {
-        const { apiPrefix } = causalStore;
-        const res = await fetch(`${apiPrefix}/explain`, {
+        const { causalServer } = causalStore.operator;
+        const res = await fetch(`${causalServer}/explain`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

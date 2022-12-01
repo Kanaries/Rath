@@ -224,10 +224,10 @@ export const insightExplain = (props: IRInsightExplainProps): IRInsightExplainRe
             if (!measure) {
                 continue;
             }
-            if (view.dimensions.some(dim => cramersV(data, dim, f.fid) >= RELATION_THRESHOLD)) {
+            if (view.dimensions.some(dim => cramersV(data.slice(0), dim, f.fid) >= RELATION_THRESHOLD)) {
                 continue;
             }
-            const responsibility = diffGroups(data, indices1, indices2, f, {
+            const responsibility = diffGroups(data.slice(0), indices1, indices2, f, {
                 field: measure,
                 aggregate: target.op,
             });

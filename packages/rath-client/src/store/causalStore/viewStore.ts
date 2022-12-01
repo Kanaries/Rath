@@ -1,5 +1,5 @@
 import produce from "immer";
-import { makeAutoObservable, observable, reaction } from "mobx";
+import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
 import { Subject, withLatestFrom } from "rxjs";
 import type { IFieldMeta } from "../../interfaces";
@@ -42,6 +42,8 @@ class CausalViewStore {
         return this._selectedNodes.at(0) ?? null;
     }
 
+    public shouldDisplayAlgorithmPanel = false;
+
     public readonly destroy: () => void;
 
     constructor(causalStore: CausalStore) {
@@ -56,41 +58,45 @@ class CausalViewStore {
                 this.selectedFidArr$.next([]);
             }),
             reaction(() => this.explorationKey, explorationKey => {
-                switch (explorationKey) {
-                    case ExplorationKey.AUTO_VIS: {
-                        if (this.graphNodeSelectionMode === NodeSelectionMode.NONE) {
-                            this.graphNodeSelectionMode = NodeSelectionMode.SINGLE;
+                runInAction(() => {
+                    switch (explorationKey) {
+                        case ExplorationKey.AUTO_VIS: {
+                            if (this.graphNodeSelectionMode === NodeSelectionMode.NONE) {
+                                this.graphNodeSelectionMode = NodeSelectionMode.SINGLE;
+                            }
+                            break;
                         }
-                        break;
+                        case ExplorationKey.CAUSAL_INSIGHT:
+                        case ExplorationKey.PREDICT: {
+                            this.graphNodeSelectionMode = NodeSelectionMode.SINGLE;
+                            break;
+                        }
+                        case ExplorationKey.CROSS_FILTER: {
+                            this.graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
+                            break;
+                        }
+                        default: {
+                            this.graphNodeSelectionMode = NodeSelectionMode.NONE;
+                        }
                     }
-                    case ExplorationKey.CAUSAL_INSIGHT:
-                    case ExplorationKey.PREDICT: {
-                        this.graphNodeSelectionMode = NodeSelectionMode.SINGLE;
-                        break;
-                    }
-                    case ExplorationKey.CROSS_FILTER: {
-                        this.graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
-                        break;
-                    }
-                    default: {
-                        this.graphNodeSelectionMode = NodeSelectionMode.NONE;
-                    }
-                }
+                });
             }),
             reaction(() => this.graphNodeSelectionMode, graphNodeSelectionMode => {
-                switch (graphNodeSelectionMode) {
-                    case NodeSelectionMode.SINGLE: {
-                        this._selectedNodes = this._selectedNodes.slice(this._selectedNodes.length - 1);
-                        break;
+                runInAction(() => {
+                    switch (graphNodeSelectionMode) {
+                        case NodeSelectionMode.SINGLE: {
+                            this._selectedNodes = this._selectedNodes.slice(this._selectedNodes.length - 1);
+                            break;
+                        }
+                        case NodeSelectionMode.MULTIPLE: {
+                            break;
+                        }
+                        default: {
+                            this._selectedNodes = [];
+                            break;
+                        }
                     }
-                    case NodeSelectionMode.MULTIPLE: {
-                        break;
-                    }
-                    default: {
-                        this._selectedNodes = [];
-                        break;
-                    }
-                }
+                });
             }),
         ];
 
@@ -98,15 +104,17 @@ class CausalViewStore {
             this.selectedFidArr$.pipe(
                 withLatestFrom(fields$)
             ).subscribe(([fidArr, fields]) => {
-                this._selectedNodes = fidArr.reduce<IFieldMeta[]>((nodes, fid) => {
-                    const f = fields.find(which => which.fid === fid);
-                    if (f) {
-                        return nodes.concat([f]);
-                    } else {
-                        console.warn(`Select node warning: cannot find field ${fid}.`, fields);
-                    }
-                    return nodes;
-                }, []);
+                runInAction(() => {
+                    this._selectedNodes = fidArr.reduce<IFieldMeta[]>((nodes, fid) => {
+                        const f = fields.find(which => which.fid === fid);
+                        if (f) {
+                            return nodes.concat([f]);
+                        } else {
+                            console.warn(`Select node warning: cannot find field ${fid}.`, fields);
+                        }
+                        return nodes;
+                    }, []);
+                });
             }),
         ];
 
@@ -160,8 +168,43 @@ class CausalViewStore {
         }
     }
 
+    public selectNode(fid: string) {
+        switch (this.graphNodeSelectionMode) {
+            case NodeSelectionMode.SINGLE: {
+                if (this.selectedField?.fid === fid) {
+                    this.selectedFidArr$.next([]);
+                    return false;
+                } else {
+                    this.selectedFidArr$.next([fid]);
+                    return true;
+                }
+            }
+            case NodeSelectionMode.MULTIPLE: {
+                const selectedFidArr = this.selectedFieldGroup.map(f => f.fid);
+                this.selectedFidArr$.next(produce(selectedFidArr, draft => {
+                    const matchedIndex = draft.findIndex(f => f === fid);
+                    if (matchedIndex === -1) {
+                        draft.push(fid);
+                    }
+                }));
+                break;
+            }
+            default: {
+                return undefined;
+            }
+        }
+    }
+
     public clearSelected() {
         this.selectedFidArr$.next([]);
+    }
+
+    public openAlgorithmPanel() {
+        this.shouldDisplayAlgorithmPanel = true;
+    }
+
+    public closeAlgorithmPanel() {
+        this.shouldDisplayAlgorithmPanel = false;
     }
 
 }

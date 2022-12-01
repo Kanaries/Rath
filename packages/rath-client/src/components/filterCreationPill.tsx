@@ -29,7 +29,7 @@ const Cont = styled.div`
     min-width: 16em;
 `;
 interface FilterCreationPillProps {
-    fields: IFieldMeta[];
+    fields: readonly IFieldMeta[];
     onFilterSubmit: (field: IFieldMeta, filter: IFilter) => void;
     onRenderPill?: (text: string, handleClick: () => void) => void;
 }

@@ -1,6 +1,6 @@
 import { applyFilters } from "@kanaries/loa";
 import produce from "immer";
-import { makeAutoObservable, observable, reaction } from "mobx";
+import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { combineLatest, map, Subject, switchAll, withLatestFrom } from "rxjs";
 import type { IFieldMeta, IRow, IFilter } from "../../interfaces";
 import { focusedSample } from "../../utils/sample";
@@ -57,7 +57,9 @@ export default class CausalDatasetStore {
                 fullData$.next(cleanedData);
                 this.fieldIndices$.next([]);
                 this.filters$.next([]);
-                this.fullDataSize = cleanedData.length;
+                runInAction(() => {
+                    this.fullDataSize = cleanedData.length;
+                });
             }),
             reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
                 allFields$.next(fieldMetas);
@@ -75,7 +77,9 @@ export default class CausalDatasetStore {
         const rxReactions = [
             // reset field selector
             allFields$.subscribe(fields => {
-                this.allFields = fields;
+                runInAction(() => {
+                    this.allFields = fields;
+                });
                 // Choose the first 10 fields by default
                 this.fieldIndices$.next(fields.slice(0, 10).map((_, i) => i));
             }),
@@ -87,7 +91,9 @@ export default class CausalDatasetStore {
 
             // bind `fields` with observer
             fields$.subscribe(fields => {
-                this.fields = fields;
+                runInAction(() => {
+                    this.fields = fields;
+                });
             }),
 
             // apply filtering
@@ -99,7 +105,9 @@ export default class CausalDatasetStore {
 
             // update filteredData info
             filteredData$.subscribe(data => {
-                this.filteredDataSize = data.length;
+                runInAction(() => {
+                    this.filteredDataSize = data.length;
+                });
             }),
 
             // apply sampling
@@ -116,8 +124,10 @@ export default class CausalDatasetStore {
             this.sampleIndices$.pipe(
                 withLatestFrom(filteredData$)
             ).subscribe(([indices, filteredData]) => {
-                this.sample = indices.map(index => filteredData[index]);
-                this.sampleSize = this.sample.length;
+                runInAction(() => {
+                    this.sample = indices.map(index => filteredData[index]);
+                    this.sampleSize = this.sample.length;
+                });
             }),
 
             // apply vis sampling
@@ -128,7 +138,9 @@ export default class CausalDatasetStore {
                 }),
                 withLatestFrom(filteredData$),
             ).subscribe(([indices, filteredData]) => {
-                this.visSample = indices.map(index => filteredData[index]);
+                runInAction(() => {
+                    this.visSample = indices.map(index => filteredData[index]);
+                });
             }),
         ];
 

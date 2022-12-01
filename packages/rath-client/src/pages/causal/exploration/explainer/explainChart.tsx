@@ -11,7 +11,7 @@ import { SelectedFlag } from './RExplainer';
 
 interface ExplainChartProps {
     title?: string;
-    data: IRow[];
+    data: readonly IRow[];
     mainField: IFieldMeta;
     mainFieldAggregation: null | 'sum' | 'mean' | 'count';
     indexKey: IFieldMeta | null;

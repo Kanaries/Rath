@@ -10,8 +10,8 @@ import {
     IAlgoSchema,
     CAUSAL_ALGORITHM_OPTIONS,
     BgKnowledge,
-    BgKnowledgePagLink,
     IFunctionalDep,
+    PagLink,
 } from '../pages/causal/config';
 import { causalService } from '../pages/causal/service';
 import resolveCausal, { CausalLinkDirection, findUnmatchedCausalResults, stringifyDirection } from '../utils/resolve-causal';
@@ -169,7 +169,7 @@ export class CausalStore {
         const modelKeys = await getModelStorageList();
         this.userModelKeys = modelKeys;
     }
-    public async computeIGMatrix(dataSource: IRow[], fields: IFieldMeta[]) {
+    public async computeIGMatrix(dataSource: readonly IRow[], fields: readonly IFieldMeta[]) {
         this.computing = true;
         const res = await causalService({ task: 'ig', dataSource, fields });
         runInAction(() => {
@@ -177,7 +177,7 @@ export class CausalStore {
             this.computing = false;
         });
     }
-    public async computeIGCondMatrix(dataSource: IRow[], fields: IFieldMeta[]) {
+    public async computeIGCondMatrix(dataSource: readonly IRow[], fields: readonly IFieldMeta[]) {
         this.computing = true;
         const res = await causalService({ task: 'ig_cond', dataSource, fields, matrix: this.igMatrix });
         runInAction(() => {
@@ -209,10 +209,10 @@ export class CausalStore {
         this.causalStrength = causalMatrix;
     }
     public async causalDiscovery(
-        dataSource: IRow[],
+        dataSource: readonly IRow[],
         /** @deprecated */ precondition: BgKnowledge[],
-        preconditionPag: BgKnowledgePagLink[],
-        funcDeps: IFunctionalDep[],
+        preconditionPag: readonly PagLink[],
+        funcDeps: readonly IFunctionalDep[],
     ) {
         const fields = this.dataSourceStore.fieldMetas;
         const focusFieldIds = this.focusFieldIds;
@@ -292,10 +292,10 @@ export class CausalStore {
         }
     }
     public async reRunCausalDiscovery(
-        dataSource: IRow[],
+        dataSource: readonly IRow[],
         /** @deprecated */ precondition: BgKnowledge[],
-        preconditionPag: BgKnowledgePagLink[],
-        funcDeps: IFunctionalDep[],
+        preconditionPag: readonly PagLink[],
+        funcDeps: readonly IFunctionalDep[],
     ) {
         this.causalDiscovery(dataSource, precondition, preconditionPag, funcDeps);
     }
