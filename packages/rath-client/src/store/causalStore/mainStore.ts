@@ -52,11 +52,11 @@ export default class CausalStore {
             fields: this.fields.map(f => f.fid),
             causalModel: this.operator.algorithm && this.model.causalityRaw ? {
                 algorithm: this.operator.algorithm,
-                params: this.operator.params[this.operator.algorithm],
+                params: toJS(this.operator.params[this.operator.algorithm]),
                 causalityRaw: this.model.causalityRaw,
             } : null,
         };
-        await setCausalModelStorage(this.dataset.datasetId, toJS(save));
+        await setCausalModelStorage(this.dataset.datasetId, save);
         return true;
     }
 
@@ -102,16 +102,7 @@ export default class CausalStore {
                     fid => this.dataset.allFields.findIndex(f => f.fid === fid)
                 ));
                 if (save.causalModel) {
-                    if (save.causalModel.algorithm in this.operator.params) {
-                        this.operator.updateConfig(save.causalModel.algorithm, save.causalModel.params);
-                    } else {
-                        notify({
-                            type: 'error',
-                            title: 'Load Causal Model Failed',
-                            content: `Algorithm ${save.causalModel.algorithm} is not supported.`,
-                        });
-                        return false;
-                    }
+                    this.operator.updateConfig(save.causalModel.algorithm, save.causalModel.params);
                     runInAction(() => {
                         this.model.causalityRaw = save.causalModel!.causalityRaw;
                         this.model.causality = resolveCausality(save.causalModel!.causalityRaw, this.dataset.fields);
