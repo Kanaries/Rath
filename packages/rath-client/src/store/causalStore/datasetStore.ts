@@ -35,6 +35,7 @@ export default class CausalDatasetStore {
     public set sampleRate(value: number) {
         this._sampleRate = Math.max(0, Math.min(1, value));
         this.appliedSampleRate$.next(this._sampleRate);
+        this.shouldDisplaySampleSpinner = true;
     }
     public shouldDisplaySampleSpinner = false;
 
@@ -55,15 +56,14 @@ export default class CausalDatasetStore {
         const mobxReactions = [
             reaction(() => dataSourceStore.cleanedData, cleanedData => {
                 fullData$.next(cleanedData);
-                this.fieldIndices$.next([]);
                 this.filters$.next([]);
+                this.sampleIndices$.next([]);
                 runInAction(() => {
                     this.fullDataSize = cleanedData.length;
                 });
             }),
             reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
                 allFields$.next(fieldMetas);
-                this.sampleIndices$.next([]);
             }),
         ];
 
@@ -100,6 +100,9 @@ export default class CausalDatasetStore {
             this.filters$.pipe(
                 withLatestFrom(fullData$)
             ).subscribe(([filters, fullData]) => {
+                runInAction(() => {
+                    this.filters = filters;
+                });
                 filteredData$.next(filters.length ? applyFilters(fullData, filters.slice(0)) : fullData);
             }),
 
@@ -127,6 +130,7 @@ export default class CausalDatasetStore {
                 runInAction(() => {
                     this.sample = indices.map(index => filteredData[index]);
                     this.sampleSize = this.sample.length;
+                    this.shouldDisplaySampleSpinner = false;
                 });
             }),
 
@@ -147,6 +151,8 @@ export default class CausalDatasetStore {
         // initialize data
         allFields$.next(dataSourceStore.fieldMetas);
         fullData$.next(dataSourceStore.cleanedData);
+        this.filters$.next([]);
+        this.appliedSampleRate$.next(1);
         
         makeAutoObservable(this, {
             allFields: observable.ref,

@@ -241,46 +241,7 @@ const DatasetPanel: FC = () => {
                 <Label style={{ marginRight: '1em' }}>数据增强</Label>
                 <LaTiaoConsole />
             </Stack>
-            <Stack style={{ marginBlock: '0.8em' }}>
-                <Slider
-                    label="采样率"
-                    min={0.01}
-                    max={1}
-                    step={0.01}
-                    value={sampleRate}
-                    showValue
-                    onChange={(val) => causalStore.dataset.sampleRate = val}
-                    valueFormat={(val) => `${(val * 100).toFixed(0)}%`}
-                    styles={{
-                        root: {
-                            flexGrow: 0,
-                            flexShrink: 0,
-                            display: 'flex',
-                            flexDirection: 'row',
-                            flexWrap: 'wrap',
-                            alignItems: 'center',
-                        },
-                        container: {
-                            minWidth: '160px',
-                            maxWidth: '300px',
-                            flexGrow: 1,
-                            flexShrink: 0,
-                            marginInline: '1vmax',
-                        },
-                    }}
-                />
-                <small style={{ padding: '0.2em 0', color: '#666', display: 'flex', alignItems: 'center' }}>
-                    {`原始大小: ${cleanedData.length} 行，样本量: `}
-                    {shouldDisplaySampleSpinner ? (
-                        <Spinner
-                            style={{ display: 'inline-block', transform: 'scale(0.9)', margin: '-50% 0.6em' }}
-                        />
-                    ) : (
-                        `${sampleSize} 行`
-                    )}
-                </small>
-            </Stack>
-            <Stack style={{ marginTop: '0.3em' }}>
+            <Stack style={{ marginTop: '0.6em' }}>
                 <Label style={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
                     <span>筛选器</span>
                     <div
@@ -320,6 +281,45 @@ const DatasetPanel: FC = () => {
                 )}
                 <small style={{ color: '#666', display: 'flex', alignItems: 'center' }}>
                     {`${filters.length ? `筛选后子集大小: ${filteredDataSize} 行` : '(无筛选项)'}`}
+                </small>
+            </Stack>
+            <Stack style={{ marginBlock: '0.8em' }}>
+                <Slider
+                    label="采样率"
+                    min={0.01}
+                    max={1}
+                    step={0.01}
+                    value={sampleRate}
+                    showValue
+                    onChange={(val) => causalStore.dataset.sampleRate = val}
+                    valueFormat={(val) => `${(val * 100).toFixed(0)}%`}
+                    styles={{
+                        root: {
+                            flexGrow: 0,
+                            flexShrink: 0,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            flexWrap: 'wrap',
+                            alignItems: 'center',
+                        },
+                        container: {
+                            minWidth: '160px',
+                            maxWidth: '300px',
+                            flexGrow: 1,
+                            flexShrink: 0,
+                            marginInline: '1vmax',
+                        },
+                    }}
+                />
+                <small style={{ padding: '0.2em 0', color: '#666', display: 'flex', alignItems: 'center' }}>
+                    {`原始大小: ${cleanedData.length} 行，样本量: `}
+                    {shouldDisplaySampleSpinner ? (
+                        <Spinner
+                            style={{ display: 'inline-block', transform: 'scale(0.9)', margin: '-50% 0.6em' }}
+                        />
+                    ) : (
+                        `${sampleSize} 行`
+                    )}
                 </small>
             </Stack>
             <Label>需要分析的字段</Label>

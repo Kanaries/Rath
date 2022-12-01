@@ -41,6 +41,7 @@ export default class CausalModelStore {
     public functionalDependencies: readonly IFunctionalDep[] = [];
     public functionalDependenciesAsPag: readonly PagLink[] = [];
 
+    protected assertions$ = new Subject<readonly CausalModelAssertion[]>();
     /**
      * Modifiable assertions based on background knowledge of user,
      * reset with the non-weak value of the causal result when the latter changes.
@@ -61,7 +62,7 @@ export default class CausalModelStore {
         const fields$ = new Subject<readonly IFieldMeta[]>();
         const extFields$ = new Subject<readonly IFieldMeta[]>();
         const causality$ = new Subject<readonly PagLink[]>();
-        const assertions$ = new Subject<readonly PagLink[]>();
+        const assertionsPag$ = new Subject<readonly PagLink[]>();
 
         const mobxReactions = [
             reaction(() => datasetStore.fields, fields => {
@@ -80,12 +81,6 @@ export default class CausalModelStore {
             }),
             reaction(() => datasetStore.sample, data => {
                 data$.next(data);
-            }),
-            reaction(() => this.assertions, assertions => {
-                runInAction(() => {
-                    this.assertionsAsPag = transformAssertionsToPag(assertions, datasetStore.fields);
-                });
-                assertions$.next(this.assertionsAsPag);
             }),
             reaction(() => this.functionalDependencies, funcDeps => {
                 runInAction(() => {
@@ -144,10 +139,18 @@ export default class CausalModelStore {
                     this.mutualMatrix = matrix;
                 });
             }),
+            // update assertions
+            this.assertions$.subscribe(assertions => {
+                runInAction(() => {
+                    this.assertions = assertions;
+                    this.assertionsAsPag = transformAssertionsToPag(assertions, datasetStore.fields);
+                    assertionsPag$.next(this.assertionsAsPag);
+                });
+            }),
             // compute merged pag
             combineLatest({
                 basis: causality$,
-                assertions: assertions$,
+                assertions: assertionsPag$,
             }).pipe(
                 map(({ basis, assertions }) => mergePAGs(basis, assertions))
             ).subscribe(pag => {
@@ -223,7 +226,7 @@ export default class CausalModelStore {
 
     protected synchronizeAssertionsWithResult() {
         const nodeAssertions = this.assertions.filter(decl => 'fid' in decl);
-        this.assertions = this.causality ? nodeAssertions.concat(transformTagToAssertions(this.causality)) : [];
+        this.assertions$.next(this.causality ? nodeAssertions.concat(transformTagToAssertions(this.causality)) : []);
     }
 
     public addNodeAssertion(fid: string, assertion: NodeAssert): boolean {
@@ -233,10 +236,10 @@ export default class CausalModelStore {
             }
             return [decl.sourceFid, decl.targetFid].every(node => node !== fid);
         });
-        this.assertions = assertionsWithoutThisNode.concat([{
+        this.assertions$.next(assertionsWithoutThisNode.concat([{
             fid,
             assertion,
-        }]);
+        }]));
         return true;
     }
 
@@ -245,9 +248,9 @@ export default class CausalModelStore {
         if (assertionIndex === -1) {
             return false;
         }
-        this.assertions = produce(this.assertions, draft => {
+        this.assertions$.next(produce(this.assertions, draft => {
             draft.splice(assertionIndex, 1);
-        });
+        }));
         return true;
     }
 
@@ -256,13 +259,13 @@ export default class CausalModelStore {
         if (assertionIndex === -1) {
             return false;
         }
-        this.assertions = produce(this.assertions, draft => {
+        this.assertions$.next(produce(this.assertions, draft => {
             const decl = draft[assertionIndex] as CausalModelNodeAssertion;
             decl.assertion = ({
                 [NodeAssert.FORBID_AS_CAUSE]: NodeAssert.FORBID_AS_EFFECT,
                 [NodeAssert.FORBID_AS_EFFECT]: NodeAssert.FORBID_AS_CAUSE,
             })[decl.assertion];
-        });
+        }));
         return true;
     }
 
@@ -273,11 +276,11 @@ export default class CausalModelStore {
         const assertionsWithoutThisEdge = this.assertions.filter(
             decl => 'fid' in decl || !([decl.sourceFid, decl.targetFid].every(fid => [sourceFid, targetFid].includes(fid)))
         );
-        this.assertions = assertionsWithoutThisEdge.concat([{
+        this.assertions$.next(assertionsWithoutThisEdge.concat([{
             sourceFid,
             targetFid,
             assertion,
-        }]);
+        }]));
     }
 
     public removeEdgeAssertion(nodes: [string, string]) {
@@ -288,9 +291,9 @@ export default class CausalModelStore {
         if (assertionIndex === -1) {
             return false;
         }
-        this.assertions = produce(this.assertions, draft => {
+        this.assertions$.next(produce(this.assertions, draft => {
             draft.splice(assertionIndex, 1);
-        });
+        }));
         return true;
     }
 
@@ -302,7 +305,7 @@ export default class CausalModelStore {
         if (assertionIndex === -1) {
             return false;
         }
-        this.assertions = produce(this.assertions, draft => {
+        this.assertions$.next(produce(this.assertions, draft => {
             const decl = draft[assertionIndex] as CausalModelEdgeAssertion;
             decl.assertion = ({
                 [EdgeAssert.TO_BE_RELEVANT]: EdgeAssert.TO_BE_NOT_RELEVANT,
@@ -310,7 +313,7 @@ export default class CausalModelStore {
                 [EdgeAssert.TO_EFFECT]: EdgeAssert.TO_NOT_EFFECT,
                 [EdgeAssert.TO_NOT_EFFECT]: EdgeAssert.TO_EFFECT,
             })[decl.assertion];
-        });
+        }));
         return true;
     }
 

@@ -199,10 +199,10 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                         label="连接类型"
                         selectedKey={createEdgeMode}
                         options={[
-                            { key: 'directed-must-link', text: '单向一定影响' },
-                            { key: 'directed-must-not-link', text: '单向一定不影响' },
-                            { key: 'must-link', text: '至少在一个方向存在影响' },
-                            { key: 'must-not-link', text: '在任意方向一定不影响' },
+                            { key: EdgeAssert.TO_EFFECT, text: '单向一定影响' },
+                            { key: EdgeAssert.TO_NOT_EFFECT, text: '单向一定不影响' },
+                            { key: EdgeAssert.TO_BE_RELEVANT, text: '至少在一个方向存在影响' },
+                            { key: EdgeAssert.TO_BE_NOT_RELEVANT, text: '在任意方向一定不影响' },
                         ]}
                         onChange={(_e, option) => {
                             if (!option) {

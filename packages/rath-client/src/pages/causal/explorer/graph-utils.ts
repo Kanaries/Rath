@@ -178,16 +178,16 @@ export const useGraphOptions = ({
     handleLinkRef.current = handleLink;
 
     return useMemo<Omit<GraphOptions, 'container'>>(() => {
-        let createEdgeFrom = -1;
+        let createEdgeFrom: string | null = null;
         const exploreMode = ['drag-canvas', 'drag-node', {
             type: 'lasso-select',
             trigger: 'shift',
             onSelect(nodes: any, edges: any) {
                 const selected: IFieldMeta[] = [];
                 for (const node of nodes) {
-                    const idx = node._cfg?.id;
-                    if (idx) {
-                        const f = fieldsRef.current[parseInt(idx, 10)];
+                    const fid = node._cfg?.id as string | undefined;
+                    if (fid) {
+                        const f = fieldsRef.current.find(which => which.fid === fid);
                         if (f) {
                             selected.push(f);
                         }
@@ -204,25 +204,23 @@ export const useGraphOptions = ({
             type: 'create-edge',
             trigger: 'drag',
             shouldBegin(e: any) {
-                const source = e.item?._cfg?.id;
-                if (source) {
-                    createEdgeFrom = parseInt(source, 10);
+                const sourceFid = e.item?._cfg?.id as string | undefined;
+                if (sourceFid) {
+                    createEdgeFrom = sourceFid;
                 }
                 return true;
             },
             shouldEnd(e: any) {
-                if (createEdgeFrom === -1) {
+                if (createEdgeFrom === null) {
                     return false;
                 }
-                const target = e.item?._cfg?.id;
-                if (target) {
-                    const origin = fieldsRef.current[createEdgeFrom];
-                    const destination = fieldsRef.current[parseInt(target, 10)];
-                    if (origin.fid !== destination.fid) {
-                        handleLinkRef.current?.(origin.fid, destination.fid);
+                const targetFid = e.item?._cfg?.id as string | undefined;
+                if (targetFid) {
+                    if (createEdgeFrom !== targetFid) {
+                        handleLinkRef.current?.(createEdgeFrom, targetFid);
                     }
                 }
-                createEdgeFrom = -1;
+                createEdgeFrom = null;
                 return false;
             },
         }];

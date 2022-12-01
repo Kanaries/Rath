@@ -55,10 +55,9 @@ export const useReactiveGraph = (
             graph.render();
 
             graph.on('node:click', (e: any) => {
-                const nodeId = e.item._cfg.id;
-                if (typeof nodeId === 'string') {
-                    const idx = parseInt(nodeId, 10);
-                    handleNodeClickRef.current?.(fieldsRef.current[idx].fid);
+                const fid = e.item._cfg.id;
+                if (typeof fid === 'string') {
+                    handleNodeClickRef.current?.(fid);
                 } else {
                     handleNodeClickRef.current?.(null);
                 }
@@ -67,12 +66,10 @@ export const useReactiveGraph = (
             graph.on('edge:click', (e: any) => {
                 const edge = e.item;
                 if (edge) {
-                    const src = (edge._cfg?.source as any)?._cfg.id;
-                    const tar = (edge._cfg?.target as any)?._cfg.id;
-                    if (src && tar) {
-                        const srcF = fieldsRef.current[parseInt(src, 10)];
-                        const tarF = fieldsRef.current[parseInt(tar, 10)];
-                        handleEdgeClickRef.current?.({ srcFid: srcF.fid, tarFid: tarF.fid });
+                    const srcFid = (edge._cfg?.source as any)?._cfg.id as string | undefined;
+                    const tarFid = (edge._cfg?.target as any)?._cfg.id as string | undefined;
+                    if (srcFid && tarFid) {
+                        handleEdgeClickRef.current?.({ srcFid, tarFid });
                     } else {
                         handleEdgeClickRef.current?.(null);
                     }
@@ -99,7 +96,7 @@ export const useReactiveGraph = (
                 // for rendering after each iteration
                 tick: () => {
                     graphRef.current?.refreshPositions();
-                }
+                },
             });
             graphRef.current.render();
         }
@@ -141,14 +138,8 @@ export const useReactiveGraph = (
         const { current: graph } = graphRef;
         if (graph) {
             const focusedNodes = graph.getNodes().filter(node => {
-                const fid = (() => {
-                    try {
-                        return fieldsRef.current[parseInt(node._cfg?.id ?? '-1', 10)].fid;
-                    } catch {
-                        return null;
-                    }
-                })();
-                return fid !== null && selectedFieldGroup.some(field => field.fid === fid);
+                const fid = node._cfg?.id as string | undefined;
+                return fid !== undefined && selectedFieldGroup.some(field => field.fid === fid);
             });
             const subtreeNodes = focusedNodes.reduce<INode[]>((list, focusedNode) => {
                 for (const node of graph.getNeighbors(focusedNode)) {
@@ -160,15 +151,8 @@ export const useReactiveGraph = (
                 return list;
             }, []);
             const subtreeFidArr = subtreeNodes.map(node => {
-                const idx = (() => {
-                    try {
-                        return parseInt(node._cfg?.id ?? '-1', 10);
-                    } catch {
-                        return -1;
-                    }
-                })();
-                return fieldsRef.current[idx]?.fid;
-            });
+                return node._cfg?.id as string | undefined;
+            }).filter(Boolean) as string[];
             const subtreeFields = subtreeFidArr.reduce<IFieldMeta[]>((list, fid) => {
                 const f = fieldsRef.current.find(which => which.fid === fid);
                 if (f) {
@@ -204,25 +188,13 @@ export const useReactiveGraph = (
                 });
             });
             graph.getEdges().forEach(edge => {
-                const sourceIdx = (() => {
-                    try {
-                        return parseInt((edge._cfg?.source as any)?._cfg?.id ?? '-1', 10);
-                    } catch {
-                        return -1;
-                    }
-                })();
-                const targetIdx = (() => {
-                    try {
-                        return parseInt((edge._cfg?.target as any)?._cfg?.id ?? '-1', 10);
-                    } catch {
-                        return -1;
-                    }
-                })();
+                const sourceFid = (edge._cfg?.source as any)?._cfg?.id as string | undefined;
+                const targetFid = (edge._cfg?.target as any)?._cfg?.id as string | undefined;
                 const nodesSelected = [
-                    fieldsRef.current[sourceIdx]?.fid, fieldsRef.current[targetIdx]?.fid
+                    sourceFid, targetFid
                 ].filter(fid => typeof fid === 'string' && selectedFieldGroup.some(f => f.fid === fid));
                 const nodesInSubtree = [
-                    fieldsRef.current[sourceIdx]?.fid, fieldsRef.current[targetIdx]?.fid
+                    sourceFid, targetFid
                 ].filter(fid => typeof fid === 'string' && subtreeFidArr.some(f => f === fid));
                 const isInSubtree = nodesSelected.length === 2;
                 const isHalfInSubtree = nodesSelected.length === 1 && nodesInSubtree.length === 1;
