@@ -1,6 +1,6 @@
 import { ChoiceGroup, DefaultButton, Label, Modal, PrimaryButton, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { Fragment, useState } from 'react';
+import { FC, Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { notify } from '../../../components/error';
 import { useGlobalStore } from '../../../store';
@@ -9,10 +9,9 @@ const ModalInnerContainer = styled.div`
     padding: 1em;
 `;
 
-interface ModelStorageProps {}
-const ModelStorage: React.FC<ModelStorageProps> = (props) => {
-    const { __deprecatedCausalStore } = useGlobalStore();
-    const { userModelKeys } = __deprecatedCausalStore;
+const ModelStorage: FC = () => {
+    const { causalStore } = useGlobalStore();
+    const { saveKeys } = causalStore;
     const [selectedModelKey, setSelectedModelKey] = useState<string | undefined>(undefined);
     const [showModels, setShowModels] = useState<boolean>(false);
     return (
@@ -21,22 +20,21 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
                 text="保存因果模型"
                 iconProps={{ iconName: 'Save' }}
                 onClick={() => {
-                    __deprecatedCausalStore
-                        .saveCausalModel()
-                        .then(() => {
+                    causalStore.save().then(ok => {
+                        if (ok) {
                             notify({
                                 title: 'Causal Model Saved',
                                 content: 'Causal model saved successfully.',
                                 type: 'success',
                             });
-                        })
-                        .catch((err) => {
+                        } else {
                             notify({
                                 title: 'Causal Model Save Failed',
-                                content: `${err}`,
+                                content: '',
                                 type: 'error',
                             });
-                        });
+                        }
+                    });
                 }}
             />
             <DefaultButton
@@ -44,7 +42,7 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
                 iconProps={{ iconName: 'CloudDownload' }}
                 onClick={() => {
                     setShowModels(true);
-                    __deprecatedCausalStore.getCausalModelList();
+                    causalStore.updateSaveKeys();
                 }}
             />
             <Modal
@@ -59,7 +57,7 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
                         <ChoiceGroup
                             label="模型列表"
                             value={selectedModelKey}
-                            options={userModelKeys.map((key) => {
+                            options={saveKeys.map((key) => {
                                 return {
                                     key,
                                     text: key,
@@ -74,7 +72,7 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
                             text="使用"
                             onClick={() => {
                                 if (selectedModelKey) {
-                                    __deprecatedCausalStore.fetchCausalModel(selectedModelKey);
+                                    causalStore.checkout(selectedModelKey);
                                 }
                                 setShowModels(false);
                             }}

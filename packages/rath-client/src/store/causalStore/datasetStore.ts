@@ -14,6 +14,8 @@ const SAMPLE_UPDATE_DELAY = 500;
 
 export default class CausalDatasetStore {
 
+    public datasetId: string | null;
+
     public allFields: readonly IFieldMeta[] = [];
 
     protected fieldIndices$ = new Subject<readonly number[]>();
@@ -62,9 +64,14 @@ export default class CausalDatasetStore {
         });
 
         const mobxReactions = [
+            reaction(() => dataSourceStore.datasetId, id => {
+                runInAction(() => {
+                    this.datasetId = id;
+                });
+                this.filters$.next([]);
+            }),
             reaction(() => dataSourceStore.cleanedData, cleanedData => {
                 fullData$.next(cleanedData);
-                this.filters$.next([]);
                 this.sampleIndices$.next([]);
                 runInAction(() => {
                     this.fullDataSize = cleanedData.length;
@@ -72,6 +79,7 @@ export default class CausalDatasetStore {
             }),
             reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
                 allFields$.next(fieldMetas);
+                this.filters$.next([]);
             }),
         ];
 
@@ -157,6 +165,7 @@ export default class CausalDatasetStore {
         ];
 
         // initialize data
+        this.datasetId = dataSourceStore.datasetId;
         allFields$.next(dataSourceStore.fieldMetas);
         fullData$.next(dataSourceStore.cleanedData);
         this.filters$.next([]);

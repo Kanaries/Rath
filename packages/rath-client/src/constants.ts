@@ -47,7 +47,7 @@ export const STORAGES = {
     DATASOURCE: 'datasource',
     WORKSPACE: 'workspace',
     META: 'meta',
-    MODEL: 'model',
+    CAUSAL_MODEL: 'causal',
     STATE: 'state',
     ITERATOR: 'iterator',
     CONFIG: 'config',

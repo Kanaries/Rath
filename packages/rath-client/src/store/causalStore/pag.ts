@@ -96,7 +96,7 @@ export const transformFuncDepsToPag = (funcDeps: readonly IFunctionalDep[]): Pag
     }, []);
 };
   
-export const transformTagToAssertions = (pag: readonly PagLink[]): CausalModelAssertion[] => {
+export const transformPagToAssertions = (pag: readonly PagLink[]): CausalModelAssertion[] => {
     return pag.reduce<CausalModelAssertion[]>((list, link) => {
         if (link.src_type === PAG_NODE.BLANK && link.tar_type === PAG_NODE.ARROW) {
             return list.concat([{
@@ -127,7 +127,7 @@ export const transformTagToAssertions = (pag: readonly PagLink[]): CausalModelAs
     }, []);
 };
 
-export const resolveCausality = (causality: PAG_NODE[][], fields: readonly IFieldMeta[]): PagLink[] => {
+export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fields: readonly IFieldMeta[]): PagLink[] => {
     const links: PagLink[] = [];
 
     for (let i = 0; i < causality.length - 1; i += 1) {

@@ -1,7 +1,8 @@
 import localforage from 'localforage';
 
 import { RESULT_STORAGE_SPLITOR, STORAGES, STORAGE_INSTANCE } from '../constants';
-import { IFieldMeta, IMuteFieldBase, IRow } from '../interfaces';
+import type { IFieldMeta, IMuteFieldBase, IRow } from '../interfaces';
+import type { ICausalStoreSave } from '../store/causalStore/mainStore';
 import type { CausalLinkDirection } from './resolve-causal';
 
 export interface IDBMeta {
@@ -15,6 +16,7 @@ export interface IDBMeta {
     fields?: IMuteFieldBase[];
 }
 
+/** @deprecated */
 export interface IModel {
     metas: IFieldMeta[];
     causal: {
@@ -192,35 +194,35 @@ export async function getDataConfig(name: string) {
     return ds;
 }
 
-export async function setModelStorage (name: string, model: IModel) {
+export async function setCausalModelStorage (saveId: string, model: ICausalStoreSave) {
     const modelBucket = localforage.createInstance({
         name: STORAGE_INSTANCE,
-        storeName: STORAGES.MODEL
-    })
-    await modelBucket.setItem(name, model);
+        storeName: STORAGES.CAUSAL_MODEL,
+    });
+    await modelBucket.setItem(saveId, model);
 }
 
-export async function deleteModelStorage (name: string, model: IModel) {
+export async function deleteCausalModelStorage (saveId: string) {
     const modelBucket = localforage.createInstance({
         name: STORAGE_INSTANCE,
-        storeName: STORAGES.MODEL
-    })
-    await modelBucket.removeItem(name);
+        storeName: STORAGES.CAUSAL_MODEL,
+    });
+    await modelBucket.removeItem(saveId);
 }
 
-export async function getModelStorage (name: string): Promise<IModel> {
+export async function getCausalModelStorage (saveId: string): Promise<ICausalStoreSave | null> {
     const modelBucket = localforage.createInstance({
         name: STORAGE_INSTANCE,
-        storeName: STORAGES.MODEL
-    })
-    return await modelBucket.getItem(name) as IModel;
+        storeName: STORAGES.CAUSAL_MODEL,
+    });
+    return await modelBucket.getItem(saveId);
 }
 
-export async function getModelStorageList (): Promise<string[]> {
+export async function getCausalModelStorageKeys (): Promise<string[]> {
     const modelBucket = localforage.createInstance({
         name: STORAGE_INSTANCE,
-        storeName: STORAGES.MODEL
-    })
+        storeName: STORAGES.CAUSAL_MODEL,
+    });
     return await modelBucket.keys();
 }
 

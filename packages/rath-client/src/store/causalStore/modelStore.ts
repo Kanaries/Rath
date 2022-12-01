@@ -5,7 +5,7 @@ import type { IFieldMeta, IRow } from "../../interfaces";
 import type { IFunctionalDep, PagLink } from "../../pages/causal/config";
 import type CausalDatasetStore from "./datasetStore";
 import CausalOperatorStore from "./operatorStore";
-import { mergePAGs, transformAssertionsToPag, transformFuncDepsToPag, transformTagToAssertions } from "./pag";
+import { mergePAGs, transformAssertionsToPag, transformFuncDepsToPag, transformPagToAssertions } from "./pag";
 
 
 export enum NodeAssert {
@@ -227,7 +227,7 @@ export default class CausalModelStore {
 
     protected synchronizeAssertionsWithResult() {
         const nodeAssertions = this.assertions.filter(decl => 'fid' in decl);
-        this.assertions$.next(this.causality ? nodeAssertions.concat(transformTagToAssertions(this.causality)) : []);
+        this.assertions$.next(this.causality ? nodeAssertions.concat(transformPagToAssertions(this.causality)) : []);
     }
 
     public addNodeAssertion(fid: string, assertion: NodeAssert): boolean {
