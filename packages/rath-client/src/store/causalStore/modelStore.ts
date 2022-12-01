@@ -230,6 +230,10 @@ export default class CausalModelStore {
         this.assertions$.next(this.causality ? nodeAssertions.concat(transformPagToAssertions(this.causality)) : []);
     }
 
+    public clearAssertions() {
+        this.assertions$.next([]);
+    }
+
     public addNodeAssertion(fid: string, assertion: NodeAssert): boolean {
         const assertionsWithoutThisNode = this.assertions.filter(decl => {
             if ('fid' in decl) {

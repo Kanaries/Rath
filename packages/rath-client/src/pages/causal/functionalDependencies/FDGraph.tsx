@@ -109,19 +109,18 @@ const FDGraph: React.FC<{
 
     const [forceUpdateFlag, setUpdateFlag] = useState<1 | 0>(1);
 
-    useReactiveGraph(
+    useReactiveGraph({
         containerRef,
         width,
         graphRef,
-        cfg,
-        renderData,
-        'edit',
-        undefined,
-        onRemoveLink,
+        options: cfg,
+        data: renderData,
+        mode: 'edit',
+        handleEdgeClick: onRemoveLink,
         fields,
-        forceUpdateFlag,
-        false,
-    );
+        forceRelayoutFlag: forceUpdateFlag,
+        allowZoom: false,
+    });
 
     useEffect(() => {
         const { current: container } = containerRef;

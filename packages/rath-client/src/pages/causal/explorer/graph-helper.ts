@@ -8,26 +8,45 @@ import type { IFieldMeta } from "../../../interfaces";
 import { GRAPH_HEIGHT, useGraphOptions, useRenderData } from "./graph-utils";
 
 
-export const useReactiveGraph = (
-    containerRef: RefObject<HTMLDivElement>,
-    width: number,
-    graphRef: MutableRefObject<Graph | undefined>,
-    options: ReturnType<typeof useGraphOptions>,
-    data: ReturnType<typeof useRenderData>,
-    mode: "explore" | "edit",
-    handleNodeClick: ((fid: string | null) => void) | undefined,
-    handleEdgeClick: ((edge: { srcFid: string, tarFid: string } | null) => void) | undefined,
-    fields: readonly IFieldMeta[],
-    forceRelayoutFlag: 0 | 1,
-    allowZoom: boolean,
-    handleSubtreeSelected?: (subtree: Subtree | null) => void | undefined,
-) => {
+export interface IReactiveGraphProps {
+    containerRef: RefObject<HTMLDivElement>;
+    width: number;
+    graphRef: MutableRefObject<Graph | undefined>;
+    options: ReturnType<typeof useGraphOptions>;
+    data: ReturnType<typeof useRenderData>;
+    mode: "explore" | "edit";
+    handleNodeClick?: ((fid: string | null) => void) | undefined;
+    handleNodeDblClick?: ((fid: string | null) => void) | undefined;
+    handleEdgeClick?: ((edge: { srcFid: string, tarFid: string } | null) => void) | undefined;
+    fields: readonly IFieldMeta[];
+    forceRelayoutFlag: 0 | 1;
+    allowZoom: boolean;
+    handleSubtreeSelected?: (subtree: Subtree | null) => void | undefined;
+}
+
+export const useReactiveGraph = ({
+    containerRef,
+    width,
+    graphRef,
+    options,
+    data,
+    mode,
+    handleNodeClick,
+    handleNodeDblClick,
+    handleEdgeClick,
+    fields,
+    forceRelayoutFlag,
+    allowZoom,
+    handleSubtreeSelected,
+}: IReactiveGraphProps) => {
     const cfgRef = useRef(options);
     cfgRef.current = options;
     const dataRef = useRef(data);
     dataRef.current = data;
     const handleNodeClickRef = useRef(handleNodeClick);
     handleNodeClickRef.current = handleNodeClick;
+    const handleNodeDblClickRef = useRef(handleNodeDblClick);
+    handleNodeDblClickRef.current = handleNodeDblClick;
     const fieldsRef = useRef(fields);
     fieldsRef.current = fields;
     const handleEdgeClickRef = useRef(handleEdgeClick);
@@ -61,6 +80,15 @@ export const useReactiveGraph = (
                     handleNodeClickRef.current?.(fid);
                 } else {
                     handleNodeClickRef.current?.(null);
+                }
+            });
+
+            graph.on('node:dblclick', (e: any) => {
+                const fid = e.item._cfg.id;
+                if (typeof fid === 'string') {
+                    handleNodeDblClickRef.current?.(fid);
+                } else {
+                    handleNodeDblClickRef.current?.(null);
                 }
             });
 

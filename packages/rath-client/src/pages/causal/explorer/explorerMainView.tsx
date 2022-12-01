@@ -62,7 +62,7 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                 autoLayout={autoLayout}
                 allowZoom={allowZoom}
                 handleLasso={handleLasso}
-                handleSubTreeSelected={handleSubTreeSelected}
+                handleSubtreeSelected={handleSubTreeSelected}
                 style={{
                     flexGrow: 1,
                     flexShrink: 1,

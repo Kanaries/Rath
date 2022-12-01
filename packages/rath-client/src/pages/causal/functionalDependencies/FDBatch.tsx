@@ -56,7 +56,7 @@ const dropdownOptions: { key: BatchUpdateMode; text: string }[] = [
 
 const FDBatch: FC = () => {
     const { causalStore } = useGlobalStore();
-    const { fields, sample } = causalStore.dataset;
+    const { sample } = causalStore.dataset;
     const { functionalDependencies } = causalStore.model;
     const [displayPreview, setDisplayPreview] = useState(false);
     const [preview, setPreview] = useState<readonly IFunctionalDep[] | null>(null);
@@ -82,7 +82,7 @@ const FDBatch: FC = () => {
         }
     }, [displayPreview]);
     const generateFDFromAutoDetection = useCallback(() => {
-        const p = getGeneratedFDFromAutoDetection(sample, fields.map(f => f.fid));
+        const p = getGeneratedFDFromAutoDetection(sample);
         pendingRef.current = p;
         p.then(res => {
             if (p === pendingRef.current) {
@@ -97,7 +97,7 @@ const FDBatch: FC = () => {
             pendingRef.current = undefined;
         });
         setDisplayPreview(true);
-    }, [fields, sample]);
+    }, [sample]);
 
     const handleClear = useCallback(() => {
         causalStore.model.updateFunctionalDependencies([]);
@@ -166,13 +166,10 @@ const FDBatch: FC = () => {
                 <ActionButton iconProps={{ iconName: 'EngineeringGroup' || 'BranchSearch' }} onClick={generateFDFromExtInfo}>
                     使用扩展字段计算图
                 </ActionButton>
-                <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
+                {/* <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
                     导入影响关系
-                </ActionButton>
-                <ActionButton iconProps={{ iconName: 'FileTemplate' }} disabled>
-                    导入因果模型
-                </ActionButton>
-                <ActionButton iconProps={{ iconName: 'HintText' }} disabled onClick={undefined && generateFDFromAutoDetection}>
+                </ActionButton> */}
+                <ActionButton iconProps={{ iconName: 'HintText' }} onClick={generateFDFromAutoDetection}>
                     自动识别
                 </ActionButton>
             </Stack>

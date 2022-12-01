@@ -2,10 +2,10 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "r
 import styled, { StyledComponentProps } from "styled-components";
 import { Graph } from "@antv/g6";
 import { observer } from "mobx-react-lite";
-import { Dropdown } from "@fluentui/react";
+import { ActionButton, Dropdown } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { Subtree } from "../exploration";
-import { EdgeAssert } from "../../../store/causalStore/modelStore";
+import { EdgeAssert, NodeAssert } from "../../../store/causalStore/modelStore";
 import { useCausalViewContext } from "../../../store/causalStore/viewStore";
 import { useGlobalStore } from "../../../store";
 import { useGraphOptions, useRenderData } from "./graph-utils";
@@ -42,7 +42,7 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
     handleLasso?: (fields: IFieldMeta[]) => void;
-    handleSubTreeSelected?: (subtree: Subtree | null) => void;
+    handleSubtreeSelected?: (subtree: Subtree | null) => void;
     allowZoom: boolean;
 }, never>, 'onChange' | 'ref'>;
 
@@ -58,7 +58,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     autoLayout,
     allowZoom,
     handleLasso,
-    handleSubTreeSelected,
+    handleSubtreeSelected,
     ...props
 }, ref) => {
     const { causalStore } = useGlobalStore();
@@ -122,6 +122,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const [forceRelayoutFlag, setForceRelayoutFlag] = useState<0 | 1>(0);
     
     const [clickEdgeMode, setClickEdgeMode] = useState<'delete' | 'forbid'>('forbid');
+    const [dblClickNodeMode, setDblClickNodeMode] = useState(NodeAssert.FORBID_AS_CAUSE);
 
     const handleEdgeClick = useCallback((edge: { srcFid: string; tarFid: string; } | null) => {
         if (edge) {
@@ -139,20 +140,24 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         }
     }, [onRevertLink, onRemoveLink, clickEdgeMode]);
 
-    useReactiveGraph(
+    // const handleNodeDblClick = useCallback((fid: string | null) => {
+    //     console.log('double click', fid);
+    // }, []);
+
+    useReactiveGraph({
         containerRef,
         width,
         graphRef,
-        cfg,
-        renderData,
+        options: cfg,
+        data: renderData,
         mode,
-        onClickNode,
+        handleNodeClick: onClickNode,
         handleEdgeClick,
         fields,
         forceRelayoutFlag,
         allowZoom,
-        handleSubTreeSelected,
-    );
+        handleSubtreeSelected,
+    });
 
     useEffect(() => {
         const { current: graph } = graphRef;
@@ -195,6 +200,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
             <div className="container" ref={containerRef} />
             {mode === 'edit' && (
                 <div className="tools">
+                    <ActionButton
+                        onClick={() => causalStore.model.clearAssertions()}
+                    >
+                        清空所有
+                    </ActionButton>
                     <Dropdown
                         label="连接类型"
                         selectedKey={createEdgeMode}
@@ -245,6 +255,41 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                             }
                             const behaviorType = option.key as typeof clickEdgeMode;
                             setClickEdgeMode(behaviorType);
+                        }}
+                        styles={{
+                            title: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                                padding: '0 2.8em 0 0.8em',
+                                border: 'none',
+                                borderBottom: '1px solid #8888',
+                            },
+                            caretDownWrapper: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                            },
+                            caretDown: {
+                                fontSize: '0.8rem',
+                                lineHeight: '1.8em',
+                                height: '1.8em',
+                            },
+                        }}
+                    />
+                    <Dropdown
+                        label="双击节点行为"
+                        selectedKey={dblClickNodeMode}
+                        options={[
+                            { key: NodeAssert.FORBID_AS_CAUSE, text: '一定不作为输出' },
+                            { key: NodeAssert.FORBID_AS_EFFECT, text: '一定不作为输入' },
+                        ]}
+                        onChange={(_e, option) => {
+                            if (!option) {
+                                return;
+                            }
+                            const assrType = option.key as typeof dblClickNodeMode;
+                            setDblClickNodeMode(assrType);
                         }}
                         styles={{
                             title: {
