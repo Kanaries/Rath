@@ -68,10 +68,9 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
     const [viewType, setViewType] = useState<VIEW_TYPE>(VIEW_TYPE.diagram);
     const [selectedKey, setSelectedKey] = useState(MATRIX_TYPE.causal);
     const [markType, setMarkType] = useState<'circle' | 'square'>('circle');
-    const { __deprecatedCausalStore, causalStore } = useGlobalStore();
-    const { igCondMatrix } = __deprecatedCausalStore;
+    const { causalStore } = useGlobalStore();
     const { fields } = causalStore;
-    const { mutualMatrix, causalityRaw } = causalStore.model;
+    const { mutualMatrix, condMutualMatrix, causalityRaw } = causalStore.model;
     const { busy } = causalStore.operator;
 
     return (
@@ -164,12 +163,12 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                     onSelect={onMatrixPointClick}
                 />
             )}
-            {selectedKey === MATRIX_TYPE.conditionalMutualInfo && showMatrix(fields, igCondMatrix, busy) && (
+            {selectedKey === MATRIX_TYPE.conditionalMutualInfo && condMutualMatrix && showMatrix(fields, condMutualMatrix, busy) && (
                 <RelationMatrixHeatMap
                     mark={markType}
                     absolute
                     fields={fields}
-                    data={igCondMatrix}
+                    data={condMutualMatrix}
                     onSelect={onMatrixPointClick}
                 />
             )}

@@ -62,4 +62,33 @@ export default class CausalStore {
         return result;
     }
 
+    public async computeMutualMatrix() {
+        runInAction(() => {
+            this.model.mutualMatrix = null;
+        });
+        const result = await this.operator.computeMutualMatrix(this.dataset.sample, this.dataset.fields);
+        runInAction(() => {
+            this.model.mutualMatrix = result;
+        });
+        return result;
+    }
+
+    public async computeCondMutualMatrix() {
+        if (!this.model.mutualMatrix) {
+            await this.computeMutualMatrix();
+        }
+        const { mutualMatrix } = this.model;
+        if (!mutualMatrix) {
+            return null;
+        }
+        runInAction(() => {
+            this.model.condMutualMatrix = null;
+        });
+        const result = await this.operator.computeCondMutualMatrix(this.dataset.sample, this.dataset.fields, mutualMatrix);
+        runInAction(() => {
+            this.model.condMutualMatrix = result;
+        });
+        return result;
+    }
+
 }

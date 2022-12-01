@@ -14,7 +14,7 @@ type ICausalProps = {
     task: 'ig_cond';
     dataSource: readonly IRow[];
     fields: readonly IFieldMeta[];
-    matrix: number[][];
+    matrix: readonly (readonly number[])[];
 }
 
 export async function causalService(props: ICausalProps): Promise<number[][]> {

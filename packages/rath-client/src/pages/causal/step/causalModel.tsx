@@ -87,8 +87,7 @@ export const CausalExplorer = observer<
 });
 
 const CausalModal: React.FC<CausalModalProps> = ({ renderNode }) => {
-    const { __deprecatedCausalStore, causalStore } = useGlobalStore();
-    const { fields, sample } = causalStore.dataset;
+    const { causalStore } = useGlobalStore();
     
     const viewContext = useCausalViewContext();
 
@@ -114,16 +113,19 @@ const CausalModal: React.FC<CausalModalProps> = ({ renderNode }) => {
                 <MatrixPanel
                     onMatrixPointClick={onFieldGroupSelect}
                     onCompute={(matKey) => {
+                        if (causalStore.operator.busy) {
+                            return;
+                        }
                         switch (matKey) {
                             case MATRIX_TYPE.conditionalMutualInfo:
-                                __deprecatedCausalStore.computeIGCondMatrix(sample, fields);
+                                causalStore.computeCondMutualMatrix();
                                 break;
                             case MATRIX_TYPE.causal:
                                 causalStore.run();
                                 break;
                             case MATRIX_TYPE.mutualInfo:
                             default:
-                                __deprecatedCausalStore.computeIGMatrix(sample, fields);
+                                causalStore.computeMutualMatrix();
                                 break;
                         }
                     }}

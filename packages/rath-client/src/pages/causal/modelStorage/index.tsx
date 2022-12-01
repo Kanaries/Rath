@@ -11,8 +11,8 @@ const ModalInnerContainer = styled.div`
 
 interface ModelStorageProps {}
 const ModelStorage: React.FC<ModelStorageProps> = (props) => {
-    const { __deprecatedCausalStore: causalStore } = useGlobalStore();
-    const { userModelKeys } = causalStore;
+    const { __deprecatedCausalStore } = useGlobalStore();
+    const { userModelKeys } = __deprecatedCausalStore;
     const [selectedModelKey, setSelectedModelKey] = useState<string | undefined>(undefined);
     const [showModels, setShowModels] = useState<boolean>(false);
     return (
@@ -21,7 +21,7 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
                 text="保存因果模型"
                 iconProps={{ iconName: 'Save' }}
                 onClick={() => {
-                    causalStore
+                    __deprecatedCausalStore
                         .saveCausalModel()
                         .then(() => {
                             notify({
@@ -44,7 +44,7 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
                 iconProps={{ iconName: 'CloudDownload' }}
                 onClick={() => {
                     setShowModels(true);
-                    causalStore.getCausalModelList();
+                    __deprecatedCausalStore.getCausalModelList();
                 }}
             />
             <Modal
@@ -74,7 +74,7 @@ const ModelStorage: React.FC<ModelStorageProps> = (props) => {
                             text="使用"
                             onClick={() => {
                                 if (selectedModelKey) {
-                                    causalStore.fetchCausalModel(selectedModelKey);
+                                    __deprecatedCausalStore.fetchCausalModel(selectedModelKey);
                                 }
                                 setShowModels(false);
                             }}

@@ -49,6 +49,7 @@ export default class CausalModelStore {
     public assertionsAsPag: readonly PagLink[] = [];
 
     public mutualMatrix: readonly (readonly number[])[] | null = null;
+    public condMutualMatrix: readonly (readonly number[])[] | null = null;
 
     public causalityRaw: readonly (readonly number[])[] | null = null;
     public causality: readonly PagLink[] | null = null;
@@ -69,6 +70,12 @@ export default class CausalModelStore {
                     this.assertions = [];
                     this.assertionsAsPag = [];
                     this.mutualMatrix = null;
+                    this.condMutualMatrix = null;
+                });
+            }),
+            reaction(() => this.mutualMatrix, () => {
+                runInAction(() => {
+                    this.condMutualMatrix = null;
                 });
             }),
             reaction(() => datasetStore.sample, data => {
