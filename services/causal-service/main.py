@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, Extra
 import interfaces as I
 import algorithms
 
+debug = os.environ.get('dev', None) is not None
 app = FastAPI()
 origins = [ "*" ]
 app.add_middleware(
@@ -84,7 +85,7 @@ async def algoList(req: AlgoListRequest, response: Response) -> Dict[str, I.Serv
     # print("/algo/list", req)
     return {
         algoName: getAlgoSchema(algoName, req)
-        for algoName in algorithms.DICT.keys()
+        for algoName, algo in algorithms.DICT.items() if algo.dev_only == False or debug == True
     }
     
 @app.post('/algo/list/{algoName}', response_model=I.ServiceSchemaResponse)
@@ -149,7 +150,6 @@ from algorithms.causallearn.FCI import FCIParams
 import sys
 import logging
 
-debug = os.environ.get('dev', None) is not None
 def causal(algoName: str, item: algorithms.CausalRequest, response: Response) -> I.CausalAlgorithmResponse:
     try:
         method: I.AlgoInterface = algorithms.DICT.get(algoName)(item.dataSource, item.fields, item.params)

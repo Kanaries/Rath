@@ -96,7 +96,7 @@ def checkLinearCorr(array: np.ndarray):
             print(U, s, VT, sep='\n')
             # raise Exception("The input array is linear correlated, some fields should be unselected.\n[to be optimized]")
             # array *= (1 + np.random.randn(*array.shape)*1e-3)
-            array *= (1 + np.random.randn(*array.shape) * 1e-3)
+            # array *= (1 + np.random.randn(*array.shape) * 1e-3)
             print("The input array is linear correlated, some fields should be unselected.\n[to be optimized]", file=sys.stderr)
             # if np.abs(s[-1] / s[0]) < 1e-4:
             #     print("CheckLinearCorr", U, s, VT)
@@ -196,7 +196,7 @@ def encodeCat(origin: pd.Series, fact: pd.Series, encodeType: str) -> pd.DataFra
     return pd.DataFrame(fact)
 
 def encodeQuant(x: pd.Series, encodeType: str) -> pd.DataFrame:
-    n, eps = 10, 1e-5
+    n, eps = 16, 1e-5
     if encodeType == 'bin': # encodeType.bin:
         width = x.max() - x.min()
         if width == 0: return pd.DataFrame(x)
@@ -332,6 +332,7 @@ class CausalRequest(BaseModel, extra=Extra.allow):
 
 class AlgoInterface:
     ParamType = OptionalParams
+    dev_only = True
     cache_path = None # '/tmp/causal.json'
     verbose = False
     def __init__(self, dataSource: List[IRow], fields: List[IFieldMeta], 
