@@ -2,8 +2,6 @@ import { DefaultButton, Icon, IconButton } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import type { GraphNodeAttributes } from "../explorer/graph-utils";
-import type { IFieldMeta } from "../../../interfaces";
 import CausalDatasetConfig from './datasetConfig';
 import CausalFDConfig from './FDConfig';
 import CausalModel from "./causalModel";
@@ -106,11 +104,7 @@ export const CausalSteps: readonly CausalStepOption[] = [
     },
 ];
 
-interface CausalStepPagerProps {
-    renderNode: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
-}
-
-export const CausalStepPager = observer<CausalStepPagerProps>(function CausalStepPager ({ renderNode }) {
+export const CausalStepPager = observer(function CausalStepPager () {
     const [stepKey, setStepKey] = useState<CausalStep>(CausalStep.DATASET_CONFIG);
     const [showHelp, setShowHelp] = useState<CausalStep>(stepKey);
 
@@ -212,10 +206,10 @@ export const CausalStepPager = observer<CausalStepPagerProps>(function CausalSte
                 {{
                     [CausalStep.DATASET_CONFIG]: <CausalDatasetConfig />,
                     [CausalStep.FD_CONFIG]: (
-                        <CausalFDConfig renderNode={renderNode} />
+                        <CausalFDConfig />
                     ),
                     [CausalStep.CAUSAL_MODEL]: (
-                        <CausalModel renderNode={renderNode} />
+                        <CausalModel />
                     ),
                 }[curStep.key]}
             </StepPanel>

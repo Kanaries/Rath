@@ -3,6 +3,7 @@ import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
 import { Subject, withLatestFrom } from "rxjs";
 import type { IFieldMeta } from "../../interfaces";
+import type { GraphNodeAttributes } from "../../pages/causal/explorer/graph-utils";
 import type CausalStore from "./mainStore";
 
 
@@ -44,14 +45,25 @@ class CausalViewStore {
 
     public shouldDisplayAlgorithmPanel = false;
 
+    public onRenderNode: ((node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined) | undefined;
+
     public readonly destroy: () => void;
 
     constructor(causalStore: CausalStore) {
+        this.onRenderNode = node => {
+            const value = 2 / (1 + Math.exp(-1 * node.features.entropy / 2)) - 1;
+            return {
+                style: {
+                    stroke: `rgb(${Math.floor(95 * (1 - value))},${Math.floor(149 * (1 - value))},255)`,
+                },
+            };
+        };
         const fields$ = new Subject<readonly IFieldMeta[]>();
 
         makeAutoObservable(this, {
             // @ts-expect-error non-public field
             _selectedNodes: observable.ref,
+            onRenderNode: observable.ref,
         });
 
         const mobxReactions = [
@@ -205,6 +217,10 @@ class CausalViewStore {
 
     public closeAlgorithmPanel() {
         this.shouldDisplayAlgorithmPanel = false;
+    }
+
+    public setNodeRenderer(handleRender: typeof this.onRenderNode) {
+        this.onRenderNode = handleRender;
     }
 
 }

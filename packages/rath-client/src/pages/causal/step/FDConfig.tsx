@@ -1,18 +1,12 @@
 import { observer } from 'mobx-react-lite';
-import React from 'react';
-import type { IFieldMeta } from '../../../interfaces';
-import type { GraphNodeAttributes } from '../explorer/graph-utils';
+import type { FC } from 'react';
 import FDPanel from '../functionalDependencies/FDPanel';
 
 
-export interface CausalFDConfigProps {
-    renderNode: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
-}
-
-const CausalFDConfig: React.FC<CausalFDConfigProps> = ({ renderNode }) => {
+const CausalFDConfig: FC = () => {
     return (
         <>
-            <FDPanel renderNode={renderNode} />
+            <FDPanel />
         </>
     );
 };

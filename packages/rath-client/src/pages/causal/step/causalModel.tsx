@@ -1,6 +1,6 @@
 import { Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { RefObject, useCallback, useRef } from 'react';
+import { FC, RefObject, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
@@ -11,7 +11,6 @@ import Params from '../params';
 import ModelStorage from '../modelStorage';
 import Exploration, { Subtree } from '../exploration';
 import MatrixPanel, { MATRIX_TYPE } from '../matrixPanel';
-import type { GraphNodeAttributes } from '../explorer/graph-utils';
 
 
 const Container = styled.div`
@@ -33,18 +32,11 @@ const Container = styled.div`
     }
 `;
 
-export interface CausalModalProps {
-    renderNode: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
-}
-
-export const CausalExplorer = observer<
-    Omit<CausalModalProps, 'functionalDependencies'> & {
-        allowEdit: boolean;
-        listenerRef?: RefObject<{ onSubtreeSelected?: (subtree: Subtree | null) => void }>;
-    }
->(function CausalExplorer ({
+export const CausalExplorer = observer<{
+    allowEdit: boolean;
+    listenerRef?: RefObject<{ onSubtreeSelected?: (subtree: Subtree | null) => void }>;
+}>(function CausalExplorer ({
     allowEdit,
-    renderNode,
     listenerRef,
 }) {
     const { causalStore } = useGlobalStore();
@@ -77,7 +69,6 @@ export const CausalExplorer = observer<
         <Explorer
             allowEdit={allowEdit}
             onLinkTogether={handleLinkTogether}
-            renderNode={renderNode}
             onRevertLink={handleRevertLink}
             onRemoveLink={handleRemoveLink}
             handleLasso={handleLasso}
@@ -86,7 +77,7 @@ export const CausalExplorer = observer<
     );
 });
 
-const CausalModal: React.FC<CausalModalProps> = ({ renderNode }) => {
+const CausalModal: FC = () => {
     const { causalStore } = useGlobalStore();
     
     const viewContext = useCausalViewContext();
@@ -132,7 +123,6 @@ const CausalModal: React.FC<CausalModalProps> = ({ renderNode }) => {
                     diagram={(
                         <CausalExplorer
                             allowEdit
-                            renderNode={renderNode}
                             listenerRef={listenerRef}
                         />
                     )}

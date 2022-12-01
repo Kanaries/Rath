@@ -1,10 +1,8 @@
 import { observer } from 'mobx-react-lite';
-import React, { useCallback } from 'react';
+import { FC, useCallback } from 'react';
 import styled from 'styled-components';
-import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { IFunctionalDep } from '../config';
-import type { GraphNodeAttributes } from '../explorer/graph-utils';
 import FDBatch from './FDBatch';
 import FDEditor from './FDEditor';
 
@@ -22,11 +20,7 @@ const Container = styled.div`
     }
 `;
 
-export interface FDPanelProps {
-    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
-}
-
-const FDPanel: React.FC<FDPanelProps> = ({ renderNode }) => {
+const FDPanel: FC = () => {
     const { causalStore } = useGlobalStore();
     const { functionalDependencies } = causalStore.model;
 
@@ -38,9 +32,8 @@ const FDPanel: React.FC<FDPanelProps> = ({ renderNode }) => {
 
     return (
         <Container>
-            <FDBatch renderNode={renderNode} />
+            <FDBatch />
             <FDEditor
-                renderNode={renderNode}
                 functionalDependencies={functionalDependencies}
                 setFunctionalDependencies={setFunctionalDependencies}
             />

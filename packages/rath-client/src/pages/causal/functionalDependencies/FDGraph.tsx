@@ -9,7 +9,7 @@ import { useRenderData, useGraphOptions } from '../explorer/graph-utils';
 import { useReactiveGraph } from '../explorer/graph-helper';
 import { transformFuncDepsToPag } from '../../../store/causalStore/pag';
 import type { IFunctionalDep } from '../config';
-import type { FDPanelProps } from './FDPanel';
+import { useCausalViewContext } from '../../../store/causalStore/viewStore';
 
 
 const Container = styled.div`
@@ -35,17 +35,17 @@ const Container = styled.div`
     }
 `;
 
-const FDGraph: React.FC<FDPanelProps & {
+const FDGraph: React.FC<{
     functionalDependencies: readonly IFunctionalDep[];
     setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: readonly IFunctionalDep[] | null) => readonly IFunctionalDep[])) => void;
 }> = ({
-    renderNode,
     functionalDependencies,
     setFunctionalDependencies,
 }) => {
     const { causalStore } = useGlobalStore();
     const { fields } = causalStore;
     const functionalDependenciesAsPag = transformFuncDepsToPag(functionalDependencies);
+    const { onRenderNode } = useCausalViewContext() ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -96,7 +96,7 @@ const FDGraph: React.FC<FDPanelProps & {
         mode: 'edit',
         fields,
         PAG: functionalDependenciesAsPag,
-        renderNode,
+        renderNode: onRenderNode,
     });
     const cfg = useGraphOptions({
         width,

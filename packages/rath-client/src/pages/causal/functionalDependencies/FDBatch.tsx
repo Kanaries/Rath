@@ -1,11 +1,10 @@
 import { ActionButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import produce from 'immer';
 import { useGlobalStore } from '../../../store';
 import type { IFunctionalDep } from '../config';
-import type { FDPanelProps } from './FDPanel';
 import { getGeneratedFDFromAutoDetection } from './utils';
 import FDEditor from './FDEditor';
 
@@ -55,7 +54,7 @@ const dropdownOptions: { key: BatchUpdateMode; text: string }[] = [
     },
 ];
 
-const FDBatch: React.FC<FDPanelProps> = ({ renderNode }) => {
+const FDBatch: FC = () => {
     const { causalStore } = useGlobalStore();
     const { fields, sample } = causalStore.dataset;
     const { functionalDependencies } = causalStore.model;
@@ -188,7 +187,6 @@ const FDBatch: React.FC<FDPanelProps> = ({ renderNode }) => {
                                     title="预览"
                                     functionalDependencies={submittable}
                                     setFunctionalDependencies={updatePreview}
-                                    renderNode={renderNode}
                                 />
                             )}
                         </div>

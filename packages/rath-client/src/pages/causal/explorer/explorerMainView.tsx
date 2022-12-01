@@ -4,7 +4,6 @@ import type { IFieldMeta } from "../../../interfaces";
 import type { EdgeAssert } from "../../../store/causalStore/modelStore";
 import type { Subtree } from "../exploration";
 import GraphView from "./graphView";
-import type { GraphNodeAttributes } from "./graph-utils";
 
 
 const Container = styled.div`
@@ -29,7 +28,6 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
-    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
     allowZoom: boolean;
     handleLasso?: (fields: IFieldMeta[]) => void;
     handleSubTreeSelected?: (subtree: Subtree | null) => void;
@@ -45,7 +43,6 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     onRemoveLink,
     forceRelayoutRef,
     autoLayout,
-    renderNode,
     allowZoom,
     handleLasso,
     handleSubTreeSelected,
@@ -63,7 +60,6 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                 onRevertLink={onRevertLink}
                 onRemoveLink={onRemoveLink}
                 autoLayout={autoLayout}
-                renderNode={renderNode}
                 allowZoom={allowZoom}
                 handleLasso={handleLasso}
                 handleSubTreeSelected={handleSubTreeSelected}

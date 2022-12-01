@@ -1,11 +1,9 @@
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
-import type { IFieldMeta } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { useCausalViewProvider } from '../../store/causalStore/viewStore';
 import type { IFunctionalDep } from './config';
-import type { GraphNodeAttributes } from './explorer/graph-utils';
 import { CausalStepPager } from './step';
 
 
@@ -36,16 +34,6 @@ const CausalPage: FC = () => {
         });
     }, []);
 
-    // 结点可以 project 一些字段信息
-    const renderNode = useCallback((node: Readonly<IFieldMeta>): GraphNodeAttributes | undefined => {
-        const value = 2 / (1 + Math.exp(-1 * node.features.entropy / 2)) - 1;
-        return {
-            style: {
-                stroke: `rgb(${Math.floor(95 * (1 - value))},${Math.floor(149 * (1 - value))},255)`,
-            },
-        };
-    }, []);
-
     const submitRef = useRef(setFunctionalDependencies);
     submitRef.current = setFunctionalDependencies;
     const fdRef = useRef(functionalDependencies);
@@ -57,7 +45,7 @@ const CausalPage: FC = () => {
                 <Main className="card">
                     <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>因果分析</h1>
                     <hr className="card-line" />
-                    <CausalStepPager renderNode={renderNode} />
+                    <CausalStepPager />
                 </Main>
             </ViewContextProvider>
         </div>

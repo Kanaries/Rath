@@ -9,7 +9,6 @@ import { useCausalViewContext } from "../../../store/causalStore/viewStore";
 import type { Subtree } from "../exploration";
 import Floating from "../floating";
 import ExplorerMainView from "./explorerMainView";
-import type { GraphNodeAttributes } from "./graph-utils";
 
 
 export type CausalNode = {
@@ -29,7 +28,6 @@ export interface ExplorerProps {
     onLinkTogether: (srcFid: string, tarFid: string, type: EdgeAssert) => void;
     onRevertLink: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
-    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
     handleLasso?: (fields: IFieldMeta[]) => void;
     handleSubTreeSelected?: (subtree: Subtree | null) => void;
 }
@@ -84,7 +82,6 @@ const Explorer: FC<ExplorerProps> = ({
     onLinkTogether,
     onRevertLink,
     onRemoveLink,
-    renderNode,
     handleLasso,
     handleSubTreeSelected,
 }) => {
@@ -138,7 +135,6 @@ const Explorer: FC<ExplorerProps> = ({
                     onRevertLink={onRevertLink}
                     onRemoveLink={onRemoveLink}
                     autoLayout={autoLayout}
-                    renderNode={renderNode}
                     allowZoom={allowZoom}
                     handleLasso={handleLasso}
                     handleSubTreeSelected={handleSubTreeSelected}

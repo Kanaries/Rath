@@ -6,8 +6,9 @@ import { Dropdown } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { Subtree } from "../exploration";
 import { EdgeAssert } from "../../../store/causalStore/modelStore";
+import { useCausalViewContext } from "../../../store/causalStore/viewStore";
 import { useGlobalStore } from "../../../store";
-import { GraphNodeAttributes, useGraphOptions, useRenderData } from "./graph-utils";
+import { useGraphOptions, useRenderData } from "./graph-utils";
 import { useReactiveGraph } from "./graph-helper";
 
 
@@ -40,7 +41,6 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     forceRelayoutRef: React.MutableRefObject<() => void>;
     autoLayout: boolean;
-    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
     handleLasso?: (fields: IFieldMeta[]) => void;
     handleSubTreeSelected?: (subtree: Subtree | null) => void;
     allowZoom: boolean;
@@ -56,7 +56,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     onRemoveLink,
     forceRelayoutRef,
     autoLayout,
-    renderNode,
     allowZoom,
     handleLasso,
     handleSubTreeSelected,
@@ -65,6 +64,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const { causalStore } = useGlobalStore();
     const { fields } = causalStore;
     const { causality, assertionsAsPag, mutualMatrix } = causalStore.model;
+    const { onRenderNode } = useCausalViewContext() ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -107,7 +107,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         weights: mode === 'edit' ? undefined : weights,
         cutThreshold,
         limit,
-        renderNode,
+        renderNode: onRenderNode,
     });
     const cfg = useGraphOptions({
         width,
