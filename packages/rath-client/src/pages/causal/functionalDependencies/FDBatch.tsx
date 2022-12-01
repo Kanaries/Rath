@@ -82,7 +82,7 @@ const FDBatch: FC = () => {
         }
     }, [displayPreview]);
     const generateFDFromAutoDetection = useCallback(() => {
-        const p = getGeneratedFDFromAutoDetection(sample);
+        const p = sample.getAll().then(data => getGeneratedFDFromAutoDetection(data));
         pendingRef.current = p;
         p.then(res => {
             if (p === pendingRef.current) {

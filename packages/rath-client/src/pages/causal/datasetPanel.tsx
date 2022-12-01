@@ -5,7 +5,6 @@ import {
     Label,
     SelectionMode,
     Slider,
-    Spinner,
     Stack,
 } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
@@ -65,7 +64,7 @@ const DatasetPanel: FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { cleanedData } = dataSourceStore;
     const {
-        fields, allFields, filteredDataSize, sampleRate, shouldDisplaySampleSpinner, sampleSize, filters
+        fields, allFields, filteredDataSize, sampleRate, sampleSize, filters
     } = causalStore.dataset;
 
     const totalFieldsRef = useRef(allFields);
@@ -280,7 +279,7 @@ const DatasetPanel: FC = () => {
                     </div>
                 )}
                 <small style={{ color: '#666', display: 'flex', alignItems: 'center' }}>
-                    {`${filters.length ? `筛选后子集大小: ${filteredDataSize} 行` : '(无筛选项)'}`}
+                    {`原始大小: ${cleanedData.length} 行，${filters.length ? `筛选后子集大小: ${filteredDataSize} 行` : '(无筛选项)'}`}
                 </small>
             </Stack>
             <Stack style={{ marginBlock: '0.8em' }}>
@@ -312,14 +311,7 @@ const DatasetPanel: FC = () => {
                     }}
                 />
                 <small style={{ padding: '0.2em 0', color: '#666', display: 'flex', alignItems: 'center' }}>
-                    {`原始大小: ${cleanedData.length} 行，样本量: `}
-                    {shouldDisplaySampleSpinner ? (
-                        <Spinner
-                            style={{ display: 'inline-block', transform: 'scale(0.9)', margin: '-50% 0.6em' }}
-                        />
-                    ) : (
-                        `${sampleSize} 行`
-                    )}
+                    {`样本量: ${sampleSize} 行`}
                 </small>
             </Stack>
             <Label>需要分析的字段</Label>

@@ -171,25 +171,27 @@ const RInsightView: FC<IRInsightViewProps> = ({
                     [mainField.fid, measure]
                 )
             );
-            RInsightService({
-                data: sample,
-                fields,
-                causalModel: {
-                    funcDeps: functionalDependencies,
-                    edges: mergedPag,
-                },
-                groups: {
-                    current,
-                    other,
-                },
-                view: {
-                    dimensions: [...fieldsInSight],
-                    measures: [measure].map(fid => ({
-                        fid: fid,
-                        op: null,
-                    })),
-                },
-            }, serviceMode).then(resolve);
+            sample.getAll().then(data => {
+                RInsightService({
+                    data,
+                    fields,
+                    causalModel: {
+                        funcDeps: functionalDependencies,
+                        edges: mergedPag,
+                    },
+                    groups: {
+                        current,
+                        other,
+                    },
+                    view: {
+                        dimensions: [...fieldsInSight],
+                        measures: [measure].map(fid => ({
+                            fid: fid,
+                            op: null,
+                        })),
+                    },
+                }, serviceMode).then(resolve);
+            });
         });
         pendingRef.current = p;
         p.then(res => {

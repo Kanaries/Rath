@@ -30,7 +30,7 @@ const ModelStorage: FC = () => {
                         } else {
                             notify({
                                 title: 'Causal Model Save Failed',
-                                content: '',
+                                content: 'DatasetId is null.',
                                 type: 'error',
                             });
                         }

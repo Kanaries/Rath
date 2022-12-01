@@ -1,7 +1,7 @@
 import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { combineLatest, distinctUntilChanged, map, Subject, switchAll } from "rxjs";
-import type { IFieldMeta, IRow } from "../../interfaces";
+import type { IFieldMeta } from "../../interfaces";
 import type { IFunctionalDep, PagLink } from "../../pages/causal/config";
 import type CausalDatasetStore from "./datasetStore";
 import CausalOperatorStore from "./operatorStore";
@@ -58,7 +58,6 @@ export default class CausalModelStore {
     public mergedPag: readonly PagLink[] = [];
 
     constructor(datasetStore: CausalDatasetStore, operatorStore: CausalOperatorStore) {
-        const data$ = new Subject<readonly IRow[]>();
         const fields$ = new Subject<readonly IFieldMeta[]>();
         const extFields$ = new Subject<readonly IFieldMeta[]>();
         const causality$ = new Subject<readonly PagLink[]>();
@@ -92,9 +91,6 @@ export default class CausalModelStore {
                 runInAction(() => {
                     this.condMutualMatrix = null;
                 });
-            }),
-            reaction(() => datasetStore.sample, data => {
-                data$.next(data);
             }),
             reaction(() => this.functionalDependencies, funcDeps => {
                 runInAction(() => {
@@ -140,12 +136,11 @@ export default class CausalModelStore {
                 });
             }),
             // compute mutual matrix
-            // discuss if this should be triggered manually for a big set of fields
             combineLatest({
-                data: data$,
+                dataSignal: datasetStore.sampleMetaInfo$,
                 fields: fields$,
             }).pipe(
-                map(({ data, fields }) => operatorStore.computeMutualMatrix(data, fields)),
+                map(({ fields }) => operatorStore.computeMutualMatrix(datasetStore.sample, fields)),
                 switchAll()
             ).subscribe(matrix => {
                 runInAction(() => {
@@ -173,7 +168,6 @@ export default class CausalModelStore {
             }),
         ];
 
-        data$.next(datasetStore.sample);
         fields$.next(datasetStore.fields);
 
         this.destroy = () => {

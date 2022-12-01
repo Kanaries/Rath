@@ -3,9 +3,10 @@ import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { distinctUntilChanged, Subject, switchAll } from "rxjs";
 import { getGlobalStore } from "..";
 import { notify } from "../../components/error";
-import type { IFieldMeta, IRow } from "../../interfaces";
+import type { IFieldMeta } from "../../interfaces";
 import { IAlgoSchema, IFunctionalDep, makeFormInitParams, PagLink, PAG_NODE } from "../../pages/causal/config";
 import { causalService } from "../../pages/causal/service";
+import type { IteratorStorage } from "../../utils/iteStorage";
 import type { DataSourceStore } from "../dataSourceStore";
 import { findUnmatchedCausalResults, resolveCausality } from "./pag";
 
@@ -127,20 +128,22 @@ export default class CausalOperatorStore {
         }
     }
 
-    public async computeMutualMatrix(dataSource: readonly IRow[], fields: readonly IFieldMeta[]): Promise<number[][] | null> {
+    public async computeMutualMatrix(data: IteratorStorage, fields: readonly IFieldMeta[]): Promise<number[][] | null> {
+        const dataSource = await data.getAll();
         const res = await causalService({ task: 'ig', dataSource, fields });
         return res;
     }
 
     public async computeCondMutualMatrix(
-        dataSource: readonly IRow[], fields: readonly IFieldMeta[], mutualMatrix: readonly (readonly number[])[]
+        data: IteratorStorage, fields: readonly IFieldMeta[], mutualMatrix: readonly (readonly number[])[]
     ): Promise<number[][] | null> {
+        const dataSource = await data.getAll();
         const res = await causalService({ task: 'ig_cond', dataSource, fields, matrix: mutualMatrix });
         return res;
     }
 
     public async causalDiscovery(
-        data: readonly IRow[],
+        data: IteratorStorage,
         fields: readonly IFieldMeta[],
         functionalDependencies: readonly IFunctionalDep[],
         assertions: readonly PagLink[],
@@ -168,13 +171,14 @@ export default class CausalOperatorStore {
                 this.busy = true;
             });
             const originFieldsLength = inputFields.length;
+            const dataSource = await data.getAll();
             const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    dataSource: data,
+                    dataSource,
                     fields: allFields,
                     focusedFields: inputFields.map(f => f.fid),
                     bgKnowledgesPag: assertions,

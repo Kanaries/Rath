@@ -29,10 +29,6 @@ export default class CausalStore {
         return this.dataset.fields;
     }
 
-    public get data() {
-        return this.dataset.sample;
-    }
-
     public destroy() {
         this.model.destroy();
         this.operator.destroy();

@@ -56,25 +56,27 @@ const RExplainer: FC = () => {
         }
         const p = new Promise<IRInsightExplainResult>(resolve => {
             const fieldsInSight = new Set(current.predicates.map(pdc => pdc.fid).concat([mainField.fid]));
-            RInsightService({
-                data: sample,
-                fields,
-                causalModel: {
-                    funcDeps: functionalDependencies,
-                    edges: mergedPag,
-                },
-                groups: {
-                    current,
-                    other,
-                },
-                view: {
-                    dimensions: [...fieldsInSight].filter(fid => fid !== mainField.fid),
-                    measures: [mainField].map(ms => ({
-                        fid: ms.fid,
-                        op: aggr,
-                    })),
-                },
-            }, serviceMode).then(resolve);
+            sample.getAll().then(data => {
+                RInsightService({
+                    data,
+                    fields,
+                    causalModel: {
+                        funcDeps: functionalDependencies,
+                        edges: mergedPag,
+                    },
+                    groups: {
+                        current,
+                        other,
+                    },
+                    view: {
+                        dimensions: [...fieldsInSight].filter(fid => fid !== mainField.fid),
+                        measures: [mainField].map(ms => ({
+                            fid: ms.fid,
+                            op: aggr,
+                        })),
+                    },
+                }, serviceMode).then(resolve);
+            });
         });
         pendingRef.current = p;
         p.then(res => {
@@ -97,7 +99,7 @@ const RExplainer: FC = () => {
             return [[], []];
         }
         const indexName = '__this_is_the_index_of_the_row__';
-        const data = sample.map((row, i) => ({ ...row, [indexName]: i }));
+        const data = visSample.map((row, i) => ({ ...row, [indexName]: i }));
         const indicesA = applyFilters(data, subspaces[0].predicates).map(row => row[indexName]) as number[];
         // console.log('indices');
         // console.log(indicesA.join(','));
@@ -107,28 +109,28 @@ const RExplainer: FC = () => {
                 index => !indicesA.includes(index)
             );
         return [indicesA, indicesB];
-    }, [subspaces, sample, diffMode]);
+    }, [subspaces, visSample, diffMode]);
 
     useEffect(() => {
         setIrResult({ causalEffects: [] });
-    }, [indexKey, mainField, sample, subspaces, mergedPag]);
+    }, [indexKey, mainField, visSample, subspaces, mergedPag]);
 
     const applySelection = useCallback(() => {
         if (!subspaces) {
-            return setSelectedSet(sample);
+            return setSelectedSet(visSample);
         }
         setSelectedSet(
-            sample.map((row, i) => ({ ...row, [SelectedFlag]: indicesA.includes(i) ? 1 : indicesB.includes(i) ? 2 : 0 }))
+            visSample.map((row, i) => ({ ...row, [SelectedFlag]: indicesA.includes(i) ? 1 : indicesB.includes(i) ? 2 : 0 }))
         );
         calculate();
-    }, [subspaces, sample, indicesA, indicesB, calculate]);
+    }, [subspaces, visSample, indicesA, indicesB, calculate]);
 
     useEffect(() => {
         if (!subspaces) {
-            setSelectedSet(sample);
+            setSelectedSet(visSample);
             return;
         }
-    }, [subspaces, sample]);
+    }, [subspaces, visSample]);
 
     const [editingGroupIdx, setEditingGroupIdx] = useState<1 | 2>(1);
 
@@ -263,7 +265,7 @@ const RExplainer: FC = () => {
                         <>
                             <ChartItem
                                 title="对照组"//"Foreground Group"
-                                data={sample}
+                                data={visSample}
                                 indexKey={indexKey}
                                 mainField={mainField}
                                 mainFieldAggregation={aggr}
@@ -273,7 +275,7 @@ const RExplainer: FC = () => {
                             />
                             <ChartItem
                                 title="实验组"//"Background Group"
-                                data={sample}
+                                data={visSample}
                                 indexKey={indexKey}
                                 mainField={mainField}
                                 mainFieldAggregation={aggr}

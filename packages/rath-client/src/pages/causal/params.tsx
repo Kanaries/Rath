@@ -7,7 +7,7 @@ import {
     PrimaryButton,
 } from '@fluentui/react';
 import produce from 'immer';
-import { toJS } from 'mobx';
+import { runInAction, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { makeRenderLabelHandler } from '../../components/labelTooltip';
@@ -47,9 +47,11 @@ const Params: FC = () => {
         if (algoName === null) {
             return;
         }
-        causalStore.operator.updateConfig(algoName, params);
-        causalStore.run();
-        viewContext?.closeAlgorithmPanel();
+        runInAction(() => {
+            causalStore.operator.updateConfig(algoName, params);
+            causalStore.run();
+            viewContext?.closeAlgorithmPanel();
+        });
     };
 
     return (
