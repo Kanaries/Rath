@@ -18,6 +18,7 @@ export const geomTypeMap: { [key: string]: any } = {
 interface BaseVisProps {
     // dataSource: DataSource;
     pattern: IPattern;
+    /** @default false */
     interactive?: boolean;
     resizeMode?: IResizeMode;
     width?: number;

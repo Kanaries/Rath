@@ -73,6 +73,6 @@ export function viewSampling (data: IRow[], fields: IFieldMeta[], sampleSize: nu
     return samples
 }
 
-export function baseDemoSample (data: IRow[], sampleSize: number): IRow[] {
-    return Sampling.reservoirSampling(data, sampleSize)
+export function baseDemoSample (data: readonly IRow[], sampleSize: number): IRow[] {
+    return Sampling.reservoirSampling(data as IRow[], sampleSize)
 }

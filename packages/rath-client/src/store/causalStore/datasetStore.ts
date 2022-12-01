@@ -79,7 +79,6 @@ export default class CausalDatasetStore {
             }),
             reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
                 allFields$.next(fieldMetas);
-                this.filters$.next([]);
             }),
         ];
 
@@ -113,13 +112,15 @@ export default class CausalDatasetStore {
             }),
 
             // apply filtering
-            this.filters$.pipe(
-                withLatestFrom(fullData$)
-            ).subscribe(([filters, fullData]) => {
+            combineLatest({
+                filters: this.filters$,
+                fullData: fullData$,
+            }).subscribe(({ filters, fullData }) => {
                 runInAction(() => {
                     this.filters = filters;
                 });
-                filteredData$.next(filters.length ? applyFilters(fullData, filters.slice(0)) : fullData);
+                const filteredData = filters.length ? applyFilters(fullData, filters.slice(0)) : fullData;
+                filteredData$.next(filteredData);
             }),
 
             // update filteredData info
@@ -146,20 +147,8 @@ export default class CausalDatasetStore {
                 runInAction(() => {
                     this.sample = indices.map(index => filteredData[index]);
                     this.sampleSize = this.sample.length;
+                    this.visSample = this.sampleSize > VIS_SUBSET_LIMIT ? baseDemoSample(this.sample, VIS_SUBSET_LIMIT) : this.sample;
                     this.shouldDisplaySampleSpinner = false;
-                });
-            }),
-
-            // apply vis sampling
-            this.sampleIndices$.pipe(
-                map(rows => {
-                    const indices = baseDemoSample(rows as unknown as IRow[], VIS_SUBSET_LIMIT);
-                    return indices as unknown as number[];
-                }),
-                withLatestFrom(filteredData$),
-            ).subscribe(([indices, filteredData]) => {
-                runInAction(() => {
-                    this.visSample = indices.map(index => filteredData[index]);
                 });
             }),
         ];
