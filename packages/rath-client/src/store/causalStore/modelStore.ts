@@ -63,6 +63,18 @@ export default class CausalModelStore {
         const extFields$ = new Subject<readonly IFieldMeta[]>();
         const causality$ = new Subject<readonly PagLink[]>();
         const assertionsPag$ = new Subject<readonly PagLink[]>();
+        
+        makeAutoObservable(this, {
+            destroy: false,
+            functionalDependencies: observable.ref,
+            generatedFDFromExtInfo: observable.ref,
+            assertions: observable.ref,
+            assertionsAsPag: observable.ref,
+            mutualMatrix: observable.ref,
+            causalityRaw: observable.ref,
+            causality: observable.ref,
+            mergedPag: observable.ref,
+        });
 
         const mobxReactions = [
             reaction(() => datasetStore.fields, fields => {
@@ -72,6 +84,8 @@ export default class CausalModelStore {
                     this.assertionsAsPag = [];
                     this.mutualMatrix = null;
                     this.condMutualMatrix = null;
+                    this.causalityRaw = null;
+                    this.causality = null;
                 });
             }),
             reaction(() => this.mutualMatrix, () => {
@@ -87,7 +101,6 @@ export default class CausalModelStore {
                     this.functionalDependenciesAsPag = transformFuncDepsToPag(funcDeps);
                     this.causalityRaw = null;
                     this.causality = null;
-                    this.mergedPag = [];
                 });
             }),
             reaction(() => this.causality, () => {
@@ -162,18 +175,6 @@ export default class CausalModelStore {
 
         data$.next(datasetStore.sample);
         fields$.next(datasetStore.fields);
-        
-        makeAutoObservable(this, {
-            destroy: false,
-            functionalDependencies: observable.ref,
-            generatedFDFromExtInfo: observable.ref,
-            assertions: observable.ref,
-            assertionsAsPag: observable.ref,
-            mutualMatrix: observable.ref,
-            causalityRaw: observable.ref,
-            causality: observable.ref,
-            mergedPag: observable.ref,
-        });
 
         this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());

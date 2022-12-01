@@ -1,4 +1,4 @@
-import { runInAction } from "mobx";
+import { action, makeAutoObservable, observable, runInAction } from "mobx";
 import type { DataSourceStore } from "../dataSourceStore";
 import CausalDatasetStore from "./datasetStore";
 import CausalModelStore from "./modelStore";
@@ -7,9 +7,9 @@ import CausalOperatorStore from "./operatorStore";
 
 export default class CausalStore {
 
-    public readonly dataset: CausalDatasetStore;
-    public readonly operator: CausalOperatorStore;
-    public readonly model: CausalModelStore;
+    public dataset: CausalDatasetStore;
+    public operator: CausalOperatorStore;
+    public model: CausalModelStore;
 
     public get fields() {
         return this.dataset.fields;
@@ -25,10 +25,26 @@ export default class CausalStore {
         this.dataset.destroy();
     }
 
+    readonly checkout: () => void;
+
     constructor(dataSourceStore: DataSourceStore) {
         this.dataset = new CausalDatasetStore(dataSourceStore);
         this.operator = new CausalOperatorStore(dataSourceStore);
         this.model = new CausalModelStore(this.dataset, this.operator);
+
+        this.checkout = () => {
+            this.destroy();
+            this.dataset = new CausalDatasetStore(dataSourceStore);
+            this.operator = new CausalOperatorStore(dataSourceStore);
+            this.model = new CausalModelStore(this.dataset, this.operator);
+        };
+        
+        makeAutoObservable(this, {
+            dataset: observable.ref,
+            operator: observable.ref,
+            model: observable.ref,
+            checkout: action,
+        });
     }
 
     public selectFields(...args: Parameters<CausalDatasetStore['selectFields']>) {

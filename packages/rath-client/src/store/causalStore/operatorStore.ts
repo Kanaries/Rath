@@ -56,10 +56,15 @@ export default class CausalOperatorStore {
         const allFields$ = new Subject<IFieldMeta[]>();
         const dynamicFormSchema$ = new Subject<ReturnType<typeof this.fetchCausalAlgorithmList>>();
 
+        makeAutoObservable(this, {
+            destroy: false,
+        });
+
         const mobxReactions = [
             reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
                 allFields$.next(fieldMetas);
             }),
+            // this reaction requires `makeAutoObservable` to be called before
             reaction(() => this._causalAlgorithmForm, form => {
                 runInAction(() => {
                     this._algorithm = null;
@@ -96,10 +101,6 @@ export default class CausalOperatorStore {
                 });
             }),
         ];
-
-        makeAutoObservable(this, {
-            destroy: false,
-        });
 
         this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());
@@ -193,7 +194,7 @@ export default class CausalOperatorStore {
                 body: JSON.stringify({
                     dataSource: data,
                     fields: allFields,
-                    focusedFields,
+                    focusedFields: inputFields.map(f => f.fid),
                     bgKnowledgesPag: assertions,
                     funcDeps: functionalDependencies,
                     params: this.params[algoName],

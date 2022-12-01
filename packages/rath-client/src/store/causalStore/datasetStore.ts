@@ -52,6 +52,14 @@ export default class CausalDatasetStore {
         const fields$ = new Subject<IFieldMeta[]>();
         const fullData$ = new Subject<IRow[]>();
         const filteredData$ = new Subject<IRow[]>();
+        
+        makeAutoObservable(this, {
+            allFields: observable.ref,
+            fields: observable.ref,
+            filters: observable.ref,
+            sample: observable.ref,
+            destroy: false,
+        });
 
         const mobxReactions = [
             reaction(() => dataSourceStore.cleanedData, cleanedData => {
@@ -153,14 +161,6 @@ export default class CausalDatasetStore {
         fullData$.next(dataSourceStore.cleanedData);
         this.filters$.next([]);
         this.appliedSampleRate$.next(1);
-        
-        makeAutoObservable(this, {
-            allFields: observable.ref,
-            fields: observable.ref,
-            filters: observable.ref,
-            sample: observable.ref,
-            destroy: false,
-        });
 
         this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());

@@ -117,7 +117,7 @@ export const useRenderData = ({
                     },
                     lineWidth: typeof w === 'number' ? 1 + w * 2 : undefined,
                 },
-                label: typeof w === 'number' ? `${w.toPrecision(2)}` : undefined,
+                label: typeof w === 'number' ? `${(w * 100).toPrecision(2).replace(/(?<=\.\d{3})\d+/, '')}%` : undefined,
                 labelCfg: {
                     style: {
                         opacity: 0,
@@ -276,7 +276,7 @@ export const useGraphOptions = ({
                     opacity: 1,
                 },
                 semiHighlighted: {
-                    opacity: 0.4,
+                    opacity: 0.6,
                 },
                 faded: {
                     opacity: 0.12,

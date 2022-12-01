@@ -49,6 +49,11 @@ class CausalViewStore {
     constructor(causalStore: CausalStore) {
         const fields$ = new Subject<readonly IFieldMeta[]>();
 
+        makeAutoObservable(this, {
+            // @ts-expect-error non-public field
+            _selectedNodes: observable.ref,
+        });
+
         const mobxReactions = [
             reaction(() => causalStore.fields, fields => {
                 fields$.next(fields);
@@ -119,11 +124,6 @@ class CausalViewStore {
         ];
 
         fields$.next(causalStore.fields);
-
-        makeAutoObservable(this, {
-            // @ts-expect-error non-public field
-            _selectedNodes: observable.ref,
-        });
 
         this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());

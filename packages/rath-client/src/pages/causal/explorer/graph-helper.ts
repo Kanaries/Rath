@@ -114,7 +114,7 @@ export const useReactiveGraph = (
         const { current: graph } = graphRef;
         if (graph) {
             graph.updateLayout(options);
-            graph.refresh();
+            graph.render();
         }
     }, [options, graphRef]);
 
@@ -122,8 +122,9 @@ export const useReactiveGraph = (
         const { current: container } = containerRef;
         const { current: graph } = graphRef;
         if (container && graph) {
-            graph.changeData(data);
-            graph.refresh();
+            graph.data(data);
+            graph.render();
+            (window as any).g = graph;
         }
     }, [data, graphRef, containerRef]);
 
@@ -210,5 +211,5 @@ export const useReactiveGraph = (
                 graph.setItemState(edge, 'faded', selectedFieldGroup.length !== 0 && !isInSubtree);
             });
         }
-    }, [graphRef, selectedFieldGroup]);
+    }, [graphRef, selectedFieldGroup, data]);
 };

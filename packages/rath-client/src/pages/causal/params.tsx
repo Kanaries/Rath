@@ -30,11 +30,11 @@ const Params: FC = () => {
     }, [algorithm, shouldDisplayAlgorithmPanel]);
 
     useEffect(() => {
-        setParams(algoName ? causalParams[algoName] : {});
+        setParams(algoName && algoName in causalParams ? causalParams[algoName] : {});
     }, [causalParams, algoName, shouldDisplayAlgorithmPanel]);
 
     const form = useMemo<IAlgoSchema[string] | null>(() => {
-        return algoName ? causalAlgorithmForm[algoName] : null;
+        return algoName && algoName in causalAlgorithmForm ? causalAlgorithmForm[algoName] : null;
     }, [causalAlgorithmForm, algoName]);
 
     const updateParam = (key: string, value: any) => {
