@@ -4,6 +4,7 @@ import { createContext, FC, useContext, useMemo, createElement, useEffect, useCa
 import { Subject, withLatestFrom } from "rxjs";
 import type { IFieldMeta } from "../../interfaces";
 import type { GraphNodeAttributes } from "../../pages/causal/explorer/graph-utils";
+import type { IRInsightExplainResult } from "../../workers/insight/r-insight.worker";
 import type CausalStore from "./mainStore";
 
 
@@ -46,7 +47,8 @@ class CausalViewStore {
     public shouldDisplayAlgorithmPanel = false;
 
     public onRenderNode: ((node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined) | undefined;
-
+    public localWeights: Map<string, Map<string, number>> | undefined;
+    
     public readonly destroy: () => void;
 
     constructor(causalStore: CausalStore) {
@@ -58,12 +60,16 @@ class CausalViewStore {
                 },
             };
         };
+        this.localWeights = undefined;
+
         const fields$ = new Subject<readonly IFieldMeta[]>();
 
         makeAutoObservable(this, {
+            onRenderNode: observable.ref,
+            localWeights: observable.ref,
             // @ts-expect-error non-public field
             _selectedNodes: observable.ref,
-            onRenderNode: observable.ref,
+            selectedFidArr$: false,
         });
 
         const mobxReactions = [
@@ -118,6 +124,9 @@ class CausalViewStore {
         ];
 
         const rxReactions = [
+            this.selectedFidArr$.subscribe(() => {
+                this.localWeights = undefined;
+            }),
             this.selectedFidArr$.pipe(
                 withLatestFrom(fields$)
             ).subscribe(([fidArr, fields]) => {
@@ -221,6 +230,21 @@ class CausalViewStore {
 
     public setNodeRenderer(handleRender: typeof this.onRenderNode) {
         this.onRenderNode = handleRender;
+    }
+
+    public clearLocalWeights() {
+        this.localWeights = undefined;
+    }
+
+    public setLocalWeights(irResult: IRInsightExplainResult) {
+        const weights = new Map<string, Map<string, number>>();
+        for (const link of irResult.causalEffects) {
+            if (!weights.has(link.src)) {
+                weights.set(link.src, new Map<string, number>());
+            }
+            weights.get(link.src)!.set(link.tar, link.responsibility);
+        }
+        this.localWeights = weights;
     }
 
 }

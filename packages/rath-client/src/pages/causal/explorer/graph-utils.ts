@@ -117,7 +117,7 @@ export const useRenderData = ({
                     },
                     lineWidth: typeof w === 'number' ? 1 + w * 2 : undefined,
                 },
-                label: typeof w === 'number' ? `${(w * 100).toPrecision(2).replace(/(?<=\.\d{3})\d+/, '')}%` : undefined,
+                label: typeof w === 'number' ? `${(w * 100).toFixed(2).replace(/\.?0+$/, '')}%` : undefined,
                 labelCfg: {
                     style: {
                         opacity: 0,

@@ -64,7 +64,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const { causalStore } = useGlobalStore();
     const { fields } = causalStore;
     const { causality, assertionsAsPag, mutualMatrix } = causalStore.model;
-    const { onRenderNode } = useCausalViewContext() ?? {};
+    const { onRenderNode, localWeights } = useCausalViewContext() ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -75,7 +75,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         onLinkTogether(srcFid, tarFid, createEdgeMode);
     }, [createEdgeMode, onLinkTogether]);
 
-    const weights = useMemo<Map<string, Map<string, number>> | undefined>(() => {
+    const W = useMemo<Map<string, Map<string, number>> | undefined>(() => {
         if (!causality || !mutualMatrix || mutualMatrix.length !== fields.length) {
             return undefined;
         }
@@ -104,7 +104,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         mode,
         fields,
         PAG: mode === 'edit' ? assertionsAsPag : causality ?? [],
-        weights: mode === 'edit' ? undefined : weights,
+        weights: mode === 'edit' ? undefined : localWeights ?? W,
         cutThreshold,
         limit,
         renderNode: onRenderNode,
@@ -140,9 +140,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         }
     }, [onRevertLink, onRemoveLink, clickEdgeMode]);
 
-    // const handleNodeDblClick = useCallback((fid: string | null) => {
-    //     console.log('double click', fid);
-    // }, []);
+    const handleNodeDblClick = useCallback((fid: string | null) => {
+        if (mode === 'edit' && fid) {
+            causalStore.model.addNodeAssertion(fid, dblClickNodeMode);
+        }
+    }, [mode, dblClickNodeMode, causalStore]);
 
     useReactiveGraph({
         containerRef,
@@ -153,6 +155,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         mode,
         handleNodeClick: onClickNode,
         handleEdgeClick,
+        handleNodeDblClick,
         fields,
         forceRelayoutFlag,
         allowZoom,

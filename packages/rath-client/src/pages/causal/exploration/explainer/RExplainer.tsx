@@ -26,8 +26,8 @@ const RExplainer: FC = () => {
 
     const mainField = selectedFieldGroup.at(-1) ?? null;
     const [indexKey, setIndexKey] = useState<IFieldMeta | null>(null);
-    const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('count');
-    const [diffMode, setDiffMode] = useState<"full" | "other" | "two-group">("full");
+    const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('sum');
+    const [diffMode, setDiffMode] = useState<"full" | "other" | "two-group">("other");
 
     useEffect(() => {
         setIndexKey(ik => ik ? fieldMetas.find(f => f.fid === ik.fid) ?? null : null);
@@ -40,11 +40,12 @@ const RExplainer: FC = () => {
     }, [mainField, aggr]);
 
     const [irResult, setIrResult] = useState<IRInsightExplainResult>({ causalEffects: [] });
-    const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('worker');
+    const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('server');
 
     const pendingRef = useRef<Promise<IRInsightExplainResult>>();
 
     const calculate = useCallback(() => {
+        viewContext?.clearLocalWeights();
         if (!subspaces || !mainField) {
             setIrResult({ causalEffects: [] });
             return;
@@ -86,11 +87,12 @@ const RExplainer: FC = () => {
                         item => Number.isFinite(item.responsibility)// && item.responsibility !== 0
                     ).sort((a, b) => b.responsibility - a.responsibility)
                 });
+                viewContext?.setLocalWeights(res);
             }
         }).finally(() => {
             pendingRef.current = undefined;
         });
-    }, [aggr, mainField, sample, fields, subspaces, mergedPag, serviceMode, functionalDependencies]);
+    }, [aggr, mainField, sample, fields, subspaces, mergedPag, serviceMode, functionalDependencies, viewContext]);
 
     const [selectedSet, setSelectedSet] = useState<readonly IRow[]>([]);
 
@@ -202,8 +204,8 @@ const RExplainer: FC = () => {
                             label="对照选择"//"Diff Mode"
                             selectedKey={diffMode}
                             options={[
-                                { key: 'full', text: '数据全集' || 'Full' },
                                 { key: 'other', text: '数据补集' || 'Other' },
+                                { key: 'full', text: '数据全集' || 'Full' },
                                 { key: 'two-group', text: '自选两个集合' || 'Two Groups' },
                             ]}
                             onChange={(_, option) => {
