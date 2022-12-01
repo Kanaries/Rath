@@ -1,4 +1,4 @@
-import { action, makeAutoObservable, observable, runInAction, toJS } from "mobx";
+import { action, makeAutoObservable, runInAction, toJS } from "mobx";
 import { notify } from "../../components/error";
 import type { PAG_NODE } from "../../pages/causal/config";
 import { getCausalModelStorage, getCausalModelStorageKeys, setCausalModelStorage } from "../../utils/storage";
@@ -21,9 +21,9 @@ export interface ICausalStoreSave {
 
 export default class CausalStore {
 
-    public dataset: CausalDatasetStore;
-    public operator: CausalOperatorStore;
-    public model: CausalModelStore;
+    public readonly dataset: CausalDatasetStore;
+    public readonly operator: CausalOperatorStore;
+    public readonly model: CausalModelStore;
 
     public get fields() {
         return this.dataset.fields;
@@ -69,10 +69,6 @@ export default class CausalStore {
         this.model = new CausalModelStore(this.dataset, this.operator);
 
         this.checkout = async (saveKey: string) => {
-            this.destroy();
-            this.dataset = new CausalDatasetStore(dataSourceStore);
-            this.operator = new CausalOperatorStore(dataSourceStore);
-            this.model = new CausalModelStore(this.dataset, this.operator);
             const save = await getCausalModelStorage(saveKey);
             if (save) {
                 if (save.datasetId !== this.dataset.datasetId) {
@@ -115,9 +111,9 @@ export default class CausalStore {
         };
         
         makeAutoObservable(this, {
-            dataset: observable.ref,
-            operator: observable.ref,
-            model: observable.ref,
+            dataset: false,
+            operator: false,
+            model: false,
             checkout: action,
         });
     }
