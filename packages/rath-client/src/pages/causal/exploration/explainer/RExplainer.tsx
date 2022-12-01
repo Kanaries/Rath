@@ -295,7 +295,6 @@ const RExplainer: FC = () => {
                             data={selectedSet}
                             result={irResult}
                             mainField={mainField}
-                            mainFieldAggregation={aggr}
                             entryDimension={indexKey}
                             mode={diffMode}
                             subspaces={subspaces}

@@ -17,7 +17,6 @@ export interface IRInsightViewProps {
     data: readonly IRow[];
     result: IRInsightExplainResult;
     mainField: IFieldMeta;
-    mainFieldAggregation: "sum" | "mean" | "count" | null;
     entryDimension: IFieldMeta | null;
     mode: "full" | "other" | "two-group";
     indices: [number[], number[]];
@@ -132,8 +131,8 @@ const ExploreQueue = styled.div`
 `;
 
 const RInsightView: FC<IRInsightViewProps> = ({
-    data, result, mainField, mainFieldAggregation, entryDimension,
-    mode, indices, subspaces, aggr, serviceMode,
+    data, result, mainField, entryDimension,
+    mode, indices, subspaces, serviceMode,
 }) => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
@@ -187,7 +186,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
                     dimensions: [...fieldsInSight],
                     measures: [measure].map(fid => ({
                         fid: fid,
-                        op: aggr,
+                        op: null,
                     })),
                 },
             }, serviceMode).then(resolve);
@@ -328,8 +327,8 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                             <ExplainChart
                                                 title="全局分布"
                                                 data={data}
-                                                mainField={mainField}
-                                                mainFieldAggregation={mainFieldAggregation}
+                                                mainField={tar}
+                                                mainFieldAggregation={null}
                                                 indexKey={dim}
                                                 interactive={false}
                                                 normalize={normalize}
@@ -338,8 +337,8 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                                 title="对比分布"
                                                 data={data}
                                                 subspaces={indices}
-                                                mainField={mainField}
-                                                mainFieldAggregation={mainFieldAggregation}
+                                                mainField={tar}
+                                                mainFieldAggregation={null}
                                                 dimension={dim}
                                                 mode={mode}
                                             />

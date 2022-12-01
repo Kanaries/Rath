@@ -66,13 +66,8 @@ const AutoVis: FC<IAutoVisProps> = () => {
             return null;
         }
         return distVis({
-            // resizeMode: mainVizSetting.resize.mode,
             pattern: toJS(viewPattern),
-            // width: mainVizSetting.resize.width,
-            // height: mainVizSetting.resize.height,
             interactive: true,
-            // stepSize: 32,
-            // excludeScaleZero: mainVizSetting.excludeScaleZero,
             specifiedEncodes: viewPattern.encodes,
         });
     }, [viewPattern]);
@@ -87,10 +82,6 @@ const AutoVis: FC<IAutoVisProps> = () => {
                 <PillContainer>
                     {selectedFields.map((f: IFieldMeta) => (
                         <ViewField
-                            // onDoubleClick={() => {
-                            //     semiAutoStore.setNeighborKeys(neighborKeys.includes(f.fid) ? [] : [f.fid]);
-                            // }}
-                            // mode={neighborKeys.includes(f.fid) ? 'wildcard' : 'real'}
                             key={f.fid}
                             type={f.analyticType}
                             text={f.name || f.fid}
@@ -99,7 +90,9 @@ const AutoVis: FC<IAutoVisProps> = () => {
                             }}
                         />
                     ))}
-                    <FieldPlaceholder fields={fields} onAdd={appendFieldHandler} />
+                    {graphNodeSelectionMode === NodeSelectionMode.MULTIPLE && (
+                        <FieldPlaceholder fields={fields} onAdd={appendFieldHandler} />
+                    )}
                 </PillContainer>
                 <Toggle
                     label="多选"
