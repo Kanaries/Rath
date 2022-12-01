@@ -1,4 +1,4 @@
-import { action, makeAutoObservable, observable, runInAction } from "mobx";
+import { action, makeAutoObservable, observable, runInAction, toJS } from "mobx";
 import { notify } from "../../components/error";
 import type { PAG_NODE } from "../../pages/causal/config";
 import { getCausalModelStorage, getCausalModelStorageKeys, setCausalModelStorage } from "../../utils/storage";
@@ -56,7 +56,7 @@ export default class CausalStore {
                 causalityRaw: this.model.causalityRaw,
             } : null,
         };
-        await setCausalModelStorage(this.dataset.datasetId, save);
+        await setCausalModelStorage(this.dataset.datasetId, toJS(save));
         return true;
     }
 

@@ -1,5 +1,6 @@
-import { RefObject, useEffect, useRef, MutableRefObject } from "react";
+import { RefObject, useEffect, useRef, MutableRefObject, useMemo } from "react";
 import G6, { Graph, INode } from "@antv/g6";
+import { debounceTime, Subject } from "rxjs";
 import { NodeSelectionMode, useCausalViewContext } from "../../../store/causalStore/viewStore";
 import type { Subtree } from "../exploration";
 import { PAG_NODE } from "../config";
@@ -118,15 +119,27 @@ export const useReactiveGraph = (
         }
     }, [options, graphRef]);
 
+    const data$ = useMemo(() => new Subject<typeof data>(), []);
+
     useEffect(() => {
-        const { current: container } = containerRef;
-        const { current: graph } = graphRef;
-        if (container && graph) {
-            graph.data(data);
-            graph.render();
-            (window as any).g = graph;
-        }
-    }, [data, graphRef, containerRef]);
+        const subscription = data$.pipe(
+            debounceTime(200)
+        ).subscribe(d => {
+            const { current: container } = containerRef;
+            const { current: graph } = graphRef;
+            if (container && graph) {
+                graph.changeData(d);
+                graph.layout();
+            }
+        });
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [containerRef, data$, graphRef]);
+
+    useEffect(() => {
+        data$.next(data);
+    }, [data, data$]);
 
     useEffect(() => {
         const { current: graph } = graphRef;

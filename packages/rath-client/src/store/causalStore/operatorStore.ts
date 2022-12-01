@@ -128,32 +128,14 @@ export default class CausalOperatorStore {
     }
 
     public async computeMutualMatrix(dataSource: readonly IRow[], fields: readonly IFieldMeta[]): Promise<number[][] | null> {
-        if (this.busy) {
-            return null;
-        }
-        runInAction(() => {
-            this.busy = true;
-        });
         const res = await causalService({ task: 'ig', dataSource, fields });
-        runInAction(() => {
-            this.busy = false;
-        });
         return res;
     }
 
     public async computeCondMutualMatrix(
         dataSource: readonly IRow[], fields: readonly IFieldMeta[], mutualMatrix: readonly (readonly number[])[]
     ): Promise<number[][] | null> {
-        if (this.busy) {
-            return null;
-        }
-        runInAction(() => {
-            this.busy = true;
-        });
         const res = await causalService({ task: 'ig_cond', dataSource, fields, matrix: mutualMatrix });
-        runInAction(() => {
-            this.busy = false;
-        });
         return res;
     }
 
