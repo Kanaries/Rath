@@ -10,7 +10,7 @@ import interfaces as I
 import algorithms
 
 debug = os.environ.get('mode', 'prod') == 'dev'
-print("Develop Mode")
+print("Development Mode" if debug else 'Production Mode', file=sys.stderr)
 app = FastAPI()
 origins = [ "*" ]
 cors_regex = \
