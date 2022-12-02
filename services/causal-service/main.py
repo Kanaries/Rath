@@ -9,7 +9,8 @@ from pydantic import BaseModel, Field, Extra
 import interfaces as I
 import algorithms
 
-debug = os.environ.get('dev', None) is not None
+debug = os.environ.get('mode', 'prod') == 'dev'
+print("Develop Mode")
 app = FastAPI()
 origins = [ "*" ]
 cors_regex = \
