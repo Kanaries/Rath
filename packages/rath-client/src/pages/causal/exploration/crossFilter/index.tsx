@@ -1,7 +1,7 @@
 import { IconButton } from '@fluentui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { IFieldMeta, IRow } from '../../../interfaces';
+import { IFieldMeta, IRow } from '../../../../interfaces';
 import ColDist, { IBrushSignalStore } from './colDist';
 
 const VizContainer = styled.div`
@@ -19,8 +19,8 @@ const VizCard = styled.div`
 `;
 
 interface CrossFilterProps {
-    fields: IFieldMeta[];
-    dataSource: IRow[];
+    fields: readonly IFieldMeta[];
+    dataSource: readonly IRow[];
     onVizEdit?: (fid: string) => void;
     onVizClue?: (fid: string) => void;
     onVizDelete?: (fid: string) => void;

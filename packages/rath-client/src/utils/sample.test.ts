@@ -159,6 +159,13 @@ describe('function focusedSample', () => {
 
         expect(sample.length).toBe(0);
     });
+    it('Sample size test (float)', () => {
+        const { data: fullSet, fields } = createRandomData(8, 100);
+        const sampleSize = 33.3;
+        const sample = focusedSample(fullSet, fields, sampleSize);
+
+        expect(sample.length).toBe(33);
+    });
     it('Sample size test (small set, more than half)', () => {
         const { data: fullSet, fields } = createRandomData(6, 64);
         const sampleRate = 0.8;

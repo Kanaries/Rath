@@ -4,14 +4,14 @@ import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import embed from 'vega-embed';
 import { Subject, throttleTime } from 'rxjs';
-import { EDITOR_URL } from '../../../constants';
-import type { IFieldMeta, IRow, IFilter } from '../../../interfaces';
-import { getRange, getVegaTimeFormatRules } from '../../../utils';
+import { EDITOR_URL } from '../../../../constants';
+import type { IFieldMeta, IRow, IFilter } from '../../../../interfaces';
+import { getRange, getVegaTimeFormatRules } from '../../../../utils';
 import { SelectedFlag } from './RExplainer';
 
 interface ExplainChartProps {
     title?: string;
-    data: IRow[];
+    data: readonly IRow[];
     mainField: IFieldMeta;
     mainFieldAggregation: null | 'sum' | 'mean' | 'count';
     indexKey: IFieldMeta | null;

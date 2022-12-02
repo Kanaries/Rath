@@ -10,8 +10,8 @@ export const RInsightService = async (props: IRInsightExplainProps, mode: 'worke
     const { causalStore } = getGlobalStore();
 
     if (mode === 'server') {
-        const { apiPrefix } = causalStore;
-        const res = await fetch(`${apiPrefix}/explain`, {
+        const { causalServer } = causalStore.operator;
+        const res = await fetch(`${causalServer}/explain`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

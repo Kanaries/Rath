@@ -54,6 +54,7 @@ class PCParams(OptionalParams, title="PC Algorithm"):
 
 class PC(AlgoInterface):
     ParamType = PCParams
+    dev_only = False
     def __init__(self, dataSource: List[IRow], fields: List[IFieldMeta], params: Optional[ParamType] = ParamType()):
         super(PC, self).__init__(dataSource=dataSource, fields=fields, params=params)
         

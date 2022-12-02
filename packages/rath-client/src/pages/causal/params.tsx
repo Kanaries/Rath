@@ -7,37 +7,35 @@ import {
     PrimaryButton,
 } from '@fluentui/react';
 import produce from 'immer';
-import { toJS } from 'mobx';
+import { runInAction, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { makeRenderLabelHandler } from '../../components/labelTooltip';
-import { IRow } from '../../interfaces';
 import { useGlobalStore } from '../../store';
-import type { BgKnowledge, BgKnowledgePagLink, IFunctionalDep } from './config';
+import { useCausalViewContext } from '../../store/causalStore/viewStore';
+import { IAlgoSchema } from './config';
 import DynamicForm from './dynamicForm';
 
-const Params: React.FC<{
-    dataSource: IRow[];
-    focusFields: string[];
-    bgKnowledge: BgKnowledgePagLink[];
-    /** @deprecated */precondition: BgKnowledge[];
-    funcDeps: IFunctionalDep[];
-}> = ({ precondition, bgKnowledge, dataSource, funcDeps }) => {
+const Params: FC = () => {
     const { causalStore } = useGlobalStore();
-    const { causalAlgorithm, causalParams, showSettings, causalAlgorithmForm, causalAlgorithmOptions } = causalStore;
+    const { algorithm, causalAlgorithmForm, params: causalParams, causalAlgorithmOptions } = causalStore.operator;
+    const viewContext = useCausalViewContext();
+    const { shouldDisplayAlgorithmPanel } = viewContext ?? {};
 
-    const [algoName, setAlgoName] = useState(causalAlgorithm);
-    const [params, setParams] = useState<{ [algo: string]: { [key: string]: any } }>(causalParams[causalAlgorithm]);
-
-    useEffect(() => {
-        setAlgoName(causalAlgorithm);
-    }, [causalAlgorithm, showSettings]);
+    const [algoName, setAlgoName] = useState(algorithm);
+    const [params, setParams] = useState<{ [key: string]: any }>(algorithm ? causalParams[algorithm] : {});
 
     useEffect(() => {
-        setParams(causalParams[algoName]);
-    }, [causalParams, algoName, showSettings]);
+        setAlgoName(algorithm);
+    }, [algorithm, shouldDisplayAlgorithmPanel]);
 
-    const form = useMemo(() => causalAlgorithmForm[algoName], [causalAlgorithmForm, algoName]);
+    useEffect(() => {
+        setParams(algoName && algoName in causalParams ? causalParams[algoName] : {});
+    }, [causalParams, algoName, shouldDisplayAlgorithmPanel]);
+
+    const form = useMemo<IAlgoSchema[string] | null>(() => {
+        return algoName && algoName in causalAlgorithmForm ? causalAlgorithmForm[algoName] : null;
+    }, [causalAlgorithmForm, algoName]);
 
     const updateParam = (key: string, value: any) => {
         setParams(p => produce(toJS(p), draft => {
@@ -46,9 +44,14 @@ const Params: React.FC<{
     };
 
     const saveParamsAndRun = () => {
-        causalStore.updateCausalAlgoAndParams(algoName, params);
-        causalStore.reRunCausalDiscovery(dataSource, precondition, bgKnowledge, funcDeps);
-        causalStore.toggleSettings(false);
+        if (algoName === null) {
+            return;
+        }
+        runInAction(() => {
+            causalStore.operator.updateConfig(algoName, params);
+            causalStore.run();
+            viewContext?.closeAlgorithmPanel();
+        });
     };
 
     return (
@@ -56,14 +59,12 @@ const Params: React.FC<{
             <IconButton
                 text="Params"
                 iconProps={{ iconName: 'Settings' }}
-                onClick={() => causalStore.toggleSettings(true)}
+                onClick={() => viewContext?.openAlgorithmPanel()}
             />
             <Panel
-                isOpen={showSettings}
+                isOpen={shouldDisplayAlgorithmPanel}
                 type={PanelType.medium}
-                onDismiss={() => {
-                    causalStore.toggleSettings(false);
-                }}
+                onDismiss={() => viewContext?.closeAlgorithmPanel()}
             >
                 <Label>Settings</Label>
                 <Dropdown
@@ -75,17 +76,22 @@ const Params: React.FC<{
                     }}
                     onRenderLabel={makeRenderLabelHandler('The algorithm to use.')}
                 />
-                <pre>{ form.description }</pre>
-                <DynamicForm
-                    form={form}
-                    values={params}
-                    onChange={updateParam}
-                />
-                <PrimaryButton
-                    style={{ marginTop: '10px' }}
-                    text="Run"
-                    onClick={saveParamsAndRun}
-                />
+                {form && (
+                    <>
+                        <pre>{ form.description }</pre>
+                        <DynamicForm
+                            form={form}
+                            values={params}
+                            onChange={updateParam}
+                        />
+                        <PrimaryButton
+                            style={{ marginTop: '10px' }}
+                            text="Run"
+                            disabled={algoName === null}
+                            onClick={saveParamsAndRun}
+                        />
+                    </>
+                )}
             </Panel>
         </div>
     );

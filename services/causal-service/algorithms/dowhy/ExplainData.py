@@ -287,13 +287,21 @@ def ExplainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
         results.append(IDoWhy.LinkInfo(
             src=props.view.dimensions[0], tar=props.view.measures[0].fid, src_type=-1, tar_type=1,
             description=IDoWhy.LinkInfoDescription(key='', data=descrip_data),
-            responsibility=significance_value(session.estimate.value, var=1.)
+            responsibility=session.estimate.value
         ))
     except Exception as e:
         print(str(e), file=sys.stderr)
     
     results.extend(explainData(props))
-    # print("results =", results)
+    
+    sum2 = 0.
+    for res in results:
+        sum2 += res.responsibility * res.responsibility
+    vars = math.sqrt(sum2 / len(results))
+    for res in results:
+        res.responsibility = significance_value(res.responsibility, vars)
+    
+    print("results =", results)
     
     return IDoWhy.IRInsightExplainResult(
         causalEffects=results

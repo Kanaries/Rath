@@ -4,29 +4,23 @@ import { observer } from "mobx-react-lite";
 import { FC, Fragment, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { useId } from '@fluentui/react-hooks';
-import type { IFieldMeta, IRow } from "../../../interfaces";
-import { useGlobalStore } from "../../../store";
-import type { IRInsightExplainResult, IRInsightExplainSubspace } from "../../../workers/insight/r-insight.worker";
-import { RInsightService } from '../../../services/r-insight';
-import type { IFunctionalDep, PagLink } from '../config';
-import type { useDataViews } from '../hooks/dataViews';
+import type { IFieldMeta, IRow } from "../../../../interfaces";
+import { useGlobalStore } from "../../../../store";
+import type { IRInsightExplainResult, IRInsightExplainSubspace } from "../../../../workers/insight/r-insight.worker";
+import { RInsightService } from '../../../../services/r-insight';
 import DiffChart from "./diffChart";
 import ExplainChart from "./explainChart";
 import VisText, { IVisTextProps } from './visText';
 
 
 export interface IRInsightViewProps {
-    data: IRow[];
+    data: readonly IRow[];
     result: IRInsightExplainResult;
     mainField: IFieldMeta;
-    mainFieldAggregation: "sum" | "mean" | "count" | null;
     entryDimension: IFieldMeta | null;
     mode: "full" | "other" | "two-group";
     indices: [number[], number[]];
     subspaces: [IRInsightExplainSubspace, IRInsightExplainSubspace];
-    context: ReturnType<typeof useDataViews>;
-    functionalDependencies: IFunctionalDep[];
-    edges: PagLink[];
     aggr: "sum" | "mean" | "count" | null;
     serviceMode: "worker" | "server";
 }
@@ -137,16 +131,15 @@ const ExploreQueue = styled.div`
 `;
 
 const RInsightView: FC<IRInsightViewProps> = ({
-    data, result, mainField, mainFieldAggregation, entryDimension,
-    mode, indices, subspaces, context, functionalDependencies, edges,
-    aggr, serviceMode,
+    data, result, mainField, entryDimension,
+    mode, indices, subspaces, serviceMode,
 }) => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { selectedFields } = causalStore;
+    const { fields, sample } = causalStore.dataset;
+    const { mergedPag, functionalDependencies } = causalStore.model;
     const [normalize, setNormalize] = useState<boolean>(true);
     const [cursor, setCursor] = useState(0);
-    const { sample } = context;
 
     const [localIrResult, setLocalIrResult] = useState<{
         addedMeasure: string;
@@ -178,25 +171,27 @@ const RInsightView: FC<IRInsightViewProps> = ({
                     [mainField.fid, measure]
                 )
             );
-            RInsightService({
-                data: sample,
-                fields: selectedFields,
-                causalModel: {
-                    funcDeps: functionalDependencies,
-                    edges,
-                },
-                groups: {
-                    current,
-                    other,
-                },
-                view: {
-                    dimensions: [...fieldsInSight],
-                    measures: [measure].map(fid => ({
-                        fid: fid,
-                        op: aggr,
-                    })),
-                },
-            }, serviceMode).then(resolve);
+            sample.getAll().then(data => {
+                RInsightService({
+                    data,
+                    fields,
+                    causalModel: {
+                        funcDeps: functionalDependencies,
+                        edges: mergedPag,
+                    },
+                    groups: {
+                        current,
+                        other,
+                    },
+                    view: {
+                        dimensions: [...fieldsInSight],
+                        measures: [measure].map(fid => ({
+                            fid: fid,
+                            op: null,
+                        })),
+                    },
+                }, serviceMode).then(resolve);
+            });
         });
         pendingRef.current = p;
         p.then(res => {
@@ -334,8 +329,8 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                             <ExplainChart
                                                 title="全局分布"
                                                 data={data}
-                                                mainField={mainField}
-                                                mainFieldAggregation={mainFieldAggregation}
+                                                mainField={tar}
+                                                mainFieldAggregation={null}
                                                 indexKey={dim}
                                                 interactive={false}
                                                 normalize={normalize}
@@ -344,8 +339,8 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                                 title="对比分布"
                                                 data={data}
                                                 subspaces={indices}
-                                                mainField={mainField}
-                                                mainFieldAggregation={mainFieldAggregation}
+                                                mainField={tar}
+                                                mainFieldAggregation={null}
                                                 dimension={dim}
                                                 mode={mode}
                                             />

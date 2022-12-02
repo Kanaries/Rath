@@ -1,3 +1,5 @@
+/** @deprecated */
+
 import intl from 'react-intl-universal';
 import type { IFieldMeta } from '../interfaces';
 import { BgKnowledgePagLink, ModifiableBgKnowledge, PagLink, PAG_NODE } from '../pages/causal/config';

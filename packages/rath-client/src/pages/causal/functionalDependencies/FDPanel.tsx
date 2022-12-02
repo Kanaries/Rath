@@ -1,10 +1,8 @@
 import { observer } from 'mobx-react-lite';
-import React from 'react';
+import { FC, useCallback } from 'react';
 import styled from 'styled-components';
-import type { IFunctionalDep } from '../config';
-import type { IFieldMeta } from '../../../interfaces';
-import type { GraphNodeAttributes } from '../explorer/graph-utils';
-import type { useDataViews } from '../hooks/dataViews';
+import { useGlobalStore } from '../../../store';
+import { IFunctionalDep } from '../config';
 import FDBatch from './FDBatch';
 import FDEditor from './FDEditor';
 
@@ -22,29 +20,22 @@ const Container = styled.div`
     }
 `;
 
-export interface FDPanelProps {
-    context: ReturnType<typeof useDataViews>;
-    functionalDependencies: IFunctionalDep[];
-    setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: IFunctionalDep[]) => IFunctionalDep[])) => void;
-    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined;
-}
+const FDPanel: FC = () => {
+    const { causalStore } = useGlobalStore();
+    const { functionalDependencies } = causalStore.model;
 
-const FDPanel: React.FC<FDPanelProps> = ({
-    context, functionalDependencies, setFunctionalDependencies, renderNode,
-}) => {
+    const setFunctionalDependencies = useCallback((
+        fdArr: IFunctionalDep[] | ((prev: readonly IFunctionalDep[] | null) => readonly IFunctionalDep[])
+    ) => {
+        causalStore.model.updateFunctionalDependencies(Array.isArray(fdArr) ? fdArr : fdArr(functionalDependencies));
+    }, [causalStore, functionalDependencies]);
+
     return (
         <Container>
-            <FDBatch
-                context={context}
-                functionalDependencies={functionalDependencies}
-                setFunctionalDependencies={setFunctionalDependencies}
-                renderNode={renderNode}
-            />
+            <FDBatch />
             <FDEditor
-                context={context}
                 functionalDependencies={functionalDependencies}
                 setFunctionalDependencies={setFunctionalDependencies}
-                renderNode={renderNode}
             />
         </Container>
     );

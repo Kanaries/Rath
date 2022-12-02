@@ -6,7 +6,7 @@ import { EDITOR_URL } from '../constants';
 import { getVegaTimeFormatRules } from '../utils';
 
 interface ReactVegaProps {
-    dataSource: any[];
+    dataSource: readonly any[];
     spec: any;
     actions?: boolean;
     signalHandler?: {

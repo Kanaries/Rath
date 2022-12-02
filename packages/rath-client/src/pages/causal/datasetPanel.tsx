@@ -5,12 +5,11 @@ import {
     Label,
     SelectionMode,
     Slider,
-    Spinner,
     Stack,
 } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
-import React, { useCallback, useMemo, useRef } from 'react';
+import { FC, useCallback, useMemo, useRef } from 'react';
 import produce from 'immer';
 import intl from 'react-intl-universal'
 import { useGlobalStore } from '../../store';
@@ -18,7 +17,6 @@ import FilterCreationPill from '../../components/filterCreationPill';
 import LaTiaoConsole from '../../components/latiaoConsole/index';
 import type { IFieldMeta } from '../../interfaces';
 import { FilterCell } from './filters';
-import type { useDataViews } from './hooks/dataViews';
 
 
 const TableContainer = styled.div`
@@ -62,29 +60,32 @@ const Row = styled.div<{ selected: boolean }>`
 
 const SelectedKey = 'selected';
 
-export interface DatasetPanelProps {
-    context: ReturnType<typeof useDataViews>;
-}
-
-const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
+const DatasetPanel: FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
-    const { fieldMetas, cleanedData } = dataSourceStore;
-    const { focusFieldIds } = causalStore;
-    const totalFieldsRef = useRef(fieldMetas);
-    totalFieldsRef.current = fieldMetas;
+    const { cleanedData } = dataSourceStore;
+    const {
+        fields, allFields, filteredDataSize, sampleRate, sampleSize, filters
+    } = causalStore.dataset;
 
-    const { dataSubset, sampleRate, setSampleRate, appliedSampleRate, filters, setFilters, sampleSize } = context;
+    const totalFieldsRef = useRef(allFields);
+    totalFieldsRef.current = allFields;
 
-    const focusFieldIdsRef = useRef(focusFieldIds);
-    focusFieldIdsRef.current = focusFieldIds;
+    const fieldsRef = useRef(fields);
+    fieldsRef.current = fields;
 
     const toggleFocus = useCallback((fid: string) => {
-        causalStore.setFocusFieldIds(produce(focusFieldIdsRef.current, draft => {
-            const idx = draft.findIndex(key => fid === key);
+        const prevIndices = fieldsRef.current.map(
+            f => totalFieldsRef.current.findIndex(which => f.fid === which.fid)
+        ).filter(idx => idx !== -1);
+        causalStore.dataset.selectFields(produce(prevIndices, draft => {
+            const idx = totalFieldsRef.current.findIndex(f => f.fid === fid);
             if (idx !== -1) {
-                draft.splice(idx, 1);
-            } else {
-                draft.push(fid);
+                const i = draft.findIndex(which => which === idx);
+                if (i !== -1) {
+                    draft.splice(i, 1);
+                } else {
+                    draft.push(idx);
+                }
             }
         }));
     }, [causalStore]);
@@ -97,15 +98,15 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                 onRenderHeader: () => {
                     const handleClick = (_: unknown, checked?: boolean | undefined) => {
                         if (checked) {
-                            causalStore.setFocusFieldIds(totalFieldsRef.current.map(f => f.fid));
+                            causalStore.selectFields(totalFieldsRef.current.map((_, i) => i));
                         } else {
-                            causalStore.setFocusFieldIds([]);
+                            causalStore.selectFields([]);
                         }
                     };
                     return (
                         <Checkbox
-                            checked={focusFieldIds.length === totalFieldsRef.current.length}
-                            indeterminate={focusFieldIds.length > 0 && focusFieldIds.length < totalFieldsRef.current.length}
+                            checked={fields.length === totalFieldsRef.current.length}
+                            indeterminate={fields.length > 0 && fields.length < totalFieldsRef.current.length}
                             onChange={handleClick}
                             styles={{
                                 root: {
@@ -117,7 +118,7 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                 },
                 onRender: (item) => {
                     const field = item as IFieldMeta;
-                    const checked = focusFieldIds.includes(field.fid);
+                    const checked = fields.some(f => f.fid === field.fid);
                     return (
                         <Checkbox checked={checked} styles={{ root: { pointerEvents: 'none' } }} />
                     );
@@ -128,7 +129,7 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
             },
             {
                 key: 'name',
-                name: `因素 (${focusFieldIds.length} / ${totalFieldsRef.current.length})`,
+                name: `因素 (${fields.length} / ${totalFieldsRef.current.length})`,
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
@@ -231,13 +232,55 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                 maxWidth: 100,
             },
         ];
-    }, [focusFieldIds, causalStore]);
+    }, [fields, causalStore]);
 
     return (
         <>
             <Stack style={{ marginBlock: '0.6em -0.6em', alignItems: 'center' }} horizontal>
                 <Label style={{ marginRight: '1em' }}>数据增强</Label>
                 <LaTiaoConsole />
+            </Stack>
+            <Stack style={{ marginTop: '0.6em' }}>
+                <Label style={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
+                    <span>筛选器</span>
+                    <div
+                        style={{
+                            display: 'flex',
+                            padding: '0 2em',
+                        }}
+                    >
+                        <FilterCreationPill
+                            fields={allFields}
+                            onFilterSubmit={(_, filter) => causalStore.dataset.appendFilter(filter)}
+                        />
+                    </div>
+                </Label>
+                {filters.length > 0 && (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            overflow: 'auto hidden',
+                            margin: '1em 0',
+                        }}
+                    >
+                        {filters.map((filter, i) => {
+                            const field = allFields.find((f) => f.fid === filter.fid);
+
+                            return field ? (
+                                <FilterCell
+                                    key={i}
+                                    field={field}
+                                    data={filter}
+                                    remove={() => causalStore.dataset.removeFilter(i)}
+                                />
+                            ) : null;
+                        })}
+                    </div>
+                )}
+                <small style={{ color: '#666', display: 'flex', alignItems: 'center' }}>
+                    {`原始大小: ${cleanedData.length} 行，${filters.length ? `筛选后子集大小: ${filteredDataSize} 行` : '(无筛选项)'}`}
+                </small>
             </Stack>
             <Stack style={{ marginBlock: '0.8em' }}>
                 <Slider
@@ -247,7 +290,7 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                     step={0.01}
                     value={sampleRate}
                     showValue
-                    onChange={(val) => setSampleRate(val)}
+                    onChange={(val) => causalStore.dataset.sampleRate = val}
                     valueFormat={(val) => `${(val * 100).toFixed(0)}%`}
                     styles={{
                         root: {
@@ -268,73 +311,18 @@ const DatasetPanel: React.FC<DatasetPanelProps> = ({ context }) => {
                     }}
                 />
                 <small style={{ padding: '0.2em 0', color: '#666', display: 'flex', alignItems: 'center' }}>
-                    {`原始大小: ${cleanedData.length} 行，样本量: `}
-                    {sampleRate !== appliedSampleRate ? (
-                        <Spinner
-                            style={{ display: 'inline-block', transform: 'scale(0.9)', margin: '-50% 0.6em' }}
-                        />
-                    ) : (
-                        `${sampleSize} 行`
-                    )}
-                </small>
-            </Stack>
-            <Stack style={{ marginTop: '0.3em' }}>
-                <Label style={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <span>筛选器</span>
-                    <div
-                        style={{
-                            display: 'flex',
-                            padding: '0 2em',
-                        }}
-                    >
-                        <FilterCreationPill
-                            fields={fieldMetas}
-                            onFilterSubmit={(_, filter) => setFilters((list) => [...list, filter])}
-                        />
-                    </div>
-                </Label>
-                {filters.length > 0 && (
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            overflow: 'auto hidden',
-                            margin: '1em 0',
-                        }}
-                    >
-                        {filters.map((filter, i) => {
-                            const field = fieldMetas.find((f) => f.fid === filter.fid);
-
-                            return field ? (
-                                <FilterCell
-                                    key={i}
-                                    field={field}
-                                    data={filter}
-                                    remove={() =>
-                                        setFilters((list) => {
-                                            return produce(list, (draft) => {
-                                                draft.splice(i, 1);
-                                            });
-                                        })
-                                    }
-                                />
-                            ) : null;
-                        })}
-                    </div>
-                )}
-                <small style={{ color: '#666', display: 'flex', alignItems: 'center' }}>
-                    {`${filters.length ? `筛选后子集大小: ${dataSubset.length} 行` : '(无筛选项)'}`}
+                    {`样本量: ${sampleSize} 行`}
                 </small>
             </Stack>
             <Label>需要分析的字段</Label>
             <TableContainer>
                 <DetailsList
-                    items={fieldMetas}
+                    items={allFields.slice(0)}
                     columns={fieldsTableCols}
                     selectionMode={SelectionMode.none}
                     onRenderRow={(props, defaultRender) => {
                         const field = props?.item as IFieldMeta;
-                        const checked = focusFieldIds.includes(field.fid);
+                        const checked = fields.some(f => f.fid === field.fid);
                         return (
                             <Row selected={checked} onClick={() => toggleFocus(field.fid)}>
                                 {defaultRender?.(props)}

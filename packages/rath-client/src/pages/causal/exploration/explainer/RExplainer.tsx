@@ -1,42 +1,33 @@
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { DefaultButton, Dropdown, Stack, Toggle } from '@fluentui/react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyFilters } from '@kanaries/loa';
-import { useGlobalStore } from '../../../store';
-import type { useInteractFieldGroups } from '../hooks/interactFieldGroup';
-import type { useDataViews } from '../hooks/dataViews';
-import { IFieldMeta, IFilter, IRow } from '../../../interfaces';
-import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../workers/insight/r-insight.worker';
-import { RInsightService } from '../../../services/r-insight';
-import type { IFunctionalDep, PagLink } from '../config';
+import { useGlobalStore } from '../../../../store';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
+import { IFieldMeta, IFilter, IRow } from '../../../../interfaces';
+import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../../workers/insight/r-insight.worker';
+import { RInsightService } from '../../../../services/r-insight';
 import ChartItem from './explainChart';
 import RInsightView from './RInsightView';
 
 
 const Container = styled.div``;
 
-export interface RExplainerProps {
-    context: ReturnType<typeof useDataViews>;
-    interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
-    functionalDependencies: IFunctionalDep[];
-    edges: PagLink[];
-}
-
 export const SelectedFlag = '__RExplainer_selected__';
 
-const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, functionalDependencies, edges }) => {
+const RExplainer: FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { fieldGroup } = interactFieldGroups;
-    const { selectedFields } = causalStore;
+    const viewContext = useCausalViewContext();
+    const { selectedFieldGroup = [] } = viewContext ?? {};
+    const { fields, sample, visSample } = causalStore.dataset;
+    const { mergedPag, functionalDependencies } = causalStore.model;
 
-    const { sample, vizSampleData } = context;
-
-    const mainField = fieldGroup.at(-1) ?? null;
+    const mainField = selectedFieldGroup.at(-1) ?? null;
     const [indexKey, setIndexKey] = useState<IFieldMeta | null>(null);
-    const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('count');
-    const [diffMode, setDiffMode] = useState<"full" | "other" | "two-group">("full");
+    const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('sum');
+    const [diffMode, setDiffMode] = useState<"full" | "other" | "two-group">("other");
 
     useEffect(() => {
         setIndexKey(ik => ik ? fieldMetas.find(f => f.fid === ik.fid) ?? null : null);
@@ -49,11 +40,12 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, f
     }, [mainField, aggr]);
 
     const [irResult, setIrResult] = useState<IRInsightExplainResult>({ causalEffects: [] });
-    const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('worker');
+    const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('server');
 
     const pendingRef = useRef<Promise<IRInsightExplainResult>>();
 
     const calculate = useCallback(() => {
+        viewContext?.clearLocalWeights();
         if (!subspaces || !mainField) {
             setIrResult({ causalEffects: [] });
             return;
@@ -65,25 +57,27 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, f
         }
         const p = new Promise<IRInsightExplainResult>(resolve => {
             const fieldsInSight = new Set(current.predicates.map(pdc => pdc.fid).concat([mainField.fid]));
-            RInsightService({
-                data: sample,
-                fields: selectedFields,
-                causalModel: {
-                    funcDeps: functionalDependencies,
-                    edges,
-                },
-                groups: {
-                    current,
-                    other,
-                },
-                view: {
-                    dimensions: [...fieldsInSight].filter(fid => fid !== mainField.fid),
-                    measures: [mainField].map(ms => ({
-                        fid: ms.fid,
-                        op: aggr,
-                    })),
-                },
-            }, serviceMode).then(resolve);
+            sample.getAll().then(data => {
+                RInsightService({
+                    data,
+                    fields,
+                    causalModel: {
+                        funcDeps: functionalDependencies,
+                        edges: mergedPag,
+                    },
+                    groups: {
+                        current,
+                        other,
+                    },
+                    view: {
+                        dimensions: [...fieldsInSight].filter(fid => fid !== mainField.fid),
+                        measures: [mainField].map(ms => ({
+                            fid: ms.fid,
+                            op: aggr,
+                        })),
+                    },
+                }, serviceMode).then(resolve);
+            });
         });
         pendingRef.current = p;
         p.then(res => {
@@ -93,20 +87,21 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, f
                         item => Number.isFinite(item.responsibility)// && item.responsibility !== 0
                     ).sort((a, b) => b.responsibility - a.responsibility)
                 });
+                viewContext?.setLocalWeights(res);
             }
         }).finally(() => {
             pendingRef.current = undefined;
         });
-    }, [aggr, mainField, sample, selectedFields, subspaces, edges, serviceMode, functionalDependencies]);
+    }, [aggr, mainField, sample, fields, subspaces, mergedPag, serviceMode, functionalDependencies, viewContext]);
 
-    const [selectedSet, setSelectedSet] = useState<IRow[]>([]);
+    const [selectedSet, setSelectedSet] = useState<readonly IRow[]>([]);
 
     const [indicesA, indicesB] = useMemo<[number[], number[]]>(() => {
         if (!subspaces) {
             return [[], []];
         }
         const indexName = '__this_is_the_index_of_the_row__';
-        const data = sample.map((row, i) => ({ ...row, [indexName]: i }));
+        const data = visSample.map((row, i) => ({ ...row, [indexName]: i }));
         const indicesA = applyFilters(data, subspaces[0].predicates).map(row => row[indexName]) as number[];
         // console.log('indices');
         // console.log(indicesA.join(','));
@@ -116,28 +111,28 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, f
                 index => !indicesA.includes(index)
             );
         return [indicesA, indicesB];
-    }, [subspaces, sample, diffMode]);
+    }, [subspaces, visSample, diffMode]);
 
     useEffect(() => {
         setIrResult({ causalEffects: [] });
-    }, [indexKey, mainField, sample, subspaces, edges]);
+    }, [indexKey, mainField, visSample, subspaces, mergedPag]);
 
     const applySelection = useCallback(() => {
         if (!subspaces) {
-            return setSelectedSet(sample);
+            return setSelectedSet(visSample);
         }
         setSelectedSet(
-            sample.map((row, i) => ({ ...row, [SelectedFlag]: indicesA.includes(i) ? 1 : indicesB.includes(i) ? 2 : 0 }))
+            visSample.map((row, i) => ({ ...row, [SelectedFlag]: indicesA.includes(i) ? 1 : indicesB.includes(i) ? 2 : 0 }))
         );
         calculate();
-    }, [subspaces, sample, indicesA, indicesB, calculate]);
+    }, [subspaces, visSample, indicesA, indicesB, calculate]);
 
     useEffect(() => {
         if (!subspaces) {
-            setSelectedSet(sample);
+            setSelectedSet(visSample);
             return;
         }
-    }, [subspaces, sample]);
+    }, [subspaces, visSample]);
 
     const [editingGroupIdx, setEditingGroupIdx] = useState<1 | 2>(1);
 
@@ -209,8 +204,8 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, f
                             label="对照选择"//"Diff Mode"
                             selectedKey={diffMode}
                             options={[
-                                { key: 'full', text: '数据全集' || 'Full' },
                                 { key: 'other', text: '数据补集' || 'Other' },
+                                { key: 'full', text: '数据全集' || 'Full' },
                                 { key: 'two-group', text: '自选两个集合' || 'Two Groups' },
                             ]}
                             onChange={(_, option) => {
@@ -259,7 +254,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, f
                     )}
                     <br />
                     <ChartItem
-                        data={vizSampleData}
+                        data={visSample}
                         indexKey={indexKey}
                         mainField={mainField}
                         mainFieldAggregation={aggr}
@@ -272,7 +267,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, f
                         <>
                             <ChartItem
                                 title="对照组"//"Foreground Group"
-                                data={sample}
+                                data={visSample}
                                 indexKey={indexKey}
                                 mainField={mainField}
                                 mainFieldAggregation={aggr}
@@ -282,7 +277,7 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, f
                             />
                             <ChartItem
                                 title="实验组"//"Background Group"
-                                data={sample}
+                                data={visSample}
                                 indexKey={indexKey}
                                 mainField={mainField}
                                 mainFieldAggregation={aggr}
@@ -304,16 +299,12 @@ const RExplainer: React.FC<RExplainerProps> = ({ context, interactFieldGroups, f
                             data={selectedSet}
                             result={irResult}
                             mainField={mainField}
-                            mainFieldAggregation={aggr}
                             entryDimension={indexKey}
                             mode={diffMode}
                             subspaces={subspaces}
                             indices={[indicesA, indicesB]}
-                            functionalDependencies={functionalDependencies}
                             aggr={aggr}
                             serviceMode={serviceMode}
-                            context={context}
-                            edges={edges}
                         />
                     )}
                 </>

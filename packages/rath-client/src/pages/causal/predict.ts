@@ -1,6 +1,5 @@
 import { notify } from "../../components/error";
 import type { IRow, IFieldMeta } from "../../interfaces";
-import { getGlobalStore } from "../../store";
 
 
 export const PredictAlgorithms = [
@@ -48,7 +47,8 @@ export interface IPredictResult {
     result: PredictResultItem[];
 }
 
-const PredictApiPath = 'api/train_test';
+// TODO: 模型预测服务：上生产环境后改称线上服务地址
+const PredictApiPath = 'http://127.0.0.1:5533/api/train_test';
 
 export const execPredict = async (props: IPredictProps): Promise<IPredictResult | null> => {
     try {
@@ -57,9 +57,7 @@ export const execPredict = async (props: IPredictProps): Promise<IPredictResult 
         //     0: 'T',
         //     1: '_',
         // }[flag])).join(''), props.trainTestSplitIndices.length)
-        const { causalStore } = getGlobalStore();
-        const { apiPrefix } = causalStore;
-        const res = await fetch(`${'http://127.0.0.1:5533' || apiPrefix}/${PredictApiPath}`, {
+        const res = await fetch(PredictApiPath, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

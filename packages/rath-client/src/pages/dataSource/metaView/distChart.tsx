@@ -33,11 +33,13 @@ export interface DistributionChartProps {
     height?: number;
     maxItemInView?: number;
     dataSource: IRow[]
+    /** @default true */
+    label?: boolean;
 }
 
 const DistributionChart: React.FC<DistributionChartProps> = (props) => {
     const chart = useRef<HTMLDivElement>(null);
-    const { x, y, dataSource, semanticType, width = 180, height = 80, maxItemInView = 10 } = props;
+    const { x, y, dataSource, semanticType, width = 180, height = 80, maxItemInView = 10, label = true } = props;
     const [view, setView] = useState<Result['view']>();
     // 是否有分箱的ordinal列
     const hasBinIndex = useMemo(() => {
@@ -103,12 +105,12 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                     x: {
                         field: x,
                         title: null,
-                        axis: {
+                        axis: label ? {
                             // "labelAngle": 0,
                             labelLimit: 52,
                             "labelOverlap": "parity",
                             ticks: false
-                        },
+                        } : null,
                         //   axis: null,    
                         type: semanticType === 'quantitative' ? 'ordinal' : semanticType, sort: sortBy
                     },
@@ -129,7 +131,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 }).catch(console.error)
             }
         }
-    }, [x, y, sortBy, semanticType, width, height, maxItemInView])
+    }, [x, y, sortBy, semanticType, width, height, maxItemInView, label])
     useEffect(() => {
         if (view) {
             try {

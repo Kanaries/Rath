@@ -9,7 +9,7 @@ import { CausalLinkDirection, describeDirection, stringifyDirection } from '../.
 
 interface Props {
     mark: 'circle' | 'square';
-    data: DeepReadonly<CausalLinkDirection[][]>;
+    data: DeepReadonly<number[][]>;
     fields: DeepReadonly<IFieldMeta[]>;
     onSelect?: (xFieldId: string, yFieldId: string) => void;
 }

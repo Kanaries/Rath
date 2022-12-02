@@ -216,7 +216,7 @@ export const focusedSample = (fullSet: readonly IRow[], focusedFields: readonly 
     }
     const hashed = hashAll(fullSet, focusedFields);
     const bins = treeSplit(hashed, fullSet.length / Math.sqrt(sampleSize));
-    const indices = sampleBins(bins, fullSet.length, sampleSize);
+    const indices = sampleBins(bins, fullSet.length, Math.floor(sampleSize));
 
     return indices;
 };

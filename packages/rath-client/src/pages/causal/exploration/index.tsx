@@ -1,20 +1,20 @@
 import { ActionButton, Pivot, PivotItem, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import type { IPattern } from '@kanaries/loa';
 import styled from 'styled-components';
 import type { Specification } from 'visual-insights';
-import type { IFieldMeta } from '../../interfaces';
-import { useGlobalStore } from '../../store';
-import SemiEmbed from '../semiAutomation/semiEmbed';
+import type { IFieldMeta } from '../../../interfaces';
+import { useGlobalStore } from '../../../store';
+import SemiEmbed from '../../semiAutomation/semiEmbed';
+import { PAG_NODE } from '../config';
+import { ExplorationKey, ExplorationOptions, useCausalViewContext } from '../../../store/causalStore/viewStore';
 import CrossFilter from './crossFilter';
-import type { useInteractFieldGroups } from './hooks/interactFieldGroup';
-import type { useDataViews } from './hooks/dataViews';
-import RExplainer from './explainer/RExplainer';
-import type { IFunctionalDep, PagLink } from './config';
 import PredictPanel from './predictPanel';
-import type { ExplorerProps } from './explorer';
+import RExplainer from './explainer/RExplainer';
+import AutoVis from './autoVis';
+// import CausalBlame from './causalBlame';
 
 
 const Container = styled.div`
@@ -33,50 +33,41 @@ const Container = styled.div`
     }
 `;
 
-export interface ManualAnalyzerProps {
-    context: ReturnType<typeof useDataViews>;
-    interactFieldGroups: ReturnType<typeof useInteractFieldGroups>;
-    functionalDependencies: IFunctionalDep[];
-    edges: PagLink[];
-
+export interface Subtree {
+    node: IFieldMeta;
+    neighbors: {
+        field: IFieldMeta;
+        rootType: PAG_NODE;
+        neighborType: PAG_NODE;
+    }[];
 }
 
-const CustomAnalysisModes = [
-    { key: 'crossFilter', text: '因果验证' },
-    { key: 'explainer', text: '可解释探索' },
-    { key: 'graphicWalker', text: '可视化自助分析' },
-    { key: 'predict', text: '模型预测' },
-] as const;
-
-type CustomAnalysisMode = typeof CustomAnalysisModes[number]['key'];
-
-const ManualAnalyzer = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSelected'] }, ManualAnalyzerProps>(function ManualAnalyzer (
-    { context, interactFieldGroups, functionalDependencies, edges }, ref
-) {
-    const { dataSourceStore, causalStore, langStore } = useGlobalStore();
+const Exploration = forwardRef<{
+    onSubtreeSelected?: (subtree: Subtree | null) => void;
+}, {}>(function ManualAnalyzer (_, ref) {
+    const { dataSourceStore, langStore, causalStore } = useGlobalStore();
     const { fieldMetas } = dataSourceStore;
-    const { fieldGroup, setFieldGroup, clearFieldGroup } = interactFieldGroups;
     const [showSemiClue, setShowSemiClue] = useState(false);
     const [clueView, setClueView] = useState<IPattern | null>(null);
-    const [customAnalysisMode, setCustomAnalysisMode] = useState<CustomAnalysisMode>('crossFilter');
-    const { selectedFields } = causalStore;
+    const { fields, visSample, filters } = causalStore.dataset;
 
-    const { vizSampleData, filters } = context;
+    const viewContext = useCausalViewContext();
+    const { selectedFieldGroup = [] } = viewContext ?? {};
 
     useEffect(() => {
-        if (fieldGroup.length > 0) {
+        if (selectedFieldGroup.length > 0) {
             setClueView({
-                fields: [...fieldGroup],
-                filters: [...filters],
+                fields: selectedFieldGroup.slice(0),
+                filters: filters.slice(0),
                 imp: 0,
             });
         } else {
             setClueView(null);
         }
-    }, [fieldGroup, filters]);
+    }, [selectedFieldGroup, filters]);
 
     const initialSpec = useMemo<Specification>(() => {
-        const [discreteChannel, concreteChannel] = fieldGroup.reduce<[IFieldMeta[], IFieldMeta[]]>(
+        const [discreteChannel, concreteChannel] = selectedFieldGroup.reduce<[IFieldMeta[], IFieldMeta[]]>(
             ([discrete, concrete], f, i) => {
                 if (i === 0 || f.semanticType === 'quantitative' || f.semanticType === 'temporal') {
                     concrete.push(f);
@@ -87,7 +78,7 @@ const ManualAnalyzer = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSel
             },
             [[], []]
         );
-        return fieldGroup.length
+        return selectedFieldGroup.length
             ? {
                   position: concreteChannel.map((f) => f.fid),
                   color: discreteChannel[0] ? [discreteChannel[0].fid] : [],
@@ -113,39 +104,51 @@ const ManualAnalyzer = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSel
         //     position: ['gw_count_fid'],
         //     facets: fieldGroup.map(f => f.fid),
         // };
-    }, [fieldGroup]);
+    }, [selectedFieldGroup]);
 
     const predictPanelRef = useRef<{ updateInput?: (input: {
         features: Readonly<IFieldMeta>[]; targets: Readonly<IFieldMeta>[]
     }) => void }>({});
 
     useImperativeHandle(ref, () => ({
-        onSubtreeSelected: (node, simpleCause) => {
-            if (customAnalysisMode === 'predict' && node && simpleCause.length > 0) {
-                const features = simpleCause.map(cause => cause.field);
+        onSubtreeSelected: (subtree) => {
+            if (viewContext?.explorationKey === 'predict' && subtree && subtree.neighbors.length > 0) {
+                const features = subtree.neighbors.filter(neighbor => {
+                    return !(
+                        [PAG_NODE.BLANK, PAG_NODE.CIRCLE].includes(neighbor.rootType) && neighbor.neighborType === PAG_NODE.ARROW
+                    );
+                }).map(cause => cause.field);
                 predictPanelRef.current.updateInput?.({
                     features,
-                    targets: [node],
+                    targets: [subtree.node],
                 });
             }
         },
     }));
 
-    return (
+    const clearFieldGroup = useCallback(() => {
+        viewContext?.clearSelected();
+    }, [viewContext]);
+
+    const removeSelectedField = useCallback((fid: string) => {
+        viewContext?.toggleNodeSelected(fid);
+    }, [viewContext]);
+
+    return viewContext && (
         <Container>
             <Pivot
                 style={{ marginBottom: '0.4em' }}
-                selectedKey={customAnalysisMode}
+                selectedKey={viewContext.explorationKey}
                 onLinkClick={(item) => {
-                    item && setCustomAnalysisMode(item.props.itemKey as CustomAnalysisMode);
+                    item && viewContext.setExplorationKey(item.props.itemKey as ExplorationKey);
                 }}
             >
-                {CustomAnalysisModes.map(mode => (
+                {ExplorationOptions.map(mode => (
                     <PivotItem key={mode.key} itemKey={mode.key} headerText={mode.text} />
                 ))}
             </Pivot>
             <Stack horizontal>
-                {new Array<CustomAnalysisMode>('crossFilter', 'graphicWalker').includes(customAnalysisMode) && (
+                {[ExplorationKey.CROSS_FILTER, ExplorationKey.GRAPHIC_WALKER].includes(viewContext.explorationKey) && (
                     <SemiEmbed
                         view={clueView}
                         show={showSemiClue}
@@ -155,34 +158,29 @@ const ManualAnalyzer = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSel
                         neighborKeys={clueView ? clueView.fields.slice(0, 1).map(f => f.fid) : []}
                     />
                 )}
-                {new Array<CustomAnalysisMode>('crossFilter', 'explainer').includes(customAnalysisMode) && (
+                {[ExplorationKey.AUTO_VIS, ExplorationKey.CROSS_FILTER, ExplorationKey.CAUSAL_INSIGHT].includes(viewContext.explorationKey) && (
                     <ActionButton
                         iconProps={{ iconName: 'Delete' }}
                         text="清除全部选择字段"
-                        disabled={fieldGroup.length === 0}
+                        disabled={selectedFieldGroup.length === 0}
                         onClick={clearFieldGroup}
                     />
                 )}
             </Stack>
             <div className="body">
                 {{
-                    predict: (
-                        <PredictPanel ref={predictPanelRef} />
+                    // [ExplorationKey.CAUSAL_BLAME]: (
+                    //     <CausalBlame />
+                    // ),
+                    [ExplorationKey.AUTO_VIS]: (
+                        <AutoVis />
                     ),
-                    explainer: vizSampleData.length > 0 && fieldGroup.length > 0 && (
-                        <RExplainer
-                            context={context}
-                            interactFieldGroups={interactFieldGroups}
-                            functionalDependencies={functionalDependencies}
-                            edges={edges}
-                        />
-                    ),
-                    crossFilter: vizSampleData.length > 0 && fieldGroup.length > 0 && (
+                    [ExplorationKey.CROSS_FILTER]: visSample.length > 0 && selectedFieldGroup.length > 0 && (
                         <CrossFilter
-                            fields={fieldGroup}
-                            dataSource={vizSampleData}
+                            fields={selectedFieldGroup}
+                            dataSource={visSample}
                             onVizClue={(fid) => {
-                                const field = selectedFields.find((f) => f.fid === fid);
+                                const field = fields.find((f) => f.fid === fid);
                                 if (field) {
                                     setClueView({
                                         fields: [field],
@@ -192,15 +190,16 @@ const ManualAnalyzer = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSel
                                     setShowSemiClue(true);
                                 }
                             }}
-                            onVizDelete={(fid) => {
-                                setFieldGroup((list) => list.filter((f) => f.fid !== fid));
-                            }}
+                            onVizDelete={removeSelectedField}
                         />
                     ),
-                    graphicWalker: (
+                    [ExplorationKey.CAUSAL_INSIGHT]: visSample.length > 0 && (
+                        <RExplainer />
+                    ),
+                    [ExplorationKey.GRAPHIC_WALKER]: (
                         /* 小心这里的内存占用 */
                         <GraphicWalker
-                            dataSource={vizSampleData}
+                            dataSource={visSample.slice(0)}
                             rawFields={fieldMetas}
                             hideDataSourceConfig
                             spec={initialSpec}
@@ -208,10 +207,13 @@ const ManualAnalyzer = forwardRef<{ onSubtreeSelected?: ExplorerProps['onNodeSel
                             keepAlive={false}
                         />
                     ),
-                }[customAnalysisMode]}
+                    [ExplorationKey.PREDICT]: (
+                        <PredictPanel ref={predictPanelRef} />
+                    ),
+                }[viewContext.explorationKey]}
             </div>
         </Container>
     );
 });
 
-export default observer(ManualAnalyzer);
+export default observer(Exploration);

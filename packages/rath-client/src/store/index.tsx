@@ -9,7 +9,7 @@ import { SemiAutomationStore } from './semiAutomation/mainStore';
 import { PainterStore } from './painterStore'
 import { CollectionStore } from './collectionStore'
 import DashboardStore from './dashboardStore';
-import { CausalStore } from './causalStore';
+import CausalStore from './causalStore/mainStore';
 export interface StoreCollection {
     langStore: LangStore;
     dataSourceStore: DataSourceStore;
@@ -47,7 +47,7 @@ const storeCol: StoreCollection = {
     painterStore,
     collectionStore,
     dashboardStore,
-    causalStore
+    causalStore,
 }
 
 const StoreContext = React.createContext<StoreCollection>(null!);

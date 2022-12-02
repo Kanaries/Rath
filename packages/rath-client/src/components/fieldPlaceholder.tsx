@@ -34,7 +34,7 @@ export const PillPlaceholder = styled.div`
 `
  
 interface FieldPlaceholderProps {
-    fields: IFieldMeta[];
+    fields: readonly IFieldMeta[];
     onAdd: (fid: string) => void;
 }
 const  FieldPlaceholder: React.FC<FieldPlaceholderProps> = props => {

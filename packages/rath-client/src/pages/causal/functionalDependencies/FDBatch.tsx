@@ -1,12 +1,11 @@
 import { ActionButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import produce from 'immer';
 import { useGlobalStore } from '../../../store';
 import type { IFunctionalDep } from '../config';
-import type { FDPanelProps } from './FDPanel';
-import { getGeneratedFDFromAutoDetection, getGeneratedFDFromExtInfo } from './utils';
+import { getGeneratedFDFromAutoDetection } from './utils';
 import FDEditor from './FDEditor';
 
 
@@ -55,28 +54,26 @@ const dropdownOptions: { key: BatchUpdateMode; text: string }[] = [
     },
 ];
 
-const FDBatch: React.FC<FDPanelProps> = ({
-    context, functionalDependencies, setFunctionalDependencies, renderNode,
-}) => {
+const FDBatch: FC = () => {
     const { causalStore } = useGlobalStore();
-    const { selectedFields } = causalStore;
+    const { sample } = causalStore.dataset;
+    const { functionalDependencies } = causalStore.model;
     const [displayPreview, setDisplayPreview] = useState(false);
-    const [preview, setPreview] = useState<IFunctionalDep[] | null>(null);
+    const [preview, setPreview] = useState<readonly IFunctionalDep[] | null>(null);
     const isPending = displayPreview && preview === null;
     const [mode, setMode] = useState(BatchUpdateMode.OVERWRITE_ONLY);
-    const { dataSubset } = context;
 
-    const updatePreview = useMemo<typeof setFunctionalDependencies>(() => {
+    const updatePreview = useMemo<(fdArr: IFunctionalDep[] | ((prev: readonly IFunctionalDep[] | null) => readonly IFunctionalDep[])) => void>(() => {
         if (displayPreview) {
-            return setPreview as typeof setFunctionalDependencies;
+            return setPreview;
         }
         return () => {};
     }, [displayPreview]);
 
     const generateFDFromExtInfo = useCallback(() => {
-        setPreview(getGeneratedFDFromExtInfo(selectedFields));
+        setPreview(causalStore.model.generatedFDFromExtInfo);
         setDisplayPreview(true);
-    }, [selectedFields]);
+    }, [causalStore]);
 
     const pendingRef = useRef<Promise<unknown>>();
     useEffect(() => {
@@ -85,7 +82,7 @@ const FDBatch: React.FC<FDPanelProps> = ({
         }
     }, [displayPreview]);
     const generateFDFromAutoDetection = useCallback(() => {
-        const p = getGeneratedFDFromAutoDetection(dataSubset, selectedFields.map(f => f.fid));
+        const p = sample.getAll().then(data => getGeneratedFDFromAutoDetection(data));
         pendingRef.current = p;
         p.then(res => {
             if (p === pendingRef.current) {
@@ -100,11 +97,11 @@ const FDBatch: React.FC<FDPanelProps> = ({
             pendingRef.current = undefined;
         });
         setDisplayPreview(true);
-    }, [selectedFields, dataSubset]);
+    }, [sample]);
 
     const handleClear = useCallback(() => {
-        setFunctionalDependencies([]);
-    }, [setFunctionalDependencies]);
+        causalStore.model.updateFunctionalDependencies([]);
+    }, [causalStore]);
 
     const submittable = useMemo<IFunctionalDep[]>(() => {
         if (preview) {
@@ -118,7 +115,7 @@ const FDBatch: React.FC<FDPanelProps> = ({
                             });
                         }
                         return deps.concat([dep]);
-                    }, functionalDependencies);
+                    }, functionalDependencies.slice(0));
                 }
                 case BatchUpdateMode.FILL_ONLY: {
                     return preview.reduce<IFunctionalDep[]>((deps, dep) => {
@@ -134,25 +131,25 @@ const FDBatch: React.FC<FDPanelProps> = ({
                             });
                         }
                         return deps;
-                    }, functionalDependencies);
+                    }, functionalDependencies.slice(0));
                 }
                 case BatchUpdateMode.FULLY_REPLACE: {
-                    return preview;
+                    return preview.slice(0);
                 }
                 default: {
-                    return functionalDependencies;
+                    return functionalDependencies.slice(0);
                 }
             }
         } else {
-            return functionalDependencies;
+            return functionalDependencies.slice(0);
         }
     }, [preview, functionalDependencies, mode]);
     
     const handleSubmit = useCallback(() => {
-        setFunctionalDependencies(submittable);
+        causalStore.model.updateFunctionalDependencies(submittable);
         setDisplayPreview(false);
         setPreview(null);
-    }, [setFunctionalDependencies, submittable]);
+    }, [causalStore, submittable]);
 
     const handleCancel = useCallback(() => {
         setPreview(null);
@@ -169,13 +166,10 @@ const FDBatch: React.FC<FDPanelProps> = ({
                 <ActionButton iconProps={{ iconName: 'EngineeringGroup' || 'BranchSearch' }} onClick={generateFDFromExtInfo}>
                     使用扩展字段计算图
                 </ActionButton>
-                <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
+                {/* <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
                     导入影响关系
-                </ActionButton>
-                <ActionButton iconProps={{ iconName: 'FileTemplate' }} disabled>
-                    导入因果模型
-                </ActionButton>
-                <ActionButton iconProps={{ iconName: 'HintText' }} disabled onClick={undefined && generateFDFromAutoDetection}>
+                </ActionButton> */}
+                <ActionButton iconProps={{ iconName: 'HintText' }} onClick={generateFDFromAutoDetection}>
                     自动识别
                 </ActionButton>
             </Stack>
@@ -188,10 +182,8 @@ const FDBatch: React.FC<FDPanelProps> = ({
                             ) : (
                                 <FDEditor
                                     title="预览"
-                                    context={context}
                                     functionalDependencies={submittable}
                                     setFunctionalDependencies={updatePreview}
-                                    renderNode={renderNode}
                                 />
                             )}
                         </div>

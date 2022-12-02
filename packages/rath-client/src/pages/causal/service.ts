@@ -8,13 +8,13 @@ import CausalComputationWorker from './computation.worker.js?worker';
 
 type ICausalProps = {
     task: 'ig';
-    dataSource: IRow[];
-    fields: IFieldMeta[];
+    dataSource: readonly IRow[];
+    fields: readonly IFieldMeta[];
 } | {
     task: 'ig_cond';
-    dataSource: IRow[];
-    fields: IFieldMeta[];
-    matrix: number[][];
+    dataSource: readonly IRow[];
+    fields: readonly IFieldMeta[];
+    matrix: readonly (readonly number[])[];
 }
 
 export async function causalService(props: ICausalProps): Promise<number[][]> {
