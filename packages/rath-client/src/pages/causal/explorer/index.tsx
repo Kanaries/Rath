@@ -1,4 +1,4 @@
-import { DefaultButton, Icon, Slider, Toggle } from "@fluentui/react";
+import { DefaultButton, Icon, Slider, Stack, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -35,7 +35,7 @@ export interface ExplorerProps {
 const Container = styled.div`
     width: 100%;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: stretch;
     position: relative;
 `;
@@ -111,10 +111,8 @@ const Explorer: FC<ExplorerProps> = ({
     }, [mode, viewContext]);
 
     const [limit, setLimit] = useState(20);
-    const [autoLayout, setAutoLayout] = useState(true);
 
     const forceLayout = useCallback(() => {
-        setAutoLayout(true);
         forceRelayoutRef.current();
     }, []);
 
@@ -122,8 +120,22 @@ const Explorer: FC<ExplorerProps> = ({
         setMode('explore');
     }, [allowEdit]);
 
-    return (<>
+    return (
         <Container>
+            <Stack style={{ margin: '0 0 0.6em' }} horizontal >
+                <DefaultButton
+                    style={{
+                        flexGrow: 0,
+                        flexShrink: 0,
+                        flexBasis: 'max-content',
+                        padding: '0.4em 0',
+                    }}
+                    iconProps={{ iconName: 'Play' }}
+                    onClick={forceLayout}
+                >
+                    重新布局
+                </DefaultButton>
+            </Stack>
             <MainView>
                 <ExplorerMainView
                     forceRelayoutRef={forceRelayoutRef}
@@ -134,7 +146,6 @@ const Explorer: FC<ExplorerProps> = ({
                     onLinkTogether={onLinkTogether}
                     onRevertLink={onRevertLink}
                     onRemoveLink={onRemoveLink}
-                    autoLayout={autoLayout}
                     allowZoom={allowZoom}
                     handleLasso={handleLasso}
                     handleSubTreeSelected={handleSubTreeSelected}
@@ -146,18 +157,6 @@ const Explorer: FC<ExplorerProps> = ({
             </MainView>
             <Floating position="absolute" direction="start" onRenderAside={() => (<Icon iconName="Waffle" />)}>
                 <Tools>
-                    <DefaultButton
-                        style={{
-                            flexGrow: 0,
-                            flexShrink: 0,
-                            flexBasis: 'max-content',
-                            padding: '0.4em 0',
-                        }}
-                        iconProps={{ iconName: 'Repair' }}
-                        onClick={forceLayout}
-                    >
-                        刷新布局
-                    </DefaultButton>
                     <Toggle
                         label="画布缩放"
                         checked={allowZoom}
@@ -177,14 +176,6 @@ const Explorer: FC<ExplorerProps> = ({
                             inlineLabel
                         />
                     )}
-                    <Toggle
-                        label="自动布局"
-                        checked={autoLayout}
-                        onChange={(_, checked) => setAutoLayout(Boolean(checked))}
-                        onText="On"
-                        offText="Off"
-                        inlineLabel
-                    />
                     <Slider
                         // label="Display Limit"
                         label="边显示上限"
@@ -208,7 +199,7 @@ const Explorer: FC<ExplorerProps> = ({
                 </Tools>
             </Floating>
         </Container>
-    </>);
+    );
 };
 
 

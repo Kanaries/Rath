@@ -15,6 +15,7 @@ export enum NodeSelectionMode {
 }
 
 export enum ExplorationKey {
+    CAUSAL_BLAME = 'CausalBlame',
     AUTO_VIS = 'AutoVis',
     CROSS_FILTER = 'CrossFilter',
     CAUSAL_INSIGHT = 'CausalInsight',
@@ -23,6 +24,7 @@ export enum ExplorationKey {
 }
 
 export const ExplorationOptions = [
+    { key: ExplorationKey.CAUSAL_BLAME, text: '归因探索' },
     { key: ExplorationKey.AUTO_VIS, text: '自动可视化' },
     { key: ExplorationKey.CROSS_FILTER, text: '因果验证' },
     { key: ExplorationKey.CAUSAL_INSIGHT, text: '可解释探索' },
@@ -32,7 +34,7 @@ export const ExplorationOptions = [
 
 class CausalViewStore {
 
-    public explorationKey = ExplorationKey.AUTO_VIS;
+    public explorationKey = ExplorationKey.CAUSAL_BLAME;
     public graphNodeSelectionMode = NodeSelectionMode.SINGLE;
 
     protected selectedFidArr$ = new Subject<readonly string[]>();
@@ -83,17 +85,13 @@ class CausalViewStore {
             reaction(() => this.explorationKey, explorationKey => {
                 runInAction(() => {
                     switch (explorationKey) {
-                        case ExplorationKey.AUTO_VIS: {
-                            if (this.graphNodeSelectionMode === NodeSelectionMode.NONE) {
-                                this.graphNodeSelectionMode = NodeSelectionMode.SINGLE;
-                            }
-                            break;
-                        }
+                        case ExplorationKey.CAUSAL_BLAME:
                         case ExplorationKey.CAUSAL_INSIGHT:
                         case ExplorationKey.PREDICT: {
                             this.graphNodeSelectionMode = NodeSelectionMode.SINGLE;
                             break;
                         }
+                        case ExplorationKey.AUTO_VIS:
                         case ExplorationKey.CROSS_FILTER: {
                             this.graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
                             break;

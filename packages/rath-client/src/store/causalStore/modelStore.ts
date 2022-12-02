@@ -269,7 +269,7 @@ export default class CausalModelStore {
     }
 
     public addEdgeAssertion(sourceFid: string, targetFid: string, assertion: EdgeAssert) {
-        if (sourceFid === targetFid && this.assertions.some(decl => 'fid' in decl && [sourceFid, targetFid].includes(decl.fid))) {
+        if (sourceFid === targetFid || this.assertions.some(decl => 'fid' in decl && [sourceFid, targetFid].includes(decl.fid))) {
             return false;
         }
         const assertionsWithoutThisEdge = this.assertions.filter(

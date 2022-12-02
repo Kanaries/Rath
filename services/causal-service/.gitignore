@@ -1,3 +1,6 @@
 __pycache__
 .ipynb_checkpoints
 causal-learn
+
+# python virtual env
+cms

@@ -27,7 +27,6 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     onRevertLink: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     forceRelayoutRef: React.MutableRefObject<() => void>;
-    autoLayout: boolean;
     allowZoom: boolean;
     handleLasso?: (fields: IFieldMeta[]) => void;
     handleSubTreeSelected?: (subtree: Subtree | null) => void;
@@ -42,7 +41,6 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
     onRevertLink,
     onRemoveLink,
     forceRelayoutRef,
-    autoLayout,
     allowZoom,
     handleLasso,
     handleSubTreeSelected,
@@ -59,7 +57,6 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                 onLinkTogether={onLinkTogether}
                 onRevertLink={onRevertLink}
                 onRemoveLink={onRemoveLink}
-                autoLayout={autoLayout}
                 allowZoom={allowZoom}
                 handleLasso={handleLasso}
                 handleSubtreeSelected={handleSubTreeSelected}

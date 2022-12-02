@@ -107,9 +107,7 @@ const FDGraph: React.FC<{
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
 
-    const [forceUpdateFlag, setUpdateFlag] = useState<1 | 0>(1);
-
-    useReactiveGraph({
+    const graph = useReactiveGraph({
         containerRef,
         width,
         graphRef,
@@ -118,7 +116,6 @@ const FDGraph: React.FC<{
         mode: 'edit',
         handleEdgeClick: onRemoveLink,
         fields,
-        forceRelayoutFlag: forceUpdateFlag,
         allowZoom: false,
     });
 
@@ -137,6 +134,10 @@ const FDGraph: React.FC<{
         }
     }, []);
 
+    const handleForceLayout = useCallback(() => {
+        graph.refresh();
+    }, [graph]);
+
     return (
         <Container>
             <div ref={containerRef} />
@@ -147,10 +148,10 @@ const FDGraph: React.FC<{
                         padding: '0.4em 0',
                         height: 'unset',
                     }}
-                    onClick={() => setUpdateFlag(flag => flag ? 0 : 1)}
-                    iconProps={{ iconName: 'Repair' }}
+                    onClick={handleForceLayout}
+                    iconProps={{ iconName: 'Play' }}
                 >
-                    刷新布局
+                    重新布局
                 </DefaultButton>
             </div>
         </Container>

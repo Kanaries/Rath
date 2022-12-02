@@ -28,6 +28,9 @@ const Container = styled.div`
         left: 1em;
         top: 1em;
         padding: 0.8em;
+        & * {
+            user-select: none;
+        }
     }
 `;
 
@@ -40,7 +43,6 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     onRevertLink: (srcFid: string, tarFid: string) => void;
     onRemoveLink: (srcFid: string, tarFid: string) => void;
     forceRelayoutRef: React.MutableRefObject<() => void>;
-    autoLayout: boolean;
     handleLasso?: (fields: IFieldMeta[]) => void;
     handleSubtreeSelected?: (subtree: Subtree | null) => void;
     allowZoom: boolean;
@@ -55,7 +57,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     onRevertLink,
     onRemoveLink,
     forceRelayoutRef,
-    autoLayout,
     allowZoom,
     handleLasso,
     handleSubtreeSelected,
@@ -119,8 +120,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
 
-    const [forceRelayoutFlag, setForceRelayoutFlag] = useState<0 | 1>(0);
-    
     const [clickEdgeMode, setClickEdgeMode] = useState<'delete' | 'forbid'>('forbid');
     const [dblClickNodeMode, setDblClickNodeMode] = useState(NodeAssert.FORBID_AS_CAUSE);
 
@@ -142,11 +141,17 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
 
     const handleNodeDblClick = useCallback((fid: string | null) => {
         if (mode === 'edit' && fid) {
-            causalStore.model.addNodeAssertion(fid, dblClickNodeMode);
+            const overload = causalStore.model.assertions.find(decl => 'fid' in decl && decl.fid === fid);
+            if (overload?.assertion === dblClickNodeMode) {
+                // remove it
+                causalStore.model.removeNodeAssertion(fid);
+            } else {
+                causalStore.model.addNodeAssertion(fid, dblClickNodeMode);
+            }
         }
     }, [mode, dblClickNodeMode, causalStore]);
 
-    useReactiveGraph({
+    const graph = useReactiveGraph({
         containerRef,
         width,
         graphRef,
@@ -157,28 +162,18 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         handleEdgeClick,
         handleNodeDblClick,
         fields,
-        forceRelayoutFlag,
         allowZoom,
         handleSubtreeSelected,
     });
 
     useEffect(() => {
-        const { current: graph } = graphRef;
-        if (graph) {
-            graph.stopAnimate();
-            graph.destroyLayout();
-            if (autoLayout) {
-                graph.updateLayout(cfgRef.current.layout);
-            }
-        }
-    }, [autoLayout]);
-
-    useEffect(() => {
-        forceRelayoutRef.current = () => setForceRelayoutFlag(flag => flag === 0 ? 1 : 0);
+        forceRelayoutRef.current = () => {
+            graph.refresh();
+        };
         return () => {
             forceRelayoutRef.current = () => {};
         };
-    }, [forceRelayoutRef]);
+    }, [forceRelayoutRef, graph]);
 
     useEffect(() => {
         const { current: container } = containerRef;
@@ -203,9 +198,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
             <div className="container" ref={containerRef} />
             {mode === 'edit' && (
                 <div className="tools">
-                    <ActionButton
-                        onClick={() => causalStore.model.clearAssertions()}
-                    >
+                    <ActionButton onClick={() => causalStore.model.clearAssertions()}>
                         清空所有
                     </ActionButton>
                     <Dropdown

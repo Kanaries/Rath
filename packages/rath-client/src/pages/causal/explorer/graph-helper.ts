@@ -1,6 +1,5 @@
 import { RefObject, useEffect, useRef, MutableRefObject, useMemo } from "react";
 import G6, { Graph, INode } from "@antv/g6";
-import { Subject } from "rxjs";
 import { NodeSelectionMode, useCausalViewContext } from "../../../store/causalStore/viewStore";
 import type { Subtree } from "../exploration";
 import { PAG_NODE } from "../config";
@@ -19,9 +18,12 @@ export interface IReactiveGraphProps {
     handleNodeDblClick?: ((fid: string | null) => void) | undefined;
     handleEdgeClick?: ((edge: { srcFid: string, tarFid: string } | null) => void) | undefined;
     fields: readonly IFieldMeta[];
-    forceRelayoutFlag: 0 | 1;
     allowZoom: boolean;
     handleSubtreeSelected?: (subtree: Subtree | null) => void | undefined;
+}
+
+export interface IReactiveGraphHandler {
+    readonly refresh: () => void;
 }
 
 export const useReactiveGraph = ({
@@ -35,10 +37,9 @@ export const useReactiveGraph = ({
     handleNodeDblClick,
     handleEdgeClick,
     fields,
-    forceRelayoutFlag,
     allowZoom,
     handleSubtreeSelected,
-}: IReactiveGraphProps) => {
+}: IReactiveGraphProps): IReactiveGraphHandler => {
     const cfgRef = useRef(options);
     cfgRef.current = options;
     const dataRef = useRef(data);
@@ -134,10 +135,33 @@ export const useReactiveGraph = ({
     useEffect(() => {
         const { current: graph } = graphRef;
         if (graph) {
+            if (mode === 'explore') {
+                // It is found that under explore mode,
+                // it works strange that the edges are not correctly synchronized with changeData() method,
+                // while it's checked that the input data is always right.
+                // This unexpected behavior never occurs under edit mode.
+                // Fortunately we have data less frequently updated under explore mode,
+                // unlike what goes under edit mode, which behaviors well.
+                // Thus, this is a reasonable solution to completely reset the layout
+                // using read() method (is a combination of data() and render()).
+                // If a better solution which always perfectly prevents the unexpected behavior mentioned before,
+                // just remove this clause.
+                // @author kyusho antoineyang99@gmail.com
+                graph.read(data);
+            } else {
+                graph.changeData(data);
+                graph.refresh();
+            }
+        }
+    }, [graphRef, data, mode]);
+
+    useEffect(() => {
+        const { current: graph } = graphRef;
+        if (graph) {
             graph.data(dataRef.current);
             graph.render();
         }
-    }, [forceRelayoutFlag, graphRef]);
+    }, [graphRef]);
 
     useEffect(() => {
         const { current: graph } = graphRef;
@@ -146,26 +170,6 @@ export const useReactiveGraph = ({
             graph.render();
         }
     }, [options, graphRef]);
-
-    const data$ = useMemo(() => new Subject<typeof data>(), []);
-
-    useEffect(() => {
-        const subscription = data$.subscribe(d => {
-            const { current: container } = containerRef;
-            const { current: graph } = graphRef;
-            if (container && graph) {
-                graph.read(d);
-                // graph.layout();
-            }
-        });
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [containerRef, data$, graphRef]);
-
-    useEffect(() => {
-        data$.next(data);
-    }, [data, data$]);
 
     useEffect(() => {
         const { current: graph } = graphRef;
@@ -251,4 +255,10 @@ export const useReactiveGraph = ({
             });
         }
     }, [graphRef, selectedFieldGroup, data]);
+
+    return useMemo<IReactiveGraphHandler>(() => ({
+        refresh() {
+            graphRef.current?.read(dataRef.current);
+        },
+    }), [graphRef]);
 };

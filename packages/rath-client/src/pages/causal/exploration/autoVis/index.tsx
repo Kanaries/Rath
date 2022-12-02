@@ -1,7 +1,7 @@
 import { FC, useCallback, useMemo } from "react";
 import { IPattern } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
-import { Stack, Toggle } from "@fluentui/react";
+import { Stack } from "@fluentui/react";
 import { toJS } from "mobx";
 import styled from "styled-components";
 import { NodeSelectionMode, useCausalViewContext } from "../../../../store/causalStore/viewStore";
@@ -30,12 +30,6 @@ const AutoVis: FC<IAutoVisProps> = () => {
     const { causalStore } = useGlobalStore();
     const { visSample, fields } = causalStore.dataset;
     const viewContext = useCausalViewContext();
-    const toggleSelectionMode = useCallback(() => {
-        if (viewContext) {
-            const { graphNodeSelectionMode } = viewContext;
-            viewContext.setNodeSelectionMode(graphNodeSelectionMode === NodeSelectionMode.MULTIPLE ? NodeSelectionMode.SINGLE : NodeSelectionMode.MULTIPLE);
-        }
-    }, [viewContext]);
 
     const {
         graphNodeSelectionMode = NodeSelectionMode.NONE, selectedField = null, selectedFieldGroup = []
@@ -94,11 +88,6 @@ const AutoVis: FC<IAutoVisProps> = () => {
                         <FieldPlaceholder fields={fields} onAdd={appendFieldHandler} />
                     )}
                 </PillContainer>
-                <Toggle
-                    label="多选"
-                    checked={viewContext.graphNodeSelectionMode === NodeSelectionMode.MULTIPLE}
-                    onChange={toggleSelectionMode}
-                />
             </Stack>
             <Stack tokens={{ childrenGap: 10 }} >
                 {viewSpec && (
