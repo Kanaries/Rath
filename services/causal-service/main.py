@@ -12,11 +12,14 @@ import algorithms
 debug = os.environ.get('dev', None) is not None
 app = FastAPI()
 origins = [ "*" ]
+cors_regex = \
+    "^(https?\://)?(([\w\-_\.]*\.)?kanaries\.\w*|rath[\w\-_]*\-kanaries\.vercel.app)(\:\d{1,})?$" if not debug else \
+    "^(https?\://)?(([\w\-_\.]*\.)?kanaries\.\w*|rath[\w\-_]*\-kanaries\.vercel.app|localhost|192\.168\.\d{1,3}\.\d{1,3}|127\.0\.0\.1)(\:\d{1,})?$"
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    # allow_origin_regex="^https?\://([\w\-_\.]*\.kanaries\.\w*)(\:\d{1,})?$",
-    allow_origin_regex="^https?\://([\w\-_\.]*\.kanaries\.\w*|localhost)(\:\d{1,})?$", # dev only
+    # allow_origin_regex="^https?\://([\w\-_\.]*\.kanaries\.\w*|rath[\w\-_]*\-kanaries\.vercel.app)(\:\d{1,})?$",
+    allow_origin_regex=cors_regex,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
