@@ -54,9 +54,13 @@ const DetailContainer = styled.div`
 
 interface MetaDetailProps {
     field?: IFieldMeta;
+    /** @default 200 */
+    height?: number;
+    /** @default 620 */
+    width?: number;
 }
 const MetaDetail: React.FC<MetaDetailProps> = (props) => {
-    const { field } = props;
+    const { field, width = 620, height = 200 } = props;
     const [selection, setSelection] = React.useState<any[]>([]);
     const { dataSourceStore, commonStore, semiAutoStore } = useGlobalStore();
     const { cleanedData } = dataSourceStore;
@@ -134,8 +138,8 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
                 dataSource={field.distribution}
                 x="memberName"
                 y="count"
-                height={200}
-                width={620}
+                height={height}
+                width={width}
                 maxItemInView={1000}
                 analyticType={field.analyticType}
                 semanticType={field.semanticType}

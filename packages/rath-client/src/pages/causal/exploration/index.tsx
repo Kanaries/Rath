@@ -14,7 +14,7 @@ import CrossFilter from './crossFilter';
 import PredictPanel from './predictPanel';
 import RExplainer from './explainer/RExplainer';
 import AutoVis from './autoVis';
-import CausalBlame from './causalBlame';
+// import CausalBlame from './causalBlame';
 
 
 const Container = styled.div`
@@ -169,9 +169,9 @@ const Exploration = forwardRef<{
             </Stack>
             <div className="body">
                 {{
-                    [ExplorationKey.CAUSAL_BLAME]: (
-                        <CausalBlame />
-                    ),
+                    // [ExplorationKey.CAUSAL_BLAME]: (
+                    //     <CausalBlame />
+                    // ),
                     [ExplorationKey.AUTO_VIS]: (
                         <AutoVis />
                     ),

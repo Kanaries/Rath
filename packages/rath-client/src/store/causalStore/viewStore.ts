@@ -4,6 +4,7 @@ import { createContext, FC, useContext, useMemo, createElement, useEffect, useCa
 import { Subject, withLatestFrom } from "rxjs";
 import type { IFieldMeta } from "../../interfaces";
 import type { GraphNodeAttributes } from "../../pages/causal/explorer/graph-utils";
+import type { IPredictResult, PredictAlgorithm } from "../../pages/causal/predict";
 import type { IRInsightExplainResult } from "../../workers/insight/r-insight.worker";
 import type CausalStore from "./mainStore";
 
@@ -15,7 +16,7 @@ export enum NodeSelectionMode {
 }
 
 export enum ExplorationKey {
-    CAUSAL_BLAME = 'CausalBlame',
+    // CAUSAL_BLAME = 'CausalBlame',
     AUTO_VIS = 'AutoVis',
     CROSS_FILTER = 'CrossFilter',
     CAUSAL_INSIGHT = 'CausalInsight',
@@ -24,7 +25,7 @@ export enum ExplorationKey {
 }
 
 export const ExplorationOptions = [
-    { key: ExplorationKey.CAUSAL_BLAME, text: '归因探索' },
+    // { key: ExplorationKey.CAUSAL_BLAME, text: '归因分析' },
     { key: ExplorationKey.AUTO_VIS, text: '自动可视化' },
     { key: ExplorationKey.CROSS_FILTER, text: '因果验证' },
     { key: ExplorationKey.CAUSAL_INSIGHT, text: '可解释探索' },
@@ -34,8 +35,8 @@ export const ExplorationOptions = [
 
 class CausalViewStore {
 
-    public explorationKey = ExplorationKey.CAUSAL_BLAME;
-    public graphNodeSelectionMode = NodeSelectionMode.SINGLE;
+    public explorationKey = ExplorationKey.AUTO_VIS;
+    public graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
 
     protected selectedFidArr$ = new Subject<readonly string[]>();
     protected _selectedNodes: readonly IFieldMeta[] = [];
@@ -50,6 +51,9 @@ class CausalViewStore {
 
     public onRenderNode: ((node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined) | undefined;
     public localWeights: Map<string, Map<string, number>> | undefined;
+    public predictCache: {
+        id: string; algo: PredictAlgorithm; startTime: number; completeTime: number; data: IPredictResult;
+    }[];
     
     public readonly destroy: () => void;
 
@@ -63,12 +67,14 @@ class CausalViewStore {
             };
         };
         this.localWeights = undefined;
+        this.predictCache = [];
 
         const fields$ = new Subject<readonly IFieldMeta[]>();
 
         makeAutoObservable(this, {
             onRenderNode: observable.ref,
             localWeights: observable.ref,
+            predictCache: observable.shallow,
             // @ts-expect-error non-public field
             _selectedNodes: observable.ref,
             selectedFidArr$: false,
@@ -85,7 +91,7 @@ class CausalViewStore {
             reaction(() => this.explorationKey, explorationKey => {
                 runInAction(() => {
                     switch (explorationKey) {
-                        case ExplorationKey.CAUSAL_BLAME:
+                        // case ExplorationKey.CAUSAL_BLAME:
                         case ExplorationKey.CAUSAL_INSIGHT:
                         case ExplorationKey.PREDICT: {
                             this.graphNodeSelectionMode = NodeSelectionMode.SINGLE;
@@ -243,6 +249,14 @@ class CausalViewStore {
             weights.get(link.src)!.set(link.tar, link.responsibility);
         }
         this.localWeights = weights;
+    }
+
+    public pushPredictResult(result: typeof this.predictCache[number]) {
+        this.predictCache.push(result);
+    }
+
+    public clearPredictResults() {
+        this.predictCache = [];
     }
 
 }
