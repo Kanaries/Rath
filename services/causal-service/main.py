@@ -9,12 +9,15 @@ from pydantic import BaseModel, Field, Extra
 import interfaces as I
 import algorithms
 
-debug = os.environ.get('mode', 'prod') == 'dev'
-print("Development Mode" if debug else 'Production Mode', file=sys.stderr)
+params = {*os.environ.get('mode', '').split(',')}
+is_dev = 'dev' in params
+is_test = 'test' in params
+
+print("Development Mode" if is_dev else "Test Mode" if is_test else 'Production Mode', file=sys.stderr)
 app = FastAPI()
 origins = [ "*" ]
 cors_regex = \
-    "^(https?\://)?(([\w\-_\.]*\.)?kanaries\.\w*|rath[\w\-_]*\-kanaries\.vercel.app)(\:\d{1,})?$" if not debug else \
+    "^(https?\://)?(([\w\-_\.]*\.)?kanaries\.\w*|rath[\w\-_]*\-kanaries\.vercel.app)(\:\d{1,})?$" if not (is_test or is_dev) else \
     "^(https?\://)?(([\w\-_\.]*\.)?kanaries\.\w*|rath[\w\-_]*\-kanaries\.vercel.app|localhost|192\.168\.\d{1,3}\.\d{1,3}|127\.0\.0\.1)(\:\d{1,})?$"
 app.add_middleware(
     CORSMiddleware,
@@ -89,7 +92,7 @@ async def algoList(req: AlgoListRequest, response: Response) -> Dict[str, I.Serv
     # print("/algo/list", req)
     return {
         algoName: getAlgoSchema(algoName, req)
-        for algoName, algo in algorithms.DICT.items() if algo.dev_only == False or debug == True
+        for algoName, algo in algorithms.DICT.items() if algo.dev_only == False or is_dev == True
     }
     
 @app.post('/algo/list/{algoName}', response_model=I.ServiceSchemaResponse)
@@ -163,7 +166,7 @@ def causal(algoName: str, item: algorithms.CausalRequest, response: Response) ->
             orig_matrix=data.get('data'),
             matrix=data.get('matrix', data.get('data')),
             fields=data.get('fields'),
-            extra={ 'debug': data if debug else "" }
+            extra={ 'debug': data if is_dev or is_test else "" }
         )
         return I.CausalAlgorithmResponse(
             success=True,
