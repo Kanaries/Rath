@@ -322,6 +322,7 @@ class XLearnerParams(OptionalParams, title="XLearn"):
 
 class XLearner(AlgoInterface):
     ParamType = XLearnerParams
+    dev_only = False
     def __init__(self, dataSource: List[IRow], fields: List[IFieldMeta], params: Optional[ParamType] = ParamType()):
         super(XLearner, self).__init__(dataSource, fields, params)
         
