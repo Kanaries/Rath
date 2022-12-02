@@ -276,7 +276,7 @@ export const useGraphOptions = ({
                     opacity: 1,
                 },
                 semiHighlighted: {
-                    opacity: 0.6,
+                    opacity: 0.8,
                 },
                 faded: {
                     opacity: 0.12,

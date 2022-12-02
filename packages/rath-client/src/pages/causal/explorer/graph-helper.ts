@@ -251,7 +251,7 @@ export const useReactiveGraph = ({
                 });
                 graph.setItemState(edge, 'highlighted', isInSubtree);
                 graph.setItemState(edge, 'semiHighlighted', isHalfInSubtree);
-                graph.setItemState(edge, 'faded', selectedFieldGroup.length !== 0 && !isInSubtree);
+                graph.setItemState(edge, 'faded', selectedFieldGroup.length !== 0 && !isInSubtree && !isHalfInSubtree);
             });
         }
     }, [graphRef, selectedFieldGroup, data]);

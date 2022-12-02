@@ -26,7 +26,7 @@ export enum ExplorationKey {
 
 export const ExplorationOptions = [
     // { key: ExplorationKey.CAUSAL_BLAME, text: '归因分析' },
-    { key: ExplorationKey.AUTO_VIS, text: '自动可视化' },
+    { key: ExplorationKey.AUTO_VIS, text: '变量概览' },
     { key: ExplorationKey.CROSS_FILTER, text: '因果验证' },
     { key: ExplorationKey.CAUSAL_INSIGHT, text: '可解释探索' },
     { key: ExplorationKey.GRAPHIC_WALKER, text: '可视化自助分析' },
