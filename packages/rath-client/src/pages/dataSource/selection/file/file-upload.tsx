@@ -62,8 +62,13 @@ const ActionGroup = styled.div`
             > div {
                 width: 100%;
                 height: 100%;
-                padding: 0.6em 1.2em;
                 overflow: auto;
+            }
+            & p {
+                font-size: 0.8rem;
+                margin: 0.6em 1.2em;
+                color: #555;
+                user-select: none;
             }
         }
     }
@@ -143,12 +148,12 @@ const FileOutput = styled.div`
 
 const RawArea = styled.pre`
     font-size: 0.8rem;
-    padding: 0 1em 1em 0;
+    padding: 0.6em 1.2em 2em;
 `;
 
 const PreviewArea = styled.table`
     font-size: 0.8rem;
-    padding: 0 1em 1em 0;
+    padding: 0 0 1em;
     & * {
         white-space: nowrap;
     }
@@ -180,7 +185,11 @@ const FileUpload: FC<IFileUploadProps> = ({ preview, previewOfFile, previewOfRaw
 
     const handleReset = useCallback(() => {
         onFileUpload(null);
-        fileInputRef.current?.click();
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+            fileInputRef.current.files = null;
+            fileInputRef.current.click();
+        }
     }, [onFileUpload]);
 
     const handleButtonClick = useCallback(() => {
@@ -246,7 +255,7 @@ const FileUpload: FC<IFileUploadProps> = ({ preview, previewOfFile, previewOfRaw
                         }}
                     >
                         <PivotItem itemKey="parsed" headerText={intl.get('dataSource.upload.preview_parsed')} >
-                            {previewOfFile && (
+                            {previewOfFile ? (
                                 <PreviewArea>
                                     <tbody>
                                         <tr>
@@ -267,6 +276,8 @@ const FileUpload: FC<IFileUploadProps> = ({ preview, previewOfFile, previewOfRaw
                                         ))}
                                     </tbody>
                                 </PreviewArea>
+                            ) : (
+                                <p>{intl.get("dataSource.upload.data_is_empty")}</p>
                             )}
                         </PivotItem>
                         <PivotItem itemKey="raw" headerText={intl.get('dataSource.upload.preview_raw')} >

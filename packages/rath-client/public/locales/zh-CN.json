@@ -230,7 +230,7 @@
         },
         "upload": {
             "title": "连接你的数据集，根据需求调整以下配置",
-            "fileTypes": "支持 JSON, CSV, XLSX 文件",
+            "fileTypes": "支持 JSON, CSV 及 Excel 文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
             "sampling": "数据采样",
             "percentSize": "样本大小(行)",
@@ -240,8 +240,10 @@
             "firstOpen": "创建时间",
             "history": "最近使用",
             "new": "新的文件",
+            "sheet": "工作簿",
             "preview_parsed": "预览",
-            "preview_raw": "原始内容"
+            "preview_raw": "原始内容",
+            "data_is_empty": "数据集是空的。"
         },
         "exploreMode": {
             "title": "探索模式",

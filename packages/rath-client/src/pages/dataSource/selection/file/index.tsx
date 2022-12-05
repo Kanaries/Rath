@@ -3,7 +3,7 @@ import { PrimaryButton } from '@fluentui/react';
 import styled from "styled-components";
 import { observer } from "mobx-react-lite";
 import intl from "react-intl-universal";
-import { loadDataFile, readRaw, SampleKey } from "../../utils";
+import { isExcelFile, loadDataFile, loadExcelFile, parseExcelFile, readRaw, SampleKey } from "../../utils";
 import { dataBackup, logDataImport } from "../../../../loggers/dataImport";
 import type { IMuteFieldBase, IRow } from "../../../../interfaces";
 import FileUpload from "./file-upload";
@@ -40,6 +40,13 @@ const FileData: FC<FileDataProps> = (props) => {
     const [previewOfRaw, setPreviewOfRaw] = useState<string | null>(null);
     const [previewOfFile, setPreviewOfFile] = useState<Awaited<ReturnType<typeof loadDataFile>> | null>(null);
 
+    const [excelFile, setExcelFile] = useState<Awaited<ReturnType<typeof parseExcelFile>> | false>(false);
+    const [selectedSheetIdx, setSelectedSheetIdx] = useState(-1);
+
+    useEffect(() => {
+        setSelectedSheetIdx(-1);
+    }, [excelFile]);
+
     const filePreviewPendingRef = useRef<Promise<unknown>>();
 
     useEffect(() => {
@@ -47,7 +54,21 @@ const FileData: FC<FileDataProps> = (props) => {
         if (preview) {
             setPreviewOfRaw(null);
             setPreviewOfFile(null);
+            setExcelFile(false);
             toggleLoadingAnimation(true);
+            if (isExcelFile(preview)) {
+                const p = parseExcelFile(preview);
+                filePreviewPendingRef.current = p;
+                p.then(res => {
+                    if (p !== filePreviewPendingRef.current) {
+                        return;
+                    }
+                    setExcelFile(res);
+                }).finally(() => {
+                    toggleLoadingAnimation(false);
+                });
+                return;
+            }
             const p = Promise.all([
                 readRaw(preview, charset, 1024, 32, 128),
                 loadDataFile({
@@ -74,6 +95,27 @@ const FileData: FC<FileDataProps> = (props) => {
             setPreviewOfFile(null);
         }
     }, [charset, onDataLoading, onLoadingFailed, preview, sampleMethod, sampleSize, toggleLoadingAnimation]);
+
+    useEffect(() => {
+        if (excelFile && selectedSheetIdx !== -1) {
+            setPreviewOfRaw(null);
+            setPreviewOfFile(null);
+            filePreviewPendingRef.current = undefined;
+            toggleLoadingAnimation(true);
+            const p = loadExcelFile(excelFile, selectedSheetIdx, charset);
+            filePreviewPendingRef.current = p;
+            p.then(res => {
+                if (p !== filePreviewPendingRef.current) {
+                    return;
+                }
+                setPreviewOfFile(res);
+            }).catch(reason => {
+                onLoadingFailed(reason);
+            }).finally(() => {
+                toggleLoadingAnimation(false);
+            });
+        }
+    }, [excelFile, onLoadingFailed, selectedSheetIdx, toggleLoadingAnimation, charset]);
 
     const handleFileLoad = useCallback((file: File | null) => {
         setPreview(file);
@@ -106,6 +148,9 @@ const FileData: FC<FileDataProps> = (props) => {
                 sampleSize={sampleSize}
                 setSampleSize={setSampleSize}
                 preview={preview}
+                sheetNames={excelFile ? excelFile.SheetNames : false}
+                selectedSheetIdx={selectedSheetIdx}
+                setSelectedSheetIdx={setSelectedSheetIdx}
             />
             <FileUpload preview={preview} previewOfFile={previewOfFile} previewOfRaw={previewOfRaw} onFileUpload={handleFileLoad} />
             {preview ? (

@@ -1,6 +1,6 @@
 import intl from 'react-intl-universal';
 import { ChoiceGroup, Dropdown, SpinButton } from "@fluentui/react";
-import { FC } from "react";
+import type { FC } from "react";
 import styled from "styled-components";
 import { SampleKey, useSampleOptions } from '../../utils';
 
@@ -66,9 +66,15 @@ export interface IFileHelperProps {
     sampleSize: number;
     setSampleSize: (sampleSize: number | ((prev: number) => number)) => void;
     preview: File | null;
+    sheetNames: string[] | false;
+    selectedSheetIdx: number;
+    setSelectedSheetIdx: (selectedSheetIdx: number) => void;
 }
 
-const FileHelper: FC<IFileHelperProps> = ({ charset, setCharset, sampleMethod, setSampleMethod, sampleSize, setSampleSize, preview }) => {
+const FileHelper: FC<IFileHelperProps> = ({
+    charset, setCharset, sampleMethod, setSampleMethod, sampleSize, setSampleSize, preview, sheetNames,
+    selectedSheetIdx, setSelectedSheetIdx,
+}) => {
     const sampleOptions = useSampleOptions();
 
     return (
@@ -114,6 +120,15 @@ const FileHelper: FC<IFileHelperProps> = ({ charset, setCharset, sampleMethod, s
                     )}
                 </>
             ) : null}
+            {sheetNames && (
+                <Dropdown
+                    label={intl.get("dataSource.upload.sheet")}
+                    options={sheetNames.map((name, i) => ({ key: `${i}`, text: name }))}
+                    selectedKey={`${selectedSheetIdx}`}
+                    onChange={(_, option) => option?.key && setSelectedSheetIdx(Number(option.key))}
+                    styles={{ root: { padding: '1em 0', display: 'flex', flexDirection: 'row', marginRight: '2em' }, label: { marginRight: '1em', fontWeight: 400 }, dropdown: { width: '10em' } }}
+                />
+            )}
         </Container>
     );
 };

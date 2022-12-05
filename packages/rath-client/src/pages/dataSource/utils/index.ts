@@ -2,6 +2,7 @@ import { Sampling } from 'visual-insights';
 import { FileReader as KFileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
+import * as xlsx from 'xlsx';
 import { STORAGE_FILE_SUFFIX } from "../../../constants";
 import { FileLoader } from "../../../utils";
 import { IMuteFieldBase, IRow } from "../../../interfaces";
@@ -128,6 +129,36 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
     const dataset = await transformRawDataService(rawData);
     return dataset
 }
+
+export const isExcelFile = (file: File): boolean => {
+    return [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',    // xlsx
+        'application/vnd.ms-excel.sheet.binary.macroEnabled.12',                // xlsb
+        'application/vnd.ms-excel',                                             // xls
+        'application/vnd.ms-excel.sheet.macroEnabled.12',                       // xlsm
+    ].includes(file.type);
+};
+
+export const parseExcelFile = async (file: File) => {
+    const content = await FileLoader.binaryLoader(file);
+    const data = xlsx.read(content);
+    return data;
+};
+
+export const loadExcelFile = async (data: Awaited<ReturnType<typeof parseExcelFile>>, sheetIdx: number, encoding: string): Promise<{
+    fields: IMuteFieldBase[];
+    dataSource: IRow[];
+}> => {
+    const sheet = data.SheetNames[sheetIdx];
+    const worksheet = data.Sheets[sheet];
+    const csvData = xlsx.utils.sheet_to_csv(worksheet, { skipHidden: true });   // more options available here
+    const csvFile = new File([new Blob([csvData], { type: 'text/plain' })], 'file.csv');
+    const rawData = (await KFileReader.csvReader({
+        file: csvFile,
+        encoding,
+    })) as IRow[];
+    return await transformRawDataService(rawData);
+};
 
 export async function loadRathStorageFile (file: File): Promise<IRathStorage> {
     // FIXME file type

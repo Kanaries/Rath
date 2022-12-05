@@ -230,7 +230,7 @@
         },
         "upload": {
             "title": "Upload Your own dataset",
-            "fileTypes": "JSON, CSV, XLSX are supported.",
+            "fileTypes": "JSON, CSV and Excel files are supported.",
             "uniqueIdIssue": "Add unique ids for fields",
             "sampling": "Sampling",
             "percentSize": "sample size(rows)",
@@ -240,8 +240,10 @@
             "firstOpen": "First created",
             "history": "Open Recent",
             "new": "New file",
+            "sheet": "Sheet",
             "preview_parsed": "Preview",
-            "preview_raw": "Raw"
+            "preview_raw": "Raw",
+            "data_is_empty": "This dataset is empty"
         },
         "exploreMode": {
             "title": "Explore Mode",
