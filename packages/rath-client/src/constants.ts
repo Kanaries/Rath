@@ -30,8 +30,8 @@ export const EXPLORE_MODE = {
 export const DEMO_DATA_REQUEST_TIMEOUT = 1000 * 10;
 
 export const ENGINE_CONNECTION_STAGES: Array<{ stage: number; name: IECStatus; description?: string }> = [
-    { stage: 0, name: 'client', description: 'client module importetd.' },
-    { stage: 1, name: 'proxy', description: 'database proxy connector lanuched.' },
+    { stage: 0, name: 'client', description: 'client module imported.' },
+    { stage: 1, name: 'proxy', description: 'database proxy connector launched.' },
     { stage: 2, name: 'engine', description: 'clickhouse connected.' },
 ];
 
@@ -53,3 +53,18 @@ export const STORAGES = {
     CONFIG: 'config',
     ITERATOR_META: 'iterator_meta',
 }
+
+export enum RATH_ENV {
+    DEV = 'development environment',
+    TEST = 'test environment',
+    LPE = 'local preview environment',
+    IPE = 'integrative preview environment',
+    ONLINE = 'online production environment',
+}
+
+export const RathEnv: RATH_ENV = (
+    process.env.NODE_ENV === 'development' ? RATH_ENV.DEV
+        : process.env.NODE_ENV === 'test' ? RATH_ENV.TEST
+        : window.location.host.match(/^(.*\.)?kanaries\.(net|cn)$/) ? RATH_ENV.ONLINE
+        : window.location.host.match(/^.*kanaries\.vercel\.app$/) ? RATH_ENV.IPE : RATH_ENV.LPE
+);

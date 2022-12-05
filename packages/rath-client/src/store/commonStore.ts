@@ -2,7 +2,7 @@ import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Specification } from 'visual-insights';
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
 import { IAccessPageKeys, ITaskTestMode, IVegaSubset } from '../interfaces';
-import { getAvatarURL, getServerUrl, AVATAR_IMG_LIST, IAVATAR_TYPES } from '../utils/user';
+import { getAvatarURL, getMainServerUrl, AVATAR_IMG_LIST, IAVATAR_TYPES } from '../utils/user';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
 import { transVegaSubset2Schema } from '../utils/transform';
 import { notify } from '../components/error';
@@ -159,7 +159,7 @@ export class CommonStore {
     }
 
     public async liteAuth(certMethod: 'email' | 'phone') {
-        const url = getServerUrl('/api/liteAuth');
+        const url = getMainServerUrl('/api/liteAuth');
         const { certCode, phone, email } = this.signup;
         const res = await fetch(url, {
             method: 'POST',
@@ -212,7 +212,7 @@ export class CommonStore {
 
     public async commitLogout() {
         try {
-            const url = getServerUrl('/api/logout');
+            const url = getMainServerUrl('/api/logout');
             const res = await fetch(url, {
                 method: 'GET',
             });
@@ -237,7 +237,7 @@ export class CommonStore {
 
     public async updateAuthStatus() {
         try {
-            const url = getServerUrl('/api/loginStatus');
+            const url = getMainServerUrl('/api/loginStatus');
             const res = await request.get<{}, { loginStatus: boolean; userName: string }>(url);
             if (res.loginStatus && res.userName !== null) {
                 runInAction(() => {
@@ -254,7 +254,7 @@ export class CommonStore {
         }
     }
     public async getPersonalInfo() {
-        const url = getServerUrl('/api/ce/personal');
+        const url = getMainServerUrl('/api/ce/personal');
         try {
             const result = await request.get<{}, IUserInfo>(url);
             if (result !== null) {
@@ -279,7 +279,7 @@ export class CommonStore {
             const { file } = value;
             const data = new FormData();
             file && data.append('file', file);
-            const url = getServerUrl('/api/ce/avatar');
+            const url = getMainServerUrl('/api/ce/avatar');
             const res = await fetch(url, {
                 method: 'POST',
                 credentials: 'include',
@@ -300,7 +300,7 @@ export class CommonStore {
     }
 
     public async getAvatarImgUrl() {
-        const url = getServerUrl('/api/ce/avatar');
+        const url = getMainServerUrl('/api/ce/avatar');
         try {
             const result = await request.get<{}, { avatarURL: string }>(url);
             if (result !== null) {
