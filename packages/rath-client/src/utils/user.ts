@@ -18,7 +18,7 @@ export const AVATAR_IMG_LIST: string[] = new Array(18)
 
 export const DEFAULT_AVATAR_URL_PREFIX = 'https://foghorn-assets.s3.ap-northeast-1.amazonaws.com/avatar/';
 
-const DEFAULT_MAIN_SERVER_HOST = RathEnv === `${
+const DEFAULT_MAIN_SERVER_HOST = `${
     window.location.host.match(/kanaries\.[a-z]+$/i)?.[0] ?? 'kanaries.net'
 }`;
 
