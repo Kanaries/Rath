@@ -21,6 +21,7 @@
     "@kanaries/loa": "^0.0.16",
     "@kanaries/web-data-loader": "0.1.7",
     "@material-ui/core": "^5.0.0-beta.5",
+    "@zip.js/zip.js": "^2.6.60",
     "airtable": "^0.11.4",
     "ali-react-table": "^2.6.1",
     "codemirror": "^6.0.1",
