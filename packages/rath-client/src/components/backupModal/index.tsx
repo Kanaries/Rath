@@ -1,9 +1,10 @@
 import { Checkbox, Modal, PrimaryButton, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect } from 'react';
+import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
-import { downloadFileWithContent } from '../../utils/download';
+import { downloadFileFromBlob, getKRFParseMap, IKRFComponents } from '../../utils/download';
 
 const Cont = styled.div`
     padding: 1em;
@@ -25,47 +26,61 @@ const BackupModal: React.FC = (props) => {
     const mutFieldsLength = dataSourceStore.mutFields.length;
     const collectionLength = collectionStore.collectionList.length;
     const [backupItemKeys, setBackupItemKeys] = React.useState<{
-        data: boolean;
-        meta: boolean;
-        collection: boolean;
+        [key in IKRFComponents]: boolean;
     }>({
-        data: rawDataLength > 0,
-        meta: mutFieldsLength > 0,
-        collection: collectionLength > 0,
+        [IKRFComponents.data]: rawDataLength > 0,
+        [IKRFComponents.meta]: mutFieldsLength > 0,
+        [IKRFComponents.collection]: collectionLength > 0,
+        [IKRFComponents.causal]: false,
+        [IKRFComponents.dashboard]: false,
+        [IKRFComponents.mega]: false
     });
     useEffect(() => {
         setBackupItemKeys({
             data: rawDataLength > 0,
             meta: mutFieldsLength > 0,
             collection: collectionLength > 0,
-        });
+            causal: false,
+            dashboard: false,
+            mega: false
+        })
     }, [rawDataLength, mutFieldsLength, collectionLength])
     // const storageItems =
-    const backup = () => {
-        backupItemKeys.data && dataSourceStore.backupDataStore().then((data) => {
-            const content = JSON.stringify(data);
-            downloadFileWithContent(content, 'dataset_rathds.json');
-        });
-        backupItemKeys.meta && dataSourceStore.backupMetaStore().then((data) => {
-            const content = JSON.stringify(data);
-            downloadFileWithContent(content, 'dataset_rathds_meta.json');
-        });
-        backupItemKeys.collection && collectionStore.backupCollectionStore().then((data) => {
-            const content = JSON.stringify(data);
-            downloadFileWithContent(content, 'collection_rathds.json');
-        });
+    const backup = async () => {
+        const parseMap = getKRFParseMap(backupItemKeys);
+        const zipFileWriter = new BlobWriter();
+        const zipWriter = new ZipWriter(zipFileWriter);
+        const pm = new TextReader(JSON.stringify(parseMap));
+        zipWriter.add("parse_map.json", pm);
+        if (backupItemKeys.data && parseMap[IKRFComponents.data]) {
+            const data = await dataSourceStore.backupDataStore()
+            const content = new TextReader(JSON.stringify(data));
+            await zipWriter.add(parseMap[IKRFComponents.data]!, content);
+        }
+        if (backupItemKeys.meta && parseMap[IKRFComponents.meta]) {
+            const data = await dataSourceStore.backupMetaStore()
+            const content = new TextReader(JSON.stringify(data));
+            await zipWriter.add(parseMap[IKRFComponents.meta]!, content);
+        }
+        if (backupItemKeys.collection && parseMap[IKRFComponents.collection]) {
+            const data = await collectionStore.backupCollectionStore()
+            const content = new TextReader(JSON.stringify(data));
+            await zipWriter.add(parseMap[IKRFComponents.collection]!, content);
+        }
+        const blob = await zipWriter.close();
+        downloadFileFromBlob(blob, 'rathds_backup.krf');
     };
     const items = [
         {
-            key: 'data',
+            key: IKRFComponents.data,
             text: `Raw Data (${rawDataLength} rows)`,
         },
         {
-            key: 'meta',
+            key: IKRFComponents.meta,
             text: `Meta Data (${mutFieldsLength} fields)`,
         },
         {
-            key: 'collection',
+            key: IKRFComponents.collection,
             text: `Collection (${collectionLength} collections)`,
         },
     ]
