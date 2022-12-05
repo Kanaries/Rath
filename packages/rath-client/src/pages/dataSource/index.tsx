@@ -16,6 +16,7 @@ import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '..
 import { Card } from '../../components/card';
 import { setDataStorage } from '../../utils/storage';
 import { BorderCard } from '../../components/borderCard';
+import BackupModal from '../../components/backupModal';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
 import Selection from './selection/index';
@@ -115,6 +116,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 <ImportStorage />
                 <AnalysisSettings />
                 <FastSelection />
+                <BackupModal />
                 <Stack horizontal>
                     <MainActionButton />
                     {dataImportButton(intl.get('dataSource.importData.buttonName'), rawDataMetaInfo.length === 0)}

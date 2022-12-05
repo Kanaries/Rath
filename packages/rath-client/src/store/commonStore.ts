@@ -44,6 +44,7 @@ export class CommonStore {
     public taskMode: ITaskTestMode = ITaskTestMode.local;
     public messages: Array<{ type: ErrorType; content: string }> = []; //[{type:'error', content: 'This is a test.'}];
     public showStorageModal: boolean = false;
+    public showBackupModal: boolean = false;
     public showAnalysisConfig: boolean = false;
     public navMode: 'text' | 'icon' = 'text';
     public graphicWalkerSpec: Specification;
@@ -60,7 +61,6 @@ export class CommonStore {
     };
     public avatarType: IAVATAR_TYPES = IAVATAR_TYPES.default;
     public avatarKey: string = localStorage.getItem(avatar_storage_key) || AVATAR_IMG_LIST[0];
-
     constructor() {
         this.login = {
             userName: '',
@@ -125,6 +125,9 @@ export class CommonStore {
     }
     public setShowStorageModal(show: boolean) {
         this.showStorageModal = show;
+    }
+    public setShowBackupModal(show: boolean) {
+        this.showBackupModal = show;
     }
     public async setComputationEngine(engine: string) {
         try {
