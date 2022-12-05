@@ -7,7 +7,6 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
     const fileText = intl.get(`dataSource.importData.type.${IDataSourceType.FILE}`);
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
     const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
-    const localText = intl.get('common.history');
     const dbText = intl.get(`dataSource.importData.type.${IDataSourceType.DATABASE}`);
 
     const options = useMemo<Array<{ key: IDataSourceType; text: string }>>(() => {
@@ -15,13 +14,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
             {
                 key: IDataSourceType.FILE,
                 text: fileText,
-                iconProps: { iconName: "ExcelDocument" },
-            },
-            {
-                key: IDataSourceType.LOCAL,
-                text: localText,
                 iconProps: { iconName: "FabricUserFolder" },
-                disabled: false,
             },
             {
                 key: IDataSourceType.DEMO,
@@ -51,7 +44,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 disabled: false
             },
         ];
-    }, [fileText, restfulText, demoText, localText, dbText]);
+    }, [fileText, restfulText, demoText, dbText]);
     return options;
 };
 

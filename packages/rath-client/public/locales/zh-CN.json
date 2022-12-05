@@ -174,7 +174,8 @@
             "lackDimension": "数据集中缺少维度。（全自动化分析模块部分能力会受到影响）",
             "lackMeasure": "数据集中缺少度量，（全自动化分析模块会受到影响，可以尝试使用其他模块）",
             "smallSample": "数据集中样本数量低于预期，可能会对推荐结果的一般性造成影响。（小样本问题）",
-            "forceAnalysis": "强制分析"
+            "forceAnalysis": "强制分析",
+            "upload_file_too_large": "文件体积过大。尝试使用更少的数据，或将文件转换为 CSV 格式以使用采样功能。"
         },
         "meta": {
             "title": "元数据视图",
@@ -190,7 +191,7 @@
         "importData": {
             "buttonName": "选择数据",
             "type": {
-                "file": "文件",
+                "file": "本地",
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
                 "demo": "示例数据",
@@ -229,11 +230,18 @@
         },
         "upload": {
             "title": "连接你的数据集，根据需求调整以下配置",
-            "fileTypes": "支持csv, json文件",
+            "fileTypes": "支持 JSON, CSV, XLSX 文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
             "sampling": "数据采样",
             "percentSize": "样本大小(行)",
-            "upload": "上传文件"
+            "upload": "上传文件",
+            "change": "重新选择",
+            "lastOpen": "上一次使用",
+            "firstOpen": "创建时间",
+            "history": "最近使用",
+            "new": "新的文件",
+            "preview_parsed": "预览",
+            "preview_raw": "原始内容"
         },
         "exploreMode": {
             "title": "探索模式",

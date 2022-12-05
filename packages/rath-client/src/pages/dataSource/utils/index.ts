@@ -1,5 +1,5 @@
 import { Sampling } from 'visual-insights';
-import { FileReader } from '@kanaries/web-data-loader'
+import { FileReader as KFileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
 import { STORAGE_FILE_SUFFIX } from "../../../constants";
@@ -53,6 +53,28 @@ export async function transformRawDataService (rawData: IRow[]): Promise<{
     }
 }
 
+export const readRaw = (file: File, encoding?: string, limit?: number, rowLimit?: number, colLimit?: number): Promise<string | null> => {
+    const fr = new FileReader();
+    fr.readAsText(file, encoding);
+    return new Promise<string | null>(resolve => {
+        fr.onload = () => {
+            let text = fr.result as string | null;
+            if (typeof text === 'string') {
+                if (limit) {
+                    text = text.slice(0, limit);
+                }
+                if (rowLimit || colLimit) {
+                    text = text.split('\n').slice(0, rowLimit).map(row => row.slice(0, colLimit)).join('\n');
+                }
+                return resolve(text);
+            } else {
+                return resolve(text);
+            }
+        };
+        fr.onerror = () => resolve(null);
+    });
+};
+
 interface LoadDataFileProps {
     file: File;
     sampleMethod: SampleKey;
@@ -79,7 +101,7 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
     if (file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
         rawData = []
         if (sampleMethod === SampleKey.reservoir) {
-            rawData = (await FileReader.csvReader({
+            rawData = (await KFileReader.csvReader({
               file,
               encoding,
               config: {
@@ -89,7 +111,7 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
               onLoading
             })) as IRow[]
         } else {
-            rawData = (await FileReader.csvReader({
+            rawData = (await KFileReader.csvReader({
               file,
               encoding,
               onLoading

@@ -35,7 +35,7 @@ const Selection: React.FC<SelectionProps> = props => {
 
     const formMap: Record<IDataSourceType, JSX.Element> = {
         [IDataSourceType.FILE]: (
-            <FileData onDataLoading={onDataLoading} onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+            <FileData onDataLoading={onDataLoading} onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} toggleLoadingAnimation={setLoadingAnimation} />
         ),
         [IDataSourceType.DEMO]: (
             <DemoData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />

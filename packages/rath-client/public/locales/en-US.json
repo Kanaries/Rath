@@ -63,7 +63,7 @@
     "config": {
         "computationEngine": {
             "title": "Computation Engine",
-            "desc": "Define where the analysis task run. If your dataset is small (< 100MB), web worker mode is recommanded. Otherwise try clickhosue mode.",
+            "desc": "Define where the analysis task run. If your dataset is small (< 100MB), web worker mode is recommended. Otherwise try clickhouse mode.",
             "clickhouse": "ClickHouse",
             "webworker": "Browser(Web Worker)",
             "notCompatible": "Not compatible with datasource"
@@ -174,8 +174,9 @@
             "lackData": "Lack of Data",
             "lackDimension": "It seems you don't have dimensions in your dataset. (part of functions of mega-automation maybe influenced.)",
             "lackMeasure": "It seems you don't have measures in your dataset. (part of functions of mega-automation maybe influenced.)",
-            "smallSample": "The sample size is not big enough, which may influence the reliability of recommandation.",
-            "forceAnalysis": "Force Analysis"
+            "smallSample": "The sample size is not big enough, which may influence the reliability of recommendation.",
+            "forceAnalysis": "Force Analysis",
+            "upload_file_too_large": "This file is too large. Use a smaller subset or transform it into CSV file to apply sampling."
         },
         "meta": {
             "uniqueValue": "Unique Value",
@@ -191,7 +192,7 @@
             "buttonName": "Import Data",
             "load": "Load Data",
             "type": {
-                "file": "File",
+                "file": "Local",
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
                 "demo": "Demo",
@@ -229,11 +230,18 @@
         },
         "upload": {
             "title": "Upload Your own dataset",
-            "fileTypes": "csv, json are supportted.",
+            "fileTypes": "JSON, CSV, XLSX are supported.",
             "uniqueIdIssue": "Add unique ids for fields",
             "sampling": "Sampling",
             "percentSize": "sample size(rows)",
-            "upload": "Upload"
+            "upload": "Upload",
+            "change": "Browse",
+            "lastOpen": "Last opened",
+            "firstOpen": "First created",
+            "history": "Open Recent",
+            "new": "New file",
+            "preview_parsed": "Preview",
+            "preview_raw": "Raw"
         },
         "exploreMode": {
             "title": "Explore Mode",
@@ -353,7 +361,7 @@
             "pin": "pin",
             "compare": "compare",
             "vizsys": {
-                "title": "visualization recommand system",
+                "title": "visualization recommend system",
                 "lite": "Lite mode(fast)",
                 "strict": "Strict mode"
             },
@@ -436,7 +444,7 @@
             "$ReLU": "Projects a field by x -> max(0, x) as a new column.",
             "$match": "Finds the matched parts of each text content using Regular Expression as a new column.",
             "$replace": "Replaces the matched parts of each text content with a given string using Regular Expression as a new column.",
-            "$concat": "Concats text contents of all the fields as a new column.",
+            "$concat": "Merge two or more text contents of all the fields as a new column.",
             "$sigmoid": "Projects a field by x -> (1 + e^-x)^-1 as a new column.",
             "$boxClip": "Maps overflowing values (due to boxplot) to the domain as a new column.",
             "$meanClip": "Maps overflowing values (due to the given domain) to the mean of all the other values as a new column.",
@@ -480,7 +488,7 @@
     },
     "login": {
         "clickLogin": "Click Login",
-        "haveSent": "Alredy Send",
+        "haveSent": "Already Sent",
         "signIn": "Sign In",
         "signOut": "Sign Out",
         "preferences": "Preferences",
@@ -506,7 +514,7 @@
             "errEmail": "not support email type"
         },
         "password": {
-            "userName": "UsernNme",
+            "userName": "Username",
             "password": "Password"
         }
     }

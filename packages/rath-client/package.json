@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.10.4",
     "@fluentui/font-icons-mdl2": "^8.4.13",
     "@fluentui/react": "^8.94.4",
+    "@fluentui/react-file-type-icons": "^8.8.3",
     "@fluentui/react-hooks": "^8.6.11",
     "@kanaries/graphic-walker": "0.2.8",
     "@kanaries/loa": "^0.0.16",
