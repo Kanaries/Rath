@@ -28,11 +28,22 @@ export enum IKRFComponents {
     dashboard = 'dashboard',
     mega = 'mega',
 }
-export function getKRFParseMap (props: { [key in IKRFComponents]: boolean }): { [key in IKRFComponents]?: string } {
-    const parseMap: { [key in IKRFComponents]?: string } = {};
+interface IParseMapItem {
+    key: IKRFComponents;
+    name: string;
+    type?: string;
+    fileType: string;
+}
+export function getKRFParseMap (props: { [key in IKRFComponents]: boolean }): IParseMapItem[]{
+    const parseMap: IParseMapItem[] = []
     Object.keys(props).forEach((key) => {
         if (props[key as IKRFComponents]) {
-            parseMap[key as IKRFComponents] = `rath_${IKRFComponents[key as IKRFComponents]}.json`;
+            parseMap.push({
+                key: key as IKRFComponents,
+                name: `rath_${IKRFComponents[key as IKRFComponents]}.json`,
+                fileType: 'json',
+                type: key === IKRFComponents.meta ? 'meta' : undefined,
+            })
         }
     });
     return parseMap
