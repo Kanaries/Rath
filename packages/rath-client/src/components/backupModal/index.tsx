@@ -47,28 +47,30 @@ const BackupModal: React.FC = (props) => {
     }, [rawDataLength, mutFieldsLength, collectionLength])
     // const storageItems =
     const backup = async () => {
-        const parseMap = getKRFParseMap(backupItemKeys);
+        const parseMapItems = getKRFParseMap(backupItemKeys);
         const zipFileWriter = new BlobWriter();
         const zipWriter = new ZipWriter(zipFileWriter);
         const pm = new TextReader(JSON.stringify({
-            ...parseMap,
+            items: parseMapItems,
             version: KRF_VERSION
         }));
         zipWriter.add("parse_map.json", pm);
-        if (backupItemKeys.data && parseMap[IKRFComponents.data]) {
-            const data = await dataSourceStore.backupDataStore()
-            const content = new TextReader(JSON.stringify(data));
-            await zipWriter.add(parseMap[IKRFComponents.data]!, content);
-        }
-        if (backupItemKeys.meta && parseMap[IKRFComponents.meta]) {
-            const data = await dataSourceStore.backupMetaStore()
-            const content = new TextReader(JSON.stringify(data));
-            await zipWriter.add(parseMap[IKRFComponents.meta]!, content);
-        }
-        if (backupItemKeys.collection && parseMap[IKRFComponents.collection]) {
-            const data = await collectionStore.backupCollectionStore()
-            const content = new TextReader(JSON.stringify(data));
-            await zipWriter.add(parseMap[IKRFComponents.collection]!, content);
+        for (let item of parseMapItems) {
+            if (item.key === IKRFComponents.data) {
+                const data = await dataSourceStore.backupDataStore()
+                const content = new TextReader(JSON.stringify(data));
+                await zipWriter.add(item.name, content);
+            }
+            if (item.key === IKRFComponents.meta) {
+                const data = await dataSourceStore.backupMetaStore()
+                const content = new TextReader(JSON.stringify(data));
+                await zipWriter.add(item.name, content);
+            }
+            if (item.key === IKRFComponents.collection) {
+                const data = await collectionStore.backupCollectionStore()
+                const content = new TextReader(JSON.stringify(data));
+                await zipWriter.add(item.name, content);
+            }
         }
         const blob = await zipWriter.close();
         downloadFileFromBlob(blob, 'rathds_backup.krf');
