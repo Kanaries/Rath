@@ -20,7 +20,7 @@ const Cont = styled.div`
 `
 
 const BackupModal: React.FC = (props) => {
-    const { commonStore, dataSourceStore, collectionStore } = useGlobalStore();
+    const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore } = useGlobalStore();
     const { showBackupModal } = commonStore;
     const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
     const mutFieldsLength = dataSourceStore.mutFields.length;
@@ -33,7 +33,7 @@ const BackupModal: React.FC = (props) => {
         [IKRFComponents.collection]: collectionLength > 0,
         [IKRFComponents.causal]: false,
         [IKRFComponents.dashboard]: false,
-        [IKRFComponents.mega]: false
+        [IKRFComponents.mega]: false,
     });
     useEffect(() => {
         setBackupItemKeys({
@@ -55,21 +55,43 @@ const BackupModal: React.FC = (props) => {
             version: KRF_VERSION
         }));
         zipWriter.add("parse_map.json", pm);
-        for (let item of parseMapItems) {
-            if (item.key === IKRFComponents.data) {
-                const data = await dataSourceStore.backupDataStore()
-                const content = new TextReader(JSON.stringify(data));
-                await zipWriter.add(item.name, content);
-            }
-            if (item.key === IKRFComponents.meta) {
-                const data = await dataSourceStore.backupMetaStore()
-                const content = new TextReader(JSON.stringify(data));
-                await zipWriter.add(item.name, content);
-            }
-            if (item.key === IKRFComponents.collection) {
-                const data = await collectionStore.backupCollectionStore()
-                const content = new TextReader(JSON.stringify(data));
-                await zipWriter.add(item.name, content);
+        for await (const item of parseMapItems) {
+            switch (item.key) {
+                case IKRFComponents.data: {
+                    const data = await dataSourceStore.backupDataStore()
+                    const content = new TextReader(JSON.stringify(data));
+                    await zipWriter.add(item.name, content);
+                    break;
+                }
+                case IKRFComponents.mega: {
+                    const data = await dataSourceStore.backupMetaStore()
+                    const content = new TextReader(JSON.stringify(data));
+                    await zipWriter.add(item.name, content);
+                    break;
+                }
+                case IKRFComponents.collection: {
+                    const data = await collectionStore.backupCollectionStore()
+                    const content = new TextReader(JSON.stringify(data));
+                    await zipWriter.add(item.name, content);
+                    break;
+                }
+                case IKRFComponents.causal: {
+                    const save = await causalStore.save();
+                    if (save) {
+                        const content = new TextReader(JSON.stringify(save));
+                        await zipWriter.add(item.name, content);
+                    }
+                    break;
+                }
+                case IKRFComponents.dashboard: {
+                    const save = dashboardStore.save();
+                    const content = new TextReader(JSON.stringify(save));
+                    await zipWriter.add(item.name, content);
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
         }
         const blob = await zipWriter.close();
@@ -87,6 +109,14 @@ const BackupModal: React.FC = (props) => {
         {
             key: IKRFComponents.collection,
             text: `Collection (${collectionLength} collections)`,
+        },
+        {
+            key: 'causal',
+            text: `Causal Model${causalStore.model.causality ? '' : ' (empty)'}`,
+        },
+        {
+            key: 'dashboard',
+            text: `Dashboard (${dashboardStore.pages.length} documents)`,
         },
     ]
     return (
