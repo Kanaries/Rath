@@ -249,7 +249,8 @@
             "title": "export data",
             "downloadCSV": "Download CSV",
             "downloadJSON": "Download JSON",
-            "downloadJSONMeta": "Download JSON with Meta"
+            "downloadJSONMeta": "Download JSON with Meta",
+            "downloadRATHDS": "Download RATH's Dataset"
         },
         "extend": {
             "title": "Extend Information",

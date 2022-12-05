@@ -7,6 +7,7 @@ import { useGlobalStore } from '../../../store';
 import LaTiaoConsole from '../../../components/latiaoConsole';
 import { useCleanMethodList } from '../../../hooks';
 import { rows2csv } from '../../../utils/rows2csv';
+import { downloadFileWithContent } from '../../../utils/download';
 
 const Cont = styled.div`
     /* margin: 1em; */
@@ -16,19 +17,8 @@ const Cont = styled.div`
     align-items: center;
 `;
 
-function downloadFileWithContent(content: string, fileName: string) {
-    const ele = document.createElement('a');
-    ele.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
-    ele.setAttribute('download', fileName);
-    ele.style.display = 'none';
-    document.body.appendChild(ele);
-    ele.click();
-
-    document.body.removeChild(ele);
-}
-
 const DataOperations: React.FC = () => {
-    const { dataSourceStore } = useGlobalStore();
+    const { dataSourceStore, commonStore } = useGlobalStore();
     const { mutFields, cleanMethod } = dataSourceStore;
     const exportDataset = useCallback(() => {
         const ds = dataSourceStore.exportDataAsDSService();
@@ -45,6 +35,17 @@ const DataOperations: React.FC = () => {
         const content = rows2csv(data, fields);
         downloadFileWithContent(content, 'dataset.csv');
     }, [dataSourceStore]);
+    const exportDataAsRATHDS = useCallback(() => {
+        dataSourceStore.backupDataStore().then(data => {
+            const content = JSON.stringify(data);
+            downloadFileWithContent(content, 'dataset_rathds.json');
+        })
+        dataSourceStore.backupMetaStore().then(data => {
+            const content = JSON.stringify(data);
+            downloadFileWithContent(content, 'dataset_rathds_meta.json');
+        })
+    }, [dataSourceStore]);
+
     const cleanMethodListLang = useCleanMethodList();
     const items = useMemo(() => {
         return [
@@ -83,6 +84,11 @@ const DataOperations: React.FC = () => {
                             text: intl.get('dataSource.downloadData.downloadJSONMeta'),
                             onClick: exportDataset,
                         },
+                        {
+                            key: 'downloadRATHDS',
+                            text: intl.get('dataSource.downloadData.downloadRATHDS'),
+                            onClick: exportDataAsRATHDS
+                        }
                     ],
                 },
                 disabled: mutFields.length === 0,
@@ -112,8 +118,16 @@ const DataOperations: React.FC = () => {
                     dataSourceStore.setAllMutFieldsDisable(true);
                 },
             },
+            {
+                key: 'backup',
+                text: 'backup',
+                iconProps: { iconName: 'download' },
+                onClick: () => {
+                    commonStore.setShowBackupModal(true)
+                },
+            }
         ];
-    }, [cleanMethod, cleanMethodListLang, dataSourceStore, exportDataset, exportDataAsCSV, exportDataAsJson, mutFields.length]);
+    }, [cleanMethod, cleanMethodListLang, dataSourceStore, exportDataset, exportDataAsCSV, exportDataAsJson, mutFields.length, exportDataAsRATHDS, commonStore]);
     return (
         <Cont>
             <LaTiaoConsole />

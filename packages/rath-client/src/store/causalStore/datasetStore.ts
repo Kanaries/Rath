@@ -1,9 +1,9 @@
 import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { combineLatest, from, map, Observable, share, Subject, switchAll, throttleTime } from "rxjs";
-import type { IFieldMeta, IFilter, ICol, IRow } from "../../interfaces";
+import type { IFieldMeta, IFilter, ICol, IRow, IteratorStorageMetaInfo } from "../../interfaces";
 import { filterDataService } from "../../services";
-import { IteratorStorage, IteratorStorageMetaInfo } from "../../utils/iteStorage";
+import { IteratorStorage } from "../../utils/iteStorage";
 import { focusedSample } from "../../utils/sample";
 import { baseDemoSample } from "../../utils/view-sample";
 import type { DataSourceStore } from "../dataSourceStore";

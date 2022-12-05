@@ -1,6 +1,6 @@
 import localforage from 'localforage';
 import { STORAGES, STORAGE_INSTANCE } from '../constants';
-import { IRow } from '../interfaces';
+import { IRow, IteratorStorageMetaInfo } from '../interfaces';
 
 export interface IteratorStorageProps {
     storageName?: string;
@@ -11,10 +11,6 @@ export interface IteratorStorageProps {
     metaInfo?: IteratorStorageMetaInfo;
 }
 
-export interface IteratorStorageMetaInfo {
-    versionCode: number;
-    length: number;
-}
 export class IteratorStorage {
     public storageName: string = '';
     public metaStorageName: string = '';
