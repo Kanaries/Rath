@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
-import { downloadFileFromBlob, getKRFParseMap, IKRFComponents } from '../../utils/download';
+import { downloadFileFromBlob, getKRFParseMap, IKRFComponents, KRF_VERSION } from '../../utils/download';
 
 const Cont = styled.div`
     padding: 1em;
@@ -50,7 +50,10 @@ const BackupModal: React.FC = (props) => {
         const parseMap = getKRFParseMap(backupItemKeys);
         const zipFileWriter = new BlobWriter();
         const zipWriter = new ZipWriter(zipFileWriter);
-        const pm = new TextReader(JSON.stringify(parseMap));
+        const pm = new TextReader(JSON.stringify({
+            ...parseMap,
+            version: KRF_VERSION
+        }));
         zipWriter.add("parse_map.json", pm);
         if (backupItemKeys.data && parseMap[IKRFComponents.data]) {
             const data = await dataSourceStore.backupDataStore()
