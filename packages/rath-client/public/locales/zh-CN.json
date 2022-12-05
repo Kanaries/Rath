@@ -249,7 +249,8 @@
             "title": "导出数据",
             "downloadCSV": "导出CSV",
             "downloadJSON": "导出JSON",
-            "downloadJSONMeta": "导出JSON(含元数据)"
+            "downloadJSONMeta": "导出JSON(含元数据)",
+            "downloadRATHDS": "下载RATH格式数据集"
         },
         "extend": {
             "title": "扩展信息",
