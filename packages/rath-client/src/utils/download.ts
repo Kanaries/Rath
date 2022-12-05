@@ -37,3 +37,5 @@ export function getKRFParseMap (props: { [key in IKRFComponents]: boolean }): { 
     });
     return parseMap
 }
+
+export const KRF_VERSION = '0.0.1'
