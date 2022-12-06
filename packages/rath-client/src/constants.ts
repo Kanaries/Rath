@@ -62,9 +62,10 @@ export enum RATH_ENV {
     ONLINE = 'online production environment',
 }
 
+// This file is included in Worker so never forget to check if `window` is undefined!!!!!
 export const RathEnv: RATH_ENV = (
     process.env.NODE_ENV === 'development' ? RATH_ENV.DEV
         : process.env.NODE_ENV === 'test' ? RATH_ENV.TEST
-        : window.location.host.match(/^(.*\.)?kanaries\.(net|cn)$/) ? RATH_ENV.ONLINE
-        : window.location.host.match(/^.*kanaries\.vercel\.app$/) ? RATH_ENV.IPE : RATH_ENV.LPE
+        : globalThis.window === undefined || globalThis.window?.location.host.match(/^(.*\.)?kanaries\.(net|cn)$/) ? RATH_ENV.ONLINE
+        : globalThis.window?.location.host.match(/^.*kanaries\.vercel\.app$/) ? RATH_ENV.IPE : RATH_ENV.LPE
 );
