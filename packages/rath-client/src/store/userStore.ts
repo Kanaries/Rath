@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { IAccessPageKeys } from '../interfaces';
 import { getServerUrl } from '../utils/user';
 import { notify } from '../components/error';
@@ -10,6 +10,17 @@ export interface ILoginForm {
     userName: string;
     password: string;
     email: string;
+}
+
+export interface IWorkspace {
+    readonly id: number;
+    readonly name: string;
+}
+
+export interface IOrganization {
+    readonly name: string;
+    readonly id: number;
+    workspaces: readonly IWorkspace[] | null;
 }
 
 interface ISignUpForm {
@@ -27,6 +38,7 @@ interface IUserInfo {
     email: string;
     eduEmail: string;
     phone: string;
+    organizations?: readonly IOrganization[] | undefined;
 }
 
 export default class UserStore {
@@ -51,7 +63,9 @@ export default class UserStore {
             certCode: '',
             invCode: '',
         };
-        makeAutoObservable(this, {});
+        makeAutoObservable(this, {
+            info: observable.shallow,
+        });
     }
 
     public updateForm(formKey: IAccessPageKeys, fieldKey: keyof ILoginForm | keyof ISignUpForm, value: string) {
@@ -139,17 +153,17 @@ export default class UserStore {
         try {
             const url = getServerUrl('/api/loginStatus');
             const res = await request.get<{}, { loginStatus: boolean; userName: string }>(url);
-            if (res.loginStatus && res.userName !== null) {
-                return this.userName;
-            }
-            return null;
+            return res.loginStatus;
         } catch (error) {
-            runInAction(() => {
-                this.info = null;
+            notify({
+                title: '[/api/loginStatus]',
+                type: 'error',
+                content: `${error}${error instanceof Error ? error.stack : ''}`,
             });
-            return null;
+            return false;
         }
     }
+
     public async getPersonalInfo() {
         const url = getServerUrl('/api/ce/personal');
         try {
@@ -162,6 +176,7 @@ export default class UserStore {
                         email: result.email,
                         phone: result.phone,
                     };
+                    this.getOrganizations();
                 });
             }
         } catch (error: any) {
@@ -169,6 +184,75 @@ export default class UserStore {
                 title: '[/api/ce/personal]',
                 type: 'error',
                 content: error.toString(),
+            });
+        }
+    }
+
+    protected async getOrganizations() {
+        if (!this.info) {
+            return;
+        }
+        const url = getServerUrl('/api/ce/organization/list');
+        try {
+            const result = await request.get<{}, { organization: readonly IOrganization[] }>(url);
+            this.info.organizations = result.organization;
+        } catch (error) {
+            notify({
+                title: '[/api/ce/organization/list]',
+                type: 'error',
+                content: `${error}${error instanceof Error ? error.stack : ''}`,
+            });
+        }
+    }
+
+    public async getWorkspaces(organizationId: number) {
+        const which = this.info?.organizations?.find(org => org.id === organizationId);
+        if (!which || which.workspaces === null) {
+            return null;
+        }
+        const url = getServerUrl('/api/ce/organization/workspace/list');
+        try {
+            const result = await request.get<{ organizationId: number }, { workspaceList: IWorkspace[] }>(url, {
+                organizationId,
+            });
+            which.workspaces = result.workspaceList;
+        } catch (error) {
+            notify({
+                title: '[/api/ce/organization/workspace/list]',
+                type: 'error',
+                content: `${error}${error instanceof Error ? error.stack : ''}`,
+            });
+        }
+    }
+
+    public async uploadWorkspace(workspaceId: number, file: File) {
+        const url = getServerUrl('/api/ce/notebook');
+        try {
+            const { uploadUrl, id } = (await (await fetch(url, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: file.name,
+                    type: 0,    // TODO: customize type of upload workspace
+                    workspaceId,
+                    fileType: file.type,
+                    introduction: '',
+                    size: file.size,
+                }),
+            })).json()).data;
+            await fetch(uploadUrl, {
+                method: 'PUT',
+                body: file,
+            });
+            await request.post<{ id: number }, {}>(getServerUrl('/api/ce/notebook/callback'), { id });
+        } catch (error) {
+            notify({
+                title: '[/api/ce/notebook]',
+                type: 'error',
+                content: `${error}${error instanceof Error ? error.stack : ''}`,
             });
         }
     }
