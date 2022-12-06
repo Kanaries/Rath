@@ -83,6 +83,12 @@ const BackupModal: React.FC = (props) => {
                     await zipWriter.add(item.name, content);
                     break;
                 }
+                case IKRFComponents.meta: {
+                    const data = await dataSourceStore.backupMetaStore()
+                    const content = new TextReader(JSON.stringify(data));
+                    await zipWriter.add(item.name, content);
+                    break;
+                }
                 case IKRFComponents.mega: {
                     const data = await dataSourceStore.backupMetaStore()
                     const content = new TextReader(JSON.stringify(data));
