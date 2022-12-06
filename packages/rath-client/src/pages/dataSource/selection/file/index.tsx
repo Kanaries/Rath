@@ -13,7 +13,7 @@ import FileHelper, { Charset } from "./file-helper";
 
 
 const Container = styled.div`
-    width: 55vw;
+    max-width: 680px;
     > header {
         margin-top: 1.2em;
         font-weight: 550;
@@ -89,7 +89,7 @@ const FileData: FC<FileDataProps> = (props) => {
                 return;
             }
             const p = Promise.allSettled([
-                readRaw(preview, charset, 1024, 32, 128),
+                readRaw(preview, charset, 4096, 64, 128),
                 loadDataFile({
                     file: preview,
                     sampleMethod,

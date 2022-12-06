@@ -60,6 +60,15 @@ function requestDemoData (dsKey: IDemoDataKey = 'CARS'): Promise<IDatasetBase> {
 
 export const RathDemoVirtualExt = 'rath-demo.json';
 
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    > label {
+        width: 100%;
+    }
+`;
+
 const List = styled.div`
     margin: 1em 0;
     min-height: 8em;
@@ -91,14 +100,25 @@ const ListItem = styled.div`
             margin-right: 0.8em;
             user-select: none;
         }
-        > header {
-            font-size: 0.8rem;
-            line-height: 1.2em;
-            font-weight: 550;
-            color: #111;
+        > div {
             flex-grow: 1;
             flex-shrink: 1;
+            flex-basis: 0;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            > header {
+                font-size: 0.8rem;
+                line-height: 1.2em;
+                font-weight: 550;
+                color: #111;
+                margin-bottom: 0.4em;
+            }
+            > span {
+                word-break: break-all;
+                line-height: 1.2em;
+                margin: 0.12em 0;
+            }
         }
     }
     :hover {
@@ -138,7 +158,7 @@ const DemoData: FC<DemoDataProps> = props => {
     const colCount = useMemo(() => Math.floor((width ?? (window.innerWidth * 0.6)) / ITEM_MIN_WIDTH), [width]);
 
     return (
-        <div>
+        <Container>
             <Label id={labelId}>{intl.get("dataSource.importData.demo.available")}</Label>
             <List role="grid" ref={listRef} aria-colcount={colCount || 1} style={{ gridTemplateColumns: `repeat(${colCount || 1}, 1fr)` }}>
                 {options.map((demo, i) => {
@@ -152,16 +172,24 @@ const DemoData: FC<DemoDataProps> = props => {
                             onClick={() => loadDemo(demo)}
                         >
                             <div className="head">
-                                <Icon iconName={getFileIcon('.json')} />
-                                <header>
-                                    <span>{demo.text}</span>
-                                </header>
+                                <Icon iconName={getFileIcon('')} />
+                                <div>
+                                    <header>
+                                        <span>{intl.get(`dataSource.demoDataset.${demo.key}.title`)}</span>
+                                    </header>
+                                    <span className="state-description">
+                                        {intl.get(`dataSource.demoDataset.${demo.key}.description`)}
+                                    </span>
+                                    <span className="state-description">
+                                        {intl.get(`dataSource.sizeInfo`, demo)}
+                                    </span>
+                                </div>
                             </div>
                         </ListItem>
                     );
                 })}
             </List>
-        </div>
+        </Container>
     );
 }
 

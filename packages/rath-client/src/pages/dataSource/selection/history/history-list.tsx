@@ -223,7 +223,7 @@ const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFa
                         onClick={() => handleLoadHistory(file)}
                     >
                         <div className="head">
-                            <Icon iconName={getFileIcon(isRathDemo ? '.json' : file.name)} />
+                            <Icon iconName={getFileIcon(isRathDemo ? '' : file.name)} />
                             <div>
                                 <header>
                                     <TooltipHost content={name}>

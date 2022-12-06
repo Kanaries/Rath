@@ -138,6 +138,17 @@
             "originStatTable": "原始数据统计信息",
             "selectionStatTable": "筛选部分统计信息"
         },
+        "sizeInfo": "{nCols} 列 x {nRows} 行",
+        "demoDataset": {
+            "CARS": { "title": "汽车数据集", "description": "记录了汽车的型号、厂商、物理参数的数据。" },
+            "STUDENTS": { "title": "学生成绩数据集", "description": "分析学生的成绩和部分其他因素等关系。" },
+            "BTC_GOLD": { "title": "比特币-金价数据集", "description": "" },
+            "CAR_SALES": { "title": "汽车销售数据集", "description": "" },
+            "COLLAGE": { "title": "大学数据集", "description": "" },
+            "TITANIC": { "title": "泰坦尼克数据集", "description": "" },
+            "KEPLER": { "title": "开普勒数据集", "description": "" },
+            "BIKE_SHARING_DC": { "title": "共享单车数据集", "description": "" }
+        },
         "dbProgress": [
             {
                 "label": "建立连接",

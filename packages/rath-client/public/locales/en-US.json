@@ -139,6 +139,17 @@
             "originStatTable": "Original Data Statistics",
             "selectionStatTable": "Selection Data Statistics"
         },
+        "sizeInfo": "{nCols} fields, {nRows} rows",
+        "demoDataset": {
+            "CARS": { "title": "Cars", "description": "Origin, product name and physical attributes of cars." },
+            "STUDENTS": { "title": "Students", "description": "" },
+            "BTC_GOLD": { "title": "BTC - Gold", "description": "" },
+            "CAR_SALES": { "title": "Car Sales", "description": "" },
+            "COLLAGE": { "title": "Collage", "description": "" },
+            "TITANIC": { "title": "Titanic", "description": "" },
+            "KEPLER": { "title": "Kepler", "description": "" },
+            "BIKE_SHARING_DC": { "title": "Bike Sharing", "description": "" }
+        },
         "dbProgress": [
             {
                 "label": "Connection",

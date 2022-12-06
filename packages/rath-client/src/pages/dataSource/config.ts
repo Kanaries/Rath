@@ -28,14 +28,15 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 iconProps: { iconName: "FileTemplate" },
             },
             {
-                key: IDataSourceType.RESTFUL,
-                text: restfulText,
-                iconProps: { iconName: "Cloud" },
-            },
-            {
                 key: IDataSourceType.DATABASE,
                 text: dbText,
                 iconProps: { iconName: "Database" }
+            },
+            {
+                key: IDataSourceType.AIRTABLE,
+                text: 'AirTable',
+                iconProps: { iconName: 'Table' },
+                disabled: false
             },
             {
                 key: IDataSourceType.OLAP,
@@ -44,10 +45,9 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 disabled: false,
             },
             {
-                key: IDataSourceType.AIRTABLE,
-                text: 'AirTable',
-                iconProps: { iconName: 'Table' },
-                disabled: false
+                key: IDataSourceType.RESTFUL,
+                text: restfulText,
+                iconProps: { iconName: "Cloud" },
             },
         ];
     }, [fileText, restfulText, demoText, dbText, historyText]);
@@ -62,7 +62,7 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
     CAR_SALES: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-carsales-service.json',
     COLLAGE: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-collage-service.json',
     TITANIC: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-titanic-service.json',
-    KELPER: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-kelper-service.json',
+    KEPLER: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-kelper-service.json',
     BIKE_SHARING_DC: 'https://chspace.oss-cn-hongkong.aliyuncs.com/api/bike_dc-dataset-service.json'
 } : {
     // CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
@@ -75,47 +75,63 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
     CAR_SALES: '/datasets/ds-carsales-service.json',
     COLLAGE: '/datasets/ds-collage-service.json',
     TITANIC: '/datasets/ds-titanic-service.json',
-    KELPER: '/datasets/ds-kelper-service.json',
+    KEPLER: '/datasets/ds-kelper-service.json',
     BIKE_SHARING_DC: '/datasets/bike_dc-dataset-service.json'
 } as const;
 
 export type IDemoDataKey = keyof typeof DemoDataAssets;
 
-export const useDemoDataOptions = function (): Array<{key: IDemoDataKey; text: string}> {
-    const options = useMemo<Array<{ key: IDemoDataKey; text: string }>>(() => {
+export const useDemoDataOptions = function (): Array<{key: IDemoDataKey; text: string; nCols: number; nRows: number}> {
+    const options = useMemo<Array<{ key: IDemoDataKey; text: string; nCols: number; nRows: number }>>(() => {
         return [
             {
                 key: "CARS",
                 text: "Cars",
+                nCols: 9,
+                nRows: 406,
             },
             {
                 key: "STUDENTS",
-                text: "Students' Performance"
+                text: "Students' Performance",
+                nCols: 8,
+                nRows: 1000,
             },
             {
                 key: 'BIKE_SHARING_DC',
-                text: 'Bike Sharing in Washington D.C.'
+                text: 'Bike Sharing in Washington D.C.',
+                nCols: 16,
+                nRows: 17319,
             },
             {
                 key: "CAR_SALES",
-                text: "Car Sales"
+                text: "Car Sales",
+                nCols: 16,
+                nRows: 157,
             },
             {
                 key: "COLLAGE",
-                text: "Collage"
+                text: "Collage",
+                nCols: 16,
+                nRows: 1294,
             },
             {
-                key: "KELPER",
-                text: "NASA Kelper"
+                key: "KEPLER",
+                text: "NASA Kepler",
+                nCols: 44,
+                nRows: 9218,
             },
             {
                 key: 'BTC_GOLD',
-                text: "2022MCM Problem C: Trading Strategies"
+                text: "2022MCM Problem C: Trading Strategies",
+                nCols: 7,
+                nRows: 464,
             },
             {
                 key: "TITANIC",
-                text: "Titanic"
-            }
+                text: "Titanic",
+                nCols: 11,
+                nRows: 712,
+            },
         ];
     }, []);
     return options;

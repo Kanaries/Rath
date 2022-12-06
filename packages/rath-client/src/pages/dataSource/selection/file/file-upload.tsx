@@ -171,7 +171,7 @@ const PreviewArea = styled.table`
     }
 `;
 
-const MAX_UPLOAD_SIZE = 1024 * 1024 * 128 * 0.0001;
+const MAX_UPLOAD_SIZE = 1024 * 1024 * 128;
 
 export interface IFileUploadProps {
     preview: File | null;
