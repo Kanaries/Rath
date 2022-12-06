@@ -72,8 +72,8 @@ const PIVOT_LIST = [
 function Account() {
     const [isLoginStatus, setIsLoginStatus] = useState<boolean>(false);
     // const [globalSwitch, setGlobalSwitch] = useState(true);
-    const { commonStore } = useGlobalStore();
-    const { userName, info } = commonStore;
+    const { userStore } = useGlobalStore();
+    const { userName, info } = userStore;
     // const pivots = PIVOT_LIST.map((p) => ({
     //     // ...p,
     //     key: p.itemKey,
@@ -90,7 +90,7 @@ function Account() {
                                 <PivotItem key={item.itemKey} headerText={intl.get(`login.${item.headerText}`)}>
                                     {item.element(() => {
                                         setIsLoginStatus(false);
-                                        commonStore.getPersonalInfo();
+                                        userStore.getPersonalInfo();
                                     })}
                                 </PivotItem>
                             ))}
@@ -106,7 +106,7 @@ function Account() {
                                 <PrimaryButton
                                     className="ml-2"
                                     onClick={() => {
-                                        commonStore.commitLogout()
+                                        userStore.commitLogout()
                                     }}
                                 >
                                     {intl.get('login.signOut')}
@@ -119,12 +119,12 @@ function Account() {
                         </span>
                         {userName && <TextField value={userName || ''} disabled={true} />}
                     </div>
-                    {userName && (
+                    {info && (
                         <div className="phone">
                             <TextField label="Phone" value={info.phone} disabled={true} />
                         </div>
                     )}
-                    {userName && (
+                    {info && (
                         <div className="email">
                             <TextField label="Email" value={info.email} disabled={true} />
                         </div>

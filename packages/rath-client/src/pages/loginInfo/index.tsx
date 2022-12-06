@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { Dialog, Icon } from '@fluentui/react';
+import { Dialog } from '@fluentui/react';
 import styled from 'styled-components';
 import { PreferencesListType } from '../../App';
 import { useGlobalStore } from '../../store';
@@ -51,8 +51,9 @@ const LoginInfoDiv = styled.div`
 
 const LoginInfo = (props: loginInfoProps) => {
     const { preferencesList, element } = props;
-    const { commonStore } = useGlobalStore();
-    const { userName, navMode, avatarUrl, info } = commonStore;
+    const { commonStore, userStore } = useGlobalStore();
+    const { navMode } = commonStore;
+    const { userName } = userStore;
     const [loginHidden, setLoginHidden] = useState(true);
     return (
         <LoginInfoDiv>
@@ -77,17 +78,6 @@ const LoginInfo = (props: loginInfoProps) => {
                     <LoginInfoList infoList={preferencesList} />
                 </Dialog>
                 <div className="avatar-img">
-                    <div>
-                        {userName && (info.avatar || avatarUrl) ? (
-                            <img
-                                src={info.avatar || avatarUrl}
-                                alt="头像"
-                                style={{ width: 24, height: 24, borderRadius: '50%' }}
-                            />
-                        ) : (
-                            <Icon iconName="Contact" className="mr-2" />
-                        )}
-                    </div>
                     {navMode === 'text' && (
                         <div className="user-name">
                             <p className="user">{userName || intl.get('login.clickLogin')}</p>

@@ -44,21 +44,23 @@ const preferencesList: PreferencesListType[] = [
 ];
 
 function App() {
-    const { langStore, commonStore } = useGlobalStore();
+    const { langStore, commonStore, userStore } = useGlobalStore();
     const { appKey, navMode } = commonStore;
 
     useEffect(() => {
         initRathWorker(commonStore.computationEngine);
-        commonStore.updateAuthStatus().then((res) => {
-            if (res) {
-                commonStore.getPersonalInfo();
-                commonStore.getAvatarImgUrl()
-            }
-        });
         return () => {
             destroyRathWorker();
         };
     }, [commonStore]);
+    
+    useEffect(() => {
+        userStore.updateAuthStatus().then((res) => {
+            if (res) {
+                userStore.getPersonalInfo();
+            }
+        });
+    }, [userStore]);
 
     if (!langStore.loaded) {
         return (
