@@ -64,6 +64,8 @@ const FileData: FC<FileDataProps> = (props) => {
 
     const filePreviewPendingRef = useRef<Promise<unknown>>();
 
+    const inputRef = useRef<{ reset: () => void }>(null);
+
     useEffect(() => {
         filePreviewPendingRef.current = undefined;
         if (preview) {
@@ -79,6 +81,8 @@ const FileData: FC<FileDataProps> = (props) => {
                         return;
                     }
                     setExcelFile(res);
+                }).catch(() => {
+                    inputRef.current?.reset();
                 }).finally(() => {
                     toggleLoadingAnimation(false);
                 });
@@ -104,6 +108,7 @@ const FileData: FC<FileDataProps> = (props) => {
                 setPreviewOfFile(res[1].status === 'fulfilled' ? res[1].value : null);
             }).catch(reason => {
                 onLoadingFailed(reason);
+                inputRef.current?.reset();
             }).finally(() => {
                 toggleLoadingAnimation(false);
             });
@@ -127,6 +132,7 @@ const FileData: FC<FileDataProps> = (props) => {
                 setPreviewOfFile(res);
             }).catch(reason => {
                 onLoadingFailed(reason);
+                inputRef.current?.reset();
             }).finally(() => {
                 toggleLoadingAnimation(false);
             });
@@ -170,7 +176,7 @@ const FileData: FC<FileDataProps> = (props) => {
                 separator={separator}
                 setSeparator={setSeparator}
             />
-            <FileUpload preview={preview} previewOfFile={previewOfFile} previewOfRaw={previewOfRaw} onFileUpload={handleFileLoad} />
+            <FileUpload ref={inputRef} preview={preview} previewOfFile={previewOfFile} previewOfRaw={previewOfRaw} onFileUpload={handleFileLoad} />
             {preview ? (
                 previewOfFile && (
                     <div className="action">

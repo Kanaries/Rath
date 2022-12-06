@@ -1,7 +1,7 @@
 import { ActionButton, Icon, Pivot, PivotItem, TooltipHost } from "@fluentui/react";
 import intl from 'react-intl-universal';
 import { observer } from "mobx-react-lite";
-import { FC, useCallback, useRef, useState } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
 import styled from "styled-components";
 import type { loadDataFile } from "../../utils";
 import { notify } from "../../../../components/error";
@@ -180,7 +180,9 @@ export interface IFileUploadProps {
     onFileUpload: (file: File | null) => void;
 }
 
-const FileUpload: FC<IFileUploadProps> = ({ preview, previewOfFile, previewOfRaw, onFileUpload }) => {
+const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function FileUpload (
+    { preview, previewOfFile, previewOfRaw, onFileUpload }, ref
+) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleReset = useCallback(() => {
@@ -191,6 +193,10 @@ const FileUpload: FC<IFileUploadProps> = ({ preview, previewOfFile, previewOfRaw
             fileInputRef.current.click();
         }
     }, [onFileUpload]);
+
+    useImperativeHandle(ref, () => ({
+        reset: () => handleReset(),
+    }));
 
     const handleButtonClick = useCallback(() => {
         fileInputRef.current?.click();
@@ -292,6 +298,6 @@ const FileUpload: FC<IFileUploadProps> = ({ preview, previewOfFile, previewOfRaw
             </ActionGroup>
         </Container>
     );
-};
+});
 
 export default observer(FileUpload);
