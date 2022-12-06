@@ -496,7 +496,7 @@
         "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     },
     "login": {
-        "clickLogin": "Click Login",
+        "clickLogin": "Login",
         "haveSent": "Already Sent",
         "signIn": "Sign In",
         "signOut": "Sign Out",

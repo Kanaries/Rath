@@ -28,7 +28,7 @@ interface SelectionProps {
 const Selection: React.FC<SelectionProps> = props => {
     const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed, onDataLoading, setLoadingAnimation } = props;
 
-    const [dataSourceType, setDataSourceType] = useState<IDataSourceType>(IDataSourceType.DEMO);
+    const [dataSourceType, setDataSourceType] = useState<IDataSourceType>(IDataSourceType.LOCAL);
     const dsTypeOptions = useDataSourceTypeOptions();
 
     const formMap: Record<IDataSourceType, JSX.Element> = {
