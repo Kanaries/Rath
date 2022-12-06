@@ -1,6 +1,6 @@
 import intl from 'react-intl-universal';
-import { ChoiceGroup, Dropdown, SpinButton } from "@fluentui/react";
-import type { FC } from "react";
+import { ChoiceGroup, Dropdown, IChoiceGroupOption, SpinButton, TextField } from "@fluentui/react";
+import { FC, useMemo, useState } from "react";
 import styled from "styled-components";
 import { SampleKey, useSampleOptions } from '../../utils';
 
@@ -36,9 +36,8 @@ export type Charset = typeof charsetOptions[number]['key'];
 
 const Container = styled.div`
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
+    flex-direction: column;
+    padding-top: 1em;
     & label {
         font-weight: 400;
         margin-right: 1em;
@@ -47,7 +46,6 @@ const Container = styled.div`
         display: flex;
         flex-direction: row;
         align-items: center;
-        padding: 1em 0;
         > div {
             display: flex;
             flex-direction: row;
@@ -55,6 +53,9 @@ const Container = styled.div`
                 margin: 0;
             }
         }
+    }
+    > * {
+        margin-bottom: 0.8em;
     }
 `;
 
@@ -69,13 +70,47 @@ export interface IFileHelperProps {
     sheetNames: string[] | false;
     selectedSheetIdx: number;
     setSelectedSheetIdx: (selectedSheetIdx: number) => void;
+    separator: string;
+    setSeparator: (separator: string) => void;
 }
 
 const FileHelper: FC<IFileHelperProps> = ({
     charset, setCharset, sampleMethod, setSampleMethod, sampleSize, setSampleSize, preview, sheetNames,
-    selectedSheetIdx, setSelectedSheetIdx,
+    selectedSheetIdx, setSelectedSheetIdx, separator, setSeparator,
 }) => {
     const sampleOptions = useSampleOptions();
+    const [customizeSeparator, setCustomizeSeparator] = useState('');
+
+    const separatorOptions = useMemo<IChoiceGroupOption[]>(() => {
+        return [
+            { key: ',', text: intl.get('dataSource.upload.separator.comma') },
+            { key: '\t', text: intl.get('dataSource.upload.separator.tab') },
+            { key: ';', text: intl.get('dataSource.upload.separator.semicolon') },
+            {
+                key: '',
+                text: intl.get('dataSource.upload.separator.other'),
+                onRenderField(props, defaultRenderer) {
+                    return (
+                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                            {defaultRenderer?.(props)}
+                            <TextField
+                                value={customizeSeparator}
+                                name="rath_upload_file_col_separator"
+                                onChange={(_, value) => {
+                                    setCustomizeSeparator(value ?? '');
+                                    if (value) {
+                                        setSeparator(value);
+                                    }
+                                }}
+                            />
+                        </div>
+                    );
+                },
+            },
+        ];
+    }, [customizeSeparator, setSeparator]);
+
+    const selectedSeparatorKey = separatorOptions.find(opt => opt.key === separator)?.key ?? '';
 
     return (
         <Container>
@@ -89,34 +124,48 @@ const FileHelper: FC<IFileHelperProps> = ({
                 }}
                 styles={{ root: { display: 'flex', flexDirection: 'row', marginRight: '2em' }, label: { marginRight: '1em', fontWeight: 400 }, dropdown: { width: '8em' } }}
             />
-            {!preview || preview.name.endsWith('.csv') ? (
+            {!preview || preview.type.match(/^text\/.*/) ? (
                 <>
                     <ChoiceGroup
-                        label={intl.get("dataSource.upload.sampling")}
-                        options={sampleOptions}
-                        selectedKey={sampleMethod}
+                        label={intl.get("dataSource.separator")}
+                        options={separatorOptions}
+                        selectedKey={selectedSeparatorKey}
                         onChange={(_, option) => {
                             if (option) {
-                                setSampleMethod(option.key as SampleKey);
+                                setSeparator(option.key);
                             }
                         }}
                     />
-                    {sampleMethod === SampleKey.reservoir && (
-                        <SpinButton
-                            label={intl.get("dataSource.upload.percentSize")}
-                            min={0}
-                            step={1}
-                            value={sampleSize.toString()}
-                            onValidate={(value) => {
-                                setSampleSize(Number(value));
-                            }}
-                            onIncrement={() => {
-                                setSampleSize((v) => v + 1);
-                            }}
-                            onDecrement={() => {
-                                setSampleSize((v) => Math.max(v - 1, 0));
-                            }}
-                        />
+                    {(!preview || preview.type === 'text/csv') && separator === ',' && (
+                        <>
+                            <ChoiceGroup
+                                label={intl.get("dataSource.upload.sampling")}
+                                options={sampleOptions}
+                                selectedKey={sampleMethod}
+                                onChange={(_, option) => {
+                                    if (option) {
+                                        setSampleMethod(option.key as SampleKey);
+                                    }
+                                }}
+                            />
+                            {sampleMethod === SampleKey.reservoir && (
+                                <SpinButton
+                                    label={intl.get("dataSource.upload.percentSize")}
+                                    min={0}
+                                    step={1}
+                                    value={sampleSize.toString()}
+                                    onValidate={(value) => {
+                                        setSampleSize(Number(value));
+                                    }}
+                                    onIncrement={() => {
+                                        setSampleSize((v) => v + 1);
+                                    }}
+                                    onDecrement={() => {
+                                        setSampleSize((v) => Math.max(v - 1, 0));
+                                    }}
+                                />
+                            )}
+                        </>
                     )}
                 </>
             ) : null}

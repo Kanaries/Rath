@@ -82,6 +82,7 @@ interface LoadDataFileProps {
     sampleSize?: number;
     encoding?: string;
     onLoading?: (progress: number) => void;
+    separator: string;
 }
 export async function loadDataFile(props: LoadDataFileProps): Promise<{
     fields: IMuteFieldBase[];
@@ -92,15 +93,28 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
         sampleMethod,
         sampleSize = 500,
         encoding = 'utf-8',
-        onLoading
+        onLoading,
+        separator,
     } = props;
     /**
      * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
      */
     let rawData: IRow[] = []
 
-    if (file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
-        rawData = []
+    if (file.type.match(/^text\/.*/)) {     // csv-like text files
+        if (separator && separator !== ',') {
+            const content = (await readRaw(file, encoding) ?? '');
+            const rows = content.split(/\r?\n/g).map(row => row.split(separator));
+            const fields = rows[0]?.map<IMuteFieldBase>((h, i) => ({
+                fid: `col_${i}`,
+                name: h,
+                geoRole: '?',
+                analyticType: '?',
+                semanticType: '?',
+            }));
+            const dataSource = rows.slice(1).map<IRow>(row => Object.fromEntries(fields.map((f, i) => [f.fid, row[i]])));
+            return { fields, dataSource };
+        }
         if (sampleMethod === SampleKey.reservoir) {
             rawData = (await KFileReader.csvReader({
               file,
@@ -123,6 +137,19 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
         if (sampleMethod === SampleKey.reservoir) {
             rawData = Sampling.reservoirSampling(rawData, sampleSize)
         }
+    } else if (file.type.startsWith('text/')) {
+        let content = (await readRaw(file, encoding) ?? '');
+        if (separator && separator !== ',') {
+            content = content.replaceAll(
+                new RegExp(`\\\\{0, 2}${separator}`, 'g'),
+                part => `${new RegExp(`^(\\{2})?`).exec(part)?.[0] ?? ''},`,
+            );
+        }
+        const translatedFile = new File([new Blob([content], { type: 'text/plain' })], 'file.csv');
+        rawData = (await KFileReader.csvReader({
+            file: translatedFile,
+            encoding,
+        })) as IRow[];
     } else {
         throw new Error(`unsupported file type=${file.type} `)
     }

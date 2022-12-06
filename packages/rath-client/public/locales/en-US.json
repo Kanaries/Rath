@@ -120,6 +120,7 @@
         "dataView": "Table View",
         "statView": "Statistics View",
         "charset": "character encoding",
+        "separator": "Separator",
         "databaseType": "Select Database",
         "connectUri": "Connection URI",
         "databaseName": "Database",
@@ -192,7 +193,7 @@
             "buttonName": "Import Data",
             "load": "Load Data",
             "type": {
-                "file": "Local",
+                "file": "File",
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
                 "demo": "Demo",
@@ -243,7 +244,13 @@
             "sheet": "Sheet",
             "preview_parsed": "Preview",
             "preview_raw": "Raw",
-            "data_is_empty": "This dataset is empty"
+            "data_is_empty": "This dataset is empty",
+            "separator": {
+                "comma": "Comma",
+                "semicolon": "Semicolon",
+                "tab": "Tab",
+                "other": "Other..."
+            }
         },
         "exploreMode": {
             "title": "Explore Mode",

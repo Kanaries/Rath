@@ -35,6 +35,20 @@ const FileData: FC<FileDataProps> = (props) => {
     const [sampleMethod, setSampleMethod] = useState<SampleKey>(SampleKey.none);
     const [sampleSize, setSampleSize] = useState<number>(500);
     const [charset, setCharset] = useState<Charset>('utf-8');
+    const [separator, setSeparator] = useState(',');
+    const [appliedSeparator, setAppliedSeparator] = useState(separator);
+
+    useEffect(() => {
+        setPreviewOfRaw(null);
+        setPreviewOfFile(null);
+        setExcelFile(false);
+        const delay = setTimeout(() => {
+            setAppliedSeparator(separator);
+        }, 1_000);
+        return () => {
+            clearTimeout(delay);
+        };
+    }, [separator]);
 
     const [preview, setPreview] = useState<File | null>(null);
     const [previewOfRaw, setPreviewOfRaw] = useState<string | null>(null);
@@ -76,7 +90,8 @@ const FileData: FC<FileDataProps> = (props) => {
                     sampleMethod,
                     sampleSize,
                     encoding: charset,
-                    onLoading: onDataLoading
+                    onLoading: onDataLoading,
+                    separator: appliedSeparator,
                 }),
             ]);
             filePreviewPendingRef.current = p;
@@ -94,7 +109,7 @@ const FileData: FC<FileDataProps> = (props) => {
         } else {
             setPreviewOfFile(null);
         }
-    }, [charset, onDataLoading, onLoadingFailed, preview, sampleMethod, sampleSize, toggleLoadingAnimation]);
+    }, [charset, onDataLoading, onLoadingFailed, preview, sampleMethod, sampleSize, toggleLoadingAnimation, appliedSeparator]);
 
     useEffect(() => {
         if (excelFile && selectedSheetIdx !== -1) {
@@ -151,6 +166,8 @@ const FileData: FC<FileDataProps> = (props) => {
                 sheetNames={excelFile ? excelFile.SheetNames : false}
                 selectedSheetIdx={selectedSheetIdx}
                 setSelectedSheetIdx={setSelectedSheetIdx}
+                separator={separator}
+                setSeparator={setSeparator}
             />
             <FileUpload preview={preview} previewOfFile={previewOfFile} previewOfRaw={previewOfRaw} onFileUpload={handleFileLoad} />
             {preview ? (

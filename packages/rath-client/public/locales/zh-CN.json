@@ -119,6 +119,7 @@
         "dataView": "数据视图",
         "statView": "统计视图",
         "charset": "字符集编码",
+        "separator": "分隔符",
         "databaseType": "选择数据库",
         "connectUri": "连接 URI",
         "databaseName": "数据库",
@@ -191,7 +192,7 @@
         "importData": {
             "buttonName": "选择数据",
             "type": {
-                "file": "本地",
+                "file": "文件",
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
                 "demo": "示例数据",
@@ -243,7 +244,13 @@
             "sheet": "工作簿",
             "preview_parsed": "预览",
             "preview_raw": "原始内容",
-            "data_is_empty": "数据集是空的。"
+            "data_is_empty": "数据集是空的。",
+            "separator": {
+                "comma": "逗号",
+                "semicolon": "分号",
+                "tab": "制表符",
+                "other": "自定义..."
+            }
         },
         "exploreMode": {
             "title": "探索模式",
