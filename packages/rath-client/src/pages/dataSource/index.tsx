@@ -14,7 +14,7 @@ import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
 import { Card } from '../../components/card';
-import { setDataStorage } from '../../utils/storage';
+import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
 import { BorderCard } from '../../components/borderCard';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
@@ -73,11 +73,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     }, [dataSourceStore]);
 
     const onSelectDataLoaded = useCallback(
-        (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => {
+        (fields: IMuteFieldBase[], dataSource: IRow[], name?: string, tag?: DataSourceTag | undefined, withHistory?: IDBMeta | undefined) => {
             dataSourceStore.loadDataWithInferMetas(dataSource, fields);
-            if (name) {
+            if (name && tag !== undefined) {
                 dataSourceStore.setDatasetId(name);
-                setDataStorage(name, fields, dataSource);
+                setDataStorage(name, fields, dataSource, tag, withHistory);
             }
         },
         [dataSourceStore]

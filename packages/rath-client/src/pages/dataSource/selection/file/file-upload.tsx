@@ -5,8 +5,8 @@ import { FC, useCallback, useRef, useState } from "react";
 import styled from "styled-components";
 import type { loadDataFile } from "../../utils";
 import { notify } from "../../../../components/error";
-import getFileIcon from "./get-file-icon";
-import { formatSize } from "./history-list";
+import getFileIcon from "../history/get-file-icon";
+import { formatSize } from "../history/history-list";
 
 
 const Container = styled.div`

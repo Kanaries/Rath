@@ -6,6 +6,7 @@ import intl from 'react-intl-universal'
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
 import { logDataImport } from '../../../loggers/dataImport';
+import { DataSourceTag } from '../../../utils/storage';
 
 function requestAPIData (api: string): Promise<IDatasetBase> {
     return new Promise<IDatasetBase>((resolve, reject) => {
@@ -46,7 +47,7 @@ interface RestFulProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: undefined, tag: DataSourceTag) => void;
 }
 const RestFul: React.FC<RestFulProps> = props => {
     const { onClose, onStartLoading, onLoadingFailed, onDataLoaded } = props;
@@ -56,7 +57,7 @@ const RestFul: React.FC<RestFulProps> = props => {
         onStartLoading();
         requestAPIData(api).then(data => {
             const { dataSource, fields } = data;
-            onDataLoaded(fields, dataSource);
+            onDataLoaded(fields, dataSource, undefined, DataSourceTag.RESTFUL);
             logDataImport({
                 dataType: "Restful API",
                 name: api,

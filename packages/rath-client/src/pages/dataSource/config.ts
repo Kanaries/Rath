@@ -6,11 +6,17 @@ import { IDataSourceType } from "../../global";
 export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceType; text: string }> {
     const fileText = intl.get(`dataSource.importData.type.${IDataSourceType.FILE}`);
     const restfulText = intl.get(`dataSource.importData.type.${IDataSourceType.RESTFUL}`);
-    const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
+    const demoText = intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`);
     const dbText = intl.get(`dataSource.importData.type.${IDataSourceType.DATABASE}`);
+    const historyText = intl.get('common.history');
 
     const options = useMemo<Array<{ key: IDataSourceType; text: string }>>(() => {
         return [
+            {
+                key: IDataSourceType.LOCAL,
+                text: historyText,
+                iconProps: { iconName: "History" },
+            },
             {
                 key: IDataSourceType.FILE,
                 text: fileText,
@@ -44,7 +50,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 disabled: false
             },
         ];
-    }, [fileText, restfulText, demoText, dbText]);
+    }, [fileText, restfulText, demoText, dbText, historyText]);
     return options;
 };
 

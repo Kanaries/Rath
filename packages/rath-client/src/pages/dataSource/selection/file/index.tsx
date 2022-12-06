@@ -6,8 +6,9 @@ import intl from "react-intl-universal";
 import { isExcelFile, loadDataFile, loadExcelFile, parseExcelFile, readRaw, SampleKey } from "../../utils";
 import { dataBackup, logDataImport } from "../../../../loggers/dataImport";
 import type { IMuteFieldBase, IRow } from "../../../../interfaces";
+import { DataSourceTag, IDBMeta } from "../../../../utils/storage";
+import HistoryList from "../history/history-list";
 import FileUpload from "./file-upload";
-import HistoryList from "./history-list";
 import FileHelper, { Charset } from "./file-helper";
 
 
@@ -25,7 +26,7 @@ const Container = styled.div`
 interface FileDataProps {
     onClose: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: string, tag: DataSourceTag, withHistory?: IDBMeta | undefined) => void;
     onDataLoading: (p: number) => void;
     toggleLoadingAnimation: (on: boolean) => void;
 }
@@ -83,7 +84,7 @@ const FileData: FC<FileDataProps> = (props) => {
                 });
                 return;
             }
-            const p = Promise.all([
+            const p = Promise.allSettled([
                 readRaw(preview, charset, 1024, 32, 128),
                 loadDataFile({
                     file: preview,
@@ -99,8 +100,8 @@ const FileData: FC<FileDataProps> = (props) => {
                 if (p !== filePreviewPendingRef.current) {
                     return;
                 }
-                setPreviewOfRaw(res[0]);
-                setPreviewOfFile(res[1]);
+                setPreviewOfRaw(res[0].status === 'fulfilled' ? res[0].value : null);
+                setPreviewOfFile(res[1].status === 'fulfilled' ? res[1].value : null);
             }).catch(reason => {
                 onLoadingFailed(reason);
             }).finally(() => {
@@ -148,7 +149,7 @@ const FileData: FC<FileDataProps> = (props) => {
             size: dataSource.length
         });
         dataBackup(preview);
-        onDataLoaded(fields, dataSource, preview.name);
+        onDataLoaded(fields, dataSource, preview.name, DataSourceTag.FILE);
         onClose();
     }, [onClose, onDataLoaded, preview, previewOfFile]);
 
@@ -182,7 +183,12 @@ const FileData: FC<FileDataProps> = (props) => {
             ) : (
                 <>
                     <header>{intl.get('dataSource.upload.history')}</header>
-                    <HistoryList onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onClose={onClose} />
+                    <HistoryList
+                        is={DataSourceTag.FILE}
+                        onDataLoaded={onDataLoaded}
+                        onLoadingFailed={onLoadingFailed}
+                        onClose={onClose}
+                    />
                 </>
             )}
         </Container>
