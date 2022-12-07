@@ -53,7 +53,7 @@ Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have
 
 **RATH** is beyond an open-source alternative to Data Analysis and Visualization tools such as Tableau. It automates your Explotoary Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
-<img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github_readme.gif" alt="GitHub ReadMe Demo"/>
+<a href="https://kanaries.net"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/feature-demo.gif" alt="RATH features demo"></a>
 
 ## Get started
 
@@ -69,7 +69,6 @@ To get started with RATH, you can:
 
 <a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/></a>
 <a href="https://discord.gg/Z4ngFWXz2U"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/discord.png" alt="Join our Discord community" width="200"/> </a>
-
 
 
 > Please consider sharing your experience or thoughts about [Kanaries RATH](https://kanaries.net) with the border Open Source community. It really does help!
@@ -101,17 +100,14 @@ You can either:
 - Run RATH in a browser. [RATH Cloud](https://rath.kanaries.net/)
 - Download the [desktop version](https://kanaries.net/#/products) for Windows/Mac.
 - Run your own RATH instance. Steps:
-Clone the Rath repository:
+
 ```bash
 git clone https://github.com/Kanaries/Rath.git && cd Rath
-```
-Setup your Yarn workspace:
-```bash
+# Clone the Rath repository
 yarn install
-```
-Boot up RATH:
-```bash
+# Setup your Yarn workspace
 yarn workspace rath-client start
+# Boot up RATH
 ```
 
 ## Feature highlights
@@ -127,43 +123,31 @@ yarn workspace rath-client start
 
 - :construction: Causal Analysis: Provide causal discovery and explanations for complex relation analysis.
 
-- 🎓 Wanna learn more about RATH? Visit our [Free online Courses](https://docs.kanaries.net/blog/tags/course): Access learning materials, detailed instructions and skill tests for **FREE**!
+- 🎓 Wanna learn more about RATH? Visit our [Free online Courses](https://docs.kanaries.net/tutorials): Access learning materials, detailed instructions and skill tests for **FREE**!
 
 ## Walkthroughs
-### Import data
-**View statistics from your data source:**
 
-![View statistics from your data source](https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/study-biking-sharing-data-with-rath.webp)
+### Import data from online databases or CSV/JSON files.
 
-**Try different data views:**
-![View your dataset](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/datasource-02.png)
+<a href="https://docs.kanaries.net/data-profiling#import-your-data"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/import-data-from-selected-data-source.gif" alt="Import data from a selected data source"></a>
 
-### Conduct Automated Data Exploration
+### View statistics from your data source
 
-**One-click data analysis with Mega-auto Exploration:**
+<a href="https://docs.kanaries.net/data-profiling#data-profiling"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/view-statistics-data-source.gif" alt="View statistics from your data source"></a>
 
-![One-click data analysis with Mega-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-mega-auto-01.png)
+### One-click automated data analysis with visualizations
 
-**Generate more associate visualizations in Mega-auto Exploration:**
+<a href="https://docs.kanaries.net/mega-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/one-click-automated-data-analysis-visualization.gif" alt="One-click automated data analysis with visualizations"></a>
 
-![Generate more associate visualizations in Mega-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-asso-01.png)
+### Use RATH as your AI Copilot in Data Analysis
 
-### Use RATH as the Data Analysis Copilot
+Assisted with AI, RATH can help you with your data analysis. Just provide RATH with some input and it will learn about your interests and suggest analysis directions to take.
 
-**Provide RATH with some input in Semi-auto Exploration:**
+<a href="https://docs.kanaries.net/semi-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/rath-data-analysis-ai-copilot.gif" alt="RATH Data Analysis AI Copilot"></a>
 
-![Use RATH as the Data Analysis copilot in Semi-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-semi-02.png)
+### Manually explore your data with a Tableau-like UI:
 
-**RATH automatically learns your interests and generates recommendations:**
-
-![Use RATH as the Data Analysis copilot in Semi-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-semi-01.png)
-
-### Manual data exploration
-
-**Manually explore your data with a Tableau-like module:**
-![Use RATH as the Data Analysis copilot in Semi-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-gw-01.png)
-
-![Use RATH as the Data Analysis copilot in Semi-auto Exploration](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-gw-02.png)
+<a href="https://docs.kanaries.net/semi-auto-data-exploration#manually-explore-your-data"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/manually-explore-data-tableau-ui.gif" alt="Manually explore your data with a Tableau-like UI"></a>
 
 > Manual Exploration is an independent embedding module. You can use it independently in your apps. For more details, refer to the README.md in in `packages/graphic-walker/README.md`.
 >
@@ -171,9 +155,12 @@ yarn workspace rath-client start
 > ```bash
 > yarn add @kanaries/graphic-walker
 > # or
->
 > npm i --save @kanaries/graphic-walker
 > ```
+
+### :sparkles: Interactive data analysis workflow by data painting
+
+<a href="https://docs.kanaries.net/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="Interactive data analysis by painting"></a>
 
 ## Supported Databases
 
