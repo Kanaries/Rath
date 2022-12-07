@@ -2,6 +2,7 @@ import { IDropdownOption } from "@fluentui/react";
 import type { IFieldMeta } from "../../interfaces";
 import PC_PARAMS from './pc_params.json'
 
+/** @see https://ewgw6z7tk0.feishu.cn/wiki/wikcnh1Xksf2zbHUHuMXfyup83f */
 export interface IFormItem{
     title: string;
     key: string;
@@ -12,6 +13,14 @@ export interface IFormItem{
     range?: [number, number]; //slider
     step?: number; // slider
     options?: {text: string; key: any}[] // dropdown or radio or checkbox
+    conditions?: {
+        or: {
+            and: {
+                key: string;
+                oneOf: any[];
+            }[];
+        }[];
+    };
 }
 export interface IForm {
     title: string;

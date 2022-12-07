@@ -3,8 +3,20 @@ import React from 'react';
 import { LabelWithDesc } from '../../components/labelTooltip';
 import { IForm, IFormItem } from './config';
 
-export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) => void; value: any }) {
-    const { item, onChange, value } = props;
+export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) => void; value: any; values: { [key: string]: any } }) {
+    const { item, onChange, value, values } = props;
+    if (item.conditions) {
+        let ok = false;
+        for (const groups of item.conditions.or) {
+            if (groups.and.every(condition => condition.oneOf.includes(values[condition.key]))) {
+                ok = true;
+                break;
+            }
+        }
+        if (!ok) {
+            return null;
+        }
+    }
     switch (item.renderType) {
         case 'text':
             return <TextField label={item.title} value={value} onChange={(e, v) => onChange(v)} />;
@@ -72,6 +84,7 @@ const DynamicForm: React.FC<DynamicFormProps> = (props) => {
                                         onChange(item.key, val);
                                     }}
                                     value={values[item.key]}
+                                    values={values}
                                 />
                             </td>
                         </tr>
