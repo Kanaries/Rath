@@ -6,7 +6,6 @@ import styled from "styled-components";
 import type { loadDataFile } from "../../utils";
 import { notify } from "../../../../components/error";
 import getFileIcon from "../history/get-file-icon";
-import { formatSize } from "../history/history-list";
 
 
 const Container = styled.div`
@@ -172,6 +171,19 @@ const PreviewArea = styled.table`
 `;
 
 const MAX_UPLOAD_SIZE = 1024 * 1024 * 128;
+
+function formatSize(size: number) {
+    if (size < 1024) {
+        return `${size}B`;
+    }
+    if (size < 1024 * 1024) {
+        return `${(size / 1024).toFixed(2)}KB`;
+    }
+    if (size < 1024 * 1024 * 1024) {
+        return `${(size / 1024 / 1024).toFixed(2)}MB`;
+    }
+    return `${(size / 1024 / 1024 / 1024).toFixed(2)}GB`;
+}
 
 export interface IFileUploadProps {
     preview: File | null;

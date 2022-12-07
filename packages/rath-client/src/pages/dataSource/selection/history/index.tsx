@@ -23,6 +23,7 @@ const HistoryPanel: FC<Pick<IHistoryListProps, 'onDataLoaded' | 'onClose' | 'onL
                 onLoadingFailed={onLoadingFailed}
                 onClose={onClose}
                 search={search}
+                groupByPeriod
             />
         </>
     );

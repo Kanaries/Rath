@@ -1,178 +1,59 @@
 import intl from 'react-intl-universal';
-import { Icon, IconButton, TooltipHost } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
-import dayjs from 'dayjs';
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import useBoundingClientRect from "../../../../hooks/use-bounding-client-rect";
-import { DataSourceTag, deleteDataStorageById, getDataStorageById, getDataStorageList, IDBMeta, updateDataStorageUserTagGroup, UserTagGroup, userTagGroupColors } from "../../../../utils/storage";
+import { DataSourceTag, deleteDataStorageById, getDataStorageById, getDataStorageList, IDBMeta } from "../../../../utils/storage";
 import type { IMuteFieldBase, IRow } from '../../../../interfaces';
-import { RathDemoVirtualExt } from '../demo';
-import { IDataSourceType } from '../../../../global';
-import getFileIcon from './get-file-icon';
+import HistoryListItem from './history-list-item';
 
 
-const allUserTagGroups = Object.keys(userTagGroupColors) as unknown as UserTagGroup[];
-
-const UserTagGroupSize = 12;
-const UserTagGroupPadding = 2;
+const Group = styled.div`
+    display: flex;
+    flex-direction: column;
+    max-width: 680px;
+    max-height: 50vh;
+    overflow: hidden auto;
+    > * {
+        flex-grow: 0;
+        flex-shrink: 0;
+        max-height: unset;
+    }
+`;
 
 const List = styled.div`
     margin: 1em 0;
     min-height: 8em;
     max-height: 50vh;
-    max-width: 44vw;
+    max-width: 680px;
     overflow: hidden auto;
     display: grid;
     gap: 0.4em;
     grid-auto-rows: max-content;
 `;
 
-const ListItem = styled.div`
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-width: ${(UserTagGroupSize + UserTagGroupPadding * 2) * ((allUserTagGroups.length - 1) * 0.8 + 1) + 10}px;
-    height: 100%;
-    padding: 1.2em 1em 1em 1.4em;
-    border-radius: 2px;
-    position: relative;
-    box-shadow: inset 0 0 2px #8881;
-    > .head {
-        display: flex;
-        align-items: center;
-        > i {
-            flex-grow: 0;
-            flex-shrink: 0;
-            width: 2em;
-            height: 2em;
-            margin-right: 0.8em;
-            user-select: none;
-        }
-        > div {
-            flex-grow: 1;
-            flex-shrink: 1;
-            overflow: hidden;
-            > header {
-                font-size: 0.8rem;
-                line-height: 1.5em;
-                font-weight: 550;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                color: #111;
-            }
-            > span {
-                font-size: 0.6rem;
-                line-height: 1.2em;
-                color: #555;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-            }
-        }
-    }
-    .time {
-        font-size: 0.5rem;
-        color: #888;
-    }
-    > button {
-        position: absolute;
-        top: 0;
-        right: 0;
-        margin: 0;
-        padding: 0;
-        font-size: 12px;
-        background-color: #d13438 !important;
-        border-radius: 50%;
-        color: #fff !important;
-        width: 1.2em;
-        height: 1.2em;
-        i {
-            font-weight: 1000;
-            line-height: 1em;
-            width: 1em;
-            height: 1em;
-            transform: scale(0.4);
-        }
-        opacity: 0.5;
-        :hover {
-            opacity: 1;
-        }
-    }
-    & .hover-only:not([aria-selected=true]) {
-        visibility: hidden;
-    }
-    :hover {
-        background-color: #8881;
-        & .hover-only {
-            visibility: visible;
-        }
-    }
-    cursor: pointer;
-`;
-
-const UserTagGroupContainer = styled.div`
-    position: absolute;
-    left: 0;
-    top: 0;
-    display: flex;
-    flex-direction: row;
-    background-image: linear-gradient(to bottom, #8881, transparent 5px);
-    padding: 0 5px;
-    > svg {
-        margin: 0 ${UserTagGroupPadding}px;
-        cursor: pointer;
-        transition: transform 200ms;
-        transform: translateY(-67%);
-        opacity: 0.2;
-        :hover {
-            opacity: 0.95;
-            transform: translateY(-4px);
-        }
-        &[aria-selected=true] {
-            opacity: 1;
-            transform: translateY(-3px);
-            animation: pull 400ms linear forwards;
-        }
-        &[aria-selected=false] {
-            transition: transform 100ms;
-            filter: saturate(0.75);
-        }
-        > * {
-            pointer-events: none;
-            filter: drop-shadow(0.8px 1px 0.6px #888);
-        }
-        :not(:first-child) {
-            margin-left: ${-0.2 * UserTagGroupSize - UserTagGroupPadding}px;
-        }
-    }
-    @keyframes pull {
-        from {
-            transform: translateY(-4px);
-        }
-        30% {
-            transform: translateY(-1.5px);
-        }
-        to {
-            transform: translateY(-3px);
-        }
-    }
-`;
-
 const ITEM_MIN_WIDTH = 200;
 const MAX_HISTORY_SIZE = 64;
-const MAX_RECENT_TIME = 1_000 * 60 * 60 * 24 * 31 * 3;  // 3 months
 
-export function formatSize(size: number) {
-    if (size < 1024) {
-        return `${size.toFixed(2)}KB`;
-    }
-    if (size < 1024 * 1024) {
-        return `${(size / 1024).toFixed(2)}MB`;
-    }
-    return `${(size / 1024 / 1024).toFixed(2)}GB`;
+export enum HistoryRecentTag {
+    TODAY = '1d',
+    WEEK = '1w',
+    MONTH = '1mo',
+    THREE_MONTHS = '3mo',
+    SIX_MONTHS = '6mo',
+    YEAR = '1yr',
 }
+
+const limitRecentTime: Record<HistoryRecentTag, number> = {
+    [HistoryRecentTag.TODAY]: 1_000 * 60 * 60 * 24,
+    [HistoryRecentTag.WEEK]: 1_000 * 60 * 60 * 24 * 7,
+    [HistoryRecentTag.MONTH]: 1_000 * 60 * 60 * 24 * 31,
+    [HistoryRecentTag.THREE_MONTHS]: 1_000 * 60 * 60 * 24 * 31 * 3,
+    [HistoryRecentTag.SIX_MONTHS]: 1_000 * 60 * 60 * 24 * 183,
+    [HistoryRecentTag.YEAR]: 1_000 * 60 * 60 * 24 * 366,
+};
+
+const MAX_RECENT_TIME = limitRecentTime[HistoryRecentTag.YEAR];
 
 export interface IHistoryListProps {
     onClose: () => void;
@@ -180,9 +61,11 @@ export interface IHistoryListProps {
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: string, tag: DataSourceTag, withHistory: IDBMeta) => void;
     is?: DataSourceTag;
     search?: string;
+    /** @default false */
+    groupByPeriod?: boolean;
 }
 
-const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFailed, is, search }) => {
+const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFailed, is, search, groupByPeriod = false }) => {
     const [localDataList, setLocalDataList] = useState<IDBMeta[]>([]);
     const prevList = useRef(localDataList);
     prevList.current = localDataList;
@@ -243,73 +126,79 @@ const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFa
         });
     }, [localDataList, search]);
 
+    const groups = useMemo<{ list: typeof list; tag: HistoryRecentTag }[]>(() => {
+        if (!groupByPeriod) {
+            return [];
+        }
+        const all = Object.keys(limitRecentTime).map<{ list: typeof list; tag: HistoryRecentTag }>(tag => {
+            return {
+                list: [],
+                tag: tag as HistoryRecentTag,
+            };
+        });
+        const now = Date.now();
+        for (const item of list) {
+            for (const group of all) {
+                if (group.tag === HistoryRecentTag.TODAY) {
+                    if (new Date(item.editTime).toDateString() === new Date(now).toDateString()) {
+                        group.list.push(item);
+                        break;
+                    }
+                } else if (now - item.editTime < limitRecentTime[group.tag]) {
+                    group.list.push(item);
+                    break;
+                }
+            }
+        }
+        return all.filter(group => group.list.length > 0);
+    }, [list, groupByPeriod]);
+
     return (
-        <List role="grid" ref={listRef} aria-colcount={colCount || 1} style={{ gridTemplateColumns: `repeat(${colCount || 1}, 1fr)` }}>
-            {list.map((file, i) => {
-                const ext = file.name.endsWith(RathDemoVirtualExt) ? RathDemoVirtualExt : /(?<=\.)[^.]+$/.exec(file.name)?.[0];
-                const isRathDemo = ext === RathDemoVirtualExt;
-                const name = isRathDemo ? file.name.replace(new RegExp(`\\.${RathDemoVirtualExt.replaceAll(/\./g, '\\.')}$`), '') : file.name;
+        <Group ref={listRef}>
+            {groups.length > 0 ? groups.map(group => {
+                const beginTime = new Date(group.list.at(-1)!.editTime).toLocaleDateString();
+                const endTime = new Date(group.list[0].editTime).toLocaleDateString();
+                const period = endTime === beginTime ? endTime : `${beginTime} - ${endTime}`;
 
                 return (
-                    <ListItem
-                        key={i}
-                        role="gridcell"
-                        aria-rowindex={Math.floor(i / colCount) + 1}
-                        aria-colindex={(i % colCount) + 1}
-                        tabIndex={0}
-                        onClick={() => handleLoadHistory(file)}
-                    >
-                        <div className="head">
-                            <Icon iconName={getFileIcon(isRathDemo ? '' : file.name)} />
-                            <div>
-                                <header>
-                                    <TooltipHost content={name}>
-                                        <span>{name}</span>
-                                    </TooltipHost>
-                                </header>
-                                <span>
-                                    {`${ext ? `${
-                                        isRathDemo ? `Rath ${
-                                            intl.get(`dataSource.importData.type.${IDataSourceType.DEMO}`)
-                                        }` : ext
-                                    } - ` : ''}${formatSize(file.size)}`}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="time">
-                            <p>{`${intl.get('dataSource.upload.lastOpen')}: ${dayjs(file.editTime).toDate().toLocaleString()}`}</p>
-                        </div>
-                        <UserTagGroupContainer onClick={e => e.stopPropagation()}>
-                            {allUserTagGroups.map(key => {
-                                const selected = file.userTagGroup === key;
-                                return (
-                                    <svg
-                                        key={key} aria-selected={selected} className="hover-only"
-                                        width={UserTagGroupSize} height={24} viewBox={`-1 -1 ${UserTagGroupSize + 2} 26`}
-                                        fill={userTagGroupColors[key]} stroke="none"
-                                        onClick={() => {
-                                            updateDataStorageUserTagGroup(file.id, selected ? undefined : key);
-                                            fetchDataStorageList(false);
-                                        }}
-                                    >
-                                        <path d={`M0,0 h${UserTagGroupSize} v16 l-${UserTagGroupSize / 2},4 l-${UserTagGroupSize / 2},-4 Z`} />
-                                    </svg>
-                                );
-                            })}
-                        </UserTagGroupContainer>
-                        <IconButton
-                            className="hover-only"
-                            title="Delete"
-                            iconProps={{ iconName: 'Clear' }}
-                            onClick={e => {
-                                e.stopPropagation();
-                                handleDeleteHistory(file.id);
-                            }}
-                        />
-                    </ListItem>
+                    <Fragment key={group.tag}>
+                        <header>
+                            {`${intl.get(`dataSource.upload.history_time.${group.tag}`)}${
+                                group.tag === HistoryRecentTag.TODAY ? ''
+                                    : ` (${period})`
+                            }`}
+                        </header>
+                        <List role="grid" aria-colcount={colCount || 1} style={{ gridTemplateColumns: `repeat(${colCount || 1}, 1fr)` }}>
+                            {group.list.map((file, i) => (
+                                <HistoryListItem
+                                    key={i}
+                                    file={file}
+                                    rowIndex={Math.floor(i / colCount) + 1}
+                                    colIndex={(i % colCount) + 1}
+                                    handleClick={handleLoadHistory}
+                                    handleClearClick={handleDeleteHistory}
+                                    handleRefresh={() => fetchDataStorageList(false)}
+                                />
+                            ))}
+                        </List>
+                    </Fragment>
                 );
-            })}
-        </List>
+            }) : (
+                <List role="grid" ref={listRef} aria-colcount={colCount || 1} style={{ gridTemplateColumns: `repeat(${colCount || 1}, 1fr)` }}>
+                    {list.map((file, i) => (
+                        <HistoryListItem
+                            key={i}
+                            file={file}
+                            rowIndex={Math.floor(i / colCount) + 1}
+                            colIndex={(i % colCount) + 1}
+                            handleClick={handleLoadHistory}
+                            handleClearClick={handleDeleteHistory}
+                            handleRefresh={() => fetchDataStorageList(false)}
+                        />
+                    ))}
+                </List>
+            )}
+        </Group>
     );
 };
 
