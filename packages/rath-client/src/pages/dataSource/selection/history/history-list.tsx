@@ -21,7 +21,7 @@ const List = styled.div`
     margin: 1em 0;
     min-height: 8em;
     max-height: 50vh;
-    max-width: 50vw;
+    max-width: 44vw;
     overflow: hidden auto;
     display: grid;
     gap: 0.4em;
@@ -55,7 +55,7 @@ const ListItem = styled.div`
             overflow: hidden;
             > header {
                 font-size: 0.8rem;
-                line-height: 1.2em;
+                line-height: 1.5em;
                 font-weight: 550;
                 white-space: nowrap;
                 text-overflow: ellipsis;
@@ -66,6 +66,9 @@ const ListItem = styled.div`
                 font-size: 0.6rem;
                 line-height: 1.2em;
                 color: #555;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
             }
         }
     }
@@ -129,7 +132,12 @@ const UserTagGroupContainer = styled.div`
         }
         &[aria-selected=true] {
             opacity: 1;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            animation: pull 400ms linear forwards;
+        }
+        &[aria-selected=false] {
+            transition: transform 100ms;
+            filter: saturate(0.75);
         }
         > * {
             pointer-events: none;
@@ -137,6 +145,17 @@ const UserTagGroupContainer = styled.div`
         }
         :not(:first-child) {
             margin-left: ${-0.2 * UserTagGroupSize - UserTagGroupPadding}px;
+        }
+    }
+    @keyframes pull {
+        from {
+            transform: translateY(-4px);
+        }
+        30% {
+            transform: translateY(-1.5px);
+        }
+        to {
+            transform: translateY(-3px);
         }
     }
 `;
@@ -155,14 +174,15 @@ export function formatSize(size: number) {
     return `${(size / 1024 / 1024).toFixed(2)}GB`;
 }
 
-interface IHistoryListProps {
+export interface IHistoryListProps {
     onClose: () => void;
     onLoadingFailed: (err: any) => void;
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: string, tag: DataSourceTag, withHistory: IDBMeta) => void;
     is?: DataSourceTag;
+    search?: string;
 }
 
-const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFailed, is }) => {
+const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFailed, is, search }) => {
     const [localDataList, setLocalDataList] = useState<IDBMeta[]>([]);
     const prevList = useRef(localDataList);
     prevList.current = localDataList;
@@ -206,9 +226,26 @@ const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFa
         });
     }, [fetchDataStorageList]);
 
+    const list = useMemo(() => {
+        if (!search) {
+            return localDataList;
+        }
+        return localDataList.filter(item => {
+            let temp = item.name.toLocaleLowerCase();
+            for (const keyword of search.toLocaleLowerCase().split(/ +/)) {
+                const idx = temp.indexOf(keyword);
+                if (idx === -1) {
+                    return false;
+                }
+                temp = temp.slice(idx);
+            }
+            return true;
+        });
+    }, [localDataList, search]);
+
     return (
         <List role="grid" ref={listRef} aria-colcount={colCount || 1} style={{ gridTemplateColumns: `repeat(${colCount || 1}, 1fr)` }}>
-            {localDataList.map((file, i) => {
+            {list.map((file, i) => {
                 const ext = file.name.endsWith(RathDemoVirtualExt) ? RathDemoVirtualExt : /(?<=\.)[^.]+$/.exec(file.name)?.[0];
                 const isRathDemo = ext === RathDemoVirtualExt;
                 const name = isRathDemo ? file.name.replace(new RegExp(`\\.${RathDemoVirtualExt.replaceAll(/\./g, '\\.')}$`), '') : file.name;
@@ -248,7 +285,7 @@ const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFa
                                 return (
                                     <svg
                                         key={key} aria-selected={selected} className="hover-only"
-                                        width={UserTagGroupSize} height={20} viewBox={`-1 -1 ${UserTagGroupSize + 2} 22`}
+                                        width={UserTagGroupSize} height={24} viewBox={`-1 -1 ${UserTagGroupSize + 2} 26`}
                                         fill={userTagGroupColors[key]} stroke="none"
                                         onClick={() => {
                                             updateDataStorageUserTagGroup(file.id, selected ? undefined : key);

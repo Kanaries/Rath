@@ -10,7 +10,7 @@ import FileData from './file';
 import DemoData from './demo';
 import RestfulData from './restful';
 import OLAPData from './olap';
-import HistoryList from './history/history-list';
+import HistoryPanel from './history';
 import DatabaseData from './database/';
 import AirTableSource from './airtable';
 
@@ -45,7 +45,7 @@ const Selection: React.FC<SelectionProps> = props => {
             <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
         ),
         [IDataSourceType.LOCAL]: (
-            <HistoryList onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} />
+            <HistoryPanel onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} />
         ),
         [IDataSourceType.DATABASE]: (
             <DatabaseData onClose={onClose} onDataLoaded={onDataLoaded} setLoadingAnimation={setLoadingAnimation} />
