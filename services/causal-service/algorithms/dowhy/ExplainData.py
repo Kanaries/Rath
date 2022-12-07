@@ -1,4 +1,5 @@
 import sys, os, math
+import logging
 import pandas as pd, numpy as np
 from . import interface as IDoWhy
 import typing as tp
@@ -59,7 +60,7 @@ def constructPAG(fields, causal_model: IDoWhy.ICausalModel):
             g_gml += f"\nedge[source \"{e.src}\" target \"{e.tar}\"]"
         # k.src_type, k.tar_type
     g_gml += "]"
-    print("gml=", g_gml)
+    logging.debug(f"gml={g_gml}")
     return g_gml
 
 class ExplainDataSession(RathSession):
@@ -67,9 +68,7 @@ class ExplainDataSession(RathSession):
         super(ExplainDataSession, self).__init__(data, fields)
     
     def updateModel(self, dimensions: tp.List[str], measures: tp.List[IDoWhy.IRMeasureSpec], groups: IDoWhy.IRInsightSubspaceGroup):
-        print("data:", self.dataSource)
-        print("dim:", dimensions)
-        print("meas:", measures[0].fid)
+        logging.info("updateModel data={}\ndim={}\nmeas={}".format(self.dataSource, dimensions, measures[0].fid))
         import algorithms
         params = algorithms.common.OptionalParams(catEncodeType='topk-with-noise', quantEncodeType='none')
         self.data, self.fields = algorithms.common.trans(self.dataSource, self.fields, params)
@@ -108,7 +107,7 @@ class ExplainDataSession(RathSession):
             'iv/rd': 'iv.regression_discontinuity'
         }
         tmp = lambda df: satisfy(df, groups.current)
-        print("target_units=\n", self.dataSource[tmp(self.data)])
+        logging.info("target_units=\n{}".format(self.dataSource[tmp(self.data)]))
         satCurrent, satOther = satisfy(self.dataSource, groups.current), satisfy(self.dataSource, groups.other)
         method = 'lr'
         if methods[method].startswith('backdoor.propensity_score_'):
@@ -123,7 +122,7 @@ class ExplainDataSession(RathSession):
             evaluate_effect_strength=True,
             )
         # TOBEDONE: param
-        print(self.estimate)
+        logging.info(f"estimate={self.estimate}")
 
 def inferInfo(session: ExplainDataSession):
     self = session.estimate
@@ -164,7 +163,7 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
     current, other = groups.current, groups.other
     dimensions, measures = view.dimensions, view.measures
     
-    print("transData =", transData)
+    logging.info(f"transData = {transData}")
     for dep in props.causalModel.funcDeps:
         pass
     f_ind = {f.fid: i for i, f in enumerate(fields)}
@@ -179,7 +178,7 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
     currentData, otherData = transData[inCurrent], transData[inOther]
     treatment = [d for d in dimensions if (np.sort(currentData[d].unique(), 0).tolist() != np.sort(otherData[d].unique(), 0).tolist())] if hasDiffGroups else dimensions
     graph = constructPAG(fields, causalModel)
-    print('treat:', treatment)
+    logging.info(f"treat: {treatment}")
     results = []
     
     def testModel(results, model):
@@ -218,9 +217,9 @@ def explainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
         ))
         # TOBEDONE: more params
         if estimate.value > 0:
-            print("f===========", f.fid)
-            print("target_units=\n", dataSource[tmp(transData)])
-            print('unobserved f = ', f, '\n', estimate)
+            logging.info(f"f==========={f.fid}\n" \
+                f"target_units=\n{dataSource[tmp(transData)]}\n" \
+                f"unobserved f = {f}\nestimate={estimate}")
     
     # General: use origin graph 
     # Fallback: without graph, any variable can be used as common_cause
@@ -251,8 +250,7 @@ def significance_value(x: float, var: float=1.):
         x (float): X - EX
         var (float): σ(X)
     """
-    print("x = ", x)
-    print("norm cdf =", st.norm.cdf(abs(x)))
+    logging.debug(f"x = {x}\nnorm cdf ={st.norm.cdf(abs(x))}")
     return 2 * st.norm.cdf(abs(x), scale=var) - 1
 
 def ExplainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsightExplainResult]:
@@ -282,7 +280,7 @@ def ExplainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
             descrip_data['conditional estimates'] = str(session.estimate.conditional_estimates)
         if session.estimate.effect_strength is not None:
             descrip_data['change in outcome attributable to treatment'] = session.estimate.effect_strength["fraction-effect"]
-        print("descrip_data=", descrip_data)
+        logging.info(f"descrip_data={descrip_data}")
         descrip_data['desc_by'] = 'ExplainData'
         results.append(IDoWhy.LinkInfo(
             src=props.view.dimensions[0], tar=props.view.measures[0].fid, src_type=-1, tar_type=1,
@@ -290,7 +288,7 @@ def ExplainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
             responsibility=session.estimate.value
         ))
     except Exception as e:
-        print(str(e), file=sys.stderr)
+        logging.warning(str(e))
     
     results.extend(explainData(props))
     
@@ -301,7 +299,12 @@ def ExplainData(props: IDoWhy.IRInsightExplainProps) -> tp.List[IDoWhy.IRInsight
     for res in results:
         res.responsibility = significance_value(res.responsibility, vars)
     
-    print("results =", results)
+    log = ''
+    logging.info("results = {}".format('\n'.join([repr(res) for res in results])))
+    for res in results:
+        log += f"<{res.src}:{res.src_type}, {res.tar}:{res.tar_type}>:\t{res.responsibility}\n"
+        log += f"{res.description.key}:" + '\n'.join([f"{k}: {v}" for k, v in res.description.data.items()])
+    logging.debug(f"results = {log}")
     
     return IDoWhy.IRInsightExplainResult(
         causalEffects=results

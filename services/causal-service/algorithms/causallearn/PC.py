@@ -1,4 +1,5 @@
 from typing import Dict, List, Tuple, Optional, Union, Literal
+import logging
 import traceback
 from pydantic import Field
 
@@ -71,8 +72,7 @@ class PC(AlgoInterface):
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
-        print("fields=", self.fields)
-        print("array=", array)
+        logging.info("fields={}, array={}", self.fields, array)
         
         params.__dict__['cache_path'] = None # '/tmp/causal/pc.json'
         

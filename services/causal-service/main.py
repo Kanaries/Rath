@@ -1,4 +1,5 @@
 import os, sys, json, time, argparse, math
+import logging
 import numpy as np, pandas as pd
 from typing import Dict, List, Tuple, Optional, Union, Literal, Generic
 import traceback
@@ -13,7 +14,9 @@ params = {*os.environ.get('mode', '').split(',')}
 is_dev = 'dev' in params
 is_test = 'test' in params
 
-print("Development Mode" if is_dev else "Test Mode" if is_test else 'Production Mode', file=sys.stderr)
+logging.basicConfig(level=logging.DEBUG if is_dev else logging.INFO if is_test else logging.WARNING, format="%(asctime)s.%(msecs)d [%(levelname)s]<\"%(pathname)s\", line %(lineno)s>:\n%(message)s")
+
+logging.info("Development Mode" if is_dev else "Test Mode" if is_test else 'Production Mode')
 app = FastAPI()
 origins = [ "*" ]
 cors_regex = \
@@ -155,12 +158,11 @@ async def algoSchema(algoName: str, response: Response):
 from algorithms.causallearn.PC import PCParams
 from algorithms.causallearn.FCI import FCIParams
 import sys
-import logging
 
 def causal(algoName: str, item: algorithms.CausalRequest, response: Response) -> I.CausalAlgorithmResponse:
     try:
         method: I.AlgoInterface = algorithms.DICT.get(algoName)(item.dataSource, item.fields, item.params)
-        print("causal", item.params, item.focusedFields, item.bgKnowledgesPag)
+        logging.info("causal(params={}, focusedFields={}, bgKnowledgesPag={}".format(item.params, item.focusedFields, item.bgKnowledgesPag))
         data = method.calc(item.params, item.focusedFields, bgKnowledgesPag=item.bgKnowledgesPag, funcDeps=item.funcDeps)
         response_data = I.CausalAlgorithmData(
             orig_matrix=data.get('data'),
@@ -174,7 +176,7 @@ def causal(algoName: str, item: algorithms.CausalRequest, response: Response) ->
         )
     except Exception as e:
         msg = traceback.format_exc()
-        print(msg, file=sys.stderr)
+        logging.warning(msg)
         response.status_code = status.HTTP_400_BAD_REQUEST
         return I.CausalAlgorithmResponse(
             success=False,

@@ -1,4 +1,5 @@
 import os, sys, json, time, argparse
+import logging
 import numpy as np, pandas as pd
 from typing import Dict, List, Tuple, Optional, Union, Literal
 import traceback
@@ -74,7 +75,7 @@ class FCI(AlgoInterface):
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledges: Optional[List[common.BgKnowledge]] = [], **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
-        print(array, array.min(), array.max())
+        logging.info("calc: array={}\nmin={}, max={}".format(array, array.min(), array.max()))
         self.G, self.edges = fci(array, **params.__dict__, background_knowledge=None, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
         
         if bgKnowledges and len(bgKnowledges) > 0:

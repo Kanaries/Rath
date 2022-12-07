@@ -1,4 +1,5 @@
 from . import common
+import logging
 from causallearn.search.Granger.Granger import Granger
 from causallearn.search.FCMBased.ANM.ANM import ANM
 from typing import List, Optional, Dict, Set
@@ -40,7 +41,7 @@ class FuncDepTestParams(common.OptionalParams, title="FuncDepTest Algorithm"):
 class FuncDepTest(common.AlgoInterface):
     ParamType = FuncDepTestParams
     def __init__(self, dataSource: List[common.IRow], fields: List[common.IFieldMeta], params: Optional[ParamType] = ParamType(), **kwargs):
-        print("FuncDepTest", fields, params)
+        logging.info(f"FuncDepTest(fields={fields}, params={params})")
         super(FuncDepTest, self).__init__(dataSource=dataSource, fields=fields, params=params)
         
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
@@ -61,7 +62,7 @@ class FuncDepTest(common.AlgoInterface):
         for i in range(d):
             for j in range(d):
                 if i != j: coeff_p[i, j] = coeff_p[j, i] = cit(i, j, [])
-        print(coeff_p)
+        logging.info(f"coeff_p = {coeff_p}")
         linear_threshold = 1e-18
         threshold = 10 ** params.o_alpha
         max_samples = 128
@@ -70,8 +71,8 @@ class FuncDepTest(common.AlgoInterface):
             for j in range(i):
                 if coeff_p[i, j] < 10 ** params.alpha:
                     a, b = o_test(array[:, i:i+1], array[:, j:j+1])
-                    print(f"indep: {i}, {j}, {coeff_p[i, j]}")
-                    print("Orient model p:", a, b)
+                    logging.info(f"indep: {i}, {j}, {coeff_p[i, j]}")
+                    logging.info(f"Orient model p: {a}, {b}")
                     if a * threshold < b:
                         res[i, j], res[j, i] = -1, 1
                     elif a > b * threshold: 

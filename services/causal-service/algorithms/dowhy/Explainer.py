@@ -1,4 +1,5 @@
 from algorithms import common
+import logging
 from typing import List, Optional, Dict, Set
 from pydantic import Field
 import dowhy
@@ -32,7 +33,7 @@ class Explainer(common.AlgoInterface):
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = []):
         # array = self.selectArray(focusedFields=focusedFields, params=params)
         self.data = self.dataSource[focusedFields]
-        print(self.data, focusedFields, bgKnowledgesPag)
+        logging.info("calc: data={}\nfocusedFields={}\nbgKnowledgesPag={}".format(self.data, focusedFields, bgKnowledgesPag))
         d = len(focusedFields)
         g_gml = "graph[directed 1"
         for f in focusedFields:
@@ -41,13 +42,13 @@ class Explainer(common.AlgoInterface):
             g_gml += f"edge[source \"{k.src}\" target \"{k.tar}\"]"
             # k.src_type, k.tar_type
         g_gml += "]"
-        print(g_gml)
+        logging.info(f"g_gml={g_gml}")
         import pandas as pd
         import numpy as np
         for f in [params.treatment]:
             if params.estimate_effect_method == 'backdoor.distance_matching' and np.unique(self.data[f].values).size == 2:
                 self.data = self.data.assign(**{f: self.data[f] != self.data[f].values[0]})
-        print(self.data[f])
+        logging.info(f"data = {self.data[f]}")
         
         self.model = dowhy.CausalModel(
             data=self.data,
@@ -56,16 +57,16 @@ class Explainer(common.AlgoInterface):
             graph=g_gml
         )
         self.model.view_model()
-        print(self.model)
+        logging.info(f"model = {self.model}")
         
         res = {}
         res['identified_estimand'] = self.model.identify_effect(proceed_when_unidentifiable=True)
-        print(res['identified_estimand'], params.estimate_effect_method)
+        logging.info(res['identified_estimand'], params.estimate_effect_method)
         res['causal_estimate'] = self.model.estimate_effect(res['identified_estimand'], method_name=params.estimate_effect_method, test_significance=True)
         # res['refute'] = self.model.refute_estimate(res['identified_estimand'], estimate=res['causal_estimate'], method_name="random_common_cause", show_progress_bar=True)
-        print("res=")
+        logging.info("res:")
         for k, v in res.items():
-            print(k, v)
+            logging.info(f"{k} {v}")
         
         return {
             'data': [[]],

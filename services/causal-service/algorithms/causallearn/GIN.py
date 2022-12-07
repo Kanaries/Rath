@@ -1,4 +1,5 @@
 from typing import Dict, List, Tuple, Optional, Union, Literal
+import logging
 import traceback
 from pydantic import Field
 
@@ -29,7 +30,7 @@ class GINParams(OptionalParams, title="GIN Algorithm(暂不支持背景知识)")
 class GIN(AlgoInterface):
     ParamType = GINParams
     def __init__(self, dataSource: List[IRow], fields: List[IFieldMeta], params: Optional[ParamType] = ParamType()):
-        print("GIN", dataSource, fields, params)
+        logging.info("GIN: data={}\nfields={}, params={}".format(dataSource, fields, params))
         super(GIN, self).__init__(dataSource=dataSource, fields=fields, params=params)
         
     def constructBgKnowledge(self, bgKnowledges: Optional[List[common.BgKnowledge]] = [], f_ind: Dict[str, int] = {}):

@@ -1,5 +1,6 @@
 
 import os, sys, json, time, argparse
+import logging
 import numpy as np, pandas as pd
 from typing import Dict, List, Tuple, Optional, Union, Literal, Any
 import traceback
@@ -88,16 +89,16 @@ def getOpts(Items: Dict):
 
 
 def checkLinearCorr(array: np.ndarray):
-    print(array)
+    logging.info(array)
     for i in range(8):
         if np.linalg.matrix_rank(array) < array.shape[1]:
             U, s, VT = np.linalg.svd(array)
-            print("================checkLinearCorr:{}".format(i))
-            print(U, s, VT, sep='\n')
+            logging.debug("================checkLinearCorr:{}".format(i))
+            logging.debug(f"{U}\n{s}\n{VT}\n")
             # raise Exception("The input array is linear correlated, some fields should be unselected.\n[to be optimized]")
             # array *= (1 + np.random.randn(*array.shape)*1e-3)
             # array *= (1 + np.random.randn(*array.shape) * 1e-3)
-            print("The input array is linear correlated, some fields should be unselected.\n[to be optimized]", file=sys.stderr)
+            logging.info("The input array is linear correlated, some fields should be unselected.\n[to be optimized]")
             # if np.abs(s[-1] / s[0]) < 1e-4:
             #     print("CheckLinearCorr", U, s, VT)
             #     raise Exception("The input array is linear correlated, some fields should be unselected")
@@ -230,7 +231,7 @@ def trans(df: pd.DataFrame, fields: List[IFieldMeta], params: OptionalParams):
                     newcode = encodeCat(df[f.fid], pd.Series(code, name=f.fid), params.catEncodeType)
                 except Exception as e:
                     with sys.stderr:
-                        print(f"encodeCat by {params.catEncodeType} failed:")
+                        logging.warning(f"encodeCat by {params.catEncodeType} failed:")
                         traceback.print_exception(e)
                 # print("newcode-nominal", newcode)
                 if params.keepOriginCat or newcode.size == 0:
@@ -371,7 +372,7 @@ class AlgoInterface:
     
     def selectArray(self, focusedFields: List[str] = [], params: OptionalParams = OptionalParams()) -> np.ndarray:
         # print('\n\nselectArray', [{f.fid: f for f in self.fields}[ff] for ff in focusedFields])
-        print("Fields: ", {f.fid: f for f in self.fields}.keys(), focusedFields)
+        logging.info("Fields: {}\n{}".format({f.fid: f for f in self.fields}.keys(), focusedFields))
         focusedFields = self.transFocusedFields(focusedFields)
         self.data, self.focusedFields = transDataSource(self.dataSource, [{f.fid: f for f in self.fields}[ff] for ff in focusedFields], params)
         # print('\n\n', data.dtypes)

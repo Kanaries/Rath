@@ -1,4 +1,5 @@
 import os, sys, json, time, argparse
+import logging
 import numpy as np, pandas as pd
 from typing import Dict, List, Tuple, Optional, Union, Literal
 import traceback
@@ -148,7 +149,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     for t in topo[::-1]:
         mxvcnt, y = 0, -1
         for a in anc[t]:
-            print("a = ", a, attr_id[a])
+            logging.debug("a = {}, attr_id[a] = {}".format(a, attr_id[a]))
             vcnt = np.unique(dataset[:, attr_id[a]]).size
             if vcnt > mxvcnt:
                 y = a
@@ -169,7 +170,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
         GfdNodes.append(node)
     FDgraph, FD_sep_sets = FCI.fas(dataset, GfdNodes, independence_test_method=independence_test_method, alpha=alpha,
                           knowledge=None, depth=depth, verbose=verbose)
-    print("FDGraph:", FDgraph, FD_sep_sets)
+    logging.debug("FDGraph = {}, sep_sets = {}".format(FDgraph, FD_sep_sets))
     
     # S = S join fas(dataset, GV)
     nodes = []
@@ -188,8 +189,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
             # if FDgraph.graph[j, i] == -1:
             #     fake_knowledge.add_required_by_node(node[y], node[x])
     
-    print("fake_knowledge =", fake_knowledge)
-    print(skeleton_knowledge)
+    logging.debug("fake_knowledge = {}\nskeleton_knowledge = {}".format(fake_knowledge, skeleton_knowledge))
     # for k in fake_knowledge.required_rules_specs:
     #     print(k[0].get_all_attributes(), k[1].get_all_attributes())
     
@@ -201,12 +201,12 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
     graph, sep_sets = FCI.fas(dataset, nodes, independence_test_method=independence_test_method, alpha=alpha,
                           knowledge=background_knowledge, depth=depth, verbose=verbose)
     for u, v in skeleton_knowledge:
-        print(u, v)
+        logging.debug((u, v))
         graph.add_edge(FCI.Edge(nodes[u], nodes[v], FCI.Endpoint.TAIL, FCI.Endpoint.TAIL))
         # graph[u, v] = graph[v, u] = -1
     
-    print("global fas graph =", graph)
-    print({u: s for u, s in sep_sets.items() if len(s)})
+    logging.debug(f"global fas graph = {graph}")
+    logging.debug({u: s for u, s in sep_sets.items() if len(s)})
     # return graph, sep_sets
     # forbid_knowledge = BackgroundKnowledge()
     # for (u, v) in background_knowledge.forbidden_rules_specs:
@@ -249,7 +249,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
             for ss in dedge_sep_set:
                 message += graph.nodes[ss].get_name() + " "
             message += "]"
-            print(message)
+            logging.info(message)
 
     FCI.reorientAllWith(graph, FCI.Endpoint.CIRCLE)
     FCI.rule0(graph, nodes, sep_sets, background_knowledge, verbose)
@@ -273,7 +273,7 @@ def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha
             first_time = False
 
             if verbose:
-                print("Epoch")
+                logging.info("Epoch")
 
     graph.set_pag(True)
 
@@ -339,7 +339,7 @@ class XLearner(AlgoInterface):
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [], bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], funcDeps: common.IFunctionalDep = [],  **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
         # common.checkLinearCorr(array)
-        print(array, array.min(), array.max())
+        logging.info("calc: array={}\nmin={}, max={}".format(array, array.min(), array.max()))
         self.G, self.edges = fci(array, **params.__dict__, background_knowledge=None, cache_path=self.__class__.cache_path, verbose=self.__class__.verbose)
         
         # if bgKnowledges and len(bgKnowledges) > 0:
