@@ -58,6 +58,7 @@ const FDBatch: FC = () => {
     const { causalStore } = useGlobalStore();
     const { sample } = causalStore.dataset;
     const { functionalDependencies } = causalStore.model;
+    const { serverActive } = causalStore.operator;
     const [displayPreview, setDisplayPreview] = useState(false);
     const [preview, setPreview] = useState<readonly IFunctionalDep[] | null>(null);
     const isPending = displayPreview && preview === null;
@@ -169,7 +170,7 @@ const FDBatch: FC = () => {
                 {/* <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
                     导入影响关系
                 </ActionButton> */}
-                <ActionButton iconProps={{ iconName: 'HintText' }} onClick={generateFDFromAutoDetection}>
+                <ActionButton iconProps={{ iconName: 'HintText' }} disabled={!serverActive} onClick={generateFDFromAutoDetection}>
                     自动识别
                 </ActionButton>
             </Stack>

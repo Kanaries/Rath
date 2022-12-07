@@ -18,7 +18,7 @@ import DynamicForm from './dynamicForm';
 
 const Params: FC = () => {
     const { causalStore } = useGlobalStore();
-    const { algorithm, causalAlgorithmForm, params: causalParams, causalAlgorithmOptions } = causalStore.operator;
+    const { algorithm, causalAlgorithmForm, params: causalParams, causalAlgorithmOptions, serverActive } = causalStore.operator;
     const viewContext = useCausalViewContext();
     const { shouldDisplayAlgorithmPanel } = viewContext ?? {};
 
@@ -59,6 +59,7 @@ const Params: FC = () => {
             <IconButton
                 text="Params"
                 iconProps={{ iconName: 'Settings' }}
+                disabled={!serverActive}
                 onClick={() => viewContext?.openAlgorithmPanel()}
             />
             <Panel

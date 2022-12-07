@@ -9,7 +9,10 @@ const AutoDetectionApiPath = 'causal/FuncDepTest';
 export const getGeneratedFDFromAutoDetection = async (dataSource: readonly IRow[]): Promise<IFunctionalDep[]> => {
     try {
         const { causalStore } = getGlobalStore();
-        const { causalServer } = causalStore.operator;
+        const { causalServer, serverActive } = causalStore.operator;
+        if (!serverActive) {
+            return [];
+        }
         const { allFields, fields } = causalStore.dataset;
         const res = await fetch(`${causalServer}/${AutoDetectionApiPath}`, {
             method: 'POST',

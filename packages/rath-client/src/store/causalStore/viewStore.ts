@@ -274,6 +274,13 @@ export const useCausalViewProvider = (causalStore: CausalStore): FC => {
         };
     }, [context]);
 
+    useEffect(() => {
+        causalStore.operator.connect();
+        return () => {
+            causalStore.operator.disconnect();
+        };
+    }, [causalStore]);
+
     return useCallback(function CausalViewProvider ({ children }) {
         return createElement(CausalViewContext.Provider, { value: context }, children);
     }, [context]);

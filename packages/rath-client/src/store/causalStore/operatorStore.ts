@@ -18,6 +18,8 @@ export default class CausalOperatorStore {
         || 'http://gateway.kanaries.cn:2080/causal'
     );
 
+    public serverActive = false;
+
     public busy = false;
 
     protected _causalAlgorithmForm: IAlgoSchema = {};
@@ -26,10 +28,6 @@ export default class CausalOperatorStore {
     }
     public params: { [algo: string]: { [key: string]: any } } = {};
     protected set causalAlgorithmForm(schema: IAlgoSchema) {
-        if (Object.keys(schema).length === 0) {
-            console.error('[causalAlgorithmForm]: schema is empty');
-            return;
-        }
         this._causalAlgorithmForm = schema;
     }
     public get causalAlgorithmOptions() {
@@ -59,6 +57,8 @@ export default class CausalOperatorStore {
 
         makeAutoObservable(this, {
             destroy: false,
+            // @ts-expect-error non-public field
+            pendingConnectAction: false,
         });
 
         const mobxReactions = [
@@ -78,6 +78,21 @@ export default class CausalOperatorStore {
                         this._algorithm = firstAlgoName;
                     }
                 });
+            }),
+            reaction(() => this.causalServer, () => {
+                runInAction(() => {
+                    this.serverActive = false;
+                    this.pendingConnectAction = undefined;
+                });
+            }),
+            reaction(() => this.serverActive, ok => {
+                if (ok) {
+                    dynamicFormSchema$.next(this.fetchCausalAlgorithmList(dataSourceStore.fieldMetas));
+                } else {
+                    runInAction(() => {
+                        this.causalAlgorithmForm = {};
+                    });
+                }
             }),
         ];
 
@@ -108,8 +123,44 @@ export default class CausalOperatorStore {
             rxReactions.forEach(subscription => subscription.unsubscribe());
         };
     }
+
+    protected pendingConnectAction: Promise<unknown> | undefined = undefined;
+
+    public async connect(server?: string) {
+        this.pendingConnectAction = undefined;
+        runInAction(() => {
+            if (server) {
+                this.causalServer = server;
+            }
+            this.serverActive = false;
+        });
+        const action = fetch(`${this.causalServer}`, { method: 'GET' });    // this is a ping
+        this.pendingConnectAction = action;
+        try {
+            const result = await action;
+            if (!result.ok) {
+                throw new Error(`[causal] Server did not successfully handle ping request. (${result.status})`);
+            }
+            if (result.ok && this.pendingConnectAction === action) {
+                runInAction(() => {
+                    this.pendingConnectAction = undefined;
+                    this.serverActive = true;
+                });
+            }
+        } catch (error) {
+            console.warn(error);
+        }
+    }
+
+    public disconnect() {
+        this.pendingConnectAction = undefined;
+        this.serverActive = false;
+    }
     
     protected async fetchCausalAlgorithmList(fields: readonly IFieldMeta[]): Promise<IAlgoSchema | null> {
+        if (!this.serverActive) {
+            return null;
+        }
         try {
             const schema: IAlgoSchema = await fetch(`${this.causalServer}/algo/list`, {
                 method: 'POST',
@@ -148,7 +199,7 @@ export default class CausalOperatorStore {
         functionalDependencies: readonly IFunctionalDep[],
         assertions: readonly PagLink[],
     ): Promise<{ raw: number[][]; pag: PagLink[] } | null> {
-        if (this.busy) {
+        if (this.busy || !this.serverActive) {
             return null;
         }
         let causality: { raw: number[][]; pag: PagLink[] } | null = null;

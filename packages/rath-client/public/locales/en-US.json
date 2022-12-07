@@ -446,6 +446,14 @@
             "$partition": "Separates each value by boolean expression into two new column."
         }
     },
+    "causal": {
+        "no_connection": {
+            "before": "The server is not responding. Some features of the causal module will be inaccessible now. This module is currently under experiment. If you need support, please click ",
+            "text": "here",
+            "after": " to email us.",
+            "subject": "[Causal] Consult for Support of Experimental Causal Module"
+        }
+    },
     "causal_direction": {
         "_": "Type of Link",
         "none": "irrelevant to",

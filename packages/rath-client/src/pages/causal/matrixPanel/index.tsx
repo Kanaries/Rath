@@ -71,7 +71,7 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
     const { causalStore } = useGlobalStore();
     const { fields } = causalStore;
     const { mutualMatrix, condMutualMatrix, causalityRaw } = causalStore.model;
-    const { busy } = causalStore.operator;
+    const { busy, serverActive } = causalStore.operator;
 
     return (
         <Cont>
@@ -100,7 +100,7 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                             </div>
                         );
                     }}
-                    disabled={busy}
+                    disabled={busy || (selectedKey === MATRIX_TYPE.causal && !serverActive)}
                     onClick={() => {
                         if (busy) {
                             return;
