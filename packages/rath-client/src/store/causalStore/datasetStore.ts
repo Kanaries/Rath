@@ -94,7 +94,7 @@ export default class CausalDatasetStore {
 
         this.sampleMetaInfo$ = combineLatest({
             filteredDataMetaInfo: filteredDataMetaInfo$,
-            sampleRate: sampleRate$.pipe(throttleTime(SAMPLE_UPDATE_DELAY)),
+            sampleRate: sampleRate$.pipe(throttleTime(SAMPLE_UPDATE_DELAY, undefined, { leading: false, trailing: true })),
             fields: fields$,
         }).pipe(
             map(({ sampleRate, fields }) => {
