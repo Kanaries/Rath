@@ -219,7 +219,7 @@ const HistoryListItem: FC<IHistoryListItemProps> = ({
             <IconButton
                 className="hover-only"
                 title="Delete"
-                iconProps={{ iconName: 'Clear' }}
+                iconProps={{ iconName: 'Remove' }}
                 onClick={e => {
                     e.stopPropagation();
                     handleClearClick?.(file.id);

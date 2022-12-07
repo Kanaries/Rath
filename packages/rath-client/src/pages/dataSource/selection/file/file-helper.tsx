@@ -1,7 +1,8 @@
 import intl from 'react-intl-universal';
-import { ChoiceGroup, Dropdown, IChoiceGroupOption, SpinButton, TextField } from "@fluentui/react";
+import { ChoiceGroup, Dropdown, IChoiceGroupOption, Label, SpinButton, TextField } from "@fluentui/react";
 import { FC, useMemo, useState } from "react";
 import styled from "styled-components";
+import produce from 'immer';
 import { SampleKey, useSampleOptions } from '../../utils';
 
 
@@ -57,9 +58,27 @@ const Container = styled.div`
     > * {
         margin-bottom: 0.8em;
     }
+    & .spin-group {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        & * {
+            min-width: unset;
+            width: max-content;
+            height: max-content;
+            min-height: unset;
+        }
+        > * {
+            margin: 0 0.5em;
+        }
+        & input {
+            width: 3em;
+        }
+    }
 `;
 
 export interface IFileHelperProps {
+    showMoreConfig: boolean;
     charset: Charset;
     setCharset: (charset: Charset) => void;
     sampleMethod: SampleKey;
@@ -67,6 +86,10 @@ export interface IFileHelperProps {
     sampleSize: number;
     setSampleSize: (sampleSize: number | ((prev: number) => number)) => void;
     preview: File | null;
+    isExcel: boolean;
+    excelRef: [[number, number], [number, number]];
+    excelRange: [[number, number], [number, number]];
+    setExcelRange: (range: [[number, number], [number, number]]) => void;
     sheetNames: string[] | false;
     selectedSheetIdx: number;
     setSelectedSheetIdx: (selectedSheetIdx: number) => void;
@@ -75,8 +98,10 @@ export interface IFileHelperProps {
 }
 
 const FileHelper: FC<IFileHelperProps> = ({
+    showMoreConfig,
     charset, setCharset, sampleMethod, setSampleMethod, sampleSize, setSampleSize, preview, sheetNames,
     selectedSheetIdx, setSelectedSheetIdx, separator, setSeparator,
+    isExcel, excelRef, excelRange, setExcelRange,
 }) => {
     const sampleOptions = useSampleOptions();
     const [customizeSeparator, setCustomizeSeparator] = useState('');
@@ -114,28 +139,32 @@ const FileHelper: FC<IFileHelperProps> = ({
 
     return (
         <Container>
-            <Dropdown
-                label={intl.get('dataSource.charset')}
-                style={{ maxWidth: '120px' }}
-                options={charsetOptions.slice()}
-                selectedKey={charset}
-                onChange={(_, item) => {
-                    item && setCharset(item.key as Charset)
-                }}
-                styles={{ root: { display: 'flex', flexDirection: 'row', marginRight: '2em' }, label: { marginRight: '1em', fontWeight: 400 }, dropdown: { width: '8em' } }}
-            />
+            {showMoreConfig && (
+                <Dropdown
+                    label={intl.get('dataSource.charset')}
+                    style={{ maxWidth: '120px' }}
+                    options={charsetOptions.slice()}
+                    selectedKey={charset}
+                    onChange={(_, item) => {
+                        item && setCharset(item.key as Charset)
+                    }}
+                    styles={{ root: { display: 'flex', flexDirection: 'row', marginRight: '2em' }, label: { marginRight: '1em', fontWeight: 400 }, dropdown: { width: '8em' } }}
+                />
+            )}
             {!preview || preview.type.match(/^text\/.*/) ? (
                 <>
-                    <ChoiceGroup
-                        label={intl.get("dataSource.separator")}
-                        options={separatorOptions}
-                        selectedKey={selectedSeparatorKey}
-                        onChange={(_, option) => {
-                            if (option) {
-                                setSeparator(option.key);
-                            }
-                        }}
-                    />
+                    {showMoreConfig && (
+                        <ChoiceGroup
+                            label={intl.get("dataSource.separator")}
+                            options={separatorOptions}
+                            selectedKey={selectedSeparatorKey}
+                            onChange={(_, option) => {
+                                if (option) {
+                                    setSeparator(option.key);
+                                }
+                            }}
+                        />
+                    )}
                     {(!preview || preview.type === 'text/csv') && separator === ',' && (
                         <>
                             <ChoiceGroup
@@ -177,6 +206,54 @@ const FileHelper: FC<IFileHelperProps> = ({
                     onChange={(_, option) => option?.key && setSelectedSheetIdx(Number(option.key))}
                     styles={{ root: { padding: '1em 0', display: 'flex', flexDirection: 'row', marginRight: '2em' }, label: { marginRight: '1em', fontWeight: 400 }, dropdown: { width: '10em' } }}
                 />
+            )}
+            {isExcel && showMoreConfig && (
+                <div className="spin-group">
+                    <Label>{intl.get("dataSource.upload.excel_range")}</Label>
+                    <SpinButton
+                        value={String(excelRange[0][0])}
+                        min={excelRef[0][0]}
+                        max={Math.min(excelRef[1][0], excelRange[1][0])}
+                        step={1}
+                        onChange={(_, str) => str && setExcelRange(produce(excelRange, draft => {
+                            draft[0][0] = Number(str);
+                        }))}
+                        styles={{ spinButtonWrapper: { display: 'flex', alignItems: 'center' } }}
+                    />
+                    ,
+                    <SpinButton
+                        value={String(excelRange[0][1])}
+                        min={excelRef[0][1]}
+                        max={Math.min(excelRef[1][1], excelRange[1][1])}
+                        step={1}
+                        onChange={(_, str) => str && setExcelRange(produce(excelRange, draft => {
+                            draft[0][1] = Number(str);
+                        }))}
+                        styles={{ spinButtonWrapper: { display: 'flex', alignItems: 'center' } }}
+                    />
+                    {'-'}
+                    <SpinButton
+                        value={String(excelRange[1][0])}
+                        min={Math.max(excelRef[0][0], excelRange[0][0])}
+                        max={excelRef[1][0]}
+                        step={1}
+                        onChange={(_, str) => str && setExcelRange(produce(excelRange, draft => {
+                            draft[1][0] = Number(str);
+                        }))}
+                        styles={{ spinButtonWrapper: { display: 'flex', alignItems: 'center' } }}
+                    />
+                    ,
+                    <SpinButton
+                        value={String(excelRange[1][1])}
+                        min={Math.max(excelRef[0][1], excelRange[0][1])}
+                        max={excelRef[1][1]}
+                        step={1}
+                        onChange={(_, str) => str && setExcelRange(produce(excelRange, draft => {
+                            draft[1][1] = Number(str);
+                        }))}
+                        styles={{ spinButtonWrapper: { display: 'flex', alignItems: 'center' } }}
+                    />
+                </div>
             )}
         </Container>
     );

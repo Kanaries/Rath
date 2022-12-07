@@ -172,13 +172,37 @@ export const parseExcelFile = async (file: File) => {
     return data;
 };
 
-export const loadExcelFile = async (data: Awaited<ReturnType<typeof parseExcelFile>>, sheetIdx: number, encoding: string): Promise<{
+export const loadExcelRaw = async (data: Awaited<ReturnType<typeof parseExcelFile>>, sheetIdx: number, limit?: number, rowLimit?: number, colLimit?: number): Promise<string> => {
+    const sheet = data.SheetNames[sheetIdx];
+    const worksheet = data.Sheets[sheet];
+    const csvData = xlsx.utils.sheet_to_csv(worksheet, { skipHidden: true });   // more options available here
+    let text = csvData;
+    if (limit) {
+        text = text.slice(0, limit);
+    }
+    if (rowLimit || colLimit) {
+        text = text.split('\n').slice(0, rowLimit).map(row => row.slice(0, colLimit)).join('\n');
+    }
+    return text;
+};
+
+export const loadExcelFile = async (
+    data: Awaited<ReturnType<typeof parseExcelFile>>, sheetIdx: number, encoding: string,
+    range?: [[number, number], [number, number]],
+): Promise<{
     fields: IMuteFieldBase[];
     dataSource: IRow[];
 }> => {
     const sheet = data.SheetNames[sheetIdx];
     const worksheet = data.Sheets[sheet];
-    const csvData = xlsx.utils.sheet_to_csv(worksheet, { skipHidden: true });   // more options available here
+    const copy = range ? { ...worksheet } : worksheet;
+    if (range) {
+        copy['!ref'] = xlsx.utils.encode_range({
+            s: { r: range[0][0], c: range[0][1] },
+            e: { r: range[1][0], c: range[1][1] },
+        });
+    }
+    const csvData = xlsx.utils.sheet_to_csv(copy, { skipHidden: true });   // more options available here
     const csvFile = new File([new Blob([csvData], { type: 'text/plain' })], 'file.csv');
     const rawData = (await KFileReader.csvReader({
         file: csvFile,

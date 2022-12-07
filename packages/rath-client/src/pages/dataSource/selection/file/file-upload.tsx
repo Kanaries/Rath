@@ -1,7 +1,7 @@
 import { ActionButton, Icon, Pivot, PivotItem, TooltipHost } from "@fluentui/react";
 import intl from 'react-intl-universal';
 import { observer } from "mobx-react-lite";
-import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import styled from "styled-components";
 import type { loadDataFile } from "../../utils";
 import { notify } from "../../../../components/error";
@@ -187,13 +187,14 @@ function formatSize(size: number) {
 
 export interface IFileUploadProps {
     preview: File | null;
-    previewOfFile: Awaited<ReturnType<typeof loadDataFile>> | null;
     previewOfRaw: string | null;
+    previewOfFull: Awaited<ReturnType<typeof loadDataFile>> | null;
+    previewOfFile: Awaited<ReturnType<typeof loadDataFile>> | null;
     onFileUpload: (file: File | null) => void;
 }
 
 const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function FileUpload (
-    { preview, previewOfFile, previewOfRaw, onFileUpload }, ref
+    { preview, previewOfFile, previewOfFull, previewOfRaw, onFileUpload }, ref
 ) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -227,7 +228,13 @@ const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function 
         onFileUpload(file ?? null);
     }, [onFileUpload]);
 
-    const [previewTab, setPreviewTab] = useState<'parsed' | 'raw'>('parsed');
+    const [previewTab, setPreviewTab] = useState<'parsed' | 'full' | 'raw'>('parsed');
+
+    useEffect(() => {
+        if (previewTab === 'full' && !previewOfFull) {
+            setPreviewTab('parsed');
+        }
+    }, [previewOfFull, previewTab]);
 
     return (
         <Container>
@@ -298,6 +305,30 @@ const FileUpload = forwardRef<{ reset: () => void }, IFileUploadProps>(function 
                                 <p>{intl.get("dataSource.upload.data_is_empty")}</p>
                             )}
                         </PivotItem>
+                        {previewOfFull && (
+                            <PivotItem itemKey="full" headerText={intl.get('dataSource.upload.preview_full')} >
+                                <PreviewArea>
+                                    <tbody>
+                                        <tr>
+                                            {previewOfFull.fields.map(f => (
+                                                <th key={f.fid}>
+                                                    {f.name || f.fid}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                        {previewOfFull.dataSource.slice(0, 20).map((row, i) => (
+                                            <tr key={i}>
+                                                {previewOfFull.fields.map(f => (
+                                                    <td key={f.fid}>
+                                                        {JSON.stringify(row[f.fid])}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </PreviewArea>
+                            </PivotItem>
+                        )}
                         <PivotItem itemKey="raw" headerText={intl.get('dataSource.upload.preview_raw')} >
                             <RawArea>
                                 {previewOfRaw}

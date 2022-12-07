@@ -242,10 +242,12 @@
         },
         "upload": {
             "title": "连接你的数据集，根据需求调整以下配置",
-            "fileTypes": "支持 JSON, CSV 及 Excel 文件",
+            "fileTypes": "支持 Excel 工作簿以及 JSON、CSV 等文本类型文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
+            "show_more": "高级设置",
             "sampling": "数据采样",
             "percentSize": "样本大小(行)",
+            "excel_range": "工作簿范围",
             "upload": "上传文件",
             "change": "重新选择",
             "lastOpen": "上一次使用",
@@ -262,6 +264,7 @@
             "new": "新的文件",
             "sheet": "工作簿",
             "preview_parsed": "预览",
+            "preview_full": "完整内容",
             "preview_raw": "原始内容",
             "data_is_empty": "数据集是空的。",
             "separator": {

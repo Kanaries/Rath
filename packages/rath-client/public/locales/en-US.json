@@ -242,10 +242,12 @@
         },
         "upload": {
             "title": "Upload Your own dataset",
-            "fileTypes": "JSON, CSV and Excel files are supported.",
+            "fileTypes": "Excel workbooks and text-based files (e.g. JSON, CSV) are supported.",
             "uniqueIdIssue": "Add unique ids for fields",
+            "show_more": "More Options",
             "sampling": "Sampling",
             "percentSize": "sample size(rows)",
+            "excel_range": "Range of cells",
             "upload": "Upload",
             "change": "Browse",
             "lastOpen": "Last opened",
@@ -262,6 +264,7 @@
             "new": "New file",
             "sheet": "Sheet",
             "preview_parsed": "Preview",
+            "preview_full": "Full",
             "preview_raw": "Raw",
             "data_is_empty": "This dataset is empty",
             "separator": {

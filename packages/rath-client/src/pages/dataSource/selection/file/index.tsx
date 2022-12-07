@@ -1,9 +1,10 @@
 import { FC, useState, useRef, useCallback, useEffect } from "react";
-import { PrimaryButton } from '@fluentui/react';
+import { PrimaryButton, Toggle } from '@fluentui/react';
 import styled from "styled-components";
 import { observer } from "mobx-react-lite";
+import * as xlsx from 'xlsx';
 import intl from "react-intl-universal";
-import { isExcelFile, loadDataFile, loadExcelFile, parseExcelFile, readRaw, SampleKey } from "../../utils";
+import { isExcelFile, loadDataFile, loadExcelFile, loadExcelRaw, parseExcelFile, readRaw, SampleKey } from "../../utils";
 import { dataBackup, logDataImport } from "../../../../loggers/dataImport";
 import type { IMuteFieldBase, IRow } from "../../../../interfaces";
 import { DataSourceTag, IDBMeta } from "../../../../utils/storage";
@@ -17,6 +18,29 @@ const Container = styled.div`
     > header {
         margin-top: 1.2em;
         font-weight: 550;
+        &.upload {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            > span {
+                flex-grow: 1;
+                flex-shrink: 1;
+            }
+            > div {
+                margin: 0;
+                flex-grow: 0;
+                flex-shrink: 0;
+                transform: scale(0.9);
+                > label {
+                    padding-left: 0.3em;
+                    margin: 0;
+                    font-weight: 500;
+                }
+                > div {
+                    transform: scale(0.8);
+                }
+            }
+        }
     }
     > .action {
         margin: 1em 0;
@@ -53,10 +77,13 @@ const FileData: FC<FileDataProps> = (props) => {
 
     const [preview, setPreview] = useState<File | null>(null);
     const [previewOfRaw, setPreviewOfRaw] = useState<string | null>(null);
+    const [previewOfFull, setPreviewOfFull] = useState<Awaited<ReturnType<typeof loadDataFile>> | null>(null);
     const [previewOfFile, setPreviewOfFile] = useState<Awaited<ReturnType<typeof loadDataFile>> | null>(null);
 
     const [excelFile, setExcelFile] = useState<Awaited<ReturnType<typeof parseExcelFile>> | false>(false);
     const [selectedSheetIdx, setSelectedSheetIdx] = useState(-1);
+    const [excelRef, setExcelRef] = useState<[[number, number], [number, number]]>([[0, 0], [0, 0]]);
+    const [excelRange, setExcelRange] = useState<[[number, number], [number, number]]>([[0, 0], [0, 0]]);
 
     useEffect(() => {
         setSelectedSheetIdx(-1);
@@ -70,6 +97,7 @@ const FileData: FC<FileDataProps> = (props) => {
         filePreviewPendingRef.current = undefined;
         if (preview) {
             setPreviewOfRaw(null);
+            setPreviewOfFull(null);
             setPreviewOfFile(null);
             setExcelFile(false);
             toggleLoadingAnimation(true);
@@ -105,6 +133,7 @@ const FileData: FC<FileDataProps> = (props) => {
                     return;
                 }
                 setPreviewOfRaw(res[0].status === 'fulfilled' ? res[0].value : null);
+                setPreviewOfFull(null);
                 setPreviewOfFile(res[1].status === 'fulfilled' ? res[1].value : null);
             }).catch(reason => {
                 onLoadingFailed(reason);
@@ -113,6 +142,8 @@ const FileData: FC<FileDataProps> = (props) => {
                 toggleLoadingAnimation(false);
             });
         } else {
+            setPreviewOfRaw(null);
+            setPreviewOfFull(null);
             setPreviewOfFile(null);
         }
     }, [charset, onDataLoading, onLoadingFailed, preview, sampleMethod, sampleSize, toggleLoadingAnimation, appliedSeparator]);
@@ -120,16 +151,26 @@ const FileData: FC<FileDataProps> = (props) => {
     useEffect(() => {
         if (excelFile && selectedSheetIdx !== -1) {
             setPreviewOfRaw(null);
+            setPreviewOfFull(null);
             setPreviewOfFile(null);
+            const sheet = excelFile.Sheets[excelFile.SheetNames[selectedSheetIdx]];
+            const range = sheet["!ref"] ? xlsx.utils.decode_range(sheet["!ref"]) : { s: { r: 0, c: 0 }, e: { r: 0, c: 0 } };
+            const rangeRef = [[range.s.r, range.s.c], [range.e.r, range.e.c]] as [[number, number], [number, number]];
+            setExcelRef(rangeRef);
+            setExcelRange(rangeRef);
             filePreviewPendingRef.current = undefined;
             toggleLoadingAnimation(true);
-            const p = loadExcelFile(excelFile, selectedSheetIdx, charset);
+            const p = Promise.allSettled([
+                loadExcelRaw(excelFile, selectedSheetIdx, 4096, 64, 128),
+                loadExcelFile(excelFile, selectedSheetIdx, charset),
+            ] as const);
             filePreviewPendingRef.current = p;
             p.then(res => {
                 if (p !== filePreviewPendingRef.current) {
                     return;
                 }
-                setPreviewOfFile(res);
+                setPreviewOfRaw(res[0].status === 'fulfilled' ? res[0].value : null);
+                setPreviewOfFull(res[1].status === 'fulfilled' ? res[1].value : null);
             }).catch(reason => {
                 onLoadingFailed(reason);
                 inputRef.current?.reset();
@@ -138,6 +179,26 @@ const FileData: FC<FileDataProps> = (props) => {
             });
         }
     }, [excelFile, onLoadingFailed, selectedSheetIdx, toggleLoadingAnimation, charset]);
+
+    useEffect(() => {
+        if (excelFile && previewOfFull) {
+            setPreviewOfFile(null);
+            filePreviewPendingRef.current = undefined;
+            toggleLoadingAnimation(true);
+            const p = loadExcelFile(excelFile, selectedSheetIdx, charset, excelRange);
+            filePreviewPendingRef.current = p;
+            p.then(res => {
+                if (p !== filePreviewPendingRef.current) {
+                    return;
+                }
+                setPreviewOfFile(res);
+            }).catch(reason => {
+                onLoadingFailed(reason);
+            }).finally(() => {
+                toggleLoadingAnimation(false);
+            });
+        }
+    }, [charset, excelFile, excelRange, onLoadingFailed, previewOfFull, selectedSheetIdx, toggleLoadingAnimation]);
 
     const handleFileLoad = useCallback((file: File | null) => {
         setPreview(file);
@@ -159,10 +220,21 @@ const FileData: FC<FileDataProps> = (props) => {
         onClose();
     }, [onClose, onDataLoaded, preview, previewOfFile]);
 
+    const [showMoreConfig, setShowMoreConfig] = useState(false);
+
     return (
         <Container>
-            <header>{intl.get('dataSource.upload.new')}</header>
+            <header className="upload">
+                <span>{intl.get('dataSource.upload.new')}</span>
+                <Toggle
+                    label={intl.get('dataSource.upload.show_more')}
+                    inlineLabel
+                    checked={showMoreConfig}
+                    onChange={(_, checked) => setShowMoreConfig(Boolean(checked))}
+                />
+            </header>
             <FileHelper
+                showMoreConfig={showMoreConfig}
                 charset={charset}
                 setCharset={setCharset}
                 sampleMethod={sampleMethod}
@@ -175,8 +247,19 @@ const FileData: FC<FileDataProps> = (props) => {
                 setSelectedSheetIdx={setSelectedSheetIdx}
                 separator={separator}
                 setSeparator={setSeparator}
+                isExcel={Boolean(excelFile)}
+                excelRef={excelRef}
+                excelRange={excelRange}
+                setExcelRange={setExcelRange}
             />
-            <FileUpload ref={inputRef} preview={preview} previewOfFile={previewOfFile} previewOfRaw={previewOfRaw} onFileUpload={handleFileLoad} />
+            <FileUpload
+                ref={inputRef}
+                preview={preview}
+                previewOfRaw={previewOfRaw}
+                previewOfFull={previewOfFull}
+                previewOfFile={previewOfFile}
+                onFileUpload={handleFileLoad}
+            />
             {preview ? (
                 previewOfFile && (
                     <div className="action">
