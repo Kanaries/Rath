@@ -10,12 +10,17 @@ import { MainViewContainer } from '../components';
 import FilterCreationPill from '../../../components/filterCreationPill';
 import Narrative from '../narrative';
 import EncodeCreationPill from '../../../components/encodeCreationPill';
+import type { IReactVegaHandler } from '../../../components/react-vega';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
-const FocusZone: React.FC = (props) => {
+interface IFocusZoneProps {
+    handler: React.RefObject<IReactVegaHandler>;
+}
+
+const FocusZone: React.FC<IFocusZoneProps> = ({ handler }) => {
     const { semiAutoStore, commonStore, collectionStore, painterStore } = useGlobalStore();
     const { mainVizSetting, mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas, neighborKeys } =
         semiAutoStore;
@@ -50,10 +55,10 @@ const FocusZone: React.FC = (props) => {
 
     return (
         <MainViewContainer>
-            {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
+            {mainView && showMiniFloatView && <MiniFloatCanvas handler={handler} pined={mainView} />}
             <div className="vis-container">
-                <div>{mainView && mainViewSpec && <MainCanvas view={mainView} spec={mainViewSpec} />}</div>
-                <div>{compareView && compareViewSpec && <MainCanvas view={compareView} spec={compareViewSpec} />}</div>
+                <div>{mainView && mainViewSpec && <MainCanvas handler={handler} view={mainView} spec={mainViewSpec} />}</div>
+                <div>{compareView && compareViewSpec && <MainCanvas handler={handler} view={compareView} spec={compareViewSpec} />}</div>
                 {mainVizSetting.nlg && (
                     <div style={{ overflow: 'auto' }}>
                         <Narrative />
@@ -187,6 +192,49 @@ const FocusZone: React.FC = (props) => {
                     text={intl.get('common.settings')}
                     onClick={() => {
                         semiAutoStore.setShowSettings(true);
+                    }}
+                />
+                <ActionButton
+                    style={{ marginTop: BUTTON_STYLE.marginTop }}
+                    styles={{ splitButtonMenuButton: BUTTON_STYLE }}
+                    iconProps={{ iconName: 'Download' }}
+                    ariaLabel={intl.get('megaAuto.commandBar.download')}
+                    title={intl.get('megaAuto.commandBar.download')}
+                    text={intl.get('megaAuto.commandBar.download')}
+                    onClick={() => {
+                        handler.current?.getCanvasData().then(data => {
+                            if (data) {
+                                const a = document.createElement('a');
+                                a.download = 'image.png';
+                                a.href = data.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+                                a.click();
+                            }
+                        });
+                    }}
+                    split
+                    menuProps={{
+                        items: [
+                            {
+                                key: 'svg',
+                                text: 'SVG',
+                                onClick: e => {
+                                    e?.stopPropagation();
+                                    handler.current?.getSVGData().then(data => {
+                                        if (data) {
+                                            const file = new File([data], 'image.svg');
+                                            const url = URL.createObjectURL(file);
+                                            const a = document.createElement('a');
+                                            a.download = file.name;
+                                            a.href = url;
+                                            a.click();
+                                            requestAnimationFrame(() => {
+                                                URL.revokeObjectURL(url);
+                                            });
+                                        }
+                                    });
+                                },
+                            },
+                        ],
                     }}
                 />
             </div>

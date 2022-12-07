@@ -4,9 +4,12 @@ import { observer } from 'mobx-react-lite';
 import {  CommandBar, ICommandBarItemProps } from '@fluentui/react';
 import { toJS } from 'mobx';
 import { useGlobalStore } from '../../../store';
+import type { IReactVegaHandler } from '../../../components/react-vega';
 
-interface OperationBarProps {}
-const OperationBar: React.FC<OperationBarProps> = props => {
+interface OperationBarProps {
+    handler: React.RefObject<IReactVegaHandler>;
+}
+const OperationBar: React.FC<OperationBarProps> = ({ handler }) => {
     const { megaAutoStore, commonStore, collectionStore, painterStore } = useGlobalStore();
     const { taskMode } = commonStore;
     const { mainViewSpec, mainViewPattern } = megaAutoStore;
@@ -72,7 +75,47 @@ const OperationBar: React.FC<OperationBarProps> = props => {
                 megaAutoStore.setShowContraints(true);
             },
             disabled: true
-        }
+        },
+        {
+            key: 'download',
+            text: intl.get('megaAuto.commandBar.download'),
+            iconProps: { iconName: 'Download' },
+            split: true,
+            subMenuProps: {
+                items: [
+                    {
+                        key: 'svg',
+                        text: 'SVG',
+                        onClick: e => {
+                            e?.stopPropagation();
+                            handler.current?.getSVGData().then(data => {
+                                if (data) {
+                                    const file = new File([data], 'image.svg');
+                                    const url = URL.createObjectURL(file);
+                                    const a = document.createElement('a');
+                                    a.download = file.name;
+                                    a.href = url;
+                                    a.click();
+                                    requestAnimationFrame(() => {
+                                        URL.revokeObjectURL(url);
+                                    });
+                                }
+                            });
+                        },
+                    },
+                ],
+            },
+            onClick: () => {
+                handler.current?.getCanvasData().then(data => {
+                    if (data) {
+                        const a = document.createElement('a');
+                        a.download = 'image.png';
+                        a.href = data.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+                        a.click();
+                    }
+                });
+            },
+        },
     ]
 
     return <div style={{ position: 'relative', zIndex: 99}}>

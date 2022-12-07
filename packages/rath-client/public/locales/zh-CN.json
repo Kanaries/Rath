@@ -314,7 +314,8 @@
             "painting": "数据绘板",
             "editing": "编辑图表",
             "associate": "联想",
-            "constraints": "分析约束"
+            "constraints": "分析约束",
+            "download": "导出图表"
         },
         "constraints": {
             "exclude": "排除字段",

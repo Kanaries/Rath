@@ -314,7 +314,8 @@
             "painting": "data painter",
             "editing": "edit chart",
             "associate": "associate views",
-            "constraints": "analysis constraints"
+            "constraints": "analysis constraints",
+            "download": "export chart"
         },
         "constraints": {
             "exclude": "exclude field",

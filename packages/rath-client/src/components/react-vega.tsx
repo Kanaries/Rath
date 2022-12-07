@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { View } from 'vega';
 import intl from 'react-intl-universal';
 import embed, { vega } from 'vega-embed';
@@ -14,10 +14,23 @@ interface ReactVegaProps {
     };
 }
 
-const ReactVega: React.FC<ReactVegaProps> = (props) => {
+export interface IReactVegaHandler {
+    getSVGData: () => Promise<string | null>;
+    getCanvasData: () => Promise<string | null>;
+}
+
+const ReactVega = forwardRef<IReactVegaHandler, ReactVegaProps>(function ReactVega (props, ref) {
     const { spec, dataSource, signalHandler = {}, actions } = props;
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View>();
+    useImperativeHandle(ref, () => ({
+        getSVGData() {
+            return viewRef.current?.toSVG() ?? Promise.resolve(null);
+        },
+        getCanvasData() {
+            return viewRef.current?.toCanvas().then(canvas => canvas.toDataURL('image/png')) ?? Promise.resolve(null);
+        },
+    }));
     useEffect(() => {
         if (container.current) {
             const sspec = {
@@ -93,6 +106,6 @@ const ReactVega: React.FC<ReactVegaProps> = (props) => {
         }
     }, [dataSource]);
     return <div ref={container} />;
-};
+});
 
 export default ReactVega;
