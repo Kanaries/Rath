@@ -202,14 +202,7 @@ const FocusZone: React.FC<IFocusZoneProps> = ({ handler }) => {
                     title={intl.get('megaAuto.commandBar.download')}
                     text={intl.get('megaAuto.commandBar.download')}
                     onClick={() => {
-                        handler.current?.getCanvasData().then(data => {
-                            if (data) {
-                                const a = document.createElement('a');
-                                a.download = 'image.png';
-                                a.href = data.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
-                                a.click();
-                            }
-                        });
+                        handler.current?.downloadPNG();
                     }}
                     split
                     menuProps={{
@@ -217,21 +210,8 @@ const FocusZone: React.FC<IFocusZoneProps> = ({ handler }) => {
                             {
                                 key: 'svg',
                                 text: 'SVG',
-                                onClick: e => {
-                                    e?.stopPropagation();
-                                    handler.current?.getSVGData().then(data => {
-                                        if (data) {
-                                            const file = new File([data], 'image.svg');
-                                            const url = URL.createObjectURL(file);
-                                            const a = document.createElement('a');
-                                            a.download = file.name;
-                                            a.href = url;
-                                            a.click();
-                                            requestAnimationFrame(() => {
-                                                URL.revokeObjectURL(url);
-                                            });
-                                        }
-                                    });
+                                onClick: () => {
+                                    handler.current?.downloadSVG();
                                 },
                             },
                         ],
