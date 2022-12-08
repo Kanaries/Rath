@@ -48,7 +48,7 @@ const ReactVega = forwardRef<IReactVegaHandler, ReactVegaProps>(function ReactVe
             return false;
         },
         async downloadPNG() {
-            const data = (await viewRef.current?.toCanvas().then(canvas => canvas.toDataURL('image/png'))) ?? null;
+            const data = (await viewRef.current?.toCanvas(2).then(canvas => canvas.toDataURL('image/png', 1))) ?? null;
             if (data) {
                 const a = document.createElement('a');
                 a.download = 'image.png';
