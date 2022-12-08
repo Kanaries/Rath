@@ -116,12 +116,6 @@ export const transformPagToAssertions = (pag: readonly PagLink[]): CausalModelAs
                 targetFid: link.tar,
                 assertion: EdgeAssert.TO_BE_RELEVANT,
             }]);
-        } else if (link.src_type === PAG_NODE.ARROW && link.tar_type === PAG_NODE.ARROW) {
-            return list.concat([{
-                sourceFid: link.src,
-                targetFid: link.tar,
-                assertion: EdgeAssert.TO_BE_RELEVANT,
-            }]);
         }
         return list;
     }, []);
