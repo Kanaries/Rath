@@ -1,6 +1,7 @@
 import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
+import { getGlobalStore } from "../../../../store";
 import { IForm, makeFormInitParams } from "../../config";
 import { doWhy, fetchDoWhyParamSchema, IDoWhyServiceResult } from "./service";
 
@@ -19,6 +20,7 @@ class DoWhyStore {
     };
 
     public busy = false;
+    public okToRun = false;
     public logs: Readonly<{
         beginTime: number;
         endTime: number;
@@ -49,6 +51,12 @@ class DoWhyStore {
                     this.params = form ? makeFormInitParams(form) : {};
                 });
             }),
+            reaction(() => this.definitions, defs => {
+                const { causalStore: { dataset: { allFields } } } = getGlobalStore();
+                runInAction(() => {
+                    this.okToRun = defs.predicates.length > 0 && allFields.some(f => f.fid === defs.outcome);
+                });
+            }),
         ];
         
         this.destroy = () => {
@@ -70,7 +78,7 @@ class DoWhyStore {
     }
 
     public async run() {
-        if (this.busy) {
+        if (this.busy || !this.okToRun) {
             return null;
         }
         runInAction(() => {

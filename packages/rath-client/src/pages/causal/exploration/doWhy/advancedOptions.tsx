@@ -1,7 +1,7 @@
 import intl from 'react-intl-universal';
 import { Toggle } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { FC, useState } from 'react';
+import { FC, Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { LabelWithDesc } from '../../../../components/labelTooltip';
 import { RenderFormItem, shouldFormItemDisplay } from '../../dynamicForm';
@@ -17,17 +17,15 @@ const Container = styled.div`
     padding: 0.6em 0;
 `;
 
-const RowGroup = styled.table`
-    margin-bottom: 1em;
+const RowGroup = styled.div`
+    margin: 0.6em 0 1em;
+    display: grid;
+    grid-template-columns: max-content auto;
+    gap: 0.6em 2em;
 `;
 
-const Row = styled.tr`
-    > td {
-        padding: 0.4em 1em;
-        :first-child {
-            width: 40%;
-        }
-    }
+const Cell = styled.div`
+    padding: 0 1em;
 `;
 
 const AdvancedOptions: FC = () => {
@@ -43,25 +41,23 @@ const AdvancedOptions: FC = () => {
                 onChange={(_, checked) => setDisplay(Boolean(checked))}
             />
             {display && (
-                <RowGroup>
-                    <tbody>
-                        {context.form.items.map((item) => {
-                            return shouldFormItemDisplay(item, context.params) && (
-                                <Row key={item.key}>
-                                    <td>
-                                        <LabelWithDesc label={item.title} description={item.description} />
-                                    </td>
-                                    <td>
-                                        <RenderFormItem
-                                            item={item}
-                                            onChange={(val) => context.updateParam(item.key, val)}
-                                            value={context.params[item.key]}
-                                        />
-                                    </td>
-                                </Row>
-                            );
-                        })}
-                    </tbody>
+                <RowGroup role="grid" aria-colcount={2}>
+                    {context.form.items.map((item, i) => {
+                        return shouldFormItemDisplay(item, context.params) && (
+                            <Fragment key={item.key}>
+                                <Cell role="gridcell" aria-rowindex={i + 1} aria-colindex={1}>
+                                    <LabelWithDesc label={item.title} description={item.description} />
+                                </Cell>
+                                <Cell role="gridcell" aria-rowindex={i + 1} aria-colindex={2}>
+                                    <RenderFormItem
+                                        item={item}
+                                        onChange={(val) => context.updateParam(item.key, val)}
+                                        value={context.params[item.key]}
+                                    />
+                                </Cell>
+                            </Fragment>
+                        );
+                    })}
                 </RowGroup>
             )}
         </Container>
