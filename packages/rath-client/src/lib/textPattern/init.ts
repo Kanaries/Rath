@@ -8,25 +8,25 @@ import regexgen from 'regexgen';
 const patterns = [
     {
         name: 'text',
-        pattern: /(?:\w+|[\u4e00-\u9fa5]+)(?:\s+|[\u4e00-\u9fa5]+)*/g
+        pattern: /(?!\d+$)(?:\w+|[\u4e00-\u9fa5]+)(?:\s+|[\u4e00-\u9fa5]+)*/
     },
     {
         name: 'number',
-        pattern: /(?:\d+)(?:\.\d+)?/g
+        pattern: /(?:\d+)(?:\.\d+)?/
     },
     {
         name: 'punctuation',
-        pattern: /[\u0020-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/g
+        pattern: /[\u0020-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/
     },
     {
         name: 'symbol',
-        pattern: /[\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/g
+        pattern: /[\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/
     }
 ];
 // @ts-ignore
 // console.log('window buffer', window.Buffer, regexgen)
 export function initPatterns (textSelection: {str: string; startIndex: number; endIndex: number}[]) {
-    console.log(textSelection)
+    // console.log(textSelection)
     const patternTypes = new Set<string>();
     const rawPH: string[] = [];
     const rawPE: string[] = [];
@@ -40,6 +40,7 @@ export function initPatterns (textSelection: {str: string; startIndex: number; e
         }
         // rawPH.push(text.str.slice(text.endIndex))
         for (let pattern of patterns) {
+            // console.log(pattern.name, selection)
             if (pattern.pattern.test(selection)) {
                 patternTypes.add(pattern.name);
             }
@@ -64,11 +65,11 @@ export function initPatterns (textSelection: {str: string; startIndex: number; e
             }
         }
     } else {
-        const concatPattern = new RegExp(`${ph.source}(?<selection>.+?)${pe.source}`);
+        const concatPattern = new RegExp(`${ph.source}(?<selection>\\S+?)${pe.source}`);
         return {
             ph,
             pe,
-            selection: /.+/,
+            selection: /\S+/,
             pattern: concatPattern
         }
     }

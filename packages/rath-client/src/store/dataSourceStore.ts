@@ -622,6 +622,28 @@ export class DataSourceStore {
         return fieldWithExtSuggestions;
     }
 
+    public addExtSuggestions (suggestion: FieldExtSuggestion, fid: string) {
+        const field = this.fieldMetas.find(f => f.fid === fid);
+        if (!field) {
+            return;
+        }
+        let which = this.fieldsWithExtSug.find(f => f.fid === fid);
+        if (!which) {
+            which = {
+                ...field,
+                extSuggestions: []
+            }
+            this.fieldsWithExtSug.push(which);
+        }
+        const targetIndex  = which.extSuggestions.findIndex(s => s.type === suggestion.type);
+        if (targetIndex > -1) {
+            which.extSuggestions.splice(targetIndex, 1);
+        }
+        which.extSuggestions.push(suggestion);
+        which.extSuggestions.sort((a, b) => b.score - a.score)
+    }
+
+
     public canExpandAsDateTime(fid: string) {
         const which = this.mutFields.find(f => f.fid === fid);
         const expanded = Boolean(this.mutFields.find(
@@ -762,6 +784,43 @@ export class DataSourceStore {
             })));
         }
     }
+    public async expandFromRegex (fid: string, pattern: RegExp) {
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField) {
+            return;
+        }
+        const data = await this.rawDataStorage.getAll();
+        const values: string[] = data.map(d => `${d[fid]}`);
+        const newField: IRawField = {
+            fid: `${fid}_regex_selection`,
+            name: `${originField.name}.selection`,
+            semanticType: 'nominal',
+            analyticType: 'dimension',
+            extInfo: {
+                extFrom: [fid],
+                extOpt: 'LaTiao.$regex',
+                extInfo: {
+                    pattern: pattern.toString(),
+                }
+            },
+            geoRole: 'none'
+        }
+        const newData = data.map((d, index) => {
+            const match = values[index].match(pattern);
+            if (match) {
+                return {
+                    ...d,
+                    [newField.fid]: match[0],
+                }
+            }
+            return d;
+        });
+        this.addExtFieldsFromRows(newData, [newField].map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
+    }
+
     public async expandWordTF (fid: string) {
         const data = await this.rawDataStorage.getAll();
         const values: string[] = data.map(d => `${d[fid]}`);

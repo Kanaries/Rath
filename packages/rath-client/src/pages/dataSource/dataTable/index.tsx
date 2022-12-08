@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState} from "react";
+import React, { useCallback, useEffect, useMemo, useState} from "react";
 import { ArtColumn, BaseTable, Classes } from "ali-react-table";
 import styled from "styled-components";
 import { observer } from 'mobx-react-lite'
@@ -30,13 +30,27 @@ const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
     const { filteredDataMetaInfo, fieldsWithExtSug: fields, filteredDataStorage } = dataSourceStore;
     const [filteredData, setFilteredData] = useState<IRow[]>([]);
-    const [textPattern, setTextPattern] = useState<{
+    const [textSelectList, setTextSelectList] = useState<{
+        fid: string;
+        str: string;
+        startIndex: number;
+        endIndex: number}[]>([]);
+    const textPattern = useMemo<{
         fid: string;
         ph: RegExp;
         pe: RegExp;
         selection: RegExp;
         pattern: RegExp;
-    } | undefined>();
+    } | undefined>(() => {
+        if (textSelectList.length === 0) return;
+        const res = initPatterns(textSelectList);
+        if (res) {
+            return {
+                fid: textSelectList[0].fid,
+                ...res
+            };
+        }
+    }, [textSelectList])
     useEffect(() => {
         if (filteredDataMetaInfo.versionCode === -1) {
             setFilteredData([]);
@@ -100,31 +114,67 @@ const DataTable: React.FC = (props) => {
             }
         }
     }
-    const onTextSelect = (fid: string, fullText: string) => {
+    const onTextSelect = (fid: string, fullText: string, td: Node) => {
+        // console.log('onTextSelect', fid, fullText, td)
         const sl = document.getSelection();
-        // const fullText = sl?.focusNode?.nodeValue;
-        const selectedText = sl?.toString();
+        const range = sl?.getRangeAt(0);
+        if (!range)return;
+        const selectedText = range.toString();
+
+        // Create a range representing the selected text
+        const selectedRange = range.cloneRange();
+
+        // Create a range representing the full text of the element
+        const fullRange = document.createRange();
+        fullRange.selectNodeContents(td);
+
+        // Compare the selected range to the full range
+        const startPos = selectedRange.startOffset;//fullRange.compareBoundaryPoints(Range.START_TO_START, selectedRange);
+        const endPos = selectedRange.endOffset;//fullRange.compareBoundaryPoints(Range.END_TO_END, selectedRange);
         if (fullText && selectedText) {
             // console.log({
             //     fullText,
             //     selectedText,
             //     sl
             // })
-            const startIndex = fullText.indexOf(selectedText);
-            const endIndex = startIndex + selectedText.length;
-            const res = initPatterns([{
+            const startIndex = startPos//fullText.indexOf(selectedText);
+            const endIndex = endPos//startIndex + selectedText.length;
+            setTextSelectList(l => l.concat({
+                fid,
                 str: fullText,
                 startIndex: startIndex,
                 endIndex: endIndex,
-            }])
-            if (res) {
-                setTextPattern({
-                    fid,
-                    ...res
-                });
-            }
+            }));
         }
     }
+    const clearTextSelect = () => {
+        // setTextPattern(undefined);
+        setTextSelectList([]);
+    }
+    useEffect(() => {
+        if (textPattern?.fid) {
+            dataSourceStore.addExtSuggestions({
+                score: 10.1,
+                type: 'regex_selection',
+                apply: (fid) => dataSourceStore.expandFromRegex(fid, textPattern.pattern)
+            }, textPattern.fid);
+        }
+        
+    }, [dataSourceStore, textPattern])
+
+    useEffect(() => {
+        // clear text pattern when ESC is pressed
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                clearTextSelect();
+            }
+        }
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+
+    }, [])
 
     const columns: ArtColumn[] = displayList.map((f, i) => {
         const fm = (fields[i] && fields[i].fid === displayList[i].fid) ? fields[i] : fields.find(m => m.fid === f.fid);
@@ -147,43 +197,41 @@ const DataTable: React.FC = (props) => {
                     />
                 ),
             };
-            if (textPattern && textPattern.fid === f.fid) {
-                col.render = (value: any) => {
-                    const { ph, pe, selection, pattern } = textPattern;
-                    const text: string = value?.toString() ?? '';
-                    const match = pattern.exec(value)
+            col.render = (value: any) => {
+                const text: string = `${value}`;
+                if (textPattern && textPattern.fid === f.fid) {
+                    const { pattern } = textPattern;
+                    const patternForIndices = new RegExp(pattern.source, pattern.flags + 'd');
+                    const match = patternForIndices.exec(text)
+                    
                     // console.log({ match, text, value, pattern, ph, pe, selection })
                     if (match) {
                         // @ts-ignore
-                        const matched = match.groups['selection'];
-                        if (!matched) return;
-                        const start = text.indexOf(matched);
-                        const end = start + matched.length;
+                        const matchedRange = match.indices.groups['selection'];
+                        if (!matchedRange) return;
+                        const start = matchedRange[0];
+                        const end = matchedRange[1]
                         const before = text.slice(0, start);
                         const after = text.slice(end);
                         
                         return (
-                            <span onMouseUp={() => {
-                                onTextSelect(f.fid, `${value}`)
+                            <span onMouseUp={(e) => {
+                                onTextSelect(f.fid, `${text}`, e.currentTarget)
                             }}>
                                 {before}
                                 <span style={{ backgroundColor: '#FFC107' }}>
-                                    {matched}
+                                    {text.slice(start, end)}
                                 </span>
                                 {after}
                             </span>
                         );
                     }
-                    return text;
                 }
-            } else {
-                col.render = (value: any) => {
-                    return <span onMouseUp={() => {
-                        onTextSelect(f.fid, `${value}`)
-                    }}>
-                        {value}
-                    </span>
-                }
+                return <span onMouseUp={(e) => {
+                    onTextSelect(f.fid, `${text}`, e.currentTarget)
+                }}>
+                    {text}
+                </span>
             }
             return col;
     })
