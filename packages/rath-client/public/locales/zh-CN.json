@@ -36,7 +36,8 @@
             "qt_25": "25%分位数",
             "qt_75": "75%分位数",
             "qt_50": "中位数"
-        }
+        },
+        "advanced_options_switch": "高级选项"
     },
     "menu": {
         "dataSource": "数据源",

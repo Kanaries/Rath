@@ -2,7 +2,7 @@ import { IDropdownOption } from "@fluentui/react";
 import type { IFieldMeta } from "../../interfaces";
 import PC_PARAMS from './pc_params.json'
 
-/** @see https://ewgw6z7tk0.feishu.cn/wiki/wikcnh1Xksf2zbHUHuMXfyup83f */
+/** @see https://ewgw6z7tk0.feishu.cn/wiki/wikcnh1Xksf2zbHUHuMXfyup83f#V6mKdwQ2uo0EUWxUVmMcNvPrnJh */
 export interface IFormItem{
     title: string;
     key: string;

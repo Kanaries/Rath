@@ -14,6 +14,7 @@ import CrossFilter from './crossFilter';
 import PredictPanel from './predictPanel';
 import RExplainer from './explainer/RExplainer';
 import AutoVis from './autoVis';
+import DoWhy from './doWhy';
 // import CausalBlame from './causalBlame';
 
 
@@ -174,6 +175,9 @@ const Exploration = forwardRef<{
                     // ),
                     [ExplorationKey.AUTO_VIS]: (
                         <AutoVis />
+                    ),
+                    [ExplorationKey.DO_WHY]: (
+                        <DoWhy />
                     ),
                     [ExplorationKey.CROSS_FILTER]: visSample.length > 0 && selectedFieldGroup.length > 0 && (
                         <CrossFilter

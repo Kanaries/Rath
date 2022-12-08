@@ -3,8 +3,8 @@ import React from 'react';
 import { LabelWithDesc } from '../../components/labelTooltip';
 import { IForm, IFormItem } from './config';
 
-export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) => void; value: any; values: { [key: string]: any } }) {
-    const { item, onChange, value, values } = props;
+
+export const shouldFormItemDisplay = (item: IFormItem, values: { [key: string]: any }): boolean => {
     if (item.conditions) {
         let ok = false;
         for (const groups of item.conditions.or) {
@@ -14,9 +14,14 @@ export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) =>
             }
         }
         if (!ok) {
-            return null;
+            return false;
         }
     }
+    return true;
+};
+
+export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) => void; value: any }) {
+    const { item, onChange, value } = props;
     switch (item.renderType) {
         case 'text':
             return <TextField label={item.title} value={value} onChange={(e, v) => onChange(v)} />;
@@ -72,7 +77,7 @@ const DynamicForm: React.FC<DynamicFormProps> = (props) => {
         <table>
             <tbody>
                 {form.items.map((item) => {
-                    return (
+                    return shouldFormItemDisplay(item, values) && (
                         <tr key={item.key} style={{ borderBottom: '1px solid #ccc' }}>
                             <td align="right" style={{ padding: '1em 2em', verticalAlign: 'middle' }}>
                                 <LabelWithDesc label={item.title} description={item.description} />
@@ -84,7 +89,6 @@ const DynamicForm: React.FC<DynamicFormProps> = (props) => {
                                         onChange(item.key, val);
                                     }}
                                     value={values[item.key]}
-                                    values={values}
                                 />
                             </td>
                         </tr>

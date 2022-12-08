@@ -36,7 +36,8 @@
             "qt_25": "25th Percentile",
             "qt_75": "75th Percentile",
             "qt_50": "Median"
-        }
+        },
+        "advanced_options_switch": "Advanced Options"
     },
     "menu": {
         "dataSource": "DataSource",

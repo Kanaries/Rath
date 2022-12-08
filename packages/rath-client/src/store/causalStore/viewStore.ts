@@ -18,6 +18,7 @@ export enum NodeSelectionMode {
 export enum ExplorationKey {
     // CAUSAL_BLAME = 'CausalBlame',
     AUTO_VIS = 'AutoVis',
+    DO_WHY = 'DoWhy',
     CROSS_FILTER = 'CrossFilter',
     CAUSAL_INSIGHT = 'CausalInsight',
     GRAPHIC_WALKER = 'GraphicWalker',
@@ -27,6 +28,7 @@ export enum ExplorationKey {
 export const ExplorationOptions = [
     // { key: ExplorationKey.CAUSAL_BLAME, text: '归因分析' },
     { key: ExplorationKey.AUTO_VIS, text: '变量概览' },
+    { key: ExplorationKey.DO_WHY, text: 'Do Why' },
     { key: ExplorationKey.CROSS_FILTER, text: '因果验证' },
     { key: ExplorationKey.CAUSAL_INSIGHT, text: '可解释探索' },
     { key: ExplorationKey.GRAPHIC_WALKER, text: '可视化自助分析' },
@@ -35,8 +37,12 @@ export const ExplorationOptions = [
 
 class CausalViewStore {
 
-    public explorationKey = ExplorationKey.AUTO_VIS;
-    public graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
+    // TODO: 改回下面的
+    public explorationKey = ExplorationKey.DO_WHY;
+    public graphNodeSelectionMode = NodeSelectionMode.NONE;
+
+    // public explorationKey = ExplorationKey.AUTO_VIS;
+    // public graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
 
     protected selectedFidArr$ = new Subject<readonly string[]>();
     protected _selectedNodes: readonly IFieldMeta[] = [];
