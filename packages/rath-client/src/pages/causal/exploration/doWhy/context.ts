@@ -3,6 +3,7 @@ import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
 import { getGlobalStore } from "../../../../store";
 import { IForm, makeFormInitParams } from "../../config";
+import { shouldFormItemDisplay } from "../../dynamicForm";
 import { doWhy, fetchDoWhyParamSchema, IDoWhyServiceResult } from "./service";
 
 
@@ -78,7 +79,7 @@ class DoWhyStore {
     }
 
     public async run() {
-        if (this.busy || !this.okToRun) {
+        if (this.busy || !this.okToRun || !this.form) {
             return null;
         }
         runInAction(() => {
@@ -86,7 +87,9 @@ class DoWhyStore {
         });
         const beginTime = Date.now();
         const props = { ...this.definitions };
-        const params = { ...this.params };
+        const params = Object.fromEntries(this.form.items.filter(item => {
+            return shouldFormItemDisplay(item, this.params);
+        }).map(item => [item.key, this.params[item.key]]));
         const result = await doWhy(props, params);
         const endTime = Date.now();
         runInAction(() => {

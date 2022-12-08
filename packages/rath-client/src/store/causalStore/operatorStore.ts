@@ -5,6 +5,7 @@ import { getGlobalStore } from "..";
 import { notify } from "../../components/error";
 import type { IFieldMeta } from "../../interfaces";
 import { IAlgoSchema, IFunctionalDep, makeFormInitParams, PagLink, PAG_NODE } from "../../pages/causal/config";
+import { shouldFormItemDisplay } from "../../pages/causal/dynamicForm";
 import { causalService } from "../../pages/causal/service";
 import type { IteratorStorage } from "../../utils/iteStorage";
 import type { DataSourceStore } from "../dataSourceStore";
@@ -223,6 +224,9 @@ export default class CausalOperatorStore {
             });
             const originFieldsLength = inputFields.length;
             const dataSource = await data.getAll();
+            const params = Object.fromEntries(this._causalAlgorithmForm[algoName].items.filter(item => {
+                return shouldFormItemDisplay(item, this.params[algoName]);
+            }).map(item => [item.key, this.params[algoName][item.key]]));
             const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
                 method: 'POST',
                 headers: {
@@ -234,7 +238,7 @@ export default class CausalOperatorStore {
                     focusedFields: inputFields.map(f => f.fid),
                     bgKnowledgesPag: assertions,
                     funcDeps: functionalDependencies,
-                    params: this.params[algoName],
+                    params,
                 }),
             });
             const result = await res.json();
