@@ -6,7 +6,7 @@ import { MessageBar, MessageBarType } from "@fluentui/react";
 import intl from 'react-intl-universal';
 import { useGlobalStore } from "../../../store";
 import type { IRow } from "../../../interfaces";
-import { initPatterns } from "../../../lib/textPattern/init";
+import { initPatterns, intersectPattern } from "../../../lib/textPattern/init";
 import HeaderCell from "./headerCell";
 
 
@@ -43,6 +43,7 @@ const DataTable: React.FC = (props) => {
         pattern: RegExp;
     } | undefined>(() => {
         if (textSelectList.length === 0) return;
+        console.log(intersectPattern(textSelectList))
         const res = initPatterns(textSelectList);
         if (res) {
             return {
