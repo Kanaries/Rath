@@ -39,6 +39,11 @@ export const fetchDoWhyParamSchema = async (): Promise<IForm | null> => {
     const res = await fetch(`${causalServer}/estimate/form`, { method: 'GET' });
 
     if (!res.ok) {
+        notify({
+            type: 'error',
+            title: 'Do Why Error',
+            content: res.statusText,
+        });
         return null;
     }
 
@@ -97,6 +102,11 @@ export const doWhy = async (
     });
 
     if (!res.ok) {
+        notify({
+            type: 'error',
+            title: 'Do Why Error',
+            content: res.statusText,
+        });
         return null;
     }
 

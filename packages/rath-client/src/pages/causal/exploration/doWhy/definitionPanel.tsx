@@ -1,10 +1,12 @@
 import { Dropdown, Label } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import FilterCreationPill from '../../../../components/filterCreationPill';
 import type { IFilter } from '../../../../interfaces';
-import { useGlobalStore } from '../../../../store';
+import { getGlobalStore, useGlobalStore } from '../../../../store';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
+// import { PAG_NODE } from '../../config';
 import { FilterCell } from '../../filters';
 import { useDoWhyContext } from './context';
 
@@ -24,6 +26,53 @@ const DefinitionPanel: FC = () => {
     const { causalStore } = useGlobalStore();
     const { allFields } = causalStore.dataset;
     const context = useDoWhyContext();
+    const viewContext = useCausalViewContext();
+    const { selectedFieldGroup } = viewContext ?? {};
+
+    useEffect(() => {
+        if (context) {
+            const [outcome, treatment] = selectedFieldGroup ?? [undefined, undefined];
+            if (outcome) {
+                context.updateDefinition('outcome', outcome.fid);
+                const { causalStore: { model: { causality } } } = getGlobalStore();
+                const links = (causality ?? []).filter(link => {
+                    const matched = [link.src, link.tar].filter(fid => [outcome.fid, treatment?.fid].includes(fid));
+                    if (matched.length === 1) {
+                        return true;
+                        // const typeInLink = link.src === matched[0] ? link.tar_type : link.src_type;
+                        // if (typeInLink !== PAG_NODE.ARROW) {
+                        //     return true;
+                        // }
+                    }
+                    return false;
+                });
+                if (treatment) {
+                    const confounders: string[] = [];
+                    const effectModifiers: string[] = [];
+                    for (const link of links) {
+                        if ([link.src, link.tar].includes(treatment.fid)) {
+                            confounders.push(link.src === treatment.fid ? link.tar : link.src);
+                            continue;
+                        }
+                        effectModifiers.push(link.src === outcome.fid ? link.tar : link.src);
+                    }
+                    context.updateDefinition('confounders', confounders);
+                    context.updateDefinition('effectModifiers', effectModifiers.filter(fid => !confounders.includes(fid)));
+                    context.updateDefinition('predicates', [{
+                        fid: treatment.fid,
+                        type: 'set',
+                        values: [],
+                    }]);
+                } else {
+                    context.updateDefinition('confounders', []);
+                    context.updateDefinition('effectModifiers', links.map(link => {
+                        return link.src === outcome.fid ? link.tar : link.src;
+                    }));
+                    context.updateDefinition('predicates', []);
+                }
+            }
+        }
+    }, [selectedFieldGroup, context]);
 
     const appendPopulationPicker = useCallback((filter: IFilter) => {
         if (context) {

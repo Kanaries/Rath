@@ -10,9 +10,10 @@ import type CausalStore from "./mainStore";
 
 
 export enum NodeSelectionMode {
-    NONE,
-    SINGLE,
-    MULTIPLE,
+    NONE = '0',
+    SINGLE = '1',
+    DOUBLE = '2',
+    MULTIPLE = 'n',
 }
 
 export enum ExplorationKey {
@@ -39,7 +40,7 @@ class CausalViewStore {
 
     // TODO: 改回下面的
     public explorationKey = ExplorationKey.DO_WHY;
-    public graphNodeSelectionMode = NodeSelectionMode.NONE;
+    public graphNodeSelectionMode = NodeSelectionMode.DOUBLE;
 
     // public explorationKey = ExplorationKey.AUTO_VIS;
     // public graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
@@ -108,6 +109,10 @@ class CausalViewStore {
                             this.graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
                             break;
                         }
+                        case ExplorationKey.DO_WHY: {
+                            this.graphNodeSelectionMode = NodeSelectionMode.DOUBLE;
+                            break;
+                        }
                         default: {
                             this.graphNodeSelectionMode = NodeSelectionMode.NONE;
                         }
@@ -117,7 +122,8 @@ class CausalViewStore {
             reaction(() => this.graphNodeSelectionMode, graphNodeSelectionMode => {
                 runInAction(() => {
                     switch (graphNodeSelectionMode) {
-                        case NodeSelectionMode.SINGLE: {
+                        case NodeSelectionMode.SINGLE:
+                        case NodeSelectionMode.DOUBLE: {
                             this._selectedNodes = this._selectedNodes.slice(this._selectedNodes.length - 1);
                             break;
                         }
@@ -180,6 +186,19 @@ class CausalViewStore {
                     this.selectedFidArr$.next([fid]);
                     return true;
                 }
+            }
+            case NodeSelectionMode.DOUBLE: {
+                if (this.selectedFieldGroup.some(f => f.fid === fid)) {
+                    this.selectedFidArr$.next(this.selectedFieldGroup.filter(f => f.fid !== fid).map(f => f.fid));
+                    return false;
+                } else if (this.selectedFieldGroup.length === 0) {
+                    this.selectedFidArr$.next([fid]);
+                    return true;
+                } else if (this.selectedFieldGroup.length !== 1) {
+                    return false;
+                }
+                this.selectedFidArr$.next([this.selectedFieldGroup[0].fid, fid]);
+                return false;
             }
             case NodeSelectionMode.MULTIPLE: {
                 const selectedFidArr = this.selectedFieldGroup.map(f => f.fid);
