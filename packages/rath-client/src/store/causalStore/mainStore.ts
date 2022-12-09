@@ -7,6 +7,7 @@ import CausalDatasetStore from "./datasetStore";
 import CausalModelStore from "./modelStore";
 import CausalOperatorStore from "./operatorStore";
 import { resolveCausality } from "./pag";
+import { discover } from "./service";
 
 
 export interface ICausalStoreSave {
@@ -133,12 +134,7 @@ export default class CausalStore {
             this.model.causalityRaw = null;
             this.model.causality = null;
         });
-        const result = await this.operator.causalDiscovery(
-            this.dataset.sample,
-            this.dataset.fields,
-            this.model.functionalDependencies,
-            this.model.assertionsAsPag,
-        );
+        const result = await discover();
         runInAction(() => {
             this.model.causalityRaw = result?.raw ?? null;
             this.model.causality = result?.pag ?? null;

@@ -1,7 +1,7 @@
 import { getGlobalStore } from "..";
 import { notify } from "../../components/error";
-import type { IFieldMeta, IRow } from "../../interfaces";
-import type { IAlgoSchema, IFunctionalDep, PagLink, PAG_NODE } from "../../pages/causal/config";
+import type { IFieldMeta } from "../../interfaces";
+import type { IAlgoSchema, PagLink, PAG_NODE } from "../../pages/causal/config";
 import { shouldFormItemDisplay } from "../../pages/causal/dynamicForm";
 import type { IteratorStorage } from "../../utils/iteStorage";
 import { findUnmatchedCausalResults, resolveCausality } from "./pag";
@@ -58,7 +58,7 @@ export const connectToSession = async (onClose: (reason: Error) => void): Promis
 };
 
 export const updateDataSource = async (
-    data: readonly IRow[], fields: readonly IFieldMeta[], prevTableId: string | null
+    data: IteratorStorage, fields: readonly IFieldMeta[], prevTableId: string | null
 ): Promise<string | null> => {
     const { causalStore: { operator: { sessionId, causalServer } } } = getGlobalStore();
     if (!sessionId) {
@@ -72,6 +72,7 @@ export const updateDataSource = async (
         console.warn('Delete session table error', error);
     }
     try {
+        const dataSource = await data.getAll();
         const res = await fetch(`${causalServer}/v0.1/s/${sessionId}/uploadTable`, {
             method: 'POST',
             headers: {
@@ -79,7 +80,7 @@ export const updateDataSource = async (
             },
             body: JSON.stringify({
                 format: 'dataSource',
-                data,
+                data: dataSource,
                 fields: fields.map(f => ({
                     fid: f.fid,
                     name: f.name,
@@ -112,7 +113,7 @@ export const fetchCausalAlgorithmList = async (fields: readonly IFieldMeta[]): P
         return null;
     }
     try {
-        const schema: IAlgoSchema = await fetch(`${causalServer}/algo/list`, {
+        const schema: IAlgoSchema = await fetch(`${causalServer}/v0.1/form/discovery`, {
             method: 'POST',
             body: JSON.stringify({
                 fieldIds: fields.map((f) => f.fid),
@@ -129,14 +130,11 @@ export const fetchCausalAlgorithmList = async (fields: readonly IFieldMeta[]): P
     }
 };
 
-export const causalDiscovery = async (
-    data: IteratorStorage,
-    fields: readonly IFieldMeta[],
-    functionalDependencies: readonly IFunctionalDep[],
-    assertions: readonly PagLink[],
-): Promise<{ raw: number[][]; pag: PagLink[] } | null> => {
+export const discover = async (): Promise<{ raw: number[][]; pag: PagLink[] } | null> => {
     const { causalStore: {
-        operator: { causalServer, busy, serverActive, algorithm, causalAlgorithmForm, params: options }
+        operator: { causalServer, busy, sessionId, tableId, algorithm, causalAlgorithmForm, params: options },
+        dataset: { fields },
+        model: { functionalDependencies, assertionsAsPag }
     } } = getGlobalStore();
     if (!algorithm) {
         notify({
@@ -146,7 +144,7 @@ export const causalDiscovery = async (
         });
         return null;
     }
-    if (busy || !serverActive) {
+    if (busy || !sessionId || !tableId) {
         return null;
     }
     let causality: { raw: number[][]; pag: PagLink[] } | null = null;
@@ -157,20 +155,20 @@ export const causalDiscovery = async (
     const inputFields = focusedFields.map(idx => allFields[idx]);
     try {
         const originFieldsLength = inputFields.length;
-        const dataSource = await data.getAll();
         const params = Object.fromEntries(causalAlgorithmForm[algorithm].items.filter(item => {
             return shouldFormItemDisplay(item, options[algorithm]);
         }).map(item => [item.key, options[algorithm][item.key]]));
-        const res = await fetch(`${causalServer}/causal/${algorithm}`, {
+        const res = await fetch(`${causalServer}/v0.1/s/${sessionId}/discover`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                dataSource,
+                algoName: algorithm,
+                tableId,
                 fields: allFields,
-                focusedFields: inputFields.map(f => f.fid),
-                bgKnowledgesPag: assertions,
+                focusedFields: inputFields.filter(f => f.fid),
+                bgKnowledgesPag: assertionsAsPag,
                 funcDeps: functionalDependencies,
                 params,
             }),
@@ -183,7 +181,7 @@ export const causalDiscovery = async (
                 .map((row) => row.slice(0, originFieldsLength));
             const causalPag = resolveCausality(causalMatrix, inputFields);
             causality = { raw: causalMatrix, pag: causalPag };
-            const unmatched = findUnmatchedCausalResults(assertions, causalPag);
+            const unmatched = findUnmatchedCausalResults(assertionsAsPag, causalPag);
             if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
                 const getFieldName = (fid: string) => {
                     const field = inputFields.find(f => f.fid === fid);
@@ -204,7 +202,7 @@ export const causalDiscovery = async (
         }
     } catch (error) {
         notify({
-            title: 'Causal Discovery Error',
+            title: 'Causal Discover Error',
             type: 'error',
             content: `${error}`,
         });

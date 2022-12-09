@@ -36,7 +36,7 @@ export interface IWhatIfServiceResult {
 export const fetchWhatIfParamSchema = async (): Promise<IForm | null> => {
     const { causalStore: { operator: { causalServer } } } = getGlobalStore();
 
-    const res = await fetch(`${causalServer}/estimate/form`, { method: 'GET' });
+    const res = await fetch(`${causalServer}/v0.1/form/estimate`, { method: 'GET' });
 
     if (!res.ok) {
         notify({
@@ -73,8 +73,12 @@ export const estimate = async (
 ): Promise<IWhatIfServiceResult | null> => {
     const { causalStore, dataSourceStore } = getGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
-    const { causalServer } = causalStore.operator;
+    const { causalServer, sessionId } = causalStore.operator;
     const { functionalDependencies, mergedPag } = causalStore.model;
+
+    if (!sessionId) {
+        return null;
+    }
 
     const payload: IWhatIfServiceRequest = {
         data: cleanedData,
@@ -93,7 +97,7 @@ export const estimate = async (
         params,
     };
 
-    const res = await fetch(`${causalServer}/estimate/calc`, {
+    const res = await fetch(`${causalServer}/v0.1/${sessionId}/estimate/calc`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

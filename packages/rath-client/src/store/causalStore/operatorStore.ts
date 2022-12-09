@@ -2,12 +2,13 @@ import type { IDropdownOption } from "@fluentui/react";
 import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { nanoid } from "nanoid";
 import { distinctUntilChanged, Subject, switchAll } from "rxjs";
-import type { IFieldMeta, IRow } from "../../interfaces";
-import { IAlgoSchema, IFunctionalDep, makeFormInitParams, PagLink } from "../../pages/causal/config";
+import { getGlobalStore } from "..";
+import type { IFieldMeta } from "../../interfaces";
+import { IAlgoSchema, makeFormInitParams } from "../../pages/causal/config";
 import { causalService } from "../../pages/causal/service";
 import type { IteratorStorage } from "../../utils/iteStorage";
 import type { DataSourceStore } from "../dataSourceStore";
-import { causalDiscovery, connectToSession, fetchCausalAlgorithmList, updateDataSource } from "./service";
+import { connectToSession, fetchCausalAlgorithmList, updateDataSource } from "./service";
 
 
 export default class CausalOperatorStore {
@@ -71,7 +72,7 @@ export default class CausalOperatorStore {
             reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
                 allFields$.next(fieldMetas);
                 // fieldMetas update whenever cleanedData update
-                this.updateDataSource(dataSourceStore.cleanedData, fieldMetas);
+                this.updateDataSource();
             }),
             // this reaction requires `makeAutoObservable` to be called before
             reaction(() => this._causalAlgorithmForm, form => {
@@ -98,7 +99,7 @@ export default class CausalOperatorStore {
             }),
             reaction(() => this.sessionId, sessionId => {
                 if (sessionId) {
-                    this.updateDataSource(dataSourceStore.cleanedData, dataSourceStore.fieldMetas);
+                    this.updateDataSource();
                 }
             }),
         ];
@@ -145,6 +146,7 @@ export default class CausalOperatorStore {
         this.disconnect();
         const connection = connectToSession(reason => {
             console.warn('Causal server session disconnected', reason);
+            this.disconnect();
         });
         this.pendingConnectAction = connection;
         const sessionId = await connection;
@@ -181,23 +183,8 @@ export default class CausalOperatorStore {
         return res;
     }
 
-    public async causalDiscovery(
-        data: IteratorStorage,
-        fields: readonly IFieldMeta[],
-        functionalDependencies: readonly IFunctionalDep[],
-        assertions: readonly PagLink[],
-    ): Promise<{ raw: number[][]; pag: PagLink[] } | null> {
-        runInAction(() => {
-            this.busy = true;
-        });
-        const result = await causalDiscovery(data, fields, functionalDependencies, assertions);
-        runInAction(() => {
-            this.busy = false;
-        });
-        return result;
-    }
-
-    protected async updateDataSource(data: readonly IRow[], fields: readonly IFieldMeta[]) {
+    protected async updateDataSource() {
+        const { sample: data, allFields: fields } = getGlobalStore().causalStore.dataset;
         const dataId = nanoid(12);
         this.dataId = dataId;
         const prevTableId = this.tableId;
