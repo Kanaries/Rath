@@ -11,6 +11,7 @@ export type GraphNodeAttributes<
 > = Partial<{
     /** https://antv-g6.gitee.io/zh/docs/manual/middle/elements/nodes/defaultNode#%E5%86%85%E7%BD%AE%E8%8A%82%E7%82%B9%E7%B1%BB%E5%9E%8B%E8%AF%B4%E6%98%8E */
     type: T;
+    description: string;
     style: Partial<{
         size: T extends 'circle' ? number : never;
         label: T extends 'circle' ? string : never;
@@ -25,6 +26,24 @@ export type GraphNodeAttributes<
         opacity: number;
         fillOpacity: number;
         cursor: CSSProperties['cursor'];
+    }>;
+    size: number;
+    labelCfg: Partial<{
+        position: 'center' | 'top' | 'left' | 'right' | 'bottom';
+        offset: number;
+        style: Partial<{
+            fill: string;
+            stroke: string;
+            lineWidth: number;
+            lineDash: number[];
+            shadowColor: string;
+            shadowBlur: number;
+            shadowOffsetX: number;
+            shadowOffsetY: number;
+            opacity: number;
+            fillOpacity: number;
+            cursor: CSSProperties['cursor'];
+        }>;
     }>;
 }>;
 
@@ -250,6 +269,12 @@ export const useGraphOptions = ({
                 size: 20,
                 style: {
                     lineWidth: 1,
+                },
+                labelCfg: {
+                    style: {
+                        stroke: '#fff',
+                        lineWidth: 2,
+                    },
                 },
             },
             nodeStateStyles: {

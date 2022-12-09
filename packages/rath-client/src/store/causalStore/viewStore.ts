@@ -298,6 +298,7 @@ class CausalViewStore {
 
     public setNodeRenderer(handleRender: typeof this.onRenderNode) {
         this.onRenderNode = handleRender;
+        this.graph?.update();
     }
 
     public clearLocalWeights() {

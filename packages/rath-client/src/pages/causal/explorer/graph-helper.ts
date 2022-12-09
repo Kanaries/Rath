@@ -20,6 +20,8 @@ export interface IReactiveGraphProps {
     fields: readonly IFieldMeta[];
     allowZoom: boolean;
     handleSubtreeSelected?: (subtree: Subtree | null) => void | undefined;
+    /** @default "loose" */
+    updatePolicy?: 'normal' | 'loose';
 }
 
 export interface IReactiveGraphHandler {
@@ -41,6 +43,7 @@ export const useReactiveGraph = ({
     fields,
     allowZoom,
     handleSubtreeSelected,
+    updatePolicy = 'loose',
 }: IReactiveGraphProps): IReactiveGraphHandler => {
     const cfgRef = useRef(options);
     cfgRef.current = options;
@@ -137,7 +140,7 @@ export const useReactiveGraph = ({
     useEffect(() => {
         const { current: graph } = graphRef;
         if (graph) {
-            if (mode === 'explore') {
+            if (mode === 'explore' && updatePolicy === 'normal') {
                 // It is found that under explore mode,
                 // it works strange that the edges are not correctly synchronized with changeData() method,
                 // while it's checked that the input data is always right.
@@ -155,7 +158,7 @@ export const useReactiveGraph = ({
                 graph.refresh();
             }
         }
-    }, [graphRef, data, mode]);
+    }, [graphRef, data, mode, updatePolicy]);
 
     useEffect(() => {
         const { current: graph } = graphRef;
@@ -263,7 +266,7 @@ export const useReactiveGraph = ({
             graphRef.current?.read(dataRef.current);
         },
         update() {
-            graphRef.current?.refresh();
+            graphRef.current?.paint();
         },
     }), [graphRef]);
 };

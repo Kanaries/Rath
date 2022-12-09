@@ -6,7 +6,7 @@ import { ActionButton, Dropdown } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { Subtree } from "../exploration";
 import { EdgeAssert, NodeAssert } from "../../../store/causalStore/modelStore";
-import { useCausalViewContext } from "../../../store/causalStore/viewStore";
+import { ExplorationKey, useCausalViewContext } from "../../../store/causalStore/viewStore";
 import { useGlobalStore } from "../../../store";
 import { useGraphOptions, useRenderData } from "./graph-utils";
 import { useReactiveGraph } from "./graph-helper";
@@ -66,7 +66,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const { fields } = causalStore;
     const { causality, assertionsAsPag, mutualMatrix } = causalStore.model;
     const viewContext = useCausalViewContext();
-    const { onRenderNode, localWeights } = viewContext ?? {};
+    const { onRenderNode, localWeights, explorationKey } = viewContext ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -165,6 +165,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         fields,
         allowZoom,
         handleSubtreeSelected,
+        updatePolicy: explorationKey === ExplorationKey.WHAT_IF ? 'loose' : 'normal',
     });
 
     useEffect(() => {

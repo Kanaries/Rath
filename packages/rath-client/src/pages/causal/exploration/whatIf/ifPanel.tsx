@@ -66,6 +66,40 @@ const IfPanel: FC = () => {
         }
     }, [viewContext, context]);
 
+    useEffect(() => {
+        if (viewContext) {
+            const originRenderer = viewContext.onRenderNode;
+
+            const WhatIfRenderer: typeof originRenderer = ({ fid, name }) => {
+                const value = context?.conditions[fid] ?? context?.predication[fid];
+                const displayName = name || fid;
+                return value === undefined ? {} : {
+                    description: value === 0 ? `${displayName} (+0)` : `${displayName} (${value > 0 ? '+' : '-'}${Math.abs(value).toFixed(2)})`,
+                    style: {
+                        fill: value === 0 ? undefined : `${
+                            value > 0 ? '#da3b01' : '#0027b4'
+                        }${Math.round(Math.abs(value * 7)).toString(16)}0`,
+                        stroke: fid in (context?.conditions ?? {}) ? '#000' : undefined,
+                        lineWidth: fid in (context?.conditions ?? {}) ? 2 : 1,
+                    },
+                    labelCfg: {
+                        style: {
+                            fill: fid in (context?.conditions ?? {}) ? '#000' : value === 0 ? undefined : value > 0 ? '#da3b01' : '#0027b4',
+                        },
+                    },
+                };
+            };
+
+            viewContext.setNodeRenderer(WhatIfRenderer);
+            viewContext.graph?.update();
+
+            return () => {
+                viewContext.setNodeRenderer(originRenderer);
+                viewContext.graph?.update();
+            };
+        }
+    }, [viewContext, context]);
+
     const getFieldName = useCallback((fid: string): string => {
         return allFields.find(f => f.fid === fid)?.name ?? fid;
     }, [allFields]);
