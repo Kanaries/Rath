@@ -144,6 +144,7 @@ const Exploration = forwardRef<{
                 onLinkClick={(item) => {
                     item && viewContext.setExplorationKey(item.props.itemKey as ExplorationKey);
                 }}
+                overflowBehavior="menu"
             >
                 {ExplorationOptions.map(mode => (
                     <PivotItem key={mode.key} itemKey={mode.key} headerText={mode.text} />

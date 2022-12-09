@@ -32,9 +32,9 @@ const NoConnection: FC = () => {
     return (
         <Container>
             <MessageBar
-                isMultiline={false}
                 messageBarType={MessageBarType.warning}
-                styles={{ icon: { paddingTop: '0.16em' } }}
+                styles={{ icon: { paddingTop: '0.26em' } }}
+                style={{ lineHeight: '1.4em', padding: '0.2em 0' }}
             >
                 <span>{intl.get('causal.no_connection.before')}</span>
                 <a href={`mailto:${SupportMailAddr}?subject=${encodeURIComponent(intl.get('causal.no_connection.subject'))}`}>
