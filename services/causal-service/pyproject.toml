@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "causal-service"
+version = "0.1.0"
+description = ""
+authors = ["Asm.Def <woojson@zju.edu.cn>"]
+readme = "README.md"
+packages = [{include = "causal_service"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+fastapi = "^0.88.0"
+celery = "^5.2.7"
+redis = "^4.4.0"
+pygam = "^0.8.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "CN"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+default = true

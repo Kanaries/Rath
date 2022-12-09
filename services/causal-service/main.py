@@ -208,3 +208,6 @@ async def explainData(item: dowhy.IRInsightExplainProps):
         success=True,
         message={}
     )
+
+from api.router import v0_1
+app.include_router(v0_1, prefix="/v0.1")
