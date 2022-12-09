@@ -156,18 +156,27 @@ export interface IDiscoverResult {
 type ITaskStatus = {
     taskType: string; // discovery
     taskOpt: string; // 对应的算子
-    status: 'PENDING' | 'RUNNING' | 'FAILED';
+    status: 'PENDING' | 'RUNNING';
     progress: number; // 0 - 100
     result: undefined;
+    message: undefined;
 } | {
     taskType: string; // discovery
     taskOpt: string; // 对应的算子
     status: 'DONE';
     progress: 100;
     result: IDiscoverResult; // 未来有可能把其他流程也作为Task，例如Explain中的批量实验
+    message: undefined;
+} | {
+    taskType: string; // discovery
+    taskOpt: string; // 对应的算子
+    status: 'FAILED';
+    progress: 100;
+    result: undefined; // 未来有可能把其他流程也作为Task，例如Explain中的批量实验
+    message: string;
 };
 
-const PROGRESS_QUERY_SPAN = 4_000;
+const PROGRESS_QUERY_SPAN = 1_000;
 
 export interface ITask<T = unknown> {
     value: Promise<T>;
@@ -247,6 +256,8 @@ export const discover = async (): Promise<IDiscoveryTask | null> => {
                             const { data } = d;
                             if (data.status === 'DONE') {
                                 return _resolve(data.result);
+                            } else if (data.status === 'FAILED') {
+                                return _reject(data.message || 'task failed');
                             }
                             handleProgress?.(data.progress);
                             timer = setTimeout(query, PROGRESS_QUERY_SPAN);
