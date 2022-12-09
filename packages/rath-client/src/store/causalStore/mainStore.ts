@@ -152,6 +152,8 @@ export default class CausalStore {
                 this.pendingTasks = this.pendingTasks.filter(t => t !== task);
                 this.operator.toggleRunning();
             });
+        } else {
+            this.operator.toggleRunning();
         }
         return task;
     }

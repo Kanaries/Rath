@@ -49,6 +49,7 @@ export interface IDBMeta {
     fields?: IMuteFieldBase[];
     tag?: DataSourceTag;
     userTagGroup?: UserTagGroup | undefined;
+    views?: number;
 }
 
 /** @deprecated */
@@ -194,6 +195,8 @@ export async function setDataStorage(
         rows: dataSource.length,
         fields,
         tag: withHistory?.tag ?? tag,
+        views: withHistory ? (withHistory.views ?? 1) + 1 : 1,
+        userTagGroup: withHistory?.userTagGroup,
     } as IDBMeta)
     const storages = localforage.createInstance({
         name: STORAGE_INSTANCE,

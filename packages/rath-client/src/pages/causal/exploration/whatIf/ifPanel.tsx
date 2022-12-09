@@ -76,16 +76,13 @@ const IfPanel: FC = () => {
                 return value === undefined ? {} : {
                     description: value === 0 ? `${displayName} (+0)` : `${displayName} (${value > 0 ? '+' : '-'}${Math.abs(value).toFixed(2)})`,
                     style: {
-                        fill: value === 0 ? undefined : `${
+                        fill: fid in (context?.conditions ?? {}) ? '#0000' : value === 0 ? undefined : `${
                             value > 0 ? '#da3b01' : '#0027b4'
                         }${Math.round(Math.abs(value * 7)).toString(16)}0`,
-                        stroke: fid in (context?.conditions ?? {}) ? '#000' : undefined,
+                        stroke: value === 0 ? undefined : `${
+                            value > 0 ? '#da3b01' : '#0027b4'
+                        }`,
                         lineWidth: fid in (context?.conditions ?? {}) ? 2 : 1,
-                    },
-                    labelCfg: {
-                        style: {
-                            fill: fid in (context?.conditions ?? {}) ? '#000' : value === 0 ? undefined : value > 0 ? '#da3b01' : '#0027b4',
-                        },
                     },
                 };
             };

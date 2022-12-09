@@ -6,6 +6,7 @@ import useBoundingClientRect from "../../../../hooks/use-bounding-client-rect";
 import { DataSourceTag, deleteDataStorageById, getDataStorageById, getDataStorageList, IDBMeta } from "../../../../utils/storage";
 import type { IMuteFieldBase, IRow } from '../../../../interfaces';
 import HistoryListItem from './history-list-item';
+import HistoryQueue from './history-queue';
 
 
 const Group = styled.div`
@@ -17,12 +18,15 @@ const Group = styled.div`
     > * {
         flex-grow: 0;
         flex-shrink: 0;
-        max-height: unset;
+        &[role=grid] {
+            min-height: unset;
+            max-height: unset;
+        }
     }
 `;
 
 const List = styled.div`
-    margin: 1em 0;
+    margin: 1em 0 1.6em;
     min-height: 8em;
     max-height: 50vh;
     max-width: 680px;
@@ -63,9 +67,11 @@ export interface IHistoryListProps {
     search?: string;
     /** @default false */
     groupByPeriod?: boolean;
+    /** @default false */
+    showQueue?: boolean;
 }
 
-const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFailed, is, search, groupByPeriod = false }) => {
+const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFailed, is, search, groupByPeriod = false, showQueue = false }) => {
     const [localDataList, setLocalDataList] = useState<IDBMeta[]>([]);
     const prevList = useRef(localDataList);
     prevList.current = localDataList;
@@ -116,6 +122,26 @@ const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFa
         return localDataList.filter(item => {
             let temp = item.name.toLocaleLowerCase();
             for (const keyword of search.toLocaleLowerCase().split(/ +/)) {
+                if (keyword.match(/^:.*$/)) {
+                    switch (keyword) {
+                        case ':is-marked': {
+                            if (item.userTagGroup === undefined) {
+                                return false;
+                            }
+                            break;
+                        }
+                        default: {
+                            const { type } = /^:is-(?<type>.*)$/.exec(keyword)?.groups ?? {};
+                            if (type && item.tag) {
+                                if (item.tag.slice(1) !== type) {
+                                    return false;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    continue;
+                }
                 const idx = temp.indexOf(keyword);
                 if (idx === -1) {
                     return false;
@@ -155,6 +181,15 @@ const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFa
 
     return (
         <Group ref={listRef}>
+            {showQueue && (
+                <HistoryQueue
+                    onDataLoaded={onDataLoaded}
+                    onLoadingFailed={onLoadingFailed}
+                    onClose={onClose}
+                    search={search}
+                    sortBy="mark"
+                />
+            )}
             {groups.length > 0 ? groups.map(group => {
                 const beginTime = new Date(group.list.at(-1)!.editTime).toLocaleDateString();
                 const endTime = new Date(group.list[0].editTime).toLocaleDateString();

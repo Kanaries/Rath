@@ -262,6 +262,7 @@
                 "6mo": "Last half a year",
                 "1yr": "Last year"
             },
+            "history_queue": "Collection",
             "new": "New file",
             "sheet": "Sheet",
             "preview_parsed": "Preview",

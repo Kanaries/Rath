@@ -262,6 +262,7 @@
                 "6mo": "过去半年",
                 "1yr": "一年内"
             },
+            "history_queue": "常用",
             "new": "新的文件",
             "sheet": "工作簿",
             "preview_parsed": "预览",

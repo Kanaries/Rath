@@ -1,7 +1,7 @@
 import type { IDropdownOption } from "@fluentui/react";
 import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { nanoid } from "nanoid";
-import { distinctUntilChanged, Subject, switchAll } from "rxjs";
+import { Subject, switchAll } from "rxjs";
 import { getGlobalStore } from "..";
 import type { IFieldMeta } from "../../interfaces";
 import { IAlgoSchema, makeFormInitParams } from "../../pages/causal/config";
@@ -59,7 +59,6 @@ export default class CausalOperatorStore {
     public readonly destroy: () => void;
 
     constructor(dataSourceStore: DataSourceStore) {
-        const allFields$ = new Subject<IFieldMeta[]>();
         const dynamicFormSchema$ = new Subject<ReturnType<typeof fetchCausalAlgorithmList>>();
 
         makeAutoObservable(this, {
@@ -70,8 +69,7 @@ export default class CausalOperatorStore {
         });
 
         const mobxReactions = [
-            reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
-                allFields$.next(fieldMetas);
+            reaction(() => dataSourceStore.fieldMetas, () => {
                 // fieldMetas update whenever cleanedData update
                 this.updateDataSource();
             }),
@@ -91,7 +89,7 @@ export default class CausalOperatorStore {
             }),
             reaction(() => this.serverActive, ok => {
                 if (ok) {
-                    dynamicFormSchema$.next(fetchCausalAlgorithmList(dataSourceStore.fieldMetas));
+                    dynamicFormSchema$.next(fetchCausalAlgorithmList());
                 } else {
                     runInAction(() => {
                         this.causalAlgorithmForm = {};
@@ -111,17 +109,6 @@ export default class CausalOperatorStore {
         ];
 
         const rxReactions = [
-            // fetch schema
-            allFields$.pipe(
-                distinctUntilChanged((prev, next) => {
-                    return prev.length === next.length && next.every(f => prev.some(which => which.fid === f.fid));
-                }),
-            ).subscribe(fields => {
-                runInAction(() => {
-                    this.causalAlgorithmForm = {};
-                });
-                dynamicFormSchema$.next(fetchCausalAlgorithmList(fields));
-            }),
             // update form
             dynamicFormSchema$.pipe(
                 switchAll()

@@ -25,6 +25,7 @@ const HistoryPanel: FC<Pick<IHistoryListProps, 'onDataLoaded' | 'onClose' | 'onL
                 onClose={onClose}
                 search={search}
                 groupByPeriod
+                showQueue
             />
         </>
     );

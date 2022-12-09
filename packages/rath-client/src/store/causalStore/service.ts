@@ -18,7 +18,7 @@ export const connectToSession = async (onClose: (reason: Error) => void): Promis
             const { sessionId } = result.data;
             let { lifeSpan } = result.data;
             const keepSessionAlive = async (): Promise<boolean> => {
-                await new Promise<void>(resolve => setTimeout(resolve, lifeSpan - 10));
+                await new Promise<void>(resolve => setTimeout(resolve, lifeSpan * 1_000 * 0.8));
                 const { causalStore: { operator: { sessionId: sid } } } = getGlobalStore();
                 if (sessionId !== sid) {
                     return false;
@@ -102,22 +102,13 @@ export const updateDataSource = async (
     return null;
 };
 
-export const fetchCausalAlgorithmList = async (fields: readonly IFieldMeta[]): Promise<IAlgoSchema | null> => {
+export const fetchCausalAlgorithmList = async (): Promise<IAlgoSchema | null> => {
     const { causalStore: { operator: { causalServer, sessionId } } } = getGlobalStore();
     if (!sessionId) {
         return null;
     }
     try {
-        const res = await fetch(`${causalServer}/v0.1/form/discovery`, {
-            method: 'POST',
-            body: JSON.stringify({
-                fieldIds: fields.map((f) => f.fid),
-                fieldMetas: fields,
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        const res = await fetch(`${causalServer}/v0.1/form/discovery`, { method: 'GET' });
         if (!res.ok) {
             throw new Error(res.statusText);
         }
@@ -188,7 +179,7 @@ export interface IDiscoveryTask extends ITask<IDiscoverResult> {}
 
 export const discover = async (): Promise<IDiscoveryTask | null> => {
     const { causalStore: {
-        operator: { causalServer, busy, sessionId, tableId, algorithm, causalAlgorithmForm, params: options },
+        operator: { causalServer, sessionId, tableId, algorithm, causalAlgorithmForm, params: options },
         dataset: { fields },
         model: { functionalDependencies, assertionsAsPag }
     } } = getGlobalStore();
@@ -200,7 +191,7 @@ export const discover = async (): Promise<IDiscoveryTask | null> => {
         });
         return null;
     }
-    if (busy || !sessionId || !tableId) {
+    if (!sessionId || !tableId) {
         return null;
     }
     const { fieldMetas: allFields } = getGlobalStore().dataSourceStore;
@@ -221,7 +212,7 @@ export const discover = async (): Promise<IDiscoveryTask | null> => {
                 algoName: algorithm,
                 tableId,
                 fields: allFields,
-                focusedFields: inputFields.filter(f => f.fid),
+                focusedFields: inputFields.map(f => f.fid),
                 bgKnowledgesPag: assertionsAsPag,
                 funcDeps: functionalDependencies,
                 params,

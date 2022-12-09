@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Icon, MessageBar, MessageBarType } from '@fluentui/react';
 
 
-const Container = styled.p`
+const Container = styled.div`
     color: #ff8c00;
     font-size: 0.8rem;
     margin: 1em 0;

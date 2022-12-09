@@ -23,6 +23,37 @@ const Cont = styled.div`
     }
 `;
 
+const ProgressContainer = styled.div`
+    padding: 0 0 2px;
+    display: inline-block;
+    width: max-content;
+    position: relative;
+    background-size: 100% 2px;
+    background-repeat: no-repeat;
+    background-position: bottom;
+    ::before {
+        content: "";
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background-image: linear-gradient(to right, #fff2, #fffc 35%, #fffb 38%, #fff0 46%);
+        background-size: 400% 100%;
+        background-repeat: repeat-x;
+        animation: scrolling 8s linear infinite;
+        @keyframes scrolling {
+            from {
+                background-position: 400% 0;
+            }
+            to {
+                background-position: 0 0;
+            }
+        }
+    }
+`;
+
 export enum VIEW_TYPE {
     matrix = 'matrix',
     diagram = 'diagram',
@@ -71,7 +102,7 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
     const { causalStore } = useGlobalStore();
     const { fields } = causalStore;
     const { mutualMatrix, condMutualMatrix, causalityRaw } = causalStore.model;
-    const { busy, serverActive } = causalStore.operator;
+    const { busy, serverActive, progress } = causalStore.operator;
 
     return (
         <Cont>
@@ -90,26 +121,35 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                 })}
             </Pivot>
             <Stack style={{ marginBottom: '1em' }} tokens={{ childrenGap: 10 }}>
-                <PrimaryButton
-                    text={MATRIX_PIVOT_LIST.find((item) => item.itemKey === selectedKey)?.taskLabel}
-                    onRenderText={(props, defaultRenderer) => {
-                        return (
-                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} >
-                                {busy && <Spinner style={{ transform: 'scale(0.75)' }} />}
-                                {defaultRenderer?.(props)}
-                            </div>
-                        );
+                <ProgressContainer
+                    style={{
+                        backgroundImage: selectedKey === MATRIX_TYPE.causal && busy ? `linear-gradient(to right,
+                            #0078d4 ${1 + progress * 99}%,
+                            #cdd6d880 ${1 + progress * 99}%
+                        )` : undefined,
                     }}
-                    disabled={busy || (selectedKey === MATRIX_TYPE.causal && !serverActive)}
-                    onClick={() => {
-                        if (busy) {
-                            return;
-                        }
-                        onCompute(selectedKey);
-                    }}
-                    iconProps={busy ? undefined : { iconName: 'Rerun' }}
-                    style={{ width: 'max-content', transition: 'width 400ms' }}
-                />
+                >
+                    <PrimaryButton
+                        text={MATRIX_PIVOT_LIST.find((item) => item.itemKey === selectedKey)?.taskLabel}
+                        onRenderText={(props, defaultRenderer) => {
+                            return (
+                                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} >
+                                    {busy && <Spinner style={{ transform: 'scale(0.75)' }} />}
+                                    {defaultRenderer?.(props)}
+                                </div>
+                            );
+                        }}
+                        disabled={busy || (selectedKey === MATRIX_TYPE.causal && !serverActive)}
+                        onClick={() => {
+                            if (busy) {
+                                return;
+                            }
+                            onCompute(selectedKey);
+                        }}
+                        iconProps={busy ? undefined : { iconName: 'Rerun' }}
+                        style={{ width: 'max-content', transition: 'width 400ms' }}
+                    />
+                </ProgressContainer>
                 {selectedKey === MATRIX_TYPE.causal && (
                     <Dropdown
                         options={VIEW_LABELS}
