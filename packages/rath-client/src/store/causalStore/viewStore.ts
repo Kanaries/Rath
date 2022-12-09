@@ -19,7 +19,7 @@ export enum NodeSelectionMode {
 export enum ExplorationKey {
     // CAUSAL_BLAME = 'CausalBlame',
     AUTO_VIS = 'AutoVis',
-    DO_WHY = 'DoWhy',
+    WHAT_IF = 'WhatIf',
     CROSS_FILTER = 'CrossFilter',
     CAUSAL_INSIGHT = 'CausalInsight',
     GRAPHIC_WALKER = 'GraphicWalker',
@@ -29,7 +29,7 @@ export enum ExplorationKey {
 export const ExplorationOptions = [
     // { key: ExplorationKey.CAUSAL_BLAME, text: '归因分析' },
     { key: ExplorationKey.AUTO_VIS, text: '变量概览' },
-    { key: ExplorationKey.DO_WHY, text: 'Do Why' },
+    { key: ExplorationKey.WHAT_IF, text: 'What If' },
     { key: ExplorationKey.CROSS_FILTER, text: '因果验证' },
     { key: ExplorationKey.CAUSAL_INSIGHT, text: '可解释探索' },
     { key: ExplorationKey.GRAPHIC_WALKER, text: '可视化自助分析' },
@@ -39,7 +39,7 @@ export const ExplorationOptions = [
 class CausalViewStore {
 
     // TODO: 改回下面的
-    public explorationKey = ExplorationKey.DO_WHY;
+    public explorationKey = ExplorationKey.WHAT_IF;
     public graphNodeSelectionMode = NodeSelectionMode.DOUBLE;
 
     // public explorationKey = ExplorationKey.AUTO_VIS;
@@ -109,7 +109,7 @@ class CausalViewStore {
                             this.graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
                             break;
                         }
-                        case ExplorationKey.DO_WHY: {
+                        case ExplorationKey.WHAT_IF: {
                             this.graphNodeSelectionMode = NodeSelectionMode.DOUBLE;
                             break;
                         }

@@ -2,15 +2,15 @@ import type { FC } from 'react';
 import styled from 'styled-components';
 import ConfigPanel from './configPanel';
 import ConsoleTable from './consoleTable';
-import { useDoWhyProvider } from './context';
+import { useWhatIfProvider } from './context';
 
 
 const Container = styled.div`
     width: 100%;
 `;
 
-const DoWhy: FC = () => {
-    const DoWhyProvider = useDoWhyProvider();
+const WhatIf: FC = () => {
+    const DoWhyProvider = useWhatIfProvider();
 
     return (
         <DoWhyProvider>
@@ -23,4 +23,4 @@ const DoWhy: FC = () => {
 };
 
 
-export default DoWhy;
+export default WhatIf;

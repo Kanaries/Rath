@@ -4,15 +4,15 @@ import { createContext, FC, useContext, useMemo, createElement, useEffect, useCa
 import { getGlobalStore } from "../../../../store";
 import { IForm, makeFormInitParams } from "../../config";
 import { shouldFormItemDisplay } from "../../dynamicForm";
-import { doWhy, fetchDoWhyParamSchema, IDoWhyServiceResult } from "./service";
+import { estimate, fetchWhatIfParamSchema, IWhatIfServiceResult } from "./service";
 
 
-class DoWhyStore {
+class WhatIfStore {
     
     public form: IForm | null = null;
     public params: { readonly [key: string]: any } = {};
 
-    public definitions: Readonly<Parameters<typeof doWhy>[0]> = {
+    public definitions: Readonly<Parameters<typeof estimate>[0]> = {
         confounders: [],
         effectModifiers: [],
         outcome: '',
@@ -25,9 +25,9 @@ class DoWhyStore {
     public logs: Readonly<{
         beginTime: number;
         endTime: number;
-        props: Parameters<typeof doWhy>[0];
-        params: Parameters<typeof doWhy>[1];
-        data: IDoWhyServiceResult;
+        props: Parameters<typeof estimate>[0];
+        params: Parameters<typeof estimate>[1];
+        data: IWhatIfServiceResult;
     }>[] = [];
 
     public readonly destroy: () => void;
@@ -40,7 +40,7 @@ class DoWhyStore {
             logs: observable.shallow,
         });
 
-        fetchDoWhyParamSchema().then(res => {
+        fetchWhatIfParamSchema().then(res => {
             runInAction(() => {
                 this.form = res;
             });
@@ -90,7 +90,7 @@ class DoWhyStore {
         const params = Object.fromEntries(this.form.items.filter(item => {
             return shouldFormItemDisplay(item, this.params);
         }).map(item => [item.key, this.params[item.key]]));
-        const result = await doWhy(props, params);
+        const result = await estimate(props, params);
         const endTime = Date.now();
         runInAction(() => {
             if (result) {
@@ -113,10 +113,10 @@ class DoWhyStore {
 }
 
 
-const DoWhyContext = createContext<DoWhyStore | null>(null);
+const WhatIfContext = createContext<WhatIfStore | null>(null);
 
-export const useDoWhyProvider = (): FC => {
-    const context = useMemo(() => new DoWhyStore(), []);
+export const useWhatIfProvider = (): FC => {
+    const context = useMemo(() => new WhatIfStore(), []);
 
     useEffect(() => {
         const ref = context;
@@ -125,9 +125,9 @@ export const useDoWhyProvider = (): FC => {
         };
     }, [context]);
 
-    return useCallback(function DoWhyProvider ({ children }) {
-        return createElement(DoWhyContext.Provider, { value: context }, children);
+    return useCallback(function WhatIfProvider ({ children }) {
+        return createElement(WhatIfContext.Provider, { value: context }, children);
     }, [context]);
 };
 
-export const useDoWhyContext = () => useContext(DoWhyContext);
+export const useWhatIfContext = () => useContext(WhatIfContext);

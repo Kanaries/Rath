@@ -4,7 +4,7 @@ import { getGlobalStore } from "../../../../store";
 import type { IForm, IFunctionalDep, PagLink } from "../../config";
 
 
-export interface IDoWhyServiceRequest {
+export interface IWhatIfServiceRequest {
     data: readonly IRow[];
     /** 数据中所有字段 */
     fields: readonly IFieldMeta[];
@@ -28,12 +28,12 @@ export interface IDoWhyServiceRequest {
     params: { [key: string]: any };
 }
 
-export interface IDoWhyServiceResult {
+export interface IWhatIfServiceResult {
     /** 贡献度 */
     weight: number;
 }
 
-export const fetchDoWhyParamSchema = async (): Promise<IForm | null> => {
+export const fetchWhatIfParamSchema = async (): Promise<IForm | null> => {
     const { causalStore: { operator: { causalServer } } } = getGlobalStore();
 
     const res = await fetch(`${causalServer}/estimate/form`, { method: 'GET' });
@@ -41,7 +41,7 @@ export const fetchDoWhyParamSchema = async (): Promise<IForm | null> => {
     if (!res.ok) {
         notify({
             type: 'error',
-            title: 'Do Why Error',
+            title: 'WhatIf Error',
             content: res.statusText,
         });
         return null;
@@ -55,7 +55,7 @@ export const fetchDoWhyParamSchema = async (): Promise<IForm | null> => {
     if (result.success === false) {
         notify({
             type: 'error',
-            title: 'Failed to get Do Why param schema',
+            title: 'Failed to get WhatIf param schema',
             content: result.message,
         });
         return null;
@@ -64,19 +64,19 @@ export const fetchDoWhyParamSchema = async (): Promise<IForm | null> => {
     return result.data;
 };
 
-export const doWhy = async (
-    props: Pick<IDoWhyServiceRequest, 'confounders' | 'effectModifiers' | 'outcome'> & {
+export const estimate = async (
+    props: Pick<IWhatIfServiceRequest, 'confounders' | 'effectModifiers' | 'outcome'> & {
         populationPicker: readonly IFilter[];
         predicates: readonly IFilter[];
     },
-    params: IDoWhyServiceRequest['params'],
-): Promise<IDoWhyServiceResult | null> => {
+    params: IWhatIfServiceRequest['params'],
+): Promise<IWhatIfServiceResult | null> => {
     const { causalStore, dataSourceStore } = getGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
     const { causalServer } = causalStore.operator;
     const { functionalDependencies, mergedPag } = causalStore.model;
 
-    const payload: IDoWhyServiceRequest = {
+    const payload: IWhatIfServiceRequest = {
         data: cleanedData,
         fields: fieldMetas,
         causalModel: {
@@ -104,21 +104,21 @@ export const doWhy = async (
     if (!res.ok) {
         notify({
             type: 'error',
-            title: 'Do Why Error',
+            title: 'WhatIf Error',
             content: res.statusText,
         });
         return null;
     }
 
     const result = await res.json() as (
-        | { success: true; data: IDoWhyServiceResult }
+        | { success: true; data: IWhatIfServiceResult }
         | { success: false; message: string }
     );
 
     if (result.success === false) {
         notify({
             type: 'error',
-            title: 'Do Why Error',
+            title: 'WhatIf Error',
             content: result.message,
         });
         return null;

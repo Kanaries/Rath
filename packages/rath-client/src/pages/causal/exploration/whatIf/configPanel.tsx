@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../../store';
 import AdvancedOptions from './advancedOptions';
-import { useDoWhyContext } from './context';
+import { useWhatIfContext } from './context';
 import DefinitionPanel from './definitionPanel';
 
 
@@ -20,7 +20,7 @@ const Container = styled.div`
 const ConfigPanel: FC = () => {
     const { causalStore } = useGlobalStore();
     const { serverActive } = causalStore.operator;
-    const context = useDoWhyContext();
+    const context = useWhatIfContext();
 
     return (
         <Container>

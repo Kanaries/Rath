@@ -5,7 +5,7 @@ import { FC, Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { LabelWithDesc } from '../../../../components/labelTooltip';
 import { RenderFormItem, shouldFormItemDisplay } from '../../dynamicForm';
-import { useDoWhyContext } from './context';
+import { useWhatIfContext } from './context';
 
 
 const Container = styled.div`
@@ -29,7 +29,7 @@ const Cell = styled.div`
 `;
 
 const AdvancedOptions: FC = () => {
-    const context = useDoWhyContext();
+    const context = useWhatIfContext();
     const [display, setDisplay] = useState(false);
 
     return context?.form ? (

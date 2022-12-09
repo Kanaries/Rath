@@ -8,7 +8,7 @@ import { getGlobalStore, useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 // import { PAG_NODE } from '../../config';
 import { FilterCell } from '../../filters';
-import { useDoWhyContext } from './context';
+import { useWhatIfContext } from './context';
 
 
 const Container = styled.div`
@@ -25,7 +25,7 @@ const Container = styled.div`
 const DefinitionPanel: FC = () => {
     const { causalStore } = useGlobalStore();
     const { allFields } = causalStore.dataset;
-    const context = useDoWhyContext();
+    const context = useWhatIfContext();
     const viewContext = useCausalViewContext();
     const { selectedFieldGroup } = viewContext ?? {};
 
