@@ -1,15 +1,13 @@
 import type { IDropdownOption } from "@fluentui/react";
 import { makeAutoObservable, reaction, runInAction } from "mobx";
+import { nanoid } from "nanoid";
 import { distinctUntilChanged, Subject, switchAll } from "rxjs";
-import { getGlobalStore } from "..";
-import { notify } from "../../components/error";
-import type { IFieldMeta } from "../../interfaces";
-import { IAlgoSchema, IFunctionalDep, makeFormInitParams, PagLink, PAG_NODE } from "../../pages/causal/config";
-import { shouldFormItemDisplay } from "../../pages/causal/dynamicForm";
+import type { IFieldMeta, IRow } from "../../interfaces";
+import { IAlgoSchema, IFunctionalDep, makeFormInitParams, PagLink } from "../../pages/causal/config";
 import { causalService } from "../../pages/causal/service";
 import type { IteratorStorage } from "../../utils/iteStorage";
 import type { DataSourceStore } from "../dataSourceStore";
-import { findUnmatchedCausalResults, resolveCausality } from "./pag";
+import { causalDiscovery, connectToSession, fetchCausalAlgorithmList, updateDataSource } from "./service";
 
 
 export default class CausalOperatorStore {
@@ -18,8 +16,6 @@ export default class CausalOperatorStore {
         decodeURIComponent(new URL(window.location.href).searchParams.get('causalServer') ?? '').replace(/\/$/, '')
         || 'http://gateway.kanaries.cn:2080/causal'
     );
-
-    public serverActive = false;
 
     public busy = false;
 
@@ -50,21 +46,32 @@ export default class CausalOperatorStore {
         }
     }
 
+    public sessionId: string | null = null;
+    protected dataId: string = nanoid(12);
+    public tableId: string | null = null;
+
+    public get serverActive(): boolean {
+        return this.sessionId !== null;
+    }
+
     public readonly destroy: () => void;
 
     constructor(dataSourceStore: DataSourceStore) {
         const allFields$ = new Subject<IFieldMeta[]>();
-        const dynamicFormSchema$ = new Subject<ReturnType<typeof this.fetchCausalAlgorithmList>>();
+        const dynamicFormSchema$ = new Subject<ReturnType<typeof fetchCausalAlgorithmList>>();
 
         makeAutoObservable(this, {
             destroy: false,
             // @ts-expect-error non-public field
             pendingConnectAction: false,
+            dataId: false,
         });
 
         const mobxReactions = [
             reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
                 allFields$.next(fieldMetas);
+                // fieldMetas update whenever cleanedData update
+                this.updateDataSource(dataSourceStore.cleanedData, fieldMetas);
             }),
             // this reaction requires `makeAutoObservable` to be called before
             reaction(() => this._causalAlgorithmForm, form => {
@@ -80,19 +87,18 @@ export default class CausalOperatorStore {
                     }
                 });
             }),
-            reaction(() => this.causalServer, () => {
-                runInAction(() => {
-                    this.serverActive = false;
-                    this.pendingConnectAction = undefined;
-                });
-            }),
             reaction(() => this.serverActive, ok => {
                 if (ok) {
-                    dynamicFormSchema$.next(this.fetchCausalAlgorithmList(dataSourceStore.fieldMetas));
+                    dynamicFormSchema$.next(fetchCausalAlgorithmList(dataSourceStore.fieldMetas));
                 } else {
                     runInAction(() => {
                         this.causalAlgorithmForm = {};
                     });
+                }
+            }),
+            reaction(() => this.sessionId, sessionId => {
+                if (sessionId) {
+                    this.updateDataSource(dataSourceStore.cleanedData, dataSourceStore.fieldMetas);
                 }
             }),
         ];
@@ -107,7 +113,7 @@ export default class CausalOperatorStore {
                 runInAction(() => {
                     this.causalAlgorithmForm = {};
                 });
-                dynamicFormSchema$.next(this.fetchCausalAlgorithmList(fields));
+                dynamicFormSchema$.next(fetchCausalAlgorithmList(fields));
             }),
             // update form
             dynamicFormSchema$.pipe(
@@ -127,57 +133,38 @@ export default class CausalOperatorStore {
 
     protected pendingConnectAction: Promise<unknown> | undefined = undefined;
 
-    public async connect(server?: string) {
+    public async connect(server?: string): Promise<boolean> {
         this.pendingConnectAction = undefined;
         runInAction(() => {
             if (server) {
                 this.causalServer = server;
             }
-            this.serverActive = false;
+            this.sessionId = null;
+            this.tableId = null;
         });
-        const action = fetch(`${this.causalServer}`, { method: 'GET' });    // this is a ping
-        this.pendingConnectAction = action;
-        try {
-            const result = await action;
-            if (!result.ok) {
-                throw new Error(`[causal] Server did not successfully handle ping request. (${result.status})`);
-            }
-            if (result.ok && this.pendingConnectAction === action) {
-                runInAction(() => {
-                    this.pendingConnectAction = undefined;
-                    this.serverActive = true;
-                });
-            }
-        } catch (error) {
-            console.warn(error);
+        this.disconnect();
+        const connection = connectToSession(reason => {
+            console.warn('Causal server session disconnected', reason);
+        });
+        this.pendingConnectAction = connection;
+        const sessionId = await connection;
+        if (this.pendingConnectAction !== connection) {
+            return false;
         }
+        this.pendingConnectAction = undefined;
+        if (sessionId) {
+            runInAction(() => {
+                this.sessionId = sessionId;
+                this.tableId = null;
+            });
+            return true;
+        }
+        return false;
     }
 
     public disconnect() {
-        this.pendingConnectAction = undefined;
-        this.serverActive = false;
-    }
-    
-    protected async fetchCausalAlgorithmList(fields: readonly IFieldMeta[]): Promise<IAlgoSchema | null> {
-        if (!this.serverActive) {
-            return null;
-        }
-        try {
-            const schema: IAlgoSchema = await fetch(`${this.causalServer}/algo/list`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    fieldIds: fields.map((f) => f.fid),
-                    fieldMetas: fields,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }).then((resp) => resp.json());
-            return schema;
-        } catch (error) {
-            console.error('[CausalAlgorithmList error]:', error);
-            return null;
-        }
+        this.sessionId = null;
+        this.tableId = null;
     }
 
     public async computeMutualMatrix(data: IteratorStorage, fields: readonly IFieldMeta[]): Promise<number[][] | null> {
@@ -200,86 +187,29 @@ export default class CausalOperatorStore {
         functionalDependencies: readonly IFunctionalDep[],
         assertions: readonly PagLink[],
     ): Promise<{ raw: number[][]; pag: PagLink[] } | null> {
-        if (this.busy || !this.serverActive) {
-            return null;
-        }
-        let causality: { raw: number[][]; pag: PagLink[] } | null = null;
-        const { fieldMetas: allFields } = getGlobalStore().dataSourceStore;
-        const focusedFields = fields.map(f => {
-            return allFields.findIndex(which => which.fid === f.fid);
-        }).filter(idx => idx !== -1);
-        const algoName = this._algorithm;
-        const inputFields = focusedFields.map(idx => allFields[idx]);
-        if (!algoName) {
-            notify({
-                title: 'Causal Discovery Error',
-                type: 'error',
-                content: 'Algorithm is not chosen yet.',
-            });
-            return null;
-        }
-        try {
+        runInAction(() => {
+            this.busy = true;
+        });
+        const result = await causalDiscovery(data, fields, functionalDependencies, assertions);
+        runInAction(() => {
+            this.busy = false;
+        });
+        return result;
+    }
+
+    protected async updateDataSource(data: readonly IRow[], fields: readonly IFieldMeta[]) {
+        const dataId = nanoid(12);
+        this.dataId = dataId;
+        const prevTableId = this.tableId;
+        runInAction(() => {
+            this.tableId = null;
+        });
+        const tableId = await updateDataSource(data, fields, prevTableId);
+        if (tableId && dataId === this.dataId) {
             runInAction(() => {
-                this.busy = true;
-            });
-            const originFieldsLength = inputFields.length;
-            const dataSource = await data.getAll();
-            const params = Object.fromEntries(this._causalAlgorithmForm[algoName].items.filter(item => {
-                return shouldFormItemDisplay(item, this.params[algoName]);
-            }).map(item => [item.key, this.params[algoName][item.key]]));
-            const res = await fetch(`${this.causalServer}/causal/${algoName}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    dataSource,
-                    fields: allFields,
-                    focusedFields: inputFields.map(f => f.fid),
-                    bgKnowledgesPag: assertions,
-                    funcDeps: functionalDependencies,
-                    params,
-                }),
-            });
-            const result = await res.json();
-            if (result.success) {
-                const rawMatrix = result.data.matrix as PAG_NODE[][];
-                const causalMatrix = rawMatrix
-                    .slice(0, originFieldsLength)
-                    .map((row) => row.slice(0, originFieldsLength));
-                const causalPag = resolveCausality(causalMatrix, inputFields);
-                causality = { raw: causalMatrix, pag: causalPag };
-                const unmatched = findUnmatchedCausalResults(assertions, causalPag);
-                if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
-                    const getFieldName = (fid: string) => {
-                        const field = inputFields.find(f => f.fid === fid);
-                        return field?.name ?? fid;
-                    };
-                    for (const info of unmatched) {
-                        notify({
-                            title: 'Causal Result Not Matching',
-                            type: 'error',
-                            content: `Conflict in edge "${getFieldName(info.srcFid)} -> ${getFieldName(info.tarFid)}":\n`
-                                + `  Expected: ${info.expected.src_type} -> ${info.expected.tar_type}\n`
-                                + `  Received: ${info.received.src_type} -> ${info.received.tar_type}`,
-                        });
-                    }
-                }
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (error) {
-            notify({
-                title: 'Causal Discovery Error',
-                type: 'error',
-                content: `${error}`,
-            });
-        } finally {
-            runInAction(() => {
-                this.busy = false;
+                this.tableId = tableId;
             });
         }
-        return causality;
     }
 
     public updateConfig(algoName: string, params: typeof this.params[string]): boolean {

@@ -223,20 +223,22 @@ export const findUnmatchedCausalResults = (
         ));
         if ([decl.src_type, decl.tar_type].every(nodeType => nodeType === PAG_NODE.CIRCLE)) {
             // EdgeAssert.TO_BE_RELEVANT
-            if (!link) {
-                diffs.push({
-                    srcFid: decl.src,
-                    tarFid: decl.src,
-                    expected: {
-                        src_type: decl.src_type,
-                        tar_type: decl.tar_type,
-                    },
-                    received: {
-                        src_type: PAG_NODE.EMPTY,
-                        tar_type: PAG_NODE.EMPTY,
-                    },
-                });
-            }
+            // Currently it is not reasonable enough to force algorithm to link two nodes
+            // without an explicit direction, so this case will not be reported as a fault.
+            // if (!link) {
+            //     diffs.push({
+            //         srcFid: decl.src,
+            //         tarFid: decl.src,
+            //         expected: {
+            //             src_type: decl.src_type,
+            //             tar_type: decl.tar_type,
+            //         },
+            //         received: {
+            //             src_type: PAG_NODE.EMPTY,
+            //             tar_type: PAG_NODE.EMPTY,
+            //         },
+            //     });
+            // }
         } else if ([decl.src_type, decl.tar_type].every(nodeType => nodeType === PAG_NODE.EMPTY)) {
             // EdgeAssert.TO_BE_NOT_RELEVANT
             if (link) {
