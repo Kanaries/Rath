@@ -6,7 +6,7 @@ import { MessageBar, MessageBarType } from "@fluentui/react";
 import intl from 'react-intl-universal';
 import { useGlobalStore } from "../../../store";
 import type { IRow } from "../../../interfaces";
-import { initPatterns, intersectPattern } from "../../../lib/textPattern/init";
+import { intersectPattern } from "../../../lib/textPattern/init";
 import HeaderCell from "./headerCell";
 
 
@@ -43,8 +43,9 @@ const DataTable: React.FC = (props) => {
         pattern: RegExp;
     } | undefined>(() => {
         if (textSelectList.length === 0) return;
-        console.log(intersectPattern(textSelectList))
-        const res = initPatterns(textSelectList);
+        // console.log(intersectPattern(textSelectList))
+        // const res = initPatterns(textSelectList);
+        const res = intersectPattern(textSelectList)
         if (res) {
             return {
                 fid: textSelectList[0].fid,
@@ -128,10 +129,23 @@ const DataTable: React.FC = (props) => {
         // Create a range representing the full text of the element
         const fullRange = document.createRange();
         fullRange.selectNodeContents(td);
+        let startNode = td.firstChild;
+        let startPos = 0;
+        while (startNode) {
+            if (startNode === selectedRange.startContainer) break;
+            if (startNode.nodeType === Node.TEXT_NODE) {
+                startPos += startNode.textContent?.length || 0;
+            }
+            if (startNode.nextSibling) {
+                startNode = startNode.nextSibling;
+            } else {
+                break;
+            }
+        }
 
         // Compare the selected range to the full range
-        const startPos = selectedRange.startOffset;//fullRange.compareBoundaryPoints(Range.START_TO_START, selectedRange);
-        const endPos = selectedRange.endOffset;//fullRange.compareBoundaryPoints(Range.END_TO_END, selectedRange);
+        startPos += selectedRange.startOffset;
+        let endPos = startPos + selectedText.length;
         if (fullText && selectedText) {
             // console.log({
             //     fullText,
@@ -214,22 +228,23 @@ const DataTable: React.FC = (props) => {
                         const end = matchedRange[1]
                         const before = text.slice(0, start);
                         const after = text.slice(end);
-                        
-                        return (
-                            <span onMouseUp={(e) => {
-                                onTextSelect(f.fid, `${text}`, e.currentTarget)
+                        const ele = (
+                            <span className="cell-content" onMouseUp={(e) => {
+                                const ele = (e.currentTarget.className === 'cell-content' ? e.currentTarget : e.currentTarget.parentElement) as Node;
+                                onTextSelect(f.fid, `${text}`, ele)
                             }}>
                                 {before}
-                                <span style={{ backgroundColor: '#FFC107' }}>
+                                <span {...{ startIndex: before.length }} style={{ backgroundColor: '#FFC107' }}>
                                     {text.slice(start, end)}
                                 </span>
                                 {after}
                             </span>
-                        );
+                        )
+                        return ele;
                     }
                 }
-                return <span onMouseUp={(e) => {
-                    onTextSelect(f.fid, `${text}`, e.currentTarget)
+                return <span className="cell-content" onMouseUp={(e) => {
+                    onTextSelect(f.fid, `${text}`, e.target as Node)
                 }}>
                     {text}
                 </span>

@@ -26,7 +26,6 @@ import FastSelection from './fastSelection';
 import ProfilingView from './profilingView';
 import MainActionButton from './baseActions/mainActionButton';
 import DataOperations from './baseActions/dataOperations';
-import { initPatterns } from '../../lib/textPattern/init';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -109,19 +108,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         },
         [dataSourceStore]
     );
-    // console.log(initPatterns)
-    console.log(initPatterns([
-        {
-            str: 'Alice is 18 years old',
-            startIndex: 0,
-            endIndex: 5
-        },
-        {
-            str: 'Bob is 17 years old',
-            startIndex: 0,
-            endIndex: 3
-        }
-    ]))
     return (
         <div className="content-container" style={{ position: 'relative' }}>
             <Card>
