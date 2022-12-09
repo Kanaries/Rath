@@ -47,11 +47,7 @@ export const connectToSession = async (onClose: (reason: Error) => void): Promis
             throw new Error(result.message);
         }
     } catch (error) {
-        notify({
-            title: 'Initialize Causal Session Error',
-            type: 'error',
-            content: `${error}`,
-        });
+        console.warn('Initialize Causal Session Error', error);
     }
     return null;
 };
@@ -112,7 +108,7 @@ export const fetchCausalAlgorithmList = async (fields: readonly IFieldMeta[]): P
         return null;
     }
     try {
-        const schema: IAlgoSchema = await fetch(`${causalServer}/v0.1/form/discovery`, {
+        const res = await fetch(`${causalServer}/v0.1/form/discovery`, {
             method: 'POST',
             body: JSON.stringify({
                 fieldIds: fields.map((f) => f.fid),
@@ -121,10 +117,32 @@ export const fetchCausalAlgorithmList = async (fields: readonly IFieldMeta[]): P
             headers: {
                 'Content-Type': 'application/json',
             },
-        }).then((resp) => resp.json());
+        });
+        if (!res.ok) {
+            throw new Error(res.statusText);
+        }
+
+        const result = await res.json() as (
+            | { success: true; data: IAlgoSchema }
+            | { success: false; message: string }
+        );
+
+        if (result.success === false) {
+            notify({
+                type: 'error',
+                title: 'Failed to get causal discovery param schema',
+                content: result.message,
+            });
+            return null;
+        }
+        const schema = result.data;
         return schema;
     } catch (error) {
-        console.error('[CausalAlgorithmList error]:', error);
+        notify({
+            title: 'CausalAlgorithmList Error',
+            type: 'error',
+            content: `${error}`,
+        });
         return null;
     }
 };

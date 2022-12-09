@@ -17,7 +17,11 @@ export interface IWhatIfServiceResult {
 }
 
 export const fetchWhatIfParamSchema = async (): Promise<IAlgoSchema | null> => {
-    const { causalStore: { operator: { causalServer } } } = getGlobalStore();
+    const { causalStore: { operator: { causalServer, serverActive } } } = getGlobalStore();
+
+    if (!serverActive) {
+        return null;
+    }
 
     const res = await fetch(`${causalServer}/v0.1/form/intervention`, { method: 'GET' });
 

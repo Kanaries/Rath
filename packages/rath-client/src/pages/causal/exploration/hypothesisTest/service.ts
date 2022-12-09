@@ -34,7 +34,11 @@ export interface IHypothesisTestServiceResult {
 }
 
 export const fetchHypothesisTestParamSchema = async (): Promise<IForm | null> => {
-    const { causalStore: { operator: { causalServer } } } = getGlobalStore();
+    const { causalStore: { operator: { causalServer, serverActive } } } = getGlobalStore();
+
+    if (!serverActive) {
+        return null;
+    }
 
     const res = await fetch(`${causalServer}/v0.1/form/estimate`, { method: 'GET' });
 
