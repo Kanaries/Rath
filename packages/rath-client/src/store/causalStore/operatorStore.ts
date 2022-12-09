@@ -19,6 +19,7 @@ export default class CausalOperatorStore {
     );
 
     public busy = false;
+    public progress = 0;
 
     protected _causalAlgorithmForm: IAlgoSchema = {};
     public get causalAlgorithmForm(): IAlgoSchema {
@@ -101,6 +102,11 @@ export default class CausalOperatorStore {
                 if (sessionId) {
                     this.updateDataSource();
                 }
+            }),
+            reaction(() => this.busy, () => {
+                runInAction(() => {
+                    this.progress = 0;
+                });
             }),
         ];
 
@@ -206,6 +212,16 @@ export default class CausalOperatorStore {
             return true;
         }
         return false;
+    }
+
+    public updateTaskProgress(progress: number) {
+        if (this.busy) {
+            this.progress = progress;
+        }
+    }
+
+    public toggleRunning() {
+        this.busy = !this.busy;
     }
 
 }

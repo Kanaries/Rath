@@ -1,11 +1,13 @@
 import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { combineLatest, distinctUntilChanged, map, Subject, switchAll } from "rxjs";
+import { notify } from "../../components/error";
 import type { IFieldMeta } from "../../interfaces";
 import type { IFunctionalDep, PagLink } from "../../pages/causal/config";
 import type CausalDatasetStore from "./datasetStore";
 import CausalOperatorStore from "./operatorStore";
-import { mergePAGs, transformAssertionsToPag, transformFuncDepsToPag, transformPagToAssertions } from "./pag";
+import { findUnmatchedCausalResults, mergePAGs, resolveCausality, transformAssertionsToPag, transformFuncDepsToPag, transformPagToAssertions } from "./pag";
+import { IDiscoverResult } from "./service";
 
 
 export enum NodeAssert {
@@ -37,6 +39,8 @@ export default class CausalModelStore {
 
     public readonly destroy: () => void;
 
+    public modelId: string | null = null;
+
     public generatedFDFromExtInfo: readonly IFunctionalDep[] = [];
     public functionalDependencies: readonly IFunctionalDep[] = [];
     public functionalDependenciesAsPag: readonly PagLink[] = [];
@@ -64,6 +68,7 @@ export default class CausalModelStore {
         const assertionsPag$ = new Subject<readonly PagLink[]>();
         
         makeAutoObservable(this, {
+            modelId: false,
             destroy: false,
             functionalDependencies: observable.ref,
             generatedFDFromExtInfo: observable.ref,
@@ -314,6 +319,30 @@ export default class CausalModelStore {
             })[decl.assertion];
         }));
         return true;
+    }
+
+    public updateCausalResult(result: IDiscoverResult) {
+        const { data: { matrix, fields }, modelId } = result;
+        this.modelId = modelId;
+        this.causalityRaw = matrix;
+        const causalPag = resolveCausality(matrix, fields);
+        const unmatched = findUnmatchedCausalResults(this.assertionsAsPag, causalPag);
+        if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
+            const getFieldName = (fid: string) => {
+                const field = fields.find(f => f.fid === fid);
+                return field?.name ?? fid;
+            };
+            for (const info of unmatched) {
+                notify({
+                    title: 'Causal Result Not Matching',
+                    type: 'error',
+                    content: `Conflict in edge "${getFieldName(info.srcFid)} -> ${getFieldName(info.tarFid)}":\n`
+                        + `  Expected: ${info.expected.src_type} -> ${info.expected.tar_type}\n`
+                        + `  Received: ${info.received.src_type} -> ${info.received.tar_type}`,
+                });
+            }
+        }
+        this.causality = causalPag;
     }
 
 }

@@ -7,7 +7,7 @@ import CausalDatasetStore from "./datasetStore";
 import CausalModelStore from "./modelStore";
 import CausalOperatorStore from "./operatorStore";
 import { resolveCausality } from "./pag";
-import { discover } from "./service";
+import { discover, IDiscoveryTask, ITask } from "./service";
 
 
 export interface ICausalStoreSave {
@@ -26,11 +26,16 @@ export default class CausalStore {
     public readonly operator: CausalOperatorStore;
     public readonly model: CausalModelStore;
 
+    protected pendingTasks: ITask[] = [];
+
     public get fields() {
         return this.dataset.fields;
     }
 
     public destroy() {
+        this.pendingTasks.forEach(task => {
+            task.abort('Causal store destroyed');
+        });
         this.model.destroy();
         this.operator.destroy();
         this.dataset.destroy();
@@ -129,18 +134,26 @@ export default class CausalStore {
         this.dataset.removeFilter(...args);
     }
 
-    public async run() {
-        runInAction(() => {
-            this.model.causalityRaw = null;
-            this.model.causality = null;
-        });
-        const result = await discover();
-        runInAction(() => {
-            this.model.causalityRaw = result?.raw ?? null;
-            this.model.causality = result?.pag ?? null;
-        });
-
-        return result;
+    public async run(): Promise<IDiscoveryTask | null> {
+        const { busy } = this.operator;
+        if (busy) {
+            return null;
+        }
+        this.operator.toggleRunning();
+        const task = await discover();
+        if (task) {
+            this.pendingTasks.push(task);
+            task.onprogress(progress => {
+                this.operator.updateTaskProgress(progress);
+            });
+            task.value.then(data => {
+                this.model.updateCausalResult(data);
+            }).finally(() => {
+                this.pendingTasks = this.pendingTasks.filter(t => t !== task);
+                this.operator.toggleRunning();
+            });
+        }
+        return task;
     }
 
     public async computeMutualMatrix() {
