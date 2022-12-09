@@ -15,6 +15,7 @@ import PredictPanel from './predictPanel';
 import RExplainer from './explainer/RExplainer';
 import AutoVis from './autoVis';
 import WhatIf from './whatIf';
+import HypothesisTest from './hypothesisTest';
 // import CausalBlame from './causalBlame';
 
 
@@ -178,6 +179,9 @@ const Exploration = forwardRef<{
                     ),
                     [ExplorationKey.WHAT_IF]: (
                         <WhatIf />
+                    ),
+                    [ExplorationKey.HYPOTHESIS_TEST]: (
+                        <HypothesisTest />
                     ),
                     [ExplorationKey.CROSS_FILTER]: visSample.length > 0 && selectedFieldGroup.length > 0 && (
                         <CrossFilter

@@ -65,7 +65,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const { causalStore } = useGlobalStore();
     const { fields } = causalStore;
     const { causality, assertionsAsPag, mutualMatrix } = causalStore.model;
-    const { onRenderNode, localWeights } = useCausalViewContext() ?? {};
+    const viewContext = useCausalViewContext();
+    const { onRenderNode, localWeights } = viewContext ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -174,6 +175,15 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
             forceRelayoutRef.current = () => {};
         };
     }, [forceRelayoutRef, graph]);
+
+    useEffect(() => {
+        if (viewContext) {
+            viewContext.graph = graph;
+            return () => {
+                viewContext.graph = null;
+            };
+        }
+    }, [graph, viewContext]);
 
     useEffect(() => {
         const { current: container } = containerRef;

@@ -24,6 +24,8 @@ export interface IReactiveGraphProps {
 
 export interface IReactiveGraphHandler {
     readonly refresh: () => void;
+    /** repaint without recalculating positions */
+    readonly update: () => void;
 }
 
 export const useReactiveGraph = ({
@@ -259,6 +261,9 @@ export const useReactiveGraph = ({
     return useMemo<IReactiveGraphHandler>(() => ({
         refresh() {
             graphRef.current?.read(dataRef.current);
+        },
+        update() {
+            graphRef.current?.refresh();
         },
     }), [graphRef]);
 };

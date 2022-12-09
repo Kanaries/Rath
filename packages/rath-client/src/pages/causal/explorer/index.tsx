@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
-import { useGlobalStore } from "../../../store";
+import { getGlobalStore, useGlobalStore } from "../../../store";
 import type { EdgeAssert } from "../../../store/causalStore/modelStore";
 import { useCausalViewContext } from "../../../store/causalStore/viewStore";
 import type { Subtree } from "../exploration";
@@ -98,6 +98,11 @@ const Explorer: FC<ExplorerProps> = ({
     const handleClickCircle = useCallback((fid: string | null) => {
         if (fid === null) {
             return viewContext?.clearSelected();
+        } else {
+            const f = getGlobalStore().causalStore.dataset.allFields.find(which => which.fid === fid);
+            if (f) {
+                viewContext?.fireEvent('nodeClick', f);
+            }
         }
         if (mode === 'explore') {
             viewContext?.toggleNodeSelected(fid);

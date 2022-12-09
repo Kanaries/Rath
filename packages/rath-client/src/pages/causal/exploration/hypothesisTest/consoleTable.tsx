@@ -4,7 +4,7 @@ import { FC, Fragment, useCallback } from 'react';
 import { ActionButton, TooltipHost } from '@fluentui/react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../../store';
-import { useWhatIfContext } from './context';
+import { useHypothesisTestContext } from './context';
 
 
 const Container = styled.div``;
@@ -39,7 +39,7 @@ const Cell = styled.div`
 `;
 
 const ConsoleTable: FC = () => {
-    const context = useWhatIfContext();
+    const context = useHypothesisTestContext();
     const { dataSourceStore: { fieldMetas } } = useGlobalStore();
 
     const formatFid = useCallback((fid: string) => {

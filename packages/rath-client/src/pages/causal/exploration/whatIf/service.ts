@@ -1,42 +1,25 @@
 import { notify } from "../../../../components/error";
-import type { IFieldMeta, IRow, IFilter } from "../../../../interfaces";
 import { getGlobalStore } from "../../../../store";
-import type { IForm, IFunctionalDep, PagLink } from "../../config";
+import type { IAlgoSchema } from "../../config";
 
 
 export interface IWhatIfServiceRequest {
-    data: readonly IRow[];
-    /** 数据中所有字段 */
-    fields: readonly IFieldMeta[];
-    causalModel: {
-        /** 函数依赖 */
-        funcDeps: readonly IFunctionalDep[];
-        /** 用户编辑后的因果图 */
-        edges: readonly PagLink[];
+    algoName: string; // 预测算法
+    modelId: string;
+    do: {
+        [fid: string]: number; // [-2, 2], 调整的方向和范围
     };
-    groups: {
-        current: { predicates: readonly IFilter[] };
-        population: { predicates: readonly IFilter[] };
-    };
-    /** 同时影响 dimensions 和 measure 的 fid */
-    confounders: readonly string[];
-    /** 只作用于 measure 的 fid */
-    effectModifiers: readonly string[];
-    /** 分析目标 fid */
-    outcome: string;
-    
     params: { [key: string]: any };
 }
 
 export interface IWhatIfServiceResult {
-    /** 贡献度 */
-    weight: number;
+    base: { [fid: string]: number };
 }
 
-export const fetchWhatIfParamSchema = async (): Promise<IForm | null> => {
+export const fetchWhatIfParamSchema = async (): Promise<IAlgoSchema | null> => {
     const { causalStore: { operator: { causalServer } } } = getGlobalStore();
 
-    const res = await fetch(`${causalServer}/v0.1/form/estimate`, { method: 'GET' });
+    const res = await fetch(`${causalServer}/v0.1/form/intervention`, { method: 'GET' });
 
     if (!res.ok) {
         notify({
@@ -48,7 +31,7 @@ export const fetchWhatIfParamSchema = async (): Promise<IForm | null> => {
     }
 
     const result = await res.json() as (
-        | { success: true; data: IForm }
+        | { success: true; data: IAlgoSchema }
         | { success: false; message: string }
     );
 
@@ -64,40 +47,31 @@ export const fetchWhatIfParamSchema = async (): Promise<IForm | null> => {
     return result.data;
 };
 
-export const estimate = async (
-    props: Pick<IWhatIfServiceRequest, 'confounders' | 'effectModifiers' | 'outcome'> & {
-        populationPicker: readonly IFilter[];
-        predicates: readonly IFilter[];
-    },
+export const predicateWhatIf = async (
+    conditions: { [fid: string]: number },
+    algoName: string,
     params: IWhatIfServiceRequest['params'],
 ): Promise<IWhatIfServiceResult | null> => {
-    const { causalStore, dataSourceStore } = getGlobalStore();
-    const { cleanedData, fieldMetas } = dataSourceStore;
-    const { causalServer, sessionId } = causalStore.operator;
-    const { functionalDependencies, mergedPag } = causalStore.model;
+    if (Object.keys(conditions).length === 0) {
+        return null;
+    }
 
-    if (!sessionId) {
+    const { causalStore } = getGlobalStore();
+    const { causalServer, sessionId } = causalStore.operator;
+    const { modelId } = causalStore.model;
+
+    if (!sessionId || !modelId) {
         return null;
     }
 
     const payload: IWhatIfServiceRequest = {
-        data: cleanedData,
-        fields: fieldMetas,
-        causalModel: {
-            funcDeps: functionalDependencies,
-            edges: mergedPag,
-        },
-        groups: {
-            current: { predicates: props.populationPicker.concat(props.predicates) },
-            population: { predicates: props.populationPicker },
-        },
-        confounders: props.confounders,
-        effectModifiers: props.effectModifiers,
-        outcome: props.outcome,
+        algoName,
+        modelId,
+        do: conditions,
         params,
     };
 
-    const res = await fetch(`${causalServer}/v0.1/${sessionId}/estimate/calc`, {
+    const res = await fetch(`${causalServer}/v0.1/${sessionId}/intervene`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

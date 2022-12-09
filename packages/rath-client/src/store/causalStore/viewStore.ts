@@ -3,6 +3,7 @@ import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
 import { Subject, withLatestFrom } from "rxjs";
 import type { IFieldMeta } from "../../interfaces";
+import { IReactiveGraphHandler } from "../../pages/causal/explorer/graph-helper";
 import type { GraphNodeAttributes } from "../../pages/causal/explorer/graph-utils";
 import type { IPredictResult, PredictAlgorithm } from "../../pages/causal/predict";
 import type { IRInsightExplainResult } from "../../workers/insight/r-insight.worker";
@@ -19,6 +20,7 @@ export enum NodeSelectionMode {
 export enum ExplorationKey {
     // CAUSAL_BLAME = 'CausalBlame',
     AUTO_VIS = 'AutoVis',
+    HYPOTHESIS_TEST = 'HypothesisTest',
     WHAT_IF = 'WhatIf',
     CROSS_FILTER = 'CrossFilter',
     CAUSAL_INSIGHT = 'CausalInsight',
@@ -30,17 +32,22 @@ export const ExplorationOptions = [
     // { key: ExplorationKey.CAUSAL_BLAME, text: '归因分析' },
     { key: ExplorationKey.AUTO_VIS, text: '变量概览' },
     { key: ExplorationKey.WHAT_IF, text: 'What If' },
+    { key: ExplorationKey.HYPOTHESIS_TEST, text: '因果假设' },
     { key: ExplorationKey.CROSS_FILTER, text: '因果验证' },
     { key: ExplorationKey.CAUSAL_INSIGHT, text: '可解释探索' },
     { key: ExplorationKey.GRAPHIC_WALKER, text: '可视化自助分析' },
     { key: ExplorationKey.PREDICT, text: '模型预测' },
 ] as const;
 
+type CausalViewEventListeners = {
+    nodeClick: (node: Readonly<IFieldMeta>) => void;
+};
+
 class CausalViewStore {
 
     // TODO: 改回下面的
     public explorationKey = ExplorationKey.WHAT_IF;
-    public graphNodeSelectionMode = NodeSelectionMode.DOUBLE;
+    public graphNodeSelectionMode = NodeSelectionMode.NONE;
 
     // public explorationKey = ExplorationKey.AUTO_VIS;
     // public graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
@@ -64,6 +71,12 @@ class CausalViewStore {
     
     public readonly destroy: () => void;
 
+    protected listeners: { [key in keyof CausalViewEventListeners]: CausalViewEventListeners[key][] } = {
+        nodeClick: [],
+    };
+
+    public graph: IReactiveGraphHandler | null = null;
+
     constructor(causalStore: CausalStore) {
         this.onRenderNode = node => {
             const value = 2 / (1 + Math.exp(-1 * node.features.entropy / 2)) - 1;
@@ -82,9 +95,11 @@ class CausalViewStore {
             onRenderNode: observable.ref,
             localWeights: observable.ref,
             predictCache: observable.shallow,
+            graph: false,
             // @ts-expect-error non-public field
             _selectedNodes: observable.ref,
             selectedFidArr$: false,
+            listeners: false,
         });
 
         const mobxReactions = [
@@ -109,7 +124,7 @@ class CausalViewStore {
                             this.graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
                             break;
                         }
-                        case ExplorationKey.WHAT_IF: {
+                        case ExplorationKey.HYPOTHESIS_TEST: {
                             this.graphNodeSelectionMode = NodeSelectionMode.DOUBLE;
                             break;
                         }
@@ -165,7 +180,31 @@ class CausalViewStore {
         this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());
             rxReactions.forEach(subscription => subscription.unsubscribe());
+            for (const key of Object.keys(this.listeners)) {
+                this.listeners[key as keyof typeof this.listeners] = [];
+            }
         };
+    }
+
+    public addEventListener<T extends keyof CausalViewEventListeners, E extends CausalViewEventListeners[T]>(
+        eventName: T, callback: E
+    ) {
+        this.listeners[eventName].push(callback);
+    }
+
+    public removeEventListener<T extends keyof CausalViewEventListeners, E extends CausalViewEventListeners[T]>(
+        eventName: T, callback: E
+    ) {
+        this.listeners[eventName] = this.listeners[eventName].filter(cb => cb !== callback);
+    }
+
+    public fireEvent<T extends keyof CausalViewEventListeners, E extends CausalViewEventListeners[T]>(
+        eventName: T, ...args: Parameters<E>
+    ) {
+        for (const cb of this.listeners[eventName]) {
+            // @ts-expect-error this is correct
+            cb(...args);
+        }
     }
 
     public setExplorationKey(explorationKey: ExplorationKey) {

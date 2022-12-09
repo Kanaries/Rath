@@ -1,11 +1,11 @@
 import intl from 'react-intl-universal';
-import { Dropdown, Label, Toggle } from '@fluentui/react';
+import { Toggle } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { LabelWithDesc } from '../../../../components/labelTooltip';
 import { RenderFormItem, shouldFormItemDisplay } from '../../dynamicForm';
-import { useWhatIfContext } from './context';
+import { useHypothesisTestContext } from './context';
 
 
 const Container = styled.div`
@@ -13,6 +13,8 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     margin-bottom: 1em;
+    border-block: 1px solid #8884;
+    padding: 0.6em 0;
 `;
 
 const RowGroup = styled.div`
@@ -20,8 +22,6 @@ const RowGroup = styled.div`
     display: grid;
     grid-template-columns: max-content auto;
     gap: 0.6em 2em;
-    border-bottom: 1px solid #8884;
-    padding-bottom: 1.2em;
 `;
 
 const Cell = styled.div`
@@ -29,7 +29,7 @@ const Cell = styled.div`
 `;
 
 const AdvancedOptions: FC = () => {
-    const context = useWhatIfContext();
+    const context = useHypothesisTestContext();
     const [display, setDisplay] = useState(false);
 
     return context?.form ? (
@@ -42,32 +42,17 @@ const AdvancedOptions: FC = () => {
             />
             {display && (
                 <RowGroup role="grid" aria-colcount={2}>
-                    <Cell role="gridcell" aria-rowindex={1} aria-colindex={1}>
-                        <Label>预测算法</Label>
-                    </Cell>
-                    <Cell role="gridcell" aria-rowindex={1} aria-colindex={2}>
-                        <Dropdown
-                            options={Object.keys(context.form).map(name => ({
-                                key: name,
-                                text: name,
-                            }))}
-                            selectedKey={context.algoName}
-                            onChange={(e, o) => {
-                                o && context.switchAlgorithm(o.key as string);
-                            }}
-                        />
-                    </Cell>
-                    {context.form[context.algoName]?.items.map((item, i) => {
-                        return shouldFormItemDisplay(item, context.allParams[context.algoName]) && (
+                    {context.form.items.map((item, i) => {
+                        return shouldFormItemDisplay(item, context.params) && (
                             <Fragment key={item.key}>
-                                <Cell role="gridcell" aria-rowindex={i + 2} aria-colindex={1}>
+                                <Cell role="gridcell" aria-rowindex={i + 1} aria-colindex={1}>
                                     <LabelWithDesc label={item.title} description={item.description} />
                                 </Cell>
-                                <Cell role="gridcell" aria-rowindex={i + 2} aria-colindex={2}>
+                                <Cell role="gridcell" aria-rowindex={i + 1} aria-colindex={2}>
                                     <RenderFormItem
                                         item={item}
                                         onChange={(val) => context.updateParam(item.key, val)}
-                                        value={context.allParams[context.algoName][item.key]}
+                                        value={context.params[item.key]}
                                     />
                                 </Cell>
                             </Fragment>

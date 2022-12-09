@@ -24,7 +24,7 @@ export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) =>
     const { item, onChange, value } = props;
     switch (item.renderType) {
         case 'text':
-            return <TextField label={item.title} value={value} onChange={(e, v) => onChange(v)} />;
+            return <TextField /*label={item.title}*/ value={value} onChange={(e, v) => onChange(v)} />;
         case 'dropdown':
             return (
                 <Dropdown
