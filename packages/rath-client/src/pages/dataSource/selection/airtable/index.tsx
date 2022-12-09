@@ -4,6 +4,7 @@ import intl from 'react-intl-universal'
 import { logDataImport } from '../../../../loggers/dataImport';
 import { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { transformRawDataService } from '../../utils';
+import { DataSourceTag, IDBMeta } from '../../../../utils/storage';
 import { fetchAllRecordsFromAirTable } from './utils';
 
 
@@ -11,7 +12,7 @@ interface AirTableSourceProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: string, tag: DataSourceTag, withHistory?: IDBMeta | undefined) => void;
 }
 const AirTableSource: React.FC<AirTableSourceProps> = (props) => {
     const { onClose, onDataLoaded, onLoadingFailed, onStartLoading } = props;
@@ -33,7 +34,7 @@ const AirTableSource: React.FC<AirTableSourceProps> = (props) => {
             .then((data) => transformRawDataService(data))
             .then((ds) => {
                 const name = `airtable-${tableName}-${viewName}`;
-                onDataLoaded(ds.fields, ds.dataSource, name);
+                onDataLoaded(ds.fields, ds.dataSource, name, DataSourceTag.AIR_TABLE);
                 logDataImport({
                     dataType: 'AirTable',
                     fields: ds.fields,

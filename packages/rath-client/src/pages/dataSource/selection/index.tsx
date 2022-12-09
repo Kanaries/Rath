@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { Modal, ChoiceGroup, IconButton, ProgressIndicator } from '@fluentui/react';
-import { useId } from '@fluentui/react-hooks';
 import intl from 'react-intl-universal';
 import { IDataSourceType } from '../../../global';
 import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useDataSourceTypeOptions } from '../config';
 import DataLoadingStatus from '../dataLoadingStatus';
+import type { DataSourceTag, IDBMeta } from '../../../utils/storage';
 import FileData from './file';
 import DemoData from './demo';
 import RestfulData from './restful';
 import OLAPData from './olap';
-import Local from './local';
+import HistoryPanel from './history';
 import DatabaseData from './database/';
 import AirTableSource from './airtable';
 
@@ -20,7 +20,7 @@ interface SelectionProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name?: string, tag?: DataSourceTag | undefined, withHistory?: IDBMeta | undefined) => void;
     onDataLoading: (p: number) => void;
     setLoadingAnimation: (on: boolean) => void;
 }
@@ -28,14 +28,12 @@ interface SelectionProps {
 const Selection: React.FC<SelectionProps> = props => {
     const { show, onClose, onDataLoaded, loading, onStartLoading, onLoadingFailed, onDataLoading, setLoadingAnimation } = props;
 
-    const [dataSourceType, setDataSourceType] = useState<IDataSourceType>(IDataSourceType.DEMO);
+    const [dataSourceType, setDataSourceType] = useState<IDataSourceType>(IDataSourceType.LOCAL);
     const dsTypeOptions = useDataSourceTypeOptions();
-
-    const dsTypeLabelId = useId('dataSourceType');
 
     const formMap: Record<IDataSourceType, JSX.Element> = {
         [IDataSourceType.FILE]: (
-            <FileData onDataLoading={onDataLoading} onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+            <FileData onDataLoading={onDataLoading} onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} toggleLoadingAnimation={setLoadingAnimation} />
         ),
         [IDataSourceType.DEMO]: (
             <DemoData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
@@ -47,7 +45,7 @@ const Selection: React.FC<SelectionProps> = props => {
             <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
         ),
         [IDataSourceType.LOCAL]: (
-            <Local onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+            <HistoryPanel onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} />
         ),
         [IDataSourceType.DATABASE]: (
             <DatabaseData onClose={onClose} onDataLoaded={onDataLoaded} setLoadingAnimation={setLoadingAnimation} />
@@ -72,7 +70,6 @@ const Selection: React.FC<SelectionProps> = props => {
                             setDataSourceType(option.key as IDataSourceType);
                         }
                     }}
-                    ariaLabelledBy={dsTypeLabelId}
                 />
                 {loading && dataSourceType !== IDataSourceType.FILE && <ProgressIndicator description="loading" />}
                 {loading && dataSourceType === IDataSourceType.FILE && <DataLoadingStatus />}

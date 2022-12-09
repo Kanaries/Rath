@@ -13,10 +13,8 @@ const AccountDiv = styled.div`
         width: 100%;
         display: flex;
         flex-direction: column;
-        align-items: center;
         margin-bottom: 20px;
-        padding-left: 10px;
-        padding-top: 10px;
+        padding-left: 2em;
         .label {
             font-weight: 600;
             font-size: 14px;
@@ -26,20 +24,14 @@ const AccountDiv = styled.div`
             -webkit-font-smoothing: antialiased;
         }
         .account {
+            display: flex;
+            flex-direction: column;
             width: 100%;
-            > span {
-                width: 100%;
+            > .label {
+                margin-bottom: 1em;
             }
-            > span:first-child {
-                display: flex;
-                justify-content: space-between;
-                height: 35px;
-                line-height: 35px;
-                margin-bottom: 3px;
-            }
-            > span:last-child {
-                height: 35px;
-                line-height: 35px;
+            > button {
+                width: max-content;
             }
         }
         .phone {
@@ -100,23 +92,20 @@ function Account() {
             ) : (
                 <div>
                     <div className="account">
-                        <span>
-                            <span className="label">Account</span>
-                            {userName ? (
-                                <PrimaryButton
-                                    className="ml-2"
-                                    onClick={() => {
-                                        commonStore.commitLogout()
-                                    }}
-                                >
-                                    {intl.get('login.signOut')}
-                                </PrimaryButton>
-                            ) : (
-                                <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>
-                                    {intl.get('login.signIn')}
-                                </PrimaryButton>
-                            )}
-                        </span>
+                        <span className="label">Account</span>
+                        {userName ? (
+                            <PrimaryButton
+                                onClick={() => {
+                                    commonStore.commitLogout()
+                                }}
+                            >
+                                {intl.get('login.signOut')}
+                            </PrimaryButton>
+                        ) : (
+                            <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>
+                                {intl.get('login.signIn')}
+                            </PrimaryButton>
+                        )}
                         {userName && <TextField value={userName || ''} disabled={true} />}
                     </div>
                     {userName && (

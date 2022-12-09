@@ -41,7 +41,7 @@ RATH 是数据分析和可视化工具（如 Tableau）的开源替代品。主�
 - 发现数据规律，揭示数据的内在联系和因果关系
 - 使用增强分析引擎自动化你的探索性数据分析（EDA）流程
 
-<img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github_readme.gif" alt="GitHub ReadMe Demo"/>
+<a href="https://kanaries.net"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/feature-demo.gif" alt="RATH 功能 demo"></a>
 
 ## 快速上手RATH
 
@@ -97,50 +97,41 @@ yarn workspace rath-client start
 
 ## 功能截图
 
-### 导入数据
+### 导入数据源
 
-导入数据源:
+<a href="https://docs.kanaries.net/zh/data-profiling#导入数据"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/import-data-from-selected-data-source.gif" alt="导入数据源"></a>
 
-![导入数据源](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/datasource-01-zh.png)
+### 浏览数据视图
 
-浏览数据视图:
+<a href="https://docs.kanaries.net/zh/data-profiling#数据剖析"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/view-statistics-data-source.gif" alt="浏览数据视图"></a>
 
-![浏览数据视图](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/datasource-02-zh.png)
+### 一键全自动分析，并生成可视化视图
 
-### 自动分析
+<a href="https://docs.kanaries.net/zh/mega-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/one-click-automated-data-analysis-visualization.gif" alt="RATH全自动分析"></a>
 
-使用RATH一键全自动分析：
+### 半自动探索
 
-![一键全自动分析](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-mega-auto-01-zh.png)
+RATH作为数据分析的智能助手，通过AI学习给出提示，协助数据分析师探索数据。
+分析师提供输入，AI智能学习，给出分析：
 
-生成联想视图：
-
-![联想视图](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-asso-01-zh.png)
-
-### 半自动分析
-
-RATH作为数据分析的智能助手，通过AI学习给出提示，协助数据分析师探索数据
-
-分析师提供输入：
-![分析师提供输入](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-semi-02-zh.png)
-
-AI智能学习，给出分析：
-![AI智能学习，给出分析](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-semi-01-zh.png)
+<a href="https://docs.kanaries.net/zh/semi-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/rath-data-analysis-ai-copilot.gif" alt="RATH半自动探索"></a>
 
 ### 自助分析 （类Tableau）
-![RATH自助分析](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-gw-01-zh.png)
 
-![RATH自助分析](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/1.0.0/rath-gw-02-zh.png)
+<a href="https://docs.kanaries.net/zh/semi-auto-data-exploration#自助分析"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/manually-explore-data-tableau-ui.gif" alt="RATH自助分析"></a>
 
-> 手动分析同时也是一个独立的模块。你可以把它嵌入到你自己的APP内。更多参考位于`packages/graphic-walker/README.md`的README文档
+> 自助分析同时也是一个独立的模块。你可以把它嵌入到你自己的APP内。更多参考位于`packages/graphic-walker/README.md`的README文档
 >
 >安装方法：
 >```bash
 >yarn add @kanaries/graphic-walker
 ># or
->
 >npm i --save @kanaries/graphic-walker
 >```
+
+### 数据绘板，以绘画的方式完成数据分析工作流
+
+<a href="https://docs.kanaries.net/zh/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="数据绘板"></a>
 
 ## 支持数据库
 

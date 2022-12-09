@@ -3,7 +3,7 @@ import produce, { Draft } from 'immer';
 import intl from 'react-intl-universal';
 import { CleanMethod } from '../interfaces';
 import { notify } from '../components/error';
-import { getServerUrl } from '../utils/user';
+import { getMainServerUrl } from '../utils/user';
 import { request } from '../utils/request';
 
 /**
@@ -56,7 +56,7 @@ export const useCleanMethodList = function (): typeof cleanMethodList {
 };
 
 async function sendCertMail(email: string) {
-    const url = getServerUrl('/api/sendMailCert');
+    const url = getMainServerUrl('/api/sendMailCert');
     // TODO: [feat] email format check
     const res = await request.post<{ email: string }, string>(url, { email });
     if (res) {
@@ -66,7 +66,7 @@ async function sendCertMail(email: string) {
 }
 
 async function sendCertPhone(phone: string) {
-    const url = getServerUrl('/api/sendPhoneCert');
+    const url = getMainServerUrl('/api/sendPhoneCert');
     const res = await request.post<{ phone: string }, string>(url, { phone });
     if (res) {
         // console.log("message sent success");

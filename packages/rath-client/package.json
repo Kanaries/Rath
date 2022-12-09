@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.10.4",
     "@fluentui/font-icons-mdl2": "^8.4.13",
     "@fluentui/react": "^8.94.4",
+    "@fluentui/react-file-type-icons": "^8.8.3",
     "@fluentui/react-hooks": "^8.6.11",
     "@kanaries/graphic-walker": "0.2.8",
     "@kanaries/loa": "^0.0.16",
@@ -46,7 +47,8 @@
     "vega-scenegraph": "4.10.1-kanaries-patch",
     "visual-insights": "^0.12.3",
     "web-vitals": "^0.2.4",
-    "worker-loader": "^3.0.7"
+    "worker-loader": "^3.0.7",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.8",

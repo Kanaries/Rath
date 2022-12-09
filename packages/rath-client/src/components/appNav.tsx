@@ -6,11 +6,13 @@ import styled from 'styled-components';
 
 import { PIVOT_KEYS } from '../constants';
 import { useGlobalStore } from '../store';
+import LoginInfo from '../pages/loginInfo';
 import useHotKey from '../hooks/use-hotkey';
 import UserSetting from './userSettings';
 
 const NavContainer = styled.div`
-    height: 100%;
+    height: 100vh;
+    overflow: hidden auto;
     /* display: relative; */
     position: relative;
     /* flex-direction: vertical; */
@@ -20,6 +22,9 @@ const NavContainer = styled.div`
         /* position: absolute; */
         bottom: 0px;
         /* padding-left: 1em; */
+        flex-grow: 0;
+        flex-shrink: 0;
+        overflow: hidden;
     }
     padding-left: 10px;
     .text-red {
@@ -196,11 +201,12 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     </h1>
                 )}
             </LogoBar>
-            <div className="flex-1">
+            <div style={{ flexGrow: 1, flexShrink: 1 }}>
                 <Nav selectedKey={appKey} groups={groups} />
             </div>
             <div className="nav-footer">
                 <UserSetting />
+                <LoginInfo />
             </div>
         </NavContainer>
     );
