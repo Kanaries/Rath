@@ -60,7 +60,6 @@ Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have
 To get started with RATH, you can:
 - 🚀 [Try RATH now!](https://rath.kanaries.net)
 - 📖 [Read RATH Docs](https://docs.kanaries.net)
-- ⭐️ Give us a star on GitHub
 
 
 **RATH** is an ongoing project, actively being developed and maintained by a group of data scientists, developers and community enthusiasts. We are a group of people who are passionate about creating the next generation of data analytic tools.
