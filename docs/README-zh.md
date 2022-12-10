@@ -1,4 +1,4 @@
-<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> [English](README.md) | 简体中文
+<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> [English](../README.md) | [日本語](./README-jp.md) | 简体中文
 
 <div align="center">
   <br>
