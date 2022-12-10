@@ -1,8 +1,8 @@
-import { getMainServiceUrl } from '../utils/user';
+import { getMainServerUrl } from '../utils/user';
 import { ILoginForm } from './commonStore';
 
 export async function commitLoginService(props: ILoginForm) {
-    const url = getMainServiceUrl('/api/login');
+    const url = getMainServerUrl('/api/login');
     const res = await fetch(url, {
         method: 'POST',
         headers: {

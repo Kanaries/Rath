@@ -5,15 +5,50 @@ import type { IFieldMeta, IMuteFieldBase, IRow } from '../interfaces';
 import type { ICausalStoreSave } from '../store/causalStore/mainStore';
 import type { CausalLinkDirection } from './resolve-causal';
 
+
+export enum DataSourceTag {
+    FILE = '@file',
+    DEMO = '@demo',
+    RESTFUL = '@restful',
+    DATABASE = '@database',
+    OLAP = '@olap',
+    AIR_TABLE = '@air_table',
+}
+
+export enum UserTagGroup {
+    Red,
+    Green,
+    Yellow,
+    Berry,
+    Peach,
+    DarkGreen,
+    Teal,
+    Navy,
+}
+
+export const userTagGroupColors: Record<UserTagGroup, string> = {
+    [UserTagGroup.Red]: '#d13438',
+    [UserTagGroup.Green]: '#13a10e',
+    [UserTagGroup.Yellow]: '#fde300',
+    [UserTagGroup.Berry]: '#c239b3',
+    [UserTagGroup.Peach]: '#ff8c00',
+    [UserTagGroup.DarkGreen]: '#063b06',
+    [UserTagGroup.Teal]: '#00b7c3',
+    [UserTagGroup.Navy]: '#0027b4',
+};
+
 export interface IDBMeta {
     id: string;
     name: string;
     type: 'workspace' | 'dataset';
     createTime: number;
     editTime: number;
+    /** kb */
     size: number;
     rows?: number;
     fields?: IMuteFieldBase[];
+    tag?: DataSourceTag;
+    userTagGroup?: UserTagGroup | undefined;
 }
 
 /** @deprecated */
@@ -100,14 +135,14 @@ export async function deleteStorageByIdInLocal (id: string) {
     await storages.removeItem(id)
 }
 
-export async function getDataStorageList (): Promise<IDBMeta[]> {
+export async function getDataStorageList (): Promise<(IDBMeta & { type: 'dataset' })[]> {
     const metas = localforage.createInstance({
         name: STORAGE_INSTANCE,
         storeName: STORAGES.META
     });
     const keys = await metas.keys();
     const values = await Promise.all(keys.map(itemKey => metas.getItem(itemKey))) as IDBMeta[];
-    return values.filter(v => v.type === 'dataset');
+    return values.filter(v => v.type === 'dataset') as (IDBMeta & { type: 'dataset' })[];
 }
 
 export async function getDataStorageById (id: string): Promise<{ fields: IMuteFieldBase[]; dataSource: IRow[] }> {
@@ -140,7 +175,9 @@ export async function deleteDataStorageById (id: string) {
     await storages.removeItem(id)
 }
 
-export async function setDataStorage(name: string, fields: IMuteFieldBase[], dataSource: IRow[]) {
+export async function setDataStorage(
+    name: string, fields: IMuteFieldBase[], dataSource: IRow[], tag: DataSourceTag, withHistory?: IDBMeta,
+) {
     const time = Date.now();
     const dataString = JSON.stringify(dataSource);
     const metas = localforage.createInstance({
@@ -151,11 +188,12 @@ export async function setDataStorage(name: string, fields: IMuteFieldBase[], dat
         id: name,
         name,
         type: 'dataset',
-        createTime: time,
+        createTime: withHistory?.createTime ?? time,
         editTime: time,
         size: Math.round(dataString.length / 1024),
         rows: dataSource.length,
-        fields
+        fields,
+        tag: withHistory?.tag ?? tag,
     } as IDBMeta)
     const storages = localforage.createInstance({
         name: STORAGE_INSTANCE,
@@ -174,6 +212,18 @@ export async function updateDataStorageMeta(name: string, fields: IMuteFieldBase
         ...oldMeta,
         fields,
         editTime: Date.now()
+    } as IDBMeta)
+}
+
+export async function updateDataStorageUserTagGroup(name: string, userTagGroup: UserTagGroup | undefined) {
+    const metas = localforage.createInstance({
+        name: STORAGE_INSTANCE,
+        storeName: STORAGES.META
+    });
+    const oldMeta = await metas.getItem(name) as IDBMeta;
+    await metas.setItem(name, {
+        ...oldMeta,
+        userTagGroup,
     } as IDBMeta)
 }
 

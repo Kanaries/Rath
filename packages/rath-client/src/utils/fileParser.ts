@@ -35,3 +35,18 @@ export function textLoader (file: File): Promise<string> {
     reader.onerror = reject
   })
 }
+
+export function binaryLoader (file: File): Promise<ArrayBuffer> {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader()
+    reader.readAsArrayBuffer(file)
+    reader.onload = (ev) => {
+      if (ev.target) {
+        resolve(ev.target.result as ArrayBuffer)
+      } else {
+        reject(ev)
+      }
+    }
+    reader.onerror = reject
+  })
+}
