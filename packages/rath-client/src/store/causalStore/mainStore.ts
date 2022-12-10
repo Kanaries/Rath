@@ -7,7 +7,7 @@ import CausalDatasetStore from "./datasetStore";
 import CausalModelStore from "./modelStore";
 import CausalOperatorStore from "./operatorStore";
 import { resolveCausality } from "./pag";
-import { discover, IDiscoveryTask, ITask } from "./service";
+import { discover, IDiscoverResult, IDiscoveryTask, ITask, ITaskRecord } from "./service";
 
 
 export interface ICausalStoreSave {
@@ -139,23 +139,25 @@ export default class CausalStore {
         if (busy) {
             return null;
         }
-        this.operator.toggleRunning();
-        const task = await discover();
-        if (task) {
+        const res = await discover();
+        if (res) {
+            const [taskId, task] = res;
+            const record: ITaskRecord<IDiscoverResult> = {
+                taskId,
+                task,
+                status: 'PENDING',
+                onResolve: result => {
+                    this.model.updateCausalResult(result);
+                },
+                onFinally: () => {
+                    this.pendingTasks = this.pendingTasks.filter(t => t !== task);
+                },
+                progress: 0,
+            };
+            this.operator.addTask(record);
             this.pendingTasks.push(task);
-            task.onprogress(progress => {
-                this.operator.updateTaskProgress(progress);
-            });
-            task.value.then(data => {
-                this.model.updateCausalResult(data);
-            }).finally(() => {
-                this.pendingTasks = this.pendingTasks.filter(t => t !== task);
-                this.operator.toggleRunning();
-            });
-        } else {
-            this.operator.toggleRunning();
         }
-        return task;
+        return res?.[1] ?? null;
     }
 
     public async computeMutualMatrix() {

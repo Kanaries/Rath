@@ -8,7 +8,7 @@ import { IAlgoSchema, makeFormInitParams } from "../../pages/causal/config";
 import { causalService } from "../../pages/causal/service";
 import type { IteratorStorage } from "../../utils/iteStorage";
 import type { DataSourceStore } from "../dataSourceStore";
-import { connectToSession, fetchCausalAlgorithmList, updateDataSource } from "./service";
+import { connectToSession, fetchCausalAlgorithmList, ITaskRecord, updateDataSource } from "./service";
 
 
 export default class CausalOperatorStore {
@@ -18,8 +18,20 @@ export default class CausalOperatorStore {
         || 'http://gateway.kanaries.cn:2080/causal'
     );
 
-    public busy = false;
-    public progress = 0;
+    public get busy() {
+        const task = this.tasks[this.taskIdx];
+        if (!task) {
+            return false;
+        }
+        return task.status === 'PENDING' || task.status === 'RUNNING';
+    }
+    
+    public get progress() {
+        return this.tasks[this.taskIdx]?.progress ?? 0;
+    }
+
+    public tasks: ITaskRecord<any>[] = [];
+    public taskIdx = 0;
 
     protected _causalAlgorithmForm: IAlgoSchema = {};
     public get causalAlgorithmForm(): IAlgoSchema {
@@ -99,12 +111,11 @@ export default class CausalOperatorStore {
             reaction(() => this.sessionId, sessionId => {
                 if (sessionId) {
                     this.updateDataSource();
+                    runInAction(() => {
+                        this.tasks = [];
+                        this.taskIdx = 0;
+                    });
                 }
-            }),
-            reaction(() => this.busy, () => {
-                runInAction(() => {
-                    this.progress = 0;
-                });
             }),
         ];
 
@@ -201,14 +212,60 @@ export default class CausalOperatorStore {
         return false;
     }
 
-    public updateTaskProgress(progress: number) {
-        if (this.busy) {
-            this.progress = progress;
+    public addTask<T = any>(task: ITaskRecord<T>) {
+        const index = this.tasks.findIndex(which => which.taskId === task.taskId);
+        if (index !== -1) {
+            this.tasks.splice(index, 1, task);
+            this.taskIdx = index;
+        } else {
+            this.tasks.push(task);
+            this.taskIdx = this.tasks.length - 1;
+        }
+        task.task.onprogress(progress => {
+            this.updateTaskStatus(task.taskId, 'RUNNING', progress);
+        });
+        task.task.value.then(data => {
+            task.onResolve?.(data);
+            this.updateTaskStatus(task.taskId, 'DONE', 1);
+        }).catch(() => {
+            this.updateTaskStatus(task.taskId, 'FAILED');
+        }).finally(() => {
+            task.onFinally?.();
+        });
+    }
+
+    protected updateTaskStatus(taskId: string, status: ITaskRecord['status'], progress?: ITaskRecord['progress']) {
+        const which = this.tasks.find(which => which.taskId === taskId);
+        if (which) {
+            which.status = status;
+            if (progress !== undefined) {
+                which.progress = progress;
+            }
         }
     }
 
-    public toggleRunning() {
-        this.busy = !this.busy;
+    public switchTask(taskId: string) {
+        const index = this.tasks.findIndex(which => which.taskId === taskId);
+        if (index !== -1) {
+            this.taskIdx = index;
+            return true;
+        }
+        return false;
+    }
+
+    public retryTask(taskId: string) {
+        const which = this.tasks.find(which => which.taskId === taskId);
+        if (which) {
+            const next = which.task.retry();
+            this.addTask({
+                taskId: which.taskId,
+                task: next,
+                status: 'PENDING',
+                onResolve: which.onResolve,
+                onFinally: which.onFinally,
+                progress: 0,
+            });
+        }
     }
 
 }

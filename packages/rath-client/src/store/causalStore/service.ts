@@ -184,6 +184,16 @@ export interface ITask<T = unknown> {
     value: Promise<T>;
     onprogress: (cb: (progress: number) => void) => void;
     abort: (reason?: unknown) => void;
+    retry: () => ITask<T>;
+}
+
+export interface ITaskRecord<T = unknown> {
+    readonly taskId: string;
+    readonly task: ITask<T>;
+    readonly onResolve?: (result: T) => void;
+    readonly onFinally?: () => void;
+    status: ITaskStatus['status'];
+    progress: number;
 }
 
 export interface IDiscoveryTask extends ITask<IDiscoverResult> {}
@@ -197,7 +207,7 @@ const runDiscovery = async (
         tableId: getGlobalStore().causalStore.operator.tableId,
     },
     model: Pick<CausalModelStore, 'assertionsAsPag' | 'functionalDependencies'> = getGlobalStore().causalStore.model,
-): Promise<IDiscoveryTask | null> => {
+): Promise<[string, IDiscoveryTask] | null> => {
     const { fieldMetas: allFields } = getGlobalStore().dataSourceStore;
     const {
         operator: { causalServer, sessionId, causalAlgorithmForm, params, algorithm },
@@ -235,49 +245,53 @@ const runDiscovery = async (
         );
         if (result.success) {
             const { taskId } = result.data;
-            let reject = (() => {}) as (reason?: unknown) => void;
-            let handleProgress: ((progress: number) => void) | null = null;
-            const taskAsPromise = new Promise<IDiscoverResult>((_resolve, _reject) => {
-                let timer: NodeJS.Timeout | null = null;
-                reject = (reason) => {
-                    if (timer !== null) {
-                        clearTimeout(timer);
-                    }
-                    fetch(`${causalServer}/v0.1/s/${sessionId}/task/${taskId}`, { method: 'DELETE' });
-                    _reject(reason);
-                };
-                const query = async () => {
-                    timer = null;
-                    try {
-                        const r = await fetch(`${causalServer}/v0.1/s/${sessionId}/task/${taskId}`, { method: 'GET' });
-                        const d = await r.json() as (
-                            | { success: true; data: ITaskStatus }
-                            | { success: false; message: string }
-                        );
-                        if (d.success) {
-                            const { data } = d;
-                            if (data.status === 'DONE') {
-                                return _resolve(data.result);
-                            } else if (data.status === 'FAILED') {
-                                return _reject(data.message || 'task failed');
-                            }
-                            handleProgress?.(data.progress);
-                            timer = setTimeout(query, PROGRESS_QUERY_SPAN);
-                        } else {
-                            throw new Error(`[Discover Task] Request failed: ${d.message}`);
+            const make = (): IDiscoveryTask => {
+                let reject = (() => {}) as (reason?: unknown) => void;
+                let handleProgress: ((progress: number) => void) | null = null;
+                const taskAsPromise = new Promise<IDiscoverResult>((_resolve, _reject) => {
+                    let timer: NodeJS.Timeout | null = null;
+                    reject = (reason) => {
+                        if (timer !== null) {
+                            clearTimeout(timer);
                         }
-                    } catch (error) {
-                        _reject(error);
-                    }
+                        fetch(`${causalServer}/v0.1/s/${sessionId}/task/${taskId}`, { method: 'DELETE' });
+                        _reject(reason);
+                    };
+                    const query = async () => {
+                        timer = null;
+                        try {
+                            const r = await fetch(`${causalServer}/v0.1/s/${sessionId}/task/${taskId}`, { method: 'GET' });
+                            const d = await r.json() as (
+                                | { success: true; data: ITaskStatus }
+                                | { success: false; message: string }
+                            );
+                            if (d.success) {
+                                const { data } = d;
+                                if (data.status === 'DONE') {
+                                    return _resolve(data.result);
+                                } else if (data.status === 'FAILED') {
+                                    return _reject(data.message || 'task failed');
+                                }
+                                handleProgress?.(data.progress);
+                                timer = setTimeout(query, PROGRESS_QUERY_SPAN);
+                            } else {
+                                throw new Error(`[Discover Task] Request failed: ${d.message}`);
+                            }
+                        } catch (error) {
+                            _reject(error);
+                        }
+                    };
+                    timer = setTimeout(query, PROGRESS_QUERY_SPAN);
+                });
+                return {
+                    value: taskAsPromise,
+                    onprogress: cb => handleProgress = cb,
+                    abort: reject,
+                    retry: make,
                 };
-                timer = setTimeout(query, PROGRESS_QUERY_SPAN);
-            });
-            const handler: IDiscoveryTask = {
-                value: taskAsPromise,
-                onprogress: cb => handleProgress = cb,
-                abort: reject,
             };
-            return handler;
+            const handler = make();
+            return [taskId, handler];
         }
         throw new Error(`Request Failed: ${result.message}`);
     } catch (error) {
@@ -290,7 +304,7 @@ const runDiscovery = async (
     return null;
 };
 
-export const discover = (): Promise<IDiscoveryTask | null> => {
+export const discover = (): Promise<[string, IDiscoveryTask] | null> => {
     return runDiscovery();
 };
 
@@ -306,17 +320,12 @@ export const forceUpdateModel = async (
         { assertionsAsPag: model, functionalDependencies: getGlobalStore().causalStore.model.functionalDependencies }
     );
     if (!task) {
-        return null;
-    }
-    try {
-        const res = await task.value;
-        return res.modelId;
-    } catch (error) {
         notify({
             title: 'Failed to force update causal model',
             type: 'error',
-            content: `${error}`,
+            content: 'task is null',
         });
         return null;
     }
+    return task[0];
 };
