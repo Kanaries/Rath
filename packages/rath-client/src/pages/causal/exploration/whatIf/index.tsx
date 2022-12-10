@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react-lite';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect } from 'react';
 import styled from 'styled-components';
-import { getGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 import AdvancedOptions from './advancedOptions';
 import { useWhatIfProviderAndContext } from './context';
@@ -15,19 +14,23 @@ const Container = styled.div`
 const WhatIf: FC = () => {
     const [DoWhyProvider, context] = useWhatIfProviderAndContext();
     const viewContext = useCausalViewContext();
-    const [expandTargets, setExpandTargets] = useState<string[]>([]);
 
     useEffect(() => {
         viewContext?.setLocalRenderData(null);
-        context.__unsafeForceUploadModelWithOneHotEncoding(expandTargets).then(res => {
-            if (res) {
-                viewContext?.setLocalRenderData({ fields: res[1], pag: res[2] });
-            }
+        viewContext?.addEventListener('nodeDoubleClick', node => {
+            context.toggleExpand(node).then(res => {
+                if (res) {
+                    viewContext?.setLocalRenderData({ fields: res[1], pag: res[2] });
+                    viewContext?.graph?.refresh();
+                } else {
+                    viewContext?.setLocalRenderData(null);
+                }
+            });
         });
-    }, [expandTargets, context, viewContext]);
-
-    (window as any)['what'] = () => getGlobalStore().causalStore.dataset.allFields;
-    (window as any)['exp'] = setExpandTargets;
+        return () => {
+            viewContext?.setLocalRenderData(null);
+        };
+    }, [context, viewContext]);
 
     return (
         <DoWhyProvider>

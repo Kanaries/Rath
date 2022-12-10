@@ -22,6 +22,7 @@ class WhatIfStore {
 
     public busy = false;
 
+    protected expandTargets: string[] = [];
     protected tempModelId: string | null = null;
 
     public readonly destroy: () => void;
@@ -33,6 +34,7 @@ class WhatIfStore {
             conditions: observable.ref,
             predication: observable.ref,
             // @ts-expect-error non-public fields
+            expandTargets: false,
             tempModelId: false,
         });
 
@@ -136,7 +138,7 @@ class WhatIfStore {
         return result;
     }
 
-    public async __unsafeForceUploadModelWithOneHotEncoding(targets: readonly string[]): Promise<[string, readonly IFieldMeta[], readonly PagLink[]] | null> {
+    protected async __unsafeForceUploadModelWithOneHotEncoding(targets: readonly string[]): Promise<[string, readonly IFieldMeta[], readonly PagLink[]] | null> {
         const {
             dataset: { fields, sample },
             model: { mergedPag },
@@ -190,6 +192,17 @@ class WhatIfStore {
         });
 
         return modelId ? [modelId, nextFields, pag] : null;
+    }
+
+    public async toggleExpand(f: Readonly<IFieldMeta>) {
+        if (f.extInfo?.extOpt === 'Non-standard OneHot service') {
+            this.expandTargets = this.expandTargets.filter(fid => fid !== f.extInfo?.extFrom[0]);
+        } else if (!f.extInfo && f.semanticType === 'nominal') {
+            this.expandTargets.push(f.fid);
+        } else {
+            return null;
+        }
+        return this.__unsafeForceUploadModelWithOneHotEncoding(this.expandTargets);
     }
 
 }

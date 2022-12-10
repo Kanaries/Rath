@@ -42,6 +42,7 @@ export const ExplorationOptions = [
 
 type CausalViewEventListeners = {
     nodeClick: (node: Readonly<IFieldMeta>) => void;
+    nodeDoubleClick: (node: Readonly<IFieldMeta>) => void;
 };
 
 class CausalViewStore {
@@ -75,6 +76,7 @@ class CausalViewStore {
 
     protected listeners: { [key in keyof CausalViewEventListeners]: CausalViewEventListeners[key][] } = {
         nodeClick: [],
+        nodeDoubleClick: [],
     };
 
     public graph: IReactiveGraphHandler | null = null;

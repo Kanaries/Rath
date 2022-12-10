@@ -42,13 +42,16 @@ const Table = styled.div`
 `;
 
 const IfPanel: FC = () => {
-    const { causalStore: { dataset: { allFields, fields } } } = useGlobalStore();
+    const { causalStore: { dataset: { fields: causalFields } } } = useGlobalStore();
     const viewContext = useCausalViewContext();
+    const { localData = null } = viewContext ?? {};
+    const { fields: localFields } = localData ?? {};
+    const fields = localFields ?? causalFields;
     const context = useWhatIfContext();
 
     useEffect(() => {
         context?.clearConditions();
-    }, [allFields, context]);
+    }, [fields, context]);
 
     useEffect(() => {
         if (context && viewContext) {
@@ -98,8 +101,8 @@ const IfPanel: FC = () => {
     }, [viewContext, context]);
 
     const getFieldName = useCallback((fid: string): string => {
-        return allFields.find(f => f.fid === fid)?.name ?? fid;
-    }, [allFields]);
+        return fields.find(f => f.fid === fid)?.name ?? fid;
+    }, [fields]);
 
     if (!context) {
         return null;
