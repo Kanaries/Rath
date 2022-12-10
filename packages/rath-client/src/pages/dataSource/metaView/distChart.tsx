@@ -86,6 +86,7 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
 
     useEffect(() => {
         if (chart.current) {
+            const markType = ['quantitative', 'temporal'].includes(semanticType) ? 'area' : 'bar';
             const resultPromise = embed(chart.current, {
                 background: 'rgba(0,0,0,0)',
                 data: {
@@ -98,8 +99,10 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 height,
                 width,
                 mark: {
-                    type: ['quantitative', 'temporal'].includes(semanticType) ? 'area' : 'bar',
-                    opacity: 0.86
+                    type: markType,
+                    opacity: 0.86,
+                    tooltip: true,
+                    interpolate: markType === 'area' ? 'monotone' : undefined
                 },
                 encoding: {
                     x: {

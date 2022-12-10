@@ -43,9 +43,7 @@ const UserSettings: React.FC = () => {
                 <ActionButton
                     text={commonStore.navMode === 'text' ? intl.get('preference.title') : ''}
                     iconProps={{ iconName: 'PlayerSettings' }}
-                    onClick={() => {
-                        commonStore.setShowAnalysisConfig(true);
-                    }}
+                    disabled
                 ></ActionButton>
             </div>
             <div>

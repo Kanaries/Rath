@@ -1,3 +1,5 @@
+const webpack = require('webpack');
+
 // const path = require('path');
 // const { override, babelInclude } = require('customize-cra')
 
@@ -9,32 +11,64 @@
 // )
 
 module.exports = function override(config, env) {
-  // do stuff with the webpack config...
-  config.module.rules.push({
-    test: /\.worker\.js$/,
-    use: {
-      loader: 'worker-loader',
-      options: {
-        inline: 'fallback',
-        filename: '[contenthash].worker.js'
-      },
-    },
-  }, {
-    test: /\.worker\.ts$/,
-    use: [{
-      loader: 'worker-loader',
-      options: {
-        inline: 'fallback',
-        filename: '[contenthash].worker.js'
-      },
-    }, 'ts-loader'],
-  })
-  config.stats = {
-    children: true
-  }
-  config.output.globalObject = 'self'
-  // config.module = config.module || {};
-  // config.module.unknownContextCritical = false
-  return config
-  // return mid_override(config)
+    config.plugins.push(
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+        }),
+    );
+    // do stuff with the webpack config...
+    config.module.rules.push(
+        {
+            test: /\.worker\.js$/,
+            use: {
+                loader: 'worker-loader',
+                options: {
+                    inline: 'fallback',
+                    filename: '[contenthash].worker.js',
+                },
+            },
+        },
+        {
+            test: /\.worker\.ts$/,
+            use: [
+                {
+                    loader: 'worker-loader',
+                    options: {
+                        inline: 'fallback',
+                        filename: '[contenthash].worker.js',
+                    },
+                },
+                'ts-loader',
+            ],
+        }
+    );
+    config.stats = {
+        children: true,
+    };
+    if (config.resolve) {
+        let fallback = {};
+        if (config.resolve.fallback) {
+            fallback = { ...config.resolve.fallback };
+        }
+        fallback.buffer = require.resolve('buffer/');
+        config.resolve = {
+            ...config.resolve,
+            fallback,
+        };
+    } else {
+        config.resolve = {
+            fallback: {
+                buffer: require.resolve('buffer/'),
+            },
+        };
+    }
+    config.resolve.extensions.push('.ts', '.tsx', 'js');
+      config.resolve.fallback = {
+        buffer: require.resolve('buffer')
+      }
+    config.output.globalObject = 'self';
+    // config.module = config.module || {};
+    // config.module.unknownContextCritical = false
+    return config;
+    // return mid_override(config)
 };
