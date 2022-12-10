@@ -19,7 +19,7 @@ export const oneHot = async (dataStorage: IteratorStorage, targets: readonly str
             continue;
         }
         const values = data.map(row => row[fid]);
-        const records = getFreqRange(values).reduce<[string, number][]>((list, [key, freq]) => {
+        const records = getFreqRange(values).reduce<[string | number, number][]>((list, [key, freq]) => {
             const idx = list.findIndex(which => which[0] === key);
             if (idx !== -1) {
                 list[idx][1] += freq;
@@ -37,7 +37,7 @@ export const oneHot = async (dataStorage: IteratorStorage, targets: readonly str
             const _fid = nanoid();
             derivedFields.push({
                 fid: _fid,
-                name: `${f.name || f.fid}::${key.replace(/[\s,.]+/g, '_')}`,
+                name: `${f.name || f.fid}::${`${key}`.replace(/[\s,.]+/g, '_')}`,
                 semanticType: 'nominal',
                 analyticType: 'dimension',
                 extInfo: {

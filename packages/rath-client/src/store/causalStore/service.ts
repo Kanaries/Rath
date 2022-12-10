@@ -80,6 +80,7 @@ export const updateDataSource = async (
                 fields: fields.map(f => ({
                     fid: f.fid,
                     name: f.name,
+                    semanticType: f.semanticType,
                 })),
             }),
         });

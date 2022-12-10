@@ -2,6 +2,7 @@ import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
 import { map, share, Subject, switchAll, throttleTime } from "rxjs";
+import type { IFieldMeta } from "../../../../interfaces";
 import { getGlobalStore } from "../../../../store";
 import { forceUpdateModel } from "../../../../store/causalStore/service";
 import { IAlgoSchema, makeFormInitParams, PagLink } from "../../config";
@@ -135,7 +136,7 @@ class WhatIfStore {
         return result;
     }
 
-    public async __unsafeForceUploadModelWithOneHotEncoding(targets: readonly string[]): Promise<string | null> {
+    public async __unsafeForceUploadModelWithOneHotEncoding(targets: readonly string[]): Promise<[string, readonly IFieldMeta[], readonly PagLink[]] | null> {
         const {
             dataset: { fields, sample },
             model: { mergedPag },
@@ -147,10 +148,24 @@ class WhatIfStore {
             return null;
         }
         const [derivedFields, data] = await oneHot(sample, targets);
+        const nextFields: IFieldMeta[] = fields.slice();
         const derivation = new Map<string, string[]>();
         for (const f of derivedFields) {
             const from = f.extInfo.extFrom[0];
+            const idx = nextFields.findIndex(which => which.fid === from);
+            if (idx !== -1) {
+                nextFields.splice(idx, 1);
+            }
             derivation.set(from, (derivation.get(from) ?? []).concat([f.fid]));
+            nextFields.push({
+                ...f,
+                distribution: [],
+                features: {
+                    entropy: NaN,
+                    maxEntropy: NaN,
+                    unique: NaN,
+                },
+            });
         }
         const pag = mergedPag.reduce<PagLink[]>((list, link) => {
             const srcPro = derivation.get(link.src) ?? [link.src];
@@ -167,14 +182,14 @@ class WhatIfStore {
             }
             return list;
         }, []);
-        
-        const modelId = await forceUpdateModel(data, fields, pag);
+
+        const modelId = await forceUpdateModel(data, nextFields, pag);
 
         runInAction(() => {
             this.tempModelId = modelId;
         });
 
-        return modelId;
+        return modelId ? [modelId, nextFields, pag] : null;
     }
 
 }
@@ -198,3 +213,18 @@ export const useWhatIfProvider = (): FC => {
 };
 
 export const useWhatIfContext = () => useContext(WhatIfContext);
+
+export const useWhatIfProviderAndContext = (): [FC, WhatIfStore] => {
+    const context = useMemo(() => new WhatIfStore(), []);
+
+    useEffect(() => {
+        const ref = context;
+        return () => {
+            ref.destroy();
+        };
+    }, [context]);
+
+    return [useCallback(function WhatIfProvider ({ children }) {
+        return createElement(WhatIfContext.Provider, { value: context }, children);
+    }, [context]), context];
+};

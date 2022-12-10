@@ -66,7 +66,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const { fields } = causalStore;
     const { causality, assertionsAsPag, mutualMatrix } = causalStore.model;
     const viewContext = useCausalViewContext();
-    const { onRenderNode, localWeights, explorationKey } = viewContext ?? {};
+    const { onRenderNode, localWeights, explorationKey, localData = null } = viewContext ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -104,9 +104,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const graphRef = useRef<Graph>();
     const renderData = useRenderData({
         mode,
-        fields,
-        PAG: mode === 'edit' ? assertionsAsPag : causality ?? [],
-        weights: mode === 'edit' ? undefined : localWeights ?? W,
+        fields: localData?.fields ?? fields,
+        PAG: mode === 'edit' ? assertionsAsPag : localData?.pag ?? causality ?? [],
+        weights: mode === 'edit' || localData ? undefined : localWeights ?? W,
         cutThreshold,
         limit,
         renderNode: onRenderNode,

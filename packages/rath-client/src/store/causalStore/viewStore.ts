@@ -3,7 +3,8 @@ import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
 import { Subject, withLatestFrom } from "rxjs";
 import type { IFieldMeta } from "../../interfaces";
-import { IReactiveGraphHandler } from "../../pages/causal/explorer/graph-helper";
+import type { PagLink } from "../../pages/causal/config";
+import type { IReactiveGraphHandler } from "../../pages/causal/explorer/graph-helper";
 import type { GraphNodeAttributes } from "../../pages/causal/explorer/graph-utils";
 import type { IPredictResult, PredictAlgorithm } from "../../pages/causal/predict";
 import type { IRInsightExplainResult } from "../../workers/insight/r-insight.worker";
@@ -45,7 +46,7 @@ type CausalViewEventListeners = {
 
 class CausalViewStore {
 
-    // TODO: 改回下面的
+    // TODO: 改回下面的 auto_vis 两行
     public explorationKey = ExplorationKey.WHAT_IF;
     public graphNodeSelectionMode = NodeSelectionMode.NONE;
 
@@ -65,6 +66,7 @@ class CausalViewStore {
 
     public onRenderNode: ((node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined) | undefined;
     public localWeights: Map<string, Map<string, number>> | undefined;
+    public localData: { fields: readonly IFieldMeta[]; pag: readonly PagLink[] } | null = null;
     public predictCache: {
         id: string; algo: PredictAlgorithm; startTime: number; completeTime: number; data: IPredictResult;
     }[];
@@ -95,6 +97,7 @@ class CausalViewStore {
             onRenderNode: observable.ref,
             localWeights: observable.ref,
             predictCache: observable.shallow,
+            localData: observable.ref,
             graph: false,
             // @ts-expect-error non-public field
             _selectedNodes: observable.ref,
@@ -322,6 +325,10 @@ class CausalViewStore {
 
     public clearPredictResults() {
         this.predictCache = [];
+    }
+
+    public setLocalRenderData(data: CausalViewStore['localData']) {
+        this.localData = data;
     }
 
 }
