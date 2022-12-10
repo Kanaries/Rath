@@ -6,7 +6,7 @@ import type { IFieldMeta } from "../../../../interfaces";
 import { getGlobalStore } from "../../../../store";
 import { forceUpdateModel } from "../../../../store/causalStore/service";
 import { IAlgoSchema, makeFormInitParams, PagLink } from "../../config";
-// import { shouldFormItemDisplay } from "../../dynamicForm";
+import { shouldFormItemDisplay } from "../../dynamicForm";
 import { predicateWhatIf, fetchWhatIfParamSchema, IWhatIfServiceResult } from "./service";
 import { oneHot } from "./utils";
 
@@ -127,17 +127,15 @@ class WhatIfStore {
     protected async predicate(): Promise<IWhatIfServiceResult | null> {
         const algoName = this.algoName;
         const conditions = this.conditions;
-        const result = await predicateWhatIf(conditions, algoName, {}, this.tempModelId ?? getGlobalStore().causalStore.model.modelId);
+        const allParams = this.allParams;
+        if (!this.form || !(algoName in this.allParams)) {
+            return null;
+        }
+        const params = Object.fromEntries(this.form[algoName].items.filter(item => {
+            return shouldFormItemDisplay(item, allParams[algoName]);
+        }).map(item => [item.key, allParams[algoName][item.key]]));
+        const result = await predicateWhatIf(conditions, algoName, params, this.tempModelId ?? getGlobalStore().causalStore.model.modelId);
         return result;
-        // const allParams = this.allParams;
-        // if (!this.form || !(algoName in this.allParams)) {
-        //     return null;
-        // }
-        // const params = Object.fromEntries(this.form[algoName].items.filter(item => {
-        //     return shouldFormItemDisplay(item, allParams[algoName]);
-        // }).map(item => [item.key, allParams[algoName][item.key]]));
-        // const result = await predicateWhatIf(conditions, algoName, params);
-        // return result;
     }
 
     protected async __unsafeForceUploadModelWithOneHotEncoding(targets: readonly string[]): Promise<[string, readonly IFieldMeta[], readonly PagLink[]] | null> {

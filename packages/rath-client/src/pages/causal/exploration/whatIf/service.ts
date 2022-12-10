@@ -36,20 +36,21 @@ export const fetchWhatIfParamSchema = async (): Promise<IAlgoSchema | null> => {
     }
 
     const result = await res.json() as (
-        | { success: true; data: IAlgoSchema }
-        | { success: false; message: string }
+        IAlgoSchema
+        // | { success: true; data: IAlgoSchema }
+        // | { success: false; message: string }
     );
 
-    if (result.success === false) {
-        notify({
-            type: 'error',
-            title: 'Failed to get WhatIf param schema',
-            content: result.message,
-        });
-        return null;
-    }
+    // if (result.success === false) {
+    //     notify({
+    //         type: 'error',
+    //         title: 'Failed to get WhatIf param schema',
+    //         content: result.message,
+    //     });
+    //     return null;
+    // }
 
-    return result.data;
+    return result//.data;
 };
 
 export const predicateWhatIf = async (

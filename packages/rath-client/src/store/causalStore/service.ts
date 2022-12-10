@@ -255,7 +255,8 @@ const runDiscovery = async (
                     const query = async () => {
                         timer = null;
                         try {
-                            const r = await fetch(`${causalServer}/v0.1/s/${sessionId}/task/${taskId}`, { method: 'GET' });
+                            // TODO: 阈值
+                            const r = await fetch(`${causalServer}/v0.1/s/${sessionId}/task/${taskId}?confidence_threshold=${(window as any).ct ?? 0.0001}`, { method: 'GET' });
                             const d = await r.json() as (
                                 | { success: true; data: ITaskStatus }
                                 | { success: false; message: string }
