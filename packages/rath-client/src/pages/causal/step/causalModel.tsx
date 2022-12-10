@@ -128,7 +128,7 @@ const CausalModal: FC = () => {
                     )}
                 />
             </div>
-            <div style={{ flexGrow: 1.4, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flexGrow: 0.4, display: 'flex', flexDirection: 'column' }}>
                 <Exploration ref={listenerRef} />
             </div>
         </Container>

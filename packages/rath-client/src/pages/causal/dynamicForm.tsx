@@ -74,7 +74,7 @@ interface DynamicFormProps {
 const DynamicForm: React.FC<DynamicFormProps> = (props) => {
     const { form, values, onChange } = props;
     return (
-        <table>
+        <table style={{ width: '100%' }}>
             <tbody>
                 {form.items.map((item) => {
                     return shouldFormItemDisplay(item, values) && (

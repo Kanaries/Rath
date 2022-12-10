@@ -49,7 +49,7 @@ export const oneHot = async (dataStorage: IteratorStorage, targets: readonly str
             });
             for (let i = 0; i < derivedTable.length; i += 1) {
                 const flag = derivedTable[i][f.fid] === key ? 1 : 0;
-                derivedTable[i][key] = flag;
+                derivedTable[i][_fid] = flag;
                 derivedTable[i][others] = (derivedTable[i][others] ?? 1) & (1 ^ flag);
             }
         }

@@ -259,7 +259,8 @@ export const useGraphOptions = ({
                 // https://antv-g6.gitee.io/zh/docs/api/graphLayout/fruchterman#layoutcfggpuenabled
                 // 启用 GPU 加速会导致数据更新时视图变化很大
                 gpuEnabled: false,
-                speed: 1,
+                gravity: 5,
+                speed: 5,
                 // for rendering after each iteration
                 tick: () => {
                     graphRef.current?.refreshPositions();

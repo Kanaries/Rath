@@ -208,7 +208,6 @@ const runDiscovery = async (
     },
     model: Pick<CausalModelStore, 'assertionsAsPag' | 'functionalDependencies'> = getGlobalStore().causalStore.model,
 ): Promise<[string, IDiscoveryTask] | null> => {
-    const { fieldMetas: allFields } = getGlobalStore().dataSourceStore;
     const {
         operator: { causalServer, sessionId, causalAlgorithmForm, params, algorithm },
     } = getGlobalStore().causalStore;
@@ -216,10 +215,6 @@ const runDiscovery = async (
         return null;
     }
     const { assertionsAsPag, functionalDependencies } = model;
-    const focusedFields = fields.map(f => {
-        return allFields.findIndex(which => which.fid === f.fid);
-    }).filter(idx => idx !== -1);
-    const inputFields = focusedFields.map(idx => allFields[idx]);
     try {
         const realParams = Object.fromEntries(causalAlgorithmForm[algorithm].items.filter(item => {
             return shouldFormItemDisplay(item, params[algorithm]);
@@ -232,8 +227,8 @@ const runDiscovery = async (
             body: JSON.stringify({
                 algoName: algorithm,
                 tableId,
-                fields: allFields,
-                focusedFields: inputFields.map(f => f.fid),
+                fields: fields,
+                focusedFields: fields.map(f => f.fid),
                 bgKnowledgesPag: assertionsAsPag,
                 funcDeps: functionalDependencies,
                 params: realParams,

@@ -102,7 +102,9 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
     const { causalStore } = useGlobalStore();
     const { fields } = causalStore;
     const { mutualMatrix, condMutualMatrix, causalityRaw } = causalStore.model;
-    const { busy, serverActive, progress, tasks, taskIdx } = causalStore.operator;
+    const { serverActive, tasks, taskIdx } = causalStore.operator;
+    const task = tasks.at(taskIdx);
+    const busy = task?.status === 'PENDING' || task?.status === 'RUNNING';
 
     return (
         <Cont>
@@ -124,8 +126,8 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                 <ProgressContainer
                     style={{
                         backgroundImage: selectedKey === MATRIX_TYPE.causal && busy ? `linear-gradient(to right,
-                            #0078d4 ${0.5 + progress * 99.5}%,
-                            #cdd6d880 ${0.5 + progress * 99.5}%
+                            #0078d4 ${0.5 + task.progress * 99.5}%,
+                            #cdd6d880 ${0.5 + task.progress * 99.5}%
                         )` : undefined,
                     }}
                 >
@@ -151,10 +153,9 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                     />
                 </ProgressContainer>
                 {selectedKey === MATRIX_TYPE.causal && tasks.length > 0 && (
-                    <div>
+                    <Stack tokens={{ childrenGap: 10 }} horizontal>
                         <Dropdown
-                            label="任务队列"
-                            options={tasks.map(task => ({ key: task.taskId, text: `(${task.status} ${task.progress}%) ${task.taskId}` }))}
+                            options={tasks.map(task => ({ key: task.taskId, text: `(${task.status} ${(task.progress * 100).toFixed(0)}%) ${task.taskId}` }))}
                             selectedKey={tasks[taskIdx]?.taskId}
                             onChange={(_, op) => op && causalStore.operator.switchTask(op.key as string)}
                             style={{ width: '14em' }}
@@ -165,7 +166,7 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                                 onClick={() => causalStore.operator.retryTask(tasks[taskIdx].taskId)}
                             />
                         )}
-                    </div>
+                    </Stack>
                 )}
                 {selectedKey === MATRIX_TYPE.causal && (
                     <Dropdown

@@ -14,6 +14,7 @@ export interface IWhatIfServiceRequest {
 
 export interface IWhatIfServiceResult {
     base: { [fid: string]: number };
+    new: { [fid: string]: number };
 }
 
 export const fetchWhatIfParamSchema = async (): Promise<IAlgoSchema | null> => {
@@ -55,6 +56,7 @@ export const predicateWhatIf = async (
     conditions: { [fid: string]: number },
     algoName: string,
     params: IWhatIfServiceRequest['params'],
+    modelId: string | null,
 ): Promise<IWhatIfServiceResult | null> => {
     if (Object.keys(conditions).length === 0) {
         return null;
@@ -62,7 +64,6 @@ export const predicateWhatIf = async (
 
     const { causalStore } = getGlobalStore();
     const { causalServer, sessionId } = causalStore.operator;
-    const { modelId } = causalStore.model;
 
     if (!sessionId || !modelId) {
         return null;
@@ -75,7 +76,18 @@ export const predicateWhatIf = async (
         params,
     };
 
-    const res = await fetch(`${causalServer}/v0.1/${sessionId}/intervene`, {
+    await fetch(`${causalServer}/v0.1/s/${sessionId}/intervene`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            ...payload,
+            do: {},
+        }),
+    });
+
+    const res = await fetch(`${causalServer}/v0.1/s/${sessionId}/intervene`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -105,6 +117,8 @@ export const predicateWhatIf = async (
         });
         return null;
     }
+
+    result.data.base = Object.fromEntries(Object.entries(result.data.new).filter(([key]) => !(key in conditions)).map(([key, value]) => [key, value - result.data.base[key]]));
 
     return result.data;
 };

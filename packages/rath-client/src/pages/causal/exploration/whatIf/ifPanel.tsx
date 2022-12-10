@@ -2,8 +2,8 @@ import { Icon, IconButton, Slider, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, Fragment, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { IFieldMeta } from '../../../../interfaces';
-import { useGlobalStore } from '../../../../store';
+import type { IFieldMeta } from '../../../../interfaces';
+import { getGlobalStore, useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 import { useWhatIfContext } from './context';
 
@@ -75,6 +75,8 @@ const IfPanel: FC = () => {
 
             const WhatIfRenderer: typeof originRenderer = ({ fid, name }) => {
                 const value = context?.conditions[fid] ?? context?.predication[fid];
+                const f = getGlobalStore().causalStore.fields.find(which => which.fid === fid);
+                const canExpand = f?.semanticType === 'nominal' && !f.extInfo;
                 const displayName = name || fid;
                 return value === undefined ? {} : {
                     description: value === 0 ? `${displayName} (+0)` : `${displayName} (${value > 0 ? '+' : '-'}${Math.abs(value).toFixed(2)})`,
@@ -86,6 +88,12 @@ const IfPanel: FC = () => {
                             value > 0 ? '#da3b01' : '#0027b4'
                         }`,
                         lineWidth: fid in (context?.conditions ?? {}) ? 2 : 1,
+                        cursor: canExpand ? 'pointer' : 'default',
+                    },
+                    labelCfg: {
+                        style: {
+                            stroke: canExpand ? '#ff8c00' : undefined,
+                        },
                     },
                 };
             };
@@ -98,7 +106,7 @@ const IfPanel: FC = () => {
                 viewContext.graph?.update();
             };
         }
-    }, [viewContext, context]);
+    }, [viewContext, context, context?.conditions, context?.predication]);
 
     const getFieldName = useCallback((fid: string): string => {
         return fields.find(f => f.fid === fid)?.name ?? fid;
@@ -150,7 +158,9 @@ const IfPanel: FC = () => {
                     );
                 })}
                 {Object.keys(predication).map((fid, i) => {
-                    const value = predication[fid];
+                    let value = predication[fid];
+                    value = 1 / (1 + Math.exp(-value));
+                    value = value * 4 - 2;
                     const shadowSize = 2 + Math.abs(value) * 4;
                     return (
                         <Fragment key={fid}>

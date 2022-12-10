@@ -81,10 +81,6 @@ export default class CausalOperatorStore {
         });
 
         const mobxReactions = [
-            reaction(() => dataSourceStore.fieldMetas, () => {
-                // fieldMetas update whenever cleanedData update
-                this.updateDataSource();
-            }),
             // this reaction requires `makeAutoObservable` to be called before
             reaction(() => this._causalAlgorithmForm, form => {
                 runInAction(() => {
@@ -112,10 +108,18 @@ export default class CausalOperatorStore {
                 if (sessionId) {
                     this.updateDataSource();
                     runInAction(() => {
-                        this.tasks = [];
-                        this.taskIdx = 0;
+                        this.tableId = null;
                     });
                 }
+            }),
+            reaction(() => this.tableId, () => {
+                runInAction(() => {
+                    for (const task of this.tasks) {
+                        task.task.abort('Table ID changed');
+                    }
+                    this.tasks = [];
+                    this.taskIdx = 0;
+                });
             }),
         ];
 
@@ -187,7 +191,7 @@ export default class CausalOperatorStore {
         return res;
     }
 
-    protected async updateDataSource() {
+    public async updateDataSource() {
         const { sample: data, allFields: fields } = getGlobalStore().causalStore.dataset;
         const dataId = nanoid(12);
         this.dataId = dataId;

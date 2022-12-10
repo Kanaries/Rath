@@ -1,6 +1,7 @@
 import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { combineLatest, from, map, Observable, share, Subject, switchAll, throttleTime } from "rxjs";
+import { getGlobalStore } from "..";
 import type { IFieldMeta, IFilter, ICol, IRow } from "../../interfaces";
 import { filterDataService } from "../../services";
 import { IteratorStorage, IteratorStorageMetaInfo } from "../../utils/iteStorage";
@@ -188,6 +189,7 @@ export default class CausalDatasetStore {
             this.sampleMetaInfo$.subscribe(meta => {
                 runInAction(() => {
                     this.sampleSize = meta.length;
+                    getGlobalStore().causalStore.operator.updateDataSource();
                 });
             }),
 
