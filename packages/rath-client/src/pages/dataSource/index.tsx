@@ -57,7 +57,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             return (
                 <UsedButton
                     style={MARGIN_LEFT}
-                    iconProps={{ iconName: 'ExcelDocument' }}
+                    iconProps={{ iconName: 'SearchData' }}
                     text={text}
                     onClick={() => {
                         dataSourceStore.setShowDataImportSelection(true);

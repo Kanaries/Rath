@@ -162,18 +162,6 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     ]),
                 },
                 ...getLinks([PIVOT_KEYS.support]),
-                // ...pivotList.map(item => {
-                //     return {
-                //         url: `#${item.itemKey}`,
-                //         key: item.itemKey,
-                //         name: item.title,
-                //         forceAnchor: true,
-                //         onClick (e: any) {
-                //             e.preventDefault();
-                //             commonStore.setAppKey(item.itemKey)
-                //         }
-                //     }
-                // })
             ],
         },
     ];

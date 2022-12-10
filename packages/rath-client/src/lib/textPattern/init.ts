@@ -134,13 +134,13 @@ function initPatternTree(): IPatternNode {
     return root;
 }
 
-interface ITextSelection {
+export interface ITextSelection {
     str: string;
     startIndex: number;
     endIndex: number;
 }
 
-interface ITextPattern {
+export interface ITextPattern {
     ph: RegExp;
     pe: RegExp;
     selection: RegExp;
@@ -398,5 +398,35 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern 
         pe,
         selection: uniques[0].pattern,
         pattern: new RegExp(`${ph.source}(?<selection>${uniques[0].pattern.source})${pe.source}`)
+    }
+}
+
+type IExtractResult = {
+    missing: false;
+    matchedText: string;
+    matchPos: [number, number];
+} | {
+    missing: true
+}
+export function extractSelection (selectionPattern: ITextPattern, text: string): IExtractResult {
+    if (text.length === 0) return { missing: true }
+    const { pattern } = selectionPattern;
+    const patternForIndices = new RegExp(pattern.source, pattern.flags + 'd');
+    const match = patternForIndices.exec(text);
+    // @ts-ignore
+    if (match && match.indices) {
+        // @ts-ignore
+        const matchedPos: [number, number] = match.indices.groups['selection'];
+        if (!matchedPos) return { missing: true }
+        const startPos = matchedPos[0]
+        const endPos = matchedPos[1]
+        return {
+            missing: false,
+            matchedText: text.slice(startPos, endPos),
+            matchPos: matchedPos
+        }
+    }
+    return {
+        missing: true
     }
 }

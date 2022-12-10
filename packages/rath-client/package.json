@@ -76,6 +76,7 @@
     "start": "react-app-rewired start",
     "build": "GENERATE_SOURCEMAP=false react-app-rewired build",
     "build2": "react-app-rewired --max_old_space_size=4096 build",
+    "buildForAnalysis": "react-app-rewired build",
     "test": "jest -c ./jest.config.js --passWithNoTests --no-cache",
     "eject": "react-app-rewired eject",
     "analyze": "source-map-explorer 'build/static/js/*.js'",
