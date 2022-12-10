@@ -23,32 +23,67 @@ export const fetchWhatIfParamSchema = async (): Promise<IAlgoSchema | null> => {
         return null;
     }
 
-    const res = await fetch(`${causalServer}/v0.1/form/intervention`, { method: 'GET' });
+    // TODO: remove this mock
+    return {
+        algoA: {
+            title: 'A',
+            items: [
+                {
+                    key: 'a',
+                    renderType: 'text',
+                    title: 'param a',
+                    defaultValue: 4,
+                    dataType: 'number',
+                },
+            ],
+        },
+        algoB: {
+            title: 'B',
+            items: [
+                {
+                    key: 'b',
+                    renderType: 'text',
+                    title: 'param b',
+                    defaultValue: 123,
+                    dataType: 'number',
+                },
+                {
+                    key: 'c',
+                    renderType: 'text',
+                    title: 'param c',
+                    defaultValue: -1,
+                    dataType: 'number',
+                },
+            ],
+        },
+    };
 
-    if (!res.ok) {
-        notify({
-            type: 'error',
-            title: 'WhatIf Error',
-            content: res.statusText,
-        });
-        return null;
-    }
+    // const res = await fetch(`${causalServer}/v0.1/form/intervention`, { method: 'GET' });
 
-    const result = await res.json() as (
-        | { success: true; data: IAlgoSchema }
-        | { success: false; message: string }
-    );
+    // if (!res.ok) {
+    //     notify({
+    //         type: 'error',
+    //         title: 'WhatIf Error',
+    //         content: res.statusText,
+    //     });
+    //     return null;
+    // }
 
-    if (result.success === false) {
-        notify({
-            type: 'error',
-            title: 'Failed to get WhatIf param schema',
-            content: result.message,
-        });
-        return null;
-    }
+    // const result = await res.json() as (
+    //     | { success: true; data: IAlgoSchema }
+    //     | { success: false; message: string }
+    // );
 
-    return result.data;
+    // if (result.success === false) {
+    //     notify({
+    //         type: 'error',
+    //         title: 'Failed to get WhatIf param schema',
+    //         content: result.message,
+    //     });
+    //     return null;
+    // }
+
+    // return result.data;
 };
 
 export const predicateWhatIf = async (
@@ -59,52 +94,63 @@ export const predicateWhatIf = async (
     if (Object.keys(conditions).length === 0) {
         return null;
     }
-
-    const { causalStore } = getGlobalStore();
-    const { causalServer, sessionId } = causalStore.operator;
-    const { modelId } = causalStore.model;
-
-    if (!sessionId || !modelId) {
-        return null;
+    
+    // TODO: remove this mock
+    const { causalStore: { dataset: { fields } } } = getGlobalStore();
+    await new Promise<void>(resolve => setTimeout(resolve, 4 + 20 * Math.random()));
+    const res: { [fid: string]: number } = {};
+    for (const { fid } of fields.filter(f => !(f.fid in conditions))) {
+        res[fid] = Math.random() * 4 - 2;
     }
-
-    const payload: IWhatIfServiceRequest = {
-        algoName,
-        modelId,
-        do: conditions,
-        params,
+    return {
+        base: res,
     };
 
-    const res = await fetch(`${causalServer}/v0.1/${sessionId}/intervene`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-    });
+    // const { causalStore } = getGlobalStore();
+    // const { causalServer, sessionId } = causalStore.operator;
+    // const { modelId } = causalStore.model;
 
-    if (!res.ok) {
-        notify({
-            type: 'error',
-            title: 'WhatIf Error',
-            content: res.statusText,
-        });
-        return null;
-    }
+    // if (!sessionId || !modelId) {
+    //     return null;
+    // }
 
-    const result = await res.json() as (
-        | { success: true; data: IWhatIfServiceResult }
-        | { success: false; message: string }
-    );
+    // const payload: IWhatIfServiceRequest = {
+    //     algoName,
+    //     modelId,
+    //     do: conditions,
+    //     params,
+    // };
 
-    if (result.success === false) {
-        notify({
-            type: 'error',
-            title: 'WhatIf Error',
-            content: result.message,
-        });
-        return null;
-    }
+    // const res = await fetch(`${causalServer}/v0.1/${sessionId}/intervene`, {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify(payload),
+    // });
 
-    return result.data;
+    // if (!res.ok) {
+    //     notify({
+    //         type: 'error',
+    //         title: 'WhatIf Error',
+    //         content: res.statusText,
+    //     });
+    //     return null;
+    // }
+
+    // const result = await res.json() as (
+    //     | { success: true; data: IWhatIfServiceResult }
+    //     | { success: false; message: string }
+    // );
+
+    // if (result.success === false) {
+    //     notify({
+    //         type: 'error',
+    //         title: 'WhatIf Error',
+    //         content: result.message,
+    //     });
+    //     return null;
+    // }
+
+    // return result.data;
 };

@@ -2,9 +2,12 @@ import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
 import { map, share, Subject, switchAll, throttleTime } from "rxjs";
-import { IAlgoSchema, makeFormInitParams } from "../../config";
+import { getGlobalStore } from "../../../../store";
+import { forceUpdateModel } from "../../../../store/causalStore/service";
+import { IAlgoSchema, makeFormInitParams, PagLink } from "../../config";
 import { shouldFormItemDisplay } from "../../dynamicForm";
 import { predicateWhatIf, fetchWhatIfParamSchema, IWhatIfServiceResult } from "./service";
+import { oneHot } from "./utils";
 
 
 class WhatIfStore {
@@ -18,6 +21,8 @@ class WhatIfStore {
 
     public busy = false;
 
+    protected tempModelId: string | null = null;
+
     public readonly destroy: () => void;
 
     constructor() {
@@ -26,6 +31,8 @@ class WhatIfStore {
             allParams: observable.ref,
             conditions: observable.ref,
             predication: observable.ref,
+            // @ts-expect-error non-public fields
+            tempModelId: false,
         });
 
         const predicateFlag$ = new Subject<void>();
@@ -121,24 +128,53 @@ class WhatIfStore {
         if (!this.form || !(algoName in this.allParams)) {
             return null;
         }
-        // const beginTime = Date.now();
         const params = Object.fromEntries(this.form[algoName].items.filter(item => {
             return shouldFormItemDisplay(item, allParams[algoName]);
         }).map(item => [item.key, allParams[algoName][item.key]]));
         const result = await predicateWhatIf(conditions, algoName, params);
-        // const endTime = Date.now();
-        if (result) {
-            // console.log({
-            //     beginTime,
-            //     endTime,
-            //     conditions,
-            //     algoName,
-            //     params,
-            //     data: result,
-            // });
-            return result;
+        return result;
+    }
+
+    public async __unsafeForceUploadModelWithOneHotEncoding(targets: readonly string[]): Promise<string | null> {
+        const {
+            dataset: { fields, sample },
+            model: { mergedPag },
+        } = getGlobalStore().causalStore;
+        if (targets.length === 0) {
+            runInAction(() => {
+                this.tempModelId = null;
+            });
+            return null;
         }
-        return null;
+        const [derivedFields, data] = await oneHot(sample, targets);
+        const derivation = new Map<string, string[]>();
+        for (const f of derivedFields) {
+            const from = f.extInfo.extFrom[0];
+            derivation.set(from, (derivation.get(from) ?? []).concat([f.fid]));
+        }
+        const pag = mergedPag.reduce<PagLink[]>((list, link) => {
+            const srcPro = derivation.get(link.src) ?? [link.src];
+            const tarPro = derivation.get(link.tar) ?? [link.tar];
+            for (const src of srcPro) {
+                for (const tar of tarPro) {
+                    list.push({
+                        src,
+                        src_type: link.src_type,
+                        tar,
+                        tar_type: link.tar_type,
+                    });
+                }
+            }
+            return list;
+        }, []);
+        
+        const modelId = await forceUpdateModel(data, fields, pag);
+
+        runInAction(() => {
+            this.tempModelId = modelId;
+        });
+
+        return modelId;
     }
 
 }

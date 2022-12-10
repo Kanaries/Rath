@@ -1,9 +1,10 @@
 import { getGlobalStore } from "..";
 import { notify } from "../../components/error";
-import type { IFieldMeta } from "../../interfaces";
-import type { IAlgoSchema } from "../../pages/causal/config";
+import type { IRawField, IRow } from "../../interfaces";
+import type { IAlgoSchema, PagLink } from "../../pages/causal/config";
 import { shouldFormItemDisplay } from "../../pages/causal/dynamicForm";
 import type { IteratorStorage } from "../../utils/iteStorage";
+import type CausalModelStore from "./modelStore";
 
 
 export const connectToSession = async (onClose: (reason: Error) => void): Promise<string | null> => {
@@ -53,7 +54,7 @@ export const connectToSession = async (onClose: (reason: Error) => void): Promis
 };
 
 export const updateDataSource = async (
-    data: IteratorStorage, fields: readonly IFieldMeta[], prevTableId: string | null
+    data: IteratorStorage | readonly IRow[], fields: readonly IRawField[], prevTableId: string | null
 ): Promise<string | null> => {
     const { causalStore: { operator: { sessionId, causalServer } } } = getGlobalStore();
     if (!sessionId) {
@@ -67,7 +68,7 @@ export const updateDataSource = async (
         console.warn('Delete session table error', error);
     }
     try {
-        const dataSource = await data.getAll();
+        const dataSource = Array.isArray(data) ? data as readonly IRow[] : await (data as IteratorStorage).getAll();
         const res = await fetch(`${causalServer}/v0.1/s/${sessionId}/uploadTable`, {
             method: 'POST',
             headers: {
@@ -145,7 +146,7 @@ interface IDiscoverData {
      */
     orig_matrix?: number[][];
     matrix: number[][]; // PAG result
-    fields: IFieldMeta[];
+    fields: IRawField[];
 }
     
 export interface IDiscoverResult {
@@ -186,32 +187,32 @@ export interface ITask<T = unknown> {
 
 export interface IDiscoveryTask extends ITask<IDiscoverResult> {}
 
-export const discover = async (): Promise<IDiscoveryTask | null> => {
-    const { causalStore: {
-        operator: { causalServer, sessionId, tableId, algorithm, causalAlgorithmForm, params: options },
-        dataset: { fields },
-        model: { functionalDependencies, assertionsAsPag }
-    } } = getGlobalStore();
-    if (!algorithm) {
-        notify({
-            title: 'Causal Discovery Error',
-            type: 'error',
-            content: 'Algorithm is not chosen yet.',
-        });
-        return null;
-    }
-    if (!sessionId || !tableId) {
-        return null;
-    }
+const runDiscovery = async (
+    { fields, tableId }: {
+        fields: readonly IRawField[],
+        tableId: string | null,
+    } = {
+        fields: getGlobalStore().causalStore.dataset.fields,
+        tableId: getGlobalStore().causalStore.operator.tableId,
+    },
+    model: Pick<CausalModelStore, 'assertionsAsPag' | 'functionalDependencies'> = getGlobalStore().causalStore.model,
+): Promise<IDiscoveryTask | null> => {
     const { fieldMetas: allFields } = getGlobalStore().dataSourceStore;
+    const {
+        operator: { causalServer, sessionId, causalAlgorithmForm, params, algorithm },
+    } = getGlobalStore().causalStore;
+    if (sessionId === null || tableId === null || algorithm === null) {
+        return null;
+    }
+    const { assertionsAsPag, functionalDependencies } = model;
     const focusedFields = fields.map(f => {
         return allFields.findIndex(which => which.fid === f.fid);
     }).filter(idx => idx !== -1);
     const inputFields = focusedFields.map(idx => allFields[idx]);
     try {
-        const params = Object.fromEntries(causalAlgorithmForm[algorithm].items.filter(item => {
-            return shouldFormItemDisplay(item, options[algorithm]);
-        }).map(item => [item.key, options[algorithm][item.key]]));
+        const realParams = Object.fromEntries(causalAlgorithmForm[algorithm].items.filter(item => {
+            return shouldFormItemDisplay(item, params[algorithm]);
+        }).map(item => [item.key, params[algorithm][item.key]]));
         const res = await fetch(`${causalServer}/v0.1/s/${sessionId}/discover`, {
             method: 'POST',
             headers: {
@@ -224,7 +225,7 @@ export const discover = async (): Promise<IDiscoveryTask | null> => {
                 focusedFields: inputFields.map(f => f.fid),
                 bgKnowledgesPag: assertionsAsPag,
                 funcDeps: functionalDependencies,
-                params,
+                params: realParams,
             }),
         });
         const result = await res.json() as (
@@ -286,4 +287,35 @@ export const discover = async (): Promise<IDiscoveryTask | null> => {
         });
     }
     return null;
+};
+
+export const discover = (): Promise<IDiscoveryTask | null> => {
+    return runDiscovery();
+};
+
+export const forceUpdateModel = async (
+    data: readonly IRow[], fields: readonly IRawField[], model: readonly PagLink[]
+): Promise<string | null> => {
+    const tableId = await updateDataSource(data, fields, null);
+    if (!tableId) {
+        return null;
+    }
+    const task = await runDiscovery(
+        { fields, tableId },
+        { assertionsAsPag: model, functionalDependencies: getGlobalStore().causalStore.model.functionalDependencies }
+    );
+    if (!task) {
+        return null;
+    }
+    try {
+        const res = await task.value;
+        return res.modelId;
+    } catch (error) {
+        notify({
+            title: 'Failed to force update causal model',
+            type: 'error',
+            content: `${error}`,
+        });
+        return null;
+    }
 };

@@ -19,6 +19,7 @@ export type IGeoRole = 'longitude' | 'latitude' | 'none';
 export type FieldExtOptType = (
     | 'dateTimeExpand'
     | `LaTiao.$${string}`
+    | `Non-standard ${string}`
 );
 
 /** Detailed information of a extended field.  */
@@ -38,7 +39,7 @@ export interface IFieldExtInfoBaseDateTime extends IFieldExtInfoBase {
 }
 
 interface IFieldExtInfoBaseLaTiao extends IFieldExtInfoBase {
-    extOpt: `LaTiao.$${string}` | 'dateTimeExpand';
+    extOpt: FieldExtOptType;
     extInfo: any;
 }
 

@@ -1,4 +1,4 @@
-import type { IFieldMeta } from "../../interfaces";
+import type { IFieldMeta, IRawField } from "../../interfaces";
 import { IFunctionalDep, PagLink, PAG_NODE } from "../../pages/causal/config";
 import { CausalModelAssertion, NodeAssert, EdgeAssert } from "./modelStore";
 
@@ -121,7 +121,7 @@ export const transformPagToAssertions = (pag: readonly PagLink[]): CausalModelAs
     }, []);
 };
 
-export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fields: readonly IFieldMeta[]): PagLink[] => {
+export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fields: readonly IRawField[]): PagLink[] => {
     const links: PagLink[] = [];
 
     for (let i = 0; i < causality.length - 1; i += 1) {

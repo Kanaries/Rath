@@ -101,7 +101,7 @@ const HistoryQueue: FC<IHistoryQueueProps> = ({ onDataLoaded, onClose, onLoading
                             break;
                         }
                         default: {
-                            const { type } = /^:is-(?<type>.*)$/.exec(keyword)?.groups ?? {};
+                            const { type } = /^:is-(?<type>(file|demo|restful|database|olap|air_table))$/.exec(keyword)?.groups ?? {};
                             if (type && item.tag) {
                                 if (item.tag.slice(1) !== type) {
                                     return false;

@@ -131,7 +131,7 @@ const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFa
                             break;
                         }
                         default: {
-                            const { type } = /^:is-(?<type>.*)$/.exec(keyword)?.groups ?? {};
+                            const { type } = /^:is-(?<type>(file|demo|restful|database|olap|air_table))$/.exec(keyword)?.groups ?? {};
                             if (type && item.tag) {
                                 if (item.tag.slice(1) !== type) {
                                     return false;
@@ -181,7 +181,7 @@ const HistoryList: FC<IHistoryListProps> = ({ onDataLoaded, onClose, onLoadingFa
 
     return (
         <Group ref={listRef}>
-            {showQueue && (
+            {showQueue && !(search ?? '').split(/ +/).includes(':is-marked') && (
                 <HistoryQueue
                     onDataLoaded={onDataLoaded}
                     onLoadingFailed={onLoadingFailed}
