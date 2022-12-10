@@ -9,6 +9,7 @@
         "hide": "Hide",
         "expand": "Expand",
         "filter": "Filter",
+        "preview": "Preview",
         "semanticType": {
             "nominal": "nominal",
             "ordinal": "ordinal",

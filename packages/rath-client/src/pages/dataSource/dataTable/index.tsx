@@ -9,15 +9,18 @@ import type { IRow } from "../../../interfaces";
 import { intersectPattern } from "../../../lib/textPattern/init";
 import HeaderCell from "./headerCell";
 
-
 const CustomBaseTable = styled(BaseTable)`
-    --header-bgcolor: #fafafa!important;
+    --header-bgcolor: #ffffff !important;
     --bgcolor: rgba(0, 0, 0, 0);
+    --border-color: #f2f2f2;
     .${Classes.tableHeaderCell} {
         position: relative;
     }
     thead{
         vertical-align: top;
+        th{
+            padding: 0px 0px 8px 0px;
+        }
     }
 `;
 
@@ -168,12 +171,16 @@ const DataTable: React.FC = (props) => {
     }
     useEffect(() => {
         if (textPattern?.fid) {
-            dataSourceStore.addExtSuggestions({
-                score: 10.1,
-                type: 'regex_selection',
-                apply: (fid) => dataSourceStore.expandFromRegex(fid, textPattern.pattern)
-            }, textPattern.fid);
+            // dataSourceStore.addExtSuggestions({
+            //     score: 10.1,
+            //     type: 'regex_selection',
+            //     apply: (fid) => dataSourceStore.expandFromRegex(fid, textPattern.pattern)
+            // }, textPattern.fid);
+            dataSourceStore.expandFromRegex(textPattern?.fid, textPattern.pattern)
+        } else {
+            dataSourceStore.clearTextPatternIfExist();
         }
+        
         
     }, [dataSourceStore, textPattern])
 
@@ -234,7 +241,7 @@ const DataTable: React.FC = (props) => {
                                 onTextSelect(f.fid, `${text}`, ele)
                             }}>
                                 {before}
-                                <span {...{ startIndex: before.length }} style={{ backgroundColor: '#FFC107' }}>
+                                <span style={{ backgroundColor: '#b7eb8f' }}>
                                     {text.slice(start, end)}
                                 </span>
                                 {after}
@@ -258,7 +265,7 @@ const DataTable: React.FC = (props) => {
         });
         return {
             style: {
-                backgroundColor: hasEmpty ? "#ffd8bf" : "rgba(0,0,0,0)",
+                backgroundColor: hasEmpty ? "#fff2e8" : "rgba(0,0,0,0)",
             },
         };
     }, [fields])
@@ -283,7 +290,7 @@ const DataTable: React.FC = (props) => {
                             color: 'rgb(0, 120, 212)',
                             backgroundColor: 'rgba(0, 120, 212, 0.12)',
                             // border: '1px solid rgba(0, 120, 212, 0.5)',
-                            margin: '2px 0 1em 0',
+                            margin: '2px 0',
                         },
                     }}
                 >
@@ -300,7 +307,7 @@ const DataTable: React.FC = (props) => {
                         root: {
                             boxSizing: 'border-box',
                             width: 'unset',
-                            margin: '2px 0 1em 0',
+                            margin: '2px 0 0 0',
                         },
                     }}
                 >

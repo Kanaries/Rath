@@ -9,6 +9,7 @@
         "hide": "隐藏",
         "expand": "展开",
         "filter": "筛选",
+        "preview": "预览",
         "semanticType": {
             "nominal": "类别类型",
             "ordinal": "有序类型",

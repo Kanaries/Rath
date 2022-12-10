@@ -784,11 +784,18 @@ export class DataSourceStore {
             })));
         }
     }
+    public clearTextPatternIfExist () {
+        const extRemainFields = this.extFields.filter(f => f.extInfo?.extOpt !== 'LaTiao.$regex');
+        if (extRemainFields.length !== this.extFields.length) {
+            this.extFields = extRemainFields;
+        }
+    }
     public async expandFromRegex (fid: string, pattern: RegExp) {
         const originField = this.allFields.find(f => f.fid === fid);
         if (!originField) {
             return;
         }
+        this.clearTextPatternIfExist();
         const data = await this.rawDataStorage.getAll();
         const values: string[] = data.map(d => `${d[fid]}`);
         const newField: IRawField = {
