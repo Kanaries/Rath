@@ -5,7 +5,7 @@
     <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="120">
    </p>
    <h1 style="font-size:55px">RATH</h1>
-  <strong>Your Open Source Augmented Analytics BI Solution</strong>
+  <strong>Next Generation Open Source Augmented Analytics BI</strong>
 </div>
 <br>
 <div id="header" align="center">
@@ -32,17 +32,17 @@
   <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
     <img src="https://img.shields.io/badge/license-AGPL-brightgreen?style=flat-square" alt="AGPL License">
   </a>
-  <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+  <a href="https://github.com/Kanaries/Rath/stargazers">
     <img src="https://badgen.net/github/stars/kanaries/rath?style=flat-square" alt="RATH GitHub Stars">
   </a>
-  <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+  <a href="https://github.com/Kanaries/Rath/fork">
     <img src="https://badgen.net/github/forks/kanaries/rath?style=flat-square" alt="RATH GitHub Forks">
   </a>
-    <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
-    <img src="https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build?style=flat-square" alt="RATH GitHub Forks">
+    <a href="https://github.com/Kanaries/Rath/actions">
+    <img src="https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build?style=flat-square" alt="RATH GitHub Actions">
   </a>
   </a>
-    <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+    <a href="https://github.com/Kanaries/graphic-walker">
     <img src="https://img.shields.io/npm/v/@kanaries/graphic-walker/latest?label=%40kanaries%2Fgraphic-walker&style=flat-square" alt="RATH GitHub Forks">
   </a>
 </div>
@@ -58,7 +58,7 @@ Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have
 ## Get started
 
 To get started with RATH, you can:
-- 🚀 [Try RATH in a browser](https://rath.kanaries.net)
+- 🚀 [Try RATH now!](https://rath.kanaries.net)
 - 📖 [Read RATH Docs](https://docs.kanaries.net)
 - ⭐️ Give us a star on GitHub
 
