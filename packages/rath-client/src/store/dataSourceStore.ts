@@ -33,6 +33,7 @@ import { updateDataStorageMeta } from "../utils/storage";
 import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
 import { IsolationForest } from "../lib/outlier/iforest";
 import { compressRows, uncompressRows } from "../utils/rows2csv";
+import { extractSelection, ITextPattern } from "../lib/textPattern/init";
 
 interface IDataMessage {
     type: 'init_data' | 'others';
@@ -650,6 +651,28 @@ export class DataSourceStore {
         return fieldWithExtSuggestions;
     }
 
+    public addExtSuggestions (suggestion: FieldExtSuggestion, fid: string) {
+        const field = this.fieldMetas.find(f => f.fid === fid);
+        if (!field) {
+            return;
+        }
+        let which = this.fieldsWithExtSug.find(f => f.fid === fid);
+        if (!which) {
+            which = {
+                ...field,
+                extSuggestions: []
+            }
+            this.fieldsWithExtSug.push(which);
+        }
+        const targetIndex  = which.extSuggestions.findIndex(s => s.type === suggestion.type);
+        if (targetIndex > -1) {
+            which.extSuggestions.splice(targetIndex, 1);
+        }
+        which.extSuggestions.push(suggestion);
+        which.extSuggestions.sort((a, b) => b.score - a.score)
+    }
+
+
     public canExpandAsDateTime(fid: string) {
         const which = this.mutFields.find(f => f.fid === fid);
         const expanded = Boolean(this.mutFields.find(
@@ -790,6 +813,85 @@ export class DataSourceStore {
             })));
         }
     }
+    public clearTextPatternIfExist () {
+        const extRemainFields = this.extFields.filter(f => f.extInfo?.extOpt !== 'LaTiao.$selection_pattern');
+        if (extRemainFields.length !== this.extFields.length) {
+            this.extFields = extRemainFields;
+        }
+    }
+    public async expandFromSelectionPattern (fid: string, pattern: ITextPattern) {
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField) {
+            return;
+        }
+        this.clearTextPatternIfExist();
+        const data = await this.rawDataStorage.getAll();
+        const values: string[] = data.map(d => `${d[fid]}`);
+        const newField: IRawField = {
+            fid: `${fid}_selection_pattern`,
+            name: `${originField.name}.selection_pattern`,
+            semanticType: 'nominal',
+            analyticType: 'dimension',
+            extInfo: {
+                extFrom: [fid],
+                extOpt: 'LaTiao.$selection_pattern',
+                extInfo: {
+                    pattern: pattern.toString(),
+                }
+            },
+            geoRole: 'none'
+        }
+        const newData = data.map((d, index) => {
+            const extraction = extractSelection(pattern, values[index])
+            const nextRow = { ...d };
+            if (!extraction.missing) {
+                nextRow[newField.fid] = extraction.matchedText
+            }
+            return nextRow
+        });
+        this.addExtFieldsFromRows(newData, [newField].map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
+    }
+    public async expandFromRegex (fid: string, pattern: RegExp) {
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField) {
+            return;
+        }
+        this.clearTextPatternIfExist();
+        const data = await this.rawDataStorage.getAll();
+        const values: string[] = data.map(d => `${d[fid]}`);
+        const newField: IRawField = {
+            fid: `${fid}_regex`,
+            name: `${originField.name}.regex`,
+            semanticType: 'nominal',
+            analyticType: 'dimension',
+            extInfo: {
+                extFrom: [fid],
+                extOpt: 'LaTiao.$regex',
+                extInfo: {
+                    pattern: pattern.toString(),
+                }
+            },
+            geoRole: 'none'
+        }
+        const newData = data.map((d, index) => {
+            const match = values[index].match(pattern);
+            if (match) {
+                return {
+                    ...d,
+                    [newField.fid]: match[0],
+                }
+            }
+            return d;
+        });
+        this.addExtFieldsFromRows(newData, [newField].map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
+    }
+
     public async expandWordTF (fid: string) {
         const data = await this.rawDataStorage.getAll();
         const values: string[] = data.map(d => `${d[fid]}`);

@@ -14,7 +14,7 @@ import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
 import { Card } from '../../components/card';
-import { setDataStorage } from '../../utils/storage';
+import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
 import { BorderCard } from '../../components/borderCard';
 import BackupModal from '../../components/backupModal';
 import DataTable from './dataTable/index';
@@ -58,7 +58,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
             return (
                 <UsedButton
                     style={MARGIN_LEFT}
-                    iconProps={{ iconName: 'ExcelDocument' }}
+                    iconProps={{ iconName: 'SearchData' }}
                     text={text}
                     onClick={() => {
                         dataSourceStore.setShowDataImportSelection(true);
@@ -74,11 +74,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     }, [dataSourceStore]);
 
     const onSelectDataLoaded = useCallback(
-        (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => {
+        (fields: IMuteFieldBase[], dataSource: IRow[], name?: string, tag?: DataSourceTag | undefined, withHistory?: IDBMeta | undefined) => {
             dataSourceStore.loadDataWithInferMetas(dataSource, fields);
-            if (name) {
+            if (name && tag !== undefined) {
                 dataSourceStore.setDatasetId(name);
-                setDataStorage(name, fields, dataSource);
+                setDataStorage(name, fields, dataSource, tag, withHistory);
             }
         },
         [dataSourceStore]
@@ -109,7 +109,6 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         },
         [dataSourceStore]
     );
-
     return (
         <div className="content-container" style={{ position: 'relative' }}>
             <Card>

@@ -1,7 +1,8 @@
 import { Sampling } from 'visual-insights';
-import { FileReader } from '@kanaries/web-data-loader'
+import { FileReader as KFileReader } from '@kanaries/web-data-loader'
 import intl from 'react-intl-universal';
 import { useMemo } from "react";
+import * as xlsx from 'xlsx';
 import { STORAGE_FILE_SUFFIX } from "../../../constants";
 import { FileLoader } from "../../../utils";
 import { IMuteFieldBase, IRow } from "../../../interfaces";
@@ -53,12 +54,35 @@ export async function transformRawDataService (rawData: IRow[]): Promise<{
     }
 }
 
+export const readRaw = (file: File, encoding?: string, limit?: number, rowLimit?: number, colLimit?: number): Promise<string | null> => {
+    const fr = new FileReader();
+    fr.readAsText(file, encoding);
+    return new Promise<string | null>(resolve => {
+        fr.onload = () => {
+            let text = fr.result as string | null;
+            if (typeof text === 'string') {
+                if (limit) {
+                    text = text.slice(0, limit);
+                }
+                if (rowLimit || colLimit) {
+                    text = text.split('\n').slice(0, rowLimit).map(row => row.slice(0, colLimit)).join('\n');
+                }
+                return resolve(text);
+            } else {
+                return resolve(text);
+            }
+        };
+        fr.onerror = () => resolve(null);
+    });
+};
+
 interface LoadDataFileProps {
     file: File;
     sampleMethod: SampleKey;
     sampleSize?: number;
     encoding?: string;
     onLoading?: (progress: number) => void;
+    separator: string;
 }
 export async function loadDataFile(props: LoadDataFileProps): Promise<{
     fields: IMuteFieldBase[];
@@ -69,17 +93,30 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
         sampleMethod,
         sampleSize = 500,
         encoding = 'utf-8',
-        onLoading
+        onLoading,
+        separator,
     } = props;
     /**
      * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
      */
     let rawData: IRow[] = []
 
-    if (file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
-        rawData = []
+    if (file.type.match(/^text\/.*/)) {     // csv-like text files
+        if (separator && separator !== ',') {
+            const content = (await readRaw(file, encoding) ?? '');
+            const rows = content.split(/\r?\n/g).map(row => row.split(separator));
+            const fields = rows[0]?.map<IMuteFieldBase>((h, i) => ({
+                fid: `col_${i}`,
+                name: h,
+                geoRole: '?',
+                analyticType: '?',
+                semanticType: '?',
+            }));
+            const dataSource = rows.slice(1).map<IRow>(row => Object.fromEntries(fields.map((f, i) => [f.fid, row[i]])));
+            return { fields, dataSource };
+        }
         if (sampleMethod === SampleKey.reservoir) {
-            rawData = (await FileReader.csvReader({
+            rawData = (await KFileReader.csvReader({
               file,
               encoding,
               config: {
@@ -89,7 +126,7 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
               onLoading
             })) as IRow[]
         } else {
-            rawData = (await FileReader.csvReader({
+            rawData = (await KFileReader.csvReader({
               file,
               encoding,
               onLoading
@@ -100,12 +137,79 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
         if (sampleMethod === SampleKey.reservoir) {
             rawData = Sampling.reservoirSampling(rawData, sampleSize)
         }
+    } else if (file.type.startsWith('text/')) {
+        let content = (await readRaw(file, encoding) ?? '');
+        if (separator && separator !== ',') {
+            content = content.replaceAll(
+                new RegExp(`\\\\{0, 2}${separator}`, 'g'),
+                part => `${new RegExp(`^(\\{2})?`).exec(part)?.[0] ?? ''},`,
+            );
+        }
+        const translatedFile = new File([new Blob([content], { type: 'text/plain' })], 'file.csv');
+        rawData = (await KFileReader.csvReader({
+            file: translatedFile,
+            encoding,
+        })) as IRow[];
     } else {
         throw new Error(`unsupported file type=${file.type} `)
     }
     const dataset = await transformRawDataService(rawData);
     return dataset
 }
+
+export const isExcelFile = (file: File): boolean => {
+    return [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',    // xlsx
+        'application/vnd.ms-excel.sheet.binary.macroEnabled.12',                // xlsb
+        'application/vnd.ms-excel',                                             // xls
+        'application/vnd.ms-excel.sheet.macroEnabled.12',                       // xlsm
+    ].includes(file.type);
+};
+
+export const parseExcelFile = async (file: File) => {
+    const content = await FileLoader.binaryLoader(file);
+    const data = xlsx.read(content);
+    return data;
+};
+
+export const loadExcelRaw = async (data: Awaited<ReturnType<typeof parseExcelFile>>, sheetIdx: number, limit?: number, rowLimit?: number, colLimit?: number): Promise<string> => {
+    const sheet = data.SheetNames[sheetIdx];
+    const worksheet = data.Sheets[sheet];
+    const csvData = xlsx.utils.sheet_to_csv(worksheet, { skipHidden: true });   // more options available here
+    let text = csvData;
+    if (limit) {
+        text = text.slice(0, limit);
+    }
+    if (rowLimit || colLimit) {
+        text = text.split('\n').slice(0, rowLimit).map(row => row.slice(0, colLimit)).join('\n');
+    }
+    return text;
+};
+
+export const loadExcelFile = async (
+    data: Awaited<ReturnType<typeof parseExcelFile>>, sheetIdx: number, encoding: string,
+    range?: [[number, number], [number, number]],
+): Promise<{
+    fields: IMuteFieldBase[];
+    dataSource: IRow[];
+}> => {
+    const sheet = data.SheetNames[sheetIdx];
+    const worksheet = data.Sheets[sheet];
+    const copy = range ? { ...worksheet } : worksheet;
+    if (range) {
+        copy['!ref'] = xlsx.utils.encode_range({
+            s: { r: range[0][0], c: range[0][1] },
+            e: { r: range[1][0], c: range[1][1] },
+        });
+    }
+    const csvData = xlsx.utils.sheet_to_csv(copy, { skipHidden: true });   // more options available here
+    const csvFile = new File([new Blob([csvData], { type: 'text/plain' })], 'file.csv');
+    const rawData = (await KFileReader.csvReader({
+        file: csvFile,
+        encoding,
+    })) as IRow[];
+    return await transformRawDataService(rawData);
+};
 
 export async function loadRathStorageFile (file: File): Promise<IRathStorage> {
     // FIXME file type

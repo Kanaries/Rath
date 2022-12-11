@@ -5,6 +5,7 @@ import type { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { logDataImport } from '../../../../loggers/dataImport';
 import prefetch from '../../../../utils/prefetch';
 import { notify } from '../../../../components/error';
+import { DataSourceTag } from '../../../../utils/storage';
 import { transformRawDataService } from '../../utils';
 import Progress from './progress';
 import datasetOptions from './config';
@@ -59,7 +60,7 @@ export interface TableData<TL extends TableLabels = TableLabels> {
 
 interface DatabaseDataProps {
     onClose: () => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name?: string) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: string, tag: DataSourceTag) => void;
     setLoadingAnimation: (on: boolean) => void;
 }
 
@@ -203,7 +204,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 dataSource: dataSource.slice(0, 10),
                 size: dataSource.length,
             });
-            onDataLoaded(fields, dataSource, name);
+            onDataLoaded(fields, dataSource, name, DataSourceTag.DATABASE);
 
             onClose();
         } catch (error) {

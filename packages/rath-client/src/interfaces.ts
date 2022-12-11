@@ -252,3 +252,10 @@ export interface IBackUpData {
     rawData: any[][];
     extData: [string, ICol<any>][]
 }
+export interface IRawFeatures {
+    fid: string;
+    valid: number;
+    unique: number;
+    missing: number;
+    mismatch: number;
+}

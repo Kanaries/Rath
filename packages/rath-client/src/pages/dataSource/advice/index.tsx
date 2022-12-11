@@ -9,10 +9,9 @@ import { useActionModes } from '../baseActions/mainActionButton';
 
 const AdviceContainer = styled.div`
     .row{
-        margin-bottom: 3px;
-        margin-top: 3px;
+        margin-bottom: 2px;
+        margin-top: 2px;
     }
-
 `
 
 const Advice: React.FC = props => {
