@@ -30,6 +30,7 @@ class SessionPingResp(c.IRestfulResp):
 class IField(BaseModel):
     fid: str
     name: Optional[str]
+    semanticType: str
 
 class ListTableResp(c.IRestfulResp):
     class Data(BaseModel):
@@ -40,10 +41,10 @@ class ListTableResp(c.IRestfulResp):
 
 class UploadTableReq(BaseModel):
     tableId: Optional[str] = ''
-    tableName: Optional[str]
+    tableName: Optional[str] = ''
     format: Optional[str] = Field(options=alg.common.getOpts({'dataSource': 'DataSource'}))
     data: List[I.IRow]
-    fields: List[IField]
+    fields: List[I.IFieldMeta]
 
 class UploadTableResp(c.IRestfulResp):
     class Data(BaseModel): tableId: str
@@ -127,21 +128,29 @@ class DiscoverReq(BaseModel):
 class DiscoverResp(c.IRestfulResp):
     class Data(BaseModel): taskId: str
     data: Optional[Data]
+    
+
+class TaskStatusItem(BaseModel, extra=Extra.allow):
+    taskType: str
+    taskOpt: str
+    taskParams: Optional[Union[DiscoverReq, Any]]
+    status: Optional[str] = Field(options=alg.common.getOpts({s: s for s in ['PENDING', 'RUNNING', 'DONE', 'FAILED']}))
+    progress: float = Field(ge=0.0, le=1.0)
+
+class ListTaskResp(c.IRestfulResp):
+    data: Dict[str, TaskStatusItem]
 
 class TaskStatusResp(c.IRestfulResp):
-    class Data(BaseModel):
-        class Result(BaseModel):
-            class Data(BaseModel):
-                orig_matrix: Optional[List[List[int]]]
+    class Data(TaskStatusItem):
+        class Result(BaseModel, extra=Extra.allow):
+            class TaskResultData(BaseModel):
+                orig_matrix: Optional[List[List[float]]]
                 matrix: List[List[int]]
                 fields: List[c.IFieldMeta]
             modelId: str
-            data: Data
-        taskType: str
-        taskOpt: str
-        status: Optional[str] = Field(options=alg.common.getOpts({s: s for s in ['PENDING', 'RUNNING', 'DONE', 'FAILED']}))
-        progress: int
+            data: TaskResultData
         result: Optional[Result]
+        # class TaskStatusResp.Data
     data: Optional[Data]
     
 

@@ -14,8 +14,9 @@ import interfaces as I
 from .. import common as c
 
 class DECIParams(c.OptionalParams):
-    pass
-
+    confidence_threshold: Optional[float] = Field(
+        title='置信度阈值', default=0.11,
+        ge=0.0, le=1.0, multiple_of=1e-5)
 class DECI(c.AlgInterface):
     ParamType = DECIParams
     pass
