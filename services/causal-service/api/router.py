@@ -96,8 +96,9 @@ def discover(sessionId: str, data: DiscoverReq):
 
 @Discovery.delete('/task/{taskId}', response_model=c.IRestfulResp)
 def killTask(sessionId: str, taskId: str):
-    res = s.killTask(sessionId, taskId)
-    logging.debug(f"killTask: {res}")
+    # res = s.killTask(sessionId, taskId)
+    # logging.debug(f"killTask: {res}")
+    logging.debug(f"killTask: {sessionId}, {taskId}")
     # session.clearValue(sessionId, f"task-{taskId}/")
     session.setValue(sessionId, f"task-{taskId}/killed", "")
     return {
@@ -120,14 +121,15 @@ def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_th
     Data = TaskStatusResp.Data
     res = s.getTaskStatus(sessionId, taskId)
     res_st = res['status']
-    session.setValue(sessionId, f"task-{taskId}/response")
-    logging.debug(f"get task {taskId}: {res}")
+    session.setValue(sessionId, f"task-{taskId}/response", json.dumps(res))
+    logging.debug(f"get task {taskId} task-{taskId}/response")
     task_status = 'PENDING' if res_st == 'PENDING' else \
         'DONE' if res_st == 'SUCCESS' else \
             'RUNNING' if res_st == 'STARTED' else 'FAILED'
     progress = res.get('progress', 1.)
     result = None
     infered_confidence = None
+    infered_weight = None
     
     request_json = session.getValue(sessionId, f"task-{taskId}/request")
     task_meta_json = session.getValue(sessionId, f"task-{taskId}/meta")
@@ -141,7 +143,8 @@ def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_th
             orig_matrix = res_result['confidence_matrix']
             matrix = [[0 for value in row] for row in orig_matrix]
             trans_matrix = [[0 for value in row] for row in orig_matrix]
-            sorted_edges = sorted(res['result']['elements']['edges'], key=lambda x: -x['data']['confidence'])
+            # sorted_edges = sorted(res['result']['elements']['edges'], key=lambda x: -x['data']['confidence'])
+            sorted_edges = sorted(res['result']['elements']['edges'], key=lambda x: -x['data']['weight'])
             # for i in range(len(matrix)):
             #     for j in range(i):
             #         if orig_matrix[i][j] > .001:
@@ -152,16 +155,19 @@ def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_th
             #             matrix[i][j], matrix[j][i] = 2, 2
             columns = res['result']['columns']
             columnIdx = {f: i for i, f in enumerate(columns)}
-            if confidence_threshold is None:
-                max_edge_count = len(columns) ** 1.25
-                # confidence_threshold = task_params.params.confidence_threshold
+            # if confidence_threshold is None:
+            max_edge_count = len(columns) ** 1.25
+            # confidence_threshold = task_params.params.confidence_threshold
             
             e_cnt = 0
+            weight_threshold = None
             for edge in sorted_edges:
                 e = edge['data']
                 e_cnt += 1
-                if confidence_threshold is None and e_cnt > max_edge_count:
-                    infered_confidence = confidence_threshold = e['confidence']
+                # if confidence_threshold is None and e_cnt > max_edge_count:
+                if weight_threshold is None and e_cnt > max_edge_count:
+                    # infered_confidence = confidence_threshold = e['confidence']
+                    infered_weight = weight_threshold = e['weight']
                     break
                 if confidence_threshold is not None and e['confidence'] < confidence_threshold:
                     break
@@ -187,7 +193,10 @@ def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_th
             optional = {}
             if infered_confidence is not None:
                 optional['infered_confidence'] = infered_confidence
-            result = Data.Result(modelId=modelId, data=res_data, res=res, edges=sorted_edges, confidence_threshold=confidence_threshold, **optional)
+            if infered_weight is not None:
+                optional['infered_weight'] = infered_weight
+            # result = Data.Result(modelId=modelId, data=res_data, res=res, edges=sorted_edges, confidence_threshold=confidence_threshold, **optional)
+            result = Data.Result(modelId=modelId, data=res_data, res=res, edges=sorted_edges, confidence_threshold=confidence_threshold, weight_threshold=weight_threshold, **optional)
         elif task_status == 'FAILED':
             response.status_code = status.HTTP_400_BAD_REQUEST
             data = Data(

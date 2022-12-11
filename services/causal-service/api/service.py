@@ -3,7 +3,7 @@ import requests, logging, json
 from . import session, common as c, interface as I
 
 url = 'https://showwhy.gateway.kanaries.cn:3433'
-# url = 'http://52.82.70.212:8081'
+url = 'http://52.82.70.212:8081'
 
 def inferDataNature(data, fields: c.IFieldMeta):
     import pandas as pd
@@ -97,6 +97,7 @@ def runDiscover(sessionId: str, req: I.DiscoverReq):
 
 def killTask(sessionId: str, taskId: str):
     resp = requests.delete(f"{url}/api/discover/{taskId}")
+    return {}
     return resp.json()
 
 def getTaskStatus(sessionId: str, taskId: str):
