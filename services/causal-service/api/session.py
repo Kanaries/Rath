@@ -73,7 +73,7 @@ def uploadTable(sessionId: str, tableId: str, tableName: str, data: List[I.IRow]
     if tableId == '':
         tableId = str(uuid.uuid4())
     with open(f'{loc}/s-{sessionId}/tableMeta/{tableId}', 'w') as f:
-        json.dump({'tableId': tableId, 'tableName': tableName, 'fields': jsonable_encoder(fields)}, f)
+        json.dump({'tableId': tableId, 'tableName': tableName, 'fields': jsonable_encoder(fields)}, f, indent=2)
     if format == 'dataSource':
         import pandas as pd
         df = pd.DataFrame(data)
@@ -124,5 +124,6 @@ def clearValue(sessionId: str, prefix: str):
                 os.remove(fp)
             except:
                 continue
+        os.removedirs(path)
     except:
-        logging.warning(traceback.extract_tb())
+        logging.warning(traceback.extract_stack())

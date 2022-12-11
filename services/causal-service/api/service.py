@@ -7,17 +7,25 @@ url = 'https://showwhy.gateway.kanaries.cn:3433'
 
 def inferDataNature(data, fields: c.IFieldMeta):
     import pandas as pd
+    import math
     causal_variables = []
     for f in fields:
         nature = None
         fid = f['fid']
         s = f['semanticType']
+        unique_cnt = data[fid].unique().size
+        tot_cnt = len(data)
         if s == 'nominal':
-            if data[fid].unique().size == 2:
+            if unique_cnt == 2:
                 data = data.assign(**{fid: pd.factorize(data[fid])[0]})
                 nature = 'Binary'
             else: nature = 'Categorical Nominal'
-        elif s == 'quantitative': nature = 'Continuous'
+        elif s == 'quantitative':
+            if unique_cnt <= max(math.log1p(tot_cnt), 16):
+                # nature = 'Descrete'
+                nature = 'Continuous' # 'Categorical Oridinal'
+            else:
+                nature = 'Continuous'
         elif s == 'temporal':
             logging.debug(pd.to_datetime(data[fid]).astype('int64'))
             data = data.assign(**{fid: pd.to_datetime(data[fid]).astype('int64')})
@@ -60,20 +68,27 @@ def runDiscover(sessionId: str, req: I.DiscoverReq):
             'fields': [{'name': f} for f in focusedFields]
         }
     }
+    model_options = I.DeciModelOptions.parse_obj(params.dict())
+    training_options = I.DeciTrainingOptions.parse_obj(params.dict())
+    ate_options = I.DeciAteOptions.parse_obj(params.dict())
     data = {
-        'dataset': dataset,
         'causal_variables': causal_variables,
         'constraints': {
             'causes': causes,
             'effects': effects,
             'forbiddenRelationships': forbiddenRelationships
         },
-        'ate_options': {},
-        'model_options': {}
+        'model_options': model_options.dict(),
+        'training_options': training_options.dict(),
+        'ate_options': ate_options.dict(),
     }
+    logging.debug(f"{url}/api/discover/deci\n{data}")
+    data['dataset'] = dataset
     resp = requests.post(f"{url}/api/discover/deci", json=data)
+    logging.debug(f"{resp}")
     
     if resp.status_code != 200:
+        del data['dataset']
         logging.debug(f"data = {json.dumps(data)}")
         logging.warning(resp.json())
         raise Exception(resp.json())
@@ -86,7 +101,9 @@ def killTask(sessionId: str, taskId: str):
 
 def getTaskStatus(sessionId: str, taskId: str):
     resp = requests.get(f"{url}/api/discover/{taskId}")
+    logging.debug(f"{url}/api/discover/{taskId}\nResponse={resp}")
     if resp.status_code != 200:
+        session.setValue(sessionId, f"task-{taskId}/failed-response", json.dumps(res))
         raise f'getTaskStatus: {resp}'
     res = resp.json()
     res['progress'] = res.get('progress', 100) / 100.0

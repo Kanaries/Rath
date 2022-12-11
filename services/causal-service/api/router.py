@@ -79,7 +79,7 @@ def getDiscoverySchema(response: Response):
             for algoName, algo in discovery_alg.items()
         })
     except Exception as e:
-        msg = c.handleHttpException
+        msg = c.handleHttpException(e, response)
         return FormSchemaResp(success=False, message=msg)
     
 Discovery = APIRouter(prefix='/s/{sessionId}', tags=['Discovery'])
@@ -98,7 +98,8 @@ def discover(sessionId: str, data: DiscoverReq):
 def killTask(sessionId: str, taskId: str):
     res = s.killTask(sessionId, taskId)
     logging.debug(f"killTask: {res}")
-    session.clearValue(sessionId, f"task-{taskId}/")
+    # session.clearValue(sessionId, f"task-{taskId}/")
+    session.setValue(sessionId, f"task-{taskId}/killed", "")
     return {
         'success': True,
     }
@@ -119,11 +120,14 @@ def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_th
     Data = TaskStatusResp.Data
     res = s.getTaskStatus(sessionId, taskId)
     res_st = res['status']
+    session.setValue(sessionId, f"task-{taskId}/response")
+    logging.debug(f"get task {taskId}: {res}")
     task_status = 'PENDING' if res_st == 'PENDING' else \
         'DONE' if res_st == 'SUCCESS' else \
             'RUNNING' if res_st == 'STARTED' else 'FAILED'
     progress = res.get('progress', 1.)
     result = None
+    infered_confidence = None
     
     request_json = session.getValue(sessionId, f"task-{taskId}/request")
     task_meta_json = session.getValue(sessionId, f"task-{taskId}/meta")
@@ -149,10 +153,17 @@ def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_th
             columns = res['result']['columns']
             columnIdx = {f: i for i, f in enumerate(columns)}
             if confidence_threshold is None:
-                confidence_threshold = task_params.params.confidence_threshold
+                max_edge_count = len(columns) ** 1.25
+                # confidence_threshold = task_params.params.confidence_threshold
+            
+            e_cnt = 0
             for edge in sorted_edges:
                 e = edge['data']
-                if e['confidence'] < confidence_threshold:
+                e_cnt += 1
+                if confidence_threshold is None and e_cnt > max_edge_count:
+                    infered_confidence = confidence_threshold = e['confidence']
+                    break
+                if confidence_threshold is not None and e['confidence'] < confidence_threshold:
                     break
                 source, target = e['source'], e['target']
                 s_i, t_i = columnIdx[source], columnIdx[target]
@@ -173,7 +184,10 @@ def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_th
             res_data = Data.Result.TaskResultData(orig_matrix=orig_matrix, matrix=matrix, fields=[fields_map[f] for f in focusedFields])
 
             # result = Data.Result(modelId=modelId, data=res_data, res=res)
-            result = Data.Result(modelId=modelId, data=res_data, res=res, edges=sorted_edges)
+            optional = {}
+            if infered_confidence is not None:
+                optional['infered_confidence'] = infered_confidence
+            result = Data.Result(modelId=modelId, data=res_data, res=res, edges=sorted_edges, confidence_threshold=confidence_threshold, **optional)
         elif task_status == 'FAILED':
             response.status_code = status.HTTP_400_BAD_REQUEST
             data = Data(
@@ -213,13 +227,15 @@ Intervention = APIRouter(prefix='/s/{sessionId}', tags=['Intervention'])
 def intervene(sessionId: str, req: InterveneReq):
     Data = InterveneResp.Data
     algoName, modelId, do, params = req.algoName, req.modelId, req.do, req.params
-    logging.debug(f'args = {req}')
+    intervId = time.time()
+    session.setValue(sessionId, f"model-{modelId}/interv-{intervId}/req", req.json())
     params = params.dict()
     res = s.runIntervention(
         sessionId, modelId, do,
         **params
     )
-    logging.warning(f'res = {res}')
+    session.setValue(sessionId, f"model-{modelId}/interv-{intervId}/resp", json.dumps(res))
+    # logging.warning(f'res = {res}')
     return InterveneResp(data=Data(base=res['baseline'], new=res['intervention']))
 
 v0_1.include_router(Sessions)
