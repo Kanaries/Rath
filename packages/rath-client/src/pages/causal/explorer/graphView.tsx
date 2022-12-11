@@ -142,9 +142,12 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     }, [onRevertLink, onRemoveLink, clickEdgeMode]);
 
     const handleNodeDblClick = useCallback((fid: string | null) => {
-        const f = fields.find(which => which.fid === fid);
-        if (f) {
-            viewContext?.fireEvent('nodeDoubleClick', f);
+        if (mode === 'explore') {
+            const f = fields.find(which => which.fid === fid);
+            if (f) {
+                viewContext?.fireEvent('nodeDoubleClick', f);
+            }
+            return;
         }
         if (mode === 'edit' && fid) {
             const overload = causalStore.model.assertions.find(decl => 'fid' in decl && decl.fid === fid);

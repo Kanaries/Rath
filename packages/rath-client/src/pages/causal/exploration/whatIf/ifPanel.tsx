@@ -2,11 +2,23 @@ import { Icon, IconButton, Slider, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, Fragment, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
+import { interpolateHcl } from 'd3-interpolate';
 import type { IFieldMeta } from '../../../../interfaces';
 import { useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 import { useWhatIfContext } from './context';
 
+
+const interpolationL = interpolateHcl('#13a10e', '#ddd');
+const interpolationR = interpolateHcl('#ddd', '#da3b01');
+const colorize = (value: number) => {
+    return value < 0 ? interpolationL(1 + value / 2) : interpolationR(value / 2);
+};
+const interpolationAL = interpolateHcl('#13a10ecc', '#dddc');
+const interpolationAR = interpolateHcl('#dddc', '#da3b01cc');
+const colorizeA = (value: number) => {
+    return value < 0 ? interpolationAL(1 + value / 2) : interpolationAR(value / 2);
+};
 
 const Container = styled.div``;
 
@@ -100,19 +112,15 @@ const IfPanel: FC = () => {
 
             const WhatIfRenderer: typeof originRenderer = ({ fid }) => {
                 const value = context?.conditions[fid] ?? context?.predication[fid];
-                const nor = value === undefined ? 0 : Math.abs(2 / (1 + Math.exp(-value)) - 1);
+                const nor = value === undefined ? 0 : 4 / (1 + Math.exp(-value)) - 2;
                 return value === undefined ? {} : {
-                    subtext: value === 0 ? '(+0)' : `(${value > 0 ? '+' : '-'}${Math.abs(value) > 10 ? '...' : Math.abs(value).toFixed(2)})`,
-                    subtextFill: fid in (context?.conditions ?? {}) ? '#000' : value === 0 ? '#888' : `${
-                        value > 0 ? '#da3b01' : '#0027b4'
-                    }`,
+                    subtext: value === 0 ? '(+0)' : `(${value > 0 ? '+' : '-'}${Math.abs(nor).toFixed(2)})`,
+                    subtextFill: fid in (context?.conditions ?? {}) ? '#000' : value === 0 ? '#888' : colorize(
+                        nor < 0 ? -2 : 2
+                    ),
                     style: {
-                        fill: fid in (context?.conditions ?? {}) ? '#0000' : value === 0 ? undefined : `${
-                            value > 0 ? '#da3b01' : '#0027b4'
-                        }${Math.round(nor * 15).toString(16).repeat(2)}`,
-                        stroke: value === 0 ? undefined : `${
-                            value > 0 ? '#da3b01' : '#0027b4'
-                        }`,
+                        fill: fid in (context?.conditions ?? {}) || value === 0 ? '#fffc' : colorizeA(nor),
+                        stroke: value === 0 ? undefined : colorize(nor),
                         lineWidth: fid in (context?.conditions ?? {}) ? 2 : 1,
                     },
                 };
@@ -175,9 +183,7 @@ const IfPanel: FC = () => {
                                             height: '24px',
                                             borderRadius: '50%',
                                             top: '-10px',
-                                            backgroundColor: value === 0 ? 'transparent' : `${
-                                                value > 0 ? '#da3b01' : '#0027b4'
-                                            }${Math.round(Math.abs(value * 7)).toString(16)}0`,
+                                            backgroundColor: value === 0 ? 'transparent' : colorize(value),
                                         },
                                     }}
                                 />
@@ -190,7 +196,7 @@ const IfPanel: FC = () => {
                     let nor = value;
                     nor = 1 / (1 + Math.exp(-nor));
                     nor = nor * 4 - 2;
-                    const shadowSize = 2 + Math.abs(nor) * 4;
+                    const shadowSize = 1.2 + Math.abs(nor) * 2.4;
                     return (
                         <Fragment key={fid}>
                             <div role="gridcell" className={busy ? undefined : "hover-to-switch"} aria-rowindex={i + 1 + Object.keys(conditions).length} aria-colindex={1}>
@@ -212,12 +218,12 @@ const IfPanel: FC = () => {
                                     max={2}
                                     step={1e-2}
                                     value={value}
-                                    valueFormat={() => `${value < 0 ? '-' : '+'}${Math.abs(value) > 10 ? '...' : Math.abs(value).toFixed(2)}`}
+                                    valueFormat={() => `${value < 0 ? '-' : '+'}${Math.abs(nor).toFixed(2)}`}
                                     showValue
                                     originFromZero
                                     styles={{
                                         thumb: {
-                                            boxShadow: nor === 0 ? undefined : `0 0 ${shadowSize}px ${shadowSize * 0.67}px ${nor > 0 ? '#da3b01' : '#0027b4'}`,
+                                            boxShadow: nor === 0 ? undefined : `0 0 ${shadowSize}px ${shadowSize * 0.67}px ${colorizeA(nor)}`,
                                         },
                                     }}
                                 />

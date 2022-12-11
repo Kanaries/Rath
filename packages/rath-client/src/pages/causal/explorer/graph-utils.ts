@@ -55,8 +55,8 @@ G6.registerNode(
             if (label) {
                 group.addShape('text', {
                     attrs: {
-                        x: 15,
-                        y: -12,
+                        x: 16,
+                        y: 0,
                         textAlign: 'left',
                         textBaseline: 'middle',
                         text: label,
@@ -158,6 +158,8 @@ export const useRenderData = ({
                                 ...renderNode?.(f)?.labelCfg?.style,
                                 cursor: 'zoom-in',
                             } as unknown as {},
+                            position: 'top',
+                            offset: 2,
                         },
                     }]);
                 }
@@ -175,6 +177,7 @@ export const useRenderData = ({
                         style: {
                             ...renderNode?.(f)?.style,
                             cursor: 'zoom-out',
+                            lineDash: [4, 4],
                         },
                         labelCfg: {
                             ...renderNode?.(f)?.labelCfg,
@@ -183,6 +186,8 @@ export const useRenderData = ({
                                 fontSize: 10,
                                 cursor: 'zoom-out',
                             } as unknown as {},
+                            position: 'top',
+                            offset: 2,
                         },
                     }]);
                 }
@@ -203,6 +208,8 @@ export const useRenderData = ({
                         ...renderNode?.(f)?.labelCfg?.style,
                         cursor: 'pointer',
                     } as unknown as {},
+                    position: 'top',
+                    offset: 2,
                 },
             }]);
         }, []);

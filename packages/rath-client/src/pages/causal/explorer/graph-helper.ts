@@ -125,15 +125,27 @@ export const useReactiveGraph = ({
         if (graphRef.current) {
             graphRef.current.changeSize(width, GRAPH_HEIGHT);
             graphRef.current.updateLayout({
-                type: 'fruchterman',
-                gravity: 5,
-                speed: 5,
-                center: [width / 2, GRAPH_HEIGHT / 2],
-                // for rendering after each iteration
-                tick: () => {
-                    graphRef.current?.refreshPositions();
-                },
+                type: 'radial',
+                // center: [ 200, 200 ],     // 可选，默认为图的中心
+                linkDistance: 500,         // 可选，边长
+                maxIteration: 1000,       // 可选
+                focusNode: 'c',      // 可选
+                unitRadius: 100,          // 可选
+                preventOverlap: true,     // 可选，必须配合 nodeSize
+                nodeSize: 30,             // 可选
+                strictRadial: false       // 可选
+                // workerEnabled: true       // 可选，开启 web-worker
             });
+            // graphRef.current.updateLayout({
+            //     type: 'fruchterman',
+            //     gravity: 5,
+            //     speed: 5,
+            //     center: [width / 2, GRAPH_HEIGHT / 2],
+            //     // for rendering after each iteration
+            //     tick: () => {
+            //         graphRef.current?.refreshPositions();
+            //     },
+            // });
             graphRef.current.render();
         }
     }, [width, graphRef]);

@@ -112,15 +112,15 @@ export default class CausalOperatorStore {
                     });
                 }
             }),
-            reaction(() => this.tableId, () => {
-                runInAction(() => {
-                    for (const task of this.tasks) {
-                        task.task.abort('Table ID changed');
-                    }
-                    this.tasks = [];
-                    this.taskIdx = 0;
-                });
-            }),
+            // reaction(() => this.tableId, () => {
+            //     runInAction(() => {
+            //         for (const task of this.tasks) {
+            //             task.task.abort('Table ID changed');
+            //         }
+            //         this.tasks = [];
+            //         this.taskIdx = 0;
+            //     });
+            // }),
         ];
 
         const rxReactions = [
