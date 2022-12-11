@@ -1,7 +1,7 @@
 import { getGlobalStore } from "..";
 import { notify } from "../../components/error";
-import type { IRawField, IRow } from "../../interfaces";
-import type { IAlgoSchema, PagLink } from "../../pages/causal/config";
+import type { IFieldMeta, IRawField, IRow } from "../../interfaces";
+import { IAlgoSchema, PagLink, PAG_NODE } from "../../pages/causal/config";
 import { shouldFormItemDisplay } from "../../pages/causal/dynamicForm";
 import type { IteratorStorage } from "../../utils/iteStorage";
 import type CausalModelStore from "./modelStore";
@@ -301,7 +301,31 @@ const runDiscovery = async (
 };
 
 export const discover = (): Promise<[string, IDiscoveryTask] | null> => {
-    return runDiscovery();
+    const {
+        dataset: { fields: allFields, groups },
+        operator: { tableId },
+        model: { assertionsAsPag, functionalDependencies },
+    } = getGlobalStore().causalStore;
+    const fields: IFieldMeta[] = allFields.filter((f) => {
+        return !groups.some(group => group.root === f.fid);
+    });
+    const groupAssr = groups.reduce<typeof assertionsAsPag[number][]>((list, group) => {
+        for (const src of group.children) {
+            for (const tar of group.children.filter(node => node !== src)) {
+                list.push({
+                    src,
+                    src_type: PAG_NODE.EMPTY,
+                    tar,
+                    tar_type: PAG_NODE.EMPTY,
+                });
+            }
+        }
+        return list;
+    }, []);
+    return runDiscovery(
+        { fields, tableId },
+        { assertionsAsPag: assertionsAsPag.concat(groupAssr), functionalDependencies }
+    );
 };
 
 export const forceUpdateModel = async (

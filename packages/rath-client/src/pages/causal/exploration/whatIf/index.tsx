@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { FC, useEffect } from 'react';
 import styled from 'styled-components';
+import { useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 import AdvancedOptions from './advancedOptions';
 import { useWhatIfProviderAndContext } from './context';
@@ -12,25 +13,15 @@ const Container = styled.div`
 `;
 
 const WhatIf: FC = () => {
+    const { causalStore: { dataset } } = useGlobalStore();
     const [DoWhyProvider, context] = useWhatIfProviderAndContext();
     const viewContext = useCausalViewContext();
 
     useEffect(() => {
-        viewContext?.setLocalRenderData(null);
         viewContext?.addEventListener('nodeDoubleClick', node => {
-            context.toggleExpand(node).then(res => {
-                if (res) {
-                    viewContext?.setLocalRenderData({ fields: res[1], pag: res[2] });
-                    viewContext?.graph?.refresh();
-                } else {
-                    viewContext?.setLocalRenderData(null);
-                }
-            });
+            dataset.toggleExpand(node);
         });
-        return () => {
-            viewContext?.setLocalRenderData(null);
-        };
-    }, [context, viewContext]);
+    }, [context, viewContext, dataset]);
 
     return (
         <DoWhyProvider>

@@ -1,24 +1,22 @@
 import { getFreqRange } from "@kanaries/loa";
 import { nanoid } from "nanoid";
-import type { IRawField, IRow } from "../../../../interfaces";
-import { getGlobalStore } from "../../../../store";
+import type { IFieldMeta, IRawField, IRow } from "../../../../interfaces";
 import type { IteratorStorage } from "../../../../utils/iteStorage";
 
 
 const MAX_CHILDREN = 6;
 
-export const oneHot = async (dataStorage: IteratorStorage, targets: readonly string[]) => {
-    const { fields } = getGlobalStore().causalStore;
-    const data = await dataStorage.getAll();
+export const oneHot = async (data: IteratorStorage | readonly IRow[], fields: readonly IFieldMeta[], targets: readonly string[]) => {
+    const rows = Array.isArray(data) ? data as IRow[] : await (data as IteratorStorage).getAll();
     const derivedFields: (IRawField & Required<Pick<IRawField, 'extInfo'>>)[] = [];
-    const derivedTable: IRow[] = data.map(row => ({ ...row }));
+    const derivedTable: IRow[] = rows.map(row => ({ ...row }));
     for (const fid of targets) {
         const f = fields.find(f => f.fid === fid);
         if (!f) {
             console.warn(`Cannot find field ${fid}.`);
             continue;
         }
-        const values = data.map(row => row[fid]);
+        const values = rows.map(row => row[fid]);
         const records = getFreqRange(values).reduce<[string | number, number][]>((list, [key, freq]) => {
             const idx = list.findIndex(which => which[0] === key);
             if (idx !== -1) {

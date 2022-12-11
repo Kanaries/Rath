@@ -4,17 +4,13 @@ import { PagLink, PAG_NODE } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
 
 
-export const GRAPH_HEIGHT = 500;
+export const GRAPH_HEIGHT = 600;
 
-export type GraphNodeAttributes<
-    T extends 'circle' | 'rect' | 'ellipse' | 'diamond' | 'triangle' | 'star' | 'image' | 'modelRect' | 'donut' = 'circle'
-> = Partial<{
-    /** https://antv-g6.gitee.io/zh/docs/manual/middle/elements/nodes/defaultNode#%E5%86%85%E7%BD%AE%E8%8A%82%E7%82%B9%E7%B1%BB%E5%9E%8B%E8%AF%B4%E6%98%8E */
-    type: T;
+export type GraphNodeAttributes = Partial<{
     description: string;
     style: Partial<{
-        size: T extends 'circle' ? number : never;
-        label: T extends 'circle' ? string : never;
+        size: number;
+        label: string;
         fill: string;
         stroke: string;
         lineWidth: number;
@@ -28,6 +24,8 @@ export type GraphNodeAttributes<
         cursor: CSSProperties['cursor'];
     }>;
     size: number;
+    subtext?: string;
+    subtextFill?: string;
     labelCfg: Partial<{
         position: 'center' | 'top' | 'left' | 'right' | 'bottom';
         offset: number;
@@ -46,6 +44,31 @@ export type GraphNodeAttributes<
         }>;
     }>;
 }>;
+
+export const NodeType = 'field-node';
+
+G6.registerNode(
+    NodeType,
+    {
+        afterDraw(cfg, group: any) {
+            const label = cfg?.subtext as string | undefined;
+            if (label) {
+                group.addShape('text', {
+                    attrs: {
+                        x: 15,
+                        y: -12,
+                        textAlign: 'left',
+                        textBaseline: 'middle',
+                        text: label,
+                        fill: cfg?.subtextFill ?? '#666',
+                        fontSize: 10,
+                    },
+                });
+            }
+        },
+    },
+    'circle',
+);
 
 const arrows = {
     [PAG_NODE.EMPTY]: '',
@@ -88,6 +111,11 @@ G6.registerEdge(
 export interface IRenderDataProps {
     mode: "explore" | "edit";
     fields: readonly Readonly<IFieldMeta>[];
+    groups?: readonly Readonly<{
+        root: string;
+        children: string[];
+        expanded: boolean;
+    }>[];
     PAG: readonly PagLink[];
     /** @default undefined */
     weights?: Map<string, Map<string, number>> | undefined;
@@ -101,24 +129,100 @@ export interface IRenderDataProps {
 export const useRenderData = ({
     mode,
     fields,
+    groups = [],
     PAG,
     weights = undefined,
     cutThreshold = 0,
-    limit = Infinity,
+    limit = Infinity,   // TODO: 目前暂时关掉
     renderNode,
 }: IRenderDataProps) => {
-    return useMemo<GraphData>(() => ({
-        nodes: fields.map((f) => {
-            return {
+    const nodes = useMemo<NonNullable<GraphData['nodes']>>(() => {
+        return fields.reduce<NonNullable<GraphData['nodes']>>((list, f) => {
+            const fAsRoot = groups.find(group => group.root === f.fid);
+            if (fAsRoot) {
+                if (!fAsRoot.expanded) {
+                    return list.concat([ {
+                        type: NodeType, // TODO: new
+                        id: `${f.fid}`,
+                        description: `${f.name || f.fid} [...]`,
+                        ...renderNode?.(f),
+                    }]);
+                }
+                return list;
+            }
+            const fAsLeaf = groups.find(group => group.children.includes(f.fid));
+            if (fAsLeaf) {
+                if (fAsLeaf.expanded) {
+                    return list.concat([ {
+                        type: NodeType, // TODO: new
+                        id: `${f.fid}`,
+                        description: f.name || f.fid,
+                        ...renderNode?.(f),
+                    }]);
+                }
+                return list;
+            }
+            return list.concat([{
+                type: NodeType,
                 id: `${f.fid}`,
-                description: f.name ?? f.fid,
+                description: f.name || f.fid,
                 ...renderNode?.(f),
-            };
-        }),
-        edges: mode === 'explore' ? PAG.filter(link => {
+            }]);
+        }, []);
+    }, [fields, groups, renderNode]);
+    const realEdges = useMemo<NonNullable<GraphData['edges']>>(() => {
+        let links: PagLink[] = [];
+
+        for (const link of PAG.filter(link => {
             const w = weights?.get(link.src)?.get(link.tar);
             return w === undefined || w >= cutThreshold;
-        }).slice(0, limit).map((link, i) => {
+        })) {
+            const sources: [string, PAG_NODE][] = [];
+            const targets: [string, PAG_NODE][] = [];
+            const { src, src_type, tar, tar_type } = link;
+            ([[src, src_type, sources], [tar, tar_type, targets]] as [string, PAG_NODE, [string, PAG_NODE][]][]).forEach(([fid, lType, list]) => {
+                const fAsLeaf = groups.find(group => group.children.includes(fid));
+                if (fAsLeaf) {
+                    if (fAsLeaf.expanded) {
+                        list.push([fid, lType]);
+                    } else {
+                        list.push([fAsLeaf.root, lType]);
+                    }
+                    return list;
+                } else {
+                    list.push([fid, lType]);
+                }
+            });
+            for (const s of sources) {
+                for (const t of targets) {
+                    links.push({
+                        src: s[0],
+                        src_type: s[1],
+                        tar: t[0],
+                        tar_type: t[1],
+                    });
+                }
+            }
+        }
+
+        links = links.reduce<typeof links>((list, link) => {
+            const another = list.find(which => which.src === link.src && which.tar === link.tar);
+            if (another) {
+                another.src_type = another.src_type === link.src_type ? another.src_type : PAG_NODE.CIRCLE;
+                another.tar_type = another.tar_type === link.tar_type ? another.tar_type : PAG_NODE.CIRCLE;
+            } else {
+                const anotherReversed = list.find(which => which.src === link.src && which.tar === link.tar);
+                if (anotherReversed) {
+                    anotherReversed.src_type = anotherReversed.tar_type === link.src_type ? anotherReversed.src_type : PAG_NODE.CIRCLE;
+                    anotherReversed.tar_type = anotherReversed.src_type === link.tar_type ? anotherReversed.tar_type : PAG_NODE.CIRCLE;
+                } else {
+                    list.push(link);
+                }
+            }
+            return list;
+        }, []).filter(({ src, tar }) => src !== tar);
+
+        return links.map((link, i) => {
             const w = weights?.get(link.src)?.get(link.tar);
 
             return {
@@ -134,7 +238,7 @@ export const useRenderData = ({
                         fill: '#F6BD16',
                         path: arrows[link.tar_type],
                     },
-                    lineWidth: typeof w === 'number' ? 1 + w * 2 : undefined,
+                    lineWidth: typeof w === 'number' ? 1 + w * 2 : 1,
                 },
                 label: typeof w === 'number' ? `${(w * 100).toFixed(2).replace(/\.?0+$/, '')}%` : undefined,
                 labelCfg: {
@@ -143,7 +247,34 @@ export const useRenderData = ({
                     },
                 },
             };
-        }) : PAG.map((assr, i) => {
+        });
+    }, [PAG, cutThreshold, groups, weights]);
+    const inGroupEdges = useMemo<NonNullable<GraphData['edges']>>(() => {
+        return groups.reduce<NonNullable<GraphData['edges']>>((list, group) => {
+            if (group.expanded) {
+                for (const src of group.children) {
+                    for (const tar of group.children.filter(node => node !== src)) {
+                        list.push({
+                            id: `in_group__${list.length}__`,
+                            source: src,
+                            target: tar,
+                            style: {
+                                lineWidth: 1,
+                                lineAppendWidth: 5,
+                                stroke: '#888',
+                                lineDash: [4, 4],
+                                opacity: 0.4,
+                            },
+                        });
+                    }
+                }
+            }
+            return list;
+        }, []);
+    }, [groups]);
+    return useMemo<GraphData>(() => ({
+        nodes,
+        edges: mode === 'explore' ? realEdges.concat(inGroupEdges) : PAG.map((assr, i) => {
             const isForbiddenType = [assr.src_type, assr.tar_type].includes(PAG_NODE.EMPTY);
             const color = isForbiddenType ? '#c50f1f' : '#0027b4';
 
@@ -169,7 +300,7 @@ export const useRenderData = ({
                 type: isForbiddenType ? ForbiddenEdgeType : undefined,
             };
         }),
-    }), [fields, mode, PAG, limit, renderNode, weights, cutThreshold]);
+    }), [nodes, mode, realEdges, inGroupEdges, PAG]);
 };
 
 export interface IGraphOptions {

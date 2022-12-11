@@ -3,6 +3,7 @@ import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mob
 import { combineLatest, from, map, Observable, share, Subject, switchAll, throttleTime } from "rxjs";
 import { getGlobalStore } from "..";
 import type { IFieldMeta, IFilter, ICol, IRow } from "../../interfaces";
+import { oneHot } from "../../pages/causal/exploration/whatIf/utils";
 import { filterDataService } from "../../services";
 import { IteratorStorage, IteratorStorageMetaInfo } from "../../utils/iteStorage";
 import { focusedSample } from "../../utils/sample";
@@ -23,6 +24,12 @@ export default class CausalDatasetStore {
     protected fieldIndices$ = new Subject<readonly number[]>();
     /** All fields to analyze */
     public fields: readonly IFieldMeta[] = [];
+
+    public groups: readonly Readonly<{
+        root: string;
+        children: string[];
+        expanded: boolean;
+    }>[] = [];
 
     protected filters$ = new Subject<readonly IFilter[]>();
     public filters: readonly IFilter[] = [];
@@ -56,6 +63,7 @@ export default class CausalDatasetStore {
         this.filteredData = new IteratorStorage({ itemKey: 'causalStoreFilteredData' });
         this.sample = new IteratorStorage({ itemKey: 'causalStoreSample' });
 
+        const originFields$ = new Subject<IFieldMeta[]>();
         const allFields$ = new Subject<IFieldMeta[]>();
         const fields$ = new Subject<IFieldMeta[]>();
         const fullDataChangedSignal$ = new Subject<1>();
@@ -65,6 +73,7 @@ export default class CausalDatasetStore {
             allFields: observable.ref,
             fields: observable.ref,
             filters: observable.ref,
+            groups: observable.ref,
             // @ts-expect-error non-public field
             filteredData: false,
             sample: false,
@@ -73,21 +82,58 @@ export default class CausalDatasetStore {
             destroy: false,
         });
 
+        const expandedData = new IteratorStorage({ itemKey: 'causalStoreExpandedData' });
+
+        const expandedDataMetaInfo$ = originFields$.pipe(
+            map((originFields) => {
+                return from(this.__unsafeExpandFieldsWithOneHotEncoding(
+                    dataSourceStore.cleanedData,
+                    originFields,
+                ).then(([fields, rows]) => {
+                    return Promise.all([fields, expandedData.setAll(rows)] as const);
+                }).then(([fields]) => {
+                    const allFields = originFields.concat(fields);
+                    const groups: CausalDatasetStore['groups'][number][] = [];
+                    for (const f of originFields) {
+                        if (fields.some(which => which.extInfo.extFrom[0] === f.fid)) {
+                            const group: typeof groups[number] = {
+                                expanded: false,
+                                root: f.fid,
+                                children: [],
+                            };
+                            fields.filter(which => which.extInfo.extFrom[0] === f.fid).forEach(ef => {
+                                group.children.push(ef.fid);
+                            });
+                            groups.push(group);
+                        }
+                    }
+                    return Promise.all([allFields, expandedData.syncMetaInfoFromStorage(), groups] as const);
+                }));
+            }),
+            switchAll(),
+            share(),
+        );
+
+        const expandedFields$ = expandedDataMetaInfo$.pipe(
+            map(([allFields, , groups]) => [allFields, groups] as const),
+            share(),
+        );
+
         const filteredDataMetaInfo$ = combineLatest({
-            _: fullDataChangedSignal$,
+            _: expandedFields$,
             filters: this.filters$,
+            fields: allFields$,
         }).pipe(
             map(({ filters }) => {
                 return from(filterDataService({
-                    computationMode: 'inline',
-                    dataSource: dataSourceStore.cleanedData,
+                    computationMode: 'offline',
+                    dataStorage: expandedData,
+                    resultStorage: this.filteredData,
                     extData: new Map<string, ICol<any>>(),
                     filters: toJS(filters) as IFilter[],
-                }).then(r => {
-                    return this.filteredData.setAll(r.rows);
                 }).then(() => {
                     return this.filteredData.syncMetaInfoFromStorage();
-                }))
+                }));
             }),
             switchAll(),
             share()
@@ -142,7 +188,7 @@ export default class CausalDatasetStore {
                 });
             }),
             reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
-                allFields$.next(fieldMetas);
+                originFields$.next(fieldMetas);
             }),
             reaction(() => this.sampleRate, sr => {
                 sampleRate$.next(sr);
@@ -150,6 +196,14 @@ export default class CausalDatasetStore {
         ];
 
         const rxReactions = [
+            // set fields
+            expandedFields$.subscribe(([allFields, groups]) => {
+                allFields$.next(allFields);
+                runInAction(() => {
+                    this.groups = groups;
+                });
+            }),
+            
             // reset field selector
             allFields$.subscribe(fields => {
                 runInAction(() => {
@@ -203,7 +257,6 @@ export default class CausalDatasetStore {
 
         // initialize data
         this.datasetId = dataSourceStore.datasetId;
-        allFields$.next(dataSourceStore.fieldMetas);
         sampleRate$.next(this.sampleRate);
         fullDataChangedSignal$.next(1);
         this.filters$.next([]);
@@ -228,4 +281,64 @@ export default class CausalDatasetStore {
         }));
     }
 
+    protected async __unsafeExpandFieldsWithOneHotEncoding(
+        rows: readonly IRow[], fields: readonly IFieldMeta[]
+    ): Promise<[(IFieldMeta & Required<Pick<IFieldMeta, "extInfo">>)[], IRow[]]> {
+        const targets: string[] = fields.filter(f => {
+            return !f.extInfo && f.semanticType === 'nominal';
+        }).map(f => f.fid);
+        const [derivedFields, data] = await oneHot(rows, fields, targets);
+        const nextFields: IFieldMeta[] = fields.slice();
+        const derivation = new Map<string, string[]>();
+        for (const f of derivedFields) {
+            const from = f.extInfo.extFrom[0];
+            const idx = nextFields.findIndex(which => which.fid === from);
+            if (idx !== -1) {
+                nextFields.splice(idx, 1);
+            }
+            derivation.set(from, (derivation.get(from) ?? []).concat([f.fid]));
+            nextFields.push({
+                ...f,
+                distribution: [],
+                features: {
+                    entropy: -1,
+                    maxEntropy: -1,
+                    unique: -1,
+                },
+            });
+        }
+
+        return [derivedFields.map(f => ({
+            ...f,
+            features: {
+                unique: NaN,
+                entropy: NaN,
+                maxEntropy: NaN,
+            },
+            distribution: [],
+        })), data];
+    }
+
+    public toggleExpand(f: Readonly<IFieldMeta>) {
+        this.groups = produce(this.groups, draft => {
+            const gAsRoot = draft.find(group => group.root === f.fid);
+            if (gAsRoot) {
+                if (!gAsRoot.expanded) {
+                    gAsRoot.expanded = true;
+                }
+                return;
+            }
+            const gAsLeaf = draft.find(group => group.children.includes(f.fid));
+            if (gAsLeaf) {
+                if (gAsLeaf.expanded) {
+                    gAsLeaf.expanded = false;
+                }
+                return;
+            }
+        });
+    }
+
 }
+
+// TODO: remove this
+(window as any)['c'] = () => getGlobalStore().causalStore;

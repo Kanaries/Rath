@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { FC, Fragment, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import type { IFieldMeta } from '../../../../interfaces';
-import { getGlobalStore, useGlobalStore } from '../../../../store';
+import { useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 import { useWhatIfContext } from './context';
 
@@ -55,16 +55,30 @@ const IfPanel: FC = () => {
 
     useEffect(() => {
         if (context && viewContext) {
+            let timer: NodeJS.Timeout | null = null;
             const onNodeClick = (node: IFieldMeta) => {
-                if (node.fid in context.conditions) {
-                    context.removeCondition(node.fid);
-                } else {
-                    context.setCondition(node.fid, 0);
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(() => {
+                    if (node.fid in context.conditions) {
+                        context.removeCondition(node.fid);
+                    } else {
+                        context.setCondition(node.fid, 0);
+                    }
+                }, 200);
+            };
+            const onNodeDblClick = () => {
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
                 }
             };
             viewContext.addEventListener('nodeClick', onNodeClick);
+            viewContext.addEventListener('nodeDoubleClick', onNodeDblClick);
             return () => {
                 viewContext.removeEventListener('nodeClick', onNodeClick);
+                viewContext.removeEventListener('nodeDoubleClick', onNodeDblClick);
             };
         }
     }, [viewContext, context]);
@@ -75,11 +89,12 @@ const IfPanel: FC = () => {
 
             const WhatIfRenderer: typeof originRenderer = ({ fid, name }) => {
                 const value = context?.conditions[fid] ?? context?.predication[fid];
-                const f = getGlobalStore().causalStore.fields.find(which => which.fid === fid);
-                const canExpand = f?.semanticType === 'nominal' && !f.extInfo;
-                const displayName = name || fid;
                 return value === undefined ? {} : {
-                    description: value === 0 ? `${displayName} (+0)` : `${displayName} (${value > 0 ? '+' : '-'}${Math.abs(value).toFixed(2)})`,
+                    // description: value === 0 ? `${displayName} (+0)` : `${displayName} (${value > 0 ? '+' : '-'}${Math.abs(value).toFixed(2)})`,
+                    subtext: value === 0 ? '(+0)' : `(${value > 0 ? '+' : '-'}${Math.abs(value).toFixed(2)})`,
+                    subtextFill: fid in (context?.conditions ?? {}) ? '#0000' : value === 0 ? undefined : `${
+                        value > 0 ? '#da3b01' : '#0027b4'
+                    }`,
                     style: {
                         fill: fid in (context?.conditions ?? {}) ? '#0000' : value === 0 ? undefined : `${
                             value > 0 ? '#da3b01' : '#0027b4'
@@ -88,12 +103,6 @@ const IfPanel: FC = () => {
                             value > 0 ? '#da3b01' : '#0027b4'
                         }`,
                         lineWidth: fid in (context?.conditions ?? {}) ? 2 : 1,
-                        cursor: canExpand ? 'pointer' : 'default',
-                    },
-                    labelCfg: {
-                        style: {
-                            stroke: canExpand ? '#ff8c00' : undefined,
-                        },
                     },
                 };
             };

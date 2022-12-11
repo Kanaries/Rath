@@ -63,7 +63,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     ...props
 }, ref) => {
     const { causalStore } = useGlobalStore();
-    const { fields } = causalStore;
+    const { fields, groups } = causalStore.dataset;
     const { causality, assertionsAsPag, mutualMatrix } = causalStore.model;
     const viewContext = useCausalViewContext();
     const { onRenderNode, localWeights, explorationKey, localData = null } = viewContext ?? {};
@@ -101,12 +101,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         return map;
     }, [causality, fields, mutualMatrix]);
 
-    const dataFields = localData?.fields ?? fields;
-
     const graphRef = useRef<Graph>();
     const renderData = useRenderData({
         mode,
-        fields: dataFields,
+        fields,
+        groups,
         PAG: mode === 'edit' ? assertionsAsPag : localData?.pag ?? causality ?? [],
         weights: mode === 'edit' || localData ? undefined : localWeights ?? W,
         cutThreshold,
@@ -143,7 +142,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     }, [onRevertLink, onRemoveLink, clickEdgeMode]);
 
     const handleNodeDblClick = useCallback((fid: string | null) => {
-        const f = dataFields.find(which => which.fid === fid);
+        const f = fields.find(which => which.fid === fid);
         if (f) {
             viewContext?.fireEvent('nodeDoubleClick', f);
         }
@@ -156,7 +155,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                 causalStore.model.addNodeAssertion(fid, dblClickNodeMode);
             }
         }
-    }, [mode, dblClickNodeMode, causalStore, viewContext, dataFields]);
+    }, [mode, dblClickNodeMode, causalStore, viewContext, fields]);
 
     const graph = useReactiveGraph({
         containerRef,

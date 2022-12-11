@@ -149,7 +149,7 @@ class WhatIfStore {
             });
             return null;
         }
-        const [derivedFields, data] = await oneHot(sample, targets);
+        const [derivedFields, data] = await oneHot(sample, fields, targets);
         const nextFields: IFieldMeta[] = fields.slice();
         const derivation = new Map<string, string[]>();
         for (const f of derivedFields) {
