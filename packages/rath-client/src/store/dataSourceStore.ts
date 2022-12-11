@@ -410,19 +410,6 @@ export class DataSourceStore {
         }
     }
 
-    public async loadData (fields: IRawField[], rawData: IRow[]) {
-        this.mutFields = fields.map(f => ({
-            ...f,
-            name: f.name ? f.name : f.fid,
-            disable: false
-        }))
-        await this.rawDataStorage.setAll(rawData);
-        runInAction(() => {
-            this.rawDataMetaInfo = this.rawDataStorage.metaInfo;
-            this.loading = false;
-        })
-    }
-
     /**
      * @deprecated
      * @returns 

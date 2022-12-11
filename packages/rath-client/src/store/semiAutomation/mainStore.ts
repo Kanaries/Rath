@@ -7,6 +7,7 @@ import { distVis } from "../../queries/distVis";
 import { labDistVis } from "../../queries/labdistVis";
 import { loaEngineService } from "../../services/index";
 import { DataSourceStore } from "../dataSourceStore";
+import { adviceVisSize } from "../../pages/collection/utils";
 import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoViews } from "./localTypes";
 
 const RENDER_BATCH_SIZE = 5;
@@ -48,7 +49,7 @@ export class SemiAutomationStore {
             excludeScaleZero: false
         }
         this.settings = {
-            vizAlgo: 'lite'
+            vizAlgo: 'strict'
         }
         this.pattViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.featViews = makeInitAssoViews(RENDER_BATCH_SIZE);
@@ -350,10 +351,10 @@ export class SemiAutomationStore {
         }
     }
     public get mainViewSpec (): IVegaSubset | null {
-        const { mainVizSetting, mainView } = this;
+        const { mainVizSetting, mainView, fieldMetas } = this;
         if (mainView === null) return null
         if (this.settings.vizAlgo === 'lite') {
-            return distVis({
+            return adviceVisSize(distVis({
                 resizeMode: mainVizSetting.resize.mode,
                 pattern: toJS(mainView),
                 width: mainVizSetting.resize.width,
@@ -362,9 +363,9 @@ export class SemiAutomationStore {
                 stepSize: 32,
                 excludeScaleZero: mainVizSetting.excludeScaleZero,
                 specifiedEncodes: mainView.encodes
-            })
+            }), fieldMetas, 800, 500)
         } else {
-            return labDistVis({
+            return adviceVisSize(labDistVis({
                 resizeMode: mainVizSetting.resize.mode,
                 pattern: toJS(mainView),
                 width: mainVizSetting.resize.width,
@@ -374,7 +375,7 @@ export class SemiAutomationStore {
                 dataSource: this.dataSource,
                 excludeScaleZero: mainVizSetting.excludeScaleZero,
                 specifiedEncodes: mainView.encodes
-            })
+            }), fieldMetas, 800, 500)
         }
     }
     public get compareViewSpec (): IVegaSubset | null {
