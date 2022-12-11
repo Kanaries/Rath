@@ -117,7 +117,7 @@ def listTask(sessionId: str, response: Response):
     return ListTaskResp(data=data[taskId])
 
 @Discovery.get('/task/{taskId}', response_model=TaskStatusResp)
-def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_threshold: float=None):
+def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_threshold: float=None, weight_threshold: float=None):
     Data = TaskStatusResp.Data
     res = s.getTaskStatus(sessionId, taskId)
     res_st = res['status']
@@ -143,8 +143,8 @@ def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_th
             orig_matrix = res_result['confidence_matrix']
             matrix = [[0 for value in row] for row in orig_matrix]
             trans_matrix = [[0 for value in row] for row in orig_matrix]
-            # sorted_edges = sorted(res['result']['elements']['edges'], key=lambda x: -x['data']['confidence'])
-            sorted_edges = sorted(res['result']['elements']['edges'], key=lambda x: -x['data']['weight'])
+            sorted_edges = sorted(res['result']['elements']['edges'], key=lambda x: -x['data']['confidence'])
+            # sorted_edges = sorted(res['result']['elements']['edges'], key=lambda x: -x['data']['weight'])
             # for i in range(len(matrix)):
             #     for j in range(i):
             #         if orig_matrix[i][j] > .001:
@@ -160,17 +160,18 @@ def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_th
             # confidence_threshold = task_params.params.confidence_threshold
             
             e_cnt = 0
-            weight_threshold = None
             for edge in sorted_edges:
                 e = edge['data']
                 e_cnt += 1
-                # if confidence_threshold is None and e_cnt > max_edge_count:
-                if weight_threshold is None and e_cnt > max_edge_count:
-                    # infered_confidence = confidence_threshold = e['confidence']
-                    infered_weight = weight_threshold = e['weight']
+                if confidence_threshold is None and e_cnt > max_edge_count:
+                # if weight_threshold is None and e_cnt > max_edge_count:
+                    infered_confidence = confidence_threshold = e['confidence']
+                    # infered_weight = weight_threshold = e['weight']
                     break
                 if confidence_threshold is not None and e['confidence'] < confidence_threshold:
                     break
+                if weight_threshold is not None and e['weight'] < weight_threshold:
+                    continue
                 source, target = e['source'], e['target']
                 s_i, t_i = columnIdx[source], columnIdx[target]
                 if trans_matrix[s_i][t_i] != 1:
