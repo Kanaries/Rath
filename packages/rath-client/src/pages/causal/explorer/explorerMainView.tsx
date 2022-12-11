@@ -18,8 +18,8 @@ const Container = styled.div`
 `;
 
 export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
-    /** @default 0 */
-    cutThreshold?: number;
+    weightThreshold: number;
+    confThreshold: number;
     limit: number;
     mode: 'explore' | 'edit';
     onClickNode?: (fid: string | null) => void;
@@ -33,7 +33,8 @@ export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
 }, never>, 'onChange' | 'ref'>;
 
 const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
-    cutThreshold = 0,
+    weightThreshold,
+    confThreshold,
     mode,
     limit,
     onClickNode,
@@ -52,7 +53,8 @@ const ExplorerMainView = forwardRef<HTMLDivElement, ExplorerMainViewProps>(({
                 forceRelayoutRef={forceRelayoutRef}
                 limit={limit}
                 mode={mode}
-                cutThreshold={cutThreshold}
+                weightThreshold={weightThreshold}
+                confThreshold={confThreshold}
                 onClickNode={onClickNode}
                 onLinkTogether={onLinkTogether}
                 onRevertLink={onRevertLink}

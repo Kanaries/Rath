@@ -117,10 +117,12 @@ export interface IRenderDataProps {
         expanded: boolean;
     }>[];
     PAG: readonly PagLink[];
-    /** @default undefined */
-    weights?: Map<string, Map<string, number>> | undefined;
+    weightMatrix?: number[][];
+    confMatrix?: number[][];
     /** @default 0 */
-    cutThreshold?: number;
+    weightThreshold?: number;
+    /** @default 0 */
+    confThreshold?: number;
     /** @default Infinity */
     limit?: number;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
@@ -131,8 +133,10 @@ export const useRenderData = ({
     fields,
     groups = [],
     PAG,
-    weights = undefined,
-    cutThreshold = 0,
+    weightMatrix,
+    confMatrix,
+    weightThreshold = 0,
+    confThreshold = 0,
     limit = Infinity,   // TODO: 目前暂时关掉
     renderNode,
 }: IRenderDataProps) => {
@@ -215,12 +219,19 @@ export const useRenderData = ({
         }, []);
     }, [fields, groups, renderNode]);
     const realEdges = useMemo<NonNullable<GraphData['edges']>>(() => {
-        let links: PagLink[] = [];
+        let links: (PagLink & { c: number; w: number })[] = [];
 
-        for (const link of PAG.filter(link => {
-            const w = weights?.get(link.src)?.get(link.tar);
-            return w === undefined || w >= cutThreshold;
-        })) {
+        const result = PAG.map(link => {
+            const srcIdx = fields.findIndex(f => f.fid === link.src);
+            const tarIdx = fields.findIndex(f => f.fid === link.tar);
+            const w = weightMatrix?.[srcIdx][tarIdx] ?? 0;
+            const c = confMatrix?.[srcIdx][tarIdx] ?? 0;
+            return { ...link, c, w };
+        }).filter(({ c, w }) => {
+            return w >= weightThreshold && c >= confThreshold;
+        });
+
+        for (const link of result) {
             const sources: [string, PAG_NODE][] = [];
             const targets: [string, PAG_NODE][] = [];
             const { src, src_type, tar, tar_type } = link;
@@ -244,6 +255,8 @@ export const useRenderData = ({
                         src_type: s[1],
                         tar: t[0],
                         tar_type: t[1],
+                        c: link.c,
+                        w: link.w,
                     });
                 }
             }
@@ -267,8 +280,6 @@ export const useRenderData = ({
         }, []).filter(({ src, tar }) => src !== tar);
 
         return links.map((link, i) => {
-            const w = weights?.get(link.src)?.get(link.tar);
-
             return {
                 id: `link_${i}`,
                 source: link.src,
@@ -282,17 +293,17 @@ export const useRenderData = ({
                         fill: '#F6BD16',
                         path: arrows[link.tar_type],
                     },
-                    lineWidth: typeof w === 'number' ? 1 + w * 2 : 1,
+                    lineWidth: 1 + link.w * 2,
                 },
-                label: typeof w === 'number' ? `${(w * 100).toFixed(2).replace(/\.?0+$/, '')}%` : undefined,
-                labelCfg: {
-                    style: {
-                        opacity: 0,
-                    },
-                },
+                label: `${(link.c * 100).toFixed(2).replace(/\.?0+$/, '')}%`,
+                // labelCfg: {
+                //     style: {
+                //         opacity: 0,
+                //     },
+                // },
             };
         });
-    }, [PAG, cutThreshold, groups, weights]);
+    }, [PAG, confMatrix, confThreshold, fields, groups, weightMatrix, weightThreshold]);
     const inGroupEdges = useMemo<NonNullable<GraphData['edges']>>(() => {
         return groups.reduce<NonNullable<GraphData['edges']>>((list, group) => {
             if (group.expanded) {

@@ -1,4 +1,4 @@
-import { DefaultButton, Icon, Slider, Stack, Toggle } from "@fluentui/react";
+import { DefaultButton, Icon, Slider, Stack, TextField, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -88,7 +88,8 @@ const Explorer: FC<ExplorerProps> = ({
     const { causalStore } = useGlobalStore();
     const { causality } = causalStore.model;
 
-    const [cutThreshold, setCutThreshold] = useState(0);
+    const [wThreshold, setWThreshold] = useState(0);
+    const [cThreshold, setCThreshold] = useState(0);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
     const [allowZoom, setAllowZoom] = useState(false);
@@ -146,7 +147,8 @@ const Explorer: FC<ExplorerProps> = ({
                     forceRelayoutRef={forceRelayoutRef}
                     limit={limit}
                     mode={mode}
-                    cutThreshold={cutThreshold}
+                    weightThreshold={wThreshold}
+                    confThreshold={cThreshold}
                     onClickNode={handleClickCircle}
                     onLinkTogether={onLinkTogether}
                     onRevertLink={onRevertLink}
@@ -181,26 +183,25 @@ const Explorer: FC<ExplorerProps> = ({
                             inlineLabel
                         />
                     )}
-                    <Slider
+                    {/* <Slider
                         // label="Display Limit"
                         label="边显示上限"
                         min={1}
                         max={Math.max((causality ?? []).length, limit, 10)}
                         value={limit}
                         onChange={value => setLimit(value)}
+                    /> */}
+                    {/* TODO: 数值校验 */}
+                    <TextField
+                        label="按权重筛选"
+                        value={`${wThreshold}`}
+                        onChange={d => setWThreshold(Number(d))}
                     />
-                    {/* TODO: 现在没有有意义的权重，暂时隐藏 */}
-                    {false && (
-                        <Slider
-                            label="按权重筛选"
-                            min={0}
-                            max={1}
-                            step={0.01}
-                            value={cutThreshold}
-                            showValue
-                            onChange={d => setCutThreshold(d)}
-                        />
-                    )}
+                    <TextField
+                        label="按置信度筛选"
+                        value={`${cThreshold}`}
+                        onChange={d => setCThreshold(Number(d))}
+                    />
                 </Tools>
             </Floating>
         </Container>

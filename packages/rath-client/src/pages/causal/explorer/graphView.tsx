@@ -35,7 +35,8 @@ const Container = styled.div`
 `;
 
 export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
-    cutThreshold: number;
+    weightThreshold: number;
+    confThreshold: number;
     limit: number;
     mode: 'explore' | 'edit';
     onClickNode?: (fid: string | null) => void;
@@ -50,7 +51,8 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
 
 const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     onClickNode,
-    cutThreshold,
+    weightThreshold,
+    confThreshold,
     limit,
     mode,
     onLinkTogether,
@@ -64,7 +66,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
 }, ref) => {
     const { causalStore } = useGlobalStore();
     const { fields, groups } = causalStore.dataset;
-    const { causality, assertionsAsPag, mutualMatrix } = causalStore.model;
+    const { causality, assertionsAsPag, weightMatrix, confMatrix } = causalStore.model;
     const viewContext = useCausalViewContext();
     const { onRenderNode, localWeights, explorationKey, localData = null } = viewContext ?? {};
 
@@ -77,38 +79,19 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         onLinkTogether(srcFid, tarFid, createEdgeMode);
     }, [createEdgeMode, onLinkTogether]);
 
-    const W = useMemo<Map<string, Map<string, number>> | undefined>(() => {
-        if (!causality || !mutualMatrix || mutualMatrix.length !== fields.length) {
-            return undefined;
-        }
-
-        const scoreMatrix = sNormalize(mutualMatrix);
-
-        const map = new Map<string, Map<string, number>>();
-
-        for (const link of causality) {
-            const srcIdx = fields.findIndex(f => f.fid === link.src);
-            const tarIdx = fields.findIndex(f => f.fid === link.tar);
-            if (srcIdx !== -1 && tarIdx !== -1) {
-                const w = Math.abs(scoreMatrix[srcIdx][tarIdx]);
-                if (!map.has(link.src)) {
-                    map.set(link.src, new Map<string, number>());
-                }
-                map.get(link.src)!.set(link.tar, w);
-            }
-        }
-
-        return map;
-    }, [causality, fields, mutualMatrix]);
-
     const graphRef = useRef<Graph>();
     const renderData = useRenderData({
         mode,
         fields,
         groups,
+        // weights: mode === 'edit' || localData ? undefined : localWeights ?? W,
         PAG: mode === 'edit' ? assertionsAsPag : localData?.pag ?? causality ?? [],
-        weights: mode === 'edit' || localData ? undefined : localWeights ?? W,
-        cutThreshold,
+        // @ts-ignore readonly
+        weightMatrix,
+        // @ts-ignore readonly
+        confMatrix,
+        weightThreshold,
+        confThreshold,
         limit,
         renderNode: onRenderNode,
     });

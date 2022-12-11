@@ -148,11 +148,18 @@ interface IDiscoverData {
     orig_matrix?: number[][];
     matrix: number[][]; // PAG result
     fields: IRawField[];
+    
 }
     
 export interface IDiscoverResult {
     modelId: string; // 用于之后的Estimation和Intervention
     data: IDiscoverData;
+    edges: {
+        confidence: number;
+        weight: number;
+        source: string;
+        target: string;
+    }[];
 }
 
 type ITaskStatus = {
@@ -255,8 +262,7 @@ const runDiscovery = async (
                     const query = async () => {
                         timer = null;
                         try {
-                            // TODO: 阈值
-                            const r = await fetch(`${causalServer}/v0.1/s/${sessionId}/task/${taskId}?confidence_threshold=${(window as any).ct ?? 0.0001}`, { method: 'GET' });
+                            const r = await fetch(`${causalServer}/v0.1/s/${sessionId}/task/${taskId}?confidence_threshold=0&weight_threshold=0`, { method: 'GET' });
                             const d = await r.json() as (
                                 | { success: true; data: ITaskStatus }
                                 | { success: false; message: string }

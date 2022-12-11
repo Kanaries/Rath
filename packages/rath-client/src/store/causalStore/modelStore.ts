@@ -55,9 +55,11 @@ export default class CausalModelStore {
 
     public mutualMatrix: readonly (readonly number[])[] | null = null;
     public condMutualMatrix: readonly (readonly number[])[] | null = null;
-
+    
     public causalityRaw: readonly (readonly number[])[] | null = null;
     public causality: readonly PagLink[] | null = null;
+    public confMatrix: readonly (readonly number[])[] | null = null;
+    public weightMatrix: readonly (readonly number[])[] | null = null;
     /** causality + assertionsAsPag */
     public mergedPag: readonly PagLink[] = [];
 
@@ -76,6 +78,8 @@ export default class CausalModelStore {
             assertionsAsPag: observable.ref,
             mutualMatrix: observable.ref,
             causalityRaw: observable.ref,
+            weightMatrix: observable.ref,
+            condMutualMatrix: observable.ref,
             causality: observable.ref,
             mergedPag: observable.ref,
         });
@@ -105,7 +109,7 @@ export default class CausalModelStore {
                 });
             }),
             reaction(() => this.causality, () => {
-                this.synchronizeAssertionsWithResult();
+                // this.synchronizeAssertionsWithResult();
                 causality$.next(this.causality ?? []);
             }),
         ];
@@ -343,6 +347,16 @@ export default class CausalModelStore {
             }
         }
         this.causality = causalPag;
+        const confMatrix: number[][] = fields.map(() => fields.map(() => 0));
+        const weightMatrix: number[][] = fields.map(() => fields.map(() => 0));
+        for (const edge of result.edges) {
+            const srcIdx = fields.findIndex(f => f.fid === edge.source);
+            const tarIdx = fields.findIndex(f => f.fid === edge.target);
+            confMatrix[srcIdx][tarIdx] = edge.confidence;
+            weightMatrix[srcIdx][tarIdx] = edge.weight;
+        }
+        this.confMatrix = confMatrix;
+        this.weightMatrix = weightMatrix;
     }
 
 }
