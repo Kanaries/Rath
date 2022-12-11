@@ -142,10 +142,23 @@ export const useRenderData = ({
             if (fAsRoot) {
                 if (!fAsRoot.expanded) {
                     return list.concat([ {
-                        type: NodeType, // TODO: new
+                        type: 'rect',
                         id: `${f.fid}`,
-                        description: `${f.name || f.fid} [...]`,
+                        size: 24,
+                        description: `${f.name || f.fid} +`,
                         ...renderNode?.(f),
+                        style: {
+                            ...renderNode?.(f)?.style,
+                            radius: 4,
+                            cursor: 'zoom-in',
+                        },
+                        labelCfg: {
+                            ...renderNode?.(f)?.labelCfg,
+                            style: {
+                                ...renderNode?.(f)?.labelCfg?.style,
+                                cursor: 'zoom-in',
+                            } as unknown as {},
+                        },
                     }]);
                 }
                 return list;
@@ -154,10 +167,23 @@ export const useRenderData = ({
             if (fAsLeaf) {
                 if (fAsLeaf.expanded) {
                     return list.concat([ {
-                        type: NodeType, // TODO: new
+                        type: NodeType,
                         id: `${f.fid}`,
+                        size: 18,
                         description: f.name || f.fid,
                         ...renderNode?.(f),
+                        style: {
+                            ...renderNode?.(f)?.style,
+                            cursor: 'zoom-out',
+                        },
+                        labelCfg: {
+                            ...renderNode?.(f)?.labelCfg,
+                            style: {
+                                ...renderNode?.(f)?.labelCfg?.style,
+                                fontSize: 10,
+                                cursor: 'zoom-out',
+                            } as unknown as {},
+                        },
                     }]);
                 }
                 return list;
@@ -167,6 +193,17 @@ export const useRenderData = ({
                 id: `${f.fid}`,
                 description: f.name || f.fid,
                 ...renderNode?.(f),
+                style: {
+                    cursor: 'pointer',
+                    ...renderNode?.(f)?.style,
+                },
+                labelCfg: {
+                    ...renderNode?.(f)?.labelCfg,
+                    style: {
+                        ...renderNode?.(f)?.labelCfg?.style,
+                        cursor: 'pointer',
+                    } as unknown as {},
+                },
             }]);
         }, []);
     }, [fields, groups, renderNode]);
