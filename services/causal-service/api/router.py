@@ -9,6 +9,7 @@ from .discovery import discovery_alg
 from .intervention import intervention_alg
 from . import service as s
 from . import session
+import math
 
 v0_1 = APIRouter()
 @v0_1.get('/initSession', response_model=InitSessionResp)
@@ -170,7 +171,7 @@ def getTaskStatus(sessionId: str, taskId: str, response: Response, confidence_th
                     break
                 if confidence_threshold is not None and e['confidence'] < confidence_threshold:
                     break
-                if weight_threshold is not None and e['weight'] < weight_threshold:
+                if weight_threshold is not None and math.abs(e['weight']) < weight_threshold:
                     continue
                 source, target = e['source'], e['target']
                 s_i, t_i = columnIdx[source], columnIdx[target]
