@@ -61,8 +61,6 @@ const DataTable: React.FC = (props) => {
         }
     }, [filteredDataMetaInfo.versionCode, filteredDataStorage]);
 
-    const fieldsCanExpand = fields.filter((f) => f.extSuggestions.length > 0);
-
     const fieldsNotDecided = fields.filter((f) => f.stage === 'preview');
 
     const updateFieldInfo = useCallback(
@@ -252,30 +250,6 @@ const DataTable: React.FC = (props) => {
 
     return (
         <div>
-            {fieldsCanExpand.length > 0 && (
-                <MessageBar
-                    messageBarType={MessageBarType.warning}
-                    isMultiline={false}
-                    messageBarIconProps={{
-                        iconName: 'AutoEnhanceOn',
-                        style: {
-                            color: 'rgb(0, 120, 212)',
-                            fontWeight: 800,
-                        },
-                    }}
-                    styles={{
-                        root: {
-                            boxSizing: 'border-box',
-                            width: 'unset',
-                            color: 'rgb(0, 120, 212)',
-                            backgroundColor: 'rgba(0, 120, 212, 0.12)',
-                            margin: '2px 0',
-                        },
-                    }}
-                >
-                    <span>{intl.get('dataSource.extend.autoExtend', { count: fieldsCanExpand.length })}</span>
-                </MessageBar>
-            )}
             {fieldsNotDecided.length > 0 && (
                 <MessageBar
                     messageBarType={MessageBarType.warning}

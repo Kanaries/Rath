@@ -4,11 +4,10 @@ import {
     PrimaryButton,
     Stack,
     DefaultButton,
-    IconButton,
-    ProgressIndicator,
     Pivot,
     PivotItem,
     MessageBar,
+    Spinner,
 } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
@@ -21,7 +20,6 @@ import MetaView from './metaView/index';
 import Selection from './selection/index';
 import ImportStorage from './importStorage';
 import Advice from './advice';
-import AnalysisSettings from './settings';
 import FastSelection from './fastSelection';
 import ProfilingView from './profilingView';
 import MainActionButton from './baseActions/mainActionButton';
@@ -112,12 +110,11 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         <div className="content-container" style={{ position: 'relative' }}>
             <Card>
                 <ImportStorage />
-                <AnalysisSettings />
                 <FastSelection />
                 <Stack horizontal>
                     <MainActionButton />
                     {dataImportButton(intl.get('dataSource.importData.buttonName'), rawDataMetaInfo.length === 0)}
-                    <IconButton
+                    {/* <IconButton
                         style={MARGIN_LEFT}
                         title={intl.get('function.importStorage.title')}
                         ariaLabel={intl.get('function.importStorage.title')}
@@ -125,17 +122,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         onClick={() => {
                             commonStore.setShowStorageModal(true);
                         }}
-                    />
+                    /> */}
 
-                    <IconButton
-                        style={MARGIN_LEFT}
-                        iconProps={{ iconName: 'Settings' }}
-                        title={intl.get('common.settings')}
-                        ariaLabel={intl.get('common.settings')}
-                        onClick={() => {
-                            commonStore.setShowAnalysisConfig(true);
-                        }}
-                    />
+                    { dataPrepProgressTag !== IDataPrepProgressTag.none && <Spinner style={MARGIN_LEFT} label={dataPrepProgressTag} ariaLive="assertive" labelPosition="right" /> }
 
                     <Selection
                         show={showDataImportSelection}
@@ -148,20 +137,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
                 </Stack>
-                {dataPrepProgressTag !== IDataPrepProgressTag.none && <ProgressIndicator label={dataPrepProgressTag} />}
-                {/* <Stack horizontal verticalAlign="end" style={{ margin: '1em 0px' }}>
-                    <Dropdown
-                        styles={{ root: { minWidth: '180px' } }}
-                        selectedKey={cleanMethod}
-                        label={intl.get('dataSource.cleanMethod')}
-                        options={cleanMethodListLang}
-                        onChange={(e, option) => {
-                            option && dataSourceStore.setCleanMethod(option.key as CleanMethod);
-                        }}
-                        onRenderLabel={makeRenderLabelHandler(intl.get('dataSource.tip'))}
-                    />
-                </Stack> */}
-                <hr style={{ margin: '1em 0em'}} />
+                <hr style={{ margin: '1em 0em 0em 0em'}} />
                 <Pivot
                     style={{ marginBottom: '6px' }}
                     selectedKey={dataPreviewMode}
