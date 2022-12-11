@@ -2,13 +2,10 @@ import produce from "immer";
 import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
 import { map, share, Subject, switchAll, throttleTime } from "rxjs";
-import type { IFieldMeta } from "../../../../interfaces";
 import { getGlobalStore } from "../../../../store";
-import { forceUpdateModel } from "../../../../store/causalStore/service";
-import { IAlgoSchema, makeFormInitParams, PagLink } from "../../config";
+import { IAlgoSchema, makeFormInitParams } from "../../config";
 import { shouldFormItemDisplay } from "../../dynamicForm";
 import { predicateWhatIf, fetchWhatIfParamSchema, IWhatIfServiceResult } from "./service";
-import { oneHot } from "./utils";
 
 
 class WhatIfStore {
@@ -70,7 +67,7 @@ class WhatIfStore {
         ];
 
         const predicateTask$ = predicateFlag$.pipe(
-            throttleTime(100, undefined, { trailing: true }),
+            throttleTime(400, undefined, { trailing: true }),
             map(() => this.predicate()),
             share(),
         );
@@ -136,73 +133,6 @@ class WhatIfStore {
         }).map(item => [item.key, allParams[algoName][item.key]]));
         const result = await predicateWhatIf(conditions, algoName, params, this.tempModelId ?? getGlobalStore().causalStore.model.modelId);
         return result;
-    }
-
-    protected async __unsafeForceUploadModelWithOneHotEncoding(targets: readonly string[]): Promise<[string, readonly IFieldMeta[], readonly PagLink[]] | null> {
-        const {
-            dataset: { fields, sample },
-            model: { mergedPag },
-        } = getGlobalStore().causalStore;
-        if (targets.length === 0) {
-            runInAction(() => {
-                this.tempModelId = null;
-            });
-            return null;
-        }
-        const [derivedFields, data] = await oneHot(sample, fields, targets);
-        const nextFields: IFieldMeta[] = fields.slice();
-        const derivation = new Map<string, string[]>();
-        for (const f of derivedFields) {
-            const from = f.extInfo.extFrom[0];
-            const idx = nextFields.findIndex(which => which.fid === from);
-            if (idx !== -1) {
-                nextFields.splice(idx, 1);
-            }
-            derivation.set(from, (derivation.get(from) ?? []).concat([f.fid]));
-            nextFields.push({
-                ...f,
-                distribution: [],
-                features: {
-                    entropy: NaN,
-                    maxEntropy: NaN,
-                    unique: NaN,
-                },
-            });
-        }
-        const pag = mergedPag.reduce<PagLink[]>((list, link) => {
-            const srcPro = derivation.get(link.src) ?? [link.src];
-            const tarPro = derivation.get(link.tar) ?? [link.tar];
-            for (const src of srcPro) {
-                for (const tar of tarPro) {
-                    list.push({
-                        src,
-                        src_type: link.src_type,
-                        tar,
-                        tar_type: link.tar_type,
-                    });
-                }
-            }
-            return list;
-        }, []);
-
-        const modelId = await forceUpdateModel(data, nextFields, pag);
-
-        runInAction(() => {
-            this.tempModelId = modelId;
-        });
-
-        return modelId ? [modelId, nextFields, pag] : null;
-    }
-
-    public async toggleExpand(f: Readonly<IFieldMeta>) {
-        if (f.extInfo?.extOpt === 'Non-standard OneHot service') {
-            this.expandTargets = this.expandTargets.filter(fid => fid !== f.extInfo?.extFrom[0]);
-        } else if (!f.extInfo && f.semanticType === 'nominal') {
-            this.expandTargets.push(f.fid);
-        } else {
-            return null;
-        }
-        return this.__unsafeForceUploadModelWithOneHotEncoding(this.expandTargets);
     }
 
 }

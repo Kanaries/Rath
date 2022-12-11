@@ -385,18 +385,18 @@ export const useGraphOptions = ({
                 edit_zoom: [...exploreMode, 'zoom-canvas'],
             },
             animate: true,
-            layout: {
-                type: 'fruchterman',
-                // https://antv-g6.gitee.io/zh/docs/api/graphLayout/fruchterman#layoutcfggpuenabled
-                // 启用 GPU 加速会导致数据更新时视图变化很大
-                gpuEnabled: false,
-                gravity: 5,
-                speed: 5,
-                // for rendering after each iteration
-                tick: () => {
-                    graphRef.current?.refreshPositions();
-                },
-            },
+            // layout: {
+            //     type: 'fruchterman',
+            //     // https://antv-g6.gitee.io/zh/docs/api/graphLayout/fruchterman#layoutcfggpuenabled
+            //     // 启用 GPU 加速会导致数据更新时视图变化很大
+            //     gpuEnabled: false,
+            //     gravity: 5,
+            //     speed: 5,
+            //     // for rendering after each iteration
+            //     tick: () => {
+            //         graphRef.current?.refreshPositions();
+            //     },
+            // },
             defaultNode: {
                 size: 20,
                 style: {

@@ -321,7 +321,9 @@ export const discover = (): Promise<[string, IDiscoveryTask] | null> => {
             }
         }
         return list;
-    }, []);
+    }, []).filter(assr => {
+        return fields.some(f => f.fid === assr.src) && fields.some(f => f.fid === assr.tar);
+    });
     return runDiscovery(
         { fields, tableId },
         { assertionsAsPag: assertionsAsPag.concat(groupAssr), functionalDependencies }

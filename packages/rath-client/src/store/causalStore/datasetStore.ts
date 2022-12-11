@@ -311,9 +311,9 @@ export default class CausalDatasetStore {
         return [derivedFields.map(f => ({
             ...f,
             features: {
-                unique: NaN,
-                entropy: NaN,
-                maxEntropy: NaN,
+                unique: -1,
+                entropy: -1,
+                maxEntropy: -1,
             },
             distribution: [],
         })), data];
@@ -339,6 +339,3 @@ export default class CausalDatasetStore {
     }
 
 }
-
-// TODO: remove this
-(window as any)['c'] = () => getGlobalStore().causalStore;

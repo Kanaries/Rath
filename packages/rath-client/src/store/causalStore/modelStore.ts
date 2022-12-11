@@ -332,7 +332,7 @@ export default class CausalModelStore {
                 const field = fields.find(f => f.fid === fid);
                 return field?.name ?? fid;
             };
-            for (const info of unmatched) {
+            for (const info of unmatched.slice(0, 0)) { // temporarily disable this
                 notify({
                     title: 'Causal Result Not Matching',
                     type: 'error',

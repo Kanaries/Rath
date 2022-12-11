@@ -42,16 +42,25 @@ const Table = styled.div`
 `;
 
 const IfPanel: FC = () => {
-    const { causalStore: { dataset: { fields: causalFields } } } = useGlobalStore();
+    const { causalStore: { dataset: { fields, groups } } } = useGlobalStore();
     const viewContext = useCausalViewContext();
-    const { localData = null } = viewContext ?? {};
-    const { fields: localFields } = localData ?? {};
-    const fields = localFields ?? causalFields;
     const context = useWhatIfContext();
 
     useEffect(() => {
         context?.clearConditions();
     }, [fields, context]);
+
+    const isFieldInView = useCallback((fid: string) => {
+        const fAsRoot = groups.find(group => group.root === fid);
+        if (fAsRoot) {
+            return false;
+        }
+        const fAsLeaf = groups.find(group => group.children.includes(fid));
+        if (fAsLeaf) {
+            return fAsLeaf.expanded;
+        }
+        return true;
+    }, [groups]);
 
     useEffect(() => {
         if (context && viewContext) {
@@ -60,13 +69,15 @@ const IfPanel: FC = () => {
                 if (timer) {
                     clearTimeout(timer);
                 }
-                timer = setTimeout(() => {
-                    if (node.fid in context.conditions) {
-                        context.removeCondition(node.fid);
-                    } else {
-                        context.setCondition(node.fid, 0);
-                    }
-                }, 200);
+                if (isFieldInView(node.fid)) {
+                    timer = setTimeout(() => {
+                        if (node.fid in context.conditions) {
+                            context.removeCondition(node.fid);
+                        } else {
+                            context.setCondition(node.fid, 0);
+                        }
+                    }, 200);
+                }
             };
             const onNodeDblClick = () => {
                 if (timer) {
@@ -81,24 +92,24 @@ const IfPanel: FC = () => {
                 viewContext.removeEventListener('nodeDoubleClick', onNodeDblClick);
             };
         }
-    }, [viewContext, context]);
+    }, [viewContext, context, isFieldInView]);
 
     useEffect(() => {
         if (viewContext) {
             const originRenderer = viewContext.onRenderNode;
 
-            const WhatIfRenderer: typeof originRenderer = ({ fid, name }) => {
+            const WhatIfRenderer: typeof originRenderer = ({ fid }) => {
                 const value = context?.conditions[fid] ?? context?.predication[fid];
+                const nor = value === undefined ? 0 : Math.abs(2 / (1 + Math.exp(-value)) - 1);
                 return value === undefined ? {} : {
-                    // description: value === 0 ? `${displayName} (+0)` : `${displayName} (${value > 0 ? '+' : '-'}${Math.abs(value).toFixed(2)})`,
-                    subtext: value === 0 ? '(+0)' : `(${value > 0 ? '+' : '-'}${Math.abs(value).toFixed(2)})`,
-                    subtextFill: fid in (context?.conditions ?? {}) ? '#0000' : value === 0 ? undefined : `${
+                    subtext: value === 0 ? '(+0)' : `(${value > 0 ? '+' : '-'}${Math.abs(value) > 10 ? '...' : Math.abs(value).toFixed(2)})`,
+                    subtextFill: fid in (context?.conditions ?? {}) ? '#000' : value === 0 ? '#888' : `${
                         value > 0 ? '#da3b01' : '#0027b4'
                     }`,
                     style: {
                         fill: fid in (context?.conditions ?? {}) ? '#0000' : value === 0 ? undefined : `${
                             value > 0 ? '#da3b01' : '#0027b4'
-                        }${Math.round(Math.abs(value * 7)).toString(16)}0`,
+                        }${Math.round(nor * 15).toString(16).repeat(2)}`,
                         stroke: value === 0 ? undefined : `${
                             value > 0 ? '#da3b01' : '#0027b4'
                         }`,
@@ -108,14 +119,18 @@ const IfPanel: FC = () => {
             };
 
             viewContext.setNodeRenderer(WhatIfRenderer);
-            viewContext.graph?.update();
+            setTimeout(() => {
+                viewContext.graph?.refresh();
+            }, 100);
 
             return () => {
                 viewContext.setNodeRenderer(originRenderer);
-                viewContext.graph?.update();
+                setTimeout(() => {
+                    viewContext.graph?.refresh();
+                }, 100);
             };
         }
-    }, [viewContext, context, context?.conditions, context?.predication]);
+    }, [viewContext, context?.conditions, context?.predication]);
 
     const getFieldName = useCallback((fid: string): string => {
         return fields.find(f => f.fid === fid)?.name ?? fid;
@@ -127,10 +142,14 @@ const IfPanel: FC = () => {
 
     const { conditions, predication, busy } = context;
 
+    const others = fields.filter(f => {
+        return isFieldInView(f.fid) && !Object.keys(conditions).concat(Object.keys(predication)).includes(f.fid);
+    });
+    
     return (
         <Container>
             <Table role="grid" aria-colcount={2}>
-                {Object.keys(conditions).map((fid, i) => {
+                {Object.keys(conditions).filter(fid => isFieldInView(fid)).map((fid, i) => {
                     const value = conditions[fid];
                     return (
                         <Fragment key={fid}>
@@ -166,11 +185,12 @@ const IfPanel: FC = () => {
                         </Fragment>
                     );
                 })}
-                {Object.keys(predication).map((fid, i) => {
-                    let value = predication[fid];
-                    value = 1 / (1 + Math.exp(-value));
-                    value = value * 4 - 2;
-                    const shadowSize = 2 + Math.abs(value) * 4;
+                {Object.keys(predication).filter(fid => isFieldInView(fid)).map((fid, i) => {
+                    const value = predication[fid];
+                    let nor = value;
+                    nor = 1 / (1 + Math.exp(-nor));
+                    nor = nor * 4 - 2;
+                    const shadowSize = 2 + Math.abs(nor) * 4;
                     return (
                         <Fragment key={fid}>
                             <div role="gridcell" className={busy ? undefined : "hover-to-switch"} aria-rowindex={i + 1 + Object.keys(conditions).length} aria-colindex={1}>
@@ -192,12 +212,12 @@ const IfPanel: FC = () => {
                                     max={2}
                                     step={1e-2}
                                     value={value}
-                                    valueFormat={val => val.toFixed(2)}
+                                    valueFormat={() => `${value < 0 ? '-' : '+'}${Math.abs(value) > 10 ? '...' : Math.abs(value).toFixed(2)}`}
                                     showValue
                                     originFromZero
                                     styles={{
                                         thumb: {
-                                            boxShadow: value === 0 ? undefined : `0 0 ${shadowSize}px ${shadowSize * 0.67}px ${value > 0 ? '#da3b01' : '#0027b4'}`,
+                                            boxShadow: nor === 0 ? undefined : `0 0 ${shadowSize}px ${shadowSize * 0.67}px ${nor > 0 ? '#da3b01' : '#0027b4'}`,
                                         },
                                     }}
                                 />
@@ -205,7 +225,7 @@ const IfPanel: FC = () => {
                         </Fragment>
                     );
                 })}
-                {fields.filter(f => !Object.keys(conditions).concat(Object.keys(predication)).includes(f.fid)).map(({ fid }, i) => {
+                {others.map(({ fid }, i) => {
                     return (
                         <Fragment key={fid}>
                             <div role="gridcell" aria-rowindex={i + 1 + Object.keys(conditions).length + Object.keys(predication).length} aria-colindex={1}>
