@@ -10,12 +10,14 @@ import { PainterStore } from './painterStore'
 import { CollectionStore } from './collectionStore'
 import DashboardStore from './dashboardStore';
 import CausalStore from './causalStore/mainStore';
+import UserStore from './userStore';
 export interface StoreCollection {
     langStore: LangStore;
     dataSourceStore: DataSourceStore;
     ltsPipeLineStore: LTSPipeLine;
     megaAutoStore: MegaAutomationStore;
     commonStore: CommonStore;
+    userStore: UserStore;
     clickHouseStore: ClickHouseStore;
     semiAutoStore: SemiAutomationStore;
     painterStore: PainterStore;
@@ -26,6 +28,7 @@ export interface StoreCollection {
 
 const langStore = new LangStore();
 const commonStore = new CommonStore();
+const userStore = new UserStore();
 const dataSourceStore = new DataSourceStore();
 const clickHouseStore = new ClickHouseStore();
 const ltsPipeLineStore = new LTSPipeLine(dataSourceStore, commonStore, clickHouseStore);
@@ -38,6 +41,7 @@ const causalStore = new CausalStore(dataSourceStore);
 
 const storeCol: StoreCollection = {
     commonStore,
+    userStore,
     langStore,
     dataSourceStore,
     ltsPipeLineStore,

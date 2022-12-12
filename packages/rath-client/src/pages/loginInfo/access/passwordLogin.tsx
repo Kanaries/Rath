@@ -27,8 +27,8 @@ interface PasswordLoginProps {
 }
 
 const PasswordLogin: React.FC<PasswordLoginProps> = (props) => {
-    const { commonStore } = useGlobalStore();
-    const { login } = commonStore;
+    const { userStore } = useGlobalStore();
+    const { login } = userStore;
     const { onSuccessLogin } = props;
     const notEmpty = login.password.length > 0 && login.userName.length > 0;
     const formFields = FORM_FIELDS.map((f) => ({
@@ -46,7 +46,7 @@ const PasswordLogin: React.FC<PasswordLoginProps> = (props) => {
                         label={field.label}
                         required
                         onChange={(e, newValue) => {
-                            commonStore.updateForm(IAccessPageKeys.LOGIN, field.fieldKey, newValue || '');
+                            userStore.updateForm(IAccessPageKeys.LOGIN, field.fieldKey, newValue || '');
                         }}
                     />
                 </div>
@@ -55,17 +55,17 @@ const PasswordLogin: React.FC<PasswordLoginProps> = (props) => {
                 <PrimaryButton
                     disabled={!notEmpty}
                     onClick={() => {
-                        commonStore
+                        userStore
                             .commitLogin()
                             .then((res) => {
-                                if (res.success) {
+                                if (res?.success) {
                                     onSuccessLogin();
                                     notify({
                                         title: 'Success',
                                         type: 'success',
                                         content: 'Success',
                                     });
-                                } else {
+                                } else if (res) {
                                     notify({
                                         title: 'Error',
                                         type: 'error',

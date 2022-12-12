@@ -128,17 +128,6 @@ const LoginInfo: FC = () => {
                     </Container>
                 </Dialog>
                 <div className="avatar-img">
-                    <div>
-                        {userName && (info.avatar || avatarUrl) ? (
-                            <img
-                                src={info.avatar || avatarUrl}
-                                alt="头像"
-                                style={{ width: 24, height: 24, borderRadius: '50%' }}
-                            />
-                        ) : (
-                            <Icon iconName="Contact" className="mr-2" />
-                        )}
-                    </div>
                     {navMode === 'text' && (
                         <div className="user-name">
                             <p className="user">{userName || intl.get('login.clickLogin')}</p>
