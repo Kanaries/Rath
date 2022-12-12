@@ -1,4 +1,4 @@
-import { getServerUrl } from '../utils/user';
+import { getMainServiceAddress } from '../utils/user';
 import type { ILoginForm } from './userStore';
 
 export async function commitLoginService(props: ILoginForm) {

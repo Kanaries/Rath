@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { Dialog, Icon, Pivot, PivotItem } from '@fluentui/react';
+import { Dialog, Pivot, PivotItem } from '@fluentui/react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import Account from './account';
@@ -92,8 +92,9 @@ const Container = styled.div`
 `;
 
 const LoginInfo: FC = () => {
-    const { commonStore } = useGlobalStore();
-    const { userName, navMode, avatarUrl, info } = commonStore;
+    const { commonStore, userStore } = useGlobalStore();
+    const { navMode } = commonStore;
+    const { userName } = userStore;
     const [loginHidden, setLoginHidden] = useState(true);
     const [tab, setTab] = useState<PreferencesType>(PreferencesType.Account);
 

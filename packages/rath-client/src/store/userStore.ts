@@ -1,6 +1,6 @@
 import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { IAccessPageKeys } from '../interfaces';
-import { getServerUrl } from '../utils/user';
+import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
 import { commitLoginService } from './fetch';
@@ -76,7 +76,7 @@ export default class UserStore {
     }
 
     public async liteAuth(certMethod: 'email' | 'phone') {
-        const url = getServerUrl('/api/liteAuth');
+        const url = getMainServiceAddress('/api/liteAuth');
         const { certCode, phone, email } = this.signup;
         const res = await fetch(url, {
             method: 'POST',
@@ -126,7 +126,7 @@ export default class UserStore {
 
     public async commitLogout() {
         try {
-            const url = getServerUrl('/api/logout');
+            const url = getMainServiceAddress('/api/logout');
             const res = await fetch(url, {
                 method: 'GET',
             });
@@ -151,7 +151,7 @@ export default class UserStore {
 
     public async updateAuthStatus() {
         try {
-            const url = getServerUrl('/api/loginStatus');
+            const url = getMainServiceAddress('/api/loginStatus');
             const res = await request.get<{}, { loginStatus: boolean; userName: string }>(url);
             return res.loginStatus;
         } catch (error) {
@@ -165,7 +165,7 @@ export default class UserStore {
     }
 
     public async getPersonalInfo() {
-        const url = getServerUrl('/api/ce/personal');
+        const url = getMainServiceAddress('/api/ce/personal');
         try {
             const result = await request.get<{}, IUserInfo>(url);
             if (result !== null) {
@@ -192,7 +192,7 @@ export default class UserStore {
         if (!this.info) {
             return;
         }
-        const url = getServerUrl('/api/ce/organization/list');
+        const url = getMainServiceAddress('/api/ce/organization/list');
         try {
             const result = await request.get<{}, { organization: readonly IOrganization[] }>(url);
             this.info.organizations = result.organization;
@@ -210,7 +210,7 @@ export default class UserStore {
         if (!which || which.workspaces === null) {
             return null;
         }
-        const url = getServerUrl('/api/ce/organization/workspace/list');
+        const url = getMainServiceAddress('/api/ce/organization/workspace/list');
         try {
             const result = await request.get<{ organizationId: number }, { workspaceList: IWorkspace[] }>(url, {
                 organizationId,
@@ -226,7 +226,7 @@ export default class UserStore {
     }
 
     public async uploadWorkspace(workspaceId: number, file: File) {
-        const url = getServerUrl('/api/ce/notebook');
+        const url = getMainServiceAddress('/api/ce/notebook');
         try {
             const { uploadUrl, id } = (await (await fetch(url, {
                 method: 'PUT',
@@ -247,7 +247,7 @@ export default class UserStore {
                 method: 'PUT',
                 body: file,
             });
-            await request.post<{ id: number }, {}>(getServerUrl('/api/ce/notebook/callback'), { id });
+            await request.post<{ id: number }, {}>(getMainServiceAddress('/api/ce/notebook/callback'), { id });
         } catch (error) {
             notify({
                 title: '[/api/ce/notebook]',
