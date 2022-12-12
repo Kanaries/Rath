@@ -1,20 +1,38 @@
-import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
+import { IReactionDisposer, makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { combineLatest, from, Observable, Subscription } from "rxjs";
 import { getFreqRange } from "@kanaries/loa";
 import * as op from 'rxjs/operators'
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, ICol, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions, IExtField } from "../interfaces";
+import {
+    IDataPreviewMode,
+    IDatasetBase,
+    IFieldMeta,
+    IMuteFieldBase,
+    IRawField,
+    IRow,
+    ICol,
+    IFilter,
+    CleanMethod,
+    IDataPrepProgressTag,
+    FieldExtSuggestion,
+    IFieldMetaWithExtSuggestions,
+    IExtField,
+    IteratorStorageMetaInfo,
+    IBackUpDataMeta,
+    IBackUpData
+} from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
 import { findRathSafeColumnIndex, colFromIRow, readableWeekday } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
-import { IteratorStorage, IteratorStorageMetaInfo } from "../utils/iteStorage";
+import { IteratorStorage } from "../utils/iteStorage";
 import { updateDataStorageMeta } from "../utils/storage";
 import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
 import { IsolationForest } from "../lib/outlier/iforest";
+import { compressRows, uncompressRows } from "../utils/rows2csv";
 import { extractSelection, ITextPattern } from "../lib/textPattern/init";
 
 interface IDataMessage {
@@ -45,8 +63,8 @@ export class DataSourceStore {
      * raw data is fetched and parsed data or uploaded data without any other changes.
      * computed value `dataSource` will be calculated
      */
-    public rawDataStorage: IteratorStorage;
-    public filteredDataStorage: IteratorStorage;
+    public rawDataStorage!: IteratorStorage;
+    public filteredDataStorage!: IteratorStorage;
     public extData = new Map<string, ICol<any>>();
     /**
      * fields contains fields with `dimension` or `measure` type.
@@ -57,31 +75,23 @@ export class DataSourceStore {
     public extFields: IExtField[] = [];
     public fieldsWithExtSug: IFieldMetaWithExtSuggestions[] = [];
     public filters: IFilter[] = [];
-    
-    // public fields: BIField[] = [];
     public cookedDataSource: IRow[] = [];
     public cookedDimensions: string[] = [];
     public cookedMeasures: string[] = [];
     public cleanMethod: CleanMethod = 'dropNull';
-    /**
-     * 作为计算属性来考虑
-     */
-    // public fieldMetas: IFieldMeta[] = [];
     public loading: boolean = false;
     public dataPreviewMode: IDataPreviewMode = IDataPreviewMode.data;
     public showDataImportSelection: boolean = false;
     public showFastSelectionModal: boolean = false;
-    private fieldMetasRef: StreamListener<IFieldMeta[]>;
-    private cleanedDataRef: StreamListener<IRow[]>;
-    // private filteredDataRef: StreamListener<IRow[]>;
-    private filteredDataMetaInfoRef: StreamListener<IteratorStorageMetaInfo>;
+    private fieldMetasRef!: StreamListener<IFieldMeta[]>;
+    private cleanedDataRef!: StreamListener<IRow[]>;
+    private filteredDataMetaInfoRef!: StreamListener<IteratorStorageMetaInfo>;
     public loadingDataProgress: number = 0;
     public dataPrepProgressTag: IDataPrepProgressTag = IDataPrepProgressTag.none;
     private subscriptions: Subscription[] = [];
+    private reactions: IReactionDisposer[] = []
     public datasetId: string | null = null;
     constructor() {
-        this.rawDataStorage = new IteratorStorage({ itemKey: 'rawData' });
-        this.filteredDataStorage = new IteratorStorage({ itemKey: 'filteredData' });
         makeAutoObservable(this, {
             cookedDataSource: observable.ref,
             cookedMeasures: observable.ref,
@@ -95,24 +105,42 @@ export class DataSourceStore {
             rawDataStorage: false,
             filteredDataStorage: false,
         });
+        this.initStore();
+    }
+    public destroy() {
+        this.subscriptions.forEach(s => s.unsubscribe());
+        this.subscriptions = [];
+        this.reactions.forEach(dispose => dispose());
+        this.reactions = [];
+    }
+    public initStore () {
+        this.rawDataMetaInfo = {
+            versionCode: -1,
+            length: 0,
+        }
+        this.extData = new Map<string, ICol<any>>();
+        this.mutFields = [];
+        this.extFields = [];
+        this.fieldsWithExtSug = [];
+        this.filters = [];
+        this.cookedDataSource = [];
+        this.cookedDimensions = [];
+        this.cookedMeasures = [];
+        this.cleanMethod = 'dropNull';
+        this.loading = false;
+        this.dataPreviewMode = IDataPreviewMode.data;
+        this.showDataImportSelection = false;
+        this.showFastSelectionModal = false;
+        this.loadingDataProgress = 0;
+        this.dataPrepProgressTag = IDataPrepProgressTag.none;
+        this.datasetId = null;
+        this.rawDataStorage = new IteratorStorage({ itemKey: 'rawData' });
+        this.filteredDataStorage = new IteratorStorage({ itemKey: 'filteredData' });
         const fields$ = from(toStream(() => this.fieldsAndPreview, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
         const rawDataMetaInfo$ = from(toStream(() => this.rawDataMetaInfo, false));
         const extData$ = from(toStream(() => this.extData, true));
         const filters$ = from(toStream(() => this.filters, true))
-        // const filteredData$ = from(toStream(() => this.filteredData, true));
-        // const filteredData$ = combineLatest([dataVersionCode$, extData$, filters$]).pipe(
-        //     op.map(([code, extData, filters]) => {
-        //         return from(filterDataService({
-        //             dataStorageType: 'db',
-        //             dataStorage: this.rawDataStorage,
-        //             extData: toJS(extData),
-        //             filters: toJS(filters)
-        //         }))
-        //     }),
-        //     op.switchAll(),
-        //     op.share()
-        // )
         const filteredDataMetaInfo$: Observable<IteratorStorageMetaInfo> = combineLatest([rawDataMetaInfo$, extData$, filters$]).pipe(
             op.map(([info, extData, filters]) => {
                 return from(filterDataService({
@@ -210,12 +238,12 @@ export class DataSourceStore {
                 });
             });
         };
-        reaction(() => this.allFields, allFields => {
+        this.reactions.push(reaction(() => this.allFields, allFields => {
             suggestExt(allFields, undefined);
-        })
-        reaction(() => this.fieldMetaAndPreviews, fieldMetaAndPreviews => {
+        }))
+        this.reactions.push(reaction(() => this.fieldMetaAndPreviews, fieldMetaAndPreviews => {
             suggestExt(undefined, fieldMetaAndPreviews);
-        })
+        }))
     }
     public get filteredDataMetaInfo (): IteratorStorageMetaInfo {
         return this.filteredDataMetaInfoRef.current;
@@ -1064,4 +1092,39 @@ export class DataSourceStore {
             });
         }
     }
+
+    public async backupMetaStore (): Promise<IBackUpDataMeta> {
+        const { extFields, mutFields, rawDataMetaInfo, filters, cleanMethod } = this;
+        const data: IBackUpDataMeta = {
+            mutFields: toJS(mutFields),
+            extFields: extFields,
+            rawDataMetaInfo: rawDataMetaInfo,
+            filters: toJS(filters),
+            cleanMethod: cleanMethod
+        };
+        return data;
+    }
+    public async backupDataStore (): Promise<IBackUpData> {
+        const { rawDataStorage, mutFields } = this;
+        const data = await rawDataStorage.getAll();
+        return {
+            rawData: compressRows(data, mutFields),
+            extData: Array.from(this.extData.entries()),
+        }
+    }
+    public async loadBackupDataStore (data: IBackUpData, meta: IBackUpDataMeta) {
+        const { rawData, extData } = data;
+        const { rawDataStorage } = this;
+        this.extData = new Map(extData);
+        await rawDataStorage.setAll(uncompressRows(rawData, meta.mutFields.map(f => f.fid)));
+    }
+    public async loadBackupMetaStore (data: IBackUpDataMeta) {
+        const { mutFields, extFields, rawDataMetaInfo, filters, cleanMethod } = data;
+        this.mutFields = mutFields;
+        this.extFields = extFields;
+        this.rawDataMetaInfo = rawDataMetaInfo;
+        this.filters = filters;
+        this.cleanMethod = cleanMethod as CleanMethod;
+    }
+
 }

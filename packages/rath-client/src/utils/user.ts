@@ -31,21 +31,3 @@ export function getMainServiceAddress(path: string) {
     url.pathname = path;
     return url.toString();
 }
-
-export function getDefaultAvatarURL(imgKey: string, size: 'small' | 'large' = 'large') {
-    return `${DEFAULT_AVATAR_URL_PREFIX}${size}/${imgKey}`;
-}
-
-type AvatarProps = {
-    avatarType: IAVATAR_TYPES;
-    avatarKey: string;
-    size: 'small' | 'large';
-    email: string;
-}
-
-export function getAvatarURL(props: AvatarProps) {
-    if (props.avatarType === IAVATAR_TYPES.default) {
-        return `${DEFAULT_AVATAR_URL_PREFIX}${props.size}/${props.avatarKey}`
-    }
-    return ''
-}

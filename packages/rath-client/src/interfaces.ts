@@ -235,7 +235,23 @@ export interface IResponse<T = void> {
     data: T;
     message?: string;
 }
+export interface IteratorStorageMetaInfo {
+    versionCode: number;
+    length: number;
+}
 
+export interface IBackUpDataMeta {
+    mutFields: IRawField[],
+    extFields: IExtField[],
+    rawDataMetaInfo: IteratorStorageMetaInfo,
+    filters: IFilter[];
+    cleanMethod: string;
+}
+
+export interface IBackUpData {
+    rawData: any[][];
+    extData: [string, ICol<any>][]
+}
 export interface IRawFeatures {
     fid: string;
     valid: number;

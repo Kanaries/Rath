@@ -24,8 +24,8 @@ const PhoneAuthDiv = styled.div`
 `;
 
 const PhoneAuth: React.FC<PhoneAuthProps> = (props) => {
-    const { commonStore, langStore } = useGlobalStore();
-    const { signup } = commonStore;
+    const { userStore, langStore } = useGlobalStore();
+    const { signup } = userStore;
     const { clock, startClock } = useCertPhone(signup.phone);
     const { onSuccessLogin } = props;
     const phoneIsValid = validPhone(signup.phone, langStore.lang);
@@ -38,7 +38,7 @@ const PhoneAuth: React.FC<PhoneAuthProps> = (props) => {
                     label={intl.get('login.phone.phoneNo')}
                     required
                     onChange={(e, newValue) => {
-                        commonStore.updateForm(IAccessPageKeys.SIGNUP, 'phone', newValue || '');
+                        userStore.updateForm(IAccessPageKeys.SIGNUP, 'phone', newValue || '');
                     }}
                 />
             </div>
@@ -50,7 +50,7 @@ const PhoneAuth: React.FC<PhoneAuthProps> = (props) => {
                     buttonLabel={clock > 0 ? `${intl.get('login.haveSent')}(${clock}s)` : intl.get('login.getCertCode')}
                     isDisable={!phoneIsValid || clock !== 0}
                     onChange={(newValue) => {
-                        commonStore.updateForm(IAccessPageKeys.SIGNUP, 'certCode', newValue || '');
+                        userStore.updateForm(IAccessPageKeys.SIGNUP, 'certCode', newValue || '');
                     }}
                 />
             </div>
@@ -58,7 +58,7 @@ const PhoneAuth: React.FC<PhoneAuthProps> = (props) => {
                 <PrimaryButton
                     disabled={!phoneIsValid || signup.certCode.length !== 6}
                     onClick={() => {
-                        commonStore.liteAuth('phone').then((res) => {
+                        userStore.liteAuth('phone').then((res) => {
                             if (res) {
                                 onSuccessLogin();
                             }
