@@ -114,6 +114,7 @@ export const useReactiveGraph = ({
             graphRef.current = graph;
 
             return () => {
+                graph.clear();
                 graph.destroy();
                 graphRef.current = undefined;
                 container.innerHTML = '';

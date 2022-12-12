@@ -269,7 +269,7 @@ export const useRenderData = ({
                 another.src_type = another.src_type === link.src_type ? another.src_type : PAG_NODE.CIRCLE;
                 another.tar_type = another.tar_type === link.tar_type ? another.tar_type : PAG_NODE.CIRCLE;
             } else {
-                const anotherReversed = list.find(which => which.src === link.src && which.tar === link.tar);
+                const anotherReversed = list.find(which => which.src === link.tar && which.tar === link.src);
                 if (anotherReversed) {
                     anotherReversed.src_type = anotherReversed.tar_type === link.src_type ? anotherReversed.src_type : PAG_NODE.CIRCLE;
                     anotherReversed.tar_type = anotherReversed.src_type === link.tar_type ? anotherReversed.tar_type : PAG_NODE.CIRCLE;
@@ -299,14 +299,14 @@ export const useRenderData = ({
                     lineWidth: 1 + Math.abs(w) * 2,
                 },
                 label: `${
-                    'confidence' in link.weight ? `confidence=${(link.weight.confidence! * 100).toFixed(2).replace(/\.?0+$/, '')}%\n` : ''
+                    'confidence' in link.weight ? `c=${(link.weight.confidence! * 100).toFixed(2).replace(/\.?0+$/, '')}%\n` : ''
                 }${
-                    'weight' in link.weight ? `weight=${link.weight.weight!.toFixed(2).replace(/\.?0+$/, '')}(${w.toFixed(2).replace(/\.?0+$/, '')})\n` : ''
+                    'weight' in link.weight ? `w=${link.weight.weight!.toFixed(2).replace(/\.?0+$/, '')}(${w.toFixed(2).replace(/\.?0+$/, '')})\n` : ''
                 }`.slice(0, /* remove trailing `\n` */ -1),
                 labelCfg: {
                     style: {
                         fontSize: 9.85,
-                        fill: '#211',
+                        fill: '#2118',
                     },
                 },
             };
