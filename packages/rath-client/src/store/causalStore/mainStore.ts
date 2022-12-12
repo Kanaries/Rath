@@ -6,7 +6,7 @@ import type { DataSourceStore } from "../dataSourceStore";
 import CausalDatasetStore from "./datasetStore";
 import CausalModelStore from "./modelStore";
 import CausalOperatorStore from "./operatorStore";
-import { resolveCausality } from "./pag";
+// import { resolveCausality } from "./pag";
 import { discover, IDiscoverResult, IDiscoveryTask, ITask, ITaskRecord } from "./service";
 
 
@@ -72,7 +72,8 @@ export default class CausalStore {
                 this.operator.updateConfig(save.causalModel.algorithm, save.causalModel.params);
                 runInAction(() => {
                     this.model.causalityRaw = save.causalModel!.causalityRaw;
-                    this.model.causality = resolveCausality(save.causalModel!.causalityRaw, this.dataset.fields);
+                    // TODO: 包含上权重矩阵后加回来
+                    // this.model.causality = resolveCausality(save.causalModel!.causalityRaw, this.dataset.fields);
                 });
             }
             return true;

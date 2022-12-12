@@ -1,6 +1,6 @@
 import { useMemo, useRef, CSSProperties } from "react";
 import G6, { Graph, GraphData, GraphOptions } from "@antv/g6";
-import { PagLink, PAG_NODE } from "../config";
+import { LinkWeightSet, PagLink, PAG_NODE, WeightedPagLink } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
 
 
@@ -117,12 +117,12 @@ export interface IRenderDataProps {
         expanded: boolean;
     }>[];
     PAG: readonly PagLink[];
-    weightMatrix?: number[][];
-    confMatrix?: number[][];
-    /** @default 0 */
-    weightThreshold?: number;
-    /** @default 0 */
-    confThreshold?: number;
+    thresholds?: {
+        /**
+         * @default 0
+         */
+        [key in keyof LinkWeightSet]?: number;
+    };
     /** @default Infinity */
     limit?: number;
     renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
@@ -133,10 +133,7 @@ export const useRenderData = ({
     fields,
     groups = [],
     PAG,
-    weightMatrix,
-    confMatrix,
-    weightThreshold = 0,
-    confThreshold = 0,
+    thresholds,
     limit = Infinity,   // TODO: 目前暂时关掉
     renderNode,
 }: IRenderDataProps) => {
@@ -219,16 +216,21 @@ export const useRenderData = ({
         }, []);
     }, [fields, groups, renderNode]);
     const realEdges = useMemo<NonNullable<GraphData['edges']>>(() => {
-        let links: (PagLink & { c: number; w: number })[] = [];
+        let links: WeightedPagLink[] = [];
 
-        const result = PAG.map(link => {
-            const srcIdx = fields.findIndex(f => f.fid === link.src);
-            const tarIdx = fields.findIndex(f => f.fid === link.tar);
-            const w = weightMatrix?.[srcIdx]?.[tarIdx] ?? 0;
-            const c = confMatrix?.[srcIdx]?.[tarIdx] ?? 0;
-            return { ...link, c, w };
-        }).filter(({ c, w }) => {
-            return w >= weightThreshold && c >= confThreshold;
+        const result = PAG.filter(({ weight }) => {
+            for (const key of Object.keys(thresholds ?? {}) as (keyof LinkWeightSet)[]) {
+                const threshold = thresholds?.[key] ?? 0;
+                if ( (weight?.[key] ?? 0) < threshold) {
+                    return false;
+                }
+            }
+            return true;
+        }).map((link) => {
+            return {
+                ...link,
+                weight: link.weight ?? {},
+            };
         });
 
         for (const link of result) {
@@ -255,8 +257,7 @@ export const useRenderData = ({
                         src_type: s[1],
                         tar: t[0],
                         tar_type: t[1],
-                        c: link.c,
-                        w: link.w,
+                        weight: link.weight,
                     });
                 }
             }
@@ -280,7 +281,7 @@ export const useRenderData = ({
         }, []).filter(({ src, tar }) => src !== tar);
 
         return links.map((link, i) => {
-            const w = 2 / (1 + Math.exp(- link.w)) - 1;
+            const w = 2 / (1 + Math.exp(- (link.weight.weight ?? 0))) - 1;
 
             return {
                 id: `link_${i}`,
@@ -297,17 +298,20 @@ export const useRenderData = ({
                     },
                     lineWidth: 1 + Math.abs(w) * 2,
                 },
-                label: `confidence=${(link.c * 100).toFixed(2).replace(/\.?0+$/, '')}%\nweight=${
-                    link.w.toFixed(4).replace(/\.?0+$/, '')
-                }`,
-                // labelCfg: {
-                //     style: {
-                //         opacity: 0,
-                //     },
-                // },
+                label: `${
+                    'confidence' in link.weight ? `confidence=${(link.weight.confidence! * 100).toFixed(2).replace(/\.?0+$/, '')}%\n` : ''
+                }${
+                    'weight' in link.weight ? `weight=${link.weight.weight!.toFixed(2).replace(/\.?0+$/, '')}(${w.toFixed(2).replace(/\.?0+$/, '')})\n` : ''
+                }`.slice(0, /* remove trailing `\n` */ -1),
+                labelCfg: {
+                    style: {
+                        fontSize: 9.85,
+                        fill: '#211',
+                    },
+                },
             };
         });
-    }, [PAG, confMatrix, confThreshold, fields, groups, weightMatrix, weightThreshold]);
+    }, [PAG, groups, thresholds]);
     const inGroupEdges = useMemo<NonNullable<GraphData['edges']>>(() => {
         return groups.reduce<NonNullable<GraphData['edges']>>((list, group) => {
             if (group.expanded) {

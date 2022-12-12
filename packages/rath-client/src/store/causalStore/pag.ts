@@ -1,5 +1,5 @@
 import type { IFieldMeta, IRawField } from "../../interfaces";
-import { IFunctionalDep, PagLink, PAG_NODE } from "../../pages/causal/config";
+import { IFunctionalDep, LinkWeightSet, PagLink, PAG_NODE, WeightedPagLink } from "../../pages/causal/config";
 import { CausalModelAssertion, NodeAssert, EdgeAssert } from "./modelStore";
 
 
@@ -121,8 +121,16 @@ export const transformPagToAssertions = (pag: readonly PagLink[]): CausalModelAs
     }, []);
 };
 
-export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fields: readonly IRawField[]): PagLink[] => {
-    const links: PagLink[] = [];
+export const resolveCausality = (
+    fields: readonly IRawField[],
+    matrix: {
+        causality: readonly (readonly PAG_NODE[])[];
+        confidence?: readonly (readonly number[])[];
+        weight?: readonly (readonly number[])[];
+    },
+): WeightedPagLink[] => {
+    const links: WeightedPagLink[] = [];
+    const { causality, confidence, weight } = matrix;
 
     for (let i = 0; i < causality.length - 1; i += 1) {
         for (let j = i + 1; j < causality.length; j += 1) {
@@ -130,6 +138,14 @@ export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fi
             const tar = fields[j].fid;
             const src_type = causality[i][j];
             const tar_type = causality[j][i];
+            const wForwards: LinkWeightSet = {
+                confidence: confidence?.[i]?.[j],
+                weight: weight?.[i]?.[j],
+            };
+            const wBackwards: LinkWeightSet = {
+                confidence: confidence?.[j]?.[i],
+                weight: weight?.[j]?.[i],
+            };
             if (src_type === PAG_NODE.BLANK && tar_type === PAG_NODE.ARROW) {
                 // i ----> j
                 links.push({
@@ -137,6 +153,7 @@ export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fi
                     tar,
                     src_type,
                     tar_type,
+                    weight: wForwards,
                 });
             } else if (tar_type === PAG_NODE.BLANK && src_type === PAG_NODE.ARROW) {
                 // j ----> i
@@ -145,6 +162,7 @@ export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fi
                     tar: src,
                     src_type: tar_type,
                     tar_type: src_type,
+                    weight: wBackwards,
                 });
             } else if (src_type === PAG_NODE.BLANK && tar_type === PAG_NODE.BLANK) {
                 // i ----- j
@@ -153,6 +171,7 @@ export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fi
                     tar,
                     src_type,
                     tar_type,
+                    weight: wForwards,
                 });
             } else if (src_type === PAG_NODE.ARROW && tar_type === PAG_NODE.ARROW) {
                 // i <---> j
@@ -161,6 +180,7 @@ export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fi
                     tar,
                     src_type,
                     tar_type,
+                    weight: wForwards,
                 });
             } else if (src_type === PAG_NODE.CIRCLE && tar_type === PAG_NODE.ARROW) {
                 // i o---> j
@@ -169,6 +189,7 @@ export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fi
                     tar,
                     src_type,
                     tar_type,
+                    weight: wForwards,
                 });
             } else if (src_type === PAG_NODE.ARROW && tar_type === PAG_NODE.CIRCLE) {
                 // j o---> i
@@ -177,6 +198,7 @@ export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fi
                     tar: src,
                     src_type: tar_type,
                     tar_type: src_type,
+                    weight: wBackwards,
                 });
             } else if (tar_type === PAG_NODE.CIRCLE && src_type === PAG_NODE.CIRCLE) {
                 // i o---o j
@@ -185,6 +207,7 @@ export const resolveCausality = (causality: readonly (readonly PAG_NODE[])[], fi
                     tar,
                     src_type,
                     tar_type,
+                    weight: wForwards,
                 });
             }
         }

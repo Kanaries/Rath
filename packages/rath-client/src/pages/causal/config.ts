@@ -62,12 +62,20 @@ export enum PAG_NODE {
     CIRCLE = 2,
 }
 
+export interface LinkWeightSet {
+    weight?: number;
+    confidence?: number;
+}
+
 export interface PagLink {
     src: string;
     tar: string;
     src_type: PAG_NODE;
     tar_type: PAG_NODE;
+    weight?: LinkWeightSet;
 }
+
+export type WeightedPagLink = PagLink & Required<Pick<PagLink, 'weight'>>;
 
 /** @deprecated */
 export type BgKnowledgePagLink = PagLink;

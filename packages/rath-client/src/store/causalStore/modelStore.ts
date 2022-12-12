@@ -3,7 +3,7 @@ import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { combineLatest, distinctUntilChanged, map, Subject, switchAll } from "rxjs";
 import { notify } from "../../components/error";
 import type { IFieldMeta } from "../../interfaces";
-import type { IFunctionalDep, PagLink } from "../../pages/causal/config";
+import type { IFunctionalDep, PagLink, WeightedPagLink } from "../../pages/causal/config";
 import type CausalDatasetStore from "./datasetStore";
 import CausalOperatorStore from "./operatorStore";
 import { findUnmatchedCausalResults, mergePAGs, resolveCausality, transformAssertionsToPag, transformFuncDepsToPag, transformPagToAssertions } from "./pag";
@@ -57,9 +57,7 @@ export default class CausalModelStore {
     public condMutualMatrix: readonly (readonly number[])[] | null = null;
     
     public causalityRaw: readonly (readonly number[])[] | null = null;
-    public causality: readonly PagLink[] | null = null;
-    public confMatrix: readonly (readonly number[])[] | null = null;
-    public weightMatrix: readonly (readonly number[])[] | null = null;
+    public causality: readonly WeightedPagLink[] | null = null;
     /** causality + assertionsAsPag */
     public mergedPag: readonly PagLink[] = [];
 
@@ -78,8 +76,6 @@ export default class CausalModelStore {
             assertionsAsPag: observable.ref,
             mutualMatrix: observable.ref,
             causalityRaw: observable.ref,
-            weightMatrix: observable.ref,
-            confMatrix: observable.ref,
             condMutualMatrix: observable.ref,
             causality: observable.ref,
             mergedPag: observable.ref,
@@ -95,8 +91,6 @@ export default class CausalModelStore {
                     this.condMutualMatrix = null;
                     this.causalityRaw = null;
                     this.causality = null;
-                    this.weightMatrix = [];
-                    this.confMatrix = [];
                 });
             }),
             reaction(() => this.mutualMatrix, () => {
@@ -109,8 +103,6 @@ export default class CausalModelStore {
                     this.functionalDependenciesAsPag = transformFuncDepsToPag(funcDeps);
                     this.causalityRaw = null;
                     this.causality = null;
-                    this.weightMatrix = [];
-                    this.confMatrix = [];
                 });
             }),
             reaction(() => this.causality, () => {
@@ -233,10 +225,11 @@ export default class CausalModelStore {
         });
     }
 
-    // protected synchronizeAssertionsWithResult() {
-    //     const nodeAssertions = this.assertions.filter(decl => 'fid' in decl);
-    //     this.assertions$.next(this.causality ? nodeAssertions.concat(transformPagToAssertions(this.causality)) : []);
-    // }
+    // TODO: expose it as a button action
+    public synchronizeAssertionsWithResult() {
+        const nodeAssertions = this.assertions.filter(decl => 'fid' in decl);
+        this.assertions$.next(this.causality ? nodeAssertions.concat(transformPagToAssertions(this.causality)) : []);
+    }
 
     public clearAssertions() {
         this.assertions$.next([]);
@@ -334,7 +327,27 @@ export default class CausalModelStore {
         const { data: { matrix, fields }, modelId, edges } = result;
         this.modelId = modelId;
         this.causalityRaw = matrix;
-        const causalPag = resolveCausality(matrix, fields);
+        const confMatrix: number[][] = fields.map(() => fields.map(() => 0));
+        const weightMatrix: number[][] = fields.map(() => fields.map(() => 0));
+        for (const { data: edge } of edges) {
+            const srcIdx = fields.findIndex(f => f.fid === edge.source);
+            const tarIdx = fields.findIndex(f => f.fid === edge.target);
+            if (srcIdx === -1) {
+                console.warn('not found:', edge.source);
+                continue;
+            }
+            if (tarIdx === -1) {
+                console.warn('not found:', edge.target);
+                continue;
+            }
+            confMatrix[srcIdx][tarIdx] = edge.confidence;
+            weightMatrix[srcIdx][tarIdx] = edge.weight;
+        }
+        const causalPag = resolveCausality(fields, {
+            causality: matrix,
+            weight: weightMatrix,
+            confidence: confMatrix,
+        });
         const unmatched = findUnmatchedCausalResults(this.assertionsAsPag, causalPag);
         if (unmatched.length > 0 && process.env.NODE_ENV !== 'production') {
             const getFieldName = (fid: string) => {
@@ -352,24 +365,6 @@ export default class CausalModelStore {
             }
         }
         this.causality = causalPag;
-        const confMatrix: number[][] = fields.map(() => fields.map(() => 0));
-        const weightMatrix: number[][] = fields.map(() => fields.map(() => 0));
-        for (const { data: edge } of edges) {
-            const srcIdx = fields.findIndex(f => f.fid === edge.source);
-            const tarIdx = fields.findIndex(f => f.fid === edge.target);
-            if (srcIdx === -1) {
-                console.warn('not found:', edge.source);
-                continue;
-            }
-            if (tarIdx === -1) {
-                console.warn('not found:', edge.target);
-                continue;
-            }
-            confMatrix[srcIdx][tarIdx] = edge.confidence;
-            weightMatrix[srcIdx][tarIdx] = edge.weight;
-        }
-        this.confMatrix = confMatrix;
-        this.weightMatrix = weightMatrix;
     }
 
 }

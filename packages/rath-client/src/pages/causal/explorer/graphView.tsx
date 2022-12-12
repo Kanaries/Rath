@@ -12,9 +12,9 @@ import { useGraphOptions, useRenderData } from "./graph-utils";
 import { useReactiveGraph } from "./graph-helper";
 
 
-const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
-    return matrix.map(vec => vec.map(n => 2 / (1 + Math.exp(-n)) - 1));
-};
+// const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
+//     return matrix.map(vec => vec.map(n => 2 / (1 + Math.exp(-n)) - 1));
+// };
 
 const Container = styled.div`
     overflow: hidden;
@@ -66,11 +66,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
 }, ref) => {
     const { causalStore } = useGlobalStore();
     const { fields, groups } = causalStore.dataset;
-    const { causality, assertionsAsPag, weightMatrix, confMatrix } = causalStore.model;
+    const { causality, assertionsAsPag } = causalStore.model;
     const viewContext = useCausalViewContext();
-    const { onRenderNode, localWeights, explorationKey, localData = null } = viewContext ?? {};
-
-    console.log({weightMatrix, confMatrix});
+    const { onRenderNode, /*localWeights, */explorationKey, localData = null } = viewContext ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -81,19 +79,22 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         onLinkTogether(srcFid, tarFid, createEdgeMode);
     }, [createEdgeMode, onLinkTogether]);
 
+    const thresholds = useMemo(() => {
+        return {
+            weight: weightThreshold,
+            confidence: confThreshold,
+        };
+    }, [weightThreshold, confThreshold]);
+
     const graphRef = useRef<Graph>();
     const renderData = useRenderData({
         mode,
         fields,
         groups,
+        // TODO: 把「可解释探索」模块的临时 weight 加回来
         // weights: mode === 'edit' || localData ? undefined : localWeights ?? W,
         PAG: mode === 'edit' ? assertionsAsPag : localData?.pag ?? causality ?? [],
-        // @ts-ignore readonly
-        weightMatrix,
-        // @ts-ignore readonly
-        confMatrix,
-        weightThreshold,
-        confThreshold,
+        thresholds,
         limit,
         renderNode: onRenderNode,
     });
