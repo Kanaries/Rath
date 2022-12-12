@@ -155,10 +155,13 @@ export interface IDiscoverResult {
     modelId: string; // 用于之后的Estimation和Intervention
     data: IDiscoverData;
     edges: {
-        confidence: number;
-        weight: number;
-        source: string;
-        target: string;
+        data: {
+            /** ~[0, 1] */
+            confidence: number;
+            weight: number;
+            source: string;
+            target: string;
+        };
     }[];
 }
 

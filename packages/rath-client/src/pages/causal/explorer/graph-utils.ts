@@ -224,8 +224,8 @@ export const useRenderData = ({
         const result = PAG.map(link => {
             const srcIdx = fields.findIndex(f => f.fid === link.src);
             const tarIdx = fields.findIndex(f => f.fid === link.tar);
-            const w = weightMatrix?.[srcIdx][tarIdx] ?? 0;
-            const c = confMatrix?.[srcIdx][tarIdx] ?? 0;
+            const w = weightMatrix?.[srcIdx]?.[tarIdx] ?? 0;
+            const c = confMatrix?.[srcIdx]?.[tarIdx] ?? 0;
             return { ...link, c, w };
         }).filter(({ c, w }) => {
             return w >= weightThreshold && c >= confThreshold;
@@ -280,6 +280,8 @@ export const useRenderData = ({
         }, []).filter(({ src, tar }) => src !== tar);
 
         return links.map((link, i) => {
+            const w = 2 / (1 + Math.exp(- link.w)) - 1;
+
             return {
                 id: `link_${i}`,
                 source: link.src,
@@ -293,9 +295,11 @@ export const useRenderData = ({
                         fill: '#F6BD16',
                         path: arrows[link.tar_type],
                     },
-                    lineWidth: 1 + link.w * 2,
+                    lineWidth: 1 + Math.abs(w) * 2,
                 },
-                label: `${(link.c * 100).toFixed(2).replace(/\.?0+$/, '')}%`,
+                label: `confidence=${(link.c * 100).toFixed(2).replace(/\.?0+$/, '')}%\nweight=${
+                    link.w.toFixed(4).replace(/\.?0+$/, '')
+                }`,
                 // labelCfg: {
                 //     style: {
                 //         opacity: 0,

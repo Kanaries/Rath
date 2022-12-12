@@ -70,6 +70,8 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const viewContext = useCausalViewContext();
     const { onRenderNode, localWeights, explorationKey, localData = null } = viewContext ?? {};
 
+    console.log({weightMatrix, confMatrix});
+
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
 

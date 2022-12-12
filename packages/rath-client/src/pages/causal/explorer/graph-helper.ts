@@ -263,7 +263,7 @@ export const useReactiveGraph = ({
                 graph.updateItem(edge, {
                     labelCfg: {
                         style: {
-                            opacity: isInSubtree ? 1 : isHalfInSubtree ? 0.6 : 0,
+                            opacity: focusedNodes.length === 0 ? 1 : isInSubtree ? 1 : isHalfInSubtree ? 0.6 : 0,
                         },
                     },
                 });

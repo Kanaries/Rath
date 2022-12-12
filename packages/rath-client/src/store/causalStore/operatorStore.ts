@@ -3,6 +3,7 @@ import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { nanoid } from "nanoid";
 import { Subject, switchAll } from "rxjs";
 import { getGlobalStore } from "..";
+import { notify } from "../../components/error";
 import type { IFieldMeta } from "../../interfaces";
 import { IAlgoSchema, makeFormInitParams } from "../../pages/causal/config";
 import { causalService } from "../../pages/causal/service";
@@ -231,7 +232,12 @@ export default class CausalOperatorStore {
         task.task.value.then(data => {
             task.onResolve?.(data);
             this.updateTaskStatus(task.taskId, 'DONE', 1);
-        }).catch(() => {
+        }).catch(reason => {
+            notify({
+                type: 'error',
+                title: 'Causal Task Failed',
+                content: `${reason instanceof Error ? reason.stack : reason}`,
+            });
             this.updateTaskStatus(task.taskId, 'FAILED');
         }).finally(() => {
             task.onFinally?.();
