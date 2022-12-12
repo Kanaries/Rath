@@ -1,9 +1,9 @@
-import { DefaultButton, Icon, Slider, Stack, TextField, Toggle } from "@fluentui/react";
+import { DefaultButton, Icon, SpinButton, Stack, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
-import { getGlobalStore, useGlobalStore } from "../../../store";
+import { getGlobalStore/*, useGlobalStore*/ } from "../../../store";
 import type { EdgeAssert } from "../../../store/causalStore/modelStore";
 import { useCausalViewContext } from "../../../store/causalStore/viewStore";
 import type { Subtree } from "../exploration";
@@ -85,11 +85,11 @@ const Explorer: FC<ExplorerProps> = ({
     handleLasso,
     handleSubTreeSelected,
 }) => {
-    const { causalStore } = useGlobalStore();
-    const { causality } = causalStore.model;
+    // const { causalStore } = useGlobalStore();
+    // const { causality } = causalStore.model;
 
-    const [wThreshold, setWThreshold] = useState(0);
-    const [cThreshold, setCThreshold] = useState(0);
+    const [cThreshold, setCThreshold] = useState(0.9);
+    const [wThreshold, setWThreshold] = useState(0.2);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
     const [allowZoom, setAllowZoom] = useState(false);
@@ -191,16 +191,21 @@ const Explorer: FC<ExplorerProps> = ({
                         value={limit}
                         onChange={value => setLimit(value)}
                     /> */}
-                    {/* TODO: 数值校验 */}
-                    <TextField
-                        label="按权重筛选"
-                        value={`${wThreshold}`}
-                        onChange={d => setWThreshold(Number(d))}
+                    <SpinButton
+                        label="按置信度筛选 (%)"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={(cThreshold * 100).toFixed()}
+                        onChange={(_, d) => setCThreshold(Number(d) / 100)}
                     />
-                    <TextField
-                        label="按置信度筛选"
-                        value={`${cThreshold}`}
-                        onChange={d => setCThreshold(Number(d))}
+                    <SpinButton
+                        label="按权重筛选 (%)"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={(wThreshold * 100).toFixed()}
+                        onChange={(_, d) => setWThreshold(Number(d) / 100)}
                     />
                 </Tools>
             </Floating>

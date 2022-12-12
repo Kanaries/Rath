@@ -221,7 +221,10 @@ export const useRenderData = ({
         const result = PAG.filter(({ weight }) => {
             for (const key of Object.keys(thresholds ?? {}) as (keyof LinkWeightSet)[]) {
                 const threshold = thresholds?.[key] ?? 0;
-                if ( (weight?.[key] ?? 0) < threshold) {
+                const w = key === 'weight' ? Math.abs(
+                    2 / (1 + Math.exp(- (weight?.weight ?? 0))) - 1
+                ) : weight?.[key];
+                if ((w ?? 0) < threshold) {
                     return false;
                 }
             }
@@ -448,18 +451,18 @@ export const useGraphOptions = ({
                 edit_zoom: [...exploreMode, 'zoom-canvas'],
             },
             animate: true,
-            // layout: {
-            //     type: 'fruchterman',
-            //     // https://antv-g6.gitee.io/zh/docs/api/graphLayout/fruchterman#layoutcfggpuenabled
-            //     // 启用 GPU 加速会导致数据更新时视图变化很大
-            //     gpuEnabled: false,
-            //     gravity: 5,
-            //     speed: 5,
-            //     // for rendering after each iteration
-            //     tick: () => {
-            //         graphRef.current?.refreshPositions();
-            //     },
-            // },
+            layout: {
+                type: 'fruchterman',
+                // https://antv-g6.gitee.io/zh/docs/api/graphLayout/fruchterman#layoutcfggpuenabled
+                // 启用 GPU 加速会导致数据更新时视图变化很大
+                gpuEnabled: false,
+                gravity: 5,
+                speed: 5,
+                // for rendering after each iteration
+                tick: () => {
+                    graphRef.current?.refreshPositions();
+                },
+            },
             defaultNode: {
                 size: 20,
                 style: {
