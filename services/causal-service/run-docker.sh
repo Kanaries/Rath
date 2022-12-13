@@ -10,7 +10,7 @@ if [ $? -eq 0 ] ; then
 docker stop run-causal-server
 docker rm run-causal-server
 fi
-docker run -d -p $PORT:8000 -p $PORT2:8000 --env mode=$mode --name run-causal-server causal-server
+docker run -d -p $PORT:8000 -p $PORT2:8000 -v /var/tmp/showwhy_log:/var/tmp --env mode=$mode --name run-causal-server causal-server
 
 # docker wait run-causal-server && \
 # 	docker rm run-causal-server && \
