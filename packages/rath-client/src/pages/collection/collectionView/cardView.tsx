@@ -7,6 +7,7 @@ import ViewInfo from '../../../components/viewInfo/textInfo';
 import { IFieldMeta, IInsightVizView, IRow } from '../../../interfaces';
 import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { changeVisSize, VIEW_NUM_IN_PAGE } from '../utils';
+import { VegaThemeConfig } from '../../../queries/themes/config';
 
 const CollectContainer = styled.div`
     display: flex;
@@ -46,9 +47,10 @@ interface CardViewProps {
     metas: IFieldMeta[];
     views: IInsightVizView[];
     onConfig: (data: IInsightVizView) => void;
+    themeConfig?: VegaThemeConfig;
 }
 const CardView: React.FC<CardViewProps> = (props) => {
-    const { data, views, metas, onConfig } = props;
+    const { data, views, metas, onConfig, themeConfig } = props;
     const [pageIndex, setPageIndex] = useState<number>(0);
     return (
         <div>
@@ -79,6 +81,7 @@ const CardView: React.FC<CardViewProps> = (props) => {
                                     dataSource={applyFilters(data, item.filters)}
                                     spec={changeVisSize(item.spec, 200, 180)}
                                     actions={false}
+                                    config={themeConfig}
                                 />
                             </VisErrorBoundary>
                         </div>

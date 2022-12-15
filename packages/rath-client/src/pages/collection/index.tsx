@@ -27,7 +27,7 @@ const collectionConfig = [
 ];
 
 const Collection: React.FC = (props) => {
-    const { collectionStore, dataSourceStore } = useGlobalStore();
+    const { collectionStore, dataSourceStore, commonStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
     const { collectionList } = collectionStore;
     const [viewMode, setViewMode] = useState<VIEW_MODE>(VIEW_MODE.CARD);
@@ -140,6 +140,7 @@ const Collection: React.FC = (props) => {
                             data={sampleData}
                             views={filteredColcList}
                             onConfig={onOpenKeyChange}
+                            themeConfig={commonStore.themeConfig}
                         />
                     )}
                     {viewMode === VIEW_MODE.LIST && (
@@ -148,6 +149,7 @@ const Collection: React.FC = (props) => {
                             data={sampleData}
                             views={filteredColcList}
                             onConfig={onOpenKeyChange}
+                            themeConfig={commonStore.themeConfig}
                         />
                     )}
                 </MainCardContainer>

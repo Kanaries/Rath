@@ -2,6 +2,8 @@ import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Specification } from 'visual-insights';
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
 import { ITaskTestMode, IVegaSubset } from '../interfaces';
+import { visThemeParser } from '../queries/themes';
+import { VegaThemeConfig } from '../queries/themes/config';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
 import { transVegaSubset2Schema } from '../utils/transform';
 
@@ -20,6 +22,9 @@ export class CommonStore {
     public navMode: 'text' | 'icon' = 'text';
     public graphicWalkerSpec: Specification;
     public vizSpec: IVegaSubset | null = null;
+    public vizTheme: string = 'default';
+    // should not be computated values, for custom theme cases.
+    public themeConfig: VegaThemeConfig | undefined = undefined;
     constructor() {
         const taskMode = localStorage.getItem(TASK_TEST_MODE_COOKIE_KEY) || ITaskTestMode.local;
         this.taskMode = taskMode as ITaskTestMode;
@@ -27,10 +32,15 @@ export class CommonStore {
         makeAutoObservable(this, {
             graphicWalkerSpec: observable.ref,
             vizSpec: observable.ref,
+            themeConfig: observable.ref
         });
     }
     public setAppKey(key: string) {
         this.appKey = key;
+    }
+    public applyPreBuildTheme (themeKey: string) {
+        this.vizTheme = themeKey;
+        this.themeConfig = visThemeParser(themeKey);
     }
     public showError(type: ErrorType, content: string) {
         this.messages.push({

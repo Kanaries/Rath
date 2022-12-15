@@ -63,7 +63,7 @@ function extractVizGridOnly(spec: IVegaSubset): IVegaSubset {
 }
 
 const VizPagination: React.FC = (props) => {
-    const { megaAutoStore } = useGlobalStore();
+    const { megaAutoStore, commonStore } = useGlobalStore();
     const { insightSpaces, fieldMetas, visualConfig, vizMode, pageIndex, samplingDataSource } = megaAutoStore;
     const [searchContent, setSearchContent] = useState<string>('');
     const updatePage = useCallback(
@@ -137,6 +137,7 @@ const VizPagination: React.FC = (props) => {
                                             dataSource={samplingDataSource}
                                             spec={view.spec}
                                             actions={visualConfig.debug}
+                                            config={commonStore.themeConfig}
                                         />
                                     </VisErrorBoundary>
                                 );

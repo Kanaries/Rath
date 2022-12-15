@@ -10,7 +10,7 @@ import { useGlobalStore } from "../../../../store";
 
 
 const Vis: FC = () => {
-    const { causalStore } = useGlobalStore();
+    const { causalStore, commonStore } = useGlobalStore();
     const { visSample } = causalStore.dataset;
     const viewContext = useCausalViewContext();
 
@@ -55,7 +55,7 @@ const Vis: FC = () => {
                 可视化分析
             </header>
             <ErrorBoundary>
-                <ReactVega actions={false} spec={viewSpec} dataSource={visSample} />
+                <ReactVega actions={false} spec={viewSpec} dataSource={visSample} config={commonStore.themeConfig} />
             </ErrorBoundary>
         </div>
     );
