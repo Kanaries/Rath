@@ -1,4 +1,3 @@
-import intl from 'react-intl-universal';
 import { Icon, ITooltipProps, TooltipDelay, TooltipHost } from '@fluentui/react';
 import type { DeepReadonly } from '@kanaries/graphic-walker/dist/interfaces';
 import React, { useEffect, useMemo, useRef } from 'react';
@@ -6,6 +5,7 @@ import styled from 'styled-components';
 import embed from 'vega-embed';
 import type { IFieldMeta, IRow } from '../../../interfaces';
 import { CausalLinkDirection, describeDirection, stringifyDirection } from '../../../utils/resolve-causal';
+import { getI18n } from '../locales';
 
 interface Props {
     mark: 'circle' | 'square';
@@ -70,7 +70,7 @@ const DirectionMatrix: React.FC<Props> = (props) => {
     const selectHandlerRef = useRef(onSelect);
     selectHandlerRef.current = onSelect;
     const container = useRef<HTMLDivElement>(null);
-    const linkTypeName = intl.get('causal_direction._');
+    const linkTypeName = getI18n('matrix.causal_direction.label');
     const values = useMemo<IRow[]>(() => {
         const ans: IRow[] = [];
         for (let i = 0; i < data.length; i++) {

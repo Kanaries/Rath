@@ -1,4 +1,8 @@
-import { MATRIX_TYPE, VIEW_TYPE } from "../matrixPanel";
+import { MATRIX_MARK_TYPE } from "../matrixPanel";
+import { VIEW_TYPE, MATRIX_TYPE } from "../step/causalModal";
+import { LayoutMethod } from "../../../store/causalStore/viewStore";
+import { EdgeAssert, NodeAssert } from "../../../store/causalStore/modelStore";
+import { CausalLinkDirection } from "../../../utils/resolve-causal";
 import type { Locales } from ".";
 
 const locales: Locales = {
@@ -64,6 +68,35 @@ const locales: Locales = {
     computing: '计算中',
     chart: {
         re_layout: '重新布局',
+        layout: {
+            [LayoutMethod.FORCE]: '力引导布局',
+            [LayoutMethod.CIRCULAR]: '环形布局',
+            [LayoutMethod.RADIAL]: '辐射布局',
+            [LayoutMethod.GRID]: '网格布局',
+        },
+        assertion: {
+            edge: '连接两个节点',
+            node: '双击一个节点',
+            [EdgeAssert.TO_EFFECT]: '一定影响',
+            [EdgeAssert.TO_NOT_EFFECT]: '一定不影响',
+            [EdgeAssert.TO_BE_RELEVANT]: '一定关联',
+            [EdgeAssert.TO_BE_NOT_RELEVANT]: '一定不关联',
+            [NodeAssert.FORBID_AS_CAUSE]: '不可作为原因',
+            [NodeAssert.FORBID_AS_EFFECT]: '不可作为结果',
+            click_edge: '单击一条连接',
+            forbid: '取反',
+            delete: '删除',
+        },
+        tools: {
+            edit: {
+                settings: '交互行为',
+                clear: '清空所有',
+            },
+            resize: '画布缩放',
+            write: '编辑因果关系',
+            filter_by_confidence: '按置信度筛选',
+            filter_by_weight: '按贡献度筛选',
+        },
     },
     viewType: {
         label: '视图',
@@ -82,6 +115,32 @@ const locales: Locales = {
         [MATRIX_TYPE.causal]: {
             name: '因果模型',
             action: '因果发现',
+        },
+        markType: {
+            label: '标记',
+            [MATRIX_MARK_TYPE.circle]: '圆',
+            [MATRIX_MARK_TYPE.square]: '矩形',
+        },
+        causal_direction: {
+            label: '连接类型',
+            [CausalLinkDirection.none]: '无关',
+            [CausalLinkDirection.directed]: '导向',
+            [CausalLinkDirection.reversed]: '被导向',
+            [CausalLinkDirection.weakDirected]: '导向（弱关系）',
+            [CausalLinkDirection.weakReversed]: '被导向（弱关系）',
+            [CausalLinkDirection.undirected]: '无向相关',
+            [CausalLinkDirection.weakUndirected]: '无向相关（弱关系）',
+            [CausalLinkDirection.bidirected]: '双向相关',
+        },
+        causal_direction_desc: {
+            [CausalLinkDirection.none]: 'A 与 B 不相关。',
+            [CausalLinkDirection.directed]: 'A 对 B 有影响。',
+            [CausalLinkDirection.reversed]: 'A 被 B 影响。',
+            [CausalLinkDirection.weakDirected]: '在部分子集合中，A 对 B 有影响。',
+            [CausalLinkDirection.weakReversed]: '在部分子集合中，A 被 B 影响。',
+            [CausalLinkDirection.undirected]: 'A 与 B 相关，但影响方向不确定。',
+            [CausalLinkDirection.weakUndirected]: '在不同的部分子集合中，A 与 B 有不同方向的影响关系。',
+            [CausalLinkDirection.bidirected]: 'A 与 B 相互作用。',
         },
     },
     storage: {

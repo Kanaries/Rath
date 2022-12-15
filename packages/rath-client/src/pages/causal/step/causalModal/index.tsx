@@ -1,4 +1,4 @@
-import { Stack } from '@fluentui/react';
+import { DefaultButton, Dropdown, Pivot, PivotItem, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, RefObject, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -8,7 +8,8 @@ import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 import type { EdgeAssert } from '../../../../store/causalStore/modelStore';
 import Explorer from '../../explorer';
 import Submodule, { Subtree } from '../../submodule';
-import MatrixPanel, { MATRIX_TYPE } from '../../matrixPanel';
+import { getI18n } from '../../locales';
+import MatrixPanel from '../../matrixPanel';
 import ModelStorage from './modelStorage';
 import Params from './params';
 
@@ -63,10 +64,60 @@ const Aside = styled.div<{ size: "big" | "small" }>`
     }
 `;
 
-export const CausalExplorer = observer<{
+const ProgressContainer = styled.div`
+    padding: 0 0 2px;
+    display: inline-block;
+    width: max-content;
+    position: relative;
+    background-size: 100% 2px;
+    background-repeat: no-repeat;
+    background-position: bottom;
+    ::before {
+        content: "";
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background-image: linear-gradient(to right, #fff2, #fffc 35%, #fffb 38%, #fff0 46%);
+        background-size: 400% 100%;
+        background-repeat: repeat-x;
+        animation: scrolling 8s linear infinite;
+        @keyframes scrolling {
+            from {
+                background-position: 400% 0;
+            }
+            to {
+                background-position: 0 0;
+            }
+        }
+    }
+`;
+
+export enum VIEW_TYPE {
+    matrix = 'matrix',
+    diagram = 'diagram',
+}
+
+const VIEW_LABELS: readonly VIEW_TYPE[] = [VIEW_TYPE.matrix, VIEW_TYPE.diagram];
+
+export enum MATRIX_TYPE {
+    mutualInfo = 'mutual_info',
+    conditionalMutualInfo = 'conditional_mutual_info',
+    causal = 'causal',
+}
+
+export const MATRIX_PIVOT_LIST: readonly MATRIX_TYPE[] = [
+    MATRIX_TYPE.mutualInfo,
+    MATRIX_TYPE.conditionalMutualInfo,
+    MATRIX_TYPE.causal,
+];
+
+export const CausalMainChart = observer<{
     allowEdit: boolean;
     listenerRef?: RefObject<{ onSubtreeSelected?: (subtree: Subtree | null) => void }>;
-}>(function CausalExplorer ({
+}>(function CausalMainChart ({
     allowEdit,
     listenerRef,
 }) {
@@ -126,6 +177,12 @@ const CausalModal: FC = () => {
     const listenerRef = useRef<{ onSubtreeSelected?: (subtree: Subtree | null) => void }>({});
 
     const [rightAsideSize, setRightAsideSize] = useState<'small' | 'big'>('small');
+    const [viewType, setViewType] = useState<VIEW_TYPE>(VIEW_TYPE.diagram);
+    const [selectedKey, setSelectedKey] = useState(MATRIX_TYPE.causal);
+
+    const { tasks, taskIdx, serverActive } = causalStore.operator;
+    const task = tasks.at(taskIdx);
+    const busy = task?.status === 'PENDING' || task?.status === 'RUNNING';
 
     return (
         <Container>
@@ -134,32 +191,115 @@ const CausalModal: FC = () => {
                     <ModelStorage />
                     <Params />
                 </Stack>
-                <MatrixPanel
-                    onMatrixPointClick={onFieldGroupSelect}
-                    onCompute={(matKey) => {
-                        if (causalStore.operator.busy) {
-                            return;
-                        }
-                        switch (matKey) {
-                            case MATRIX_TYPE.conditionalMutualInfo:
-                                causalStore.computeCondMutualMatrix();
-                                break;
-                            case MATRIX_TYPE.causal:
-                                causalStore.run();
-                                break;
-                            case MATRIX_TYPE.mutualInfo:
-                            default:
-                                causalStore.computeMutualMatrix();
-                                break;
+                <Pivot
+                    style={{ marginBottom: '1em' }}
+                    selectedKey={selectedKey}
+                    onLinkClick={(item) => {
+                        if (item) {
+                            setSelectedKey(item.props.itemKey as MATRIX_TYPE);
+                            setViewType(item.props.itemKey === MATRIX_TYPE.causal ? VIEW_TYPE.diagram : VIEW_TYPE.matrix);
                         }
                     }}
-                    diagram={(
-                        <CausalExplorer
+                >
+                    {MATRIX_PIVOT_LIST.map((key) => {
+                        return <PivotItem key={key} headerText={getI18n(`matrix.${key}.name`)} itemKey={key} />;
+                    })}
+                </Pivot>
+                <Stack style={{ marginBottom: '1em' }} tokens={{ childrenGap: 10 }}>
+                    <ProgressContainer
+                        style={{
+                            backgroundImage: selectedKey === MATRIX_TYPE.causal && busy ? `linear-gradient(to right,
+                            #0078d4 ${0.5 + task.progress * 99.5}%,
+                            #cdd6d880 ${0.5 + task.progress * 99.5}%
+                        )` : undefined,
+                        }}
+                    >
+                        <PrimaryButton
+                            text={getI18n(`matrix.${selectedKey}.action`)}
+                            onRenderText={(props, defaultRenderer) => {
+                                return (
+                                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} >
+                                        {busy && <Spinner style={{ transform: 'scale(0.75)' }} />}
+                                        {defaultRenderer?.(props)}
+                                    </div>
+                                );
+                            }}
+                            disabled={busy || (selectedKey === MATRIX_TYPE.causal && !serverActive)}
+                            onClick={() => {
+                                if (busy) {
+                                    return;
+                                }
+                                if (causalStore.operator.busy) {
+                                    return;
+                                }
+                                switch (selectedKey) {
+                                    case MATRIX_TYPE.conditionalMutualInfo:
+                                        causalStore.computeCondMutualMatrix();
+                                        break;
+                                    case MATRIX_TYPE.causal:
+                                        causalStore.run();
+                                        break;
+                                    case MATRIX_TYPE.mutualInfo:
+                                    default:
+                                        causalStore.computeMutualMatrix();
+                                        break;
+                                }
+                            }}
+                            iconProps={busy ? undefined : { iconName: 'Rerun' }}
+                            style={{ width: 'max-content', transition: 'width 400ms' }}
+                        />
+                    </ProgressContainer>
+                    {selectedKey === MATRIX_TYPE.causal && tasks.length > 0 && (
+                        <Stack tokens={{ childrenGap: 10 }} horizontal>
+                            <Dropdown
+                                options={tasks.map(task => ({ key: task.taskId, text: `(${task.status} ${(task.progress * 100).toFixed(0)}%) ${task.taskId}` }))}
+                                selectedKey={tasks[taskIdx]?.taskId}
+                                onChange={(_, op) => op && causalStore.operator.switchTask(op.key as string)}
+                                style={{ width: '14em' }}
+                            />
+                            {tasks[taskIdx]?.taskId && (
+                                <DefaultButton
+                                    text={getI18n('task.reload')}
+                                    onClick={() => causalStore.operator.retryTask(tasks[taskIdx].taskId)}
+                                />
+                            )}
+                        </Stack>
+                    )}
+                </Stack>
+                {selectedKey === MATRIX_TYPE.causal && (
+                    <Dropdown
+                        options={VIEW_LABELS.map((key) => ({ key, text: getI18n(`viewType.${key}`) }))}
+                        label={getI18n('viewType.label')}
+                        selectedKey={viewType}
+                        onChange={(e, op) => {
+                            op && setViewType(op.key as VIEW_TYPE);
+                        }}
+                        style={{ width: '250px' }}
+                        styles={{
+                            root: {
+                                display: 'flex',
+                                flexDirection: 'row',
+                            },
+                            label: {
+                                margin: '0 1em',
+                            },
+                        }}
+                    />
+                )}
+                {viewType === VIEW_TYPE.matrix && (
+                    <MatrixPanel
+                        selectedKey={selectedKey}
+                        onMatrixPointClick={onFieldGroupSelect}
+                    />
+                )}
+                {viewType === VIEW_TYPE.diagram && selectedKey === MATRIX_TYPE.causal && (
+                    busy ? <Spinner label={getI18n('computing')} /> : (
+                        <CausalMainChart
                             allowEdit
                             listenerRef={listenerRef}
                         />
-                    )}
-                />
+                    )
+                )}
             </div>
             <Aside size={rightAsideSize}>
                 <div

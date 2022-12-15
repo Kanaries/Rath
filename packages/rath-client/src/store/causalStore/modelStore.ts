@@ -11,8 +11,8 @@ import { IDiscoverResult } from "./service";
 
 
 export enum NodeAssert {
-    FORBID_AS_CAUSE,
-    FORBID_AS_EFFECT,
+    FORBID_AS_CAUSE = '!-x->',
+    FORBID_AS_EFFECT = '!<-x-',
 }
 
 export type CausalModelNodeAssertion = {
@@ -21,10 +21,10 @@ export type CausalModelNodeAssertion = {
 };
 
 export enum EdgeAssert {
-    TO_BE_RELEVANT,
-    TO_BE_NOT_RELEVANT,
-    TO_EFFECT,
-    TO_NOT_EFFECT,
+    TO_BE_RELEVANT = '---->',
+    TO_BE_NOT_RELEVANT = '--x->',
+    TO_EFFECT = 'o---o',
+    TO_NOT_EFFECT = 'o-x-o',
 }
 
 export type CausalModelEdgeAssertion = {

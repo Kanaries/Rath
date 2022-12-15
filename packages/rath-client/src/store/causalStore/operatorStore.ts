@@ -8,7 +8,6 @@ import type { IFieldMeta } from "../../interfaces";
 import { IAlgoSchema, makeFormInitParams } from "../../pages/causal/config";
 import { causalService } from "../../pages/causal/service";
 import type { IteratorStorage } from "../../utils/iteStorage";
-import type { DataSourceStore } from "../dataSourceStore";
 import { connectToSession, fetchCausalAlgorithmList, ITaskRecord, updateDataSource } from "./service";
 
 
@@ -71,7 +70,7 @@ export default class CausalOperatorStore {
 
     public readonly destroy: () => void;
 
-    constructor(dataSourceStore: DataSourceStore) {
+    constructor() {
         const dynamicFormSchema$ = new Subject<ReturnType<typeof fetchCausalAlgorithmList>>();
 
         makeAutoObservable(this, {
@@ -98,7 +97,8 @@ export default class CausalOperatorStore {
             }),
             reaction(() => this.serverActive, ok => {
                 if (ok) {
-                    dynamicFormSchema$.next(fetchCausalAlgorithmList());
+                    const { langStore: { lang } } = getGlobalStore();
+                    dynamicFormSchema$.next(fetchCausalAlgorithmList(lang));
                 } else {
                     runInAction(() => {
                         this.causalAlgorithmForm = {};

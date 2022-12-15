@@ -1,14 +1,15 @@
-import { Dropdown, Icon, SpinButton, Stack, Toggle } from "@fluentui/react";
+import { DefaultButton, Dropdown, Icon, SpinButton, Stack, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
 import { getGlobalStore/*, useGlobalStore*/ } from "../../../store";
 import type { EdgeAssert } from "../../../store/causalStore/modelStore";
-import { useCausalViewContext } from "../../../store/causalStore/viewStore";
+import { LayoutMethod, LayoutMethods, useCausalViewContext } from "../../../store/causalStore/viewStore";
 import type { Subtree } from "../submodule";
+import { getI18n } from "../locales";
 import Floating from "../floating";
-import ExplorerMainView from "./explorerMainView";
+import GraphView from "./graphView";
 
 
 export type CausalNode = {
@@ -33,11 +34,13 @@ export interface ExplorerProps {
 }
 
 const Container = styled.div`
+    margin-top: 2em;
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     position: relative;
+    overflow: hidden;
 `;
 
 const Tools = styled.div`
@@ -62,14 +65,12 @@ const Tools = styled.div`
 const MainView = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
-    /* height: 46vh; */
     overflow: hidden;
     display: flex;
     flex-direction: row;
     align-items: stretch;
     justify-content: stretch;
     border: 1px solid #e3e2e2;
-    /* padding: 1em; */
     > * {
         height: 100%;
         flex-grow: 1;
@@ -85,9 +86,6 @@ const Explorer: FC<ExplorerProps> = ({
     handleLasso,
     handleSubTreeSelected,
 }) => {
-    // const { causalStore } = useGlobalStore();
-    // const { causality } = causalStore.model;
-
     const [cThreshold, setCThreshold] = useState(0.9);
     const [wThreshold, setWThreshold] = useState(0.2);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
@@ -116,8 +114,6 @@ const Explorer: FC<ExplorerProps> = ({
         viewContext?.clearSelected();
     }, [mode, viewContext]);
 
-    // const [limit, setLimit] = useState(20);
-
     const forceLayout = useCallback(() => {
         forceRelayoutRef.current();
     }, []);
@@ -126,42 +122,37 @@ const Explorer: FC<ExplorerProps> = ({
         setMode('explore');
     }, [allowEdit]);
 
-    const [s, ss] = useState('force');
-
     return (
         <Container>
-            <Stack style={{ margin: '0 0 0.6em' }} horizontal >
-                {/* <DefaultButton
-                    style={{
-                        flexGrow: 0,
-                        flexShrink: 0,
-                        flexBasis: 'max-content',
-                        padding: '0.4em 0',
-                    }}
-                    iconProps={{ iconName: 'Play' }}
-                    onClick={forceLayout}
-                >
-                    重新布局
-                </DefaultButton> */}
-                <Dropdown
-                    selectedKey={s}
-                    options={[
-                        { key: 'force', text: '力引导布局' },
-                        { key: 'circular', text: '环形布局' },
-                        { key: 'radial', text: '辐射布局' },
-                        { key: 'grid', text: '网格布局' },
-                    ]}
-                    style={{ minWidth: '6em' }}
-                    onChange={(_, opt) => {
-                        opt?.key && ss(opt.key as string);
-                        setTimeout(() => forceLayout(), 100);
-                    }}
-                />
-            </Stack>
+            {viewContext && (
+                <Stack style={{ margin: '0 0 0.6em' }} horizontal >
+                    <Dropdown
+                        selectedKey={viewContext.layoutMethod}
+                        options={LayoutMethods.map(key => ({ key, text: getI18n(`chart.layout.${key}`) }))}
+                        style={{ minWidth: '6em' }}
+                        onChange={(_, opt) => {
+                            if (opt?.key) {
+                                viewContext.setLayout(opt.key as LayoutMethod);
+                            }
+                        }}
+                    />
+                    <DefaultButton
+                        style={{
+                            flexGrow: 0,
+                            flexShrink: 0,
+                            flexBasis: 'max-content',
+                            padding: '0.4em 0',
+                        }}
+                        iconProps={{ iconName: 'Play' }}
+                        onClick={forceLayout}
+                    >
+                        {getI18n('chart.re_layout')}
+                    </DefaultButton>
+                </Stack>
+            )}
             <MainView>
-                <ExplorerMainView
+                <GraphView
                     forceRelayoutRef={forceRelayoutRef}
-                    // limit={limit}
                     mode={mode}
                     weightThreshold={wThreshold}
                     confThreshold={cThreshold}
@@ -171,17 +162,18 @@ const Explorer: FC<ExplorerProps> = ({
                     onRemoveLink={onRemoveLink}
                     allowZoom={allowZoom}
                     handleLasso={handleLasso}
-                    handleSubTreeSelected={handleSubTreeSelected}
+                    handleSubtreeSelected={handleSubTreeSelected}
                     style={{
+                        flexGrow: 1,
+                        flexShrink: 1,
                         width: '100%',
-                        height: '100%',
                     }}
                 />
             </MainView>
             <Floating position="absolute" direction="start" onRenderAside={() => (<Icon iconName="Waffle" />)}>
                 <Tools>
                     <Toggle
-                        label="画布缩放"
+                        label={getI18n('chart.tools.resize')}
                         checked={allowZoom}
                         onChange={(_, checked) => setAllowZoom(Boolean(checked))}
                         onText="On"
@@ -190,8 +182,7 @@ const Explorer: FC<ExplorerProps> = ({
                     />
                     {allowEdit && (
                         <Toggle
-                            // label="Modify Constraints"
-                            label="编辑因果关系"
+                            label={getI18n('chart.tools.write')}
                             checked={mode === 'edit'}
                             onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
                             onText="On"
@@ -199,16 +190,8 @@ const Explorer: FC<ExplorerProps> = ({
                             inlineLabel
                         />
                     )}
-                    {/* <Slider
-                        // label="Display Limit"
-                        label="边显示上限"
-                        min={1}
-                        max={Math.max((causality ?? []).length, limit, 10)}
-                        value={limit}
-                        onChange={value => setLimit(value)}
-                    /> */}
                     <SpinButton
-                        label="按置信度筛选"
+                        label={getI18n('chart.tools.filter_by_confidence')}
                         min={0}
                         max={1}
                         step={1e-3}
@@ -216,7 +199,7 @@ const Explorer: FC<ExplorerProps> = ({
                         onChange={(_, d) => setCThreshold(Number(d))}
                     />
                     <SpinButton
-                        label="按权重筛选"
+                        label={getI18n('chart.tools.filter_by_weight')}
                         min={0}
                         max={1}
                         step={1e-3}

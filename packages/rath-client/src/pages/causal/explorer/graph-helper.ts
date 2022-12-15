@@ -61,7 +61,9 @@ export const useReactiveGraph = ({
     handleSubtreeSelectedRef.current = handleSubtreeSelected;
 
     const viewContext = useCausalViewContext();
-    const { selectedFieldGroup = [], graphNodeSelectionMode = NodeSelectionMode.NONE } = viewContext ?? {};
+    const {
+        selectedFieldGroup = [], graphNodeSelectionMode = NodeSelectionMode.NONE
+    } = viewContext ?? {};
 
     const graphNodeSelectionModeRef = useRef(graphNodeSelectionMode);
     graphNodeSelectionModeRef.current = graphNodeSelectionMode;
@@ -125,38 +127,6 @@ export const useReactiveGraph = ({
     useEffect(() => {
         if (graphRef.current) {
             graphRef.current.changeSize(width, GRAPH_HEIGHT);
-            // const all = [
-            //     { type: 'fruchterman' },
-            //     { type: 'circular' },
-            //     { type: 'radial' },
-            //     { type: 'MDS' },
-            // ];
-            // const layout = all[time % 4];
-            // console.log(layout)
-            // graphRef.current.updateLayout(layout);
-            // time += 1;
-            // graphRef.current.updateLayout({
-            //     type: 'radial',
-            //     // center: [ 200, 200 ],     // 可选，默认为图的中心
-            //     linkDistance: 500,         // 可选，边长
-            //     maxIteration: 1000,       // 可选
-            //     focusNode: 'c',      // 可选
-            //     unitRadius: 100,          // 可选
-            //     preventOverlap: true,     // 可选，必须配合 nodeSize
-            //     nodeSize: 30,             // 可选
-            //     strictRadial: false       // 可选
-            //     // workerEnabled: true       // 可选，开启 web-worker
-            // });
-            // graphRef.current.updateLayout({
-            //     type: 'fruchterman',
-            //     gravity: 5,
-            //     speed: 5,
-            //     center: [width / 2, GRAPH_HEIGHT / 2],
-            //     // for rendering after each iteration
-            //     tick: () => {
-            //         graphRef.current?.refreshPositions();
-            //     },
-            // });
             graphRef.current.read(dataRef.current);
         }
     }, [width, graphRef]);
@@ -199,6 +169,13 @@ export const useReactiveGraph = ({
             graph.render();
         }
     }, [options, graphRef]);
+
+    useEffect(() => {
+        graphRef.current?.updateLayout(options.layout);
+        return () => {
+            graphRef.current?.destroyLayout();
+        };
+    }, [graphRef, options.layout]);
 
     useEffect(() => {
         const { current: graph } = graphRef;
@@ -289,15 +266,6 @@ export const useReactiveGraph = ({
 
     return useMemo<IReactiveGraphHandler>(() => ({
         refresh() {
-            // const all = [
-            //     { speed: 5,type: 'force' },
-            //     // { speed: 5,type: 'circular', startRadius: 120, endRadius: 120 },
-            //     // { speed: 5,type: 'radial', linkDistance: 60 },
-            //     // { speed: 5,type: 'grid' },
-            // ];
-            // const layout = all[time % 1];
-            // graphRef.current?.updateLayout(layout);
-            // time += 1;
             graphRef.current?.read(dataRef.current);
         },
         update() {

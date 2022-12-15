@@ -104,13 +104,13 @@ export const updateDataSource = async (
     return null;
 };
 
-export const fetchCausalAlgorithmList = async (): Promise<IAlgoSchema | null> => {
+export const fetchCausalAlgorithmList = async (lang: string): Promise<IAlgoSchema | null> => {
     const { causalStore: { operator: { causalServer, sessionId } } } = getGlobalStore();
     if (!sessionId) {
         return null;
     }
     try {
-        const res = await fetch(`${causalServer}/v0.1/form/discovery`, { method: 'GET' });
+        const res = await fetch(`${causalServer}/v0.1/form/discovery?i18n=${lang}`, { method: 'GET' });
         if (!res.ok) {
             throw new Error(res.statusText);
         }

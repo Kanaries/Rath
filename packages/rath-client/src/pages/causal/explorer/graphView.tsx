@@ -2,19 +2,16 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "r
 import styled, { StyledComponentProps } from "styled-components";
 import { Graph } from "@antv/g6";
 import { observer } from "mobx-react-lite";
-import { ActionButton, Dropdown } from "@fluentui/react";
+import { ActionButton, Dropdown, Label } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
 import type { Subtree } from "../submodule";
 import { EdgeAssert, NodeAssert } from "../../../store/causalStore/modelStore";
 import { ExplorationKey, useCausalViewContext } from "../../../store/causalStore/viewStore";
 import { useGlobalStore } from "../../../store";
+import { getI18n } from "../locales";
 import { useGraphOptions, useRenderData } from "./graph-utils";
 import { useReactiveGraph } from "./graph-helper";
 
-
-// const sNormalize = (matrix: readonly (readonly number[])[]): number[][] => {
-//     return matrix.map(vec => vec.map(n => 2 / (1 + Math.exp(-n)) - 1));
-// };
 
 const Container = styled.div`
     overflow: hidden;
@@ -68,7 +65,7 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const { fields, groups } = causalStore.dataset;
     const { causality, assertionsAsPag } = causalStore.model;
     const viewContext = useCausalViewContext();
-    const { onRenderNode, /*localWeights, */explorationKey, localData = null } = viewContext ?? {};
+    const { onRenderNode, /*localWeights, */explorationKey, localData = null, layoutMethod } = viewContext ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -101,13 +98,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     const cfg = useGraphOptions({
         width,
         fields,
+        layout: layoutMethod,
         handleLasso,
         handleLink: handleLinkTogether,
         graphRef,
     });
-    const cfgRef = useRef(cfg);
-    cfgRef.current = cfg;
-
     const [clickEdgeMode, setClickEdgeMode] = useState<'delete' | 'forbid'>('forbid');
     const [dblClickNodeMode, setDblClickNodeMode] = useState(NodeAssert.FORBID_AS_CAUSE);
 
@@ -206,18 +201,16 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                     {/* <ActionButton onClick={() => causalStore.model.synchronizeAssertionsWithResult()}>
                         编辑因果图覆盖
                     </ActionButton> */}
-                    <ActionButton onClick={() => causalStore.model.clearAssertions()}>
-                        清空所有
+                    <ActionButton iconProps={{ iconName: 'Delete' }} onClick={() => causalStore.model.clearAssertions()}>
+                        {getI18n('chart.tools.edit.clear')}
                     </ActionButton>
+                    <Label style={{ marginBlock: '0.1em', fontSize: '90%' }} >{getI18n('chart.tools.edit.settings')}</Label>
                     <Dropdown
-                        label="连接类型"
+                        label={getI18n('chart.assertion.edge')}
                         selectedKey={createEdgeMode}
                         options={[
-                            { key: EdgeAssert.TO_EFFECT, text: '单向一定影响' },
-                            { key: EdgeAssert.TO_NOT_EFFECT, text: '单向一定不影响' },
-                            { key: EdgeAssert.TO_BE_RELEVANT, text: '至少在一个方向存在影响' },
-                            { key: EdgeAssert.TO_BE_NOT_RELEVANT, text: '在任意方向一定不影响' },
-                        ]}
+                            EdgeAssert.TO_EFFECT, EdgeAssert.TO_NOT_EFFECT, EdgeAssert.TO_BE_RELEVANT, EdgeAssert.TO_BE_NOT_RELEVANT
+                        ].map((key => ({ key, text: getI18n(`chart.assertion.${key}`) })))}
                         onChange={(_e, option) => {
                             if (!option) {
                                 return;
@@ -247,12 +240,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                         }}
                     />
                     <Dropdown
-                        label="单击连接行为"
+                        label={getI18n('chart.assertion.click_edge')}
                         selectedKey={clickEdgeMode}
-                        options={[
-                            { key: 'forbid', text: '禁用此连接' },
-                            { key: 'delete', text: '删除约束' },
-                        ]}
+                        options={(['forbid', 'delete'] as typeof clickEdgeMode[]).map((key) => ({
+                            key, text: getI18n(`chart.assertion.${key}`),
+                        }))}
                         onChange={(_e, option) => {
                             if (!option) {
                                 return;
@@ -282,12 +274,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                         }}
                     />
                     <Dropdown
-                        label="双击节点行为"
+                        label={getI18n('chart.assertion.node')}
                         selectedKey={dblClickNodeMode}
-                        options={[
-                            { key: NodeAssert.FORBID_AS_CAUSE, text: '一定不作为输出' },
-                            { key: NodeAssert.FORBID_AS_EFFECT, text: '一定不作为输入' },
-                        ]}
+                        options={[NodeAssert.FORBID_AS_CAUSE, NodeAssert.FORBID_AS_EFFECT].map((key) => ({
+                            key, text: getI18n(`chart.assertion.${key}`)
+                        }))}
                         onChange={(_e, option) => {
                             if (!option) {
                                 return;

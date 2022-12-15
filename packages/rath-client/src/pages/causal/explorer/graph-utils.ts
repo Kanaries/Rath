@@ -2,6 +2,7 @@ import { useMemo, useRef, CSSProperties } from "react";
 import G6, { Graph, GraphData, GraphOptions } from "@antv/g6";
 import { LinkWeightSet, PagLink, PAG_NODE, WeightedPagLink } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
+import { getLayoutConfig, LayoutMethod } from "../../../store/causalStore/viewStore";
 
 
 export const GRAPH_HEIGHT = 600;
@@ -376,6 +377,8 @@ export const useRenderData = ({
 export interface IGraphOptions {
     width: number;
     fields: readonly Readonly<IFieldMeta>[];
+    /** @default LayoutMethod.FORCE */
+    layout?: LayoutMethod;
     handleLasso?: ((fields: IFieldMeta[]) => void) | undefined;
     handleLink?: (srcFid: string, tarFid: string) => void | undefined;
     graphRef: { current: Graph | undefined };
@@ -384,6 +387,7 @@ export interface IGraphOptions {
 export const useGraphOptions = ({
     width,
     fields,
+    layout = LayoutMethod.FORCE,
     handleLasso,
     handleLink,
     graphRef,
@@ -456,13 +460,7 @@ export const useGraphOptions = ({
             },
             animate: true,
             layout: {
-                type: 'fruchterman',
-                // https://antv-g6.gitee.io/zh/docs/api/graphLayout/fruchterman#layoutcfggpuenabled
-                // 启用 GPU 加速会导致数据更新时视图变化很大
-                gpuEnabled: false,
-                gravity: 5,
-                speed: 5,
-                // for rendering after each iteration
+                ...getLayoutConfig(layout),
                 tick: () => {
                     graphRef.current?.refreshPositions();
                 },
@@ -511,5 +509,5 @@ export const useGraphOptions = ({
             },
         };
         return cfg;
-    }, [graphRef]);
+    }, [graphRef, layout]);
 };

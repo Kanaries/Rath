@@ -40,6 +40,50 @@ export const ExplorationOptions = [
     { key: ExplorationKey.PREDICT, text: '模型预测' },
 ] as const;
 
+export enum LayoutMethod {
+    FORCE = 'force',
+    CIRCULAR = 'circular',
+    RADIAL = 'radial',
+    GRID = 'grid',
+}
+
+export const LayoutMethods: readonly LayoutMethod[] = [
+    LayoutMethod.FORCE, LayoutMethod.CIRCULAR, LayoutMethod.RADIAL, LayoutMethod.GRID,
+];
+
+export const getLayoutConfig = (layout: LayoutMethod) => {
+    switch (layout) {
+        case LayoutMethod.FORCE: {
+            return {
+                type: 'fruchterman',
+                gravity: 5,
+                speed: 10,
+            };
+        }
+        case LayoutMethod.CIRCULAR: {
+            return {
+                type: 'circular',
+                speed: 10,
+                startRadius: 120,
+                endRadius: 120,
+            };
+        }
+        case LayoutMethod.RADIAL: {
+            return {
+                type: 'radial',
+                speed: 10,
+                linkDistance: 50,
+            };
+        }
+        case LayoutMethod.GRID: {
+            return {
+                type: 'grid',
+                speed: 10,
+            };
+        }
+    }
+};
+
 type CausalViewEventListeners = {
     nodeClick: (node: Readonly<IFieldMeta>) => void;
     nodeDoubleClick: (node: Readonly<IFieldMeta>) => void;
@@ -47,12 +91,8 @@ type CausalViewEventListeners = {
 
 class CausalViewStore {
 
-    // TODO: 改回下面的 auto_vis 两行
-    public explorationKey = ExplorationKey.WHAT_IF;
-    public graphNodeSelectionMode = NodeSelectionMode.NONE;
-
-    // public explorationKey = ExplorationKey.AUTO_VIS;
-    // public graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
+    public explorationKey = ExplorationKey.AUTO_VIS;
+    public graphNodeSelectionMode = NodeSelectionMode.MULTIPLE;
 
     protected selectedFidArr$ = new Subject<readonly string[]>();
     protected _selectedNodes: readonly IFieldMeta[] = [];
@@ -62,6 +102,8 @@ class CausalViewStore {
     public get selectedField() {
         return this._selectedNodes.at(0) ?? null;
     }
+
+    public layoutMethod: LayoutMethod = LayoutMethod.FORCE;
 
     public shouldDisplayAlgorithmPanel = false;
 
@@ -189,6 +231,10 @@ class CausalViewStore {
                 this.listeners[key as keyof typeof this.listeners] = [];
             }
         };
+    }
+
+    public setLayout(layout: LayoutMethod) {
+        this.layoutMethod = layout;
     }
 
     public addEventListener<T extends keyof CausalViewEventListeners, E extends CausalViewEventListeners[T]>(

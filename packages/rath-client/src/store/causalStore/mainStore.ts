@@ -147,7 +147,7 @@ export default class CausalStore {
 
     constructor(dataSourceStore: DataSourceStore) {
         this.dataset = new CausalDatasetStore(dataSourceStore);
-        this.operator = new CausalOperatorStore(dataSourceStore);
+        this.operator = new CausalOperatorStore();
         this.model = new CausalModelStore(this.dataset, this.operator);
         
         makeAutoObservable(this, {

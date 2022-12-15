@@ -1,6 +1,10 @@
 import intl from 'react-intl-universal';
+import { EdgeAssert, NodeAssert } from '../../../store/causalStore/modelStore';
+import { LayoutMethod } from '../../../store/causalStore/viewStore';
 import type { I18nSetupFunction } from "../../../store/langStore";
-import { MATRIX_TYPE, VIEW_TYPE } from '../matrixPanel';
+import { CausalLinkDirection } from '../../../utils/resolve-causal';
+import { MATRIX_MARK_TYPE } from '../matrixPanel';
+import { VIEW_TYPE, MATRIX_TYPE } from '../step/causalModal';
 import zhCN from './zh-CN';
 
 
@@ -67,6 +71,35 @@ export const LocaleKeys = {
     computing: 'computing',
     chart: {
         re_layout: 'Refresh Layout',
+        layout: {
+            [LayoutMethod.FORCE]: 'Force',
+            [LayoutMethod.CIRCULAR]: 'Circular',
+            [LayoutMethod.RADIAL]: 'Radial',
+            [LayoutMethod.GRID]: 'Grid',
+        },
+        assertion: {
+            edge: 'Link Two Nodes',
+            node: 'Double Click on A Node',
+            [EdgeAssert.TO_EFFECT]: 'To Effect',
+            [EdgeAssert.TO_NOT_EFFECT]: 'To Not Effect',
+            [EdgeAssert.TO_BE_RELEVANT]: 'To Be Relevant',
+            [EdgeAssert.TO_BE_NOT_RELEVANT]: 'To Be Not Relevant',
+            [NodeAssert.FORBID_AS_CAUSE]: 'Forbid As Cause',
+            [NodeAssert.FORBID_AS_EFFECT]: 'Forbid As Effect',
+            click_edge: 'Click on An Edge',
+            forbid: 'Revert',
+            delete: 'Remove',
+        },
+        tools: {
+            edit: {
+                settings: 'Behavior Settings',
+                clear: 'Delete All',
+            },
+            resize: 'Enable Zoom',
+            write: 'Modify Constraints',
+            filter_by_confidence: 'Filter by Confidence',
+            filter_by_weight: 'Filter by Contribution',
+        },
     },
     viewType: {
         label: 'View Mode',
@@ -85,6 +118,32 @@ export const LocaleKeys = {
         [MATRIX_TYPE.causal]: {
             name: 'Causal Model',
             action: 'Causal Discovery',
+        },
+        markType: {
+            label: 'Mark',
+            [MATRIX_MARK_TYPE.circle]: 'Circle',
+            [MATRIX_MARK_TYPE.square]: 'Square',
+        },
+        causal_direction: {
+            label: 'Link Type',
+            [CausalLinkDirection.none]: 'Not relevant',
+            [CausalLinkDirection.directed]: 'Effect',
+            [CausalLinkDirection.reversed]: 'Effected by',
+            [CausalLinkDirection.weakDirected]: 'Effect (weak)',
+            [CausalLinkDirection.weakReversed]: 'Effected by (weak)',
+            [CausalLinkDirection.undirected]: 'Relevant',
+            [CausalLinkDirection.weakUndirected]: 'Relevant (weak)',
+            [CausalLinkDirection.bidirected]: 'Effect each other',
+        },
+        causal_direction_desc: {
+            [CausalLinkDirection.none]: 'A is irrelevant to B.',
+            [CausalLinkDirection.directed]: 'A influences B.',
+            [CausalLinkDirection.reversed]: 'A is influenced by B.',
+            [CausalLinkDirection.weakDirected]: 'In some cases, A influences B.',
+            [CausalLinkDirection.weakReversed]: 'In some cases, A is influenced by B.',
+            [CausalLinkDirection.undirected]: 'A is relevant to B, but the direction is not decided.',
+            [CausalLinkDirection.weakUndirected]: 'In different cases, A or B is relevant to the other one.',
+            [CausalLinkDirection.bidirected]: 'Both A and B influences each other.',
         },
     },
     storage: {
