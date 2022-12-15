@@ -70,6 +70,7 @@ const FilterSegment: React.FC = () => {
                             actions={mainVizSetting.debug}
                             spec={adviceVisSize(spec, fieldMetas)}
                             dataSource={applyFilters(dataSource, filterViews.views[i].filters)}
+                            config={commonStore.themeConfig}
                         />
                     </div>
                     <div className="chart-desc">

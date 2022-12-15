@@ -6,6 +6,7 @@ import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IRow, PreferencePanelConfig } from '../../../interfaces';
 import ReactVega from '../../../components/react-vega';
 import { distVis } from '../../../queries/distVis';
+import { VegaThemeConfig } from '../../../queries/themes/config';
 
 interface AssociationProps {
     visualConfig: PreferencePanelConfig;
@@ -13,9 +14,10 @@ interface AssociationProps {
     fieldMetas: IFieldMeta[];
     dataSource: IRow[];
     onSelectView: (viz: IInsightSpace) => void;
+    themeConfig?: VegaThemeConfig;
 }
 const AssociationCharts: React.FC<AssociationProps> = (props) => {
-    const { vizList, onSelectView, dataSource, fieldMetas } = props;
+    const { vizList, onSelectView, dataSource, fieldMetas, themeConfig } = props;
 
     return (
         <div style={{ border: 'solid 1px #bfbfbf', marginTop: '2em', backgroundColor: '#e7e7e7' }}>
@@ -51,6 +53,7 @@ const AssociationCharts: React.FC<AssociationProps> = (props) => {
                                     spec={distVis({
                                         pattern: { fields: fieldsInView, imp: 0 },
                                     })}
+                                    config={themeConfig}
                                 />
                             </VisErrorBoundary>
                         </div>
