@@ -61,7 +61,9 @@ export const LocaleKeys = {
             fill_only: 'Update Undeclared',
             fully_replace: 'Clear and Replace All',
         },
+        edit: 'Edit Mode',
     },
+    computing: 'computing',
     chart: {
         re_layout: 'Refresh Layout',
     },

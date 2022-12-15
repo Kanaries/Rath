@@ -58,7 +58,9 @@ const locales: Locales = {
             fill_only: '补充不替换',
             fully_replace: '全部覆盖',
         },
+        edit: '编辑视图',
     },
+    computing: '计算中',
     chart: {
         re_layout: '重新布局',
     },

@@ -171,7 +171,7 @@ const FDBatch: FC = () => {
                     <div>
                         <div className="container">
                             {isPending ? (
-                                <Spinner label="computing" />
+                                <Spinner label={getI18n('computing')} />
                             ) : (
                                 <FDEditor
                                     title={getI18n('fd_config.batch.preview')}

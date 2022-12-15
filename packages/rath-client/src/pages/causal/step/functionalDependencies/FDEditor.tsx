@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import type { FC } from 'react';
 import type { IFunctionalDep } from '../../config';
+import { getI18n } from '../../locales';
 import FDGraph from './FDGraph';
 
 
@@ -8,7 +9,7 @@ const FDEditor: FC<{
     title?: string;
     functionalDependencies: readonly IFunctionalDep[];
     setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: readonly IFunctionalDep[] | null) => readonly IFunctionalDep[])) => void;
-}> = ({ functionalDependencies, setFunctionalDependencies, title = '编辑视图' }) => {
+}> = ({ functionalDependencies, setFunctionalDependencies, title = getI18n('fd_config.edit') }) => {
     return (
         <>
             <h3>{title}</h3>
