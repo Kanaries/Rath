@@ -219,6 +219,9 @@ export const useRenderData = ({
         let links: WeightedPagLink[] = [];
 
         const result = PAG.filter(({ weight }) => {
+            if (mode === 'edit') {
+                return true;
+            }
             for (const key of Object.keys(thresholds ?? {}) as (keyof LinkWeightSet)[]) {
                 const threshold = thresholds?.[key] ?? 0;
                 const w = key === 'weight' ? Math.abs(
@@ -284,6 +287,32 @@ export const useRenderData = ({
         }, []).filter(({ src, tar }) => src !== tar);
 
         return links.map((link, i) => {
+            if (mode === 'edit') {
+                const isForbiddenType = [link.src_type, link.tar_type].includes(PAG_NODE.EMPTY);
+                const color = isForbiddenType ? '#c50f1f' : '#0027b4';
+
+                return {
+                    id: `bk_${i}`,
+                    source: link.src,
+                    target: link.tar,
+                    style: {
+                        lineWidth: 2,
+                        lineAppendWidth: 5,
+                        stroke: color,
+                        startArrow: {
+                            fill: color,
+                            stroke: color,
+                            path: arrows[link.src_type],
+                        },
+                        endArrow: {
+                            fill: color,
+                            stroke: color,
+                            path: arrows[link.tar_type],
+                        },
+                    },
+                    type: isForbiddenType ? ForbiddenEdgeType : undefined,
+                };
+            }
             const w = 2 / (1 + Math.exp(- (link.weight.weight ?? 0))) - 1;
 
             return {
@@ -314,7 +343,7 @@ export const useRenderData = ({
                 },
             };
         });
-    }, [PAG, groups, thresholds]);
+    }, [PAG, groups, mode, thresholds]);
     const inGroupEdges = useMemo<NonNullable<GraphData['edges']>>(() => {
         return groups.reduce<NonNullable<GraphData['edges']>>((list, group) => {
             if (group.expanded) {
@@ -340,33 +369,8 @@ export const useRenderData = ({
     }, [groups]);
     return useMemo<GraphData>(() => ({
         nodes,
-        edges: mode === 'explore' ? realEdges.concat(inGroupEdges) : PAG.map((assr, i) => {
-            const isForbiddenType = [assr.src_type, assr.tar_type].includes(PAG_NODE.EMPTY);
-            const color = isForbiddenType ? '#c50f1f' : '#0027b4';
-
-            return {
-                id: `bk_${i}`,
-                source: assr.src,
-                target: assr.tar,
-                style: {
-                    lineWidth: 2,
-                    lineAppendWidth: 5,
-                    stroke: color,
-                    startArrow: {
-                        fill: color,
-                        stroke: color,
-                        path: arrows[assr.src_type],
-                    },
-                    endArrow: {
-                        fill: color,
-                        stroke: color,
-                        path: arrows[assr.tar_type],
-                    },
-                },
-                type: isForbiddenType ? ForbiddenEdgeType : undefined,
-            };
-        }),
-    }), [nodes, mode, realEdges, inGroupEdges, PAG]);
+        edges: realEdges.concat(inGroupEdges),
+    }), [nodes, realEdges, inGroupEdges]);
 };
 
 export interface IGraphOptions {

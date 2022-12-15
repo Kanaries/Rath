@@ -40,13 +40,30 @@ export const LocaleKeys = {
         fields: 'Fields to Analyze',
         field_info: {
             field: 'Field ({selected} / {total})',
-            extInfo: 'Extended',
             unique: 'Unique Values',
             sType: 'Type',
             mean: 'Mean',
             std: 'Standard Deviation',
             median: 'Median',
         },
+    },
+    fd_config: {
+        batch: {
+            title: 'One Click Setup',
+            delete_all: 'Delete All',
+            from_ext: 'Use Derivations',
+            from_detection: 'Detect',
+            preview: 'Preview',
+            cancel: 'Cancel',
+        },
+        batch_mode: {
+            overwrite_only: 'Update and Replace',
+            fill_only: 'Update Undeclared',
+            fully_replace: 'Clear and Replace All',
+        },
+    },
+    chart: {
+        re_layout: 'Refresh Layout',
     },
 } as const;
 

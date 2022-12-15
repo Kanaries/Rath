@@ -82,8 +82,8 @@ export default class CausalModelStore {
         });
 
         const mobxReactions = [
-            reaction(() => datasetStore.fields, fields => {
-                fields$.next(fields);
+            reaction(() => datasetStore.allSelectableFields, allSelectableFields => {
+                fields$.next(allSelectableFields.map(f => datasetStore.allFields[f.field]));
                 runInAction(() => {
                     this.assertions = [];
                     this.assertionsAsPag = [];
@@ -174,7 +174,7 @@ export default class CausalModelStore {
             }),
         ];
 
-        fields$.next(datasetStore.fields);
+        fields$.next(datasetStore.allSelectableFields.map(f => datasetStore.allFields[f.field]));
 
         this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());

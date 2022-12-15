@@ -1,7 +1,7 @@
-import { notify } from "../../../components/error";
-import type { IRow } from "../../../interfaces";
-import { getGlobalStore } from "../../../store";
-import { IFunctionalDep, IFunctionalDepParam, PAG_NODE } from "../config";
+import { notify } from "../../../../components/error";
+import type { IRow } from "../../../../interfaces";
+import { getGlobalStore } from "../../../../store";
+import { IFunctionalDep, IFunctionalDepParam, PAG_NODE } from "../../config";
 
 
 const AutoDetectionApiPath = 'causal/FuncDepTest';

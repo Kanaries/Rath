@@ -37,13 +37,30 @@ const locales: Locales = {
         fields: '需要分析的因素',
         field_info: {
             field: '因素（{selected} / {total}）',
-            extInfo: '扩展来源',
             unique: '唯一值数量',
             sType: '类型',
             mean: '均值',
             std: '标准差',
             median: '中位数',
         },
+    },
+    fd_config: {
+        batch: {
+            title: '快捷操作',
+            delete_all: '全部删除',
+            from_ext: '使用扩展字段计算图',
+            from_detection: '自动识别',
+            preview: '预览',
+            cancel: '取消',
+        },
+        batch_mode: {
+            overwrite_only: '更新并替换',
+            fill_only: '补充不替换',
+            fully_replace: '全部覆盖',
+        },
+    },
+    chart: {
+        re_layout: '重新布局',
     },
 };
 

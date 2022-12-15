@@ -3,8 +3,9 @@ import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import produce from 'immer';
-import { useGlobalStore } from '../../../store';
-import type { IFunctionalDep } from '../config';
+import { useGlobalStore } from '../../../../store';
+import type { IFunctionalDep } from '../../config';
+import { getI18n } from '../../locales';
 import { getGeneratedFDFromAutoDetection } from './utils';
 import FDEditor from './FDEditor';
 
@@ -34,24 +35,15 @@ const Mask = styled.div`
 `;
 
 enum BatchUpdateMode {
-    OVERWRITE_ONLY = 'overwrite-only',
-    FILL_ONLY = 'fill-only',
-    FULLY_REPLACE = 'fully replace',
+    OVERWRITE_ONLY = 'overwrite_only',
+    FILL_ONLY = 'fill_only',
+    FULLY_REPLACE = 'fully_replace',
 }
 
-const dropdownOptions: { key: BatchUpdateMode; text: string }[] = [
-    {
-        key: BatchUpdateMode.OVERWRITE_ONLY,
-        text: '更新并替换',//BatchUpdateMode.OVERWRITE_ONLY,
-    },
-    {
-        key: BatchUpdateMode.FILL_ONLY,
-        text: '补充不替换',//BatchUpdateMode.FILL_ONLY,
-    },
-    {
-        key: BatchUpdateMode.FULLY_REPLACE,
-        text: '全部覆盖',//BatchUpdateMode.FULLY_REPLACE,
-    },
+const dropdownOptions: readonly BatchUpdateMode[] = [
+    BatchUpdateMode.OVERWRITE_ONLY,
+    BatchUpdateMode.FILL_ONLY,
+    BatchUpdateMode.FULLY_REPLACE,
 ];
 
 const FDBatch: FC = () => {
@@ -159,19 +151,19 @@ const FDBatch: FC = () => {
 
     return (
         <>
-            <h3>快捷操作</h3>
+            <h3>{getI18n('fd_config.batch.title')}</h3>
             <Stack tokens={{ childrenGap: 10 }} horizontal>
                 <ActionButton iconProps={{ iconName: 'Delete' }} onClick={handleClear}>
-                    全部删除
+                    {getI18n('fd_config.batch.delete_all')}
                 </ActionButton>
-                <ActionButton iconProps={{ iconName: 'EngineeringGroup' || 'BranchSearch' }} onClick={generateFDFromExtInfo}>
-                    使用扩展字段计算图
+                <ActionButton iconProps={{ iconName: 'EngineeringGroup' }} onClick={generateFDFromExtInfo}>
+                    {getI18n('fd_config.batch.from_ext')}
                 </ActionButton>
                 {/* <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
                     导入影响关系
                 </ActionButton> */}
                 <ActionButton iconProps={{ iconName: 'HintText' }} disabled={!serverActive} onClick={generateFDFromAutoDetection}>
-                    自动识别
+                    {getI18n('fd_config.batch.from_detection')}
                 </ActionButton>
             </Stack>
             {displayPreview && (
@@ -182,7 +174,7 @@ const FDBatch: FC = () => {
                                 <Spinner label="computing" />
                             ) : (
                                 <FDEditor
-                                    title="预览"
+                                    title={getI18n('fd_config.batch.preview')}
                                     functionalDependencies={submittable}
                                     setFunctionalDependencies={updatePreview}
                                 />
@@ -190,12 +182,12 @@ const FDBatch: FC = () => {
                         </div>
                         <Stack tokens={{ childrenGap: 20 }} horizontal style={{ justifyContent: 'center' }}>
                             <DefaultButton
-                                text={dropdownOptions.find(opt => opt.key === mode)?.text ?? '确定'}
+                                text={getI18n(`fd_config.batch_mode.${mode}`)}
                                 onClick={handleSubmit}
                                 primary
                                 split
                                 menuProps={{
-                                    items: dropdownOptions,
+                                    items: dropdownOptions.map(key => ({ key, text: getI18n(`fd_config.batch_mode.${key}`) })),
                                     onItemClick: (_e, item) => {
                                         if (item) {
                                             setMode(item.key as BatchUpdateMode);
@@ -204,7 +196,7 @@ const FDBatch: FC = () => {
                                 }}
                             />
                             <DefaultButton
-                                text="取消"
+                                text={getI18n('fd_config.batch.cancel')}
                                 onClick={handleCancel}
                             />
                         </Stack>

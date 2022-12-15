@@ -4,12 +4,13 @@ import type { Graph } from '@antv/g6';
 import { DefaultButton } from '@fluentui/react';
 import styled from 'styled-components';
 import produce from 'immer';
-import { useGlobalStore } from '../../../store';
-import { useRenderData, useGraphOptions } from '../explorer/graph-utils';
-import { useReactiveGraph } from '../explorer/graph-helper';
-import { transformFuncDepsToPag } from '../../../store/causalStore/pag';
-import type { IFunctionalDep } from '../config';
-import { useCausalViewContext } from '../../../store/causalStore/viewStore';
+import { useGlobalStore } from '../../../../store';
+import { useRenderData, useGraphOptions } from '../../explorer/graph-utils';
+import { useReactiveGraph } from '../../explorer/graph-helper';
+import { transformFuncDepsToPag } from '../../../../store/causalStore/pag';
+import type { IFunctionalDep } from '../../config';
+import { getI18n } from '../../locales';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 
 
 const Container = styled.div`
@@ -43,14 +44,22 @@ const FDGraph: React.FC<{
     setFunctionalDependencies,
 }) => {
     const { causalStore } = useGlobalStore();
-    const { fields } = causalStore;
+    const { fields, groups } = causalStore.dataset;
     const functionalDependenciesAsPag = transformFuncDepsToPag(functionalDependencies);
-    const { onRenderNode } = useCausalViewContext() ?? {};
+    const viewContext = useCausalViewContext();
+    const { onRenderNode } = viewContext ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
 
     const onLinkTogether = useCallback((srcFid: string, tarFid: string) => {
+        if ([srcFid, tarFid].some(fid => groups.some(grp => grp.root === fid))) {
+            return;
+        }
+        const group = groups.find(grp => grp.children.includes(srcFid));
+        if (group?.children.includes(tarFid)) {
+            return;
+        }
         setFunctionalDependencies(list => produce(list ?? [], draft => {
             const linked = draft.find(fd => fd.fid === tarFid);
             if (linked && !linked.params.some(prm => prm.fid === srcFid)) {
@@ -70,7 +79,7 @@ const FDGraph: React.FC<{
                 });
             }
         }));
-    }, [setFunctionalDependencies]);
+    }, [setFunctionalDependencies, groups]);
 
     const onRemoveLink = useCallback((edge: { srcFid: string; tarFid: string; } | null) => {
         if (edge) {
@@ -95,6 +104,7 @@ const FDGraph: React.FC<{
     const renderData = useRenderData({
         mode: 'edit',
         fields,
+        groups,
         PAG: functionalDependenciesAsPag,
         renderNode: onRenderNode,
     });
@@ -107,6 +117,13 @@ const FDGraph: React.FC<{
     const cfgRef = useRef(cfg);
     cfgRef.current = cfg;
 
+    const handleNodeDblClick = useCallback((fid: string | null) => {
+        const f = fields.find(which => which.fid === fid);
+        if (f) {
+            causalStore.dataset.toggleExpand(f);
+        }
+    }, [causalStore.dataset, fields]);
+
     const graph = useReactiveGraph({
         containerRef,
         width,
@@ -115,6 +132,7 @@ const FDGraph: React.FC<{
         data: renderData,
         mode: 'edit',
         handleEdgeClick: onRemoveLink,
+        handleNodeDblClick,
         fields,
         allowZoom: false,
     });
@@ -151,7 +169,7 @@ const FDGraph: React.FC<{
                     onClick={handleForceLayout}
                     iconProps={{ iconName: 'Play' }}
                 >
-                    重新布局
+                    {getI18n('chart.re_layout')}
                 </DefaultButton>
             </div>
         </Container>

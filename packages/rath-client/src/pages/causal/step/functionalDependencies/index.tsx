@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback } from 'react';
 import styled from 'styled-components';
-import { useGlobalStore } from '../../../store';
-import { IFunctionalDep } from '../config';
+import { useGlobalStore } from '../../../../store';
+import { IFunctionalDep } from '../../config';
 import FDBatch from './FDBatch';
 import FDEditor from './FDEditor';
 

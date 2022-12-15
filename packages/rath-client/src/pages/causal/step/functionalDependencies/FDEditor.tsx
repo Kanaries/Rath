@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import type { FC } from 'react';
-import type { IFunctionalDep } from '../config';
+import type { IFunctionalDep } from '../../config';
 import FDGraph from './FDGraph';
 
 

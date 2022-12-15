@@ -4,7 +4,7 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { getI18n } from "../locales";
 import CausalDatasetConfig from './datasetConfig';
-import CausalFDConfig from './FDConfig';
+import CausalFDConfig from './functionalDependencies';
 import CausalModel from "./causalModel";
 
 
