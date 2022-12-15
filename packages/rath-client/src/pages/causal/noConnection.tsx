@@ -1,7 +1,7 @@
-import intl from 'react-intl-universal';
 import type { FC } from "react";
 import styled from 'styled-components';
 import { Icon, MessageBar, MessageBarType } from '@fluentui/react';
+import { getI18n } from './locales';
 
 
 const Container = styled.div`
@@ -36,13 +36,13 @@ const NoConnection: FC = () => {
                 styles={{ icon: { paddingTop: '0.26em' } }}
                 style={{ lineHeight: '1.4em', padding: '0.2em 0' }}
             >
-                <span>{intl.get('causal.no_connection.before')}</span>
-                <a href={`mailto:${SupportMailAddr}?subject=${encodeURIComponent(intl.get('causal.no_connection.subject'))}`}>
-                    {intl.get('causal.no_connection.text')}
+                <span>{getI18n('no_connection.before')}</span>
+                <a href={`mailto:${SupportMailAddr}?subject=${encodeURIComponent(getI18n('no_connection.subject'))}`}>
+                    {getI18n('no_connection.text')}
                     {`(${SupportMailAddr})`}
                     <Icon iconName="MailForward" />
                 </a>
-                <span>{intl.get('causal.no_connection.after')}</span>
+                <span>{getI18n('no_connection.after')}</span>
             </MessageBar>
         </Container>
     );

@@ -4,19 +4,15 @@ import {
     IColumn,
     Label,
     SelectionMode,
-    Slider,
-    Stack,
 } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { FC, useCallback, useMemo, useRef } from 'react';
 import produce from 'immer';
 import intl from 'react-intl-universal'
-import { useGlobalStore } from '../../store';
-import FilterCreationPill from '../../components/filterCreationPill';
-import LaTiaoConsole from '../../components/latiaoConsole/index';
-import type { IFieldMeta } from '../../interfaces';
-import { FilterCell } from './filters';
+import { useGlobalStore } from '../../../../store';
+import type { IFieldMeta } from '../../../../interfaces';
+import { getI18n } from '../../locales';
 
 
 const TableContainer = styled.div`
@@ -60,12 +56,9 @@ const Row = styled.div<{ selected: boolean }>`
 
 const SelectedKey = 'selected';
 
-const DatasetPanel: FC = () => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
-    const { cleanedData } = dataSourceStore;
-    const {
-        fields, allFields, filteredDataSize, sampleRate, sampleSize, filters
-    } = causalStore.dataset;
+const FieldPanel: FC = () => {
+    const { causalStore } = useGlobalStore();
+    const { fields, allFields } = causalStore.dataset;
 
     const totalFieldsRef = useRef(allFields);
     totalFieldsRef.current = allFields;
@@ -129,7 +122,7 @@ const DatasetPanel: FC = () => {
             },
             {
                 key: 'name',
-                name: `因素 (${fields.length} / ${totalFieldsRef.current.length})`,
+                name: getI18n('dataset_config.field_info.field', { total: totalFieldsRef.current.length, selected: fields.length }),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
@@ -143,7 +136,7 @@ const DatasetPanel: FC = () => {
             },
             {
                 key: 'extInfo',
-                name: '扩展来源',
+                name: getI18n('dataset_config.field_info.extInfo'),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     const { extInfo } = field;
@@ -162,7 +155,7 @@ const DatasetPanel: FC = () => {
             },
             {
                 key: 'unique',
-                name: '唯一值数量',
+                name: getI18n('dataset_config.field_info.unique'),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
@@ -176,12 +169,11 @@ const DatasetPanel: FC = () => {
             },
             {
                 key: 'semanticType',
-                name: '类型',
+                name: getI18n('dataset_config.field_info.sType'),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {/* {field.features.entropy} */}
                             {intl.get(`common.semanticType.${field.semanticType}`)}
                         </span>
                     );
@@ -191,7 +183,7 @@ const DatasetPanel: FC = () => {
             },
             {
                 key: 'mean',
-                name: '均值',
+                name: getI18n('dataset_config.field_info.mean'),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
@@ -205,7 +197,7 @@ const DatasetPanel: FC = () => {
             },
             {
                 key: 'std',
-                name: '标准差',
+                name: getI18n('dataset_config.field_info.std'),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
@@ -219,7 +211,7 @@ const DatasetPanel: FC = () => {
             },
             {
                 key: 'median',
-                name: '中位数',
+                name: getI18n('dataset_config.field_info.median'),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
@@ -236,85 +228,7 @@ const DatasetPanel: FC = () => {
 
     return (
         <>
-            <Stack style={{ marginBlock: '0.6em -0.6em', alignItems: 'center' }} horizontal>
-                <Label style={{ marginRight: '1em' }}>数据增强</Label>
-                <LaTiaoConsole />
-            </Stack>
-            <Stack style={{ marginTop: '0.6em' }}>
-                <Label style={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <span>筛选器</span>
-                    <div
-                        style={{
-                            display: 'flex',
-                            padding: '0 2em',
-                        }}
-                    >
-                        <FilterCreationPill
-                            fields={allFields}
-                            onFilterSubmit={(_, filter) => causalStore.dataset.appendFilter(filter)}
-                        />
-                    </div>
-                </Label>
-                {filters.length > 0 && (
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            overflow: 'auto hidden',
-                            margin: '1em 0',
-                        }}
-                    >
-                        {filters.map((filter, i) => {
-                            const field = allFields.find((f) => f.fid === filter.fid);
-
-                            return field ? (
-                                <FilterCell
-                                    key={i}
-                                    field={field}
-                                    data={filter}
-                                    remove={() => causalStore.dataset.removeFilter(i)}
-                                />
-                            ) : null;
-                        })}
-                    </div>
-                )}
-                <small style={{ color: '#666', display: 'flex', alignItems: 'center' }}>
-                    {`原始大小: ${cleanedData.length} 行，${filters.length ? `筛选后子集大小: ${filteredDataSize} 行` : '(无筛选项)'}`}
-                </small>
-            </Stack>
-            <Stack style={{ marginBlock: '0.8em' }}>
-                <Slider
-                    label="采样率"
-                    min={0.01}
-                    max={1}
-                    step={0.01}
-                    value={sampleRate}
-                    showValue
-                    onChange={(val) => causalStore.dataset.sampleRate = val}
-                    valueFormat={(val) => `${(val * 100).toFixed(0)}%`}
-                    styles={{
-                        root: {
-                            flexGrow: 0,
-                            flexShrink: 0,
-                            display: 'flex',
-                            flexDirection: 'row',
-                            flexWrap: 'wrap',
-                            alignItems: 'center',
-                        },
-                        container: {
-                            minWidth: '160px',
-                            maxWidth: '300px',
-                            flexGrow: 1,
-                            flexShrink: 0,
-                            marginInline: '1vmax',
-                        },
-                    }}
-                />
-                <small style={{ padding: '0.2em 0', color: '#666', display: 'flex', alignItems: 'center' }}>
-                    {`样本量: ${sampleSize} 行`}
-                </small>
-            </Stack>
-            <Label>需要分析的字段</Label>
+            <Label>{getI18n('dataset_config.fields')}</Label>
             <TableContainer>
                 <DetailsList
                     items={allFields.slice(0)}
@@ -335,4 +249,4 @@ const DatasetPanel: FC = () => {
     );
 };
 
-export default observer(DatasetPanel);
+export default observer(FieldPanel);

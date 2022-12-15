@@ -1,5 +1,6 @@
 import intl from 'react-intl-universal';
 import type { IErrorInfo } from './components/error/store';
+import type { I18nSetupFunction } from './store/langStore';
 
 type ErrorMessageLocales = {
     raw: string;
@@ -97,17 +98,20 @@ const RATH_ERROR = {
     } as RathErrorType,
 };
 
+let i18nPrefix = 'error';
+
 export const getRathError = (name: keyof typeof RATH_ERROR, detail?: any, data?: { [key: string]: string }): IErrorInfo => {
     const err = RATH_ERROR[name];
 
     return {
         title: `[${err.errId}] ${err.displayName}`,
         type: 'error',
-        content: `${intl.get(`error.${err.displayName}`, data)}${detail && detail instanceof Error && (detail as Error).message ? `\n\n${detail}` : ''}`,
+        content: `${intl.get(`${i18nPrefix}.${err.displayName}`, data)}${detail && detail instanceof Error && (detail as Error).message ? `\n\n${detail}` : ''}`,
     };
 };
 
-export const loadRathErrorLocales = (lang: string): { [displayName: string]: string } => {
+export const loadRathErrorLocales: I18nSetupFunction = (lang: string, id: string): { [displayName: string]: string } => {
+    i18nPrefix = id;
     const res: { [displayName: string]: string } = {};
 
     for (const name in RATH_ERROR) {

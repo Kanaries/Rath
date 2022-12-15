@@ -2,6 +2,7 @@ import { DefaultButton, Icon, IconButton } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
+import { getI18n } from "../locales";
 import CausalDatasetConfig from './datasetConfig';
 import CausalFDConfig from './FDConfig';
 import CausalModel from "./causalModel";
@@ -86,22 +87,10 @@ export type CausalStepOption = {
     help: string;
 };
 
-export const CausalSteps: readonly CausalStepOption[] = [
-    {
-        key: CausalStep.DATASET_CONFIG,
-        title: '数据集配置',
-        help: '从数据中有针对性地选出合适的数据子集以及分析目标关注的因素集合。',
-    },
-    {
-        key: CausalStep.FD_CONFIG,
-        title: '编辑函数依赖',
-        help: '基于特定领域或背景知识定义绝对的函数依赖，帮助算法回避不合理的探索空间，更好进行决策。',
-    },
-    {
-        key: CausalStep.CAUSAL_MODEL,
-        title: '因果模型',
-        help: '选择算法进行因果发现，完善因果图。在已确认的因果图上结合可视化探索进行结论验证和进一步分析。（需要运行因果发现完成因果模型）',
-    },
+export const CausalSteps: readonly CausalStep[] = [
+    CausalStep.DATASET_CONFIG,
+    CausalStep.FD_CONFIG,
+    CausalStep.CAUSAL_MODEL,
 ];
 
 export const CausalStepPager = observer(function CausalStepPager () {
@@ -112,13 +101,10 @@ export const CausalStepPager = observer(function CausalStepPager () {
         setShowHelp(stepKey);
     }, [stepKey]);
 
-    const curStep = useMemo(() => CausalSteps.find(s => s.key === stepKey)!, [stepKey]);
-    const hintStep = useMemo(() => CausalSteps.find(s => s.key === showHelp)!, [showHelp]);
-
     const [skipFDEdit, setSkipFDEdit] = useState(true);
 
     const goPreviousStep = useMemo(() => {
-        switch (curStep.key) {
+        switch (stepKey) {
             case CausalStep.DATASET_CONFIG: {
                 return undefined;
             }
@@ -132,10 +118,10 @@ export const CausalStepPager = observer(function CausalStepPager () {
                 return undefined;
             }
         }
-    }, [curStep]);
+    }, [stepKey]);
 
     const goNextStep = useMemo(() => {
-        switch (curStep.key) {
+        switch (stepKey) {
             case CausalStep.DATASET_CONFIG: {
                 return () => setStepKey(skipFDEdit ? CausalStep.CAUSAL_MODEL : CausalStep.FD_CONFIG);
             }
@@ -149,35 +135,35 @@ export const CausalStepPager = observer(function CausalStepPager () {
                 return undefined;
             }
         }
-    }, [curStep, skipFDEdit]);
+    }, [stepKey, skipFDEdit]);
 
     return (
         <Container>
             <StepHeader>
                 <DefaultButton disabled={!goPreviousStep} onClick={goPreviousStep} iconProps={{ iconName: 'Previous' }}>
-                    上一步
+                    {getI18n('step_control.prev')}
                 </DefaultButton>
                 <StepList>
                     {CausalSteps.map((step, i, arr) => {
-                        const active = step.key === stepKey;
-                        const completed = arr.slice(i + 1).some(opt => opt.key === stepKey);
+                        const active = step === stepKey;
+                        const completed = arr.slice(i + 1).some(opt => opt === stepKey);
                         return (
-                            <Fragment key={step.key}>
+                            <Fragment key={step}>
                                 {i !== 0 && (
                                     <span>{'>'}</span>
                                 )}
                                 <StepItem
                                     active={active}
                                     completed={completed}
-                                    onClick={() => active || setStepKey(step.key)}
-                                    onMouseOver={() => active || setShowHelp(step.key)}
+                                    onClick={() => active || setStepKey(step)}
+                                    onMouseOver={() => active || setShowHelp(step)}
                                     onMouseOut={() => setShowHelp(stepKey)}
                                 >
-                                    <span>{step.title}</span>
-                                    {step.key === CausalStep.FD_CONFIG && (
+                                    <span>{getI18n(`step.${step}.title`)}</span>
+                                    {step === CausalStep.FD_CONFIG && (
                                         <Badge>
                                             <IconButton
-                                                title="Bypass"
+                                                title={getI18n('step_control.bypass')}
                                                 iconProps={{ iconName: "DoubleChevronRight", style: { fontWeight: 'bold' } }}
                                                 onClick={e => {
                                                     e.stopPropagation();
@@ -194,12 +180,12 @@ export const CausalStepPager = observer(function CausalStepPager () {
                     })}
                 </StepList>
                 <DefaultButton primary disabled={!goNextStep} onClick={goNextStep} iconProps={{ iconName: 'Next' }}>
-                    继续
+                    {getI18n('step_control.next')}
                 </DefaultButton>
             </StepHeader>
-            <StepHint isCurrentStep={hintStep.key === stepKey}>
-                <Icon iconName={hintStep.key === stepKey ? "Info" : "InfoSolid"} />
-                {hintStep.help}
+            <StepHint isCurrentStep={showHelp === stepKey}>
+                <Icon iconName={showHelp === stepKey ? "Info" : "InfoSolid"} />
+                {getI18n(`step.${showHelp}.description`)}
             </StepHint>
             <hr className="card-line" />
             <StepPanel>
@@ -211,7 +197,7 @@ export const CausalStepPager = observer(function CausalStepPager () {
                     [CausalStep.CAUSAL_MODEL]: (
                         <CausalModel />
                     ),
-                }[curStep.key]}
+                }[stepKey]}
             </StepPanel>
         </Container>
     );

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import { useCausalViewProvider } from '../../store/causalStore/viewStore';
 import type { IFunctionalDep } from './config';
+import { getI18n } from './locales';
 import NoConnection from './noConnection';
 import { CausalStepPager } from './step';
 
@@ -45,7 +46,9 @@ const CausalPage: FC = () => {
         <div className="content-container">
             <ViewContextProvider>
                 <Main className="card">
-                    <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>因果分析</h1>
+                    <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>
+                        {getI18n('title')}
+                    </h1>
                     <hr className="card-line" />
                     {serverActive || <NoConnection />}
                     <CausalStepPager />
