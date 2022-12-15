@@ -86,7 +86,7 @@ export default class CausalStore {
         return false;
     }
 
-    public async save(): Promise<boolean> {
+    public async save(toStorage = true): Promise<ICausalStoreSave | false> {
         if (!this.dataset.datasetId) {
             return false;
         }
@@ -99,7 +99,42 @@ export default class CausalStore {
                 causalityRaw: this.model.causalityRaw,
             } : null,
         };
-        await setCausalModelStorage(this.dataset.datasetId, save);
+        if (toStorage) {
+            await setCausalModelStorage(this.dataset.datasetId, save);
+        }
+        return save;
+    }
+
+    public load(save: ICausalStoreSave): boolean {
+        if (save.datasetId !== this.dataset.datasetId) {
+            notify({
+                type: 'error',
+                title: 'Load Causal Model Failed',
+                content: `Dataset ID not match\nrequires: ${save.datasetId}\n: current:${this.dataset.datasetId}.`,
+            });
+            return false;
+        }
+        const droppedFields = save.fields.filter(fid => {
+            return this.dataset.allFields.findIndex(f => f.fid === fid) === -1;
+        });
+        if (droppedFields.length > 0) {
+            notify({
+                type: 'error',
+                title: 'Load Causal Model Failed',
+                content: `${droppedFields.length} fields not found: ${droppedFields.join(', ')}.`,
+            });
+            return false;
+        }
+        this.dataset.selectFields(save.fields.map(
+            fid => this.dataset.allFields.findIndex(f => f.fid === fid)
+        ));
+        if (save.causalModel) {
+            this.operator.updateConfig(save.causalModel.algorithm, save.causalModel.params);
+            runInAction(() => {
+                this.model.causalityRaw = save.causalModel!.causalityRaw;
+                // this.model.causality = resolveCausality(save.causalModel!.causalityRaw, this.dataset.fields);
+            });
+        }
         return true;
     }
 

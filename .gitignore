@@ -51,3 +51,5 @@ connect.db
 not_sqlalchemy/
 run_flask_app.bat
 venv
+
+dataset-with-metas.json

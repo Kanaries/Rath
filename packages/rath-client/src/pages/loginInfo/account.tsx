@@ -64,8 +64,8 @@ const PIVOT_LIST = [
 function Account() {
     const [isLoginStatus, setIsLoginStatus] = useState<boolean>(false);
     // const [globalSwitch, setGlobalSwitch] = useState(true);
-    const { commonStore } = useGlobalStore();
-    const { userName, info } = commonStore;
+    const { userStore } = useGlobalStore();
+    const { userName, info } = userStore;
     // const pivots = PIVOT_LIST.map((p) => ({
     //     // ...p,
     //     key: p.itemKey,
@@ -82,7 +82,7 @@ function Account() {
                                 <PivotItem key={item.itemKey} headerText={intl.get(`login.${item.headerText}`)}>
                                     {item.element(() => {
                                         setIsLoginStatus(false);
-                                        commonStore.getPersonalInfo();
+                                        userStore.getPersonalInfo();
                                     })}
                                 </PivotItem>
                             ))}
@@ -92,28 +92,31 @@ function Account() {
             ) : (
                 <div>
                     <div className="account">
-                        <span className="label">Account</span>
-                        {userName ? (
-                            <PrimaryButton
-                                onClick={() => {
-                                    commonStore.commitLogout()
-                                }}
-                            >
-                                {intl.get('login.signOut')}
-                            </PrimaryButton>
-                        ) : (
-                            <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>
-                                {intl.get('login.signIn')}
-                            </PrimaryButton>
-                        )}
+                        <span>
+                            <span className="label">Account</span>
+                            {userName ? (
+                                <PrimaryButton
+                                    className="ml-2"
+                                    onClick={() => {
+                                        userStore.commitLogout()
+                                    }}
+                                >
+                                    {intl.get('login.signOut')}
+                                </PrimaryButton>
+                            ) : (
+                                <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>
+                                    {intl.get('login.signIn')}
+                                </PrimaryButton>
+                            )}
+                        </span>
                         {userName && <TextField value={userName || ''} disabled={true} />}
                     </div>
-                    {userName && (
+                    {info && (
                         <div className="phone">
                             <TextField label="Phone" value={info.phone} disabled={true} />
                         </div>
                     )}
-                    {userName && (
+                    {info && (
                         <div className="email">
                             <TextField label="Email" value={info.email} disabled={true} />
                         </div>

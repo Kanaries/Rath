@@ -1,4 +1,4 @@
-<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> [English](README.md) | 简体中文
+<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> [English](../README.md) | [日本語](./README-jp.md) | 简体中文
 
 <div align="center">
   <br>
@@ -6,9 +6,9 @@
     <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="120">
    </p>
    <h1 style="font-size:55px">RATH</h1>
-  <strong>新一代开源，自动化的数据分析与智能可视化工具</strong>
+  <strong>次世代开源智能数据分析与可视化应用</strong>
   <br></br>
-  未来的数据分析场景会是怎样的？自动化的数据分析与智能可视化叙事帮助你挖掘数据
+  未来的数据分析场景会是怎样的？RATH借助自动化的数据分析、智能可视化叙事、因果发现与文本挖掘帮助你以前所未有的方式挖掘数据中的价值。
 </div>
 <br>
 <div id="header" align="center">
@@ -34,12 +34,15 @@
 
 **欢迎使用[RATH](https://kanaries.cn)!**
 
-RATH 是数据分析和可视化工具（如 Tableau）的开源替代品。主要功能包括：
+RATH 不仅仅是数据分析和可视化工具（如 Tableau）的开源替代品，还是次世代的数据分析应用的雏形。主要功能包括：
 
 - 支持主流数据库导入
 - 自动生成多维数据并可视化
-- 发现数据规律，揭示数据的内在联系和因果关系
+- 自动发现数据规律，揭示数据的内在联系和因果关系
+- 因果发现与推断，帮你挖掘更深层次的变量关系。
+- 根据你关心的文本片段，自动理解你想要进行的数据转化操作，并帮你生成转化选项。
 - 使用增强分析引擎自动化你的探索性数据分析（EDA）流程
+- 数据绘板，使用绘画的方式玩数据分析。
 
 <a href="https://kanaries.net"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/feature-demo.gif" alt="RATH 功能 demo"></a>
 
@@ -48,13 +51,12 @@ RATH 是数据分析和可视化工具（如 Tableau）的开源替代品。主�
 
 - 🚀 在浏览器中[立即尝试RATH](https://rath.kanaries.net)
 - 📖 阅读[RATH 文档](https://docs.kanaries.net)
-- ⭐️ 给我们GitHub 加星
+- [绘板功能视频](https://www.bilibili.com/video/BV1Pe4y1E7Y2/?share_source=copy_web&vd_source=57ac992756e57aeb910c02693db35eac)
 
 ## 联系我们
 
 RATH是开源项目，离不开开源贡献者和关注者的支持。当你遇到问题，bug，疑惑，甚至有有趣的想法或建议，都可以联系我们：
 - 邮件: support@kanaries.org
-- 领英: https://www.linkedin.com/in/hao-chen-50950a168/
 - QQ群: 129132269
 - 公众号: kanaries
 
@@ -130,6 +132,8 @@ RATH作为数据分析的智能助手，通过AI学习给出提示，协助数�
 >```
 
 ### 数据绘板，以绘画的方式完成数据分析工作流
+
+[数据绘板演示视频](https://www.bilibili.com/video/BV1Pe4y1E7Y2/?share_source=copy_web&vd_source=57ac992756e57aeb910c02693db35eac)
 
 <a href="https://docs.kanaries.net/zh/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="数据绘板"></a>
 

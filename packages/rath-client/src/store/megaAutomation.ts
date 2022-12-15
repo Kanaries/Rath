@@ -3,13 +3,13 @@ import { computed, makeAutoObservable, observable, runInAction, toJS } from 'mob
 import { Specification, IInsightSpace, ISpec } from 'visual-insights';
 import { STORAGE_FILE_SUFFIX } from '../constants';
 import {  IResizeMode, IRow, ITaskTestMode, IVegaSubset, PreferencePanelConfig } from '../interfaces';
+import { adviceVisSize } from '../pages/collection/utils';
 import { distVis } from '../queries/distVis';
 import { labDistVis } from '../queries/labdistVis';
 import { rathEngineService } from '../services/index';
 import { isSetEqual } from '../utils';
 import { RathStorageDump } from '../utils/storage';
 import { LTSPipeLine } from './pipeLineStore/lts';
-
 
 export interface IVizSpace extends IInsightSpace {
     schema: Specification;
@@ -45,7 +45,7 @@ export class MegaAutomationStore {
     public mainViewPattern: IPattern | null = null;
     public orderBy: string = EXPLORE_VIEW_ORDER.DEFAULT;
     public nlgThreshold: number = 0.2;
-    public vizMode: 'lite' | 'strict' = 'lite';
+    public vizMode: 'lite' | 'strict' = 'strict';
     public globalConstraints: {
         dimensions: Array<IConstranints>;
         measures: Array<IConstranints>
@@ -245,9 +245,9 @@ export class MegaAutomationStore {
         return this.mainViewPattern;
     }
     public createMainViewSpec (pattern: IPattern) {
-        const { visualConfig, vizMode } = this;
+        const { visualConfig, vizMode, fieldMetas } = this;
         if (vizMode === 'lite') {
-            this.mainViewSpec = distVis({
+            this.mainViewSpec = adviceVisSize(distVis({
                 resizeMode: visualConfig.resize,
                 pattern: toJS(pattern),
                 width: visualConfig.resizeConfig.width,
@@ -256,9 +256,9 @@ export class MegaAutomationStore {
                 stepSize: 32,
                 excludeScaleZero: visualConfig.excludeScaleZero,
                 specifiedEncodes: pattern.encodes
-            })
+            }), fieldMetas)
         } else if (vizMode === 'strict') {
-            this.mainViewSpec = labDistVis({
+            this.mainViewSpec = adviceVisSize(labDistVis({
                 resizeMode: visualConfig.resize,
                 pattern: toJS(pattern),
                 width: visualConfig.resizeConfig.width,
@@ -268,7 +268,7 @@ export class MegaAutomationStore {
                 dataSource: this.dataSource,
                 excludeScaleZero: visualConfig.excludeScaleZero,
                 specifiedEncodes: pattern.encodes
-            })
+            }), fieldMetas)
         }
     }
     public refreshMainViewSpec () {

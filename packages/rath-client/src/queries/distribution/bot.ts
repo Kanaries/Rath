@@ -87,6 +87,15 @@ export function autoMark(
         if (isSetEqual(semantics, ['nominal', 'nominal'])) {
             return 'square';
         } else if (isSetEqual(semantics, ['nominal', 'quantitative'])) {
+            if (dataSource) {
+                const groups = groupBy(
+                    dataSource,
+                    allFields.filter((f) => f.analyticType === 'dimension').map((f) => f.fid)
+                );
+                if (groups.size > 16) {
+                    return 'circle'
+                }
+            }
             return 'tick';
         } else if (isSetEqual(semantics, ['ordinal', 'quantitative'])) {
             return 'point';

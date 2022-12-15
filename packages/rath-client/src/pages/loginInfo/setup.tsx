@@ -1,9 +1,9 @@
-import React from 'react';
-import { IDropdownOption } from '@fluentui/react';
+import React, { useState } from 'react';
+import { Dropdown, IDropdownOption, Pivot, PivotItem } from '@fluentui/react';
 import styled from 'styled-components';
-import DropdownSelect from '../../components/dropDownSelect';
 import { SUPPORT_LANG } from '../../locales';
 import { useGlobalStore } from '../../store';
+import AnalysisSettings from '../../components/analysisSettings';
 
 const langOptions: IDropdownOption[] = SUPPORT_LANG.map((lang) => ({
     key: lang.value,
@@ -11,51 +11,43 @@ const langOptions: IDropdownOption[] = SUPPORT_LANG.map((lang) => ({
 }));
 
 const SetUpDiv = styled.div`
-    > div {
-        width: 100%;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-        padding-left: 10px;
-        padding-top: 10px;
-        > span:first-child {
-            display: inline-block;
-            width: 80px;
-        }
-        > span:last-child {
-            display: inline-block;
-            flex: 1;
-        }
+    padding: 0.5em 1em 1em 1em;
+    hr {
+        margin: 1em 0em;
     }
 `;
 
 function Setup() {
-    const { langStore, commonStore } = useGlobalStore();
-    const { navMode } = commonStore;
+    const { langStore } = useGlobalStore();
+    const [configKey, setConfigKey] = useState<'basic' | 'analysis'>('basic');
     return (
         <SetUpDiv>
-            {navMode === 'text' && (
-                <div className="lang">
-                    <span className="label">Language:</span>
-                    <span className="element">
-                        <DropdownSelect
-                            border
-                            value={langStore.lang}
-                            onChange={(e) => {
-                                langStore.changeLocalesAndReload(e.target.value);
-                            }}
-                        >
-                            {langOptions.map((lang) => (
-                                <option key={lang.key} value={lang.key}>
-                                    {lang.text}
-                                </option>
-                            ))}
-                        </DropdownSelect>
-                    </span>
+            <Pivot
+                selectedKey={configKey}
+                onLinkClick={(item) => {
+                    if (item?.props.itemKey) {
+                        setConfigKey(item.props.itemKey as 'basic' | 'analysis');
+                    }
+                }}
+            >
+                <PivotItem headerText="Basic" itemKey="basic"></PivotItem>
+                <PivotItem headerText="Data Analysis" itemKey="analysis"></PivotItem>
+            </Pivot>
+            <hr />
+
+            {configKey === 'basic' && (
+                <div>
+                    <Dropdown
+                        label='Language'
+                        selectedKey={langStore.lang}
+                        options={langOptions}
+                        onChange={(e, op) => {
+                            op && langStore.changeLocalesAndReload(op.key as string);
+                        }}
+                    />
                 </div>
             )}
-            <div></div>
+            {configKey === 'analysis' && <AnalysisSettings />}
         </SetUpDiv>
     );
 }

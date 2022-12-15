@@ -1,11 +1,11 @@
-<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> English | [日本語](./docs/README-jp.md) | [简体中文](./docs/README-zh.md)
+<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> [English](../README.md) | 日本語 | [简体中文](./README-zh.md)
 <div align="center">
   <br>
   <p align="center">
     <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="120">
    </p>
    <h1 style="font-size:55px">RATH</h1>
-  <strong>Next Generation Open Source Augmented Analytics BI</strong>
+  <strong>次世代のオープンソース増強型分析BI</strong>
 </div>
 <br>
 <div id="header" align="center">
@@ -47,25 +47,24 @@
   </a>
 </div>
 
-## Welcome
+## いらっしゃいませ
 
-Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have you as part of our community.
+[Kanaries RATH](https://kanaries.net/) へようこそ。私たちはあなたを私たちのコミュニティの一員として迎えることにとても興奮しています.
 
-**RATH** is beyond an open-source alternative to Data Analysis and Visualization tools such as Tableau. It automates your Exploratory Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
+**RATH** は、データ分析と視覚化のためのオープンソースの代替ツールであるTableauなどの代わりになるものです。自動的にパターン、洞察、因果関係を発見し、その知見を強力な自動生成された多次元データの可視化で表示することによって、探索的データ分析のワークフローを自動化します。
 
 <a href="https://kanaries.net"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/feature-demo.gif" alt="RATH features demo"></a>
 
-## Get started
+## 始めましょう
 
-To get started with RATH, you can:
+RATH を開始するには、次のことができます。
 - 🚀 [Try RATH now!](https://rath.kanaries.net)
 - 📖 [Read RATH Docs](https://docs.kanaries.net)
-- [Video introducing RATH's data painter](https://youtu.be/djqePNyhz7w)
 
 
-**RATH** is an ongoing project, actively being developed and maintained by a group of data scientists, developers and community enthusiasts. We are a group of people who are passionate about creating the next generation of data analytic tools.
+「RATH」は、データサイエンティスト、開発者、コミュニティ愛好家のグループによって現在開発され、保守されているプロジェクトです。私たちは、次世代のデータ分析ツールを作成することに情熱を持った人々です。
 
-💪Join us, let's build it up!💪
+💪私たちに参加して、それを構築しましょう!💪
 
 <a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/></a>
 <a href="https://discord.gg/Z4ngFWXz2U"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/discord.png" alt="Join our Discord community" width="200"/> </a>
@@ -80,26 +79,25 @@ To get started with RATH, you can:
 [![GitHub Repo stars](https://img.shields.io/badge/share%20on-linkedin-3949AB?style=flat-square&logo=linkedin)](https://www.linkedin.com/shareArticle?url=https://github.com/Kanaries/Rath&title=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
 
 
-## Table of contents
+## 目次
 
 | [Why use RATH?](#why-use-rath) | [Try RATH](#try-rath) | [Feature highlights](#feature-highlights) | [Walkthroughs](#walkthroughs) | [Developer Documentation](#developer-documentation) | [Project Status](#project-status) | [Community](#community) | [Contributions](#contributions) | [License (AGPL)](#license-agpl) |
 
-## Why use RATH?
+## RATH を使用する理由
 
-- Effortlessly automate your Exploratory Data Analysis process with a no-code UI.
-- Generate editable and insightful data visualizations. Freely modify your visualizations with Vega/Vega-lite.
-- Support a variety of database types.
-- Flexible copilot to assist your data exploration journey.
-- Paint your data to explore your datasets directly with Data Painter.
-- Causal discovery and explainer module to help you understand complex data patterns.
-- Open APIs and SDK for embedding requirements.
+- ノーコードのUIを使用して、簡単に探索的データ分析プロセスを自動化します。
+- 編集可能で洞察に富むデータ視覚化を生成します。Vega/Vega-liteを使用して、視覚化を自由に変更できます。
+- 様々なデータベースタイプをサポートします。
+- データ探索の旅を支援するフレキシブルなコピロット。
+- データペイントを使用して、直接データセットを探索するData Painter。
+- 複雑なデータパターンを理解するための因果探索および説明モジュール。
+- 埋め込み要件用のオープンAPIとSDK。
 
-## Try RATH
+## それを試してみてください
 
-You can either:
-- Run RATH in a browser. [RATH Cloud](https://rath.kanaries.net/)
-- Download the [desktop version](https://kanaries.net/#/products) for Windows/Mac.
-- Run your own RATH instance. Steps:
+- ブラウザで RATH を実行する. [RATH Cloud](https://rath.kanaries.net/)
+- ダウンロード [desktop version](https://kanaries.net/#/products) for Windows/Mac.
+- 独自の RATH インスタンスを実行します。手順:
 
 ```bash
 git clone https://github.com/Kanaries/Rath.git && cd Rath
@@ -110,46 +108,46 @@ yarn workspace rath-client start
 # Boot up RATH
 ```
 
-## Feature highlights
-- 👓 [Data profiling](https://docs.kanaries.net/data-source): overview your data source with one click. You can upload, sample, define dimensions and measures, perform data cleaning and more complicated computing on your data source. 
+## 機能のハイライト
+- 👓 [Data profiling](https://docs.kanaries.net/data-source): 1クリックでデータソースを概観します。データソースに対して、アップロード、サンプリング、寸法と測定値の定義、データクリーニング、およびより複雑な計算を実行することができます
 
-- 🤖 [Mega-auto exploration](https://docs.kanaries.net/auto-explore): a fully-automated way to explore your data set and visualize your data with one click. Leave everything to RATH, simply pick the associate view that inspires you the most.
+- 🤖 [Mega-auto exploration](https://docs.kanaries.net/auto-explore): データセットを探索し、1クリックでデータを視覚化するためのフル自動化された方法。すべてをRATHに任せて、最も感銘を受ける関連ビューを選択してください。
 
-- 🛠 [Semi-auto exploration](https://docs.kanaries.net/semi-auto-explore): The middle ground between a fully automated Data Exploration and Tableau-like manual exploration. RATH will work as your copilot, learn your interests and uses AI to generate relevant recommendations for you.
+- 🛠 [Semi-auto exploration](https://docs.kanaries.net/semi-auto-explore): 完全自動化されたデータ探索と、Tableauのような手動探索の中間地帯。RATHはあなたのコピロットとして働き、あなたの興味を学び、AIを使用して関連するおすすめを生成します。
 
-- 🎨 [Data painter](https://docs.kanaries.net/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features. A video about data painter [here](https://youtu.be/djqePNyhz7w)
+- 🎨 [Data painter](https://docs.kanaries.net/data-painter): 直接データを着色することにより、さらなる分析機能を備えた、探索的データ分析のためのインタラクティブで直感的で強力なツール。
 
-- :bar_chart: Dashboard: build a beautiful interactive data dashboard.
+- :bar_chart: ダッシュボード：インタラクティブなデータダッシュボードを構築します。
 
-- :construction: Causal Analysis: Provide causal discovery and explanations for complex relation analysis.
+- :construction: 因果分析：複雑な関係分析のための因果探索と説明を提供します。
 
-- 🎓 Wanna learn more about RATH? Visit our [Free online Courses](https://docs.kanaries.net/tutorials): Access learning materials, detailed instructions and skill tests for **FREE**!
+- 🎓 RATHについてもっと知りたい? Visit our [Free online Courses](https://docs.kanaries.net/tutorials): **無料**で学習教材、詳細な手順、スキルテストにアクセス!
 
-## Walkthroughs
+## ウォークスルー
 
-### Import data from online databases or CSV/JSON files.
+### オンライン データベースまたは CSV/JSON ファイルからデータをインポートする.
 
 <a href="https://docs.kanaries.net/data-profiling#import-your-data"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/import-data-from-selected-data-source.gif" alt="Import data from a selected data source"></a>
 
-### View statistics from your data source
+### データ ソースから統計を表示する
 
 <a href="https://docs.kanaries.net/data-profiling#data-profiling"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/view-statistics-data-source.gif" alt="View statistics from your data source"></a>
 
-### One-click automated data analysis with visualizations
+### ビジュアライゼーションによるワンクリックの自動データ分析
 
 <a href="https://docs.kanaries.net/mega-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/one-click-automated-data-analysis-visualization.gif" alt="One-click automated data analysis with visualizations"></a>
 
-### Use RATH as your AI Copilot in Data Analysis
+### データ分析の AI コパイロットとして RATH を使用する
 
-Assisted with AI, RATH can help you with your data analysis. Just provide RATH with some input and it will learn about your interests and suggest analysis directions to take.
+AIを支援することで、RATHはあなたのデータ分析を手伝ってくれます。RATHにいくらかの入力を与えるだけで、あなたの興味を学び、分析方向を提案します。
 
 <a href="https://docs.kanaries.net/semi-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/rath-data-analysis-ai-copilot.gif" alt="RATH Data Analysis AI Copilot"></a>
 
-### Manually explore your data with a Tableau-like UI:
+### Tableau のような UI を使用してデータを手動で探索する
 
 <a href="https://docs.kanaries.net/semi-auto-data-exploration#manually-explore-your-data"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/manually-explore-data-tableau-ui.gif" alt="Manually explore your data with a Tableau-like UI"></a>
 
-> Manual Exploration is an independent embedding module. You can use it independently in your apps. For more details, refer to the README.md in in `packages/graphic-walker/README.md`.
+> 手動探索は、独立した埋め込みモジュールです。アプリ内で独立して使用することができます。詳細については、packages/graphic-walker/README.md内のREADME.mdを参照してください。
 >
 > Install Graphic Walker
 > ```bash
@@ -158,15 +156,13 @@ Assisted with AI, RATH can help you with your data analysis. Just provide RATH w
 > npm i --save @kanaries/graphic-walker
 > ```
 
-### :sparkles: Interactive data analysis workflow by data painting
+### :sparkles: インタラクティブなデータ分析ワークフロー by data painting
 
 <a href="https://docs.kanaries.net/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="Interactive data analysis by painting"></a>
 
-[Data Painter Video](https://youtu.be/djqePNyhz7w)
+## サポートされているデータベース
 
-## Supported Databases
-
-RATH supports a wide range of data sources. Here are some of the major database solutions that you can connect to RATH:
+RATHは、幅広いデータソースをサポートします。RATHに接続できる主要なデータベースソリューションの一部を以下に示します。
 
 <p align="center">
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/athena.png" alt="Amazon Athena" border="0" width="200" height="80"/>
@@ -183,25 +179,25 @@ RATH supports a wide range of data sources. Here are some of the major database 
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/airtable.png" alt="AirTable" border="0" width="200" height="80"/>
 </p>
 
-If you want to add support for more database types or data engines, feel free to [Contact us](https://docs.kanaries.net/join#-need-help)
+もしも、さらにデータベースタイプやデータエンジンをサポートしたい場合は、ぜひ[私たちに連絡してください](https://docs.kanaries.net/join#-need-help)。
 
-## Developer Documentation
+## 開発者向けドキュメント
 
-We encourage you to check out our [RATH Docs](https://docs.kanaries.net) for references and guidance. RATH Docs are scripted and maintained by technical writers and editors who collectively follow a standardized [style guide](https://docs.kanaries.net/documentation-style-guide) to produce clear and consistent documentation.
+当社の[RATH Docs]（https://docs.kanaries.net）を参照して、案内とガイダンスをご覧いただくことをお勧めします。RATH Docsは、標準化された[スタイルガイド]（https://docs.kanaries.net/documentation-style-guide）に従って協力して技術ライターと編集者が脚色し、管理しています。明瞭で一貫したドキュメントを生成します。
 
-## Project Status
+## プロジェクトの状況
 
 ![Alt](https://repobeats.axiom.co/api/embed/0aa0df006ea6857c02565043d39c2b0da5380f93.svg "Repobeats analytics image")
 
-## Community
+## コミュニティ
 
-[Kanaries community](https://docs.kanaries.net/community) is a place to have open discussions on features, voice your ideas, or get help with general questions. Get onboard with us through the following channels:
+[Kanaries コミュニティ](https://docs.kanaries.net/community) は、機能に関するオープンな議論の場所、あなたのアイデアを聞き、一般的な質問に対するヘルプを得ることができます。次のチャンネルを通じて私たちと一緒に乗り込んでください。:
 
-Our developer community is the backbone of the ongoing RATH project. We sincerely welcome you to [join our community](join), participate in the conversation and stay connected with us for the latest updates.
+私たちの開発者コミュニティは、継続中のRATHプロジェクトの中枢を担っています。[私たちのコミュニティに参加](join)して、会話に参加し、最新の更新情報を接続し続けることを心から歓迎します
 - [Join our Slack](https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg)
 - [Join our Discord](https://discord.gg/Z4ngFWXz2U)
 
-Feel free to [contribute to the RATH project](contribution-guide), submit any issues on our GitHub page, or split your grand new ideas in our chats.
+RATHプロジェクトに貢献することを[自由に](contribution-guide)、GitHubページで問題を提出するか、チャットで新しいアイデアを分割することができます。
 
 ## Contributions
 

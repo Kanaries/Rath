@@ -1,4 +1,4 @@
-import { makeAutoObservable, observable } from "mobx";
+import { makeAutoObservable, observable, toJS } from "mobx";
 import { IFieldMeta, IFilter, IInsightVizView, IVegaSubset } from "../interfaces";
 import { DataSourceStore } from "./dataSourceStore";
 
@@ -29,7 +29,7 @@ export class CollectionStore {
         if (!this.vizHash.has(vizCode)) {
             this.vizHash.set(vizCode, visId);
             this.collectionList.push({
-                viewId: `vis-${new Date().getTime()}`,
+                viewId: visId,
                 fields,
                 filters,
                 spec
@@ -73,5 +73,15 @@ export class CollectionStore {
     }
     public addConfigCollectionList(value: IInsightVizView[]) {
         this.collectionList = value;
+    }
+    public init () {
+        this.collectionList = [];
+        this.vizHash.clear();
+    }
+    public async backupCollectionStore () {
+        return {
+            collectionList: toJS(this.collectionList),
+            vizHash: Array.from(this.vizHash.entries())
+        }
     }
 }
