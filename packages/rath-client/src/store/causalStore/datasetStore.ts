@@ -20,8 +20,10 @@ export default class CausalDatasetStore {
     public datasetId: string | null;
 
     public allFields: readonly IFieldMeta[] = [];
+    public allSelectableFields: readonly { field: number; children: readonly number[] }[] = [];
 
     protected fieldIndices$ = new Subject<readonly number[]>();
+    protected fieldIndices: readonly number[] = [];
     /** All fields to analyze */
     public fields: readonly IFieldMeta[] = [];
 
@@ -71,6 +73,7 @@ export default class CausalDatasetStore {
         
         makeAutoObservable(this, {
             allFields: observable.ref,
+            allSelectableFields: observable.ref,
             fields: observable.ref,
             filters: observable.ref,
             groups: observable.ref,
@@ -79,6 +82,7 @@ export default class CausalDatasetStore {
             sample: false,
             sampleMetaInfo$: false,
             visSample: observable.ref,
+            fieldIndices: false,
             destroy: false,
         });
 
@@ -199,9 +203,28 @@ export default class CausalDatasetStore {
             // set fields
             expandedFields$.subscribe(([allFields, groups]) => {
                 allFields$.next(allFields);
+                const allSelectableFields: { field: number; children: number[] }[] = [];
+                for (let i = 0; i < allFields.length; i += 1) {
+                    const field = allFields[i];
+                    const gAsRoot = groups.find(grp => grp.root === field.fid);
+                    if (gAsRoot) {
+                        allSelectableFields.push({
+                            field: i,
+                            children: gAsRoot.children.map(fid => allFields.findIndex(f => f.fid === fid)),
+                        });
+                    } else if (!groups.some(grp => grp.children.some(fid => fid === field.fid))) {
+                        allSelectableFields.push({
+                            field: i,
+                            children: [],
+                        });
+                    }
+                }
                 runInAction(() => {
                     this.groups = groups;
+                    this.allSelectableFields = allSelectableFields;
                 });
+                // Choose the first 10 fields by default
+                this.fieldIndices$.next(allSelectableFields.slice(0, 10).map((_, i) => i));
             }),
             
             // reset field selector
@@ -209,13 +232,17 @@ export default class CausalDatasetStore {
                 runInAction(() => {
                     this.allFields = fields;
                 });
-                // Choose the first 10 fields by default
-                this.fieldIndices$.next(fields.slice(0, 10).map((_, i) => i));
             }),
 
             // compute `fields`
             this.fieldIndices$.subscribe((fieldIndices) => {
-                fields$.next(fieldIndices.map(index => this.allFields[index]));
+                runInAction(() => {
+                    this.fieldIndices = fieldIndices;
+                });
+                fields$.next(fieldIndices.map(index => [
+                    this.allFields[this.allSelectableFields[index].field],
+                    ...this.allSelectableFields[index].children.map(i => this.allFields[i]),
+                ]).flat());
             }),
 
             // bind `fields` with observer
@@ -336,6 +363,21 @@ export default class CausalDatasetStore {
                 return;
             }
         });
+    }
+
+    public toggleFieldSelected(fid: string) {
+        const index = this.allFields.findIndex(f => f.fid === fid);
+        if (index === -1) {
+            return;
+        }
+        const next = this.fieldIndices.slice();
+        const pos = next.findIndex(idx => idx === index);
+        if (pos === -1) {
+            next.push(index);
+        } else {
+            next.splice(pos, 1);
+        }
+        this.fieldIndices$.next(next);
     }
 
 }

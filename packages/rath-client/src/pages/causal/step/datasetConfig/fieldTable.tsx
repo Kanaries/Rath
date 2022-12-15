@@ -7,8 +7,7 @@ import {
 } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
-import { FC, useCallback, useMemo, useRef } from 'react';
-import produce from 'immer';
+import { FC, useMemo } from 'react';
 import intl from 'react-intl-universal'
 import { useGlobalStore } from '../../../../store';
 import type { IFieldMeta } from '../../../../interfaces';
@@ -16,9 +15,9 @@ import { getI18n } from '../../locales';
 
 
 const TableContainer = styled.div`
-    flex-grow: 1;
-    flex-shrink: 1;
-    overflow: hidden;
+    margin: 0.6em 0;
+    max-height: 30vh;
+    overflow: hidden auto;
     > * {
         height: 100%;
         > * {
@@ -58,30 +57,14 @@ const SelectedKey = 'selected';
 
 const FieldPanel: FC = () => {
     const { causalStore } = useGlobalStore();
-    const { fields, allFields } = causalStore.dataset;
+    const { fields, allFields, allSelectableFields } = causalStore.dataset;
 
-    const totalFieldsRef = useRef(allFields);
-    totalFieldsRef.current = allFields;
-
-    const fieldsRef = useRef(fields);
-    fieldsRef.current = fields;
-
-    const toggleFocus = useCallback((fid: string) => {
-        const prevIndices = fieldsRef.current.map(
-            f => totalFieldsRef.current.findIndex(which => f.fid === which.fid)
-        ).filter(idx => idx !== -1);
-        causalStore.dataset.selectFields(produce(prevIndices, draft => {
-            const idx = totalFieldsRef.current.findIndex(f => f.fid === fid);
-            if (idx !== -1) {
-                const i = draft.findIndex(which => which === idx);
-                if (i !== -1) {
-                    draft.splice(i, 1);
-                } else {
-                    draft.push(idx);
-                }
-            }
-        }));
-    }, [causalStore]);
+    const selectedFields = useMemo(() => {
+        const roots = allSelectableFields.map(({ field }) => allFields[field]);
+        return fields.filter(f => {
+            return roots.some(which => which.fid === f.fid);
+        });
+    }, [fields, allFields, allSelectableFields]);
 
     const fieldsTableCols = useMemo<IColumn[]>(() => {
         return [
@@ -91,15 +74,15 @@ const FieldPanel: FC = () => {
                 onRenderHeader: () => {
                     const handleClick = (_: unknown, checked?: boolean | undefined) => {
                         if (checked) {
-                            causalStore.selectFields(totalFieldsRef.current.map((_, i) => i));
+                            causalStore.selectFields(allSelectableFields.map((_, i) => i));
                         } else {
                             causalStore.selectFields([]);
                         }
                     };
                     return (
                         <Checkbox
-                            checked={fields.length === totalFieldsRef.current.length}
-                            indeterminate={fields.length > 0 && fields.length < totalFieldsRef.current.length}
+                            checked={selectedFields.length === allSelectableFields.length}
+                            indeterminate={selectedFields.length > 0 && selectedFields.length < allSelectableFields.length}
                             onChange={handleClick}
                             styles={{
                                 root: {
@@ -111,7 +94,7 @@ const FieldPanel: FC = () => {
                 },
                 onRender: (item) => {
                     const field = item as IFieldMeta;
-                    const checked = fields.some(f => f.fid === field.fid);
+                    const checked = selectedFields.some(f => f.fid === field.fid);
                     return (
                         <Checkbox checked={checked} styles={{ root: { pointerEvents: 'none' } }} />
                     );
@@ -122,7 +105,7 @@ const FieldPanel: FC = () => {
             },
             {
                 key: 'name',
-                name: getI18n('dataset_config.field_info.field', { total: totalFieldsRef.current.length, selected: fields.length }),
+                name: getI18n('dataset_config.field_info.field', { total: allSelectableFields.length, selected: selectedFields.length }),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
@@ -133,25 +116,6 @@ const FieldPanel: FC = () => {
                 },
                 minWidth: 160,
                 maxWidth: 160,
-            },
-            {
-                key: 'extInfo',
-                name: getI18n('dataset_config.field_info.extInfo'),
-                onRender: (item) => {
-                    const field = item as IFieldMeta;
-                    const { extInfo } = field;
-                    const sources = extInfo?.extFrom.map(
-                        fid => totalFieldsRef.current.find(f => f.fid === fid) ?? fid
-                    ).map(f => typeof f === 'string' ? f : (f.name || f.fid)) ?? [];
-
-                    return (
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {extInfo ? `[${extInfo.extOpt}] from ${sources.join(', ')} (${extInfo.extInfo})` : ''}
-                        </span>
-                    );
-                },
-                minWidth: 100,
-                maxWidth: 240,
             },
             {
                 key: 'unique',
@@ -224,21 +188,27 @@ const FieldPanel: FC = () => {
                 maxWidth: 100,
             },
         ];
-    }, [fields, causalStore]);
+    }, [allSelectableFields, selectedFields, causalStore]);
+
+    const allRoots = allSelectableFields.map(d => allFields[d.field]);
 
     return (
         <>
             <Label>{getI18n('dataset_config.fields')}</Label>
             <TableContainer>
                 <DetailsList
-                    items={allFields.slice(0)}
+                    items={allRoots}
                     columns={fieldsTableCols}
                     selectionMode={SelectionMode.none}
                     onRenderRow={(props, defaultRender) => {
+                        const i = props?.itemIndex;
+                        if (i === undefined) {
+                            return null;
+                        }
                         const field = props?.item as IFieldMeta;
-                        const checked = fields.some(f => f.fid === field.fid);
+                        const checked = selectedFields.some(f => f.fid === field.fid);
                         return (
-                            <Row selected={checked} onClick={() => toggleFocus(field.fid)}>
+                            <Row selected={checked} onClick={() => causalStore.dataset.toggleFieldSelected(field.fid)}>
                                 {defaultRender?.(props)}
                             </Row>
                         );
