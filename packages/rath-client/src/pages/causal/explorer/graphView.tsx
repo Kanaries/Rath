@@ -37,7 +37,7 @@ const Container = styled.div`
 export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
     weightThreshold: number;
     confThreshold: number;
-    limit: number;
+    limit?: number;
     mode: 'explore' | 'edit';
     onClickNode?: (fid: string | null) => void;
     onLinkTogether: (srcFid: string, tarFid: string, type: EdgeAssert) => void;
@@ -203,6 +203,9 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
             <div className="container" ref={containerRef} />
             {mode === 'edit' && (
                 <div className="tools">
+                    {/* <ActionButton onClick={() => causalStore.model.synchronizeAssertionsWithResult()}>
+                        编辑因果图覆盖
+                    </ActionButton> */}
                     <ActionButton onClick={() => causalStore.model.clearAssertions()}>
                         清空所有
                     </ActionButton>

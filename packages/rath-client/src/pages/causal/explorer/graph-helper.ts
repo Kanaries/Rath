@@ -125,6 +125,16 @@ export const useReactiveGraph = ({
     useEffect(() => {
         if (graphRef.current) {
             graphRef.current.changeSize(width, GRAPH_HEIGHT);
+            // const all = [
+            //     { type: 'fruchterman' },
+            //     { type: 'circular' },
+            //     { type: 'radial' },
+            //     { type: 'MDS' },
+            // ];
+            // const layout = all[time % 4];
+            // console.log(layout)
+            // graphRef.current.updateLayout(layout);
+            // time += 1;
             // graphRef.current.updateLayout({
             //     type: 'radial',
             //     // center: [ 200, 200 ],     // 可选，默认为图的中心
@@ -137,17 +147,17 @@ export const useReactiveGraph = ({
             //     strictRadial: false       // 可选
             //     // workerEnabled: true       // 可选，开启 web-worker
             // });
-            graphRef.current.updateLayout({
-                type: 'fruchterman',
-                gravity: 5,
-                speed: 5,
-                center: [width / 2, GRAPH_HEIGHT / 2],
-                // for rendering after each iteration
-                tick: () => {
-                    graphRef.current?.refreshPositions();
-                },
-            });
-            graphRef.current.render();
+            // graphRef.current.updateLayout({
+            //     type: 'fruchterman',
+            //     gravity: 5,
+            //     speed: 5,
+            //     center: [width / 2, GRAPH_HEIGHT / 2],
+            //     // for rendering after each iteration
+            //     tick: () => {
+            //         graphRef.current?.refreshPositions();
+            //     },
+            // });
+            graphRef.current.read(dataRef.current);
         }
     }, [width, graphRef]);
 
@@ -279,6 +289,15 @@ export const useReactiveGraph = ({
 
     return useMemo<IReactiveGraphHandler>(() => ({
         refresh() {
+            // const all = [
+            //     { speed: 5,type: 'force' },
+            //     // { speed: 5,type: 'circular', startRadius: 120, endRadius: 120 },
+            //     // { speed: 5,type: 'radial', linkDistance: 60 },
+            //     // { speed: 5,type: 'grid' },
+            // ];
+            // const layout = all[time % 1];
+            // graphRef.current?.updateLayout(layout);
+            // time += 1;
             graphRef.current?.read(dataRef.current);
         },
         update() {

@@ -1,4 +1,4 @@
-import { DefaultButton, Icon, SpinButton, Stack, Toggle } from "@fluentui/react";
+import { DefaultButton, Dropdown, Icon, SpinButton, Stack, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -116,7 +116,7 @@ const Explorer: FC<ExplorerProps> = ({
         viewContext?.clearSelected();
     }, [mode, viewContext]);
 
-    const [limit, setLimit] = useState(20);
+    // const [limit, setLimit] = useState(20);
 
     const forceLayout = useCallback(() => {
         forceRelayoutRef.current();
@@ -126,10 +126,12 @@ const Explorer: FC<ExplorerProps> = ({
         setMode('explore');
     }, [allowEdit]);
 
+    const [s, ss] = useState('force');
+
     return (
         <Container>
             <Stack style={{ margin: '0 0 0.6em' }} horizontal >
-                <DefaultButton
+                {/* <DefaultButton
                     style={{
                         flexGrow: 0,
                         flexShrink: 0,
@@ -140,12 +142,26 @@ const Explorer: FC<ExplorerProps> = ({
                     onClick={forceLayout}
                 >
                     重新布局
-                </DefaultButton>
+                </DefaultButton> */}
+                <Dropdown
+                    selectedKey={s}
+                    options={[
+                        { key: 'force', text: '力引导布局' },
+                        { key: 'circular', text: '环形布局' },
+                        { key: 'radial', text: '辐射布局' },
+                        { key: 'grid', text: '网格布局' },
+                    ]}
+                    style={{ minWidth: '6em' }}
+                    onChange={(_, opt) => {
+                        opt?.key && ss(opt.key as string);
+                        setTimeout(() => forceLayout(), 100);
+                    }}
+                />
             </Stack>
             <MainView>
                 <ExplorerMainView
                     forceRelayoutRef={forceRelayoutRef}
-                    limit={limit}
+                    // limit={limit}
                     mode={mode}
                     weightThreshold={wThreshold}
                     confThreshold={cThreshold}
@@ -192,20 +208,20 @@ const Explorer: FC<ExplorerProps> = ({
                         onChange={value => setLimit(value)}
                     /> */}
                     <SpinButton
-                        label="按置信度筛选 (%)"
+                        label="按置信度筛选"
                         min={0}
-                        max={100}
-                        step={1}
-                        value={(cThreshold * 100).toFixed()}
-                        onChange={(_, d) => setCThreshold(Number(d) / 100)}
+                        max={1}
+                        step={1e-3}
+                        value={`${cThreshold}`}
+                        onChange={(_, d) => setCThreshold(Number(d))}
                     />
                     <SpinButton
-                        label="按权重筛选 (%)"
+                        label="按权重筛选"
                         min={0}
-                        max={100}
-                        step={1}
-                        value={(wThreshold * 100).toFixed()}
-                        onChange={(_, d) => setWThreshold(Number(d) / 100)}
+                        max={1}
+                        step={1e-3}
+                        value={`${wThreshold}`}
+                        onChange={(_, d) => setWThreshold(Number(d))}
                     />
                 </Tools>
             </Floating>

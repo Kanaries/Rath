@@ -20,7 +20,7 @@ const Container = styled.div`
 export type ExplorerMainViewProps = Omit<StyledComponentProps<'div', {}, {
     weightThreshold: number;
     confThreshold: number;
-    limit: number;
+    limit?: number;
     mode: 'explore' | 'edit';
     onClickNode?: (fid: string | null) => void;
     onLinkTogether: (srcFid: string, tarFid: string, type: EdgeAssert) => void;
