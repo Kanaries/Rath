@@ -1,6 +1,6 @@
 import { MATRIX_MARK_TYPE } from "../matrixPanel";
 import { VIEW_TYPE, MATRIX_TYPE } from "../step/causalModal";
-import { LayoutMethod } from "../../../store/causalStore/viewStore";
+import { ExplorationKey, LayoutMethod } from "../../../store/causalStore/viewStore";
 import { EdgeAssert, NodeAssert } from "../../../store/causalStore/modelStore";
 import { CausalLinkDirection } from "../../../utils/resolve-causal";
 import type { Locales } from ".";
@@ -159,6 +159,68 @@ const locales: Locales = {
     },
     task: {
         reload: '重新加载',
+    },
+    extra: {
+        clear_focused: '清除选中字段',
+    },
+    submodule: {
+        [ExplorationKey.AUTO_VIS]: {
+            title: '变量概览',
+            chart: '可视化分析',
+            meta_info: '统计信息',
+            meta: {
+                dist: '分布',
+                unique: '唯一值数量',
+                mean: '均值',
+                min: '最小值',
+                qt_25: '25% 分位数',
+                qt_50: '50% 分位数',
+                qt_75: '75% 分位数',
+                max: '最大值',
+                stdev: '标准差',
+            },
+            relation: '关联因素',
+            rel: {
+                cause: '因',
+                value: '相关系数',
+                effect: '果',
+            },
+        },
+        [ExplorationKey.WHAT_IF]: {
+            title: '输出预测',
+            algorithm: '预测算法',
+        },
+        [ExplorationKey.HYPOTHESIS_TEST]: {
+            title: '因果假设',
+            population: '样本空间 (Population)',
+            outcome: '衡量指标 (Outcome)',
+            confounders: '联合影响因素 (Confounders)',
+            delete: '删除',
+            add: '新增',
+            effect_modifiers: '外部影响因素（Effect Modifiers）',
+            predicates: '目标群体 (Predicates)',
+            history: {
+                title: '运行历史',
+                clear: '清空',
+                hypothesis: '命题',
+                score: '分数',
+                params: '运行参数',
+                full_set: '全集',
+                template: '验证目标群体 ({Pdc}) 是否导致了 {O} 在样本空间 ({Pop}) 的变化。'
+            },
+        },
+        [ExplorationKey.CROSS_FILTER]: {
+            title: '因果验证',
+        },
+        [ExplorationKey.CAUSAL_INSIGHT]: {
+            title: '字段透视',
+        },
+        [ExplorationKey.GRAPHIC_WALKER]: {
+            title: '可视化自助分析',
+        },
+        [ExplorationKey.PREDICT]: {
+            title: '预测实验',
+        },
     },
 };
 

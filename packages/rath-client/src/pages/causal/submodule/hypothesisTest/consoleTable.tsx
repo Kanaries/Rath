@@ -4,6 +4,7 @@ import { FC, Fragment, useCallback } from 'react';
 import { ActionButton, TooltipHost } from '@fluentui/react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../../store';
+import { getI18n } from '../../locales';
 import { useHypothesisTestContext } from './context';
 
 
@@ -54,9 +55,9 @@ const ConsoleTable: FC = () => {
 
     return (
         <Container>
-            <header>运行记录</header>
+            <header>{getI18n('submodule.HypothesisTest.history.title')}</header>
             <ActionButton
-                text="清空"
+                text={getI18n('submodule.HypothesisTest.history.clear')}
                 iconProps={{ iconName: 'Delete' }}
                 onClick={() => context.clearLogs()}
             />
@@ -65,13 +66,13 @@ const ConsoleTable: FC = () => {
                     ID
                 </Cell>
                 <Cell role="gridcell" aria-rowindex={1} aria-colindex={2}>
-                    命题
+                    {getI18n('submodule.HypothesisTest.history.hypothesis')}
                 </Cell>
                 <Cell role="gridcell" aria-rowindex={1} aria-colindex={3}>
-                    分数
+                    {getI18n('submodule.HypothesisTest.history.score')}
                 </Cell>
                 <Cell role="gridcell" aria-rowindex={1} aria-colindex={4}>
-                    运行参数
+                    {getI18n('submodule.HypothesisTest.history.params')}
                 </Cell>
                 <Cell role="gridcell" aria-rowindex={1} aria-colindex={5}>
                     {intl.get('common.advanced_options_switch')}
@@ -83,15 +84,15 @@ const ConsoleTable: FC = () => {
                                 {i + 1}
                             </Cell>
                             <Cell role="gridcell" aria-rowindex={i + 2} aria-colindex={2}>
-                                {`验证目标群体 (${
-                                    log.props.predicates.map(data => `"${formatFid(data.fid)} ∈ ${
+                                {getI18n('submodule.HypothesisTest.history.template', {
+                                    Pdc: log.props.predicates.map(data => `"${formatFid(data.fid)} ∈ ${
                                         data.type === 'range' ? `[${data.range.join(',')}]` : `{${data.values.map(v => JSON.stringify(v)).join(',')}}`
-                                    }"`).join(' ∧ ')
-                                }) 是否导致了 ${formatFid(log.props.outcome)} 在样本空间 (${
-                                    log.props.populationPicker.map(data => `"${formatFid(data.fid)} ∈ ${
+                                    }"`).join(' ∧ '),
+                                    O: formatFid(log.props.outcome),
+                                    Pop: log.props.populationPicker.map(data => `"${formatFid(data.fid)} ∈ ${
                                         data.type === 'range' ? `[${data.range.join(',')}]` : `{${data.values.map(v => JSON.stringify(v)).join(',')}}`
-                                    }"`).join(' ∧ ') || '全集'
-                                }) 的变化。`}
+                                    }"`).join(' ∧ ') || getI18n('submodule.HypothesisTest.history.full_set'),
+                                })}
                             </Cell>
                             <Cell role="gridcell" aria-rowindex={i + 2} aria-colindex={3}>
                                 <TooltipHost content={<>{log.data.weight}</>}>

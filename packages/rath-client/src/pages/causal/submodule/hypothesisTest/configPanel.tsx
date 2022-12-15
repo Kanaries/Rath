@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import type { FC } from 'react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../../store';
+import { getI18n } from '../../locales';
 import AdvancedOptions from './advancedOptions';
 import { useHypothesisTestContext } from './context';
 import DefinitionPanel from './definitionPanel';
@@ -32,7 +33,7 @@ const ConfigPanel: FC = () => {
                     disabled={context?.okToRun !== true || context?.busy || !serverActive}
                     onClick={() => context?.run()}
                 >
-                    {context?.busy ? <Spinner /> : 'Run'}
+                    {context?.busy ? <Spinner /> : getI18n('form.run')}
                 </PrimaryButton>
             </div>
         </Container>

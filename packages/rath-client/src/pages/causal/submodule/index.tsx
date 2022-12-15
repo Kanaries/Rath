@@ -9,6 +9,7 @@ import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import SemiEmbed from '../../semiAutomation/semiEmbed';
 import { PAG_NODE } from '../config';
+import { getI18n } from '../locales';
 import { ExplorationKey, ExplorationOptions, useCausalViewContext } from '../../../store/causalStore/viewStore';
 import CrossFilter from './crossFilter';
 import PredictPanel from './predictPanel';
@@ -146,8 +147,8 @@ const Submodule = forwardRef<{
                 }}
                 overflowBehavior="menu"
             >
-                {ExplorationOptions.map(mode => (
-                    <PivotItem key={mode.key} itemKey={mode.key} headerText={mode.text} />
+                {ExplorationOptions.map(key => (
+                    <PivotItem key={key} itemKey={key} headerText={getI18n(`submodule.${key}.title`)} />
                 ))}
             </Pivot>
             <Stack horizontal>
@@ -164,7 +165,7 @@ const Submodule = forwardRef<{
                 {[ExplorationKey.AUTO_VIS, ExplorationKey.CROSS_FILTER, ExplorationKey.CAUSAL_INSIGHT].includes(viewContext.explorationKey) && (
                     <ActionButton
                         iconProps={{ iconName: 'Delete' }}
-                        text="清除全部选择字段"
+                        text={getI18n('extra.clear_focused')}
                         disabled={selectedFieldGroup.length === 0}
                         onClick={clearFieldGroup}
                     />

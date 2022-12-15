@@ -17,14 +17,14 @@ export interface IWhatIfServiceResult {
     new: { [fid: string]: number };
 }
 
-export const fetchWhatIfParamSchema = async (): Promise<IAlgoSchema | null> => {
+export const fetchWhatIfParamSchema = async (lang: string): Promise<IAlgoSchema | null> => {
     const { causalStore: { operator: { causalServer, serverActive } } } = getGlobalStore();
 
     if (!serverActive) {
         return null;
     }
 
-    const res = await fetch(`${causalServer}/v0.1/form/intervention`, { method: 'GET' });
+    const res = await fetch(`${causalServer}/v0.1/form/intervention?i18n=${lang}`, { method: 'GET' });
 
     if (!res.ok) {
         notify({

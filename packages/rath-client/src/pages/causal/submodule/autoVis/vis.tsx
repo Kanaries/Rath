@@ -1,12 +1,13 @@
 import { FC, useMemo } from "react";
-import { IPattern } from "@kanaries/loa";
+import type { IPattern } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
 import { toJS } from "mobx";
 import { NodeSelectionMode, useCausalViewContext } from "../../../../store/causalStore/viewStore";
-import { distVis } from "../../../../queries/distVis";
+import { labDistVis } from "../../../../queries/labdistVis";
 import ErrorBoundary from "../../../../components/visErrorBoundary";
 import ReactVega from "../../../../components/react-vega";
 import { useGlobalStore } from "../../../../store";
+import { getI18n } from "../../locales";
 
 
 const Vis: FC = () => {
@@ -42,17 +43,18 @@ const Vis: FC = () => {
         if (viewPattern === null) {
             return null;
         }
-        return distVis({
+        return labDistVis({
+            dataSource: visSample as typeof visSample[number][],
             pattern: toJS(viewPattern),
             interactive: true,
             specifiedEncodes: viewPattern.encodes,
         });
-    }, [viewPattern]);
+    }, [viewPattern, visSample]);
 
     return viewContext && viewSpec && (
         <div>
             <header>
-                可视化分析
+                {getI18n('submodule.AutoVis.chart')}
             </header>
             <ErrorBoundary>
                 <ReactVega actions={false} spec={viewSpec} dataSource={visSample} />

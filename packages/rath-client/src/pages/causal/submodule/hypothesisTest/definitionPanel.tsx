@@ -6,8 +6,8 @@ import FilterCreationPill from '../../../../components/filterCreationPill';
 import type { IFilter } from '../../../../interfaces';
 import { getGlobalStore, useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
-// import { PAG_NODE } from '../../config';
 import { FilterCell } from '../../filters';
+import { getI18n } from '../../locales';
 import { useHypothesisTestContext } from './context';
 
 
@@ -39,10 +39,6 @@ const DefinitionPanel: FC = () => {
                     const matched = [link.src, link.tar].filter(fid => [outcome.fid, treatment?.fid].includes(fid));
                     if (matched.length === 1) {
                         return true;
-                        // const typeInLink = link.src === matched[0] ? link.tar_type : link.src_type;
-                        // if (typeInLink !== PAG_NODE.ARROW) {
-                        //     return true;
-                        // }
                     }
                     return false;
                 });
@@ -134,13 +130,8 @@ const DefinitionPanel: FC = () => {
         <Container>
             <div>
                 <Label style={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <span>{'样本空间 (Population)' || 'Population'}</span>
-                    <div
-                        style={{
-                            display: 'flex',
-                            padding: '0 2em',
-                        }}
-                    >
+                    <span>{getI18n('submodule.HypothesisTest.population')}</span>
+                    <div style={{ display: 'flex', padding: '0 2em' }}>
                         <FilterCreationPill
                             fields={allFields}
                             onFilterSubmit={(_, filter) => appendPopulationPicker(filter)}
@@ -157,7 +148,6 @@ const DefinitionPanel: FC = () => {
                 >
                     {context.definitions.populationPicker.map((filter, i) => {
                         const field = allFields.find((f) => f.fid === filter.fid);
-
                         return field ? (
                             <FilterCell
                                 key={i}
@@ -170,7 +160,7 @@ const DefinitionPanel: FC = () => {
                 </div>
             </div>
             <Dropdown
-                label={'衡量指标 (Outcome)' || 'Outcome'}
+                label={getI18n('submodule.HypothesisTest.outcome')}
                 required
                 selectedKey={context.definitions.outcome}
                 options={allFields.filter(f => f.fid === context.definitions.outcome).map(f => ({
@@ -187,7 +177,7 @@ const DefinitionPanel: FC = () => {
                 style={{ width: '12em' }}
             />
             <div>
-                <Label>{'联合影响因素 (Confounders)' || 'Confounders'}</Label>
+                <Label>{getI18n('submodule.HypothesisTest.confounders')}</Label>
                 <div
                     style={{
                         display: 'flex',
@@ -202,7 +192,7 @@ const DefinitionPanel: FC = () => {
                             selectedKey={fid}
                             options={[
                                 { key: fid, text: allFields.find(f => f.fid === fid)?.name || fid, disabled: true },
-                                { key: '', text: '删除' },
+                                { key: '', text: getI18n('submodule.HypothesisTest.delete') },
                             ]}
                             onChange={(_, option) => {
                                 if (option?.key !== fid) {
@@ -212,7 +202,7 @@ const DefinitionPanel: FC = () => {
                         />
                     ))}
                     <Dropdown
-                        placeholder="新增"
+                        placeholder={getI18n('submodule.HypothesisTest.add')}
                         selectedKey={-1}
                         options={unselectedFields.map(f => ({
                             key: f.fid,
@@ -229,7 +219,7 @@ const DefinitionPanel: FC = () => {
                 </div>
             </div>
             <div>
-                <Label>{'外部影响因素（Effect Modifiers）' || 'Effect Modifiers'}</Label>
+                <Label>{getI18n('submodule.HypothesisTest.effect_modifiers')}</Label>
                 <div
                     style={{
                         display: 'flex',
@@ -244,7 +234,7 @@ const DefinitionPanel: FC = () => {
                             selectedKey={fid}
                             options={[
                                 { key: fid, text: allFields.find(f => f.fid === fid)?.name || fid, disabled: true },
-                                { key: '', text: '删除' },
+                                { key: '', text: getI18n('submodule.HypothesisTest.delete') },
                             ]}
                             onChange={(_, option) => {
                                 if (option?.key !== fid) {
@@ -254,7 +244,7 @@ const DefinitionPanel: FC = () => {
                         />
                     ))}
                     <Dropdown
-                        placeholder="新增"
+                        placeholder={getI18n('submodule.HypothesisTest.add')}
                         selectedKey={-1}
                         options={unselectedFields.map(f => ({
                             key: f.fid,
@@ -272,13 +262,8 @@ const DefinitionPanel: FC = () => {
             </div>
             <div>
                 <Label style={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }} required>
-                    <span>{'目标群体 (Predicates)' || 'Predicates'}</span>
-                    <div
-                        style={{
-                            display: 'flex',
-                            padding: '0 2em',
-                        }}
-                    >
+                    <span>{getI18n('submodule.HypothesisTest.predicates')}</span>
+                    <div style={{ display: 'flex', padding: '0 2em' }}>
                         <FilterCreationPill
                             fields={allFields}
                             onFilterSubmit={(_, filter) => appendPredicate(filter)}
@@ -295,7 +280,6 @@ const DefinitionPanel: FC = () => {
                 >
                     {context.definitions.predicates.map((filter, i) => {
                         const field = allFields.find((f) => f.fid === filter.fid);
-
                         return field ? (
                             <FilterCell
                                 key={i}

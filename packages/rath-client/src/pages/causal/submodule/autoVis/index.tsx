@@ -4,7 +4,7 @@ import { Stack } from "@fluentui/react";
 import styled from "styled-components";
 import { NodeSelectionMode, useCausalViewContext } from "../../../../store/causalStore/viewStore";
 import { useGlobalStore } from "../../../../store";
-import { IFieldMeta } from "../../../../interfaces";
+import type { IFieldMeta } from "../../../../interfaces";
 import ViewField from "../../../megaAutomation/vizOperation/viewField";
 import FieldPlaceholder from "../../../../components/fieldPlaceholder";
 import MetaList from "./metaList";

@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { FC, useMemo } from "react";
 import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
 import DistributionChart from "../../../dataSource/metaView/distChart";
+import { getI18n } from "../../locales";
 
 
 const metaKeys = ['dist', 'unique', 'mean', 'min', 'qt_25', 'qt_50', 'qt_75', 'max', 'stdev'] as const;
@@ -23,15 +24,15 @@ const MetaList: FC = () => {
             isResizable: false,
             onRender(key: typeof metaKeys[number]) {
                 return {
-                    dist: '分布',
-                    unique: '唯一值数量',
-                    mean: '均值',
-                    min: '最小值',
-                    qt_25: '25% 分位数',
-                    qt_50: '50% 分位数',
-                    qt_75: '75% 分位数',
-                    max: '最大值',
-                    stdev: '标准差',
+                    dist: getI18n('submodule.AutoVis.meta.dist'),
+                    unique: getI18n('submodule.AutoVis.meta.unique'),
+                    mean: getI18n('submodule.AutoVis.meta.mean'),
+                    min: getI18n('submodule.AutoVis.meta.min'),
+                    qt_25: getI18n('submodule.AutoVis.meta.qt_25'),
+                    qt_50: getI18n('submodule.AutoVis.meta.qt_50'),
+                    qt_75: getI18n('submodule.AutoVis.meta.qt_75'),
+                    max: getI18n('submodule.AutoVis.meta.max'),
+                    stdev: getI18n('submodule.AutoVis.meta.stdev'),
                 }[key];
             },
         }).concat(selectedFieldGroup?.map<IColumn>(f => ({
@@ -76,7 +77,7 @@ const MetaList: FC = () => {
     return selectedFieldGroup?.length ? (
         <div>
             <header>
-                统计信息
+                {getI18n('submodule.AutoVis.meta_info')}
             </header>
             <DetailsList
                 items={metaKeys.slice(0)}

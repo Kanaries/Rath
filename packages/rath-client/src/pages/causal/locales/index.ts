@@ -1,6 +1,6 @@
 import intl from 'react-intl-universal';
 import { EdgeAssert, NodeAssert } from '../../../store/causalStore/modelStore';
-import { LayoutMethod } from '../../../store/causalStore/viewStore';
+import { ExplorationKey, LayoutMethod } from '../../../store/causalStore/viewStore';
 import type { I18nSetupFunction } from "../../../store/langStore";
 import { CausalLinkDirection } from '../../../utils/resolve-causal';
 import { MATRIX_MARK_TYPE } from '../matrixPanel';
@@ -162,6 +162,68 @@ export const LocaleKeys = {
     },
     task: {
         reload: 'Reload',
+    },
+    extra: {
+        clear_focused: 'Reset Selection',
+    },
+    submodule: {
+        [ExplorationKey.AUTO_VIS]: {
+            title: 'Auto Vis',
+            chart: 'Visualization',
+            meta_info: 'Meta Info',
+            meta: {
+                dist: 'Distribution',
+                unique: 'Unique Values',
+                mean: 'Mean',
+                min: 'Min',
+                qt_25: '1st Quartile',
+                qt_50: 'Median',
+                qt_75: '3rd Quartile',
+                max: 'Max',
+                stdev: 'Standard Derivation',
+            },
+            relation: 'Relations',
+            rel: {
+                cause: 'Cause',
+                value: 'Correlation',
+                effect: 'Effect',
+            },
+        },
+        [ExplorationKey.WHAT_IF]: {
+            title: 'What If',
+            algorithm: 'Algorithm',
+        },
+        [ExplorationKey.HYPOTHESIS_TEST]: {
+            title: 'Hypothesis Examination',
+            population: 'Population',
+            outcome: 'Outcome',
+            confounders: 'Confounders',
+            delete: 'Remove',
+            add: 'Add',
+            effect_modifiers: 'Effect Modifiers',
+            predicates: 'Predicates',
+            history: {
+                title: 'History',
+                clear: 'Clear History',
+                hypothesis: 'Hypothesis',
+                score: 'Score',
+                params: 'Parameters',
+                full_set: 'full set',
+                template: 'If ({Pdc}) causes the change of {O} in {Pop}.',
+            },
+        },
+        [ExplorationKey.CROSS_FILTER]: {
+            title: 'Mutual Inspection',
+        },
+        [ExplorationKey.CAUSAL_INSIGHT]: {
+            title: 'Field Insight',
+        },
+        [ExplorationKey.GRAPHIC_WALKER]: {
+            title: 'Manual Exploration',
+        },
+        [ExplorationKey.PREDICT]: {
+            title: 'Prediction Test',
+        },
     },
 } as const;
 

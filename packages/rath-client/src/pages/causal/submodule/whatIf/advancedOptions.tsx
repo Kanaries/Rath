@@ -5,6 +5,7 @@ import { FC, Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { LabelWithDesc } from '../../../../components/labelTooltip';
 import { RenderFormItem, shouldFormItemDisplay } from '../../dynamicForm';
+import { getI18n } from '../../locales';
 import { useWhatIfContext } from './context';
 
 
@@ -43,7 +44,7 @@ const AdvancedOptions: FC = () => {
             {display && (
                 <RowGroup role="grid" aria-colcount={2}>
                     <Cell role="gridcell" aria-rowindex={1} aria-colindex={1}>
-                        <Label>预测算法</Label>
+                        <Label>{getI18n('submodule.WhatIf.algorithm')}</Label>
                     </Cell>
                     <Cell role="gridcell" aria-rowindex={1} aria-colindex={2}>
                         <Dropdown

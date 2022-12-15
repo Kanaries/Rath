@@ -4,6 +4,7 @@ import { FC, useMemo } from "react";
 import { useGlobalStore } from "../../../../store";
 import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
 import { PAG_NODE } from "../../config";
+import { getI18n } from "../../locales";
 
 
 const NeighborList: FC = () => {
@@ -43,7 +44,7 @@ const NeighborList: FC = () => {
         return [
             {
                 key: 'cause',
-                name: '因',
+                name: getI18n('submodule.AutoVis.rel.cause'),
                 minWidth: 100,
                 maxWidth: 100,
                 isResizable: false,
@@ -53,7 +54,7 @@ const NeighborList: FC = () => {
             },
             {
                 key: 'corr',
-                name: '相关系数',
+                name: getI18n('submodule.AutoVis.rel.value'),
                 minWidth: 120,
                 maxWidth: 120,
                 isResizable: false,
@@ -73,7 +74,7 @@ const NeighborList: FC = () => {
             },
             {
                 key: 'effect',
-                name: '果',
+                name: getI18n('submodule.AutoVis.rel.effect'),
                 minWidth: 100,
                 maxWidth: 100,
                 isResizable: false,
@@ -87,7 +88,7 @@ const NeighborList: FC = () => {
     return selectedFieldGroup?.length ? (
         <div>
             <header>
-                关联因素
+                {getI18n('submodule.AutoVis.relation')}
             </header>
             <DetailsList
                 items={neighbors}

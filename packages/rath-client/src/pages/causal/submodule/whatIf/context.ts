@@ -37,7 +37,7 @@ class WhatIfStore {
 
         const predicateFlag$ = new Subject<void>();
 
-        fetchWhatIfParamSchema().then(res => {
+        fetchWhatIfParamSchema(getGlobalStore().langStore.lang).then(res => {
             runInAction(() => {
                 this.form = res;
             });
