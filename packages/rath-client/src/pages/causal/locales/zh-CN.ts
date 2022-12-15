@@ -1,3 +1,4 @@
+import { MATRIX_TYPE, VIEW_TYPE } from "../matrixPanel";
 import type { Locales } from ".";
 
 const locales: Locales = {
@@ -63,6 +64,42 @@ const locales: Locales = {
     computing: '计算中',
     chart: {
         re_layout: '重新布局',
+    },
+    viewType: {
+        label: '视图',
+        [VIEW_TYPE.matrix]: '矩阵',
+        [VIEW_TYPE.diagram]: '因果图',
+    },
+    matrix: {
+        [MATRIX_TYPE.mutualInfo]: {
+            name: '关联信息',
+            action: '计算',
+        },
+        [MATRIX_TYPE.conditionalMutualInfo]: {
+            name: '条件关联信息',
+            action: '计算',
+        },
+        [MATRIX_TYPE.causal]: {
+            name: '因果模型',
+            action: '因果发现',
+        },
+    },
+    storage: {
+        save: '保存因果模型',
+        load: '导入因果模型',
+        title: '已保存的模型',
+        list: '模型列表',
+        apply: '导入',
+    },
+    form: {
+        trigger: '参数',
+        title: '设置',
+        first_level: '算法',
+        first_level_desc: '选择运行因果发现的算法实现。',
+        run: '运行',
+    },
+    task: {
+        reload: '重新加载',
     },
 };
 

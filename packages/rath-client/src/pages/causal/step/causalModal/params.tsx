@@ -1,6 +1,6 @@
 import {
+    ActionButton,
     Dropdown,
-    IconButton,
     Label,
     Panel,
     PanelType,
@@ -10,11 +10,12 @@ import produce from 'immer';
 import { runInAction, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { makeRenderLabelHandler } from '../../components/labelTooltip';
-import { useGlobalStore } from '../../store';
-import { useCausalViewContext } from '../../store/causalStore/viewStore';
-import { IAlgoSchema } from './config';
-import DynamicForm from './dynamicForm';
+import { makeRenderLabelHandler } from '../../../../components/labelTooltip';
+import { useGlobalStore } from '../../../../store';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
+import { IAlgoSchema } from '../../config';
+import DynamicForm from '../../dynamicForm';
+import { getI18n } from '../../locales';
 
 const Params: FC = () => {
     const { causalStore } = useGlobalStore();
@@ -56,26 +57,27 @@ const Params: FC = () => {
 
     return (
         <div>
-            <IconButton
-                text="Params"
+            <ActionButton
+                text={getI18n('form.trigger')}
                 iconProps={{ iconName: 'Settings' }}
                 disabled={!serverActive}
                 onClick={() => viewContext?.openAlgorithmPanel()}
+                style={{ height: '32px' }}
             />
             <Panel
                 isOpen={shouldDisplayAlgorithmPanel}
                 type={PanelType.medium}
                 onDismiss={() => viewContext?.closeAlgorithmPanel()}
             >
-                <Label>Settings</Label>
+                <Label>{getI18n('form.title')}</Label>
                 <Dropdown
-                    label="Algorithm"
+                    label={getI18n('form.first_level')}
                     options={causalAlgorithmOptions}
                     selectedKey={algoName}
                     onChange={(e, o) => {
                         o && setAlgoName(o.key as string);
                     }}
-                    onRenderLabel={makeRenderLabelHandler('The algorithm to use.')}
+                    onRenderLabel={makeRenderLabelHandler(getI18n('form.first_level_desc'))}
                 />
                 {form && (
                     <>
@@ -87,7 +89,7 @@ const Params: FC = () => {
                         />
                         <PrimaryButton
                             style={{ marginTop: '10px' }}
-                            text="Run"
+                            text={getI18n('form.run')}
                             disabled={algoName === null}
                             onClick={saveParamsAndRun}
                         />

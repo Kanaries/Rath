@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useRef, MutableRefObject, useMemo } from "react";
 import G6, { Graph, INode } from "@antv/g6";
 import { NodeSelectionMode, useCausalViewContext } from "../../../store/causalStore/viewStore";
-import type { Subtree } from "../exploration";
+import type { Subtree } from "../submodule";
 import { PAG_NODE } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
 import { GRAPH_HEIGHT, useGraphOptions, useRenderData } from "./graph-utils";

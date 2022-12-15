@@ -44,7 +44,7 @@ export interface Subtree {
     }[];
 }
 
-const Exploration = forwardRef<{
+const Submodule = forwardRef<{
     onSubtreeSelected?: (subtree: Subtree | null) => void;
 }, {}>(function ManualAnalyzer (_, ref) {
     const { dataSourceStore, langStore, causalStore } = useGlobalStore();
@@ -225,4 +225,4 @@ const Exploration = forwardRef<{
     );
 });
 
-export default observer(Exploration);
+export default observer(Submodule);

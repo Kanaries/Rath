@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { getI18n } from "../locales";
 import CausalDatasetConfig from './datasetConfig';
 import CausalFDConfig from './functionalDependencies';
-import CausalModel from "./causalModel";
+import CausalModel from "./causalModal";
 
 
 const Container = styled.div`

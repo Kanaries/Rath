@@ -1,5 +1,6 @@
 import intl from 'react-intl-universal';
 import type { I18nSetupFunction } from "../../../store/langStore";
+import { MATRIX_TYPE, VIEW_TYPE } from '../matrixPanel';
 import zhCN from './zh-CN';
 
 
@@ -66,6 +67,42 @@ export const LocaleKeys = {
     computing: 'computing',
     chart: {
         re_layout: 'Refresh Layout',
+    },
+    viewType: {
+        label: 'View Mode',
+        [VIEW_TYPE.matrix]: 'Matrix',
+        [VIEW_TYPE.diagram]: 'Diagram',
+    },
+    matrix: {
+        [MATRIX_TYPE.mutualInfo]: {
+            name: 'Mutual Information',
+            action: 'Compute',
+        },
+        [MATRIX_TYPE.conditionalMutualInfo]: {
+            name: 'Conditional Mutual Information',
+            action: 'Compute',
+        },
+        [MATRIX_TYPE.causal]: {
+            name: 'Causal Model',
+            action: 'Causal Discovery',
+        },
+    },
+    storage: {
+        save: 'Save Model',
+        load: 'Load Model',
+        title: 'Saved Models',
+        list: 'Model List',
+        apply: 'Load',
+    },
+    form: {
+        trigger: 'Params',
+        title: 'Settings',
+        first_level: 'Algorithm',
+        first_level_desc: 'The algorithm to use.',
+        run: 'Run',
+    },
+    task: {
+        reload: 'Reload',
     },
 } as const;
 

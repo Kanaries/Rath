@@ -1,16 +1,16 @@
 import { Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { FC, RefObject, useCallback, useRef } from 'react';
+import { FC, RefObject, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { IFieldMeta } from '../../../interfaces';
-import { useGlobalStore } from '../../../store';
-import { useCausalViewContext } from '../../../store/causalStore/viewStore';
-import type { EdgeAssert } from '../../../store/causalStore/modelStore';
-import Explorer from '../explorer';
-import Params from '../params';
-import ModelStorage from '../modelStorage';
-import Exploration, { Subtree } from '../exploration';
-import MatrixPanel, { MATRIX_TYPE } from '../matrixPanel';
+import type { IFieldMeta } from '../../../../interfaces';
+import { useGlobalStore } from '../../../../store';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
+import type { EdgeAssert } from '../../../../store/causalStore/modelStore';
+import Explorer from '../../explorer';
+import Submodule, { Subtree } from '../../submodule';
+import MatrixPanel, { MATRIX_TYPE } from '../../matrixPanel';
+import ModelStorage from './modelStorage';
+import Params from './params';
 
 
 const Container = styled.div`
@@ -21,13 +21,44 @@ const Container = styled.div`
     overflow: hidden;
     > div {
         height: 100%;
-        flex-grow: 1;
         flex-shrink: 1;
         flex-basis: 0;
         overflow: auto;
         padding: 0 1em;
-        :not(:first-child) {
-            border-left: 1px solid #8882;
+        &.main {
+            flex-grow: 1;
+        }
+    }
+`;
+
+const Aside = styled.div<{ size: "big" | "small" }>`
+    border-left: 1px solid #8882;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    position: relative;
+    flex-grow: ${({ size }) => size === 'big' ? 1.6 : 0.4};
+    > div {
+        height: 100%;
+        &.resizer {
+            position: absolute;
+            left: 0;
+            top: 0;
+            flex-grow: 0;
+            flex-shrink: 0;
+            width: 10px;
+            cursor: ${({ size }) => size === 'big' ? 'e-resize' : 'w-resize'};
+            outline: none;
+            :hover {
+                background-color: #8882;
+            }
+        }
+        &:not(.resizer) {
+            flex-grow: 1;
+            flex-shrink: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
     }
 `;
@@ -94,9 +125,11 @@ const CausalModal: FC = () => {
 
     const listenerRef = useRef<{ onSubtreeSelected?: (subtree: Subtree | null) => void }>({});
 
+    const [rightAsideSize, setRightAsideSize] = useState<'small' | 'big'>('small');
+
     return (
         <Container>
-            <div>
+            <div className="main">
                 <Stack tokens={{ childrenGap: '1em' }} horizontal style={{ marginTop: '1em' }}>
                     <ModelStorage />
                     <Params />
@@ -128,9 +161,15 @@ const CausalModal: FC = () => {
                     )}
                 />
             </div>
-            <div style={{ flexGrow: 0.4, display: 'flex', flexDirection: 'column' }}>
-                <Exploration ref={listenerRef} />
-            </div>
+            <Aside size={rightAsideSize}>
+                <div
+                    className="resizer"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setRightAsideSize(rightAsideSize === 'big' ? 'small' : 'big')}
+                />
+                <Submodule ref={listenerRef} />
+            </Aside>
         </Container>
     );
 };

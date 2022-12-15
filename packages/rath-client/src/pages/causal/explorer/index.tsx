@@ -1,4 +1,4 @@
-import { DefaultButton, Dropdown, Icon, SpinButton, Stack, Toggle } from "@fluentui/react";
+import { Dropdown, Icon, SpinButton, Stack, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -6,7 +6,7 @@ import type { IFieldMeta } from "../../../interfaces";
 import { getGlobalStore/*, useGlobalStore*/ } from "../../../store";
 import type { EdgeAssert } from "../../../store/causalStore/modelStore";
 import { useCausalViewContext } from "../../../store/causalStore/viewStore";
-import type { Subtree } from "../exploration";
+import type { Subtree } from "../submodule";
 import Floating from "../floating";
 import ExplorerMainView from "./explorerMainView";
 

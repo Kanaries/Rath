@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import type { IFieldMeta } from "../../../interfaces";
 import type { EdgeAssert } from "../../../store/causalStore/modelStore";
-import type { Subtree } from "../exploration";
+import type { Subtree } from "../submodule";
 import GraphView from "./graphView";
 
 

@@ -4,6 +4,7 @@ import { FC, useState } from 'react';
 import styled from 'styled-components';
 import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
+import { getI18n } from '../locales';
 import DirectionMatrix from './directionMatrix';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 
@@ -65,20 +66,13 @@ export enum MATRIX_TYPE {
     causal = 'causal',
 }
 
-const MATRIX_PIVOT_LIST = [
-    { itemKey: MATRIX_TYPE.mutualInfo, text: '关联信息' || 'Mutual Info', taskLabel: '计算' || 'Compute' },
-    {
-        itemKey: MATRIX_TYPE.conditionalMutualInfo,
-        text: '条件关联信息' || 'Conditional Mutual Info',
-        taskLabel: '计算' || 'Compute',
-    },
-    { itemKey: MATRIX_TYPE.causal, text: '因果发现' || 'Causal Discovery', taskLabel: '因果发现' || 'Causal Discover', iconName: 'Relationship' },
+const MATRIX_PIVOT_LIST: readonly MATRIX_TYPE[] = [
+    MATRIX_TYPE.mutualInfo,
+    MATRIX_TYPE.conditionalMutualInfo,
+    MATRIX_TYPE.causal,
 ];
 
-const VIEW_LABELS = [
-    { key: 'matrix', text: '矩阵' },
-    { key: 'diagram', text: '图（PAG）' },
-];
+const VIEW_LABELS: readonly VIEW_TYPE[] = [VIEW_TYPE.matrix, VIEW_TYPE.diagram];
 
 const MARK_LABELS = [
     { key: 'circle', text: '圆形' || 'Circle' },
@@ -118,8 +112,8 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                     }
                 }}
             >
-                {MATRIX_PIVOT_LIST.map((item) => {
-                    return <PivotItem key={item.itemKey} headerText={item.text} itemKey={item.itemKey} itemIcon={item.iconName} />;
+                {MATRIX_PIVOT_LIST.map((key) => {
+                    return <PivotItem key={key} headerText={getI18n(`matrix.${key}.name`)} itemKey={key} />;
                 })}
             </Pivot>
             <Stack style={{ marginBottom: '1em' }} tokens={{ childrenGap: 10 }}>
@@ -132,7 +126,7 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                     }}
                 >
                     <PrimaryButton
-                        text={MATRIX_PIVOT_LIST.find((item) => item.itemKey === selectedKey)?.taskLabel}
+                        text={getI18n(`matrix.${MATRIX_PIVOT_LIST.find((key) => key === selectedKey)!}.action`)}
                         onRenderText={(props, defaultRenderer) => {
                             return (
                                 <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} >
@@ -162,7 +156,7 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                         />
                         {tasks[taskIdx]?.taskId && (
                             <DefaultButton
-                                text="重新加载"
+                                text={getI18n('task.reload')}
                                 onClick={() => causalStore.operator.retryTask(tasks[taskIdx].taskId)}
                             />
                         )}
@@ -170,8 +164,8 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                 )}
                 {selectedKey === MATRIX_TYPE.causal && (
                     <Dropdown
-                        options={VIEW_LABELS}
-                        label="视图"
+                        options={VIEW_LABELS.map((key) => ({ key, text: getI18n(`viewType.${key}`) }))}
+                        label={getI18n('viewType.label')}
                         selectedKey={viewType}
                         onChange={(e, op) => {
                             op && setViewType(op.key as VIEW_TYPE);
@@ -242,7 +236,7 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                     />
                 )
             )}
-            {busy && <Spinner label="computing" />}
+            {busy && <Spinner label={getI18n('computing')} />}
             </div>
         </Cont>
     );

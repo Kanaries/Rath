@@ -4,7 +4,7 @@ import { Graph } from "@antv/g6";
 import { observer } from "mobx-react-lite";
 import { ActionButton, Dropdown } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
-import type { Subtree } from "../exploration";
+import type { Subtree } from "../submodule";
 import { EdgeAssert, NodeAssert } from "../../../store/causalStore/modelStore";
 import { ExplorationKey, useCausalViewContext } from "../../../store/causalStore/viewStore";
 import { useGlobalStore } from "../../../store";

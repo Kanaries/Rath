@@ -2,8 +2,9 @@ import { ChoiceGroup, DefaultButton, Label, Modal, PrimaryButton, Stack } from '
 import { observer } from 'mobx-react-lite';
 import { FC, Fragment, useState } from 'react';
 import styled from 'styled-components';
-import { notify } from '../../../components/error';
-import { useGlobalStore } from '../../../store';
+import { notify } from '../../../../components/error';
+import { useGlobalStore } from '../../../../store';
+import { getI18n } from '../../locales';
 
 const ModalInnerContainer = styled.div`
     padding: 1em;
@@ -17,7 +18,7 @@ const ModelStorage: FC = () => {
     return (
         <Fragment>
             <DefaultButton
-                text="保存因果模型"
+                text={getI18n('storage.save')}
                 iconProps={{ iconName: 'Save' }}
                 onClick={() => {
                     causalStore.save().then(ok => {
@@ -38,7 +39,7 @@ const ModelStorage: FC = () => {
                 }}
             />
             <DefaultButton
-                text="导入因果模型"
+                text={getI18n('storage.load')}
                 iconProps={{ iconName: 'CloudDownload' }}
                 onClick={() => {
                     setShowModels(true);
@@ -53,9 +54,9 @@ const ModelStorage: FC = () => {
             >
                 <ModalInnerContainer>
                     <Stack tokens={{ childrenGap: 10 }}>
-                        <Label>我的模型</Label>
+                        <Label>{getI18n('storage.title')}</Label>
                         <ChoiceGroup
-                            label="模型列表"
+                            label={getI18n('storage.list')}
                             value={selectedModelKey}
                             options={saveKeys.map((key) => {
                                 return {
@@ -69,7 +70,7 @@ const ModelStorage: FC = () => {
                         />
                         <PrimaryButton
                             disabled={selectedModelKey === undefined}
-                            text="使用"
+                            text={getI18n('storage.apply')}
                             onClick={() => {
                                 if (selectedModelKey) {
                                     causalStore.checkout(selectedModelKey);

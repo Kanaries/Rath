@@ -3,7 +3,7 @@ import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mob
 import { combineLatest, from, map, Observable, share, Subject, switchAll, throttleTime } from "rxjs";
 import { getGlobalStore } from "..";
 import type { IFieldMeta, IFilter, ICol, IRow, IteratorStorageMetaInfo } from "../../interfaces";
-import { oneHot } from "../../pages/causal/exploration/whatIf/utils";
+import { oneHot } from "../../pages/causal/submodule/whatIf/utils";
 import { filterDataService } from "../../services";
 import { IteratorStorage } from "../../utils/iteStorage";
 import { focusedSample } from "../../utils/sample";
