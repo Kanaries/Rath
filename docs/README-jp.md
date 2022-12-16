@@ -60,6 +60,7 @@
 ここにある１行目のリンクをクリックすると、RATH の機能を気軽に利用できる。もっと情報を追いたい人には、その次のリンクがおすすめします。
 - 🚀 [RATH を試す](https://rath.kanaries.net)
 - 📖 [ドキュメント](https://docs.kanaries.net)
+- [動画：Data Painter](https://youtu.be/djqePNyhz7w)
 
 
 **「RATH」** はデータサイエンティスト、開発者、オープンソースコミュニティのコラボレーターからできるグループにメンテナンスされ、今も成長しています。私たちは、RATH で次世代のデータ分析を実現することを夢見て、熱意を持つ人々です。
@@ -115,7 +116,7 @@ yarn workspace rath-client start
 
 - 🛠 [セミオート](https://docs.kanaries.net/semi-auto-explore)：完全自動化されたメガオートと、Tableau 的な手動モードのミクスイン。コピロットのように RATH を使って、少しずつ意思を AI に伝えて、望んだ分析結果にたどります。
 
-- 🎨 [Data Painter](https://docs.kanaries.net/data-painter)：グラフでマークを色付けことだけでデータを処理する、探索的な分析で活用できるインタラクティブなツール。
+- 🎨 [Data Painter](https://docs.kanaries.net/data-painter)：グラフでマークを色付けことだけでデータを処理する、探索的な分析で活用できるインタラクティブなツール。その機能については[この動画](https://youtu.be/Ds-K_FpE7VQ)を見てください。
 
 - :bar_chart: ダッシュボード：インタラクティブなデータダッシュボードエディタ。
 
@@ -159,6 +160,8 @@ yarn workspace rath-client start
 ### :sparkles: インタラクティブなデータ分析ワークフロー：Data Painter
 
 <a href="https://docs.kanaries.net/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="Interactive data analysis by painting"></a>
+
+[動画：Data Painter](https://youtu.be/Ds-K_FpE7VQ)
 
 ## サポートされたデータベース
 
