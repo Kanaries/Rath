@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import type { Graph } from '@antv/g6';
 import { DefaultButton } from '@fluentui/react';
 import styled from 'styled-components';
@@ -10,7 +10,6 @@ import { useReactiveGraph } from '../../explorer/graph-helper';
 import { transformFuncDepsToPag } from '../../../../store/causalStore/pag';
 import type { IFunctionalDep } from '../../config';
 import { getI18n } from '../../locales';
-import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 
 
 const Container = styled.div`
@@ -36,7 +35,7 @@ const Container = styled.div`
     }
 `;
 
-const FDGraph: React.FC<{
+const FDGraph: FC<{
     functionalDependencies: readonly IFunctionalDep[];
     setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: readonly IFunctionalDep[] | null) => readonly IFunctionalDep[])) => void;
 }> = ({
@@ -46,8 +45,6 @@ const FDGraph: React.FC<{
     const { causalStore } = useGlobalStore();
     const { fields, groups } = causalStore.dataset;
     const functionalDependenciesAsPag = transformFuncDepsToPag(functionalDependencies);
-    const viewContext = useCausalViewContext();
-    const { onRenderNode } = viewContext ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -103,14 +100,10 @@ const FDGraph: React.FC<{
     const graphRef = useRef<Graph>();
     const renderData = useRenderData({
         mode: 'edit',
-        fields,
-        groups,
         PAG: functionalDependenciesAsPag,
-        renderNode: onRenderNode,
     });
     const cfg = useGraphOptions({
         width,
-        fields,
         handleLink: onLinkTogether,
         graphRef,
     });
@@ -133,7 +126,6 @@ const FDGraph: React.FC<{
         mode: 'edit',
         handleEdgeClick: onRemoveLink,
         handleNodeDblClick,
-        fields,
         allowZoom: false,
     });
 

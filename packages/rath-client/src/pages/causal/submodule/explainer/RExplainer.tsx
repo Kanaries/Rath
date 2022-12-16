@@ -5,7 +5,7 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyFilters } from '@kanaries/loa';
 import { useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
-import { IFieldMeta, IFilter, IRow } from '../../../../interfaces';
+import type { IFieldMeta, IFilter, IRow } from '../../../../interfaces';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../../workers/insight/r-insight.worker';
 import { getI18n } from '../../locales';
 import { RInsightService } from '../../../../services/r-insight';
@@ -45,7 +45,7 @@ const RExplainer: FC = () => {
     const pendingRef = useRef<Promise<IRInsightExplainResult>>();
 
     const calculate = useCallback(() => {
-        viewContext?.clearLocalWeights();
+        viewContext?.clearLocalRenderData();
         if (!subspaces || !mainField) {
             setIrResult({ causalEffects: [] });
             return;
@@ -87,7 +87,15 @@ const RExplainer: FC = () => {
                         item => Number.isFinite(item.responsibility)// && item.responsibility !== 0
                     ).sort((a, b) => b.responsibility - a.responsibility)
                 });
-                viewContext?.setLocalWeights(res);
+                viewContext?.setLocalRenderData(mergedPag.map((link) => {
+                    const which = res.causalEffects.find(e => e.src === link.src && e.tar === link.tar);
+                    return {
+                        ...link,
+                        weight: which ? {
+                            local: which.responsibility,
+                        } : {},
+                    };
+                }));
             }
         }).finally(() => {
             pendingRef.current = undefined;
@@ -177,6 +185,10 @@ const RExplainer: FC = () => {
             }
         }
     }, [diffMode, editingGroupIdx]);
+
+    useEffect(() => {
+        viewContext?.clearLocalRenderData();
+    }, [viewContext]);
 
     // console.log({ irResult });
 

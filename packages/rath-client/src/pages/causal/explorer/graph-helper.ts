@@ -4,6 +4,7 @@ import { NodeSelectionMode, useCausalViewContext } from "../../../store/causalSt
 import type { Subtree } from "../submodule";
 import { PAG_NODE } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
+import { useGlobalStore } from "../../../store";
 import { GRAPH_HEIGHT, useGraphOptions, useRenderData } from "./graph-utils";
 
 
@@ -17,7 +18,6 @@ export interface IReactiveGraphProps {
     handleNodeClick?: ((fid: string | null) => void) | undefined;
     handleNodeDblClick?: ((fid: string | null) => void) | undefined;
     handleEdgeClick?: ((edge: { srcFid: string, tarFid: string } | null) => void) | undefined;
-    fields: readonly IFieldMeta[];
     allowZoom: boolean;
     handleSubtreeSelected?: (subtree: Subtree | null) => void | undefined;
     /** @default "loose" */
@@ -40,11 +40,11 @@ export const useReactiveGraph = ({
     handleNodeClick,
     handleNodeDblClick,
     handleEdgeClick,
-    fields,
     allowZoom,
     handleSubtreeSelected,
     updatePolicy = 'loose',
 }: IReactiveGraphProps): IReactiveGraphHandler => {
+    const { causalStore: { dataset: { fields } } } = useGlobalStore();
     const cfgRef = useRef(options);
     cfgRef.current = options;
     const dataRef = useRef(data);

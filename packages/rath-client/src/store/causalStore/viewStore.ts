@@ -3,11 +3,10 @@ import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { createContext, FC, useContext, useMemo, createElement, useEffect, useCallback } from "react";
 import { Subject, withLatestFrom } from "rxjs";
 import type { IFieldMeta } from "../../interfaces";
-import type { PagLink } from "../../pages/causal/config";
+import type { LinkWeightSet, WeightedPagLink } from "../../pages/causal/config";
 import type { IReactiveGraphHandler } from "../../pages/causal/explorer/graph-helper";
 import type { GraphNodeAttributes } from "../../pages/causal/explorer/graph-utils";
 import type { IPredictResult, PredictAlgorithm } from "../../pages/causal/predict";
-import type { IRInsightExplainResult } from "../../workers/insight/r-insight.worker";
 import type CausalStore from "./mainStore";
 
 
@@ -108,8 +107,7 @@ class CausalViewStore {
     public shouldDisplayAlgorithmPanel = false;
 
     public onRenderNode: ((node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined) | undefined;
-    public localWeights: Map<string, Map<string, number>> | undefined;
-    public localData: { fields: readonly IFieldMeta[]; pag: readonly PagLink[] } | null = null;
+    public localData: readonly WeightedPagLink[] | null = null;
     public predictCache: {
         id: string; algo: PredictAlgorithm; startTime: number; completeTime: number; data: IPredictResult;
     }[];
@@ -123,6 +121,19 @@ class CausalViewStore {
 
     public graph: IReactiveGraphHandler | null = null;
 
+    public thresholds: Readonly<{
+        /**
+         * @default 0
+         */
+        [key in keyof LinkWeightSet | 'local']: number;
+    }> = {
+        confidence: 0.9,
+        weight: 0.2,
+        local: 0,
+    };
+
+    public edgeLimit = Infinity;
+
     constructor(causalStore: CausalStore) {
         this.onRenderNode = node => {
             const value = 2 / (1 + Math.exp(-1 * node.features.entropy / 2)) - 1;
@@ -132,17 +143,16 @@ class CausalViewStore {
                 },
             };
         };
-        this.localWeights = undefined;
         this.predictCache = [];
 
         const fields$ = new Subject<readonly IFieldMeta[]>();
 
         makeAutoObservable(this, {
             onRenderNode: observable.ref,
-            localWeights: observable.ref,
             predictCache: observable.shallow,
             localData: observable.ref,
             graph: false,
+            thresholds: observable.ref,
             // @ts-expect-error non-public field
             _selectedNodes: observable.ref,
             selectedFidArr$: false,
@@ -202,9 +212,6 @@ class CausalViewStore {
         ];
 
         const rxReactions = [
-            this.selectedFidArr$.subscribe(() => {
-                this.localWeights = undefined;
-            }),
             this.selectedFidArr$.pipe(
                 withLatestFrom(fields$)
             ).subscribe(([fidArr, fields]) => {
@@ -352,19 +359,14 @@ class CausalViewStore {
         this.graph?.update();
     }
 
-    public clearLocalWeights() {
-        this.localWeights = undefined;
+    public setThreshold(key: keyof CausalViewStore['thresholds'], value: number) {
+        this.thresholds = produce(this.thresholds, draft => {
+            draft[key] = value;
+        });
     }
 
-    public setLocalWeights(irResult: IRInsightExplainResult) {
-        const weights = new Map<string, Map<string, number>>();
-        for (const link of irResult.causalEffects) {
-            if (!weights.has(link.src)) {
-                weights.set(link.src, new Map<string, number>());
-            }
-            weights.get(link.src)!.set(link.tar, link.responsibility);
-        }
-        this.localWeights = weights;
+    public clearLocalRenderData() {
+        this.localData = null;
     }
 
     public pushPredictResult(result: typeof this.predictCache[number]) {

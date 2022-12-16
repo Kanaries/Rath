@@ -1,6 +1,6 @@
-import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
-import { Graph } from "@antv/g6";
+import type { Graph } from "@antv/g6";
 import { observer } from "mobx-react-lite";
 import { ActionButton, Dropdown, Label } from "@fluentui/react";
 import type { IFieldMeta } from "../../../interfaces";
@@ -32,9 +32,6 @@ const Container = styled.div`
 `;
 
 export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
-    weightThreshold: number;
-    confThreshold: number;
-    limit?: number;
     mode: 'explore' | 'edit';
     onClickNode?: (fid: string | null) => void;
     onLinkTogether: (srcFid: string, tarFid: string, type: EdgeAssert) => void;
@@ -48,9 +45,6 @@ export type GraphViewProps = Omit<StyledComponentProps<'div', {}, {
 
 const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     onClickNode,
-    weightThreshold,
-    confThreshold,
-    limit,
     mode,
     onLinkTogether,
     onRevertLink,
@@ -62,10 +56,10 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
     ...props
 }, ref) => {
     const { causalStore } = useGlobalStore();
-    const { fields, groups } = causalStore.dataset;
+    const { fields } = causalStore.dataset;
     const { causality, assertionsAsPag } = causalStore.model;
     const viewContext = useCausalViewContext();
-    const { onRenderNode, /*localWeights, */explorationKey, localData = null, layoutMethod } = viewContext ?? {};
+    const { explorationKey, layoutMethod, localData } = viewContext ?? {};
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
@@ -76,28 +70,13 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         onLinkTogether(srcFid, tarFid, createEdgeMode);
     }, [createEdgeMode, onLinkTogether]);
 
-    const thresholds = useMemo(() => {
-        return {
-            weight: weightThreshold,
-            confidence: confThreshold,
-        };
-    }, [weightThreshold, confThreshold]);
-
     const graphRef = useRef<Graph>();
     const renderData = useRenderData({
         mode,
-        fields,
-        groups,
-        // TODO: 把「可解释探索」模块的临时 weight 加回来
-        // weights: mode === 'edit' || localData ? undefined : localWeights ?? W,
-        PAG: mode === 'edit' ? assertionsAsPag : localData?.pag ?? causality ?? [],
-        thresholds,
-        limit,
-        renderNode: onRenderNode,
+        PAG: mode === 'edit' ? assertionsAsPag : localData ?? causality ?? [],
     });
     const cfg = useGraphOptions({
         width,
-        fields,
         layout: layoutMethod,
         handleLasso,
         handleLink: handleLinkTogether,
@@ -151,7 +130,6 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
         handleNodeClick: onClickNode,
         handleEdgeClick,
         handleNodeDblClick,
-        fields,
         allowZoom,
         handleSubtreeSelected,
         updatePolicy: explorationKey === ExplorationKey.WHAT_IF ? 'loose' : 'normal',

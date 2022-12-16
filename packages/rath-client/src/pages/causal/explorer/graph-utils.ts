@@ -2,7 +2,8 @@ import { useMemo, useRef, CSSProperties } from "react";
 import G6, { Graph, GraphData, GraphOptions } from "@antv/g6";
 import { LinkWeightSet, PagLink, PAG_NODE, WeightedPagLink } from "../config";
 import type { IFieldMeta } from "../../../interfaces";
-import { getLayoutConfig, LayoutMethod } from "../../../store/causalStore/viewStore";
+import { getLayoutConfig, LayoutMethod, useCausalViewContext } from "../../../store/causalStore/viewStore";
+import { useGlobalStore } from "../../../store";
 
 
 export const GRAPH_HEIGHT = 600;
@@ -111,33 +112,17 @@ G6.registerEdge(
 
 export interface IRenderDataProps {
     mode: "explore" | "edit";
-    fields: readonly Readonly<IFieldMeta>[];
-    groups?: readonly Readonly<{
-        root: string;
-        children: string[];
-        expanded: boolean;
-    }>[];
     PAG: readonly PagLink[];
-    thresholds?: {
-        /**
-         * @default 0
-         */
-        [key in keyof LinkWeightSet]?: number;
-    };
-    /** @default Infinity */
-    limit?: number;
-    renderNode?: (node: Readonly<IFieldMeta>) => GraphNodeAttributes | undefined,
 }
 
 export const useRenderData = ({
     mode,
-    fields,
-    groups = [],
     PAG,
-    thresholds,
-    limit = Infinity,   // TODO: 目前暂时关掉
-    renderNode,
 }: IRenderDataProps) => {
+    const { causalStore } = useGlobalStore();
+    const { fields, groups } = causalStore.dataset;
+    const viewContext = useCausalViewContext();
+    const { onRenderNode, thresholds/*, edgeLimit = Infinity*/ } = viewContext ?? {};
     const nodes = useMemo<NonNullable<GraphData['nodes']>>(() => {
         return fields.reduce<NonNullable<GraphData['nodes']>>((list, f) => {
             const fAsRoot = groups.find(group => group.root === f.fid);
@@ -148,16 +133,16 @@ export const useRenderData = ({
                         id: `${f.fid}`,
                         size: 24,
                         description: `${f.name || f.fid} +`,
-                        ...renderNode?.(f),
+                        ...onRenderNode?.(f),
                         style: {
-                            ...renderNode?.(f)?.style,
+                            ...onRenderNode?.(f)?.style,
                             radius: 4,
                             cursor: 'zoom-in',
                         },
                         labelCfg: {
-                            ...renderNode?.(f)?.labelCfg,
+                            ...onRenderNode?.(f)?.labelCfg,
                             style: {
-                                ...renderNode?.(f)?.labelCfg?.style,
+                                ...onRenderNode?.(f)?.labelCfg?.style,
                                 cursor: 'zoom-in',
                             } as unknown as {},
                             position: 'top',
@@ -175,16 +160,16 @@ export const useRenderData = ({
                         id: `${f.fid}`,
                         size: 18,
                         description: f.name || f.fid,
-                        ...renderNode?.(f),
+                        ...onRenderNode?.(f),
                         style: {
-                            ...renderNode?.(f)?.style,
+                            ...onRenderNode?.(f)?.style,
                             cursor: 'zoom-out',
                             lineDash: [4, 4],
                         },
                         labelCfg: {
-                            ...renderNode?.(f)?.labelCfg,
+                            ...onRenderNode?.(f)?.labelCfg,
                             style: {
-                                ...renderNode?.(f)?.labelCfg?.style,
+                                ...onRenderNode?.(f)?.labelCfg?.style,
                                 fontSize: 10,
                                 cursor: 'zoom-out',
                             } as unknown as {},
@@ -199,15 +184,15 @@ export const useRenderData = ({
                 type: NodeType,
                 id: `${f.fid}`,
                 description: f.name || f.fid,
-                ...renderNode?.(f),
+                ...onRenderNode?.(f),
                 style: {
                     cursor: 'pointer',
-                    ...renderNode?.(f)?.style,
+                    ...onRenderNode?.(f)?.style,
                 },
                 labelCfg: {
-                    ...renderNode?.(f)?.labelCfg,
+                    ...onRenderNode?.(f)?.labelCfg,
                     style: {
-                        ...renderNode?.(f)?.labelCfg?.style,
+                        ...onRenderNode?.(f)?.labelCfg?.style,
                         cursor: 'pointer',
                     } as unknown as {},
                     position: 'top',
@@ -215,7 +200,7 @@ export const useRenderData = ({
                 },
             }]);
         }, []);
-    }, [fields, groups, renderNode]);
+    }, [fields, groups, onRenderNode]);
     const realEdges = useMemo<NonNullable<GraphData['edges']>>(() => {
         let links: WeightedPagLink[] = [];
 
@@ -376,7 +361,6 @@ export const useRenderData = ({
 
 export interface IGraphOptions {
     width: number;
-    fields: readonly Readonly<IFieldMeta>[];
     /** @default LayoutMethod.FORCE */
     layout?: LayoutMethod;
     handleLasso?: ((fields: IFieldMeta[]) => void) | undefined;
@@ -386,12 +370,13 @@ export interface IGraphOptions {
 
 export const useGraphOptions = ({
     width,
-    fields,
     layout = LayoutMethod.FORCE,
     handleLasso,
     handleLink,
     graphRef,
 }: IGraphOptions) => {
+    const { causalStore } = useGlobalStore();
+    const { fields } = causalStore.dataset;
     const widthRef = useRef(width);
     widthRef.current = width;
     const fieldsRef = useRef(fields);

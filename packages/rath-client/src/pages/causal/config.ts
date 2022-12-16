@@ -65,6 +65,7 @@ export enum PAG_NODE {
 export interface LinkWeightSet {
     weight?: number;
     confidence?: number;
+    local?: number;
 }
 
 export interface PagLink {

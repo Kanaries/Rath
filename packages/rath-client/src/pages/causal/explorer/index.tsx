@@ -86,8 +86,6 @@ const Explorer: FC<ExplorerProps> = ({
     handleLasso,
     handleSubTreeSelected,
 }) => {
-    const [cThreshold, setCThreshold] = useState(0.9);
-    const [wThreshold, setWThreshold] = useState(0.2);
     const [mode, setMode] = useState<'explore' | 'edit'>('explore');
     
     const [allowZoom, setAllowZoom] = useState(false);
@@ -154,8 +152,6 @@ const Explorer: FC<ExplorerProps> = ({
                 <GraphView
                     forceRelayoutRef={forceRelayoutRef}
                     mode={mode}
-                    weightThreshold={wThreshold}
-                    confThreshold={cThreshold}
                     onClickNode={handleClickCircle}
                     onLinkTogether={onLinkTogether}
                     onRevertLink={onRevertLink}
@@ -190,22 +186,26 @@ const Explorer: FC<ExplorerProps> = ({
                             inlineLabel
                         />
                     )}
-                    <SpinButton
-                        label={getI18n('chart.tools.filter_by_confidence')}
-                        min={0}
-                        max={1}
-                        step={1e-3}
-                        value={`${cThreshold}`}
-                        onChange={(_, d) => setCThreshold(Number(d))}
-                    />
-                    <SpinButton
-                        label={getI18n('chart.tools.filter_by_weight')}
-                        min={0}
-                        max={1}
-                        step={1e-3}
-                        value={`${wThreshold}`}
-                        onChange={(_, d) => setWThreshold(Number(d))}
-                    />
+                    {viewContext && (
+                        <>
+                            <SpinButton
+                                label={getI18n('chart.tools.filter_by_confidence')}
+                                min={0}
+                                max={1}
+                                step={1e-3}
+                                value={`${viewContext.thresholds.confidence}`}
+                                onChange={(_, d) => viewContext.setThreshold('confidence', Number(d))}
+                            />
+                            <SpinButton
+                                label={getI18n('chart.tools.filter_by_weight')}
+                                min={0}
+                                max={1}
+                                step={1e-3}
+                                value={`${viewContext.thresholds.weight}`}
+                                onChange={(_, d) => viewContext.setThreshold('weight', Number(d))}
+                            />
+                        </>
+                    )}
                 </Tools>
             </Floating>
         </Container>
