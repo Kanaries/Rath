@@ -20,7 +20,7 @@
             "dimension": "维度",
             "measure": "度量"
         },
-        "vistheme": "可视化主体",
+        "vistheme": "可视化主题",
         "addVar": "添加变量",
         "addFilter": "添加筛选项",
         "addEncode": "添加计算",
