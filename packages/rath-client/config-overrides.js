@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 // const path = require('path');
 // const { override, babelInclude } = require('customize-cra')
 
@@ -15,6 +15,10 @@ module.exports = function override(config, env) {
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
         }),
+        new MonacoWebpackPlugin({
+            // available options are documented at https://github.com/microsoft/monaco-editor/blob/main/webpack-plugin/README.md#options
+            languages: ['json']
+        })
     );
     // do stuff with the webpack config...
     config.module.rules.push(

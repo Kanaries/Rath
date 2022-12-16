@@ -20,6 +20,7 @@
             "dimension": "dimension",
             "measure": "measure"
         },
+        "vistheme": "Visualization Theme",
         "addVar": "Add Variable",
         "addFilter": "Add Filter",
         "addEncode": "Add Computation",
@@ -521,6 +522,16 @@
         "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     },
     "login": {
+        "configKeys": {
+            "basic": "Basic",
+            "design": "Design",
+            "analysis": "Data Analysis"
+        },
+        "design": {
+            "createCustomTheme": "Create Custom Theme",
+            "syncFromSelectedTheme": "Sync From Selected Theme",
+            "useCustomTheme": "Use Custom Theme"
+        },
         "clickLogin": "Login",
         "haveSent": "Already Sent",
         "signIn": "Sign In",

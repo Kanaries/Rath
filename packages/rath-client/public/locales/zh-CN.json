@@ -20,6 +20,7 @@
             "dimension": "维度",
             "measure": "度量"
         },
+        "vistheme": "可视化主体",
         "addVar": "添加变量",
         "addFilter": "添加筛选项",
         "addEncode": "添加计算",
@@ -531,6 +532,16 @@
         "shortMonths": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
     },
     "login": {
+        "configKeys": {
+            "basic": "基础信息",
+            "design": "样式/主题设计",
+            "analysis": "数据分析"
+        },
+        "design": {
+            "createCustomTheme": "创建自定义主题",
+            "syncFromSelectedTheme": "从已选主题同步配置",
+            "useCustomTheme": "使用自定义主题"
+        },
         "clickLogin": "点击登录",
         "haveSent": "已发送",
         "signIn": "登录",
