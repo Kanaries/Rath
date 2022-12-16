@@ -241,6 +241,9 @@ export const LocaleKeys = {
             },
             run: 'Insight',
             why_query: 'Why Query',
+            normalize: 'Normalize Stack',
+            distribution: 'Distribution',
+            comparison: 'Comparison',
             insight: {
                 explanation: {
                     unvisualized_dimension: {
@@ -248,6 +251,7 @@ export const LocaleKeys = {
                         description: 'Unvisualized dimension field({ dimension }) is distributed differently from the background group, that may influence the distribution of field.noEvents({ mainField }) in the same population. Score: score({ responsibility }).',
                     },
                 },
+                no_more: 'Can not find more clues.',
             },
         },
         [ExplorationKey.GRAPHIC_WALKER]: {

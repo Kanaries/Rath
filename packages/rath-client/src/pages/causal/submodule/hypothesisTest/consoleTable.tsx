@@ -41,11 +41,11 @@ const Cell = styled.div`
 
 const ConsoleTable: FC = () => {
     const context = useHypothesisTestContext();
-    const { dataSourceStore: { fieldMetas } } = useGlobalStore();
+    const { causalStore: { dataset: { allFields } } } = useGlobalStore();
 
     const formatFid = useCallback((fid: string) => {
-        return fieldMetas.find(f => f.fid === fid)?.name || fid;
-    }, [fieldMetas]);
+        return allFields.find(f => f.fid === fid)?.name || fid;
+    }, [allFields]);
 
     if (!context) {
         return null;

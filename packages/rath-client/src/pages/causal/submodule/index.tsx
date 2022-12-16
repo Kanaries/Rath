@@ -48,11 +48,10 @@ export interface Subtree {
 const Submodule = forwardRef<{
     onSubtreeSelected?: (subtree: Subtree | null) => void;
 }, {}>(function ManualAnalyzer (_, ref) {
-    const { dataSourceStore, langStore, causalStore } = useGlobalStore();
-    const { fieldMetas } = dataSourceStore;
+    const { langStore, causalStore } = useGlobalStore();
     const [showSemiClue, setShowSemiClue] = useState(false);
     const [clueView, setClueView] = useState<IPattern | null>(null);
-    const { fields, visSample, filters } = causalStore.dataset;
+    const { allFields, fields, visSample, filters } = causalStore.dataset;
 
     const viewContext = useCausalViewContext();
     const { selectedFieldGroup = [] } = viewContext ?? {};
@@ -152,7 +151,7 @@ const Submodule = forwardRef<{
                 ))}
             </Pivot>
             <Stack horizontal>
-                {[ExplorationKey.CROSS_FILTER, ExplorationKey.GRAPHIC_WALKER].includes(viewContext.explorationKey) && (
+                {[ExplorationKey.CROSS_FILTER/*, ExplorationKey.GRAPHIC_WALKER*/].includes(viewContext.explorationKey) && (
                     <SemiEmbed
                         view={clueView}
                         show={showSemiClue}
@@ -210,7 +209,7 @@ const Submodule = forwardRef<{
                         /* 小心这里的内存占用 */
                         <GraphicWalker
                             dataSource={visSample.slice(0)}
-                            rawFields={fieldMetas}
+                            rawFields={allFields.slice(0)}
                             hideDataSourceConfig
                             spec={initialSpec}
                             i18nLang={langStore.lang}

@@ -238,6 +238,9 @@ const locales: Locales = {
             },
             run: '发现',
             why_query: '线索洞察',
+            normalize: '标准化堆叠',
+            distribution: '全局分布',
+            comparison: '分布对照',
             insight: {
                 explanation: {
                     unvisualized_dimension: {
@@ -245,6 +248,7 @@ const locales: Locales = {
                         description: '视图中未展现的因素 field({ dimension }) 在选定区间有不同的分布模式，可能对 field.noEvents({ mainField }) 的分布有影响关系。评分：score({ responsibility })。',
                     },
                 },
+                no_more: '没有更多的线索',
             },
         },
         [ExplorationKey.GRAPHIC_WALKER]: {

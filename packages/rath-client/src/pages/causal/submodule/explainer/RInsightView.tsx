@@ -1,4 +1,3 @@
-import intl from 'react-intl-universal';
 import { ActionButton, Icon, Toggle, TooltipHost } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, Fragment, useCallback, useEffect, useRef, useState } from "react";
@@ -135,9 +134,8 @@ const RInsightView: FC<IRInsightViewProps> = ({
     data, result, mainField, entryDimension,
     mode, indices, subspaces, serviceMode,
 }) => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
-    const { fieldMetas } = dataSourceStore;
-    const { fields, sample } = causalStore.dataset;
+    const { causalStore } = useGlobalStore();
+    const { allFields, fields, sample } = causalStore.dataset;
     const { mergedPag, functionalDependencies } = causalStore.model;
     const [normalize, setNormalize] = useState<boolean>(true);
     const [cursor, setCursor] = useState(0);
@@ -212,7 +210,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
     };
 
     const visTextContext: IVisTextProps['context'] = {
-        fields: fieldMetas,
+        fields: allFields,
         onClickField: fid => {
             calculate(fid);
         },
@@ -241,15 +239,15 @@ const RInsightView: FC<IRInsightViewProps> = ({
                         content={(
                             <TabList role="tablist" light>
                                 {list.map((res, i) => {
-                                    const dim = fieldMetas.find(f => f.fid === res.src);
-                                    const tar = fieldMetas.find(f => f.fid === res.tar);
+                                    const dim = allFields.find(f => f.fid === res.src);
+                                    const tar = allFields.find(f => f.fid === res.tar);
         
                                     return dim && tar && (
                                         <Fragment key={dim.fid}>
                                             <div onClick={() => setCursor(i)} role="tab" aria-selected={i === cursor}>
                                                 {res.description?.title && (
                                                     <span className="title">
-                                                        {intl.get(`RInsight.explanation.title.${res.description.title}`)}
+                                                        {getI18n(`submodule.CausalInsight.insight.explanation.desc.${res.description.title}`)}
                                                     </span>
                                                 )}
                                                 <span>
@@ -278,7 +276,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
                     )}
                 </ActionButton>
                 {localIrResult.map((step, i, arr) => {
-                    const measure = fieldMetas.find(f => f.fid === step.addedMeasure);
+                    const measure = allFields.find(f => f.fid === step.addedMeasure);
                     const isCurrent = i === arr.length - 1;
                     return (
                         <Fragment key={i}>
@@ -296,19 +294,19 @@ const RInsightView: FC<IRInsightViewProps> = ({
             </ExploreQueue>
             <Container>
                 {list.length === 0 ? (
-                    <p>没有更多的线索</p>
+                    <p>{getI18n('submodule.CausalInsight.insight.no_more')}</p>
                 ) : (
                     <TabList role="tablist">
                         {list.map((res, i) => {
-                            const dim = fieldMetas.find(f => f.fid === res.src);
-                            const tar = fieldMetas.find(f => f.fid === res.tar);
+                            const dim = allFields.find(f => f.fid === res.src);
+                            const tar = allFields.find(f => f.fid === res.tar);
 
                             return dim && tar && (
                                 <Fragment key={dim.fid}>
                                     <div onClick={() => setCursor(i)} role="tab" aria-selected={i === cursor}>
                                         {res.description?.title && (
                                             <span className="title">
-                                                {intl.get(`RInsight.explanation.title.${res.description.title}`)}
+                                                {getI18n(`submodule.CausalInsight.insight.explanation.desc.${res.description.title}`)}
                                             </span>
                                         )}
                                         <span>
@@ -321,14 +319,14 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                     {i === cursor && (
                                         <div role="tabpanel" id={getTabId(i)}>
                                             <Toggle
-                                                label="标准化堆叠"//"Normalize Stack"
+                                                label={getI18n('submodule.CausalInsight.normalize')}
                                                 inlineLabel
                                                 checked={normalize}
                                                 onChange={(_, checked) => setNormalize(Boolean(checked))}
                                             />
                                             <br />
                                             <ExplainChart
-                                                title="全局分布"
+                                                title={getI18n('submodule.CausalInsight.distribution')}
                                                 data={data}
                                                 mainField={tar}
                                                 mainFieldAggregation={null}
@@ -337,7 +335,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                                 normalize={normalize}
                                             />
                                             <DiffChart
-                                                title="对比分布"
+                                                title={getI18n('submodule.CausalInsight.comparison')}
                                                 data={data}
                                                 subspaces={indices}
                                                 mainField={tar}
@@ -347,7 +345,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                             />
                                             {view.description && (
                                                 <VisText context={visTextContext}>
-                                                    {intl.get(`RInsight.explanation.desc.${view.description.key}`, {
+                                                    {getI18n(`submodule.CausalInsight.insight.explanation.desc.${view.description.key}`, {
                                                         ...view.description.data,
                                                         responsibility: view.responsibility,
                                                         mainField: tar.fid,

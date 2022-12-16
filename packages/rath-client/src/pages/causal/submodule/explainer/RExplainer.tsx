@@ -18,11 +18,10 @@ const Container = styled.div``;
 export const SelectedFlag = '__RExplainer_selected__';
 
 const RExplainer: FC = () => {
-    const { dataSourceStore, causalStore } = useGlobalStore();
-    const { fieldMetas } = dataSourceStore;
+    const { causalStore } = useGlobalStore();
     const viewContext = useCausalViewContext();
     const { selectedFieldGroup = [] } = viewContext ?? {};
-    const { fields, sample, visSample } = causalStore.dataset;
+    const { allFields, fields, sample, visSample } = causalStore.dataset;
     const { mergedPag, functionalDependencies } = causalStore.model;
 
     const mainField = selectedFieldGroup.at(-1) ?? null;
@@ -31,8 +30,8 @@ const RExplainer: FC = () => {
     const [diffMode, setDiffMode] = useState<"full" | "other" | "two-group">("other");
 
     useEffect(() => {
-        setIndexKey(ik => ik ? fieldMetas.find(f => f.fid === ik.fid) ?? null : null);
-    }, [fieldMetas]);
+        setIndexKey(ik => ik ? allFields.find(f => f.fid === ik.fid) ?? null : null);
+    }, [allFields]);
 
     const [subspaces, setSubspaces] = useState<[IRInsightExplainSubspace, IRInsightExplainSubspace] | null>(null);
 
@@ -219,12 +218,12 @@ const RExplainer: FC = () => {
                         <Dropdown
                             label={getI18n('submodule.CausalInsight.index_key')}
                             selectedKey={indexKey?.fid ?? ''}
-                            options={[{ key: '', text: getI18n('submodule.CausalInsight.empty') }].concat(fieldMetas.map(f => ({
+                            options={[{ key: '', text: getI18n('submodule.CausalInsight.empty') }].concat(allFields.map(f => ({
                                 key: f.fid,
                                 text: f.name ?? f.fid,
                             })))}
                             onChange={(_, option) => {
-                                const f = option?.key ? fieldMetas.find(which => which.fid === option.key) : null;
+                                const f = option?.key ? allFields.find(which => which.fid === option.key) : null;
                                 setIndexKey(f ?? null);
                             }}
                             style={{ width: '12em' }}
