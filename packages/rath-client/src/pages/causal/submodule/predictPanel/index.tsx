@@ -6,6 +6,7 @@ import styled from "styled-components";
 import type { IFieldMeta } from "../../../../interfaces";
 import { useGlobalStore } from "../../../../store";
 import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
+import { getI18n } from "../../locales";
 import { execPredict, IPredictProps, PredictAlgorithm, TrainTestSplitFlag } from "../../predict";
 import TabList from "./tablist";
 
@@ -30,10 +31,7 @@ const Container = styled.div`
     }
 `;
 
-const ModeOptions = [
-    { key: 'classification', text: '分类' },
-    { key: 'regression', text: '回归' },
-] as const;
+const ModeOptions: readonly IPredictProps['mode'][] = ['classification', 'regression'] as const;
 
 const TRAIN_RATE = 0.2;
 
@@ -150,7 +148,9 @@ const PredictPanel = forwardRef<{
                 style={{ width: 'max-content', flexGrow: 0, flexShrink: 0, marginLeft: '0.6em' }}
                 split
                 menuProps={{
-                    items: ModeOptions.map(opt => opt),
+                    items: ModeOptions.map(opt => ({
+                        key: opt, text: getI18n(`submodule.predict.mission.${opt}`)
+                    })),
                     onItemClick: (_e, item) => {
                         if (item) {
                             setMode(item.key as typeof mode);
@@ -158,7 +158,7 @@ const PredictPanel = forwardRef<{
                     },
                 }}
             >
-                {`${ModeOptions.find(m => m.key === mode)?.text}预测`}
+                {getI18n(`submodule.predict.mission.${mode}`)}
             </DefaultButton>
             <TabList algo={algo} setAlgo={setAlgo} tab={tab} setTab={setTab} running={running} predictInput={predictInput} setPredictInput={setPredictInput} />
         </Container>

@@ -414,7 +414,8 @@
                 "filters": "子集",
                 "neighbors": "邻近视图"
             }
-        }
+        },
+        "insight": "线索"
     },
     "desc": {
         "dataViewInfo": "在 {dimensions} 中 {measures} 的表现， 限制条件 {filters}."
@@ -488,16 +489,6 @@
             "$zeroFill": "将无穷或错误数值转换至 0 作为新的字段。",
             "$meanFill": "将无穷或错误数值转换其他所有值的均值作为新的字段。",
             "$partition": "构造一个二元映射将字段按规则拆解到两个新的字段。"
-        }
-    },
-    "RInsight": {
-        "explanation": {
-            "title": {
-                "unvisualizedDimension": "潜在因素"
-            },
-            "desc": {
-                "unvisualizedDimension": "视图中未展现的因素 field({ dimension }) 在选定区间有不同的分布模式，可能对 field.noEvents({ mainField }) 的分布有影响关系。评分：score({ responsibility })。"
-            }
         }
     },
     "time_format": {

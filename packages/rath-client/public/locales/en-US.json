@@ -414,7 +414,8 @@
                 "filters": "Subsets",
                 "neighbors": "Neighbors"
             }
-        }
+        },
+        "insight": "Insight"
     },
     "desc": {
         "dataViewInfo": "Pattern in {measures} by {dimensions} where {filters}."

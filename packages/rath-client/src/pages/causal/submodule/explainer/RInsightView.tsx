@@ -8,6 +8,7 @@ import type { IFieldMeta, IRow } from "../../../../interfaces";
 import { useGlobalStore } from "../../../../store";
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from "../../../../workers/insight/r-insight.worker";
 import { RInsightService } from '../../../../services/r-insight';
+import { getI18n } from '../../locales';
 import DiffChart from "./diffChart";
 import ExplainChart from "./explainChart";
 import VisText, { IVisTextProps } from './visText';
@@ -232,7 +233,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
 
     return (
         <>
-            <header style={{ margin: '1em 0' }}>{'线索洞察' || 'Why Query'}</header>
+            <header style={{ margin: '1em 0' }}>{getI18n('submodule.CausalInsight.why_query')}</header>
             {/* TODO: 这里面手风琴 + TOC 的设计个人比较满意，有时间可以优化下样式然后作为组件抽出去 */}
             <ExploreQueue>
                 <div className="tool">

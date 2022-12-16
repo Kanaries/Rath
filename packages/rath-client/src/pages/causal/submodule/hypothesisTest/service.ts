@@ -33,14 +33,14 @@ export interface IHypothesisTestServiceResult {
     weight: number;
 }
 
-export const fetchHypothesisTestParamSchema = async (): Promise<IForm | null> => {
+export const fetchHypothesisTestParamSchema = async (lang: string): Promise<IForm | null> => {
     const { causalStore: { operator: { causalServer, serverActive } } } = getGlobalStore();
 
     if (!serverActive) {
         return null;
     }
 
-    const res = await fetch(`${causalServer}/v0.1/form/estimate`, { method: 'GET' });
+    const res = await fetch(`${causalServer}/v0.1/form/estimate?i18n=${lang}`, { method: 'GET' });
 
     if (!res.ok) {
         notify({

@@ -4,6 +4,7 @@ import { FC, useEffect, useMemo, useRef, useState } from "react";
 import type { IFieldMeta } from "../../../../interfaces";
 import { useGlobalStore } from "../../../../store";
 import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
+import { getI18n } from "../../locales";
 import { PredictAlgorithm } from "../../predict";
 import ConfigPanel from "./configPanel";
 import ResultPanel from "./resultPanel";
@@ -92,8 +93,8 @@ const TabList: FC<{
                 }}
                 style={{ marginTop: '0.5em' }}
             >
-                <PivotItem itemKey="config" headerText="模型设置" />
-                <PivotItem itemKey="result" headerText="预测结果" />
+                <PivotItem itemKey="config" headerText={getI18n('submodule.predict.config')} />
+                <PivotItem itemKey="result" headerText={getI18n('submodule.predict.result')} />
             </Pivot>
             <div className="content">
                 {{

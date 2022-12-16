@@ -40,7 +40,7 @@ class HypothesisTestStore {
             logs: observable.shallow,
         });
 
-        fetchHypothesisTestParamSchema().then(res => {
+        fetchHypothesisTestParamSchema(getGlobalStore().langStore.lang).then(res => {
             runInAction(() => {
                 this.form = res;
             });

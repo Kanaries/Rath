@@ -214,12 +214,60 @@ const locales: Locales = {
         },
         [ExplorationKey.CAUSAL_INSIGHT]: {
             title: '字段透视',
+            header: '探索目标',
+            engine: '运行环境',
+            diff_mode: '对照选择',
+            diff: {
+                other: '数据补集',
+                full: '数据全集',
+                'two-group': '自选两个集合',
+            },
+            index_key: '基准因素',
+            empty: '无',
+            aggregate: '聚合类型',
+            aggregate_op: {
+                false: '无（明细）',
+                sum: '总和',
+                mean: '均值',
+                count: '计数',
+            },
+            two_group: {
+                text: '筛选{key}',
+                foreground: '实验组',
+                background: '对照组',
+            },
+            run: '发现',
+            why_query: '线索洞察',
+            insight: {
+                explanation: {
+                    unvisualized_dimension: {
+                        label: '潜在因素',
+                        description: '视图中未展现的因素 field({ dimension }) 在选定区间有不同的分布模式，可能对 field.noEvents({ mainField }) 的分布有影响关系。评分：score({ responsibility })。',
+                    },
+                },
+            },
         },
         [ExplorationKey.GRAPHIC_WALKER]: {
             title: '可视化自助分析',
         },
         [ExplorationKey.PREDICT]: {
             title: '预测实验',
+            mission: {
+                classification: '分类预测',
+                regression: '回归预测',
+            },
+            config: '模型设置',
+            result: '预测结果',
+            select_model: '模型选择',
+            scope: '分析空间',
+            feature: '特征',
+            target: '目标',
+            field: '因素',
+            comparison: '对比',
+            index: '运行次数',
+            algo: '预测模型',
+            accuracy: '准确率',
+            clear: '清空记录',
         },
     },
 };

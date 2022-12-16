@@ -217,12 +217,60 @@ export const LocaleKeys = {
         },
         [ExplorationKey.CAUSAL_INSIGHT]: {
             title: 'Field Insight',
+            header: 'Main Field',
+            engine: 'Service',
+            diff_mode: 'Diff Mode',
+            diff: {
+                other: 'Other',
+                full: 'Full',
+                'two-group': 'Two Groups',
+            },
+            index_key: 'Index Key',
+            empty: 'Null',
+            aggregate: 'Aggregation Type',
+            aggregate_op: {
+                false: 'Null (Detail)',
+                sum: 'Sum',
+                mean: 'Mean',
+                count: 'Count',
+            },
+            two_group: {
+                text: 'Pick {key}',
+                foreground: 'Foreground Group',
+                background: 'Background Group',
+            },
+            run: 'Insight',
+            why_query: 'Why Query',
+            insight: {
+                explanation: {
+                    unvisualized_dimension: {
+                        label: 'Unvisualized Dimension',
+                        description: 'Unvisualized dimension field({ dimension }) is distributed differently from the background group, that may influence the distribution of field.noEvents({ mainField }) in the same population. Score: score({ responsibility }).',
+                    },
+                },
+            },
         },
         [ExplorationKey.GRAPHIC_WALKER]: {
             title: 'Manual Exploration',
         },
         [ExplorationKey.PREDICT]: {
             title: 'Prediction Test',
+            mission: {
+                classification: 'Classification',
+                regression: 'Regression',
+            },
+            config: 'Configuration',
+            result: 'Result',
+            select_model: 'Select Model',
+            scope: 'Scope',
+            feature: 'Feature',
+            target: 'Target',
+            field: 'Field',
+            comparison: 'Comparison',
+            index: 'Task ID',
+            algo: 'Algorithm',
+            accuracy: 'Accuracy',
+            clear: 'Clear Record',
         },
     },
 } as const;

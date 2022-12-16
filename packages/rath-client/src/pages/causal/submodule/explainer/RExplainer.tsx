@@ -7,6 +7,7 @@ import { useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 import { IFieldMeta, IFilter, IRow } from '../../../../interfaces';
 import type { IRInsightExplainResult, IRInsightExplainSubspace } from '../../../../workers/insight/r-insight.worker';
+import { getI18n } from '../../locales';
 import { RInsightService } from '../../../../services/r-insight';
 import ChartItem from './explainChart';
 import RInsightView from './RInsightView';
@@ -184,10 +185,10 @@ const RExplainer: FC = () => {
         <Container>
             {mainField && (
                 <>
-                    <header>{'探索目标' || 'Main Field'}</header>
+                    <header>{getI18n('submodule.CausalInsight.header')}</header>
                     <Stack tokens={{ childrenGap: 20 }} horizontal style={{ alignItems: 'flex-end' }}>
                         <Dropdown
-                            label="运行环境"//"Service"
+                            label={getI18n('submodule.CausalInsight.engine')}
                             selectedKey={serviceMode}
                             options={[
                                 { key: 'worker', text: 'worker' },
@@ -201,13 +202,11 @@ const RExplainer: FC = () => {
                             style={{ width: '7em' }}
                         />
                         <Dropdown
-                            label="对照选择"//"Diff Mode"
+                            label={getI18n('submodule.CausalInsight.diff_mode')}
                             selectedKey={diffMode}
-                            options={[
-                                { key: 'other', text: '数据补集' || 'Other' },
-                                { key: 'full', text: '数据全集' || 'Full' },
-                                { key: 'two-group', text: '自选两个集合' || 'Two Groups' },
-                            ]}
+                            options={(['other', 'full', 'two-group'] as typeof diffMode[]).map((key) => ({
+                                key, text: getI18n(`submodule.CausalInsight.diff.${key}`)
+                            }))}
                             onChange={(_, option) => {
                                 if (option?.key) {
                                     setDiffMode(option.key as typeof diffMode);
@@ -218,9 +217,9 @@ const RExplainer: FC = () => {
                     </Stack>
                     <Stack tokens={{ childrenGap: 20 }} horizontal style={{ alignItems: 'flex-end' }}>
                         <Dropdown
-                            label="基准因素"//"Index Key"
+                            label={getI18n('submodule.CausalInsight.index_key')}
                             selectedKey={indexKey?.fid ?? ''}
-                            options={[{ key: '', text: '无' || 'null' }].concat(fieldMetas.map(f => ({
+                            options={[{ key: '', text: getI18n('submodule.CausalInsight.empty') }].concat(fieldMetas.map(f => ({
                                 key: f.fid,
                                 text: f.name ?? f.fid,
                             })))}
@@ -231,13 +230,13 @@ const RExplainer: FC = () => {
                             style={{ width: '12em' }}
                         />
                         <Dropdown
-                            label="聚合类型"//"Aggregation Type"
+                            label={getI18n('submodule.CausalInsight.aggregate')}
                             selectedKey={aggr}
                             options={[
-                                { key: '', text: '无（明细）' || 'None' },
-                                { key: 'sum', text: '总和' || 'SUM' },
-                                { key: 'mean', text: '均值' || 'MEAN' },
-                                { key: 'count', text: '计数' || 'COUNT' },
+                                { key: '', text: getI18n('submodule.CausalInsight.aggregate_op.false') },
+                                { key: 'sum', text: getI18n('submodule.CausalInsight.aggregate_op.sum') },
+                                { key: 'mean', text: getI18n('submodule.CausalInsight.aggregate_op.mean') },
+                                { key: 'count', text: getI18n('submodule.CausalInsight.aggregate_op.count') },
                             ]}
                             onChange={(_, option) => {
                                 setAggr((option?.key as typeof aggr) ?? null);
@@ -247,7 +246,11 @@ const RExplainer: FC = () => {
                     </Stack>
                     {diffMode === 'two-group' && (
                         <Toggle
-                            label={`Select ${editingGroupIdx === 2 ? 'Background' : 'Foreground'} Group`}
+                            label={getI18n('submodule.CausalInsight.two_group.text', {
+                                key: getI18n(`submodule.CausalInsight.two_group.${
+                                    editingGroupIdx === 2 ? 'background' : 'foreground'
+                                }`)
+                            })}
                             checked={editingGroupIdx === 2}
                             onChange={(_, checked) => setEditingGroupIdx(checked ? 2 : 1)}
                         />
@@ -266,7 +269,7 @@ const RExplainer: FC = () => {
                     {subspaces && (
                         <>
                             <ChartItem
-                                title="对照组"//"Foreground Group"
+                                title={getI18n('submodule.CausalInsight.two_group.foreground')}
                                 data={visSample}
                                 indexKey={indexKey}
                                 mainField={mainField}
@@ -276,7 +279,7 @@ const RExplainer: FC = () => {
                                 normalize={false}
                             />
                             <ChartItem
-                                title="实验组"//"Background Group"
+                                title={getI18n('submodule.CausalInsight.two_group.background')}
                                 data={visSample}
                                 indexKey={indexKey}
                                 mainField={mainField}
@@ -292,7 +295,7 @@ const RExplainer: FC = () => {
                         disabled={!subspaces}
                         onClick={applySelection}
                     >
-                        {'发现' || 'Insight'}
+                        {getI18n('submodule.CausalInsight.run')}
                     </DefaultButton>
                     {subspaces && (
                         <RInsightView

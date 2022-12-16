@@ -5,6 +5,7 @@ import { FC, useMemo } from "react";
 import styled from "styled-components";
 import type { IFieldMeta } from "../../../../interfaces";
 import { useGlobalStore } from "../../../../store";
+import { getI18n } from "../../locales";
 import { PredictAlgorithm, PredictAlgorithms } from "../../predict";
 
 
@@ -47,7 +48,7 @@ const ConfigPanel: FC<{
         return [
             {
                 key: 'selectedAsFeature',
-                name: `特征 (${predictInput.features.length} / ${fields.length})`,
+                name: `${getI18n('submodule.predict.feature')} (${predictInput.features.length} / ${fields.length})`,
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     const checked = predictInput.features.some(f => f.fid === field.fid);
@@ -76,7 +77,7 @@ const ConfigPanel: FC<{
             },
             {
                 key: 'selectedAsTarget',
-                name: `目标 (${predictInput.targets.length} / ${fields.length})`,
+                name: `${getI18n('submodule.predict.target')} (${predictInput.targets.length} / ${fields.length})`,
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     const checked = predictInput.targets.some(f => f.fid === field.fid);
@@ -105,7 +106,7 @@ const ConfigPanel: FC<{
             },
             {
                 key: 'name',
-                name: '因素',
+                name: getI18n('submodule.predict.field'),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
@@ -122,7 +123,7 @@ const ConfigPanel: FC<{
     return (
         <>
             <Dropdown
-                label="模型选择"
+                label={getI18n('submodule.predict.select_model')}
                 options={PredictAlgorithms.map(algo => ({ key: algo.key, text: algo.text }))}
                 selectedKey={algo}
                 onChange={(_, option) => {
@@ -133,7 +134,7 @@ const ConfigPanel: FC<{
                 }}
                 style={{ width: 'max-content' }}
             />
-            <Label style={{ marginTop: '1em' }}>分析空间</Label>
+            <Label style={{ marginTop: '1em' }}>{getI18n('submodule.predict.scope')}</Label>
             <TableContainer>
                 <DetailsList
                     items={fields.slice(0)}

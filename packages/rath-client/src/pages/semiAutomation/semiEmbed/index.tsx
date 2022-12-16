@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { ActionButton, Panel, PanelType } from '@fluentui/react';
 import { IPattern } from '@kanaries/loa';
 import { runInAction } from 'mobx';
@@ -32,14 +33,14 @@ const SemiEmbed: React.FC<IProps> = (props) => {
                 iconProps={{
                     iconName: 'Lightbulb',
                 }}
-                text="线索发现"
+                text={intl.get('megaAuto.commandBar.associate')}
                 onClick={() => {
                     toggleShow && toggleShow(!show);
                 }}
             />
             <Panel
                 type={PanelType.medium}
-                headerText="线索"
+                headerText={intl.get('semiAuto.insight')}
                 isOpen={show}
                 isBlocking={false}
                 onDismiss={() => {
