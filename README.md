@@ -60,6 +60,7 @@ Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have
 To get started with RATH, you can:
 - 🚀 [Try RATH now!](https://rath.kanaries.net)
 - 📖 [Read RATH Docs](https://docs.kanaries.net)
+- [Video introducing RATH's data painter](https://youtu.be/djqePNyhz7w)
 
 
 **RATH** is an ongoing project, actively being developed and maintained by a group of data scientists, developers and community enthusiasts. We are a group of people who are passionate about creating the next generation of data analytic tools.
@@ -116,7 +117,7 @@ yarn workspace rath-client start
 
 - 🛠 [Semi-auto exploration](https://docs.kanaries.net/semi-auto-explore): The middle ground between a fully automated Data Exploration and Tableau-like manual exploration. RATH will work as your copilot, learn your interests and uses AI to generate relevant recommendations for you.
 
-- 🎨 [Data painter](https://docs.kanaries.net/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features.
+- 🎨 [Data painter](https://docs.kanaries.net/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features. A video about data painter [here](https://youtu.be/djqePNyhz7w)
 
 - :bar_chart: Dashboard: build a beautiful interactive data dashboard.
 
@@ -160,6 +161,8 @@ Assisted with AI, RATH can help you with your data analysis. Just provide RATH w
 ### :sparkles: Interactive data analysis workflow by data painting
 
 <a href="https://docs.kanaries.net/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="Interactive data analysis by painting"></a>
+
+[Data Painter Video](https://youtu.be/djqePNyhz7w)
 
 ## Supported Databases
 

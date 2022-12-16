@@ -63,6 +63,7 @@ const NeighborSegment: React.FC = () => {
                             actions={mainVizSetting.debug}
                             spec={adviceVisSize(spec, fieldMetas)}
                             dataSource={applyFilters(dataSource, neighborViews.views[i].filters)}
+                            config={commonStore.themeConfig}
                         />
                     </div>
                     <div className="chart-desc">

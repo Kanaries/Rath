@@ -9,7 +9,7 @@ import { LoadingLayer } from '../../semiAutomation/components';
 import ResizeContainer from '../resizeContainer';
 
 const MainCanvas: React.FC = () => {
-    const { megaAutoStore, ltsPipeLineStore } = useGlobalStore();
+    const { megaAutoStore, ltsPipeLineStore, commonStore } = useGlobalStore();
     const { mainViewSpec, dataSource, visualConfig } = megaAutoStore;
     const { rendering } = ltsPipeLineStore;
     return (
@@ -27,7 +27,7 @@ const MainCanvas: React.FC = () => {
                     }
                 >
                     <VisErrorBoundary>
-                        <ReactVega dataSource={dataSource} spec={mainViewSpec} actions={visualConfig.debug} />
+                        <ReactVega dataSource={dataSource} spec={mainViewSpec} actions={visualConfig.debug} config={commonStore.themeConfig} />
                     </VisErrorBoundary>
                 </ResizeContainer>
             )}

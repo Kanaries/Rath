@@ -27,7 +27,7 @@ const Container = styled.div`
 const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
     const { filters } = page.data;
 
-    const { collectionStore, dataSourceStore, dashboardStore } = useGlobalStore();
+    const { collectionStore, dataSourceStore, dashboardStore, commonStore } = useGlobalStore();
     const { collectionList } = collectionStore;
     const { cleanedData } = dataSourceStore;
     
@@ -98,6 +98,7 @@ const SourcePanel: FC<DashboardPanelProps> = ({ page, card, sampleSize }) => {
                                 background: '#0000',
                             }}
                             actions={false}
+                            config={commonStore.themeConfig}
                         />
                     </VisErrorBoundary>
                 </div>

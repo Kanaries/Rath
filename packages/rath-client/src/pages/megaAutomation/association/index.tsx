@@ -10,7 +10,7 @@ import Association from './assCharts';
 const PAGE_SIZE = 7;
 
 const ObservableAssociation: React.FC = props => {
-    const {  megaAutoStore } = useGlobalStore()
+    const {  megaAutoStore, commonStore } = useGlobalStore()
     const { samplingDataSource,  assoListT1, assoListT2, visualConfig, fieldMetas } = megaAutoStore;
 
     const [pivotKey, setPivotKey] = useState<string>('T1')
@@ -45,6 +45,7 @@ const ObservableAssociation: React.FC = props => {
             visualConfig={toJS(visualConfig)}
             fieldMetas={fieldMetas}
             vizList={assoShownList}
+            themeConfig={commonStore.themeConfig}
           />
     </div>
 }

@@ -51,6 +51,7 @@ RATH 不仅仅是数据分析和可视化工具（如 Tableau）的开源替代�
 
 - 🚀 在浏览器中[立即尝试RATH](https://rath.kanaries.net)
 - 📖 阅读[RATH 文档](https://docs.kanaries.net)
+- [绘板功能视频](https://www.bilibili.com/video/BV1Pe4y1E7Y2/?share_source=copy_web&vd_source=57ac992756e57aeb910c02693db35eac)
 
 ## 联系我们
 
@@ -131,6 +132,8 @@ RATH作为数据分析的智能助手，通过AI学习给出提示，协助数�
 >```
 
 ### 数据绘板，以绘画的方式完成数据分析工作流
+
+[数据绘板演示视频](https://www.bilibili.com/video/BV1Pe4y1E7Y2/?share_source=copy_web&vd_source=57ac992756e57aeb910c02693db35eac)
 
 <a href="https://docs.kanaries.net/zh/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="数据绘板"></a>
 
