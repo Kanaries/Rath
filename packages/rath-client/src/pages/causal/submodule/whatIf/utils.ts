@@ -1,5 +1,4 @@
 import { getFreqRange } from "@kanaries/loa";
-import { nanoid } from "nanoid";
 import type { IFieldMeta, IRawField, IRow } from "../../../../interfaces";
 import type { IteratorStorage } from "../../../../utils/iteStorage";
 
@@ -27,15 +26,16 @@ export const oneHot = async (data: IteratorStorage | readonly IRow[], fields: re
             return list;
         }, []).sort((a, b) => b[1] - a[1]);
 
-        const others = nanoid();
+        const others = `${fid}::others`;
 
         const topK = records.slice(0, records.length <= MAX_CHILDREN ? undefined : MAX_CHILDREN - 1);
 
         for (const [key] of topK) {
-            const _fid = nanoid();
+            const name = `${key}`.replace(/[\s,.]+/g, '_');
+            const _fid = `${fid}::${name}`;
             derivedFields.push({
                 fid: _fid,
-                name: `${f.name || f.fid}::${`${key}`.replace(/[\s,.]+/g, '_')}`,
+                name: `${f.name || f.fid}::${name}`,
                 semanticType: 'nominal',
                 analyticType: 'dimension',
                 extInfo: {

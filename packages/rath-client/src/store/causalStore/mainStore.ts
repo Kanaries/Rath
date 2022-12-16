@@ -1,6 +1,6 @@
 import { action, makeAutoObservable, runInAction, toJS } from "mobx";
 import { notify } from "../../components/error";
-import type { PAG_NODE } from "../../pages/causal/config";
+import type { PAG_NODE, WeightedPagLink } from "../../pages/causal/config";
 import { getCausalModelStorage, getCausalModelStorageKeys, setCausalModelStorage } from "../../utils/storage";
 import type { DataSourceStore } from "../dataSourceStore";
 import CausalDatasetStore from "./datasetStore";
@@ -17,6 +17,7 @@ export interface ICausalStoreSave {
         readonly algorithm: string;
         readonly params: { readonly [key: string]: any };
         readonly causalityRaw: readonly (readonly PAG_NODE[])[];
+        readonly causality: readonly WeightedPagLink[];
     } | null;
 }
 
@@ -72,8 +73,7 @@ export default class CausalStore {
                 this.operator.updateConfig(save.causalModel.algorithm, save.causalModel.params);
                 runInAction(() => {
                     this.model.causalityRaw = save.causalModel!.causalityRaw;
-                    // TODO: 包含上权重矩阵后加回来
-                    // this.model.causality = resolveCausality(save.causalModel!.causalityRaw, this.dataset.fields);
+                    this.model.causality = save.causalModel!.causality;
                 });
             }
             return true;
@@ -93,10 +93,11 @@ export default class CausalStore {
         const save: ICausalStoreSave = {
             datasetId: this.dataset.datasetId,
             fields: this.fields.map(f => f.fid),
-            causalModel: this.operator.algorithm && this.model.causalityRaw ? {
+            causalModel: this.operator.algorithm && this.model.causality && this.model.causalityRaw ? {
                 algorithm: this.operator.algorithm,
                 params: toJS(this.operator.params[this.operator.algorithm]),
                 causalityRaw: this.model.causalityRaw,
+                causality: this.model.causality,
             } : null,
         };
         if (toStorage) {
@@ -132,7 +133,7 @@ export default class CausalStore {
             this.operator.updateConfig(save.causalModel.algorithm, save.causalModel.params);
             runInAction(() => {
                 this.model.causalityRaw = save.causalModel!.causalityRaw;
-                // this.model.causality = resolveCausality(save.causalModel!.causalityRaw, this.dataset.fields);
+                this.model.causality = save.causalModel!.causality;
             });
         }
         return true;
