@@ -246,7 +246,7 @@ export const LocaleKeys = {
             comparison: 'Comparison',
             insight: {
                 explanation: {
-                    unvisualized_dimension: {
+                    unvisualizedDimension: {
                         label: 'Unvisualized Dimension',
                         description: 'Unvisualized dimension field({ dimension }) is distributed differently from the background group, that may influence the distribution of field.noEvents({ mainField }) in the same population. Score: score({ responsibility }).',
                     },

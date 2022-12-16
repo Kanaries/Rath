@@ -8,8 +8,8 @@ import type { EdgeAssert } from "../../../store/causalStore/modelStore";
 import { LayoutMethod, LayoutMethods, useCausalViewContext } from "../../../store/causalStore/viewStore";
 import type { Subtree } from "../submodule";
 import { getI18n } from "../locales";
-import Floating from "../floating";
 import GraphView from "./graphView";
+import Floating from "./floating";
 
 
 export type CausalNode = {

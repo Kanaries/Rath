@@ -247,7 +247,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                             <div onClick={() => setCursor(i)} role="tab" aria-selected={i === cursor}>
                                                 {res.description?.title && (
                                                     <span className="title">
-                                                        {getI18n(`submodule.CausalInsight.insight.explanation.desc.${res.description.title}`)}
+                                                        {getI18n(`submodule.CausalInsight.insight.explanation.${res.description.title}.label`)}
                                                     </span>
                                                 )}
                                                 <span>
@@ -306,7 +306,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                     <div onClick={() => setCursor(i)} role="tab" aria-selected={i === cursor}>
                                         {res.description?.title && (
                                             <span className="title">
-                                                {getI18n(`submodule.CausalInsight.insight.explanation.desc.${res.description.title}`)}
+                                                {getI18n(`submodule.CausalInsight.insight.explanation.${res.description.title}.label`)}
                                             </span>
                                         )}
                                         <span>
@@ -345,7 +345,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                             />
                                             {view.description && (
                                                 <VisText context={visTextContext}>
-                                                    {getI18n(`submodule.CausalInsight.insight.explanation.desc.${view.description.key}`, {
+                                                    {getI18n(`submodule.CausalInsight.insight.explanation.${view.description.key}.description`, {
                                                         ...view.description.data,
                                                         responsibility: view.responsibility,
                                                         mainField: tar.fid,

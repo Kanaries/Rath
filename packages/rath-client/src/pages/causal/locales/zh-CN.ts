@@ -243,7 +243,7 @@ const locales: Locales = {
             comparison: '分布对照',
             insight: {
                 explanation: {
-                    unvisualized_dimension: {
+                    unvisualizedDimension: {
                         label: '潜在因素',
                         description: '视图中未展现的因素 field({ dimension }) 在选定区间有不同的分布模式，可能对 field.noEvents({ mainField }) 的分布有影响关系。评分：score({ responsibility })。',
                     },
