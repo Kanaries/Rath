@@ -50,12 +50,20 @@ function extractVizGridOnly(spec: IVegaSubset): IVegaSubset {
                 draft.encoding[ch as keyof IVegaSubset['encoding']]!.title = null;
                 // @ts-ignore
                 draft.encoding[ch as keyof IVegaSubset['encoding']]!.axis = {
-                    labelLimit: 32,
-                    labelOverlap: 'parity',
+                    labels: false,
                     ticks: false,
                 };
+                // for cases when you want to show axis
+                // draft.encoding[ch as keyof IVegaSubset['encoding']]!.axis = {
+                //     labelLimit: 32,
+                //     labelOverlap: 'parity',
+                //     ticks: false,
+                // };
                 // @ts-ignore
                 draft.encoding[ch].legend = null;
+                if (ch === 'size') {
+                    draft.encoding[ch as keyof IVegaSubset['encoding']]!.scale = {rangeMax: 120, rangeMin: 0}
+                }
             }
         }
     });
