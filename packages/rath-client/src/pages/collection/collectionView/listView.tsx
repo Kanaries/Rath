@@ -7,6 +7,7 @@ import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IInsightVizView, IRow } from '../../../interfaces';
 import { changeVisSize, VIEW_NUM_IN_PAGE } from '../utils';
 import ViewInfo from '../../../components/viewInfo/pillInfo';
+import { VegaThemeConfig } from '../../../queries/themes/config';
 
 const CollectContainer = styled.div`
     .seg-header {
@@ -38,9 +39,10 @@ interface ListViewProps {
     metas: IFieldMeta[];
     views: IInsightVizView[];
     onConfig: (data: IInsightVizView) => void;
+    themeConfig?: VegaThemeConfig;
 }
 const ListView: React.FC<ListViewProps> = (props) => {
-    const { data, views, metas, onConfig } = props;
+    const { data, views, metas, onConfig, themeConfig } = props;
     const [pageIndex, setPageIndex] = useState<number>(0);
     return (
         <div>
@@ -71,6 +73,7 @@ const ListView: React.FC<ListViewProps> = (props) => {
                                     dataSource={applyFilters(data, item.filters)}
                                     spec={changeVisSize(item.spec, 320, 220)}
                                     actions={false}
+                                    config={themeConfig}
                                 />
                             </VisErrorBoundary>
                         </div>

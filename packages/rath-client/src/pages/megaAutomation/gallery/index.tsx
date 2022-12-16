@@ -12,7 +12,7 @@ const GalleryCard = styled.div`
     border-radius: 4px;
 `
 const Gallery: React.FC = props => {
-    const { megaAutoStore } = useGlobalStore();
+    const { megaAutoStore, commonStore } = useGlobalStore();
     const { dataSource, gallerySpecList, visualConfig } = megaAutoStore;
     return <div>
         {
@@ -22,6 +22,7 @@ const Gallery: React.FC = props => {
                     dataSource={dataSource}
                     spec={spec}
                     actions={visualConfig.debug}
+                    config={commonStore.themeConfig}
                 />
             </VisErrorBoundary>
             </GalleryCard>)

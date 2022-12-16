@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Dropdown, IDropdownOption, Pivot, PivotItem } from '@fluentui/react';
+import { Dropdown, IDropdownOption, Pivot, PivotItem, Stack } from '@fluentui/react';
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 import { SUPPORT_LANG } from '../../locales';
 import { useGlobalStore } from '../../store';
 import AnalysisSettings from '../../components/analysisSettings';
+import { THEME_KEYS } from '../../queries/themes';
 
 const langOptions: IDropdownOption[] = SUPPORT_LANG.map((lang) => ({
     key: lang.value,
@@ -17,8 +19,16 @@ const SetUpDiv = styled.div`
     }
 `;
 
+const themeOptions: IDropdownOption[] = [
+    { key: THEME_KEYS.default, text: 'Default' },
+    { key: THEME_KEYS.googlecharts, text: 'Google Charts' },
+    { key: THEME_KEYS.powerbi, text: 'PowerBI' },
+    { key: THEME_KEYS.ggplot2, text: 'GGPlot2' },
+    { key: THEME_KEYS.vox, text: 'Vox' }
+]
+
 function Setup() {
-    const { langStore } = useGlobalStore();
+    const { langStore, commonStore } = useGlobalStore();
     const [configKey, setConfigKey] = useState<'basic' | 'analysis'>('basic');
     return (
         <SetUpDiv>
@@ -36,20 +46,28 @@ function Setup() {
             <hr />
 
             {configKey === 'basic' && (
-                <div>
+                <Stack>
                     <Dropdown
-                        label='Language'
+                        label="Language"
                         selectedKey={langStore.lang}
                         options={langOptions}
                         onChange={(e, op) => {
                             op && langStore.changeLocalesAndReload(op.key as string);
                         }}
                     />
-                </div>
+                    <Dropdown
+                        options={themeOptions}
+                        label="vis theme"
+                        selectedKey={commonStore.vizTheme}
+                        onChange={(e, op) => {
+                            op && commonStore.applyPreBuildTheme(op.key as string)
+                        }}
+                    />
+                </Stack>
             )}
             {configKey === 'analysis' && <AnalysisSettings />}
         </SetUpDiv>
     );
 }
 
-export default Setup;
+export default observer(Setup);
