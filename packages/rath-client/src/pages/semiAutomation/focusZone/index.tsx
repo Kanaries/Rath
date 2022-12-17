@@ -17,13 +17,7 @@ const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
 const FocusZone: React.FC = (props) => {
     const { semiAutoStore, commonStore, collectionStore, painterStore } = useGlobalStore();
-    const { mainVizSetting, mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas, neighborKeys } =
-        semiAutoStore;
-    const explainDiff = useCallback(() => {
-        if (mainView && compareView) {
-            semiAutoStore.explainViewDiff(mainView, compareView);
-        }
-    }, [mainView, compareView, semiAutoStore]);
+    const { mainVizSetting, mainView, showMiniFloatView, mainViewSpec, fieldMetas, neighborKeys } = semiAutoStore;
 
     const appendFieldHandler = useCallback(
         (fid: string) => {
@@ -53,7 +47,6 @@ const FocusZone: React.FC = (props) => {
             {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
             <div className="vis-container">
                 <div>{mainView && mainViewSpec && <MainCanvas view={mainView} spec={mainViewSpec} />}</div>
-                <div>{compareView && compareViewSpec && <MainCanvas view={compareView} spec={compareViewSpec} />}</div>
                 {mainVizSetting.nlg && (
                     <div style={{ overflow: 'auto' }}>
                         <Narrative />
@@ -157,13 +150,6 @@ const FocusZone: React.FC = (props) => {
                     iconProps={{ iconName: 'EditCreate' }}
                     disabled={mainView === null}
                     onClick={paintChart}
-                />
-                <ActionButton
-                    style={BUTTON_STYLE}
-                    text={intl.get('semiAuto.main.explainDiff')}
-                    iconProps={{ iconName: 'Compare' }}
-                    disabled={mainView === null || compareView === null}
-                    onClick={explainDiff}
                 />
                 {mainView && mainViewSpec && (
                     <ActionButton

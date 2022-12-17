@@ -41,13 +41,19 @@ interface IUserInfo {
 }
 
 export default class UserStore {
-    public login: ILoginForm;
-    public signup: ISignUpForm;
+    public login!: ILoginForm;
+    public signup!: ISignUpForm;
     public info: IUserInfo | null = null;
     public get userName() {
         return this.info?.userName ?? null;
     }
     constructor() {
+        this.init()
+        makeAutoObservable(this, {
+            info: observable.shallow,
+        });
+    }
+    public init() {
         this.login = {
             userName: '',
             password: '',
@@ -61,10 +67,11 @@ export default class UserStore {
             phone: '',
             certCode: '',
             invCode: '',
-        };
-        makeAutoObservable(this, {
-            info: observable.shallow,
-        });
+        }
+        this.info = null;
+    }
+    public destroy () {
+        this.info = null;
     }
 
     public updateForm(formKey: IAccessPageKeys, fieldKey: keyof ILoginForm | keyof ISignUpForm, value: string) {

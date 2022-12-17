@@ -57,13 +57,6 @@ const FilterSegment: React.FC = () => {
                                 commonStore.visualAnalysisInGraphicWalker(spec)
                             }}
                         />
-                        <CommandButton
-                            iconProps={{ iconName: 'Compare' }}
-                            text={intl.get('semiAuto.main.compare')}
-                            onClick={() => {
-                                semiAutoStore.updateCompareView(filterViews.views[i])
-                            }}
-                        />
                     </Stack>
                     <div className="chart-container">
                         <ReactVega

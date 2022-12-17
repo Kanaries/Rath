@@ -2,7 +2,7 @@ import { makeAutoObservable, observable, runInAction } from "mobx";
 import { ICubeStorageManageMode, Sampling, IFieldSummary, IInsightSpace } from "visual-insights";
 
 import { IRow, ISyncEngine, ITaskTestMode } from "../../interfaces";
-import { initRathWorker, rathEngineServerService, rathEngineService } from "../../services/index";
+import { initRathWorker, rathEngineServerService, rathEngineService, destroyRathWorker } from "../../services/index";
 import { IRathStorage } from "../../utils/storage";
 import { ClickHouseStore } from "../clickhouseStore";
 import { CommonStore } from "../commonStore";
@@ -14,9 +14,7 @@ export class LTSPipeLine {
     private dataSourceStore: DataSourceStore;
     private commonStore: CommonStore;
     private clickHouseStore: ClickHouseStore;
-    // private vie: RathEngine;
-    // private vie: VIEngine;
-    public insightSpaces: IInsightSpace[];
+    public insightSpaces!: IInsightSpace[];
     public fields: IFieldSummary[] = [];
     public dataSource: IRow[] = [];
     public samplingDataSource: IRow[] = [];
@@ -39,8 +37,18 @@ export class LTSPipeLine {
         this.commonStore = commonStore;
         this.clickHouseStore = clickHouseStore;
 
+        this.init();
+    }
+    public async init () {
         this.insightSpaces = [] as IInsightSpace[];
-        this.initEngine();
+        this.samplingDataSource = [];
+        this.dataSource = [];
+        this.fields = [];
+        this.insightSpaces = [];
+        await this.initEngine();
+    }
+    public async clear () {
+        destroyRathWorker();
     }
     public async initEngine () {
         try {
