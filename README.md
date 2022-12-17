@@ -39,7 +39,7 @@
     <img src="https://badgen.net/github/forks/kanaries/rath?style=flat-square" alt="RATH GitHub Forks">
   </a>
     <a href="https://github.com/Kanaries/Rath/actions">
-    <img src="https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build?style=flat-square" alt="RATH GitHub Actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/kanaries/rath/auto-build.yml?branch=master&style=flat-square">
   </a>
   </a>
     <a href="https://github.com/Kanaries/graphic-walker">
@@ -47,9 +47,7 @@
   </a>
 </div>
 
-## Welcome
-
-Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have you as part of our community.
+## Introduction
 
 **RATH** is beyond an open-source alternative to Data Analysis and Visualization tools such as Tableau. It automates your Exploratory Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
