@@ -62,7 +62,7 @@ function extractVizGridOnly(spec: IVegaSubset): IVegaSubset {
                 // @ts-ignore
                 draft.encoding[ch].legend = null;
                 if (ch === 'size') {
-                    draft.encoding[ch as keyof IVegaSubset['encoding']]!.scale = {rangeMax: 120, rangeMin: 0}
+                    draft.encoding[ch as keyof IVegaSubset['encoding']]!.scale = { rangeMax: 120, rangeMin: 0 };
                 }
             }
         }
@@ -113,7 +113,7 @@ const VizPagination: React.FC = (props) => {
 
     const searchedInsightViews = useMemo(() => {
         return searchFilterView(searchContent, insightViews);
-    }, [searchContent, insightViews])
+    }, [searchContent, insightViews]);
 
     const { items } = usePagination({
         count: searchedInsightViews.length,
@@ -125,11 +125,7 @@ const VizPagination: React.FC = (props) => {
     });
     return (
         <div>
-            <SearchBox
-                onSearch={setSearchContent}
-                placeholder="search views"
-                iconProps={{ iconName: 'Search' }}
-            />
+            <SearchBox onSearch={setSearchContent} placeholder="search views" iconProps={{ iconName: 'Search' }} />
             <VizCardContainer>
                 {searchedInsightViews.length > 0 &&
                     items.map(({ page, type, selected, ...item }, index) => {
@@ -163,12 +159,8 @@ const VizPagination: React.FC = (props) => {
                                 );
                             }
                         } else {
-                            if (type === 'next')
-                                children = (
-                                    <Icon style={{ fontSize: '2em', fontWeight: 600 }} iconName="ChevronRight" />
-                                );
-                            if (type === 'previous')
-                                children = <Icon style={{ fontSize: '2em', fontWeight: 600 }} iconName="ChevronLeft" />;
+                            if (type === 'next') children = <Icon style={{ fontSize: '2em', fontWeight: 600 }} iconName="ChevronRight" />;
+                            if (type === 'previous') children = <Icon style={{ fontSize: '2em', fontWeight: 600 }} iconName="ChevronLeft" />;
                         }
                         return (
                             <VizCard {...item} selected={selected} key={index}>

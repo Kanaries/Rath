@@ -1,12 +1,11 @@
-import { ActionButton, IconButton } from "@fluentui/react";
-import { observer } from "mobx-react-lite";
-import type { FC } from "react";
-import styled from "styled-components";
-import FilterCreationPill from "../../components/filterCreationPill";
-import { useGlobalStore } from "../../store";
-import type { DashboardDocument, DashboardDocumentOperators } from "../../store/dashboardStore";
-import type { IFieldMeta, IFilter } from "../../interfaces";
-
+import { ActionButton, IconButton } from '@fluentui/react';
+import { observer } from 'mobx-react-lite';
+import type { FC } from 'react';
+import styled from 'styled-components';
+import FilterCreationPill from '../../components/filterCreationPill';
+import { useGlobalStore } from '../../store';
+import type { DashboardDocument, DashboardDocumentOperators } from '../../store/dashboardStore';
+import type { IFieldMeta, IFilter } from '../../interfaces';
 
 const Container = styled.div``;
 
@@ -40,9 +39,7 @@ interface FieldCellProps {
 }
 
 const FilterCell: FC<FieldCellProps> = ({ field, data, remove }) => {
-    const filterDesc = `∈ ${
-        data.type === 'range' ? `[${data.range.join(',')}]` : `{${data.values.map(v => JSON.stringify(v)).join(',')}}`
-    }`;
+    const filterDesc = `∈ ${data.type === 'range' ? `[${data.range.join(',')}]` : `{${data.values.map((v) => JSON.stringify(v)).join(',')}}`}`;
 
     return (
         <Cell>
@@ -73,25 +70,18 @@ const FilterList: FC<FilterListProps> = ({ page, operators }) => {
                 fields={fieldMetas}
                 onFilterSubmit={(_, filter) => operators.addDataFilter(filter)}
                 onRenderPill={(text, handleClick) => (
-                    <ActionButton
-                        label={text}
-                        iconProps={{ iconName: 'Add' }}
-                        onClick={handleClick}
-                    >
+                    <ActionButton label={text} iconProps={{ iconName: 'Add' }} onClick={handleClick}>
                         {text}
                     </ActionButton>
                 )}
             />
             {page.config.filters.map((filter, i) => {
-                const field = fieldMetas.find(f => f.fid === filter.fid);
+                const field = fieldMetas.find((f) => f.fid === filter.fid);
 
-                return field ? (
-                    <FilterCell key={i} field={field} data={filter} remove={() => operators.removeDataFilter(i)} />
-                ) : null;
+                return field ? <FilterCell key={i} field={field} data={filter} remove={() => operators.removeDataFilter(i)} /> : null;
             })}
         </Container>
     );
 };
-
 
 export default observer(FilterList);

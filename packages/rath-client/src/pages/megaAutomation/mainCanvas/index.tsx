@@ -21,10 +21,7 @@ const MainCanvas: React.FC = () => {
             )}
             {mainViewSpec && (
                 <ResizeContainer
-                    enableResize={
-                        visualConfig.resize === IResizeMode.control &&
-                        !(mainViewSpec.encoding.column || mainViewSpec.encoding.row)
-                    }
+                    enableResize={visualConfig.resize === IResizeMode.control && !(mainViewSpec.encoding.column || mainViewSpec.encoding.row)}
                 >
                     <VisErrorBoundary>
                         <ReactVega dataSource={dataSource} spec={mainViewSpec} actions={visualConfig.debug} config={commonStore.themeConfig} />
