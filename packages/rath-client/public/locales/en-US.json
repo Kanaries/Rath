@@ -562,5 +562,25 @@
             "userName": "Username",
             "password": "Password"
         }
+    },
+    "messages": {
+        "email": {
+            "success": {
+                "title": "Email sent successfully",
+                "content": "Email has been sent to {email}  Please check your email to get the verification code."
+            },
+            "error": {
+                "title": "Email sent failed"
+            }
+        },
+        "phone": {
+            "success": {
+                "title": "SMS sent successfully",
+                "content": "SMS has been sent to {phone}  Please check your phone to get the verification code."
+            },
+            "error": {
+                "title": "SMS sent failed"
+            }
+        }
     }
 }

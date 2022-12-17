@@ -572,5 +572,25 @@
             "userName": "用户名",
             "password": "密码"
         }
+    },
+    "messages": {
+        "email": {
+            "success": {
+                "title": "邮件发送成功",
+                "content": "邮箱已发送至{email}，请检查。"
+            },
+            "error": {
+                "title": "邮件发送发生错误"
+            }
+        },
+        "phone": {
+            "success": {
+                "title": "短信发送成功",
+                "content": "短信已发送至{phone}，请检查。"
+            },
+            "error": {
+                "title": "短信发送发生错误"
+            }
+        }
     }
 }
