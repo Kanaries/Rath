@@ -261,7 +261,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                                         }}
                                                     >
                                                         <span>
-                                                            {'Preview'}
+                                                            {intl.get('common.preview')}
                                                         </span>
                                                         <PrimaryButton
                                                             onClick={submit}
