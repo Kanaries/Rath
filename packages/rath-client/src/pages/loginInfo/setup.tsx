@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Dropdown, IDropdownOption, Pivot, PivotItem, Stack } from '@fluentui/react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
+import intl from 'react-intl-universal';
 import { SUPPORT_LANG } from '../../locales';
 import { useGlobalStore } from '../../store';
 import AnalysisSettings from '../../components/analysisSettings';
-import { THEME_KEYS } from '../../queries/themes';
+import DesignSegment from './design';
 
 const langOptions: IDropdownOption[] = SUPPORT_LANG.map((lang) => ({
     key: lang.value,
@@ -19,33 +20,32 @@ const SetUpDiv = styled.div`
     }
 `;
 
-const themeOptions: IDropdownOption[] = [
-    { key: THEME_KEYS.default, text: 'Default' },
-    { key: THEME_KEYS.googlecharts, text: 'Google Charts' },
-    { key: THEME_KEYS.powerbi, text: 'PowerBI' },
-    { key: THEME_KEYS.ggplot2, text: 'GGPlot2' },
-    { key: THEME_KEYS.vox, text: 'Vox' }
-]
+enum CONFIG_KEY {
+    basic = 'basic',
+    analysis = 'analysis',
+    design = 'design',
+}
 
 function Setup() {
-    const { langStore, commonStore } = useGlobalStore();
-    const [configKey, setConfigKey] = useState<'basic' | 'analysis'>('basic');
+    const { langStore } = useGlobalStore();
+    const [configKey, setConfigKey] = useState<CONFIG_KEY>(CONFIG_KEY.basic);
     return (
         <SetUpDiv>
             <Pivot
                 selectedKey={configKey}
                 onLinkClick={(item) => {
                     if (item?.props.itemKey) {
-                        setConfigKey(item.props.itemKey as 'basic' | 'analysis');
+                        setConfigKey(item.props.itemKey as CONFIG_KEY);
                     }
                 }}
             >
-                <PivotItem headerText="Basic" itemKey="basic"></PivotItem>
-                <PivotItem headerText="Data Analysis" itemKey="analysis"></PivotItem>
+                <PivotItem headerText={intl.get(`login.configKeys.${CONFIG_KEY.basic}`)} itemKey={CONFIG_KEY.basic}></PivotItem>
+                <PivotItem headerText={intl.get(`login.configKeys.${CONFIG_KEY.design}`)} itemKey={CONFIG_KEY.design}></PivotItem>
+                <PivotItem headerText={intl.get(`login.configKeys.${CONFIG_KEY.analysis}`)} itemKey={CONFIG_KEY.analysis}></PivotItem>
             </Pivot>
             <hr />
 
-            {configKey === 'basic' && (
+            {configKey === CONFIG_KEY.basic && (
                 <Stack>
                     <Dropdown
                         label="Language"
@@ -55,17 +55,10 @@ function Setup() {
                             op && langStore.changeLocalesAndReload(op.key as string);
                         }}
                     />
-                    <Dropdown
-                        options={themeOptions}
-                        label="vis theme"
-                        selectedKey={commonStore.vizTheme}
-                        onChange={(e, op) => {
-                            op && commonStore.applyPreBuildTheme(op.key as string)
-                        }}
-                    />
                 </Stack>
             )}
-            {configKey === 'analysis' && <AnalysisSettings />}
+            {configKey === CONFIG_KEY.design && <DesignSegment />}
+            {configKey === CONFIG_KEY.analysis && <AnalysisSettings />}
         </SetUpDiv>
     );
 }

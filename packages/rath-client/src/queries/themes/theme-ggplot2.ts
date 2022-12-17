@@ -3,9 +3,6 @@ import { VegaThemeConfig } from './config';
 const markColor = '#000';
 
 const ggplot2Theme: VegaThemeConfig = {
-    group: {
-        fill: '#e5e5e5',
-    },
 
     arc: { fill: markColor },
     area: { fill: markColor },

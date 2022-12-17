@@ -5,18 +5,11 @@ import { Statistics } from 'visual-insights'
 import { IPattern, IFieldEncode } from '@kanaries/loa';
 import { bin, binMap, mic, pureGeneralMic, rangeNormilize } from '@kanaries/loa';
 import { IFieldMeta, IResizeMode, IRow, IVegaSubset } from "../interfaces";
-import { deepcopy } from "../utils";
+import { deepcopy, isSetEqual } from "../utils";
 import { applyZeroScale, encodingDecorate, splitFieldsByEnocdes } from "./base/utils";
 import { applyDefaultSort, applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
 import { autoMark, autoStat, encode, humanHabbit, VizEncoder } from './distribution/bot';
 import { autoScale } from './base/scale';
-export const geomTypeMap: { [key: string]: any } = {
-    interval: "boxplot",
-    line: "line",
-    point: "point",
-    // density: 'rect'
-    density: "point"
-};
 
 interface BaseVisProps {
     dataSource: IRow[];
@@ -28,16 +21,6 @@ interface BaseVisProps {
     stepSize?: number;
     excludeScaleZero?: boolean;
     specifiedEncodes?: IFieldEncode[];
-}
-
-function isSetEqual(a1: any[], a2: any[]) {
-    const s1 = new Set(a1);
-    const s2 = new Set(a2);
-    if (s1.size !== s2.size) return false;
-    for (let ele of s1) {
-        if (!s2.has(ele)) return false;
-    }
-    return true;
 }
 
 /**
@@ -155,7 +138,6 @@ export function labDistVis(props: BaseVisProps): IVegaSubset {
     const transedEncodes = statEncodes.concat(scaleEncodes);
 
     const { pureFields, transedFields } = splitFieldsByEnocdes(fields, transedEncodes);
-
     let markType = autoMark(fields, transedFields, pureFields, transedEncodes, dataSource)
     const channelEncoder = new VizEncoder(markType);
     const enc = encode({

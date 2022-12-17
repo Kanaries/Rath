@@ -2,10 +2,11 @@ import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Specification } from 'visual-insights';
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
 import { ITaskTestMode, IVegaSubset } from '../interfaces';
-import { visThemeParser } from '../queries/themes';
+import { THEME_KEYS, visThemeParser } from '../queries/themes';
 import { VegaThemeConfig } from '../queries/themes/config';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
 import { transVegaSubset2Schema } from '../utils/transform';
+import { deepcopy } from '../utils';
 
 export type ErrorType = 'error' | 'info' | 'success';
 const TASK_TEST_MODE_COOKIE_KEY = 'task_test_mode';
@@ -23,8 +24,8 @@ export class CommonStore {
     public graphicWalkerSpec: Specification;
     public vizSpec: IVegaSubset | null = null;
     public vizTheme: string = 'default';
-    // should not be computated values, for custom theme cases.
-    public themeConfig: VegaThemeConfig | undefined = undefined;
+    public customThemeConfig: VegaThemeConfig | undefined = undefined;
+    public useCustomTheme: boolean = false;
     constructor() {
         const taskMode = localStorage.getItem(TASK_TEST_MODE_COOKIE_KEY) || ITaskTestMode.local;
         this.taskMode = taskMode as ITaskTestMode;
@@ -32,15 +33,29 @@ export class CommonStore {
         makeAutoObservable(this, {
             graphicWalkerSpec: observable.ref,
             vizSpec: observable.ref,
-            themeConfig: observable.ref
+            customThemeConfig: observable.ref
         });
+    }
+    public get themeConfig (): VegaThemeConfig | undefined {
+        if (this.useCustomTheme) return this.customThemeConfig;
+        if (this.vizTheme === THEME_KEYS.default) return undefined;
+        return visThemeParser(this.vizTheme)
     }
     public setAppKey(key: string) {
         this.appKey = key;
     }
+    public setUseCustomeTheme (use: boolean) {
+        this.useCustomTheme = use;
+    }
     public applyPreBuildTheme (themeKey: string) {
         this.vizTheme = themeKey;
-        this.themeConfig = visThemeParser(themeKey);
+    }
+    public setCustomThemeConfig (config: VegaThemeConfig | undefined) {
+        this.customThemeConfig = config;
+    }
+    public resetCustomThemeConfigByThemeKey (themeKey: string) {
+        if (themeKey === THEME_KEYS.default) this.customThemeConfig = undefined;
+        this.customThemeConfig = deepcopy(visThemeParser(this.vizTheme));
     }
     public showError(type: ErrorType, content: string) {
         this.messages.push({

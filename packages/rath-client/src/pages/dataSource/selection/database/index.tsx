@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import intl from 'react-intl-universal';
 import { IDropdownOption, Stack, registerIcons, PrimaryButton } from '@fluentui/react';
 import type { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { logDataImport } from '../../../../loggers/dataImport';
@@ -260,12 +261,12 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                                                         }}
                                                     >
                                                         <span>
-                                                            {'Preview'}
+                                                            {intl.get('common.preview')}
                                                         </span>
                                                         <PrimaryButton
                                                             onClick={submit}
                                                         >
-                                                            submit
+                                                            {intl.get('common.submit')}
                                                         </PrimaryButton>
                                                     </header>
                                                     <TablePreview data={preview.value} />

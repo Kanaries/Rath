@@ -1,5 +1,5 @@
-import type { TableData, TableLabels } from '.';
 import type { TableInfo } from './api';
+import type { TableData, TableLabels } from '.';
 
 
 export type SupportedDatabaseType = (
