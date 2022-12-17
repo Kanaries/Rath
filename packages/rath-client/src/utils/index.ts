@@ -19,9 +19,9 @@ export function colFromIRow(from: readonly IRow[], fields?: string[] | IFieldId[
     } else if (fields.length === 0) return col;
     else if (!(fields instanceof String)) fields = fields.map((f) => (f as IFieldId).fid);
     const fieldIds = fields as string[];
-    fieldIds.forEach((fid) => {
+    for (let fid of fieldIds) {
         col.set(fid, { fid, data: from.map((data) => data[fid]) } as ICol<any>);
-    });
+    }
     return col;
 }
 export function rowFromICol(from: Map<string, ICol<any>>, fields: string[] | IFieldId[]): IRow[] {
@@ -46,13 +46,12 @@ function isASCII(str: string) {
     return /^[\x00-\x7F]*$/.test(str);
 }
 
+function isLikelyNumber (val: any): boolean {
+    return !isNaN(Number(val)) || val === undefined
+}
+
 function inferAnalyticType(dataSource: IRow[], fid: string): IAnalyticType {
-    return dataSource.every((row) => {
-        // TODO: [refactor] 推断逻辑抽象一下
-        return !isNaN(Number(row[fid])) || row[fid] === undefined;
-    })
-        ? 'measure'
-        : 'dimension';
+    return dataSource.every(isLikelyNumber) ? 'measure' : 'dimension';
 }
 
 function inferAnalyticTypeFromSemanticType(semanticType: ISemanticType): IAnalyticType {
@@ -90,9 +89,11 @@ export function inferSemanticType(data: IRow[], fid: string): ISemanticType {
     return st;
 }
 
-function isSetEqual(A: string[], B: string[]) {
+function isSetEqual(A: any[], B: any[]) {
     if (A.length !== B.length) return false;
+    const aset = new Set(A);
     const bset = new Set(B);
+    if (aset.size !== bset.size) return false;
     for (let a of A) {
         if (!bset.has(a)) return false;
     }
