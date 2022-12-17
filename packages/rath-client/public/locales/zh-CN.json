@@ -10,6 +10,7 @@
         "expand": "展开",
         "filter": "筛选",
         "preview": "预览",
+        "submit": "提交",
         "semanticType": {
             "nominal": "类别类型",
             "ordinal": "有序类型",

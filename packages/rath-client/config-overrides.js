@@ -17,13 +17,13 @@ module.exports = function override(config, env) {
         }),
         new MonacoWebpackPlugin({
             // available options are documented at https://github.com/microsoft/monaco-editor/blob/main/webpack-plugin/README.md#options
-            languages: ['json']
+            languages: ['json', 'sql']
         })
     );
     // do stuff with the webpack config...
     config.module.rules.push(
         {
-            test: /\.worker\.js$/,
+            test: /.*\/src\/.*\.worker\.js$/,
             use: {
                 loader: 'worker-loader',
                 options: {
@@ -33,7 +33,7 @@ module.exports = function override(config, env) {
             },
         },
         {
-            test: /\.worker\.ts$/,
+            test: /.*\/src\/.*\.worker\.ts$/,
             use: [
                 {
                     loader: 'worker-loader',

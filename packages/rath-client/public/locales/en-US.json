@@ -10,6 +10,7 @@
         "expand": "Expand",
         "filter": "Filter",
         "preview": "Preview",
+        "submit": "Submit",
         "semanticType": {
             "nominal": "nominal",
             "ordinal": "ordinal",

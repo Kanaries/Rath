@@ -2,73 +2,24 @@ import { PrimaryButton } from '@fluentui/react';
 import produce from 'immer';
 import { DragEvent, memo, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import intl from 'react-intl-universal';
 import type { TableInfo } from '../../pages/dataSource/selection/database/api';
 import Link from './link';
 import { IDBGraph } from './localTypes';
 import DBNode from './node';
-import { hasCircle } from './utils';
+import { encodePath, hasCircle } from './utils';
+import { BOX_HEIGHT, BOX_WIDTH, GRAPH_HEIGHT, BOX_PADDING } from './config';
+import { DBBox, DiagramContainer, ListContainer } from './components';
 
-const height = 400;
-export const BOX_WIDTH = 120;
-export const BOX_HEIGHT = 40;
-const BOX_PADDING = 20;
-
-const Container = styled.div({
-    display: 'flex',
-    flexDirection: 'row',
-    height: `${height}px`,
-    overflow: 'hidden',
-    border: '1px solid',
-    borderTop: 'none',
-});
-const ListContainer = styled.div({
-    flexGrow: 1,
-    flexShrink: 1,
-    overflow: 'hidden scroll',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '10em',
-    borderRight: '1px solid #888',
-    '> *': {
-        flexGrow: 0,
-        flexShrink: 0,
-        margin: '0.4em 0',
-    },
-});
-const DiagramContainer = styled.div({
-    flexGrow: 1,
-    flexShrink: 1,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'row',
-    position: 'relative',
-    boxSizing: 'border-box',
-    '> *': {
-        flexGrow: 0,
-        flexShrink: 0,
-    },
-});
-export const DBBox = styled.span`
-    user-select: none;
-    width: ${BOX_WIDTH}px;
-    height: ${BOX_HEIGHT}px;
-    padding: 0 0.5em;
+const Container = styled.div`
+    display: flex;
+    flexDirection: row;
+    height: ${GRAPH_HEIGHT}px;
     overflow: hidden;
-    text-overflow: ellipsis;
-    background-color: #fff;
-    border: 1px solid #555;
-    border-radius: 2px;
-    box-shadow: 0 0 4px #8888;
-    text-align: center;
-    line-height: ${BOX_HEIGHT - 2}px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    &:hover {
-        background-color: #f3f3f3;
-    }
-`;
+    border: 1px solid #cfcfcf;
+    borderTop: none;
+`
+
 const Output = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
@@ -77,7 +28,7 @@ const Output = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border: 1px solid;
+    border: 1px solid #cfcfcf;
     border-top: none;
     margin-bottom: 1em;
 
@@ -90,59 +41,6 @@ const Output = styled.div`
         max-width: 30vw;
     }
 `
-
-const STROKE_RADIUS = 12;
-
-export const encodePath = (x1: number, y1: number, x2: number, y2: number, isPreview = false): string => {
-    const main = (() => {
-        if (Math.abs(x1 - x2) < 1.2 * BOX_WIDTH) {
-            const cy = (y1 + y2) / 2;
-            const ya = cy - Math.sign(y2 - y1) * STROKE_RADIUS;
-            const xb = x1 + Math.sign(x2 - x1) * STROKE_RADIUS;
-            const xc = x2 - Math.sign(x2 - x1) * STROKE_RADIUS;
-            const yd = cy + Math.sign(y2 - y1) * STROKE_RADIUS;
-            if (Math.abs(x1 - x2) < 2 * STROKE_RADIUS) {
-                return `M${x1},${y1} V${ya} C${x1},${cy} ${x2},${cy} ${x2},${yd} V${y2}`;
-            }
-            return `M${x1},${y1} V${ya} Q${x1},${cy} ${xb},${cy} H${xc} Q${x2},${cy} ${x2},${yd} V${y2}`;
-        } else {
-            const cx = (x1 + x2) / 2;
-            const xa = cx - Math.sign(x2 - x1) * STROKE_RADIUS;
-            const yb = y1 + Math.sign(y2 - y1) * STROKE_RADIUS;
-            const yc = y2 - Math.sign(y2 - y1) * STROKE_RADIUS;
-            const xd = cx + Math.sign(x2 - x1) * STROKE_RADIUS;
-            if (Math.abs(y1 - y2) < 2 * STROKE_RADIUS) {
-                return `M${x1},${y1} H${xa} C${cx},${y1} ${cx},${y2} ${xd},${y2} H${x2}`;
-            }
-            return `M${x1},${y1} H${xa} Q${cx},${y1} ${cx},${yb} V${yc} Q${cx},${y2} ${xd},${y2} H${x2}`;
-        }
-    })();
-
-    const arrow = (() => {
-        if (isPreview) {
-            return '';
-        }
-        if (Math.abs(x1 - x2) < 1.2 * BOX_WIDTH) {
-            const x = x2;
-            if (y1 >= y2) {
-                const y = y2 + BOX_HEIGHT / 2;
-                return `M${x},${y} l-6,6 M${x},${y} l6,6`;
-            }
-            const y = y2 - BOX_HEIGHT / 2;
-            return `M${x},${y} l-6,-6 M${x},${y} l6,-6`;
-        } else {
-            const y = y2;
-            if (x1 >= x2) {
-                const x = x2 + BOX_WIDTH / 2;
-                return `M${x},${y} l6,-6 M${x},${y} l6,6`;
-            }
-            const x = x2 - BOX_WIDTH / 2;
-            return `M${x},${y} l-6,-6 M${x},${y} l-6,6`;
-        }
-    })();
-
-    return `${main}${arrow}`;
-};
 
 export interface DbGraphProps {
     tables: TableInfo[];
@@ -191,7 +89,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             ];
 
             const x = Math.round(Math.max(Math.min(tx, width - BOX_PADDING - BOX_WIDTH - 1), BOX_PADDING));
-            const y = Math.round(Math.max(Math.min(ty, height - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
+            const y = Math.round(Math.max(Math.min(ty, GRAPH_HEIGHT - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
 
             switch (dragEffectRef.current) {
                 case 'append': {
@@ -294,7 +192,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             ];
 
             const x = Math.round(Math.max(Math.min(tx, width - BOX_PADDING - BOX_WIDTH - 1), BOX_PADDING));
-            const y = Math.round(Math.max(Math.min(ty, height - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
+            const y = Math.round(Math.max(Math.min(ty, GRAPH_HEIGHT - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
 
             setLinkPreview({
                 from: linkPreview.from,
@@ -349,7 +247,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             ];
 
             const x = Math.round(Math.max(Math.min(tx, width - BOX_PADDING - BOX_WIDTH - 1), BOX_PADDING));
-            const y = Math.round(Math.max(Math.min(ty, height - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
+            const y = Math.round(Math.max(Math.min(ty, GRAPH_HEIGHT - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
 
             setLinkPreview({
                 from: linkPreview.from,
@@ -403,7 +301,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             </ListContainer>
             <DiagramContainer
                 ref={container}
-                style={{ height: `${height}px`, position: 'relative' }}
+                style={{ height: `${GRAPH_HEIGHT}px`, position: 'relative' }}
                 onDrop={handleDrop}
                 onDragOver={e => {
                     e.stopPropagation();
@@ -414,8 +312,8 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             >
                 <svg
                     width={`${width}px`}
-                    height={`${height}px`}
-                    style={{ backgroundColor: '#8882' }}
+                    height={`${GRAPH_HEIGHT}px`}
+                    style={{ backgroundColor: '#cecece20' }}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -533,7 +431,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
                 {sql}
             </span>
             <PrimaryButton onClick={preview}>
-                {'preview'}
+                {intl.get('common.preview')}
             </PrimaryButton>
         </Output>
     </>);

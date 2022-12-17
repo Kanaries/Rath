@@ -1,7 +1,8 @@
 import { Fragment, memo, useMemo } from "react";
 import styled from "styled-components";
 import type { IDBEdge } from './localTypes';
-import { BOX_HEIGHT, BOX_WIDTH, encodePath } from ".";
+import { encodePath } from "./utils";
+import { BOX_HEIGHT, BOX_WIDTH } from "./config";
 
 
 const OPTION_WIDTH = 60;

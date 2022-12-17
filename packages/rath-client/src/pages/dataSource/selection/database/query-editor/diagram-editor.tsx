@@ -2,8 +2,7 @@ import { memo, useEffect, useState } from "react";
 import DbGraph from "../../../../../components/dbGraph";
 import type { IDBGraph } from "../../../../../components/dbGraph/localTypes";
 import { toSQL } from "../../../../../components/dbGraph/utils";
-import { QueryEditorProps } from ".";
-
+import { QueryEditorProps } from "./interfaces";
 
 const DiagramEditor = memo<QueryEditorProps>(function DiagramEditor ({ tableEnumerable, query, tables, setQuery, preview }) {
     const [graph, setGraph] = useState<IDBGraph>({
