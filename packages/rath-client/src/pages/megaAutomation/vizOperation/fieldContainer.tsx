@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
-import FieldPlaceholder from '../../../components/fieldPlaceholder';
+import FieldPlaceholder from '../../../components/fieldPill/fieldPlaceholder';
 import ViewField from './viewField';
 
 const PillsContainer = styled.div`

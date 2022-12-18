@@ -5,11 +5,11 @@ import intl from 'react-intl-universal';
 import { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
-import FieldPlaceholder from '../../../components/fieldPlaceholder';
+import FieldPlaceholder from '../../../components/fieldPill/fieldPlaceholder';
 import { MainViewContainer } from '../components';
-import FilterCreationPill from '../../../components/filterCreationPill';
+import FilterCreationPill from '../../../components/fieldPill/filterCreationPill';
 import Narrative from '../narrative';
-import EncodeCreationPill from '../../../components/encodeCreationPill';
+import EncodeCreationPill from '../../../components/fieldPill/encodeCreationPill';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
 

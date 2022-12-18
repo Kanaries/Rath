@@ -2,7 +2,7 @@ import { ActionButton, IconButton } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import type { FC } from 'react';
 import styled from 'styled-components';
-import FilterCreationPill from '../../components/filterCreationPill';
+import FilterCreationPill from '../../components/fieldPill/filterCreationPill';
 import { useGlobalStore } from '../../store';
 import type { DashboardDocument, DashboardDocumentOperators } from '../../store/dashboardStore';
 import type { IFieldMeta, IFilter } from '../../interfaces';

@@ -5,6 +5,7 @@ import produce from 'immer';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import intl from 'react-intl-universal';
 import ReactVega from '../../components/react-vega';
 import { IFieldMeta, IVegaSubset } from '../../interfaces';
 import { distVis } from '../../queries/distVis';
@@ -125,7 +126,7 @@ const VizPagination: React.FC = (props) => {
     });
     return (
         <div>
-            <SearchBox onSearch={setSearchContent} placeholder="search views" iconProps={{ iconName: 'Search' }} />
+            <SearchBox onSearch={setSearchContent} placeholder={intl.get('common.search.searchViews')} iconProps={{ iconName: 'Search' }} />
             <VizCardContainer>
                 {searchedInsightViews.length > 0 &&
                     items.map(({ page, type, selected, ...item }, index) => {

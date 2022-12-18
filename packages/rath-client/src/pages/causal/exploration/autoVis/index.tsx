@@ -6,7 +6,7 @@ import { NodeSelectionMode, useCausalViewContext } from "../../../../store/causa
 import { useGlobalStore } from "../../../../store";
 import { IFieldMeta } from "../../../../interfaces";
 import ViewField from "../../../megaAutomation/vizOperation/viewField";
-import FieldPlaceholder from "../../../../components/fieldPlaceholder";
+import FieldPlaceholder from "../../../../components/fieldPill/fieldPlaceholder";
 import MetaList from "./metaList";
 import Vis from "./vis";
 import NeighborList from "./neighborList";
