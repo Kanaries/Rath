@@ -2,7 +2,7 @@ import produce from "immer";
 import { IReactionDisposer, makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { IFieldEncode, IFilter, IPattern } from "@kanaries/loa";
 import { Specification } from "visual-insights";
-import { IResizeMode, IRow, IVegaSubset } from "../../interfaces";
+import { IResizeMode, IRow, ISpecSourceType, IVegaSubset } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
 import { labDistVis } from "../../queries/labdistVis";
 import { loaEngineService } from "../../services/index";
@@ -44,6 +44,7 @@ export class SemiAutomationStore {
     public specForGraphicWalker: Specification = {};
     public showMiniFloatView: boolean = false;
     public neighborKeys: string[] = [];
+    public mainViewSpecSource: ISpecSourceType = 'default';
     public autoAsso!: {
         [key in IRenderViewKey]: boolean;
     };
@@ -62,6 +63,7 @@ export class SemiAutomationStore {
         });
     }
     public init () {
+        this.mainViewSpecSource = 'default';
         this.autoAsso = {
             pattViews: true,
             featViews: true,
@@ -126,6 +128,16 @@ export class SemiAutomationStore {
                 this.initRenderViews('neighborViews');
             }
         }))
+    }
+    public setMainViewSpecSource (sourceType: ISpecSourceType) {
+        this.mainViewSpecSource = sourceType;
+    }
+    public changeMainViewSpecSource () {
+        if (this.mainViewSpecSource === 'custom') {
+            this.mainViewSpecSource = 'default'
+        } else {
+            this.mainViewSpecSource = 'custom'
+        }
     }
     public clearStore () {
         this.reactions.forEach(clear => clear())
