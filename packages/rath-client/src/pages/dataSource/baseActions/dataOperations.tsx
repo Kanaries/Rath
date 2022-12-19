@@ -120,8 +120,8 @@ const DataOperations: React.FC = () => {
             },
             {
                 key: 'backup',
-                text: 'backup',
-                iconProps: { iconName: 'download' },
+                text: intl.get('dataSource.operations.backup'),
+                iconProps: { iconName: 'CloudUpload' },
                 onClick: () => {
                     commonStore.setShowBackupModal(true);
                 },

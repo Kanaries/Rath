@@ -217,7 +217,8 @@
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
                 "demo": "Demo",
-                "database": "Database"
+                "database": "Database",
+                "rath_notebook": "Notebook"
             },
             "demo": {
                 "available": "Available Datasets"
@@ -336,8 +337,22 @@
         "operations": {
             "title": "Operations",
             "selectAll": "Enable All Fields",
-            "disableAll": "Disable All Fields"
+            "disableAll": "Disable All Fields",
+            "backup": "Save to Cloud"
         }
+    },
+    "storage": {
+        "upload": "Save to Cloud",
+        "upload_desc": "Backup your Rath notebook.",
+        "components": {
+            "data": "Raw Data ({size} rows)",
+            "meta": "Meta Data ({size} fields)",
+            "collection": "Collection ({size} items)",
+            "causal": "Causal Model",
+            "dashboard": "Dashboard ({size} documents)"
+        },
+        "download": "Load",
+        "apply": "Upload"
     },
     "meta": {
         "title": "Meta Config",
@@ -572,6 +587,10 @@
             "userName": "Username",
             "password": "Password"
         }
+    },
+    "user": {
+        "organization": "Organization",
+        "workspace": "Workspace"
     },
     "messages": {
         "email": {

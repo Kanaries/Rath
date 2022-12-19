@@ -216,7 +216,8 @@
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
                 "demo": "示例数据",
-                "database": "数据库"
+                "database": "数据库",
+                "rath_notebook": "Notebook"
             },
             "load": "加载数据",
             "demo": {
@@ -336,8 +337,22 @@
         "operations": {
             "title": "快捷操作",
             "selectAll": "选择所有字段",
-            "disableAll": "禁用所有字段"
+            "disableAll": "禁用所有字段",
+            "backup": "保存到云"
         }
+    },
+    "storage": {
+        "upload": "保存到云",
+        "upload_desc": "备份你的 Rath notebook。",
+        "components": {
+            "data": "全量数据 ({size} 行)",
+            "meta": "元数据 ({size} 个字段)",
+            "collection": "收藏夹 ({size} 个项目)",
+            "causal": "因果模型",
+            "dashboard": "报表 ({size} 个文档)"
+        },
+        "download": "加载",
+        "apply": "上传"
     },
     "meta": {
         "title": "字段元信息配置",
@@ -582,6 +597,10 @@
             "userName": "用户名",
             "password": "密码"
         }
+    },
+    "user": {
+        "organization": "组织",
+        "workspace": "工作空间"
     },
     "messages": {
         "email": {

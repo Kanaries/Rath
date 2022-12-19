@@ -3,6 +3,7 @@ export type Aggregator = 'sum' | 'mean' | 'count';
 export type OperatorType = 'sum' | 'mean' | 'count';
 
 export enum IDataSourceType {
+    NOTEBOOK = 'rath_notebook',
     FILE = 'file',
     RESTFUL = 'restful',
     DATABASE = 'database',

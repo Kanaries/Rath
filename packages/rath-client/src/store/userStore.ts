@@ -44,6 +44,9 @@ export default class UserStore {
     public login!: ILoginForm;
     public signup!: ISignUpForm;
     public info: IUserInfo | null = null;
+    public get loggedIn() {
+        return this.info !== null;
+    }
     public get userName() {
         return this.info?.userName ?? null;
     }
@@ -125,7 +128,7 @@ export default class UserStore {
             notify({
                 title: 'Login error',
                 type: 'error',
-                content: `[/api/login] ${error}`,
+                content: `[/api/login] ${(error instanceof Error ? error.stack : null) ?? `${error}`}`,
             });
         }
     }
@@ -150,7 +153,7 @@ export default class UserStore {
             notify({
                 title: 'logout error',
                 type: 'error',
-                content: `[/api/logout] ${error}`,
+                content: `[/api/logout] ${(error instanceof Error ? error.stack : null) ?? `${error}`}`,
             });
         }
     }
@@ -164,7 +167,7 @@ export default class UserStore {
             notify({
                 title: '[/api/loginStatus]',
                 type: 'error',
-                content: `${error}`,
+                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
             });
             return false;
         }
@@ -185,11 +188,11 @@ export default class UserStore {
                     this.getOrganizations();
                 });
             }
-        } catch (error: any) {
+        } catch (error) {
             notify({
                 title: '[/api/ce/personal]',
                 type: 'error',
-                content: error.toString(),
+                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
             });
         }
     }
@@ -208,7 +211,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/organization/list]',
                 type: 'error',
-                content: `${error}`,
+                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
             });
         }
     }
@@ -231,7 +234,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/organization/workspace/list]',
                 type: 'error',
-                content: `${error}`,
+                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
             });
             return null;
         }
@@ -264,7 +267,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/notebook]',
                 type: 'error',
-                content: `${error}`,
+                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
             });
         }
     }

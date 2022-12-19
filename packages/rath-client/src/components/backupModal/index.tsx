@@ -1,10 +1,12 @@
-import { Checkbox, Dropdown, Modal, PrimaryButton, Stack } from '@fluentui/react';
+import intl from 'react-intl-universal';
+import { Checkbox, Dropdown, Modal, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import { getKRFParseMap, IKRFComponents, KRF_VERSION } from '../../utils/download';
+import { LoginPanel } from '../../pages/loginInfo/account';
 
 const Cont = styled.div`
     padding: 1em;
@@ -18,15 +20,20 @@ const Cont = styled.div`
     .modal-footer{
         margin-top: 1em;
     }
+    .login {
+        padding: 0.6em 1em 1em;
+    }
 `
 
-const BackupModal: React.FC = (props) => {
+const BackupModal: FC = (props) => {
     const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore, userStore } = useGlobalStore();
     const { showBackupModal } = commonStore;
+    const { info, loggedIn } = userStore;
     const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
     const mutFieldsLength = dataSourceStore.mutFields.length;
     const collectionLength = collectionStore.collectionList.length;
-    const [backupItemKeys, setBackupItemKeys] = React.useState<{
+    const [busy, setBusy] = useState(false);
+    const [backupItemKeys, setBackupItemKeys] = useState<{
         [key in IKRFComponents]: boolean;
     }>({
         [IKRFComponents.data]: rawDataLength > 0,
@@ -46,7 +53,7 @@ const BackupModal: React.FC = (props) => {
             mega: false
         })
     }, [rawDataLength, mutFieldsLength, collectionLength]);
-    const organizations = userStore.info?.organizations;
+    const organizations = info?.organizations;
     const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null);
     const workspaces = organizations?.find(org => org.id === selectedOrgId)?.workspaces;
     const [selectedWspId, setSelectedWspId] = useState<number | null>(null);
@@ -66,9 +73,10 @@ const BackupModal: React.FC = (props) => {
     }, [selectedOrgId, userStore]);
     // const storageItems =
     const backup = async () => {
-        if (!canBackup || selectedWspId === null) {
+        if (busy || !canBackup || selectedWspId === null) {
             return false;
         }
+        setBusy(true);
         const parseMapItems = getKRFParseMap(backupItemKeys);
         const zipFileWriter = new BlobWriter();
         const zipWriter = new ZipWriter(zipFileWriter);
@@ -124,31 +132,37 @@ const BackupModal: React.FC = (props) => {
         }
         const blob = await zipWriter.close();
         const file = new File([blob], 'rathds_backup.krf');
-        userStore.uploadWorkspace(selectedWspId, file);
+        await userStore.uploadWorkspace(selectedWspId ?? 0, file);
         // downloadFileFromBlob(blob, 'rathds_backup.krf');
+        setBusy(false);
     };
-    const items = [
+    const items: {
+        key: IKRFComponents;
+        text: string;
+        disabled?: boolean;
+    }[] = [
         {
             key: IKRFComponents.data,
-            text: `Raw Data (${rawDataLength} rows)`,
+            text: intl.get('storage.components.data', { size: rawDataLength }),
         },
         {
             key: IKRFComponents.meta,
-            text: `Meta Data (${mutFieldsLength} fields)`,
+            text: intl.get('storage.components.meta', { size: mutFieldsLength }),
         },
         {
             key: IKRFComponents.collection,
-            text: `Collection (${collectionLength} collections)`,
+            text: intl.get('storage.components.collection', { size: collectionLength }),
         },
         {
-            key: 'causal',
-            text: `Causal Model${causalStore.model.causality ? '' : ' (empty)'}`,
+            key: IKRFComponents.causal,
+            text: intl.get('storage.components.causal'),
+            disabled: !causalStore.model.causality,
         },
         {
-            key: 'dashboard',
-            text: `Dashboard (${dashboardStore.pages.length} documents)`,
+            key: IKRFComponents.dashboard,
+            text: intl.get('storage.components.dashboard', { size: dashboardStore.pages.length }),
         },
-    ]
+    ];
     return (
         <Modal
             isOpen={showBackupModal}
@@ -157,52 +171,67 @@ const BackupModal: React.FC = (props) => {
             containerClassName="modal-container"
         >
             <Cont>
-                <div className="modal-header">
-                    <h3>Backup</h3>
-                    <p className='state-description'>backup your rath notebook</p>
-                </div>
-                <Stack tokens={{ childrenGap: 10 }}>
-                    {items.map((item) => (
-                        <Stack.Item key={item.key}>
-                            <Checkbox
-                                label={item.text}
-                                checked={backupItemKeys[item.key as keyof typeof backupItemKeys]}
-                                onChange={(e, checked) => {
-                                    setBackupItemKeys({
-                                        ...backupItemKeys,
-                                        [item.key]: checked,
-                                    });
-                                }}
+                {loggedIn ? (
+                    <>
+                        <div className="modal-header">
+                            <h3>{intl.get('storage.upload')}</h3>
+                            <p className='state-description'>{intl.get('storage.upload_desc')}</p>
+                        </div>
+                        <Stack tokens={{ childrenGap: 10 }}>
+                            {items.map((item) => (
+                                <Stack.Item key={item.key}>
+                                    <Checkbox
+                                        label={item.text}
+                                        disabled={item.disabled}
+                                        checked={backupItemKeys[item.key as keyof typeof backupItemKeys]}
+                                        onChange={(e, checked) => {
+                                            setBackupItemKeys({
+                                                ...backupItemKeys,
+                                                [item.key]: checked,
+                                            });
+                                        }}
+                                    />
+                                </Stack.Item>
+                            ))}
+                        </Stack>
+                        <Stack style={{ margin: '0.6em 0' }}>
+                            <Dropdown
+                                label={intl.get('user.organization')}
+                                options={(organizations ?? []).map(org => ({
+                                    key: `${org.id}`,
+                                    text: org.name,
+                                }))}
+                                required
+                                selectedKey={`${selectedOrgId}`}
+                                onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
                             />
-                        </Stack.Item>
-                    ))}
-                </Stack>
-                <Stack style={{ margin: '0.6em 0' }}>
-                    <Dropdown
-                        label="Organization"
-                        options={(organizations ?? []).map(org => ({
-                            key: `${org.id}`,
-                            text: org.name,
-                        }))}
-                        required
-                        selectedKey={`${selectedOrgId}`}
-                        onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
-                    />
-                    <Dropdown
-                        label="Workspace"
-                        disabled={!Array.isArray(workspaces)}
-                        options={(workspaces ?? []).map(wsp => ({
-                            key: `${wsp.id}`,
-                            text: wsp.name,
-                        }))}
-                        required
-                        selectedKey={`${selectedWspId}`}
-                        onChange={(_, option) => option && setSelectedWspId(Number(option.key))}
-                    />
-                </Stack>
-                <div className="modal-footer">
-                    <PrimaryButton disabled={!canBackup} text="backup" onClick={backup} />
-                </div>
+                            <Dropdown
+                                label={intl.get('user.workspace')}
+                                disabled={!Array.isArray(workspaces)}
+                                options={(workspaces ?? []).map(wsp => ({
+                                    key: `${wsp.id}`,
+                                    text: wsp.name,
+                                }))}
+                                required
+                                selectedKey={`${selectedWspId}`}
+                                onChange={(_, option) => option && setSelectedWspId(Number(option.key))}
+                            />
+                        </Stack>
+                        <div className="modal-footer">
+                            <PrimaryButton disabled={!canBackup || busy} onClick={backup}>
+                                {busy && <Spinner style={{ transform: 'scale(0.8)', transformOrigin: '0 50%' }} />}
+                                {intl.get('storage.apply')}
+                            </PrimaryButton>
+                        </div>
+                    </>
+                ) : (
+                    <div className="login">
+                        <div className="modal-header">
+                            <h3>{intl.get('login.login')}</h3>
+                        </div>
+                        <LoginPanel />
+                    </div>
+                )}
             </Cont>
         </Modal>
     );
