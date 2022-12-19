@@ -11,6 +11,7 @@ import { CollectionStore } from './collectionStore'
 import DashboardStore from './dashboardStore';
 import CausalStore from './causalStore/mainStore';
 import UserStore from './userStore';
+import { EditorStore } from './editorStore';
 export interface StoreCollection {
     langStore: LangStore;
     dataSourceStore: DataSourceStore;
@@ -24,6 +25,7 @@ export interface StoreCollection {
     collectionStore: CollectionStore;
     dashboardStore: DashboardStore;
     causalStore: CausalStore;
+    editorStore: EditorStore;
 }
 
 const langStore = new LangStore();
@@ -38,6 +40,7 @@ const painterStore = new PainterStore(commonStore, dataSourceStore, semiAutoStor
 const collectionStore = new CollectionStore(dataSourceStore);
 const dashboardStore = new DashboardStore();
 const causalStore = new CausalStore(dataSourceStore);
+const editorStore = new EditorStore();
 
 const storeCol: StoreCollection = {
     commonStore,
@@ -52,6 +55,7 @@ const storeCol: StoreCollection = {
     collectionStore,
     dashboardStore,
     causalStore,
+    editorStore
 }
 
 const StoreContext = React.createContext<StoreCollection>(null!);

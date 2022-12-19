@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { observer } from 'mobx-react-lite'
-import { DefaultButton, Modal, PrimaryButton, Stack, TextField } from '@fluentui/react'
+import { observer } from 'mobx-react-lite';
+import { DefaultButton, Modal, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import dayjs from 'dayjs';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
@@ -9,47 +9,56 @@ import { setStorageByIdInLocal } from '../../../utils/storage';
 
 const Container = styled.div`
     padding: 1em;
-    .form-row{
+    .form-row {
         margin-bottom: 1em;
     }
     .form-button {
         margin-right: 1em;
     }
-`
+`;
 
-const SaveModal: React.FC = props => {
+const SaveModal: React.FC = (props) => {
     const { megaAutoStore, commonStore } = useGlobalStore();
-    const [name, setName] = useState<string>('')
+    const [name, setName] = useState<string>('');
     const { showSaveModal } = megaAutoStore;
 
     const saveInIndexDB = useCallback(() => {
-        megaAutoStore.getStorageContent()
-            .then(content => setStorageByIdInLocal(`[Rath_Storage]${dayjs().unix()}`, name === '' ? `[Rath_Storage]${dayjs().unix()}` : name, content))
-            .catch(err => {
+        megaAutoStore
+            .getStorageContent()
+            .then((content) =>
+                setStorageByIdInLocal(`[Rath_Storage]${dayjs().unix()}`, name === '' ? `[Rath_Storage]${dayjs().unix()}` : name, content)
+            )
+            .catch((err) => {
                 commonStore.showError('error', err);
-            })
-        megaAutoStore.setShowSaveModal(false)
-    }, [megaAutoStore, commonStore, name])
+            });
+        megaAutoStore.setShowSaveModal(false);
+    }, [megaAutoStore, commonStore, name]);
 
     const closeModal = useCallback(() => {
-        megaAutoStore.setShowSaveModal(false)
-    }, [megaAutoStore])
+        megaAutoStore.setShowSaveModal(false);
+    }, [megaAutoStore]);
 
-    return <Modal isOpen={showSaveModal} onDismiss={closeModal}>
-        <Container>
-            <h2>{intl.get('function.save.title')}</h2>
-            <div className="form-row">
-                <TextField placeholder="Name" label={intl.get('common.name')} value={name} onChange={(e, value) => {
-                    value && setName(value);
-                    }}
-                />
-            </div>
-            <Stack horizontal>
-                <PrimaryButton className="form-button" text={intl.get('function.confirm')} onClick={saveInIndexDB} />
-                <DefaultButton className="form-button" text={intl.get('function.cancel')} onClick={closeModal} />
-            </Stack>
-        </Container>
-    </Modal>
-}
+    return (
+        <Modal isOpen={showSaveModal} onDismiss={closeModal}>
+            <Container>
+                <h2>{intl.get('function.save.title')}</h2>
+                <div className="form-row">
+                    <TextField
+                        placeholder="Name"
+                        label={intl.get('common.name')}
+                        value={name}
+                        onChange={(e, value) => {
+                            value && setName(value);
+                        }}
+                    />
+                </div>
+                <Stack horizontal>
+                    <PrimaryButton className="form-button" text={intl.get('function.confirm')} onClick={saveInIndexDB} />
+                    <DefaultButton className="form-button" text={intl.get('function.cancel')} onClick={closeModal} />
+                </Stack>
+            </Container>
+        </Modal>
+    );
+};
 
 export default observer(SaveModal);

@@ -199,8 +199,14 @@ export interface IVegaSubset {
     }
 }
 
+export enum IVisSpecType {
+    vegaSubset = 'vegaSubset',
+    vegaLite = 'vegaLite',
+    vega = 'vega'
+}
 export interface IInsightVizView {
     viewId: string;
+    specType: IVisSpecType;
     spec: IVegaSubset;
     fields: IFieldMeta[];
     filters: IFilter[];
@@ -260,3 +266,5 @@ export interface IRawFeatures {
     missing: number;
     mismatch: number;
 }
+
+export type ISpecSourceType = 'default' | 'custom';

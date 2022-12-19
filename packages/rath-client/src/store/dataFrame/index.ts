@@ -31,11 +31,11 @@ export class Series<T> implements ISeries<T> {
         return this._data[this.indices[i]];
     }
     values(...args: [number|undefined, number|undefined] | [number[]] | []): ISeries<T> {
-        if(args.length == 1) {
+        if(args.length === 1) {
             let ind = args[0];
             return new Series<T>(this._data, ind.slice());
         }
-        else if(args.length == 2) {
+        else if(args.length === 2) {
             return new Series<T>(this._data, this.indices.slice(args[0], args[1]));
         }
         else return this;
@@ -62,15 +62,6 @@ export class DataFrame implements IDataFrame {
         }) as IRow;
     }
     rows(...args: [] | [number[]] | [number, number]): IRow[] {
-        if (args.length == 1) {
-
-        }
-        else if (args.length == 2) {
-
-        }
-        else {
-
-        }
         throw new Error("Method not implemented.");
     }
     columns(...args: [number, number] | [string[]] | [IFieldMeta[]]): { [key: string]: ISeries<any>; } {

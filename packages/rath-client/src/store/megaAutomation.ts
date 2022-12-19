@@ -2,7 +2,7 @@ import { IFieldEncode, IPattern } from '@kanaries/loa';
 import { computed, makeAutoObservable, observable, runInAction, toJS } from 'mobx';
 import { Specification, IInsightSpace, ISpec } from 'visual-insights';
 import { STORAGE_FILE_SUFFIX } from '../constants';
-import {  IResizeMode, IRow, ITaskTestMode, IVegaSubset, PreferencePanelConfig } from '../interfaces';
+import {  IResizeMode, IRow, ISpecSourceType, ITaskTestMode, IVegaSubset, PreferencePanelConfig } from '../interfaces';
 import { adviceVisSize } from '../pages/collection/utils';
 import { distVis } from '../queries/distVis';
 import { labDistVis } from '../queries/labdistVis';
@@ -40,18 +40,52 @@ export class MegaAutomationStore {
     public showPreferencePannel: boolean = false;
     public showSaveModal: boolean = false;
     public showSubinsights: boolean = false;
-    public visualConfig: PreferencePanelConfig;
+    public visualConfig!: PreferencePanelConfig;
     public mainViewSpec: IVegaSubset | null = null;
     public mainViewPattern: IPattern | null = null;
     public orderBy: string = EXPLORE_VIEW_ORDER.DEFAULT;
     public nlgThreshold: number = 0.2;
     public vizMode: 'lite' | 'strict' = 'strict';
-    public globalConstraints: {
+    public mainViewSpecSource: ISpecSourceType = 'default';
+    public globalConstraints!: {
         dimensions: Array<IConstranints>;
         measures: Array<IConstranints>
     }
     // public viewData: IRow[] = []
     constructor (ltsPipeLineStore: LTSPipeLine) {
+        this.ltsPipeLineStore = ltsPipeLineStore;
+        this.init();
+        makeAutoObservable(this, {
+            specForGraphicWalker: observable.ref,
+            details: observable.ref,
+            assoListT1: observable.ref,
+            assoListT2: observable.ref,
+            insightSpaces: computed,
+            mainViewSpec: observable.ref,
+            // @ts-expect-error private field
+            ltsPipeLineStore: false
+        });
+    }
+    public async clear () {
+        this.ltsPipeLineStore.clear();
+    }
+    public init () {
+        this.pageIndex = 0;
+        this.mainViewSpecSource = 'default';
+        this.specForGraphicWalker = undefined;
+        this.details = [];
+        this.assoListT1 = []
+        this.assoListT2= []
+        this.showAsso = false;
+        this.showConstraints = false;
+        this.showPreferencePannel = false;
+        this.showSaveModal = false;
+        this.showSubinsights = false;
+        this.mainViewSpec = null;
+        this.mainViewPattern = null;
+        this.orderBy = EXPLORE_VIEW_ORDER.DEFAULT;
+        this.nlgThreshold = 0.2;
+        this.vizMode = 'strict';
         this.visualConfig = {
             aggregator: "sum",
             defaultAggregated: false,
@@ -71,17 +105,7 @@ export class MegaAutomationStore {
             dimensions: [],
             measures: []
         }
-        makeAutoObservable(this, {
-            specForGraphicWalker: observable.ref,
-            details: observable.ref,
-            assoListT1: observable.ref,
-            assoListT2: observable.ref,
-            insightSpaces: computed,
-            mainViewSpec: observable.ref,
-            // @ts-expect-error private field
-            ltsPipeLineStore: false
-        });
-        this.ltsPipeLineStore = ltsPipeLineStore;
+        this.ltsPipeLineStore.init();
     }
     public get insightSpaces () {
         const cloneSpaces = [...this.ltsPipeLineStore.insightSpaces];
@@ -330,7 +354,18 @@ export class MegaAutomationStore {
             this.showAsso = false;
             this.assoListT1 = [];
             this.assoListT2 = [];
+            this.mainViewSpecSource = 'default';
             this.initVisualConfigResize();
+        }
+    }
+    public setMainViewSpecSource (sourceType: ISpecSourceType) {
+        this.mainViewSpecSource = sourceType;
+    }
+    public changeMainViewSpecSource () {
+        if (this.mainViewSpecSource === 'custom') {
+            this.mainViewSpecSource = 'default'
+        } else {
+            this.mainViewSpecSource = 'custom'
         }
     }
     public refreshMainView () {

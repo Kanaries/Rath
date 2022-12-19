@@ -56,8 +56,8 @@ export const useActionModes = function () {
                     text: intl.get('function.analysis.causal'),
                     onClick: () => {
                         commonStore.setAppKey(PIVOT_KEYS.causal);
-                    }
-                }
+                    },
+                },
             ],
         };
     }, [startMegaAutoAnalysis, onCheckResults, startSemiAutoAnalysis, commonStore]);

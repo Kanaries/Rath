@@ -1,8 +1,8 @@
 import { IFieldMeta, IFilter, IPattern } from '@kanaries/loa';
 import React from 'react';
 import styled from 'styled-components';
-import FieldPlaceholder from '../../../components/fieldPlaceholder';
-import FilterCreationPill from '../../../components/filterCreationPill';
+import FieldPlaceholder from '../../../components/fieldPill/fieldPlaceholder';
+import FilterCreationPill from '../../../components/fieldPill/filterCreationPill';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
 const Cont = styled.div`
     display: flex;

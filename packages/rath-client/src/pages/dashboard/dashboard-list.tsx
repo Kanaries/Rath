@@ -8,7 +8,6 @@ import type { DashboardDocument } from '../../store/dashboardStore';
 import DocumentPreview from './document-preview';
 import { EditableCell } from './dashboard-homepage';
 
-
 const TableContainer = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
@@ -50,7 +49,7 @@ const PreviewPopup = styled.div`
     filter: drop-shadow(0 1.6px 3.6px rgb(0 0 0 / 26%)) drop-shadow(0 0.3px 0.9px rgb(0 0 0 / 22%));
     ::after {
         position: absolute;
-        content: "";
+        content: '';
         top: 100%;
         left: 50%;
         transform: translate(-50%, -50%) rotate(45deg);
@@ -62,13 +61,21 @@ const PreviewPopup = styled.div`
     }
 `;
 
-const Row = observer(function Row ({
-    content, handleClick, handleMouseOn, handleMouseOut,
-}: { content: IDetailsRowProps; handleClick: () => void; handleMouseOn: (x: number, y: number) => void; handleMouseOut: () => void; }) {
+const Row = observer(function Row({
+    content,
+    handleClick,
+    handleMouseOn,
+    handleMouseOut,
+}: {
+    content: IDetailsRowProps;
+    handleClick: () => void;
+    handleMouseOn: (x: number, y: number) => void;
+    handleMouseOut: () => void;
+}) {
     return (
         <CustomRow
             onClick={handleClick}
-            onMouseEnter={e => {
+            onMouseEnter={(e) => {
                 const { y } = (e.target as HTMLDivElement).getBoundingClientRect();
                 handleMouseOn(e.clientX, y);
             }}
@@ -130,13 +137,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                 isSortedDescending: sortMode.direction === 'descending',
                 onRender(item) {
                     const { operators } = dashboardStore.fromPage(item['index']);
-                    return (
-                        <EditableCell
-                            value={item['name']}
-                            placeholder="(name)"
-                            onChange={operators.setName}
-                        />
-                    );
+                    return <EditableCell value={item['name']} placeholder="(name)" onChange={operators.setName} />;
                 },
             },
             {
@@ -147,13 +148,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                 isResizable: true,
                 onRender(item) {
                     const { operators } = dashboardStore.fromPage(item['index']);
-                    return (
-                        <EditableCell
-                            value={item['description']}
-                            placeholder="(description)"
-                            onChange={operators.setDesc}
-                        />
-                    );
+                    return <EditableCell value={item['description']} placeholder="(description)" onChange={operators.setDesc} />;
                 },
             },
             {
@@ -187,7 +182,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                 onRender(item) {
                     const { operators } = dashboardStore.fromPage(item['index']);
                     return (
-                        <ButtonGroup className="button-group" onClick={e => e.stopPropagation()}>
+                        <ButtonGroup className="button-group" onClick={(e) => e.stopPropagation()}>
                             <IconButton iconProps={{ iconName: 'Copy' }} onClick={operators.copy} />
                             <IconButton iconProps={{ iconName: 'Download' }} onClick={operators.download} />
                             <IconButton iconProps={{ iconName: 'Delete', style: { color: '#f21044' } }} onClick={operators.remove} />
@@ -218,21 +213,24 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
         });
     }, [items, sortMode]);
 
-    const toggleSort = useCallback((key: typeof sortMode.key) => {
-        if (['name', 'source', 'createTime', 'lastModifyTime'].includes(key)) {
-            if (key === sortMode.key) {
-                setSortMode({
-                    key,
-                    direction: sortMode.direction === 'ascending' ? 'descending' : 'ascending',
-                });
-            } else {
-                setSortMode({
-                    key,
-                    direction: sortMode.direction,
-                });
+    const toggleSort = useCallback(
+        (key: typeof sortMode.key) => {
+            if (['name', 'source', 'createTime', 'lastModifyTime'].includes(key)) {
+                if (key === sortMode.key) {
+                    setSortMode({
+                        key,
+                        direction: sortMode.direction === 'ascending' ? 'descending' : 'ascending',
+                    });
+                } else {
+                    setSortMode({
+                        key,
+                        direction: sortMode.direction,
+                    });
+                }
             }
-        }
-    }, [sortMode]);
+        },
+        [sortMode]
+    );
 
     const popupLayout = useMemo(() => {
         if (previewSource) {
@@ -241,7 +239,7 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
             return {
                 left: position[0],
                 top: position[1],
-            }
+            };
         }
         return {};
     }, [previewSource]);
@@ -254,17 +252,21 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                     columns={columns}
                     onColumnHeaderClick={(_, col) => col && toggleSort(col.key as typeof sortMode.key)}
                     selectionMode={SelectionMode.none}
-                    onRenderRow={props => props ? (
-                        <Row
-                            content={props}
-                            handleClick={() => openDocument((props.item as FlatDocumentInfo).index)}
-                            handleMouseOn={(x, y) => setPreviewSource({
-                                source: (props.item as FlatDocumentInfo).index,
-                                position: [x, y],
-                            })}
-                            handleMouseOut={() => setPreviewSource(null)}
-                        />
-                    ) : null}
+                    onRenderRow={(props) =>
+                        props ? (
+                            <Row
+                                content={props}
+                                handleClick={() => openDocument((props.item as FlatDocumentInfo).index)}
+                                handleMouseOn={(x, y) =>
+                                    setPreviewSource({
+                                        source: (props.item as FlatDocumentInfo).index,
+                                        position: [x, y],
+                                    })
+                                }
+                                handleMouseOut={() => setPreviewSource(null)}
+                            />
+                        ) : null
+                    }
                 />
             </TableContainer>
             <Layer>

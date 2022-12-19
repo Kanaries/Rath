@@ -2,7 +2,7 @@ import { Slider } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, useRef } from 'react';
 import styled from 'styled-components';
-import FilterCreationPill from '../../../../components/filterCreationPill';
+import FilterCreationPill from '../../../../components/fieldPill/filterCreationPill';
 import { useGlobalStore } from '../../../../store';
 import { FilterCell } from '../../filters';
 import { getI18n } from '../../locales';

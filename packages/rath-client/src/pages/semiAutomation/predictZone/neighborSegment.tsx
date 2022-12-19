@@ -7,6 +7,7 @@ import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
+import { IVisSpecType } from '../../../interfaces';
 
 const NeighborSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -44,10 +45,10 @@ const NeighborSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            iconProps={{ iconName: collectionStore.collectionContains(neighborViews.views[i].fields, spec, neighborViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            iconProps={{ iconName: collectionStore.collectionContains(neighborViews.views[i].fields, spec, IVisSpecType.vegaSubset, neighborViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.toggleCollectState(neighborViews.views[i].fields, spec, neighborViews.views[i].filters)
+                                collectionStore.toggleCollectState(neighborViews.views[i].fields, spec, IVisSpecType.vegaSubset, neighborViews.views[i].filters)
                             }}
                         />
                         <CommandButton

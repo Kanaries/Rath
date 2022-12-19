@@ -2,7 +2,7 @@ import { Dropdown, Label } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import FilterCreationPill from '../../../../components/filterCreationPill';
+import FilterCreationPill from '../../../../components/fieldPill/filterCreationPill';
 import type { IFilter } from '../../../../interfaces';
 import { getGlobalStore, useGlobalStore } from '../../../../store';
 import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
