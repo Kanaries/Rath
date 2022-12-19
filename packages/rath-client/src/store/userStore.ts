@@ -20,7 +20,7 @@ export interface IWorkspace {
 export interface IOrganization {
     readonly name: string;
     readonly id: number;
-    workspaces: readonly IWorkspace[] | null;
+    workspaces?: readonly IWorkspace[] | null | undefined;
 }
 
 interface ISignUpForm {
@@ -195,7 +195,9 @@ export default class UserStore {
         const url = getMainServiceAddress('/api/ce/organization/list');
         try {
             const result = await request.get<{}, { organization: readonly IOrganization[] }>(url);
-            this.info.organizations = result.organization;
+            runInAction(() => {
+                this.info!.organizations = result.organization;
+            });
         } catch (error) {
             notify({
                 title: '[/api/ce/organization/list]',
@@ -207,7 +209,7 @@ export default class UserStore {
 
     public async getWorkspaces(organizationId: number) {
         const which = this.info?.organizations?.find(org => org.id === organizationId);
-        if (!which || which.workspaces === null) {
+        if (!which || which.workspaces !== undefined) {
             return null;
         }
         const url = getMainServiceAddress('/api/ce/organization/workspace/list');
@@ -215,13 +217,17 @@ export default class UserStore {
             const result = await request.get<{ organizationId: number }, { workspaceList: IWorkspace[] }>(url, {
                 organizationId,
             });
-            which.workspaces = result.workspaceList;
+            runInAction(() => {
+                which.workspaces = result.workspaceList;
+            });
+            return result.workspaceList;
         } catch (error) {
             notify({
                 title: '[/api/ce/organization/workspace/list]',
                 type: 'error',
                 content: `${error}${error instanceof Error ? error.stack : ''}`,
             });
+            return null;
         }
     }
 

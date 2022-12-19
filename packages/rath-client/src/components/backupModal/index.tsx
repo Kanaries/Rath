@@ -8,6 +8,7 @@ import { getKRFParseMap, IKRFComponents, KRF_VERSION } from '../../utils/downloa
 
 const Cont = styled.div`
     padding: 1em;
+    width: 400px;
     .modal-header{
         h3{
             font-size: 1.5em;
@@ -49,19 +50,20 @@ const BackupModal: React.FC = (props) => {
     const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null);
     const workspaces = organizations?.find(org => org.id === selectedOrgId)?.workspaces;
     const [selectedWspId, setSelectedWspId] = useState<number | null>(null);
-    const canBackup = selectedWspId !== null;
+    const canBackup = selectedWspId !== null && Object.values(backupItemKeys).some(Boolean);
     useEffect(() => {
         setSelectedOrgId(null);
     }, [organizations]);
     useEffect(() => {
         setSelectedWspId(null);
         if (selectedOrgId !== null) {
-            userStore.getWorkspaces(selectedOrgId);
+            userStore.getWorkspaces(selectedOrgId).then(list => {
+                if (list) {
+                    setSelectedWspId(list[0]?.id ?? null);
+                }
+            });
         }
     }, [selectedOrgId, userStore]);
-    useEffect(() => {
-        setSelectedWspId(null);
-    }, [workspaces]);
     // const storageItems =
     const backup = async () => {
         if (!canBackup || selectedWspId === null) {
@@ -175,24 +177,29 @@ const BackupModal: React.FC = (props) => {
                         </Stack.Item>
                     ))}
                 </Stack>
-                <Dropdown
-                    options={(organizations ?? []).map(org => ({
-                        key: `${org.id}`,
-                        text: org.name,
-                    }))}
-                    selectedKey={`${selectedOrgId}`}
-                    onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
-                />
-                {(workspaces ?? []).length > 0 && (
+                <Stack style={{ margin: '0.6em 0' }}>
                     <Dropdown
-                        options={workspaces!.map(wsp => ({
+                        label="Organization"
+                        options={(organizations ?? []).map(org => ({
+                            key: `${org.id}`,
+                            text: org.name,
+                        }))}
+                        required
+                        selectedKey={`${selectedOrgId}`}
+                        onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
+                    />
+                    <Dropdown
+                        label="Workspace"
+                        disabled={!Array.isArray(workspaces)}
+                        options={(workspaces ?? []).map(wsp => ({
                             key: `${wsp.id}`,
                             text: wsp.name,
                         }))}
+                        required
                         selectedKey={`${selectedWspId}`}
                         onChange={(_, option) => option && setSelectedWspId(Number(option.key))}
                     />
-                )}
+                </Stack>
                 <div className="modal-footer">
                     <PrimaryButton disabled={!canBackup} text="backup" onClick={backup} />
                 </div>
