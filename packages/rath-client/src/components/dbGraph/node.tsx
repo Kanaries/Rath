@@ -1,6 +1,6 @@
 import { FC, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { DBBox } from ".";
+import { DBBox } from "./components";
 
 
 const PADDING = 6;

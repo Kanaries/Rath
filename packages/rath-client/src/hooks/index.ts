@@ -82,14 +82,14 @@ export function useCertMail(email: string) {
         sendCertMail(email)
             .then((res) => {
                 notify({
-                    title: '邮件发送成功',
+                    title: intl.get('messages.email.success.title'),
                     type: 'success',
-                    content: `邮箱已发送至${email}，请检查。`,
+                    content: intl.get('messages.email.success.content', { email }),
                 });
             })
             .catch((err) => {
                 notify({
-                    title: '发生错误',
+                    title: intl.get('messages.email.error.title'),
                     type: 'error',
                     content: `[/api/sendMailCert] ${err}`,
                 });
@@ -129,14 +129,14 @@ export function useCertPhone(phone: string) {
         sendCertPhone(phone)
             .then((res) => {
                 notify({
-                    title: '短信发送成功',
+                    title: intl.get('messages.phone.success.title'),
                     type: 'success',
-                    content: `短信已发送至${phone}，请检查。`,
+                    content: intl.get('messages.phone.success.content', { phone }),
                 });
             })
             .catch((err) => {
                 notify({
-                    title: '发生错误',
+                    title: intl.get('messages.phone.error.title'),
                     type: 'error',
                     content: `[/api/sendPhoneCert] ${err}`,
                 });

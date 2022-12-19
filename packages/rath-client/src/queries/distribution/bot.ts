@@ -1,18 +1,10 @@
 import { IRow, ISemanticType, IFieldEncode } from '@kanaries/loa';
 import { Statistics } from 'visual-insights';
 import { IFieldMeta, IVegaSubset } from '../../interfaces';
+import { isSetEqual } from '../../utils';
 
 const { groupBy } = Statistics;
 
-function isSetEqual(a1: any[], a2: any[]) {
-    const s1 = new Set(a1);
-    const s2 = new Set(a2);
-    if (s1.size !== s2.size) return false;
-    for (let ele of s1) {
-        if (!s2.has(ele)) return false;
-    }
-    return true;
-}
 export function autoMark(
     fields: IFieldMeta[],
     transedFields: IFieldMeta[] = [],

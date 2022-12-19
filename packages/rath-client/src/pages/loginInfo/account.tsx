@@ -93,7 +93,6 @@ function Account() {
                 <div>
                     <div className="account">
                         <span>
-                            <span className="label">Account</span>
                             {userName ? (
                                 <PrimaryButton
                                     className="ml-2"

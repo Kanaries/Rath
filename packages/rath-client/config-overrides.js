@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 // const path = require('path');
 // const { override, babelInclude } = require('customize-cra')
 
@@ -15,11 +15,15 @@ module.exports = function override(config, env) {
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
         }),
+        new MonacoWebpackPlugin({
+            // available options are documented at https://github.com/microsoft/monaco-editor/blob/main/webpack-plugin/README.md#options
+            languages: ['json', 'sql']
+        })
     );
     // do stuff with the webpack config...
     config.module.rules.push(
         {
-            test: /\.worker\.js$/,
+            test: /.*\/src\/.*\.worker\.js$/,
             use: {
                 loader: 'worker-loader',
                 options: {
@@ -29,7 +33,7 @@ module.exports = function override(config, env) {
             },
         },
         {
-            test: /\.worker\.ts$/,
+            test: /.*\/src\/.*\.worker\.ts$/,
             use: [
                 {
                     loader: 'worker-loader',

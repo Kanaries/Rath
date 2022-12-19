@@ -1,8 +1,8 @@
 import { PrimaryButton, Stack, TextField } from '@fluentui/react';
 import React, { useCallback, useState } from 'react';
-import ReactJson from 'react-json-view';
 import styled from 'styled-components'
 import intl from 'react-intl-universal'
+import MonacoEditor from 'react-monaco-editor';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
 import { logDataImport } from '../../../loggers/dataImport';
@@ -77,7 +77,8 @@ const RestFul: React.FC<RestFulProps> = props => {
             }} />
         </Stack>
         <PrimaryButton iconProps={{ iconName: 'CloudDownload' }} text={`${intl.get('dataSource.importData.restful.requestData')}`} className="inner-button" onClick={loadData} />
-        <ReactJson src={EXAMPLE_DATA} name={`${intl.get('dataSource.importData.restful.exampleDataStruct')}`} collapsed={2} displayObjectSize={false} />
+        <h1>{intl.get('dataSource.importData.restful.exampleDataStruct')}</h1>
+        <MonacoEditor width="600" height="300" language="json" theme="vs" value={JSON.stringify(EXAMPLE_DATA, null, 2)} />
     </Cont>
 }
 

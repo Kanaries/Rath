@@ -5,7 +5,6 @@ import { notify } from '../components/error';
 import { request } from '../utils/request';
 import { commitLoginService } from './fetch';
 
-
 export interface ILoginForm {
     userName: string;
     password: string;
@@ -158,7 +157,7 @@ export default class UserStore {
             notify({
                 title: '[/api/loginStatus]',
                 type: 'error',
-                content: `${error}${error instanceof Error ? error.stack : ''}`,
+                content: `${error}`,
             });
             return false;
         }
@@ -202,7 +201,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/organization/list]',
                 type: 'error',
-                content: `${error}${error instanceof Error ? error.stack : ''}`,
+                content: `${error}`,
             });
         }
     }
@@ -225,7 +224,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/organization/workspace/list]',
                 type: 'error',
-                content: `${error}${error instanceof Error ? error.stack : ''}`,
+                content: `${error}`,
             });
             return null;
         }
@@ -258,7 +257,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/notebook]',
                 type: 'error',
-                content: `${error}${error instanceof Error ? error.stack : ''}`,
+                content: `${error}`,
             });
         }
     }

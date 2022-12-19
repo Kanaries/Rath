@@ -6,7 +6,7 @@ import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IResizeMode } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { LoadingLayer } from '../../semiAutomation/components';
-import ResizeContainer from '../resizeContainer';
+import ResizeContainer from './resizeContainer';
 
 const MainCanvas: React.FC = () => {
     const { megaAutoStore, ltsPipeLineStore, commonStore } = useGlobalStore();
