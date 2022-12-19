@@ -18,6 +18,13 @@ function transformDataTypes (dataSource: IRow[], fields: IRawField[]): IRow[] {
                     record[field.fid] = String(row[field.fid])
                 }
             }
+            if (row[field.fid] === '') {
+                // beware that `Number('')` is `0`
+                if (['quantitative', 'ordinal'].includes(field.semanticType)) {
+                    record[field.fid] = null;
+                }
+                continue;
+            }
             if (field.semanticType === 'quantitative') {
                 record[field.fid] = Transform.transNumber(row[field.fid]);
             } else if (field.semanticType === 'ordinal' && !isNaN(Number(row[field.fid]))) {
