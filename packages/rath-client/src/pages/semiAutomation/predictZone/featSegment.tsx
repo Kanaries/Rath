@@ -7,6 +7,7 @@ import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
+import { IVisSpecType } from '../../../interfaces';
 
 const FeatSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -44,10 +45,10 @@ const FeatSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            iconProps={{ iconName: collectionStore.collectionContains(featViews.views[i].fields, spec, featViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            iconProps={{ iconName: collectionStore.collectionContains(featViews.views[i].fields, spec, IVisSpecType.vegaSubset, featViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.toggleCollectState(featViews.views[i].fields, spec, featViews.views[i].filters)
+                                collectionStore.toggleCollectState(featViews.views[i].fields, spec, IVisSpecType.vegaSubset, featViews.views[i].filters)
                             }}
                         />
                         <CommandButton

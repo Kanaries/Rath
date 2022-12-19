@@ -36,14 +36,14 @@ const DataOperations: React.FC = () => {
         downloadFileWithContent(content, 'dataset.csv');
     }, [dataSourceStore]);
     const exportDataAsRATHDS = useCallback(() => {
-        dataSourceStore.backupDataStore().then(data => {
+        dataSourceStore.backupDataStore().then((data) => {
             const content = JSON.stringify(data);
             downloadFileWithContent(content, 'dataset_rathds.json');
-        })
-        dataSourceStore.backupMetaStore().then(data => {
+        });
+        dataSourceStore.backupMetaStore().then((data) => {
             const content = JSON.stringify(data);
             downloadFileWithContent(content, 'dataset_rathds_meta.json');
-        })
+        });
     }, [dataSourceStore]);
 
     const cleanMethodListLang = useCleanMethodList();
@@ -87,8 +87,8 @@ const DataOperations: React.FC = () => {
                         {
                             key: 'downloadRATHDS',
                             text: intl.get('dataSource.downloadData.downloadRATHDS'),
-                            onClick: exportDataAsRATHDS
-                        }
+                            onClick: exportDataAsRATHDS,
+                        },
                     ],
                 },
                 disabled: mutFields.length === 0,
@@ -123,11 +123,21 @@ const DataOperations: React.FC = () => {
                 text: 'backup',
                 iconProps: { iconName: 'download' },
                 onClick: () => {
-                    commonStore.setShowBackupModal(true)
+                    commonStore.setShowBackupModal(true);
                 },
-            }
+            },
         ];
-    }, [cleanMethod, cleanMethodListLang, dataSourceStore, exportDataset, exportDataAsCSV, exportDataAsJson, mutFields.length, exportDataAsRATHDS, commonStore]);
+    }, [
+        cleanMethod,
+        cleanMethodListLang,
+        dataSourceStore,
+        exportDataset,
+        exportDataAsCSV,
+        exportDataAsJson,
+        mutFields.length,
+        exportDataAsRATHDS,
+        commonStore,
+    ]);
     return (
         <Cont>
             <LaTiaoConsole />

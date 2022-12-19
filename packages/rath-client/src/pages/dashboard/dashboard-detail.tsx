@@ -4,7 +4,6 @@ import { FC, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import DashboardDraft from './dashboard-draft';
 
-
 const PageLayout = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
@@ -70,13 +69,13 @@ const DashboardDetail: FC<DashboardDetailProps> = ({ cursor, goBack, ratio, samp
                 <ActionButton iconProps={{ iconName: mode === 'edit' ? 'AnalyticsView' : 'Edit' }} onClick={toggleMode} />
                 <Slider
                     label="Resize"
-                    min={Math.min(...Object.keys(viewScales).map(d => parseInt(d, 10)))}
-                    max={Math.max(...Object.keys(viewScales).map(d => parseInt(d, 10)))}
+                    min={Math.min(...Object.keys(viewScales).map((d) => parseInt(d, 10)))}
+                    max={Math.max(...Object.keys(viewScales).map((d) => parseInt(d, 10)))}
                     showValue
                     value={scaleIdx}
-                    onChange={idx => setScaleIdx(idx)}
+                    onChange={(idx) => setScaleIdx(idx)}
                     originFromZero
-                    valueFormat={val => `${viewScales[val as keyof typeof viewScales] ?? 1}`}
+                    valueFormat={(val) => `${viewScales[val as keyof typeof viewScales] ?? 1}`}
                     styles={{
                         root: {
                             display: 'inline-flex',

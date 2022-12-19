@@ -14,10 +14,10 @@ import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import produce from 'immer';
 import { IFilter } from '@kanaries/loa';
-import { IFieldMeta } from '../interfaces';
+import { IFieldMeta } from '../../interfaces';
+import SetSelection from '../fieldFilter/setSelection';
+import RangeSelection from '../fieldFilter/rangeSelection';
 import BasePillPlaceholder from './basePillPlaceholder';
-import SetSelection from './fieldFilter/setSelection';
-import RangeSelection from './fieldFilter/rangeSelection';
 
 function getFieldRange(field: IFieldMeta): [number, number] {
     let _min = field.features.min || 0;

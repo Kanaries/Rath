@@ -11,6 +11,7 @@
         "filter": "Filter",
         "preview": "Preview",
         "submit": "Submit",
+        "run": "执行",
         "semanticType": {
             "nominal": "nominal",
             "ordinal": "ordinal",
@@ -39,6 +40,11 @@
             "qt_25": "25th Percentile",
             "qt_75": "75th Percentile",
             "qt_50": "Median"
+        },
+        "search": {
+            "searchViews": "Search Views",
+            "searchFields": "Search fields / variables",
+            "notFound": "No results found"
         }
     },
     "menu": {
@@ -354,9 +360,12 @@
             "hint": "Associated Measures refers to keep the dimensions similar, find correlated measures. Associated Dimensions refers to keep the measures similar, find correlated dimensions."
         },
         "bring": "Customize Analysis",
+        "exitEditor": "Exit Editor",
         "commandBar": {
             "painting": "data painter",
             "editing": "edit chart",
+            "editInGW": "Customized Analysis",
+            "editInEditor": "Edit in Editor",
             "associate": "associate views",
             "constraints": "analysis constraints"
         },

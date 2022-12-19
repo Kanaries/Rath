@@ -38,9 +38,16 @@ export const LoadingLayer = styled.div`
 
 export const MainViewContainer = styled.div`
     .vis-container{
-        display: flex;
         margin: 6px 0px;
-        overflow-x: auto;
+        .vis{
+            overflow-x: auto;
+            flex-grow: 1;
+            flex-shink: 1;
+        }
+        .spec{
+
+        }
+        display: flex;
     }
     .fields-container{
         display: flex;

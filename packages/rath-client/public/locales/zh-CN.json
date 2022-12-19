@@ -11,6 +11,7 @@
         "filter": "筛选",
         "preview": "预览",
         "submit": "提交",
+        "run": "执行",
         "semanticType": {
             "nominal": "类别类型",
             "ordinal": "有序类型",
@@ -39,6 +40,11 @@
             "qt_25": "25%分位数",
             "qt_75": "75%分位数",
             "qt_50": "中位数"
+        },
+        "search": {
+            "searchViews": "搜索视图",
+            "searchFields": "搜索字段/变量",
+            "notFound": "未找到匹配结果"
         }
     },
     "menu": {
@@ -354,9 +360,12 @@
             "hint": "『关联度量』是指探索和当前图表中，度量/指标关联程度更高的图表，这可以帮你研究哪些指标的表现和当前关注的指标相近。『关联维度』是指探索和当前图表中，维度相关度更高的图表，这可以帮助你研究对于当前的度量下，相似维度对度量分布的划分差异。"
         },
         "bring": "自定义分析",
+        "exitEditor": "退出编辑",
         "commandBar": {
             "painting": "数据绘板",
             "editing": "编辑图表",
+            "editInGW": "自助分析",
+            "editInEditor": "在编辑器配置",
             "associate": "联想",
             "constraints": "分析约束"
         },
