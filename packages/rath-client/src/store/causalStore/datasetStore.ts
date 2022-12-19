@@ -6,6 +6,7 @@ import type { IFieldMeta, IFilter, ICol, IRow, IteratorStorageMetaInfo } from ".
 import { oneHot } from "../../pages/causal/submodule/whatIf/utils";
 import { filterDataService } from "../../services";
 import { IteratorStorage } from "../../utils/iteStorage";
+import { fromStream, StreamListener, toStream } from "../../utils/mobx-utils";
 import { focusedSample } from "../../utils/sample";
 import { baseDemoSample } from "../../utils/view-sample";
 import type { DataSourceStore } from "../dataSourceStore";
@@ -22,10 +23,12 @@ export default class CausalDatasetStore {
     public allFields: readonly IFieldMeta[] = [];
     public allSelectableFields: readonly { field: number; children: readonly number[] }[] = [];
 
-    protected fieldIndices$ = new Subject<readonly number[]>();
     protected fieldIndices: readonly number[] = [];
+    protected fieldsRef: StreamListener<readonly IFieldMeta[]>;
     /** All fields to analyze */
-    public fields: readonly IFieldMeta[] = [];
+    public get fields() {
+        return this.fieldsRef.current;
+    }
 
     public groups: readonly Readonly<{
         root: string;
@@ -33,7 +36,6 @@ export default class CausalDatasetStore {
         expanded: boolean;
     }>[] = [];
 
-    protected filters$ = new Subject<readonly IFilter[]>();
     public filters: readonly IFilter[] = [];
 
     public fullDataSize = 0;
@@ -56,8 +58,12 @@ export default class CausalDatasetStore {
      */
     public sample: IteratorStorage;
     public readonly sampleMetaInfo$: Observable<IteratorStorageMetaInfo>;
+    
+    protected visSampleRef: StreamListener<readonly IRow[]>;
     /** Rows used to render sub charts */
-    public visSample: readonly IRow[] = [];
+    public get visSample() {
+        return this.visSampleRef.current;
+    }
 
     public readonly destroy: () => void;
 
@@ -66,23 +72,25 @@ export default class CausalDatasetStore {
         this.sample = new IteratorStorage({ itemKey: 'causalStoreSample' });
 
         const originFields$ = new Subject<IFieldMeta[]>();
-        const allFields$ = new Subject<IFieldMeta[]>();
+        const allFields$ = toStream(() => this.allFields, true);
         const fields$ = new Subject<IFieldMeta[]>();
-        const fullDataChangedSignal$ = new Subject<1>();
-        const sampleRate$ = new Subject<number>();
+        const sampleRate$ = toStream(() => this.sampleRate, true);
+        const filters$ = toStream(() => this.filters, true);
+
+        this.fieldsRef = fromStream(fields$);
         
         makeAutoObservable(this, {
             allFields: observable.ref,
             allSelectableFields: observable.ref,
-            fields: observable.ref,
             filters: observable.ref,
             groups: observable.ref,
             // @ts-expect-error non-public field
             filteredData: false,
             sample: false,
             sampleMetaInfo$: false,
-            visSample: observable.ref,
-            fieldIndices: false,
+            visSampleRef: false,
+            fieldIndices: observable.ref,
+            fieldsRef: false,
             destroy: false,
         });
 
@@ -125,7 +133,7 @@ export default class CausalDatasetStore {
 
         const filteredDataMetaInfo$ = combineLatest({
             _: expandedFields$,
-            filters: this.filters$,
+            filters: filters$,
             fields: allFields$,
         }).pipe(
             map(({ filters }) => {
@@ -177,16 +185,16 @@ export default class CausalDatasetStore {
             switchAll(),
             share()
         );
+        this.visSampleRef = fromStream(visSample$);
 
         const mobxReactions = [
             reaction(() => dataSourceStore.datasetId, id => {
                 runInAction(() => {
                     this.datasetId = id;
+                    this.filters = [];
                 });
-                this.filters$.next([]);
             }),
             reaction(() => dataSourceStore.cleanedData, cleanedData => {
-                fullDataChangedSignal$.next(1);
                 runInAction(() => {
                     this.fullDataSize = cleanedData.length;
                 });
@@ -194,15 +202,18 @@ export default class CausalDatasetStore {
             reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
                 originFields$.next(fieldMetas);
             }),
-            reaction(() => this.sampleRate, sr => {
-                sampleRate$.next(sr);
+            // compute `fields`
+            reaction(() => this.fieldIndices, (fieldIndices) => {
+                fields$.next(fieldIndices.map(index => [
+                    this.allFields[this.allSelectableFields[index].field],
+                    ...this.allSelectableFields[index].children.map(i => this.allFields[i]),
+                ]).flat());
             }),
         ];
 
         const rxReactions = [
             // set fields
             expandedFields$.subscribe(([allFields, groups]) => {
-                allFields$.next(allFields);
                 const allSelectableFields: { field: number; children: number[] }[] = [];
                 for (let i = 0; i < allFields.length; i += 1) {
                     const field = allFields[i];
@@ -220,42 +231,11 @@ export default class CausalDatasetStore {
                     }
                 }
                 runInAction(() => {
+                    this.allFields = allFields;
                     this.groups = groups;
                     this.allSelectableFields = allSelectableFields;
-                });
-                // Choose the first 10 fields by default
-                this.fieldIndices$.next(allSelectableFields.slice(0, 10).map((_, i) => i));
-            }),
-            
-            // reset field selector
-            allFields$.subscribe(fields => {
-                runInAction(() => {
-                    this.allFields = fields;
-                });
-            }),
-
-            // compute `fields`
-            this.fieldIndices$.subscribe((fieldIndices) => {
-                runInAction(() => {
-                    this.fieldIndices = fieldIndices;
-                });
-                fields$.next(fieldIndices.map(index => [
-                    this.allFields[this.allSelectableFields[index].field],
-                    ...this.allSelectableFields[index].children.map(i => this.allFields[i]),
-                ]).flat());
-            }),
-
-            // bind `fields` with observer
-            fields$.subscribe(fields => {
-                runInAction(() => {
-                    this.fields = fields;
-                });
-            }),
-
-            // assign filters
-            this.filters$.subscribe(filters => {
-                runInAction(() => {
-                    this.filters = filters;
+                    // Choose the first 10 fields by default
+                    this.fieldIndices = allSelectableFields.slice(0, 10).map((_, i) => i);
                 });
             }),
 
@@ -273,20 +253,10 @@ export default class CausalDatasetStore {
                     getGlobalStore().causalStore.operator.updateDataSource();
                 });
             }),
-
-            // update `visSample`
-            visSample$.subscribe(data => {
-                runInAction(() => {
-                    this.visSample = data;
-                });
-            }),
         ];
 
         // initialize data
         this.datasetId = dataSourceStore.datasetId;
-        sampleRate$.next(this.sampleRate);
-        fullDataChangedSignal$.next(1);
-        this.filters$.next([]);
 
         this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());
@@ -295,17 +265,17 @@ export default class CausalDatasetStore {
     }
 
     public selectFields(indices: readonly number[]) {
-        this.fieldIndices$.next(indices);
+        this.fieldIndices = indices;
     }
 
     public appendFilter(filter: IFilter) {
-        this.filters$.next(this.filters.concat([filter]));
+        this.filters = this.filters.concat([filter]);
     }
 
     public removeFilter(index: number) {
-        this.filters$.next(produce(this.filters, draft => {
+        this.filters = produce(this.filters, draft => {
             draft.splice(index, 1);
-        }));
+        });
     }
 
     protected async __unsafeExpandFieldsWithOneHotEncoding(
@@ -377,7 +347,7 @@ export default class CausalDatasetStore {
         } else {
             next.splice(pos, 1);
         }
-        this.fieldIndices$.next(next);
+        this.fieldIndices = next;
     }
 
 }

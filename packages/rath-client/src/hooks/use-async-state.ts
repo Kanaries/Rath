@@ -22,11 +22,7 @@ const useAsyncState = <S>(fallback: S): [S, Dispatch<SetStateAction<S | Promise<
     const action = useCallback<Dispatch<SetStateAction<S | Promise<S>>>>((next) => {
         setState(fallbackRef.current);
         const nextState = typeof next === 'function' ? (next as ((prevState: S) => S))(stateRef.current) : next;
-        if (nextState instanceof Promise) {
-            asyncState$.next(nextState);
-        } else {
-            setState(nextState);
-        }
+        asyncState$.next(nextState instanceof Promise ? nextState : Promise.resolve(nextState));
     }, [asyncState$]);
 
     return [state, action];

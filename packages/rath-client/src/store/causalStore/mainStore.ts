@@ -6,7 +6,6 @@ import type { DataSourceStore } from "../dataSourceStore";
 import CausalDatasetStore from "./datasetStore";
 import CausalModelStore from "./modelStore";
 import CausalOperatorStore from "./operatorStore";
-// import { resolveCausality } from "./pag";
 import { discover, IDiscoverResult, IDiscoveryTask, ITask, ITaskRecord } from "./service";
 
 

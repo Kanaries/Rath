@@ -7,6 +7,7 @@ import type { LinkWeightSet, WeightedPagLink } from "../../pages/causal/config";
 import type { IReactiveGraphHandler } from "../../pages/causal/explorer/graph-helper";
 import type { GraphNodeAttributes } from "../../pages/causal/explorer/graph-utils";
 import type { IPredictResult, PredictAlgorithm } from "../../pages/causal/predict";
+import { toStream } from "../../utils/mobx-utils";
 import type CausalStore from "./mainStore";
 
 
@@ -145,7 +146,7 @@ class CausalViewStore {
         };
         this.predictCache = [];
 
-        const fields$ = new Subject<readonly IFieldMeta[]>();
+        const fields$ = toStream(() => causalStore.fields, true);
 
         makeAutoObservable(this, {
             onRenderNode: observable.ref,
@@ -160,10 +161,6 @@ class CausalViewStore {
         });
 
         const mobxReactions = [
-            reaction(() => causalStore.fields, fields => {
-                fields$.next(fields);
-                this.selectedFidArr$.next([]);
-            }),
             reaction(() => causalStore.model.mergedPag, () => {
                 this.selectedFidArr$.next([]);
             }),
@@ -228,8 +225,6 @@ class CausalViewStore {
                 });
             }),
         ];
-
-        fields$.next(causalStore.fields);
 
         this.destroy = () => {
             mobxReactions.forEach(dispose => dispose());
