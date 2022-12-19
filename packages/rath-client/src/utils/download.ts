@@ -28,7 +28,7 @@ export enum IKRFComponents {
     dashboard = 'dashboard',
     mega = 'mega',
 }
-interface IParseMapItem {
+export interface IParseMapItem {
     key: IKRFComponents;
     name: string;
     type?: string;

@@ -10,7 +10,7 @@ const Container = styled.div`
     > header {
         font-size: 1rem;
         font-weight: 500;
-        margin: 1em;
+        margin: 1em 0;
     }
     > div {
         display: flex;

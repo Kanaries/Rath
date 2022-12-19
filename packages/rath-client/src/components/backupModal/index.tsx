@@ -64,11 +64,7 @@ const BackupModal: FC = (props) => {
     useEffect(() => {
         setSelectedWspId(null);
         if (selectedOrgId !== null) {
-            userStore.getWorkspaces(selectedOrgId).then(list => {
-                if (list) {
-                    setSelectedWspId(list[0]?.id ?? null);
-                }
-            });
+            userStore.getWorkspaces(selectedOrgId);
         }
     }, [selectedOrgId, userStore]);
     // const storageItems =
@@ -100,9 +96,10 @@ const BackupModal: FC = (props) => {
                     break;
                 }
                 case IKRFComponents.mega: {
-                    const data = await dataSourceStore.backupMetaStore()
-                    const content = new TextReader(JSON.stringify(data));
-                    await zipWriter.add(item.name, content);
+                    // FIXME: ? save from mega auto store
+                    // const data = await dataSourceStore.backupMetaStore()
+                    // const content = new TextReader(JSON.stringify(data));
+                    // await zipWriter.add(item.name, content);
                     break;
                 }
                 case IKRFComponents.collection: {
@@ -132,7 +129,7 @@ const BackupModal: FC = (props) => {
         }
         const blob = await zipWriter.close();
         const file = new File([blob], 'rathds_backup.krf');
-        await userStore.uploadWorkspace(selectedWspId ?? 0, file);
+        await userStore.uploadNotebook(selectedWspId ?? 0, file);
         // downloadFileFromBlob(blob, 'rathds_backup.krf');
         setBusy(false);
     };

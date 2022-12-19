@@ -1,9 +1,12 @@
-import { makeAutoObservable, observable, runInAction } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
+import { TextWriter, ZipReader } from "@zip.js/zip.js";
 import { IAccessPageKeys } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
+import { IKRFComponents, IParseMapItem } from '../utils/download';
 import { commitLoginService } from './fetch';
+import { getGlobalStore } from '.';
 
 export interface ILoginForm {
     userName: string;
@@ -11,9 +14,18 @@ export interface ILoginForm {
     email: string;
 }
 
+export interface INotebook {
+    readonly id: number;
+    readonly name: string;
+    readonly size: number;
+    readonly createAt: number;
+    readonly downLoadURL: string;
+}
+
 export interface IWorkspace {
     readonly id: number;
     readonly name: string;
+    notebooks?: readonly INotebook[] | null | undefined;
 }
 
 export interface IOrganization {
@@ -52,9 +64,7 @@ export default class UserStore {
     }
     constructor() {
         this.init()
-        makeAutoObservable(this, {
-            info: observable.shallow,
-        });
+        makeAutoObservable(this);
     }
     public init() {
         this.login = {
@@ -223,7 +233,7 @@ export default class UserStore {
         }
         const url = getMainServiceAddress('/api/ce/organization/workspace/list');
         try {
-            const result = await request.get<{ organizationId: number }, { workspaceList: IWorkspace[] }>(url, {
+            const result = await request.get<{ organizationId: number }, { workspaceList: Exclude<IWorkspace, 'notebooks'>[] }>(url, {
                 organizationId,
             });
             runInAction(() => {
@@ -240,7 +250,31 @@ export default class UserStore {
         }
     }
 
-    public async uploadWorkspace(workspaceId: number, file: File) {
+    public async getNotebooks(organizationId: number, workspaceId: number) {
+        const which = this.info?.organizations?.find(org => org.id === organizationId)?.workspaces?.find(wsp => wsp.id === workspaceId);
+        if (!which || which.notebooks !== undefined) {
+            return null;
+        }
+        const url = getMainServiceAddress('/api/ce/notebook/list');
+        try {
+            const result = await request.get<{ organizationId: number }, { notebookList: INotebook[] }>(url, {
+                organizationId,
+            });
+            runInAction(() => {
+                which.notebooks = result.notebookList;
+            });
+            return result.notebookList;
+        } catch (error) {
+            notify({
+                title: '[/api/ce/notebook/list]',
+                type: 'error',
+                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public async uploadNotebook(workspaceId: number, file: File) {
         const url = getMainServiceAddress('/api/ce/notebook');
         try {
             const { uploadUrl, id } = (await (await fetch(url, {
@@ -266,6 +300,87 @@ export default class UserStore {
         } catch (error) {
             notify({
                 title: '[/api/ce/notebook]',
+                type: 'error',
+                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+            });
+        }
+    }
+
+    public async openNotebook(notebook: INotebook) {
+        try {
+            const data = await fetch(notebook.downLoadURL, { method: 'GET' });
+            if (!data.body) {
+                throw new Error('Request got empty body');
+            }
+            const zipReader = new ZipReader(data.body);
+            const result = await zipReader.getEntries();
+            const manifestFile = result.find((entry) => {
+                return entry.filename === "parse_map.json";
+            });
+            if (!manifestFile) {
+                throw new Error('Cannot find parse_map.json')
+            }
+            const writer = new TextWriter();
+            const manifest = JSON.parse(await manifestFile.getData(writer)) as {
+                items: IParseMapItem[];
+                version: string;
+            };
+            const { dataSourceStore, causalStore, dashboardStore } = getGlobalStore();
+            for await (const { name, type } of manifest.items) {
+                const entry = result.find(which => which.filename === name);
+                if (!entry || !type || type === IKRFComponents.meta) {
+                    continue;
+                }
+                const w = new TextWriter();
+                try {
+                    const res = await entry.getData(w);
+                    // TODO: load backup
+                    switch (type) {
+                        case IKRFComponents.data: {
+                            const metaFile = manifest.items.find(item => item.type === IKRFComponents.meta);
+                            if (!metaFile) {
+                                break;
+                            }
+                            const meta = result.find(which => which.filename === metaFile.name);
+                            if (!meta) {
+                                break;
+                            }
+                            const wm = new TextWriter();
+                            const rm = await meta.getData(wm);
+                            await dataSourceStore.loadBackupDataStore(JSON.parse(res), JSON.parse(rm));
+                            break;
+                        }
+                        case IKRFComponents.mega: {
+                            // TODO: load to megaAutoStore
+                            break;
+                        }
+                        case IKRFComponents.collection: {
+                            // TODO: load to collectionStore
+                            break;
+                        }
+                        case IKRFComponents.causal: {
+                            causalStore.load(JSON.parse(res));
+                            break;
+                        }
+                        case IKRFComponents.dashboard: {
+                            dashboardStore.loadAll(JSON.parse(res));
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    notify({
+                        title: '[load notebook]',
+                        type: 'error',
+                        content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+                    });
+                }
+            }
+        } catch (error) {
+            notify({
+                title: '[download notebook]',
                 type: 'error',
                 content: (error instanceof Error ? error.stack : null) ?? `${error}`,
             });

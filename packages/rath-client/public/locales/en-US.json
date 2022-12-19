@@ -352,6 +352,8 @@
             "dashboard": "Dashboard ({size} documents)"
         },
         "download": "Load",
+        "createdAt": "Created At",
+        "size": "Size",
         "apply": "Upload"
     },
     "meta": {
