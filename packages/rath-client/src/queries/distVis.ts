@@ -7,13 +7,6 @@ import { autoScale } from './base/scale';
 import { applyZeroScale, encodingDecorate, splitFieldsByEnocdes } from "./base/utils";
 import { autoMark, autoStat, encode, humanHabbit, VizEncoder } from './distribution/bot';
 import { applyDefaultSort, applyInteractiveParams2DistViz, applySizeConfig2DistViz } from "./distribution/utils";
-export const geomTypeMap: { [key: string]: any } = {
-    interval: "boxplot",
-    line: "line",
-    point: "point",
-    // density: 'rect'
-    density: "point"
-};
 
 interface BaseVisProps {
     // dataSource: DataSource;

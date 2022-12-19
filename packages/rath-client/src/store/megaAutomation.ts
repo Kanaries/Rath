@@ -173,6 +173,9 @@ export class MegaAutomationStore {
     public setVisualConig (updater: (config: PreferencePanelConfig) => void) {
         runInAction(() => {
             updater(this.visualConfig)
+            if (this.mainViewPattern) {
+                this.createMainViewSpec(this.mainViewPattern);
+            }
         });
     }
     public setShowSubinsights (show: boolean) {

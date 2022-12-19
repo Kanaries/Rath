@@ -10,6 +10,7 @@
         "expand": "Expand",
         "filter": "Filter",
         "preview": "Preview",
+        "submit": "Submit",
         "semanticType": {
             "nominal": "nominal",
             "ordinal": "ordinal",
@@ -20,6 +21,7 @@
             "dimension": "dimension",
             "measure": "measure"
         },
+        "vistheme": "Visualization Theme",
         "addVar": "Add Variable",
         "addFilter": "Add Filter",
         "addEncode": "Add Computation",
@@ -503,6 +505,16 @@
         "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     },
     "login": {
+        "configKeys": {
+            "basic": "Basic",
+            "design": "Design",
+            "analysis": "Data Analysis"
+        },
+        "design": {
+            "createCustomTheme": "Create Custom Theme",
+            "syncFromSelectedTheme": "Sync From Selected Theme",
+            "useCustomTheme": "Use Custom Theme"
+        },
         "clickLogin": "Login",
         "haveSent": "Already Sent",
         "signIn": "Sign In",
@@ -532,6 +544,26 @@
         "password": {
             "userName": "Username",
             "password": "Password"
+        }
+    },
+    "messages": {
+        "email": {
+            "success": {
+                "title": "Email sent successfully",
+                "content": "Email has been sent to {email}  Please check your email to get the verification code."
+            },
+            "error": {
+                "title": "Email sent failed"
+            }
+        },
+        "phone": {
+            "success": {
+                "title": "SMS sent successfully",
+                "content": "SMS has been sent to {phone}  Please check your phone to get the verification code."
+            },
+            "error": {
+                "title": "SMS sent failed"
+            }
         }
     }
 }

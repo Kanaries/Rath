@@ -34,5 +34,5 @@ init_db()
 
 if __name__ == '__main__':
     # init_db()
-    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app)
+    server = pywsgi.WSGIServer(('0.0.0.0', 5001), app)
     server.serve_forever()
