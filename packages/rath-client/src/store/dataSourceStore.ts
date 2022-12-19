@@ -107,7 +107,7 @@ export class DataSourceStore {
         });
         this.initStore();
     }
-    public destroy() {
+    public clear() {
         this.subscriptions.forEach(s => s.unsubscribe());
         this.subscriptions = [];
         this.reactions.forEach(dispose => dispose());

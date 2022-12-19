@@ -1,13 +1,17 @@
-import { ActionButton, ChoiceGroup, DefaultButton, IChoiceGroupOption, Pivot, PivotItem, Stack, Text, TextField } from "@fluentui/react";
-import { observer } from "mobx-react-lite";
-import { FC, useCallback, useState } from "react";
-import styled from "styled-components";
-import { DashboardCardAppearance/*, DashboardCardInsetLayout*/, DashboardCardState, DashboardDocument, DashboardDocumentOperators } from "../../store/dashboardStore";
-import { useGlobalStore } from "../../store";
-import SourcePanel from "./source-panel";
+import { ActionButton, ChoiceGroup, DefaultButton, IChoiceGroupOption, Pivot, PivotItem, Stack, Text, TextField } from '@fluentui/react';
+import { observer } from 'mobx-react-lite';
+import { FC, useCallback, useState } from 'react';
+import styled from 'styled-components';
+import {
+    DashboardCardAppearance,
+    DashboardCardState,
+    DashboardDocument,
+    DashboardDocumentOperators,
+} from '../../store/dashboardStore';
+import { useGlobalStore } from '../../store';
+import SourcePanel from './source-panel';
 import FilterList from './filter-list';
-import EditPanel from "./edit-panel";
-
+import EditPanel from './edit-panel';
 
 const Panel = styled.div`
     position: relative;
@@ -18,12 +22,11 @@ const Panel = styled.div`
     margin-block: 10px;
     padding: 1em;
     overflow: auto;
-    box-shadow:
-        -9px 1.6px 6.4px 0 rgb(0 0 0 / 1.5%), -1px 0.7px 0.9px 0 rgb(0 0 0 / 5%),
-        -9px -1.6px 6.4px 0 rgb(0 0 0 / 1.5%), -1px -0.7px 0.9px 0 rgb(0 0 0 / 5%);
+    box-shadow: -9px 1.6px 6.4px 0 rgb(0 0 0 / 1.5%), -1px 0.7px 0.9px 0 rgb(0 0 0 / 5%), -9px -1.6px 6.4px 0 rgb(0 0 0 / 1.5%),
+        -1px -0.7px 0.9px 0 rgb(0 0 0 / 5%);
     z-index: 100;
 
-    & *[role=tabpanel] {
+    & *[role='tabpanel'] {
         flex-grow: 1;
         flex-shrink: 1;
         margin-top: 1em;
@@ -52,7 +55,7 @@ export interface DashboardPanelProps {
     sampleSize: number;
 }
 
-const SupportedTabs = ['collection', 'editor'/*, 'loa' */] as const;
+const SupportedTabs = ['collection', 'editor' /*, 'loa' */] as const;
 
 const CardThemes: readonly DashboardCardAppearance[] = [
     DashboardCardAppearance.Transparent,
@@ -77,32 +80,36 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
     const { dashboardStore } = useGlobalStore();
     const [tab, setTab] = useState<typeof SupportedTabs[number]>('collection');
 
-    const themeOptions = useCallback((mode: 'single' | 'global') => CardThemes.map<IChoiceGroupOption>(thm => ({
-        key: thm,
-        text: thm,
-        onRenderField: (option, origin) => {
-            const applyToAll = () => {
-                const key = option?.key ?? '';
-                if ((CardThemes as string[]).includes(key)) {
-                    dashboardStore.runInAction(() => {
-                        page.cards.forEach(c => c.config.appearance = key as DashboardCardAppearance);
-                    });
-                }
-            };
-            return option ? mode === 'single' ? (
-                <OptionContainer>
-                    {origin?.(option)}
-                    <ActionButton onClick={applyToAll}>
-                        Apply to all
-                    </ActionButton>
-                </OptionContainer>
-            ) : (
-                <ActionButton onClick={applyToAll} style={{ height: 'unset' }}>
-                    {option.text}
-                </ActionButton>
-            ) : null;
-        },
-    })), [page, dashboardStore]);
+    const themeOptions = useCallback(
+        (mode: 'single' | 'global') =>
+            CardThemes.map<IChoiceGroupOption>((thm) => ({
+                key: thm,
+                text: thm,
+                onRenderField: (option, origin) => {
+                    const applyToAll = () => {
+                        const key = option?.key ?? '';
+                        if ((CardThemes as string[]).includes(key)) {
+                            dashboardStore.runInAction(() => {
+                                page.cards.forEach((c) => (c.config.appearance = key as DashboardCardAppearance));
+                            });
+                        }
+                    };
+                    return option ? (
+                        mode === 'single' ? (
+                            <OptionContainer>
+                                {origin?.(option)}
+                                <ActionButton onClick={applyToAll}>Apply to all</ActionButton>
+                            </OptionContainer>
+                        ) : (
+                            <ActionButton onClick={applyToAll} style={{ height: 'unset' }}>
+                                {option.text}
+                            </ActionButton>
+                        )
+                    ) : null;
+                },
+            })),
+        [page, dashboardStore]
+    );
 
     // Temporarily use column layout only
     // const layoutOptions = useCallback((mode: 'single' | 'global') => CardAlignTypes.map<IChoiceGroupOption>(alg => ({
@@ -137,7 +144,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
     // })), [page, dashboardStore]);
 
     return (
-        <Panel onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+        <Panel onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
             <Stack>
                 {card ? (
                     <>
@@ -147,16 +154,20 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                         <TextField
                             label="Title"
                             value={card.content.title ?? ''}
-                            onChange={(_, d) => dashboardStore.runInAction(() => {
-                                card.content.title = d || undefined;
-                            })}
+                            onChange={(_, d) =>
+                                dashboardStore.runInAction(() => {
+                                    card.content.title = d || undefined;
+                                })
+                            }
                         />
                         <TextField
                             label="Description"
                             value={card.content.text ?? ''}
-                            onChange={(_, d) => dashboardStore.runInAction(() => {
-                                card.content.text = d || undefined;
-                            })}
+                            onChange={(_, d) =>
+                                dashboardStore.runInAction(() => {
+                                    card.content.text = d || undefined;
+                                })
+                            }
                             multiline
                             autoAdjustHeight
                             resizable={false}
@@ -165,12 +176,14 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                             label="Theme"
                             selectedKey={card.config.appearance}
                             options={themeOptions('single')}
-                            onChange={(_, option) => dashboardStore.runInAction(() => {
-                                const key = option?.key ?? '';
-                                if ((CardThemes as string[]).includes(key)) {
-                                    card.config.appearance = key as DashboardCardAppearance;
-                                }
-                            })}
+                            onChange={(_, option) =>
+                                dashboardStore.runInAction(() => {
+                                    const key = option?.key ?? '';
+                                    if ((CardThemes as string[]).includes(key)) {
+                                        card.config.appearance = key as DashboardCardAppearance;
+                                    }
+                                })
+                            }
                         />
                         {/* <ChoiceGroup
                             label="Layout"
@@ -192,9 +205,11 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                         </Text>
                         <DefaultButton
                             iconProps={{ iconName: 'Delete' }}
-                            onClick={() => dashboardStore.runInAction(() => {
-                                card.content.chart = undefined;
-                            })}
+                            onClick={() =>
+                                dashboardStore.runInAction(() => {
+                                    card.content.chart = undefined;
+                                })
+                            }
                         />
                         <Pivot
                             selectedKey={tab}
@@ -202,17 +217,21 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                                 item && setTab(item.props.itemKey as typeof tab);
                             }}
                         >
-                            {SupportedTabs.map(key => (
+                            {SupportedTabs.map((key) => (
                                 <PivotItem key={key} itemKey={key} headerText={key} />
                             ))}
                         </Pivot>
                         <div role="tabpanel">
-                            {({
-                                collection: <SourcePanel page={page} card={card} operators={operators} sampleSize={sampleSize} />,
-                                editor: <EditPanel page={page} card={card} operators={operators} sampleSize={sampleSize} />,
-                                loa: null,      // TODO: [fix] LOA panel
-                                // kyusho, 4 weeks ago   (November 3rd, 2022 3:15 PM
-                            } as const)[tab]}
+                            {
+                                (
+                                    {
+                                        collection: <SourcePanel page={page} card={card} operators={operators} sampleSize={sampleSize} />,
+                                        editor: <EditPanel page={page} card={card} operators={operators} sampleSize={sampleSize} />,
+                                        loa: null, // TODO: [fix] LOA panel
+                                        // kyusho, 4 weeks ago   (November 3rd, 2022 3:15 PM
+                                    } as const
+                                )[tab]
+                            }
                         </div>
                     </>
                 ) : (
@@ -220,10 +239,7 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
                         <Text block variant="xLarge" style={{ margin: '0 0 0.5em' }}>
                             Global
                         </Text>
-                        <ChoiceGroup
-                            label="Theme"
-                            options={themeOptions('global')}
-                        />
+                        <ChoiceGroup label="Theme" options={themeOptions('global')} />
                         {/* <ChoiceGroup
                             label="Layout"
                             options={layoutOptions('global')}
@@ -238,6 +254,5 @@ const DashboardPanel: FC<DashboardPanelProps> = ({ page, card, operators, sample
         </Panel>
     );
 };
-
 
 export default observer(DashboardPanel);

@@ -6,7 +6,6 @@ import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
 
-
 const Cont = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
@@ -32,7 +31,7 @@ const Cont = styled.div`
 
 const Empty: React.FC = () => {
     const { commonStore } = useGlobalStore();
-    
+
     return (
         <Cont>
             <header className="header">空的收藏夹</header>

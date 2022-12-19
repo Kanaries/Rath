@@ -1,14 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import intl from 'react-intl-universal';
-import {
-    PrimaryButton,
-    Stack,
-    DefaultButton,
-    Pivot,
-    PivotItem,
-    MessageBar,
-    Spinner,
-} from '@fluentui/react';
+import { PrimaryButton, Stack, DefaultButton, Pivot, PivotItem, MessageBar, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
@@ -33,15 +25,8 @@ interface DataSourceBoardProps {}
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     const { dataSourceStore, commonStore } = useGlobalStore();
 
-    const {
-        cleanedData,
-        rawDataMetaInfo,
-        filteredDataMetaInfo,
-        loading,
-        showDataImportSelection,
-        dataPreviewMode,
-        dataPrepProgressTag,
-    } = dataSourceStore;
+    const { cleanedData, rawDataMetaInfo, filteredDataMetaInfo, loading, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } =
+        dataSourceStore;
     useEffect(() => {
         // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
         if (rawDataMetaInfo.length === 0) {
@@ -126,7 +111,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         }}
                     /> */}
 
-                    { dataPrepProgressTag !== IDataPrepProgressTag.none && <Spinner style={MARGIN_LEFT} label={dataPrepProgressTag} ariaLive="assertive" labelPosition="right" /> }
+                    {dataPrepProgressTag !== IDataPrepProgressTag.none && (
+                        <Spinner style={MARGIN_LEFT} label={dataPrepProgressTag} ariaLive="assertive" labelPosition="right" />
+                    )}
 
                     <Selection
                         show={showDataImportSelection}
@@ -139,7 +126,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
                 </Stack>
-                <hr style={{ margin: '1em 0em 0em 0em'}} />
+                <hr style={{ margin: '1em 0em 0em 0em' }} />
                 <Pivot
                     style={{ marginBottom: '6px' }}
                     selectedKey={dataPreviewMode}
@@ -147,21 +134,9 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         item && dataSourceStore.setDataPreviewMode(item.props.itemKey as IDataPreviewMode);
                     }}
                 >
-                    <PivotItem
-                        itemKey={IDataPreviewMode.data}
-                        headerText={intl.get('dataSource.dataView')}
-                        itemIcon="Table"
-                    />
-                    <PivotItem
-                        itemKey={IDataPreviewMode.meta}
-                        headerText={intl.get('dataSource.metaView')}
-                        itemIcon="ViewList"
-                    />
-                    <PivotItem
-                        itemKey={IDataPreviewMode.stat}
-                        headerText={intl.get('dataSource.statView')}
-                        itemIcon="BarChartVerticalFilter"
-                    />
+                    <PivotItem itemKey={IDataPreviewMode.data} headerText={intl.get('dataSource.dataView')} itemIcon="Table" />
+                    <PivotItem itemKey={IDataPreviewMode.meta} headerText={intl.get('dataSource.metaView')} itemIcon="ViewList" />
+                    <PivotItem itemKey={IDataPreviewMode.stat} headerText={intl.get('dataSource.statView')} itemIcon="BarChartVerticalFilter" />
                 </Pivot>
                 <BorderCard>
                     {rawDataMetaInfo.length > 0 && <DataOperations />}

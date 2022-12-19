@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import type { DashboardDocument } from '../../store/dashboardStore';
 import DashboardRenderer from './renderer';
 
-
 const Container = styled.div`
     width: 100%;
     overflow: hidden auto;
@@ -26,7 +25,8 @@ const Preview = styled.div`
     width: 260px;
     display: flex;
     flex-direction: column;
-    > header, > span {
+    > header,
+    > span {
         flex-grow: 0;
         flex-shrink: 0;
         width: 100%;
@@ -61,7 +61,7 @@ const DashboardGallery: FC<DashboardGalleryProps> = ({ openDocument, pages }) =>
                     <DashboardRenderer
                         page={page}
                         renderRatio={PREVIEW_WIDTH / page.config.size.w}
-                        dataLimit={2**9 / pages.length}
+                        dataLimit={2 ** 9 / pages.length}
                         style={{
                             margin: '8px 0 0',
                         }}

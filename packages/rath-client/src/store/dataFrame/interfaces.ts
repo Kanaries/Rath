@@ -1,4 +1,4 @@
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions } from "../../interfaces"
+import { IFieldMeta, IRow } from "../../interfaces"
 
 export interface ISeries<T> extends ArrayLike<T> {
     indices: Array<number>;

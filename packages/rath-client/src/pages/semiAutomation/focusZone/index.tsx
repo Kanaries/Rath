@@ -1,30 +1,25 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { ActionButton } from '@fluentui/react';
+import { ActionButton, CommandButton, DefaultButton, IContextualMenuProps } from '@fluentui/react';
 import intl from 'react-intl-universal';
-import { IFieldMeta } from '../../../interfaces';
+import { IFieldMeta, IVisSpecType } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
-import FieldPlaceholder from '../../../components/fieldPlaceholder';
+import FieldPlaceholder from '../../../components/fieldPill/fieldPlaceholder';
 import { MainViewContainer } from '../components';
-import FilterCreationPill from '../../../components/filterCreationPill';
+import FilterCreationPill from '../../../components/fieldPill/filterCreationPill';
 import Narrative from '../narrative';
-import EncodeCreationPill from '../../../components/encodeCreationPill';
+import EncodeCreationPill from '../../../components/fieldPill/encodeCreationPill';
+import EditorCore from '../../editor/core/index';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
 const FocusZone: React.FC = (props) => {
-    const { semiAutoStore, commonStore, collectionStore, painterStore } = useGlobalStore();
-    const { mainVizSetting, mainView, compareView, showMiniFloatView, mainViewSpec, compareViewSpec, fieldMetas, neighborKeys } =
-        semiAutoStore;
-    const explainDiff = useCallback(() => {
-        if (mainView && compareView) {
-            semiAutoStore.explainViewDiff(mainView, compareView);
-        }
-    }, [mainView, compareView, semiAutoStore]);
-
+    const { semiAutoStore, commonStore, collectionStore, painterStore, editorStore } = useGlobalStore();
+    const { mainVizSetting, mainView, showMiniFloatView, mainViewSpec, fieldMetas, neighborKeys, mainViewSpecSource } = semiAutoStore;
+    const { muteSpec } = editorStore;
     const appendFieldHandler = useCallback(
         (fid: string) => {
             if (mainView === null) {
@@ -48,12 +43,54 @@ const FocusZone: React.FC = (props) => {
         }
     }, [mainViewSpec, painterStore, mainView]);
 
+    const viewSpec = useMemo(() => {
+        return mainViewSpecSource === 'custom' ? muteSpec : mainViewSpec;
+    }, [mainViewSpec, muteSpec, mainViewSpecSource]);
+
+    const ChartEditButtonProps = useMemo<IContextualMenuProps>(() => {
+        return {
+            items: [
+                {
+                    key: 'editingInGW',
+                    text: intl.get('megaAuto.commandBar.editInGW'),
+                    iconProps: { iconName: 'BarChartVerticalEdit' },
+                    onClick: editChart,
+                },
+                {
+                    key: 'editingInEditor',
+                    text: intl.get('megaAuto.commandBar.editInEditor'),
+                    iconProps: { iconName: 'Edit' },
+                    onClick: () => {
+                        if (mainViewSpec) {
+                            editorStore.syncSpec(IVisSpecType.vegaSubset, mainViewSpec);
+                            semiAutoStore.changeMainViewSpecSource();
+                        }
+                    },
+                },
+            ],
+        };
+    }, [editChart, editorStore, mainViewSpec, semiAutoStore]);
+
     return (
         <MainViewContainer>
             {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
             <div className="vis-container">
-                <div>{mainView && mainViewSpec && <MainCanvas view={mainView} spec={mainViewSpec} />}</div>
-                <div>{compareView && compareViewSpec && <MainCanvas view={compareView} spec={compareViewSpec} />}</div>
+                <div className="spec">
+                    {mainViewSpecSource === 'custom' && (
+                        <EditorCore
+                            actionPosition="bottom"
+                            actionButtons={
+                                <DefaultButton
+                                    text={intl.get('megaAuto.exitEditor')}
+                                    onClick={() => {
+                                        semiAutoStore.setMainViewSpecSource('default');
+                                    }}
+                                />
+                            }
+                        />
+                    )}
+                </div>
+                <div className="vis">{mainView && mainViewSpec && <MainCanvas view={mainView} spec={viewSpec} />}</div>
                 {mainVizSetting.nlg && (
                     <div style={{ overflow: 'auto' }}>
                         <Narrative />
@@ -144,12 +181,12 @@ const FocusZone: React.FC = (props) => {
                 )}
             </div>
             <div className="action-buttons">
-                <ActionButton
+                <CommandButton
                     style={BUTTON_STYLE}
                     text={intl.get('megaAuto.commandBar.editing')}
                     iconProps={{ iconName: 'BarChartVerticalEdit' }}
                     disabled={mainView === null}
-                    onClick={editChart}
+                    menuProps={ChartEditButtonProps}
                 />
                 <ActionButton
                     style={BUTTON_STYLE}
@@ -158,24 +195,17 @@ const FocusZone: React.FC = (props) => {
                     disabled={mainView === null}
                     onClick={paintChart}
                 />
-                <ActionButton
-                    style={BUTTON_STYLE}
-                    text={intl.get('semiAuto.main.explainDiff')}
-                    iconProps={{ iconName: 'Compare' }}
-                    disabled={mainView === null || compareView === null}
-                    onClick={explainDiff}
-                />
                 {mainView && mainViewSpec && (
                     <ActionButton
                         style={BUTTON_STYLE}
                         iconProps={{
-                            iconName: collectionStore.collectionContains(fieldMetas, mainViewSpec, mainView.filters)
+                            iconName: collectionStore.collectionContains(fieldMetas, mainViewSpec, IVisSpecType.vegaSubset, mainView.filters)
                                 ? 'FavoriteStarFill'
                                 : 'FavoriteStar',
                         }}
                         text={intl.get('common.star')}
                         onClick={() => {
-                            collectionStore.toggleCollectState(fieldMetas, mainViewSpec, mainView.filters);
+                            collectionStore.toggleCollectState(fieldMetas, mainViewSpec, IVisSpecType.vegaSubset, mainView.filters);
                         }}
                     />
                 )}

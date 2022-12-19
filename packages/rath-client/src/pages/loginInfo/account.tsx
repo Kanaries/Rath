@@ -19,8 +19,8 @@ const AccountDiv = styled.div`
             font-weight: 600;
             font-size: 14px;
             color: rgb(50, 49, 48);
-            font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont,
-                Roboto, 'Helvetica Neue', sans-serif;
+            font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue',
+                sans-serif;
             -webkit-font-smoothing: antialiased;
         }
         .account {
@@ -97,15 +97,13 @@ function Account() {
                                 <PrimaryButton
                                     className="ml-2"
                                     onClick={() => {
-                                        userStore.commitLogout()
+                                        userStore.commitLogout();
                                     }}
                                 >
                                     {intl.get('login.signOut')}
                                 </PrimaryButton>
                             ) : (
-                                <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>
-                                    {intl.get('login.signIn')}
-                                </PrimaryButton>
+                                <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>{intl.get('login.signIn')}</PrimaryButton>
                             )}
                         </span>
                         {userName && <TextField value={userName || ''} disabled={true} />}
