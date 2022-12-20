@@ -353,6 +353,7 @@
         },
         "download": "Load",
         "createdAt": "Created At",
+        "refresh": "Refresh",
         "size": "Size",
         "apply": "Upload"
     },

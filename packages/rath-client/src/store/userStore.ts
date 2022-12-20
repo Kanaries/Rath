@@ -208,9 +208,6 @@ export default class UserStore {
     }
 
     protected async getOrganizations() {
-        if (!this.info) {
-            return;
-        }
         const url = getMainServiceAddress('/api/ce/organization/list');
         try {
             const result = await request.get<{}, { organization: readonly IOrganization[] }>(url);
@@ -326,16 +323,15 @@ export default class UserStore {
                 version: string;
             };
             const { dataSourceStore, causalStore, dashboardStore } = getGlobalStore();
-            for await (const { name, type } of manifest.items) {
+            for await (const { name, key } of manifest.items) {
                 const entry = result.find(which => which.filename === name);
-                if (!entry || !type || type === IKRFComponents.meta) {
+                if (!entry || key === IKRFComponents.meta) {
                     continue;
                 }
                 const w = new TextWriter();
                 try {
                     const res = await entry.getData(w);
-                    // TODO: load backup
-                    switch (type) {
+                    switch (key) {
                         case IKRFComponents.data: {
                             const metaFile = manifest.items.find(item => item.type === IKRFComponents.meta);
                             if (!metaFile) {

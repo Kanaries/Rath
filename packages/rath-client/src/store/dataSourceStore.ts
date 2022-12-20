@@ -1117,14 +1117,25 @@ export class DataSourceStore {
         const { rawDataStorage } = this;
         this.extData = new Map(extData);
         await rawDataStorage.setAll(uncompressRows(rawData, meta.mutFields.map(f => f.fid)));
+        runInAction(() => {
+            this.rawDataMetaInfo = rawDataStorage.metaInfo;
+            this.mutFields = meta.mutFields;
+            this.extFields = meta.extFields;
+            this.rawDataMetaInfo = meta.rawDataMetaInfo;
+            this.filters = meta.filters;
+            this.cleanMethod = meta.cleanMethod as CleanMethod;
+        });
+        this.setShowDataImportSelection(false);
     }
     public async loadBackupMetaStore (data: IBackUpDataMeta) {
         const { mutFields, extFields, rawDataMetaInfo, filters, cleanMethod } = data;
-        this.mutFields = mutFields;
-        this.extFields = extFields;
-        this.rawDataMetaInfo = rawDataMetaInfo;
-        this.filters = filters;
-        this.cleanMethod = cleanMethod as CleanMethod;
+        runInAction(() => {
+            this.mutFields = mutFields;
+            this.extFields = extFields;
+            this.rawDataMetaInfo = rawDataMetaInfo;
+            this.filters = filters;
+            this.cleanMethod = cleanMethod as CleanMethod;
+        });
     }
 
 }

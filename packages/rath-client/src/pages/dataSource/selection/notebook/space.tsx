@@ -135,6 +135,12 @@ const NotebookSpace = observer(function NotebookSpace () {
     const { width } = useBoundingClientRect(listRef, { width: true });
     const colCount = useMemo(() => Math.floor((width ?? (window.innerWidth * 0.6)) / ITEM_MIN_WIDTH), [width]);
 
+    useEffect(() => {
+        if (organization && workspace && workspace.notebooks === undefined) {
+            userStore.getNotebooks(organization.id, workspace.id);
+        }
+    }, [organization, workspace, userStore]);
+
     return organizations ? (
         <Container>
             <div>
@@ -209,7 +215,7 @@ const NotebookSpace = observer(function NotebookSpace () {
                             ))}
                         </List>
                         <DefaultButton
-                            text="refresh"
+                            text={intl.get('storage.refresh')}
                             onClick={() => userStore.getNotebooks(organization.id, workspace.id)}
                         />
                     </>

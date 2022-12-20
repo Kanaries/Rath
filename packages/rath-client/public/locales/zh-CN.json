@@ -353,6 +353,7 @@
         },
         "download": "加载",
         "createdAt": "创建时间",
+        "refresh": "刷新",
         "size": "大小",
         "apply": "上传"
     },
