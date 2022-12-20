@@ -393,9 +393,6 @@ export const useCausalViewProvider = (causalStore: CausalStore): FC => {
 
     useEffect(() => {
         causalStore.operator.connect();
-        return () => {
-            causalStore.operator.disconnect();
-        };
     }, [causalStore]);
 
     return useCallback(function CausalViewProvider ({ children }) {

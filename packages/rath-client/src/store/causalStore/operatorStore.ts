@@ -144,14 +144,23 @@ export default class CausalOperatorStore {
     protected pendingConnectAction: Promise<unknown> | undefined = undefined;
 
     public async connect(server?: string): Promise<boolean> {
-        this.pendingConnectAction = undefined;
-        runInAction(() => {
-            if (server) {
-                this.causalServer = server;
+        if (server === undefined || this.causalServer === server) {
+            if (this.sessionId !== null) {
+                return true;
+            } else {
+                runInAction(() => {
+                    this.sessionId = null;
+                    this.tableId = null;
+                });
             }
-            this.sessionId = null;
-            this.tableId = null;
-        });
+        } else {
+            runInAction(() => {
+                this.causalServer = server;
+                this.sessionId = null;
+                this.tableId = null;
+            });
+        }
+        this.pendingConnectAction = undefined;
         this.disconnect();
         const connection = connectToSession(reason => {
             console.warn('Causal server session disconnected', reason);
