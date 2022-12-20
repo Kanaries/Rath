@@ -1,5 +1,6 @@
 import { notify } from "../../components/error";
 import type { IRow, IFieldMeta } from "../../interfaces";
+import { PREDICTION_SERVICE } from "../../consts/hosts";
 
 
 export const PredictAlgorithms = [
@@ -47,8 +48,8 @@ export interface IPredictResult {
     result: PredictResultItem[];
 }
 
-// TODO: 模型预测服务：上生产环境后改称线上服务地址
-const PredictApiPath = 'http://127.0.0.1:5533/api/train_test';
+/**预测服务地址 */
+const PredictApiPath = `${PREDICTION_SERVICE}/api/train_test`;
 
 export const execPredict = async (props: IPredictProps): Promise<IPredictResult | null> => {
     try {
