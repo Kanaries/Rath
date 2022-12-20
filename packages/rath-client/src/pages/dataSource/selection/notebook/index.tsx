@@ -37,6 +37,17 @@ const Notebook = observer(function Notebook () {
                     <LoginPanel />
                 </div>
             )}
+            {process.env.NODE_ENV === 'development' && (
+                <input
+                    type="file"
+                    onChange={e => {
+                        const [file] = e.target.files ?? [undefined];
+                        if (file) {
+                            userStore.loadNotebook(file);
+                        }
+                    }}
+                />
+            )}
         </Container>
     );
 });

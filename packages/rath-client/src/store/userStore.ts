@@ -309,7 +309,19 @@ export default class UserStore {
             if (!data.body) {
                 throw new Error('Request got empty body');
             }
-            const zipReader = new ZipReader(data.body);
+            await this.loadNotebook(data.body);
+        } catch (error) {
+            notify({
+                title: '[download notebook]',
+                type: 'error',
+                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+            });
+        }
+    }
+
+    public async loadNotebook(body: ReadableStream<Uint8Array> | File) {
+        try {
+            const zipReader = new ZipReader(body instanceof File ? body.stream() : body);
             const result = await zipReader.getEntries();
             const manifestFile = result.find((entry) => {
                 return entry.filename === "parse_map.json";
@@ -322,7 +334,7 @@ export default class UserStore {
                 items: IParseMapItem[];
                 version: string;
             };
-            const { dataSourceStore, causalStore, dashboardStore } = getGlobalStore();
+            const { dataSourceStore, causalStore, dashboardStore, collectionStore } = getGlobalStore();
             for await (const { name, key } of manifest.items) {
                 const entry = result.find(which => which.filename === name);
                 if (!entry || key === IKRFComponents.meta) {
@@ -351,7 +363,7 @@ export default class UserStore {
                             break;
                         }
                         case IKRFComponents.collection: {
-                            // TODO: load to collectionStore
+                            collectionStore.loadBackup(JSON.parse(res));
                             break;
                         }
                         case IKRFComponents.causal: {
@@ -368,15 +380,16 @@ export default class UserStore {
                     }
                 } catch (error) {
                     notify({
-                        title: '[load notebook]',
+                        title: 'Load Notebook Error',
                         type: 'error',
                         content: (error instanceof Error ? error.stack : null) ?? `${error}`,
                     });
+                    continue;
                 }
             }
         } catch (error) {
             notify({
-                title: '[download notebook]',
+                title: 'Load Notebook Error',
                 type: 'error',
                 content: (error instanceof Error ? error.stack : null) ?? `${error}`,
             });
