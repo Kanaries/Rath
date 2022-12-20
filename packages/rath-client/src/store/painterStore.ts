@@ -10,15 +10,12 @@ import { DataSourceStore } from './dataSourceStore';
 import { SemiAutomationStore } from './semiAutomation/mainStore';
 
 export class PainterStore {
-    public painting: boolean = false;
-    public linkTrigger: number = 0;
-    public autoLink: boolean = false;
-    public painterView: {
+    public painting!: boolean;
+    public linkTrigger!: number;
+    public autoLink!: boolean;
+    public painterView!: {
         spec: IVegaSubset | null;
         dataView: IPattern | null;
-    } = {
-        spec: null,
-        dataView: null,
     };
     private commonStore: CommonStore;
     private dataSourceStore: DataSourceStore;
@@ -27,6 +24,7 @@ export class PainterStore {
         this.commonStore = commonStore;
         this.dataSourceStore = dataSourceStore;
         this.semiAutoStore = semiAutoStore;
+        this.init();
         makeAutoObservable(this, {
             painterView: observable.ref,
             // @ts-ignore
@@ -34,6 +32,21 @@ export class PainterStore {
             dataSourceStore: false,
             semiAutoStore: false,
         });
+    }
+    public init () {
+        this.painterView = {
+            spec: null,
+            dataView: null,
+        };
+        this.painting = false;
+        this.linkTrigger = 0;
+        this.autoLink = false;
+    }
+    public destroy() {
+        this.painterView = {
+            spec: null,
+            dataView: null,
+        };
     }
     public get fieldMetas() {
         return this.dataSourceStore.fieldMetas;

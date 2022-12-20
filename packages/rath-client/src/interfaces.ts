@@ -198,8 +198,14 @@ export interface IVegaSubset {
     }
 }
 
+export enum IVisSpecType {
+    vegaSubset = 'vegaSubset',
+    vegaLite = 'vegaLite',
+    vega = 'vega'
+}
 export interface IInsightVizView {
     viewId: string;
+    specType: IVisSpecType;
     spec: IVegaSubset;
     fields: IFieldMeta[];
     filters: IFilter[];
@@ -235,3 +241,29 @@ export interface IResponse<T = void> {
     data: T;
     message?: string;
 }
+export interface IteratorStorageMetaInfo {
+    versionCode: number;
+    length: number;
+}
+
+export interface IBackUpDataMeta {
+    mutFields: IRawField[],
+    extFields: IExtField[],
+    rawDataMetaInfo: IteratorStorageMetaInfo,
+    filters: IFilter[];
+    cleanMethod: string;
+}
+
+export interface IBackUpData {
+    rawData: any[][];
+    extData: [string, ICol<any>][]
+}
+export interface IRawFeatures {
+    fid: string;
+    valid: number;
+    unique: number;
+    missing: number;
+    mismatch: number;
+}
+
+export type ISpecSourceType = 'default' | 'custom';

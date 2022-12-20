@@ -8,8 +8,8 @@ export class LangStore {
     public lang: string = SUPPORT_LANG[0].value;
     public loaded: boolean = true;
     constructor () {
-        makeAutoObservable(this)
         this.initLocales();
+        makeAutoObservable(this)
     }
     public async useLocales (lang: string) {
         try {

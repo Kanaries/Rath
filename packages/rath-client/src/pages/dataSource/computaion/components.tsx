@@ -26,7 +26,7 @@ export const ConsoleContainer = styled.div({
         display: 'flex',
         flexDirection: 'column',
         width: '30vw',
-    
+
         '> *': {
             width: '100%',
             flexGrow: 0,
@@ -40,13 +40,14 @@ export const ConsoleContainer = styled.div({
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden auto',
-            '--font-family': '"Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
+            '--font-family':
+                '"Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
             '--font-size': '0.95rem',
             '--letter-spacing': '0.4px',
             '--font-weight': '600',
             '--line-height': '1.5em',
             '--padding': '0.8em 1em 1.5em',
-    
+
             '> *': {
                 width: '100%',
                 flexGrow: 0,
@@ -73,7 +74,7 @@ export const ConsoleContainer = styled.div({
                 position: 'fixed',
                 pointerEvents: 'none',
                 overflow: 'hidden',
-                
+
                 '> pre': {
                     color: '#444',
                     width: '100%',
@@ -97,7 +98,7 @@ export const ConsoleContainer = styled.div({
             overflow: 'hidden auto',
             border: '1px solid #c81',
             padding: '0.6em 1em 1.4em',
-            
+
             '&.err-msg': {
                 margin: '1em 0',
                 height: '8em',
@@ -114,7 +115,7 @@ export const ConsoleContainer = styled.div({
             borderTop: 'none',
             display: 'flex',
             flexDirection: 'column',
-    
+
             '> *': {
                 width: '100%',
                 flexGrow: 0,
@@ -132,7 +133,7 @@ export const ConsoleContainer = styled.div({
                 ':hover': {
                     backgroundColor: 'rgba(0, 120, 212, 0.3)',
                 },
-    
+
                 '> span': {
                     flexGrow: 0,
                     flexShrink: 0,

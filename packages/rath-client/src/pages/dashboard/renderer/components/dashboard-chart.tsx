@@ -30,7 +30,7 @@ const highlightSelectorPredicateName = '__dashboard_chart_item_highlighted';
 const DashboardChart: FC<DashboardChartProps> = ({
     item, filters, highlighters, ratio, onFilter, sampleSize,
 }) => {
-    const { dataSourceStore, dashboardStore } = useGlobalStore();
+    const { dataSourceStore, dashboardStore, commonStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
     const fields = useMemo(() => {
         return Object.values(item.subset.encoding).filter(Boolean).reduce<typeof fieldMetas>((list, encoding) => {
@@ -258,6 +258,7 @@ const DashboardChart: FC<DashboardChartProps> = ({
                     }}
                     actions={false}
                     signalHandler={signalListeners}
+                    config={commonStore.themeConfig}
                 />
             </VisErrorBoundary>
         </Container>

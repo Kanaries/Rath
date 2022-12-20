@@ -6,6 +6,8 @@ import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IRow, PreferencePanelConfig } from '../../../interfaces';
 import ReactVega from '../../../components/react-vega';
 import { distVis } from '../../../queries/distVis';
+import { VegaThemeConfig } from '../../../queries/themes/config';
+import { AssoViewContainer, AssociationContainer } from './components';
 
 interface AssociationProps {
     visualConfig: PreferencePanelConfig;
@@ -13,28 +15,18 @@ interface AssociationProps {
     fieldMetas: IFieldMeta[];
     dataSource: IRow[];
     onSelectView: (viz: IInsightSpace) => void;
+    themeConfig?: VegaThemeConfig;
 }
 const AssociationCharts: React.FC<AssociationProps> = (props) => {
-    const { vizList, onSelectView, dataSource, fieldMetas } = props;
+    const { vizList, onSelectView, dataSource, fieldMetas, themeConfig } = props;
 
     return (
-        <div style={{ border: 'solid 1px #bfbfbf', marginTop: '2em', backgroundColor: '#e7e7e7' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', overflow: 'auto' }}>
+        <AssociationContainer>
+            <div className="content-container">
                 {vizList.map((view, i) => {
-                    const fieldsInView = fieldMetas.filter(
-                        (m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid)
-                    );
+                    const fieldsInView = fieldMetas.filter((m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid));
                     return (
-                        <div
-                            key={`associate-row-${i}`}
-                            dir="ltr"
-                            style={{
-                                backgroundColor: '#fff',
-                                margin: '6px',
-                                padding: '10px',
-                                flexGrow: 1,
-                            }}
-                        >
+                        <AssoViewContainer key={`associate-row-${i}`} dir="ltr">
                             <div>
                                 <CommandButton
                                     iconProps={{ iconName: 'Lightbulb' }}
@@ -51,13 +43,14 @@ const AssociationCharts: React.FC<AssociationProps> = (props) => {
                                     spec={distVis({
                                         pattern: { fields: fieldsInView, imp: 0 },
                                     })}
+                                    config={themeConfig}
                                 />
                             </VisErrorBoundary>
-                        </div>
+                        </AssoViewContainer>
                     );
                 })}
             </div>
-        </div>
+        </AssociationContainer>
     );
 };
 

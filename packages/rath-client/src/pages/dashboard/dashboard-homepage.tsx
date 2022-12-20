@@ -7,7 +7,6 @@ import { useGlobalStore } from '../../store';
 import DashboardList from './dashboard-list';
 import dashboardGallery from './dashboard-gallery';
 
-
 const PageLayout = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
@@ -62,7 +61,7 @@ const WorkspaceDesc = styled.div`
 `;
 
 const Editable = styled.div`
-    > button[type=button] {
+    > button[type='button'] {
         position: absolute;
         right: 0;
         top: 50%;
@@ -73,16 +72,14 @@ const Editable = styled.div`
             background-color: #8882;
         }
     }
-    :hover > button[type=button] {
+    :hover > button[type='button'] {
         opacity: 1;
     }
 `;
 
 let clearActiveEditableCell = () => {};
 
-export const EditableCell: FC<{ value: string; placeholder: string; onChange: (value: string) => void }> = ({
-    value, onChange, placeholder
-}) => {
+export const EditableCell: FC<{ value: string; placeholder: string; onChange: (value: string) => void }> = ({ value, onChange, placeholder }) => {
     const [isEditing, setEditing] = useState(false);
     const [data, setData] = useState('');
 
@@ -93,7 +90,7 @@ export const EditableCell: FC<{ value: string; placeholder: string; onChange: (v
         }
         setData(value);
     }, [value, isEditing]);
-    
+
     useEffect(() => {
         setEditing(false);
     }, [value]);
@@ -105,8 +102,8 @@ export const EditableCell: FC<{ value: string; placeholder: string; onChange: (v
                     value={data}
                     onChange={(_, d) => setData(d ?? '')}
                     autoFocus
-                    onClick={e => e.stopPropagation()}
-                    onKeyDown={e => {
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                             const d = data;
                             requestAnimationFrame(() => onChange(d));
@@ -119,15 +116,13 @@ export const EditableCell: FC<{ value: string; placeholder: string; onChange: (v
                     }}
                 />
             ) : (
-                <span>
-                    {value || placeholder}
-                </span>
+                <span>{value || placeholder}</span>
             )}
             {isEditing || (
                 <IconButton
                     iconProps={{ iconName: 'Edit' }}
                     autoFocus
-                    onClick={e => {
+                    onClick={(e) => {
                         e.stopPropagation();
                         setEditing(true);
                     }}
@@ -146,7 +141,7 @@ const VIEW_MODES = [
     { key: 'gallery', icon: 'Table' },
 ] as const;
 
-type ViewMode = (typeof VIEW_MODES)[number]['key'];
+type ViewMode = typeof VIEW_MODES[number]['key'];
 
 const DashboardHomepage: FC<DashboardHomepageProps> = ({ openDocument }) => {
     const { dashboardStore } = useGlobalStore();
@@ -156,52 +151,47 @@ const DashboardHomepage: FC<DashboardHomepageProps> = ({ openDocument }) => {
 
     const [viewMode, setViewMode] = useState<ViewMode>('list');
 
-    const List = useMemo(() => ({
-        list: DashboardList,
-        gallery: dashboardGallery,
-    }[viewMode]), [viewMode]);
+    const List = useMemo(
+        () =>
+            ({
+                list: DashboardList,
+                gallery: dashboardGallery,
+            }[viewMode]),
+        [viewMode]
+    );
 
-    const keywords = search.split(/\s+/).filter(Boolean).map(s => s.toLocaleLowerCase());
-    const filteredPages = pages.filter(d => {
+    const keywords = search
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((s) => s.toLocaleLowerCase());
+    const filteredPages = pages.filter((d) => {
         if (keywords.length === 0) {
             return true;
         }
         // TODO: more search logic
-        return keywords.every(kw => (
-            d.data.source.toLocaleLowerCase().includes(kw)
-            || d.info.name.toLocaleLowerCase().includes(kw)
-            || d.info.description.toLocaleLowerCase().includes(kw)
-        ));
+        return keywords.every(
+            (kw) =>
+                d.data.source.toLocaleLowerCase().includes(kw) ||
+                d.info.name.toLocaleLowerCase().includes(kw) ||
+                d.info.description.toLocaleLowerCase().includes(kw)
+        );
     });
 
     return (
-        <PageLayout
-            onClick={clearActiveEditableCell}
-        >
+        <PageLayout onClick={clearActiveEditableCell}>
             <WorkspaceView>
                 <Stack>
                     <WorkspaceName>
-                        <EditableCell
-                            value={name}
-                            onChange={n => dashboardStore.setName(n)}
-                            placeholder="(dashboard list)"
-                        />
+                        <EditableCell value={name} onChange={(n) => dashboardStore.setName(n)} placeholder="(dashboard list)" />
                     </WorkspaceName>
                     <WorkspaceDesc>
-                        <EditableCell
-                            value={description}
-                            onChange={desc => dashboardStore.setDesc(desc)}
-                            placeholder="(description)"
-                        />
+                        <EditableCell value={description} onChange={(desc) => dashboardStore.setDesc(desc)} placeholder="(description)" />
                     </WorkspaceDesc>
                 </Stack>
             </WorkspaceView>
             <DocumentListView>
                 <div>
-                    <ActionButton
-                        iconProps={{ iconName: 'Add' }}
-                        onClick={() => dashboardStore.newPage()}
-                    >
+                    <ActionButton iconProps={{ iconName: 'Add' }} onClick={() => dashboardStore.newPage()}>
                         New Dashboard
                     </ActionButton>
                 </div>
@@ -217,19 +207,11 @@ const DashboardHomepage: FC<DashboardHomepageProps> = ({ openDocument }) => {
                     }}
                     style={{ margin: '1em 0' }}
                 >
-                    {VIEW_MODES.map(mode => (
-                        <PivotItem
-                            key={mode.key}
-                            itemKey={mode.key}
-                            headerText={intl.get(mode.key) || mode.key}
-                            itemIcon={mode.icon}
-                        />
+                    {VIEW_MODES.map((mode) => (
+                        <PivotItem key={mode.key} itemKey={mode.key} headerText={intl.get(mode.key) || mode.key} itemIcon={mode.icon} />
                     ))}
                 </Pivot>
-                <List
-                    openDocument={openDocument}
-                    pages={filteredPages}
-                />
+                <List openDocument={openDocument} pages={filteredPages} />
             </DocumentListView>
         </PageLayout>
     );

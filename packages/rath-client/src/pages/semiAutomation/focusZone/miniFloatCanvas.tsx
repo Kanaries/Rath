@@ -30,7 +30,7 @@ interface MiniFloatCanvasProps {
 }
 const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = (props) => {
     const { pined, handler } = props;
-    const { semiAutoStore } = useGlobalStore();
+    const { semiAutoStore, commonStore } = useGlobalStore();
     const { settings, mainVizSetting, dataSource, fieldMetas } = semiAutoStore;
     const { vizAlgo } = settings;
     const [hide, setHide] = useState<boolean>(false);
@@ -74,7 +74,7 @@ const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = (props) => {
                     />
                 )}
             </div>
-            {!hide && <ReactVega ref={handler} actions={debug} spec={spec} dataSource={mainViewData} />}
+            {!hide && <ReactVega ref={handler} actions={debug} spec={spec} dataSource={mainViewData} config={commonStore.themeConfig} />}
         </FloatContainer>
     );
 };

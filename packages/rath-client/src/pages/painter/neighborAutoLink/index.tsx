@@ -33,7 +33,7 @@ interface NALProps {
 }
 const NeighborAutoLink: React.FC<NALProps> = (props) => {
     const { vizSpec, dataSource, fieldMetas } = props;
-    const { painterStore } = useGlobalStore();
+    const { painterStore, commonStore } = useGlobalStore();
     const { painting, autoLink } = painterStore
     const [nearFields, setNearFields] = useState<IFieldMeta[]>([]);
     const [nearIndex, setNearIndex] = useState<number>(0);
@@ -120,7 +120,7 @@ const NeighborAutoLink: React.FC<NALProps> = (props) => {
                     />
                     <span className="state-description">{nearIndex + 1} of {nearFields.length}</span>
                 </Stack>
-                {nearSpec && <ReactVega spec={nearSpec} dataSource={dataSource} />}
+                {nearSpec && <ReactVega spec={nearSpec} dataSource={dataSource} config={commonStore.themeConfig} />}
             </div>
     );
 };

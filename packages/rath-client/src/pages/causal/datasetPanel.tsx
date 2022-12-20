@@ -13,7 +13,7 @@ import { FC, useCallback, useMemo, useRef } from 'react';
 import produce from 'immer';
 import intl from 'react-intl-universal'
 import { useGlobalStore } from '../../store';
-import FilterCreationPill from '../../components/filterCreationPill';
+import FilterCreationPill from '../../components/fieldPill/filterCreationPill';
 import LaTiaoConsole from '../../components/latiaoConsole/index';
 import type { IFieldMeta } from '../../interfaces';
 import { FilterCell } from './filters';

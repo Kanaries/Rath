@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Icon } from '@fluentui/react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
-import { PreferencesListType, PreferencesType } from '../../App';
+import { PreferencesListType, PreferencesType } from '.';
 
 const LoginInfoListDiv = styled.div`
     height: 250px;

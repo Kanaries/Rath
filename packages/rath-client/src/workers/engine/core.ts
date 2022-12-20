@@ -228,36 +228,6 @@ export class RathEngine extends VIEngine {
                     kl: EKL
                 })
             }
-            
-        //     for (let mea of viewSpace.measures) {
-        //         const distList = localDist.map(r => ({
-        //             // TODO: [discuss]讨论是否应当直接使用count
-        //              Hao Chen, 11 months ago   (December 26th, 2021 2:35 AM) 
-        //             // props: 节省计算量
-        //             // cons: 强依赖于cube必须去计算count
-        //             ...r,
-        //             freq: r[mea].reduce((total: number, value: number) => total + value, 0),
-        //             dist: r[mea]
-        //         }))
-        //         if (globalDist.length > 0) {
-        //             const globalSum = globalDist[0][mea].reduce((total: number, value: number) => total + value, 0);
-        //             const globalProbDist = globalDist[0][mea].map((v: number) => v / globalSum)
-        //             for (let i = 0; i < distList.length; i++) {
-        //                 let kl = 0;
-        //                 for (let b = 0; b < distList[i].dist.length; b++) {
-        //                     const px = distList[i].dist[b] / distList[i].freq
-        //                     const py = globalProbDist[b];
-        //                     if (px > 0 && py > 0) {
-        //                         kl += px * Math.log2(px / py);
-        //                     }
-        //                 }
-        //                 ansSet.push({
-        //                     ...distList[i],
-        //                     kl
-        //                 })
-        //             }
-        //         }
-        //     }
         } else {
             // todo
         }

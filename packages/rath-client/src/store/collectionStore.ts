@@ -1,13 +1,13 @@
-import { makeAutoObservable, observable } from "mobx";
-import { IFieldMeta, IFilter, IInsightVizView, IVegaSubset } from "../interfaces";
+import { makeAutoObservable, observable, toJS } from "mobx";
+import { IFieldMeta, IFilter, IInsightVizView, IVegaSubset, IVisSpecType } from "../interfaces";
 import { DataSourceStore } from "./dataSourceStore";
 
 function serializeFilter (filter: IFilter) {
     return `${filter.fid}=${filter.type === 'range' ? filter.range.join('-') : filter.values.join('_')}`
 }
 
-function encodeViewKey (fields: IFieldMeta[], spec: IVegaSubset, filters: IFilter[]) {
-    return `${fields.map(f => f.fid).join(',')}|${JSON.stringify(spec)}|${filters.map(f => serializeFilter(f)).join(',')}`
+function encodeViewKey (fields: IFieldMeta[], spec: IVegaSubset, specType: IVisSpecType, filters: IFilter[]) {
+    return `${fields.map(f => f.fid).join(',')}|${specType}|${JSON.stringify(spec)}|${filters.map(f => serializeFilter(f)).join(',')}`
 }
 
 export class CollectionStore {
@@ -23,16 +23,17 @@ export class CollectionStore {
             dataSourceStore: false,
         })
     }
-    public collectView (fields: IFieldMeta[], spec: IVegaSubset, filters: IFilter[] | undefined = []) {
+    public collectView (fields: IFieldMeta[], spec: IVegaSubset, specType: IVisSpecType, filters: IFilter[] | undefined = []) {
         const visId = `vis-${new Date().getTime()}`;
-        const vizCode = encodeViewKey(fields, spec, filters);
+        const vizCode = encodeViewKey(fields, spec, specType, filters);
         if (!this.vizHash.has(vizCode)) {
             this.vizHash.set(vizCode, visId);
             this.collectionList.push({
-                viewId: `vis-${new Date().getTime()}`,
+                viewId: visId,
                 fields,
                 filters,
-                spec
+                spec,
+                specType
             })
         }
     }
@@ -46,16 +47,16 @@ export class CollectionStore {
             }
         }
     }
-    public removeView (fields: IFieldMeta[], spec: IVegaSubset, filters: IFilter[] | undefined = []) {
-        const vizCode = encodeViewKey(fields, spec, filters);
+    public removeView (fields: IFieldMeta[], spec: IVegaSubset, specType: IVisSpecType, filters: IFilter[] | undefined = []) {
+        const vizCode = encodeViewKey(fields, spec, specType, filters);
         this.removeViewByCode(vizCode);
     }
-    public toggleCollectState (fields: IFieldMeta[], spec: IVegaSubset, filters: IFilter[] | undefined = []) {
-        const vizCode = encodeViewKey(fields, spec, filters);
+    public toggleCollectState (fields: IFieldMeta[], spec: IVegaSubset, specType: IVisSpecType, filters: IFilter[] | undefined = []) {
+        const vizCode = encodeViewKey(fields, spec, specType, filters);
         if (this.vizHash.has(vizCode)) {
             this.removeViewByCode(vizCode)
         } else {
-            this.collectView(fields, spec, filters)
+            this.collectView(fields, spec, specType, filters)
         }
     }
     public removeViewByIndex (index: number) {
@@ -63,15 +64,21 @@ export class CollectionStore {
         // const vizCode = encodeViewKey(fields, spec);
         // this.vizHash.delete(vizCode)
     }
-    public collectionContains (fields: IFieldMeta[], spec: IVegaSubset, filters: IFilter[] | undefined = []) {
-        // FIXME
-        // TODO: 这里还需要filter的信息，才能保证图表的唯一性。
-        // observedobserver, 2 months ago   (October 14th, 2022 9:40 PM) 
-        // 这里还需要filter的信息，才能保证图表的唯一性。
-        const vizCode = encodeViewKey(fields, spec, filters);
+    public collectionContains (fields: IFieldMeta[], spec: IVegaSubset, specType: IVisSpecType, filters: IFilter[] | undefined = []) {
+        const vizCode = encodeViewKey(fields, spec, specType, filters);
         return this.vizHash.has(vizCode)
     }
     public addConfigCollectionList(value: IInsightVizView[]) {
         this.collectionList = value;
+    }
+    public init () {
+        this.collectionList = [];
+        this.vizHash.clear();
+    }
+    public async backupCollectionStore () {
+        return {
+            collectionList: toJS(this.collectionList),
+            vizHash: Array.from(this.vizHash.entries())
+        }
     }
 }

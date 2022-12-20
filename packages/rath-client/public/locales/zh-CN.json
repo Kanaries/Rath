@@ -9,6 +9,9 @@
         "hide": "隐藏",
         "expand": "展开",
         "filter": "筛选",
+        "preview": "预览",
+        "submit": "提交",
+        "run": "执行",
         "semanticType": {
             "nominal": "类别类型",
             "ordinal": "有序类型",
@@ -19,6 +22,7 @@
             "dimension": "维度",
             "measure": "度量"
         },
+        "vistheme": "可视化主题",
         "addVar": "添加变量",
         "addFilter": "添加筛选项",
         "addEncode": "添加计算",
@@ -36,6 +40,11 @@
             "qt_25": "25%分位数",
             "qt_75": "75%分位数",
             "qt_50": "中位数"
+        },
+        "search": {
+            "searchViews": "搜索视图",
+            "searchFields": "搜索字段/变量",
+            "notFound": "未找到匹配结果"
         }
     },
     "menu": {
@@ -119,6 +128,7 @@
         "dataView": "数据视图",
         "statView": "统计视图",
         "charset": "字符集编码",
+        "separator": "分隔符",
         "databaseType": "选择数据库",
         "connectUri": "连接 URI",
         "databaseName": "数据库",
@@ -136,6 +146,17 @@
             "explore": "探索分析",
             "originStatTable": "原始数据统计信息",
             "selectionStatTable": "筛选部分统计信息"
+        },
+        "sizeInfo": "{nCols} 列 x {nRows} 行",
+        "demoDataset": {
+            "CARS": { "title": "汽车数据集", "description": "记录了汽车的型号、厂商、物理参数的数据。" },
+            "STUDENTS": { "title": "学生成绩数据集", "description": "分析学生的成绩和部分其他因素等关系。" },
+            "BTC_GOLD": { "title": "比特币-金价数据集", "description": "" },
+            "CAR_SALES": { "title": "汽车销售数据集", "description": "" },
+            "COLLAGE": { "title": "大学数据集", "description": "" },
+            "TITANIC": { "title": "泰坦尼克数据集", "description": "" },
+            "KEPLER": { "title": "开普勒数据集", "description": "" },
+            "BIKE_SHARING_DC": { "title": "共享单车数据集", "description": "" }
         },
         "dbProgress": [
             {
@@ -174,7 +195,8 @@
             "lackDimension": "数据集中缺少维度。（全自动化分析模块部分能力会受到影响）",
             "lackMeasure": "数据集中缺少度量，（全自动化分析模块会受到影响，可以尝试使用其他模块）",
             "smallSample": "数据集中样本数量低于预期，可能会对推荐结果的一般性造成影响。（小样本问题）",
-            "forceAnalysis": "强制分析"
+            "forceAnalysis": "强制分析",
+            "upload_file_too_large": "文件体积过大。尝试使用更少的数据，或将文件转换为 CSV 格式以使用采样功能。"
         },
         "meta": {
             "title": "元数据视图",
@@ -229,11 +251,37 @@
         },
         "upload": {
             "title": "连接你的数据集，根据需求调整以下配置",
-            "fileTypes": "支持csv, json文件",
+            "fileTypes": "支持 Excel 工作簿以及 JSON、CSV 等文本类型文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
+            "show_more": "高级设置",
             "sampling": "数据采样",
             "percentSize": "样本大小(行)",
-            "upload": "上传文件"
+            "excel_range": "工作簿范围",
+            "upload": "上传文件",
+            "change": "重新选择",
+            "lastOpen": "上一次使用",
+            "firstOpen": "创建时间",
+            "history": "最近使用",
+            "history_time": {
+                "1d": "今天",
+                "1w": "过去一周",
+                "1mo": "过去一个月",
+                "3mo": "过去三个月",
+                "6mo": "过去半年",
+                "1yr": "一年内"
+            },
+            "new": "新的文件",
+            "sheet": "工作簿",
+            "preview_parsed": "预览",
+            "preview_full": "完整内容",
+            "preview_raw": "原始内容",
+            "data_is_empty": "数据集是空的。",
+            "separator": {
+                "comma": "逗号",
+                "semicolon": "分号",
+                "tab": "制表符",
+                "other": "自定义..."
+            }
         },
         "exploreMode": {
             "title": "探索模式",
@@ -249,7 +297,8 @@
             "title": "导出数据",
             "downloadCSV": "导出CSV",
             "downloadJSON": "导出JSON",
-            "downloadJSONMeta": "导出JSON(含元数据)"
+            "downloadJSONMeta": "导出JSON(含元数据)",
+            "downloadRATHDS": "下载RATH格式数据集"
         },
         "extend": {
             "title": "扩展信息",
@@ -264,6 +313,7 @@
             "cancel": "取消",
             "auto": "扩展建议",
             "suggestion": {
+                "regex_selection": "模式发现&提取|将选中的字段作为模式，发现数据集中所有匹配的相似模式并提取出来。",
                 "dateTimeExpand": "将数据映射到不同时间单位。|时间序列可能在不同的单位尺度下展现出更强的周期性或相关性。",
                 "oneHot": "独热编码(one-hot encoding)|独热编码可以将类别型数据转换为多个数值型数据，方便进行相关性分析。",
                 "wordTFIDF": "按文档的词频与逆向文件频率提取类别(tf-idf)。|tf-idf是一种统计方法，用以评估一字词对于一个文件集或一个语料库中的其中一份文件的重要程度",
@@ -310,9 +360,12 @@
             "hint": "『关联度量』是指探索和当前图表中，度量/指标关联程度更高的图表，这可以帮你研究哪些指标的表现和当前关注的指标相近。『关联维度』是指探索和当前图表中，维度相关度更高的图表，这可以帮助你研究对于当前的度量下，相似维度对度量分布的划分差异。"
         },
         "bring": "自定义分析",
+        "exitEditor": "退出编辑",
         "commandBar": {
             "painting": "数据绘板",
             "editing": "编辑图表",
+            "editInGW": "自助分析",
+            "editInEditor": "在编辑器配置",
             "associate": "联想",
             "constraints": "分析约束",
             "download": "导出图表"
@@ -490,6 +543,16 @@
         "shortMonths": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
     },
     "login": {
+        "configKeys": {
+            "basic": "基础信息",
+            "design": "样式/主题设计",
+            "analysis": "数据分析"
+        },
+        "design": {
+            "createCustomTheme": "创建自定义主题",
+            "syncFromSelectedTheme": "从已选主题同步配置",
+            "useCustomTheme": "使用自定义主题"
+        },
         "clickLogin": "点击登录",
         "haveSent": "已发送",
         "signIn": "登录",
@@ -519,6 +582,26 @@
         "password": {
             "userName": "用户名",
             "password": "密码"
+        }
+    },
+    "messages": {
+        "email": {
+            "success": {
+                "title": "邮件发送成功",
+                "content": "邮箱已发送至{email}，请检查。"
+            },
+            "error": {
+                "title": "邮件发送发生错误"
+            }
+        },
+        "phone": {
+            "success": {
+                "title": "短信发送成功",
+                "content": "短信已发送至{phone}，请检查。"
+            },
+            "error": {
+                "title": "短信发送发生错误"
+            }
         }
     }
 }

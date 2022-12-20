@@ -1,22 +1,42 @@
-import { useState } from 'react';
+import { FC, useState } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { Dialog, Icon } from '@fluentui/react';
+import { Dialog, Pivot, PivotItem } from '@fluentui/react';
 import styled from 'styled-components';
-import { PreferencesListType } from '../../App';
 import { useGlobalStore } from '../../store';
-import LoginInfoList from './loginInfo';
-interface loginInfoProps {
-    preferencesList: PreferencesListType[];
+import Account from './account';
+import Setup from './setup';
+
+
+export enum PreferencesType {
+    Account = 'account',
+    Info = 'info',
+    Setting = 'setting',
+    Header = 'header'
+}
+export interface PreferencesListType {
+    key: PreferencesType;
+    name: PreferencesType;
+    icon: string;
     element: () => JSX.Element;
 }
+
+const preferencesList: PreferencesListType[] = [
+    { key: PreferencesType.Account, name: PreferencesType.Account, icon: 'Home', element: () => <Account /> },
+    // { key: PreferencesType.Info, name: PreferencesType.Info, icon: 'Info', element: () => <Info /> },
+    // { key: PreferencesType.Header, name: PreferencesType.Header, icon: 'Contact', element: () => <Header /> },
+    { key: PreferencesType.Setting, name: PreferencesType.Setting, icon: 'Settings', element: () => <Setup /> },
+];
 
 const LoginInfoDiv = styled.div`
     height: 100%;
     display: flex;
     flex-direction: column;
-    > div:first-child {
-        flex: 1;
+    border-top-width: 1px;
+    padding: 0.6em 0.8em 0.8em;
+    > div {
+        user-select: none;
+        cursor: pointer;
     }
     .user {
         white-space: nowrap;
@@ -24,7 +44,7 @@ const LoginInfoDiv = styled.div`
         overflow-x: auto;
         font-size: 0.875rem;
         line-height: 1.25rem;
-        font-weight: 500;
+        font-weight: 400;
     }
     .user::-webkit-scrollbar {
         display: none;
@@ -32,14 +52,6 @@ const LoginInfoDiv = styled.div`
     .avatar-img {
         display: flex;
         align-items: center;
-    }
-    .hidden-login {
-        /* flex flex-shrink-0 border-t border-indigo-800 p-4 bg-gray-700 cursor-pointer */
-        display: flex;
-        flex-shrink: 0;
-        border-top-width: 1px;
-        padding: 1rem;
-        cursor: pointer;
     }
     .user-name {
         /* ml-2 */
@@ -49,19 +61,51 @@ const LoginInfoDiv = styled.div`
     }
 `;
 
-const LoginInfo = (props: loginInfoProps) => {
-    const { preferencesList, element } = props;
-    const { commonStore } = useGlobalStore();
-    const { userName, navMode, avatarUrl, info } = commonStore;
+const Container = styled.div`
+    & .content {
+        display: flex;
+        flex-direction: row;
+        > [role=tablist] {
+            flex-grow: 0;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #8888;
+            > [role=tab] {
+                margin: 0px 4px 8px 0;
+                ::before {
+                    right: 0px;
+                    width: 2px;
+                    height: unset;
+                    top: 2px;
+                    bottom: 2px;
+                    left: unset;
+                    transition: unset;
+                }
+            }
+        }
+        > [role=tabpanel] {
+            flex-grow: 1;
+            flex-shrink: 1;
+        }
+    }
+`;
+
+const LoginInfo: FC = () => {
+    const { commonStore, userStore } = useGlobalStore();
+    const { navMode } = commonStore;
+    const { userName } = userStore;
     const [loginHidden, setLoginHidden] = useState(true);
+    const [tab, setTab] = useState<PreferencesType>(PreferencesType.Account);
+
     return (
         <LoginInfoDiv>
-            <div>{element()}</div>
             <div
-                className="hidden-login"
                 onClick={() => {
                     setLoginHidden(false);
                 }}
+                role="button"
+                aria-haspopup
             >
                 <Dialog
                     modalProps={{
@@ -74,20 +118,17 @@ const LoginInfo = (props: loginInfoProps) => {
                     dialogContentProps={{ title: intl.get('login.preferences') }}
                     minWidth={550}
                 >
-                    <LoginInfoList infoList={preferencesList} />
+                    <Container>
+                        <Pivot className="content" selectedKey={tab} onLinkClick={item => item && setTab(item.props.itemKey as typeof tab)}>
+                            {preferencesList.map(pref => (
+                                <PivotItem key={pref.key} itemKey={pref.key} headerText={intl.get(`login.${pref.name}`)} itemIcon={pref.icon}>
+                                    {pref.element()}
+                                </PivotItem>
+                            ))}
+                        </Pivot>
+                    </Container>
                 </Dialog>
                 <div className="avatar-img">
-                    <div>
-                        {userName && (info.avatar || avatarUrl) ? (
-                            <img
-                                src={info.avatar || avatarUrl}
-                                alt="头像"
-                                style={{ width: 24, height: 24, borderRadius: '50%' }}
-                            />
-                        ) : (
-                            <Icon iconName="Contact" className="mr-2" />
-                        )}
-                    </div>
                     {navMode === 'text' && (
                         <div className="user-name">
                             <p className="user">{userName || intl.get('login.clickLogin')}</p>

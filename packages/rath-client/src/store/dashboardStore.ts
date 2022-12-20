@@ -267,6 +267,38 @@ export default class DashboardStore {
         });
     }
 
+    public save() {
+        const data = this.pages.map<Omit<DashboardDocument, 'cards'> & { cards: DashboardCard[] }>(page => produce(toJS(page), draft => {
+            for (const card of draft.cards) {
+                if (card.content.chart) {
+                    (card.content as { chart: DashboardCard['content']['chart'] }).chart = {
+                        subset: card.content.chart.subset,
+                        filters: card.content.chart.filters,
+                        selectors: card.content.chart.selectors,
+                    };
+                }
+            }
+        }));
+        return {
+            name: this.name,
+            description: this.description,
+            data,
+        };
+    }
+
+    public loadAll(data: ReturnType<typeof this.save>) {
+        this.name = data.name;
+        this.description = data.description;
+        this.pages = data.data.map(page => produce(page as DashboardDocument, draft => {
+            for (const card of draft.cards) {
+                if (card.content.chart) {
+                    card.content.chart.highlighter = [];
+                    card.content.chart.size = { w: 1, h: 1 };
+                }
+            }
+        }));
+    }
+
     /**
      * 涉及到适合使用 mobx runInAction 处理的场景，改写为这个方法，以方便在这个 store 中进行追踪
      * @param updater change any state in store as an action

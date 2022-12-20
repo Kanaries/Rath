@@ -7,6 +7,7 @@ import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
+import { IVisSpecType } from '../../../interfaces';
 
 
 const FilterSegment: React.FC = () => {
@@ -44,10 +45,10 @@ const FilterSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            iconProps={{ iconName: collectionStore.collectionContains(filterViews.views[i].fields, spec, filterViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            iconProps={{ iconName: collectionStore.collectionContains(filterViews.views[i].fields, spec, IVisSpecType.vegaSubset, filterViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.toggleCollectState(filterViews.views[i].fields, spec, filterViews.views[i].filters)
+                                collectionStore.toggleCollectState(filterViews.views[i].fields, spec, IVisSpecType.vegaSubset, filterViews.views[i].filters)
                             }}
                         />
                         <CommandButton
@@ -57,19 +58,13 @@ const FilterSegment: React.FC = () => {
                                 commonStore.visualAnalysisInGraphicWalker(spec)
                             }}
                         />
-                        <CommandButton
-                            iconProps={{ iconName: 'Compare' }}
-                            text={intl.get('semiAuto.main.compare')}
-                            onClick={() => {
-                                semiAutoStore.updateCompareView(filterViews.views[i])
-                            }}
-                        />
                     </Stack>
                     <div className="chart-container">
                         <ReactVega
                             actions={mainVizSetting.debug}
                             spec={adviceVisSize(spec, fieldMetas)}
                             dataSource={applyFilters(dataSource, filterViews.views[i].filters)}
+                            config={commonStore.themeConfig}
                         />
                     </div>
                     <div className="chart-desc">

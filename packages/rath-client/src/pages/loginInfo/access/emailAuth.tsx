@@ -24,8 +24,8 @@ const EmailAuthDiv = styled.div`
 `;
 
 const EmailAuth: React.FC<EmailAuthProps> = (props) => {
-    const { commonStore } = useGlobalStore();
-    const { signup } = commonStore;
+    const { userStore } = useGlobalStore();
+    const { signup } = userStore;
     const { onSuccessLogin } = props;
     const originSupportEmail = window.location.hostname !== 'kanaries.cn';
     const email = signup.email;
@@ -39,7 +39,7 @@ const EmailAuth: React.FC<EmailAuthProps> = (props) => {
                     label={intl.get('login.email.title')}
                     required
                     onChange={(e, newValue) => {
-                        commonStore.updateForm(IAccessPageKeys.SIGNUP, 'email', newValue || '');
+                        userStore.updateForm(IAccessPageKeys.SIGNUP, 'email', newValue || '');
                     }}
                     errorMessage={email.length > 0 && !emailIsValid ? intl.get('login.email.errEmail') : ''}
                 />
@@ -52,7 +52,7 @@ const EmailAuth: React.FC<EmailAuthProps> = (props) => {
                     buttonLabel={clock > 0 ? `${intl.get('login.haveSent')}(${clock}s)` : intl.get('login.getCertCode')}
                     isDisable={!emailIsValid || email.length === 0 || !originSupportEmail || clock !== 0}
                     onChange={(newValue) => {
-                        commonStore.updateForm(IAccessPageKeys.SIGNUP, 'certCode', newValue || '');
+                        userStore.updateForm(IAccessPageKeys.SIGNUP, 'certCode', newValue || '');
                     }}
                 />
             </div>
@@ -60,7 +60,7 @@ const EmailAuth: React.FC<EmailAuthProps> = (props) => {
                 <PrimaryButton
                     disabled={!emailIsValid || !originSupportEmail || signup.certCode.length !== 6}
                     onClick={() => {
-                        commonStore.liteAuth('email').then((res) => {
+                        userStore.liteAuth('email').then((res) => {
                             if (res) {
                                 onSuccessLogin();
                             }

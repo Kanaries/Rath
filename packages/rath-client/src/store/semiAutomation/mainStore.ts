@@ -1,41 +1,75 @@
 import produce from "immer";
-import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
+import { IReactionDisposer, makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { IFieldEncode, IFilter, IPattern } from "@kanaries/loa";
 import { Specification } from "visual-insights";
-import { IFieldMeta, IResizeMode, IVegaSubset } from "../../interfaces";
+import { IResizeMode, IRow, ISpecSourceType, IVegaSubset } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
 import { labDistVis } from "../../queries/labdistVis";
 import { loaEngineService } from "../../services/index";
 import { DataSourceStore } from "../dataSourceStore";
+import { adviceVisSize } from "../../pages/collection/utils";
 import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoViews } from "./localTypes";
 
 const RENDER_BATCH_SIZE = 5;
 
+function batchSpecify (assoViews: IAssoViews, vizAlgo: "lite" | "strict", mainVizSetting: IMainVizSetting, dataSource: IRow[]) {
+    const { amount, views } = assoViews;
+    const renderedViews = views.slice(0, amount);
+    if (vizAlgo === 'lite') {
+        return renderedViews.map(v => distVis({
+            pattern: v,
+            specifiedEncodes: v.encodes,
+            excludeScaleZero: mainVizSetting.excludeScaleZero
+        }))
+    } else {
+        return renderedViews.map(v => labDistVis({
+            pattern: v,
+            dataSource: dataSource,
+            specifiedEncodes: v.encodes,
+            excludeScaleZero: mainVizSetting.excludeScaleZero
+        }))
+    }
+}
+
 export class SemiAutomationStore {
-    public settings: ISetting;
+    public settings!: ISetting;
     public showSettings: boolean = false;
-    public mainVizSetting: IMainVizSetting;
-    public pattViews: IAssoViews;
-    public featViews: IAssoViews;
-    public filterViews: IAssoViews;
-    public neighborViews: IAssoViews;
+    public mainVizSetting!: IMainVizSetting;
+    public pattViews!: IAssoViews;
+    public featViews!: IAssoViews;
+    public filterViews!: IAssoViews;
+    public neighborViews!: IAssoViews;
     private dataSourceStore: DataSourceStore;
     public mainView: IPattern | null = null;
-    public compareView: IPattern | null = null;
     public specForGraphicWalker: Specification = {};
     public showMiniFloatView: boolean = false;
     public neighborKeys: string[] = [];
-    public autoAsso: {
+    public mainViewSpecSource: ISpecSourceType = 'default';
+    public autoAsso!: {
         [key in IRenderViewKey]: boolean;
-    } = {
-        pattViews: true,
-        featViews: true,
-        filterViews: true,
-        neighborViews: true
-    }
-    private reactions: any[] = [];
+    };
+    private reactions: IReactionDisposer[] = [];
     constructor (dataSourceStore: DataSourceStore) {
         this.dataSourceStore = dataSourceStore;
+        this.init();
+        makeAutoObservable(this, {
+            pattViews: observable.shallow,
+            featViews: observable.shallow,
+            filterViews: observable.shallow,
+            mainView: observable.ref,
+            // @ts-expect-error private field
+            dataSourceStore: false,
+            reactions: false
+        });
+    }
+    public init () {
+        this.mainViewSpecSource = 'default';
+        this.autoAsso = {
+            pattViews: true,
+            featViews: true,
+            filterViews: true,
+            neighborViews: true
+        }
         this.mainVizSetting = {
             interactive: false,
             debug: false,
@@ -48,7 +82,7 @@ export class SemiAutomationStore {
             excludeScaleZero: false
         }
         this.settings = {
-            vizAlgo: 'lite'
+            vizAlgo: 'strict'
         }
         this.pattViews = makeInitAssoViews(RENDER_BATCH_SIZE);
         this.featViews = makeInitAssoViews(RENDER_BATCH_SIZE);
@@ -94,17 +128,20 @@ export class SemiAutomationStore {
                 this.initRenderViews('neighborViews');
             }
         }))
-
-        makeAutoObservable(this, {
-            pattViews: observable.shallow,
-            featViews: observable.shallow,
-            filterViews: observable.shallow,
-            mainView: observable.ref,
-            compareView: observable.ref,
-            // @ts-expect-error private field
-            dataSourceStore: false,
-            reactions: false
-        });
+    }
+    public setMainViewSpecSource (sourceType: ISpecSourceType) {
+        this.mainViewSpecSource = sourceType;
+    }
+    public changeMainViewSpecSource () {
+        if (this.mainViewSpecSource === 'custom') {
+            this.mainViewSpecSource = 'default'
+        } else {
+            this.mainViewSpecSource = 'custom'
+        }
+    }
+    public clearStore () {
+        this.reactions.forEach(clear => clear())
+        this.reactions = [];
     }
     public setShowSettings (show: boolean) {
         this.showSettings = show;
@@ -123,7 +160,6 @@ export class SemiAutomationStore {
     }
     public clearMainView () {
         this.mainView = null;
-        this.compareView = null;
     }
     public initMainViewWithSingleField (fid: string) {
         const field = this.fieldMetas.find(f => f.fid === fid);
@@ -158,80 +194,20 @@ export class SemiAutomationStore {
     public get pattSpecList () {
         // TODO: 这里的设计并不会带来性能上的优化，过去只会被计算一次的整体，现在反而要算的更多。
         // 仅仅对于联想视图比较多的场景会有优化。
-        const { amount, views } = this.pattViews;
-        const renderedViews = views.slice(0, amount);
-        if (this.settings.vizAlgo === 'lite') {
-            return renderedViews.map(v => distVis({
-                pattern: v,
-                specifiedEncodes: v.encodes,
-                excludeScaleZero: this.mainVizSetting.excludeScaleZero
-            }))
-        } else {
-            return renderedViews.map(v => labDistVis({
-                pattern: v,
-                dataSource: this.dataSource,
-                specifiedEncodes: v.encodes,
-                excludeScaleZero: this.mainVizSetting.excludeScaleZero
-            }))
-        }
+        return batchSpecify(this.pattViews, this.settings.vizAlgo, this.mainVizSetting, this.dataSource);
     }
     public get featSpecList () {
         // TODO: 这里的设计并不会带来性能上的优化，过去只会被计算一次的整体，现在反而要算的更多。
         // 仅仅对于联想视图比较多的场景会有优化。
-        const { amount, views } = this.featViews;
-        const renderedViews = views.slice(0, amount);
-        if (this.settings.vizAlgo === 'lite') {
-            return renderedViews.map(v => distVis({
-                pattern: v,
-                specifiedEncodes: v.encodes,
-                excludeScaleZero: this.mainVizSetting.excludeScaleZero
-            }))
-        } else {
-            return renderedViews.map(v => labDistVis({
-                pattern: v,
-                dataSource: this.dataSource,
-                specifiedEncodes: v.encodes,
-                excludeScaleZero: this.mainVizSetting.excludeScaleZero
-            }))
-        }
+        return batchSpecify(this.featViews, this.settings.vizAlgo, this.mainVizSetting, this.dataSource);
     }
     public get neighborSpecList () {
-        const { amount, views } = this.neighborViews;
-        const renderedViews = views.slice(0, amount);
-        if (this.settings.vizAlgo === 'lite') {
-            return renderedViews.map(v => distVis({
-                pattern: v,
-                specifiedEncodes: v.encodes,
-                excludeScaleZero: this.mainVizSetting.excludeScaleZero
-            }))
-        } else {
-            return renderedViews.map(v => labDistVis({
-                pattern: v,
-                dataSource: this.dataSource,
-                specifiedEncodes: v.encodes,
-                excludeScaleZero: this.mainVizSetting.excludeScaleZero
-            }))
-        }
+        return batchSpecify(this.neighborViews, this.settings.vizAlgo, this.mainVizSetting, this.dataSource);
     }
     public get filterSpecList () {
         // TODO: 这里的设计并不会带来性能上的优化，过去只会被计算一次的整体，现在反而要算的更多。
         // 仅仅对于联想视图比较多的场景会有优化。
-        const { amount, views } = this.filterViews;
-        const renderedViews = views.slice(0, amount);
-        if (this.settings.vizAlgo === 'lite') {
-            return renderedViews.map(v => distVis({
-                pattern: v,
-                excludeScaleZero: this.mainVizSetting.excludeScaleZero,
-                specifiedEncodes: v.encodes
-            }))
-        } else {
-            return renderedViews.map(v => labDistVis({
-                pattern: v,
-                dataSource: this.dataSource,
-                specifiedEncodes: v.encodes,
-                excludeScaleZero: this.mainVizSetting.excludeScaleZero
-            }))
-        }
+        return batchSpecify(this.filterViews, this.settings.vizAlgo, this.mainVizSetting, this.dataSource);
     }
 
     public changeRenderAmount (stateKey: IRenderViewKey, size: number) {
@@ -241,6 +217,14 @@ export class SemiAutomationStore {
     public increaseRenderAmount (stateKey: IRenderViewKey) {
         const safeSize = Math.min(this[stateKey].amount + RENDER_BATCH_SIZE, this[stateKey].views.length)
         this.changeRenderAmount(stateKey, safeSize)
+    }
+    public updateAssoViews (viewKey: IRenderViewKey, views: IPattern[]) {
+        this[viewKey].views = views;
+        this[viewKey].amount = RENDER_BATCH_SIZE;
+        this[viewKey].computing = false;
+    }
+    public endAssoViewComputing (viewKey: IRenderViewKey) {
+        this[viewKey].computing = false;
     }
     public async neighborAssociate () {
         this.neighborViews.computing = true
@@ -258,15 +242,11 @@ export class SemiAutomationStore {
                     filters: mainView.filters,
                 }
             }, 'local')
-            runInAction(() => {
-                this.neighborViews.computing = false;
-                this.neighborViews.views = res;
-                this.neighborViews.amount = RENDER_BATCH_SIZE;
-            })
+            this.updateAssoViews('neighborViews', res);
             return res;
         } catch (error) {
             console.error(error);
-            this.neighborViews.computing = false;
+            this.endAssoViewComputing('neighborViews');
         }
     }
     public async featAssociate () {
@@ -279,14 +259,10 @@ export class SemiAutomationStore {
                 task: 'featureSelection',
                 props: mainView
             }, 'local')
-            runInAction(() => {
-                this.featViews.views = res;
-                this.featViews.amount = RENDER_BATCH_SIZE;
-                this.featViews.computing = false;
-            })
+            this.updateAssoViews('featViews', res)
         } catch (error) {
             console.error(error);
-            this.featViews.computing = false;
+            this.endAssoViewComputing('featViews');
         }
     }
     public async pattAssociate () {
@@ -299,14 +275,10 @@ export class SemiAutomationStore {
                 task: 'patterns',
                 props: mainView
             }, 'local')
-            runInAction(() => {
-                this.pattViews.views = res;
-                this.pattViews.amount = RENDER_BATCH_SIZE;
-                this.pattViews.computing = false;
-            })
+            this.updateAssoViews('pattViews', res);
         } catch (error) {
             console.error(error);
-            this.pattViews.computing = false;
+            this.endAssoViewComputing('pattViews');
         }
     }
     public async initAssociate () {
@@ -318,14 +290,10 @@ export class SemiAutomationStore {
                 fields: fieldMetas,
                 task: 'univar'
             }, 'local')
-            runInAction(() => {
-                this.pattViews.computing = false;
-                this.pattViews.views = res;
-                this.pattViews.amount = RENDER_BATCH_SIZE;
-            })
+            this.updateAssoViews('pattViews', res);
         } catch (error) {
             console.error(error);
-            this.pattViews.computing = false;
+            this.endAssoViewComputing('pattViews')
         }
     }
     public async filterAssociate () {
@@ -339,21 +307,17 @@ export class SemiAutomationStore {
                 task: 'filterSelection',
                 props: mainView
             }, 'local')
-            runInAction(() => {
-                this.filterViews.views = res;
-                this.filterViews.amount = RENDER_BATCH_SIZE;
-                this.filterViews.computing = false;
-            })
+            this.updateAssoViews('filterViews', res);
         } catch (error) {
             console.error(error);
-            this.filterViews.computing = false;
+            this.endAssoViewComputing('filterViews');
         }
     }
     public get mainViewSpec (): IVegaSubset | null {
-        const { mainVizSetting, mainView } = this;
+        const { mainVizSetting, mainView, fieldMetas } = this;
         if (mainView === null) return null
         if (this.settings.vizAlgo === 'lite') {
-            return distVis({
+            return adviceVisSize(distVis({
                 resizeMode: mainVizSetting.resize.mode,
                 pattern: toJS(mainView),
                 width: mainVizSetting.resize.width,
@@ -362,9 +326,9 @@ export class SemiAutomationStore {
                 stepSize: 32,
                 excludeScaleZero: mainVizSetting.excludeScaleZero,
                 specifiedEncodes: mainView.encodes
-            })
+            }), fieldMetas, 800, 500)
         } else {
-            return labDistVis({
+            return adviceVisSize(labDistVis({
                 resizeMode: mainVizSetting.resize.mode,
                 pattern: toJS(mainView),
                 width: mainVizSetting.resize.width,
@@ -374,32 +338,7 @@ export class SemiAutomationStore {
                 dataSource: this.dataSource,
                 excludeScaleZero: mainVizSetting.excludeScaleZero,
                 specifiedEncodes: mainView.encodes
-            })
-        }
-    }
-    public get compareViewSpec (): IVegaSubset | null {
-        const { mainVizSetting, compareView } = this;
-        if (compareView === null) return null
-        if (this.settings.vizAlgo === 'lite') {
-            return distVis({
-                resizeMode: mainVizSetting.resize.mode,
-                pattern: toJS(compareView),
-                width: mainVizSetting.resize.width,
-                height: mainVizSetting.resize.height,
-                interactive: mainVizSetting.interactive,
-                stepSize: 32,
-                excludeScaleZero: mainVizSetting.excludeScaleZero
-            })
-        } else {
-            return labDistVis({
-                resizeMode: mainVizSetting.resize.mode,
-                pattern: toJS(compareView),
-                width: mainVizSetting.resize.width,
-                height: mainVizSetting.resize.height,
-                interactive: mainVizSetting.interactive,
-                dataSource: this.dataSource,
-                excludeScaleZero: mainVizSetting.excludeScaleZero
-            })
+            }), fieldMetas, 800, 500)
         }
     }
     public addFieldEncode2MainViewPattern (encode: IFieldEncode) {
@@ -463,45 +402,5 @@ export class SemiAutomationStore {
         this.mainView = view;
         // this.initAssociate()
         // this.clearViews();
-    }
-    public updateCompareView (view: IPattern) {
-        this.compareView = view;
-        this.mainVizSetting.resize.mode = IResizeMode.auto;
-    }
-    public async explainViewDiff (view1: IPattern, view2: IPattern) {
-        if (this.mainView === null) return;
-        this.featViews.computing = true
-        const { fieldMetas, dataSource } = this;
-        try {
-            const res = await loaEngineService<{ features: IFieldMeta[] }>({
-                dataSource,
-                fields: fieldMetas,
-                task: 'comparison',
-                props: [view1, view2]
-            }, 'local')
-            if (res === null) {
-                this.clearViews();
-            } else {
-                runInAction(() => {
-                    if (this.mainView) {
-                        this.clearViews();
-                        this.featViews.views = [
-                            {
-                                ...this.mainView,
-                                fields: [...this.mainView!.fields, ...res.features]
-                            },
-                            {
-                                ...this.mainView,
-                                fields: [...this.mainView!.fields, ...res.features]
-                            }
-                        ]
-                    }
-                    this.featViews.computing = false;
-                })
-            }
-        } catch (error) {
-            console.error(error);
-            this.featViews.computing = false
-        }
     }
 }

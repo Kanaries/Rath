@@ -13,33 +13,25 @@ const AccountDiv = styled.div`
         width: 100%;
         display: flex;
         flex-direction: column;
-        align-items: center;
         margin-bottom: 20px;
-        padding-left: 10px;
-        padding-top: 10px;
+        padding-left: 2em;
         .label {
             font-weight: 600;
             font-size: 14px;
             color: rgb(50, 49, 48);
-            font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont,
-                Roboto, 'Helvetica Neue', sans-serif;
+            font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue',
+                sans-serif;
             -webkit-font-smoothing: antialiased;
         }
         .account {
+            display: flex;
+            flex-direction: column;
             width: 100%;
-            > span {
-                width: 100%;
+            > .label {
+                margin-bottom: 1em;
             }
-            > span:first-child {
-                display: flex;
-                justify-content: space-between;
-                height: 35px;
-                line-height: 35px;
-                margin-bottom: 3px;
-            }
-            > span:last-child {
-                height: 35px;
-                line-height: 35px;
+            > button {
+                width: max-content;
             }
         }
         .phone {
@@ -72,8 +64,8 @@ const PIVOT_LIST = [
 function Account() {
     const [isLoginStatus, setIsLoginStatus] = useState<boolean>(false);
     // const [globalSwitch, setGlobalSwitch] = useState(true);
-    const { commonStore } = useGlobalStore();
-    const { userName, info } = commonStore;
+    const { userStore } = useGlobalStore();
+    const { userName, info } = userStore;
     // const pivots = PIVOT_LIST.map((p) => ({
     //     // ...p,
     //     key: p.itemKey,
@@ -90,7 +82,7 @@ function Account() {
                                 <PivotItem key={item.itemKey} headerText={intl.get(`login.${item.headerText}`)}>
                                     {item.element(() => {
                                         setIsLoginStatus(false);
-                                        commonStore.getPersonalInfo();
+                                        userStore.getPersonalInfo();
                                     })}
                                 </PivotItem>
                             ))}
@@ -101,30 +93,27 @@ function Account() {
                 <div>
                     <div className="account">
                         <span>
-                            <span className="label">Account</span>
                             {userName ? (
                                 <PrimaryButton
                                     className="ml-2"
                                     onClick={() => {
-                                        commonStore.commitLogout()
+                                        userStore.commitLogout();
                                     }}
                                 >
                                     {intl.get('login.signOut')}
                                 </PrimaryButton>
                             ) : (
-                                <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>
-                                    {intl.get('login.signIn')}
-                                </PrimaryButton>
+                                <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>{intl.get('login.signIn')}</PrimaryButton>
                             )}
                         </span>
                         {userName && <TextField value={userName || ''} disabled={true} />}
                     </div>
-                    {userName && (
+                    {info && (
                         <div className="phone">
                             <TextField label="Phone" value={info.phone} disabled={true} />
                         </div>
                     )}
-                    {userName && (
+                    {info && (
                         <div className="email">
                             <TextField label="Email" value={info.email} disabled={true} />
                         </div>

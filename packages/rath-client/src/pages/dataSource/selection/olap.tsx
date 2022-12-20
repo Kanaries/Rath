@@ -6,6 +6,7 @@ import { IMuteFieldBase, IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { logDataImport } from '../../../loggers/dataImport';
 import { notify } from '../../../components/error';
+import { DataSourceTag } from '../../../utils/storage';
 
 const StackTokens = {
     childrenGap: 1
@@ -17,7 +18,7 @@ const PROTOCOL_LIST: IDropdownOption[] = [
 ]
 interface OLAPDataProps {
     onClose: () => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: undefined, tag: DataSourceTag) => void;
 }
 
 const OLAPData: React.FC<OLAPDataProps> = props => {
@@ -47,7 +48,7 @@ const OLAPData: React.FC<OLAPDataProps> = props => {
                     dataSource: data.slice(0, 10),
                     size: data.length
                 });
-                onDataLoaded(fieldMetas, data);
+                onDataLoaded(fieldMetas, data, undefined, DataSourceTag.OLAP);
                 onClose();
             })
             .catch((err) => {

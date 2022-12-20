@@ -11,8 +11,8 @@ import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import produce from 'immer';
 import { IFieldEncode } from '@kanaries/loa';
-import { IFieldMeta } from '../interfaces';
-import { AGGREGATION_LIST } from '../global';
+import { IFieldMeta } from '../../interfaces';
+import { AGGREGATION_LIST } from '../../global';
 import BasePillPlaceholder from './basePillPlaceholder';
 
 const Cont = styled.div`

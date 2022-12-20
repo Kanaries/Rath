@@ -1,11 +1,12 @@
 import { PrimaryButton, Stack, TextField } from '@fluentui/react';
 import React, { useCallback, useState } from 'react';
-import ReactJson from 'react-json-view';
 import styled from 'styled-components'
 import intl from 'react-intl-universal'
+import MonacoEditor from 'react-monaco-editor';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../../constants';
 import { IDatasetBase, IMuteFieldBase, IRow } from '../../../interfaces';
 import { logDataImport } from '../../../loggers/dataImport';
+import { DataSourceTag } from '../../../utils/storage';
 
 function requestAPIData (api: string): Promise<IDatasetBase> {
     return new Promise<IDatasetBase>((resolve, reject) => {
@@ -46,7 +47,7 @@ interface RestFulProps {
     onClose: () => void;
     onStartLoading: () => void;
     onLoadingFailed: (err: any) => void;
-    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[]) => void;
+    onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: undefined, tag: DataSourceTag) => void;
 }
 const RestFul: React.FC<RestFulProps> = props => {
     const { onClose, onStartLoading, onLoadingFailed, onDataLoaded } = props;
@@ -56,7 +57,7 @@ const RestFul: React.FC<RestFulProps> = props => {
         onStartLoading();
         requestAPIData(api).then(data => {
             const { dataSource, fields } = data;
-            onDataLoaded(fields, dataSource);
+            onDataLoaded(fields, dataSource, undefined, DataSourceTag.RESTFUL);
             logDataImport({
                 dataType: "Restful API",
                 name: api,
@@ -76,7 +77,8 @@ const RestFul: React.FC<RestFulProps> = props => {
             }} />
         </Stack>
         <PrimaryButton iconProps={{ iconName: 'CloudDownload' }} text={`${intl.get('dataSource.importData.restful.requestData')}`} className="inner-button" onClick={loadData} />
-        <ReactJson src={EXAMPLE_DATA} name={`${intl.get('dataSource.importData.restful.exampleDataStruct')}`} collapsed={2} displayObjectSize={false} />
+        <h1>{intl.get('dataSource.importData.restful.exampleDataStruct')}</h1>
+        <MonacoEditor width="600" height="300" language="json" theme="vs" value={JSON.stringify(EXAMPLE_DATA, null, 2)} />
     </Cont>
 }
 

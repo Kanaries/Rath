@@ -1,7 +1,7 @@
 import { DefaultButton, PrimaryButton, TextField } from '@fluentui/react';
 import React, { useMemo, useRef, useState } from 'react';
 import intl from 'react-intl-universal';
-import { ICol, IExtField, IFieldMeta, IRow } from '../../../interfaces';
+import { ICol, IFieldMeta, IRow } from '../../../interfaces';
 import { rich } from '../../../latiao/ide-helper';
 import { getOperatorList } from '../../../latiao/program/operator';
 import DistributionChart from '../metaView/distChart';
@@ -18,45 +18,56 @@ interface IProps {
     onClose: () => void;
 }
 const ComputationConsole: React.FC<IProps> = (props) => {
-    const { data, onClose, fields, extData } = props;
+    const { onClose, fields } = props;
     const [code, setCode] = useState('');
     const editorRef = useRef<HTMLDivElement>(null);
-    const [editing, setEditing] = useState<{ pos: [number, number], text: string }>({
+    const [editing, ] = useState<{ pos: [number, number]; text: string }>({
         pos: [0, 0],
         text: '',
     });
     const cursorPosRef = useRef<number>();
-    const [position, setPosition] = useState<{
-        x: number; y: number; w: number; h: number; H: number; offset: number
+    const [position, ] = useState<{
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+        H: number;
+        offset: number;
     }>({ x: 0, y: 0, w: 0, h: 0, H: 0, offset: 0 });
     const [maybeIdx, setMaybeIdx] = useState(0);
-    const [preview, setPreview] = useState<IFieldMeta[]>([]);
-    const [errMsg, setErrMsg] = useState<[string, [number, number]]>(['', [-1, -1]]);
+    const [preview, ] = useState<IFieldMeta[]>([]);
+    const [errMsg, ] = useState<[string, [number, number]]>(['', [-1, -1]]);
     const resultRef = useRef<IRow[]>();
     const inputMaybe = useMemo<InputMaybe[]>(() => {
-
         if (editing.text.length === 0) {
             // 只推算子
             const ops = getOperatorList();
 
-            const maybe = ops.reduce<typeof ops>(
-                (list, op) => {
-                    if (list.find(o => o.name === op.name)) {
+            const maybe = ops
+                .reduce<typeof ops>((list, op) => {
+                    if (list.find((o) => o.name === op.name)) {
                         return list;
                     }
 
                     return [...list, op];
-                }, []
-            ).map(op => ({
-                type: 'operator' as const,
-                content: op.name,
-                description: intl.get(`latiao.op.${op.name}`) || '',
-            })).sort(); // 字典序
+                }, [])
+                .map((op) => ({
+                    type: 'operator' as const,
+                    content: op.name,
+                    description: intl.get(`latiao.op.${op.name}`) || '',
+                }))
+                .sort(); // 字典序
 
-            return maybe.find(op => op.content === editing.text) ? [] : maybe;
+            return maybe.find((op) => op.content === editing.text) ? [] : maybe;
         }
 
-        const pattern = new RegExp(`^${editing.text.split('').map(c => `.*${c}`).join('')}.*$`, 'i');
+        const pattern = new RegExp(
+            `^${editing.text
+                .split('')
+                .map((c) => `.*${c}`)
+                .join('')}.*$`,
+            'i'
+        );
 
         const maybe: InputMaybe[] = [];
 
@@ -68,43 +79,55 @@ const ComputationConsole: React.FC<IProps> = (props) => {
             });
         }
 
-        const matchedFields = fields.filter(f => (
-            f.fid.match(pattern) || f.name?.match(pattern)
-        ));
+        const matchedFields = fields.filter((f) => f.fid.match(pattern) || f.name?.match(pattern));
 
-        maybe.push(...matchedFields.map(f => ({
-            type: 'fid' as const,
-            content: `_${f.fid}`,
-            description: f.name ?? f.fid,
-        })));
+        maybe.push(
+            ...matchedFields.map((f) => ({
+                type: 'fid' as const,
+                content: `_${f.fid}`,
+                description: f.name ?? f.fid,
+            }))
+        );
 
         // 文本越长说明匹配比例越低
         maybe.sort((a, b) => a.content.length - b.content.length);
 
         if (editing.text.startsWith('$')) {
             // 优先推算子
-            const ops = getOperatorList().filter(op => op.name.slice(1).match(new RegExp(`^${editing.text.slice(1).split('').map(c => `.*${c}`).join('')}.*$`, 'i')));
+            const ops = getOperatorList().filter((op) =>
+                op.name.slice(1).match(
+                    new RegExp(
+                        `^${editing.text
+                            .slice(1)
+                            .split('')
+                            .map((c) => `.*${c}`)
+                            .join('')}.*$`,
+                        'i'
+                    )
+                )
+            );
 
             maybe.splice(
                 0,
                 0,
-                ...ops.reduce<typeof ops>(
-                    (list, op) => {
-                        if (list.find(o => o.name === op.name)) {
+                ...ops
+                    .reduce<typeof ops>((list, op) => {
+                        if (list.find((o) => o.name === op.name)) {
                             return list;
                         }
 
                         return [...list, op];
-                    }, []
-                ).map(op => ({
-                    type: 'operator' as const,
-                    content: op.name,
-                    description: intl.get(`latiao.op.${op.name}`) || '',
-                })).sort((a, b) => a.content.length - b.content.length)
+                    }, [])
+                    .map((op) => ({
+                        type: 'operator' as const,
+                        content: op.name,
+                        description: intl.get(`latiao.op.${op.name}`) || '',
+                    }))
+                    .sort((a, b) => a.content.length - b.content.length)
             );
         }
 
-        return maybe.find(m => m.content === editing.text) ? [] : maybe;
+        return maybe.find((m) => m.content === editing.text) ? [] : maybe;
     }, [editing, fields]);
     const submitMaybe = (data: string) => {
         const textarea = editorRef.current?.querySelector('textarea');
@@ -112,13 +135,7 @@ const ComputationConsole: React.FC<IProps> = (props) => {
         if (textarea) {
             cursorPosRef.current = textarea.selectionEnd;
 
-            setCode(
-                `${
-                    code.slice(0, editing.pos[0])
-                }${data}${
-                    code.slice(editing.pos[1])
-                }`
-            );
+            setCode(`${code.slice(0, editing.pos[0])}${data}${code.slice(editing.pos[1])}`);
         }
     };
     return (
@@ -283,9 +300,7 @@ const ComputationConsole: React.FC<IProps> = (props) => {
                         >
                             {intl.get('dataSource.extend.apply')}
                         </PrimaryButton>
-                        <DefaultButton onClick={onClose}>
-                            {intl.get('dataSource.extend.cancel')}
-                        </DefaultButton>
+                        <DefaultButton onClick={onClose}>{intl.get('dataSource.extend.cancel')}</DefaultButton>
                     </div>
                 </div>
             </ConsoleContainer>

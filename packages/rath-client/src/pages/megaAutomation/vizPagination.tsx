@@ -5,6 +5,7 @@ import produce from 'immer';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import intl from 'react-intl-universal';
 import ReactVega from '../../components/react-vega';
 import { IFieldMeta, IVegaSubset } from '../../interfaces';
 import { distVis } from '../../queries/distVis';
@@ -50,12 +51,20 @@ function extractVizGridOnly(spec: IVegaSubset): IVegaSubset {
                 draft.encoding[ch as keyof IVegaSubset['encoding']]!.title = null;
                 // @ts-ignore
                 draft.encoding[ch as keyof IVegaSubset['encoding']]!.axis = {
-                    labelLimit: 32,
-                    labelOverlap: 'parity',
+                    labels: false,
                     ticks: false,
                 };
+                // for cases when you want to show axis
+                // draft.encoding[ch as keyof IVegaSubset['encoding']]!.axis = {
+                //     labelLimit: 32,
+                //     labelOverlap: 'parity',
+                //     ticks: false,
+                // };
                 // @ts-ignore
                 draft.encoding[ch].legend = null;
+                if (ch === 'size') {
+                    draft.encoding[ch as keyof IVegaSubset['encoding']]!.scale = { rangeMax: 120, rangeMin: 0 };
+                }
             }
         }
     });
@@ -63,7 +72,7 @@ function extractVizGridOnly(spec: IVegaSubset): IVegaSubset {
 }
 
 const VizPagination: React.FC = (props) => {
-    const { megaAutoStore } = useGlobalStore();
+    const { megaAutoStore, commonStore } = useGlobalStore();
     const { insightSpaces, fieldMetas, visualConfig, vizMode, pageIndex, samplingDataSource } = megaAutoStore;
     const [searchContent, setSearchContent] = useState<string>('');
     const updatePage = useCallback(
@@ -105,7 +114,7 @@ const VizPagination: React.FC = (props) => {
 
     const searchedInsightViews = useMemo(() => {
         return searchFilterView(searchContent, insightViews);
-    }, [searchContent, insightViews])
+    }, [searchContent, insightViews]);
 
     const { items } = usePagination({
         count: searchedInsightViews.length,
@@ -117,11 +126,7 @@ const VizPagination: React.FC = (props) => {
     });
     return (
         <div>
-            <SearchBox
-                onSearch={setSearchContent}
-                placeholder="search views"
-                iconProps={{ iconName: 'Search' }}
-            />
+            <SearchBox onSearch={setSearchContent} placeholder={intl.get('common.search.searchViews')} iconProps={{ iconName: 'Search' }} />
             <VizCardContainer>
                 {searchedInsightViews.length > 0 &&
                     items.map(({ page, type, selected, ...item }, index) => {
@@ -137,6 +142,7 @@ const VizPagination: React.FC = (props) => {
                                             dataSource={samplingDataSource}
                                             spec={view.spec}
                                             actions={visualConfig.debug}
+                                            config={commonStore.themeConfig}
                                         />
                                     </VisErrorBoundary>
                                 );
@@ -154,12 +160,8 @@ const VizPagination: React.FC = (props) => {
                                 );
                             }
                         } else {
-                            if (type === 'next')
-                                children = (
-                                    <Icon style={{ fontSize: '2em', fontWeight: 600 }} iconName="ChevronRight" />
-                                );
-                            if (type === 'previous')
-                                children = <Icon style={{ fontSize: '2em', fontWeight: 600 }} iconName="ChevronLeft" />;
+                            if (type === 'next') children = <Icon style={{ fontSize: '2em', fontWeight: 600 }} iconName="ChevronRight" />;
+                            if (type === 'previous') children = <Icon style={{ fontSize: '2em', fontWeight: 600 }} iconName="ChevronLeft" />;
                         }
                         return (
                             <VizCard {...item} selected={selected} key={index}>
