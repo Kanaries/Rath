@@ -358,10 +358,6 @@ export default class UserStore {
                             await dataSourceStore.loadBackupDataStore(JSON.parse(res), JSON.parse(rm));
                             break;
                         }
-                        case IKRFComponents.mega: {
-                            // TODO: load to megaAutoStore
-                            break;
-                        }
                         case IKRFComponents.collection: {
                             collectionStore.loadBackup(JSON.parse(res));
                             break;

@@ -5,7 +5,7 @@ import { FC, useEffect, useState } from 'react';
 import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
-import { getKRFParseMap, IKRFComponents, KRF_VERSION } from '../../utils/download';
+import { downloadFileFromBlob, getKRFParseMap, IKRFComponents, KRF_VERSION } from '../../utils/download';
 import { LoginPanel } from '../../pages/loginInfo/account';
 
 const Cont = styled.div`
@@ -68,8 +68,8 @@ const BackupModal: FC = (props) => {
         }
     }, [selectedOrgId, userStore]);
     // const storageItems =
-    const backup = async () => {
-        if (busy || !canBackup || selectedWspId === null) {
+    const backup = async (download = false) => {
+        if (!download && (busy || !canBackup || selectedWspId === null)) {
             return false;
         }
         setBusy(true);
@@ -93,13 +93,6 @@ const BackupModal: FC = (props) => {
                     const data = await dataSourceStore.backupMetaStore()
                     const content = new TextReader(JSON.stringify(data));
                     await zipWriter.add(item.name, content);
-                    break;
-                }
-                case IKRFComponents.mega: {
-                    // FIXME: ? save from mega auto store
-                    // const data = await dataSourceStore.backupMetaStore()
-                    // const content = new TextReader(JSON.stringify(data));
-                    // await zipWriter.add(item.name, content);
                     break;
                 }
                 case IKRFComponents.collection: {
@@ -129,8 +122,11 @@ const BackupModal: FC = (props) => {
         }
         const blob = await zipWriter.close();
         const file = new File([blob], 'rathds_backup.krf');
-        await userStore.uploadNotebook(selectedWspId ?? 0, file);
-        // downloadFileFromBlob(blob, 'rathds_backup.krf');
+        if (download) {
+            downloadFileFromBlob(blob, 'rathds_backup.krf');
+        } else {
+            await userStore.uploadNotebook(selectedWspId!, file);
+        }
         setBusy(false);
     };
     const items: {
@@ -168,7 +164,7 @@ const BackupModal: FC = (props) => {
             containerClassName="modal-container"
         >
             <Cont>
-                {loggedIn ? (
+                {loggedIn || process.env.NODE_ENV === 'development' ? (
                     <>
                         <div className="modal-header">
                             <h3>{intl.get('storage.upload')}</h3>
@@ -215,10 +211,15 @@ const BackupModal: FC = (props) => {
                             />
                         </Stack>
                         <div className="modal-footer">
-                            <PrimaryButton disabled={!canBackup || busy} onClick={backup}>
+                            <PrimaryButton disabled={!canBackup || busy} onClick={() => backup()}>
                                 {busy && <Spinner style={{ transform: 'scale(0.8)', transformOrigin: '0 50%' }} />}
                                 {intl.get('storage.apply')}
                             </PrimaryButton>
+                            {process.env.NODE_ENV === 'development' && (
+                                <button onClick={() => backup(true)}>
+                                    Download File (dev)
+                                </button>
+                            )}
                         </div>
                     </>
                 ) : (

@@ -29,6 +29,20 @@ const Notebook = observer(function Notebook () {
     
     return (
         <Container>
+            {process.env.NODE_ENV === 'development' && (
+                <label>
+                    Upload File (dev)
+                    <input
+                        type="file"
+                        onChange={e => {
+                            const [file] = e.target.files ?? [undefined];
+                            if (file) {
+                                userStore.loadNotebook(file);
+                            }
+                        }}
+                    />
+                </label>
+            )}
             <header>{loggedIn ? intl.get('storage.download') : intl.get('login.login')}</header>
             {loggedIn ? (
                 <NotebookSpace />
@@ -36,17 +50,6 @@ const Notebook = observer(function Notebook () {
                 <div>
                     <LoginPanel />
                 </div>
-            )}
-            {process.env.NODE_ENV === 'development' && (
-                <input
-                    type="file"
-                    onChange={e => {
-                        const [file] = e.target.files ?? [undefined];
-                        if (file) {
-                            userStore.loadNotebook(file);
-                        }
-                    }}
-                />
             )}
         </Container>
     );
