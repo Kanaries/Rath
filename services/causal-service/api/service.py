@@ -1,7 +1,7 @@
 import requests, logging, json
 
 from . import session, common as c, interface as I
-from interface import BaseModel, Literal, List, Optional, Union, Tuple
+from .interface import BaseModel, Literal, List, Optional, Union, Tuple
 
 url = 'https://showwhy.gateway.kanaries.cn:3433'
 url = 'http://52.82.70.212:8081'
