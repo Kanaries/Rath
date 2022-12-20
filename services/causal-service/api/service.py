@@ -1,9 +1,51 @@
 import requests, logging, json
 
 from . import session, common as c, interface as I
+from interface import BaseModel, Literal, List, Optional, Union, Tuple
 
 url = 'https://showwhy.gateway.kanaries.cn:3433'
 url = 'http://52.82.70.212:8081'
+
+class DeciModelOptions(BaseModel):
+    base_distribution_type: Literal["gaussian", "spline"] = "gaussian"
+    spline_bins: int = 16
+    imputation: bool = False
+    lambda_dag: float = 100.0
+    lambda_sparse: float = 5.0
+    tau_gumbel: float = 1.0
+    var_dist_A_mode: Literal["simple", "enco", "true", "three"] = "three"
+    imputer_layer_sizes: Optional[List[int]] = None
+    mode_adjacency: Literal["upper", "lower", "learn"] = "learn"
+    # TODO: Once pytorch implements opset 17 we can use nn.LayerNorm
+    norm_layers: bool = False
+    res_connection: bool = True
+    encoder_layer_sizes: Optional[List[int]] = [32, 32]
+    decoder_layer_sizes: Optional[List[int]] = [32, 32]
+    cate_rff_n_features: int = 3000
+    cate_rff_lengthscale: Union[int, float, List[float], Tuple[float, float]] = 1
+    
+class DeciTrainingOptions(BaseModel):
+    learning_rate: float = 1e-3
+    batch_size: int = 256
+    standardize_data_mean: bool = False
+    standardize_data_std: bool = False
+    rho: float = 1.0
+    safety_rho: float = 1e13
+    alpha: float = 0.0
+    safety_alpha: float = 1e13
+    tol_dag: float = 1e-3
+    progress_rate: float = 0.25
+    max_steps_auglag: int = 20
+    max_auglag_inner_epochs: int = 1000
+    max_p_train_dropout: float = 0.25
+    reconstruction_loss_factor: float = 1.0
+    anneal_entropy: Literal["linear", "noanneal"] = "noanneal"
+    
+class DeciAteOptions(BaseModel):
+    Ngraphs: Optional[int] = 1
+    Nsamples_per_graph: Optional[int] = 5000
+    most_likely_graph: Optional[int] = True
+
 
 def inferDataNature(data, fields: c.IFieldMeta):
     import pandas as pd
