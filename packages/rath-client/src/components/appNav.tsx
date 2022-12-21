@@ -26,7 +26,7 @@ const NavContainer = styled.div`
         flex-shrink: 0;
         overflow: hidden;
     }
-    padding-left: 10px;
+    /* padding-left: 10px; */
     .text-red {
         color: #e94726;
     }
@@ -38,13 +38,36 @@ const NavContainer = styled.div`
     }
 `;
 
-const LogoBar = styled.div`
+const StyledNav = styled(Nav)<{ navMode: "text" | "icon" }>`
+    & * {
+        color: inherit;
+    }
+    a.ms-Nav-link, a.ms-Nav-compositeLink {
+        border-radius: 2px 0 0 2px;
+        padding-right: ${({ navMode }) => navMode === 'text' ? '1em' : '0'};
+        ::after {
+            display: none;
+        }
+    }
+    .ms-Nav-link[aria-current] {
+        color: rgb(26, 26, 26);
+    }
+    .ms-Nav-compositeLink:hover {
+        color: rgb(26, 26, 26);
+    }
+`;
+
+const LogoBar = styled.div<{ navMode: "text" | "icon" }>`
     display: flex;
-    padding: 12px;
+    padding: 12px ${({ navMode }) => navMode === 'text' ? '24px' : '0'};
+    height: 50px;
     align-items: center;
+    justify-content: center;
+    border-right: 2px solid;
     h1 {
         margin-left: 12px;
         font-size: 1.6em;
+        margin-block: 0.4em;
     }
 `;
 
@@ -173,10 +196,12 @@ const AppNav: React.FC<AppNavProps> = (props) => {
 
     return (
         <NavContainer>
-            <LogoBar>
+            <LogoBar navMode={navMode}>
                 <a
                     // onClick={() => { window.location.reload(false); }}
                     href="https://kanaries.cn/"
+                    target="_blank"
+                    rel="noreferrer"
                 >
                     <img style={{ width: '38px', marginTop: '4px' }} src="./assets/kanaries-lite.png" alt="rath" />
                 </a>
@@ -189,8 +214,8 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     </h1>
                 )}
             </LogoBar>
-            <div style={{ flexGrow: 1, flexShrink: 1 }}>
-                <Nav selectedKey={appKey} groups={groups} />
+            <div style={{ flexGrow: 1, flexShrink: 1, padding: '8px 0 8px 10px' }}>
+                <StyledNav navMode={navMode} selectedKey={appKey} groups={groups} />
             </div>
             <div className="nav-footer">
                 <UserSetting />

@@ -6,38 +6,54 @@ import { Specification } from 'visual-insights';
 import {
     DefaultButton,
     Slider,
-    Stack,
     SwatchColorPicker,
-    ChoiceGroup,
     Pivot,
     PivotItem,
-    Toggle,
 } from '@fluentui/react';
 import { toJS } from 'mobx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import embed, { vega } from 'vega-embed';
 import { Item, ScenegraphEvent } from 'vega';
+import {
+    ArrowPathIcon,
+    BackwardIcon,
+    DocumentMagnifyingGlassIcon,
+    FunnelIcon,
+    MagnifyingGlassCircleIcon,
+    PaintBrushIcon,
+    PencilIcon,
+    PlusCircleIcon,
+    SwatchIcon,
+    TrashIcon,
+} from '@heroicons/react/24/solid';
 import intl from 'react-intl-universal';
 import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
 import { transVegaSubset2Schema } from '../../utils/transform';
 import { viewSampling } from '../../lib/stat/sampling';
+import Toolbar, { ToolbarItemProps } from '../../components/toolbar';
 import { batchMutInCatRange, batchMutInCircle, clearAggregation, debounceShouldNeverBeUsed, labelingData } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
-import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './constants';
+import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX } from './constants';
 import NeighborAutoLink from './neighborAutoLink';
 import EmptyError from './emptyError';
 import Operations from './operations';
+import CanvasContainer from './canvasContainer';
 
-const Cont = styled.div`
-    /* cursor: none !important; */
+
+const MainHeader = styled.div`
+    font-size: 1.5em;
+    font-weight: 500;
 `;
 
 const PainterContainer = styled.div`
+    margin-top: 1.5em;
+    padding: 2em;
     display: flex;
     overflow-x: auto;
+    background-color: #fffe;
     .vis-segment {
         flex-grow: 1;
     }
@@ -45,6 +61,13 @@ const PainterContainer = styled.div`
         flex-grow: 0;
         flex-shrink: 0;
     }
+`;
+
+const FormContainer = styled.div`
+    margin: 2px;
+    border-radius: 1.2px;
+    padding: 0.5em;
+    background-color: #f2f2f2;
 `;
 
 enum PIVOT_TAB_KEYS {
@@ -79,10 +102,6 @@ const Painter: React.FC = (props) => {
 
     const painting = painterMode !== PAINTER_MODE.MOVE;
 
-    const clearPainting = useCallback(() => {
-        setViewData(labelingData(painterViewData, initValue));
-    }, [painterViewData, initValue, setViewData]);
-
     const fieldsInView = useMemo<IFieldMeta[]>(() => {
         const res: IFieldMeta[] = [];
         if (vizSpec) {
@@ -95,6 +114,17 @@ const Painter: React.FC = (props) => {
         }
         return res;
     }, [fieldMetas, vizSpec]);
+
+    const spRef = useRef(samplePercent);
+    spRef.current = samplePercent;
+    const fieldsRef = useRef(fieldsInView);
+    fieldsRef.current = fieldsInView;
+
+    const clearPainting = useCallback(() => {
+        const size = Math.min(painterViewData.length, Math.round(painterViewData.length * spRef.current));
+        const sampleData = viewSampling(labelingData(painterViewData, initValue), fieldsRef.current, size);
+        setViewData(sampleData);
+    }, [painterViewData, initValue, setViewData]);
 
     useEffect(() => {
         const size = Math.min(painterViewData.length, Math.round(painterViewData.length * samplePercent));
@@ -141,6 +171,7 @@ const Painter: React.FC = (props) => {
         }
         return null;
     }, [vizSpec, mutFeatValues, noViz, painterMode]);
+    const [realPainterSize, setRealPainterSize] = useState(0);
     useEffect(() => {
         if (painterSpec !== null && container.current) {
 
@@ -155,6 +186,7 @@ const Painter: React.FC = (props) => {
                         .remove(() => true)
                         .insert(viewData)
                 );
+                setRealPainterSize((res.view as unknown as { _width: number })._width * painterSize);
                 if (!(painterSpec.encoding.x && painterSpec.encoding.y)) return;
                 const xField = painterSpec.encoding.x.field;
                 const yField = painterSpec.encoding.y.field;
@@ -178,7 +210,7 @@ const Painter: React.FC = (props) => {
                                 point: [item.datum[xField], item.datum[yField]],
                                 a: xRange[1] - xRange[0],
                                 b: yRange[1] - yRange[0],
-                                r: painterSize,
+                                r: painterSize / 2,
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
@@ -228,7 +260,7 @@ const Painter: React.FC = (props) => {
                                 mutData: viewData,
                                 fields: [xField, yField],
                                 point: [item.datum[xField], item.datum[yField]],
-                                r: painterSize,
+                                r: painterSize / 2,
                                 key: LABEL_FIELD_KEY,
                                 range: yRange[1] - yRange[0],
                                 indexKey: LABEL_INDEX,
@@ -276,7 +308,7 @@ const Painter: React.FC = (props) => {
                                 mutData: viewData,
                                 fields: [yField, xField],
                                 point: [item.datum[yField], item.datum[xField]],
-                                r: painterSize,
+                                r: painterSize / 2,
                                 range: xRange[1] - xRange[0],
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
@@ -352,135 +384,218 @@ const Painter: React.FC = (props) => {
         return {};
     }, [painterSpec]);
 
+    const currentColor = COLOR_CELLS.find(f => f.id === mutFeatValues[mutFeatIndex])?.color;
+
+    const tools: ToolbarItemProps[] = [
+        {
+            key: 'clear',
+            label: intl.get('painter.clearPainting'),
+            icon: BackwardIcon,
+            onClick: () => clearPainting(),
+        },
+        {
+            key: 'sync',
+            label: intl.get('painter.syncData'),
+            icon: ArrowPathIcon,
+            onClick: () => setGWTrigger(v => !v),
+        },
+        '-',
+        {
+            key: PAINTER_MODE.MOVE,
+            label: intl.get(`painter.tools.${PAINTER_MODE.MOVE}`),
+            icon: MagnifyingGlassCircleIcon,
+            checked: painterMode === PAINTER_MODE.MOVE,
+            onChange: selected => {
+                if (selected) {
+                    setPainterMode(PAINTER_MODE.MOVE);
+                }
+            },
+        },
+        {
+            key: PAINTER_MODE.COLOR,
+            label: intl.get(`painter.tools.${PAINTER_MODE.COLOR}`),
+            icon: () => <SwatchIcon fill={painterMode === PAINTER_MODE.COLOR ? currentColor : 'currentColor'} />,
+            checked: painterMode === PAINTER_MODE.COLOR,
+            onChange: selected => {
+                if (selected) {
+                    setPainterMode(PAINTER_MODE.COLOR);
+                }
+            },
+            form: painterMode === PAINTER_MODE.COLOR ? (
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <SwatchColorPicker
+                        styles={{ root: { margin: '0.5em 1.2em' } }}
+                        selectedId={mutFeatValues[mutFeatIndex]}
+                        columnCount={5}
+                        cellShape={'circle'}
+                        colorCells={COLOR_CELLS}
+                        onChange={(e, id) => {
+                            if (id) {
+                                const targetIndex = COLOR_CELLS.findIndex((f) => f.id === id);
+                                targetIndex > -1 && setMutFeatIndex(targetIndex);
+                            }
+                        }}
+                    />
+                    <DefaultButton
+                        styles={{ root: { margin: '4px 8px 8px' } }}
+                        onClick={() => setMutFeatValues((v) => [...v, `Label ${v.length + 1}`])}
+                        disabled
+                    >
+                        <PlusCircleIcon width="1.5em" height="1.5em" style={{ marginRight: '0.4em' }} />
+                        <span>{intl.get('painter.addLabel')}</span>
+                    </DefaultButton>
+                </div>
+            ) : undefined,
+        },
+        {
+            key: PAINTER_MODE.ERASE,
+            label: intl.get(`painter.tools.${PAINTER_MODE.ERASE}`),
+            icon: TrashIcon,
+            checked: painterMode === PAINTER_MODE.ERASE,
+            onChange: selected => {
+                if (selected) {
+                    setPainterMode(PAINTER_MODE.ERASE);
+                }
+            },
+        },
+        {
+            key: PAINTER_MODE.CREATE,
+            label: intl.get(`painter.tools.${PAINTER_MODE.CREATE}`),
+            icon: PaintBrushIcon,
+            checked: painterMode === PAINTER_MODE.CREATE,
+            onChange: selected => {
+                if (selected) {
+                    setPainterMode(PAINTER_MODE.CREATE);
+                }
+            },
+            disabled: true,
+        },
+        {
+            key: 'paint_size',
+            label: intl.get('painter.brushSize'),
+            icon: PencilIcon,
+            form: (
+                <FormContainer>
+                    <Slider
+                        min={0.01}
+                        max={1}
+                        step={0.01}
+                        value={painterSize}
+                        label={intl.get('painter.brushSize')}
+                        styles={{ root: { width: '200px' } }}
+                        onChange={(s, v) => {
+                            setPainterSize(s);
+                        }}
+                    />
+                </FormContainer>
+            ),
+        },
+        '-',
+        {
+            key: 'sample_rate',
+            label: intl.get('painter.samplePercent'),
+            icon: FunnelIcon,
+            form: (
+                <FormContainer>
+                    <Slider
+                        min={0.01}
+                        max={1}
+                        step={0.01}
+                        value={samplePercent}
+                        valueFormat={val => `${Math.floor(val * 100)}%`}
+                        label={intl.get('painter.samplePercent')}
+                        styles={{ root: { width: '200px' } }}
+                        onChange={(s, v) => {
+                            setSamplePercent(s);
+                        }}
+                    />
+                </FormContainer>
+            ),
+        },
+        {
+            key: 'disable_aggregation',
+            label: intl.get('painter.useOriginalDist'),
+            icon: DocumentMagnifyingGlassIcon,
+            checked: clearAgg,
+            onChange: checked => setClearAgg(Boolean(checked)),
+        },
+    ];
+
+    const [showCursorPreview, setShowCursorPreview] = useState(false);
+    const painterColor = currentColor && painterMode === PAINTER_MODE.COLOR ? currentColor : '#8888';
+
+    useEffect(() => {
+        setRealPainterSize(0);
+    }, [painterSize]);
+
+    useEffect(() => {
+        setShowCursorPreview(true);
+        const timer = setTimeout(() => {
+            setShowCursorPreview(false);
+        }, 1_000);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [realPainterSize, painterColor]);
+
     if (noViz) {
         return <EmptyError />;
     }
     return (
-        <Cont style={{ padding: '1em' }}>
-            <div className="cursor rounded"></div>
-            <div className="card">
+        <div className="content-container">
+            <div className="app-card">
+                <MainHeader>
+                    {intl.get('menu.painter')}
+                </MainHeader>
                 <PainterContainer>
                     <div className="vis-segment" onTouchMove={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
                     }}>
-                        <div ref={container}></div>
+                        <div className="operation-segment" style={{ marginBottom: '2em' }}>
+                            <Toolbar
+                                items={tools}
+                            />
+                        </div>
+                        <div>
+                            <CanvasContainer
+                                showTrack={painterMode === PAINTER_MODE.COLOR || painterMode === PAINTER_MODE.ERASE}
+                                color={painterColor}
+                                size={realPainterSize}
+                                preview={showCursorPreview}
+                            >
+                                <div ref={container}></div>
+                            </CanvasContainer>
+                        </div>
                         <Operations />
                     </div>
-                    <div className="operation-segment">
-                        <Stack tokens={{ childrenGap: 18 }}>
-                            <Stack.Item>
-                                <ChoiceGroup
-                                    selectedKey={painterMode}
-                                    onChange={(e, op) => {
-                                        op && setPainterMode(op.key as PAINTER_MODE);
-                                    }}
-                                    options={PAINTER_MODE_LIST.map(r => ({
-                                        ...r,
-                                        text: intl.get(`painter.tools.${r.key}`)
-                                    }))}
-                                />
-                            </Stack.Item>
-                            {painterMode === PAINTER_MODE.COLOR && (
-                                <Stack.Item>
-                                    <SwatchColorPicker
-                                        selectedId={mutFeatValues[mutFeatIndex]}
-                                        columnCount={5}
-                                        cellShape={'circle'}
-                                        colorCells={COLOR_CELLS}
-                                        onChange={(e, id) => {
-                                            if (id) {
-                                                const targetIndex = COLOR_CELLS.findIndex((f) => f.id === id);
-                                                targetIndex > -1 && setMutFeatIndex(targetIndex);
-                                            }
-                                        }}
-                                    />
-                                </Stack.Item>
-                            )}
-                            <Stack.Item>
-                                <Slider
-                                    min={0.01}
-                                    max={1}
-                                    step={0.01}
-                                    value={samplePercent}
-                                    label={intl.get('painter.samplePercent')}
-                                    onChange={(s, v) => {
-                                        setSamplePercent(s);
-                                    }}
-                                />
-                            </Stack.Item>
-                            <Stack.Item>
-                                <Slider
-                                    min={0.01}
-                                    max={1}
-                                    step={0.01}
-                                    value={painterSize}
-                                    label={intl.get('painter.brushSize')}
-                                    onChange={(s, v) => {
-                                        setPainterSize(s);
-                                    }}
-                                />
-                            </Stack.Item>
-                            <Stack.Item>
-                                <Toggle label={intl.get('painter.useOriginalDist')} inlineLabel checked={clearAgg} onChange={(e, checked) => {
-                                    setClearAgg(Boolean(checked))
-                                }} />
-                            </Stack.Item>
-                            {painterMode === PAINTER_MODE.COLOR && (
-                                <Stack.Item>
-                                    <DefaultButton
-                                        disabled
-                                        text={intl.get('painter.addLabel')}
-                                        onClick={() => {
-                                            setMutFeatValues((v) => [...v, `Label ${v.length + 1}`]);
-                                        }}
-                                    />
-                                </Stack.Item>
-                            )}
-                        </Stack>
-                    </div>
                 </PainterContainer>
-                <div>
-                    <Stack horizontal tokens={{ childrenGap: 10 }}>
-                        <DefaultButton
-                            iconProps={{ iconName: 'Trash' }}
-                            text={intl.get('painter.clearPainting')}
-                            onClick={clearPainting}
-                        />
-                        <DefaultButton
-                            iconProps={{ iconName: 'Sync' }}
-                            text={intl.get('painter.syncData')}
-                            onClick={() => {
-                                setGWTrigger(v => !v)
-                            }}
-                        />
-                    </Stack>
-                </div>
-                <hr style={{ margin: '1em' }} />
-                <Pivot
-                    selectedKey={pivotKey}
-                    onLinkClick={(item) => {
-                        item && setPivotKey(item.props.itemKey as PIVOT_TAB_KEYS);
-                    }}
-                    style={{ marginTop: '1em' }}
-                >
-                    <PivotItem headerText={intl.get('painter.search')} itemKey={PIVOT_TAB_KEYS.SEARCH} itemIcon="Search" />
-                    <PivotItem
-                        headerText={intl.get('painter.explore')}
-                        itemKey={PIVOT_TAB_KEYS.EXPLORE}
-                        itemIcon="BarChartVerticalEdit"
-                    />
-                </Pivot>
+                <PainterContainer>
+                    <Pivot
+                        selectedKey={pivotKey}
+                        onLinkClick={(item) => {
+                            item && setPivotKey(item.props.itemKey as PIVOT_TAB_KEYS);
+                        }}
+                    >
+                        <PivotItem headerText={intl.get('painter.search')} itemKey={PIVOT_TAB_KEYS.SEARCH} itemIcon="Search">
+                            <NeighborAutoLink
+                                vizSpec={vizSpec}
+                                dataSource={viewData}
+                                fieldMetas={fieldMetas}
+                            />
+                        </PivotItem>
+                        <PivotItem
+                            headerText={intl.get('painter.explore')}
+                            itemKey={PIVOT_TAB_KEYS.EXPLORE}
+                            itemIcon="BarChartVerticalEdit"
+                        >
+                            <EmbedAnalysis dataSource={viewData} spec={walkerSchema} fields={fieldsInWalker} trigger={gwTrigger} i18nLang={langStore.lang} />
+                        </PivotItem>
+                    </Pivot>
+                </PainterContainer>
             </div>
-            {pivotKey === PIVOT_TAB_KEYS.SEARCH && <NeighborAutoLink
-                vizSpec={vizSpec}
-                dataSource={viewData}
-                fieldMetas={fieldMetas}
-            />}
-            {pivotKey === PIVOT_TAB_KEYS.EXPLORE && (
-                <EmbedAnalysis dataSource={viewData} spec={walkerSchema} fields={fieldsInWalker} trigger={gwTrigger} i18nLang={langStore.lang} />
-            )}
-        </Cont>
+        </div>
     );
 };
 

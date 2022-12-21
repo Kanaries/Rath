@@ -21,6 +21,7 @@ const ListItem = styled.div`
     overflow: hidden;
     min-width: ${(UserTagGroupSize + UserTagGroupPadding * 2) * ((allUserTagGroups.length - 1) * 0.8 + 1) + 10}px;
     height: 100%;
+    box-sizing: border-box;
     padding: 1.2em 1em 1em 1.4em;
     border-radius: 2px;
     position: relative;
