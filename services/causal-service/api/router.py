@@ -86,6 +86,8 @@ Discovery = APIRouter(prefix='/s/{sessionId}', tags=['Discovery'])
 @Discovery.post('/discover', response_model=DiscoverResp)
 def discover(sessionId: str, data: DiscoverReq):
     taskId = str(uuid.uuid4())
+    if data.algoName != 'DECI':
+        res = discovery_alg[data.algoName](sessionId, data)
     res = s.runDiscover(sessionId, data)
     taskId = res
     session.setValue(sessionId, f"task-{taskId}/meta", json.dumps({'taskType': 'discovery', 'taskOpt': data.algoName}))
