@@ -20,16 +20,13 @@ const LiteTable = styled.table`
         font-weight: 500;
         font-size: 14px;
     }
-    tr{
-        border-color: #red;
-    }
     td{
         padding: revert;
         background: revert;
         height: revert;
         border: none;
         border-right: revert;
-        border-top-color: #f2f2f2 !important;
+        border-top-color: #f8f8f8 !important;
         border-bottom: revert;
     }
 `
