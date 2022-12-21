@@ -11,7 +11,9 @@ import Picker from './picker';
 const Container = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
-    overflow: hidden auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 `;
 
 const CausalDatasetConfig: FC = () => {

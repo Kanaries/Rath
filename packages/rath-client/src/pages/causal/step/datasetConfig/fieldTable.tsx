@@ -16,7 +16,8 @@ import { getI18n } from '../../locales';
 
 const TableContainer = styled.div`
     margin: 0.6em 0;
-    max-height: 30vh;
+    flex-grow: 1;
+    flex-shrink: 1;
     overflow: hidden auto;
     > * {
         height: 100%;
