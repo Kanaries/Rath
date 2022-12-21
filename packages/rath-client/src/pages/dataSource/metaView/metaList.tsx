@@ -20,6 +20,7 @@ import { ANALYTIC_TYPE_CHOICES, SEMANTIC_TYPE_CHOICES } from '../config';
 import FieldExtSuggestions from '../../../components/fieldExtend/suggestions';
 import { getGlobalStore } from '../../../store';
 import { PIVOT_KEYS } from '../../../constants';
+import { RATH_THEME_CONFIG } from '../../../theme';
 import DistributionChart from './distChart';
 
 const MetaContainer = styled.div`
@@ -51,16 +52,16 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         }
     }
     .dimension {
-        background-color: #1890ff;
+        background-color: ${RATH_THEME_CONFIG.dimensionColor};
     }
     .measure {
-        background-color: #13c2c2;
+        background-color: ${RATH_THEME_CONFIG.measureColor};
     }
     .disable {
-        background-color: #9e9e9e;
+        background-color: ${RATH_THEME_CONFIG.disableColor};
     }
     .preview {
-        background-color: #faad14;
+        background-color: ${RATH_THEME_CONFIG.previewColor}
     }
     h1 {
         font-weight: 500;
