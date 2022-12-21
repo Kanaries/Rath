@@ -2,17 +2,17 @@ import styled from 'styled-components';
 
 export const AssociationContainer = styled.div`
     border: solid 1px #bfbfbf;
-    marginTop: 2em;
-    backgroundColor: #e7e7e7;
-    .content-container{
+    margin-top: 2em;
+    background-color: #e7e7e7;
+    .asso-content-container{
         display: flex;
-        flexWrap: wrap;
+        flex-wrap: wrap;
         overflow: auto
     }
 `
 export const AssoViewContainer = styled.div`
-    backgroundColor: #fff;
-    margin: 6px;
+    background-color: #fff;
+    margin: 3px;
     padding: 10px;
-    flexGrow: 1;
+    flex-grow: 1;
 `
