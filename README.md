@@ -162,6 +162,21 @@ Assisted with AI, RATH can help you with your data analysis. Just provide RATH w
 
 [Data Painter Video](https://youtu.be/djqePNyhz7w)
 
+### 🌅 Causal Analysis (Alpha stage)
+
+Causal analysis could be defined as the way to identify and examine the causal relationship between variables, which helps in the aid of creation of better prediction models and decision-making.
+
+RATH's causal analysis feature include:
+- Causal Discovery
+- Editable graphical causal models
+- Causal interpretability
+- Interactive tools for deeper exploration
+- What-if analysis
+
+![Causal Analysis](https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/causal-analysis.png)
+
+For more about Causal Analysis features, refer to [RATH Docs](https://docs.kanaries.net/causal-analysis).
+
 ## Supported Databases
 
 RATH supports a wide range of data sources. Here are some of the major database solutions that you can connect to RATH:
