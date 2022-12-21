@@ -13,6 +13,7 @@ const CustomBaseTable = styled(BaseTable)`
     --header-bgcolor: #ffffff !important;
     --bgcolor: rgba(0, 0, 0, 0);
     --border-color: #f2f2f2;
+    --row-height: 38px;
     .${Classes.tableHeaderCell} {
         position: relative;
     }

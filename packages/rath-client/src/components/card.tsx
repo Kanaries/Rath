@@ -7,7 +7,7 @@ export const Card = styled.div<CardProps>`
     background-color: ${props => props.backgroundColor || '#fff'};
     padding: 28px;
     border-radius: 2px;
-    box-shadow: 0 1.6px 3.6px 0 rgba(0,0,0,0.132), 0 0.3px 0.9px 0 rgba(0,0,0,0.108);
+    box-shadow: 0 1.6px 7.6px 0 rgba(0, 0, 0, 0.1), 0 0.3px 1.9px 0 rgba(0, 0, 0, 0.08);
     margin-bottom: 28px;
     animation-duration: 0.5s;
     animation-name: showCard;
