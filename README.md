@@ -84,13 +84,12 @@ To get started with RATH, you can:
 
 ## Why use RATH?
 
-- Effortlessly automate your Exploratory Data Analysis process with a no-code UI.
+- Effortlessly automate your Exploratory Data Analysis process.
 - Generate editable and insightful data visualizations. Freely modify your visualizations with Vega/Vega-lite.
 - Support a variety of database types.
-- Flexible copilot to assist your data exploration journey.
+- Use predictive interaction to provide analysis suggestions based on your operation and status.
 - Paint your data to explore your datasets directly with Data Painter.
 - Causal discovery and explainer module to help you understand complex data patterns.
-- Open APIs and SDK for embedding requirements.
 
 ## Try RATH
 
@@ -113,7 +112,7 @@ yarn workspace rath-client start
 
 - 🤖 [Mega-auto exploration](https://docs.kanaries.net/auto-explore): a fully-automated way to explore your data set and visualize your data with one click. Leave everything to RATH, simply pick the associate view that inspires you the most.
 
-- 🛠 [Semi-auto exploration](https://docs.kanaries.net/semi-auto-explore): The middle ground between a fully automated Data Exploration and Tableau-like manual exploration. RATH will work as your copilot, learn your interests and uses AI to generate relevant recommendations for you.
+- 🛠 [Semi-auto exploration](https://docs.kanaries.net/semi-auto-explore): The middle ground between a fully automated Data Exploration and manual exploration. RATH will work as your copilot, learn your interests and uses augmented analytics engine to generate relevant recommendations for you.
 
 - 🎨 [Data painter](https://docs.kanaries.net/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features. A video about data painter [here](https://youtu.be/djqePNyhz7w)
 
@@ -143,7 +142,7 @@ Assisted with AI, RATH can help you with your data analysis. Just provide RATH w
 
 <a href="https://docs.kanaries.net/semi-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/rath-data-analysis-ai-copilot.gif" alt="RATH Data Analysis AI Copilot"></a>
 
-### Manually explore your data with a Tableau-like UI:
+### Manually explore your data with drag and drop:
 
 <a href="https://docs.kanaries.net/semi-auto-data-exploration#manually-explore-your-data"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/manually-explore-data-tableau-ui.gif" alt="Manually explore your data with a Tableau-like UI"></a>
 
@@ -158,13 +157,13 @@ Assisted with AI, RATH can help you with your data analysis. Just provide RATH w
 
 ### :sparkles: Interactive data analysis workflow by data painting
 
-<a href="https://docs.kanaries.net/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="Interactive data analysis by painting"></a>
+[Data Painter Video 🔥 on Youtube](https://youtu.be/djqePNyhz7w)
 
-[Data Painter Video](https://youtu.be/djqePNyhz7w)
+<a href="https://docs.kanaries.net/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="Interactive data analysis by painting"></a>
 
 ### 🌅 Causal Analysis (Alpha stage)
 
-Causal analysis could be defined as the way to identify and examine the causal relationship between variables, which helps in the aid of creation of better prediction models and decision-making.
+Causal analysis could be defined as the way to identify and examine the causal relationship between variables, which can help explore the data, create better prediction models and make business decission.
 
 RATH's causal analysis feature include:
 - Causal Discovery
