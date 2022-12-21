@@ -103,22 +103,28 @@ yarn workspace rath-client start
 
 <a href="https://docs.kanaries.net/zh/data-profiling#导入数据"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/import-data-from-selected-data-source.gif" alt="导入数据源"></a>
 
-### 浏览数据视图
+### 数据转化与清洗
+导入数据后，你可以在RATH中快速了解数据的大致分布情况，RATH也会提供一些自动化清洗和转化的方法。
+
+另外，RATH还内置了文本模式识别提取功能，对于一些文本字段，你可以在文本中选择你关心的部分，RATH会自动归纳文本特征，并为你匹配类似的特征，并提取生成新字段。
+![text pattern selection](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/text-pattern-selection-01.gif)
 
 <a href="https://docs.kanaries.net/zh/data-profiling#数据剖析"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/view-statistics-data-source.gif" alt="浏览数据视图"></a>
 
 ### 一键全自动分析，并生成可视化视图
+在完全没有头绪时，点击自动分析，RATH就可以帮你完成对数据集的探索与挖掘，帮你发现数据中的规律，问题，并自动生成可视化。
 
 <a href="https://docs.kanaries.net/zh/mega-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/one-click-automated-data-analysis-visualization.gif" alt="RATH全自动分析"></a>
 
 ### 半自动探索
 
-RATH作为数据分析的智能助手，通过AI学习给出提示，协助数据分析师探索数据。
-分析师提供输入，AI智能学习，给出分析：
+结合了全自动和半自动的优点，每次都根据你当前关心的点，推荐下一步的分析建议，而不再是做全局的自动化。
 
 <a href="https://docs.kanaries.net/zh/semi-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/rath-data-analysis-ai-copilot.gif" alt="RATH半自动探索"></a>
 
 ### 自助分析 （类Tableau）
+
+一个传统的类tableau的拖拉拽分析的模块，适合有明确的分析目的和问题。
 
 <a href="https://docs.kanaries.net/zh/semi-auto-data-exploration#自助分析"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/manually-explore-data-tableau-ui.gif" alt="RATH自助分析"></a>
 
@@ -154,7 +160,7 @@ RATH作为数据分析的智能助手，通过AI学习给出提示，协助数�
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/airtable.png" alt="AirTable" border="0" width="200" height="80"/>
 </p>
 
-想要更多种类的数据库支持？[联系我们](#联系我们)
+想要更多种类的数据库支持？[联系我们](#联系我们) 或在issue中提出你的需求
 
 ## 项目看板
 
