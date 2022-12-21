@@ -1,10 +1,11 @@
 import intl from 'react-intl-universal';
 import { Dropdown, Label, Toggle } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { FC, Fragment, useState } from 'react';
+import { FC, Fragment, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { LabelWithDesc } from '../../../../components/labelTooltip';
 import { RenderFormItem, shouldFormItemDisplay } from '../../dynamicForm';
+import { useCausalViewContext } from '../../../../store/causalStore/viewStore';
 import { getI18n } from '../../locales';
 import { useWhatIfContext } from './context';
 
@@ -31,9 +32,25 @@ const Cell = styled.div`
 
 const AdvancedOptions: FC = () => {
     const context = useWhatIfContext();
+    const { form } = context ?? {};
     const [display, setDisplay] = useState(false);
+    const viewContext = useCausalViewContext();
+    const { thresholds } = viewContext ?? {};
+    const { confidence, weight } = thresholds ?? {};
 
-    return context?.form ? (
+    useEffect(() => {
+        if (confidence !== undefined && form) {
+            context!.updateParam('confidence_threshold', confidence);
+        }
+    }, [confidence, form, context]);
+
+    useEffect(() => {
+        if (weight !== undefined && form) {
+            context!.updateParam('weight_threshold', weight);
+        }
+    }, [context, weight, form]);
+
+    return form && context ? (
         <Container>
             <Toggle
                 label={intl.get('common.advanced_options_switch')}
@@ -48,7 +65,7 @@ const AdvancedOptions: FC = () => {
                     </Cell>
                     <Cell role="gridcell" aria-rowindex={1} aria-colindex={2}>
                         <Dropdown
-                            options={Object.keys(context.form).map(name => ({
+                            options={Object.keys(form).map(name => ({
                                 key: name,
                                 text: name,
                             }))}
@@ -58,7 +75,24 @@ const AdvancedOptions: FC = () => {
                             }}
                         />
                     </Cell>
-                    {context.form[context.algoName]?.items.map((item, i) => {
+                    {form[context.algoName]?.items.map((item, i) => {
+                        if (item.key === 'confidence_threshold' || item.key === 'weight_threshold') {
+                            return (
+                                <Fragment key={item.key}>
+                                    <Cell role="gridcell" aria-rowindex={i + 2} aria-colindex={1}>
+                                        <LabelWithDesc label={item.title} description={item.description} />
+                                    </Cell>
+                                    <Cell role="gridcell" aria-rowindex={i + 2} aria-colindex={2}>
+                                        <RenderFormItem
+                                            item={item}
+                                            readOnly
+                                            onChange={() => {}}
+                                            value={context.allParams[context.algoName][item.key]}
+                                        />
+                                    </Cell>
+                                </Fragment>
+                            );
+                        }
                         return shouldFormItemDisplay(item, context.allParams[context.algoName]) && (
                             <Fragment key={item.key}>
                                 <Cell role="gridcell" aria-rowindex={i + 2} aria-colindex={1}>

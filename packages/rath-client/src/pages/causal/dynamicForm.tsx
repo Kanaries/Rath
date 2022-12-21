@@ -20,11 +20,11 @@ export const shouldFormItemDisplay = (item: IFormItem, values: { [key: string]: 
     return true;
 };
 
-export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) => void; value: any }) {
-    const { item, onChange, value } = props;
+export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) => void; value: any; readOnly?: boolean }) {
+    const { item, onChange, value, readOnly } = props;
     switch (item.renderType) {
         case 'text':
-            return <TextField /*label={item.title}*/ value={value} onChange={(e, v) => onChange(v)} />;
+            return <TextField /*label={item.title}*/ readOnly={readOnly} value={value} onChange={(e, v) => onChange(v)} />;
         case 'dropdown':
             return (
                 <Dropdown
@@ -32,7 +32,7 @@ export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) =>
                     options={item.options || []}
                     selectedKey={value}
                     onChange={(e, o) => {
-                        o && onChange(o.key);
+                        !readOnly && o && onChange(o.key);
                     }}
                     // onRenderLabel={makeRenderLabelHandler(item.description)}
                 />
@@ -47,7 +47,7 @@ export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) =>
                     value={value}
                     showValue
                     onChange={(v) => {
-                        onChange(v);
+                        !readOnly && onChange(v);
                     }}
                 />
             );
@@ -57,7 +57,7 @@ export function RenderFormItem(props: { item: IFormItem; onChange: (val: any) =>
                     // label={item.title}
                     checked={value}
                     onChange={(e, v) => {
-                        onChange(Boolean(v));
+                        !readOnly && onChange(Boolean(v));
                     }}
                 />
             );

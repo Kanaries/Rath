@@ -258,7 +258,7 @@ export const LocaleKeys = {
             title: 'Manual Exploration',
         },
         [ExplorationKey.PREDICT]: {
-            title: 'Prediction Test',
+            title: 'Prediction',
             mission: {
                 classification: 'Classification',
                 regression: 'Regression',

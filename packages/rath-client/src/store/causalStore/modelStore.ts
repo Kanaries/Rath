@@ -316,8 +316,8 @@ export default class CausalModelStore {
         const { data: { matrix, fields }, modelId, edges } = result;
         this.modelId = modelId;
         this.causalityRaw = matrix;
-        const confMatrix: number[][] = fields.map(() => fields.map(() => 0));
-        const weightMatrix: number[][] = fields.map(() => fields.map(() => 0));
+        const confMatrix: number[][] = fields.map(() => fields.map(() => NaN));
+        const weightMatrix: number[][] = fields.map(() => fields.map(() => NaN));
         for (const { data: edge } of edges) {
             const srcIdx = fields.findIndex(f => f.fid === edge.source);
             const tarIdx = fields.findIndex(f => f.fid === edge.target);

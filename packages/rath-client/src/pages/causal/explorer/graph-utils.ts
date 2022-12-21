@@ -205,7 +205,7 @@ export const useRenderData = ({
         let links: WeightedPagLink[] = [];
 
         const result = PAG.filter(({ weight }) => {
-            if (mode === 'edit') {
+            if (mode === 'edit' || Number.isNaN(weight)) {
                 return true;
             }
             for (const key of Object.keys(thresholds ?? {}) as (keyof LinkWeightSet)[]) {
@@ -299,7 +299,7 @@ export const useRenderData = ({
                     type: isForbiddenType ? ForbiddenEdgeType : undefined,
                 };
             }
-            const w = 2 / (1 + Math.exp(- (link.weight.weight ?? 0))) - 1;
+            const w = 2 / (1 + Math.exp(- (link.weight.weight || 0))) - 1;
 
             return {
                 id: `link_${i}`,
@@ -317,9 +317,9 @@ export const useRenderData = ({
                     lineWidth: 1 + Math.abs(w) * 2,
                 },
                 label: `${
-                    'confidence' in link.weight ? `c=${(link.weight.confidence! * 100).toFixed(2).replace(/\.?0+$/, '')}%\n` : ''
+                    'confidence' in link.weight && Number.isFinite(link.weight.confidence) ? `c=${(link.weight.confidence! * 100).toFixed(2).replace(/\.?0+$/, '')}%\n` : ''
                 }${
-                    'weight' in link.weight ? `w=${link.weight.weight!.toFixed(2).replace(/\.?0+$/, '')}(${w.toFixed(2).replace(/\.?0+$/, '')})\n` : ''
+                    'weight' in link.weight && Number.isFinite(link.weight.weight) ? `w=${link.weight.weight!.toFixed(2).replace(/\.?0+$/, '')}(${w.toFixed(2).replace(/\.?0+$/, '')})\n` : ''
                 }`.slice(0, /* remove trailing `\n` */ -1),
                 labelCfg: {
                     style: {

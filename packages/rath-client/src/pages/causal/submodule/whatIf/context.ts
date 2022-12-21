@@ -140,21 +140,6 @@ class WhatIfStore {
 
 const WhatIfContext = createContext<WhatIfStore | null>(null);
 
-export const useWhatIfProvider = (): FC => {
-    const context = useMemo(() => new WhatIfStore(), []);
-
-    useEffect(() => {
-        const ref = context;
-        return () => {
-            ref.destroy();
-        };
-    }, [context]);
-
-    return useCallback(function WhatIfProvider ({ children }) {
-        return createElement(WhatIfContext.Provider, { value: context }, children);
-    }, [context]);
-};
-
 export const useWhatIfContext = () => useContext(WhatIfContext);
 
 export const useWhatIfProviderAndContext = (): [FC, WhatIfStore] => {

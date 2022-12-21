@@ -140,6 +140,42 @@ export const fetchCausalAlgorithmList = async (lang: string): Promise<IAlgoSchem
     }
 };
 
+// TODO: 下掉兼容这些算法的老逻辑
+/** @deprecated */
+export const fetchOldCausalAlgorithmList = async (lang: string): Promise<IAlgoSchema | null> => {
+    const { causalStore: {
+        dataset: { allFields },
+        operator: { causalServer, sessionId },
+    } } = getGlobalStore();
+    if (!sessionId) {
+        return null;
+    }
+    try {
+        const res = await fetch(`${causalServer}/algo/list`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fieldMetas: allFields,
+                filedIds: allFields.map(f => f.fid),
+            }),
+        });
+        if (!res.ok) {
+            throw new Error(res.statusText);
+        }
+
+        return await res.json() as IAlgoSchema;
+    } catch (error) {
+        notify({
+            title: 'CausalAlgorithmList 0 Error',
+            type: 'error',
+            content: `${error}`,
+        });
+        return null;
+    }
+};
+
 interface IDiscoverData {
     /** 
      * @deprecated
@@ -220,6 +256,7 @@ const runDiscovery = async (
 ): Promise<[string, IDiscoveryTask] | null> => {
     const {
         operator: { causalServer, sessionId, causalAlgorithmForm, params, algorithm },
+        dataset: { sample: data },
     } = getGlobalStore().causalStore;
     if (sessionId === null || tableId === null || algorithm === null) {
         return null;
@@ -229,7 +266,7 @@ const runDiscovery = async (
         const realParams = Object.fromEntries(causalAlgorithmForm[algorithm].items.filter(item => {
             return shouldFormItemDisplay(item, params[algorithm]);
         }).map(item => [item.key, params[algorithm][item.key]]));
-        const res = await fetch(`${causalServer}/v0.1/s/${sessionId}/discover`, {
+        const res = algorithm === 'DECI' ? await fetch(`${causalServer}/v0.1/s/${sessionId}/discover`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -243,7 +280,39 @@ const runDiscovery = async (
                 funcDeps: functionalDependencies,
                 params: realParams,
             }),
+            // TODO: 下掉兼容这些算法的老逻辑
+        }) : await fetch(`${causalServer}/causal/${algorithm}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                dataSource: await data.getAll(),
+                fields,
+                focusedFields: fields.map(f => f.fid),
+                bgKnowledgesPag: assertionsAsPag,
+                funcDeps: functionalDependencies,
+                params: realParams,
+            }),
         });
+        // TODO: 下掉兼容这些算法的老逻辑
+        if (algorithm !== 'DECI') {
+            const result = await res.json() as {
+                data: IDiscoverResult['data'];
+            };
+            return ['0', {
+                value: Promise.resolve<IDiscoverResult>({
+                    modelId: '-',
+                    data: result.data,
+                    edges: [],
+                }),
+                onprogress: () => void 0,
+                abort: () => void 0,
+                retry: () => {
+                    throw new Error('Not supported');
+                },
+            }];
+        }
         const result = await res.json() as (
             | { success: true; data: { taskId: string } }
             | { success: false; message: string }

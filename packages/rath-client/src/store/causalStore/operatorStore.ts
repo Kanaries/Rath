@@ -8,7 +8,7 @@ import type { IFieldMeta } from "../../interfaces";
 import { IAlgoSchema, makeFormInitParams } from "../../pages/causal/config";
 import { causalService } from "../../pages/causal/service";
 import type { IteratorStorage } from "../../utils/iteStorage";
-import { connectToSession, fetchCausalAlgorithmList, ITaskRecord, updateDataSource } from "./service";
+import { connectToSession, fetchCausalAlgorithmList, fetchOldCausalAlgorithmList, ITaskRecord, updateDataSource } from "./service";
 
 
 export default class CausalOperatorStore {
@@ -98,7 +98,16 @@ export default class CausalOperatorStore {
             reaction(() => this.serverActive, ok => {
                 if (ok) {
                     const { langStore: { lang } } = getGlobalStore();
-                    dynamicFormSchema$.next(fetchCausalAlgorithmList(lang));
+                    const all = Promise.all([
+                        fetchOldCausalAlgorithmList(lang),
+                        fetchCausalAlgorithmList(lang),
+                    ]).then<IAlgoSchema | null>(([old, neu]) => {
+                        if (old && neu) {
+                            return { ...old, ...neu };
+                        }
+                        return old ?? neu ?? null;
+                    });
+                    dynamicFormSchema$.next(all);
                 } else {
                     runInAction(() => {
                         this.causalAlgorithmForm = {};
