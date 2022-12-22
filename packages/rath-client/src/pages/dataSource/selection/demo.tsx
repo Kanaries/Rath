@@ -85,6 +85,7 @@ const ListItem = styled.div`
     flex-direction: column;
     overflow: hidden;
     height: 100%;
+    box-sizing: border-box;
     padding: 1.2em 1em 1em 1.4em;
     border-radius: 2px;
     position: relative;

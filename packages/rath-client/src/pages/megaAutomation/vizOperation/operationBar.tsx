@@ -1,10 +1,14 @@
 import React, { useCallback } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import {  CommandBar, ICommandBarItemProps } from '@fluentui/react';
 import { toJS } from 'mobx';
+import {
+    AdjustmentsHorizontalIcon, LightBulbIcon, PaintBrushIcon, PencilIcon, PencilSquareIcon, StarIcon, TableCellsIcon
+} from '@heroicons/react/24/solid';
 import { useGlobalStore } from '../../../store';
 import { IVisSpecType } from '../../../interfaces';
+import Toolbar from '../../../components/toolbar';
+import { ToolbarItemProps } from '../../../components/toolbar/toolbar-item';
 
 interface OperationBarProps {}
 const OperationBar: React.FC<OperationBarProps> = props => {
@@ -25,80 +29,82 @@ const OperationBar: React.FC<OperationBarProps> = props => {
     }, [mainViewSpec, mainViewPattern, painterStore])
 
     const viewExists = !(mainViewPattern === null || mainViewSpec === null);
-    let starIconName = 'FavoriteStar';
-    if (viewExists) {
+    const starred = viewExists && (() => {
         const viewFields = toJS(mainViewPattern.fields);
         const viewSpec = toJS(mainViewSpec);
-        if (collectionStore.collectionContains(viewFields, viewSpec, IVisSpecType.vegaSubset)) {
-            starIconName = 'FavoriteStarFill'
-        }
-    }
+        return collectionStore.collectionContains(viewFields, viewSpec, IVisSpecType.vegaSubset);
+    })();
 
-    const commandProps: ICommandBarItemProps[] = [
+    const items: ToolbarItemProps[] = [
         {
             key: 'editing',
-            text: intl.get('megaAuto.commandBar.editing'),
-            iconProps: { iconName: 'BarChartVerticalEdit' },
-            subMenuProps: {
+            icon: PencilIcon,
+            label: intl.get('megaAuto.commandBar.editing'),
+            menu: {
                 items: [
                     {
                         key: 'editingInGW',
-                        text: intl.get('megaAuto.commandBar.editInGW'),
-                        iconProps: { iconName: 'BarChartVerticalEdit' },
-                        onClick: customizeAnalysis,
+                        icon: TableCellsIcon,
+                        label: intl.get('megaAuto.commandBar.editInGW'),
+                        onClick: () => customizeAnalysis(),
                     },
                     {
                         key: 'editingInEditor',
-                        text: intl.get('megaAuto.commandBar.editInEditor'),
-                        iconProps: { iconName: 'Edit' },
+                        icon: PencilSquareIcon,
+                        label: intl.get('megaAuto.commandBar.editInEditor'),
                         onClick: () => {
                             if (mainViewPattern && mainViewSpec) {
                                 editorStore.syncSpec(IVisSpecType.vegaSubset, mainViewSpec)
                                 megaAutoStore.changeMainViewSpecSource()
                             }
-                        }
-                    }
-
-                ]
-            }
+                        },
+                    },
+                ],
+            },
         },
         {
             key: 'painting',
-            text: intl.get('megaAuto.commandBar.painting'),
-            iconProps: { iconName: 'EditCreate' },
-            onClick: analysisInPainter
+            icon: PaintBrushIcon,
+            label: intl.get('megaAuto.commandBar.painting'),
+            onClick: () => analysisInPainter(),
         },
         {
             key: 'associate',
-            text: intl.get('megaAuto.commandBar.associate'),
-            iconProps: { iconName: 'Lightbulb' },
-            onClick: () => {
-                megaAutoStore.getAssociatedViews(taskMode);
-            }
+            icon: LightBulbIcon,
+            label: intl.get('megaAuto.commandBar.associate'),
+            onClick: () => megaAutoStore.getAssociatedViews(taskMode),
         },
         {
             key: 'star',
-            text: intl.get('common.star'),
-            iconProps: { iconName: starIconName },
-            onClick: () => {
+            icon: StarIcon,
+            label: intl.get('common.star'),
+            checked: starred,
+            onChange: () => {
                 if (mainViewPattern && mainViewSpec) {
                     collectionStore.toggleCollectState(toJS(mainViewPattern.fields), toJS(mainViewSpec), IVisSpecType.vegaSubset)
                 }
-            }
+            },
         },
         {
             key: 'constraints',
-            text: intl.get('megaAuto.commandBar.constraints'),
-            iconProps: { iconName: 'MultiSelect' },
+            icon: AdjustmentsHorizontalIcon,
+            label: intl.get('megaAuto.commandBar.constraints'),
             onClick: () => {
                 megaAutoStore.setShowContraints(true);
             },
-            disabled: true
-        }
-    ]
+            disabled: true,
+        },
+    ];
 
     return <div style={{ position: 'relative', zIndex: 99}}>
-        <CommandBar items={commandProps} />
+        <Toolbar
+            items={items}
+            styles={{
+                root: {
+                    margin: '1em 0',
+                },
+            }}
+        />
     </div>
 }
 
