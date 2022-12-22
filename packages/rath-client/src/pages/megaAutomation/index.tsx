@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Divider } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
@@ -28,7 +27,6 @@ const InsightContainer = styled.div`
     .ope-container {
         margin: 1em 0em;
         padding-bottom: 1em;
-        border-bottom: 1px solid #f5f5f5;
     }
     .flex-container {
         display: flex;
@@ -114,9 +112,7 @@ const LTSPage: React.FC = () => {
                 <ComputationProgress />
                 <MainHeader>{intl.get('megaAuto.title')}</MainHeader>
                 <p className="state-description">{intl.get('megaAuto.hintMain')}</p>
-                <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
                 <VizPagination />
-                <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
                 <InsightContainer>
                     <div className="ope-container">
                         <OperationBar />

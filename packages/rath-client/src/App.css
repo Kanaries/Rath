@@ -1,6 +1,8 @@
 .content-container{
   /* padding: 1em 9% 0px 9%; */
-  padding: 3px 1em;
+  /* padding: 3px 1em; */
+  padding: 0;
+  position: relative;
 }
 .header-bar{
   position: relative;
@@ -106,6 +108,7 @@ h2, h3 {
 }
 
 .message-container {
+  position: absolute;
   padding: 1em 4em 0em 4em;
 }
 
@@ -127,7 +130,8 @@ h2, h3 {
   /* flex-basis: 220px; */
   flex-grow: 0;
   flex-shrink: 0;
-  background-color: #fff;
+  background-color: rgb(26, 26, 26);
+  color: rgb(239, 239, 239);
 }
 
 .main-app-container > .main-app-content{

@@ -2,7 +2,7 @@ import { Layer, TooltipHost } from "@fluentui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { memo, useEffect } from "react";
 import styled from "styled-components";
-import Toolbar, { ToolbarProps } from ".";
+import Toolbar, { ToolbarProps, useHandlers } from ".";
 
 
 const ToolbarItemContainer = styled.div<{ type: 'button' | 'toggle' | 'split' }>`
@@ -32,7 +32,7 @@ const ToolbarItemContainer = styled.div<{ type: 'button' | 'toggle' | 'split' }>
     }
     &[aria-disabled=false] {
         cursor: pointer;
-        :hover, &.open {
+        :hover, :focus, &.open {
             background-image: linear-gradient(#FFFFFFCC, #FEFEFECC);
             color: #0F172A;
             &.split * svg {
@@ -98,7 +98,7 @@ const ToolbarSplit = styled.div<{ open: boolean }>`
         transform: translate(-50%, ${({ open }) => open ? '-20%' : '-50%'});
         transition: transform 120ms;
     }
-    :hover > svg {
+    :hover > svg, :focus > svg {
         transform: translate(-50%, -20%);
     }
 `;
@@ -151,13 +151,15 @@ const ToolbarButton = memo<{
     item: ToolbarButtonItem;
     styles?: ToolbarProps['styles'];
 }>(function ToolbarButton({ item: { icon: Icon, label, disabled, onClick }, styles }) {
+    const handlers = useHandlers(onClick, disabled ?? false);
+
     return (
         <TooltipHost content={label}>
             <ToolbarItemContainer
-                role="button" tabIndex={0} aria-label={label} aria-disabled={disabled ?? false}
+                role="button" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled ?? false}
                 type="button"
                 style={styles?.item}
-                onClick={disabled ? undefined : onClick}
+                {...handlers}
             >
                 <Icon style={styles?.icon} />
             </ToolbarItemContainer>
@@ -169,13 +171,15 @@ const ToolbarToggleButton = memo<{
     item: ToolbarToggleButtonItem;
     styles?: ToolbarProps['styles'];
 }>(function ToolbarButton({ item: { icon: Icon, label, disabled, checked, onChange }, styles }) {
+    const handlers = useHandlers(() => onChange(!checked), disabled ?? false, [' ']);
+
     return (
         <TooltipHost content={label}>
             <ToolbarItemContainer
-                role="checkbox" tabIndex={0} aria-label={label} aria-disabled={disabled ?? false} aria-checked={checked}
+                role="checkbox" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled ?? false} aria-checked={checked}
                 type="toggle"
                 style={styles?.item}
-                onClick={disabled ? undefined : () => onChange(!checked)}
+                {...handlers}
             >
                 <ToggleContainer checked={checked}>
                     <Icon style={styles?.icon} />
@@ -192,7 +196,27 @@ const ToolbarSplitButton = memo<{
     openedKey: string | null;
     setOpenedKey: (key: string | null) => void;
 }>(function ToolbarSplitButton ({ item: { key, icon: Icon, label, disabled, onClick, menu }, styles, layerId, openedKey, setOpenedKey }) {
-    const opened = key === openedKey;
+    const opened = key === openedKey && !disabled;
+    const handlers = useHandlers(() => {
+        if (onClick) {
+            onClick();
+        } else {
+            setOpenedKey(opened ? null : key);
+        }
+    }, disabled ?? false, [' ']);
+
+    useEffect(() => {
+        if (opened) {
+            requestAnimationFrame(() => {
+                const firstOption = document.getElementById(layerId)?.querySelector('*[role=button]');
+                if (firstOption instanceof HTMLElement) {
+                    // set tab position
+                    firstOption.focus();
+                    firstOption.blur();
+                }
+            });
+        }
+    }, [opened, layerId]);
 
     useEffect(() => {
         if (opened) {
@@ -218,15 +242,15 @@ const ToolbarSplitButton = memo<{
         <TooltipHost content={label}>
             {onClick ? (
                 <ToolbarItemContainer
-                    role="button" tabIndex={0} aria-label={label} aria-disabled={disabled ?? false}
+                    role="button" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled ?? false}
                     type="split"
                     style={styles?.item}
-                    onClick={disabled ? undefined : onClick}
                     className={opened ? 'open' : undefined}
+                    {...handlers}
                 >
                     <Icon style={styles?.icon} />
                     <ToolbarSplit
-                        role="button" tabIndex={0} aria-label={label} aria-disabled={disabled} aria-haspopup="menu"
+                        role="button" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled} aria-haspopup="menu"
                         open={opened}
                         onClick={() => disabled || setOpenedKey(opened ? null : key)}
                     >
@@ -235,11 +259,11 @@ const ToolbarSplitButton = memo<{
                 </ToolbarItemContainer>
             ) : (
                 <ToolbarItemContainer
-                    role="button" tabIndex={0} aria-label={label} aria-disabled={disabled ?? false} aria-haspopup="menu"
+                    role="button" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled ?? false} aria-haspopup="menu"
                     type="split"
                     style={styles?.item}
-                    onClick={() => disabled || setOpenedKey(opened ? null : key)}
                     className={`${opened ? 'open ' : ''}split`}
+                    {...handlers}
                 >
                     <Icon style={styles?.icon} />
                     <ToolbarSplit open={opened}>
