@@ -3,8 +3,9 @@ import requests, logging, json
 from . import session, common as c, interface as I
 from .interface import BaseModel, Literal, List, Optional, Union, Tuple
 
-url = 'https://showwhy.gateway.kanaries.cn:3433'
-url = 'http://52.82.70.212:8081'
+url = 'https://causica.gateway.kanaries.cn:3433'
+url = 'https://causica2.gateway.kanaries.cn:3433'
+# url = 'http://52.82.70.212:8081'
 
 class DeciModelOptions(BaseModel):
     base_distribution_type: Literal["gaussian", "spline"] = "gaussian"
@@ -110,9 +111,9 @@ def runDiscover(sessionId: str, req: I.DiscoverReq):
             'fields': [{'name': f} for f in focusedFields]
         }
     }
-    model_options = I.DeciModelOptions.parse_obj(params.dict())
-    training_options = I.DeciTrainingOptions.parse_obj(params.dict())
-    ate_options = I.DeciAteOptions.parse_obj(params.dict())
+    model_options = DeciModelOptions.parse_obj(params.dict())
+    training_options = DeciTrainingOptions.parse_obj(params.dict())
+    ate_options = DeciAteOptions.parse_obj(params.dict())
     data = {
         'causal_variables': causal_variables,
         'constraints': {

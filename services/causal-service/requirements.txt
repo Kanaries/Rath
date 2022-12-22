@@ -13,3 +13,4 @@ uvicorn[standard]
 gunicorn
 causal-learn
 dowhy
+requests

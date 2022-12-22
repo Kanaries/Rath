@@ -15,10 +15,10 @@ from .. import common as c
 
 class DECIIParams(c.OptionalParams):
     confidence_threshold: Optional[float] = Field(
-        title='置信度阈值(推断用)', default=0.11,
-        ge=0.0, le=1.0, multiple_of=1e-5)
+        title='置信度阈值(推断用)', default=0.11)
+        # ge=0.0, le=1.0, multiple_of=1e-5)
     weight_threshold: Optional[float] = Field(
-        title='置信度阈值(推断用)', default=1e-3)
+        title='权重阈值(推断用)', default=1e-3)
         # ge=0.0, le=1.0, multiple_of=1e-5)
 
 class DECII(c.AlgInterface):

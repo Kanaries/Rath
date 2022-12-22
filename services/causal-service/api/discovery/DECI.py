@@ -74,7 +74,7 @@ class DECIParams(c.OptionalParams):
     ate_options: Optional[str] = "===================================="
     Ngraphs: Optional[int] = 1
     Nsamples_per_graph: Optional[int] = 5000
-    most_likely_graph: Optional[int] = True
+    most_likely_graph: Optional[bool] = True
 
 class DECI(c.AlgInterface):
     ParamType = DECIParams
