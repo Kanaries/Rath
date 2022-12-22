@@ -38,12 +38,19 @@ const NavContainer = styled.div`
     }
 `;
 
+const NavBody = styled.div`
+    flex-grow: 1;
+    flex-shrink: 1;
+    padding: 10px 0 10px 8px;
+    border-radius: 12px 12px 0 0;
+`;
+
 const StyledNav = styled(Nav)<{ navMode: "text" | "icon" }>`
     & * {
         color: inherit;
     }
     a.ms-Nav-link, a.ms-Nav-compositeLink {
-        border-radius: 2px 0 0 2px;
+        border-radius: 6px 0 0 6px;
         padding-right: ${({ navMode }) => navMode === 'text' ? '1em' : '0'};
         ::after {
             display: none;
@@ -63,7 +70,6 @@ const LogoBar = styled.div<{ navMode: "text" | "icon" }>`
     height: 50px;
     align-items: center;
     justify-content: center;
-    border-right: 2px solid;
     h1 {
         margin-left: 12px;
         font-size: 1.6em;
@@ -214,9 +220,9 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     </h1>
                 )}
             </LogoBar>
-            <div style={{ flexGrow: 1, flexShrink: 1, padding: '8px 0 8px 10px' }}>
+            <NavBody>
                 <StyledNav navMode={navMode} selectedKey={appKey} groups={groups} />
-            </div>
+            </NavBody>
             <div className="nav-footer">
                 <UserSetting />
                 <LoginInfo />

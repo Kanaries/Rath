@@ -42,9 +42,8 @@ const CausalPage: FC = () => {
     return (
         <div className="content-container">
             <ViewContextProvider>
-                <Main className="card">
+                <Main className="app-card">
                     <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>因果分析</h1>
-                    <hr className="card-line" />
                     <CausalStepPager />
                 </Main>
             </ViewContextProvider>

@@ -71,7 +71,7 @@ const LiteFocusZone: React.FC = (props) => {
                             }}
                         />
                     )}
-                    <IconButton
+                    {/* <IconButton
                         style={BUTTON_STYLE}
                         iconProps={{ iconName: 'Settings' }}
                         ariaLabel={intl.get('common.settings')}
@@ -80,7 +80,7 @@ const LiteFocusZone: React.FC = (props) => {
                         onClick={() => {
                             semiAutoStore.setShowSettings(true);
                         }}
-                    />
+                    /> */}
                     <IconButton
                         style={BUTTON_STYLE}
                         iconProps={{ iconName: showActions ? 'GroupedAscending' : 'GroupedDescending' }}
