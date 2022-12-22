@@ -34,7 +34,7 @@ const ComputationProgress: React.FC = () => {
     }, [computing]);
 
     return (
-        <div>
+        <div style={{ position: 'absolute', backgroundColor: '#f3f3f3ee' }}>
             {computing && (
                 <ProgressIndicator
                     description={`${intl.get('megaAuto.computing')}: ${pn > 0 ? Math.round(pn * 100) + '%' : ''}`}

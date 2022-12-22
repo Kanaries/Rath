@@ -60,12 +60,13 @@ const ToggleContainer = styled.div<{ checked: boolean }>`
     box-shadow: ${({ checked }) => checked ? 'inset 0px 1px 6px 2px rgba(0, 0, 0, 0.33)' : 'inset 0px 1px 4px 1px rgba(136, 136, 136, 0.16)'};
     border-radius: 4px;
     position: relative;
+    background-color: #F7F7F722;
     > svg {
         width: var(--icon-size);
         height: var(--icon-size);
         position: absolute;
-        color: ${({ checked }) => checked ? '#EDEFF4' : '#525763'};
-        --shadow-color: ${({ checked }) => checked ? '#2956bf66' : '#52576366'};
+        color: ${({ checked }) => checked ? '#EDEFF4' : '#9ba1ab' ||  '#525763'};
+        --shadow-color: ${({ checked }) => checked ? '#2956bf66' : '#9ba1ab66' || '#52576366'};
         transition: color 120ms;
     }
     ::before {
@@ -78,7 +79,7 @@ const ToggleContainer = styled.div<{ checked: boolean }>`
         height: 100%;
         background-color: #132f70;
         transform: ${({ checked }) => checked ? 'translate(0)' : 'translateX(-100%)'};
-        transition: transform 120ms;
+        transition: transform 80ms;
     }
 `;
 
@@ -235,7 +236,11 @@ const ToolbarSplitButton = memo<{
                 } else if (e instanceof KeyboardEvent && e.key === 'Escape') {
                     setOpenedKey(null);
                 } else if (e instanceof MouseEvent) {
-                    setOpenedKey(null);
+                    setTimeout(() => {
+                        if (openedRef.current) {
+                            setOpenedKey(null);
+                        }
+                    }, 100);
                 }
             };
 
