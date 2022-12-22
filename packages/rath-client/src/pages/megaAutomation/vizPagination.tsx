@@ -1,9 +1,13 @@
+<<<<<<< HEAD
 import { Icon, SearchBox, Theme, useTheme } from '@fluentui/react';
+=======
+import { Icon, SearchBox, Spinner } from '@fluentui/react';
+>>>>>>> 49efdcb1 (fix(megaauto): charts in pagination not synchronized with main view)
 import { IPattern } from '@kanaries/loa';
 import usePagination from '@material-ui/core/usePagination/usePagination';
 import produce from 'immer';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import ReactVega from '../../components/react-vega';
@@ -13,7 +17,7 @@ import { labDistVis } from '../../queries/labdistVis';
 import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../components/visErrorBoundary';
 import { changeVisSize } from '../collection/utils';
-import { ISearchInfoBase, searchFilterView } from '../../utils';
+import { ILazySearchInfoBase, searchFilterView } from '../../utils';
 
 const VizCard = styled.div<{ selected?: boolean; isChart: boolean }>`
     /* width: 140px; */
@@ -89,7 +93,7 @@ function extractVizGridOnly(spec: IVegaSubset): IVegaSubset {
 
 const VizPagination: React.FC = (props) => {
     const { megaAutoStore, commonStore } = useGlobalStore();
-    const { insightSpaces, fieldMetas, visualConfig, vizMode, pageIndex, samplingDataSource } = megaAutoStore;
+    const { insightSpaces, fieldMetas, visualConfig, vizMode, pageIndex, dataSource, samplingDataSource } = megaAutoStore;
     const [searchContent, setSearchContent] = useState<string>('');
     const updatePage = useCallback(
         (e: any, v: number) => {
@@ -98,35 +102,40 @@ const VizPagination: React.FC = (props) => {
         [megaAutoStore, insightSpaces.length]
     );
 
-    const insightViews = useMemo<ISearchInfoBase[]>(() => {
-        return insightSpaces.map((space) => {
+    const insightViews = useMemo<ILazySearchInfoBase[]>(() => {
+        return insightSpaces.map((space, i) => {
             const fields = space.dimensions
                 .concat(space.measures)
                 .map((f) => fieldMetas.find((fm) => fm.fid === f))
                 .filter((f) => Boolean(f)) as IFieldMeta[];
             const patt: IPattern = { fields, imp: space.score || 0 };
-            const spec =
-                vizMode === 'strict'
-                    ? labDistVis({
-                          pattern: patt,
-                          width: 200,
-                          height: 160,
-                          dataSource: samplingDataSource,
-                      })
-                    : distVis({
-                          pattern: patt,
-                          width: 200,
-                          height: 160,
-                          stepSize: 32,
-                      });
-            const viewSpec = extractVizGridOnly(changeVisSize(spec, 100, 100));
+            const specFactory: ILazySearchInfoBase['value'] = () => {
+                const spec =
+                    vizMode === 'strict'
+                        ? labDistVis({
+                            pattern: patt,
+                            width: 200,
+                            height: 160,
+                            dataSource: dataSource,
+                        })
+                        : distVis({
+                            pattern: patt,
+                            width: 200,
+                            height: 160,
+                            stepSize: 32,
+                        });
+                const viewSpec = extractVizGridOnly(changeVisSize(spec, 100, 100));
+                return viewSpec;
+            };
+
             return {
+                id: i,
                 fields,
                 filters: [],
-                spec: viewSpec,
+                value: specFactory,
             };
         });
-    }, [fieldMetas, vizMode, insightSpaces, samplingDataSource]);
+    }, [fieldMetas, vizMode, insightSpaces, dataSource]);
 
     const searchedInsightViews = useMemo(() => {
         return searchFilterView(searchContent, insightViews);
@@ -140,7 +149,31 @@ const VizPagination: React.FC = (props) => {
         page: pageIndex + 1,
         onChange: updatePage,
     });
+<<<<<<< HEAD
     const theme = useTheme();
+=======
+
+    const [resolvedSpec, setResolvedSpec] = useState<{ [id: number]: IVegaSubset }>({});
+
+    useEffect(() => {
+        setResolvedSpec({});
+    }, [insightViews]);
+
+    const resolveChart = useCallback((id: number) => {
+        const item = insightViews.find(v => v.id === id);
+        if (!item) {
+            return;
+        }
+        requestAnimationFrame(() => {
+            const spec = item.value();
+            setResolvedSpec(all => ({
+                ...all,
+                [id]: spec,
+            }));
+        });
+    }, [insightViews]);
+
+>>>>>>> 49efdcb1 (fix(megaauto): charts in pagination not synchronized with main view)
     return (
         <div>
             <SearchBox onSearch={setSearchContent} placeholder={intl.get('common.search.searchViews')} iconProps={{ iconName: 'Search' }} />
@@ -154,6 +187,7 @@ const VizPagination: React.FC = (props) => {
                         } else if (type === 'page') {
                             if (typeof page === 'number' && searchedInsightViews[page - 1]) {
                                 const view = searchedInsightViews[page - 1];
+<<<<<<< HEAD
                                 isChart = true;
                                 children = (
                                     <VisErrorBoundary>
@@ -165,6 +199,26 @@ const VizPagination: React.FC = (props) => {
                                         />
                                     </VisErrorBoundary>
                                 );
+=======
+                                const spec = resolvedSpec[view.id];
+                                if (!spec) {
+                                    resolveChart(view.id);
+                                    children = (
+                                        <Spinner />
+                                    );
+                                } else {
+                                    children = (
+                                        <VisErrorBoundary>
+                                            <StyledChart
+                                                dataSource={samplingDataSource}
+                                                spec={spec}
+                                                actions={visualConfig.debug}
+                                                config={commonStore.themeConfig}
+                                            />
+                                        </VisErrorBoundary>
+                                    );
+                                }
+>>>>>>> 49efdcb1 (fix(megaauto): charts in pagination not synchronized with main view)
                             } else {
                                 children = (
                                     <button

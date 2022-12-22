@@ -1,4 +1,4 @@
-import { makeAutoObservable, observable, toJS } from "mobx";
+import { makeAutoObservable, observable, runInAction, toJS } from "mobx";
 import { IFieldMeta, IFilter, IInsightVizView, IVegaSubset, IVisSpecType } from "../interfaces";
 import { DataSourceStore } from "./dataSourceStore";
 
@@ -80,5 +80,11 @@ export class CollectionStore {
             collectionList: toJS(this.collectionList),
             vizHash: Array.from(this.vizHash.entries())
         }
+    }
+    public async loadBackup (data: Awaited<ReturnType<CollectionStore['backupCollectionStore']>>) {
+        runInAction(() => {
+            this.collectionList = data.collectionList;
+            this.vizHash = new Map(data.vizHash);
+        });
     }
 }

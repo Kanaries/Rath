@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { Pivot, PivotItem, PrimaryButton, TextField } from '@fluentui/react';
@@ -65,6 +66,23 @@ const PIVOT_LIST = [
     },
 ];
 
+export const LoginPanel = observer<{ onSuccessLogin?: () => void }>(function LoginPanel ({ onSuccessLogin }) {
+    const { userStore } = useGlobalStore();
+
+    return (
+        <Pivot>
+            {PIVOT_LIST.map((item) => (
+                <PivotItem key={item.itemKey} headerText={intl.get(`login.${item.headerText}`)}>
+                    {item.element(() => {
+                        onSuccessLogin?.();
+                        userStore.getPersonalInfo();
+                    })}
+                </PivotItem>
+            ))}
+        </Pivot>
+    );
+});
+
 function Account() {
     const [isLoginStatus, setIsLoginStatus] = useState<boolean>(false);
     // const [globalSwitch, setGlobalSwitch] = useState(true);
@@ -79,18 +97,11 @@ function Account() {
     return (
         <AccountDiv>
             {isLoginStatus ? (
-                <PivotContainer>
-                    <Pivot>
-                        {PIVOT_LIST.map((item) => (
-                            <PivotItem key={item.itemKey} headerText={intl.get(`login.${item.headerText}`)}>
-                                {item.element(() => {
-                                    setIsLoginStatus(false);
-                                    userStore.getPersonalInfo();
-                                })}
-                            </PivotItem>
-                        ))}
-                    </Pivot>
-                </PivotContainer>
+                <div>
+                    <div className="mb-4">
+                        <LoginPanel onSuccessLogin={() => setIsLoginStatus(false)} />
+                    </div>
+                </div>
             ) : (
                 <>
                     <div className="account">
@@ -125,4 +136,4 @@ function Account() {
     );
 }
 
-export default Account;
+export default observer(Account);
