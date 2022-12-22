@@ -2,7 +2,7 @@ import { LayerHost } from "@fluentui/react";
 import { useId } from "@fluentui/react-hooks";
 import { CSSProperties, KeyboardEvent, memo, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import ToolbarItem, { ToolbarItemProps } from "./toolbar-item";
+import ToolbarItem, { ToolbarItemProps, ToolbarItemSplitter } from "./toolbar-item";
 
 
 export const useHandlers = (action: () => void, disabled: boolean, triggerKeys: string[] = ['Enter']) => {
@@ -22,8 +22,13 @@ export const useHandlers = (action: () => void, disabled: boolean, triggerKeys: 
         },
         onKeyDown: (ev: KeyboardEvent) => {
             if (triggerKeysRef.current.includes(ev.key)) {
+                ev.stopPropagation();
+                ev.preventDefault();
                 actionRef.current();
             }
+        },
+        onMouseOut: () => {
+            (document.querySelector('*:focus') as null | HTMLElement)?.blur();
         },
     }), []);
 };
@@ -37,8 +42,8 @@ const ToolbarContainer = styled.div`
     --icon-size: 18px;
     width: 100%;
     height: var(--height);
-    background: #D7D7D744;
-    /* box-shadow: 0px 1px 3px 1px rgba(136, 136, 136, 0.05); */
+    background: #121212; // #D7D7D722;
+    box-shadow: 0px 1px 3px 1px rgba(136, 136, 136, 0.1);
     border-radius: 2px;
     overflow: hidden;
     display: flex;
@@ -49,18 +54,16 @@ const ToolbarContainer = styled.div`
     }
 `;
 
-const ToolbarSplitter = styled.div`
+export const ToolbarSplitter = styled.div`
     display: inline-block;
     margin: calc(var(--height) / 6) calc(var(--icon-size) / 4);
     height: calc(var(--height) * 2 / 3);
     width: 1px;
-    background: #E2E2E2;
+    background: #bbbbbb50;
 `;
 
-export const ToolbarItemSplitter = '-';
-
 export interface ToolbarProps {
-    items: (ToolbarItemProps | typeof ToolbarItemSplitter)[];
+    items: ToolbarItemProps[];
     styles?: Partial<{
         root: CSSProperties;
         container: CSSProperties;
@@ -76,10 +79,10 @@ const Toolbar = memo<ToolbarProps>(function Toolbar ({ items, styles }) {
 
     return (
         <Root style={styles?.root}>
-            <ToolbarContainer style={styles?.container} onClick={e => e.stopPropagation()}>
+            <ToolbarContainer style={styles?.container}>
                 {items.map((item, i) => {
                     if (item === ToolbarItemSplitter) {
-                        return <ToolbarSplitter key={i} />
+                        return <ToolbarSplitter key={i} />;
                     }
                     return (
                         <ToolbarItem

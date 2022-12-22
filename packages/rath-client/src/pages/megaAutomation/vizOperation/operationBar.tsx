@@ -3,7 +3,7 @@ import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import {
-    AdjustmentsHorizontalIcon, LightBulbIcon, PaintBrushIcon, PencilIcon, PencilSquareIcon, StarIcon, TableCellsIcon
+    AdjustmentsHorizontalIcon, Cog8ToothIcon, LightBulbIcon, MagnifyingGlassCircleIcon, PaintBrushIcon, PencilIcon, PencilSquareIcon, StarIcon, TableCellsIcon, ViewfinderCircleIcon
 } from '@heroicons/react/24/solid';
 import { useGlobalStore } from '../../../store';
 import { IVisSpecType } from '../../../interfaces';
@@ -14,7 +14,7 @@ interface OperationBarProps {}
 const OperationBar: React.FC<OperationBarProps> = props => {
     const { megaAutoStore, commonStore, collectionStore, painterStore, editorStore } = useGlobalStore();
     const { taskMode } = commonStore;
-    const { mainViewSpec, mainViewPattern } = megaAutoStore;
+    const { mainViewSpec, mainViewPattern, visualConfig } = megaAutoStore;
 
     const customizeAnalysis = useCallback(() => {
         if (mainViewSpec) {
@@ -40,6 +40,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             key: 'editing',
             icon: PencilIcon,
             label: intl.get('megaAuto.commandBar.editing'),
+            disabled: !viewExists,
             menu: {
                 items: [
                     {
@@ -67,12 +68,14 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             icon: PaintBrushIcon,
             label: intl.get('megaAuto.commandBar.painting'),
             onClick: () => analysisInPainter(),
+            disabled: !viewExists,
         },
         {
             key: 'associate',
             icon: LightBulbIcon,
             label: intl.get('megaAuto.commandBar.associate'),
             onClick: () => megaAutoStore.getAssociatedViews(taskMode),
+            disabled: !viewExists,
         },
         {
             key: 'star',
@@ -84,6 +87,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
                     collectionStore.toggleCollectState(toJS(mainViewPattern.fields), toJS(mainViewSpec), IVisSpecType.vegaSubset)
                 }
             },
+            disabled: !viewExists,
         },
         {
             key: 'constraints',
@@ -94,6 +98,39 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             },
             disabled: true,
         },
+        '-',
+        {
+            key: 'advanced_options',
+            icon: Cog8ToothIcon,
+            label: intl.get('common.advanced_options'),
+            menu: {
+                items: [
+                    {
+                        key: 'excludeScaleZero',
+                        icon: ViewfinderCircleIcon,
+                        label: intl.get('megaAuto.operation.excludeScaleZero'),
+                        checked: visualConfig.excludeScaleZero,
+                        onChange: checked => {
+                            megaAutoStore.setVisualConig((cnf) => {
+                                cnf.excludeScaleZero = checked;
+                            });
+                        },
+                    },
+                    {
+                        key: 'zoom',
+                        icon: MagnifyingGlassCircleIcon,
+                        label: intl.get('megaAuto.operation.zoom'),
+                        checked: visualConfig.zoom,
+                        onChange: checked => {
+                            megaAutoStore.setVisualConig((cnf) => {
+                                cnf.zoom = checked;
+                            });
+                        },
+                    },
+                ],
+            },
+            disabled: !viewExists,
+        },
     ];
 
     return <div style={{ position: 'relative', zIndex: 99}}>
@@ -101,7 +138,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             items={items}
             styles={{
                 root: {
-                    margin: '1em 0',
+                    margin: '1em 0 0',
                 },
             }}
         />

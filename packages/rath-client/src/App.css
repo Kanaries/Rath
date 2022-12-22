@@ -49,6 +49,10 @@ h2, h3 {
   box-shadow: 0 1.6px 7.6px 0 rgba(0, 0, 0, 0.1), 0 0.3px 1.9px 0 rgba(0, 0, 0, 0.08);
   margin-bottom: 1em;
 }
+.app-card{
+  padding: 1em;
+  border-radius: 2px;
+}
 .card{
   background-color: #fff;
   padding: 1em;

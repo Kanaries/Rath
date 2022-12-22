@@ -1,8 +1,8 @@
 import { Layer, TooltipHost } from "@fluentui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { memo, useEffect } from "react";
+import { memo, useEffect, useRef } from "react";
 import styled from "styled-components";
-import Toolbar, { ToolbarProps, useHandlers } from ".";
+import Toolbar, { ToolbarProps, ToolbarSplitter, useHandlers } from ".";
 
 
 const ToolbarItemContainer = styled.div<{ type: 'button' | 'toggle' | 'split' }>`
@@ -141,10 +141,13 @@ export interface ToolbarSplitButtonItem {
     menu: ToolbarProps;
 }
 
+export const ToolbarItemSplitter = '-';
+
 export type ToolbarItemProps = (
     | ToolbarButtonItem
     | ToolbarToggleButtonItem
     | ToolbarSplitButtonItem
+    | typeof ToolbarItemSplitter
 );
 
 const ToolbarButton = memo<{
@@ -197,6 +200,9 @@ const ToolbarSplitButton = memo<{
     setOpenedKey: (key: string | null) => void;
 }>(function ToolbarSplitButton ({ item: { key, icon: Icon, label, disabled, onClick, menu }, styles, layerId, openedKey, setOpenedKey }) {
     const opened = key === openedKey && !disabled;
+    const openedRef = useRef(opened);
+    openedRef.current = opened;
+
     const handlers = useHandlers(() => {
         if (onClick) {
             onClick();
@@ -221,19 +227,24 @@ const ToolbarSplitButton = memo<{
     useEffect(() => {
         if (opened) {
             const close = (e?: unknown) => {
-                if (e instanceof KeyboardEvent && e.key !== 'Escape') {
+                if (!openedRef.current) {
                     return;
                 }
-                setOpenedKey(null);
+                if (!e) {
+                    setOpenedKey(null);
+                } else if (e instanceof KeyboardEvent && e.key === 'Escape') {
+                    setOpenedKey(null);
+                } else if (e instanceof MouseEvent) {
+                    setOpenedKey(null);
+                }
             };
 
-            document.addEventListener('click', close);
+            document.addEventListener('mousedown', close);
             document.addEventListener('keydown', close);
 
             return () => {
-                document.removeEventListener('click', close);
+                document.removeEventListener('mousedown', close);
                 document.removeEventListener('keydown', close);
-                close();
             };
         }
     }, [setOpenedKey, opened]);
@@ -287,6 +298,9 @@ const ToolbarItem = memo<{
     openedKey: string | null;
     setOpenedKey: (key: string | null) => void;
 }>(function ToolbarItem ({ item, styles, layerId, openedKey, setOpenedKey }) {
+    if (item === ToolbarItemSplitter) {
+        return  <ToolbarSplitter />;
+    }
     if ('checked' in item) {
         return <ToolbarToggleButton item={item} styles={styles} />;
     }

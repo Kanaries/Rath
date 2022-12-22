@@ -26,7 +26,6 @@ const MainHeader = styled.div`
 const InsightContainer = styled.div`
     .ope-container {
         margin: 1em 0em;
-        padding-bottom: 1em;
     }
     .flex-container {
         display: flex;
@@ -85,12 +84,11 @@ const LTSPage: React.FC = () => {
     }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode]);
     return (
         <div className="content-container">
-            <VizPreference />
             <SaveModal />
             <Constraints />
             <AssoPanel />
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
-            <div className="card">
+            <div className="app-card">
                 <DefaultButton
                     style={{ float: 'right' }}
                     iconProps={{ iconName: 'Settings' }}
@@ -111,6 +109,9 @@ const LTSPage: React.FC = () => {
                 />
                 <ComputationProgress />
                 <MainHeader>{intl.get('megaAuto.title')}</MainHeader>
+                <div className="ope-container">
+                    <VizPreference />
+                </div>
                 <p className="state-description">{intl.get('megaAuto.hintMain')}</p>
                 <VizPagination />
                 <InsightContainer>
