@@ -1,8 +1,8 @@
-import { KeyboardEvent, useMemo, useRef } from "react";
+import { KeyboardEvent, MouseEvent, useMemo, useRef } from "react";
 import styled from "styled-components";
 
 
-export const useHandlers = (action: () => void, disabled: boolean, triggerKeys: string[] = ['Enter']) => {
+export const useHandlers = (action: () => void, disabled: boolean, triggerKeys: string[] = ['Enter'], allowPropagation = true) => {
     const actionRef = useRef(action);
     actionRef.current = () => {
         if (disabled) {
@@ -14,20 +14,29 @@ export const useHandlers = (action: () => void, disabled: boolean, triggerKeys: 
     triggerKeysRef.current = triggerKeys;
 
     return useMemo(() => ({
-        onClick: () => {
+        onClick: (ev: MouseEvent) => {
+            if (!allowPropagation) {
+                ev.stopPropagation();
+            }
             actionRef.current();
         },
         onKeyDown: (ev: KeyboardEvent) => {
+            if (!allowPropagation) {
+                ev.stopPropagation();
+            }
             if (triggerKeysRef.current.includes(ev.key)) {
                 ev.stopPropagation();
                 ev.preventDefault();
                 actionRef.current();
             }
         },
-        onMouseOut: () => {
+        onMouseOut: (ev: MouseEvent) => {
+            if (!allowPropagation) {
+                ev.stopPropagation();
+            }
             (document.querySelector('*:focus') as null | HTMLElement)?.blur();
         },
-    }), []);
+    }), [allowPropagation]);
 };
 
 export const ToolbarContainer = styled.div`

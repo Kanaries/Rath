@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
-import { runInAction } from 'mobx';
 import { DefaultButton, PrimaryButton } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
@@ -89,17 +88,6 @@ const LTSPage: React.FC = () => {
             <AssoPanel />
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
             <div className="app-card">
-                <DefaultButton
-                    style={{ float: 'right' }}
-                    iconProps={{ iconName: 'Settings' }}
-                    text={intl.get('preference.config')}
-                    ariaLabel={intl.get('preference.config')}
-                    onClick={() => {
-                        runInAction(() => {
-                            megaAutoStore.showPreferencePannel = true;
-                        });
-                    }}
-                />
                 <PrimaryButton
                     style={{ float: 'right', marginRight: '1em' }}
                     iconProps={{ iconName: 'Rerun' }}

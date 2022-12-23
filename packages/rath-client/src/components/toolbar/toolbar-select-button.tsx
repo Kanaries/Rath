@@ -1,5 +1,5 @@
 import { Callout, DirectionalHint, TooltipHost } from "@fluentui/react";
-import { memo, useState } from "react";
+import { memo } from "react";
 import styled from "styled-components";
 import produce from "immer";
 import { useId } from "@fluentui/react-hooks";
@@ -20,7 +20,7 @@ const Option = styled(ToolbarItemContainerElement)`
     position: relative;
     font-size: 95%;
     padding-left: var(--aside);
-    padding-right: 0.4em;
+    padding-right: 1em;
     align-items: center;
     &[aria-selected="true"] {
         ::before {
@@ -40,6 +40,13 @@ const Option = styled(ToolbarItemContainerElement)`
     }
 `;
 
+const TriggerFlag = styled.span`
+    pointer-events: none;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+`;
+
 export interface ToolbarSelectButtonItem<T extends string = string> extends IToolbarItem {
     options: {
         key: T;
@@ -57,11 +64,13 @@ export interface ToolbarSelectButtonItem<T extends string = string> extends IToo
 
 const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(function ToolbarSelectButton(props) {
     const id = useId();
-    const { item, styles } = props;
+    const { item, styles, openedKey, setOpenedKey } = props;
     const { icon: Icon, label, disabled, options, value, onSelect } = item;
     
-    const [opened, setOpened] = useState(false);
-    const handlers = useHandlers(() => setOpened(!opened), disabled ?? false);
+    const opened = openedKey === id;
+    const handlers = useHandlers(() => {
+        setOpenedKey(opened ? null : id);
+    }, disabled ?? false);
 
     const currentOption = options.find(opt => opt.key === value);
     const CurrentIcon = currentOption?.icon;
@@ -73,11 +82,9 @@ const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(functio
                     if (currentOption) {
                         draft.item.label = `${draft.item.label}: ${currentOption.label}`;
                     }
-                    draft.item.menu = undefined;
                 })}
                 handlers={handlers}
                 aria-haspopup="listbox"
-                id={id}
             >
                 <Icon style={styles?.icon} />
                 {CurrentIcon && (
@@ -85,10 +92,10 @@ const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(functio
                         style={{
                             ...styles?.icon,
                             position: 'absolute',
-                            right: 0,
-                            bottom: 0,
-                            width: '40%',
-                            height: '40%',
+                            left: 'calc(var(--height) - var(--icon-size) * 1.2)',
+                            bottom: 'calc((var(--height) - var(--icon-size)) * 0.1)',
+                            width: 'calc(var(--icon-size) * 0.6)',
+                            height: 'calc(var(--icon-size) * 0.6)',
                             margin: 'calc((var(--height) - var(--icon-size)) * 0.2)',
                             filter: 'drop-shadow(0 0 0.5px var(--background-color)) '.repeat(4),
                             pointerEvents: 'none',
@@ -96,6 +103,7 @@ const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(functio
                         }}
                     />
                 )}
+                <TriggerFlag aria-hidden id={id} />
             </ToolbarItemContainer>
             {opened && (
                 <Callout target={`#${id}`} role="dialog" gapSpace={0} directionalHint={DirectionalHint.bottomCenter} beakWidth={8} styles={{ calloutMain: { background: 'unset' }, beakCurtain: { background: 'unset' }, beak: { backgroundColor: '#121212' } }}>
@@ -118,7 +126,7 @@ const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(functio
                                     onFocus={() => onSelect(option.key)}
                                     onClick={() => {
                                         onSelect(option.key);
-                                        setOpened(false);
+                                        setOpenedKey(null);
                                     }}
                                     onKeyDown={e => {
                                         if (e.key === 'ArrowDown') {
