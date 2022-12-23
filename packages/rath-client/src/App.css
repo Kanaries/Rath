@@ -122,8 +122,9 @@ h2, h3 {
 
 .main-app-container{
   display: flex;
-  overflow: auto;
+  overflow: hidden;
   position: fixed;
+  width: 100vw;
   /* top: 60px; */
   top:0px;
   bottom: 0px;

@@ -40,6 +40,7 @@ import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX } from './constants';
 import NeighborAutoLink from './neighborAutoLink';
 import EmptyError from './emptyError';
 import Operations from './operations';
+import CanvasContainer from './canvasContainer';
 
 
 const MainHeader = styled.div`
@@ -163,6 +164,7 @@ const Painter: React.FC = (props) => {
         }
         return null;
     }, [vizSpec, mutFeatValues, noViz, painterMode]);
+    const [realPainterSize, setRealPainterSize] = useState(0);
     useEffect(() => {
         if (painterSpec !== null && container.current) {
 
@@ -177,6 +179,7 @@ const Painter: React.FC = (props) => {
                         .remove(() => true)
                         .insert(viewData)
                 );
+                setRealPainterSize((res.view as unknown as { _width: number })._width * painterSize);
                 if (!(painterSpec.encoding.x && painterSpec.encoding.y)) return;
                 const xField = painterSpec.encoding.x.field;
                 const yField = painterSpec.encoding.y.field;
@@ -200,7 +203,7 @@ const Painter: React.FC = (props) => {
                                 point: [item.datum[xField], item.datum[yField]],
                                 a: xRange[1] - xRange[0],
                                 b: yRange[1] - yRange[0],
-                                r: painterSize,
+                                r: painterSize / 2,
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
@@ -250,7 +253,7 @@ const Painter: React.FC = (props) => {
                                 mutData: viewData,
                                 fields: [xField, yField],
                                 point: [item.datum[xField], item.datum[yField]],
-                                r: painterSize,
+                                r: painterSize / 2,
                                 key: LABEL_FIELD_KEY,
                                 range: yRange[1] - yRange[0],
                                 indexKey: LABEL_INDEX,
@@ -298,7 +301,7 @@ const Painter: React.FC = (props) => {
                                 mutData: viewData,
                                 fields: [yField, xField],
                                 point: [item.datum[yField], item.datum[xField]],
-                                r: painterSize,
+                                r: painterSize / 2,
                                 range: xRange[1] - xRange[0],
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
@@ -374,6 +377,8 @@ const Painter: React.FC = (props) => {
         return {};
     }, [painterSpec]);
 
+    const currentColor = COLOR_CELLS.find(f => f.id === mutFeatValues[mutFeatIndex])?.color;
+
     const tools: ToolbarItemProps[] = [
         {
             key: 'clear',
@@ -402,7 +407,7 @@ const Painter: React.FC = (props) => {
         {
             key: PAINTER_MODE.COLOR,
             label: intl.get(`painter.tools.${PAINTER_MODE.COLOR}`),
-            icon: () => <SwatchIcon fill={painterMode === PAINTER_MODE.COLOR ? COLOR_CELLS.find(f => f.id === mutFeatValues[mutFeatIndex])?.color : 'currentColor'} />,
+            icon: () => <SwatchIcon fill={painterMode === PAINTER_MODE.COLOR ? currentColor : 'currentColor'} />,
             checked: painterMode === PAINTER_MODE.COLOR,
             onChange: selected => {
                 if (selected) {
@@ -509,6 +514,24 @@ const Painter: React.FC = (props) => {
         },
     ];
 
+    const [showCursorPreview, setShowCursorPreview] = useState(false);
+    const painterColor = currentColor && painterMode === PAINTER_MODE.COLOR ? currentColor : '#8888';
+
+    useEffect(() => {
+        setRealPainterSize(0);
+    }, [painterSize]);
+
+    useEffect(() => {
+        setShowCursorPreview(true);
+        const timer = setTimeout(() => {
+            setShowCursorPreview(false);
+        }, 1_000);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [realPainterSize, painterColor]);
+
     if (noViz) {
         return <EmptyError />;
     }
@@ -528,7 +551,15 @@ const Painter: React.FC = (props) => {
                                 items={tools}
                             />
                         </div>
-                        <div ref={container}></div>
+                        <div>
+                            <CanvasContainer
+                                color={painterColor}
+                                size={realPainterSize}
+                                preview={showCursorPreview}
+                            >
+                                <div ref={container}></div>
+                            </CanvasContainer>
+                        </div>
                         <Operations />
                     </div>
                 </PainterContainer>
