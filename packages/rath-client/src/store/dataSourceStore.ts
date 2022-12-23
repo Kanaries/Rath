@@ -55,6 +55,15 @@ interface IDataSourceStoreStorage {
     fieldMetas: IFieldMeta[];
 }
 
+function fieldNotExtended (fid: string, mutFields: IMuteFieldBase[], extOpt: string) {
+    const which = mutFields.find(f => f.fid === fid);
+    const expanded = Boolean(mutFields.find(
+        which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === extOpt
+    ));
+    if (expanded) return;
+    return which
+}
+
 export class DataSourceStore {
     public rawDataMetaInfo: IteratorStorageMetaInfo = {
         versionCode: -1,
@@ -661,26 +670,14 @@ export class DataSourceStore {
     }
 
     public canExpandAsDateTime(fid: string) {
-        const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        const which = fieldNotExtended(fid, this.mutFields, 'dateTimeExpand');
+        if (typeof which === 'undefined') return;
 
         return which.semanticType === 'temporal' && !which.extInfo;
     }
     public canExpandAsReGroupByFreq(fid: string) {
-        const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        const which = fieldNotExtended(fid, this.mutFields, 'LaTiao.$reGroupByFreq');
+        if (typeof which === 'undefined') return;
         if (which.semanticType !== 'nominal') {
             return false;
         }
@@ -689,14 +686,8 @@ export class DataSourceStore {
         return meta.features.unique > 8;
     }
     public canExpandAsOutlier(fid: string) {
-        const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'LaTiao.$outlierIForest'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        const which = fieldNotExtended(fid, this.mutFields, 'LaTiao.$outlierIForest');
+        if (typeof which === 'undefined') return;
         if (!(which.semanticType === 'quantitative' && !which.extInfo)) return false;
         const meta = this.fieldMetas.find(f => f.fid === fid);
         if (!meta) return false;
@@ -705,13 +696,7 @@ export class DataSourceStore {
 
     public async canExpandAsWord (fid: string) {
         const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        if (typeof which === 'undefined') return;
 
         if (!(which.semanticType === 'nominal' && !which.extInfo)) return false;
         const data = await this.rawDataStorage.getAll();
