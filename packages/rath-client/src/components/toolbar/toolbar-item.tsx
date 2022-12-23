@@ -1,16 +1,18 @@
 import { Layer, TooltipHost } from "@fluentui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { memo, useEffect, useRef } from "react";
+import { HTMLAttributes, memo, useEffect, useRef } from "react";
 import styled from "styled-components";
+import ToolbarButton, { ToolbarButtonItem } from "./toolbar-button";
+import ToolbarToggleButton, { ToolbarToggleButtonItem } from "./toolbar-toggle-button";
 import Toolbar, { ToolbarProps, ToolbarSplitter, useHandlers } from ".";
 
 
-const ToolbarItemContainer = styled.div<{ type: 'button' | 'toggle' | 'split' }>`
+const ToolbarItemContainerElement = styled.div<{ split: boolean }>`
     display: inline-flex;
     flex-direction: row;
     user-select: none;
     outline: none;
-    width: ${({ type }) => type === 'split' ? 'calc(var(--height) + 10px)' : 'var(--height)'};
+    width: ${({ split }) => split ? 'calc(var(--height) + 10px)' : 'var(--height)'};
     height: var(--height);
     overflow: hidden;
     color: #AEAEAE;
@@ -20,7 +22,7 @@ const ToolbarItemContainer = styled.div<{ type: 'button' | 'toggle' | 'split' }>
         width: var(--icon-size);
         height: var(--icon-size);
         margin: calc((var(--height) - var(--icon-size)) / 2);
-        margin-right: ${({ type }) => type === 'split' ? 'calc((var(--height) - var(--icon-size)) / 4)' : ''};
+        margin-right: ${({ split }) => split ? 'calc((var(--height) - var(--icon-size)) / 4)' : ''};
         transition: text-shadow 100ms;
     }
     --shadow-color: #0F172A55;
@@ -47,42 +49,6 @@ const ToolbarItemContainer = styled.div<{ type: 'button' | 'toggle' | 'split' }>
     transition: color 100ms, background-image 100ms;
 `;
 
-const ToggleContainer = styled.div<{ checked: boolean }>`
-    flex-grow: 0;
-    flex-shrink: 0;
-    width: calc(var(--icon-size) + 12px);
-    height: calc(var(--icon-size) + 12px);
-    margin: calc((var(--height) - var(--icon-size) - 12px) / 2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    box-shadow: ${({ checked }) => checked ? 'inset 0px 1px 6px 2px rgba(0, 0, 0, 0.33)' : 'inset 0px 1px 4px 1px rgba(136, 136, 136, 0.16)'};
-    border-radius: 4px;
-    position: relative;
-    background-color: #F7F7F722;
-    > svg {
-        width: var(--icon-size);
-        height: var(--icon-size);
-        position: absolute;
-        color: ${({ checked }) => checked ? '#EDEFF4' : '#9ba1ab' ||  '#525763'};
-        --shadow-color: ${({ checked }) => checked ? '#2956bf66' : '#9ba1ab66' || '#52576366'};
-        transition: color 120ms;
-    }
-    ::before {
-        display: block;
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: #132f70;
-        transform: ${({ checked }) => checked ? 'translate(0)' : 'translateX(-100%)'};
-        transition: transform 80ms;
-    }
-`;
-
 const ToolbarSplit = styled.div<{ open: boolean }>`
     flex-grow: 1;
     flex-shrink: 1;
@@ -104,7 +70,7 @@ const ToolbarSplit = styled.div<{ open: boolean }>`
     }
 `;
 
-export interface ToolbarButtonItem {
+export interface IToolbarItem {
     key: string;
     icon: (props: React.ComponentProps<'svg'> & {
         title?: string;
@@ -113,33 +79,7 @@ export interface ToolbarButtonItem {
     label: string;
     /** @default false */
     disabled?: boolean;
-    onClick: () => void;
-}
-
-export interface ToolbarToggleButtonItem {
-    key: string;
-    icon: (props: React.ComponentProps<'svg'> & {
-        title?: string;
-        titleId?: string;
-    }) => JSX.Element;
-    label: string;
-    /** @default false */
-    disabled?: boolean;
-    checked: boolean;
-    onChange: (checked: boolean) => void;
-}
-
-export interface ToolbarSplitButtonItem {
-    key: string;
-    icon: (props: React.ComponentProps<'svg'> & {
-        title?: string;
-        titleId?: string;
-    }) => JSX.Element;
-    label: string;
-    /** @default false */
-    disabled?: boolean;
-    onClick?: () => void;
-    menu: ToolbarProps;
+    menu?: ToolbarProps;
 }
 
 export const ToolbarItemSplitter = '-';
@@ -147,69 +87,40 @@ export const ToolbarItemSplitter = '-';
 export type ToolbarItemProps = (
     | ToolbarButtonItem
     | ToolbarToggleButtonItem
-    | ToolbarSplitButtonItem
     | typeof ToolbarItemSplitter
 );
 
-const ToolbarButton = memo<{
-    item: ToolbarButtonItem;
-    styles?: ToolbarProps['styles'];
-}>(function ToolbarButton({ item: { icon: Icon, label, disabled, onClick }, styles }) {
-    const handlers = useHandlers(onClick, disabled ?? false);
-
-    return (
-        <TooltipHost content={label}>
-            <ToolbarItemContainer
-                role="button" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled ?? false}
-                type="button"
-                style={styles?.item}
-                {...handlers}
-            >
-                <Icon style={styles?.icon} />
-            </ToolbarItemContainer>
-        </TooltipHost>
-    );
-});
-
-const ToolbarToggleButton = memo<{
-    item: ToolbarToggleButtonItem;
-    styles?: ToolbarProps['styles'];
-}>(function ToolbarButton({ item: { icon: Icon, label, disabled, checked, onChange }, styles }) {
-    const handlers = useHandlers(() => onChange(!checked), disabled ?? false, [' ']);
-
-    return (
-        <TooltipHost content={label}>
-            <ToolbarItemContainer
-                role="checkbox" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled ?? false} aria-checked={checked}
-                type="toggle"
-                style={styles?.item}
-                {...handlers}
-            >
-                <ToggleContainer checked={checked}>
-                    <Icon style={styles?.icon} />
-                </ToggleContainer>
-            </ToolbarItemContainer>
-        </TooltipHost>
-    );
-});
-
-const ToolbarSplitButton = memo<{
-    item: ToolbarSplitButtonItem;
+export interface IToolbarProps<P extends Exclude<ToolbarItemProps, typeof ToolbarItemSplitter> = Exclude<ToolbarItemProps, typeof ToolbarItemSplitter>> {
+    item: P;
     styles?: ToolbarProps['styles'];
     layerId: string;
     openedKey: string | null;
     setOpenedKey: (key: string | null) => void;
-}>(function ToolbarSplitButton ({ item: { key, icon: Icon, label, disabled, onClick, menu }, styles, layerId, openedKey, setOpenedKey }) {
-    const opened = key === openedKey && !disabled;
+}
+
+export const ToolbarItemContainer = memo<{
+    props: IToolbarProps;
+    handlers: ReturnType<typeof useHandlers> | null;
+    children: JSX.Element;
+} & HTMLAttributes<HTMLDivElement>>(function ToolbarItemContainer (
+    {
+        props: {
+            item: { key, label, disabled = false, menu, icon: _, ...item },
+            styles, layerId, openedKey, setOpenedKey,
+        },
+        handlers,
+        children,
+        ...props
+    }
+) {
+    const splitOnly = Boolean(menu) && handlers === null;
+
+    const opened = Boolean(menu) && key === openedKey && !disabled;
     const openedRef = useRef(opened);
     openedRef.current = opened;
 
-    const handlers = useHandlers(() => {
-        if (onClick) {
-            onClick();
-        } else {
-            setOpenedKey(opened ? null : key);
-        }
+    const splitHandlers = useHandlers(() => {
+        setOpenedKey(opened ? null : key);
     }, disabled ?? false, [' ']);
 
     useEffect(() => {
@@ -256,38 +167,36 @@ const ToolbarSplitButton = memo<{
 
     return (
         <TooltipHost content={label}>
-            {onClick ? (
-                <ToolbarItemContainer
-                    role="button" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled ?? false}
-                    type="split"
-                    style={styles?.item}
-                    className={opened ? 'open' : undefined}
-                    {...handlers}
-                >
-                    <Icon style={styles?.icon} />
-                    <ToolbarSplit
-                        role="button" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled} aria-haspopup="menu"
-                        open={opened}
-                        onClick={() => disabled || setOpenedKey(opened ? null : key)}
-                    >
-                        <ChevronDownIcon style={styles?.splitIcon} />
-                    </ToolbarSplit>
-                </ToolbarItemContainer>
-            ) : (
-                <ToolbarItemContainer
-                    role="button" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled ?? false} aria-haspopup="menu"
-                    type="split"
-                    style={styles?.item}
-                    className={`${opened ? 'open ' : ''}split`}
-                    {...handlers}
-                >
-                    <Icon style={styles?.icon} />
-                    <ToolbarSplit open={opened}>
-                        <ChevronDownIcon style={styles?.splitIcon} />
-                    </ToolbarSplit>
-                </ToolbarItemContainer>
-            )}
-            {opened && (
+            <ToolbarItemContainerElement
+                role="button" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled ?? false}
+                split={Boolean(menu)}
+                style={styles?.item}
+                className={opened ? 'open' : undefined}
+                aria-haspopup={splitOnly ? 'menu' : 'false'}
+                {...(splitOnly ? splitHandlers : handlers)}
+                {...props}
+            >
+                {children}
+                {menu && (
+                    splitOnly ? (
+                        <ToolbarSplit
+                            open={opened}
+                            {...splitHandlers}
+                        >
+                            <ChevronDownIcon style={styles?.splitIcon} />
+                        </ToolbarSplit>
+                    ) : (
+                        <ToolbarSplit
+                            role="button" tabIndex={disabled ? undefined : 0} aria-label={label} aria-disabled={disabled} aria-haspopup="menu"
+                            open={opened}
+                            {...splitHandlers}
+                        >
+                            <ChevronDownIcon style={styles?.splitIcon} />
+                        </ToolbarSplit>
+                    )
+                )}
+            </ToolbarItemContainerElement>
+            {menu && opened && (
                 <Layer hostId={layerId}>
                     <Toolbar {...menu} />
                 </Layer>
@@ -307,12 +216,9 @@ const ToolbarItem = memo<{
         return  <ToolbarSplitter />;
     }
     if ('checked' in item) {
-        return <ToolbarToggleButton item={item} styles={styles} />;
+        return <ToolbarToggleButton item={item} styles={styles} layerId={layerId} openedKey={openedKey} setOpenedKey={setOpenedKey} />;
     }
-    if ('menu' in item) {
-        return <ToolbarSplitButton item={item} styles={styles} layerId={layerId} openedKey={openedKey} setOpenedKey={setOpenedKey} />;
-    }
-    return <ToolbarButton item={item} styles={styles} />;
+    return <ToolbarButton item={item} styles={styles} layerId={layerId} openedKey={openedKey} setOpenedKey={setOpenedKey} />;
 });
 
 

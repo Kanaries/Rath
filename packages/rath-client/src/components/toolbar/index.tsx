@@ -103,3 +103,4 @@ const Toolbar = memo<ToolbarProps>(function Toolbar ({ items, styles }) {
 
 
 export default Toolbar;
+export type { ToolbarItemProps };

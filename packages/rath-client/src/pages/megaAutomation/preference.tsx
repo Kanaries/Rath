@@ -14,8 +14,7 @@ import { runInAction } from 'mobx';
 import { useGlobalStore } from '../../store';
 import { EXPLORE_VIEW_ORDER } from '../../store/megaAutomation';
 import { IResizeMode } from '../../interfaces';
-import Toolbar from '../../components/toolbar';
-import { ToolbarItemProps } from '../../components/toolbar/toolbar-item';
+import Toolbar, { ToolbarItemProps } from '../../components/toolbar';
 
 
 const PreferencePanel: React.FC = () => {

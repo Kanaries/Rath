@@ -7,8 +7,7 @@ import {
 } from '@heroicons/react/24/solid';
 import { useGlobalStore } from '../../../store';
 import { IVisSpecType } from '../../../interfaces';
-import Toolbar from '../../../components/toolbar';
-import { ToolbarItemProps } from '../../../components/toolbar/toolbar-item';
+import Toolbar, { ToolbarItemProps } from '../../../components/toolbar';
 
 interface OperationBarProps {}
 const OperationBar: React.FC<OperationBarProps> = props => {
