@@ -45,6 +45,9 @@ const StyledNav = styled(Nav)<{ navMode: "text" | "icon" }>`
     a.ms-Nav-link, a.ms-Nav-compositeLink {
         border-radius: 2px 0 0 2px;
         padding-right: ${({ navMode }) => navMode === 'text' ? '1em' : '0'};
+        ::after {
+            display: none;
+        }
     }
     .ms-Nav-link[aria-current] {
         color: rgb(26, 26, 26);
