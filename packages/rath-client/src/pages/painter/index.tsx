@@ -560,6 +560,7 @@ const Painter: React.FC = (props) => {
                         </div>
                         <div>
                             <CanvasContainer
+                                showTrack={painterMode === PAINTER_MODE.COLOR || painterMode === PAINTER_MODE.ERASE}
                                 color={painterColor}
                                 size={realPainterSize}
                                 preview={showCursorPreview}
