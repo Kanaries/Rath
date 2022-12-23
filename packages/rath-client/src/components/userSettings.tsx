@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
 import { ActionButton, IDropdownOption, IconButton } from '@fluentui/react';
+import { LanguageIcon } from '@heroicons/react/24/solid';
 import { observer } from 'mobx-react-lite';
 import { SUPPORT_LANG } from '../locales';
 import { useGlobalStore } from '../store';
@@ -33,6 +34,7 @@ const UserSettings: React.FC = () => {
                     onChange={(e) => {
                         langStore.changeLocalesAndReload(e.target.value);
                     }}
+                    icon={<LanguageIcon style={{ margin: '0 0.5em' }} />}
                 >
                     {langOptions.map((lang) => (
                         <option key={lang.key} value={lang.key}>

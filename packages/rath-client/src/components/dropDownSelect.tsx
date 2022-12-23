@@ -1,4 +1,3 @@
-import { LanguageIcon } from '@heroicons/react/24/solid';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -55,12 +54,13 @@ interface IDropDownSelect {
     value?: string | number | readonly string[] | undefined;
     onChange?: React.ChangeEventHandler<HTMLSelectElement>;
     border?: boolean;
+    icon?: unknown;
 }
 
 const DropDownSelect: React.FC<IDropDownSelect> = props => {
-    const { value, onChange, border } = props;
+    const { value, onChange, border, icon } = props;
     return <Cont border={border}>
-        <LanguageIcon style={{ margin: '0 0.5em' }} />
+        {icon}
         <select className="select-cus-style"
             value={value}
             onChange={onChange}

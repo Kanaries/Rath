@@ -58,7 +58,7 @@ const InsightContainer = styled.div`
 const LTSPage: React.FC = () => {
     const { ltsPipeLineStore, megaAutoStore, commonStore } = useGlobalStore();
 
-    const { visualConfig, mainViewSpecSource } = megaAutoStore;
+    const { visualConfig, mainViewSpecSource, mainViewSpec, mainViewPattern } = megaAutoStore;
     const { taskMode } = commonStore;
 
     // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
@@ -81,6 +81,7 @@ const LTSPage: React.FC = () => {
         });
         commonStore.setAppKey(PIVOT_KEYS.megaAuto);
     }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode]);
+    const viewExists = !(mainViewPattern === null || mainViewSpec === null);
     return (
         <div className="content-container">
             <SaveModal />
@@ -103,9 +104,11 @@ const LTSPage: React.FC = () => {
                 <p className="state-description">{intl.get('megaAuto.hintMain')}</p>
                 <VizPagination />
                 <InsightContainer>
-                    <div className="ope-container">
-                        <OperationBar />
-                    </div>
+                    {viewExists && (
+                        <div className="ope-container">
+                            <OperationBar />
+                        </div>
+                    )}
                     <div className="flex-container">
                         <div className="spec-container">
                             {mainViewSpecSource === 'custom' && (

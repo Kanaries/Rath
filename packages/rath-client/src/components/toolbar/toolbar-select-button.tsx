@@ -1,5 +1,5 @@
 import { Callout, DirectionalHint, TooltipHost } from "@fluentui/react";
-import { memo } from "react";
+import { memo, useEffect, useRef } from "react";
 import styled from "styled-components";
 import produce from "immer";
 import { useId } from "@fluentui/react-hooks";
@@ -71,6 +71,38 @@ const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(functio
     const handlers = useHandlers(() => {
         setOpenedKey(opened ? null : id);
     }, disabled ?? false);
+
+    const openedRef = useRef(opened);
+    openedRef.current = opened;
+
+    useEffect(() => {
+        if (opened) {
+            const close = (e?: unknown) => {
+                if (!openedRef.current) {
+                    return;
+                }
+                if (!e) {
+                    setOpenedKey(null);
+                } else if (e instanceof KeyboardEvent && e.key === 'Escape') {
+                    setOpenedKey(null);
+                } else if (e instanceof MouseEvent) {
+                    setTimeout(() => {
+                        if (openedRef.current) {
+                            setOpenedKey(null);
+                        }
+                    }, 100);
+                }
+            };
+
+            document.addEventListener('mousedown', close);
+            document.addEventListener('keydown', close);
+
+            return () => {
+                document.removeEventListener('mousedown', close);
+                document.removeEventListener('keydown', close);
+            };
+        }
+    }, [setOpenedKey, opened]);
 
     const currentOption = options.find(opt => opt.key === value);
     const CurrentIcon = currentOption?.icon;
