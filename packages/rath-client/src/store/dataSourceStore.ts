@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import { IReactionDisposer, makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { combineLatest, from, Observable, Subscription } from "rxjs";
 import { getFreqRange } from "@kanaries/loa";
@@ -659,7 +660,6 @@ export class DataSourceStore {
         which.extSuggestions.sort((a, b) => b.score - a.score)
     }
 
-
     public canExpandAsDateTime(fid: string) {
         const which = this.mutFields.find(f => f.fid === fid);
         const expanded = Boolean(this.mutFields.find(
@@ -801,7 +801,7 @@ export class DataSourceStore {
         }
     }
     public clearTextPatternIfExist () {
-        const extRemainFields = this.extFields.filter(f => f.extInfo?.extOpt !== 'LaTiao.$selection_pattern');
+        const extRemainFields = this.extFields.filter(f => !(f.extInfo?.extOpt === 'LaTiao.$selection_pattern' && f.stage === 'preview'));
         if (extRemainFields.length !== this.extFields.length) {
             this.extFields = extRemainFields;
         }
@@ -815,7 +815,7 @@ export class DataSourceStore {
         const data = await this.rawDataStorage.getAll();
         const values: string[] = data.map(d => `${d[fid]}`);
         const newField: IRawField = {
-            fid: `${fid}_selection_pattern`,
+            fid: `${fid}_selection_pattern_${nanoid(2)}`,
             name: `${originField.name}.selection_pattern`,
             semanticType: 'nominal',
             analyticType: 'dimension',
