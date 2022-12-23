@@ -57,7 +57,7 @@ function App() {
     return (
         <div>
             <div className="main-app-container">
-                <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '3px' }}>
+                <div className="main-app-nav">
                     <AppNav />
                 </div>
                 <div className="main-app-content">
