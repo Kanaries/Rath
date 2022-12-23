@@ -395,12 +395,32 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern 
     }
     // uniques.length === 0 wihch is impossible
     if (ans.length === 0) {
+        const sl = regexgen(textSelection.map(t => t.str.slice(t.startIndex, t.endIndex)))
+        for (let ph of phs) {
+            for (let pe of pes) {
+                
+                const patt = {
+                    ph,
+                    pe,
+                    selection: sl,
+                    pattern: new RegExp(`${ph.source}(?<selection>${sl.source})${pe.source}`),
+                };
+                const match = textSelection.every(text => {
+                    const res = extractSelection(patt ,text.str)
+                    if (res.missing) return false;
+                    return res.matchPos[0] === text.startIndex && res.matchPos[1] === text.endIndex;
+                });
+                if (match) {
+                    return patt;
+                }
+            }
+        }
         return {
-            ph: /^/,
-            pe: /$/,
-            selection: /\S+/,
-            pattern: new RegExp(`^(?<selection>\\S+?)$`),
-        };
+            ph: /.*/,
+            pe: /.*/,
+            selection: sl,
+            pattern: new RegExp(`^.*(?<selection>${sl.source}).*$`)
+        }
     }
     return ans[0]
 }
