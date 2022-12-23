@@ -102,10 +102,6 @@ const Painter: React.FC = (props) => {
 
     const painting = painterMode !== PAINTER_MODE.MOVE;
 
-    const clearPainting = useCallback(() => {
-        setViewData(labelingData(painterViewData, initValue));
-    }, [painterViewData, initValue, setViewData]);
-
     const fieldsInView = useMemo<IFieldMeta[]>(() => {
         const res: IFieldMeta[] = [];
         if (vizSpec) {
@@ -118,6 +114,17 @@ const Painter: React.FC = (props) => {
         }
         return res;
     }, [fieldMetas, vizSpec]);
+
+    const spRef = useRef(samplePercent);
+    spRef.current = samplePercent;
+    const fieldsRef = useRef(fieldsInView);
+    fieldsRef.current = fieldsInView;
+
+    const clearPainting = useCallback(() => {
+        const size = Math.min(painterViewData.length, Math.round(painterViewData.length * spRef.current));
+        const sampleData = viewSampling(labelingData(painterViewData, initValue), fieldsRef.current, size);
+        setViewData(sampleData);
+    }, [painterViewData, initValue, setViewData]);
 
     useEffect(() => {
         const size = Math.min(painterViewData.length, Math.round(painterViewData.length * samplePercent));
