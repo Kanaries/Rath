@@ -6,8 +6,15 @@ import {
     IChoiceGroupOption,
 } from '@fluentui/react';
 import {
+    ChartBarIcon,
     ChatBubbleLeftEllipsisIcon,
-    CubeIcon, CubeTransparentIcon, MagnifyingGlassCircleIcon, ViewfinderCircleIcon, WrenchIcon
+    CommandLineIcon,
+    CubeIcon,
+    CubeTransparentIcon,
+    LightBulbIcon,
+    ListBulletIcon,
+    QueueListIcon,
+    WrenchIcon,
 } from '@heroicons/react/24/solid';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
@@ -15,6 +22,7 @@ import { useGlobalStore } from '../../store';
 import { EXPLORE_VIEW_ORDER } from '../../store/megaAutomation';
 import { IResizeMode } from '../../interfaces';
 import Toolbar, { ToolbarItemProps } from '../../components/toolbar';
+import { ToolbarSelectButtonItem } from '../../components/toolbar/toolbar-select-button';
 
 
 const PreferencePanel: React.FC = () => {
@@ -23,9 +31,14 @@ const PreferencePanel: React.FC = () => {
 
     const { nlg } = visualConfig;
 
-    const orderOptions: IDropdownOption[] = Object.values(EXPLORE_VIEW_ORDER).map((or) => ({
-        text: intl.get(`megaAuto.orderBy.${or}`),
+    const orderOptions: ToolbarSelectButtonItem['options'] = Object.values(EXPLORE_VIEW_ORDER).map((or) => ({
         key: or,
+        label: intl.get(`megaAuto.orderBy.${or}`),
+        icon: {
+            default: LightBulbIcon,
+            field_num: ListBulletIcon,
+            cardinality: QueueListIcon,
+        }[or],
     }));
 
     const resizeModeList = useMemo<IDropdownOption[]>(() => {
@@ -68,44 +81,36 @@ const PreferencePanel: React.FC = () => {
     const items: ToolbarItemProps[] = [
         {
             key: 'viz_sys',
-            icon: vizMode === 'lite' ? CubeTransparentIcon : CubeIcon,
+            icon: CommandLineIcon,
             label: intl.get('semiAuto.main.vizsys.title'),
-            menu: {
-                items: [
-                    {
-                        key: 'lite',
-                        icon: CubeTransparentIcon,
-                        label: intl.get('semiAuto.main.vizsys.lite'),
-                        checked: vizMode === 'lite',
-                        onChange: checked => {
-                            if (checked) {
-                                megaAutoStore.setVizMode('lite');
-                            }
-                        },
-                    },
-                    {
-                        key: 'strict',
-                        icon: CubeIcon,
-                        label: intl.get('semiAuto.main.vizsys.strict'),
-                        checked: vizMode === 'strict',
-                        onChange: checked => {
-                            if (checked) {
-                                megaAutoStore.setVizMode('strict');
-                            }
-                        },
-                    },
-                ],
+            value: vizMode,
+            options: [
+                {
+                    key: 'lite',
+                    icon: CubeTransparentIcon,
+                    label: intl.get('semiAuto.main.vizsys.lite'),
+                },
+                {
+                    key: 'strict',
+                    icon: CubeIcon,
+                    label: intl.get('semiAuto.main.vizsys.strict'),
+                },
+            ],
+            onSelect: key => {
+                megaAutoStore.setVizMode(key as typeof vizMode);
+            },
+        },
+        {
+            key: 'order',
+            icon: ChartBarIcon,
+            label: intl.get('megaAuto.orderBy.title'),
+            options: orderOptions,
+            value: megaAutoStore.orderBy,
+            onSelect: key => {
+                megaAutoStore.setExploreOrder(key);
             },
         },
         '-',
-        {
-            key: 'order',
-            icon: CubeIcon,  // TODO:
-            label: intl.get('megaAuto.orderBy.title'),
-            menu: {
-                items: [],  // TODO:
-            },
-        },
         {
             key: 'debug',
             icon: WrenchIcon,
@@ -148,17 +153,6 @@ const PreferencePanel: React.FC = () => {
     //         closeButtonAriaLabel="Close"
     //         onRenderFooterContent={onRenderFooterContent}
     //     >
-    //         <Stack.Item>
-    //             <Dropdown
-    //                 style={{ minWidth: '120px' }}
-    //                 selectedKey={megaAutoStore.orderBy}
-    //                 options={orderOptions}
-    //                 label={intl.get('megaAuto.orderBy.title')}
-    //                 onChange={(e, item) => {
-    //                     item && megaAutoStore.setExploreOrder(item.key as string);
-    //                 }}
-    //             />
-    //         </Stack.Item>
     //         <Stack tokens={{ childrenGap: 10 }}>
     //             <Stack.Item>
     //                 <Slider

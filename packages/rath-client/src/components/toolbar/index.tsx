@@ -1,65 +1,13 @@
 import { LayerHost } from "@fluentui/react";
 import { useId } from "@fluentui/react-hooks";
-import { CSSProperties, KeyboardEvent, memo, useMemo, useRef, useState } from "react";
+import { CSSProperties, memo, useState } from "react";
 import styled from "styled-components";
+import { ToolbarContainer, ToolbarSplitter } from "./components";
 import ToolbarItem, { ToolbarItemProps, ToolbarItemSplitter } from "./toolbar-item";
 
 
-export const useHandlers = (action: () => void, disabled: boolean, triggerKeys: string[] = ['Enter']) => {
-    const actionRef = useRef(action);
-    actionRef.current = () => {
-        if (disabled) {
-            return;
-        }
-        action();
-    };
-    const triggerKeysRef = useRef(triggerKeys);
-    triggerKeysRef.current = triggerKeys;
-
-    return useMemo(() => ({
-        onClick: () => {
-            actionRef.current();
-        },
-        onKeyDown: (ev: KeyboardEvent) => {
-            if (triggerKeysRef.current.includes(ev.key)) {
-                ev.stopPropagation();
-                ev.preventDefault();
-                actionRef.current();
-            }
-        },
-        onMouseOut: () => {
-            (document.querySelector('*:focus') as null | HTMLElement)?.blur();
-        },
-    }), []);
-};
-
 const Root = styled.div`
     width: 100%;
-`;
-
-const ToolbarContainer = styled.div`
-    --height: 36px;
-    --icon-size: 18px;
-    width: 100%;
-    height: var(--height);
-    background: #121212; // #D7D7D722;
-    box-shadow: 0px 1px 3px 1px rgba(136, 136, 136, 0.1);
-    border-radius: 2px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: row;
-    > * {
-        flex-grow: 0;
-        flex-shrink: 0;
-    }
-`;
-
-export const ToolbarSplitter = styled.div`
-    display: inline-block;
-    margin: calc(var(--height) / 6) calc(var(--icon-size) / 4);
-    height: calc(var(--height) * 2 / 3);
-    width: 1px;
-    background: #bbbbbb50;
 `;
 
 export interface ToolbarProps {

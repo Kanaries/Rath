@@ -2,7 +2,7 @@ import { TooltipHost } from "@fluentui/react";
 import { memo } from "react";
 import styled from "styled-components";
 import { IToolbarItem, IToolbarProps, ToolbarItemContainer } from "./toolbar-item";
-import { useHandlers } from ".";
+import { useHandlers } from "./components";
 
 
 const ToggleContainer = styled.div<{ checked: boolean }>`
@@ -52,7 +52,7 @@ const ToolbarToggleButton = memo<IToolbarProps<ToolbarToggleButtonItem>>(functio
     const handlers = useHandlers(() => onChange(!checked), disabled ?? false);
 
     return (
-        <TooltipHost content={label}>
+        <TooltipHost content={label} styles={{ root: { display: 'inline-flex' } }}>
             <ToolbarItemContainer
                 props={props}
                 handlers={handlers}

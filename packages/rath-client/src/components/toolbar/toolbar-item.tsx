@@ -1,53 +1,13 @@
 import { Layer, TooltipHost } from "@fluentui/react";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { ChevronDownIcon, EllipsisVerticalIcon } from "@heroicons/react/24/solid";
 import { HTMLAttributes, memo, useEffect, useRef } from "react";
 import styled from "styled-components";
 import ToolbarButton, { ToolbarButtonItem } from "./toolbar-button";
 import ToolbarToggleButton, { ToolbarToggleButtonItem } from "./toolbar-toggle-button";
-import Toolbar, { ToolbarProps, ToolbarSplitter, useHandlers } from ".";
+import ToolbarSelectButton, { ToolbarSelectButtonItem } from "./toolbar-select-button";
+import { ToolbarItemContainerElement, ToolbarSplitter, useHandlers } from "./components";
+import Toolbar, { ToolbarProps } from ".";
 
-
-const ToolbarItemContainerElement = styled.div<{ split: boolean }>`
-    display: inline-flex;
-    flex-direction: row;
-    user-select: none;
-    outline: none;
-    width: ${({ split }) => split ? 'calc(var(--height) + 10px)' : 'var(--height)'};
-    height: var(--height);
-    overflow: hidden;
-    color: #AEAEAE;
-    > svg {
-        flex-grow: 0;
-        flex-shrink: 0;
-        width: var(--icon-size);
-        height: var(--icon-size);
-        margin: calc((var(--height) - var(--icon-size)) / 2);
-        margin-right: ${({ split }) => split ? 'calc((var(--height) - var(--icon-size)) / 4)' : ''};
-        transition: text-shadow 100ms;
-    }
-    --shadow-color: #0F172A55;
-    &[aria-disabled=true] {
-        cursor: default;
-        > * {
-            opacity: 0.33;
-        }
-    }
-    &[aria-disabled=false] {
-        cursor: pointer;
-        :hover, :focus, &.open {
-            background-image: linear-gradient(#FFFFFFCC, #FEFEFECC);
-            color: #0F172A;
-            &.split * svg {
-                pointer-events: none;
-                transform: translate(-50%, -20%);
-            }
-            & svg {
-                text-shadow: 0 0 1.5px var(--shadow-color);
-            }
-        }
-    }
-    transition: color 100ms, background-image 100ms;
-`;
 
 const ToolbarSplit = styled.div<{ open: boolean }>`
     flex-grow: 1;
@@ -87,6 +47,7 @@ export const ToolbarItemSplitter = '-';
 export type ToolbarItemProps = (
     | ToolbarButtonItem
     | ToolbarToggleButtonItem
+    | ToolbarSelectButtonItem
     | typeof ToolbarItemSplitter
 );
 
@@ -101,7 +62,7 @@ export interface IToolbarProps<P extends Exclude<ToolbarItemProps, typeof Toolba
 export const ToolbarItemContainer = memo<{
     props: IToolbarProps;
     handlers: ReturnType<typeof useHandlers> | null;
-    children: JSX.Element;
+    children: unknown;
 } & HTMLAttributes<HTMLDivElement>>(function ToolbarItemContainer (
     {
         props: {
@@ -191,7 +152,7 @@ export const ToolbarItemContainer = memo<{
                             open={opened}
                             {...splitHandlers}
                         >
-                            <ChevronDownIcon style={styles?.splitIcon} />
+                            <EllipsisVerticalIcon style={styles?.splitIcon} />
                         </ToolbarSplit>
                     )
                 )}
@@ -217,6 +178,8 @@ const ToolbarItem = memo<{
     }
     if ('checked' in item) {
         return <ToolbarToggleButton item={item} styles={styles} layerId={layerId} openedKey={openedKey} setOpenedKey={setOpenedKey} />;
+    } else if ('options' in item) {
+        return <ToolbarSelectButton item={item} styles={styles} layerId={layerId} openedKey={openedKey} setOpenedKey={setOpenedKey} />;
     }
     return <ToolbarButton item={item} styles={styles} layerId={layerId} openedKey={openedKey} setOpenedKey={setOpenedKey} />;
 });

@@ -1,7 +1,7 @@
 import { TooltipHost } from "@fluentui/react";
 import { memo } from "react";
 import { IToolbarItem, IToolbarProps, ToolbarItemContainer } from "./toolbar-item";
-import { useHandlers } from ".";
+import { useHandlers } from "./components";
 
 
 export interface ToolbarButtonItem extends IToolbarItem {
@@ -14,7 +14,7 @@ const ToolbarButton = memo<IToolbarProps<ToolbarButtonItem>>(function ToolbarBut
     const handlers = useHandlers(() => onClick?.(), disabled ?? false);
 
     return (
-        <TooltipHost content={label}>
+        <TooltipHost content={label} styles={{ root: { display: 'inline-flex' } }}>
             <ToolbarItemContainer
                 props={props}
                 handlers={onClick ? handlers : null}
