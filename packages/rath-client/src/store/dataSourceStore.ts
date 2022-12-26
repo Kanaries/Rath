@@ -34,7 +34,6 @@ import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nl
 import { IsolationForest } from "../lib/outlier/iforest";
 import { compressRows, uncompressRows } from "../utils/rows2csv";
 import { extractSelection, ITextPattern } from "../lib/textPattern/init";
-import { INotebook } from "./userStore";
 import { getGlobalStore } from ".";
 
 interface IDataMessage {
