@@ -16,13 +16,11 @@ const patterns = [
     },
     {
         name: 'punctuation',
-        pattern:
-            /[\u0020-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
+        pattern: /[\u0020-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
     },
     {
         name: 'symbol',
-        pattern:
-            /[\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
+        pattern: /[\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
     },
 ];
 
@@ -46,24 +44,24 @@ function initPatternTree(): IPatternNode {
                 children: [
                     {
                         name: 'text',
-                        pattern: /(?!\d+$)(?:\w+|[\u4e00-\u9fa5]+)(?:\s+|[\u4e00-\u9fa5]+)*/,
+                        pattern: /(?!\d+$)(\w+|[\u4e00-\u9fa5]+)(\s+|[\u4e00-\u9fa5]+)*/,
                         type: 'knowledge',
                         children: [
                             {
                                 name: 'word',
-                                pattern: /(?!\d+$)(?:\w+)(?:\s+|[\u4e00-\u9fa5]+)*/,
+                                pattern: /(?!\d+$)(\w+)(\s+|[\u4e00-\u9fa5]+)*/,
                                 type: 'knowledge',
                                 children: [],
                             },
                             {
                                 name: 'chinese',
-                                pattern: /(?:[\u4e00-\u9fa5]+)(?:\s+|[\u4e00-\u9fa5]+)*/,
+                                pattern: /([\u4e00-\u9fa5]+)(?:\s+|[\u4e00-\u9fa5]+)*/,
                                 type: 'knowledge',
                                 children: [],
                             },
                             {
                                 name: 'date',
-                                pattern: /(?:\d{4}-\d{2}-\d{2})/,
+                                pattern: /(\d{4}-\d{2}-\d{2})/,
                                 type: 'knowledge',
                                 children: [],
                             },
@@ -71,18 +69,18 @@ function initPatternTree(): IPatternNode {
                     },
                     {
                         name: 'number',
-                        pattern: /(?:\d+)(?:\.\d+)?/,
+                        pattern: /(\d+)(\.\d+)?/,
                         type: 'knowledge',
                         children: [
                             {
                                 name: 'integer',
-                                pattern: /(?:\d+)/,
+                                pattern: /\d+/,
                                 type: 'knowledge',
                                 children: [],
                             },
                             {
                                 name: 'float',
-                                pattern: /(?:\d+\.\d+)/,
+                                pattern: /\d+\.\d+/,
                                 type: 'knowledge',
                                 children: [],
                             },
@@ -91,15 +89,13 @@ function initPatternTree(): IPatternNode {
                     {
                         name: 'punctuation',
                         type: 'knowledge',
-                        pattern:
-                            /[\u0020-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
+                        pattern: /[\u0020-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
                         children: [],
                     },
                     {
                         name: 'symbol',
                         type: 'knowledge',
-                        pattern:
-                            /[\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
+                        pattern: /[\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
                         children: [],
                     },
                 ],
@@ -126,9 +122,9 @@ function initPatternTree(): IPatternNode {
                         pattern: /\S+([^\S]+)\S+/,
                         type: 'knowledge',
                         children: [],
-                    }
+                    },
                 ],
-            }
+            },
         ],
     };
     return root;
@@ -197,23 +193,25 @@ export function initPatterns(textSelection: ITextSelection[]): ITextPattern {
         };
     }
 }
-
+function createSafeRegExp(str: string): RegExp {
+    return new RegExp(str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  }
 function addPattern2PatternTree(exactPattern: string, tree: IPatternNode) {
-    const nodePattern = new RegExp(`^${tree.pattern.source}$`)
+    const nodePattern = new RegExp(`^${tree.pattern.source}$`);
     if (nodePattern.test(exactPattern)) {
         if (tree.type === 'specific') {
             return;
         }
         if (tree.type === 'generalize') {
             for (let child of tree.children) {
-                const childPattern = new RegExp(`^${child.pattern.source}$`)
+                const childPattern = new RegExp(`^${child.pattern.source}$`);
                 if (childPattern.test(exactPattern)) {
                     return;
                 }
             }
             tree.children.push({
                 name: exactPattern,
-                pattern: new RegExp(exactPattern),
+                pattern: createSafeRegExp(exactPattern),
                 type: 'specific',
                 children: [],
             });
@@ -223,7 +221,7 @@ function addPattern2PatternTree(exactPattern: string, tree: IPatternNode) {
         }
         // discuss: create new generalize node
         for (let child of tree.children) {
-            const childPattern = new RegExp(`^${child.pattern.source}$`)
+            const childPattern = new RegExp(`^${child.pattern.source}$`);
             if (childPattern.test(exactPattern)) {
                 addPattern2PatternTree(exactPattern, child);
                 return;
@@ -235,19 +233,19 @@ function addPattern2PatternTree(exactPattern: string, tree: IPatternNode) {
             generalizeChild.name = generalizeChild.pattern.source;
             generalizeChild.children.push({
                 name: exactPattern,
-                pattern: new RegExp(exactPattern),
+                pattern: createSafeRegExp(exactPattern),
                 type: 'specific',
                 children: [],
             });
         } else {
             tree.children.push({
                 name: exactPattern,
-                pattern: new RegExp(exactPattern),
+                pattern: createSafeRegExp(exactPattern),
                 type: 'generalize',
                 children: [
                     {
                         name: exactPattern,
-                        pattern: new RegExp(exactPattern),
+                        pattern: createSafeRegExp(exactPattern),
                         type: 'specific',
                         children: [],
                     },
@@ -292,6 +290,7 @@ function findCommonParentsOfSepcificNodesInPatternTree(tree: IPatternNode): IPat
     return parents;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getRepeatNodes(nodes1: IPatternNode[], nodes2: IPatternNode[]): IPatternNode[] {
     const repeatNodes: IPatternNode[] = [];
     for (let node1 of nodes1) {
@@ -304,7 +303,7 @@ function getRepeatNodes(nodes1: IPatternNode[], nodes2: IPatternNode[]): IPatter
     return repeatNodes;
 }
 
-function copyNode (node: IPatternNode): IPatternNode {
+function copyNode(node: IPatternNode): IPatternNode {
     let nextNode: IPatternNode = {
         name: node.name,
         pattern: node.pattern,
@@ -312,11 +311,11 @@ function copyNode (node: IPatternNode): IPatternNode {
         children: [],
         specLabel: node.specLabel,
         depth: node.depth,
-    }
+    };
     for (let child of node.children) {
         nextNode.children.push(copyNode(child));
     }
-    return nextNode
+    return nextNode;
 }
 
 export function intersectPattern(textSelection: ITextSelection[]): ITextPattern {
@@ -346,70 +345,110 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern 
             rawPE.push(text.str.slice(text.endIndex, tailEnd));
         }
         addPattern2PatternTree(selection, patternTree);
-        const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree).map(n => copyNode(n));
+        const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree).map((n) => copyNode(n));
         if (uniques.length === 0) {
             if (textSelection.length === 1) {
-                uniques = commonParents.filter(f => f.type === 'knowledge');
+                uniques = commonParents.filter((f) => f.type === 'knowledge');
             } else {
                 uniques = commonParents;
             }
         } else {
-            uniques = getRepeatNodes(uniques, commonParents);
+            // uniques = getRepeatNodes(uniques, commonParents);
+            uniques = commonParents
         }
     }
     // const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree);
     uniques.sort((a, b) => b.depth / b.specLabel - a.depth / a.specLabel);
     // console.log('commonParents', uniques, patternTree, textSelection);
     // console.log(rawPE, rawPH)
-    const ph = rawPH.length > 0 ? regexgen(rawPH) : new RegExp('^');
-    const pe = rawPE.length > 0 ? regexgen(rawPE) : new RegExp('$');
-    // if (textSelection.length === 1) {
-    //     return {
-    //         ph,
-    //         pe,
-    //         selection: /\S+/,
-    //         pattern: new RegExp(`${ph.source}(?<selection>\\S+?)${pe.source}`)
-    //     }
-    // }
-    // if (patternTypes.size === 1) {
-    //     const pattName = [...patternTypes.values()][0];
-    //     const pattern = patterns.find(p => p.name === pattName)!;
-    //     const concatPattern = new RegExp(`${ph.source}(?<selection>${pattern.pattern.source}?)${pe.source}`);
-    //     if (pattern) {
-    //         return {
-    //             ph,
-    //             pe,
-    //             selection: pattern.pattern,
-    //             pattern: concatPattern
-    //         }
-    //     }
-    // }
-    // uniques.length === 0 wihch is impossible
-    if (uniques.length === 0) {
-        return {
-            ph,
-            pe,
-            selection: /\S+/,
-            pattern: new RegExp(`${ph.source}(?<selection>\\S+?)${pe.source}`)
+    // const ph = rawPH.length > 0 ? regexgen(rawPH) : new RegExp('^');
+    // const pe = rawPE.length > 0 ? regexgen(rawPE) : new RegExp('$');
+    let phs: RegExp[] = [new RegExp('^')];
+    let pes: RegExp[] = [new RegExp('$')];
+    if (rawPH.length > 0) {
+        phs = textPatternInduction(rawPH).map(p => p.pattern)
+    }
+    if (rawPE.length > 0) {
+        pes = textPatternInduction(rawPE).map(p => p.pattern)
+    }
+    const ans: ITextPattern[] = [];
+
+    for (let uni of uniques) {
+        for (let ph of phs) {
+            for (let pe of pes) {
+                const patt = {
+                    ph,
+                    pe,
+                    selection: uni.pattern,
+                    pattern: new RegExp(`${ph.source}(?<selection>${uni.pattern.source})${pe.source}`),
+                }
+                const match = textSelection.every(text => {
+                    const res = extractSelection(patt ,text.str)
+                    if (res.missing) return false;
+                    return res.matchPos[0] === text.startIndex && res.matchPos[1] === text.endIndex;
+                });
+                if (match) {
+                    ans.push(patt)
+                }
+            }
         }
     }
-    return {
-        ph,
-        pe,
-        selection: uniques[0].pattern,
-        pattern: new RegExp(`${ph.source}(?<selection>${uniques[0].pattern.source})${pe.source}`)
+    // uniques.length === 0 wihch is impossible
+    if (ans.length === 0) {
+        return {
+            ph: /^/,
+            pe: /$/,
+            selection: /\S+/,
+            pattern: new RegExp(`^(?<selection>\\S+?)$`),
+        };
     }
+    return ans[0]
 }
 
-type IExtractResult = {
-    missing: false;
-    matchedText: string;
-    matchPos: [number, number];
-} | {
-    missing: true
+export function textPatternInduction(textList: string[]) {
+    const patternTree = initPatternTree();
+    let uniques: IPatternNode[] = [];
+    for (let text of textList) {
+        addPattern2PatternTree(text, patternTree);
+        const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree).map((n) => copyNode(n));
+        // if (uniques.length === 0) {
+        //     uniques = commonParents;
+        // } else {
+        //     uniques = getRepeatNodes(uniques, commonParents);
+        // }
+        uniques = commonParents;
+    }
+    const ph = /^/;
+    const pe =  /$/;
+    uniques = uniques.filter(uni => {
+
+        const patt = {
+            ph,
+            pe,
+            selection: uni.pattern,
+            pattern: new RegExp(`${ph.source}(?<selection>${uni.pattern.source})${pe.source}`),
+        }
+        return textList.every(text => {
+            const res = extractSelection(patt ,text)
+            if (res.missing) return false;
+            return res.matchPos[0] === 0 && res.matchPos[1] === text.length;
+        })
+    })
+    uniques.sort((a, b) => b.depth / b.specLabel - a.depth / a.specLabel);
+    return uniques
 }
-export function extractSelection (selectionPattern: ITextPattern, text: string): IExtractResult {
-    if (text.length === 0) return { missing: true }
+
+type IExtractResult =
+    | {
+          missing: false;
+          matchedText: string;
+          matchPos: [number, number];
+      }
+    | {
+          missing: true;
+      };
+export function extractSelection(selectionPattern: ITextPattern, text: string): IExtractResult {
+    if (text.length === 0) return { missing: true };
     const { pattern } = selectionPattern;
     const patternForIndices = new RegExp(pattern.source, pattern.flags + 'd');
     const match = patternForIndices.exec(text);
@@ -417,16 +456,16 @@ export function extractSelection (selectionPattern: ITextPattern, text: string):
     if (match && match.indices) {
         // @ts-ignore
         const matchedPos: [number, number] = match.indices.groups['selection'];
-        if (!matchedPos) return { missing: true }
-        const startPos = matchedPos[0]
-        const endPos = matchedPos[1]
+        if (!matchedPos) return { missing: true };
+        const startPos = matchedPos[0];
+        const endPos = matchedPos[1];
         return {
             missing: false,
             matchedText: text.slice(startPos, endPos),
-            matchPos: matchedPos
-        }
+            matchPos: matchedPos,
+        };
     }
     return {
-        missing: true
-    }
+        missing: true,
+    };
 }

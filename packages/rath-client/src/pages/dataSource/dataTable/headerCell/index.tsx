@@ -12,6 +12,7 @@ import { LiveContainer } from '../../metaView/metaList';
 import FieldExtSuggestions from '../../../../components/fieldExtend/suggestions';
 import { getGlobalStore } from '../../../../store';
 import { PIVOT_KEYS } from '../../../../constants';
+import { RATH_THEME_CONFIG } from '../../../../theme';
 import StatTable from './liteStatTable';
 import StatePlaceholder from './statePlaceholder';
 
@@ -35,13 +36,13 @@ const HeaderCellContainer = styled.div<{ isPreview: boolean }>`
         overflow: hidden;
     }
     .dim {
-        background-color: #1890ff;
+        background-color: ${RATH_THEME_CONFIG.dimensionColor};
     }
     .mea {
-        background-color: #13c2c2;
+        background-color: ${RATH_THEME_CONFIG.measureColor};
     }
     .disable {
-        background-color: #9e9e9e;
+        background-color: ${RATH_THEME_CONFIG.disableColor};
     }
     .header-row {
         display: flex;
@@ -113,21 +114,21 @@ function useBIFieldTypeOptions(): IOption<IAnalyticType>[] {
     return options;
 }
 
-function useFocus () {
+function useFocus() {
     const [focus, setFocus] = useState<boolean>(false);
     const endFocus = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation();
         setFocus(false);
-    }, [])
+    }, []);
     const startFocus = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation();
         setFocus(true);
-    }, [])
+    }, []);
     const toggleFocus = useCallback<React.TouchEventHandler<HTMLDivElement>>((e) => {
         e.stopPropagation();
-        setFocus(v => !v);
-    }, [])
-    return { focus, endFocus, startFocus, toggleFocus, setFocus }
+        setFocus((v) => !v);
+    }, []);
+    return { focus, endFocus, startFocus, toggleFocus, setFocus };
 }
 
 const HeaderCell: React.FC<HeaderCellProps> = (props) => {
@@ -156,12 +157,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
         setHeaderName(name);
     }, [name]);
     return (
-        <HeaderCellContainer
-            isPreview={isPreview}
-            onMouseOver={startFocus}
-            onMouseLeave={endFocus}
-            onTouchStart={toggleFocus}
-        >
+        <HeaderCellContainer isPreview={isPreview} onMouseOver={startFocus} onMouseLeave={endFocus} onTouchStart={toggleFocus}>
             <StatePlaceholder
                 preview={isPreview}
                 onAcceptExtField={() => dataSourceStore.settleExtField(code)}

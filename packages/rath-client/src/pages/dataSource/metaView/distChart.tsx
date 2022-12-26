@@ -5,6 +5,7 @@ import intl from 'react-intl-universal';
 import { IRow } from '../../../interfaces';
 import { getRange, getVegaTimeFormatRules } from '../../../utils';
 import { shallowCopyArray } from '../../../utils/deepcopy';
+import { VegaThemeConfig } from '../../../queries/themes/config';
 
 const DATA_NAME = 'dataSource';
 const DEFAULT_BIN_SIZE = 10;
@@ -35,6 +36,20 @@ export interface DistributionChartProps {
     dataSource: IRow[]
     /** @default true */
     label?: boolean;
+}
+const markColor = '#3371D7';
+const theme: VegaThemeConfig = {
+    arc: { fill: markColor },
+    area: { fill: markColor },
+    path: { stroke: markColor },
+    rect: { fill: markColor },
+    shape: { stroke: markColor },
+    symbol: { stroke: markColor },
+    circle: { fill: markColor },
+    bar: { fill: markColor },
+    point: { fill: markColor },
+    tick: { fill: markColor },
+    line: { fill: markColor },
 }
 
 const DistributionChart: React.FC<DistributionChartProps> = (props) => {
@@ -121,7 +136,8 @@ const DistributionChart: React.FC<DistributionChartProps> = (props) => {
                 }
             }, {
                 actions: false,
-                timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any
+                timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
+                config: theme
             }).then(res => {
                 setView(res.view);
                 return res
