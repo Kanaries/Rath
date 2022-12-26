@@ -1,9 +1,10 @@
 import intl from 'react-intl-universal';
-import { Checkbox, Dropdown, Modal, PrimaryButton, Spinner, Stack } from '@fluentui/react';
+import { Checkbox, Dropdown, Modal, PrimaryButton, Spinner, Stack, TextField } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import styled from 'styled-components';
+import dayjs from 'dayjs';
 import { useGlobalStore } from '../../store';
 import { downloadFileFromBlob, getKRFParseMap, IKRFComponents, KRF_VERSION } from '../../utils/download';
 import { LoginPanel } from '../../pages/loginInfo/account';
@@ -32,6 +33,8 @@ const BackupModal: FC = (props) => {
     const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
     const mutFieldsLength = dataSourceStore.mutFields.length;
     const collectionLength = collectionStore.collectionList.length;
+    const defaultName = useMemo(() => intl.get('storage.default_name', { date: dayjs().format('YYYY-MM-DDTHH_mm') }), []);
+    const [name, setName] = useState('');
     const [busy, setBusy] = useState(false);
     const [backupItemKeys, setBackupItemKeys] = useState<{
         [key in IKRFComponents]: boolean;
@@ -121,9 +124,10 @@ const BackupModal: FC = (props) => {
             }
         }
         const blob = await zipWriter.close();
-        const file = new File([blob], 'rathds_backup.krf');
+        const fileName = `${name || defaultName}.krf`;
+        const file = new File([blob], fileName);
         if (download) {
-            downloadFileFromBlob(blob, 'rathds_backup.krf');
+            downloadFileFromBlob(blob, fileName);
         } else {
             await userStore.uploadNotebook(selectedWspId!, file);
         }
@@ -188,6 +192,12 @@ const BackupModal: FC = (props) => {
                             ))}
                         </Stack>
                         <Stack style={{ margin: '0.6em 0' }}>
+                            <TextField
+                                label={intl.get('storage.name')}
+                                value={name}
+                                placeholder={defaultName}
+                                onChange={(_, val) => setName(val ?? '')}
+                            />
                             <Dropdown
                                 label={intl.get('user.organization')}
                                 options={(organizations ?? []).map(org => ({

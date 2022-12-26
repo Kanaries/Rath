@@ -12,6 +12,7 @@ import { computeFieldFeatures } from '../../../lib/meta/fieldMeta';
 import { useGlobalStore } from '../../../store';
 import FieldFilter from '../../../components/fieldFilter';
 import { getRange } from '../../../utils';
+import { RATH_THEME_CONFIG } from '../../../theme';
 import { ANALYTIC_TYPE_CHOICES, SEMANTIC_TYPE_CHOICES } from '../config';
 import DetailTable from './detailTable';
 import FullDistViz from './fullDistViz';
@@ -42,13 +43,13 @@ const DetailContainer = styled.div`
         margin: 0px 1px;
     }
     .dimension {
-        background-color: #1890ff;
+        background-color: ${RATH_THEME_CONFIG.dimensionColor};
     }
     .measure {
-        background-color: #13c2c2;
+        background-color: ${RATH_THEME_CONFIG.measureColor}
     }
     .disable {
-        background-color: #9e9e9e;
+        background-color: ${RATH_THEME_CONFIG.disableColor}
     }
 `;
 
