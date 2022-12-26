@@ -12,11 +12,13 @@ from .causallearn.GRaSP import GRaSP
 from .causallearn.CAM_UV import CAM_UV
 from .causallearn.RCD import RCD
 from .causallearn.XLearner import XLearner
+from .causallearn.SELF import SELF
 from .dowhy.Explainer import Explainer
 
 from .FuncDepTest import FuncDepTest
 
 DICT: Dict[str, typing.Type[Any]] = {
+    'SELF': SELF,
     'XLearner': XLearner,
     'CD_NOD': CD_NOD,
     'PC': PC,
@@ -28,6 +30,6 @@ DICT: Dict[str, typing.Type[Any]] = {
     'CAM_UV': CAM_UV,
     'RCD': RCD,
     'FuncDepTest': FuncDepTest,
-    'Explainer': Explainer
+    'Explainer': Explainer,
 }
 from .common import registerCausalRequest, CausalRequest

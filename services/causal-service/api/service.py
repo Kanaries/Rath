@@ -109,7 +109,7 @@ def runDiscover(sessionId: str, req: I.DiscoverReq):
             forbiddenRelationships.append([src, tar])
             if src_type == 1:
                 forcedRelationhships.append([tar, src])
-    
+
     dataset = {
         'data': data.loc[:, focusedFields].to_dict('list'),
         'schema': {
