@@ -117,7 +117,7 @@ h2, h3 {
 .message-container {
   position: absolute;
   width: 100%;
-  padding: 1em 4em 0em 4em;
+  z-index: 999;
 }
 
 .main-app-container{
@@ -154,6 +154,7 @@ h2, h3 {
 }
 
 .main-app-container > .main-app-content{
+  position: relative;
   flex-basis: 800px;
   flex-grow: 1;
   flex-shrink: 1;

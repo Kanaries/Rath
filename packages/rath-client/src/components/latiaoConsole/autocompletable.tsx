@@ -48,6 +48,9 @@ const Container = styled.div`
             flex-shrink: 1;
         }
     }
+    pre {
+        margin: 0;
+    }
 `;
 
 export interface LaTiaoACProps {
