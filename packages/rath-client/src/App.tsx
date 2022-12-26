@@ -24,7 +24,7 @@ import useHotKey from './hooks/use-hotkey';
 
 function App() {
     const { langStore, commonStore, userStore } = useGlobalStore();
-    const { appKey, navMode } = commonStore;
+    const { appKey } = commonStore;
 
     useEffect(() => {
         initRathWorker(commonStore.computationEngine);

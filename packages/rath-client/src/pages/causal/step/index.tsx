@@ -29,6 +29,7 @@ const StepHint = styled.p<{ isCurrentStep: boolean }>`
     font-size: 0.8rem;
     opacity: ${({ isCurrentStep }) => isCurrentStep ? 0.8 : 0.6};
     padding: 1em 0;
+    margin: 0;
     > i {
         margin: 0 2px;
     }
@@ -201,7 +202,6 @@ export const CausalStepPager = observer(function CausalStepPager () {
                 <Icon iconName={hintStep.key === stepKey ? "Info" : "InfoSolid"} />
                 {hintStep.help}
             </StepHint>
-            <hr className="card-line" />
             <StepPanel>
                 {{
                     [CausalStep.DATASET_CONFIG]: <CausalDatasetConfig />,

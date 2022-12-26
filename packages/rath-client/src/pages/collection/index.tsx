@@ -58,7 +58,7 @@ const Collection: React.FC = (props) => {
     };
     return (
         <div className="content-container">
-            <div className="card">
+            <div className="app-card">
                 <MainCardContainer>
                     <h1 className="seg-header">{intl.get('collection.title')}</h1>
                     <p className="seg-desc">{intl.get('collection.desc')}</p>
