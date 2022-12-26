@@ -317,7 +317,7 @@ const FocusZone: React.FC = (props) => {
                     </div>
                 )}
             </div>
-            <hr style={{ marginTop: '1em' }} />
+            <hr style={{ marginTop: '1em', border: 'none' }} />
             <div className="fields-container">
                 {mainView &&
                     mainView.fields.map((f: IFieldMeta) => (

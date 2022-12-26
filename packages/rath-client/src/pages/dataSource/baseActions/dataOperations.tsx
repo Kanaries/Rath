@@ -1,13 +1,14 @@
-import { CommandBar } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { ArrowDownTrayIcon, CheckCircleIcon, CloudArrowUpIcon, FunnelIcon, WrenchScrewdriverIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import { useGlobalStore } from '../../../store';
 import LaTiaoConsole from '../../../components/latiaoConsole';
 import { useCleanMethodList } from '../../../hooks';
 import { rows2csv } from '../../../utils/rows2csv';
 import { downloadFileWithContent } from '../../../utils/download';
+import Toolbar, { ToolbarItemProps } from '../../../components/toolbar';
 
 const Cont = styled.div`
     /* margin: 1em; */
@@ -15,6 +16,10 @@ const Cont = styled.div`
     /* padding: 6px; */
     display: flex;
     align-items: center;
+`;
+
+const PlaceHolder = styled.svg`
+    margin: 0 !important;
 `;
 
 const DataOperations: React.FC = () => {
@@ -47,81 +52,83 @@ const DataOperations: React.FC = () => {
     }, [dataSourceStore]);
 
     const cleanMethodListLang = useCleanMethodList();
-    const items = useMemo(() => {
+    const items = useMemo<ToolbarItemProps[]>(() => {
         return [
             {
                 key: 'clean',
-                text: `${intl.get('dataSource.cleanMethod')}:${intl.get(`dataSource.methods.${cleanMethod}`)}`,
-                iconProps: { iconName: 'Broom' },
-                subMenuProps: {
-                    items: cleanMethodListLang.map((m) => ({
-                        key: m.key + '',
-                        text: m.text,
-                        onClick: () => {
-                            dataSourceStore.setCleanMethod(m.key);
-                        },
-                    })),
+                label: intl.get('dataSource.cleanMethod'),
+                options: cleanMethodListLang.map((m) => ({
+                    key: m.key,
+                    label: intl.get(`dataSource.methods.${m.key}`),
+                    icon: () => <PlaceHolder />,
+                })),
+                icon: WrenchScrewdriverIcon,
+                value: cleanMethod,
+                onSelect: value => {
+                    dataSourceStore.setCleanMethod(value as typeof cleanMethod);
                 },
             },
             {
                 key: 'export',
-                text: intl.get('dataSource.downloadData.title'),
-                iconProps: { iconName: 'download' },
-                subMenuProps: {
-                    items: [
-                        {
-                            key: 'downloadCSV',
-                            text: intl.get('dataSource.downloadData.downloadCSV'),
-                            onClick: exportDataAsCSV,
-                        },
-                        {
-                            key: 'downloadJSON',
-                            text: intl.get('dataSource.downloadData.downloadJSON'),
-                            onClick: exportDataAsJson,
-                        },
-                        {
-                            key: 'downloadJSONMeta',
-                            text: intl.get('dataSource.downloadData.downloadJSONMeta'),
-                            onClick: exportDataset,
-                        },
-                        {
-                            key: 'downloadRATHDS',
-                            text: intl.get('dataSource.downloadData.downloadRATHDS'),
-                            onClick: exportDataAsRATHDS,
-                        },
-                    ],
-                },
+                icon: ArrowDownTrayIcon,
+                label: intl.get('dataSource.downloadData.title'),
+                options: [
+                    {
+                        key: 'downloadCSV',
+                        label: intl.get('dataSource.downloadData.downloadCSV'),
+                        onClick: exportDataAsCSV,
+                        icon: () => <PlaceHolder />,
+                    },
+                    {
+                        key: 'downloadJSON',
+                        label: intl.get('dataSource.downloadData.downloadJSON'),
+                        onClick: exportDataAsJson,
+                        icon: () => <PlaceHolder />,
+                    },
+                    {
+                        key: 'downloadJSONMeta',
+                        label: intl.get('dataSource.downloadData.downloadJSONMeta'),
+                        onClick: exportDataset,
+                        icon: () => <PlaceHolder />,
+                    },
+                    {
+                        key: 'downloadRATHDS',
+                        label: intl.get('dataSource.downloadData.downloadRATHDS'),
+                        onClick: exportDataAsRATHDS,
+                        icon: () => <PlaceHolder />,
+                    },
+                ],
                 disabled: mutFields.length === 0,
             },
             {
                 key: 'fastSelection',
-                text: intl.get('dataSource.fastSelection.title'),
+                label: intl.get('dataSource.fastSelection.title'),
                 disabled: mutFields.length === 0,
-                iconProps: { iconName: 'filter' },
+                icon: FunnelIcon,
                 onClick: () => {
                     dataSourceStore.setShowFastSelection(true);
                 },
             },
             {
                 key: 'enableAll',
-                text: intl.get('dataSource.operations.selectAll'),
-                iconProps: { iconName: 'CheckboxComposite' },
+                label: intl.get('dataSource.operations.selectAll'),
+                icon: CheckCircleIcon,
                 onClick: () => {
                     dataSourceStore.setAllMutFieldsDisable(false);
                 },
             },
             {
                 key: 'disableAll',
-                text: intl.get('dataSource.operations.disableAll'),
-                iconProps: { iconName: 'Checkbox' },
+                label: intl.get('dataSource.operations.disableAll'),
+                icon: XCircleIcon,
                 onClick: () => {
                     dataSourceStore.setAllMutFieldsDisable(true);
                 },
             },
             {
                 key: 'backup',
-                text: 'backup',
-                iconProps: { iconName: 'download' },
+                label: 'backup',
+                icon: CloudArrowUpIcon,
                 onClick: () => {
                     commonStore.setShowBackupModal(true);
                 },
@@ -141,12 +148,7 @@ const DataOperations: React.FC = () => {
     return (
         <Cont>
             <LaTiaoConsole />
-            <CommandBar
-                styles={{
-                    root: {
-                        padding: 0,
-                    },
-                }}
+            <Toolbar
                 items={items}
             />
             {/* <div className="item">

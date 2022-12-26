@@ -94,7 +94,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     );
     return (
         <div className="content-container" style={{ position: 'relative' }}>
-            <Card>
+            <Card backgroundColor="unset">
                 <ImportStorage />
                 <FastSelection />
                 <BackupModal />
@@ -126,7 +126,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
                 </Stack>
-                <hr style={{ margin: '1em 0em 0em 0em' }} />
+                <hr style={{ margin: '1em 0em', border: 'none' }} />
                 <Pivot
                     style={{ marginBottom: '6px' }}
                     selectedKey={dataPreviewMode}
