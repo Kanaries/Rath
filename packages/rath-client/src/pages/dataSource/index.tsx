@@ -126,7 +126,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
                 </Stack>
-                <hr style={{ margin: '1em 0em', border: 'none' }} />
+                <hr style={{ margin: '0.6em 0em', border: 'none' }} />
                 <Pivot
                     style={{ marginBottom: '6px' }}
                     selectedKey={dataPreviewMode}

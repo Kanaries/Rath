@@ -76,28 +76,43 @@ const DataOperations: React.FC = () => {
                     {
                         key: 'downloadCSV',
                         label: intl.get('dataSource.downloadData.downloadCSV'),
-                        onClick: exportDataAsCSV,
                         icon: () => <PlaceHolder />,
                     },
                     {
                         key: 'downloadJSON',
                         label: intl.get('dataSource.downloadData.downloadJSON'),
-                        onClick: exportDataAsJson,
                         icon: () => <PlaceHolder />,
                     },
                     {
                         key: 'downloadJSONMeta',
                         label: intl.get('dataSource.downloadData.downloadJSONMeta'),
-                        onClick: exportDataset,
                         icon: () => <PlaceHolder />,
                     },
                     {
                         key: 'downloadRATHDS',
                         label: intl.get('dataSource.downloadData.downloadRATHDS'),
-                        onClick: exportDataAsRATHDS,
                         icon: () => <PlaceHolder />,
                     },
                 ],
+                onSelect: key => {
+                    switch (key) {
+                        case 'downloadCSV': {
+                            return exportDataAsCSV();
+                        }
+                        case 'downloadJSON': {
+                            return exportDataAsJson();
+                        }
+                        case 'downloadJSONMeta': {
+                            return exportDataset();
+                        }
+                        case 'downloadRATHDS': {
+                            return exportDataAsRATHDS();
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                },
                 disabled: mutFields.length === 0,
             },
             {
@@ -151,51 +166,6 @@ const DataOperations: React.FC = () => {
             <Toolbar
                 items={items}
             />
-            {/* <div className="item">
-                <Dropdown
-                    styles={{ root: { minWidth: '180px' } }}
-                    selectedKey={cleanMethod}
-                    // label={intl.get('dataSource.cleanMethod')}
-                    options={cleanMethodListLang}
-                    onChange={(e, option) => {
-                        option && dataSourceStore.setCleanMethod(option.key as CleanMethod);
-                    }}
-                    // onRenderLabel={makeRenderLabelHandler(intl.get('dataSource.tip'))}
-                />
-            </div> */}
-            {/* <div className="item">
-                <CommandButton
-                    text={intl.get('dataSource.downloadData.title')}
-                    disabled={mutFields.length === 0}
-                    onClick={exportData}
-                    iconProps={{ iconName: 'download' }}
-                    styles={{
-                        root: {
-                            height: '32px',
-                            marginLeft: '1.5em !important',
-                        },
-                    }}
-                />
-            </div> */}
-            {/* <div className="item">
-                <CommandButton
-                    disabled={mutFields.length === 0}
-                    text={intl.get('dataSource.fastSelection.title')}
-                    iconProps={{ iconName: 'filter' }}
-                    onClick={() => {
-                        dataSourceStore.setShowFastSelection(true);
-                    }}
-                />
-            </div> */}
-
-            {/* <Checkbox
-                checked={!allDisable}
-                indeterminate={!allDisable && !allAble}
-                label={intl.get('dataSource.operations.selectAll')}
-                onChange={(e, checked) => {
-                    dataSourceStore.setAllMutFieldsDisable(!checked);
-                }}
-            /> */}
         </Cont>
     );
 };

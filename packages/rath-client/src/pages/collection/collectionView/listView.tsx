@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { applyFilters } from '@kanaries/loa';
-import { Divider, Pagination } from '@material-ui/core';
+import { Pagination } from '@material-ui/core';
 import ReactVega from '../../../components/react-vega';
 import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IInsightVizView, IRow } from '../../../interfaces';
@@ -71,7 +71,7 @@ const ListView: React.FC<ListViewProps> = (props) => {
                     setPageIndex(v - 1);
                 }}
             />
-            <Divider style={{ marginBlock: '1.2em', border: 'none' }} />
+            <hr style={{ marginBlock: '1.2em', border: 'none' }} />
             <CollectContainer>
                 {views.slice(pageIndex * VIEW_NUM_IN_PAGE, (pageIndex + 1) * VIEW_NUM_IN_PAGE).map((item, i) => (
                     <ItemContainer

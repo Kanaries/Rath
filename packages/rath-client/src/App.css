@@ -1,9 +1,10 @@
 :root {
-  --bg-color-light: rgb(250, 250, 250);
-  --text-color-light: rgb(26, 26, 26);
+  --bg-color-light: rgb(252, 252, 252);
+  --text-color-light: rgb(30, 30, 30);
 }
 body {
   background-color: var(--bg-color-light);
+  color: var(--text-color-light);
 }
 .content-container{
   /* padding: 1em 9% 0px 9%; */
@@ -28,6 +29,40 @@ body {
 .logo>img{
   width: 100%;
 }
+
+p, pre, h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.6em;
+}
+
+h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+h2 {
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+h3 {
+  font-size: 1.05rem;
+  font-weight: 550;
+}
+h4 {
+  font-size: 1.02rem;
+  font-weight: 550;
+}
+h5 {
+  font-size: 1rem;
+  font-weight: 500;
+}
+h6 {
+  font-size: 0.975rem;
+  font-weight: 500;
+}
+
 h2, h3 {
   color: #323130;
   font-weight: 500;
@@ -145,6 +180,19 @@ h2, h3 {
   flex-basis: max-content;
   background-color: var(--bg-color-light);
   color: var(--text-color-light);
+  box-shadow: -5px 0 8px var(--text-color-light);
+  position: relative;
+  z-index: 1;
+}
+
+.main-app-nav > * > *:first-child {
+  background-color: #fff;
+}
+
+.main-app-nav > * > *:first-child h1 {
+  font-size: 1.75rem;
+  margin-right: 0.8em;
+  user-select: none;
 }
 
 .main-app-nav > * > *:not(:first-child) {
@@ -166,7 +214,7 @@ h2, h3 {
 }
 
 .kanaries-copy-right-footer{
-  position: absolute;
+  position: fixed;
   bottom: 4px;
   font-size: 12px;
   left: 50%;
@@ -180,37 +228,4 @@ h2, h3 {
 hr{
   /* border-color: #efefef; */
   border: none;
-}
-
-p, pre, h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  line-height: 1.6em;
-}
-
-h1 {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-h2 {
-  font-size: 1.08rem;
-  font-weight: 600;
-}
-h3 {
-  font-size: 1.05rem;
-  font-weight: 550;
-}
-h4 {
-  font-size: 1.02rem;
-  font-weight: 550;
-}
-h5 {
-  font-size: 1rem;
-  font-weight: 500;
-}
-h6 {
-  font-size: 0.975rem;
-  font-weight: 500;
 }

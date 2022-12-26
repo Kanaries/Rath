@@ -593,5 +593,8 @@
                 "title": "SMS sent failed"
             }
         }
+    },
+    "access": {
+        "unsupport": "Not support in your location."
     }
 }

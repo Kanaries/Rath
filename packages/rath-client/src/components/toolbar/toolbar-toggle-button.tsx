@@ -23,7 +23,7 @@ const ToggleContainer = styled.div<{ checked: boolean }>`
         width: var(--icon-size);
         height: var(--icon-size);
         position: absolute;
-        color: ${({ checked }) => checked ? '#EDEFF4' : '#9ba1ab' ||  '#525763'};
+        color: ${({ checked }) => checked ? '#EDEFF4' : 'var(--color)'};
         --shadow-color: ${({ checked }) => checked ? '#2956bf66' : '#9ba1ab66' || '#52576366'};
         transition: color 120ms;
     }
@@ -35,7 +35,7 @@ const ToggleContainer = styled.div<{ checked: boolean }>`
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: #132f70;
+        background-color: var(--blue-dark);
         transform: ${({ checked }) => checked ? 'translate(0)' : 'translateX(-100%)'};
         transition: transform 80ms;
     }

@@ -1,7 +1,7 @@
 import { applyFilters } from '@kanaries/loa';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Divider, Pagination } from '@material-ui/core';
+import { Pagination } from '@material-ui/core';
 import ReactVega from '../../../components/react-vega';
 import ViewInfo from '../../../components/viewInfo/textInfo';
 import { IFieldMeta, IInsightVizView, IRow } from '../../../interfaces';
@@ -66,7 +66,7 @@ const CardView: React.FC<CardViewProps> = (props) => {
                     setPageIndex(v - 1);
                 }}
             />
-            <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
+            <hr style={{ marginBottom: '1em', marginTop: '1em' }} />
             <CollectContainer>
                 {views.slice(pageIndex * VIEW_NUM_IN_PAGE, (pageIndex + 1) * VIEW_NUM_IN_PAGE).map((item, i) => (
                     <ItemContainer

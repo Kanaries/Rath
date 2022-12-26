@@ -1,4 +1,4 @@
-import { Callout, DirectionalHint, TooltipHost } from "@fluentui/react";
+import { Callout, DirectionalHint, Theme, TooltipHost, useTheme } from "@fluentui/react";
 import { memo, useEffect, useRef } from "react";
 import styled from "styled-components";
 import produce from "immer";
@@ -7,11 +7,17 @@ import { IToolbarItem, IToolbarProps, ToolbarItemContainer } from "./toolbar-ite
 import { ToolbarContainer, useHandlers, ToolbarItemContainerElement } from "./components";
 
 
-const OptionGroup = styled(ToolbarContainer)`
+const OptionGroup = styled(ToolbarContainer)<{ theme: Theme }>`
     flex-direction: column;
     width: max-content;
     height: max-content;
     --aside: 8px;
+    --background-color: ${({ theme }) => theme?.semanticColors?.bodyStandoutBackground};
+    --background-color-hover: ${({ theme }) => theme?.semanticColors?.bodyBackgroundHovered};
+    --color: ${({ theme }) => theme?.semanticColors?.buttonText};
+    --color-hover: ${({ theme }) => theme?.semanticColors?.buttonTextHovered};
+    --blue: ${({ theme }) => theme?.palette?.blue};
+    background-color: var(--background-color);
 `;
 
 const Option = styled(ToolbarItemContainerElement)`
@@ -31,12 +37,15 @@ const Option = styled(ToolbarItemContainerElement)`
             width: calc(var(--aside) / 2);
             top: calc(var(--height) / 8);
             bottom: calc(var(--height) / 8);
-            background-color: #3064df;
+            background-color: var(--blue);
         }
     }
     > label {
         user-select: none;
         pointer-events: none;
+    }
+    :hover, &[aria-selected="true"] {
+        color: var(--color-hover);
     }
 `;
 
@@ -107,6 +116,8 @@ const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(functio
     const currentOption = options.find(opt => opt.key === value);
     const CurrentIcon = currentOption?.icon;
 
+    const theme = useTheme();
+
     return (
         <TooltipHost content={label} styles={{ root: { display: 'inline-flex', position: 'relative' } }}>
             <ToolbarItemContainer
@@ -131,15 +142,15 @@ const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(functio
                             margin: 'calc((var(--height) - var(--icon-size)) * 0.2)',
                             filter: 'drop-shadow(0 0 0.5px var(--background-color)) '.repeat(4),
                             pointerEvents: 'none',
-                            color: '#3b72f3',
+                            color: theme?.palette?.blueDark || '#3b72f3',
                         }}
                     />
                 )}
                 <TriggerFlag aria-hidden id={id} />
             </ToolbarItemContainer>
             {opened && (
-                <Callout target={`#${id}`} role="dialog" gapSpace={0} directionalHint={DirectionalHint.bottomCenter} beakWidth={8} styles={{ calloutMain: { background: 'unset' }, beakCurtain: { background: 'unset' }, beak: { backgroundColor: '#121212' } }}>
-                    <OptionGroup role="listbox" aria-activedescendant={`${id}::${value}`} aria-describedby={id} aria-disabled={disabled}>
+                <Callout target={`#${id}`} role="dialog" gapSpace={0} directionalHint={DirectionalHint.bottomCenter} beakWidth={8} styles={{ calloutMain: { background: 'unset' }, beakCurtain: { background: 'unset' }, beak: { backgroundColor: 'var(--bg-color-light)' } }}>
+                    <OptionGroup theme={theme} role="listbox" aria-activedescendant={`${id}::${value}`} aria-describedby={id} aria-disabled={disabled}>
                         {options.map((option, idx, arr) => {
                             const selected = option.key === value;
                             const OptionIcon = option.icon;
@@ -155,7 +166,6 @@ const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(functio
                                     aria-selected={selected}
                                     split={false}
                                     tabIndex={0}
-                                    onFocus={() => onSelect(option.key)}
                                     onClick={() => {
                                         onSelect(option.key);
                                         setOpenedKey(null);
