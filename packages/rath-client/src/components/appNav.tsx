@@ -41,8 +41,9 @@ const NavContainer = styled.div`
 const NavBody = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
-    padding: 10px 0 10px 8px;
-    border-radius: 12px 12px 0 0;
+    padding: 16px 0 16px 10px;
+    overflow: hidden auto;
+    /* border-radius: 12px 12px 0 0; */
 `;
 
 const StyledNav = styled(Nav)<{ navMode: "text" | "icon" }>`
@@ -50,7 +51,7 @@ const StyledNav = styled(Nav)<{ navMode: "text" | "icon" }>`
         color: inherit;
     }
     a.ms-Nav-link, a.ms-Nav-compositeLink {
-        border-radius: 6px 0 0 6px;
+        border-radius: 4px 0 0 4px;
         padding-right: ${({ navMode }) => navMode === 'text' ? '1em' : '0'};
         ::after {
             display: none;
@@ -61,6 +62,9 @@ const StyledNav = styled(Nav)<{ navMode: "text" | "icon" }>`
     }
     .ms-Nav-compositeLink:hover {
         color: rgb(26, 26, 26);
+    }
+    span {
+        pointer-events: none;
     }
 `;
 
@@ -184,6 +188,11 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     isExpanded: altKeyPressed,
                     forceAnchor: true,
                     onClick(e: any) {
+                        const target = e.target as HTMLAnchorElement | null;
+                        if (target) {
+                            const button = target.previousSibling as HTMLButtonElement | null;
+                            button?.click();
+                        }
                         e.preventDefault();
                     },
                     links: getLinks([
@@ -209,7 +218,7 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     target="_blank"
                     rel="noreferrer"
                 >
-                    <img style={{ width: '38px', marginTop: '4px' }} src="./assets/kanaries-lite.png" alt="rath" />
+                    <img style={{ width: '46px', marginTop: '4px' }} src="./assets/kanaries-lite.png" alt="rath" />
                 </a>
                 {navMode === 'text' && (
                     <h1>
