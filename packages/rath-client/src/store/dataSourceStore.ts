@@ -34,10 +34,13 @@ import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nl
 import { IsolationForest } from "../lib/outlier/iforest";
 import { compressRows, uncompressRows } from "../utils/rows2csv";
 import { extractSelection, ITextPattern } from "../lib/textPattern/init";
+import { INotebook } from "./userStore";
+import { getGlobalStore } from ".";
 
 interface IDataMessage {
-    type: 'init_data' | 'others';
+    type: 'init_data' | 'others' | 'download';
     data: IDatasetBase
+    downLoadURL?: string;
 }
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
@@ -202,6 +205,11 @@ export class DataSourceStore {
         this.cleanedDataRef = fromStream(cleanedData$, []);
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
+            const { type, downLoadURL } = msg;
+            const { userStore } = getGlobalStore();
+            if (type === 'download' && downLoadURL) {
+                userStore.openNotebook(downLoadURL);
+            }
             if (ev.source && msg.type === 'init_data') {
                 console.warn('[Get DataSource From Other Pages]', msg)
                 // @ts-ignore

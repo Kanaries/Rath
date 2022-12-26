@@ -344,7 +344,7 @@
     },
     "storage": {
         "upload": "保存到云",
-        "upload_desc": "备份你的 Rath notebook。",
+        "upload_desc": "备份你的 Rath 工作簿。",
         "components": {
             "data": "全量数据 ({size} 行)",
             "meta": "元数据 ({size} 个字段)",
@@ -352,6 +352,8 @@
             "causal": "因果模型",
             "dashboard": "报表 ({size} 个文档)"
         },
+        "name": "工作簿名称",
+        "default_name": "Rath 工作簿 {date}",
         "download": "加载",
         "createdAt": "创建时间",
         "refresh": "刷新",

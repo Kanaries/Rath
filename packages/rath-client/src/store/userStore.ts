@@ -303,9 +303,9 @@ export default class UserStore {
         }
     }
 
-    public async openNotebook(notebook: INotebook) {
+    public async openNotebook(downLoadURL: string) {
         try {
-            const data = await fetch(notebook.downLoadURL, { method: 'GET' });
+            const data = await fetch(downLoadURL, { method: 'GET' });
             if (!data.body) {
                 throw new Error('Request got empty body');
             }

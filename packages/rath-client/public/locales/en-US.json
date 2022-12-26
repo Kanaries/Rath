@@ -355,6 +355,8 @@
         "download": "Load",
         "createdAt": "Created At",
         "refresh": "Refresh",
+        "name": "Notebook Name",
+        "default_name": "Rath Notebook {date}",
         "size": "Size",
         "apply": "Upload"
     },
