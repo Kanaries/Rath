@@ -192,7 +192,7 @@ const NotebookSpace = observer(function NotebookSpace () {
                                             return;
                                         }
                                         setBusy(true);
-                                        userStore.openNotebook(notebook).finally(() => {
+                                        userStore.openNotebook(notebook.downLoadURL).finally(() => {
                                             setBusy(false);
                                         });
                                     }}
