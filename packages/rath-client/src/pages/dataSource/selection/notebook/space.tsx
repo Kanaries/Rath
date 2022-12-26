@@ -29,6 +29,39 @@ const List = styled.div`
     grid-auto-rows: max-content;
 `;
 
+const CaretButton = styled(ActionButton)`
+    button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 0;
+        padding: 0;
+        font-size: 12px;
+        background-color: #d13438 !important;
+        border-radius: 50%;
+        color: #fff !important;
+        width: 1.2em;
+        height: 1.2em;
+        i {
+            font-weight: 1000;
+            line-height: 1em;
+            width: 1em;
+            height: 1em;
+            transform: scale(0.4);
+        }
+        opacity: 0.5;
+        :hover {
+            opacity: 1;
+        }
+        .ms-Button-label {
+            font-size: 105%;
+            font-weight: 600;
+            padding: 0 0.4em;
+            min-width: 4em;
+        }
+    }
+`;
+
 const ListItem = styled.div`
     display: flex;
     flex-direction: column;
@@ -64,33 +97,6 @@ const ListItem = styled.div`
     .time, .size {
         font-size: 0.5rem;
         color: #888;
-    }
-    > button {
-        position: absolute;
-        top: 0;
-        right: 0;
-        margin: 0;
-        padding: 0;
-        font-size: 12px;
-        background-color: #d13438 !important;
-        border-radius: 50%;
-        color: #fff !important;
-        width: 1.2em;
-        height: 1.2em;
-        i {
-            font-weight: 1000;
-            line-height: 1em;
-            width: 1em;
-            height: 1em;
-            transform: scale(0.4);
-        }
-        opacity: 0.5;
-        :hover {
-            opacity: 1;
-        }
-    }
-    & .hover-only:not([aria-selected=true]) {
-        visibility: hidden;
     }
     :hover {
         background-color: #8881;
@@ -144,7 +150,7 @@ const NotebookSpace = observer(function NotebookSpace () {
     return organizations ? (
         <Container>
             <div>
-                <ActionButton
+                <CaretButton
                     text={organization?.name}
                     split
                     menuProps={{
@@ -156,11 +162,10 @@ const NotebookSpace = observer(function NotebookSpace () {
                             },
                         })),
                     }}
-                    styles={{ label: { fontSize: '105%', fontWeight: 600, padding: '0 0.4em', minWidth: '4em' } }}
                     onClick={undefined}
                 />
                 <b>/</b>
-                <ActionButton
+                <CaretButton
                     text={workspace?.name}
                     disabled={!workspaces}
                     split
