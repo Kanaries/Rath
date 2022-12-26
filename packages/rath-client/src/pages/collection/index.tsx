@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import intl from 'react-intl-universal';
 import { Sampling } from "visual-insights";
 import { useBoolean } from '@fluentui/react-hooks';
+import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import { IInsightVizView } from '../../interfaces';
 import { searchFilterView } from '../../utils';
@@ -20,6 +21,14 @@ enum COLLECT_CONFIG {
     TITLE = 'title',
     DESC = 'desc',
 }
+
+const PanelFooter = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    > *:not(:first-child) {
+        margin-left: 1em;
+    }
+`;
 
 const collectionConfig = [
     { key: COLLECT_CONFIG.TITLE, title: COLLECT_CONFIG.TITLE },
@@ -95,10 +104,9 @@ const Collection: React.FC = (props) => {
                         closeButtonAriaLabel="Close"
                         onRenderFooterContent={() => {
                             return (
-                                <div className="flex justify-end">
+                                <PanelFooter>
                                     <DefaultButton onClick={dismissPanel}>Cancel</DefaultButton>
                                     <PrimaryButton
-                                        className="ml-2"
                                         onClick={() => {
                                             const newCollectionList = collectionList.map((item) => {
                                                 if (item.viewId === openKey) {
@@ -115,7 +123,7 @@ const Collection: React.FC = (props) => {
                                     >
                                         Submit
                                     </PrimaryButton>
-                                </div>
+                                </PanelFooter>
                             );
                         }}
                         isFooterAtBottom

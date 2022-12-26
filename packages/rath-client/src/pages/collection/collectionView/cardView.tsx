@@ -16,20 +16,22 @@ const CollectContainer = styled.div`
         font-size: 3em;
         font-weight: 500;
     }
-    .chart-container {
-        border: 1px solid rgb(218, 220, 224);
-        border-radius: 1em;
-        padding: 1em;
-        margin: 0.5em;
-        cursor: pointer;
-    }
+`;
+
+const ItemContainer = styled.div`
+    background-color: #fff;
+    box-shadow: 0 0.6px 2px rgb(218, 220, 224);
+    border-radius: 1em;
+    padding: 1em;
+    margin: 0.5em;
+    cursor: pointer;
     .collect-title {
         width: 100%;
-        font-size: 1.125rem;
         display: flex;
         justify-content: center;
-        font-weight: bold;
-        margin-bottom: 2px;
+        font-size: 1.05rem;
+        font-weight: 550;
+        margin-bottom: 1em;
     }
     .c-desc {
         > div:first-child {
@@ -67,14 +69,13 @@ const CardView: React.FC<CardViewProps> = (props) => {
             <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
             <CollectContainer>
                 {views.slice(pageIndex * VIEW_NUM_IN_PAGE, (pageIndex + 1) * VIEW_NUM_IN_PAGE).map((item, i) => (
-                    <div
-                        className="chart-container"
+                    <ItemContainer
                         key={item.viewId}
                         onClick={() => {
                             onConfig(item);
                         }}
                     >
-                        <div className="collent-title">{item.title}</div>
+                        <div className="collect-title">{item.title}</div>
                         <div className="c-vis">
                             <VisErrorBoundary>
                                 <ReactVega
@@ -89,7 +90,7 @@ const CardView: React.FC<CardViewProps> = (props) => {
                             <div>{item.desc}</div>
                             <ViewInfo metas={metas} fields={item.fields} filters={item.filters} />
                         </div>
-                    </div>
+                    </ItemContainer>
                 ))}
             </CollectContainer>
         </div>

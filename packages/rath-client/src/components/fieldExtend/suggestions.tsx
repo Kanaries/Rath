@@ -1,4 +1,4 @@
-import { ActionButton, Callout, CommandButton } from "@fluentui/react";
+import { ActionButton, Callout, CommandButton, TooltipHost } from "@fluentui/react";
 import { useId } from "@fluentui/react-hooks";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";
@@ -12,24 +12,24 @@ export interface FieldExtSuggestionsProps {
   suggestions: FieldExtSuggestion[];
 }
 
-const Container = styled.div({
-  padding: '1em',
-  minWidth: '400px',
-  maxWidth: '40vw',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'stretch',
+const Container = styled.div`
+  padding: 1em;
+  min-width: 400px;
+  max-width: 40vw;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 
-  '> *': {
-    flexGrow: 0,
-    flexShrink: 0,
-    width: '100%',
+  > * {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 100%;
 
-    '& small': {
-      display: 'block',
-    },
-  },
-});
+    & small {
+      display: block;
+    }
+  }
+`;
 
 const FieldExtSuggestions: FC<FieldExtSuggestionsProps> = ({ fid, suggestions }) => {
   const btnId = useId('field-ext-suggestion-btn');
@@ -52,17 +52,18 @@ const FieldExtSuggestions: FC<FieldExtSuggestionsProps> = ({ fid, suggestions })
 
   return (
     <div onClick={e => e.stopPropagation()}>
-      <ActionButton
-        style={{
-          animation: 'live-polite 4s infinite',
-        }}
-        id={btnId}
-        iconProps={{
-          iconName: 'AppIconDefaultAdd',
-        }}
-        text={intl.get('dataSource.extend.auto')}
-        onClick={() => setOpen(true)}
-      />
+      <TooltipHost content={intl.get('dataSource.extend.auto')} styles={{ root: { display: 'inline-block' } }}>
+        <ActionButton
+          style={{
+            animation: 'live-polite 4s infinite',
+          }}
+          id={btnId}
+          iconProps={{
+            iconName: 'AppIconDefaultAdd',
+          }}
+          onClick={() => setOpen(true)}
+        />
+      </TooltipHost>
       {open && (
         <Callout target={`#${btnId}`}>
           <Container onClick={() => setOpen(false)}>
