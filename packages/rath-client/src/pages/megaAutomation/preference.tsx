@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
     ChartBarIcon,
@@ -31,6 +31,10 @@ const PreferencePanel: React.FC = () => {
         }[or],
     }));
 
+    useEffect(() => {
+        megaAutoStore.refreshMainViewSpec();
+    });
+
     const items: ToolbarItemProps[] = [
         {
             key: 'viz_sys',
@@ -51,7 +55,6 @@ const PreferencePanel: React.FC = () => {
             ],
             onSelect: key => {
                 megaAutoStore.setVizMode(key as typeof vizMode);
-                megaAutoStore.refreshMainView();
             },
         },
         {
@@ -62,7 +65,6 @@ const PreferencePanel: React.FC = () => {
             value: megaAutoStore.orderBy,
             onSelect: key => {
                 megaAutoStore.setExploreOrder(key);
-                megaAutoStore.refreshMainView();
             },
         },
         '-',

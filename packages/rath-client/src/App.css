@@ -181,6 +181,8 @@ h2, h3 {
   background-color: var(--bg-color-light);
   color: var(--text-color-light);
   box-shadow: -5px 0 8px var(--text-color-light);
+  position: relative;
+  z-index: 1;
 }
 
 .main-app-nav > * > *:first-child {

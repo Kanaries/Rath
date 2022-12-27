@@ -166,7 +166,6 @@ const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(functio
                                     aria-selected={selected}
                                     split={false}
                                     tabIndex={0}
-                                    onFocus={() => onSelect(option.key)}
                                     onClick={() => {
                                         onSelect(option.key);
                                         setOpenedKey(null);
