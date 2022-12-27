@@ -106,7 +106,7 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
             const content = (await readRaw(file, encoding) ?? '');
             const rows = content.split(/\r?\n/g).map(row => row.split(separator));
             const fields = rows[0]?.map<IMuteFieldBase>((h, i) => ({
-                fid: `col_${i}`,
+                fid: `col_${i + 1}`,
                 name: h,
                 geoRole: '?',
                 analyticType: '?',
@@ -137,19 +137,6 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
         if (sampleMethod === SampleKey.reservoir) {
             rawData = Sampling.reservoirSampling(rawData, sampleSize)
         }
-    } else if (file.type.startsWith('text/')) {
-        let content = (await readRaw(file, encoding) ?? '');
-        if (separator && separator !== ',') {
-            content = content.replaceAll(
-                new RegExp(`\\\\{0, 2}${separator}`, 'g'),
-                part => `${new RegExp(`^(\\{2})?`).exec(part)?.[0] ?? ''},`,
-            );
-        }
-        const translatedFile = new File([new Blob([content], { type: 'text/plain' })], 'file.csv');
-        rawData = (await KFileReader.csvReader({
-            file: translatedFile,
-            encoding,
-        })) as IRow[];
     } else {
         throw new Error(`unsupported file type=${file.type} `)
     }
