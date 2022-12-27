@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, PrimaryButton, Spinner, Stack } from '@fluentui/react';
@@ -18,6 +18,14 @@ const FeatSegment: React.FC = () => {
     const advicePureFeature = useCallback(() => {
         semiAutoStore.featAssociate()
     }, [semiAutoStore])
+    const [list, setList] = useState<Awaited<typeof featSpecList>>([]);
+    useEffect(() => {
+        setList([]);
+        featSpecList.then(res => setList(res));
+        return () => {
+            setList([]);
+        };
+    }, [featSpecList]);
     if (featViews.views.length === 0 && autoAsso.featViews) return <div />
     return <Fragment>
         {
@@ -30,7 +38,7 @@ const FeatSegment: React.FC = () => {
         }
         <AssoContainer>
             {
-                featSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                list.map((spec, i) => featViews.views[i] && <div className="asso-segment" key={`p-${i}`}>
                     {
                         featViews.computing && <LoadingLayer>
                             <Spinner label="loading" />

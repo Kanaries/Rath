@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, PrimaryButton, Spinner, Stack } from '@fluentui/react';
@@ -18,6 +18,14 @@ const NeighborSegment: React.FC = () => {
     const adviceNeighbors = useCallback(() => {
         semiAutoStore.neighborAssociate()
     }, [semiAutoStore])
+    const [list, setList] = useState<Awaited<typeof neighborSpecList>>([]);
+    useEffect(() => {
+        setList([]);
+        neighborSpecList.then(res => setList(res));
+        return () => {
+            setList([]);
+        };
+    }, [neighborSpecList]);
     if (neighborViews.views.length === 0 && autoAsso.neighborViews) return <div />
     return <Fragment>
         {
@@ -30,7 +38,7 @@ const NeighborSegment: React.FC = () => {
         }
         <AssoContainer>
             {
-                neighborSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                list.map((spec, i) => neighborViews.views[i] && <div className="asso-segment" key={`p-${i}`}>
                     {
                         neighborViews.computing && <LoadingLayer>
                             <Spinner label="loading" />

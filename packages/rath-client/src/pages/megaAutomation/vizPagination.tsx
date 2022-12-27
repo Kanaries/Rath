@@ -9,11 +9,11 @@ import intl from 'react-intl-universal';
 import ReactVega from '../../components/react-vega';
 import { IFieldMeta, IVegaSubset } from '../../interfaces';
 import { distVis } from '../../queries/distVis';
-import { labDistVis } from '../../queries/labdistVis';
 import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../components/visErrorBoundary';
 import { changeVisSize } from '../collection/utils';
 import { ILazySearchInfoBase, searchFilterView } from '../../utils';
+import { labDistVisService } from '../../services';
 
 const VizCard = styled.div<{ selected?: boolean }>`
     /* width: 140px; */
@@ -89,10 +89,10 @@ const VizPagination: React.FC = (props) => {
                 .map((f) => fieldMetas.find((fm) => fm.fid === f))
                 .filter((f) => Boolean(f)) as IFieldMeta[];
             const patt: IPattern = { fields, imp: space.score || 0 };
-            const specFactory: ILazySearchInfoBase['value'] = () => {
+            const specFactory: ILazySearchInfoBase['specFactory'] = async () => {
                 const spec =
                     vizMode === 'strict'
-                        ? labDistVis({
+                        ? await labDistVisService({
                             pattern: patt,
                             width: 200,
                             height: 160,
@@ -104,6 +104,9 @@ const VizPagination: React.FC = (props) => {
                             height: 160,
                             stepSize: 32,
                         });
+                if (!spec) {
+                    return null;
+                }
                 const viewSpec = extractVizGridOnly(changeVisSize(spec, 100, 100));
                 return viewSpec;
             };
@@ -112,7 +115,7 @@ const VizPagination: React.FC = (props) => {
                 id: i,
                 fields,
                 filters: [],
-                value: specFactory,
+                specFactory,
             };
         });
     }, [fieldMetas, vizMode, insightSpaces, dataSource]);
@@ -130,7 +133,7 @@ const VizPagination: React.FC = (props) => {
         onChange: updatePage,
     });
 
-    const [resolvedSpec, setResolvedSpec] = useState<{ [id: number]: IVegaSubset }>({});
+    const [resolvedSpec, setResolvedSpec] = useState<{ [id: number]: IVegaSubset | null }>({});
 
     useEffect(() => {
         setResolvedSpec({});
@@ -141,11 +144,9 @@ const VizPagination: React.FC = (props) => {
         if (!item) {
             return;
         }
-        requestAnimationFrame(() => {
-            const spec = item.value();
-            setResolvedSpec(all => ({
-                ...all,
-                [id]: spec,
+        item.specFactory().then(spec => {
+            setResolvedSpec(all => produce(all, draft => {
+                draft[id] = spec;
             }));
         });
     }, [insightViews]);
@@ -166,7 +167,9 @@ const VizPagination: React.FC = (props) => {
                                 if (!spec) {
                                     resolveChart(view.id);
                                     children = (
-                                        <Spinner />
+                                        <div style={{ width: '102px' }}>
+                                            <Spinner />
+                                        </div>
                                     );
                                 } else {
                                     children = (

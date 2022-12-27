@@ -1,4 +1,4 @@
-import React, { useCallback, Fragment } from 'react';
+import React, { useCallback, Fragment, useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
@@ -19,6 +19,14 @@ const FilterSegment: React.FC = () => {
     const recommandFilter = useCallback(() => {
         semiAutoStore.filterAssociate();
     }, [semiAutoStore])
+    const [list, setList] = useState<Awaited<typeof filterSpecList>>([]);
+    useEffect(() => {
+        setList([]);
+        filterSpecList.then(res => setList(res));
+        return () => {
+            setList([]);
+        };
+    }, [filterSpecList]);
     if (filterViews.views.length === 0 && autoAsso.filterViews) return <div />
     return <Fragment>
         {
@@ -30,7 +38,7 @@ const FilterSegment: React.FC = () => {
         }
         <AssoContainer>
             {
-             filterSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                list.map((spec, i) => filterViews.views[i] && <div className="asso-segment" key={`p-${i}`}>
                     {
                         filterViews.computing && <LoadingLayer>
                             <Spinner label="loading" />

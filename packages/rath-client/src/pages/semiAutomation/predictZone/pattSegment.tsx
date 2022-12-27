@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
@@ -18,6 +18,14 @@ const PattSegment: React.FC = () => {
     const assViews = useCallback(() => {
         semiAutoStore.pattAssociate();
     }, [semiAutoStore])
+    const [list, setList] = useState<Awaited<typeof pattSpecList>>([]);
+    useEffect(() => {
+        setList([]);
+        pattSpecList.then(res => setList(res));
+        return () => {
+            setList([]);
+        };
+    }, [pattSpecList]);
     if (pattViews.views.length === 0 && autoAsso.pattViews) return <div />
     return <Fragment>
         {
@@ -29,7 +37,7 @@ const PattSegment: React.FC = () => {
         }
         <AssoContainer>
             {
-                pattSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                list.map((spec, i) => pattViews.views[i] && <div className="asso-segment" key={`p-${i}`}>
                     {
                         pattViews.computing && <LoadingLayer>
                             <Spinner label="loading" />

@@ -18,12 +18,17 @@ import CleanWorker from '../workers/clean.worker?worker';
 // @ts-ignore
 // eslint-disable-next-line
 import FilterWorker from '../workers/filterData.worker?worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import LabDistVisWorker from '../workers/labDistVis.worker?worker';
 
 import { MessageProps } from '../workers/engine/service';
 
 import { CleanMethod, ICol, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from '../interfaces';
 import { ILoaProps } from '../workers/loa/service';
 import { IteratorStorage } from '../utils/iteStorage';
+import type { labDistVis } from '../queries/labdistVis';
 
 interface SuccessResult<T> {
     success: true;
@@ -257,6 +262,24 @@ export async function loaEngineService<R = any>(
                 throw new Error('[meta infer worker]' + result.message);
             }
         }
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+export async function labDistVisService(props: Parameters<typeof labDistVis>[0]): Promise<ReturnType<typeof labDistVis>> {
+    let data: ReturnType<typeof labDistVis> | null = null;
+    try {
+        const worker = new LabDistVisWorker();
+        const result = await workerService<ReturnType<typeof labDistVis>, Parameters<typeof labDistVis>[0]>(worker, props);
+        if (result.success) {
+            data = result.data;
+        } else {
+            throw new Error('[labDistVis worker]' + result.message);
+        }
+        worker.terminate();
+        return data;
     } catch (error) {
         console.error(error);
         throw error;
