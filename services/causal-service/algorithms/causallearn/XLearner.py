@@ -19,7 +19,7 @@ from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 from causallearn.utils.PCUtils.BackgroundKnowledgeOrientUtils import orient_by_background_knowledge
 
 def xlearn(dataset: np.ndarray, independence_test_method: str=FCI.fisherz, alpha: float = 0.05, depth: int = -1,
-        max_path_length: int = -1, verbose: bool = False, background_knowledge: BackgroundKnowledge | None = None,
+        max_path_length: int = -1, verbose: bool = False, background_knowledge: Union[BackgroundKnowledge, None] = None,
         functional_dependencies: List[common.IFunctionalDep]=[], f_ind={}, fields=[], **kwargs) -> Tuple[FCI.Graph, List[FCI.Edge]]:
     """
     Parameters

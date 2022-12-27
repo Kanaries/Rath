@@ -1,0 +1,13 @@
+numpy
+networkx
+pandas
+scipy
+scikit-learn
+statsmodels
+graphviz
+pygam
+fastapi
+causal-learn
+dowhy
+requests
+mangum

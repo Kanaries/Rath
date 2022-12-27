@@ -6,7 +6,7 @@ import interfaces as I
 
 from .interface import *
 
-loc = '/var/tmp/___sessions___'
+loc = '/tmp/___sessions___'
 
 os.makedirs(f'{loc}/', exist_ok=True)
 lifeSpan = 1200
