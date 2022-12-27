@@ -3,7 +3,7 @@ import { IPattern } from '@kanaries/loa';
 import usePagination from '@material-ui/core/usePagination/usePagination';
 import produce from 'immer';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import ReactVega from '../../components/react-vega';
@@ -104,9 +104,6 @@ const VizPagination: React.FC = (props) => {
                             height: 160,
                             stepSize: 32,
                         });
-                if (!spec) {
-                    return null;
-                }
                 const viewSpec = extractVizGridOnly(changeVisSize(spec, 100, 100));
                 return viewSpec;
             };
@@ -133,23 +130,62 @@ const VizPagination: React.FC = (props) => {
         onChange: updatePage,
     });
 
-    const [resolvedSpec, setResolvedSpec] = useState<{ [id: number]: IVegaSubset | null }>({});
+    const [resolvedSpec, setResolvedSpec] = useState<{ [id: number]: IVegaSubset }>({});
 
     useEffect(() => {
         setResolvedSpec({});
     }, [insightViews]);
 
-    const resolveChart = useCallback((id: number) => {
-        const item = insightViews.find(v => v.id === id);
-        if (!item) {
-            return;
+    const insightViewsRef = useRef(insightViews);
+    insightViewsRef.current = insightViews;
+
+    const resolveChart = useMemo<(id: number, neighbors?: number[]) => void>(() => {
+        const execFlags: { [id: number]: boolean } = {};
+
+        return (id: number, neighbors = []) => {
+            if (execFlags[id]) {
+                for (const neighbor of neighbors) {
+                    resolveChart(neighbor);
+                }
+                return;
+            }
+            execFlags[id] = true;
+            const item = insightViewsRef.current.find(v => v.id === id);
+            if (!item) {
+                return;
+            }
+            item.specFactory().then(spec => {
+                setResolvedSpec(all => produce(all, draft => {
+                    draft[id] = spec;
+                }));
+                for (const neighbor of neighbors) {
+                    resolveChart(neighbor);
+                }
+            });
+        };
+    }, []);
+
+    const chartsInView = useMemo(() => {
+        if (searchedInsightViews.length === 0) {
+            return [];
         }
-        item.specFactory().then(spec => {
-            setResolvedSpec(all => produce(all, draft => {
-                draft[id] = spec;
-            }));
+        return items.filter(
+            ({ type, page }) => type === 'page' && typeof page === 'number' && searchedInsightViews[page - 1]
+        ).map<{ id: number; neighbors: number[] }>(({ page }) => {
+            const view = searchedInsightViews[page - 1];
+            const neighbors = [-2, -1, 1, 2].map(offset => searchedInsightViews[page - 1 + offset]).filter(Boolean).map(v => v.id);
+            return {
+                id: view.id,
+                neighbors,
+            };
         });
-    }, [insightViews]);
+    }, [items, searchedInsightViews]);
+
+    useEffect(() => {
+        for (const chart of chartsInView) {
+            resolveChart(chart.id, chart.neighbors);
+        }
+    }, [chartsInView, resolveChart]);
 
     return (
         <div>
@@ -165,7 +201,6 @@ const VizPagination: React.FC = (props) => {
                                 const view = searchedInsightViews[page - 1];
                                 const spec = resolvedSpec[view.id];
                                 if (!spec) {
-                                    resolveChart(view.id);
                                     children = (
                                         <div style={{ width: '102px' }}>
                                             <Spinner />

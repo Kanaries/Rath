@@ -22,12 +22,14 @@ async function batchSpecify (assoViews: IAssoViews, vizAlgo: "lite" | "strict", 
             excludeScaleZero: mainVizSetting.excludeScaleZero
         }))
     } else {
-        return await Promise.all(renderedViews.map(v => labDistVisService({
-            pattern: v,
-            dataSource: dataSource,
-            specifiedEncodes: v.encodes,
-            excludeScaleZero: mainVizSetting.excludeScaleZero
-        })));
+        return labDistVisService({
+            dataSource,
+            items: renderedViews.map(v => ({
+                pattern: v,
+                specifiedEncodes: v.encodes,
+                excludeScaleZero: mainVizSetting.excludeScaleZero
+            })),
+        });
     }
 }
 

@@ -192,7 +192,7 @@ export type LazyFactory<T> = () => Promise<T>;
 
 export interface ILazySearchInfoBase extends ISearchInfoBase {
     id: number;
-    specFactory: LazyFactory<IVegaSubset | null>;
+    specFactory: LazyFactory<IVegaSubset>;
 }
 
 export function searchFilterView<T extends ISearchInfoBase>(searchContent: string, views: T[]) {

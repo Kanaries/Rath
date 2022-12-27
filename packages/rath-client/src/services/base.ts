@@ -268,11 +268,23 @@ export async function loaEngineService<R = any>(
     }
 }
 
-export async function labDistVisService(props: Parameters<typeof labDistVis>[0]): Promise<ReturnType<typeof labDistVis>> {
-    let data: ReturnType<typeof labDistVis> | null = null;
+export type ILabDistVisWorkerProps = Parameters<typeof labDistVis>[0];
+
+export type ILabDistVisWorkerBatchProps = (
+    & Pick<Parameters<typeof labDistVis>[0], 'dataSource'>
+    & {
+        items: Omit<Parameters<typeof labDistVis>[0], 'dataSource'>[];
+    }
+);
+
+export async function labDistVisService<
+    P extends ILabDistVisWorkerProps | ILabDistVisWorkerBatchProps,
+    R extends P extends ILabDistVisWorkerProps ? ReturnType<typeof labDistVis> : ReturnType<typeof labDistVis>[],
+>(props: P): Promise<R> {
+    let data: R;
     try {
         const worker = new LabDistVisWorker();
-        const result = await workerService<ReturnType<typeof labDistVis>, Parameters<typeof labDistVis>[0]>(worker, props);
+        const result = await workerService<R, P>(worker, props);
         if (result.success) {
             data = result.data;
         } else {
