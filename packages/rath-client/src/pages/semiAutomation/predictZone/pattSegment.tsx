@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
@@ -8,6 +8,7 @@ import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
 import { IVisSpecType } from '../../../interfaces';
+import { useAsyncViews } from './utils';
 
 const PattSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -18,14 +19,7 @@ const PattSegment: React.FC = () => {
     const assViews = useCallback(() => {
         semiAutoStore.pattAssociate();
     }, [semiAutoStore])
-    const [list, setList] = useState<Awaited<typeof pattSpecList>>([]);
-    useEffect(() => {
-        setList([]);
-        pattSpecList.then(res => setList(res));
-        return () => {
-            setList([]);
-        };
-    }, [pattSpecList]);
+    const list = useAsyncViews(pattSpecList);
     if (pattViews.views.length === 0 && autoAsso.pattViews) return <div />
     return <Fragment>
         {

@@ -1,4 +1,4 @@
-import React, { useCallback, Fragment, useState, useEffect } from 'react';
+import React, { useCallback, Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
@@ -8,6 +8,7 @@ import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
 import { IVisSpecType } from '../../../interfaces';
+import { useAsyncViews } from './utils';
 
 
 const FilterSegment: React.FC = () => {
@@ -19,14 +20,7 @@ const FilterSegment: React.FC = () => {
     const recommandFilter = useCallback(() => {
         semiAutoStore.filterAssociate();
     }, [semiAutoStore])
-    const [list, setList] = useState<Awaited<typeof filterSpecList>>([]);
-    useEffect(() => {
-        setList([]);
-        filterSpecList.then(res => setList(res));
-        return () => {
-            setList([]);
-        };
-    }, [filterSpecList]);
+    const list = useAsyncViews(filterSpecList);
     if (filterViews.views.length === 0 && autoAsso.filterViews) return <div />
     return <Fragment>
         {

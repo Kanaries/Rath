@@ -1,12 +1,16 @@
-import React from 'react';
-import { CommandButton } from '@fluentui/react';
+import React, { useMemo } from 'react';
+import { CommandButton, Spinner } from '@fluentui/react';
 import intl from 'react-intl-universal';
+import { observer } from 'mobx-react-lite';
 import { IInsightSpace } from 'visual-insights';
 import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IRow, PreferencePanelConfig } from '../../../interfaces';
 import ReactVega from '../../../components/react-vega';
 import { distVis } from '../../../queries/distVis';
 import { VegaThemeConfig } from '../../../queries/themes/config';
+import { useGlobalStore } from '../../../store';
+import { labDistVisService } from '../../../services';
+import { useAsyncViews } from '../../semiAutomation/predictZone/utils';
 import { AssoViewContainer, AssociationContainer } from './components';
 
 interface AssociationProps {
@@ -19,12 +23,36 @@ interface AssociationProps {
 }
 const AssociationCharts: React.FC<AssociationProps> = (props) => {
     const { vizList, onSelectView, dataSource, fieldMetas, themeConfig } = props;
+    const { semiAutoStore } = useGlobalStore();
+    const { settings: { vizAlgo } } = semiAutoStore;
+
+    const specList = useMemo(() => {
+        if (vizAlgo === 'lite') {
+            return Promise.resolve(vizList.map(view => {
+                const fieldsInView = fieldMetas.filter((m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid));
+                return distVis({
+                    pattern: { fields: fieldsInView, imp: 0 }
+                });
+            }));
+        }
+        return labDistVisService({
+            dataSource,
+            items: vizList.map(view => {
+                const fieldsInView = fieldMetas.filter((m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid));
+                return {
+                    pattern: { fields: fieldsInView, imp: 0 },
+                };
+            }),
+        });
+    }, [vizAlgo, dataSource, vizList, fieldMetas]);
+
+    const views = useAsyncViews(specList);
 
     return (
         <AssociationContainer>
             <div className="asso-content-container">
                 {vizList.map((view, i) => {
-                    const fieldsInView = fieldMetas.filter((m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid));
+                    const spec = views[i];
                     return (
                         <AssoViewContainer key={`associate-row-${i}`} dir="ltr">
                             <div>
@@ -37,16 +65,18 @@ const AssociationCharts: React.FC<AssociationProps> = (props) => {
                                     }}
                                 />
                             </div>
-                            <VisErrorBoundary>
-                                <ReactVega
-                                    dataSource={dataSource}
-                                    spec={distVis({
-                                        pattern: { fields: fieldsInView, imp: 0 }
-                                    })}
-                                    actions={false}
-                                    config={themeConfig}
-                                />
-                            </VisErrorBoundary>
+                            {spec ? (
+                                <VisErrorBoundary>
+                                    <ReactVega
+                                        dataSource={dataSource}
+                                        spec={spec}
+                                        actions={false}
+                                        config={themeConfig}
+                                    />
+                                </VisErrorBoundary>
+                            ) : (
+                                <Spinner />
+                            )}
                         </AssoViewContainer>
                     );
                 })}
@@ -55,4 +85,4 @@ const AssociationCharts: React.FC<AssociationProps> = (props) => {
     );
 };
 
-export default AssociationCharts;
+export default observer(AssociationCharts);

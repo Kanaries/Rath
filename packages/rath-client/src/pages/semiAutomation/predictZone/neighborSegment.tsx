@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { CommandButton, DefaultButton, PrimaryButton, Spinner, Stack } from '@fluentui/react';
@@ -8,6 +8,7 @@ import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
 import { IVisSpecType } from '../../../interfaces';
+import { useAsyncViews } from './utils';
 
 const NeighborSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -18,14 +19,7 @@ const NeighborSegment: React.FC = () => {
     const adviceNeighbors = useCallback(() => {
         semiAutoStore.neighborAssociate()
     }, [semiAutoStore])
-    const [list, setList] = useState<Awaited<typeof neighborSpecList>>([]);
-    useEffect(() => {
-        setList([]);
-        neighborSpecList.then(res => setList(res));
-        return () => {
-            setList([]);
-        };
-    }, [neighborSpecList]);
+    const list = useAsyncViews(neighborSpecList);
     if (neighborViews.views.length === 0 && autoAsso.neighborViews) return <div />
     return <Fragment>
         {
