@@ -74,7 +74,7 @@ export const execPredict = async (props: IPredictProps): Promise<IPredictResult 
         notify({
             title: 'Predict Service Failed',
             type: 'error',
-            content: `${error}\n${error instanceof Error ? error.stack : ''}`,
+            content: `${error}`,
         });
         return null;
     }

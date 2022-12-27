@@ -13,6 +13,7 @@ import OLAPData from './olap';
 import HistoryPanel from './history';
 import DatabaseData from './database/';
 import AirTableSource from './airtable';
+import Notebook from './notebook';
 
 interface SelectionProps {
     show: boolean;
@@ -32,6 +33,9 @@ const Selection: React.FC<SelectionProps> = props => {
     const dsTypeOptions = useDataSourceTypeOptions();
 
     const formMap: Record<IDataSourceType, JSX.Element> = {
+        [IDataSourceType.NOTEBOOK]: (
+            <Notebook setLoadingAnimation={setLoadingAnimation} />
+        ),
         [IDataSourceType.FILE]: (
             <FileData onDataLoading={onDataLoading} onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} toggleLoadingAnimation={setLoadingAnimation} />
         ),
