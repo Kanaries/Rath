@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { observer } from "mobx-react-lite";
-import { ActionButton, DefaultButton, Icon, TooltipHost } from '@fluentui/react';
+import { ActionButton, DefaultButton, Icon, TooltipHost, TooltipOverflowMode } from '@fluentui/react';
 import { useGlobalStore } from '../../../../store';
 import useBoundingClientRect from '../../../../hooks/use-bounding-client-rect';
 import { formatSize } from '../history/history-list-item';
@@ -29,37 +29,14 @@ const List = styled.div`
     grid-auto-rows: max-content;
 `;
 
-const CaretButton = styled(ActionButton)`
-    button {
-        position: absolute;
-        top: 0;
-        right: 0;
-        margin: 0;
-        padding: 0;
-        font-size: 12px;
-        background-color: #d13438 !important;
-        border-radius: 50%;
-        color: #fff !important;
-        width: 1.2em;
-        height: 1.2em;
-        i {
-            font-weight: 1000;
-            line-height: 1em;
-            width: 1em;
-            height: 1em;
-            transform: scale(0.4);
-        }
-        opacity: 0.5;
-        :hover {
-            opacity: 1;
-        }
-        .ms-Button-label {
-            font-size: 105%;
-            font-weight: 600;
-            padding: 0 0.4em;
-            min-width: 4em;
-        }
-    }
+const CaretButtonLabel = styled.span`
+    font-size: 105%;
+    font-weight: 600;
+    min-width: 4em;
+    max-width: 20vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 `;
 
 const ListItem = styled.div`
@@ -150,8 +127,7 @@ const NotebookSpace = observer(function NotebookSpace () {
     return organizations ? (
         <Container>
             <div>
-                <CaretButton
-                    text={organization?.name}
+                <ActionButton
                     split
                     menuProps={{
                         items: organizations.map((org, i) => ({
@@ -163,10 +139,15 @@ const NotebookSpace = observer(function NotebookSpace () {
                         })),
                     }}
                     onClick={undefined}
-                />
+                >
+                    <TooltipHost content={organization?.name} overflowMode={TooltipOverflowMode.Parent}>
+                        <CaretButtonLabel>
+                            {organization?.name}
+                        </CaretButtonLabel>
+                    </TooltipHost>
+                </ActionButton>
                 <b>/</b>
-                <CaretButton
-                    text={workspace?.name}
+                <ActionButton
                     disabled={!workspaces}
                     split
                     menuProps={{
@@ -180,7 +161,13 @@ const NotebookSpace = observer(function NotebookSpace () {
                     }}
                     styles={{ label: { fontSize: '105%', fontWeight: 600, padding: '0 0.4em', minWidth: '4em' } }}
                     onClick={undefined}
-                />
+                >
+                    <TooltipHost content={workspace?.name} overflowMode={TooltipOverflowMode.Parent}>
+                        <CaretButtonLabel>
+                            {workspace?.name}
+                        </CaretButtonLabel>
+                    </TooltipHost>
+                </ActionButton>
             </div>
             <div className="list">
                 {organization && workspace && (
@@ -221,7 +208,7 @@ const NotebookSpace = observer(function NotebookSpace () {
                         </List>
                         <DefaultButton
                             text={intl.get('storage.refresh')}
-                            onClick={() => userStore.getNotebooks(organization.id, workspace.id)}
+                            onClick={() => userStore.getNotebooks(organization.id, workspace.id, true)}
                         />
                     </>
                 )}
