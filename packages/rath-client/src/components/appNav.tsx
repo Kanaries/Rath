@@ -57,6 +57,9 @@ const StyledNav = styled(Nav)<{ navMode: "text" | "icon" }>`
             display: none;
         }
     }
+    li ul a.ms-Nav-link {
+        padding-left: ${({ navMode }) => navMode === 'text' ? '16px' : '4px'};
+    }
     .ms-Nav-link[aria-current] {
         color: rgb(26, 26, 26);
     }
@@ -70,14 +73,16 @@ const StyledNav = styled(Nav)<{ navMode: "text" | "icon" }>`
 
 const LogoBar = styled.div<{ navMode: "text" | "icon" }>`
     display: flex;
-    padding: 12px ${({ navMode }) => navMode === 'text' ? '24px' : '0'};
-    height: 50px;
+    padding: 4px ${({ navMode }) => navMode === 'text' ? '24px' : '0'};
+    height: 54px;
     align-items: center;
     justify-content: center;
     h1 {
-        margin-left: 12px;
-        font-size: 1.6em;
+        margin-inline: 12px 8px;
+        font-size: 22.4px;
         margin-block: 0.4em;
+        font-weight: 400;
+        user-select: none;
     }
 `;
 
@@ -218,7 +223,7 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     target="_blank"
                     rel="noreferrer"
                 >
-                    <img style={{ width: '46px', marginTop: '4px' }} src="./assets/kanaries-lite.png" alt="rath" />
+                    <img style={{ width: '36px', marginTop: '4px' }} src="./assets/kanaries-lite.png" alt="rath" />
                 </a>
                 {navMode === 'text' && (
                     <h1>

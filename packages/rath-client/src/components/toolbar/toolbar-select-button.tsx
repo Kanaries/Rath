@@ -149,7 +149,18 @@ const ToolbarSelectButton = memo<IToolbarProps<ToolbarSelectButtonItem>>(functio
                 <TriggerFlag aria-hidden id={id} />
             </ToolbarItemContainer>
             {opened && (
-                <Callout target={`#${id}`} role="dialog" gapSpace={0} directionalHint={DirectionalHint.bottomCenter} beakWidth={8} styles={{ calloutMain: { background: 'unset' }, beakCurtain: { background: 'unset' }, beak: { backgroundColor: 'var(--bg-color-light)' } }}>
+                <Callout
+                    target={`#${id}`}
+                    role="dialog"
+                    gapSpace={0}
+                    directionalHint={DirectionalHint.bottomCenter}
+                    beakWidth={8}
+                    styles={{
+                        calloutMain: { background: 'unset' },
+                        beakCurtain: { background: 'unset' },
+                        beak: { backgroundColor: 'var(--bg-color-light)' }
+                    }}
+                >
                     <OptionGroup theme={theme} role="listbox" aria-activedescendant={`${id}::${value}`} aria-describedby={id} aria-disabled={disabled}>
                         {options.map((option, idx, arr) => {
                             const selected = option.key === value;

@@ -138,7 +138,7 @@ export default class UserStore {
             notify({
                 title: 'Login error',
                 type: 'error',
-                content: `[/api/login] ${(error instanceof Error ? error.stack : null) ?? `${error}`}`,
+                content: `[/api/login] ${error}`,
             });
         }
     }
@@ -163,7 +163,7 @@ export default class UserStore {
             notify({
                 title: 'logout error',
                 type: 'error',
-                content: `[/api/logout] ${(error instanceof Error ? error.stack : null) ?? `${error}`}`,
+                content: `[/api/logout] ${error}`,
             });
         }
     }
@@ -177,7 +177,7 @@ export default class UserStore {
             notify({
                 title: '[/api/loginStatus]',
                 type: 'error',
-                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+                content: `${error}`,
             });
             return false;
         }
@@ -202,7 +202,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/personal]',
                 type: 'error',
-                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+                content: `${error}`,
             });
         }
     }
@@ -218,7 +218,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/organization/list]',
                 type: 'error',
-                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+                content: `${error}`,
             });
         }
     }
@@ -241,7 +241,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/organization/workspace/list]',
                 type: 'error',
-                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+                content: `${error}`,
             });
             return null;
         }
@@ -268,7 +268,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/notebook/list]',
                 type: 'error',
-                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+                content: `${error}`,
             });
             return null;
         }
@@ -301,7 +301,7 @@ export default class UserStore {
             notify({
                 title: '[/api/ce/notebook]',
                 type: 'error',
-                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+                content: `${error}`,
             });
         }
     }
@@ -320,7 +320,7 @@ export default class UserStore {
             notify({
                 title: '[download notebook]',
                 type: 'error',
-                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+                content: `${error}`,
             });
         }
     }
@@ -384,7 +384,7 @@ export default class UserStore {
                     notify({
                         title: 'Load Notebook Error',
                         type: 'error',
-                        content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+                        content: `${error}`,
                     });
                     continue;
                 }
@@ -393,7 +393,7 @@ export default class UserStore {
             notify({
                 title: 'Load Notebook Error',
                 type: 'error',
-                content: (error instanceof Error ? error.stack : null) ?? `${error}`,
+                content: `${error}`,
             });
         }
     }

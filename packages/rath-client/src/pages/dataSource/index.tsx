@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import intl from 'react-intl-universal';
-import { PrimaryButton, Stack, DefaultButton, Pivot, PivotItem, MessageBar, Spinner } from '@fluentui/react';
+import { PrimaryButton, Stack, DefaultButton, MessageBar, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
@@ -126,18 +126,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
                 </Stack>
-                <hr style={{ margin: '0.6em 0em', border: 'none' }} />
-                <Pivot
-                    style={{ marginBottom: '6px' }}
-                    selectedKey={dataPreviewMode}
-                    onLinkClick={(item) => {
-                        item && dataSourceStore.setDataPreviewMode(item.props.itemKey as IDataPreviewMode);
-                    }}
-                >
-                    <PivotItem itemKey={IDataPreviewMode.data} headerText={intl.get('dataSource.dataView')} itemIcon="Table" />
-                    <PivotItem itemKey={IDataPreviewMode.meta} headerText={intl.get('dataSource.metaView')} itemIcon="ViewList" />
-                    <PivotItem itemKey={IDataPreviewMode.stat} headerText={intl.get('dataSource.statView')} itemIcon="BarChartVerticalFilter" />
-                </Pivot>
+                {/* <hr style={{ margin: '0.6em 0em', border: 'none' }} /> */}
                 <BorderCard>
                     {rawDataMetaInfo.length > 0 && <DataOperations />}
                     <MessageBar>

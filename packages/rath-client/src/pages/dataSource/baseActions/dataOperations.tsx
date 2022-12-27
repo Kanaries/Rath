@@ -1,14 +1,16 @@
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
-import { ArrowDownTrayIcon, CheckCircleIcon, CloudArrowUpIcon, FunnelIcon, WrenchScrewdriverIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import { Icon } from '@fluentui/react';
+import { ArrowDownTrayIcon, CloudArrowUpIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { useGlobalStore } from '../../../store';
-import LaTiaoConsole from '../../../components/latiaoConsole';
+import LaTiaoModal from '../../../components/latiaoConsole/modal';
 import { useCleanMethodList } from '../../../hooks';
 import { rows2csv } from '../../../utils/rows2csv';
 import { downloadFileWithContent } from '../../../utils/download';
 import Toolbar, { ToolbarItemProps } from '../../../components/toolbar';
+import { IDataPreviewMode } from '../../../interfaces';
 
 const Cont = styled.div`
     /* margin: 1em; */
@@ -24,7 +26,7 @@ const PlaceHolder = styled.svg`
 
 const DataOperations: React.FC = () => {
     const { dataSourceStore, commonStore } = useGlobalStore();
-    const { mutFields, cleanMethod } = dataSourceStore;
+    const { mutFields, cleanMethod, dataPreviewMode } = dataSourceStore;
     const exportDataset = useCallback(() => {
         const ds = dataSourceStore.exportDataAsDSService();
         const content = JSON.stringify(ds);
@@ -52,8 +54,52 @@ const DataOperations: React.FC = () => {
     }, [dataSourceStore]);
 
     const cleanMethodListLang = useCleanMethodList();
+
+    const [openLTDialog, setOpenLTDialog] = useState(false);
+    
     const items = useMemo<ToolbarItemProps[]>(() => {
         return [
+            {
+                key: 'view:data',
+                label: intl.get('dataSource.dataView'),
+                icon: () => <Icon iconName="Table" />,
+                checked: dataPreviewMode === IDataPreviewMode.data,
+                onChange: checked => {
+                    if (checked) {
+                        dataSourceStore.setDataPreviewMode(IDataPreviewMode.data);
+                    }
+                },
+            },
+            {
+                key: 'view:meta',
+                label: intl.get('dataSource.metaView'),
+                icon: () => <Icon iconName="ViewList" />,
+                checked: dataPreviewMode === IDataPreviewMode.meta,
+                onChange: checked => {
+                    if (checked) {
+                        dataSourceStore.setDataPreviewMode(IDataPreviewMode.meta);
+                    }
+                },
+            },
+            {
+                key: 'view:stat',
+                label: intl.get('dataSource.statView'),
+                icon: () => <Icon iconName="BarChartVerticalFilter" />,
+                checked: dataPreviewMode === IDataPreviewMode.stat,
+                onChange: checked => {
+                    if (checked) {
+                        dataSourceStore.setDataPreviewMode(IDataPreviewMode.stat);
+                    }
+                },
+            },
+            '-',
+            {
+                key: 'latiao',
+                label: intl.get('dataSource.extend.manual'),
+                icon: () => <Icon iconName="AppIconDefaultAdd" />,
+                onClick: () => setOpenLTDialog(true),
+            },
+            '-',
             {
                 key: 'clean',
                 label: intl.get('dataSource.cleanMethod'),
@@ -62,7 +108,7 @@ const DataOperations: React.FC = () => {
                     label: intl.get(`dataSource.methods.${m.key}`),
                     icon: () => <PlaceHolder />,
                 })),
-                icon: WrenchScrewdriverIcon,
+                icon: () => <Icon iconName="Broom" />,
                 value: cleanMethod,
                 onSelect: value => {
                     dataSourceStore.setCleanMethod(value as typeof cleanMethod);
@@ -127,7 +173,7 @@ const DataOperations: React.FC = () => {
             {
                 key: 'enableAll',
                 label: intl.get('dataSource.operations.selectAll'),
-                icon: CheckCircleIcon,
+                icon: () => <Icon iconName="CheckList" />,
                 onClick: () => {
                     dataSourceStore.setAllMutFieldsDisable(false);
                 },
@@ -135,11 +181,12 @@ const DataOperations: React.FC = () => {
             {
                 key: 'disableAll',
                 label: intl.get('dataSource.operations.disableAll'),
-                icon: XCircleIcon,
+                icon: () => <Icon iconName="RemoveFilter" />,
                 onClick: () => {
                     dataSourceStore.setAllMutFieldsDisable(true);
                 },
             },
+            '-',
             {
                 key: 'backup',
                 text: intl.get('dataSource.operations.backup'),
@@ -159,13 +206,14 @@ const DataOperations: React.FC = () => {
         mutFields.length,
         exportDataAsRATHDS,
         commonStore,
+        dataPreviewMode,
     ]);
     return (
         <Cont>
-            <LaTiaoConsole />
-            <Toolbar
-                items={items}
-            />
+            <Toolbar items={items} />
+            {openLTDialog && (
+                <LaTiaoModal close={() => setOpenLTDialog(false)} />
+            )}
         </Cont>
     );
 };

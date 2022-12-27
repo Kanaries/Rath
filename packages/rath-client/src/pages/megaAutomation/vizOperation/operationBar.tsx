@@ -17,7 +17,6 @@ const FormContainer = styled.div`
     margin: 2px;
     border-radius: 1.2px;
     padding: 0.5em;
-    background-color: #f2f2f2;
 `;
 
 interface OperationBarProps {}

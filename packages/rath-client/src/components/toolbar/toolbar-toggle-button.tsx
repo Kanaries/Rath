@@ -19,13 +19,14 @@ const ToggleContainer = styled.div<{ checked: boolean }>`
     border-radius: 4px;
     position: relative;
     background-color: #F7F7F722;
-    > svg {
+    > svg, i {
         width: var(--icon-size);
         height: var(--icon-size);
         position: absolute;
         color: ${({ checked }) => checked ? '#EDEFF4' : 'var(--color)'};
         --shadow-color: ${({ checked }) => checked ? '#2956bf66' : '#9ba1ab66' || '#52576366'};
         transition: color 120ms;
+        margin: 0;
     }
     ::before {
         display: block;

@@ -75,9 +75,12 @@ export const ToolbarItemContainerElement = styled.div<{ split: boolean }>`
     overflow: hidden;
     color: var(--color);
     position: relative;
-    > svg {
+    > svg, i {
         flex-grow: 0;
         flex-shrink: 0;
+        font-size: calc(var(--icon-size) * 0.88);
+        line-height: var(--icon-size);
+        text-align: center;
         width: var(--icon-size);
         height: var(--icon-size);
         margin: calc((var(--height) - var(--icon-size)) / 2);
