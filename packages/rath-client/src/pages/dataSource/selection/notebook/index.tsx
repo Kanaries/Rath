@@ -23,7 +23,7 @@ const Container = styled.div`
     }
 `;
 
-const Notebook = observer(function Notebook () {
+const Notebook = observer<{ setLoadingAnimation: (on: boolean) => void }>(function Notebook ({ setLoadingAnimation }) {
     const { userStore } = useGlobalStore();
     const { loggedIn } = userStore;
     
@@ -45,7 +45,7 @@ const Notebook = observer(function Notebook () {
             )}
             <header>{loggedIn ? intl.get('storage.download') : intl.get('login.login')}</header>
             {loggedIn ? (
-                <NotebookSpace />
+                <NotebookSpace setLoadingAnimation={setLoadingAnimation} />
             ) : (
                 <div>
                     <LoginPanel />

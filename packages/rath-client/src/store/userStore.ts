@@ -247,9 +247,12 @@ export default class UserStore {
         }
     }
 
-    public async getNotebooks(organizationId: number, workspaceId: number) {
+    public async getNotebooks(organizationId: number, workspaceId: number, forceUpdate = false) {
         const which = this.info?.organizations?.find(org => org.id === organizationId)?.workspaces?.find(wsp => wsp.id === workspaceId);
-        if (!which || which.notebooks !== undefined) {
+        if (!which) {
+            return null;
+        }
+        if (!forceUpdate && which.notebooks !== undefined) {
             return null;
         }
         const url = getMainServiceAddress('/api/ce/notebook/list');
@@ -306,6 +309,9 @@ export default class UserStore {
     public async openNotebook(downLoadURL: string) {
         try {
             const data = await fetch(downLoadURL, { method: 'GET' });
+            if (!data.ok) {
+                throw new Error(data.statusText);
+            }
             if (!data.body) {
                 throw new Error('Request got empty body');
             }
