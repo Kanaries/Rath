@@ -77,16 +77,17 @@ const ListItem = styled.div`
     }
     :hover {
         background-color: #8881;
-        & .hover-only {
-            visibility: visible;
-        }
     }
     cursor: pointer;
+    &[aria-disabled="true"] {
+        pointer-events: none;
+        opacity: 0.6;
+    }
 `;
 
 const ITEM_MIN_WIDTH = 240;
 
-const NotebookSpace = observer(function NotebookSpace () {
+const NotebookSpace = observer<{ setLoadingAnimation: (on: boolean) => void }>(function NotebookSpace ({ setLoadingAnimation }) {
     const { userStore } = useGlobalStore();
     const { info } = userStore;
     const { organizations } = info ?? {};
@@ -179,13 +180,16 @@ const NotebookSpace = observer(function NotebookSpace () {
                                     role="gridcell"
                                     aria-rowindex={Math.floor(i / colCount) + 1}
                                     aria-colindex={(i % colCount) + 1}
+                                    aria-disabled={busy}
                                     onClick={() => {
                                         if (busy) {
                                             return;
                                         }
                                         setBusy(true);
+                                        setLoadingAnimation(true);
                                         userStore.openNotebook(notebook.downLoadURL).finally(() => {
                                             setBusy(false);
+                                            setLoadingAnimation(false);
                                         });
                                     }}
                                 >
