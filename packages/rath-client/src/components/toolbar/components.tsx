@@ -42,11 +42,11 @@ export const useHandlers = (action: () => void, disabled: boolean, triggerKeys: 
 export const ToolbarContainer = styled.div`
     --height: 36px;
     --icon-size: 18px;
-    --background-color: #121212; // #D7D7D722;
     width: 100%;
     height: var(--height);
     background-color: var(--background-color);
-    box-shadow: 0px 1px 3px 1px rgba(136, 136, 136, 0.1);
+    color: var(--color);
+    /* box-shadow: 0px 1px 3px 1px rgba(136, 136, 136, 0.1); */
     border-radius: 2px;
     overflow: hidden;
     display: flex;
@@ -73,7 +73,7 @@ export const ToolbarItemContainerElement = styled.div<{ split: boolean }>`
     width: ${({ split }) => split ? 'calc(var(--height) + 10px)' : 'var(--height)'};
     height: var(--height);
     overflow: hidden;
-    color: #AEAEAE;
+    color: var(--color);
     position: relative;
     > svg {
         flex-grow: 0;
@@ -96,7 +96,7 @@ export const ToolbarItemContainerElement = styled.div<{ split: boolean }>`
         :hover, :focus, &.open {
             background-image: linear-gradient(#FFFFFFCC, #FEFEFECC);
             --background-color: #FEFEFE;
-            color: #0F172A;
+            color: var(--color-hover);
             &.split * svg {
                 pointer-events: none;
                 transform: translate(-50%, -20%);

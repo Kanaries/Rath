@@ -1,6 +1,6 @@
 :root {
-  --bg-color-light: rgb(250, 250, 250);
-  --text-color-light: rgb(26, 26, 26);
+  --bg-color-light: rgb(252, 252, 252);
+  --text-color-light: rgb(30, 30, 30);
 }
 body {
   background-color: var(--bg-color-light);
@@ -212,7 +212,7 @@ h2, h3 {
 }
 
 .kanaries-copy-right-footer{
-  position: absolute;
+  position: fixed;
   bottom: 4px;
   font-size: 12px;
   left: 50%;
