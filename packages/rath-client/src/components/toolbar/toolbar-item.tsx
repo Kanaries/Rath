@@ -34,6 +34,7 @@ const ToolbarSplit = styled.div<{ open: boolean }>`
 const FormContainer = styled(ToolbarContainer)`
     width: max-content;
     height: max-content;
+    background-color: #fff;
 `;
 
 export interface IToolbarItem {
