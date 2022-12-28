@@ -11,7 +11,12 @@
         "filter": "Filter",
         "preview": "Preview",
         "submit": "Submit",
-        "run": "执行",
+        "cancel": "Cancel",
+        "apply": "Apply",
+        "applied": "Applied",
+        "run": "Run",
+        "edit": "Edit",
+        "suggestions": "Suggestions",
         "semanticType": {
             "nominal": "nominal",
             "ordinal": "ordinal",
@@ -312,7 +317,7 @@
             "empty": "No column exported.",
             "apply": "Apply",
             "cancel": "Cancel",
-            "auto": "Extend Suggestions",
+            "auto": "transforms",
             "suggestion": {
                 "regex_selection": "Pattern discovery & extraction | Extract patterns from text fields and generate new fields matching extracted pattern.",
                 "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months.",

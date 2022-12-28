@@ -1,13 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ArtColumn, BaseTable, Classes } from 'ali-react-table';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
-import { MessageBar, MessageBarType } from '@fluentui/react';
+import { DefaultButton, IconButton, Label, MessageBar, MessageBarType, PrimaryButton, Stack } from '@fluentui/react';
 import intl from 'react-intl-universal';
+import { unstable_batchedUpdates } from 'react-dom';
 import { useGlobalStore } from '../../../store';
 import type { IRow } from '../../../interfaces';
-import { extractSelection, intersectPattern, ITextPattern, ITextSelection } from '../../../lib/textPattern/init';
+import { extractSelection, intersectPattern, ITextPattern } from '../../../lib/textPattern/init';
 import HeaderCell from './headerCell';
+import NestPanel from './nestPanel';
+import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './tpRegexEditor';
+
+const SELECT_COLOR = '#b7eb8f';
 
 const CustomBaseTable = styled(BaseTable)`
     --header-bgcolor: #ffffff !important;
@@ -25,16 +30,45 @@ const CustomBaseTable = styled(BaseTable)`
     }
 `;
 
+const TextPatternCard = styled.div`
+    padding: 8px;
+    border: 1px solid #f3f3f3;
+    border-radius: 2px;
+    max-width: 200px;
+    overflow: hidden;
+    margin: 8px 0px;
+    > .tp-content {
+        margin: 1em 0em;
+    }
+    .sl-text {
+        background-color: ${SELECT_COLOR};
+    }
+`;
+const MiniButton = styled(DefaultButton)`
+    height: 26px;
+    font-size: 12px;
+`;
+
+const MiniPrimaryButton = styled(PrimaryButton)`
+    height: 26px;
+    font-size: 12px;
+`;
+
 const TableInnerStyle = {
     height: 600,
     overflow: 'auto',
 };
 
-interface IFieldTextSelection extends ITextSelection {
-    fid: string;
-}
-interface IFieldTextPattern extends ITextPattern {
-    fid: string;
+function uniquePattern(textPatternList: ITextPattern[]): ITextPattern[] {
+    const keySet: Set<string> = new Set();
+    const ans: ITextPattern[] = [];
+    for (let tp of textPatternList) {
+        if (!keySet.has(tp.pattern.source)) {
+            ans.push(tp);
+            keySet.add(tp.pattern.source);
+        }
+    }
+    return ans;
 }
 
 const DataTable: React.FC = (props) => {
@@ -42,16 +76,22 @@ const DataTable: React.FC = (props) => {
     const { filteredDataMetaInfo, fieldsWithExtSug: fields, filteredDataStorage } = dataSourceStore;
     const [filteredData, setFilteredData] = useState<IRow[]>([]);
     const [textSelectList, setTextSelectList] = useState<IFieldTextSelection[]>([]);
-    const textPattern = useMemo<IFieldTextPattern | undefined>(() => {
-        if (textSelectList.length === 0) return;
-        const res = intersectPattern(textSelectList);
-        if (res) {
-            return {
-                fid: textSelectList[0].fid,
-                ...res,
-            };
+    const [editTP, setEditTP] = useState<boolean>(false);
+    const [textPatternList, setTextPatternList] = useState<IFieldTextPattern[]>([]);
+
+    const tsList2tpList = useCallback((tsl: IFieldTextSelection[]) => {
+        try {
+            if (tsl.length === 0) return [];
+            const res = uniquePattern(intersectPattern(tsl));
+            return res.map((r) => ({
+                ...r,
+                fid: tsl[0].fid,
+            }));
+        } catch (error) {
+            return [];
         }
-    }, [textSelectList]);
+    }, []);
+    const [tpIndex, setTpIndex] = useState<number>(0);
     useEffect(() => {
         if (filteredDataMetaInfo.versionCode === -1) {
             setFilteredData([]);
@@ -70,27 +110,6 @@ const DataTable: React.FC = (props) => {
         },
         [dataSourceStore]
     );
-
-    // 这是一个非常有趣的数据流写法的bug，可以总结一下
-    // const columns = useMemo(() => {
-    //     return fieldMetas.map((f, i) => {
-    //         const mutField = mutFields[i].fid === f.fid ? mutFields[i] : mutFields.find(mf => mf.fid === f.fid);
-    //     return {
-    //         name: f.fid,
-    //         code: f.fid,
-    //         width: 220,
-    //         title: (
-    //             <HeaderCell
-    //                 disable={Boolean(mutField?.disable)}
-    //                 name={f.fid}
-    //                 code={f.fid}
-    //                 // meta={f}
-    //                 onChange={updateFieldInfo}
-    //             />
-    //         ),
-    //     };
-    // });
-    // }, [fieldMetas, mutFields, updateFieldInfo])
 
     const displayList: typeof fields = [];
 
@@ -112,55 +131,67 @@ const DataTable: React.FC = (props) => {
             }
         }
     }
-    const onTextSelect = useCallback((fid: string, fullText: string, td: Node) => {
-        const sl = document.getSelection();
-        const range = sl?.getRangeAt(0);
-        if (!range) return;
-        const selectedText = range.toString();
-        // Create a range representing the selected text
-        const selectedRange = range.cloneRange();
-        // Create a range representing the full text of the element
-        const fullRange = document.createRange();
-        fullRange.selectNodeContents(td);
-        let startNode = td.firstChild;
-        let startPos = 0;
-        while (startNode) {
-            if (startNode === selectedRange.startContainer) break;
-            if (startNode.nodeType === Node.TEXT_NODE) {
-                startPos += startNode.textContent?.length || 0;
+    const onTextSelect = useCallback(
+        (fid: string, fullText: string, td: Node) => {
+            const sl = document.getSelection();
+            const range = sl?.getRangeAt(0);
+            if (!range) return;
+            const selectedText = range.toString();
+            // Create a range representing the selected text
+            const selectedRange = range.cloneRange();
+            // Create a range representing the full text of the element
+            const fullRange = document.createRange();
+            fullRange.selectNodeContents(td);
+            let startNode = td.firstChild;
+            let startPos = 0;
+            while (startNode) {
+                if (startNode === selectedRange.startContainer) break;
+                if (startNode.nodeType === Node.TEXT_NODE) {
+                    startPos += startNode.textContent?.length || 0;
+                }
+                if (startNode.nextSibling) {
+                    startNode = startNode.nextSibling;
+                } else {
+                    break;
+                }
             }
-            if (startNode.nextSibling) {
-                startNode = startNode.nextSibling;
-            } else {
-                break;
+            // Compare the selected range to the full range
+            startPos += selectedRange.startOffset;
+            let endPos = startPos + selectedText.length;
+            if (fullText && selectedText) {
+                const startIndex = startPos;
+                const endIndex = endPos;
+                unstable_batchedUpdates(() => {
+                    setTpIndex(0);
+                    const nextTSL = textSelectList.concat({
+                        fid,
+                        str: fullText,
+                        startIndex: startIndex,
+                        endIndex: endIndex,
+                    });
+                    const nextTPL = tsList2tpList(nextTSL);
+                    setTextSelectList(nextTSL);
+                    setTextPatternList(nextTPL);
+                });
             }
-        }
-        // Compare the selected range to the full range
-        startPos += selectedRange.startOffset;
-        let endPos = startPos + selectedText.length;
-        if (fullText && selectedText) {
-            const startIndex = startPos;
-            const endIndex = endPos;
-            setTextSelectList((l) =>
-                l.concat({
-                    fid,
-                    str: fullText,
-                    startIndex: startIndex,
-                    endIndex: endIndex,
-                })
-            );
-        }
-    }, []);
+        },
+        [textSelectList, tsList2tpList]
+    );
     const clearTextSelect = () => {
-        setTextSelectList([]);
+        unstable_batchedUpdates(() => {
+            setTextSelectList([]);
+            setTextPatternList([]);
+            setTpIndex(0);
+        });
     };
     useEffect(() => {
-        if (textPattern?.fid) {
-            dataSourceStore.expandFromSelectionPattern(textPattern?.fid, textPattern);
+        if (textPatternList[tpIndex]) {
+            dataSourceStore.expandFromSelectionPattern(textPatternList[tpIndex].fid, textPatternList[tpIndex]);
         } else {
             dataSourceStore.clearTextPatternIfExist();
+            setTpIndex(0);
         }
-    }, [dataSourceStore, textPattern]);
+    }, [dataSourceStore, textPatternList, tpIndex]);
 
     useEffect(() => {
         // clear text pattern when ESC is pressed
@@ -198,8 +229,8 @@ const DataTable: React.FC = (props) => {
         };
         col.render = (value: any) => {
             const text: string = `${value}`;
-            if (textPattern && textPattern.fid === f.fid) {
-                const res = extractSelection(textPattern, text);
+            if (textPatternList[tpIndex] && textPatternList[tpIndex].fid === f.fid) {
+                const res = extractSelection(textPatternList[tpIndex], text);
 
                 if (!res.missing) {
                     const { matchedText, matchPos } = res;
@@ -214,7 +245,7 @@ const DataTable: React.FC = (props) => {
                             }}
                         >
                             {textBeforeSelection}
-                            <span style={{ backgroundColor: '#b7eb8f' }}>{matchedText}</span>
+                            <span style={{ backgroundColor: SELECT_COLOR }}>{matchedText}</span>
                             {textAfterSelection}
                         </span>
                     );
@@ -250,7 +281,7 @@ const DataTable: React.FC = (props) => {
     );
 
     return (
-        <div>
+        <div style={{ position: 'relative' }}>
             {fieldsNotDecided.length > 0 && (
                 <MessageBar
                     messageBarType={MessageBarType.warning}
@@ -266,6 +297,54 @@ const DataTable: React.FC = (props) => {
                     <span>{intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}</span>
                 </MessageBar>
             )}
+            <NestPanel show={textPatternList.length > 0} onClose={() => {}}>
+            <IconButton style={{ float: 'right' }} iconProps={{ iconName: 'Cancel' }} onClick={clearTextSelect} />
+                <Label>{intl.get('common.suggestions')}</Label>
+                {textPatternList.map((tp, ti) => (
+                    <TextPatternCard key={tp.pattern.source + ti}>
+                        <div className="tp-content">
+                            <span className="ph-text">{tp.ph.source}</span>
+                            <span className="sl-text">{tp.selection.source}</span>
+                            <span className="pe-text">{tp.pe.source}</span>
+                        </div>
+                        <Stack tokens={{ childrenGap: 4 }}>
+                            <MiniButton
+                                text={intl.get(`common.${tpIndex === ti ? 'applied' : 'apply'}`)}
+                                disabled={ti === tpIndex}
+                                onClick={() => {
+                                    setTpIndex(ti);
+                                }}
+                            />
+                            {ti === tpIndex && (
+                                <MiniPrimaryButton
+                                    text={intl.get('common.edit')}
+                                    onClick={() => {
+                                        setEditTP(true);
+                                    }}
+                                />
+                            )}
+                        </Stack>
+                        {ti === tpIndex && editTP && (
+                            <TPRegexEditor
+                                tp={tp}
+                                onSubmit={(patt) => {
+                                    unstable_batchedUpdates(() => {
+                                        setTextPatternList((l) => {
+                                            const nl = [...l];
+                                            nl[tpIndex] = patt;
+                                            return nl;
+                                        });
+                                        setEditTP(false);
+                                    });
+                                }}
+                                onCancel={() => {
+                                    setEditTP(false);
+                                }}
+                            />
+                        )}
+                    </TextPatternCard>
+                ))}
+            </NestPanel>
             {columns.length > 0 && (
                 <CustomBaseTable
                     useVirtual={true}
