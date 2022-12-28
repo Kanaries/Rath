@@ -187,7 +187,9 @@ const RExplainer: FC = () => {
     }, [diffMode, editingGroupIdx]);
 
     useEffect(() => {
-        viewContext?.clearLocalRenderData();
+        return () => {
+            viewContext?.clearLocalRenderData();
+        };
     }, [viewContext]);
 
     // console.log({ irResult });

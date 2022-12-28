@@ -205,15 +205,18 @@ export const useRenderData = ({
         let links: WeightedPagLink[] = [];
 
         const result = PAG.filter(({ weight }) => {
-            if (mode === 'edit' || Number.isNaN(weight)) {
+            if (mode === 'edit' || !weight || !thresholds) {
                 return true;
             }
-            for (const key of Object.keys(thresholds ?? {}) as (keyof LinkWeightSet)[]) {
-                const threshold = thresholds?.[key] ?? 0;
+            for (const key of Object.keys(thresholds) as (keyof LinkWeightSet)[]) {
+                if (!(key in weight)) {
+                    return true;
+                }
+                const threshold = thresholds[key];
                 const w = key === 'weight' ? Math.abs(
                     2 / (1 + Math.exp(- (weight?.weight ?? 0))) - 1
-                ) : weight?.[key];
-                if ((w ?? 0) < threshold) {
+                ) : weight[key]!;
+                if (w < threshold) {
                     return false;
                 }
             }
