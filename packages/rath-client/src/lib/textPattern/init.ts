@@ -5,25 +5,6 @@ import { Buffer } from 'buffer';
 if (window.Buffer === undefined) window.Buffer = Buffer;
 import regexgen from 'regexgen';
 
-const patterns = [
-    {
-        name: 'text',
-        pattern: /(?!\d+$)(?:\w+|[\u4e00-\u9fa5]+)(?:\s+|[\u4e00-\u9fa5]+)*/,
-    },
-    {
-        name: 'number',
-        pattern: /(?:\d+)(?:\.\d+)?/,
-    },
-    {
-        name: 'punctuation',
-        pattern: /[\u0020-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
-    },
-    {
-        name: 'symbol',
-        pattern: /[\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
-    },
-];
-
 interface IPatternNode {
     pattern: RegExp;
     name: string;
@@ -143,56 +124,7 @@ export interface ITextPattern {
     pattern: RegExp;
 }
 
-// @ts-ignore
-// console.log('window buffer', window.Buffer, regexgen)
-export function initPatterns(textSelection: ITextSelection[]): ITextPattern {
-    // console.log(textSelection)
-    const patternTypes = new Set<string>();
-    const rawPH: string[] = [];
-    const rawPE: string[] = [];
-    for (let text of textSelection) {
-        const selection = text.str.slice(text.startIndex, text.endIndex);
-        if (text.startIndex !== 0) {
-            rawPH.push(text.str.slice(text.startIndex - 1, text.startIndex));
-        }
-        if (text.endIndex !== text.str.length) {
-            rawPE.push(text.str.slice(text.endIndex, text.endIndex + 1));
-        }
-        // rawPH.push(text.str.slice(text.endIndex))
-        for (let pattern of patterns) {
-            // console.log(pattern.name, selection)
-            if (pattern.pattern.test(selection)) {
-                patternTypes.add(pattern.name);
-            }
-        }
-    }
-    // console.log(rawPE, rawPH)
-    const ph = rawPH.length > 0 ? regexgen(rawPH) : new RegExp('^');
-    const pe = rawPE.length > 0 ? regexgen(rawPE) : new RegExp('$');
-    // const ph = /.+/;
-    // const pe = /.+/
-    if (patternTypes.size === 1) {
-        const pattName = [...patternTypes.values()][0];
-        const pattern = patterns.find((p) => p.name === pattName)!;
-        const concatPattern = new RegExp(`${ph.source}(?<selection>${pattern.pattern.source}?)${pe.source}`);
-        if (pattern) {
-            return {
-                ph,
-                pe,
-                selection: pattern.pattern,
-                pattern: concatPattern,
-            };
-        }
-    } else {
-        const concatPattern = new RegExp(`${ph.source}(?<selection>\\S+?)${pe.source}`);
-        return {
-            ph,
-            pe,
-            selection: /\S+/,
-            pattern: concatPattern,
-        };
-    }
-}
+
 function createSafeRegExp(str: string): RegExp {
     return new RegExp(str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   }
@@ -318,7 +250,7 @@ function copyNode(node: IPatternNode): IPatternNode {
     return nextNode;
 }
 
-export function intersectPattern(textSelection: ITextSelection[]): ITextPattern {
+export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[] {
     const patternTree = initPatternTree();
     // const patternTypes = new Set<string>();
     const rawPH: string[] = [];
@@ -348,7 +280,8 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern 
         const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree).map((n) => copyNode(n));
         if (uniques.length === 0) {
             if (textSelection.length === 1) {
-                uniques = commonParents.filter((f) => f.type === 'knowledge');
+                uniques = commonParents;
+                // uniques = commonParents.filter((f) => f.type === 'knowledge');
             } else {
                 uniques = commonParents;
             }
@@ -359,6 +292,9 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern 
     }
     // const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree);
     uniques.sort((a, b) => b.depth / b.specLabel - a.depth / a.specLabel);
+    if (textSelection.length === 1) {
+        uniques = uniques.filter(u => u.type === 'knowledge').concat(uniques.filter(u => u.type !== 'knowledge'))
+    }
     // console.log('commonParents', uniques, patternTree, textSelection);
     // console.log(rawPE, rawPH)
     // const ph = rawPH.length > 0 ? regexgen(rawPH) : new RegExp('^');
@@ -411,18 +347,18 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern 
                     return res.matchPos[0] === text.startIndex && res.matchPos[1] === text.endIndex;
                 });
                 if (match) {
-                    return patt;
+                    ans.push(patt);
                 }
             }
         }
-        return {
+        ans.push({
             ph: /.*/,
             pe: /.*/,
             selection: sl,
             pattern: new RegExp(`^.*(?<selection>${sl.source}).*$`)
-        }
+        })
     }
-    return ans[0]
+    return ans
 }
 
 export function textPatternInduction(textList: string[]) {

@@ -11,7 +11,11 @@
         "filter": "筛选",
         "preview": "预览",
         "submit": "提交",
+        "apply": "应用",
+        "applied": "已应用",
         "run": "执行",
+        "edit": "编辑",
+        "suggestions": "建议",
         "semanticType": {
             "nominal": "类别类型",
             "ordinal": "有序类型",

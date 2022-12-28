@@ -319,20 +319,6 @@ export class DataSourceStore {
         }
         return true;
     }
-
-    // public get groupCounts () {
-    //     return this.fieldMetas.filter(f => f.analyticType === 'dimension')
-    //         .map(f => f.features.unique)
-    //         .reduce((t, v) => t * v, 1)
-    // }
-    // /**
-    //  * 防止groupCounts累乘的时候很快就超过int最大范围的情况
-    //  */
-    // public get groupCountsLog () {
-    //     return this.fieldMetas.filter(f => f.analyticType === 'dimension')
-    //         .map(f => f.features.maxEntropy)
-    //         .reduce((t, v) => t + v, 0)
-    // }
     public get groupMeanLimitCountsLog () {
         const valueCountsList = this.fieldMetas.filter(f => f.analyticType === 'dimension')
             .map(f => f.features.unique);
