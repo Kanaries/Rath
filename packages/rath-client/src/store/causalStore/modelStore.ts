@@ -90,8 +90,6 @@ export default class CausalModelStore {
             reaction(() => this.functionalDependencies, funcDeps => {
                 runInAction(() => {
                     this.functionalDependenciesAsPag = transformFuncDepsToPag(funcDeps);
-                    this.causalityRaw = null;
-                    this.causality = null;
                 });
             }),
             // update assertions

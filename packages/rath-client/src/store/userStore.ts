@@ -4,7 +4,7 @@ import { IAccessPageKeys } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
-import { IKRFComponents, IParseMapItem } from '../utils/download';
+import { IKRFComponents, IParseMapItem, KRFComponentsLoadIndex } from '../utils/download';
 import { commitLoginService } from './fetch';
 import { getGlobalStore } from '.';
 
@@ -341,6 +341,8 @@ export default class UserStore {
                 version: string;
             };
             const { dataSourceStore, causalStore, dashboardStore, collectionStore } = getGlobalStore();
+            const items = manifest.items.slice();
+            items.sort((a, b) => KRFComponentsLoadIndex[a.key] - KRFComponentsLoadIndex[b.key]);
             for await (const { name, key } of manifest.items) {
                 const entry = result.find(which => which.filename === name);
                 if (!entry || key === IKRFComponents.meta) {
@@ -369,7 +371,7 @@ export default class UserStore {
                             break;
                         }
                         case IKRFComponents.causal: {
-                            causalStore.load(JSON.parse(res));
+                            await causalStore.load(JSON.parse(res));
                             break;
                         }
                         case IKRFComponents.dashboard: {

@@ -26,7 +26,7 @@ const RExplainer: FC = () => {
 
     const mainField = selectedFieldGroup.at(-1) ?? null;
     const [indexKey, setIndexKey] = useState<IFieldMeta | null>(null);
-    const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('mean');
+    const [aggr] = useState<"sum" | "mean" | "count" | null>('mean');
     const [diffMode, setDiffMode] = useState<"full" | "other" | "two-group">("other");
 
     useEffect(() => {
@@ -40,7 +40,7 @@ const RExplainer: FC = () => {
     }, [mainField, aggr]);
 
     const [irResult, setIrResult] = useState<IRInsightExplainResult>({ causalEffects: [] });
-    const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('server');
+    const [serviceMode] = useState<'worker' | 'server'>('server');
 
     const pendingRef = useRef<Promise<IRInsightExplainResult>>();
 

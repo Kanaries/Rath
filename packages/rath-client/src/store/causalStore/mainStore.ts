@@ -105,7 +105,17 @@ export default class CausalStore {
         return save;
     }
 
-    public load(save: ICausalStoreSave): boolean {
+    public async load(save: ICausalStoreSave): Promise<boolean> {
+        if (!this.operator.serverActive) {
+            if (!await this.operator.connect()) {
+                notify({
+                    type: 'error',
+                    title: 'Load Causal Model Failed',
+                    content: 'Failed to connect to causal server.',
+                });
+                return false;
+            }
+        }
         if (save.datasetId !== this.dataset.datasetId) {
             notify({
                 type: 'error',

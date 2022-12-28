@@ -209,7 +209,7 @@ export const useRenderData = ({
                 return true;
             }
             for (const key of Object.keys(thresholds) as (keyof LinkWeightSet)[]) {
-                if (!(key in weight)) {
+                if (typeof weight[key] !== 'number') {
                     return true;
                 }
                 const threshold = thresholds[key];

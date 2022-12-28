@@ -28,6 +28,14 @@ export enum IKRFComponents {
     dashboard = 'dashboard',
     mega = 'mega',
 }
+export const KRFComponentsLoadIndex: Record<IKRFComponents, number> = {
+    meta: 0,
+    data: 1,
+    mega: 2,
+    collection: 3,
+    dashboard: 4,
+    causal: 5,
+};
 export interface IParseMapItem {
     key: IKRFComponents;
     name: string;
