@@ -57,6 +57,9 @@ const StyledNav = styled(Nav)<{ navMode: "text" | "icon" }>`
             display: none;
         }
     }
+    li ul a.ms-Nav-link {
+        padding-left: ${({ navMode }) => navMode === 'text' ? '16px' : '4px'};
+    }
     .ms-Nav-link[aria-current] {
         color: rgb(26, 26, 26);
     }
