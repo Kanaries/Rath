@@ -15,7 +15,7 @@ export default class CausalOperatorStore {
 
     public causalServer = (
         decodeURIComponent(new URL(window.location.href).searchParams.get('causalServer') ?? '').replace(/\/$/, '')
-        || 'http://gateway.kanaries.cn:2080/causal'
+        || 'https://causal.hk.kanaries.net'
     );
 
     public get busy() {
@@ -254,7 +254,7 @@ export default class CausalOperatorStore {
             notify({
                 type: 'error',
                 title: 'Causal Task Failed',
-                content: `${reason instanceof Error ? reason.stack : reason}`,
+                content: `${reason}`,
             });
             this.updateTaskStatus(task.taskId, 'FAILED');
         }).finally(() => {
