@@ -7,17 +7,17 @@ import { IPattern } from '@kanaries/loa';
 import usePagination from '@material-ui/core/usePagination/usePagination';
 import produce from 'immer';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import ReactVega from '../../components/react-vega';
 import { IFieldMeta, IVegaSubset } from '../../interfaces';
 import { distVis } from '../../queries/distVis';
-import { labDistVis } from '../../queries/labdistVis';
 import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../components/visErrorBoundary';
 import { changeVisSize } from '../collection/utils';
 import { ILazySearchInfoBase, searchFilterView } from '../../utils';
+import { labDistVisService } from '../../services';
 
 const VizCard = styled.div<{ selected?: boolean; isChart: boolean }>`
     /* width: 140px; */
@@ -109,10 +109,10 @@ const VizPagination: React.FC = (props) => {
                 .map((f) => fieldMetas.find((fm) => fm.fid === f))
                 .filter((f) => Boolean(f)) as IFieldMeta[];
             const patt: IPattern = { fields, imp: space.score || 0 };
-            const specFactory: ILazySearchInfoBase['value'] = () => {
+            const specFactory: ILazySearchInfoBase['specFactory'] = async () => {
                 const spec =
                     vizMode === 'strict'
-                        ? labDistVis({
+                        ? await labDistVisService({
                             pattern: patt,
                             width: 200,
                             height: 160,
@@ -132,7 +132,7 @@ const VizPagination: React.FC = (props) => {
                 id: i,
                 fields,
                 filters: [],
-                value: specFactory,
+                specFactory,
             };
         });
     }, [fieldMetas, vizMode, insightSpaces, dataSource]);
@@ -159,19 +159,56 @@ const VizPagination: React.FC = (props) => {
         setResolvedSpec({});
     }, [insightViews]);
 
-    const resolveChart = useCallback((id: number) => {
-        const item = insightViews.find(v => v.id === id);
-        if (!item) {
-            return;
+    const insightViewsRef = useRef(insightViews);
+    insightViewsRef.current = insightViews;
+
+    const resolveChart = useMemo<(id: number, neighbors?: number[]) => void>(() => {
+        const execFlags: { [id: number]: boolean } = {};
+
+        return (id: number, neighbors = []) => {
+            if (execFlags[id]) {
+                for (const neighbor of neighbors) {
+                    resolveChart(neighbor);
+                }
+                return;
+            }
+            execFlags[id] = true;
+            const item = insightViewsRef.current.find(v => v.id === id);
+            if (!item) {
+                return;
+            }
+            item.specFactory().then(spec => {
+                setResolvedSpec(all => produce(all, draft => {
+                    draft[id] = spec;
+                }));
+                for (const neighbor of neighbors) {
+                    resolveChart(neighbor);
+                }
+            });
+        };
+    }, []);
+
+    const chartsInView = useMemo(() => {
+        if (searchedInsightViews.length === 0) {
+            return [];
         }
-        requestAnimationFrame(() => {
-            const spec = item.value();
-            setResolvedSpec(all => ({
-                ...all,
-                [id]: spec,
-            }));
+        return items.filter(
+            ({ type, page }) => type === 'page' && typeof page === 'number' && searchedInsightViews[page - 1]
+        ).map<{ id: number; neighbors: number[] }>(({ page }) => {
+            const view = searchedInsightViews[page - 1];
+            const neighbors = [-2, -1, 1, 2].map(offset => searchedInsightViews[page - 1 + offset]).filter(Boolean).map(v => v.id);
+            return {
+                id: view.id,
+                neighbors,
+            };
         });
-    }, [insightViews]);
+    }, [items, searchedInsightViews]);
+
+    useEffect(() => {
+        for (const chart of chartsInView) {
+            resolveChart(chart.id, chart.neighbors);
+        }
+    }, [chartsInView, resolveChart]);
 
 >>>>>>> 49efdcb1 (fix(megaauto): charts in pagination not synchronized with main view)
     return (
@@ -202,9 +239,10 @@ const VizPagination: React.FC = (props) => {
 =======
                                 const spec = resolvedSpec[view.id];
                                 if (!spec) {
-                                    resolveChart(view.id);
                                     children = (
-                                        <Spinner />
+                                        <div style={{ width: '102px' }}>
+                                            <Spinner />
+                                        </div>
                                     );
                                 } else {
                                     children = (
