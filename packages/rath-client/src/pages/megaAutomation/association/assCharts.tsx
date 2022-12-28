@@ -22,7 +22,7 @@ const AssociationCharts: React.FC<AssociationProps> = (props) => {
 
     return (
         <AssociationContainer>
-            <div className="content-container">
+            <div className="asso-content-container">
                 {vizList.map((view, i) => {
                     const fieldsInView = fieldMetas.filter((m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid));
                     return (
@@ -41,8 +41,9 @@ const AssociationCharts: React.FC<AssociationProps> = (props) => {
                                 <ReactVega
                                     dataSource={dataSource}
                                     spec={distVis({
-                                        pattern: { fields: fieldsInView, imp: 0 },
+                                        pattern: { fields: fieldsInView, imp: 0 }
                                     })}
+                                    actions={false}
                                     config={themeConfig}
                                 />
                             </VisErrorBoundary>
