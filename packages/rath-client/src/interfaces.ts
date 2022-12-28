@@ -256,6 +256,7 @@ export interface IBackUpDataMeta {
 }
 
 export interface IBackUpData {
+    datasetId: string | null;
     rawData: any[][];
     extData: [string, ICol<any>][]
 }

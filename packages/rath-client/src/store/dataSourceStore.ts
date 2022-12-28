@@ -1115,6 +1115,7 @@ export class DataSourceStore {
         const { rawDataStorage, mutFields } = this;
         const data = await rawDataStorage.getAll();
         return {
+            datasetId: this.datasetId,
             rawData: compressRows(data, mutFields),
             extData: Array.from(this.extData.entries()),
         }
@@ -1125,6 +1126,7 @@ export class DataSourceStore {
         this.extData = new Map(extData);
         await rawDataStorage.setAll(uncompressRows(rawData, meta.mutFields.map(f => f.fid)));
         runInAction(() => {
+            this.datasetId = data.datasetId;
             this.rawDataMetaInfo = rawDataStorage.metaInfo;
             this.mutFields = meta.mutFields;
             this.extFields = meta.extFields;

@@ -50,7 +50,7 @@ export default class CausalStore {
                 notify({
                     type: 'error',
                     title: 'Load Causal Model Failed',
-                    content: `Dataset ID not match\nrequires: ${save.datasetId}\n: current:${this.dataset.datasetId}.`,
+                    content: `Dataset ID not match\nrequires: ${save.datasetId}\ncurrent:${this.dataset.datasetId}.`,
                 });
                 return false;
             }
@@ -110,7 +110,7 @@ export default class CausalStore {
             notify({
                 type: 'error',
                 title: 'Load Causal Model Failed',
-                content: `Dataset ID not match\nrequires: ${save.datasetId}\n: current:${this.dataset.datasetId}.`,
+                content: `Dataset ID not match\nrequires: ${save.datasetId}\ncurrent:${this.dataset.datasetId}.`,
             });
             return false;
         }
