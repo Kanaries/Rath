@@ -26,7 +26,7 @@ const RExplainer: FC = () => {
 
     const mainField = selectedFieldGroup.at(-1) ?? null;
     const [indexKey, setIndexKey] = useState<IFieldMeta | null>(null);
-    const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('sum');
+    const [aggr, setAggr] = useState<"sum" | "mean" | "count" | null>('mean');
     const [diffMode, setDiffMode] = useState<"full" | "other" | "two-group">("other");
 
     useEffect(() => {
@@ -200,7 +200,7 @@ const RExplainer: FC = () => {
                 <>
                     <header>{getI18n('submodule.CausalInsight.header')}</header>
                     <Stack tokens={{ childrenGap: 20 }} horizontal style={{ alignItems: 'flex-end' }}>
-                        <Dropdown
+                        {/* <Dropdown
                             label={getI18n('submodule.CausalInsight.engine')}
                             selectedKey={serviceMode}
                             options={[
@@ -213,7 +213,7 @@ const RExplainer: FC = () => {
                                 }
                             }}
                             style={{ width: '7em' }}
-                        />
+                        /> */}
                         <Dropdown
                             label={getI18n('submodule.CausalInsight.diff_mode')}
                             selectedKey={diffMode}
@@ -242,7 +242,7 @@ const RExplainer: FC = () => {
                             }}
                             style={{ width: '12em' }}
                         />
-                        <Dropdown
+                        {/* <Dropdown
                             label={getI18n('submodule.CausalInsight.aggregate')}
                             selectedKey={aggr}
                             options={[
@@ -255,7 +255,7 @@ const RExplainer: FC = () => {
                                 setAggr((option?.key as typeof aggr) ?? null);
                             }}
                             style={{ width: '8em' }}
-                        />
+                        /> */}
                     </Stack>
                     {diffMode === 'two-group' && (
                         <Toggle

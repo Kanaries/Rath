@@ -62,8 +62,9 @@ export const useReactiveGraph = ({
 
     const viewContext = useCausalViewContext();
     const {
-        selectedFieldGroup = [], graphNodeSelectionMode = NodeSelectionMode.NONE
+        selectedFieldGroup = [], graphNodeSelectionMode = NodeSelectionMode.NONE, localData
     } = viewContext ?? {};
+    const isLocal = Boolean(localData);
 
     const graphNodeSelectionModeRef = useRef(graphNodeSelectionMode);
     graphNodeSelectionModeRef.current = graphNodeSelectionMode;
@@ -253,7 +254,7 @@ export const useReactiveGraph = ({
                         style: {
                             fontSize: 9.85,
                             fill: '#2118',
-                            opacity: focusedNodes.length === 0 ? 1 : isInSubtree ? 1 : isHalfInSubtree ? 0.6 : 0,
+                            opacity: isLocal ? 1 : focusedNodes.length === 0 ? 1 : isInSubtree ? 1 : isHalfInSubtree ? 0.6 : 0,
                         },
                     },
                 });
@@ -262,7 +263,7 @@ export const useReactiveGraph = ({
                 graph.setItemState(edge, 'faded', selectedFieldGroup.length !== 0 && !isInSubtree && !isHalfInSubtree);
             });
         }
-    }, [graphRef, selectedFieldGroup, data]);
+    }, [graphRef, selectedFieldGroup, data, isLocal]);
 
     return useMemo<IReactiveGraphHandler>(() => ({
         refresh() {

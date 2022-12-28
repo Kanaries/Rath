@@ -319,7 +319,9 @@ export const useRenderData = ({
                     },
                     lineWidth: 1 + Math.abs(w) * 2,
                 },
-                label: `${
+                label: 'local' in link.weight && Number.isFinite(link.weight.local) ? `${
+                    (link.weight.local! * 100).toFixed(2).replace(/\.?0+$/, '')
+                }%` : `${
                     'confidence' in link.weight && Number.isFinite(link.weight.confidence) ? `c=${(link.weight.confidence! * 100).toFixed(2).replace(/\.?0+$/, '')}%\n` : ''
                 }${
                     'weight' in link.weight && Number.isFinite(link.weight.weight) ? `w=${link.weight.weight!.toFixed(2).replace(/\.?0+$/, '')}(${w.toFixed(2).replace(/\.?0+$/, '')})\n` : ''
