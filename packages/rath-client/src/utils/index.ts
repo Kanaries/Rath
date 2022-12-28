@@ -188,6 +188,13 @@ export interface ISearchInfoBase {
     spec?: IVegaSubset | null;
 }
 
+export type LazyFactory<T> = () => T;
+
+export interface ILazySearchInfoBase extends ISearchInfoBase {
+    id: number;
+    value: LazyFactory<IVegaSubset>;
+}
+
 export function searchFilterView<T extends ISearchInfoBase>(searchContent: string, views: T[]) {
     const words = searchContent.split(/[\s,;\t]+/);
     const lookupPattern = new RegExp(`.*${words.map((w) => `(${w})`).join('|')}.*`, 'i');

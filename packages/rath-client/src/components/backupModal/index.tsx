@@ -1,13 +1,17 @@
-import { Checkbox, Dropdown, Modal, PrimaryButton, Stack } from '@fluentui/react';
+import intl from 'react-intl-universal';
+import { Checkbox, Dropdown, Modal, PrimaryButton, Spinner, Stack, TextField } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import styled from 'styled-components';
+import dayjs from 'dayjs';
 import { useGlobalStore } from '../../store';
-import { getKRFParseMap, IKRFComponents, KRF_VERSION } from '../../utils/download';
+import { downloadFileFromBlob, getKRFParseMap, IKRFComponents, KRF_VERSION } from '../../utils/download';
+import { LoginPanel } from '../../pages/loginInfo/account';
 
 const Cont = styled.div`
     padding: 1em;
+    width: 400px;
     .modal-header{
         h3{
             font-size: 1.5em;
@@ -17,15 +21,22 @@ const Cont = styled.div`
     .modal-footer{
         margin-top: 1em;
     }
+    .login {
+        padding: 0.6em 1em 1em;
+    }
 `
 
-const BackupModal: React.FC = (props) => {
+const BackupModal: FC = (props) => {
     const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore, userStore } = useGlobalStore();
     const { showBackupModal } = commonStore;
+    const { info, loggedIn } = userStore;
     const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
     const mutFieldsLength = dataSourceStore.mutFields.length;
     const collectionLength = collectionStore.collectionList.length;
-    const [backupItemKeys, setBackupItemKeys] = React.useState<{
+    const defaultName = useMemo(() => intl.get('storage.default_name', { date: dayjs().format('YYYY-MM-DDTHH_mm') }), []);
+    const [name, setName] = useState('');
+    const [busy, setBusy] = useState(false);
+    const [backupItemKeys, setBackupItemKeys] = useState<{
         [key in IKRFComponents]: boolean;
     }>({
         [IKRFComponents.data]: rawDataLength > 0,
@@ -45,11 +56,11 @@ const BackupModal: React.FC = (props) => {
             mega: false
         })
     }, [rawDataLength, mutFieldsLength, collectionLength]);
-    const organizations = userStore.info?.organizations;
+    const organizations = info?.organizations;
     const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null);
     const workspaces = organizations?.find(org => org.id === selectedOrgId)?.workspaces;
     const [selectedWspId, setSelectedWspId] = useState<number | null>(null);
-    const canBackup = selectedWspId !== null;
+    const canBackup = selectedWspId !== null && Object.values(backupItemKeys).some(Boolean);
     useEffect(() => {
         setSelectedOrgId(null);
     }, [organizations]);
@@ -59,14 +70,12 @@ const BackupModal: React.FC = (props) => {
             userStore.getWorkspaces(selectedOrgId);
         }
     }, [selectedOrgId, userStore]);
-    useEffect(() => {
-        setSelectedWspId(null);
-    }, [workspaces]);
     // const storageItems =
-    const backup = async () => {
-        if (!canBackup || selectedWspId === null) {
+    const backup = async (download = false) => {
+        if (!download && (busy || !canBackup || selectedWspId === null)) {
             return false;
         }
+        setBusy(true);
         const parseMapItems = getKRFParseMap(backupItemKeys);
         const zipFileWriter = new BlobWriter();
         const zipWriter = new ZipWriter(zipFileWriter);
@@ -84,12 +93,6 @@ const BackupModal: React.FC = (props) => {
                     break;
                 }
                 case IKRFComponents.meta: {
-                    const data = await dataSourceStore.backupMetaStore()
-                    const content = new TextReader(JSON.stringify(data));
-                    await zipWriter.add(item.name, content);
-                    break;
-                }
-                case IKRFComponents.mega: {
                     const data = await dataSourceStore.backupMetaStore()
                     const content = new TextReader(JSON.stringify(data));
                     await zipWriter.add(item.name, content);
@@ -121,32 +124,42 @@ const BackupModal: React.FC = (props) => {
             }
         }
         const blob = await zipWriter.close();
-        const file = new File([blob], 'rathds_backup.krf');
-        userStore.uploadWorkspace(selectedWspId, file);
-        // downloadFileFromBlob(blob, 'rathds_backup.krf');
+        const fileName = `${name || defaultName}.krf`;
+        const file = new File([blob], fileName);
+        if (download) {
+            downloadFileFromBlob(blob, fileName);
+        } else {
+            await userStore.uploadNotebook(selectedWspId!, file);
+        }
+        setBusy(false);
     };
-    const items = [
+    const items: {
+        key: IKRFComponents;
+        text: string;
+        disabled?: boolean;
+    }[] = [
         {
             key: IKRFComponents.data,
-            text: `Raw Data (${rawDataLength} rows)`,
+            text: intl.get('storage.components.data', { size: rawDataLength }),
         },
         {
             key: IKRFComponents.meta,
-            text: `Meta Data (${mutFieldsLength} fields)`,
+            text: intl.get('storage.components.meta', { size: mutFieldsLength }),
         },
         {
             key: IKRFComponents.collection,
-            text: `Collection (${collectionLength} collections)`,
+            text: intl.get('storage.components.collection', { size: collectionLength }),
         },
         {
-            key: 'causal',
-            text: `Causal Model${causalStore.model.causality ? '' : ' (empty)'}`,
+            key: IKRFComponents.causal,
+            text: intl.get('storage.components.causal'),
+            disabled: !causalStore.model.causality,
         },
         {
-            key: 'dashboard',
-            text: `Dashboard (${dashboardStore.pages.length} documents)`,
+            key: IKRFComponents.dashboard,
+            text: intl.get('storage.components.dashboard', { size: dashboardStore.pages.length }),
         },
-    ]
+    ];
     return (
         <Modal
             isOpen={showBackupModal}
@@ -155,47 +168,78 @@ const BackupModal: React.FC = (props) => {
             containerClassName="modal-container"
         >
             <Cont>
-                <div className="modal-header">
-                    <h3>Backup</h3>
-                    <p className='state-description'>backup your rath notebook</p>
-                </div>
-                <Stack tokens={{ childrenGap: 10 }}>
-                    {items.map((item) => (
-                        <Stack.Item key={item.key}>
-                            <Checkbox
-                                label={item.text}
-                                checked={backupItemKeys[item.key as keyof typeof backupItemKeys]}
-                                onChange={(e, checked) => {
-                                    setBackupItemKeys({
-                                        ...backupItemKeys,
-                                        [item.key]: checked,
-                                    });
-                                }}
+                {loggedIn || process.env.NODE_ENV === 'development' ? (
+                    <>
+                        <div className="modal-header">
+                            <h3>{intl.get('storage.upload')}</h3>
+                            <p className='state-description'>{intl.get('storage.upload_desc')}</p>
+                        </div>
+                        <Stack tokens={{ childrenGap: 10 }}>
+                            {items.map((item) => (
+                                <Stack.Item key={item.key}>
+                                    <Checkbox
+                                        label={item.text}
+                                        disabled={item.disabled}
+                                        checked={backupItemKeys[item.key as keyof typeof backupItemKeys]}
+                                        onChange={(e, checked) => {
+                                            setBackupItemKeys({
+                                                ...backupItemKeys,
+                                                [item.key]: checked,
+                                            });
+                                        }}
+                                    />
+                                </Stack.Item>
+                            ))}
+                        </Stack>
+                        <Stack style={{ margin: '0.6em 0' }}>
+                            <TextField
+                                label={intl.get('storage.name')}
+                                value={name}
+                                placeholder={defaultName}
+                                onChange={(_, val) => setName(val ?? '')}
                             />
-                        </Stack.Item>
-                    ))}
-                </Stack>
-                <Dropdown
-                    options={(organizations ?? []).map(org => ({
-                        key: `${org.id}`,
-                        text: org.name,
-                    }))}
-                    selectedKey={`${selectedOrgId}`}
-                    onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
-                />
-                {(workspaces ?? []).length > 0 && (
-                    <Dropdown
-                        options={workspaces!.map(wsp => ({
-                            key: `${wsp.id}`,
-                            text: wsp.name,
-                        }))}
-                        selectedKey={`${selectedWspId}`}
-                        onChange={(_, option) => option && setSelectedWspId(Number(option.key))}
-                    />
+                            <Dropdown
+                                label={intl.get('user.organization')}
+                                options={(organizations ?? []).map(org => ({
+                                    key: `${org.id}`,
+                                    text: org.name,
+                                }))}
+                                required
+                                selectedKey={`${selectedOrgId}`}
+                                onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
+                            />
+                            <Dropdown
+                                label={intl.get('user.workspace')}
+                                disabled={!Array.isArray(workspaces)}
+                                options={(workspaces ?? []).map(wsp => ({
+                                    key: `${wsp.id}`,
+                                    text: wsp.name,
+                                }))}
+                                required
+                                selectedKey={`${selectedWspId}`}
+                                onChange={(_, option) => option && setSelectedWspId(Number(option.key))}
+                            />
+                        </Stack>
+                        <div className="modal-footer">
+                            <PrimaryButton disabled={!canBackup || busy} onClick={() => backup()}>
+                                {busy && <Spinner style={{ transform: 'scale(0.8)', transformOrigin: '0 50%' }} />}
+                                {intl.get('storage.apply')}
+                            </PrimaryButton>
+                            {process.env.NODE_ENV === 'development' && (
+                                <button onClick={() => backup(true)}>
+                                    Download File (dev)
+                                </button>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    <div className="login">
+                        <div className="modal-header">
+                            <h3>{intl.get('login.login')}</h3>
+                        </div>
+                        <LoginPanel />
+                    </div>
                 )}
-                <div className="modal-footer">
-                    <PrimaryButton disabled={!canBackup} text="backup" onClick={backup} />
-                </div>
             </Cont>
         </Modal>
     );

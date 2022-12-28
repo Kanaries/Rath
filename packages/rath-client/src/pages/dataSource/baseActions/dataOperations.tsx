@@ -142,7 +142,7 @@ const DataOperations: React.FC = () => {
             },
             {
                 key: 'backup',
-                label: 'backup',
+                label: intl.get('dataSource.operations.backup'),
                 icon: CloudArrowUpIcon,
                 onClick: () => {
                     commonStore.setShowBackupModal(true);

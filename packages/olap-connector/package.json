@@ -14,7 +14,7 @@
     "@koa/cors": "^3.1.0",
     "@koa/router": "^10.1.1",
     "axios": "^0.21.4",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "koa": "^2.13.3",
     "koa-body": "^4.2.0",
     "mysql2": "^2.3.0"
