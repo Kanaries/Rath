@@ -19,7 +19,7 @@ const ToggleContainer = styled.div<{ checked: boolean }>`
     border-radius: 4px;
     position: relative;
     background-color: #F7F7F722;
-    > svg {
+    > svg, i {
         width: var(--icon-size);
         height: var(--icon-size);
         position: absolute;

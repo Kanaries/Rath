@@ -1,5 +1,5 @@
 :root {
-  --bg-color-light: rgb(252, 252, 252);
+  --bg-color-light: rgb(255, 255, 255);
   --text-color-light: rgb(30, 30, 30);
 }
 body {
@@ -92,7 +92,7 @@ h2, h3 {
   margin-bottom: 1em;
 }
 .app-card{
-  padding: 2em 3em 6vh;
+  padding: 2em 1.8em 4vh;
   border-radius: 2px;
 }
 .card{
@@ -187,12 +187,6 @@ h2, h3 {
 
 .main-app-nav > * > *:first-child {
   background-color: #fff;
-}
-
-.main-app-nav > * > *:first-child h1 {
-  font-size: 1.75rem;
-  margin-right: 0.8em;
-  user-select: none;
 }
 
 .main-app-nav > * > *:not(:first-child) {
