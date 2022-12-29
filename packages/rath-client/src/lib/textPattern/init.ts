@@ -1,3 +1,6 @@
+/**
+ * @license AGPL Kanaries & ObservedObserver
+ */
 /* eslint-disable import/first */
 // import 'buffer/'
 import { Buffer } from 'buffer';
