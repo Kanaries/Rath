@@ -60,7 +60,7 @@ class ServiceSchemaResp(BaseModel):
     class Item(BaseModel):
         class Option(BaseModel):
             text: str
-            key: Union[int, str]
+            key: str # Union[int, str]
         class Conditions(BaseModel):
             class Or(BaseModel):
                 class Ans(BaseModel):

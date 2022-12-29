@@ -5,6 +5,7 @@ from .interface import BaseModel, Literal, List, Optional, Union, Tuple
 
 url = 'https://causica.gateway.kanaries.cn:3433'
 url = 'https://causica2.gateway.kanaries.cn:3433'
+url = 'http://161.189.221.110:8081'
 # url = 'http://52.82.70.212:8081'
 
 class DeciModelOptions(BaseModel):
@@ -93,17 +94,21 @@ def runDiscover(sessionId: str, req: I.DiscoverReq):
     
     data, causal_variables = inferDataNature(data, fields)
         
-    causes, effects, forbiddenRelationships = [], [], []
+    causes, effects, forbiddenRelationships, forcedRelationhships = [], [], [], []
     for bg in bgKnowledgesPag:
         src, tar, src_type, tar_type = bg.src, bg.tar, bg.src_type, bg.tar_type
         if src_type == 0:
             forbiddenRelationships.append([src, tar])
-        elif tar_type == 0:
+        if tar_type == 0:
             forbiddenRelationships.append([tar, src])
-        elif src_type == -1:
+        if src_type == -1:
             forbiddenRelationships.append([tar, src])
-        elif tar_type == -1:
+            if tar_type == 1:
+                forcedRelationhships.append([src, tar])
+        if tar_type == -1:
             forbiddenRelationships.append([src, tar])
+            if src_type == 1:
+                forcedRelationhships.append([tar, src])
     
     dataset = {
         'data': data.loc[:, focusedFields].to_dict('list'),
@@ -119,7 +124,9 @@ def runDiscover(sessionId: str, req: I.DiscoverReq):
         'constraints': {
             'causes': causes,
             'effects': effects,
-            'forbiddenRelationships': forbiddenRelationships
+            'forbiddenRelationships': forbiddenRelationships,
+            'forcedRelationships': forcedRelationhships,
+            'defaultLink': params.default_link if algoName else 'nan',
         },
         'model_options': model_options.dict(),
         'training_options': training_options.dict(),

@@ -16,6 +16,10 @@ from .. import common as c
 def list2dict(a: List):
     return {i: i for i in a}
 class DECIParams(c.OptionalParams):
+    default_link: Optional[str] = Field(
+        default='train',
+        options=alg.common.getOpts(list2dict(['empty', 'train', 'link']))
+    )
     model_options: Optional[str] = '=============='
     # confidence_threshold: Optional[float] = Field(
     #     title='置信度阈值', default=0.11,
