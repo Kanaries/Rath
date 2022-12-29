@@ -9,6 +9,7 @@ import {
     SwatchColorPicker,
     Pivot,
     PivotItem,
+    Icon,
 } from '@fluentui/react';
 import { toJS } from 'mobx';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -16,16 +17,12 @@ import embed, { vega } from 'vega-embed';
 import { Item, ScenegraphEvent } from 'vega';
 import {
     ArrowPathIcon,
-    BackwardIcon,
+    ArrowUturnLeftIcon,
     DocumentMagnifyingGlassIcon,
-    FunnelIcon,
-    MagnifyingGlassCircleIcon,
     PaintBrushIcon,
     PencilIcon,
-    PlusCircleIcon,
-    SwatchIcon,
-    TrashIcon,
 } from '@heroicons/react/24/solid';
+import { FunnelIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
 import intl from 'react-intl-universal';
 import { IVegaSubset, PAINTER_MODE } from '../../interfaces';
 import { useGlobalStore } from '../../store';
@@ -50,7 +47,8 @@ const MainHeader = styled.div`
 
 const PainterContainer = styled.div`
     margin-top: 1.5em;
-    padding: 2em;
+    padding: 2em 1em;
+    border: 1px solid #f6f6f6;
     display: flex;
     overflow-x: auto;
     background-color: #fffe;
@@ -389,7 +387,7 @@ const Painter: React.FC = (props) => {
         {
             key: 'clear',
             label: intl.get('painter.clearPainting'),
-            icon: BackwardIcon,
+            icon: ArrowUturnLeftIcon,
             onClick: () => clearPainting(),
         },
         {
@@ -402,7 +400,7 @@ const Painter: React.FC = (props) => {
         {
             key: PAINTER_MODE.MOVE,
             label: intl.get(`painter.tools.${PAINTER_MODE.MOVE}`),
-            icon: MagnifyingGlassCircleIcon,
+            icon: () => <Icon iconName="Move" />,
             checked: painterMode === PAINTER_MODE.MOVE,
             onChange: selected => {
                 if (selected) {
@@ -413,7 +411,7 @@ const Painter: React.FC = (props) => {
         {
             key: PAINTER_MODE.COLOR,
             label: intl.get(`painter.tools.${PAINTER_MODE.COLOR}`),
-            icon: () => <SwatchIcon fill={painterMode === PAINTER_MODE.COLOR ? currentColor : 'currentColor'} />,
+            icon: () => <Icon iconName="ColorSolid" style={{ color: painterMode === PAINTER_MODE.COLOR ? currentColor : 'currentColor' }} />,
             checked: painterMode === PAINTER_MODE.COLOR,
             onChange: selected => {
                 if (selected) {
@@ -449,7 +447,7 @@ const Painter: React.FC = (props) => {
         {
             key: PAINTER_MODE.ERASE,
             label: intl.get(`painter.tools.${PAINTER_MODE.ERASE}`),
-            icon: TrashIcon,
+            icon: () => <Icon iconName="EraseTool" />,
             checked: painterMode === PAINTER_MODE.ERASE,
             onChange: selected => {
                 if (selected) {

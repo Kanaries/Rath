@@ -26,6 +26,7 @@ const ToggleContainer = styled.div<{ checked: boolean }>`
         color: ${({ checked }) => checked ? '#EDEFF4' : 'var(--color)'};
         --shadow-color: ${({ checked }) => checked ? '#2956bf66' : '#9ba1ab66' || '#52576366'};
         transition: color 120ms;
+        margin: 0;
     }
     ::before {
         display: block;
