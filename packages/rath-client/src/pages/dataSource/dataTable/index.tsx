@@ -28,13 +28,15 @@ const CustomBaseTable = styled(BaseTable)`
             padding: 0px 0px 8px 0px;
         }
     }
+    td{
+        cursor: text;
+    }
 `;
 
 const TextPatternCard = styled.div`
     padding: 8px;
     border: 1px solid #f3f3f3;
     border-radius: 2px;
-    max-width: 200px;
     overflow: hidden;
     margin: 8px 0px;
     > .tp-content {
@@ -297,63 +299,65 @@ const DataTable: React.FC = (props) => {
                     <span>{intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}</span>
                 </MessageBar>
             )}
-            <NestPanel show={textPatternList.length > 0} onClose={() => {}}>
-            <IconButton style={{ float: 'right' }} iconProps={{ iconName: 'Cancel' }} onClick={clearTextSelect} />
-                <Label>{intl.get('common.suggestions')}</Label>
-                {textPatternList.map((tp, ti) => (
-                    <TextPatternCard key={tp.pattern.source + ti}>
-                        <div className="tp-content">
-                            <span className="ph-text">{tp.ph.source}</span>
-                            <span className="sl-text">{tp.selection.source}</span>
-                            <span className="pe-text">{tp.pe.source}</span>
-                        </div>
-                        <Stack tokens={{ childrenGap: 4 }}>
-                            <MiniButton
-                                text={intl.get(`common.${tpIndex === ti ? 'applied' : 'apply'}`)}
-                                disabled={ti === tpIndex}
-                                onClick={() => {
-                                    setTpIndex(ti);
-                                }}
-                            />
-                            {ti === tpIndex && (
-                                <MiniPrimaryButton
-                                    text={intl.get('common.edit')}
+            <div style={{ display: 'flex' }}>
+                {columns.length > 0 && (
+                    <CustomBaseTable
+                        useVirtual={true}
+                        getRowProps={rowPropsCallback}
+                        style={TableInnerStyle}
+                        dataSource={filteredData}
+                        columns={columns}
+                    />
+                )}
+                <NestPanel show={textPatternList.length > 0} onClose={() => {}}>
+                    <IconButton style={{ float: 'right' }} iconProps={{ iconName: 'Cancel' }} onClick={clearTextSelect} />
+                    <Label>{intl.get('common.suggestions')}</Label>
+                    {textPatternList.map((tp, ti) => (
+                        <TextPatternCard key={tp.pattern.source + ti}>
+                            <div className="tp-content">
+                                <span className="ph-text">{tp.ph.source}</span>
+                                <span className="sl-text">{tp.selection.source}</span>
+                                <span className="pe-text">{tp.pe.source}</span>
+                            </div>
+                            <Stack tokens={{ childrenGap: 4 }}>
+                                <MiniButton
+                                    text={intl.get(`common.${tpIndex === ti ? 'applied' : 'apply'}`)}
+                                    disabled={ti === tpIndex}
                                     onClick={() => {
-                                        setEditTP(true);
+                                        setTpIndex(ti);
+                                    }}
+                                />
+                                {ti === tpIndex && (
+                                    <MiniPrimaryButton
+                                        text={intl.get('common.edit')}
+                                        onClick={() => {
+                                            setEditTP(true);
+                                        }}
+                                    />
+                                )}
+                            </Stack>
+                            {ti === tpIndex && editTP && (
+                                <TPRegexEditor
+                                    tp={tp}
+                                    onSubmit={(patt) => {
+                                        unstable_batchedUpdates(() => {
+                                            setTextPatternList((l) => {
+                                                const nl = [...l];
+                                                nl[tpIndex] = patt;
+                                                return nl;
+                                            });
+                                            setEditTP(false);
+                                        });
+                                    }}
+                                    onCancel={() => {
+                                        setEditTP(false);
                                     }}
                                 />
                             )}
-                        </Stack>
-                        {ti === tpIndex && editTP && (
-                            <TPRegexEditor
-                                tp={tp}
-                                onSubmit={(patt) => {
-                                    unstable_batchedUpdates(() => {
-                                        setTextPatternList((l) => {
-                                            const nl = [...l];
-                                            nl[tpIndex] = patt;
-                                            return nl;
-                                        });
-                                        setEditTP(false);
-                                    });
-                                }}
-                                onCancel={() => {
-                                    setEditTP(false);
-                                }}
-                            />
-                        )}
-                    </TextPatternCard>
-                ))}
-            </NestPanel>
-            {columns.length > 0 && (
-                <CustomBaseTable
-                    useVirtual={true}
-                    getRowProps={rowPropsCallback}
-                    style={TableInnerStyle}
-                    dataSource={filteredData}
-                    columns={columns}
-                />
-            )}
+                        </TextPatternCard>
+                    ))}
+                </NestPanel>
+            </div>
         </div>
     );
 };

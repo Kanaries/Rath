@@ -4,13 +4,16 @@ import styled from 'styled-components';
 
 const Cont = styled.div`
     background-color: #fff;
-    min-width: 200px;
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    bottom: 0px;
-    z-index: 50;
+    min-width: 260px;
+    /* position: absolute; */
+    /* right: 0px; */
+    /* top: 0px; */
+    /* bottom: 0px; */
+    /* z-index: 50; */
     border: 1px solid #f0f0f0;
+    flex-shrink: 0;
+    flex-grow: 0;
+    position: relative;
     > .children-content{
         padding: 8px;
         overflow-y: auto;
