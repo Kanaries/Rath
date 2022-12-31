@@ -10,12 +10,14 @@
         "expand": "展开",
         "filter": "筛选",
         "preview": "预览",
+        "source": "源",
         "submit": "提交",
         "apply": "应用",
         "applied": "已应用",
         "run": "执行",
         "edit": "编辑",
         "suggestions": "建议",
+        "showMore": "显示更多",
         "semanticType": {
             "nominal": "类别类型",
             "ordinal": "有序类型",
@@ -145,6 +147,11 @@
         "connectorConfig": "连接器设置",
         "connectorService": "连接器服务地址 (可选)",
         "apply": "设置并测试",
+        "textPattern": {
+            "knowledge": "常识",
+            "generalize": "泛化",
+            "specific": "完全匹配"
+        },
         "statViewInfo": {
             "title": "统计视图",
             "desc": "统计视图是对数据集的统计信息，包括数据集的大小、数据类型、缺失值、重复值等。",

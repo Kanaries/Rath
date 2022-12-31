@@ -10,6 +10,7 @@
         "expand": "Expand",
         "filter": "Filter",
         "preview": "Preview",
+        "source": "Source",
         "submit": "Submit",
         "cancel": "Cancel",
         "apply": "Apply",
@@ -17,6 +18,7 @@
         "run": "Run",
         "edit": "Edit",
         "suggestions": "Suggestions",
+        "showMore": "Show More",
         "semanticType": {
             "nominal": "nominal",
             "ordinal": "ordinal",
@@ -147,6 +149,11 @@
         "connectorConfig": "Connector Settings",
         "connectorService": "Connector Service URL (Optional)",
         "apply": "Apply&Test",
+        "textPattern": {
+            "knowledge": "Knowledge",
+            "generalize": "Generalize",
+            "specific": "Extract Match"
+        },
         "statViewInfo": {
             "title": "Statistics View",
             "desc": "Statistics View is a quick way to get a sense of the data. It shows the distribution of each field in the dataset. You can click the field name to see the distribution of the field in detail.",
