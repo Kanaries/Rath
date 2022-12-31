@@ -111,6 +111,26 @@ function initGroupedTextPatternList(): {
     return res;
 }
 
+function findFirstExistTextPattern(
+    groupedTextPatternList: {
+        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+    }
+): {groupKey: IFieldTextPattern['selectionType']; index: number} {
+    const groupKeys = ['knowledge', 'generalize', 'specific'] as IFieldTextPattern['selectionType'][];
+    for (let groupKey of groupKeys) {
+        if (groupedTextPatternList[groupKey].length > 0) {
+            return {
+                groupKey,
+                index: 0,
+            };
+        }
+    }
+    return {
+        groupKey: 'knowledge',
+        index: 0,
+    };
+}
+
 const ADD_BATCH_SIZE = 5;
 
 const DataTable: React.FC = (props) => {
@@ -218,10 +238,6 @@ const DataTable: React.FC = (props) => {
                 const startIndex = startPos;
                 const endIndex = endPos;
                 unstable_batchedUpdates(() => {
-                    setTpPos({
-                        groupKey: 'knowledge',
-                        index: 0,
-                    });
                     const nextTSL = textSelectList.concat({
                         fid,
                         str: fullText,
@@ -231,7 +247,9 @@ const DataTable: React.FC = (props) => {
                     const nextTPL = tsList2tpList(nextTSL);
                     setTextSelectList(nextTSL);
                     // setTextPatternList(nextTPL);
-                    setGroupedTextPatternList(groupTextPattern(nextTPL));
+                    const gtp = groupTextPattern(nextTPL);
+                    setGroupedTextPatternList(gtp);
+                    setTpPos(findFirstExistTextPattern(gtp));
                 });
             }
         },
@@ -355,6 +373,8 @@ const DataTable: React.FC = (props) => {
         [fields]
     );
 
+    const hasPattern = (Object.keys(groupedTextPatternList) as IFieldTextPattern['selectionType'][]).some((k: IFieldTextPattern['selectionType']) => groupedTextPatternList[k].length > 0);
+
     return (
         <div style={{ position: 'relative' }}>
             {fieldsNotDecided.length > 0 && (
@@ -382,7 +402,7 @@ const DataTable: React.FC = (props) => {
                         columns={columns}
                     />
                 )}
-                <NestPanel show={groupedTextPatternList[tpPos.groupKey].length > 0} onClose={() => {}}>
+                <NestPanel show={hasPattern} onClose={() => {}}>
                     <IconButton style={{ float: 'right' }} iconProps={{ iconName: 'Cancel' }} onClick={clearTextSelect} />
                     <Label>{intl.get('common.suggestions')}</Label>
                     {(['knowledge', 'generalize', 'specific'] as IFieldTextPattern['selectionType'][]).map((groupKey) =>
