@@ -36,10 +36,11 @@ const TPRegexEditor: FC<TPRegexEditorProps> = (props) => {
             ph: new RegExp(ph),
             pe: new RegExp(pe),
             selection: new RegExp(sl),
-            pattern: new RegExp(`${ph}(?<selection>${sl})${pe}`)
+            pattern: new RegExp(`${ph}(?<selection>${sl})${pe}`),
+            selectionType: tp.selectionType,
         }
         onSubmit(ans);
-    }, [tp.fid, ph, pe, sl, onSubmit])
+    }, [tp.fid, tp.selectionType, ph, pe, sl, onSubmit])
 
     return (
         <Stack>

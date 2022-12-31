@@ -1,15 +1,18 @@
+/**
+ * @license AGPL Kanaries & ObservedObserver
+ */
 /* eslint-disable import/first */
 // import 'buffer/'
 import { Buffer } from 'buffer';
 // @ts-ignore
 if (window.Buffer === undefined) window.Buffer = Buffer;
 import regexgen from 'regexgen';
-
+type ITextPatternType = 'knowledge' | 'generalize' | 'specific';
 interface IPatternNode {
     pattern: RegExp;
     name: string;
     children: IPatternNode[];
-    type: 'knowledge' | 'generalize' | 'specific';
+    type: ITextPatternType;
     [key: string]: any;
 }
 function initPatternTree(): IPatternNode {
@@ -122,6 +125,7 @@ export interface ITextPattern {
     pe: RegExp;
     selection: RegExp;
     pattern: RegExp;
+    selectionType: ITextPatternType;
 }
 
 
@@ -278,17 +282,7 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
         }
         addPattern2PatternTree(selection, patternTree);
         const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree).map((n) => copyNode(n));
-        if (uniques.length === 0) {
-            if (textSelection.length === 1) {
-                uniques = commonParents;
-                // uniques = commonParents.filter((f) => f.type === 'knowledge');
-            } else {
-                uniques = commonParents;
-            }
-        } else {
-            // uniques = getRepeatNodes(uniques, commonParents);
-            uniques = commonParents
-        }
+        uniques = commonParents
     }
     // const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree);
     uniques.sort((a, b) => b.depth / b.specLabel - a.depth / a.specLabel);
@@ -312,11 +306,12 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
     for (let uni of uniques) {
         for (let ph of phs) {
             for (let pe of pes) {
-                const patt = {
+                const patt: ITextPattern = {
                     ph,
                     pe,
                     selection: uni.pattern,
                     pattern: new RegExp(`${ph.source}(?<selection>${uni.pattern.source})${pe.source}`),
+                    selectionType: uni.type
                 }
                 const match = textSelection.every(text => {
                     const res = extractSelection(patt ,text.str)
@@ -335,11 +330,12 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
         for (let ph of phs) {
             for (let pe of pes) {
                 
-                const patt = {
+                const patt: ITextPattern = {
                     ph,
                     pe,
                     selection: sl,
                     pattern: new RegExp(`${ph.source}(?<selection>${sl.source})${pe.source}`),
+                    selectionType: 'generalize'
                 };
                 const match = textSelection.every(text => {
                     const res = extractSelection(patt ,text.str)
@@ -355,7 +351,8 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
             ph: /.*/,
             pe: /.*/,
             selection: sl,
-            pattern: new RegExp(`^.*(?<selection>${sl.source}).*$`)
+            pattern: new RegExp(`^.*(?<selection>${sl.source}).*$`),
+            selectionType: 'generalize'
         })
     }
     return ans
@@ -378,11 +375,12 @@ export function textPatternInduction(textList: string[]) {
     const pe =  /$/;
     uniques = uniques.filter(uni => {
 
-        const patt = {
+        const patt: ITextPattern = {
             ph,
             pe,
             selection: uni.pattern,
             pattern: new RegExp(`${ph.source}(?<selection>${uni.pattern.source})${pe.source}`),
+            selectionType: uni.type
         }
         return textList.every(text => {
             const res = extractSelection(patt ,text)

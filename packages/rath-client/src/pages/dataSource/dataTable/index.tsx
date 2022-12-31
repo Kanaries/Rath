@@ -11,6 +11,7 @@ import { extractSelection, intersectPattern, ITextPattern } from '../../../lib/t
 import HeaderCell from './headerCell';
 import NestPanel from './nestPanel';
 import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './tpRegexEditor';
+import { IColStateType } from './headerCell/statePlaceholder';
 
 const SELECT_COLOR = '#b7eb8f';
 
@@ -28,13 +29,23 @@ const CustomBaseTable = styled(BaseTable)`
             padding: 0px 0px 8px 0px;
         }
     }
+    td {
+        cursor: text;
+    }
+`;
+
+const Tag = styled.div`
+    display: inline-block;
+    padding: 2px 4px;
+    border-radius: 2px;
+    background-color: #f3f3f3;
+    font-size: 12px;
 `;
 
 const TextPatternCard = styled.div`
     padding: 8px;
     border: 1px solid #f3f3f3;
     border-radius: 2px;
-    max-width: 200px;
     overflow: hidden;
     margin: 8px 0px;
     > .tp-content {
@@ -71,13 +82,58 @@ function uniquePattern(textPatternList: ITextPattern[]): ITextPattern[] {
     return ans;
 }
 
+function groupTextPattern(textPatternList: IFieldTextPattern[]): {
+    [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+} {
+    const res: {
+        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+    } = {
+        knowledge: [],
+        generalize: [],
+        specific: [],
+    };
+    for (let tp of textPatternList) {
+        res[tp.selectionType].push(tp);
+    }
+    return res;
+}
+
+function initGroupedTextPatternList(): {
+    [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+} {
+    const res: {
+        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+    } = {
+        knowledge: [],
+        generalize: [],
+        specific: [],
+    };
+    return res;
+}
+
+const ADD_BATCH_SIZE = 5;
+
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
     const { filteredDataMetaInfo, fieldsWithExtSug: fields, filteredDataStorage } = dataSourceStore;
     const [filteredData, setFilteredData] = useState<IRow[]>([]);
     const [textSelectList, setTextSelectList] = useState<IFieldTextSelection[]>([]);
     const [editTP, setEditTP] = useState<boolean>(false);
-    const [textPatternList, setTextPatternList] = useState<IFieldTextPattern[]>([]);
+    // const [textPatternList, setTextPatternList] = useState<IFieldTextPattern[]>([]);
+    const [groupedTextPatternList, setGroupedTextPatternList] = useState<{
+        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+    }>(initGroupedTextPatternList());
+    const [tpPos, setTpPos] = useState<{ groupKey: IFieldTextPattern['selectionType']; index: number }>({
+        groupKey: 'knowledge',
+        index: 0,
+    });
+    const [groupShownSize, setGroupShownSize] = useState<{
+        [key in IFieldTextPattern['selectionType']]: number;
+    }>({
+        knowledge: 1,
+        generalize: 1,
+        specific: 1,
+    });
 
     const tsList2tpList = useCallback((tsl: IFieldTextSelection[]) => {
         try {
@@ -91,7 +147,7 @@ const DataTable: React.FC = (props) => {
             return [];
         }
     }, []);
-    const [tpIndex, setTpIndex] = useState<number>(0);
+    // const [tpIndex, setTpIndex] = useState<number>(0);
     useEffect(() => {
         if (filteredDataMetaInfo.versionCode === -1) {
             setFilteredData([]);
@@ -162,7 +218,10 @@ const DataTable: React.FC = (props) => {
                 const startIndex = startPos;
                 const endIndex = endPos;
                 unstable_batchedUpdates(() => {
-                    setTpIndex(0);
+                    setTpPos({
+                        groupKey: 'knowledge',
+                        index: 0,
+                    });
                     const nextTSL = textSelectList.concat({
                         fid,
                         str: fullText,
@@ -171,7 +230,8 @@ const DataTable: React.FC = (props) => {
                     });
                     const nextTPL = tsList2tpList(nextTSL);
                     setTextSelectList(nextTSL);
-                    setTextPatternList(nextTPL);
+                    // setTextPatternList(nextTPL);
+                    setGroupedTextPatternList(groupTextPattern(nextTPL));
                 });
             }
         },
@@ -180,18 +240,25 @@ const DataTable: React.FC = (props) => {
     const clearTextSelect = () => {
         unstable_batchedUpdates(() => {
             setTextSelectList([]);
-            setTextPatternList([]);
-            setTpIndex(0);
+            // setTextPatternList([]);
+            setGroupedTextPatternList(initGroupedTextPatternList());
+            setTpPos({
+                groupKey: 'knowledge',
+                index: 0,
+            });
         });
     };
     useEffect(() => {
-        if (textPatternList[tpIndex]) {
-            dataSourceStore.expandFromSelectionPattern(textPatternList[tpIndex].fid, textPatternList[tpIndex]);
+        if (groupedTextPatternList[tpPos.groupKey][tpPos.index]) {
+            dataSourceStore.expandFromSelectionPattern(
+                groupedTextPatternList[tpPos.groupKey][tpPos.index].fid,
+                groupedTextPatternList[tpPos.groupKey][tpPos.index]
+            );
         } else {
             dataSourceStore.clearTextPatternIfExist();
-            setTpIndex(0);
+            setTpPos({ groupKey: 'knowledge', index: 0 });
         }
-    }, [dataSourceStore, textPatternList, tpIndex]);
+    }, [dataSourceStore, groupedTextPatternList, tpPos.groupKey, tpPos.index]);
 
     useEffect(() => {
         // clear text pattern when ESC is pressed
@@ -209,7 +276,15 @@ const DataTable: React.FC = (props) => {
     const columns: ArtColumn[] = displayList.map((f, i) => {
         const fm = fields[i] && fields[i].fid === displayList[i].fid ? fields[i] : fields.find((m) => m.fid === f.fid);
         const suggestions = fields.find((_f) => _f.fid === f.fid)?.extSuggestions ?? [];
-
+        let colType: IColStateType | undefined = undefined;
+        const previrewField = fields.find(f => f.stage === 'preview');
+        if (f.stage === 'preview') {
+            colType = 'preview';
+        } else if (previrewField) {
+            if (previrewField.extInfo?.extFrom.includes(f.fid)) {
+                colType = 'source'
+            }
+        }
         const col: ArtColumn = {
             name: f.name || f.fid,
             code: f.fid,
@@ -223,14 +298,14 @@ const DataTable: React.FC = (props) => {
                     onChange={updateFieldInfo}
                     extSuggestions={suggestions}
                     isExt={Boolean(f.extInfo)}
-                    isPreview={f.stage === 'preview'}
+                    colType={colType}
                 />
             ),
         };
         col.render = (value: any) => {
             const text: string = `${value}`;
-            if (textPatternList[tpIndex] && textPatternList[tpIndex].fid === f.fid) {
-                const res = extractSelection(textPatternList[tpIndex], text);
+            if (groupedTextPatternList[tpPos.groupKey][tpPos.index] && groupedTextPatternList[tpPos.groupKey][tpPos.index].fid === f.fid) {
+                const res = extractSelection(groupedTextPatternList[tpPos.groupKey][tpPos.index], text);
 
                 if (!res.missing) {
                     const { matchedText, matchPos } = res;
@@ -297,63 +372,84 @@ const DataTable: React.FC = (props) => {
                     <span>{intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}</span>
                 </MessageBar>
             )}
-            <NestPanel show={textPatternList.length > 0} onClose={() => {}}>
-            <IconButton style={{ float: 'right' }} iconProps={{ iconName: 'Cancel' }} onClick={clearTextSelect} />
-                <Label>{intl.get('common.suggestions')}</Label>
-                {textPatternList.map((tp, ti) => (
-                    <TextPatternCard key={tp.pattern.source + ti}>
-                        <div className="tp-content">
-                            <span className="ph-text">{tp.ph.source}</span>
-                            <span className="sl-text">{tp.selection.source}</span>
-                            <span className="pe-text">{tp.pe.source}</span>
-                        </div>
-                        <Stack tokens={{ childrenGap: 4 }}>
-                            <MiniButton
-                                text={intl.get(`common.${tpIndex === ti ? 'applied' : 'apply'}`)}
-                                disabled={ti === tpIndex}
-                                onClick={() => {
-                                    setTpIndex(ti);
-                                }}
-                            />
-                            {ti === tpIndex && (
-                                <MiniPrimaryButton
-                                    text={intl.get('common.edit')}
-                                    onClick={() => {
-                                        setEditTP(true);
-                                    }}
-                                />
-                            )}
-                        </Stack>
-                        {ti === tpIndex && editTP && (
-                            <TPRegexEditor
-                                tp={tp}
-                                onSubmit={(patt) => {
-                                    unstable_batchedUpdates(() => {
-                                        setTextPatternList((l) => {
-                                            const nl = [...l];
-                                            nl[tpIndex] = patt;
-                                            return nl;
-                                        });
-                                        setEditTP(false);
-                                    });
-                                }}
-                                onCancel={() => {
-                                    setEditTP(false);
-                                }}
-                            />
-                        )}
-                    </TextPatternCard>
-                ))}
-            </NestPanel>
-            {columns.length > 0 && (
-                <CustomBaseTable
-                    useVirtual={true}
-                    getRowProps={rowPropsCallback}
-                    style={TableInnerStyle}
-                    dataSource={filteredData}
-                    columns={columns}
-                />
-            )}
+            <div style={{ display: 'flex' }}>
+                {columns.length > 0 && (
+                    <CustomBaseTable
+                        useVirtual={true}
+                        getRowProps={rowPropsCallback}
+                        style={TableInnerStyle}
+                        dataSource={filteredData}
+                        columns={columns}
+                    />
+                )}
+                <NestPanel show={groupedTextPatternList[tpPos.groupKey].length > 0} onClose={() => {}}>
+                    <IconButton style={{ float: 'right' }} iconProps={{ iconName: 'Cancel' }} onClick={clearTextSelect} />
+                    <Label>{intl.get('common.suggestions')}</Label>
+                    {(['knowledge', 'generalize', 'specific'] as IFieldTextPattern['selectionType'][]).map((groupKey) =>
+                        groupedTextPatternList[groupKey].slice(0, groupShownSize[groupKey]).map((tp, ti) => (
+                            <TextPatternCard key={tp.pattern.source + ti}>
+                                <Tag>{intl.get(`dataSource.textPattern.${groupKey}`)}</Tag>
+                                <div className="tp-content">
+                                    <span className="ph-text">{tp.ph.source}</span>
+                                    <span className="sl-text">{tp.selection.source}</span>
+                                    <span className="pe-text">{tp.pe.source}</span>
+                                </div>
+                                <Stack tokens={{ childrenGap: 4 }}>
+                                    <MiniButton
+                                        text={intl.get(`common.${tpPos.index === ti && tpPos.groupKey === groupKey ? 'applied' : 'apply'}`)}
+                                        disabled={tpPos.index === ti && tpPos.groupKey === groupKey}
+                                        onClick={() => {
+                                            setTpPos({
+                                                groupKey,
+                                                index: ti,
+                                            });
+                                        }}
+                                    />
+                                    {tpPos.index === ti && tpPos.groupKey === groupKey && (
+                                        <MiniPrimaryButton
+                                            text={intl.get('common.edit')}
+                                            onClick={() => {
+                                                setEditTP(true);
+                                            }}
+                                        />
+                                    )}
+                                    {ti === groupShownSize[groupKey] - 1 && groupedTextPatternList[groupKey].length > groupShownSize[groupKey] && (
+                                        <MiniButton
+                                            text={intl.get('common.showMore')}
+                                            onClick={() => {
+                                                setGroupShownSize((s) => {
+                                                    const ns = { ...s };
+                                                    ns[groupKey] += ADD_BATCH_SIZE;
+                                                    return ns;
+                                                });
+                                            }}
+                                        />
+                                    )}
+                                </Stack>
+                                {tpPos.index === ti && tpPos.groupKey === groupKey && editTP && (
+                                    <TPRegexEditor
+                                        tp={tp}
+                                        onSubmit={(patt) => {
+                                            unstable_batchedUpdates(() => {
+                                                setGroupedTextPatternList((l) => {
+                                                    const nl = { ...l };
+                                                    nl[groupKey] = [...nl[groupKey]];
+                                                    nl[groupKey][ti] = patt;
+                                                    return nl;
+                                                });
+                                                setEditTP(false);
+                                            });
+                                        }}
+                                        onCancel={() => {
+                                            setEditTP(false);
+                                        }}
+                                    />
+                                )}
+                            </TextPatternCard>
+                        ))
+                    )}
+                </NestPanel>
+            </div>
         </div>
     );
 };
