@@ -254,7 +254,7 @@
         },
         "tip": "记得在开始分析前先调整数据的清洗策略并配置字段的属性",
         "recordCount": "记录数 {count}",
-        "rowsInViews": "原始数据: {origin} 行 / 筛选后: {select} 行 / 清洗后: {clean} 行",
+        "rowsInViews": "原始数据: {originCols} 列 × {origin} 行 / 筛选后: {selectCols} 列 × {select} 行 / 清洗后: {clean} 行",
         "selection": {
             "title": "快速数据筛选",
             "desc": "基于数据中的分位数进行快速筛选",

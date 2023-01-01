@@ -255,7 +255,7 @@
         },
         "tip": "Remember to adjust the fields' types and cleaning strategy before analysis.",
         "recordCount": "Number of records {count}",
-        "rowsInViews": "Origin: {origin} rows / Select: ({select}) / Clean: ({clean}) rows",
+        "rowsInViews": "Origin: {originCols} columns × {origin} rows / Select: {selectCols} columns × {select} rows / Clean: {clean} rows",
         "selection": {
             "title": "Fast Selection Config",
             "desc": "Filter based on quantiles to get the main part of your data.",
