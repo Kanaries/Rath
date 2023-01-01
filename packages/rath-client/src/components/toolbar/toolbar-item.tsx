@@ -149,12 +149,23 @@ export const ToolbarItemContainer = memo<{
             >
                 {children}
                 {form ? (
-                    <ToolbarSplit
-                        open={opened}
-                        {...splitHandlers}
-                    >
-                        <Cog6ToothIcon style={styles?.splitIcon}/>
-                    </ToolbarSplit>
+                    splitOnly ? (
+                        <ToolbarSplit
+                            open={opened}
+                            {...splitHandlers}
+                        >
+                            <Cog6ToothIcon style={styles?.splitIcon}/>
+                        </ToolbarSplit>
+                    ) : (
+                        <ToolbarSplit
+                            open={opened}
+                            role="button"
+                            tabIndex={0}
+                            {...splitHandlers}
+                        >
+                            <Cog6ToothIcon style={styles?.splitIcon}/>
+                        </ToolbarSplit>
+                    )
                 ) : (
                     menu && (
                         splitOnly ? (
