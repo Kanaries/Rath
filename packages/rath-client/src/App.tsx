@@ -18,6 +18,7 @@ import Painter from './pages/painter';
 import Collection from './pages/collection';
 import Dashboard from './pages/dashboard';
 import CausalPage from './pages/causal';
+import PreferencePage from './pages/preference';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
 
@@ -74,6 +75,7 @@ function App() {
                     {appKey === PIVOT_KEYS.collection && <Collection />}
                     {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
                     {appKey === PIVOT_KEYS.causal && <CausalPage />}
+                    {appKey === PIVOT_KEYS.preference && <PreferencePage />}
                     <CrInfo />
                 </div>
             </div>
