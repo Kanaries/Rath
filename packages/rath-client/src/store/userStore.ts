@@ -1,9 +1,12 @@
-import { makeAutoObservable, observable, runInAction } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
+import { TextWriter, ZipReader } from "@zip.js/zip.js";
 import { IAccessPageKeys } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
+import { IKRFComponents, IParseMapItem } from '../utils/download';
 import { commitLoginService } from './fetch';
+import { getGlobalStore } from '.';
 
 export interface ILoginForm {
     userName: string;
@@ -11,15 +14,24 @@ export interface ILoginForm {
     email: string;
 }
 
+export interface INotebook {
+    readonly id: number;
+    readonly name: string;
+    readonly size: number;
+    readonly createAt: number;
+    readonly downLoadURL: string;
+}
+
 export interface IWorkspace {
     readonly id: number;
     readonly name: string;
+    notebooks?: readonly INotebook[] | null | undefined;
 }
 
 export interface IOrganization {
     readonly name: string;
     readonly id: number;
-    workspaces: readonly IWorkspace[] | null;
+    workspaces?: readonly IWorkspace[] | null | undefined;
 }
 
 interface ISignUpForm {
@@ -44,14 +56,15 @@ export default class UserStore {
     public login!: ILoginForm;
     public signup!: ISignUpForm;
     public info: IUserInfo | null = null;
+    public get loggedIn() {
+        return this.info !== null;
+    }
     public get userName() {
         return this.info?.userName ?? null;
     }
     constructor() {
         this.init()
-        makeAutoObservable(this, {
-            info: observable.shallow,
-        });
+        makeAutoObservable(this);
     }
     public init() {
         this.login = {
@@ -185,23 +198,22 @@ export default class UserStore {
                     this.getOrganizations();
                 });
             }
-        } catch (error: any) {
+        } catch (error) {
             notify({
                 title: '[/api/ce/personal]',
                 type: 'error',
-                content: error.toString(),
+                content: `${error}`,
             });
         }
     }
 
     protected async getOrganizations() {
-        if (!this.info) {
-            return;
-        }
         const url = getMainServiceAddress('/api/ce/organization/list');
         try {
             const result = await request.get<{}, { organization: readonly IOrganization[] }>(url);
-            this.info.organizations = result.organization;
+            runInAction(() => {
+                this.info!.organizations = result.organization;
+            });
         } catch (error) {
             notify({
                 title: '[/api/ce/organization/list]',
@@ -213,25 +225,56 @@ export default class UserStore {
 
     public async getWorkspaces(organizationId: number) {
         const which = this.info?.organizations?.find(org => org.id === organizationId);
-        if (!which || which.workspaces === null) {
+        if (!which || which.workspaces !== undefined) {
             return null;
         }
         const url = getMainServiceAddress('/api/ce/organization/workspace/list');
         try {
-            const result = await request.get<{ organizationId: number }, { workspaceList: IWorkspace[] }>(url, {
+            const result = await request.get<{ organizationId: number }, { workspaceList: Exclude<IWorkspace, 'notebooks'>[] }>(url, {
                 organizationId,
             });
-            which.workspaces = result.workspaceList;
+            runInAction(() => {
+                which.workspaces = result.workspaceList;
+            });
+            return result.workspaceList;
         } catch (error) {
             notify({
                 title: '[/api/ce/organization/workspace/list]',
                 type: 'error',
                 content: `${error}`,
             });
+            return null;
         }
     }
 
-    public async uploadWorkspace(workspaceId: number, file: File) {
+    public async getNotebooks(organizationId: number, workspaceId: number, forceUpdate = false) {
+        const which = this.info?.organizations?.find(org => org.id === organizationId)?.workspaces?.find(wsp => wsp.id === workspaceId);
+        if (!which) {
+            return null;
+        }
+        if (!forceUpdate && which.notebooks !== undefined) {
+            return null;
+        }
+        const url = getMainServiceAddress('/api/ce/notebook/list');
+        try {
+            const result = await request.get<{ organizationId: number }, { notebookList: INotebook[] }>(url, {
+                organizationId,
+            });
+            runInAction(() => {
+                which.notebooks = result.notebookList;
+            });
+            return result.notebookList;
+        } catch (error) {
+            notify({
+                title: '[/api/ce/notebook/list]',
+                type: 'error',
+                content: `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public async uploadNotebook(workspaceId: number, file: File) {
         const url = getMainServiceAddress('/api/ce/notebook');
         try {
             const { uploadUrl, id } = (await (await fetch(url, {
@@ -257,6 +300,98 @@ export default class UserStore {
         } catch (error) {
             notify({
                 title: '[/api/ce/notebook]',
+                type: 'error',
+                content: `${error}`,
+            });
+        }
+    }
+
+    public async openNotebook(downLoadURL: string) {
+        try {
+            const data = await fetch(downLoadURL, { method: 'GET' });
+            if (!data.ok) {
+                throw new Error(data.statusText);
+            }
+            if (!data.body) {
+                throw new Error('Request got empty body');
+            }
+            await this.loadNotebook(data.body);
+        } catch (error) {
+            notify({
+                title: '[download notebook]',
+                type: 'error',
+                content: `${error}`,
+            });
+        }
+    }
+
+    public async loadNotebook(body: ReadableStream<Uint8Array> | File) {
+        try {
+            const zipReader = new ZipReader(body instanceof File ? body.stream() : body);
+            const result = await zipReader.getEntries();
+            const manifestFile = result.find((entry) => {
+                return entry.filename === "parse_map.json";
+            });
+            if (!manifestFile) {
+                throw new Error('Cannot find parse_map.json')
+            }
+            const writer = new TextWriter();
+            const manifest = JSON.parse(await manifestFile.getData(writer)) as {
+                items: IParseMapItem[];
+                version: string;
+            };
+            const { dataSourceStore, causalStore, dashboardStore, collectionStore } = getGlobalStore();
+            for await (const { name, key } of manifest.items) {
+                const entry = result.find(which => which.filename === name);
+                if (!entry || key === IKRFComponents.meta) {
+                    continue;
+                }
+                const w = new TextWriter();
+                try {
+                    const res = await entry.getData(w);
+                    switch (key) {
+                        case IKRFComponents.data: {
+                            const metaFile = manifest.items.find(item => item.type === IKRFComponents.meta);
+                            if (!metaFile) {
+                                break;
+                            }
+                            const meta = result.find(which => which.filename === metaFile.name);
+                            if (!meta) {
+                                break;
+                            }
+                            const wm = new TextWriter();
+                            const rm = await meta.getData(wm);
+                            await dataSourceStore.loadBackupDataStore(JSON.parse(res), JSON.parse(rm));
+                            break;
+                        }
+                        case IKRFComponents.collection: {
+                            collectionStore.loadBackup(JSON.parse(res));
+                            break;
+                        }
+                        case IKRFComponents.causal: {
+                            causalStore.load(JSON.parse(res));
+                            break;
+                        }
+                        case IKRFComponents.dashboard: {
+                            dashboardStore.loadAll(JSON.parse(res));
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    notify({
+                        title: 'Load Notebook Error',
+                        type: 'error',
+                        content: `${error}`,
+                    });
+                    continue;
+                }
+            }
+        } catch (error) {
+            notify({
+                title: 'Load Notebook Error',
                 type: 'error',
                 content: `${error}`,
             });

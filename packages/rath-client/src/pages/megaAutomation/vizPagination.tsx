@@ -1,19 +1,19 @@
-import { Icon, SearchBox } from '@fluentui/react';
+import { Icon, SearchBox, Spinner } from '@fluentui/react';
 import { IPattern } from '@kanaries/loa';
 import usePagination from '@material-ui/core/usePagination/usePagination';
 import produce from 'immer';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import ReactVega from '../../components/react-vega';
 import { IFieldMeta, IVegaSubset } from '../../interfaces';
 import { distVis } from '../../queries/distVis';
-import { labDistVis } from '../../queries/labdistVis';
 import { useGlobalStore } from '../../store';
 import VisErrorBoundary from '../../components/visErrorBoundary';
 import { changeVisSize } from '../collection/utils';
-import { ISearchInfoBase, searchFilterView } from '../../utils';
+import { ILazySearchInfoBase, searchFilterView } from '../../utils';
+import { labDistVisService } from '../../services';
 
 const VizCard = styled.div<{ selected?: boolean }>`
     /* width: 140px; */
@@ -73,7 +73,7 @@ function extractVizGridOnly(spec: IVegaSubset): IVegaSubset {
 
 const VizPagination: React.FC = (props) => {
     const { megaAutoStore, commonStore } = useGlobalStore();
-    const { insightSpaces, fieldMetas, visualConfig, vizMode, pageIndex, samplingDataSource } = megaAutoStore;
+    const { insightSpaces, fieldMetas, visualConfig, vizMode, pageIndex, dataSource, samplingDataSource } = megaAutoStore;
     const [searchContent, setSearchContent] = useState<string>('');
     const updatePage = useCallback(
         (e: any, v: number) => {
@@ -82,35 +82,40 @@ const VizPagination: React.FC = (props) => {
         [megaAutoStore, insightSpaces.length]
     );
 
-    const insightViews = useMemo<ISearchInfoBase[]>(() => {
-        return insightSpaces.map((space) => {
+    const insightViews = useMemo<ILazySearchInfoBase[]>(() => {
+        return insightSpaces.map((space, i) => {
             const fields = space.dimensions
                 .concat(space.measures)
                 .map((f) => fieldMetas.find((fm) => fm.fid === f))
                 .filter((f) => Boolean(f)) as IFieldMeta[];
             const patt: IPattern = { fields, imp: space.score || 0 };
-            const spec =
-                vizMode === 'strict'
-                    ? labDistVis({
-                          pattern: patt,
-                          width: 200,
-                          height: 160,
-                          dataSource: samplingDataSource,
-                      })
-                    : distVis({
-                          pattern: patt,
-                          width: 200,
-                          height: 160,
-                          stepSize: 32,
-                      });
-            const viewSpec = extractVizGridOnly(changeVisSize(spec, 100, 100));
+            const specFactory: ILazySearchInfoBase['specFactory'] = async () => {
+                const spec =
+                    vizMode === 'strict'
+                        ? await labDistVisService({
+                            pattern: patt,
+                            width: 200,
+                            height: 160,
+                            dataSource: dataSource,
+                        })
+                        : distVis({
+                            pattern: patt,
+                            width: 200,
+                            height: 160,
+                            stepSize: 32,
+                        });
+                const viewSpec = extractVizGridOnly(changeVisSize(spec, 100, 100));
+                return viewSpec;
+            };
+
             return {
+                id: i,
                 fields,
                 filters: [],
-                spec: viewSpec,
+                specFactory,
             };
         });
-    }, [fieldMetas, vizMode, insightSpaces, samplingDataSource]);
+    }, [fieldMetas, vizMode, insightSpaces, dataSource]);
 
     const searchedInsightViews = useMemo(() => {
         return searchFilterView(searchContent, insightViews);
@@ -124,6 +129,64 @@ const VizPagination: React.FC = (props) => {
         page: pageIndex + 1,
         onChange: updatePage,
     });
+
+    const [resolvedSpec, setResolvedSpec] = useState<{ [id: number]: IVegaSubset }>({});
+
+    useEffect(() => {
+        setResolvedSpec({});
+    }, [insightViews]);
+
+    const insightViewsRef = useRef(insightViews);
+    insightViewsRef.current = insightViews;
+
+    const resolveChart = useMemo<(id: number, neighbors?: number[]) => void>(() => {
+        const execFlags: { [id: number]: boolean } = {};
+
+        return (id: number, neighbors = []) => {
+            if (execFlags[id]) {
+                for (const neighbor of neighbors) {
+                    resolveChart(neighbor);
+                }
+                return;
+            }
+            execFlags[id] = true;
+            const item = insightViewsRef.current.find(v => v.id === id);
+            if (!item) {
+                return;
+            }
+            item.specFactory().then(spec => {
+                setResolvedSpec(all => produce(all, draft => {
+                    draft[id] = spec;
+                }));
+                for (const neighbor of neighbors) {
+                    resolveChart(neighbor);
+                }
+            });
+        };
+    }, []);
+
+    const chartsInView = useMemo(() => {
+        if (searchedInsightViews.length === 0) {
+            return [];
+        }
+        return items.filter(
+            ({ type, page }) => type === 'page' && typeof page === 'number' && searchedInsightViews[page - 1]
+        ).map<{ id: number; neighbors: number[] }>(({ page }) => {
+            const view = searchedInsightViews[page - 1];
+            const neighbors = [-2, -1, 1, 2].map(offset => searchedInsightViews[page - 1 + offset]).filter(Boolean).map(v => v.id);
+            return {
+                id: view.id,
+                neighbors,
+            };
+        });
+    }, [items, searchedInsightViews]);
+
+    useEffect(() => {
+        for (const chart of chartsInView) {
+            resolveChart(chart.id, chart.neighbors);
+        }
+    }, [chartsInView, resolveChart]);
+
     return (
         <div>
             <SearchBox onSearch={setSearchContent} placeholder={intl.get('common.search.searchViews')} iconProps={{ iconName: 'Search' }} />
@@ -136,16 +199,25 @@ const VizPagination: React.FC = (props) => {
                         } else if (type === 'page') {
                             if (typeof page === 'number' && searchedInsightViews[page - 1]) {
                                 const view = searchedInsightViews[page - 1];
-                                children = (
-                                    <VisErrorBoundary>
-                                        <StyledChart
-                                            dataSource={samplingDataSource}
-                                            spec={view.spec}
-                                            actions={visualConfig.debug}
-                                            config={commonStore.themeConfig}
-                                        />
-                                    </VisErrorBoundary>
-                                );
+                                const spec = resolvedSpec[view.id];
+                                if (!spec) {
+                                    children = (
+                                        <div style={{ width: '102px' }}>
+                                            <Spinner />
+                                        </div>
+                                    );
+                                } else {
+                                    children = (
+                                        <VisErrorBoundary>
+                                            <StyledChart
+                                                dataSource={samplingDataSource}
+                                                spec={spec}
+                                                actions={visualConfig.debug}
+                                                config={commonStore.themeConfig}
+                                            />
+                                        </VisErrorBoundary>
+                                    );
+                                }
                             } else {
                                 children = (
                                     <button

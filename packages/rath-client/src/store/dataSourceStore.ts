@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import { IReactionDisposer, makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { combineLatest, from, Observable, Subscription } from "rxjs";
 import { getFreqRange } from "@kanaries/loa";
@@ -34,10 +35,12 @@ import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nl
 import { IsolationForest } from "../lib/outlier/iforest";
 import { compressRows, uncompressRows } from "../utils/rows2csv";
 import { extractSelection, ITextPattern } from "../lib/textPattern/init";
+import { getGlobalStore } from ".";
 
 interface IDataMessage {
-    type: 'init_data' | 'others';
+    type: 'init_data' | 'others' | 'download';
     data: IDatasetBase
+    downLoadURL?: string;
 }
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
@@ -52,6 +55,15 @@ interface IDataSourceStoreStorage {
     cookedMeasures: string[];
     cleanMethod: CleanMethod;
     fieldMetas: IFieldMeta[];
+}
+
+function fieldNotExtended (fid: string, mutFields: IMuteFieldBase[], extOpt: string) {
+    const which = mutFields.find(f => f.fid === fid);
+    const expanded = Boolean(mutFields.find(
+        which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === extOpt
+    ));
+    if (expanded) return;
+    return which
 }
 
 export class DataSourceStore {
@@ -202,6 +214,11 @@ export class DataSourceStore {
         this.cleanedDataRef = fromStream(cleanedData$, []);
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
+            const { type, downLoadURL } = msg;
+            const { userStore } = getGlobalStore();
+            if (type === 'download' && downLoadURL) {
+                userStore.openNotebook(downLoadURL);
+            }
             if (ev.source && msg.type === 'init_data') {
                 console.warn('[Get DataSource From Other Pages]', msg)
                 // @ts-ignore
@@ -309,20 +326,6 @@ export class DataSourceStore {
         }
         return true;
     }
-
-    // public get groupCounts () {
-    //     return this.fieldMetas.filter(f => f.analyticType === 'dimension')
-    //         .map(f => f.features.unique)
-    //         .reduce((t, v) => t * v, 1)
-    // }
-    // /**
-    //  * 防止groupCounts累乘的时候很快就超过int最大范围的情况
-    //  */
-    // public get groupCountsLog () {
-    //     return this.fieldMetas.filter(f => f.analyticType === 'dimension')
-    //         .map(f => f.features.maxEntropy)
-    //         .reduce((t, v) => t + v, 0)
-    // }
     public get groupMeanLimitCountsLog () {
         const valueCountsList = this.fieldMetas.filter(f => f.analyticType === 'dimension')
             .map(f => f.features.unique);
@@ -659,28 +662,15 @@ export class DataSourceStore {
         which.extSuggestions.sort((a, b) => b.score - a.score)
     }
 
-
     public canExpandAsDateTime(fid: string) {
-        const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        const which = fieldNotExtended(fid, this.mutFields, 'dateTimeExpand');
+        if (typeof which === 'undefined') return;
 
         return which.semanticType === 'temporal' && !which.extInfo;
     }
     public canExpandAsReGroupByFreq(fid: string) {
-        const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        const which = fieldNotExtended(fid, this.mutFields, 'LaTiao.$reGroupByFreq');
+        if (typeof which === 'undefined') return;
         if (which.semanticType !== 'nominal') {
             return false;
         }
@@ -689,14 +679,8 @@ export class DataSourceStore {
         return meta.features.unique > 8;
     }
     public canExpandAsOutlier(fid: string) {
-        const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'LaTiao.$outlierIForest'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        const which = fieldNotExtended(fid, this.mutFields, 'LaTiao.$outlierIForest');
+        if (typeof which === 'undefined') return;
         if (!(which.semanticType === 'quantitative' && !which.extInfo)) return false;
         const meta = this.fieldMetas.find(f => f.fid === fid);
         if (!meta) return false;
@@ -705,13 +689,7 @@ export class DataSourceStore {
 
     public async canExpandAsWord (fid: string) {
         const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        if (typeof which === 'undefined') return;
 
         if (!(which.semanticType === 'nominal' && !which.extInfo)) return false;
         const data = await this.rawDataStorage.getAll();
@@ -801,7 +779,7 @@ export class DataSourceStore {
         }
     }
     public clearTextPatternIfExist () {
-        const extRemainFields = this.extFields.filter(f => f.extInfo?.extOpt !== 'LaTiao.$selection_pattern');
+        const extRemainFields = this.extFields.filter(f => !(f.extInfo?.extOpt === 'LaTiao.$selection_pattern' && f.stage === 'preview'));
         if (extRemainFields.length !== this.extFields.length) {
             this.extFields = extRemainFields;
         }
@@ -815,7 +793,7 @@ export class DataSourceStore {
         const data = await this.rawDataStorage.getAll();
         const values: string[] = data.map(d => `${d[fid]}`);
         const newField: IRawField = {
-            fid: `${fid}_selection_pattern`,
+            fid: `${fid}_selection_pattern_${nanoid(2)}`,
             name: `${originField.name}.selection_pattern`,
             semanticType: 'nominal',
             analyticType: 'dimension',
@@ -1117,14 +1095,25 @@ export class DataSourceStore {
         const { rawDataStorage } = this;
         this.extData = new Map(extData);
         await rawDataStorage.setAll(uncompressRows(rawData, meta.mutFields.map(f => f.fid)));
+        runInAction(() => {
+            this.rawDataMetaInfo = rawDataStorage.metaInfo;
+            this.mutFields = meta.mutFields;
+            this.extFields = meta.extFields;
+            this.rawDataMetaInfo = meta.rawDataMetaInfo;
+            this.filters = meta.filters;
+            this.cleanMethod = meta.cleanMethod as CleanMethod;
+        });
+        this.setShowDataImportSelection(false);
     }
     public async loadBackupMetaStore (data: IBackUpDataMeta) {
         const { mutFields, extFields, rawDataMetaInfo, filters, cleanMethod } = data;
-        this.mutFields = mutFields;
-        this.extFields = extFields;
-        this.rawDataMetaInfo = rawDataMetaInfo;
-        this.filters = filters;
-        this.cleanMethod = cleanMethod as CleanMethod;
+        runInAction(() => {
+            this.mutFields = mutFields;
+            this.extFields = extFields;
+            this.rawDataMetaInfo = rawDataMetaInfo;
+            this.filters = filters;
+            this.cleanMethod = cleanMethod as CleanMethod;
+        });
     }
 
 }

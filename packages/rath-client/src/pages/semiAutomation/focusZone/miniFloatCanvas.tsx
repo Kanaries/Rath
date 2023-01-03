@@ -5,11 +5,10 @@ import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { applyFilters, IPattern } from '@kanaries/loa';
 import ReactVega, { IReactVegaHandler } from '../../../components/react-vega';
-import { IRow } from '../../../interfaces';
-import { distVis } from '../../../queries/distVis';
-import { labDistVis } from '../../../queries/labdistVis';
+import type { IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { adviceVisSize } from '../../collection/utils';
+import { useVisSpec } from '../predictZone/utils';
 
 const FloatContainer = styled.div<{ hide: boolean }>`
     position: fixed;
@@ -31,8 +30,7 @@ interface MiniFloatCanvasProps {
 const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = (props) => {
     const { pined, handler } = props;
     const { semiAutoStore, commonStore } = useGlobalStore();
-    const { settings, mainVizSetting, dataSource, fieldMetas } = semiAutoStore;
-    const { vizAlgo } = settings;
+    const { mainVizSetting, dataSource, fieldMetas } = semiAutoStore;
     const [hide, setHide] = useState<boolean>(false);
 
     const { debug } = mainVizSetting;
@@ -41,18 +39,14 @@ const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = (props) => {
         return [];
     }, [dataSource, pined]);
 
+    const specOptions = useMemo(() => ({ pattern: pined }), [pined]);
+    const simpleSpec = useVisSpec(specOptions, dataSource);
+
     const spec = useMemo(() => {
-        const ans = vizAlgo === 'lite'
-            ? distVis({ pattern: pined })
-            : labDistVis({
-                  pattern: pined,
-                  dataSource,
-              });
+        return simpleSpec && adviceVisSize(simpleSpec, fieldMetas)
+    }, [simpleSpec, fieldMetas]);
 
-        return adviceVisSize(ans, fieldMetas)
-    }, [pined, vizAlgo, dataSource, fieldMetas]);
-
-    return (
+    return spec && (
         <FloatContainer hide={hide}>
             <div className="actions">
                 {!hide && (

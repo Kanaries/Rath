@@ -1,13 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ArtColumn, BaseTable, Classes } from 'ali-react-table';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
-import { MessageBar, MessageBarType } from '@fluentui/react';
+import { DefaultButton, IconButton, Label, MessageBar, MessageBarType, PrimaryButton, Stack } from '@fluentui/react';
 import intl from 'react-intl-universal';
+import { unstable_batchedUpdates } from 'react-dom';
 import { useGlobalStore } from '../../../store';
 import type { IRow } from '../../../interfaces';
-import { extractSelection, intersectPattern, ITextPattern, ITextSelection } from '../../../lib/textPattern/init';
+import { extractSelection, intersectPattern, ITextPattern } from '../../../lib/textPattern/init';
 import HeaderCell from './headerCell';
+import NestPanel from './nestPanel';
+import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './tpRegexEditor';
+import { IColStateType } from './headerCell/statePlaceholder';
+
+const SELECT_COLOR = '#b7eb8f';
 
 const CustomBaseTable = styled(BaseTable)`
     --header-bgcolor: #ffffff !important;
@@ -23,6 +29,40 @@ const CustomBaseTable = styled(BaseTable)`
             padding: 0px 0px 8px 0px;
         }
     }
+    td {
+        cursor: text;
+    }
+`;
+
+const Tag = styled.div`
+    display: inline-block;
+    padding: 2px 4px;
+    border-radius: 2px;
+    background-color: #f3f3f3;
+    font-size: 12px;
+`;
+
+const TextPatternCard = styled.div`
+    padding: 8px;
+    border: 1px solid #f3f3f3;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 8px 0px;
+    > .tp-content {
+        margin: 1em 0em;
+    }
+    .sl-text {
+        background-color: ${SELECT_COLOR};
+    }
+`;
+const MiniButton = styled(DefaultButton)`
+    height: 26px;
+    font-size: 12px;
+`;
+
+const MiniPrimaryButton = styled(PrimaryButton)`
+    height: 26px;
+    font-size: 12px;
 `;
 
 const TableInnerStyle = {
@@ -30,28 +70,104 @@ const TableInnerStyle = {
     overflow: 'auto',
 };
 
-interface IFieldTextSelection extends ITextSelection {
-    fid: string;
+function uniquePattern(textPatternList: ITextPattern[]): ITextPattern[] {
+    const keySet: Set<string> = new Set();
+    const ans: ITextPattern[] = [];
+    for (let tp of textPatternList) {
+        if (!keySet.has(tp.pattern.source)) {
+            ans.push(tp);
+            keySet.add(tp.pattern.source);
+        }
+    }
+    return ans;
 }
-interface IFieldTextPattern extends ITextPattern {
-    fid: string;
+
+function groupTextPattern(textPatternList: IFieldTextPattern[]): {
+    [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+} {
+    const res: {
+        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+    } = {
+        knowledge: [],
+        generalize: [],
+        specific: [],
+    };
+    for (let tp of textPatternList) {
+        res[tp.selectionType].push(tp);
+    }
+    return res;
 }
+
+function initGroupedTextPatternList(): {
+    [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+} {
+    const res: {
+        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+    } = {
+        knowledge: [],
+        generalize: [],
+        specific: [],
+    };
+    return res;
+}
+
+function findFirstExistTextPattern(
+    groupedTextPatternList: {
+        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+    }
+): {groupKey: IFieldTextPattern['selectionType']; index: number} {
+    const groupKeys = ['knowledge', 'generalize', 'specific'] as IFieldTextPattern['selectionType'][];
+    for (let groupKey of groupKeys) {
+        if (groupedTextPatternList[groupKey].length > 0) {
+            return {
+                groupKey,
+                index: 0,
+            };
+        }
+    }
+    return {
+        groupKey: 'knowledge',
+        index: 0,
+    };
+}
+
+const ADD_BATCH_SIZE = 5;
 
 const DataTable: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
     const { filteredDataMetaInfo, fieldsWithExtSug: fields, filteredDataStorage } = dataSourceStore;
     const [filteredData, setFilteredData] = useState<IRow[]>([]);
     const [textSelectList, setTextSelectList] = useState<IFieldTextSelection[]>([]);
-    const textPattern = useMemo<IFieldTextPattern | undefined>(() => {
-        if (textSelectList.length === 0) return;
-        const res = intersectPattern(textSelectList);
-        if (res) {
-            return {
-                fid: textSelectList[0].fid,
-                ...res,
-            };
+    const [editTP, setEditTP] = useState<boolean>(false);
+    // const [textPatternList, setTextPatternList] = useState<IFieldTextPattern[]>([]);
+    const [groupedTextPatternList, setGroupedTextPatternList] = useState<{
+        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
+    }>(initGroupedTextPatternList());
+    const [tpPos, setTpPos] = useState<{ groupKey: IFieldTextPattern['selectionType']; index: number }>({
+        groupKey: 'knowledge',
+        index: 0,
+    });
+    const [groupShownSize, setGroupShownSize] = useState<{
+        [key in IFieldTextPattern['selectionType']]: number;
+    }>({
+        knowledge: 1,
+        generalize: 1,
+        specific: 1,
+    });
+
+    const tsList2tpList = useCallback((tsl: IFieldTextSelection[]) => {
+        try {
+            if (tsl.length === 0) return [];
+            const res = uniquePattern(intersectPattern(tsl));
+            return res.map((r) => ({
+                ...r,
+                fid: tsl[0].fid,
+            }));
+        } catch (error) {
+            return [];
         }
-    }, [textSelectList]);
+    }, []);
+    // const [tpIndex, setTpIndex] = useState<number>(0);
     useEffect(() => {
         if (filteredDataMetaInfo.versionCode === -1) {
             setFilteredData([]);
@@ -70,27 +186,6 @@ const DataTable: React.FC = (props) => {
         },
         [dataSourceStore]
     );
-
-    // 这是一个非常有趣的数据流写法的bug，可以总结一下
-    // const columns = useMemo(() => {
-    //     return fieldMetas.map((f, i) => {
-    //         const mutField = mutFields[i].fid === f.fid ? mutFields[i] : mutFields.find(mf => mf.fid === f.fid);
-    //     return {
-    //         name: f.fid,
-    //         code: f.fid,
-    //         width: 220,
-    //         title: (
-    //             <HeaderCell
-    //                 disable={Boolean(mutField?.disable)}
-    //                 name={f.fid}
-    //                 code={f.fid}
-    //                 // meta={f}
-    //                 onChange={updateFieldInfo}
-    //             />
-    //         ),
-    //     };
-    // });
-    // }, [fieldMetas, mutFields, updateFieldInfo])
 
     const displayList: typeof fields = [];
 
@@ -112,55 +207,76 @@ const DataTable: React.FC = (props) => {
             }
         }
     }
-    const onTextSelect = useCallback((fid: string, fullText: string, td: Node) => {
-        const sl = document.getSelection();
-        const range = sl?.getRangeAt(0);
-        if (!range) return;
-        const selectedText = range.toString();
-        // Create a range representing the selected text
-        const selectedRange = range.cloneRange();
-        // Create a range representing the full text of the element
-        const fullRange = document.createRange();
-        fullRange.selectNodeContents(td);
-        let startNode = td.firstChild;
-        let startPos = 0;
-        while (startNode) {
-            if (startNode === selectedRange.startContainer) break;
-            if (startNode.nodeType === Node.TEXT_NODE) {
-                startPos += startNode.textContent?.length || 0;
+    const onTextSelect = useCallback(
+        (fid: string, fullText: string, td: Node) => {
+            const sl = document.getSelection();
+            const range = sl?.getRangeAt(0);
+            if (!range) return;
+            const selectedText = range.toString();
+            // Create a range representing the selected text
+            const selectedRange = range.cloneRange();
+            // Create a range representing the full text of the element
+            const fullRange = document.createRange();
+            fullRange.selectNodeContents(td);
+            let startNode = td.firstChild;
+            let startPos = 0;
+            while (startNode) {
+                if (startNode === selectedRange.startContainer) break;
+                if (startNode.nodeType === Node.TEXT_NODE) {
+                    startPos += startNode.textContent?.length || 0;
+                }
+                if (startNode.nextSibling) {
+                    startNode = startNode.nextSibling;
+                } else {
+                    break;
+                }
             }
-            if (startNode.nextSibling) {
-                startNode = startNode.nextSibling;
-            } else {
-                break;
+            // Compare the selected range to the full range
+            startPos += selectedRange.startOffset;
+            let endPos = startPos + selectedText.length;
+            if (fullText && selectedText) {
+                const startIndex = startPos;
+                const endIndex = endPos;
+                unstable_batchedUpdates(() => {
+                    const nextTSL = textSelectList.concat({
+                        fid,
+                        str: fullText,
+                        startIndex: startIndex,
+                        endIndex: endIndex,
+                    });
+                    const nextTPL = tsList2tpList(nextTSL);
+                    setTextSelectList(nextTSL);
+                    // setTextPatternList(nextTPL);
+                    const gtp = groupTextPattern(nextTPL);
+                    setGroupedTextPatternList(gtp);
+                    setTpPos(findFirstExistTextPattern(gtp));
+                });
             }
-        }
-        // Compare the selected range to the full range
-        startPos += selectedRange.startOffset;
-        let endPos = startPos + selectedText.length;
-        if (fullText && selectedText) {
-            const startIndex = startPos;
-            const endIndex = endPos;
-            setTextSelectList((l) =>
-                l.concat({
-                    fid,
-                    str: fullText,
-                    startIndex: startIndex,
-                    endIndex: endIndex,
-                })
-            );
-        }
-    }, []);
+        },
+        [textSelectList, tsList2tpList]
+    );
     const clearTextSelect = () => {
-        setTextSelectList([]);
+        unstable_batchedUpdates(() => {
+            setTextSelectList([]);
+            // setTextPatternList([]);
+            setGroupedTextPatternList(initGroupedTextPatternList());
+            setTpPos({
+                groupKey: 'knowledge',
+                index: 0,
+            });
+        });
     };
     useEffect(() => {
-        if (textPattern?.fid) {
-            dataSourceStore.expandFromSelectionPattern(textPattern?.fid, textPattern);
+        if (groupedTextPatternList[tpPos.groupKey][tpPos.index]) {
+            dataSourceStore.expandFromSelectionPattern(
+                groupedTextPatternList[tpPos.groupKey][tpPos.index].fid,
+                groupedTextPatternList[tpPos.groupKey][tpPos.index]
+            );
         } else {
             dataSourceStore.clearTextPatternIfExist();
+            setTpPos({ groupKey: 'knowledge', index: 0 });
         }
-    }, [dataSourceStore, textPattern]);
+    }, [dataSourceStore, groupedTextPatternList, tpPos.groupKey, tpPos.index]);
 
     useEffect(() => {
         // clear text pattern when ESC is pressed
@@ -178,7 +294,15 @@ const DataTable: React.FC = (props) => {
     const columns: ArtColumn[] = displayList.map((f, i) => {
         const fm = fields[i] && fields[i].fid === displayList[i].fid ? fields[i] : fields.find((m) => m.fid === f.fid);
         const suggestions = fields.find((_f) => _f.fid === f.fid)?.extSuggestions ?? [];
-
+        let colType: IColStateType | undefined = undefined;
+        const previrewField = fields.find(f => f.stage === 'preview');
+        if (f.stage === 'preview') {
+            colType = 'preview';
+        } else if (previrewField) {
+            if (previrewField.extInfo?.extFrom.includes(f.fid)) {
+                colType = 'source'
+            }
+        }
         const col: ArtColumn = {
             name: f.name || f.fid,
             code: f.fid,
@@ -192,14 +316,14 @@ const DataTable: React.FC = (props) => {
                     onChange={updateFieldInfo}
                     extSuggestions={suggestions}
                     isExt={Boolean(f.extInfo)}
-                    isPreview={f.stage === 'preview'}
+                    colType={colType}
                 />
             ),
         };
         col.render = (value: any) => {
             const text: string = `${value}`;
-            if (textPattern && textPattern.fid === f.fid) {
-                const res = extractSelection(textPattern, text);
+            if (groupedTextPatternList[tpPos.groupKey][tpPos.index] && groupedTextPatternList[tpPos.groupKey][tpPos.index].fid === f.fid) {
+                const res = extractSelection(groupedTextPatternList[tpPos.groupKey][tpPos.index], text);
 
                 if (!res.missing) {
                     const { matchedText, matchPos } = res;
@@ -214,7 +338,7 @@ const DataTable: React.FC = (props) => {
                             }}
                         >
                             {textBeforeSelection}
-                            <span style={{ backgroundColor: '#b7eb8f' }}>{matchedText}</span>
+                            <span style={{ backgroundColor: SELECT_COLOR }}>{matchedText}</span>
                             {textAfterSelection}
                         </span>
                     );
@@ -249,8 +373,10 @@ const DataTable: React.FC = (props) => {
         [fields]
     );
 
+    const hasPattern = (Object.keys(groupedTextPatternList) as IFieldTextPattern['selectionType'][]).some((k: IFieldTextPattern['selectionType']) => groupedTextPatternList[k].length > 0);
+
     return (
-        <div>
+        <div style={{ position: 'relative' }}>
             {fieldsNotDecided.length > 0 && (
                 <MessageBar
                     messageBarType={MessageBarType.warning}
@@ -266,15 +392,84 @@ const DataTable: React.FC = (props) => {
                     <span>{intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}</span>
                 </MessageBar>
             )}
-            {columns.length > 0 && (
-                <CustomBaseTable
-                    useVirtual={true}
-                    getRowProps={rowPropsCallback}
-                    style={TableInnerStyle}
-                    dataSource={filteredData}
-                    columns={columns}
-                />
-            )}
+            <div style={{ display: 'flex' }}>
+                {columns.length > 0 && (
+                    <CustomBaseTable
+                        useVirtual={true}
+                        getRowProps={rowPropsCallback}
+                        style={TableInnerStyle}
+                        dataSource={filteredData}
+                        columns={columns}
+                    />
+                )}
+                <NestPanel show={hasPattern} onClose={() => {}}>
+                    <IconButton style={{ float: 'right' }} iconProps={{ iconName: 'Cancel' }} onClick={clearTextSelect} />
+                    <Label>{intl.get('common.suggestions')}</Label>
+                    {(['knowledge', 'generalize', 'specific'] as IFieldTextPattern['selectionType'][]).map((groupKey) =>
+                        groupedTextPatternList[groupKey].slice(0, groupShownSize[groupKey]).map((tp, ti) => (
+                            <TextPatternCard key={tp.pattern.source + ti}>
+                                <Tag>{intl.get(`dataSource.textPattern.${groupKey}`)}</Tag>
+                                <div className="tp-content">
+                                    <span className="ph-text">{tp.ph.source}</span>
+                                    <span className="sl-text">{tp.selection.source}</span>
+                                    <span className="pe-text">{tp.pe.source}</span>
+                                </div>
+                                <Stack tokens={{ childrenGap: 4 }}>
+                                    <MiniButton
+                                        text={intl.get(`common.${tpPos.index === ti && tpPos.groupKey === groupKey ? 'applied' : 'apply'}`)}
+                                        disabled={tpPos.index === ti && tpPos.groupKey === groupKey}
+                                        onClick={() => {
+                                            setTpPos({
+                                                groupKey,
+                                                index: ti,
+                                            });
+                                        }}
+                                    />
+                                    {tpPos.index === ti && tpPos.groupKey === groupKey && (
+                                        <MiniPrimaryButton
+                                            text={intl.get('common.edit')}
+                                            onClick={() => {
+                                                setEditTP(true);
+                                            }}
+                                        />
+                                    )}
+                                    {ti === groupShownSize[groupKey] - 1 && groupedTextPatternList[groupKey].length > groupShownSize[groupKey] && (
+                                        <MiniButton
+                                            text={intl.get('common.showMore')}
+                                            onClick={() => {
+                                                setGroupShownSize((s) => {
+                                                    const ns = { ...s };
+                                                    ns[groupKey] += ADD_BATCH_SIZE;
+                                                    return ns;
+                                                });
+                                            }}
+                                        />
+                                    )}
+                                </Stack>
+                                {tpPos.index === ti && tpPos.groupKey === groupKey && editTP && (
+                                    <TPRegexEditor
+                                        tp={tp}
+                                        onSubmit={(patt) => {
+                                            unstable_batchedUpdates(() => {
+                                                setGroupedTextPatternList((l) => {
+                                                    const nl = { ...l };
+                                                    nl[groupKey] = [...nl[groupKey]];
+                                                    nl[groupKey][ti] = patt;
+                                                    return nl;
+                                                });
+                                                setEditTP(false);
+                                            });
+                                        }}
+                                        onCancel={() => {
+                                            setEditTP(false);
+                                        }}
+                                    />
+                                )}
+                            </TextPatternCard>
+                        ))
+                    )}
+                </NestPanel>
+            </div>
         </div>
     );
 };

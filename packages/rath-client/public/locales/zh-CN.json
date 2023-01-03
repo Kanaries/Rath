@@ -10,8 +10,14 @@
         "expand": "展开",
         "filter": "筛选",
         "preview": "预览",
+        "source": "源",
         "submit": "提交",
+        "apply": "应用",
+        "applied": "已应用",
         "run": "执行",
+        "edit": "编辑",
+        "suggestions": "建议",
+        "showMore": "显示更多",
         "semanticType": {
             "nominal": "类别类型",
             "ordinal": "有序类型",
@@ -140,6 +146,11 @@
         "connectorConfig": "连接器设置",
         "connectorService": "连接器服务地址 (可选)",
         "apply": "设置并测试",
+        "textPattern": {
+            "knowledge": "常识",
+            "generalize": "泛化",
+            "specific": "完全匹配"
+        },
         "statViewInfo": {
             "title": "统计视图",
             "desc": "统计视图是对数据集的统计信息，包括数据集的大小、数据类型、缺失值、重复值等。",
@@ -216,7 +227,8 @@
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
                 "demo": "示例数据",
-                "database": "数据库"
+                "database": "数据库",
+                "rath_notebook": "Notebook"
             },
             "load": "加载数据",
             "demo": {
@@ -243,7 +255,7 @@
         },
         "tip": "记得在开始分析前先调整数据的清洗策略并配置字段的属性",
         "recordCount": "记录数 {count}",
-        "rowsInViews": "原始数据: {origin} 行 / 筛选后: {select} 行 / 清洗后: {clean} 行",
+        "rowsInViews": "原始数据: {originCols} 列 × {origin} 行 / 筛选后: {selectCols} 列 × {select} 行 / 清洗后: {clean} 行",
         "selection": {
             "title": "快速数据筛选",
             "desc": "基于数据中的分位数进行快速筛选",
@@ -336,8 +348,27 @@
         "operations": {
             "title": "快捷操作",
             "selectAll": "选择所有字段",
-            "disableAll": "禁用所有字段"
+            "disableAll": "禁用所有字段",
+            "backup": "保存到云"
         }
+    },
+    "storage": {
+        "upload": "保存到云",
+        "upload_desc": "备份你的 Rath 工作簿。",
+        "components": {
+            "data": "全量数据 ({size} 行)",
+            "meta": "元数据 ({size} 个字段)",
+            "collection": "收藏夹 ({size} 个项目)",
+            "causal": "因果模型",
+            "dashboard": "报表 ({size} 个文档)"
+        },
+        "name": "工作簿名称",
+        "default_name": "Rath 工作簿 {date}",
+        "download": "加载",
+        "createdAt": "创建时间",
+        "refresh": "刷新",
+        "size": "大小",
+        "apply": "上传"
     },
     "meta": {
         "title": "字段元信息配置",
@@ -583,6 +614,10 @@
             "userName": "用户名",
             "password": "密码"
         }
+    },
+    "user": {
+        "organization": "组织",
+        "workspace": "工作空间"
     },
     "messages": {
         "email": {

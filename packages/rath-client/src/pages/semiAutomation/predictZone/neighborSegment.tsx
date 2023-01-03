@@ -8,6 +8,7 @@ import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
 import { IVisSpecType } from '../../../interfaces';
+import { useAsyncViews } from './utils';
 
 const NeighborSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -18,6 +19,7 @@ const NeighborSegment: React.FC = () => {
     const adviceNeighbors = useCallback(() => {
         semiAutoStore.neighborAssociate()
     }, [semiAutoStore])
+    const list = useAsyncViews(neighborSpecList);
     if (neighborViews.views.length === 0 && autoAsso.neighborViews) return <div />
     return <Fragment>
         {
@@ -30,7 +32,7 @@ const NeighborSegment: React.FC = () => {
         }
         <AssoContainer>
             {
-                neighborSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                list.map((spec, i) => neighborViews.views[i] && <div className="asso-segment" key={`p-${i}`}>
                     {
                         neighborViews.computing && <LoadingLayer>
                             <Spinner label="loading" />

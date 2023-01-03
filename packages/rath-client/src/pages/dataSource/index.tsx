@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import intl from 'react-intl-universal';
-import { PrimaryButton, Stack, DefaultButton, Pivot, PivotItem, MessageBar, Spinner } from '@fluentui/react';
+import { PrimaryButton, Stack, DefaultButton, Pivot, PivotItem, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
@@ -17,6 +17,7 @@ import FastSelection from './fastSelection';
 import ProfilingView from './profilingView';
 import MainActionButton from './baseActions/mainActionButton';
 import DataOperations from './baseActions/dataOperations';
+import DataInfo from './dataInfo';
 
 const MARGIN_LEFT = { marginLeft: '1em' };
 
@@ -25,7 +26,7 @@ interface DataSourceBoardProps {}
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     const { dataSourceStore, commonStore } = useGlobalStore();
 
-    const { cleanedData, rawDataMetaInfo, filteredDataMetaInfo, loading, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } =
+    const { rawDataMetaInfo, loading, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } =
         dataSourceStore;
     useEffect(() => {
         // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
@@ -140,13 +141,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                 </Pivot>
                 <BorderCard>
                     {rawDataMetaInfo.length > 0 && <DataOperations />}
-                    <MessageBar>
-                        {intl.get('dataSource.rowsInViews', {
-                            origin: rawDataMetaInfo.length,
-                            select: filteredDataMetaInfo.length,
-                            clean: cleanedData.length,
-                        })}
-                    </MessageBar>
+                    <DataInfo />
                     {rawDataMetaInfo.length > 0 && <Advice />}
                     {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
                     {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}

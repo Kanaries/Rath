@@ -10,8 +10,15 @@
         "expand": "Expand",
         "filter": "Filter",
         "preview": "Preview",
+        "source": "Source",
         "submit": "Submit",
-        "run": "执行",
+        "cancel": "Cancel",
+        "apply": "Apply",
+        "applied": "Applied",
+        "run": "Run",
+        "edit": "Edit",
+        "suggestions": "Suggestions",
+        "showMore": "Show More",
         "semanticType": {
             "nominal": "nominal",
             "ordinal": "ordinal",
@@ -141,6 +148,11 @@
         "connectorConfig": "Connector Settings",
         "connectorService": "Connector Service URL (Optional)",
         "apply": "Apply&Test",
+        "textPattern": {
+            "knowledge": "Knowledge",
+            "generalize": "Generalize",
+            "specific": "Extract Match"
+        },
         "statViewInfo": {
             "title": "Statistics View",
             "desc": "Statistics View is a quick way to get a sense of the data. It shows the distribution of each field in the dataset. You can click the field name to see the distribution of the field in detail.",
@@ -217,7 +229,8 @@
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
                 "demo": "Demo",
-                "database": "Database"
+                "database": "Database",
+                "rath_notebook": "Notebook"
             },
             "demo": {
                 "available": "Available Datasets"
@@ -243,7 +256,7 @@
         },
         "tip": "Remember to adjust the fields' types and cleaning strategy before analysis.",
         "recordCount": "Number of records {count}",
-        "rowsInViews": "Origin: {origin} rows / Select: ({select}) / Clean: ({clean}) rows",
+        "rowsInViews": "Origin: {originCols} columns × {origin} rows / Select: {selectCols} columns × {select} rows / Clean: {clean} rows",
         "selection": {
             "title": "Fast Selection Config",
             "desc": "Filter based on quantiles to get the main part of your data.",
@@ -311,7 +324,7 @@
             "empty": "No column exported.",
             "apply": "Apply",
             "cancel": "Cancel",
-            "auto": "Extend Suggestions",
+            "auto": "transforms",
             "suggestion": {
                 "regex_selection": "Pattern discovery & extraction | Extract patterns from text fields and generate new fields matching extracted pattern.",
                 "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months.",
@@ -336,8 +349,27 @@
         "operations": {
             "title": "Operations",
             "selectAll": "Enable All Fields",
-            "disableAll": "Disable All Fields"
+            "disableAll": "Disable All Fields",
+            "backup": "Save to Cloud"
         }
+    },
+    "storage": {
+        "upload": "Save to Cloud",
+        "upload_desc": "Backup your Rath notebook.",
+        "components": {
+            "data": "Raw Data ({size} rows)",
+            "meta": "Meta Data ({size} fields)",
+            "collection": "Collection ({size} items)",
+            "causal": "Causal Model",
+            "dashboard": "Dashboard ({size} documents)"
+        },
+        "download": "Load",
+        "createdAt": "Created At",
+        "refresh": "Refresh",
+        "name": "Notebook Name",
+        "default_name": "Rath Notebook {date}",
+        "size": "Size",
+        "apply": "Upload"
     },
     "meta": {
         "title": "Meta Config",
@@ -573,6 +605,10 @@
             "userName": "Username",
             "password": "Password"
         }
+    },
+    "user": {
+        "organization": "Organization",
+        "workspace": "Workspace"
     },
     "messages": {
         "email": {
