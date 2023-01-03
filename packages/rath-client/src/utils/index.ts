@@ -188,11 +188,11 @@ export interface ISearchInfoBase {
     spec?: IVegaSubset | null;
 }
 
-export type LazyFactory<T> = () => T;
+export type LazyFactory<T> = () => Promise<T>;
 
 export interface ILazySearchInfoBase extends ISearchInfoBase {
     id: number;
-    value: LazyFactory<IVegaSubset>;
+    specFactory: LazyFactory<IVegaSubset>;
 }
 
 export function searchFilterView<T extends ISearchInfoBase>(searchContent: string, views: T[]) {

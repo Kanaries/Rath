@@ -5,14 +5,14 @@ import { Specification } from "visual-insights";
 import { IResizeMode, IRow, ISpecSourceType, IVegaSubset } from "../../interfaces";
 import { distVis } from "../../queries/distVis";
 import { labDistVis } from "../../queries/labdistVis";
-import { loaEngineService } from "../../services/index";
+import { labDistVisService, loaEngineService } from "../../services/index";
 import { DataSourceStore } from "../dataSourceStore";
 import { adviceVisSize } from "../../pages/collection/utils";
 import { IAssoViews, IMainVizSetting, IRenderViewKey, ISetting, makeInitAssoViews } from "./localTypes";
 
 const RENDER_BATCH_SIZE = 5;
 
-function batchSpecify (assoViews: IAssoViews, vizAlgo: "lite" | "strict", mainVizSetting: IMainVizSetting, dataSource: IRow[]) {
+async function batchSpecify (assoViews: IAssoViews, vizAlgo: "lite" | "strict", mainVizSetting: IMainVizSetting, dataSource: IRow[]) {
     const { amount, views } = assoViews;
     const renderedViews = views.slice(0, amount);
     if (vizAlgo === 'lite') {
@@ -22,12 +22,14 @@ function batchSpecify (assoViews: IAssoViews, vizAlgo: "lite" | "strict", mainVi
             excludeScaleZero: mainVizSetting.excludeScaleZero
         }))
     } else {
-        return renderedViews.map(v => labDistVis({
-            pattern: v,
-            dataSource: dataSource,
-            specifiedEncodes: v.encodes,
-            excludeScaleZero: mainVizSetting.excludeScaleZero
-        }))
+        return labDistVisService({
+            dataSource,
+            items: renderedViews.map(v => ({
+                pattern: v,
+                specifiedEncodes: v.encodes,
+                excludeScaleZero: mainVizSetting.excludeScaleZero
+            })),
+        });
     }
 }
 
