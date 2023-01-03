@@ -20,6 +20,11 @@ const Container = styled.div<{ navMode: "text" | "icon" }>`
     > * {
         padding-inline: 10px;
     }
+    .mode-switch {
+        display: flex;
+        justify-content: flex-end;
+        cursor: pointer;
+    }
 `;
 const UserSettings: React.FC = () => {
     const target = useRef<HTMLDivElement>(null);
@@ -52,7 +57,7 @@ const UserSettings: React.FC = () => {
                 />
             </div>
             <div
-                style={{ display: 'flex', justifyContent: 'flex-end', cursor: 'pointer' }}
+                className="mode-switch"
                 onClick={() => {
                     commonStore.setNavMode(navMode === 'icon' ? 'text' : 'icon');
                 }}

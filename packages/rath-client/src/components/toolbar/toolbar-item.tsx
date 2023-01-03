@@ -178,7 +178,18 @@ export const ToolbarItemContainer = memo<{
             </ToolbarItemContainerElement>
             {opened && (
                 form ? (
-                    <Callout target={`#${id}`} role="dialog" gapSpace={0} directionalHint={DirectionalHint.bottomCenter} beakWidth={8} styles={{ calloutMain: { background: 'unset' }, beakCurtain: { background: 'unset' }, beak: { backgroundColor: 'var(--bg-color-light)' } }}>
+                    <Callout
+                        target={`#${id}`}
+                        role="dialog"
+                        gapSpace={0}
+                        directionalHint={DirectionalHint.bottomCenter}
+                        beakWidth={8}
+                        styles={{
+                            calloutMain: { background: 'unset' },
+                            beakCurtain: { background: 'unset' },
+                            beak: { backgroundColor: 'var(--bg-color-light)' }
+                        }}
+                    >
                         <FormContainer>
                             {form}
                         </FormContainer>
