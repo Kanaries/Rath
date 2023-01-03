@@ -4,7 +4,6 @@ import React, { useMemo, useState } from 'react';
 import intl from 'react-intl-universal';
 import { Sampling } from "visual-insights";
 import { useBoolean } from '@fluentui/react-hooks';
-import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import { IInsightVizView } from '../../interfaces';
 import { searchFilterView } from '../../utils';
@@ -21,14 +20,6 @@ enum COLLECT_CONFIG {
     TITLE = 'title',
     DESC = 'desc',
 }
-
-const PanelFooter = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    > *:not(:first-child) {
-        margin-left: 1em;
-    }
-`;
 
 const collectionConfig = [
     { key: COLLECT_CONFIG.TITLE, title: COLLECT_CONFIG.TITLE },
@@ -67,7 +58,7 @@ const Collection: React.FC = (props) => {
     };
     return (
         <div className="content-container">
-            <div className="app-card">
+            <div className="card">
                 <MainCardContainer>
                     <h1 className="seg-header">{intl.get('collection.title')}</h1>
                     <p className="seg-desc">{intl.get('collection.desc')}</p>
@@ -104,9 +95,10 @@ const Collection: React.FC = (props) => {
                         closeButtonAriaLabel="Close"
                         onRenderFooterContent={() => {
                             return (
-                                <PanelFooter>
+                                <div className="flex justify-end">
                                     <DefaultButton onClick={dismissPanel}>Cancel</DefaultButton>
                                     <PrimaryButton
+                                        className="ml-2"
                                         onClick={() => {
                                             const newCollectionList = collectionList.map((item) => {
                                                 if (item.viewId === openKey) {
@@ -123,7 +115,7 @@ const Collection: React.FC = (props) => {
                                     >
                                         Submit
                                     </PrimaryButton>
-                                </PanelFooter>
+                                </div>
                             );
                         }}
                         isFooterAtBottom

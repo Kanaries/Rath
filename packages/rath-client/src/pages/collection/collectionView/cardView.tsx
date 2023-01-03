@@ -1,7 +1,7 @@
 import { applyFilters } from '@kanaries/loa';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Pagination } from '@material-ui/core';
+import { Divider, Pagination } from '@material-ui/core';
 import ReactVega from '../../../components/react-vega';
 import ViewInfo from '../../../components/viewInfo/textInfo';
 import { IFieldMeta, IInsightVizView, IRow } from '../../../interfaces';
@@ -16,22 +16,20 @@ const CollectContainer = styled.div`
         font-size: 3em;
         font-weight: 500;
     }
-`;
-
-const ItemContainer = styled.div`
-    background-color: #fff;
-    box-shadow: 0 0.6px 2px rgb(218, 220, 224);
-    border-radius: 1em;
-    padding: 1em;
-    margin: 0.5em;
-    cursor: pointer;
+    .chart-container {
+        border: 1px solid rgb(218, 220, 224);
+        border-radius: 1em;
+        padding: 1em;
+        margin: 0.5em;
+        cursor: pointer;
+    }
     .collect-title {
         width: 100%;
+        font-size: 1.125rem;
         display: flex;
         justify-content: center;
-        font-size: 1.05rem;
-        font-weight: 550;
-        margin-bottom: 1em;
+        font-weight: bold;
+        margin-bottom: 2px;
     }
     .c-desc {
         > div:first-child {
@@ -66,16 +64,17 @@ const CardView: React.FC<CardViewProps> = (props) => {
                     setPageIndex(v - 1);
                 }}
             />
-            <hr style={{ marginBottom: '1em', marginTop: '1em' }} />
+            <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
             <CollectContainer>
                 {views.slice(pageIndex * VIEW_NUM_IN_PAGE, (pageIndex + 1) * VIEW_NUM_IN_PAGE).map((item, i) => (
-                    <ItemContainer
+                    <div
+                        className="chart-container"
                         key={item.viewId}
                         onClick={() => {
                             onConfig(item);
                         }}
                     >
-                        <div className="collect-title">{item.title}</div>
+                        <div className="collent-title">{item.title}</div>
                         <div className="c-vis">
                             <VisErrorBoundary>
                                 <ReactVega
@@ -90,7 +89,7 @@ const CardView: React.FC<CardViewProps> = (props) => {
                             <div>{item.desc}</div>
                             <ViewInfo metas={metas} fields={item.fields} filters={item.filters} />
                         </div>
-                    </ItemContainer>
+                    </div>
                 ))}
             </CollectContainer>
         </div>

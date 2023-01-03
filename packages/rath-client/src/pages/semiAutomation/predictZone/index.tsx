@@ -13,25 +13,25 @@ const PredictZone: React.FC = (props) => {
     return (
         <div>
             {neighborViews.views.length > 0 && (
-                <div className="app-card">
+                <div className="pure-card">
                     <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.neighbors')}</h1>
                     <NeighborSegment />
                 </div>
             )}
             {pattViews.views.length > 0 && (
-                <div className="app-card">
+                <div className="pure-card">
                     <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.patterns')}</h1>
                     <PattSegment />
                 </div>
             )}
             {featViews.views.length > 0 && (
-                <div className="app-card">
+                <div className="pure-card">
                     <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.features')}</h1>
                     <FeatSegment />
                 </div>
             )}
             {filterViews.views.length > 0 && (
-                <div className="app-card">
+                <div className="pure-card">
                     <h1 className="ms-fontSize-18">{intl.get('semiAuto.main.associate.filters')}</h1>
                     <FilterSegment />
                 </div>

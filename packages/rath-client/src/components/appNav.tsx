@@ -26,7 +26,7 @@ const NavContainer = styled.div`
         flex-shrink: 0;
         overflow: hidden;
     }
-    /* padding-left: 10px; */
+    padding-left: 10px;
     .text-red {
         color: #e94726;
     }
@@ -38,51 +38,13 @@ const NavContainer = styled.div`
     }
 `;
 
-const NavBody = styled.div`
-    flex-grow: 1;
-    flex-shrink: 1;
-    padding: 16px 0 16px 10px;
-    overflow: hidden auto;
-    /* border-radius: 12px 12px 0 0; */
-`;
-
-const StyledNav = styled(Nav)<{ navMode: "text" | "icon" }>`
-    & * {
-        color: inherit;
-    }
-    a.ms-Nav-link, a.ms-Nav-compositeLink {
-        border-radius: 4px 0 0 4px;
-        padding-right: ${({ navMode }) => navMode === 'text' ? '1em' : '0'};
-        ::after {
-            display: none;
-        }
-    }
-    li ul a.ms-Nav-link {
-        padding-left: ${({ navMode }) => navMode === 'text' ? '16px' : '4px'};
-    }
-    .ms-Nav-link[aria-current] {
-        color: rgb(26, 26, 26);
-    }
-    .ms-Nav-compositeLink:hover {
-        color: rgb(26, 26, 26);
-    }
-    span {
-        pointer-events: none;
-    }
-`;
-
-const LogoBar = styled.div<{ navMode: "text" | "icon" }>`
+const LogoBar = styled.div`
     display: flex;
-    padding: 4px ${({ navMode }) => navMode === 'text' ? '24px' : '0'};
-    height: 54px;
+    padding: 12px;
     align-items: center;
-    justify-content: center;
     h1 {
-        margin-inline: 12px 8px;
-        font-size: 22.4px;
-        margin-block: 0.4em;
-        font-weight: 400;
-        user-select: none;
+        margin-left: 12px;
+        font-size: 1.6em;
     }
 `;
 
@@ -193,11 +155,6 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     isExpanded: altKeyPressed,
                     forceAnchor: true,
                     onClick(e: any) {
-                        const target = e.target as HTMLAnchorElement | null;
-                        if (target) {
-                            const button = target.previousSibling as HTMLButtonElement | null;
-                            button?.click();
-                        }
                         e.preventDefault();
                     },
                     links: getLinks([
@@ -216,14 +173,12 @@ const AppNav: React.FC<AppNavProps> = (props) => {
 
     return (
         <NavContainer>
-            <LogoBar navMode={navMode}>
+            <LogoBar>
                 <a
                     // onClick={() => { window.location.reload(false); }}
                     href="https://kanaries.cn/"
-                    target="_blank"
-                    rel="noreferrer"
                 >
-                    <img style={{ width: '36px', marginTop: '4px' }} src="./assets/kanaries-lite.png" alt="rath" />
+                    <img style={{ width: '38px', marginTop: '4px' }} src="./assets/kanaries-lite.png" alt="rath" />
                 </a>
                 {navMode === 'text' && (
                     <h1>
@@ -234,9 +189,9 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                     </h1>
                 )}
             </LogoBar>
-            <NavBody>
-                <StyledNav navMode={navMode} selectedKey={appKey} groups={groups} />
-            </NavBody>
+            <div style={{ flexGrow: 1, flexShrink: 1 }}>
+                <Nav selectedKey={appKey} groups={groups} />
+            </div>
             <div className="nav-footer">
                 <UserSetting />
                 <LoginInfo />

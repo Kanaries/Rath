@@ -1,16 +1,6 @@
-:root {
-  --bg-color-light: rgb(255, 255, 255);
-  --text-color-light: rgb(30, 30, 30);
-}
-body {
-  background-color: var(--bg-color-light);
-  color: var(--text-color-light);
-}
 .content-container{
   /* padding: 1em 9% 0px 9%; */
-  /* padding: 3px 1em; */
-  padding: 0;
-  position: relative;
+  padding: 3px 1em;
 }
 .header-bar{
   position: relative;
@@ -29,40 +19,6 @@ body {
 .logo>img{
   width: 100%;
 }
-
-p, pre, h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  line-height: 1.6em;
-}
-
-h1 {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-h2 {
-  font-size: 1.08rem;
-  font-weight: 600;
-}
-h3 {
-  font-size: 1.05rem;
-  font-weight: 550;
-}
-h4 {
-  font-size: 1.02rem;
-  font-weight: 550;
-}
-h5 {
-  font-size: 1rem;
-  font-weight: 500;
-}
-h6 {
-  font-size: 0.975rem;
-  font-weight: 500;
-}
-
 h2, h3 {
   color: #323130;
   font-weight: 500;
@@ -90,10 +46,6 @@ h2, h3 {
   border-radius: 2px;
   box-shadow: 0 1.6px 7.6px 0 rgba(0, 0, 0, 0.1), 0 0.3px 1.9px 0 rgba(0, 0, 0, 0.08);
   margin-bottom: 1em;
-}
-.app-card{
-  padding: 2em 1.8em 4vh;
-  border-radius: 2px;
 }
 .card{
   background-color: #fff;
@@ -154,16 +106,13 @@ h2, h3 {
 }
 
 .message-container {
-  position: absolute;
-  width: 100%;
-  z-index: 999;
+  padding: 1em 4em 0em 4em;
 }
 
 .main-app-container{
   display: flex;
-  overflow: hidden;
+  overflow: auto;
   position: fixed;
-  width: 100vw;
   /* top: 60px; */
   top:0px;
   bottom: 0px;
@@ -175,32 +124,13 @@ h2, h3 {
   /* position: fixed;
   left: 0px;
   bottom: 0px; */
+  /* flex-basis: 220px; */
   flex-grow: 0;
   flex-shrink: 0;
-  flex-basis: max-content;
-  background-color: var(--bg-color-light);
-  color: var(--text-color-light);
-  box-shadow: -5px 0 8px var(--text-color-light);
-  position: relative;
-  z-index: 1;
-}
-
-.main-app-nav > * > *:first-child {
   background-color: #fff;
 }
 
-.main-app-nav > * > *:not(:first-child) {
-  background-color: var(--text-color-light);
-  color: var(--bg-color-light);
-}
-
-.main-app-nav .nav-footer * {
-  background-color: var(--text-color-light);
-  color: var(--bg-color-light) !important;
-}
-
 .main-app-container > .main-app-content{
-  position: relative;
   flex-basis: 800px;
   flex-grow: 1;
   flex-shrink: 1;
@@ -208,7 +138,7 @@ h2, h3 {
 }
 
 .kanaries-copy-right-footer{
-  position: fixed;
+  position: absolute;
   bottom: 4px;
   font-size: 12px;
   left: 50%;
@@ -220,6 +150,5 @@ h2, h3 {
 }
 
 hr{
-  /* border-color: #efefef; */
-  border: none;
+  border-color: #efefef;
 }
