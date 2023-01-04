@@ -1,25 +1,22 @@
 import intl from 'react-intl-universal';
 import { Pivot, PivotItem } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
+import { ICubeStorageManageMode } from 'visual-insights';
 import { useMemo, useState } from "react";
 import { useGlobalStore } from '../../store';
-import { IResizeMode } from '../../interfaces';
+import { IResizeMode, ITaskTestMode } from '../../interfaces';
+import { EXPLORE_VIEW_ORDER } from '../../store/megaAutomation';
+import { COMPUTATION_ENGINE } from '../../constants';
 import JSONEditor from './JSONEditor';
 import { PreferencesSchema } from './types';
+import UIEditor from './UIEditor';
 
 
 const PreferencePage = observer(function PreferencePage () {
     const {
-        semiAutoStore,
-        
-        dashboardStore,
-        causalStore,
         commonStore,
-        editorStore,
-        painterStore,
+        semiAutoStore,
         megaAutoStore,
-        clickHouseStore,
-        collectionStore,
         ltsPipeLineStore,
     } = useGlobalStore();
     const [mode, setMode] = useState<'UI' | 'JSON'>('UI');
@@ -73,6 +70,49 @@ const PreferencePage = observer(function PreferencePage () {
                 required: false,
                 defaultValue: true,
             },
+            'megaAuto.cubeStorageManageMode': {
+                title: intl.get('config.cubeStorageManageMode.title'),
+                type: 'enum',
+                description: intl.get('config.cubeStorageManageMode.title'),
+                options: [ICubeStorageManageMode.LocalCache, ICubeStorageManageMode.LocalDisk, ICubeStorageManageMode.LocalMix],
+                value: ltsPipeLineStore.cubeStorageManageMode,
+                onChange: value => ltsPipeLineStore.setCubeStorageManageMode(value as ICubeStorageManageMode),
+                required: false,
+                defaultValue: ICubeStorageManageMode.LocalMix,
+            },
+            'megaAuto.engine': {
+                title: intl.get('config.computationEngine.title'),
+                type: 'enum',
+                description: intl.get('config.computationEngine.title'),
+                options: [COMPUTATION_ENGINE.webworker, COMPUTATION_ENGINE.clickhouse],
+                value: commonStore.computationEngine,
+                onChange: value => commonStore.setComputationEngine(value as string),
+                required: true,
+            },
+            'megaAuto.taskMode': {
+                title: 'task test mode',
+                type: 'enum',
+                description: 'task test mode',
+                options: [ITaskTestMode.local, ITaskTestMode.server],
+                value: commonStore.taskMode,
+                onChange: value => commonStore.setTaskTestMode(value as ITaskTestMode),
+                required: false,
+                defaultValue: ITaskTestMode.local,
+            },
+            'megaAuto.orderBy': {
+                title: intl.get('megaAuto.orderBy.title'),
+                type: 'enum',
+                description: intl.get('megaAuto.orderBy.title'),
+                options: [
+                    EXPLORE_VIEW_ORDER.DEFAULT,
+                    EXPLORE_VIEW_ORDER.FIELD_NUM,
+                    EXPLORE_VIEW_ORDER.CARDINALITY,
+                ],
+                value: megaAutoStore.orderBy,
+                onChange: value => megaAutoStore.setExploreOrder(value as string),
+                required: false,
+                defaultValue: EXPLORE_VIEW_ORDER.DEFAULT,
+            },
             'visualization.excludeScaleZero': {
                 title: intl.get('megaAuto.operation.excludeScaleZero'),
                 type: 'boolean',
@@ -111,7 +151,7 @@ const PreferencePage = observer(function PreferencePage () {
             },
             'visualization.resize': {
                 type: 'object',
-                description: intl.get('megaAuto.operation.resize.title'),
+                description: intl.get('megaAuto.operation.resize'),
                 properties: {
                     'visualization.resizeMode': {
                         title: intl.get('megaAuto.operation.resize'),
@@ -123,46 +163,49 @@ const PreferencePage = observer(function PreferencePage () {
                         required: false,
                         defaultValue: IResizeMode.auto,
                     },
+                    'visualization.resize.width': {
+                        title: 'width',
+                        type: 'number',
+                        description: 'width',
+                        value: semiAutoStore.mainVizSetting.resize.width,
+                        exclusiveMinimum: 0,
+                        onChange: (value: number) => semiAutoStore.updateMainVizSettings(s => s.resize.width = value),
+                        required: false,
+                        defaultValue: 320,
+                    },
+                    'visualization.resize.height': {
+                        title: 'height',
+                        type: 'number',
+                        description: 'height',
+                        value: semiAutoStore.mainVizSetting.resize.height,
+                        exclusiveMinimum: 0,
+                        onChange: (value: number) => semiAutoStore.updateMainVizSettings(s => s.resize.height = value),
+                        required: false,
+                        defaultValue: 320,
+                    },
                 },
-                // TODO: not working
-                allOf: [
+                anyOf: [
                     {
-                        'if': {
-                            properties: { 'visualization.resizeMode': { 'const': IResizeMode.control } },
+                        properties: {
+                            'visualization.resizeMode': { 'const': IResizeMode.control },
                         },
-                        then: {
-                            properties: {
-                                'visualization.resize.width': {
-                                    title: 'width',
-                                    type: 'number',
-                                    description: 'width',
-                                    value: semiAutoStore.mainVizSetting.resize.width,
-                                    exclusiveMinimum: 0,
-                                    onChange: (value: number) => semiAutoStore.updateMainVizSettings(s => s.resize.width = value),
-                                    required: true,
-                                },
-                                'visualization.resize.height': {
-                                    title: 'height',
-                                    type: 'number',
-                                    description: 'height',
-                                    value: semiAutoStore.mainVizSetting.resize.height,
-                                    exclusiveMinimum: 0,
-                                    onChange: (value: number) => semiAutoStore.updateMainVizSettings(s => s.resize.height = value),
-                                    required: true,
-                                },
-                            },
+                        required: ['visualization.resize.width', 'visualization.resize.height'],
+                    },
+                    {
+                        properties: {
+                            'visualization.resizeMode': { 'const': IResizeMode.auto },
                         },
                     },
                 ],
             },
         },
-    }), [semiAutoStore]);
+    }), [semiAutoStore, megaAutoStore, commonStore, ltsPipeLineStore]);
 
     return (
         <div className="card">
             <Pivot selectedKey={mode} onLinkClick={item => item?.props.itemKey && setMode(item?.props.itemKey as typeof mode)}>
                 <PivotItem itemKey="UI" headerText={intl.get('preference.ui')}>
-
+                    <UIEditor schema={schema} />
                 </PivotItem>
                 <PivotItem itemKey="JSON" headerText={intl.get('preference.json')}>
                     <JSONEditor schema={schema} />
