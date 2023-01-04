@@ -2,7 +2,7 @@ import intl from 'react-intl-universal';
 import { Pivot, PivotItem } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { ICubeStorageManageMode } from 'visual-insights';
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useGlobalStore } from '../../store';
 import { IResizeMode, ITaskTestMode } from '../../interfaces';
 import { EXPLORE_VIEW_ORDER } from '../../store/megaAutomation';
@@ -21,7 +21,7 @@ const PreferencePage = observer(function PreferencePage () {
     } = useGlobalStore();
     const [mode, setMode] = useState<'UI' | 'JSON'>('UI');
 
-    const schema = useMemo<PreferencesSchema>(() => ({
+    const schema: PreferencesSchema = {
         description: '',
         type: 'object',
         properties: {
@@ -199,7 +199,7 @@ const PreferencePage = observer(function PreferencePage () {
                 ],
             },
         },
-    }), [semiAutoStore, megaAutoStore, commonStore, ltsPipeLineStore]);
+    };
 
     return (
         <div className="card">

@@ -1,9 +1,11 @@
+import intl from 'react-intl-universal';
+import { PrimaryButton } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import MonacoEditor, { EditorWillMount } from "react-monaco-editor";
 import styled from "styled-components";
 import { PreferencesSchema } from "./types";
-import { toJSONSchema, toJSONValues } from "./utils";
+import { diffJSON, getItem, toJSONSchema, toJSONValues } from "./utils";
 
 
 const Container = styled.div`
@@ -11,10 +13,15 @@ const Container = styled.div`
     overflow: auto;
 `;
 
+const Tools = styled.div`
+    margin: 1em 0;
+`;
+
 const JSONEditor = observer<{ schema: PreferencesSchema }>(function JSONEditor ({ schema }) {
-    const JSONSchema = useMemo(() => toJSONSchema('Preferences', schema), [schema]);
+    const JSONSchema = toJSONSchema('Preferences', schema);
     const editorRef = useRef<Parameters<EditorWillMount>[0]>();
-    const contentRef = useRef(toJSONValues(schema));
+    const [content, setContent] = useState(toJSONValues(schema));
+    const [modified, setModified] = useState(false);
 
     useEffect(() => {
         editorRef.current?.languages.json.jsonDefaults.setDiagnosticsOptions({
@@ -29,8 +36,34 @@ const JSONEditor = observer<{ schema: PreferencesSchema }>(function JSONEditor (
         });
     }, [JSONSchema]);
 
+    const data = (() => {
+        try {
+            return JSON.parse(content);
+        } catch (error) {
+            return null;
+        }
+    })();
+
     return (
         <Container onKeyDown={e => e.stopPropagation()}>
+            <Tools>
+                <PrimaryButton
+                    text={intl.get('function.confirm')}
+                    disabled={!modified || data === null}
+                    onClick={() => {
+                        if (!data) {
+                            return;
+                        }
+                        const diff = diffJSON(JSON.parse(toJSONValues(schema)), data);
+                        for (const [key, value] of Object.entries(diff)) {
+                            const item = getItem(schema, key);
+                            // TODO: validate
+                            item?.onChange(value as never);
+                        }
+                        setModified(false);
+                    }}
+                />
+            </Tools>
             <MonacoEditor
                 language="json"
                 theme="vs"
@@ -40,9 +73,10 @@ const JSONEditor = observer<{ schema: PreferencesSchema }>(function JSONEditor (
                 editorWillUnmount={() => {
                     editorRef.current = undefined;
                 }}
-                value={contentRef.current}
+                value={content}
                 onChange={content => {
-                    contentRef.current = content;
+                    setModified(true);
+                    setContent(content);
                 }}
             />
         </Container>

@@ -1,5 +1,4 @@
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
 import styled from "styled-components";
 import DynamicForm from "../causal/dynamicForm";
 import { PreferencesSchema } from "./types";
@@ -12,7 +11,7 @@ const Container = styled.div`
 `;
 
 const UIEditor = observer<{ schema: PreferencesSchema }>(function UIEditor ({ schema }) {
-    const [form, values] = useMemo(() => toForm('Preferences', schema), [schema]);
+    const [form, values] = toForm('Preferences', schema);
 
     return (
         <Container onKeyDown={e => e.stopPropagation()}>

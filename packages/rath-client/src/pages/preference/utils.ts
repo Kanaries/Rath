@@ -133,3 +133,28 @@ export const toForm = (title: string, preferences: PreferencesSchema): [IForm, {
 
     return [form, values];
 };
+
+export const diffJSON = (obj1: any, obj2: any): { [key: string]: any } => {
+    const diff: { [key: string]: any } = {};
+
+    for (const [key, next] of Object.entries(obj2)) {
+        const prev = obj1[key];
+        if (key in obj1 && prev !== next && typeof prev !== 'object' && typeof next !== 'object') {
+            diff[key] = next;
+        }
+    }
+
+    return diff;
+};
+
+export const getItem = (preferences: PreferencesSchema, key: string): AnyDescriptor | null => {
+    const which = preferences.properties[key];
+    if (which) {
+        if (which.type === 'object') {
+            return null;
+        }
+        return which;
+    }
+    // TODO: go deeper
+    return null;
+};
