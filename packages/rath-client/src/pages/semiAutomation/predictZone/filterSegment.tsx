@@ -8,6 +8,7 @@ import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
 import { IVisSpecType } from '../../../interfaces';
+import { useAsyncViews } from './utils';
 
 
 const FilterSegment: React.FC = () => {
@@ -19,6 +20,7 @@ const FilterSegment: React.FC = () => {
     const recommandFilter = useCallback(() => {
         semiAutoStore.filterAssociate();
     }, [semiAutoStore])
+    const list = useAsyncViews(filterSpecList);
     if (filterViews.views.length === 0 && autoAsso.filterViews) return <div />
     return <Fragment>
         {
@@ -30,7 +32,7 @@ const FilterSegment: React.FC = () => {
         }
         <AssoContainer>
             {
-             filterSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                list.map((spec, i) => filterViews.views[i] && <div className="asso-segment" key={`p-${i}`}>
                     {
                         filterViews.computing && <LoadingLayer>
                             <Spinner label="loading" />

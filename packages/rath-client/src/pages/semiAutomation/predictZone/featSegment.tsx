@@ -8,6 +8,7 @@ import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
 import { IVisSpecType } from '../../../interfaces';
+import { useAsyncViews } from './utils';
 
 const FeatSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -18,6 +19,7 @@ const FeatSegment: React.FC = () => {
     const advicePureFeature = useCallback(() => {
         semiAutoStore.featAssociate()
     }, [semiAutoStore])
+    const list = useAsyncViews(featSpecList);
     if (featViews.views.length === 0 && autoAsso.featViews) return <div />
     return <Fragment>
         {
@@ -30,7 +32,7 @@ const FeatSegment: React.FC = () => {
         }
         <AssoContainer>
             {
-                featSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                list.map((spec, i) => featViews.views[i] && <div className="asso-segment" key={`p-${i}`}>
                     {
                         featViews.computing && <LoadingLayer>
                             <Spinner label="loading" />

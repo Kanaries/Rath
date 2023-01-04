@@ -14,9 +14,9 @@ import { getGlobalStore } from '../../../../store';
 import { PIVOT_KEYS } from '../../../../constants';
 import { RATH_THEME_CONFIG } from '../../../../theme';
 import StatTable from './liteStatTable';
-import StatePlaceholder from './statePlaceholder';
+import StatePlaceholder, { IColStateType } from './statePlaceholder';
 
-const HeaderCellContainer = styled.div<{ isPreview: boolean }>`
+const HeaderCellContainer = styled.div`
     .others {
         position: relative;
         padding: 12px;
@@ -87,7 +87,7 @@ interface HeaderCellProps {
     meta: IFieldMeta | null;
     extSuggestions: FieldExtSuggestion[];
     isExt: boolean;
-    isPreview: boolean;
+    colType?: IColStateType;
 }
 
 interface IOption<T = string> {
@@ -133,13 +133,13 @@ function useFocus() {
 
 const HeaderCell: React.FC<HeaderCellProps> = (props) => {
     const { dataSourceStore, commonStore, semiAutoStore } = getGlobalStore();
-    const { name, code, meta, disable, isPreview, onChange, extSuggestions, isExt } = props;
+    const { name, code, meta, disable, onChange, extSuggestions, isExt, colType } = props;
     const [showNameEditor, setShowNameEditor] = useState<boolean>(false);
     const [headerName, setHeaderName] = useState<string>(name);
     const { focus, endFocus, startFocus, toggleFocus, setFocus } = useFocus();
     const optionsOfBIFieldType = useBIFieldTypeOptions();
     const buttonId = useId('edit-button');
-    const canDelete = !isPreview && isExt;
+    const canDelete = !(colType === 'preview') && isExt;
     const intRef = useRef<number>(-1);
 
     useEffect(() => {
@@ -157,9 +157,9 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
         setHeaderName(name);
     }, [name]);
     return (
-        <HeaderCellContainer isPreview={isPreview} onMouseOver={startFocus} onMouseLeave={endFocus} onTouchStart={toggleFocus}>
+        <HeaderCellContainer onMouseOver={startFocus} onMouseLeave={endFocus} onTouchStart={toggleFocus}>
             <StatePlaceholder
-                preview={isPreview}
+                stateType={colType}
                 onAcceptExtField={() => dataSourceStore.settleExtField(code)}
                 onRejectExtField={() => dataSourceStore.deleteExtField(code)}
             />
@@ -171,7 +171,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                             {meta && meta.geoRole !== 'none' && <IconButton iconProps={{ iconName: 'globe', style: { fontSize: '12px' } }} />}
                             {name}
                         </h3>
-                        {isPreview || (
+                        {colType === 'preview' || (
                             <>
                                 <div className="edit-icon">
                                     {focus && (

@@ -18,12 +18,17 @@ import CleanWorker from '../workers/clean.worker?worker';
 // @ts-ignore
 // eslint-disable-next-line
 import FilterWorker from '../workers/filterData.worker?worker';
+/* eslint import/no-webpack-loader-syntax:0 */
+// @ts-ignore
+// eslint-disable-next-line
+import LabDistVisWorker from '../workers/labDistVis.worker?worker';
 
 import { MessageProps } from '../workers/engine/service';
 
 import { CleanMethod, ICol, IFieldMeta, IFilter, IMuteFieldBase, IRawField, IRow } from '../interfaces';
 import { ILoaProps } from '../workers/loa/service';
 import { IteratorStorage } from '../utils/iteStorage';
+import type { labDistVis } from '../queries/labdistVis';
 
 interface SuccessResult<T> {
     success: true;
@@ -257,6 +262,36 @@ export async function loaEngineService<R = any>(
                 throw new Error('[meta infer worker]' + result.message);
             }
         }
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+export type ILabDistVisWorkerProps = Parameters<typeof labDistVis>[0];
+
+export type ILabDistVisWorkerBatchProps = (
+    & Pick<Parameters<typeof labDistVis>[0], 'dataSource'>
+    & {
+        items: Omit<Parameters<typeof labDistVis>[0], 'dataSource'>[];
+    }
+);
+
+export async function labDistVisService<
+    P extends ILabDistVisWorkerProps | ILabDistVisWorkerBatchProps,
+    R extends P extends ILabDistVisWorkerProps ? ReturnType<typeof labDistVis> : ReturnType<typeof labDistVis>[],
+>(props: P): Promise<R> {
+    let data: R;
+    try {
+        const worker = new LabDistVisWorker();
+        const result = await workerService<R, P>(worker, props);
+        if (result.success) {
+            data = result.data;
+        } else {
+            throw new Error('[labDistVis worker]' + result.message);
+        }
+        worker.terminate();
+        return data;
     } catch (error) {
         console.error(error);
         throw error;
