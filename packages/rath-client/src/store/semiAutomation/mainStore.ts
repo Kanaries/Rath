@@ -58,6 +58,7 @@ export class SemiAutomationStore {
             pattViews: observable.shallow,
             featViews: observable.shallow,
             filterViews: observable.shallow,
+            neighborViews: observable.shallow,
             mainView: observable.ref,
             // @ts-expect-error private field
             dataSourceStore: false,
@@ -394,11 +395,13 @@ export class SemiAutomationStore {
         this.featViews = makeInitAssoViews();
         this.pattViews = makeInitAssoViews();
         this.filterViews = makeInitAssoViews();
+        this.neighborViews = makeInitAssoViews();
     }
     public initRenderSize () {
         this.featViews.amount = RENDER_BATCH_SIZE;
         this.pattViews.amount = RENDER_BATCH_SIZE;
         this.filterViews.amount = RENDER_BATCH_SIZE;
+        this.neighborViews.amount = RENDER_BATCH_SIZE;
     }
     public updateMainView (view: IPattern) {
         this.mainView = view;
