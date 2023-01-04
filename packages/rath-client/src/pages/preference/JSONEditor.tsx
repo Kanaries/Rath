@@ -1,6 +1,7 @@
 import intl from 'react-intl-universal';
 import { PrimaryButton } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
+import AJV from 'ajv';
 import { useEffect, useRef, useState } from "react";
 import MonacoEditor, { EditorWillMount } from "react-monaco-editor";
 import styled from "styled-components";
@@ -36,9 +37,13 @@ const JSONEditor = observer<{ schema: PreferencesSchema }>(function JSONEditor (
         });
     }, [JSONSchema]);
 
+    const validate = new AJV().compile(JSONSchema);
+
     const data = (() => {
         try {
-            return JSON.parse(content);
+            const d = JSON.parse(content);
+            const valid = validate(d);
+            return valid ? d : null;
         } catch (error) {
             return null;
         }
