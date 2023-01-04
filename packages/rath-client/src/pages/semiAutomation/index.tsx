@@ -38,7 +38,7 @@ const PatternPage: React.FC = () => {
 
     return (
         <div className="content-container">
-            <div className="app-card" ref={focusZoneContainer}>
+            <div className="card" ref={focusZoneContainer}>
                 <FocusZone />
             </div>
             <PredictZone />

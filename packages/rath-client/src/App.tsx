@@ -24,7 +24,7 @@ import useHotKey from './hooks/use-hotkey';
 
 function App() {
     const { langStore, commonStore, userStore } = useGlobalStore();
-    const { appKey } = commonStore;
+    const { appKey, navMode } = commonStore;
 
     useEffect(() => {
         initRathWorker(commonStore.computationEngine);
@@ -57,7 +57,7 @@ function App() {
     return (
         <div>
             <div className="main-app-container">
-                <div className="main-app-nav">
+                <div className="main-app-nav" style={{ flexBasis: navMode === 'text' ? '220px' : '3px' }}>
                     <AppNav />
                 </div>
                 <div className="main-app-content">

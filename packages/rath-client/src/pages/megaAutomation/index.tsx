@@ -88,7 +88,7 @@ const LTSPage: React.FC = () => {
             <Constraints />
             <AssoPanel />
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
-            <div className="app-card">
+            <div className="card">
                 <PrimaryButton
                     style={{ float: 'right', marginRight: '1em' }}
                     iconProps={{ iconName: 'Rerun' }}

@@ -95,7 +95,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     );
     return (
         <div className="content-container" style={{ position: 'relative' }}>
-            <Card backgroundColor="unset">
+            <Card backgroundColor="#fff">
                 <ImportStorage />
                 <FastSelection />
                 <BackupModal />
