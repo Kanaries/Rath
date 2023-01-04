@@ -10,8 +10,9 @@ import styled from 'styled-components';
 import { FC, useMemo } from 'react';
 import intl from 'react-intl-universal'
 import { useGlobalStore } from '../../../../store';
-import type { IFieldMeta } from '../../../../interfaces';
+import { IFieldMetaWithConfigs, MAX_ONE_HOT_GROUPS } from '../../../../store/causalStore/datasetStore';
 import { getI18n } from '../../locales';
+import DropdownSelect from '../../../../components/dropDownSelect';
 
 
 const TableContainer = styled.div`
@@ -94,7 +95,7 @@ const FieldPanel: FC = () => {
                     );
                 },
                 onRender: (item) => {
-                    const field = item as IFieldMeta;
+                    const field = item as IFieldMetaWithConfigs;
                     const checked = selectedFields.some(f => f.fid === field.fid);
                     return (
                         <Checkbox checked={checked} styles={{ root: { pointerEvents: 'none' } }} />
@@ -108,7 +109,7 @@ const FieldPanel: FC = () => {
                 key: 'name',
                 name: getI18n('dataset_config.field_info.field', { total: allSelectableFields.length, selected: selectedFields.length }),
                 onRender: (item) => {
-                    const field = item as IFieldMeta;
+                    const field = item as IFieldMetaWithConfigs;
                     return (
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {field.name || field.fid}
@@ -122,7 +123,7 @@ const FieldPanel: FC = () => {
                 key: 'unique',
                 name: getI18n('dataset_config.field_info.unique'),
                 onRender: (item) => {
-                    const field = item as IFieldMeta;
+                    const field = item as IFieldMetaWithConfigs;
                     return (
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {field.features.unique}
@@ -136,7 +137,7 @@ const FieldPanel: FC = () => {
                 key: 'semanticType',
                 name: getI18n('dataset_config.field_info.sType'),
                 onRender: (item) => {
-                    const field = item as IFieldMeta;
+                    const field = item as IFieldMetaWithConfigs;
                     return (
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {intl.get(`common.semanticType.${field.semanticType}`)}
@@ -147,10 +148,45 @@ const FieldPanel: FC = () => {
                 maxWidth: 100,
             },
             {
+                key: 'oneHotConfig',
+                name: getI18n('dataset_config.oneHot'),
+                onRender: (item) => {
+                    const field = item as IFieldMetaWithConfigs;
+                    const checked = selectedFields.some(f => f.fid === field.fid);
+                    return (
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {checked && field.semanticType === 'nominal' ? (
+                                <div onClick={e => e.stopPropagation()}>
+                                    <label>
+                                        {getI18n('dataset_config.oneHotOption')}
+                                    </label>
+                                    <DropdownSelect
+                                        border
+                                        value={field.extra.oneHotK}
+                                        onChange={(e) => {
+                                            const value = parseInt(e.target.value);
+                                            causalStore.dataset.updateFieldConfig(field.fid, 'oneHotK', value);
+                                        }}
+                                    >
+                                        {new Array<0>(MAX_ONE_HOT_GROUPS).fill(0).map((_, i) => (
+                                            <option key={i} value={i + 1}>
+                                                {i + 1}
+                                            </option>
+                                        )).slice(1, field.features.unique)}
+                                    </DropdownSelect>
+                                </div>
+                            ) : ''}
+                        </span>
+                    );
+                },
+                minWidth: 120,
+                maxWidth: 120,
+            },
+            {
                 key: 'mean',
                 name: getI18n('dataset_config.field_info.mean'),
                 onRender: (item) => {
-                    const field = item as IFieldMeta;
+                    const field = item as IFieldMetaWithConfigs;
                     return (
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {field.features.mean}
@@ -164,7 +200,7 @@ const FieldPanel: FC = () => {
                 key: 'std',
                 name: getI18n('dataset_config.field_info.std'),
                 onRender: (item) => {
-                    const field = item as IFieldMeta;
+                    const field = item as IFieldMetaWithConfigs;
                     return (
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {field.features.stdev}
@@ -178,7 +214,7 @@ const FieldPanel: FC = () => {
                 key: 'median',
                 name: getI18n('dataset_config.field_info.median'),
                 onRender: (item) => {
-                    const field = item as IFieldMeta;
+                    const field = item as IFieldMetaWithConfigs;
                     return (
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {field.features.qt_25}
@@ -206,7 +242,7 @@ const FieldPanel: FC = () => {
                         if (i === undefined) {
                             return null;
                         }
-                        const field = props?.item as IFieldMeta;
+                        const field = props?.item as IFieldMetaWithConfigs;
                         const checked = selectedFields.some(f => f.fid === field.fid);
                         return (
                             <Row selected={checked} onClick={() => causalStore.dataset.toggleFieldSelected(field.fid)}>

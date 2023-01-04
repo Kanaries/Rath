@@ -1,11 +1,10 @@
 import { getFreqRange } from "@kanaries/loa";
-import type { IFieldMeta, IRawField, IRow } from "../../../../interfaces";
+import type { IRawField, IRow } from "../../../../interfaces";
+import type { IFieldMetaWithConfigs } from "../../../../store/causalStore/datasetStore";
 import type { IteratorStorage } from "../../../../utils/iteStorage";
 
 
-const MAX_CHILDREN = 6;
-
-export const oneHot = async (data: IteratorStorage | readonly IRow[], fields: readonly IFieldMeta[], targets: readonly string[]) => {
+export const oneHot = async (data: IteratorStorage | readonly IRow[], fields: readonly IFieldMetaWithConfigs[], targets: readonly string[]) => {
     const rows = Array.isArray(data) ? data as IRow[] : await (data as IteratorStorage).getAll();
     const derivedFields: (IRawField & Required<Pick<IRawField, 'extInfo'>>)[] = [];
     const derivedTable: IRow[] = rows.map(row => ({ ...row }));
@@ -27,6 +26,8 @@ export const oneHot = async (data: IteratorStorage | readonly IRow[], fields: re
         }, []).sort((a, b) => b[1] - a[1]);
 
         const others = `${fid}::others`;
+
+        const MAX_CHILDREN = f.extra.oneHotK;
 
         const topK = records.slice(0, records.length <= MAX_CHILDREN ? undefined : MAX_CHILDREN - 1);
 

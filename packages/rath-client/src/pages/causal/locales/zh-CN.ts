@@ -48,6 +48,8 @@ const locales: Locales = {
             std: '标准差',
             median: '中位数',
         },
+        oneHot: '独热编码',
+        oneHotOption: '组别个数',
     },
     fd_config: {
         batch: {

@@ -51,6 +51,8 @@ export const LocaleKeys = {
             std: 'Standard Deviation',
             median: 'Median',
         },
+        oneHot: 'One-Hot Encoding',
+        oneHotOption: 'Group size',
     },
     fd_config: {
         batch: {

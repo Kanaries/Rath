@@ -14,13 +14,23 @@ import type { DataSourceStore } from "../dataSourceStore";
 
 const VIS_SUBSET_LIMIT = 400;
 const SAMPLE_UPDATE_DELAY = 500;
+export const MAX_ONE_HOT_GROUPS = 8;
+export const DEFAULT_ONE_HOT_GROUPS = 8;
 
+
+export type IFieldMetaWithConfigs = IFieldMeta & {
+    extra: {
+        oneHotK: number;
+    };
+};
 
 export default class CausalDatasetStore {
 
     public datasetId: string | null;
 
-    public allFields: readonly IFieldMeta[] = [];
+    protected originFields: StreamListener<IFieldMetaWithConfigs[]>;
+    protected originFields$ = new Subject<IFieldMetaWithConfigs[]>();
+    public allFields: readonly IFieldMetaWithConfigs[] = [];
     public allSelectableFields: readonly { field: number; children: readonly number[] }[] = [];
 
     protected fieldIndices: readonly number[] = [];
@@ -71,7 +81,7 @@ export default class CausalDatasetStore {
         this.filteredData = new IteratorStorage({ itemKey: 'causalStoreFilteredData' });
         this.sample = new IteratorStorage({ itemKey: 'causalStoreSample' });
 
-        const originFields$ = new Subject<IFieldMeta[]>();
+        this.originFields = fromStream(this.originFields$);
         const allFields$ = toStream(() => this.allFields, true);
         const fields$ = new Subject<IFieldMeta[]>();
         const sampleRate$ = toStream(() => this.sampleRate, true);
@@ -85,6 +95,8 @@ export default class CausalDatasetStore {
             filters: observable.ref,
             groups: observable.ref,
             // @ts-expect-error non-public field
+            originFields: false,
+            originFields$: false,
             filteredData: false,
             sample: false,
             sampleMetaInfo$: false,
@@ -96,7 +108,7 @@ export default class CausalDatasetStore {
 
         const expandedData = new IteratorStorage({ itemKey: 'causalStoreExpandedData' });
 
-        const expandedDataMetaInfo$ = originFields$.pipe(
+        const expandedDataMetaInfo$ = this.originFields$.pipe(
             map((originFields) => {
                 return from(this.__unsafeExpandFieldsWithOneHotEncoding(
                     dataSourceStore.cleanedData,
@@ -200,7 +212,12 @@ export default class CausalDatasetStore {
                 });
             }),
             reaction(() => dataSourceStore.fieldMetas, fieldMetas => {
-                originFields$.next(fieldMetas);
+                this.originFields$.next(fieldMetas.map(f => ({
+                    ...f,
+                    extra: {
+                        oneHotK: f.semanticType === 'nominal' ? Math.min(DEFAULT_ONE_HOT_GROUPS, f.features.unique) : 0,
+                    },
+                })));
             }),
             // compute `fields`
             reaction(() => this.fieldIndices, (fieldIndices) => {
@@ -233,9 +250,11 @@ export default class CausalDatasetStore {
                 runInAction(() => {
                     this.allFields = allFields;
                     this.groups = groups;
+                    if (this.allSelectableFields.length !== allSelectableFields.length) {
+                        // Choose the first 10 fields by default
+                        this.fieldIndices = allSelectableFields.slice(0, 10).map((_, i) => i);
+                    }
                     this.allSelectableFields = allSelectableFields;
-                    // Choose the first 10 fields by default
-                    this.fieldIndices = allSelectableFields.slice(0, 10).map((_, i) => i);
                 });
             }),
 
@@ -279,8 +298,8 @@ export default class CausalDatasetStore {
     }
 
     protected async __unsafeExpandFieldsWithOneHotEncoding(
-        rows: readonly IRow[], fields: readonly IFieldMeta[]
-    ): Promise<[(IFieldMeta & Required<Pick<IFieldMeta, "extInfo">>)[], IRow[]]> {
+        rows: readonly IRow[], fields: readonly IFieldMetaWithConfigs[]
+    ): Promise<[(IFieldMetaWithConfigs & Required<Pick<IFieldMeta, "extInfo">>)[], IRow[]]> {
         const targets: string[] = fields.filter(f => {
             return !f.extInfo && f.semanticType === 'nominal';
         }).map(f => f.fid);
@@ -313,6 +332,9 @@ export default class CausalDatasetStore {
                 maxEntropy: -1,
             },
             distribution: [],
+            extra: {
+                oneHotK: 0,
+            },
         })), data];
     }
 
@@ -348,6 +370,19 @@ export default class CausalDatasetStore {
             next.splice(pos, 1);
         }
         this.fieldIndices = next;
+    }
+
+    public updateFieldConfig<
+        K extends keyof IFieldMetaWithConfigs['extra'],
+        V extends IFieldMetaWithConfigs['extra'][K],
+    >(fid: string, key: K, value: V) {
+        const index = this.originFields.current.findIndex(f => f.fid === fid);
+        if (index === -1) {
+            return;
+        }
+        this.originFields$.next(produce(this.originFields.current, draft => {
+            draft[index].extra[key] = value;
+        }));
     }
 
 }
