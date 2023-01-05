@@ -47,7 +47,7 @@ const MainHeader = styled.div`
 
 const PainterContainer = styled.div`
     margin-top: 1.5em;
-    padding: 2em 1em;
+    padding: 1.2em 1em;
     border: 1px solid #f6f6f6;
     display: flex;
     overflow-x: auto;
@@ -541,7 +541,7 @@ const Painter: React.FC = (props) => {
     }
     return (
         <div className="content-container">
-            <div className="app-card">
+            <div className="card">
                 <MainHeader>
                     {intl.get('menu.painter')}
                 </MainHeader>
