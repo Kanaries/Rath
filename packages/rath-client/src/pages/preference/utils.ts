@@ -1,4 +1,3 @@
-import { IForm } from '../causal/config';
 import type { AnyDescriptor, PreferencesSchema } from './types';
 
 
@@ -74,64 +73,6 @@ export const toJSONValues = (preferences: PreferencesSchema): string => {
         )
     );
     return JSON.stringify(data, undefined, 2);
-};
-
-export const toForm = (title: string, preferences: PreferencesSchema): [IForm, { [key: string]: any }] => {
-    const form: IForm = {
-        title,
-        description: preferences.description,
-        items: [],
-    };
-    const values: { [key: string]: any } = {};
-
-    for (const [k, v] of Object.entries(preferences.properties)) {
-        if (v.type === 'object') {
-            continue;
-        }
-        values[k] = v.value;
-        switch (v.type) {
-            case 'boolean': {
-                form.items.push({
-                    key: k,
-                    title: v.title,
-                    description: v.description,
-                    dataType: 'boolean',
-                    renderType: 'toggle',
-                });
-                break;
-            }
-            case 'enum': {
-                form.items.push({
-                    key: k,
-                    title: v.title,
-                    description: v.description,
-                    dataType: 'string',
-                    renderType: 'dropdown',
-                    options: v.options.map(d => ({
-                        key: d,
-                        text: `${d}`,
-                    })),
-                });
-                break;
-            }
-            case 'number': {
-                form.items.push({
-                    key: k,
-                    title: v.title,
-                    description: v.description,
-                    dataType: 'number',
-                    renderType: 'slider',
-                    range: [v.minimum ?? Infinity, v.maximum ?? Infinity],
-                });
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-
-    return [form, values];
 };
 
 export const diffJSON = (obj1: any, obj2: any): { [key: string]: any } => {

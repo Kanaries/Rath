@@ -1,8 +1,7 @@
-import { observer } from "mobx-react-lite";
+import { memo } from "react";
 import styled from "styled-components";
-import DynamicForm from "../causal/dynamicForm";
+import Form from "./form";
 import { PreferencesSchema } from "./types";
-import { toForm } from "./utils";
 
 
 const Container = styled.div`
@@ -10,21 +9,10 @@ const Container = styled.div`
     overflow: auto;
 `;
 
-const UIEditor = observer<{ schema: PreferencesSchema }>(function UIEditor ({ schema }) {
-    const [form, values] = toForm('Preferences', schema);
-
+const UIEditor = memo<{ schema: PreferencesSchema }>(function UIEditor ({ schema }) {
     return (
         <Container onKeyDown={e => e.stopPropagation()}>
-            <DynamicForm
-                form={form}
-                values={values}
-                onChange={(k, v) => {
-                    const item = schema.properties[k];
-                    if ('onChange' in item) {
-                        item.onChange(v as never);
-                    }
-                }}
-            />
+            <Form schema={schema} />
         </Container>
     );
 });
