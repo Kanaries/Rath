@@ -15,7 +15,7 @@ export default class CausalOperatorStore {
 
     public causalServer = (
         decodeURIComponent(new URL(window.location.href).searchParams.get('causalServer') ?? '').replace(/\/$/, '')
-        || 'http://gateway.kanaries.cn:2080/causal'
+        || `${window.location.protocol}//causal.gateway.kanaries.net`
     );
 
     public busy = false;
