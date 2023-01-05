@@ -62,7 +62,6 @@ const JSONEditor = observer<{ schema: PreferencesSchema }>(function JSONEditor (
                         const diff = diffJSON(JSON.parse(toJSONValues(schema)), data);
                         for (const [key, value] of Object.entries(diff)) {
                             const item = getItem(schema, key);
-                            // TODO: validate
                             item?.onChange(value as never);
                         }
                         setModified(false);

@@ -26,7 +26,7 @@ const Container = styled.div`
     > .body {
         flex-grow: 1;
         flex-shrink: 1;
-        header {
+        > header {
             cursor: default;
             font-size: 1.05rem;
             font-weight: 600;
@@ -35,6 +35,23 @@ const Container = styled.div`
             :not(:first-child) {
                 margin-top: 2.6em;
             }
+        }
+        > :not(header) {
+            margin: 0.6em 1em;
+        }
+        .label {
+            > * {
+                display: block;
+                line-height: 1.5em;
+            }
+            margin-bottom: 0.4em;
+        }
+        .title {
+            font-weight: 600;
+        }
+        .desc {
+            font-size: 0.85rem;
+            color: #999;
         }
     }
 `;
@@ -108,6 +125,19 @@ const flat = (schema: PreferencesSchema): FlatItem[] => {
     });
 };
 
+const CustomLabel = (props: { value: AnyDescriptor }): JSX.Element => {
+    const { title, description } = props.value;
+
+    return (
+        <div className="label">
+            <label className="title">{props.value.title}</label>
+            {description && title !== description && (
+                <span className="desc">{props.value.description}</span>
+            )}
+        </div>
+    );
+};
+
 const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
     const [input, setInput] = useState(`${value.mode === 'item' ? value.item.value : ''}`);
     const text = `${value.mode === 'item' ? value.item.value : ''}`;
@@ -120,6 +150,7 @@ const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
             <header id={value.id}>{value.text}</header>
         );
     }
+    const onRenderLabel = () => <CustomLabel value={value.item} />;
     switch (value.item.type) {
         case 'boolean': {
             const item = value.item as PreferenceBoolDescriptor & AnyDescriptor;
@@ -177,6 +208,7 @@ const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
                         }
                     }}
                     onGetErrorMessage={onGetErrorMessage}
+                    onRenderLabel={onRenderLabel}
                 />
             );
         }
@@ -192,6 +224,7 @@ const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
                     selectedKey={value.item.value}
                     // @ts-expect-error this is expected
                     onChange={(_, option) => option?.key !== undefined && value.item.onChange(option.key)}
+                    onRenderLabel={onRenderLabel}
                 />
             );
         }
