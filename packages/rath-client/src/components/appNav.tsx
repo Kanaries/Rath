@@ -42,9 +42,14 @@ const LogoBar = styled.div`
     display: flex;
     padding: 12px;
     align-items: center;
+    a {
+        height: 35.79px;
+    }
     h1 {
         margin-left: 12px;
         font-size: 1.6em;
+        font-weight: 400;
+        line-height: 1.5em;
     }
 `;
 

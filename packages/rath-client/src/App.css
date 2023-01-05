@@ -19,6 +19,40 @@
 .logo>img{
   width: 100%;
 }
+
+p, pre, h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.6em;
+}
+
+h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+h2 {
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+h3 {
+  font-size: 1.05rem;
+  font-weight: 550;
+}
+h4 {
+  font-size: 1.02rem;
+  font-weight: 550;
+}
+h5 {
+  font-size: 1rem;
+  font-weight: 500;
+}
+h6 {
+  font-size: 0.975rem;
+  font-weight: 500;
+}
+
 h2, h3 {
   color: #323130;
   font-weight: 500;

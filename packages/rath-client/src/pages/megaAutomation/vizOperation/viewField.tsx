@@ -56,6 +56,7 @@ export const PillPlaceholder = styled.div`
     border-radius: 10px;
     border-style: solid;
     border-width: 1px;
+    border-color: rgb(229,231,235);
     box-sizing: border-box;
     cursor: default;
     display: -webkit-flex;

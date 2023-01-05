@@ -6,6 +6,7 @@ import { IFieldMeta } from '../../interfaces';
 
 export const PillPlaceholder = styled.div`
     color: #000;
+    border-color: rgb(229,231,235);
     -ms-user-select: none;
     -webkit-user-select: none;
     /* border-radius: 10px; */
