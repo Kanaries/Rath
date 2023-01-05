@@ -22,6 +22,20 @@ const MainHeader = styled.div`
     font-weight: 500;
 `;
 
+const ActionGroup = styled.div`
+    float: right;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    > * {
+        flex-grow: 0;
+        flex-shrink: 0;
+        :not(:last-child) {
+            margin-right: 1em;
+        }
+    }
+`;
+
 const InsightContainer = styled.div`
     .ope-container {
         margin: 1em 0em;
@@ -89,18 +103,17 @@ const LTSPage: React.FC = () => {
             <AssoPanel />
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
             <div className="card">
-                <PrimaryButton
-                    style={{ float: 'right', marginRight: '1em' }}
-                    iconProps={{ iconName: 'Rerun' }}
-                    text={intl.get('megaAuto.reRun')}
-                    ariaLabel={intl.get('megaAuto.reRun')}
-                    onClick={startTask}
-                />
+                <ActionGroup>
+                    <PrimaryButton
+                        iconProps={{ iconName: 'Rerun' }}
+                        text={intl.get('megaAuto.reRun')}
+                        ariaLabel={intl.get('megaAuto.reRun')}
+                        onClick={startTask}
+                    />
+                    <VizPreference />
+                </ActionGroup>
                 <ComputationProgress />
                 <MainHeader>{intl.get('megaAuto.title')}</MainHeader>
-                <div className="ope-container">
-                    <VizPreference />
-                </div>
                 <p className="state-description">{intl.get('megaAuto.hintMain')}</p>
                 <VizPagination />
                 <InsightContainer>

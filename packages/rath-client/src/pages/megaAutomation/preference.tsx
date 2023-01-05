@@ -85,7 +85,7 @@ const PreferencePanel: React.FC = () => {
         <Toolbar
             items={items}
             styles={{
-                root: { padding: '1.2em 0 0.4em' }
+                root: { width: 'max-content' }
             }}
         />
     );

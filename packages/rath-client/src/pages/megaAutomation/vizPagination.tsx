@@ -28,7 +28,7 @@ const VizCard = styled.div<{ selected?: boolean; isChart: boolean }>`
         flex-basis: 140px;
     ` : ''}
     overflow: hidden;
-    height: 140px;
+    height: 120px;
     padding: 4px;
     margin: 0 4px;
     border: 1px solid ${(props) => (props.selected ? '#faad14' : 'transparent')};
