@@ -15,6 +15,11 @@ import { changeVisSize } from '../collection/utils';
 import { ILazySearchInfoBase, searchFilterView } from '../../utils';
 import { labDistVisService } from '../../services';
 
+
+const Container = styled.div`
+    margin-top: 0.8em;
+`;
+
 const VizCard = styled.div<{ selected?: boolean; isChart: boolean }>`
     /* width: 140px; */
     ${({ isChart }) => isChart ? `
@@ -204,12 +209,12 @@ const VizPagination: React.FC = (props) => {
         }
     }, [chartsInView, resolveChart]);
 
-    return (
-        <div>
+    return insightViews.length > 0 ?
+        <Container>
             <SearchBox onSearch={setSearchContent} placeholder={intl.get('common.search.searchViews')} iconProps={{ iconName: 'Search' }} />
-            <VizCardContainer theme={theme}>
-                {searchedInsightViews.length > 0 &&
-                    items.map(({ page, type, selected, ...item }, index) => {
+            {searchedInsightViews.length > 0 && (
+                <VizCardContainer theme={theme}>
+                    {items.map(({ page, type, selected, ...item }, index) => {
                         let children = null;
                         let isChart = false;
                         if (type === 'start-ellipsis' || type === 'end-ellipsis') {
@@ -260,9 +265,10 @@ const VizPagination: React.FC = (props) => {
                             </VizCard>
                         );
                     })}
-            </VizCardContainer>
-        </div>
-    );
+                </VizCardContainer>
+            )}
+        </Container>
+    : null;
 };
 
 export default observer(VizPagination);

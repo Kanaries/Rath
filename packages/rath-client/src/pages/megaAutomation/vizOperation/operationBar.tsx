@@ -5,7 +5,7 @@ import { toJS } from 'mobx';
 import styled from 'styled-components';
 import { Position, Slider, SpinButton } from '@fluentui/react';
 import {
-    AdjustmentsHorizontalIcon, ArrowsPointingOutIcon, ChatBubbleLeftEllipsisIcon, Cog8ToothIcon, FunnelIcon, LightBulbIcon, LockClosedIcon, LockOpenIcon, MagnifyingGlassCircleIcon, PaintBrushIcon, PencilIcon, PencilSquareIcon, StarIcon, TableCellsIcon, ViewfinderCircleIcon
+    AdjustmentsHorizontalIcon, ArrowsPointingOutIcon, ChatBubbleLeftEllipsisIcon, Cog8ToothIcon, LightBulbIcon, LockClosedIcon, LockOpenIcon, MagnifyingGlassCircleIcon, PaintBrushIcon, PencilIcon, PencilSquareIcon, StarIcon, TableCellsIcon, ViewfinderCircleIcon
 } from '@heroicons/react/24/solid';
 import { useGlobalStore } from '../../../store';
 import { IResizeMode, IVisSpecType } from '../../../interfaces';
@@ -17,6 +17,7 @@ const FormContainer = styled.div`
     margin: 2px;
     border-radius: 1.2px;
     padding: 0.5em;
+    width: 200px;
 `;
 
 interface OperationBarProps {}
@@ -230,32 +231,23 @@ const OperationBar: React.FC<OperationBarProps> = props => {
                                 cnf.nlg = checked;
                             });
                         },
-                        menu: nlg ? {
-                            items: [
-                                {
-                                    key: 'nlg_threshold',
-                                    label: "NLG Threshold(beta)",
-                                    icon: FunnelIcon,
-                                    form: (
-                                        <FormContainer>
-                                            <Slider
-                                                disabled={!nlg}
-                                                value={nlgThreshold}
-                                                label="NLG Threshold(beta)"
-                                                min={0}
-                                                max={1}
-                                                step={0.01}
-                                                valueFormat={(value: number) => `${Math.round(value * 100)}%`}
-                                                showValue={true}
-                                                onChange={(value: number) => {
-                                                    megaAutoStore.setNlgThreshold(value);
-                                                }}
-                                            />
-                                        </FormContainer>
-                                    ),
-                                },
-                            ],
-                        } : undefined,
+                        form: nlg ? (
+                            <FormContainer>
+                                <Slider
+                                    disabled={!nlg}
+                                    value={nlgThreshold}
+                                    label="NLG Threshold(beta)"
+                                    min={0}
+                                    max={1}
+                                    step={0.01}
+                                    valueFormat={(value: number) => `${Math.round(value * 100)}%`}
+                                    showValue={true}
+                                    onChange={(value: number) => {
+                                        megaAutoStore.setNlgThreshold(value);
+                                    }}
+                                />
+                            </FormContainer>
+                        ) : undefined,
                     },
                 ],
             },

@@ -125,7 +125,7 @@ const LTSPage: React.FC = () => {
                             )}
                         </div>
                         <MainCanvas />
-                        <div className="insight-info">{visualConfig.nlg && <Narrative />}</div>
+                        {visualConfig.nlg && <div className="insight-info"><Narrative /></div>}
                     </div>
                     <div>
                         <FieldContainer />
