@@ -2,7 +2,7 @@ import intl from 'react-intl-universal';
 import { ICubeStorageManageMode } from 'visual-insights';
 import { COMPUTATION_ENGINE } from '../../constants';
 import { IResizeMode, ITaskTestMode } from '../../interfaces';
-import { useGlobalStore } from '../../store';
+import { getGlobalStore, StoreCollection, useGlobalStore } from '../../store';
 import { EXPLORE_VIEW_ORDER } from '../../store/megaAutomation';
 import type { AnyDescriptor, PreferencesSchema } from './types';
 
@@ -146,14 +146,14 @@ export const getItem = (preferences: PreferencesSchema, key: string): AnyDescrip
     return null;
 };
 
-export const usePreferencesSchema = (): PreferencesSchema => {
+export const getPreferencesSchema = (stores?: StoreCollection): PreferencesSchema => {
     const {
         commonStore,
         semiAutoStore,
         megaAutoStore,
         ltsPipeLineStore,
-    } = useGlobalStore();
-
+    } = stores ?? getGlobalStore();
+        
     const schema: PreferencesSchema = {
         description: '',
         type: 'object',
@@ -335,6 +335,10 @@ export const usePreferencesSchema = (): PreferencesSchema => {
     };
 
     return schema;
+};
+
+export const usePreferencesSchema = () => {
+    return getPreferencesSchema(useGlobalStore());
 };
 
 const STORAGE_KEY = 'rath_app_preferences';

@@ -19,6 +19,7 @@ import Collection from './pages/collection';
 import Dashboard from './pages/dashboard';
 import CausalPage from './pages/causal';
 import PreferencePage from './pages/preference';
+import { diffJSON, getItem, getPreferencesSchema, loadPreferences, savePreferences, toJSONValues } from './pages/preference/utils';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
 
@@ -46,6 +47,27 @@ function App() {
     useHotKey({
         'Control+Shift+P': () => setShowPerformanceWindow(on => !on),
     });
+    
+    useEffect(() => {
+        const preferences = getPreferencesSchema();
+        const preferenceValues = loadPreferences();
+        if (preferenceValues) {
+            try {
+                const data = JSON.parse(preferenceValues);
+                const prev = toJSONValues(preferences);
+                const diff = diffJSON(JSON.parse(prev), data);
+                for (const [key, value] of Object.entries(diff)) {
+                    const item = getItem(preferences, key);
+                    // @ts-expect-error correct
+                    item?.onChange(value);
+                }
+            } catch {
+                // do nothing
+            }
+        } else {
+            savePreferences(preferences);
+        }
+    }, []);
 
     if (!langStore.loaded) {
         return (
