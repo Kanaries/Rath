@@ -44,10 +44,6 @@ const AccountDiv = styled.div`
     }
 `;
 
-const PivotContainer = styled.div`
-    margin-bottom: 1em;
-`;
-
 const PIVOT_LIST = [
     {
         headerText: 'phoneCert',
@@ -97,24 +93,18 @@ function Account() {
     return (
         <AccountDiv>
             {isLoginStatus ? (
-                <PivotContainer>
-                    <Pivot>
-                        {PIVOT_LIST.map((item) => (
-                            <PivotItem key={item.itemKey} headerText={intl.get(`login.${item.headerText}`)}>
-                                {item.element(() => {
-                                    setIsLoginStatus(false);
-                                    userStore.getPersonalInfo();
-                                })}
-                            </PivotItem>
-                        ))}
-                    </Pivot>
-                </PivotContainer>
+                <div>
+                    <div className="mb-4">
+                        <LoginPanel onSuccessLogin={() => setIsLoginStatus(false)} />
+                    </div>
+                </div>
             ) : (
-                <>
+                <div>
                     <div className="account">
                         <span>
                             {userName ? (
                                 <PrimaryButton
+                                    className="ml-2"
                                     onClick={() => {
                                         userStore.commitLogout();
                                     }}
@@ -137,7 +127,7 @@ function Account() {
                             <TextField label="Email" value={info.email} disabled={true} />
                         </div>
                     )}
-                </>
+                </div>
             )}
         </AccountDiv>
     );

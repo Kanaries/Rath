@@ -1,4 +1,4 @@
-import { useId } from '@fluentui/react-hooks';
+import useId from '@material-ui/core/utils/useId';
 import { observer } from 'mobx-react-lite';
 import { forwardRef, useEffect } from 'react';
 import styled, { StyledComponentProps } from 'styled-components';

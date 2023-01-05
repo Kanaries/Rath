@@ -82,7 +82,7 @@ const NeighborAutoLink: React.FC<NALProps> = (props) => {
         getNearFields(dataSource)
     }, [dataSource, painterStore.linkTrigger, getNearFields])
     return (
-        <div style={{ position: 'relative', marginTop: '1em' }}>
+        <div className="card" style={{ position: 'relative' }}>
                 {
                     painting && <LoadingLayer>
                         <div className='cont'>

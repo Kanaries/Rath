@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import intl from 'react-intl-universal';
-import { PrimaryButton, Stack, DefaultButton, Spinner } from '@fluentui/react';
+import { PrimaryButton, Stack, DefaultButton, Pivot, PivotItem, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
@@ -95,7 +95,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     );
     return (
         <div className="content-container" style={{ position: 'relative' }}>
-            <Card backgroundColor="#fff">
+            <Card>
                 <ImportStorage />
                 <FastSelection />
                 <BackupModal />
@@ -127,7 +127,18 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
                 </Stack>
-                {/* <hr style={{ margin: '0.6em 0em', border: 'none' }} /> */}
+                <hr style={{ margin: '1em 0em 0em 0em' }} />
+                <Pivot
+                    style={{ marginBottom: '6px' }}
+                    selectedKey={dataPreviewMode}
+                    onLinkClick={(item) => {
+                        item && dataSourceStore.setDataPreviewMode(item.props.itemKey as IDataPreviewMode);
+                    }}
+                >
+                    <PivotItem itemKey={IDataPreviewMode.data} headerText={intl.get('dataSource.dataView')} itemIcon="Table" />
+                    <PivotItem itemKey={IDataPreviewMode.meta} headerText={intl.get('dataSource.metaView')} itemIcon="ViewList" />
+                    <PivotItem itemKey={IDataPreviewMode.stat} headerText={intl.get('dataSource.statView')} itemIcon="BarChartVerticalFilter" />
+                </Pivot>
                 <BorderCard>
                     {rawDataMetaInfo.length > 0 && <DataOperations />}
                     <DataInfo />

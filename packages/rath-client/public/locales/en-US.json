@@ -52,8 +52,7 @@
             "searchViews": "Search Views",
             "searchFields": "Search fields / variables",
             "notFound": "No results found"
-        },
-        "advanced_options": "Advanced Options"
+        }
     },
     "menu": {
         "dataSource": "DataSource",
@@ -629,8 +628,5 @@
                 "title": "SMS sent failed"
             }
         }
-    },
-    "access": {
-        "unsupport": "Not support in your location."
     }
 }

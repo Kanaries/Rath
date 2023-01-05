@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import { throttle } from '../../utils';
+import Settings from './settings';
 import FocusZone from './focusZone';
 import PredictZone from './predictZone';
 
@@ -38,6 +39,7 @@ const PatternPage: React.FC = () => {
 
     return (
         <div className="content-container">
+            <Settings />
             <div className="card" ref={focusZoneContainer}>
                 <FocusZone />
             </div>
