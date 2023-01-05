@@ -48,5 +48,8 @@ export type PreferencesSchema<P extends {
         then: any;
         else?: any;
     }[];
-    anyOf?: object[];
+    anyOf?: {
+        properties: { [key: string]: { const: string | number } };
+        required?: string[];
+    }[];
 };

@@ -1,7 +1,7 @@
 import { Dropdown, TextField, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
-import { memo, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import type { AnyDescriptor, PreferenceBoolDescriptor, PreferenceNumDescriptor, PreferencesSchema } from "./types";
 
@@ -15,7 +15,7 @@ const Container = styled.div`
         display: flex;
         flex-direction: column;
         overflow: auto;
-        padding-bottom: 4em;
+        padding: 1em 1em 60%;
     }
     > .toc {
         width: 25%;
@@ -50,7 +50,7 @@ const TOCLink = styled.span<{ mode: FlatItem['mode'] }>`
 
 type FlatItem = (
     | { id: string; mode: 'title'; text: string }
-    | { id: string; mode: 'item'; item: AnyDescriptor }
+    | { id: string; mode: 'item'; item: AnyDescriptor; key: string }
 );
 
 const flat = (schema: PreferencesSchema): FlatItem[] => {
@@ -68,16 +68,53 @@ const flat = (schema: PreferencesSchema): FlatItem[] => {
             }
         }
         if (item.type === 'object') {
-            // TODO:
+            items.push(...flat(item));
             continue;
         }
-        items.push({ id: nanoid(6), mode: 'item', item });
+        items.push({ id: nanoid(6), mode: 'item', item, key });
     }
 
-    return items;
+    const conditions: { [key: string]: boolean } = {};
+
+    for (const condition of schema.anyOf ?? []) {
+        let matched = false;
+        if ('properties' in condition) {
+            let ok = true;
+            for (const [key, decl] of Object.entries(condition.properties)) {
+                const item = items.find(which => which.mode === 'item' && which.key === key) as { id: string; mode: 'item'; item: AnyDescriptor; key: string } | undefined;
+                if (ok && decl['const'] !== item?.item.value) {
+                    ok = false;
+                }
+            }
+            matched = ok;
+        }
+        if ('required' in condition) {
+            for (const key of condition.required!) {
+                if (!(key in conditions)) {
+                    conditions[key] = false;
+                }
+                if (conditions[key] === false) {
+                    conditions[key] = matched;
+                }
+            }
+        }
+    }
+
+    return items.filter(item => {
+        if (item.mode === 'title') {
+            return true;
+        }
+        return conditions[item.key] !== false;
+    });
 };
 
 const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
+    const [input, setInput] = useState(`${value.mode === 'item' ? value.item.value : ''}`);
+    const text = `${value.mode === 'item' ? value.item.value : ''}`;
+    useEffect(() => {
+        setInput(text);
+    }, [text]);
+
     if (value.mode === 'title') {
         return (
             <header id={value.id}>{value.text}</header>
@@ -97,29 +134,49 @@ const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
         }
         case 'number': {
             const item = value.item as PreferenceNumDescriptor & AnyDescriptor;
+            const onGetErrorMessage = (data: string): string | undefined => {
+                const num = Number(data || 'x');
+                if (Number.isNaN(num)) {
+                    return 'Requires number';
+                }
+                if ('exclusiveMinimum' in item && num <= item.exclusiveMinimum!) {
+                    return `Input should be greater than ${item.exclusiveMinimum}`;
+                }
+                if ('exclusiveMaximum' in item && num >= item.exclusiveMaximum!) {
+                    return `Input should be lower than ${item.exclusiveMaximum}`;
+                }
+                if ('minimum' in item && num < item.minimum!) {
+                    return `Input should not be lower than ${item.minimum}`;
+                }
+                if ('maximum' in item && num > item.maximum!) {
+                    return `Input should not be greater than ${item.maximum}`;
+                }
+            };
             return (
                 <TextField
                     id={value.id}
                     label={item.title}
-                    value={`${item.value}`}
-                    onGetErrorMessage={data => {
-                        const num = Number(data || 'x');
-                        if (Number.isNaN(num)) {
-                            return 'Requires number';
-                        }
-                        if ('exclusiveMinimum' in item && num <= item.exclusiveMinimum!) {
-                            return `Input should be greater than ${item.exclusiveMinimum}`;
-                        }
-                        if ('exclusiveMaximum' in item && num >= item.exclusiveMaximum!) {
-                            return `Input should be lower than ${item.exclusiveMaximum}`;
-                        }
-                        if ('minimum' in item && num < item.minimum!) {
-                            return `Input should not be lower than ${item.minimum}`;
-                        }
-                        if ('maximum' in item && num > item.maximum!) {
-                            return `Input should not be greater than ${item.maximum}`;
+                    value={input}
+                    onChange={(_, data) => {
+                        if (Number.isFinite(Number(data))) {
+                            setInput(data ?? '');
                         }
                     }}
+                    onBlur={() => {
+                        setInput(`${item.value}`);
+                    }}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                            if (!onGetErrorMessage(input)) {
+                                const val = Number(input);
+                                if (val !== item.value) {
+                                    item.onChange(val);
+                                }
+                            }
+                            (e.target as HTMLInputElement).blur();
+                        }
+                    }}
+                    onGetErrorMessage={onGetErrorMessage}
                 />
             );
         }
@@ -144,7 +201,7 @@ const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
     }
 });
 
-const Form = memo<{ schema: PreferencesSchema }>(function Form ({ schema }) {
+const Form = observer<{ schema: PreferencesSchema }>(function Form ({ schema }) {
     const items = useMemo(() => flat(schema), [schema]);
     return (
         <Container>
@@ -154,7 +211,9 @@ const Form = memo<{ schema: PreferencesSchema }>(function Form ({ schema }) {
                         key={item.id}
                         mode={item.mode}
                         onClick={() => {
-                            const target = document.getElementById(item.id);
+                            const target = document.getElementById(
+                                `${item.id}-label`
+                            ) || document.querySelector(`*[for="${item.id}"]`) || document.getElementById(item.id);
                             target?.scrollIntoView({
                                 behavior: 'smooth',
                                 block: 'start',
@@ -172,7 +231,7 @@ const Form = memo<{ schema: PreferencesSchema }>(function Form ({ schema }) {
             </div>
         </Container>
     );
-}, () => true);
+});
 
 
 export default Form;
