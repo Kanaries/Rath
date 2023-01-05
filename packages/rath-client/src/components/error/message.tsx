@@ -10,6 +10,13 @@ const Cont = styled.div`
     box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d;
     min-width: 360px;
     background-color: #ffffff;
+    /* z-50 mt-4 bg-white p-4 border-solid border-1 border-grey-50 grid grid-cols-6 relative */
+    z-index: 50;
+    padding: 1em 1em 1.2em;
+    border: 1px solid #88888844;
+    display: grid;
+    grid-template-columns: repeat(6, calc(100% / 6));
+    position: relative;
     @keyframes cont-show{
         from {
             transform: translateX(100%);
@@ -44,12 +51,19 @@ const Cont = styled.div`
         white-space: pre-line;
         font-size: 12px;
     }
+    .col-span-5 {
+        grid-column: 2 / 6;
+    }
+    h1 {
+        font-size: 1rem;
+        margin-block: 0 0.8em;
+    }
 `
 
 const MessageCard: React.FC<MessageProps> = props => {
     const { title, content, type, onClose } = props;
 
-    return <Cont className="z-50 mt-4 bg-white p-4 border-solid border-1 border-grey-50 grid grid-cols-6 relative"
+    return <Cont
         onMouseLeave={() => {
             callTerminator();
         }}

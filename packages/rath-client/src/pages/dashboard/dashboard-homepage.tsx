@@ -30,7 +30,6 @@ const WorkspaceView = styled.div`
     overflow: hidden;
     margin-top: 0.75em;
     margin-bottom: 1em;
-    border-bottom: 1px solid #8884;
 `;
 
 const DocumentListView = styled.div`
@@ -137,7 +136,7 @@ export interface DashboardHomepageProps {
 }
 
 const VIEW_MODES = [
-    { key: 'list', icon: 'Table' },
+    { key: 'list', icon: 'BulletedList' },
     { key: 'gallery', icon: 'Table' },
 ] as const;
 

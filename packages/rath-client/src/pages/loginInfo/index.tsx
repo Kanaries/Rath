@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { Dialog, Pivot, PivotItem } from '@fluentui/react';
+import { ActionButton, Dialog, Pivot, PivotItem } from '@fluentui/react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import Account from './account';
@@ -48,16 +48,6 @@ const LoginInfoDiv = styled.div`
     }
     .user::-webkit-scrollbar {
         display: none;
-    }
-    .avatar-img {
-        display: flex;
-        align-items: center;
-    }
-    .user-name {
-        /* ml-2 */
-        margin-left: 0.5rem;
-        p {
-        }
     }
 `;
 
@@ -128,13 +118,11 @@ const LoginInfo: FC = () => {
                         </Pivot>
                     </Container>
                 </Dialog>
-                <div className="avatar-img">
-                    {navMode === 'text' && (
-                        <div className="user-name">
-                            <p className="user">{userName || intl.get('login.clickLogin')}</p>
-                        </div>
-                    )}
-                </div>
+                <ActionButton
+                    styles={{ root: { display: 'flex', alignItems: 'center' } }}
+                    text={navMode === 'icon' ? undefined : (userName ?? intl.get('login.clickLogin'))}
+                    iconProps={{ iconName: 'Contact' }}
+                />
             </div>
         </LoginInfoDiv>
     );

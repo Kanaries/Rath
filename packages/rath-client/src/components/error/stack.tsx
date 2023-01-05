@@ -7,8 +7,8 @@ import MessageCard from './message';
 const Cont = styled.div`
     position: fixed;
     display: flex;
-    top: 1em;
-    right: 1em;
+    top: 0.4em;
+    right: 3em;
     z-index: 1000010;
     width: 360px;
     flex-wrap: wrap;

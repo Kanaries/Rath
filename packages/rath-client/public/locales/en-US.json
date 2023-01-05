@@ -53,6 +53,7 @@
             "searchFields": "Search fields / variables",
             "notFound": "No results found"
         },
+        "advanced_options": "Advanced Options",
         "advanced_options_switch": "Advanced Options"
     },
     "menu": {
@@ -610,5 +611,8 @@
                 "title": "SMS sent failed"
             }
         }
+    },
+    "access": {
+        "unsupport": "Not support in your location."
     }
 }
