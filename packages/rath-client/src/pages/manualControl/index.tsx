@@ -3,7 +3,6 @@ import { observer } from 'mobx-react-lite';
 import { GraphicWalker } from '@kanaries/graphic-walker';
 import { IMutField } from '@kanaries/graphic-walker/dist/interfaces';
 import { useGlobalStore } from '../../store';
-import '@kanaries/graphic-walker/dist/style.css';
 
 const VisualInterface: React.FC = (props) => {
     const { dataSourceStore, commonStore, langStore } = useGlobalStore();

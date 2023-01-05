@@ -242,7 +242,7 @@ const ProgressiveDashboard: React.FC = (props) => {
     }, [originSpecList]);
 
     return (
-        <Segment className="flex flex-wrap">
+        <Segment>
             {recommendVisList.map((vis, visIndex) => (
                 <Cont key={visIndex}>
                     {/* {

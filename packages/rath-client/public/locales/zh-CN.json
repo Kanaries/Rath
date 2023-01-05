@@ -51,7 +51,8 @@
             "searchViews": "搜索视图",
             "searchFields": "搜索字段/变量",
             "notFound": "未找到匹配结果"
-        }
+        },
+        "advanced_options": "高级选项"
     },
     "menu": {
         "dataSource": "数据源",
@@ -637,5 +638,8 @@
                 "title": "短信发送发生错误"
             }
         }
+    },
+    "access": {
+        "unsupport": "当前地区不支持此类注册/登录方式。"
     }
 }

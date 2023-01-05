@@ -51,6 +51,7 @@ const Container = styled.div`
         overflow: hidden;
         
         > pre {
+            margin: 0;
             color: #444;
             width: 100%;
             height: 100%;
