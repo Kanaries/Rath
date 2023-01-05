@@ -1,4 +1,5 @@
-import { Dropdown, TextField, Toggle } from "@fluentui/react";
+import { DefaultButton, Dropdown, PrimaryButton, TextField, Toggle } from "@fluentui/react";
+import intl from 'react-intl-universal';
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { useEffect, useMemo, useState } from "react";
@@ -53,6 +54,31 @@ const Container = styled.div`
             font-size: 0.85rem;
             color: #999;
         }
+        .group {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            position: relative;
+            > *:first-child {
+                flex-grow: 1;
+                flex-shrink: 1;
+            }
+            > *:not(:first-child) {
+                flex-grow: 0;
+                flex-shrink: 0;
+            }
+            div[role="alert"] {
+                position: absolute;
+                width: 100%;
+                padding-bottom: 0.6em;
+                background-color: #fff;
+                span::before {
+                    content: '*';
+                    display: inline-block;
+                    margin: 0 0.4em;
+                }
+            }
+        }
     }
 `;
 
@@ -63,6 +89,9 @@ const TOCLink = styled.span<{ mode: FlatItem['mode'] }>`
     font-size: 0.8rem;
     line-height: 1.5em;
     padding-left: ${({ mode }) => mode === 'title' ? '0.4em' : '1.4em'};
+    :hover {
+        font-weight: 600;
+    }
 `;
 
 type FlatItem = (
@@ -85,7 +114,7 @@ const flat = (schema: PreferencesSchema): FlatItem[] => {
             }
         }
         if (item.type === 'object') {
-            items.push(...flat(item));
+            items.push(...flat(item).filter(d => d.mode === 'item'));
             continue;
         }
         items.push({ id: nanoid(6), mode: 'item', item, key });
@@ -154,12 +183,15 @@ const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
     switch (value.item.type) {
         case 'boolean': {
             const item = value.item as PreferenceBoolDescriptor & AnyDescriptor;
+            const desc = item.description && item.description !== item.title ? item.description : undefined;
             return (
                 <Toggle
                     id={value.id}
                     label={item.title}
                     checked={item.value}
                     onChange={(_, checked) => item.onChange(Boolean(checked))}
+                    onText={desc}
+                    offText={desc}
                 />
             );
         }
@@ -184,32 +216,50 @@ const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
                 }
             };
             return (
-                <TextField
-                    id={value.id}
-                    label={item.title}
-                    value={input}
-                    onChange={(_, data) => {
-                        if (Number.isFinite(Number(data))) {
-                            setInput(data ?? '');
-                        }
-                    }}
-                    onBlur={() => {
-                        setInput(`${item.value}`);
-                    }}
-                    onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                            if (!onGetErrorMessage(input)) {
-                                const val = Number(input);
-                                if (val !== item.value) {
-                                    item.onChange(val);
+                <div className="group">
+                    <TextField
+                        id={value.id}
+                        label={item.title}
+                        value={input}
+                        onChange={(_, data) => {
+                            if (Number.isFinite(Number(data))) {
+                                setInput(data ?? '');
+                            }
+                        }}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                                if (!onGetErrorMessage(input)) {
+                                    const val = Number(input);
+                                    if (val !== item.value) {
+                                        item.onChange(val);
+                                    }
                                 }
                             }
-                            (e.target as HTMLInputElement).blur();
-                        }
-                    }}
-                    onGetErrorMessage={onGetErrorMessage}
-                    onRenderLabel={onRenderLabel}
-                />
+                        }}
+                        onGetErrorMessage={onGetErrorMessage}
+                        onRenderLabel={onRenderLabel}
+                    />
+                    {input !== text && (
+                        <div>
+                            <PrimaryButton
+                                text={intl.get('function.confirm')}
+                                disabled={Boolean(onGetErrorMessage(input))}
+                                onClick={() => {
+                                    const val = Number(input);
+                                    if (val !== item.value) {
+                                        item.onChange(val);
+                                    }
+                                }}
+                            />
+                            <DefaultButton
+                                text={intl.get('function.cancel')}
+                                onClick={() => {
+                                    setInput(`${item.value}`);
+                                }}
+                            />
+                        </div>
+                    )}
+                </div>
             );
         }
         case 'enum': {
