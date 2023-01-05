@@ -27,6 +27,7 @@ const Container = styled.div`
     > .body {
         flex-grow: 1;
         flex-shrink: 1;
+        --locate-padding: 4em;
         > header {
             cursor: default;
             font-size: 1.05rem;
@@ -38,7 +39,7 @@ const Container = styled.div`
             }
         }
         > :not(header) {
-            margin: 0.6em 1em;
+            margin: 0.8em 1em;
         }
         .label {
             > * {
@@ -49,9 +50,12 @@ const Container = styled.div`
         }
         .title {
             font-weight: 600;
+            padding-top: var(--locate-padding);
+            margin-top: calc(-1 * var(--locate-padding));
         }
         .desc {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            font-weight: 400;
             color: #999;
         }
         .group {
@@ -154,14 +158,14 @@ const flat = (schema: PreferencesSchema): FlatItem[] => {
     });
 };
 
-const CustomLabel = (props: { value: AnyDescriptor }): JSX.Element => {
+const CustomLabel = (props: { value: AnyDescriptor; id: string }): JSX.Element => {
     const { title, description } = props.value;
 
     return (
         <div className="label">
-            <label className="title">{props.value.title}</label>
+            <label className="title" id={`${props.id}-label`} htmlFor={props.id}>{title}</label>
             {description && title !== description && (
-                <span className="desc">{props.value.description}</span>
+                <span className="desc">{description}</span>
             )}
         </div>
     );
@@ -179,19 +183,16 @@ const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
             <header id={value.id}>{value.text}</header>
         );
     }
-    const onRenderLabel = () => <CustomLabel value={value.item} />;
+    const onRenderLabel = () => <CustomLabel value={value.item} id={value.id} />;
     switch (value.item.type) {
         case 'boolean': {
             const item = value.item as PreferenceBoolDescriptor & AnyDescriptor;
-            const desc = item.description && item.description !== item.title ? item.description : undefined;
             return (
                 <Toggle
                     id={value.id}
-                    label={item.title}
+                    label={onRenderLabel()}
                     checked={item.value}
                     onChange={(_, checked) => item.onChange(Boolean(checked))}
-                    onText={desc}
-                    offText={desc}
                 />
             );
         }
@@ -293,6 +294,8 @@ const Form = observer<{ schema: PreferencesSchema }>(function Form ({ schema }) 
                     <TOCLink
                         key={item.id}
                         mode={item.mode}
+                        tabIndex={0}
+                        role="button"
                         onClick={() => {
                             const target = document.getElementById(
                                 `${item.id}-label`
@@ -300,6 +303,9 @@ const Form = observer<{ schema: PreferencesSchema }>(function Form ({ schema }) 
                             target?.scrollIntoView({
                                 behavior: 'smooth',
                                 block: 'start',
+                            });
+                            document.getElementById(item.id)?.focus({
+                                preventScroll: true
                             });
                         }}
                     >
