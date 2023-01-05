@@ -1,4 +1,4 @@
-import { Icon, SearchBox, Spinner } from '@fluentui/react';
+import { Icon, SearchBox, Theme, useTheme, Spinner } from '@fluentui/react';
 import { IPattern } from '@kanaries/loa';
 import usePagination from '@material-ui/core/usePagination/usePagination';
 import produce from 'immer';
@@ -15,24 +15,40 @@ import { changeVisSize } from '../collection/utils';
 import { ILazySearchInfoBase, searchFilterView } from '../../utils';
 import { labDistVisService } from '../../services';
 
-const VizCard = styled.div<{ selected?: boolean }>`
+const VizCard = styled.div<{ selected?: boolean; isChart: boolean }>`
     /* width: 140px; */
+    ${({ isChart }) => isChart ? `
+        flex-grow: 1;
+        flex-shrink: 1;
+        flex-basis: 140px;
+    ` : ''}
     overflow: hidden;
     height: 140px;
     padding: 4px;
-    margin: 12px 4px 4px 4px;
-    border: 1px solid ${(props) => (props.selected ? '#faad14' : 'rgba(0, 0, 0, 0.23)')};
+    margin: 0 4px;
+    border: 1px solid ${(props) => (props.selected ? '#faad14' : 'transparent')};
     color: #434343;
     border-radius: 4px;
     display: flex;
     cursor: pointer;
     justify-content: center; /* 水平居中 */
     align-items: center; /* 垂直居中 */
+    user-select: none;
+    > * {
+        pointer-events: none;
+    }
 `;
 
-const VizCardContainer = styled.div`
+const VizCardContainer = styled.div<{ theme: Theme }>`
     display: flex;
-    overflow-x: auto;
+    overflow: hidden;
+    background-color: ${({ theme }) => theme.palette?.neutralLighterAlt};
+    margin-top: 1em;
+    padding: 4px 0;
+    > * {
+        background-color: ${({ theme }) => theme.palette?.white};
+        box-shadow: 0 0 1.5px ${({ theme }) => theme.palette?.neutralQuaternary};
+    }
 `;
 
 const StyledChart = styled(ReactVega)`
@@ -129,6 +145,7 @@ const VizPagination: React.FC = (props) => {
         page: pageIndex + 1,
         onChange: updatePage,
     });
+    const theme = useTheme();
 
     const [resolvedSpec, setResolvedSpec] = useState<{ [id: number]: IVegaSubset }>({});
 
@@ -190,15 +207,17 @@ const VizPagination: React.FC = (props) => {
     return (
         <div>
             <SearchBox onSearch={setSearchContent} placeholder={intl.get('common.search.searchViews')} iconProps={{ iconName: 'Search' }} />
-            <VizCardContainer>
+            <VizCardContainer theme={theme}>
                 {searchedInsightViews.length > 0 &&
                     items.map(({ page, type, selected, ...item }, index) => {
                         let children = null;
+                        let isChart = false;
                         if (type === 'start-ellipsis' || type === 'end-ellipsis') {
                             children = '…';
                         } else if (type === 'page') {
                             if (typeof page === 'number' && searchedInsightViews[page - 1]) {
                                 const view = searchedInsightViews[page - 1];
+                                isChart = true;
                                 const spec = resolvedSpec[view.id];
                                 if (!spec) {
                                     children = (
@@ -236,7 +255,7 @@ const VizPagination: React.FC = (props) => {
                             if (type === 'previous') children = <Icon style={{ fontSize: '2em', fontWeight: 600 }} iconName="ChevronLeft" />;
                         }
                         return (
-                            <VizCard {...item} selected={selected} key={index}>
+                            <VizCard isChart={isChart} {...item} selected={selected} key={index}>
                                 {children}
                             </VizCard>
                         );

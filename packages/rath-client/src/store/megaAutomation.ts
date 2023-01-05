@@ -37,7 +37,6 @@ export class MegaAutomationStore {
     public assoListT2: IInsightSpace[] = []
     public showAsso: boolean = false;
     public showConstraints: boolean = false;
-    public showPreferencePannel: boolean = false;
     public showSaveModal: boolean = false;
     public showSubinsights: boolean = false;
     public visualConfig!: PreferencePanelConfig;
@@ -78,7 +77,6 @@ export class MegaAutomationStore {
         this.assoListT2= []
         this.showAsso = false;
         this.showConstraints = false;
-        this.showPreferencePannel = false;
         this.showSaveModal = false;
         this.showSubinsights = false;
         this.mainViewSpec = null;
@@ -218,9 +216,6 @@ export class MegaAutomationStore {
                 break;
             }
         }
-    }
-    public setShowPreferencePannel(show: boolean) {
-        this.showPreferencePannel = show;
     }
     public initConstraints () {
         const fields = this.ltsPipeLineStore.fieldMetas;

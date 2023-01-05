@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
-import { Callout, IconButton, PrimaryButton, TextField } from '@fluentui/react';
+import { Callout, IconButton, PrimaryButton, TextField, TooltipHost, TooltipOverflowMode } from '@fluentui/react';
 import { useId } from '@fluentui/react-hooks';
 import DistributionChart from '../../metaView/distChart';
 import DropdownSelect from '../../../../components/dropDownSelect';
@@ -71,6 +71,17 @@ const HeaderCellContainer = styled.div`
         label {
             margin-right: 6px;
         }
+    }
+`;
+
+const CalloutBody = styled.div`
+    padding: 1em;
+    & > div {
+        padding: 0.6em;
+    }
+    > h1 {
+        font-size: 1.1rem;
+        padding: 0 0.6em;
     }
 `;
 
@@ -169,12 +180,14 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                     <div className="header-row">
                         <h3 className="header">
                             {meta && meta.geoRole !== 'none' && <IconButton iconProps={{ iconName: 'globe', style: { fontSize: '12px' } }} />}
-                            {name}
+                            <TooltipHost content={name} overflowMode={TooltipOverflowMode.Parent}>
+                                {name}
+                            </TooltipHost>
                         </h3>
                         {colType === 'preview' || (
                             <>
                                 <div className="edit-icon">
-                                    {focus && (
+                                    {(focus || showNameEditor) && (
                                         <IconButton
                                             title={intl.get('dataSource.editName')}
                                             id={buttonId}
@@ -204,8 +217,8 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                                 {extSuggestions.length > 0 && (
                                     <LiveContainer
                                         style={{
-                                            transform: 'scale(0.75)',
-                                            margin: '-4px -18px',
+                                            transform: 'scale(0.8)',
+                                            margin: '-4px -4px',
                                             flexShrink: 0,
                                         }}
                                     >
@@ -234,9 +247,9 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                                 setShowNameEditor(false);
                             }}
                         >
-                            <div className="p-4">
-                                <h1 className="text-xl">{intl.get('dataSource.table.edit')}</h1>
-                                <div className="p-4">
+                            <CalloutBody>
+                                <h1>{intl.get('dataSource.table.edit')}</h1>
+                                <div>
                                     <TextField
                                         label={intl.get('dataSource.table.fieldName')}
                                         value={headerName}
@@ -245,7 +258,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                                         }}
                                     />
                                 </div>
-                                <div className="p-4">
+                                <div>
                                     <PrimaryButton
                                         text={intl.get('function.confirm')}
                                         onClick={() => {
@@ -254,7 +267,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                                         }}
                                     />
                                 </div>
-                            </div>
+                            </CalloutBody>
                         </Callout>
                     )}
                 </div>

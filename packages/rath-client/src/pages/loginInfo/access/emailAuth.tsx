@@ -20,6 +20,11 @@ const EmailAuthDiv = styled.div`
     .action {
         text-align: right;
         margin-top: 20px;
+        .error {
+            color: rgb(255, 71, 71);
+            font-size: 0.9rem;
+            margin-top: 0.5em;
+        }
     }
 `;
 
@@ -69,7 +74,7 @@ const EmailAuth: React.FC<EmailAuthProps> = (props) => {
                 >
                     {intl.get('login.loginAndRegister')}
                 </PrimaryButton>
-                {!originSupportEmail && <div className="text-red-500 text-xs t-2">{intl.get('access.unsupport')}</div>}
+                {!originSupportEmail && <div className="error">{intl.get('access.unsupport')}</div>}
             </div>
         </EmailAuthDiv>
     );

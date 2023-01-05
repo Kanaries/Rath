@@ -1,13 +1,16 @@
-import { CommandBar } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { Icon } from '@fluentui/react';
+import { ArrowDownTrayIcon, CloudArrowUpIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { useGlobalStore } from '../../../store';
-import LaTiaoConsole from '../../../components/latiaoConsole';
+import LaTiaoModal from '../../../components/latiaoConsole/modal';
 import { useCleanMethodList } from '../../../hooks';
 import { rows2csv } from '../../../utils/rows2csv';
 import { downloadFileWithContent } from '../../../utils/download';
+import Toolbar, { ToolbarItemProps } from '../../../components/toolbar';
+import { IDataPreviewMode } from '../../../interfaces';
 
 const Cont = styled.div`
     /* margin: 1em; */
@@ -17,9 +20,13 @@ const Cont = styled.div`
     align-items: center;
 `;
 
+const PlaceHolder = styled.svg`
+    margin: 0 !important;
+`;
+
 const DataOperations: React.FC = () => {
     const { dataSourceStore, commonStore } = useGlobalStore();
-    const { mutFields, cleanMethod } = dataSourceStore;
+    const { mutFields, cleanMethod, dataPreviewMode } = dataSourceStore;
     const exportDataset = useCallback(() => {
         const ds = dataSourceStore.exportDataAsDSService();
         const content = JSON.stringify(ds);
@@ -47,81 +54,143 @@ const DataOperations: React.FC = () => {
     }, [dataSourceStore]);
 
     const cleanMethodListLang = useCleanMethodList();
-    const items = useMemo(() => {
+
+    const [openLTDialog, setOpenLTDialog] = useState(false);
+    
+    const items = useMemo<ToolbarItemProps[]>(() => {
         return [
             {
+                key: 'view:data',
+                label: intl.get('dataSource.dataView'),
+                icon: () => <Icon iconName="Table" />,
+                checked: dataPreviewMode === IDataPreviewMode.data,
+                onChange: checked => {
+                    if (checked) {
+                        dataSourceStore.setDataPreviewMode(IDataPreviewMode.data);
+                    }
+                },
+            },
+            {
+                key: 'view:meta',
+                label: intl.get('dataSource.metaView'),
+                icon: () => <Icon iconName="ViewList" />,
+                checked: dataPreviewMode === IDataPreviewMode.meta,
+                onChange: checked => {
+                    if (checked) {
+                        dataSourceStore.setDataPreviewMode(IDataPreviewMode.meta);
+                    }
+                },
+            },
+            {
+                key: 'view:stat',
+                label: intl.get('dataSource.statView'),
+                icon: () => <Icon iconName="BarChartVerticalFilter" />,
+                checked: dataPreviewMode === IDataPreviewMode.stat,
+                onChange: checked => {
+                    if (checked) {
+                        dataSourceStore.setDataPreviewMode(IDataPreviewMode.stat);
+                    }
+                },
+            },
+            '-',
+            {
+                key: 'latiao',
+                label: intl.get('dataSource.extend.manual'),
+                icon: () => <Icon iconName="AppIconDefaultAdd" />,
+                onClick: () => setOpenLTDialog(true),
+            },
+            '-',
+            {
                 key: 'clean',
-                text: `${intl.get('dataSource.cleanMethod')}:${intl.get(`dataSource.methods.${cleanMethod}`)}`,
-                iconProps: { iconName: 'Broom' },
-                subMenuProps: {
-                    items: cleanMethodListLang.map((m) => ({
-                        key: m.key + '',
-                        text: m.text,
-                        onClick: () => {
-                            dataSourceStore.setCleanMethod(m.key);
-                        },
-                    })),
+                label: intl.get('dataSource.cleanMethod'),
+                options: cleanMethodListLang.map((m) => ({
+                    key: m.key,
+                    label: intl.get(`dataSource.methods.${m.key}`),
+                    icon: () => <PlaceHolder />,
+                })),
+                icon: () => <Icon iconName="Broom" />,
+                value: cleanMethod,
+                onSelect: value => {
+                    dataSourceStore.setCleanMethod(value as typeof cleanMethod);
                 },
             },
             {
                 key: 'export',
-                text: intl.get('dataSource.downloadData.title'),
-                iconProps: { iconName: 'download' },
-                subMenuProps: {
-                    items: [
-                        {
-                            key: 'downloadCSV',
-                            text: intl.get('dataSource.downloadData.downloadCSV'),
-                            onClick: exportDataAsCSV,
-                        },
-                        {
-                            key: 'downloadJSON',
-                            text: intl.get('dataSource.downloadData.downloadJSON'),
-                            onClick: exportDataAsJson,
-                        },
-                        {
-                            key: 'downloadJSONMeta',
-                            text: intl.get('dataSource.downloadData.downloadJSONMeta'),
-                            onClick: exportDataset,
-                        },
-                        {
-                            key: 'downloadRATHDS',
-                            text: intl.get('dataSource.downloadData.downloadRATHDS'),
-                            onClick: exportDataAsRATHDS,
-                        },
-                    ],
+                icon: ArrowDownTrayIcon,
+                label: intl.get('dataSource.downloadData.title'),
+                options: [
+                    {
+                        key: 'downloadCSV',
+                        label: intl.get('dataSource.downloadData.downloadCSV'),
+                        icon: () => <PlaceHolder />,
+                    },
+                    {
+                        key: 'downloadJSON',
+                        label: intl.get('dataSource.downloadData.downloadJSON'),
+                        icon: () => <PlaceHolder />,
+                    },
+                    {
+                        key: 'downloadJSONMeta',
+                        label: intl.get('dataSource.downloadData.downloadJSONMeta'),
+                        icon: () => <PlaceHolder />,
+                    },
+                    {
+                        key: 'downloadRATHDS',
+                        label: intl.get('dataSource.downloadData.downloadRATHDS'),
+                        icon: () => <PlaceHolder />,
+                    },
+                ],
+                onSelect: key => {
+                    switch (key) {
+                        case 'downloadCSV': {
+                            return exportDataAsCSV();
+                        }
+                        case 'downloadJSON': {
+                            return exportDataAsJson();
+                        }
+                        case 'downloadJSONMeta': {
+                            return exportDataset();
+                        }
+                        case 'downloadRATHDS': {
+                            return exportDataAsRATHDS();
+                        }
+                        default: {
+                            break;
+                        }
+                    }
                 },
                 disabled: mutFields.length === 0,
             },
             {
                 key: 'fastSelection',
-                text: intl.get('dataSource.fastSelection.title'),
+                label: intl.get('dataSource.fastSelection.title'),
                 disabled: mutFields.length === 0,
-                iconProps: { iconName: 'filter' },
+                icon: FunnelIcon,
                 onClick: () => {
                     dataSourceStore.setShowFastSelection(true);
                 },
             },
             {
                 key: 'enableAll',
-                text: intl.get('dataSource.operations.selectAll'),
-                iconProps: { iconName: 'CheckboxComposite' },
+                label: intl.get('dataSource.operations.selectAll'),
+                icon: () => <Icon iconName="CheckList" />,
                 onClick: () => {
                     dataSourceStore.setAllMutFieldsDisable(false);
                 },
             },
             {
                 key: 'disableAll',
-                text: intl.get('dataSource.operations.disableAll'),
-                iconProps: { iconName: 'Checkbox' },
+                label: intl.get('dataSource.operations.disableAll'),
+                icon: () => <Icon iconName="RemoveFilter" />,
                 onClick: () => {
                     dataSourceStore.setAllMutFieldsDisable(true);
                 },
             },
+            '-',
             {
                 key: 'backup',
-                text: intl.get('dataSource.operations.backup'),
-                iconProps: { iconName: 'CloudUpload' },
+                label: intl.get('dataSource.operations.backup'),
+                icon: CloudArrowUpIcon,
                 onClick: () => {
                     commonStore.setShowBackupModal(true);
                 },
@@ -137,63 +206,14 @@ const DataOperations: React.FC = () => {
         mutFields.length,
         exportDataAsRATHDS,
         commonStore,
+        dataPreviewMode,
     ]);
     return (
         <Cont>
-            <LaTiaoConsole />
-            <CommandBar
-                styles={{
-                    root: {
-                        padding: 0,
-                    },
-                }}
-                items={items}
-            />
-            {/* <div className="item">
-                <Dropdown
-                    styles={{ root: { minWidth: '180px' } }}
-                    selectedKey={cleanMethod}
-                    // label={intl.get('dataSource.cleanMethod')}
-                    options={cleanMethodListLang}
-                    onChange={(e, option) => {
-                        option && dataSourceStore.setCleanMethod(option.key as CleanMethod);
-                    }}
-                    // onRenderLabel={makeRenderLabelHandler(intl.get('dataSource.tip'))}
-                />
-            </div> */}
-            {/* <div className="item">
-                <CommandButton
-                    text={intl.get('dataSource.downloadData.title')}
-                    disabled={mutFields.length === 0}
-                    onClick={exportData}
-                    iconProps={{ iconName: 'download' }}
-                    styles={{
-                        root: {
-                            height: '32px',
-                            marginLeft: '1.5em !important',
-                        },
-                    }}
-                />
-            </div> */}
-            {/* <div className="item">
-                <CommandButton
-                    disabled={mutFields.length === 0}
-                    text={intl.get('dataSource.fastSelection.title')}
-                    iconProps={{ iconName: 'filter' }}
-                    onClick={() => {
-                        dataSourceStore.setShowFastSelection(true);
-                    }}
-                />
-            </div> */}
-
-            {/* <Checkbox
-                checked={!allDisable}
-                indeterminate={!allDisable && !allAble}
-                label={intl.get('dataSource.operations.selectAll')}
-                onChange={(e, checked) => {
-                    dataSourceStore.setAllMutFieldsDisable(!checked);
-                }}
-            /> */}
+            <Toolbar items={items} />
+            {openLTDialog && (
+                <LaTiaoModal close={() => setOpenLTDialog(false)} />
+            )}
         </Cont>
     );
 };

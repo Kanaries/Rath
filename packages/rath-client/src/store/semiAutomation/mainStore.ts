@@ -35,7 +35,6 @@ async function batchSpecify (assoViews: IAssoViews, vizAlgo: "lite" | "strict", 
 
 export class SemiAutomationStore {
     public settings!: ISetting;
-    public showSettings: boolean = false;
     public mainVizSetting!: IMainVizSetting;
     public pattViews!: IAssoViews;
     public featViews!: IAssoViews;
@@ -145,9 +144,6 @@ export class SemiAutomationStore {
     public clearStore () {
         this.reactions.forEach(clear => clear())
         this.reactions = [];
-    }
-    public setShowSettings (show: boolean) {
-        this.showSettings = show;
     }
     public setNeighborKeys (keys: string[]) {
         this.neighborKeys = keys;
