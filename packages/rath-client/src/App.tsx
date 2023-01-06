@@ -27,6 +27,7 @@ import useHotKey from './hooks/use-hotkey';
 function App() {
     const { langStore, commonStore, userStore } = useGlobalStore();
     const { appKey, navMode } = commonStore;
+    const { userName } = userStore;
 
     useEffect(() => {
         initRathWorker(commonStore.computationEngine);
@@ -49,25 +50,29 @@ function App() {
     });
     
     useEffect(() => {
+        const { loggedIn } = userStore;
         const preferences = getPreferencesSchema();
-        const preferenceValues = loadPreferences();
-        if (preferenceValues) {
-            try {
-                const data = JSON.parse(preferenceValues);
-                const prev = toJSONValues(preferences);
-                const diff = diffJSON(JSON.parse(prev), data);
-                for (const [key, value] of Object.entries(diff)) {
-                    const item = getItem(preferences, key);
-                    // @ts-expect-error correct
-                    item?.onChange(value);
+        loadPreferences().then(preferenceValues => {
+            if (preferenceValues) {
+                try {
+                    const prev = toJSONValues(preferences);
+                    const diff = diffJSON(JSON.parse(prev), preferenceValues);
+                    for (const [key, value] of Object.entries(diff)) {
+                        const item = getItem(preferences, key);
+                        // @ts-expect-error correct
+                        item?.onChange(value);
+                    }
+                } catch {
+                    // do nothing
                 }
-            } catch {
-                // do nothing
+            } else {
+                savePreferences(preferences);
             }
-        } else {
-            savePreferences(preferences);
+        });
+        if (loggedIn && userName) {
+            // TODO: save online
         }
-    }, []);
+    }, [userName, userStore]);
 
     if (!langStore.loaded) {
         return (

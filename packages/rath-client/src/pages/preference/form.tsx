@@ -3,6 +3,7 @@ import intl from 'react-intl-universal';
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { useEffect, useMemo, useState } from "react";
+import { useId } from "@fluentui/react-hooks";
 import styled from "styled-components";
 import type { AnyDescriptor, PreferenceBoolDescriptor, PreferenceNumDescriptor, PreferencesSchema } from "./types";
 
@@ -27,7 +28,7 @@ const Container = styled.div`
     > .body {
         flex-grow: 1;
         flex-shrink: 1;
-        --locate-padding: 4em;
+        --locate-padding: 1em;
         > header {
             cursor: default;
             font-size: 1.05rem;
@@ -103,7 +104,7 @@ type FlatItem = (
     | { id: string; mode: 'item'; item: AnyDescriptor; key: string }
 );
 
-const flat = (schema: PreferencesSchema): FlatItem[] => {
+const flat = (idPrefix: string, schema: PreferencesSchema): FlatItem[] => {
     const items: FlatItem[] = [];
     const entries = Object.entries(schema.properties).sort((a, b) => a[0].localeCompare(b[0]));
 
@@ -113,15 +114,15 @@ const flat = (schema: PreferencesSchema): FlatItem[] => {
         const title = key.split('.')[0];
         if (title) {
             if (title !== prevTitle) {
-                items.push({ id: nanoid(6), mode: 'title', text: title });
+                items.push({ id: `${idPrefix}__${nanoid(6)}`, mode: 'title', text: title });
                 prevTitle = title;
             }
         }
         if (item.type === 'object') {
-            items.push(...flat(item).filter(d => d.mode === 'item'));
+            items.push(...flat(idPrefix, item).filter(d => d.mode === 'item'));
             continue;
         }
-        items.push({ id: nanoid(6), mode: 'item', item, key });
+        items.push({ id: `${idPrefix}__${nanoid(6)}`, mode: 'item', item, key });
     }
 
     const conditions: { [key: string]: boolean } = {};
@@ -286,7 +287,8 @@ const FormItem = observer<{ value: FlatItem }>(function FormItem ({ value }) {
 });
 
 const Form = observer<{ schema: PreferencesSchema }>(function Form ({ schema }) {
-    const items = useMemo(() => flat(schema), [schema]);
+    const id = useId('form');
+    const items = useMemo(() => flat(id, schema), [id, schema]);
     return (
         <Container>
             <div className="toc">

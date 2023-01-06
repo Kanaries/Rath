@@ -343,11 +343,27 @@ export const usePreferencesSchema = () => {
 
 const STORAGE_KEY = 'rath_app_preferences';
 
-export const savePreferences = (preferences: PreferencesSchema) => {
+export const savePreferences = async (preferences: PreferencesSchema) => {
     const save = toJSONValues(preferences);
     localStorage.setItem(STORAGE_KEY, save);
+    const { userStore } = getGlobalStore();
+    const { loggedIn, userName } = userStore;
+    if (loggedIn && userName) {
+        // TODO: save online
+    }
 };
 
-export const loadPreferences = () => {
-    return localStorage.getItem(STORAGE_KEY);
+export const loadPreferences = async (): Promise<object | null> => {
+    try {
+        const { userStore } = getGlobalStore();
+        const { loggedIn, userName } = userStore;
+        if (loggedIn && userName) {
+            // TODO: load online
+        }
+        const storage = localStorage.getItem(STORAGE_KEY);
+        return storage ? JSON.parse(storage) : null;
+    } catch (error) {
+        console.warn('Failed to load preferences', error);
+        return null;
+    }
 };
