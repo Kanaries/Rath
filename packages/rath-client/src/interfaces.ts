@@ -267,3 +267,75 @@ export interface IRawFeatures {
 }
 
 export type ISpecSourceType = 'default' | 'custom';
+
+export enum CloudAccessModifier {
+    PROTECTED = 0,
+    PUBLIC = 1,
+}
+
+export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
+    name: string;
+    workplaceId: number;
+    type: CloudAccessModifier;
+} & (
+    Mode extends 'online' ? {
+        linkInfo: Record<string, any>;
+    } : {
+        fileInfo: {
+            fileType: string;
+            fileName: string;
+            /** bytes */
+            fileSize: number;
+        };
+    }
+);
+
+export type ICreateDataSourceResult<Mode extends 'online' | 'offline'> = {
+    id: number;
+    name: string;
+    type: CloudAccessModifier;
+} & (
+    Mode extends 'online' ? {
+        linkInfo: Record<string, any>;
+    } : {
+        fileInfo: {
+            storageId: number;
+            fileType: string;
+            fileName: string;
+            /** bytes */
+            fileSize: number;
+            uploadUrl: string;
+        };
+    }
+);
+
+export type ICreateDatasetPayload = {
+    /** declared -> overwrite; undeclared -> create; */
+    id?: number;
+    datasourceId: number;
+    name: string;
+    workspaceId: number;
+    type: CloudAccessModifier;
+    /** bytes */
+    size: number;
+    totalCount: number;
+    meta: {
+        name: string;
+        fid: string;
+        semanticType: ISemanticType;
+        analyticType: IAnalyticType;
+        geoRole: IGeoRole;
+        features: IFieldMeta['features'];
+    }[];
+};
+
+export type IDatasetMeta = ICreateDatasetPayload & {
+    id: number;
+    createAt: number;
+    downloadUrl: string;
+};
+
+export type IDatasetData = {
+    data: IBackUpData;
+    meta: IBackUpDataMeta;
+};

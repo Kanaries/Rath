@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { TextWriter, ZipReader } from "@zip.js/zip.js";
-import { IAccessPageKeys } from '../interfaces';
+import { IAccessPageKeys, IDatasetMeta } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
@@ -25,6 +25,7 @@ export interface INotebook {
 export interface IWorkspace {
     readonly id: number;
     readonly name: string;
+    datasets?: readonly IDatasetMeta[] | null | undefined;
     notebooks?: readonly INotebook[] | null | undefined;
 }
 
@@ -247,7 +248,7 @@ export default class UserStore {
         }
     }
 
-    public async getNotebooks(organizationId: number, workspaceId: number, forceUpdate = false) {
+    public async getNotebooksAndDatasets(organizationId: number, workspaceId: number, forceUpdate = false) {
         const which = this.info?.organizations?.find(org => org.id === organizationId)?.workspaces?.find(wsp => wsp.id === workspaceId);
         if (!which) {
             return null;
@@ -255,15 +256,39 @@ export default class UserStore {
         if (!forceUpdate && which.notebooks !== undefined) {
             return null;
         }
-        const url = getMainServiceAddress('/api/ce/notebook/list');
+        const listNotebookApiUrl = getMainServiceAddress('/api/ce/notebook/list');
+        const listDatasetApiUrl = getMainServiceAddress('/api/ce/dataset/list');
         try {
-            const result = await request.get<{ organizationId: number }, { notebookList: INotebook[] }>(url, {
-                organizationId,
-            });
+            const result = await Promise.allSettled([
+                request.get<{ organizationId: number }, { notebookList: INotebook[] }>(listNotebookApiUrl, {
+                    organizationId,
+                }),
+                request.get<{ workspaceId: number }, { datasetList: IDatasetMeta[] }>(listDatasetApiUrl, {
+                    workspaceId,
+                })
+            ]).then(([notebookRes, datasetRes]) => ({
+                notebooks: notebookRes.status === 'fulfilled' ? notebookRes.value.notebookList : [],
+                datasets: datasetRes.status === 'fulfilled' ? datasetRes.value.datasetList : [],
+                errInfo: [
+                    notebookRes.status === 'rejected' ? notebookRes.reason : null,
+                    datasetRes.status === 'rejected' ? datasetRes.reason : null,
+                ].filter(reason => reason !== null),
+            }));
+            for (const errInfo of result.errInfo) {
+                notify({
+                    title: '[getNotebooksAndDatasets]',
+                    type: 'error',
+                    content: `${errInfo}`,
+                });
+            }
+            if (result.errInfo.length > 0) {
+                return null;
+            }
             runInAction(() => {
-                which.notebooks = result.notebookList;
+                which.notebooks = result.notebooks;
+                which.datasets = result.datasets;
             });
-            return result.notebookList;
+            return result;
         } catch (error) {
             notify({
                 title: '[/api/ce/notebook/list]',

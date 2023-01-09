@@ -3,8 +3,9 @@ import { IReactionDisposer, makeAutoObservable, observable, reaction, runInActio
 import { combineLatest, from, Observable, Subscription } from "rxjs";
 import { getFreqRange } from "@kanaries/loa";
 import * as op from 'rxjs/operators'
+import { BlobWriter, TextReader, TextWriter, ZipReader, ZipWriter } from "@zip.js/zip.js";
 import { notify } from "../components/error";
-import { RATH_INDEX_COLUMN_KEY } from "../constants";
+import { KanariesDatasetFilenameCloud, KanariesDatasetPackCloud, RATH_INDEX_COLUMN_KEY } from "../constants";
 import {
     IDataPreviewMode,
     IDatasetBase,
@@ -21,7 +22,12 @@ import {
     IExtField,
     IteratorStorageMetaInfo,
     IBackUpDataMeta,
-    IBackUpData
+    IBackUpData,
+    ICreateDataSourcePayload,
+    ICreateDataSourceResult,
+    IDatasetMeta,
+    IDatasetData,
+    ICreateDatasetPayload,
 } from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
@@ -35,6 +41,8 @@ import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nl
 import { IsolationForest } from "../lib/outlier/iforest";
 import { compressRows, uncompressRows } from "../utils/rows2csv";
 import { extractSelection, ITextPattern } from "../lib/textPattern/init";
+import { getMainServiceAddress } from "../utils/user";
+import { request } from "../utils/request";
 import { getGlobalStore } from ".";
 
 interface IDataMessage {
@@ -67,6 +75,8 @@ function fieldNotExtended (fid: string, mutFields: IMuteFieldBase[], extOpt: str
 }
 
 export class DataSourceStore {
+    /** Storage id on cloud. */
+    public dataSourceId: number | null = null;
     public rawDataMetaInfo: IteratorStorageMetaInfo = {
         versionCode: -1,
         length: 0,
@@ -126,6 +136,7 @@ export class DataSourceStore {
         this.reactions = [];
     }
     public initStore () {
+        this.datasetId = null;
         this.rawDataMetaInfo = {
             versionCode: -1,
             length: 0,
@@ -1096,6 +1107,7 @@ export class DataSourceStore {
         this.extData = new Map(extData);
         await rawDataStorage.setAll(uncompressRows(rawData, meta.mutFields.map(f => f.fid)));
         runInAction(() => {
+            this.datasetId = null;
             this.rawDataMetaInfo = rawDataStorage.metaInfo;
             this.mutFields = meta.mutFields;
             this.extFields = meta.extFields;
@@ -1108,12 +1120,111 @@ export class DataSourceStore {
     public async loadBackupMetaStore (data: IBackUpDataMeta) {
         const { mutFields, extFields, rawDataMetaInfo, filters, cleanMethod } = data;
         runInAction(() => {
+            this.datasetId = null;
             this.mutFields = mutFields;
             this.extFields = extFields;
             this.rawDataMetaInfo = rawDataMetaInfo;
             this.filters = filters;
             this.cleanMethod = cleanMethod as CleanMethod;
         });
+    }
+
+    public async saveDataSourceOnCloud<
+        Mode extends 'online' | 'offline',
+        Args extends Mode extends 'online' ? [payload: ICreateDataSourcePayload<'online'>] : [
+            payload: ICreateDataSourcePayload<'offline'>,
+            file: File,
+        ] = Mode extends 'online' ? [payload: ICreateDataSourcePayload<'online'>] : [
+            payload: ICreateDataSourcePayload<'offline'>,
+            file: File,
+        ],
+        Res extends (
+            Mode extends 'online' ? true : { downloadUrl: string }
+        ) = Mode extends 'online' ? true : { downloadUrl: string },
+    >([payload, file]: Args): Promise<Res | null> {
+        const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+        try {
+            const createDataSourceApiRes = await request.post<typeof payload, ICreateDataSourceResult<Mode>>(
+                createDataSourceApiUrl, payload
+            );
+            if ('fileInfo' in createDataSourceApiRes && file) {
+                const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
+                    method: 'PUT',
+                    body: file,
+                });
+                if (!fileUploadRes.ok) {
+                    throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+                }
+                const reportUploadSuccessApiRes = await request.get<{ storageId: number; status: 1 }, { downloadUrl: string }>(
+                    reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
+                );
+                return reportUploadSuccessApiRes as Res;
+            }
+            return true as Res;
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+
+    public async saveDatasetOnCloud(payload: ICreateDatasetPayload): Promise<{ downloadUrl: string } | null> {
+        const createDatasetApiUrl = getMainServiceAddress('/api/ce/dataset');
+        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+        const zipFileWriter = new BlobWriter();
+        const zipWriter = new ZipWriter(zipFileWriter);
+        const data: IDatasetData = {
+            data: await this.backupDataStore(),
+            meta: await this.backupMetaStore(),
+        };
+        const content = new TextReader(JSON.stringify(data));
+        zipWriter.add(KanariesDatasetFilenameCloud, content);
+        const blob = await zipWriter.close();
+        const file = new File([blob], KanariesDatasetPackCloud);
+        try {
+            const createDatasetApiRes = await request.post<ICreateDatasetPayload, { storageId: number; uploadUrl: string }>(
+                createDatasetApiUrl, payload
+            );
+            const fileUploadRes = await fetch(createDatasetApiRes.uploadUrl, {
+                method: 'PUT',
+                body: file,
+            });
+            if (!fileUploadRes.ok) {
+                throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+            }
+            const reportUploadSuccessApiRes = await request.get<{ storageId: number; status: 1 }, { downloadUrl: string }>(
+                reportUploadSuccessApiUrl, { storageId: createDatasetApiRes.storageId, status: 1 }
+            );
+            return reportUploadSuccessApiRes;
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+
+    public async loadDatasetOnCloud(dataset: IDatasetMeta): Promise<boolean> {
+        const { downloadUrl } = dataset;
+        try {
+            const data = await fetch(downloadUrl, { method: 'GET' });
+            if (!data.ok) {
+                throw new Error(data.statusText);
+            }
+            if (!data.body) {
+                throw new Error('Request got empty body');
+            }
+            const zipReader = new ZipReader(data.body);
+            const file = (await zipReader.getEntries()).find(entry => entry.filename === KanariesDatasetFilenameCloud);
+            if (!file) {
+                throw new Error('Dataset file not found');
+            }
+            const writer = new TextWriter();
+            const dataset = JSON.parse(await file.getData(writer)) as IDatasetData;
+            await this.loadBackupDataStore(dataset.data, dataset.meta);
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
     }
 
 }
