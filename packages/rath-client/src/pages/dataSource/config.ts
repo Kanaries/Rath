@@ -28,8 +28,8 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 iconProps: { iconName: "FileTemplate" },
             },
             {
-                key: IDataSourceType.NOTEBOOK,
-                text: intl.get(`dataSource.importData.type.${IDataSourceType.NOTEBOOK}`),
+                key: IDataSourceType.CLOUD,
+                text: intl.get(`dataSource.importData.type.${IDataSourceType.CLOUD}`),
                 iconProps: { iconName: "CloudDownload" },
             },
             {

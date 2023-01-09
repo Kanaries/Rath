@@ -228,7 +228,12 @@
                 "mysql": "MySQL",
                 "demo": "示例数据",
                 "database": "数据库",
-                "rath_notebook": "Notebook"
+                "kanaries_cloud": "云"
+            },
+            "cloud": {
+                "notebook": "工作簿",
+                "dataset": "数据集",
+                "total": "所有"
             },
             "load": "加载数据",
             "demo": {

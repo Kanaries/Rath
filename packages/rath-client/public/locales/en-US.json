@@ -230,7 +230,12 @@
                 "mysql": "MySQL",
                 "demo": "Demo",
                 "database": "Database",
-                "rath_notebook": "Notebook"
+                "kanaries_cloud": "Cloud"
+            },
+            "cloud": {
+                "notebook": "Notebook",
+                "dataset": "Dataset",
+                "total": "Total"
             },
             "demo": {
                 "available": "Available Datasets"

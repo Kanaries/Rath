@@ -1,9 +1,10 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { TextWriter, ZipReader } from "@zip.js/zip.js";
-import { IAccessPageKeys, IDatasetMeta } from '../interfaces';
+import { IAccessPageKeys, IDatasetData, IDatasetMeta } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
+import { KanariesDatasetFilenameCloud } from '../constants';
 import { IKRFComponents, IParseMapItem } from '../utils/download';
 import { commitLoginService } from './fetch';
 import { getGlobalStore } from '.';
@@ -328,6 +329,40 @@ export default class UserStore {
                 type: 'error',
                 content: `${error}`,
             });
+        }
+    }
+
+    public async openDataset(downLoadURL: string) {
+        try {
+            const data = await fetch(downLoadURL, { method: 'GET' });
+            if (!data.ok) {
+                throw new Error(data.statusText);
+            }
+            if (!data.body) {
+                throw new Error('Request got empty body');
+            }
+            return await this.loadDataset(data.body);
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
+    }
+
+    public async loadDataset(body: ReadableStream<Uint8Array> | File) {
+        const { dataSourceStore } = getGlobalStore();
+        try {
+            const zipReader = new ZipReader(body instanceof File ? body.stream() : body);
+            const file = (await zipReader.getEntries()).find(entry => entry.filename === KanariesDatasetFilenameCloud);
+            if (!file) {
+                throw new Error('Dataset file not found');
+            }
+            const writer = new TextWriter();
+            const dataset = JSON.parse(await file.getData(writer)) as IDatasetData;
+            await dataSourceStore.loadBackupDataStore(dataset.data, dataset.meta);
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false;
         }
     }
 

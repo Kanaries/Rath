@@ -3,7 +3,8 @@ import styled from 'styled-components';
 import { observer } from "mobx-react-lite";
 import { useGlobalStore } from "../../../../store";
 import { LoginPanel } from "../../../loginInfo/account";
-import NotebookSpace from './space';
+import { KanariesDatasetPackCloud } from '../../../../constants';
+import KanariesCloudSpace from './space';
 
 
 const Container = styled.div`
@@ -23,7 +24,7 @@ const Container = styled.div`
     }
 `;
 
-const Notebook = observer<{ setLoadingAnimation: (on: boolean) => void }>(function Notebook ({ setLoadingAnimation }) {
+const KanariesCloud = observer<{ setLoadingAnimation: (on: boolean) => void }>(function KanariesCloud ({ setLoadingAnimation }) {
     const { userStore } = useGlobalStore();
     const { loggedIn } = userStore;
     
@@ -36,8 +37,10 @@ const Notebook = observer<{ setLoadingAnimation: (on: boolean) => void }>(functi
                         type="file"
                         onChange={e => {
                             const [file] = e.target.files ?? [undefined];
-                            if (file) {
+                            if (file?.name.endsWith('.krf')) {
                                 userStore.loadNotebook(file);
+                            } else if (file?.name.endsWith(KanariesDatasetPackCloud.split('.')[1])) {
+                                userStore.loadDataset(file);
                             }
                         }}
                     />
@@ -45,7 +48,7 @@ const Notebook = observer<{ setLoadingAnimation: (on: boolean) => void }>(functi
             )}
             <header>{loggedIn ? intl.get('storage.download') : intl.get('login.login')}</header>
             {loggedIn ? (
-                <NotebookSpace setLoadingAnimation={setLoadingAnimation} />
+                <KanariesCloudSpace setLoadingAnimation={setLoadingAnimation} />
             ) : (
                 <div>
                     <LoginPanel />
@@ -56,4 +59,4 @@ const Notebook = observer<{ setLoadingAnimation: (on: boolean) => void }>(functi
 });
 
 
-export default Notebook;
+export default KanariesCloud;
