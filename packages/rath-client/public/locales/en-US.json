@@ -360,7 +360,7 @@
     },
     "storage": {
         "upload": "Save to Cloud",
-        "upload_desc": "Backup your Rath notebook.",
+        "upload_desc": "Backup your {mode}.",
         "components": {
             "data": "Raw Data ({size} rows)",
             "meta": "Meta Data ({size} fields)",
@@ -371,8 +371,9 @@
         "download": "Load",
         "createdAt": "Created At",
         "refresh": "Refresh",
-        "name": "Notebook Name",
-        "default_name": "Rath Notebook {date}",
+        "name": "{mode} Name",
+        "default_name": "Rath {mode} {date}",
+        "data_source_name": "Data Source Name",
         "size": "Size",
         "apply": "Upload"
     },

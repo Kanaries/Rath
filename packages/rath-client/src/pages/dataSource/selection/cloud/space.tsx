@@ -89,7 +89,7 @@ const ListItem = styled.div`
 
 const ITEM_MIN_WIDTH = 240;
 
-enum CloudItemType {
+export enum CloudItemType {
     NOTEBOOK = 'notebook',
     DATASET = 'dataset',
 }

@@ -71,4 +71,4 @@ export const RathEnv: RATH_ENV = (
 );
 
 export const KanariesDatasetFilenameCloud = 'data.kanaries-data';
-export const KanariesDatasetPackCloud = 'data.kanaries-pack';
+export const KanariesDatasetPackCloudExtension = 'kanaries-pack';

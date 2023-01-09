@@ -24,6 +24,8 @@ import {
     IBackUpData,
     ICreateDataSourcePayload,
     ICreateDataSourceResult,
+    ICreateDatasetPayload,
+    ICreateDatasetResult,
 } from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
@@ -1137,7 +1139,7 @@ export class DataSourceStore {
         Res extends (
             Mode extends 'online' ? true : { downloadUrl: string }
         ) = Mode extends 'online' ? true : { downloadUrl: string },
-    >([payload, file]: Args): Promise<Res | null> {
+    >(...[payload, file]: Args): Promise<Res | null> {
         const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
         const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
         try {
@@ -1155,11 +1157,45 @@ export class DataSourceStore {
                 const reportUploadSuccessApiRes = await request.get<{ storageId: number; status: 1 }, { downloadUrl: string }>(
                     reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
                 );
+                this.dataSourceId = createDataSourceApiRes.id;
                 return reportUploadSuccessApiRes as Res;
             }
+            this.dataSourceId = createDataSourceApiRes.id;
             return true as Res;
         } catch (error) {
-            console.error(error);
+            notify({
+                type: 'error',
+                title: '[saveDataSourceOnCloud]',
+                content: `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public async saveDatasetOnCloud(payload: ICreateDatasetPayload, file: File) {
+        const createDatasetApiUrl = getMainServiceAddress('/api/ce/dataset');
+        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+        try {
+            const createDatasetApiRes = await request.post<ICreateDatasetPayload, ICreateDatasetResult>(
+                createDatasetApiUrl, payload
+            );
+            const fileUploadRes = await fetch(createDatasetApiRes.uploadUrl, {
+                method: 'PUT',
+                body: file,
+            });
+            if (!fileUploadRes.ok) {
+                throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+            }
+            const reportUploadSuccessApiRes = await request.get<{ storageId: number; status: 1 }, { downloadUrl: string }>(
+                reportUploadSuccessApiUrl, { storageId: createDatasetApiRes.storageId, status: 1 }
+            );
+            return reportUploadSuccessApiRes;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[saveDataSourceOnCloud]',
+                content: `${error}`,
+            });
             return null;
         }
     }

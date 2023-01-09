@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { observer } from "mobx-react-lite";
 import { useGlobalStore } from "../../../../store";
 import { LoginPanel } from "../../../loginInfo/account";
-import { KanariesDatasetPackCloud } from '../../../../constants';
+import { KanariesDatasetPackCloudExtension } from '../../../../constants';
 import KanariesCloudSpace from './space';
 
 
@@ -39,7 +39,7 @@ const KanariesCloud = observer<{ setLoadingAnimation: (on: boolean) => void }>(f
                             const [file] = e.target.files ?? [undefined];
                             if (file?.name.endsWith('.krf')) {
                                 userStore.loadNotebook(file);
-                            } else if (file?.name.endsWith(KanariesDatasetPackCloud.split('.')[1])) {
+                            } else if (file?.name.endsWith(`.${KanariesDatasetPackCloudExtension}`)) {
                                 userStore.loadDataset(file);
                             }
                         }}

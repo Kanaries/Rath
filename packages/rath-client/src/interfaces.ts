@@ -309,6 +309,15 @@ export type ICreateDataSourceResult<Mode extends 'online' | 'offline'> = {
     }
 );
 
+export interface IDatasetFieldMeta {
+    name: string;
+    fid: string;
+    semanticType: ISemanticType;
+    analyticType: IAnalyticType;
+    geoRole: IGeoRole;
+    features: IFieldMeta['features'];
+}
+
 export type ICreateDatasetPayload = {
     /** declared -> overwrite; undeclared -> create; */
     id?: number;
@@ -319,14 +328,13 @@ export type ICreateDatasetPayload = {
     /** bytes */
     size: number;
     totalCount: number;
-    meta: {
-        name: string;
-        fid: string;
-        semanticType: ISemanticType;
-        analyticType: IAnalyticType;
-        geoRole: IGeoRole;
-        features: IFieldMeta['features'];
-    }[];
+    meta: IDatasetFieldMeta[];
+};
+
+export type ICreateDatasetResult = {
+    datasetId: number;
+    storageId: number;
+    uploadUrl: string;
 };
 
 export type IDatasetMeta = ICreateDatasetPayload & {
