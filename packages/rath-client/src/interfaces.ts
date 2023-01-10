@@ -285,7 +285,7 @@ export enum DataSourceType {
 export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
     name: string;
     workspaceId: number;
-    sourceType: DataSourceType;
+    datasourceType: DataSourceType;
 } & (
     Mode extends 'online' ? {
         linkInfo: Record<string, any>;

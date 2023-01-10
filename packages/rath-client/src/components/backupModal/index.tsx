@@ -128,7 +128,7 @@ const BackupModal: FC = (props) => {
                     const dataSourceSaveRes = await dataSourceStore.saveDataSourceOnCloud<'online'>({
                         name: modifiableDataSourceName,
                         workspaceId: selectedWspId!,
-                        sourceType,
+                        datasourceType: sourceType,
                         linkInfo: {},
                     });
                     if (dataSourceSaveRes) {
