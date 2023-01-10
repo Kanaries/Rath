@@ -3,6 +3,7 @@ import { KanariesDatasetFilenameCloud, KanariesDatasetPackCloudExtension } from 
 import { CloudAccessModifier, IDatasetData, IDatasetFieldMeta } from "../../interfaces";
 import { getGlobalStore } from "../../store";
 import { IKRFComponents, IParseMapItem, KRF_VERSION } from "../../utils/download";
+import { notify } from "../error";
 
 
 export const writeNotebookFile = async (parseMapItems: IParseMapItem[], filename: string): Promise<File> => {
@@ -119,10 +120,19 @@ export const autoSaveDataset = async (): Promise<boolean> => {
             meta,
         }, file, true);
         userStore.setSaving(false);
+        notify({
+            type: 'success',
+            title: 'Dataset Auto Saved',
+            content: '',
+        });
         return true;
     } catch (error) {
-        console.warn(error);
         userStore.setSaving(false);
+        notify({
+            type: 'warning',
+            title: 'Dataset Auto Save Failed',
+            content: '',
+        });
         return false;
     }
 };

@@ -130,7 +130,7 @@ const BackupModal: FC = (props) => {
                 let dsId = dataSourceId;
                 if (dsId === undefined) {
                     const dataSourceSaveRes = await dataSourceStore.saveDataSourceOnCloud<'online'>({
-                        name: modifiableDataSourceName,
+                        name: modifiableDataSourceName || defaultDataSourceName,
                         workspaceId: selectedWspId!,
                         datasourceType: sourceType,
                         linkInfo: {},
