@@ -59,7 +59,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
     const onSelectDataLoaded = useCallback(
         (fields: IMuteFieldBase[], dataSource: IRow[], name?: string, tag?: DataSourceTag | undefined, withHistory?: IDBMeta | undefined) => {
-            dataSourceStore.loadDataWithInferMetas(dataSource, fields);
+            dataSourceStore.loadDataWithInferMetas(dataSource, fields, tag);
             if (name && tag !== undefined) {
                 dataSourceStore.setDatasetId(name);
                 setDataStorage(name, fields, dataSource, tag, withHistory);

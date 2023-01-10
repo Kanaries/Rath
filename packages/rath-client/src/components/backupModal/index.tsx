@@ -30,7 +30,7 @@ const Cont = styled.div`
 
 const BackupModal: FC = (props) => {
     const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore, userStore } = useGlobalStore();
-    const { cloudDataSourceMeta, cloudDatasetMeta, datasetId } = dataSourceStore;
+    const { cloudDataSourceMeta, cloudDatasetMeta, datasetId, sourceType } = dataSourceStore;
     const { datasourceId: dataSourceId } = cloudDataSourceMeta ?? {};
     const { showBackupModal } = commonStore;
     const { info, loggedIn } = userStore;
@@ -124,11 +124,11 @@ const BackupModal: FC = (props) => {
                 downloadFileFromBlob(file, file.name);
             } else {
                 let dsId = dataSourceId;
-                if (dsId === null) {
+                if (dsId === undefined) {
                     const dataSourceSaveRes = await dataSourceStore.saveDataSourceOnCloud<'online'>({
                         name: modifiableDataSourceName,
                         workspaceId: selectedWspId!,
-                        type: accessMode,
+                        sourceType,
                         linkInfo: {},
                     });
                     if (dataSourceSaveRes) {

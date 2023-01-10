@@ -273,10 +273,19 @@ export enum CloudAccessModifier {
     PUBLIC = 1,
 }
 
+export enum DataSourceType {
+    File = 1,
+    Database = 2,
+    Olap = 3,
+    AirTable = 4,
+    Restful = 5,
+    Unknown = 6,
+}
+
 export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
     name: string;
     workspaceId: number;
-    type: CloudAccessModifier;
+    sourceType: DataSourceType;
 } & (
     Mode extends 'online' ? {
         linkInfo: Record<string, any>;
