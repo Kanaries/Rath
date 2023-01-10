@@ -330,15 +330,16 @@ export interface IDatasetFieldMeta {
 export interface IDataSourceMeta {
     id: number;
     name: string;
-    datasourceId: number;
-    workspaceId: number;
-    type: CloudAccessModifier;
-    /** bytes */
-    size: number;
-    totalCount: number;
-    meta: IDatasetFieldMeta[];
+    type: DataSourceType;
+    fileInfo?: {
+        storageId: number;
+        fileType: string;
+        fileName: string;
+        /** bytes */
+        fileSize: number;
+        download_url: string;
+    };
     createAt: number;
-    downloadUrl: string;
 }
 
 export type ICreateDatasetPayload = {

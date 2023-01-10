@@ -81,6 +81,9 @@ export class DataSourceStore {
     public cloudDataSourceMeta: IDataSourceMeta | null = null;
     /** Dataset storage meta on cloud. */
     public cloudDatasetMeta: IDatasetMeta | null = null;
+    /** Auto-saved dataset storage meta on cloud. */
+    public cloudAutoSaveDatasetMeta: IDatasetMeta | null = null;
+    public currentWsp: number | null = null;
 
     public rawDataMetaInfo: IteratorStorageMetaInfo = {
         versionCode: -1,
@@ -123,6 +126,7 @@ export class DataSourceStore {
         makeAutoObservable(this, {
             cloudDataSourceMeta: observable.ref,
             cloudDatasetMeta: observable.ref,
+            cloudAutoSaveDatasetMeta: observable.ref,
             cookedDataSource: observable.ref,
             cookedMeasures: observable.ref,
             fieldsWithExtSug: observable.ref,
@@ -1189,7 +1193,7 @@ export class DataSourceStore {
             if (!dataSource) {
                 throw new Error('Data source not existed');
             }
-            this.setCloudDataSource(dataSource);
+            this.setCloudDataSource(dataSource, payload.workspaceId);
             if ('fileInfo' in createDataSourceApiRes && file) {
                 const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
                     method: 'PUT',
@@ -1217,7 +1221,7 @@ export class DataSourceStore {
         }
     }
 
-    public async saveDatasetOnCloud(payload: ICreateDatasetPayload, file: File) {
+    public async saveDatasetOnCloud(payload: ICreateDatasetPayload, file: File, isAutoSave = false) {
         const { userStore } = getGlobalStore();
         const createDatasetApiUrl = getMainServiceAddress('/api/ce/dataset');
         const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
@@ -1239,7 +1243,11 @@ export class DataSourceStore {
             if (!dataset) {
                 throw new Error('Data source not existed');
             }
-            this.setCloudDataset(dataset);
+            if (isAutoSave) {
+                this.setAutoSavedCloudDataset(dataset);
+            } else {
+                this.setCloudDataset(dataset);
+            }
             return reportUploadSuccessApiRes;
         } catch (error) {
             notify({
@@ -1251,12 +1259,17 @@ export class DataSourceStore {
         }
     }
 
-    public setCloudDataSource(dataSource: IDataSourceMeta) {
+    public setCloudDataSource(dataSource: IDataSourceMeta, wspId: number) {
         this.cloudDataSourceMeta = dataSource;
+        this.currentWsp = wspId;
     }
 
     public setCloudDataset(dataset: IDatasetMeta) {
         this.cloudDatasetMeta = dataset;
+    }
+
+    public setAutoSavedCloudDataset(dataset: IDatasetMeta) {
+        this.cloudAutoSaveDatasetMeta = dataset;
     }
 
 }

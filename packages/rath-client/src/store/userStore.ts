@@ -377,7 +377,7 @@ export default class UserStore {
             await dataSourceStore.loadBackupDataStore(dataset.data, dataset.meta);
             const dataSource = await this.fetchDataSource(workspaceId, dataSourceId);
             if (dataSource) {
-                dataSourceStore.setCloudDataSource(dataSource);
+                dataSourceStore.setCloudDataSource(dataSource, workspaceId);
             }
             const cloudMeta = await this.fetchDataset(workspaceId, datasetId);
             if (cloudMeta) {

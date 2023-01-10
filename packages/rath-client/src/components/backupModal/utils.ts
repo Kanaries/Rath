@@ -98,26 +98,26 @@ export const DATASET_AUTO_SAVE_NAME = 'auto save';
 
 export const autoSaveDataset = async (): Promise<boolean> => {
     const { dataSourceStore, userStore } = getGlobalStore();
-    const { cloudDataSourceMeta, cloudDatasetMeta } = dataSourceStore;
+    const { cloudDataSourceMeta, cloudAutoSaveDatasetMeta, currentWsp } = dataSourceStore;
     const { saving } = userStore;
 
-    if (saving || !cloudDataSourceMeta) {
+    if (saving || !cloudDataSourceMeta || currentWsp === null) {
         return false;
     }
 
     try {
         userStore.setSaving(true);
-        const [file, nRows, meta] = await writeDatasetFile(cloudDatasetMeta?.name ?? DATASET_AUTO_SAVE_NAME);
+        const [file, nRows, meta] = await writeDatasetFile(DATASET_AUTO_SAVE_NAME);
         await dataSourceStore.saveDatasetOnCloud({
-            id: cloudDatasetMeta?.id,
-            datasourceId: cloudDatasetMeta?.datasourceId ?? cloudDataSourceMeta.id,
-            name: cloudDatasetMeta?.name ?? DATASET_AUTO_SAVE_NAME,
-            workspaceId: cloudDatasetMeta?.workspaceId ?? cloudDataSourceMeta.workspaceId,
-            type: cloudDatasetMeta?.type ?? CloudAccessModifier.PROTECTED,
+            id: cloudAutoSaveDatasetMeta?.id,
+            datasourceId: cloudAutoSaveDatasetMeta?.datasourceId ?? cloudDataSourceMeta.id,
+            name: DATASET_AUTO_SAVE_NAME,
+            workspaceId: cloudAutoSaveDatasetMeta?.workspaceId ?? currentWsp,
+            type: cloudAutoSaveDatasetMeta?.type ?? CloudAccessModifier.PROTECTED,
             size: file.size,
             totalCount: nRows,
             meta,
-        }, file);
+        }, file, true);
         userStore.setSaving(false);
         return true;
     } catch (error) {

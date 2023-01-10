@@ -31,7 +31,7 @@ const Cont = styled.div`
 const BackupModal: FC = (props) => {
     const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore, userStore } = useGlobalStore();
     const { cloudDataSourceMeta, cloudDatasetMeta, datasetId, sourceType } = dataSourceStore;
-    const { datasourceId: dataSourceId } = cloudDataSourceMeta ?? {};
+    const { id: dataSourceId } = cloudDataSourceMeta ?? {};
     const { showBackupModal } = commonStore;
     const { info, loggedIn } = userStore;
     const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
@@ -93,7 +93,7 @@ const BackupModal: FC = (props) => {
     const canBackup =  selectedWspId !== null && (mode === CloudItemType.NOTEBOOK ? (
         Object.values(backupItemKeys).some(Boolean)
     ) : (
-        (cloudDataSourceMeta && cloudDatasetMeta && datasetOverwrite) || (dataSourceName ?? modifiableDataSourceName)
+        (cloudDataSourceMeta && cloudDatasetMeta) || !datasetOverwrite || !cloudDatasetMeta
     ));
     useEffect(() => {
         setSelectedOrgId(null);
@@ -134,8 +134,8 @@ const BackupModal: FC = (props) => {
                     if (dataSourceSaveRes) {
                         const dataSource = await userStore.fetchDataSource(selectedWspId!, dataSourceSaveRes.id);
                         if (dataSource) {
-                            dataSourceStore.setCloudDataSource(dataSource);
-                            dsId = dataSourceStore.cloudDataSourceMeta?.datasourceId;
+                            dataSourceStore.setCloudDataSource(dataSource, selectedWspId!);
+                            dsId = dataSourceStore.cloudDataSourceMeta?.id;
                         }
                     }
                 }
