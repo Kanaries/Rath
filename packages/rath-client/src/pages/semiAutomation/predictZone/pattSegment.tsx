@@ -7,6 +7,8 @@ import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
+import { IVisSpecType } from '../../../interfaces';
+import { useAsyncViews } from './utils';
 
 const PattSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -17,6 +19,7 @@ const PattSegment: React.FC = () => {
     const assViews = useCallback(() => {
         semiAutoStore.pattAssociate();
     }, [semiAutoStore])
+    const list = useAsyncViews(pattSpecList);
     if (pattViews.views.length === 0 && autoAsso.pattViews) return <div />
     return <Fragment>
         {
@@ -28,7 +31,7 @@ const PattSegment: React.FC = () => {
         }
         <AssoContainer>
             {
-                pattSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                list.map((spec, i) => pattViews.views[i] && <div className="asso-segment" key={`p-${i}`}>
                     {
                         pattViews.computing && <LoadingLayer>
                             <Spinner label="loading" />
@@ -43,10 +46,10 @@ const PattSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            iconProps={{ iconName: collectionStore.collectionContains(pattViews.views[i].fields, spec, pattViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            iconProps={{ iconName: collectionStore.collectionContains(pattViews.views[i].fields, spec, IVisSpecType.vegaSubset, pattViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.toggleCollectState(pattViews.views[i].fields, spec, pattViews.views[i].filters)
+                                collectionStore.toggleCollectState(pattViews.views[i].fields, spec, IVisSpecType.vegaSubset, pattViews.views[i].filters)
                             }}
                         />
                         <CommandButton
@@ -62,6 +65,7 @@ const PattSegment: React.FC = () => {
                             actions={mainVizSetting.debug}
                             spec={adviceVisSize(spec, fieldMetas)}
                             dataSource={applyFilters(dataSource, pattViews.views[i].filters)}
+                            config={commonStore.themeConfig}
                         />
                     </div>
                     <div className="chart-desc">

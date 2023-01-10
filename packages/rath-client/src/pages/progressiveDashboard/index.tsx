@@ -78,7 +78,7 @@ const Cont = styled.div`
 
 const ProgressiveDashboard: React.FC = (props) => {
     // const ;
-    const { dataSourceStore } = useGlobalStore();
+    const { dataSourceStore, commonStore } = useGlobalStore();
     const { cleanedData, fieldMetas } = dataSourceStore;
     const [originSpecList, setOriginSpecList] = useState<{ locked: boolean; fields: (IFieldMeta | '*')[] }[]>([
         {
@@ -277,6 +277,7 @@ const ProgressiveDashboard: React.FC = (props) => {
                                     imp: 0,
                                 },
                             })}
+                            config={commonStore.themeConfig}
                         />
                     </div>
                     {visSettingList[visIndex] && (

@@ -28,6 +28,11 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 iconProps: { iconName: "FileTemplate" },
             },
             {
+                key: IDataSourceType.NOTEBOOK,
+                text: intl.get(`dataSource.importData.type.${IDataSourceType.NOTEBOOK}`),
+                iconProps: { iconName: "CloudDownload" },
+            },
+            {
                 key: IDataSourceType.DATABASE,
                 text: dbText,
                 iconProps: { iconName: "Database" }
@@ -67,7 +72,7 @@ export const DemoDataAssets = process.env.NODE_ENV === 'production' ? {
 } : {
     // CARS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-cars-service.json",
     CARS: "/datasets/ds-cars-service.json",
-    // CARS: "/datasets/dataset-service-edge.json",
+    // CARS: "/datasets/test.json",
     // STUDENTS: "https://chspace.oss-cn-hongkong.aliyuncs.com/api/ds-students-service.json",
     STUDENTS: "/datasets/ds-students-service.json",
     BTC_GOLD: "/datasets/ds_btc_gold_service.json",

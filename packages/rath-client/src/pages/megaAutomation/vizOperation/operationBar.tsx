@@ -4,10 +4,11 @@ import { observer } from 'mobx-react-lite';
 import {  CommandBar, ICommandBarItemProps } from '@fluentui/react';
 import { toJS } from 'mobx';
 import { useGlobalStore } from '../../../store';
+import { IVisSpecType } from '../../../interfaces';
 
 interface OperationBarProps {}
 const OperationBar: React.FC<OperationBarProps> = props => {
-    const { megaAutoStore, commonStore, collectionStore, painterStore } = useGlobalStore();
+    const { megaAutoStore, commonStore, collectionStore, painterStore, editorStore } = useGlobalStore();
     const { taskMode } = commonStore;
     const { mainViewSpec, mainViewPattern } = megaAutoStore;
 
@@ -28,7 +29,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
     if (viewExists) {
         const viewFields = toJS(mainViewPattern.fields);
         const viewSpec = toJS(mainViewSpec);
-        if (collectionStore.collectionContains(viewFields, viewSpec)) {
+        if (collectionStore.collectionContains(viewFields, viewSpec, IVisSpecType.vegaSubset)) {
             starIconName = 'FavoriteStarFill'
         }
     }
@@ -38,7 +39,28 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             key: 'editing',
             text: intl.get('megaAuto.commandBar.editing'),
             iconProps: { iconName: 'BarChartVerticalEdit' },
-            onClick: customizeAnalysis
+            subMenuProps: {
+                items: [
+                    {
+                        key: 'editingInGW',
+                        text: intl.get('megaAuto.commandBar.editInGW'),
+                        iconProps: { iconName: 'BarChartVerticalEdit' },
+                        onClick: customizeAnalysis,
+                    },
+                    {
+                        key: 'editingInEditor',
+                        text: intl.get('megaAuto.commandBar.editInEditor'),
+                        iconProps: { iconName: 'Edit' },
+                        onClick: () => {
+                            if (mainViewPattern && mainViewSpec) {
+                                editorStore.syncSpec(IVisSpecType.vegaSubset, mainViewSpec)
+                                megaAutoStore.changeMainViewSpecSource()
+                            }
+                        }
+                    }
+
+                ]
+            }
         },
         {
             key: 'painting',
@@ -60,7 +82,7 @@ const OperationBar: React.FC<OperationBarProps> = props => {
             iconProps: { iconName: starIconName },
             onClick: () => {
                 if (mainViewPattern && mainViewSpec) {
-                    collectionStore.toggleCollectState(toJS(mainViewPattern.fields), toJS(mainViewSpec))
+                    collectionStore.toggleCollectState(toJS(mainViewPattern.fields), toJS(mainViewSpec), IVisSpecType.vegaSubset)
                 }
             }
         },

@@ -5,8 +5,23 @@ import intl from 'react-intl-universal';
 import { IRow } from '../../../interfaces';
 import { shallowCopyArray } from '../../../utils/deepcopy';
 import { getVegaTimeFormatRules } from '../../../utils';
+import { VegaThemeConfig } from '../../../queries/themes/config';
 const DATA_NAME = 'dataSource';
 const DEFAULT_BIN_SIZE = 10;
+const markColor = '#3371D7';
+const theme: VegaThemeConfig = {
+    arc: { fill: markColor },
+    area: { fill: markColor },
+    path: { stroke: markColor },
+    rect: { fill: markColor },
+    shape: { stroke: markColor },
+    symbol: { stroke: markColor },
+    circle: { fill: markColor },
+    bar: { fill: markColor },
+    point: { fill: markColor },
+    tick: { fill: markColor },
+    line: { fill: markColor },
+}
 function fl2bins(data: IRow[], valueField: string, ctField: string, binSize: number | undefined = DEFAULT_BIN_SIZE) {
     const values: number[] = data.map(row => Number(row[valueField]));
     const [_min, _max] = getRange(values)
@@ -119,7 +134,8 @@ const FullDistViz: React.FC<FullDistVizProps> = (props) => {
                 }
             }, {
                 actions: false,
-                timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any
+                timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
+                config: theme
             }).then(res => {
                 setView(res.view);
                 res.view.addSignalListener('brush', (name, value) => {

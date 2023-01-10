@@ -1,8 +1,8 @@
-import { getMainServerUrl } from '../utils/user';
-import { ILoginForm } from './commonStore';
+import { getMainServiceAddress } from '../utils/user';
+import type { ILoginForm } from './userStore';
 
 export async function commitLoginService(props: ILoginForm) {
-    const url = getMainServerUrl('/api/login');
+    const url = getMainServiceAddress('/api/login');
     const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -12,9 +12,12 @@ export async function commitLoginService(props: ILoginForm) {
         body: JSON.stringify(props),
     });
     const result = await res.json();
-    if (result.code === 200) {
-        return result.data;
+    if (res.status === 200) {
+        return result as (
+            | { success: true; data: boolean }
+            | { success: false; message: string }
+        );
     } else {
-        throw new Error(`[/source/list] ${result.message}`);
+        throw new Error(`[/api/login] ${result.message}`);
     }
 }

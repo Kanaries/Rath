@@ -24,7 +24,6 @@ export function adviceVisSize(spec: IVegaSubset, fields: IFieldMeta[], width: nu
     return spec;
 }
 
-
 export function changeVisSize(spec: IVegaSubset, propsWidth: number, propsHeight: number): IVegaSubset {
     const nextSpec = produce(spec, (draft) => {
         let width = propsWidth;

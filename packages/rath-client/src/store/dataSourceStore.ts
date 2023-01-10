@@ -1,24 +1,46 @@
-import { makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
+import { nanoid } from "nanoid";
+import { IReactionDisposer, makeAutoObservable, observable, reaction, runInAction, toJS } from "mobx";
 import { combineLatest, from, Observable, Subscription } from "rxjs";
 import { getFreqRange } from "@kanaries/loa";
 import * as op from 'rxjs/operators'
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
-import { IDataPreviewMode, IDatasetBase, IFieldMeta, IMuteFieldBase, IRawField, IRow, ICol, IFilter, CleanMethod, IDataPrepProgressTag, FieldExtSuggestion, IFieldMetaWithExtSuggestions, IExtField } from "../interfaces";
+import {
+    IDataPreviewMode,
+    IDatasetBase,
+    IFieldMeta,
+    IMuteFieldBase,
+    IRawField,
+    IRow,
+    ICol,
+    IFilter,
+    CleanMethod,
+    IDataPrepProgressTag,
+    FieldExtSuggestion,
+    IFieldMetaWithExtSuggestions,
+    IExtField,
+    IteratorStorageMetaInfo,
+    IBackUpDataMeta,
+    IBackUpData
+} from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
 // import { expandDateTimeService } from "../service";
 import { findRathSafeColumnIndex, colFromIRow, readableWeekday } from "../utils";
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
-import { IteratorStorage, IteratorStorageMetaInfo } from "../utils/iteStorage";
+import { IteratorStorage } from "../utils/iteStorage";
 import { updateDataStorageMeta } from "../utils/storage";
 import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
 import { IsolationForest } from "../lib/outlier/iforest";
+import { compressRows, uncompressRows } from "../utils/rows2csv";
+import { extractSelection, ITextPattern } from "../lib/textPattern/init";
+import { getGlobalStore } from ".";
 
 interface IDataMessage {
-    type: 'init_data' | 'others';
+    type: 'init_data' | 'others' | 'download';
     data: IDatasetBase
+    downLoadURL?: string;
 }
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
@@ -35,6 +57,15 @@ interface IDataSourceStoreStorage {
     fieldMetas: IFieldMeta[];
 }
 
+function fieldNotExtended (fid: string, mutFields: IMuteFieldBase[], extOpt: string) {
+    const which = mutFields.find(f => f.fid === fid);
+    const expanded = Boolean(mutFields.find(
+        which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === extOpt
+    ));
+    if (expanded) return;
+    return which
+}
+
 export class DataSourceStore {
     public rawDataMetaInfo: IteratorStorageMetaInfo = {
         versionCode: -1,
@@ -44,8 +75,8 @@ export class DataSourceStore {
      * raw data is fetched and parsed data or uploaded data without any other changes.
      * computed value `dataSource` will be calculated
      */
-    public rawDataStorage: IteratorStorage;
-    public filteredDataStorage: IteratorStorage;
+    public rawDataStorage!: IteratorStorage;
+    public filteredDataStorage!: IteratorStorage;
     public extData = new Map<string, ICol<any>>();
     /**
      * fields contains fields with `dimension` or `measure` type.
@@ -56,31 +87,23 @@ export class DataSourceStore {
     public extFields: IExtField[] = [];
     public fieldsWithExtSug: IFieldMetaWithExtSuggestions[] = [];
     public filters: IFilter[] = [];
-    
-    // public fields: BIField[] = [];
     public cookedDataSource: IRow[] = [];
     public cookedDimensions: string[] = [];
     public cookedMeasures: string[] = [];
     public cleanMethod: CleanMethod = 'dropNull';
-    /**
-     * 作为计算属性来考虑
-     */
-    // public fieldMetas: IFieldMeta[] = [];
     public loading: boolean = false;
     public dataPreviewMode: IDataPreviewMode = IDataPreviewMode.data;
     public showDataImportSelection: boolean = false;
     public showFastSelectionModal: boolean = false;
-    private fieldMetasRef: StreamListener<IFieldMeta[]>;
-    private cleanedDataRef: StreamListener<IRow[]>;
-    // private filteredDataRef: StreamListener<IRow[]>;
-    private filteredDataMetaInfoRef: StreamListener<IteratorStorageMetaInfo>;
+    private fieldMetasRef!: StreamListener<IFieldMeta[]>;
+    private cleanedDataRef!: StreamListener<IRow[]>;
+    private filteredDataMetaInfoRef!: StreamListener<IteratorStorageMetaInfo>;
     public loadingDataProgress: number = 0;
     public dataPrepProgressTag: IDataPrepProgressTag = IDataPrepProgressTag.none;
     private subscriptions: Subscription[] = [];
+    private reactions: IReactionDisposer[] = []
     public datasetId: string | null = null;
     constructor() {
-        this.rawDataStorage = new IteratorStorage({ itemKey: 'rawData' });
-        this.filteredDataStorage = new IteratorStorage({ itemKey: 'filteredData' });
         makeAutoObservable(this, {
             cookedDataSource: observable.ref,
             cookedMeasures: observable.ref,
@@ -94,24 +117,42 @@ export class DataSourceStore {
             rawDataStorage: false,
             filteredDataStorage: false,
         });
+        this.initStore();
+    }
+    public clear() {
+        this.subscriptions.forEach(s => s.unsubscribe());
+        this.subscriptions = [];
+        this.reactions.forEach(dispose => dispose());
+        this.reactions = [];
+    }
+    public initStore () {
+        this.rawDataMetaInfo = {
+            versionCode: -1,
+            length: 0,
+        }
+        this.extData = new Map<string, ICol<any>>();
+        this.mutFields = [];
+        this.extFields = [];
+        this.fieldsWithExtSug = [];
+        this.filters = [];
+        this.cookedDataSource = [];
+        this.cookedDimensions = [];
+        this.cookedMeasures = [];
+        this.cleanMethod = 'dropNull';
+        this.loading = false;
+        this.dataPreviewMode = IDataPreviewMode.data;
+        this.showDataImportSelection = false;
+        this.showFastSelectionModal = false;
+        this.loadingDataProgress = 0;
+        this.dataPrepProgressTag = IDataPrepProgressTag.none;
+        this.datasetId = null;
+        this.rawDataStorage = new IteratorStorage({ itemKey: 'rawData' });
+        this.filteredDataStorage = new IteratorStorage({ itemKey: 'filteredData' });
         const fields$ = from(toStream(() => this.fieldsAndPreview, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
         const rawDataMetaInfo$ = from(toStream(() => this.rawDataMetaInfo, false));
         const extData$ = from(toStream(() => this.extData, true));
         const filters$ = from(toStream(() => this.filters, true))
-        // const filteredData$ = from(toStream(() => this.filteredData, true));
-        // const filteredData$ = combineLatest([dataVersionCode$, extData$, filters$]).pipe(
-        //     op.map(([code, extData, filters]) => {
-        //         return from(filterDataService({
-        //             dataStorageType: 'db',
-        //             dataStorage: this.rawDataStorage,
-        //             extData: toJS(extData),
-        //             filters: toJS(filters)
-        //         }))
-        //     }),
-        //     op.switchAll(),
-        //     op.share()
-        // )
         const filteredDataMetaInfo$: Observable<IteratorStorageMetaInfo> = combineLatest([rawDataMetaInfo$, extData$, filters$]).pipe(
             op.map(([info, extData, filters]) => {
                 return from(filterDataService({
@@ -173,6 +214,11 @@ export class DataSourceStore {
         this.cleanedDataRef = fromStream(cleanedData$, []);
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
+            const { type, downLoadURL } = msg;
+            const { userStore } = getGlobalStore();
+            if (type === 'download' && downLoadURL) {
+                userStore.openNotebook(downLoadURL);
+            }
             if (ev.source && msg.type === 'init_data') {
                 console.warn('[Get DataSource From Other Pages]', msg)
                 // @ts-ignore
@@ -209,12 +255,12 @@ export class DataSourceStore {
                 });
             });
         };
-        reaction(() => this.allFields, allFields => {
+        this.reactions.push(reaction(() => this.allFields, allFields => {
             suggestExt(allFields, undefined);
-        })
-        reaction(() => this.fieldMetaAndPreviews, fieldMetaAndPreviews => {
+        }))
+        this.reactions.push(reaction(() => this.fieldMetaAndPreviews, fieldMetaAndPreviews => {
             suggestExt(undefined, fieldMetaAndPreviews);
-        })
+        }))
     }
     public get filteredDataMetaInfo (): IteratorStorageMetaInfo {
         return this.filteredDataMetaInfoRef.current;
@@ -280,20 +326,6 @@ export class DataSourceStore {
         }
         return true;
     }
-
-    // public get groupCounts () {
-    //     return this.fieldMetas.filter(f => f.analyticType === 'dimension')
-    //         .map(f => f.features.unique)
-    //         .reduce((t, v) => t * v, 1)
-    // }
-    // /**
-    //  * 防止groupCounts累乘的时候很快就超过int最大范围的情况
-    //  */
-    // public get groupCountsLog () {
-    //     return this.fieldMetas.filter(f => f.analyticType === 'dimension')
-    //         .map(f => f.features.maxEntropy)
-    //         .reduce((t, v) => t + v, 0)
-    // }
     public get groupMeanLimitCountsLog () {
         const valueCountsList = this.fieldMetas.filter(f => f.analyticType === 'dimension')
             .map(f => f.features.unique);
@@ -407,19 +439,6 @@ export class DataSourceStore {
             this.extFields = [...this.extFields];
             this.updateDataMetaInIndexedDB();
         }
-    }
-
-    public async loadData (fields: IRawField[], rawData: IRow[]) {
-        this.mutFields = fields.map(f => ({
-            ...f,
-            name: f.name ? f.name : f.fid,
-            disable: false
-        }))
-        await this.rawDataStorage.setAll(rawData);
-        runInAction(() => {
-            this.rawDataMetaInfo = this.rawDataStorage.metaInfo;
-            this.loading = false;
-        })
     }
 
     /**
@@ -622,27 +641,36 @@ export class DataSourceStore {
         return fieldWithExtSuggestions;
     }
 
-    public canExpandAsDateTime(fid: string) {
-        const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
-        ));
-
-        if (expanded || !which) {
-            return false;
+    public addExtSuggestions (suggestion: FieldExtSuggestion, fid: string) {
+        const field = this.fieldMetas.find(f => f.fid === fid);
+        if (!field) {
+            return;
         }
+        let which = this.fieldsWithExtSug.find(f => f.fid === fid);
+        if (!which) {
+            which = {
+                ...field,
+                extSuggestions: []
+            }
+            this.fieldsWithExtSug.push(which);
+        }
+        const targetIndex  = which.extSuggestions.findIndex(s => s.type === suggestion.type);
+        if (targetIndex > -1) {
+            which.extSuggestions.splice(targetIndex, 1);
+        }
+        which.extSuggestions.push(suggestion);
+        which.extSuggestions.sort((a, b) => b.score - a.score)
+    }
+
+    public canExpandAsDateTime(fid: string) {
+        const which = fieldNotExtended(fid, this.mutFields, 'dateTimeExpand');
+        if (typeof which === 'undefined') return;
 
         return which.semanticType === 'temporal' && !which.extInfo;
     }
     public canExpandAsReGroupByFreq(fid: string) {
-        const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        const which = fieldNotExtended(fid, this.mutFields, 'LaTiao.$reGroupByFreq');
+        if (typeof which === 'undefined') return;
         if (which.semanticType !== 'nominal') {
             return false;
         }
@@ -651,14 +679,8 @@ export class DataSourceStore {
         return meta.features.unique > 8;
     }
     public canExpandAsOutlier(fid: string) {
-        const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'LaTiao.$outlierIForest'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        const which = fieldNotExtended(fid, this.mutFields, 'LaTiao.$outlierIForest');
+        if (typeof which === 'undefined') return;
         if (!(which.semanticType === 'quantitative' && !which.extInfo)) return false;
         const meta = this.fieldMetas.find(f => f.fid === fid);
         if (!meta) return false;
@@ -667,13 +689,7 @@ export class DataSourceStore {
 
     public async canExpandAsWord (fid: string) {
         const which = this.mutFields.find(f => f.fid === fid);
-        const expanded = Boolean(this.mutFields.find(
-            which => which.extInfo?.extFrom.includes(fid) && which.extInfo.extOpt === 'dateTimeExpand'
-        ));
-
-        if (expanded || !which) {
-            return false;
-        }
+        if (typeof which === 'undefined') return;
 
         if (!(which.semanticType === 'nominal' && !which.extInfo)) return false;
         const data = await this.rawDataStorage.getAll();
@@ -762,6 +778,85 @@ export class DataSourceStore {
             })));
         }
     }
+    public clearTextPatternIfExist () {
+        const extRemainFields = this.extFields.filter(f => !(f.extInfo?.extOpt === 'LaTiao.$selection_pattern' && f.stage === 'preview'));
+        if (extRemainFields.length !== this.extFields.length) {
+            this.extFields = extRemainFields;
+        }
+    }
+    public async expandFromSelectionPattern (fid: string, pattern: ITextPattern) {
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField) {
+            return;
+        }
+        this.clearTextPatternIfExist();
+        const data = await this.rawDataStorage.getAll();
+        const values: string[] = data.map(d => `${d[fid]}`);
+        const newField: IRawField = {
+            fid: `${fid}_selection_pattern_${nanoid(2)}`,
+            name: `${originField.name}.selection_pattern`,
+            semanticType: 'nominal',
+            analyticType: 'dimension',
+            extInfo: {
+                extFrom: [fid],
+                extOpt: 'LaTiao.$selection_pattern',
+                extInfo: {
+                    pattern: pattern.toString(),
+                }
+            },
+            geoRole: 'none'
+        }
+        const newData = data.map((d, index) => {
+            const extraction = extractSelection(pattern, values[index])
+            const nextRow = { ...d };
+            if (!extraction.missing) {
+                nextRow[newField.fid] = extraction.matchedText
+            }
+            return nextRow
+        });
+        this.addExtFieldsFromRows(newData, [newField].map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
+    }
+    public async expandFromRegex (fid: string, pattern: RegExp) {
+        const originField = this.allFields.find(f => f.fid === fid);
+        if (!originField) {
+            return;
+        }
+        this.clearTextPatternIfExist();
+        const data = await this.rawDataStorage.getAll();
+        const values: string[] = data.map(d => `${d[fid]}`);
+        const newField: IRawField = {
+            fid: `${fid}_regex`,
+            name: `${originField.name}.regex`,
+            semanticType: 'nominal',
+            analyticType: 'dimension',
+            extInfo: {
+                extFrom: [fid],
+                extOpt: 'LaTiao.$regex',
+                extInfo: {
+                    pattern: pattern.toString(),
+                }
+            },
+            geoRole: 'none'
+        }
+        const newData = data.map((d, index) => {
+            const match = values[index].match(pattern);
+            if (match) {
+                return {
+                    ...d,
+                    [newField.fid]: match[0],
+                }
+            }
+            return d;
+        });
+        this.addExtFieldsFromRows(newData, [newField].map(f => ({
+            ...f,
+            stage: 'preview',
+        })));
+    }
+
     public async expandWordTF (fid: string) {
         const data = await this.rawDataStorage.getAll();
         const values: string[] = data.map(d => `${d[fid]}`);
@@ -975,4 +1070,50 @@ export class DataSourceStore {
             });
         }
     }
+
+    public async backupMetaStore (): Promise<IBackUpDataMeta> {
+        const { extFields, mutFields, rawDataMetaInfo, filters, cleanMethod } = this;
+        const data: IBackUpDataMeta = {
+            mutFields: toJS(mutFields),
+            extFields: extFields,
+            rawDataMetaInfo: rawDataMetaInfo,
+            filters: toJS(filters),
+            cleanMethod: cleanMethod
+        };
+        return data;
+    }
+    public async backupDataStore (): Promise<IBackUpData> {
+        const { rawDataStorage, mutFields } = this;
+        const data = await rawDataStorage.getAll();
+        return {
+            rawData: compressRows(data, mutFields),
+            extData: Array.from(this.extData.entries()),
+        }
+    }
+    public async loadBackupDataStore (data: IBackUpData, meta: IBackUpDataMeta) {
+        const { rawData, extData } = data;
+        const { rawDataStorage } = this;
+        this.extData = new Map(extData);
+        await rawDataStorage.setAll(uncompressRows(rawData, meta.mutFields.map(f => f.fid)));
+        runInAction(() => {
+            this.rawDataMetaInfo = rawDataStorage.metaInfo;
+            this.mutFields = meta.mutFields;
+            this.extFields = meta.extFields;
+            this.rawDataMetaInfo = meta.rawDataMetaInfo;
+            this.filters = meta.filters;
+            this.cleanMethod = meta.cleanMethod as CleanMethod;
+        });
+        this.setShowDataImportSelection(false);
+    }
+    public async loadBackupMetaStore (data: IBackUpDataMeta) {
+        const { mutFields, extFields, rawDataMetaInfo, filters, cleanMethod } = data;
+        runInAction(() => {
+            this.mutFields = mutFields;
+            this.extFields = extFields;
+            this.rawDataMetaInfo = rawDataMetaInfo;
+            this.filters = filters;
+            this.cleanMethod = cleanMethod as CleanMethod;
+        });
+    }
+
 }

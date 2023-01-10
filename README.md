@@ -1,11 +1,11 @@
-<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> English | [简体中文](./README-zh.md)
+<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> English | [日本語](./docs/README-jp.md) | [简体中文](./docs/README-zh.md)
 <div align="center">
   <br>
   <p align="center">
     <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="120">
    </p>
    <h1 style="font-size:55px">RATH</h1>
-  <strong>Your Open Source Augmented Analytics BI Solution</strong>
+  <strong>Next Generation Open Source Augmented Analytics BI</strong>
 </div>
 <br>
 <div id="header" align="center">
@@ -32,35 +32,33 @@
   <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
     <img src="https://img.shields.io/badge/license-AGPL-brightgreen?style=flat-square" alt="AGPL License">
   </a>
-  <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+  <a href="https://github.com/Kanaries/Rath/stargazers">
     <img src="https://badgen.net/github/stars/kanaries/rath?style=flat-square" alt="RATH GitHub Stars">
   </a>
-  <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+  <a href="https://github.com/Kanaries/Rath/fork">
     <img src="https://badgen.net/github/forks/kanaries/rath?style=flat-square" alt="RATH GitHub Forks">
   </a>
-    <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
-    <img src="https://img.shields.io/github/workflow/status/kanaries/rath/Rath%20Auto%20Build?style=flat-square" alt="RATH GitHub Forks">
+    <a href="https://github.com/Kanaries/Rath/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/kanaries/rath/auto-build.yml?branch=master&style=flat-square">
   </a>
   </a>
-    <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+    <a href="https://github.com/Kanaries/graphic-walker">
     <img src="https://img.shields.io/npm/v/@kanaries/graphic-walker/latest?label=%40kanaries%2Fgraphic-walker&style=flat-square" alt="RATH GitHub Forks">
   </a>
 </div>
 
-## Welcome
+## Introduction
 
-Welcome to the [Kanaries RATH](https://kanaries.net/). We are so excited to have you as part of our community.
-
-**RATH** is beyond an open-source alternative to Data Analysis and Visualization tools such as Tableau. It automates your Explotoary Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
+**RATH** is beyond an open-source alternative to Data Analysis and Visualization tools such as Tableau. It automates your Exploratory Data Analysis workflow with an Augmented Analytic engine by discovering patterns, insights, causals and presents those insights with powerful auto-generated multi-dimensional data visualization.
 
 <a href="https://kanaries.net"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/feature-demo.gif" alt="RATH features demo"></a>
 
 ## Get started
 
 To get started with RATH, you can:
-- 🚀 [Try RATH in a browser](https://rath.kanaries.net)
+- 🚀 [Try RATH now!](https://rath.kanaries.net)
 - 📖 [Read RATH Docs](https://docs.kanaries.net)
-- ⭐️ Give us a star on GitHub
+- [Video introducing RATH's data painter](https://youtu.be/djqePNyhz7w)
 
 
 **RATH** is an ongoing project, actively being developed and maintained by a group of data scientists, developers and community enthusiasts. We are a group of people who are passionate about creating the next generation of data analytic tools.
@@ -86,13 +84,12 @@ To get started with RATH, you can:
 
 ## Why use RATH?
 
-- Effortlessly automate your Exploratory Data Analysis process with a no-code UI.
+- Effortlessly automate your Exploratory Data Analysis process.
 - Generate editable and insightful data visualizations. Freely modify your visualizations with Vega/Vega-lite.
 - Support a variety of database types.
-- Flexible copilot to assist your data exploration journey.
+- Use predictive interaction to provide analysis suggestions based on your operation and status.
 - Paint your data to explore your datasets directly with Data Painter.
 - Causal discovery and explainer module to help you understand complex data patterns.
-- Open APIs and SDK for embedding requirements.
 
 ## Try RATH
 
@@ -115,9 +112,9 @@ yarn workspace rath-client start
 
 - 🤖 [Mega-auto exploration](https://docs.kanaries.net/auto-explore): a fully-automated way to explore your data set and visualize your data with one click. Leave everything to RATH, simply pick the associate view that inspires you the most.
 
-- 🛠 [Semi-auto exploration](https://docs.kanaries.net/semi-auto-explore): The middle ground between a fully automated Data Exploration and Tableau-like manual exploration. RATH will work as your copilot, learn your interests and uses AI to generate relevant recommendations for you.
+- 🛠 [Semi-auto exploration](https://docs.kanaries.net/semi-auto-explore): The middle ground between a fully automated Data Exploration and manual exploration. RATH will work as your copilot, learn your interests and uses augmented analytics engine to generate relevant recommendations for you.
 
-- 🎨 [Data painter](https://docs.kanaries.net/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features.
+- 🎨 [Data painter](https://docs.kanaries.net/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features. A video about data painter [here](https://youtu.be/djqePNyhz7w)
 
 - :bar_chart: Dashboard: build a beautiful interactive data dashboard.
 
@@ -129,23 +126,25 @@ yarn workspace rath-client start
 
 ### Import data from online databases or CSV/JSON files.
 
-<a href="https://docs.kanaries.net/data-profiling#import-your-data"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/import-data-from-selected-data-source.gif" alt="Import data from a selected data source"></a>
+[![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/datasource-readme.gif)](https://docs.kanaries.net/data-profiling#import-your-data)
+
 
 ### View statistics from your data source
 
-<a href="https://docs.kanaries.net/data-profiling#data-profiling"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/view-statistics-data-source.gif" alt="View statistics from your data source"></a>
+[![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/data-profiling-readme.gif)](https://docs.kanaries.net/data-profiling#data-profiling)
 
 ### One-click automated data analysis with visualizations
 
-<a href="https://docs.kanaries.net/mega-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/one-click-automated-data-analysis-visualization.gif" alt="One-click automated data analysis with visualizations"></a>
+
+[![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/mega-auto.gif)](https://docs.kanaries.net/mega-auto-data-exploration)
 
 ### Use RATH as your AI Copilot in Data Analysis
 
 Assisted with AI, RATH can help you with your data analysis. Just provide RATH with some input and it will learn about your interests and suggest analysis directions to take.
 
-<a href="https://docs.kanaries.net/semi-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/rath-data-analysis-ai-copilot.gif" alt="RATH Data Analysis AI Copilot"></a>
+[![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/semi-auto-readme.gif)](https://docs.kanaries.net/semi-auto-data-exploration)
 
-### Manually explore your data with a Tableau-like UI:
+### Manually explore your data with drag and drop:
 
 <a href="https://docs.kanaries.net/semi-auto-data-exploration#manually-explore-your-data"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/manually-explore-data-tableau-ui.gif" alt="Manually explore your data with a Tableau-like UI"></a>
 
@@ -160,7 +159,24 @@ Assisted with AI, RATH can help you with your data analysis. Just provide RATH w
 
 ### :sparkles: Interactive data analysis workflow by data painting
 
+[Data Painter Video 🔥 on Youtube](https://youtu.be/djqePNyhz7w)
+
 <a href="https://docs.kanaries.net/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="Interactive data analysis by painting"></a>
+
+### 🌅 Causal Analysis (Alpha stage)
+
+Causal analysis could be defined as the way to identify and examine the causal relationship between variables, which can help explore the data, create better prediction models and make business decission.
+
+RATH's causal analysis feature include:
+- Causal Discovery
+- Editable graphical causal models
+- Causal interpretability
+- Interactive tools for deeper exploration
+- What-if analysis
+
+![Causal Analysis](https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/causal-analysis.png)
+
+For more about Causal Analysis features, refer to [RATH Docs](https://docs.kanaries.net/causal-analysis).
 
 ## Supported Databases
 

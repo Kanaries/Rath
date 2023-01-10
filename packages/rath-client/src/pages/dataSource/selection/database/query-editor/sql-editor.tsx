@@ -1,67 +1,38 @@
-import { useEffect, useRef } from 'react';
-import { EditorView, basicSetup } from 'codemirror';
-import { sql } from '@codemirror/lang-sql';
-import { DefaultButton } from '@fluentui/react';
+import { useCallback, useState } from 'react';
+import { DefaultButton, Stack } from '@fluentui/react';
 import styled from 'styled-components';
-import type { QueryEditorProps } from '.';
+import MonacoEditor, { ChangeHandler } from 'react-monaco-editor';
+import intl from 'react-intl-universal';
+import { QueryEditorProps } from './interfaces';
 
 const Container = styled.div`
     width: 100%;
     height: 300;
-    margin-top: 10;
-    > div {
-        display: flex;
-        &.group {
-            width: 100%;
-            justify-content: flex-end;
-            align-items: center;
-        }
-        .sqlEditor {
-            width: 100%;
-            height: 200px;
-            overflow: auto;
-        }
+    .sql-editor {
+        margin-top: 1em;
     }
 `;
 
 const SQLEditor = ({ setQuery, preview }: QueryEditorProps) => {
-    const container = useRef<HTMLDivElement>(null);
-    const viewRef = useRef<any>(null);
+    const [code, setCode] = useState<string>('');
 
-    useEffect(() => {
-        if (container.current) {
-            const editorView = new EditorView({
-                extensions: [basicSetup, sql()],
-                parent: container.current,
-            });
-            viewRef.current = editorView;
-
-            return () => editorView.destroy();
-        }
+    const updateCode = useCallback<ChangeHandler>((newValue, e) => {
+        setCode(newValue);
     }, []);
-    
     return (
         <Container>
-            <div className="group">
+            <Stack horizontal>
                 <DefaultButton
                     onClick={() => {
-                        if (viewRef.current !== null) {
-                            const queryString = (viewRef.current.state.doc.text as string[]).join(' ');
-                            setQuery(queryString);
-                            preview(queryString);
-                        }
+                        setQuery(code);
+                        preview(code);
                     }}
                 >
-                    {'Preview'}
+                    {intl.get('common.preview')}
                 </DefaultButton>
-            </div>
-            <div>
-                <div style={{ flex: 1 }}>
-                    <div
-                        ref={container}
-                        className="sqlEditor"
-                    ></div>
-                </div>
+            </Stack>
+            <div className="sql-editor">
+                <MonacoEditor width="100%" height="300" language="sql" theme="vs" value={code} onChange={updateCode} />
             </div>
         </Container>
     );

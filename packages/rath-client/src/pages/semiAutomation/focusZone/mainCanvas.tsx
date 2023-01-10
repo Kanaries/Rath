@@ -13,8 +13,9 @@ interface MainCanvasProps {
 }
 const MainCanvas: React.FC<MainCanvasProps> = (props) => {
     const { view, spec } = props;
-    const { semiAutoStore } = useGlobalStore();
-    const { mainVizSetting, dataSource } = semiAutoStore;
+    const { semiAutoStore, commonStore, dataSourceStore } = useGlobalStore();
+    const { mainVizSetting } = semiAutoStore;
+    const { cleanedData: dataSource } = dataSourceStore;
 
     const { resize, debug } = mainVizSetting;
     const { width, height, mode } = resize;
@@ -41,14 +42,14 @@ const MainCanvas: React.FC<MainCanvasProps> = (props) => {
                 }}
             >
                 <ErrorBoundary>
-                    <ReactVega actions={debug} spec={spec} dataSource={viewData} />
+                    <ReactVega actions={debug} spec={spec} dataSource={viewData} config={commonStore.themeConfig} />
                 </ErrorBoundary>
             </Resizable>
         );
     }
     return (
         <ErrorBoundary>
-            <ReactVega actions={debug} spec={spec} dataSource={viewData} />
+            <ReactVega actions={debug} spec={spec} dataSource={viewData} config={commonStore.themeConfig} />
         </ErrorBoundary>
     );
 };

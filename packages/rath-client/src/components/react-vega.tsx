@@ -4,6 +4,7 @@ import intl from 'react-intl-universal';
 import embed, { vega } from 'vega-embed';
 import { EDITOR_URL } from '../constants';
 import { getVegaTimeFormatRules } from '../utils';
+import { VegaThemeConfig } from '../queries/themes/config';
 
 interface ReactVegaProps {
     dataSource: readonly any[];
@@ -12,10 +13,11 @@ interface ReactVegaProps {
     signalHandler?: {
         [key: string]: (name: any, value: any, view: View) => void;
     };
+    config?: VegaThemeConfig;
 }
 
 const ReactVega: React.FC<ReactVegaProps> = (props) => {
-    const { spec, dataSource, signalHandler = {}, actions } = props;
+    const { spec, dataSource, signalHandler = {}, actions, config } = props;
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View>();
     useEffect(() => {
@@ -36,6 +38,7 @@ const ReactVega: React.FC<ReactVegaProps> = (props) => {
                 editorUrl: EDITOR_URL,
                 timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
                 actions,
+                config
             }).then((res) => {
                 const view = res.view;
                 viewRef.current = view;
@@ -54,7 +57,7 @@ const ReactVega: React.FC<ReactVegaProps> = (props) => {
             }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [spec, actions]);
+    }, [spec, actions, config]);
 
     useEffect(() => {
         if (viewRef.current && signalHandler) {

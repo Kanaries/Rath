@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Dropdown, IDropdownOption, Panel } from '@fluentui/react';
+import { Dropdown, IDropdownOption, Stack } from '@fluentui/react';
 import { ICubeStorageManageMode } from 'visual-insights';
 import intl from 'react-intl-universal';
-import { useGlobalStore } from '../../store';
+import { useGlobalStore } from '../store';
 
-import { COMPUTATION_ENGINE, EXPLORE_MODE } from '../../constants';
-import { makeRenderLabelHandler } from '../../components/labelTooltip';
-import { ITaskTestMode } from '../../interfaces';
+import { COMPUTATION_ENGINE, EXPLORE_MODE } from '../constants';
+import { ITaskTestMode } from '../interfaces';
+import { makeRenderLabelHandler } from './labelTooltip';
 
 
 const AnalysisSettings: React.FC = props => {
@@ -43,9 +43,7 @@ const AnalysisSettings: React.FC = props => {
         { text: 'local', key: ITaskTestMode.local },
         { text: 'server', key: ITaskTestMode.server }
     ]
-    return <Panel isOpen={commonStore.showAnalysisConfig}
-        headerText={intl.get('config.analysisConfig')}
-        onDismiss={() => {commonStore.setShowAnalysisConfig(false) }}>
+    return <Stack>
         <Dropdown options={options}
             style={{ minWidth: '180px', marginRight: '1em' }}
             label={intl.get('config.cubeStorageManageMode.title')}
@@ -81,7 +79,7 @@ const AnalysisSettings: React.FC = props => {
                 option && commonStore.setTaskTestMode(option.key as any)
             }}
         />
-    </Panel>
+    </Stack>
 }
 
 export default observer(AnalysisSettings);

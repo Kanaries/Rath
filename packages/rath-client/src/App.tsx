@@ -23,21 +23,23 @@ import useHotKey from './hooks/use-hotkey';
 
 
 function App() {
-    const { langStore, commonStore } = useGlobalStore();
+    const { langStore, commonStore, userStore } = useGlobalStore();
     const { appKey, navMode } = commonStore;
 
     useEffect(() => {
         initRathWorker(commonStore.computationEngine);
-        commonStore.updateAuthStatus().then((res) => {
-            if (res) {
-                commonStore.getPersonalInfo();
-                commonStore.getAvatarImgUrl()
-            }
-        });
         return () => {
             destroyRathWorker();
         };
     }, [commonStore]);
+    
+    useEffect(() => {
+        userStore.updateAuthStatus().then((res) => {
+            if (res) {
+                userStore.getPersonalInfo();
+            }
+        });
+    }, [userStore]);
 
     const [showPerformanceWindow, setShowPerformanceWindow] = useState(false);
     useHotKey({

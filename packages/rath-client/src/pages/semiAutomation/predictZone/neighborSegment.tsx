@@ -7,6 +7,8 @@ import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
+import { IVisSpecType } from '../../../interfaces';
+import { useAsyncViews } from './utils';
 
 const NeighborSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -17,6 +19,7 @@ const NeighborSegment: React.FC = () => {
     const adviceNeighbors = useCallback(() => {
         semiAutoStore.neighborAssociate()
     }, [semiAutoStore])
+    const list = useAsyncViews(neighborSpecList);
     if (neighborViews.views.length === 0 && autoAsso.neighborViews) return <div />
     return <Fragment>
         {
@@ -29,7 +32,7 @@ const NeighborSegment: React.FC = () => {
         }
         <AssoContainer>
             {
-                neighborSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                list.map((spec, i) => neighborViews.views[i] && <div className="asso-segment" key={`p-${i}`}>
                     {
                         neighborViews.computing && <LoadingLayer>
                             <Spinner label="loading" />
@@ -44,10 +47,10 @@ const NeighborSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            iconProps={{ iconName: collectionStore.collectionContains(neighborViews.views[i].fields, spec, neighborViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            iconProps={{ iconName: collectionStore.collectionContains(neighborViews.views[i].fields, spec, IVisSpecType.vegaSubset, neighborViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.toggleCollectState(neighborViews.views[i].fields, spec, neighborViews.views[i].filters)
+                                collectionStore.toggleCollectState(neighborViews.views[i].fields, spec, IVisSpecType.vegaSubset, neighborViews.views[i].filters)
                             }}
                         />
                         <CommandButton
@@ -63,6 +66,7 @@ const NeighborSegment: React.FC = () => {
                             actions={mainVizSetting.debug}
                             spec={adviceVisSize(spec, fieldMetas)}
                             dataSource={applyFilters(dataSource, neighborViews.views[i].filters)}
+                            config={commonStore.themeConfig}
                         />
                     </div>
                     <div className="chart-desc">

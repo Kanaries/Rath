@@ -9,7 +9,7 @@ import { getInsightExpl } from '../../../services/insights';
 const InsightContainer = styled.div({
     height: '40vh',
     overflow: 'hidden auto',
-})
+});
 
 const InsightDesc = styled.div`
     margin: 4px 12px 0px 12px;
@@ -18,21 +18,20 @@ const InsightDesc = styled.div`
     font-size: 12px;
     max-width: 500px;
     overflow-y: auto;
-    .insight-header{
+    .insight-header {
         display: flex;
         font-size: 14px;
         line-height: 14px;
         margin-bottom: 8px;
-        .type-title{
-
+        .type-title {
         }
-        .type-score{
+        .type-score {
             margin-left: 1em;
             padding-left: 1em;
             border-left: 1px solid #bfbfbf;
         }
     }
-    .type-label{
+    .type-label {
         background-color: green;
         color: white;
         display: inline-block;
@@ -40,24 +39,26 @@ const InsightDesc = styled.div`
         border-radius: 8px;
         font-size: 12px;
     }
-`
+`;
 
-const Narrative: React.FC = props => {
+const Narrative: React.FC = (props) => {
     const { megaAutoStore, langStore } = useGlobalStore();
     const { pageIndex, insightSpaces, dataSource, fieldMetas, nlgThreshold } = megaAutoStore;
     const [explainLoading, setExplainLoading] = useState(false);
     const requestId = useRef<number>(0);
     const fms = toJS(fieldMetas);
     const fieldsInViz = useMemo(() => {
-        return insightSpaces[pageIndex] ? [...insightSpaces[pageIndex].dimensions, ...insightSpaces[pageIndex].measures].map(fid => fms.find(fm => fm.fid === fid)) : []
+        return insightSpaces[pageIndex]
+            ? [...insightSpaces[pageIndex].dimensions, ...insightSpaces[pageIndex].measures].map((fid) => fms.find((fm) => fm.fid === fid))
+            : [];
     }, [insightSpaces, pageIndex, fms]);
-    const [viewInfo, setViewInfo] = useState<any[]>([])
+    const [viewInfo, setViewInfo] = useState<any[]>([]);
     useEffect(() => {
-        setViewInfo([])
+        setViewInfo([]);
         setExplainLoading(false);
-    }, [pageIndex])
+    }, [pageIndex]);
     useEffect(() => {
-        setExplainLoading(true)
+        setExplainLoading(true);
         requestId.current++;
         getInsightExpl({
             requestId: requestId,
@@ -66,36 +67,41 @@ const Narrative: React.FC = props => {
             aggrType: 'mean',
             langType: langStore.lang,
             setExplainLoading: setExplainLoading,
-            resolveInsight: setViewInfo
-        })
-    }, [pageIndex, dataSource, fieldsInViz, langStore.lang])
+            resolveInsight: setViewInfo,
+        });
+    }, [pageIndex, dataSource, fieldsInViz, langStore.lang]);
     const explains = useMemo<any[]>(() => {
-        if (!viewInfo || viewInfo.length === 0) return []
-        return Object.keys(viewInfo[0]).filter((k: string) => viewInfo[0][k].score > 0).map((k: string) => ({
-            score: viewInfo[0][k].score,
-            type: k,
-            explain: viewInfo[0][k].para.explain
-        }));
-    }, [viewInfo])
-    return <InsightContainer>
-        {
-            !explainLoading && explains.filter(ex => ex.score > nlgThreshold).sort((a, b) => b.score - a.score).map(ex => <InsightDesc key={ex.type}>
-                <div className="insight-header">
-                    <div className="type-title">{ex.type}</div>
-                    <div className="type-score">{(ex.score * 100).toFixed(1)} %</div>
+        if (!viewInfo || viewInfo.length === 0) return [];
+        return Object.keys(viewInfo[0])
+            .filter((k: string) => viewInfo[0][k].score > 0)
+            .map((k: string) => ({
+                score: viewInfo[0][k].score,
+                type: k,
+                explain: viewInfo[0][k].para.explain,
+            }));
+    }, [viewInfo]);
+    return (
+        <InsightContainer>
+            {!explainLoading &&
+                explains
+                    .filter((ex) => ex.score > nlgThreshold)
+                    .sort((a, b) => b.score - a.score)
+                    .map((ex) => (
+                        <InsightDesc key={ex.type}>
+                            <div className="insight-header">
+                                <div className="type-title">{ex.type}</div>
+                                <div className="type-score">{(ex.score * 100).toFixed(1)} %</div>
+                            </div>
+                            <p>{ex.explain}</p>
+                        </InsightDesc>
+                    ))}
+            {explainLoading && (
+                <div>
+                    <Spinner label="explain loading..." />
                 </div>
-                {/* <div className="type-label">{ex.type}</div> */}
-                <p>{ex.explain}</p>
-            </InsightDesc>)
-        }
-        {
-            explainLoading && <div>
-                <Spinner label="explain loading..." />
-            </div>
-        }
-        {/* <ReactJson src={viewInfo} /> */}
-        {/* {JSON.stringify(viewInfo)} */}
-    </InsightContainer>
-}
+            )}
+        </InsightContainer>
+    );
+};
 
 export default observer(Narrative);

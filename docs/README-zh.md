@@ -1,4 +1,4 @@
-<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> [English](README.md) | 简体中文
+<img src="https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/lang-icons/icon128px.png" width="22px" /> [English](../README.md) | [日本語](./README-jp.md) | 简体中文
 
 <div align="center">
   <br>
@@ -6,9 +6,9 @@
     <img src="https://camo.githubusercontent.com/53b952ee2dce0e37b0357d94965630b98e729027fb979911b377fa70501471e4/68747470733a2f2f6b616e61726965732e636e2f6173736574732f6b616e61726965732d6c6f676f2e706e67" alt="RATH, the automated exploratory Data Analysis co-pilot" width="120">
    </p>
    <h1 style="font-size:55px">RATH</h1>
-  <strong>新一代开源，自动化的数据分析与智能可视化工具</strong>
+  <strong>次世代开源智能数据分析与可视化应用</strong>
   <br></br>
-  未来的数据分析场景会是怎样的？自动化的数据分析与智能可视化叙事帮助你挖掘数据
+  未来的数据分析场景会是怎样的？RATH借助自动化的数据分析、智能可视化叙事、因果发现与文本挖掘帮助你以前所未有的方式挖掘数据中的价值。
 </div>
 <br>
 <div id="header" align="center">
@@ -34,12 +34,15 @@
 
 **欢迎使用[RATH](https://kanaries.cn)!**
 
-RATH 是数据分析和可视化工具（如 Tableau）的开源替代品。主要功能包括：
+RATH 不仅仅是数据分析和可视化工具（如 Tableau）的开源替代品，还是次世代的数据分析应用的雏形。主要功能包括：
 
 - 支持主流数据库导入
 - 自动生成多维数据并可视化
-- 发现数据规律，揭示数据的内在联系和因果关系
+- 自动发现数据规律，揭示数据的内在联系和因果关系
+- 因果发现与推断，帮你挖掘更深层次的变量关系。
+- 根据你关心的文本片段，自动理解你想要进行的数据转化操作，并帮你生成转化选项。
 - 使用增强分析引擎自动化你的探索性数据分析（EDA）流程
+- 数据绘板，使用绘画的方式玩数据分析。
 
 <a href="https://kanaries.net"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/feature-demo.gif" alt="RATH 功能 demo"></a>
 
@@ -48,13 +51,12 @@ RATH 是数据分析和可视化工具（如 Tableau）的开源替代品。主�
 
 - 🚀 在浏览器中[立即尝试RATH](https://rath.kanaries.net)
 - 📖 阅读[RATH 文档](https://docs.kanaries.net)
-- ⭐️ 给我们GitHub 加星
+- [绘板功能视频](https://www.bilibili.com/video/BV1Pe4y1E7Y2/?share_source=copy_web&vd_source=57ac992756e57aeb910c02693db35eac)
 
 ## 联系我们
 
 RATH是开源项目，离不开开源贡献者和关注者的支持。当你遇到问题，bug，疑惑，甚至有有趣的想法或建议，都可以联系我们：
 - 邮件: support@kanaries.org
-- 领英: https://www.linkedin.com/in/hao-chen-50950a168/
 - QQ群: 129132269
 - 公众号: kanaries
 
@@ -101,22 +103,28 @@ yarn workspace rath-client start
 
 <a href="https://docs.kanaries.net/zh/data-profiling#导入数据"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/import-data-from-selected-data-source.gif" alt="导入数据源"></a>
 
-### 浏览数据视图
+### 数据转化与清洗
+导入数据后，你可以在RATH中快速了解数据的大致分布情况，RATH也会提供一些自动化清洗和转化的方法。
+
+另外，RATH还内置了文本模式识别提取功能，对于一些文本字段，你可以在文本中选择你关心的部分，RATH会自动归纳文本特征，并为你匹配类似的特征，并提取生成新字段。
+![text pattern selection](https://ch-resources.oss-cn-shanghai.aliyuncs.com/images/rath/text-pattern-selection-01.gif)
 
 <a href="https://docs.kanaries.net/zh/data-profiling#数据剖析"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/view-statistics-data-source.gif" alt="浏览数据视图"></a>
 
 ### 一键全自动分析，并生成可视化视图
+在完全没有头绪时，点击自动分析，RATH就可以帮你完成对数据集的探索与挖掘，帮你发现数据中的规律，问题，并自动生成可视化。
 
 <a href="https://docs.kanaries.net/zh/mega-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/one-click-automated-data-analysis-visualization.gif" alt="RATH全自动分析"></a>
 
 ### 半自动探索
 
-RATH作为数据分析的智能助手，通过AI学习给出提示，协助数据分析师探索数据。
-分析师提供输入，AI智能学习，给出分析：
+结合了全自动和半自动的优点，每次都根据你当前关心的点，推荐下一步的分析建议，而不再是做全局的自动化。
 
 <a href="https://docs.kanaries.net/zh/semi-auto-data-exploration"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/rath-data-analysis-ai-copilot.gif" alt="RATH半自动探索"></a>
 
 ### 自助分析 （类Tableau）
+
+一个传统的类tableau的拖拉拽分析的模块，适合有明确的分析目的和问题。
 
 <a href="https://docs.kanaries.net/zh/semi-auto-data-exploration#自助分析"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/manually-explore-data-tableau-ui.gif" alt="RATH自助分析"></a>
 
@@ -130,6 +138,8 @@ RATH作为数据分析的智能助手，通过AI学习给出提示，协助数�
 >```
 
 ### 数据绘板，以绘画的方式完成数据分析工作流
+
+[数据绘板演示视频](https://www.bilibili.com/video/BV1Pe4y1E7Y2/?share_source=copy_web&vd_source=57ac992756e57aeb910c02693db35eac)
 
 <a href="https://docs.kanaries.net/zh/data-painter"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/data-analysis-paiting.gif" alt="数据绘板"></a>
 
@@ -150,7 +160,7 @@ RATH作为数据分析的智能助手，通过AI学习给出提示，协助数�
   <img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-logos/airtable.png" alt="AirTable" border="0" width="200" height="80"/>
 </p>
 
-想要更多种类的数据库支持？[联系我们](#联系我们)
+想要更多种类的数据库支持？[联系我们](#联系我们) 或在issue中提出你的需求
 
 ## 项目看板
 

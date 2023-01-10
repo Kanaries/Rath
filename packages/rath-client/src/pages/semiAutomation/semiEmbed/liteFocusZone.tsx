@@ -2,12 +2,12 @@ import React, { useCallback, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { IconButton, Stack } from '@fluentui/react';
 import intl from 'react-intl-universal';
-import { IFieldMeta } from '../../../interfaces';
+import { IFieldMeta, IVisSpecType } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ViewField from '../../megaAutomation/vizOperation/viewField';
-import FieldPlaceholder from '../../../components/fieldPlaceholder';
+import FieldPlaceholder from '../../../components/fieldPill/fieldPlaceholder';
 import { MainViewContainer } from '../components';
-import FilterCreationPill from '../../../components/filterCreationPill';
+import FilterCreationPill from '../../../components/fieldPill/filterCreationPill';
 import Narrative from '../narrative';
 import MainCanvas from '../focusZone/mainCanvas';
 import MiniFloatCanvas from '../focusZone/miniFloatCanvas';
@@ -61,13 +61,13 @@ const LiteFocusZone: React.FC = (props) => {
                         <IconButton
                             style={BUTTON_STYLE}
                             iconProps={{
-                                iconName: collectionStore.collectionContains(fieldMetas, mainViewSpec, mainView.filters)
+                                iconName: collectionStore.collectionContains(fieldMetas, mainViewSpec, IVisSpecType.vegaSubset, mainView.filters)
                                     ? 'FavoriteStarFill'
                                     : 'FavoriteStar',
                             }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.toggleCollectState(fieldMetas, mainViewSpec, mainView.filters);
+                                collectionStore.toggleCollectState(fieldMetas, mainViewSpec, IVisSpecType.vegaSubset, mainView.filters);
                             }}
                         />
                     )}

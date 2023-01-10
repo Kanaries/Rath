@@ -9,6 +9,15 @@
         "hide": "隐藏",
         "expand": "展开",
         "filter": "筛选",
+        "preview": "预览",
+        "source": "源",
+        "submit": "提交",
+        "apply": "应用",
+        "applied": "已应用",
+        "run": "执行",
+        "edit": "编辑",
+        "suggestions": "建议",
+        "showMore": "显示更多",
         "semanticType": {
             "nominal": "类别类型",
             "ordinal": "有序类型",
@@ -19,6 +28,7 @@
             "dimension": "维度",
             "measure": "度量"
         },
+        "vistheme": "可视化主题",
         "addVar": "添加变量",
         "addFilter": "添加筛选项",
         "addEncode": "添加计算",
@@ -36,6 +46,11 @@
             "qt_25": "25%分位数",
             "qt_75": "75%分位数",
             "qt_50": "中位数"
+        },
+        "search": {
+            "searchViews": "搜索视图",
+            "searchFields": "搜索字段/变量",
+            "notFound": "未找到匹配结果"
         }
     },
     "menu": {
@@ -131,6 +146,11 @@
         "connectorConfig": "连接器设置",
         "connectorService": "连接器服务地址 (可选)",
         "apply": "设置并测试",
+        "textPattern": {
+            "knowledge": "常识",
+            "generalize": "泛化",
+            "specific": "完全匹配"
+        },
         "statViewInfo": {
             "title": "统计视图",
             "desc": "统计视图是对数据集的统计信息，包括数据集的大小、数据类型、缺失值、重复值等。",
@@ -207,7 +227,8 @@
                 "restful": "RESTFUL",
                 "mysql": "MySQL",
                 "demo": "示例数据",
-                "database": "数据库"
+                "database": "数据库",
+                "rath_notebook": "Notebook"
             },
             "load": "加载数据",
             "demo": {
@@ -234,7 +255,7 @@
         },
         "tip": "记得在开始分析前先调整数据的清洗策略并配置字段的属性",
         "recordCount": "记录数 {count}",
-        "rowsInViews": "原始数据: {origin} 行 / 筛选后: {select} 行 / 清洗后: {clean} 行",
+        "rowsInViews": "原始数据: {originCols} 列 × {origin} 行 / 筛选后: {selectCols} 列 × {select} 行 / 清洗后: {clean} 行",
         "selection": {
             "title": "快速数据筛选",
             "desc": "基于数据中的分位数进行快速筛选",
@@ -288,7 +309,8 @@
             "title": "导出数据",
             "downloadCSV": "导出CSV",
             "downloadJSON": "导出JSON",
-            "downloadJSONMeta": "导出JSON(含元数据)"
+            "downloadJSONMeta": "导出JSON(含元数据)",
+            "downloadRATHDS": "下载RATH格式数据集"
         },
         "extend": {
             "title": "扩展信息",
@@ -303,6 +325,7 @@
             "cancel": "取消",
             "auto": "扩展建议",
             "suggestion": {
+                "regex_selection": "模式发现&提取|将选中的字段作为模式，发现数据集中所有匹配的相似模式并提取出来。",
                 "dateTimeExpand": "将数据映射到不同时间单位。|时间序列可能在不同的单位尺度下展现出更强的周期性或相关性。",
                 "oneHot": "独热编码(one-hot encoding)|独热编码可以将类别型数据转换为多个数值型数据，方便进行相关性分析。",
                 "wordTFIDF": "按文档的词频与逆向文件频率提取类别(tf-idf)。|tf-idf是一种统计方法，用以评估一字词对于一个文件集或一个语料库中的其中一份文件的重要程度",
@@ -325,8 +348,27 @@
         "operations": {
             "title": "快捷操作",
             "selectAll": "选择所有字段",
-            "disableAll": "禁用所有字段"
+            "disableAll": "禁用所有字段",
+            "backup": "保存到云"
         }
+    },
+    "storage": {
+        "upload": "保存到云",
+        "upload_desc": "备份你的 Rath 工作簿。",
+        "components": {
+            "data": "全量数据 ({size} 行)",
+            "meta": "元数据 ({size} 个字段)",
+            "collection": "收藏夹 ({size} 个项目)",
+            "causal": "因果模型",
+            "dashboard": "报表 ({size} 个文档)"
+        },
+        "name": "工作簿名称",
+        "default_name": "Rath 工作簿 {date}",
+        "download": "加载",
+        "createdAt": "创建时间",
+        "refresh": "刷新",
+        "size": "大小",
+        "apply": "上传"
     },
     "meta": {
         "title": "字段元信息配置",
@@ -349,9 +391,12 @@
             "hint": "『关联度量』是指探索和当前图表中，度量/指标关联程度更高的图表，这可以帮你研究哪些指标的表现和当前关注的指标相近。『关联维度』是指探索和当前图表中，维度相关度更高的图表，这可以帮助你研究对于当前的度量下，相似维度对度量分布的划分差异。"
         },
         "bring": "自定义分析",
+        "exitEditor": "退出编辑",
         "commandBar": {
             "painting": "数据绘板",
             "editing": "编辑图表",
+            "editInGW": "自助分析",
+            "editInEditor": "在编辑器配置",
             "associate": "联想",
             "constraints": "分析约束"
         },
@@ -528,6 +573,16 @@
         "shortMonths": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
     },
     "login": {
+        "configKeys": {
+            "basic": "基础信息",
+            "design": "样式/主题设计",
+            "analysis": "数据分析"
+        },
+        "design": {
+            "createCustomTheme": "创建自定义主题",
+            "syncFromSelectedTheme": "从已选主题同步配置",
+            "useCustomTheme": "使用自定义主题"
+        },
         "clickLogin": "点击登录",
         "haveSent": "已发送",
         "signIn": "登录",
@@ -557,6 +612,30 @@
         "password": {
             "userName": "用户名",
             "password": "密码"
+        }
+    },
+    "user": {
+        "organization": "组织",
+        "workspace": "工作空间"
+    },
+    "messages": {
+        "email": {
+            "success": {
+                "title": "邮件发送成功",
+                "content": "邮箱已发送至{email}，请检查。"
+            },
+            "error": {
+                "title": "邮件发送发生错误"
+            }
+        },
+        "phone": {
+            "success": {
+                "title": "短信发送成功",
+                "content": "短信已发送至{phone}，请检查。"
+            },
+            "error": {
+                "title": "短信发送发生错误"
+            }
         }
     }
 }

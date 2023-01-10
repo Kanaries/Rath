@@ -22,7 +22,7 @@ const DEFAULT_MAIN_SERVER_HOST = `${
     window.location.host.match(/kanaries\.[a-z]+$/i)?.[0] ?? 'kanaries.net'
 }`;
 
-export function getMainServerUrl(path: string) {
+export function getMainServiceAddress(path: string) {
     const baseURL = new URL(window.location.href);
     const CONFIGURABLE_MAIN_SERVER_URL = RathEnv === RATH_ENV.ONLINE ? null
         : baseURL.searchParams.get('main_service') || localStorage.getItem('main_service');
@@ -30,22 +30,4 @@ export function getMainServerUrl(path: string) {
     const url = new URL(serverUrl);
     url.pathname = path;
     return url.toString();
-}
-
-export function getDefaultAvatarURL(imgKey: string, size: 'small' | 'large' = 'large') {
-    return `${DEFAULT_AVATAR_URL_PREFIX}${size}/${imgKey}`;
-}
-
-type AvatarProps = {
-    avatarType: IAVATAR_TYPES;
-    avatarKey: string;
-    size: 'small' | 'large';
-    email: string;
-}
-
-export function getAvatarURL(props: AvatarProps) {
-    if (props.avatarType === IAVATAR_TYPES.default) {
-        return `${DEFAULT_AVATAR_URL_PREFIX}${props.size}/${props.avatarKey}`
-    }
-    return ''
 }

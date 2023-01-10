@@ -7,6 +7,8 @@ import { useGlobalStore } from '../../../store';
 import { AssoContainer, LoadingLayer } from '../components';
 import ReactVega from '../../../components/react-vega';
 import { adviceVisSize } from '../../collection/utils';
+import { IVisSpecType } from '../../../interfaces';
+import { useAsyncViews } from './utils';
 
 const FeatSegment: React.FC = () => {
     const { semiAutoStore, collectionStore, commonStore } = useGlobalStore();
@@ -17,6 +19,7 @@ const FeatSegment: React.FC = () => {
     const advicePureFeature = useCallback(() => {
         semiAutoStore.featAssociate()
     }, [semiAutoStore])
+    const list = useAsyncViews(featSpecList);
     if (featViews.views.length === 0 && autoAsso.featViews) return <div />
     return <Fragment>
         {
@@ -29,7 +32,7 @@ const FeatSegment: React.FC = () => {
         }
         <AssoContainer>
             {
-                featSpecList.map((spec, i) => <div className="asso-segment" key={`p-${i}`}>
+                list.map((spec, i) => featViews.views[i] && <div className="asso-segment" key={`p-${i}`}>
                     {
                         featViews.computing && <LoadingLayer>
                             <Spinner label="loading" />
@@ -44,10 +47,10 @@ const FeatSegment: React.FC = () => {
                             }}
                         />
                         <CommandButton
-                            iconProps={{ iconName: collectionStore.collectionContains(featViews.views[i].fields, spec, featViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
+                            iconProps={{ iconName: collectionStore.collectionContains(featViews.views[i].fields, spec, IVisSpecType.vegaSubset, featViews.views[i].filters) ? 'FavoriteStarFill' : 'FavoriteStar' }}
                             text={intl.get('common.star')}
                             onClick={() => {
-                                collectionStore.toggleCollectState(featViews.views[i].fields, spec, featViews.views[i].filters)
+                                collectionStore.toggleCollectState(featViews.views[i].fields, spec, IVisSpecType.vegaSubset, featViews.views[i].filters)
                             }}
                         />
                         <CommandButton
@@ -63,6 +66,7 @@ const FeatSegment: React.FC = () => {
                             actions={mainVizSetting.debug}
                             spec={adviceVisSize(spec, fieldMetas)}
                             dataSource={applyFilters(dataSource, featViews.views[i].filters)}
+                            config={commonStore.themeConfig}
                         />
                     </div>
                     <div className="chart-desc">

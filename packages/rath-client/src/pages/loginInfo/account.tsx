@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { Pivot, PivotItem, PrimaryButton, TextField } from '@fluentui/react';
@@ -19,8 +20,8 @@ const AccountDiv = styled.div`
             font-weight: 600;
             font-size: 14px;
             color: rgb(50, 49, 48);
-            font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont,
-                Roboto, 'Helvetica Neue', sans-serif;
+            font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue',
+                sans-serif;
             -webkit-font-smoothing: antialiased;
         }
         .account {
@@ -61,11 +62,28 @@ const PIVOT_LIST = [
     },
 ];
 
+export const LoginPanel = observer<{ onSuccessLogin?: () => void }>(function LoginPanel ({ onSuccessLogin }) {
+    const { userStore } = useGlobalStore();
+
+    return (
+        <Pivot>
+            {PIVOT_LIST.map((item) => (
+                <PivotItem key={item.itemKey} headerText={intl.get(`login.${item.headerText}`)}>
+                    {item.element(() => {
+                        onSuccessLogin?.();
+                        userStore.getPersonalInfo();
+                    })}
+                </PivotItem>
+            ))}
+        </Pivot>
+    );
+});
+
 function Account() {
     const [isLoginStatus, setIsLoginStatus] = useState<boolean>(false);
     // const [globalSwitch, setGlobalSwitch] = useState(true);
-    const { commonStore } = useGlobalStore();
-    const { userName, info } = commonStore;
+    const { userStore } = useGlobalStore();
+    const { userName, info } = userStore;
     // const pivots = PIVOT_LIST.map((p) => ({
     //     // ...p,
     //     key: p.itemKey,
@@ -77,43 +95,34 @@ function Account() {
             {isLoginStatus ? (
                 <div>
                     <div className="mb-4">
-                        <Pivot>
-                            {PIVOT_LIST.map((item) => (
-                                <PivotItem key={item.itemKey} headerText={intl.get(`login.${item.headerText}`)}>
-                                    {item.element(() => {
-                                        setIsLoginStatus(false);
-                                        commonStore.getPersonalInfo();
-                                    })}
-                                </PivotItem>
-                            ))}
-                        </Pivot>
+                        <LoginPanel onSuccessLogin={() => setIsLoginStatus(false)} />
                     </div>
                 </div>
             ) : (
                 <div>
                     <div className="account">
-                        <span className="label">Account</span>
-                        {userName ? (
-                            <PrimaryButton
-                                onClick={() => {
-                                    commonStore.commitLogout()
-                                }}
-                            >
-                                {intl.get('login.signOut')}
-                            </PrimaryButton>
-                        ) : (
-                            <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>
-                                {intl.get('login.signIn')}
-                            </PrimaryButton>
-                        )}
+                        <span>
+                            {userName ? (
+                                <PrimaryButton
+                                    className="ml-2"
+                                    onClick={() => {
+                                        userStore.commitLogout();
+                                    }}
+                                >
+                                    {intl.get('login.signOut')}
+                                </PrimaryButton>
+                            ) : (
+                                <PrimaryButton onClick={() => [setIsLoginStatus(true)]}>{intl.get('login.signIn')}</PrimaryButton>
+                            )}
+                        </span>
                         {userName && <TextField value={userName || ''} disabled={true} />}
                     </div>
-                    {userName && (
+                    {info && (
                         <div className="phone">
                             <TextField label="Phone" value={info.phone} disabled={true} />
                         </div>
                     )}
-                    {userName && (
+                    {info && (
                         <div className="email">
                             <TextField label="Email" value={info.email} disabled={true} />
                         </div>
@@ -124,4 +133,4 @@ function Account() {
     );
 }
 
-export default Account;
+export default observer(Account);

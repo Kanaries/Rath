@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal'
-import { IFieldMeta } from '../../../interfaces';
-import { formatNumbers } from '../profilingView/utils';
+import { IFieldMeta } from '../../../../interfaces';
+import { formatNumbers } from '../../profilingView/utils';
 
 const QuantitativeMetrics: string[] = [
     'min',
@@ -20,16 +20,13 @@ const LiteTable = styled.table`
         font-weight: 500;
         font-size: 14px;
     }
-    tr{
-        border-color: #red;
-    }
     td{
         padding: revert;
         background: revert;
         height: revert;
         border: none;
         border-right: revert;
-        border-top-color: #efefef !important;
+        border-top-color: #f8f8f8 !important;
         border-bottom: revert;
     }
 `

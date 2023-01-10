@@ -7,6 +7,7 @@ import { runInAction } from 'mobx';
 import { DefaultButton, PrimaryButton } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
+import EditorCore from '../editor/core';
 import VizPreference from './preference';
 import SaveModal from './save';
 import OperationBar from './vizOperation/operationBar';
@@ -61,7 +62,7 @@ const InsightContainer = styled.div`
 const LTSPage: React.FC = () => {
     const { ltsPipeLineStore, megaAutoStore, commonStore } = useGlobalStore();
 
-    const { visualConfig } = megaAutoStore;
+    const { visualConfig, mainViewSpecSource } = megaAutoStore;
     const { taskMode } = commonStore;
 
     // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
@@ -121,17 +122,20 @@ const LTSPage: React.FC = () => {
                         <OperationBar />
                     </div>
                     <div className="flex-container">
-                        {/* <div className='spec-container'>
-                        {
-                            spec && <VizSpec
-                                schema={spec.schema}
-                                fields={fieldMetas}
-                                onSchemaChange={(schemaKey, pos, val) => {
-                                    megaAutoStore.setSpecSchema(schemaKey, pos, val);
-                                }}
-                            />
-                        }
-                    </div> */}
+                        <div className="spec-container">
+                            {mainViewSpecSource === 'custom' && (
+                                <EditorCore
+                                    actionButtons={
+                                        <DefaultButton
+                                            text={intl.get('megaAuto.exitEditor')}
+                                            onClick={() => {
+                                                megaAutoStore.setMainViewSpecSource('default');
+                                            }}
+                                        />
+                                    }
+                                />
+                            )}
+                        </div>
                         <MainCanvas />
                         <div className="insight-info">{visualConfig.nlg && <Narrative />}</div>
                     </div>

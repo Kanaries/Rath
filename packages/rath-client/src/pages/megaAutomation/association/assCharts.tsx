@@ -1,11 +1,17 @@
-import React from 'react';
-import { CommandButton } from '@fluentui/react';
+import React, { useMemo } from 'react';
+import { CommandButton, Spinner } from '@fluentui/react';
 import intl from 'react-intl-universal';
+import { observer } from 'mobx-react-lite';
 import { IInsightSpace } from 'visual-insights';
 import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IFieldMeta, IRow, PreferencePanelConfig } from '../../../interfaces';
 import ReactVega from '../../../components/react-vega';
 import { distVis } from '../../../queries/distVis';
+import { VegaThemeConfig } from '../../../queries/themes/config';
+import { useGlobalStore } from '../../../store';
+import { labDistVisService } from '../../../services';
+import { useAsyncViews } from '../../semiAutomation/predictZone/utils';
+import { AssoViewContainer, AssociationContainer } from './components';
 
 interface AssociationProps {
     visualConfig: PreferencePanelConfig;
@@ -13,28 +19,42 @@ interface AssociationProps {
     fieldMetas: IFieldMeta[];
     dataSource: IRow[];
     onSelectView: (viz: IInsightSpace) => void;
+    themeConfig?: VegaThemeConfig;
 }
 const AssociationCharts: React.FC<AssociationProps> = (props) => {
-    const { vizList, onSelectView, dataSource, fieldMetas } = props;
+    const { vizList, onSelectView, dataSource, fieldMetas, themeConfig } = props;
+    const { semiAutoStore } = useGlobalStore();
+    const { settings: { vizAlgo } } = semiAutoStore;
+
+    const specList = useMemo(() => {
+        if (vizAlgo === 'lite') {
+            return Promise.resolve(vizList.map(view => {
+                const fieldsInView = fieldMetas.filter((m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid));
+                return distVis({
+                    pattern: { fields: fieldsInView, imp: 0 }
+                });
+            }));
+        }
+        return labDistVisService({
+            dataSource,
+            items: vizList.map(view => {
+                const fieldsInView = fieldMetas.filter((m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid));
+                return {
+                    pattern: { fields: fieldsInView, imp: 0 },
+                };
+            }),
+        });
+    }, [vizAlgo, dataSource, vizList, fieldMetas]);
+
+    const views = useAsyncViews(specList);
 
     return (
-        <div style={{ border: 'solid 1px #bfbfbf', marginTop: '2em', backgroundColor: '#e7e7e7' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', overflow: 'auto' }}>
+        <AssociationContainer>
+            <div className="asso-content-container">
                 {vizList.map((view, i) => {
-                    const fieldsInView = fieldMetas.filter(
-                        (m) => view.dimensions.includes(m.fid) || view.measures.includes(m.fid)
-                    );
+                    const spec = views[i];
                     return (
-                        <div
-                            key={`associate-row-${i}`}
-                            dir="ltr"
-                            style={{
-                                backgroundColor: '#fff',
-                                margin: '6px',
-                                padding: '10px',
-                                flexGrow: 1,
-                            }}
-                        >
+                        <AssoViewContainer key={`associate-row-${i}`} dir="ltr">
                             <div>
                                 <CommandButton
                                     iconProps={{ iconName: 'Lightbulb' }}
@@ -45,20 +65,24 @@ const AssociationCharts: React.FC<AssociationProps> = (props) => {
                                     }}
                                 />
                             </div>
-                            <VisErrorBoundary>
-                                <ReactVega
-                                    dataSource={dataSource}
-                                    spec={distVis({
-                                        pattern: { fields: fieldsInView, imp: 0 },
-                                    })}
-                                />
-                            </VisErrorBoundary>
-                        </div>
+                            {spec ? (
+                                <VisErrorBoundary>
+                                    <ReactVega
+                                        dataSource={dataSource}
+                                        spec={spec}
+                                        actions={false}
+                                        config={themeConfig}
+                                    />
+                                </VisErrorBoundary>
+                            ) : (
+                                <Spinner />
+                            )}
+                        </AssoViewContainer>
                     );
                 })}
             </div>
-        </div>
+        </AssociationContainer>
     );
 };
 
-export default AssociationCharts;
+export default observer(AssociationCharts);

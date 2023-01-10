@@ -3,7 +3,7 @@ import produce, { Draft } from 'immer';
 import intl from 'react-intl-universal';
 import { CleanMethod } from '../interfaces';
 import { notify } from '../components/error';
-import { getMainServerUrl } from '../utils/user';
+import { getMainServiceAddress } from '../utils/user';
 import { request } from '../utils/request';
 
 /**
@@ -56,7 +56,7 @@ export const useCleanMethodList = function (): typeof cleanMethodList {
 };
 
 async function sendCertMail(email: string) {
-    const url = getMainServerUrl('/api/sendMailCert');
+    const url = getMainServiceAddress('/api/sendMailCert');
     // TODO: [feat] email format check
     const res = await request.post<{ email: string }, string>(url, { email });
     if (res) {
@@ -66,7 +66,7 @@ async function sendCertMail(email: string) {
 }
 
 async function sendCertPhone(phone: string) {
-    const url = getMainServerUrl('/api/sendPhoneCert');
+    const url = getMainServiceAddress('/api/sendPhoneCert');
     const res = await request.post<{ phone: string }, string>(url, { phone });
     if (res) {
         // console.log("message sent success");
@@ -82,14 +82,14 @@ export function useCertMail(email: string) {
         sendCertMail(email)
             .then((res) => {
                 notify({
-                    title: '邮件发送成功',
+                    title: intl.get('messages.email.success.title'),
                     type: 'success',
-                    content: `邮箱已发送至${email}，请检查。`,
+                    content: intl.get('messages.email.success.content', { email }),
                 });
             })
             .catch((err) => {
                 notify({
-                    title: '发生错误',
+                    title: intl.get('messages.email.error.title'),
                     type: 'error',
                     content: `[/api/sendMailCert] ${err}`,
                 });
@@ -129,14 +129,14 @@ export function useCertPhone(phone: string) {
         sendCertPhone(phone)
             .then((res) => {
                 notify({
-                    title: '短信发送成功',
+                    title: intl.get('messages.phone.success.title'),
                     type: 'success',
-                    content: `短信已发送至${phone}，请检查。`,
+                    content: intl.get('messages.phone.success.content', { phone }),
                 });
             })
             .catch((err) => {
                 notify({
-                    title: '发生错误',
+                    title: intl.get('messages.phone.error.title'),
                     type: 'error',
                     content: `[/api/sendPhoneCert] ${err}`,
                 });
