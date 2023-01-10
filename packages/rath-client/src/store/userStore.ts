@@ -334,12 +334,14 @@ export default class UserStore {
                 body: file,
             });
             await request.post<{ id: number }, {}>(getMainServiceAddress('/api/ce/notebook/callback'), { id });
+            return true;
         } catch (error) {
             notify({
                 title: '[/api/ce/notebook]',
                 type: 'error',
                 content: `${error}`,
             });
+            return false;
         }
     }
 

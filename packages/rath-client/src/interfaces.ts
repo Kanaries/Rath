@@ -269,8 +269,8 @@ export interface IRawFeatures {
 export type ISpecSourceType = 'default' | 'custom';
 
 export enum CloudAccessModifier {
-    PROTECTED = 0,
     PUBLIC = 1,
+    PROTECTED = 2,
 }
 
 export enum DataSourceType {

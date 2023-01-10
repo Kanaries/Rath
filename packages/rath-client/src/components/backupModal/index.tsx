@@ -8,6 +8,7 @@ import { useGlobalStore } from '../../store';
 import { downloadFileFromBlob, getKRFParseMap, IKRFComponents } from '../../utils/download';
 import { LoginPanel } from '../../pages/loginInfo/account';
 import { CloudItemType } from '../../pages/dataSource/selection/cloud/space';
+import { notify } from '../error';
 import { CloudAccessModifier } from '../../interfaces';
 import { writeDatasetFile, writeNotebookFile } from './utils';
 
@@ -116,7 +117,10 @@ const BackupModal: FC = (props) => {
             if (download) {
                 downloadFileFromBlob(file, file.name);
             } else {
-                await userStore.uploadNotebook(selectedWspId!, file);
+                const ok = await userStore.uploadNotebook(selectedWspId!, file);
+                if (ok) {
+                    commonStore.setShowBackupModal(false);
+                }
             }
         } else if (mode === CloudItemType.DATASET) {
             const [file, nRows, meta] = await writeDatasetFile(name || defaultName);
@@ -149,6 +153,13 @@ const BackupModal: FC = (props) => {
                         totalCount: nRows,
                         meta,
                     }, file);
+                    commonStore.setShowBackupModal(false);
+                } else {
+                    notify({
+                        type: 'error',
+                        title: 'Backup Dataset',
+                        content: 'DatasourceID is empty',
+                    });
                 }
             }
         }
