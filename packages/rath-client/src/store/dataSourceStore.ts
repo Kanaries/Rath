@@ -46,9 +46,10 @@ import { request } from "../utils/request";
 import { getGlobalStore } from ".";
 
 interface IDataMessage {
-    type: 'init_data' | 'others' | 'download';
+    type: 'init_data' | 'dataset' | 'others' | 'download';
     data: IDatasetBase
     downLoadURL?: string;
+    dataset?: IDatasetMeta;
 }
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
@@ -230,17 +231,35 @@ export class DataSourceStore {
         this.cleanedDataRef = fromStream(cleanedData$, []);
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
-            const { type, downLoadURL } = msg;
+            const { type, downLoadURL, dataset } = msg;
             const { userStore } = getGlobalStore();
-            if (type === 'download' && downLoadURL) {
-                userStore.openNotebook(downLoadURL);
-            }
-            if (ev.source && msg.type === 'init_data') {
-                console.warn('[Get DataSource From Other Pages]', msg)
-                // @ts-ignore
-                ev.source.postMessage(true, ev.origin)
-                this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
-                this.setShowDataImportSelection(false);
+            switch (type) {
+                case 'download': {
+                    if (downLoadURL) {
+                        userStore.openNotebook(downLoadURL);
+                    }
+                    break;
+                }
+                case 'dataset': {
+                    if (dataset) {
+                        console.warn('[Get Dataset From Other Pages]', msg);
+                        userStore.openDataset(dataset);
+                    }
+                    break;
+                }
+                case 'init_data': {
+                    if (ev.source) {
+                        console.warn('[Get DataSource From Other Pages]', msg)
+                        // @ts-ignore
+                        ev.source.postMessage(true, ev.origin)
+                        this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
+                        this.setShowDataImportSelection(false);
+                    }
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
         })
         this.subscriptions.push(rawDataMetaInfo$.subscribe(() => {
