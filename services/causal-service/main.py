@@ -91,8 +91,6 @@ def inferRender(p: Dict, req: AlgoListRequest) -> Dict:
 
 @app.post('/algo/list', response_model=Dict[str, I.ServiceSchemaResponse])
 async def algoList(req: AlgoListRequest, response: Response) -> Dict[str, I.ServiceSchemaResponse]:
-    response.headers['content-type'] = 'application/json'
-    # print("/algo/list", req)
     return {
         algoName: getAlgoSchema(algoName, req)
         for algoName, algo in algorithms.DICT.items() if algo.dev_only == False or is_dev == True
@@ -101,7 +99,6 @@ async def algoList(req: AlgoListRequest, response: Response) -> Dict[str, I.Serv
 @app.post('/algo/list/{algoName}', response_model=I.ServiceSchemaResponse)
 async def algoListAlgo(algoName: str, req: AlgoListRequest, response: Response) -> I.ServiceSchemaResponse:
     try:
-        response.headers['content-type'] = 'application/json'
         return getAlgoSchema(algoName, req)
     except Exception as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
@@ -145,7 +142,6 @@ def getAlgoSchema(algoName: str, req: AlgoListRequest) -> I.ServiceSchemaRespons
 
 @app.get('/algo/schema/{algoName}')
 async def algoSchema(algoName: str, response: Response):
-    response.headers['content-type'] = 'application/json'
     try:
         schema = getAlgoSchema(algoName=algoName)
         return schema
