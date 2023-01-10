@@ -376,7 +376,8 @@
         "size": "大小",
         "apply": "上传",
         "public": "公开",
-        "overwrite": "覆盖当前备份"
+        "overwrite": "覆盖当前备份",
+        "auto_save": "自动备份"
     },
     "meta": {
         "title": "字段元信息配置",

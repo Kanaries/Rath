@@ -6,6 +6,7 @@ import { notify } from '../components/error';
 import { request } from '../utils/request';
 import { KanariesDatasetFilenameCloud } from '../constants';
 import { IKRFComponents, IParseMapItem } from '../utils/download';
+import { autoSaveDataset } from '../components/backupModal/utils';
 import { commitLoginService } from './fetch';
 import { getGlobalStore } from '.';
 
@@ -54,10 +55,14 @@ interface IUserInfo {
     organizations?: readonly IOrganization[] | undefined;
 }
 
+const AUTO_SAVE_SPAN = 1_000 * 60 * 5;  // 5 mins
+
 export default class UserStore {
     public login!: ILoginForm;
     public signup!: ISignUpForm;
     public info: IUserInfo | null = null;
+    public saving = false;
+    protected autoSaveTimer: NodeJS.Timeout | null = null;
     public get loggedIn() {
         return this.info !== null;
     }
@@ -66,7 +71,13 @@ export default class UserStore {
     }
     constructor() {
         this.init()
-        makeAutoObservable(this);
+        makeAutoObservable(this, {
+            // @ts-expect-error non-public fields
+            autoSaveTimer: false,
+        });
+        this.autoSaveTimer = setInterval(() => {
+            autoSaveDataset();
+        }, AUTO_SAVE_SPAN);
     }
     public init() {
         this.login = {
@@ -509,6 +520,10 @@ export default class UserStore {
                 content: `${error}`,
             });
         }
+    }
+
+    public setSaving(saving: boolean) {
+        this.saving = saving;
     }
 
 }

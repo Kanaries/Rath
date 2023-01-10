@@ -93,7 +93,7 @@ const BackupModal: FC = (props) => {
     const canBackup =  selectedWspId !== null && (mode === CloudItemType.NOTEBOOK ? (
         Object.values(backupItemKeys).some(Boolean)
     ) : (
-        dataSourceName ?? modifiableDataSourceName
+        (cloudDataSourceMeta && cloudDatasetMeta && datasetOverwrite) || (dataSourceName ?? modifiableDataSourceName)
     ));
     useEffect(() => {
         setSelectedOrgId(null);

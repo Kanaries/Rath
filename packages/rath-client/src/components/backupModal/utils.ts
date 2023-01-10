@@ -1,6 +1,6 @@
 import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import { KanariesDatasetFilenameCloud, KanariesDatasetPackCloudExtension } from "../../constants";
-import type { IDatasetData, IDatasetFieldMeta } from "../../interfaces";
+import { CloudAccessModifier, IDatasetData, IDatasetFieldMeta } from "../../interfaces";
 import { getGlobalStore } from "../../store";
 import { IKRFComponents, IParseMapItem, KRF_VERSION } from "../../utils/download";
 
@@ -92,4 +92,37 @@ export const writeDatasetFile = async (filename: string): Promise<[File, number,
     const blob = await zipWriter.close();
     const fileName = `${filename}.${KanariesDatasetPackCloudExtension}`;
     return [new File([blob], fileName), data.data.rawData.length, allFields];
+};
+
+export const DATASET_AUTO_SAVE_NAME = 'auto save';
+
+export const autoSaveDataset = async (): Promise<boolean> => {
+    const { dataSourceStore, userStore } = getGlobalStore();
+    const { cloudDataSourceMeta, cloudDatasetMeta } = dataSourceStore;
+    const { saving } = userStore;
+
+    if (saving || !cloudDataSourceMeta) {
+        return false;
+    }
+
+    try {
+        userStore.setSaving(true);
+        const [file, nRows, meta] = await writeDatasetFile(cloudDatasetMeta?.name ?? DATASET_AUTO_SAVE_NAME);
+        await dataSourceStore.saveDatasetOnCloud({
+            id: cloudDatasetMeta?.id,
+            datasourceId: cloudDatasetMeta?.datasourceId ?? cloudDataSourceMeta.id,
+            name: cloudDatasetMeta?.name ?? DATASET_AUTO_SAVE_NAME,
+            workspaceId: cloudDatasetMeta?.workspaceId ?? cloudDataSourceMeta.workspaceId,
+            type: cloudDatasetMeta?.type ?? CloudAccessModifier.PROTECTED,
+            size: file.size,
+            totalCount: nRows,
+            meta,
+        }, file);
+        userStore.setSaving(false);
+        return true;
+    } catch (error) {
+        console.warn(error);
+        userStore.setSaving(false);
+        return false;
+    }
 };

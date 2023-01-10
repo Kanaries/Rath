@@ -20,6 +20,7 @@ import Dashboard from './pages/dashboard';
 import CausalPage from './pages/causal';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
+import AutoSaving from './components/backupModal/autoSaving';
 
 
 function App() {
@@ -78,6 +79,7 @@ function App() {
                 </div>
             </div>
             {showPerformanceWindow && <PerformanceWindow />}
+            <AutoSaving />
         </div>
     );
 }

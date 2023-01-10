@@ -377,7 +377,8 @@
         "size": "Size",
         "apply": "Upload",
         "public": "Public",
-        "overwrite": "Overwrite"
+        "overwrite": "Overwrite",
+        "auto_save": "Auto Save"
     },
     "meta": {
         "title": "Meta Config",
