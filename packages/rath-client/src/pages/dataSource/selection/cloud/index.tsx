@@ -40,7 +40,7 @@ const KanariesCloud = observer<{ setLoadingAnimation: (on: boolean) => void }>(f
                             if (file?.name.endsWith('.krf')) {
                                 userStore.loadNotebook(file);
                             } else if (file?.name.endsWith(`.${KanariesDatasetPackCloudExtension}`)) {
-                                userStore.loadDataset(file, -1, -1);
+                                userStore.loadDataset(file, -1, -1, -1);
                             }
                         }}
                     />

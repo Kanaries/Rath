@@ -333,7 +333,7 @@ export default class UserStore {
     }
 
     public async openDataset(dataset: IDatasetMeta) {
-        const { downloadUrl, datasourceId, workspaceId } = dataset;
+        const { downloadUrl, datasourceId, id, workspaceId } = dataset;
         try {
             const data = await fetch(downloadUrl, { method: 'GET' });
             if (!data.ok) {
@@ -342,7 +342,7 @@ export default class UserStore {
             if (!data.body) {
                 throw new Error('Request got empty body');
             }
-            return await this.loadDataset(data.body, datasourceId, workspaceId);
+            return await this.loadDataset(data.body, workspaceId, datasourceId, id);
         } catch (error) {
             notify({
                 type: 'error',
@@ -353,7 +353,7 @@ export default class UserStore {
         }
     }
 
-    public async loadDataset(body: ReadableStream<Uint8Array> | File, dataSourceId: number, workspaceId: number) {
+    public async loadDataset(body: ReadableStream<Uint8Array> | File, workspaceId: number, dataSourceId: number, datasetId: number) {
         const { dataSourceStore } = getGlobalStore();
         try {
             const zipReader = new ZipReader(body instanceof File ? body.stream() : body);
@@ -367,6 +367,10 @@ export default class UserStore {
             const dataSource = await this.fetchDataSource(workspaceId, dataSourceId);
             if (dataSource) {
                 dataSourceStore.setCloudDataSource(dataSource);
+            }
+            const cloudMeta = await this.fetchDataset(workspaceId, datasetId);
+            if (cloudMeta) {
+                dataSourceStore.setCloudDataset(cloudMeta);
             }
             return true;
         } catch (error) {
