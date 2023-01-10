@@ -140,7 +140,7 @@ const BackupModal: FC = (props) => {
                 if (dsId) {
                     await dataSourceStore.saveDatasetOnCloud({
                         datasourceId: dsId,
-                        name,
+                        name: name || defaultName,
                         workspaceId: selectedWspId!,
                         type: accessMode,
                         size: file.size,
