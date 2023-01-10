@@ -375,7 +375,9 @@
         "default_name": "Rath {mode} {date}",
         "data_source_name": "Data Source Name",
         "size": "Size",
-        "apply": "Upload"
+        "apply": "Upload",
+        "public": "Public",
+        "overwrite": "Overwrite"
     },
     "meta": {
         "title": "Meta Config",

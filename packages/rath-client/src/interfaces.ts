@@ -275,7 +275,7 @@ export enum CloudAccessModifier {
 
 export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
     name: string;
-    workplaceId: number;
+    workspaceId: number;
     type: CloudAccessModifier;
 } & (
     Mode extends 'online' ? {

@@ -384,13 +384,31 @@ export default class UserStore {
         try {
             const dataSourceDetail = await request.get<{
                 workspaceId: number;
-                dataSourceId: number;
-            }, IDataSourceMeta>(dataSourceApiUrl, { dataSourceId, workspaceId });
+                datasourceId: number;
+            }, IDataSourceMeta>(dataSourceApiUrl, { datasourceId: dataSourceId, workspaceId });
             return dataSourceDetail;
         } catch (error) {
             notify({
                 type: 'error',
                 title: '[fetchDataSource]',
+                content: `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public async fetchDataset(workspaceId: number, datasetId: number): Promise<IDatasetMeta | null> {
+        const dataSourceApiUrl = getMainServiceAddress('/api/ce/dataset');
+        try {
+            const dataSourceDetail = await request.get<{
+                workspaceId: number;
+                datasetId: number;
+            }, IDatasetMeta>(dataSourceApiUrl, { datasetId, workspaceId });
+            return dataSourceDetail;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[fetchDataset]',
                 content: `${error}`,
             });
             return null;

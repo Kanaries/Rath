@@ -30,7 +30,7 @@ const Cont = styled.div`
 
 const BackupModal: FC = (props) => {
     const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore, userStore } = useGlobalStore();
-    const { cloudDataSourceMeta, datasetId } = dataSourceStore;
+    const { cloudDataSourceMeta, cloudDatasetMeta, datasetId } = dataSourceStore;
     const { datasourceId: dataSourceId } = cloudDataSourceMeta ?? {};
     const { showBackupModal } = commonStore;
     const { info, loggedIn } = userStore;
@@ -61,6 +61,8 @@ const BackupModal: FC = (props) => {
             mode: intl.get(`dataSource.importData.cloud.${mode}`),
         });
     }, [dsName, mode]);
+
+    const [datasetOverwrite, setDatasetOverwrite] = useState(true);
     
     const [busy, setBusy] = useState(false);
     const [backupItemKeys, setBackupItemKeys] = useState<{
@@ -125,7 +127,7 @@ const BackupModal: FC = (props) => {
                 if (dsId === null) {
                     const dataSourceSaveRes = await dataSourceStore.saveDataSourceOnCloud<'online'>({
                         name: modifiableDataSourceName,
-                        workplaceId: selectedWspId!,
+                        workspaceId: selectedWspId!,
                         type: accessMode,
                         linkInfo: {},
                     });
@@ -246,47 +248,76 @@ const BackupModal: FC = (props) => {
                             <PivotItem itemKey={CloudItemType.DATASET} headerText={intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`)}>
                                 <p className='state-description'>{intl.get('storage.upload_desc', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`) })}</p>
                                 <Stack style={{ margin: '0.6em 0' }}>
-                                    <Dropdown
-                                        label={intl.get('user.organization')}
-                                        options={(organizations ?? []).map(org => ({
-                                            key: `${org.id}`,
-                                            text: org.name,
-                                        }))}
-                                        required
-                                        selectedKey={`${selectedOrgId}`}
-                                        onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
-                                    />
-                                    <Dropdown
-                                        label={intl.get('user.workspace')}
-                                        disabled={!Array.isArray(workspaces)}
-                                        options={(workspaces ?? []).map(wsp => ({
-                                            key: `${wsp.id}`,
-                                            text: wsp.name,
-                                        }))}
-                                        required
-                                        selectedKey={`${selectedWspId}`}
-                                        onChange={(_, option) => option && setSelectedWspId(Number(option.key))}
-                                    />
-                                    <TextField
-                                        label={intl.get('storage.data_source_name')}
-                                        value={dataSourceName ?? modifiableDataSourceName}
-                                        readOnly={dataSourceName !== null}
-                                        placeholder={defaultDataSourceName}
-                                        onChange={(_, val) => setModifiableDataSourceName(val ?? '')}
-                                        required
-                                    />
-                                    <TextField
-                                        label={intl.get('storage.name', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`) })}
-                                        value={name}
-                                        placeholder={defaultName}
-                                        onChange={(_, val) => setName(val ?? '')}
-                                        required
-                                    />
-                                    <Toggle
-                                        label={'public'}
-                                        checked={accessMode === CloudAccessModifier.PUBLIC}
-                                        onChange={(_, checked) => setAccessMode(checked ? CloudAccessModifier.PUBLIC : CloudAccessModifier.PROTECTED)}
-                                    />
+                                    {cloudDatasetMeta && (
+                                        <Toggle
+                                            label={intl.get('storage.overwrite')}
+                                            checked={datasetOverwrite}
+                                            onChange={(_, checked) => setDatasetOverwrite(Boolean(checked))}
+                                        />
+                                    )}
+                                    {cloudDataSourceMeta && cloudDatasetMeta && datasetOverwrite ? (
+                                        <>
+                                            <TextField
+                                                label={intl.get('storage.data_source_name')}
+                                                value={cloudDataSourceMeta.name}
+                                                readOnly
+                                            />
+                                            <TextField
+                                                label={intl.get('storage.name', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`) })}
+                                                value={cloudDatasetMeta.name}
+                                                readOnly
+                                            />
+                                            <Toggle
+                                                label={intl.get('storage.public')}
+                                                checked={cloudDatasetMeta.type === CloudAccessModifier.PUBLIC}
+                                                onChange={() => void 0}
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Dropdown
+                                                label={intl.get('user.organization')}
+                                                options={(organizations ?? []).map(org => ({
+                                                    key: `${org.id}`,
+                                                    text: org.name,
+                                                }))}
+                                                required
+                                                selectedKey={`${selectedOrgId}`}
+                                                onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
+                                            />
+                                            <Dropdown
+                                                label={intl.get('user.workspace')}
+                                                disabled={!Array.isArray(workspaces)}
+                                                options={(workspaces ?? []).map(wsp => ({
+                                                    key: `${wsp.id}`,
+                                                    text: wsp.name,
+                                                }))}
+                                                required
+                                                selectedKey={`${selectedWspId}`}
+                                                onChange={(_, option) => option && setSelectedWspId(Number(option.key))}
+                                            />
+                                            <TextField
+                                                label={intl.get('storage.data_source_name')}
+                                                value={dataSourceName ?? modifiableDataSourceName}
+                                                readOnly={dataSourceName !== null}
+                                                placeholder={defaultDataSourceName}
+                                                onChange={(_, val) => setModifiableDataSourceName(val ?? '')}
+                                                required
+                                            />
+                                            <TextField
+                                                label={intl.get('storage.name', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`) })}
+                                                value={name}
+                                                placeholder={defaultName}
+                                                onChange={(_, val) => setName(val ?? '')}
+                                                required
+                                            />
+                                            <Toggle
+                                                label={intl.get('storage.public')}
+                                                checked={accessMode === CloudAccessModifier.PUBLIC}
+                                                onChange={(_, checked) => setAccessMode(checked ? CloudAccessModifier.PUBLIC : CloudAccessModifier.PROTECTED)}
+                                            />
+                                        </>
+                                    )}
                                 </Stack>
                             </PivotItem>
                         </Pivot>

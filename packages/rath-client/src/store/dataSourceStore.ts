@@ -27,6 +27,7 @@ import {
     ICreateDatasetPayload,
     ICreateDatasetResult,
     IDataSourceMeta,
+    IDatasetMeta,
 } from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
@@ -76,6 +77,9 @@ function fieldNotExtended (fid: string, mutFields: IMuteFieldBase[], extOpt: str
 export class DataSourceStore {
     /** Storage meta on cloud. */
     public cloudDataSourceMeta: IDataSourceMeta | null = null;
+    /** Dataset storage meta on cloud. */
+    public cloudDatasetMeta: IDatasetMeta | null = null;
+
     public rawDataMetaInfo: IteratorStorageMetaInfo = {
         versionCode: -1,
         length: 0,
@@ -114,6 +118,8 @@ export class DataSourceStore {
     public datasetId: string | null = null;
     constructor() {
         makeAutoObservable(this, {
+            cloudDataSourceMeta: observable.ref,
+            cloudDatasetMeta: observable.ref,
             cookedDataSource: observable.ref,
             cookedMeasures: observable.ref,
             fieldsWithExtSug: observable.ref,
@@ -1148,7 +1154,7 @@ export class DataSourceStore {
             const createDataSourceApiRes = await request.post<typeof payload, ICreateDataSourceResult<Mode>>(
                 createDataSourceApiUrl, payload
             );
-            const dataSource = await userStore.fetchDataSource(payload.workplaceId, createDataSourceApiRes.id);
+            const dataSource = await userStore.fetchDataSource(payload.workspaceId, createDataSourceApiRes.id);
             if (!dataSource) {
                 throw new Error('Data source not existed');
             }
@@ -1181,6 +1187,7 @@ export class DataSourceStore {
     }
 
     public async saveDatasetOnCloud(payload: ICreateDatasetPayload, file: File) {
+        const { userStore } = getGlobalStore();
         const createDatasetApiUrl = getMainServiceAddress('/api/ce/dataset');
         const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
         try {
@@ -1197,6 +1204,11 @@ export class DataSourceStore {
             const reportUploadSuccessApiRes = await request.get<{ storageId: number; status: 1 }, { downloadUrl: string }>(
                 reportUploadSuccessApiUrl, { storageId: createDatasetApiRes.storageId, status: 1 }
             );
+            const dataset = await userStore.fetchDataset(payload.workspaceId, createDatasetApiRes.datasetId);
+            if (!dataset) {
+                throw new Error('Data source not existed');
+            }
+            this.setCloudDataset(dataset);
             return reportUploadSuccessApiRes;
         } catch (error) {
             notify({
@@ -1210,6 +1222,10 @@ export class DataSourceStore {
 
     public setCloudDataSource(dataSource: IDataSourceMeta) {
         this.cloudDataSourceMeta = dataSource;
+    }
+
+    public setCloudDataset(dataset: IDatasetMeta) {
+        this.cloudDatasetMeta = dataset;
     }
 
 }
