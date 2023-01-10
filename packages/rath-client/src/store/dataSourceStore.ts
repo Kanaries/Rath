@@ -26,6 +26,7 @@ import {
     ICreateDataSourceResult,
     ICreateDatasetPayload,
     ICreateDatasetResult,
+    IDataSourceMeta,
 } from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
@@ -73,8 +74,8 @@ function fieldNotExtended (fid: string, mutFields: IMuteFieldBase[], extOpt: str
 }
 
 export class DataSourceStore {
-    /** Storage id on cloud. */
-    public dataSourceId: number | null = null;
+    /** Storage meta on cloud. */
+    public cloudDataSourceMeta: IDataSourceMeta | null = null;
     public rawDataMetaInfo: IteratorStorageMetaInfo = {
         versionCode: -1,
         length: 0,
@@ -1137,15 +1138,21 @@ export class DataSourceStore {
             file: File,
         ],
         Res extends (
-            Mode extends 'online' ? true : { downloadUrl: string }
-        ) = Mode extends 'online' ? true : { downloadUrl: string },
+            Mode extends 'online' ? { id: number } : { id: number; downloadUrl: string }
+        ) = Mode extends 'online' ? { id: number } : { id: number; downloadUrl: string },
     >(...[payload, file]: Args): Promise<Res | null> {
+        const { userStore } = getGlobalStore();
         const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
         const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
         try {
             const createDataSourceApiRes = await request.post<typeof payload, ICreateDataSourceResult<Mode>>(
                 createDataSourceApiUrl, payload
             );
+            const dataSource = await userStore.fetchDataSource(payload.workplaceId, createDataSourceApiRes.id);
+            if (!dataSource) {
+                throw new Error('Data source not existed');
+            }
+            this.setCloudDataSource(dataSource);
             if ('fileInfo' in createDataSourceApiRes && file) {
                 const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
                     method: 'PUT',
@@ -1157,11 +1164,12 @@ export class DataSourceStore {
                 const reportUploadSuccessApiRes = await request.get<{ storageId: number; status: 1 }, { downloadUrl: string }>(
                     reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
                 );
-                this.dataSourceId = createDataSourceApiRes.id;
-                return reportUploadSuccessApiRes as Res;
+                return {
+                    id: createDataSourceApiRes.id,
+                    downloadUrl: reportUploadSuccessApiRes.downloadUrl,
+                } as Res;
             }
-            this.dataSourceId = createDataSourceApiRes.id;
-            return true as Res;
+            return { id: createDataSourceApiRes.id } as Res;
         } catch (error) {
             notify({
                 type: 'error',
@@ -1198,6 +1206,10 @@ export class DataSourceStore {
             });
             return null;
         }
+    }
+
+    public setCloudDataSource(dataSource: IDataSourceMeta) {
+        this.cloudDataSourceMeta = dataSource;
     }
 
 }

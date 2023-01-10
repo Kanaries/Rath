@@ -271,7 +271,7 @@ const KanariesCloudSpace = observer<{ setLoadingAnimation: (on: boolean) => void
                                                 }
                                                 setBusy(true);
                                                 setLoadingAnimation(true);
-                                                userStore.openDataset(dataset.downloadUrl).finally(() => {
+                                                userStore.openDataset(dataset).finally(() => {
                                                     setBusy(false);
                                                     setLoadingAnimation(false);
                                                 });

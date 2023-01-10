@@ -30,7 +30,8 @@ const Cont = styled.div`
 
 const BackupModal: FC = (props) => {
     const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore, userStore } = useGlobalStore();
-    const { dataSourceId, datasetId } = dataSourceStore;
+    const { cloudDataSourceMeta, datasetId } = dataSourceStore;
+    const { datasourceId: dataSourceId } = cloudDataSourceMeta ?? {};
     const { showBackupModal } = commonStore;
     const { info, loggedIn } = userStore;
     const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
@@ -42,12 +43,12 @@ const BackupModal: FC = (props) => {
     const [modifiableDataSourceName, setModifiableDataSourceName] = useState('');
     const defaultDataSourceName = `${datasetId || 'unnamed'}`;
     useEffect(() => {
-        if (dataSourceId === null) {
+        if (cloudDataSourceMeta === null) {
             setDataSourceName(null);
         } else {
-            // TODO: search for this data source and set name
+            setDataSourceName(cloudDataSourceMeta.name);
         }
-    }, [dataSourceId, userStore]);
+    }, [cloudDataSourceMeta, userStore]);
     const dsName = dataSourceName || modifiableDataSourceName || datasetId;
 
     const [name, setName] = useState('');
@@ -129,7 +130,11 @@ const BackupModal: FC = (props) => {
                         linkInfo: {},
                     });
                     if (dataSourceSaveRes) {
-                        dsId = dataSourceStore.dataSourceId;
+                        const dataSource = await userStore.fetchDataSource(selectedWspId!, dataSourceSaveRes.id);
+                        if (dataSource) {
+                            dataSourceStore.setCloudDataSource(dataSource);
+                            dsId = dataSourceStore.cloudDataSourceMeta?.datasourceId;
+                        }
                     }
                 }
                 if (dsId) {

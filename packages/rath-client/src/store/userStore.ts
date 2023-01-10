@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { TextWriter, ZipReader } from "@zip.js/zip.js";
-import { IAccessPageKeys, IDatasetData, IDatasetMeta } from '../interfaces';
+import { IAccessPageKeys, IDatasetData, IDatasetMeta, IDataSourceMeta } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
@@ -332,23 +332,28 @@ export default class UserStore {
         }
     }
 
-    public async openDataset(downLoadURL: string) {
+    public async openDataset(dataset: IDatasetMeta) {
+        const { downloadUrl, datasourceId, workspaceId } = dataset;
         try {
-            const data = await fetch(downLoadURL, { method: 'GET' });
+            const data = await fetch(downloadUrl, { method: 'GET' });
             if (!data.ok) {
                 throw new Error(data.statusText);
             }
             if (!data.body) {
                 throw new Error('Request got empty body');
             }
-            return await this.loadDataset(data.body);
+            return await this.loadDataset(data.body, datasourceId, workspaceId);
         } catch (error) {
-            console.error(error);
+            notify({
+                type: 'error',
+                title: '[openDataset]',
+                content: `${error}`,
+            });
             return false;
         }
     }
 
-    public async loadDataset(body: ReadableStream<Uint8Array> | File) {
+    public async loadDataset(body: ReadableStream<Uint8Array> | File, dataSourceId: number, workspaceId: number) {
         const { dataSourceStore } = getGlobalStore();
         try {
             const zipReader = new ZipReader(body instanceof File ? body.stream() : body);
@@ -359,10 +364,36 @@ export default class UserStore {
             const writer = new TextWriter();
             const dataset = JSON.parse(await file.getData(writer)) as IDatasetData;
             await dataSourceStore.loadBackupDataStore(dataset.data, dataset.meta);
+            const dataSource = await this.fetchDataSource(workspaceId, dataSourceId);
+            if (dataSource) {
+                dataSourceStore.setCloudDataSource(dataSource);
+            }
             return true;
         } catch (error) {
-            console.error(error);
+            notify({
+                type: 'error',
+                title: '[loadDataset]',
+                content: `${error}`,
+            });
             return false;
+        }
+    }
+
+    public async fetchDataSource(workspaceId: number, dataSourceId: number): Promise<IDataSourceMeta | null> {
+        const dataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+        try {
+            const dataSourceDetail = await request.get<{
+                workspaceId: number;
+                dataSourceId: number;
+            }, IDataSourceMeta>(dataSourceApiUrl, { dataSourceId, workspaceId });
+            return dataSourceDetail;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[fetchDataSource]',
+                content: `${error}`,
+            });
+            return null;
         }
     }
 

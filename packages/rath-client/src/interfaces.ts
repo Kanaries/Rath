@@ -318,6 +318,20 @@ export interface IDatasetFieldMeta {
     features: IFieldMeta['features'];
 }
 
+export interface IDataSourceMeta {
+    id: number;
+    name: string;
+    datasourceId: number;
+    workspaceId: number;
+    type: CloudAccessModifier;
+    /** bytes */
+    size: number;
+    totalCount: number;
+    meta: IDatasetFieldMeta[];
+    createAt: number;
+    downloadUrl: string;
+}
+
 export type ICreateDatasetPayload = {
     /** declared -> overwrite; undeclared -> create; */
     id?: number;
