@@ -235,21 +235,28 @@ export class DataSourceStore {
         })
         this.fieldMetasRef = fromStream(fieldMetas$, [])
         this.cleanedDataRef = fromStream(cleanedData$, []);
+        let loadTaskReceived = false;
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
             const { type, downLoadURL, dataset } = msg;
             const { userStore } = getGlobalStore();
             switch (type) {
                 case 'download': {
-                    if (downLoadURL) {
+                    if (downLoadURL && !loadTaskReceived) {
+                        loadTaskReceived = true;
+                        console.warn('[Get Notebook From Other Pages]', msg);
                         userStore.openNotebook(downLoadURL);
                     }
                     break;
                 }
                 case 'dataset': {
-                    if (dataset) {
+                    if (ev.source && dataset && !loadTaskReceived) {
+                        loadTaskReceived = true;
                         console.warn('[Get Dataset From Other Pages]', msg);
-                        userStore.openDataset(dataset);
+                        userStore.openDataset(dataset).then(ok => {
+                            // @ts-ignore
+                            ev.source!.postMessage({ type: "dataset", success: ok }, ev.origin);
+                        });
                     }
                     break;
                 }
