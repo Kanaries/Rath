@@ -2,6 +2,8 @@ from sklearn import linear_model
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn import tree, ensemble
 import numpy as np
+from xgboost import XGBRegressor
+
 
 def regression (X_train, X_test, y_train, y_test, headers, algorithm):
     regr = None
@@ -15,6 +17,8 @@ def regression (X_train, X_test, y_train, y_test, headers, algorithm):
         regr = tree.DecisionTreeRegressor()
     elif algorithm == 'randomForest':
         regr = ensemble.RandomForestRegressor(max_depth=3, random_state=50, oob_score=True)
+    elif algorithm == 'xgboost':
+        regr = XGBRegressor(n_estimators=100, max_depth=3, learning_rate=0.1)
     else:
         regr = linear_model.ElasticNet(alpha=0.1, l1_ratio=0.7)
 
