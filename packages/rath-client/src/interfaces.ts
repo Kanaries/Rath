@@ -284,7 +284,8 @@ export enum DataSourceType {
 
 export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
     name: string;
-    workspaceId: number;
+    organizationName: string;
+    workspaceName: string;
     datasourceType: DataSourceType;
 } & (
     Mode extends 'online' ? {
@@ -300,7 +301,7 @@ export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
 );
 
 export type ICreateDataSourceResult<Mode extends 'online' | 'offline'> = {
-    id: number;
+    id: string;
     name: string;
     type: CloudAccessModifier;
 } & (
@@ -308,7 +309,7 @@ export type ICreateDataSourceResult<Mode extends 'online' | 'offline'> = {
         linkInfo: Record<string, any>;
     } : {
         fileInfo: {
-            storageId: number;
+            storageId: string;
             fileType: string;
             fileName: string;
             /** bytes */
@@ -328,7 +329,7 @@ export interface IDatasetFieldMeta {
 }
 
 export interface IDataSourceMeta {
-    id: number;
+    id: string;
     name: string;
     type: DataSourceType;
     fileInfo?: {
@@ -344,10 +345,10 @@ export interface IDataSourceMeta {
 
 export type ICreateDatasetPayload = {
     /** declared -> overwrite; undeclared -> create; */
-    id?: number;
-    datasourceId: number;
+    id?: string;
+    datasourceId: string;
     name: string;
-    workspaceId: number;
+    workspaceName: string;
     type: CloudAccessModifier;
     /** bytes */
     size: number;
@@ -356,13 +357,13 @@ export type ICreateDatasetPayload = {
 };
 
 export type ICreateDatasetResult = {
-    datasetId: number;
-    storageId: number;
+    datasetId: string;
+    storageId: string;
     uploadUrl: string;
 };
 
 export type IDatasetMeta = ICreateDatasetPayload & {
-    id: number;
+    id: string;
     createAt: number;
     downloadUrl: string;
 };

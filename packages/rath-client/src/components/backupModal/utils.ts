@@ -100,9 +100,9 @@ export const DATASET_AUTO_SAVE_NAME = 'auto save';
 export const autoSaveDataset = async (): Promise<boolean> => {
     const { dataSourceStore, userStore } = getGlobalStore();
     const { cloudDataSourceMeta, cloudAutoSaveDatasetMeta, currentWsp } = dataSourceStore;
-    const { saving } = userStore;
+    const { saving, info } = userStore;
 
-    if (saving || !cloudDataSourceMeta || currentWsp === null) {
+    if (saving || !cloudDataSourceMeta || currentWsp === null || !info) {
         return false;
     }
 
@@ -113,7 +113,7 @@ export const autoSaveDataset = async (): Promise<boolean> => {
             id: cloudAutoSaveDatasetMeta?.id,
             datasourceId: cloudAutoSaveDatasetMeta?.datasourceId ?? cloudDataSourceMeta.id,
             name: DATASET_AUTO_SAVE_NAME,
-            workspaceId: cloudAutoSaveDatasetMeta?.workspaceId ?? currentWsp,
+            workspaceName: cloudAutoSaveDatasetMeta?.workspaceName ?? currentWsp,
             type: cloudAutoSaveDatasetMeta?.type ?? CloudAccessModifier.PROTECTED,
             size: file.size,
             totalCount: nRows,

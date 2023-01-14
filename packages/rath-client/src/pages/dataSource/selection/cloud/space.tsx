@@ -110,7 +110,7 @@ const KanariesCloudSpace = observer<{ setLoadingAnimation: (on: boolean) => void
 
     useEffect(() => {
         if (organization && organization.workspaces === undefined) {
-            userStore.getWorkspaces(organization.id);
+            userStore.getWorkspaces(organization.name);
         }
     }, [organization, userStore]);
 
@@ -143,7 +143,7 @@ const KanariesCloudSpace = observer<{ setLoadingAnimation: (on: boolean) => void
 
     useEffect(() => {
         if (organization && workspace && workspace.notebooks === undefined) {
-            userStore.getNotebooksAndDatasets(organization.id, workspace.id);
+            userStore.getNotebooksAndDatasets(organization.name, workspace.name);
         }
     }, [organization, workspace, userStore]);
 
@@ -299,7 +299,7 @@ const KanariesCloudSpace = observer<{ setLoadingAnimation: (on: boolean) => void
                         </List>
                         <DefaultButton
                             text={intl.get('storage.refresh')}
-                            onClick={() => userStore.getNotebooksAndDatasets(organization.id, workspace.id, true)}
+                            onClick={() => userStore.getNotebooksAndDatasets(organization.name, workspace.name, true)}
                         />
                     </>
                 )}

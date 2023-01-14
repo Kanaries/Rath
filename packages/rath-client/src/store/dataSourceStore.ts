@@ -83,7 +83,10 @@ export class DataSourceStore {
     public cloudDatasetMeta: IDatasetMeta | null = null;
     /** Auto-saved dataset storage meta on cloud. */
     public cloudAutoSaveDatasetMeta: IDatasetMeta | null = null;
-    public currentWsp: number | null = null;
+    /** Organization name */
+    public currentOrg: string | null = null;
+    /** Workspace name */
+    public currentWsp: string | null = null;
 
     public rawDataMetaInfo: IteratorStorageMetaInfo = {
         versionCode: -1,
@@ -1186,8 +1189,8 @@ export class DataSourceStore {
             file: File,
         ],
         Res extends (
-            Mode extends 'online' ? { id: number } : { id: number; downloadUrl: string }
-        ) = Mode extends 'online' ? { id: number } : { id: number; downloadUrl: string },
+            Mode extends 'online' ? { id: string } : { id: string; downloadUrl: string }
+        ) = Mode extends 'online' ? { id: string } : { id: string; downloadUrl: string },
     >(...[payload, file]: Args): Promise<Res | null> {
         const { userStore } = getGlobalStore();
         const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
@@ -1196,11 +1199,11 @@ export class DataSourceStore {
             const createDataSourceApiRes = await request.post<typeof payload, ICreateDataSourceResult<Mode>>(
                 createDataSourceApiUrl, payload
             );
-            const dataSource = await userStore.fetchDataSource(payload.workspaceId, createDataSourceApiRes.id);
+            const dataSource = await userStore.fetchDataSource(payload.workspaceName, createDataSourceApiRes.id);
             if (!dataSource) {
                 throw new Error('Data source not existed');
             }
-            this.setCloudDataSource(dataSource, payload.workspaceId);
+            this.setCloudDataSource(dataSource, payload.organizationName, payload.workspaceName);
             if ('fileInfo' in createDataSourceApiRes && file) {
                 const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
                     method: 'PUT',
@@ -1209,7 +1212,7 @@ export class DataSourceStore {
                 if (!fileUploadRes.ok) {
                     throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
                 }
-                const reportUploadSuccessApiRes = await request.get<{ storageId: number; status: 1 }, { downloadUrl: string }>(
+                const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
                     reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
                 );
                 return {
@@ -1243,10 +1246,10 @@ export class DataSourceStore {
             if (!fileUploadRes.ok) {
                 throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
             }
-            const reportUploadSuccessApiRes = await request.get<{ storageId: number; status: 1 }, { downloadUrl: string }>(
+            const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
                 reportUploadSuccessApiUrl, { storageId: createDatasetApiRes.storageId, status: 1 }
             );
-            const dataset = await userStore.fetchDataset(payload.workspaceId, createDatasetApiRes.datasetId);
+            const dataset = await userStore.fetchDataset(payload.workspaceName, createDatasetApiRes.datasetId);
             if (!dataset) {
                 throw new Error('Data source not existed');
             }
@@ -1266,9 +1269,10 @@ export class DataSourceStore {
         }
     }
 
-    public setCloudDataSource(dataSource: IDataSourceMeta, wspId: number) {
+    public setCloudDataSource(dataSource: IDataSourceMeta, organizationName: string, workspaceName: string) {
         this.cloudDataSourceMeta = dataSource;
-        this.currentWsp = wspId;
+        this.currentOrg = organizationName;
+        this.currentWsp = workspaceName;
     }
 
     public setCloudDataset(dataset: IDatasetMeta) {

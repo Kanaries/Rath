@@ -17,7 +17,7 @@ export interface ILoginForm {
 }
 
 export interface INotebook {
-    readonly id: number;
+    readonly id: string;
     readonly name: string;
     readonly size: number;
     readonly createAt: number;
@@ -25,7 +25,7 @@ export interface INotebook {
 }
 
 export interface IWorkspace {
-    readonly id: number;
+    readonly id: string;
     readonly name: string;
     datasets?: readonly IDatasetMeta[] | null | undefined;
     notebooks?: readonly INotebook[] | null | undefined;
@@ -33,7 +33,7 @@ export interface IWorkspace {
 
 export interface IOrganization {
     readonly name: string;
-    readonly id: number;
+    readonly id: string;
     workspaces?: readonly IWorkspace[] | null | undefined;
 }
 
@@ -223,7 +223,7 @@ export default class UserStore {
     protected async getOrganizations() {
         const url = getMainServiceAddress('/api/ce/organization/list');
         try {
-            const result = await request.get<{}, { organization: readonly IOrganization[] }>(url);
+            const result = await request.get<{}, { organization: readonly Omit<IOrganization, 'workspaces'>[] }>(url);
             runInAction(() => {
                 this.info!.organizations = result.organization;
             });
@@ -236,15 +236,15 @@ export default class UserStore {
         }
     }
 
-    public async getWorkspaces(organizationId: number) {
-        const which = this.info?.organizations?.find(org => org.id === organizationId);
+    public async getWorkspaces(organizationName: string) {
+        const which = this.info?.organizations?.find(org => org.name === organizationName);
         if (!which || which.workspaces !== undefined) {
             return null;
         }
         const url = getMainServiceAddress('/api/ce/organization/workspace/list');
         try {
-            const result = await request.get<{ organizationId: number }, { workspaceList: Exclude<IWorkspace, 'notebooks'>[] }>(url, {
-                organizationId,
+            const result = await request.get<{ organizationName: string }, { workspaceList: Omit<IWorkspace, 'notebooks' | 'datasets'>[] }>(url, {
+                organizationName,
             });
             runInAction(() => {
                 which.workspaces = result.workspaceList;
@@ -260,8 +260,8 @@ export default class UserStore {
         }
     }
 
-    public async getNotebooksAndDatasets(organizationId: number, workspaceId: number, forceUpdate = false) {
-        const which = this.info?.organizations?.find(org => org.id === organizationId)?.workspaces?.find(wsp => wsp.id === workspaceId);
+    public async getNotebooksAndDatasets(organizationName: string, workspaceName: string, forceUpdate = false) {
+        const which = this.info?.organizations?.find(org => org.name === organizationName)?.workspaces?.find(wsp => wsp.name === workspaceName);
         if (!which) {
             return null;
         }
@@ -272,11 +272,11 @@ export default class UserStore {
         const listDatasetApiUrl = getMainServiceAddress('/api/ce/dataset/list');
         try {
             const result = await Promise.allSettled([
-                request.get<{ organizationId: number }, { notebookList: INotebook[] }>(listNotebookApiUrl, {
-                    organizationId,
+                request.get<{ workspaceName: string }, { notebookList: INotebook[] }>(listNotebookApiUrl, {
+                    workspaceName,
                 }),
-                request.get<{ workspaceId: number }, { datasetList: IDatasetMeta[] }>(listDatasetApiUrl, {
-                    workspaceId,
+                request.get<{ workspaceName: string }, { datasetList: IDatasetMeta[] }>(listDatasetApiUrl, {
+                    workspaceName,
                 })
             ]).then(([notebookRes, datasetRes]) => ({
                 notebooks: notebookRes.status === 'fulfilled' ? notebookRes.value.notebookList : [],
@@ -303,7 +303,7 @@ export default class UserStore {
             return result;
         } catch (error) {
             notify({
-                title: '[/api/ce/notebook/list]',
+                title: '[getNotebooksAndDatasets]',
                 type: 'error',
                 content: `${error}`,
             });
@@ -311,7 +311,7 @@ export default class UserStore {
         }
     }
 
-    public async uploadNotebook(workspaceId: number, file: File) {
+    public async uploadNotebook(workspaceId: string, file: File) {
         const url = getMainServiceAddress('/api/ce/notebook');
         try {
             const { uploadUrl, id } = (await (await fetch(url, {
@@ -333,7 +333,7 @@ export default class UserStore {
                 method: 'PUT',
                 body: file,
             });
-            await request.post<{ id: number }, {}>(getMainServiceAddress('/api/ce/notebook/callback'), { id });
+            await request.post<{ id: string }, {}>(getMainServiceAddress('/api/ce/notebook/callback'), { id });
             return true;
         } catch (error) {
             notify({
@@ -345,8 +345,8 @@ export default class UserStore {
         }
     }
 
-    public async openDataset(dataset: IDatasetMeta) {
-        const { downloadUrl, datasourceId, id, workspaceId } = dataset;
+    public async openDataset(dataset: IDatasetMeta): Promise<boolean> {
+        const { downloadUrl, datasourceId, id, workspaceName } = dataset;
         try {
             const data = await fetch(downloadUrl, { method: 'GET' });
             if (!data.ok) {
@@ -355,7 +355,20 @@ export default class UserStore {
             if (!data.body) {
                 throw new Error('Request got empty body');
             }
-            return await this.loadDataset(data.body, workspaceId, datasourceId, id);
+            const ok = await this.loadDataset(data.body, null, workspaceName, datasourceId, id);
+            if (ok) {
+                const etUrl = getMainServiceAddress('/api/ce/tracing/normal');
+                try {
+                    // FIXME: ET params
+                    await request.post<{
+                        eventTime: number;
+                        dataset: IDatasetMeta;
+                    }, never>(etUrl, { eventTime: Date.now(), dataset });
+                } catch (error) {
+                    console.warn('EventTrack error <report dataset use>', error);
+                }
+            }
+            return ok;
         } catch (error) {
             notify({
                 type: 'error',
@@ -366,7 +379,13 @@ export default class UserStore {
         }
     }
 
-    public async loadDataset(body: ReadableStream<Uint8Array> | File, workspaceId: number, dataSourceId: number, datasetId: number) {
+    public async loadDataset(
+        body: ReadableStream<Uint8Array> | File,
+        organizationName: string | null,
+        workspaceName: string,
+        dataSourceId: string,
+        datasetId: string
+    ): Promise<boolean> {
         const { dataSourceStore } = getGlobalStore();
         try {
             const zipReader = new ZipReader(body instanceof File ? body.stream() : body);
@@ -377,11 +396,11 @@ export default class UserStore {
             const writer = new TextWriter();
             const dataset = JSON.parse(await file.getData(writer)) as IDatasetData;
             await dataSourceStore.loadBackupDataStore(dataset.data, dataset.meta);
-            const dataSource = await this.fetchDataSource(workspaceId, dataSourceId);
-            if (dataSource) {
-                dataSourceStore.setCloudDataSource(dataSource, workspaceId);
+            const dataSource = await this.fetchDataSource(workspaceName, dataSourceId);
+            if (dataSource && organizationName) {
+                dataSourceStore.setCloudDataSource(dataSource, organizationName, workspaceName);
             }
-            const cloudMeta = await this.fetchDataset(workspaceId, datasetId);
+            const cloudMeta = await this.fetchDataset(workspaceName, datasetId);
             if (cloudMeta) {
                 dataSourceStore.setCloudDataset(cloudMeta);
             }
@@ -396,13 +415,13 @@ export default class UserStore {
         }
     }
 
-    public async fetchDataSource(workspaceId: number, dataSourceId: number): Promise<IDataSourceMeta | null> {
+    public async fetchDataSource(workspaceName: string, dataSourceId: string): Promise<IDataSourceMeta | null> {
         const dataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
         try {
             const dataSourceDetail = await request.get<{
-                workspaceId: number;
-                datasourceId: number;
-            }, IDataSourceMeta>(dataSourceApiUrl, { datasourceId: dataSourceId, workspaceId });
+                workspaceName: string;
+                datasourceId: string;
+            }, IDataSourceMeta>(dataSourceApiUrl, { datasourceId: dataSourceId, workspaceName });
             return dataSourceDetail;
         } catch (error) {
             notify({
@@ -414,13 +433,13 @@ export default class UserStore {
         }
     }
 
-    public async fetchDataset(workspaceId: number, datasetId: number): Promise<IDatasetMeta | null> {
+    public async fetchDataset(workspaceName: string, datasetId: string): Promise<IDatasetMeta | null> {
         const dataSourceApiUrl = getMainServiceAddress('/api/ce/dataset');
         try {
             const dataSourceDetail = await request.get<{
-                workspaceId: number;
-                datasetId: number;
-            }, IDatasetMeta>(dataSourceApiUrl, { datasetId, workspaceId });
+                workspaceName: string;
+                datasetId: string;
+            }, IDatasetMeta>(dataSourceApiUrl, { datasetId, workspaceName });
             return dataSourceDetail;
         } catch (error) {
             notify({

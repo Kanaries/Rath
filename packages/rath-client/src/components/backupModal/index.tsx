@@ -87,27 +87,27 @@ const BackupModal: FC = (props) => {
         })
     }, [rawDataLength, mutFieldsLength, collectionLength]);
     const organizations = info?.organizations;
-    const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null);
-    const workspaces = organizations?.find(org => org.id === selectedOrgId)?.workspaces;
-    const [selectedWspId, setSelectedWspId] = useState<number | null>(null);
+    const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
+    const workspaces = organizations?.find(org => org.name === selectedOrg)?.workspaces;
+    const [selectedWsp, setSelectedWsp] = useState<string | null>(null);
     const [accessMode, setAccessMode] = useState(CloudAccessModifier.PUBLIC);
-    const canBackup =  selectedWspId !== null && (mode === CloudItemType.NOTEBOOK ? (
+    const canBackup =  selectedWsp !== null && (mode === CloudItemType.NOTEBOOK ? (
         Object.values(backupItemKeys).some(Boolean)
     ) : (
         (cloudDataSourceMeta && cloudDatasetMeta) || !datasetOverwrite || !cloudDatasetMeta
     ));
     useEffect(() => {
-        setSelectedOrgId(null);
+        setSelectedOrg(null);
     }, [organizations]);
     useEffect(() => {
-        setSelectedWspId(null);
-        if (selectedOrgId !== null) {
-            userStore.getWorkspaces(selectedOrgId);
+        setSelectedWsp(null);
+        if (selectedOrg !== null) {
+            userStore.getWorkspaces(selectedOrg);
         }
-    }, [selectedOrgId, userStore]);
+    }, [selectedOrg, userStore]);
     // const storageItems =
     const backup = async (download = false) => {
-        if (!download && (busy || !canBackup || selectedWspId === null)) {
+        if (!download && (busy || !canBackup || selectedOrg === null || selectedWsp === null)) {
             return false;
         }
         setBusy(true);
@@ -117,7 +117,17 @@ const BackupModal: FC = (props) => {
             if (download) {
                 downloadFileFromBlob(file, file.name);
             } else {
-                const ok = await userStore.uploadNotebook(selectedWspId!, file);
+                const wsp = workspaces?.find(which => which.name === selectedWsp);
+                if (!wsp) {
+                    setBusy(false);
+                    notify({
+                        type: 'error',
+                        title: 'Backup Dataset',
+                        content: 'Workspace not found',
+                    });
+                    return false;
+                }
+                const ok = await userStore.uploadNotebook(wsp.id, file);
                 if (ok) {
                     commonStore.setShowBackupModal(false);
                 }
@@ -131,14 +141,15 @@ const BackupModal: FC = (props) => {
                 if (dsId === undefined) {
                     const dataSourceSaveRes = await dataSourceStore.saveDataSourceOnCloud<'online'>({
                         name: modifiableDataSourceName || defaultDataSourceName,
-                        workspaceId: selectedWspId!,
+                        organizationName: selectedOrg!,
+                        workspaceName: selectedWsp!,
                         datasourceType: sourceType,
                         linkInfo: {},
                     });
                     if (dataSourceSaveRes) {
-                        const dataSource = await userStore.fetchDataSource(selectedWspId!, dataSourceSaveRes.id);
+                        const dataSource = await userStore.fetchDataSource(selectedWsp!, dataSourceSaveRes.id);
                         if (dataSource) {
-                            dataSourceStore.setCloudDataSource(dataSource, selectedWspId!);
+                            dataSourceStore.setCloudDataSource(dataSource, selectedOrg!, selectedWsp!);
                             dsId = dataSourceStore.cloudDataSourceMeta?.id;
                         }
                     }
@@ -147,7 +158,7 @@ const BackupModal: FC = (props) => {
                     await dataSourceStore.saveDatasetOnCloud({
                         datasourceId: dsId,
                         name: name || defaultName,
-                        workspaceId: selectedWspId!,
+                        workspaceName: selectedWsp!,
                         type: accessMode,
                         size: file.size,
                         totalCount: nRows,
@@ -229,23 +240,23 @@ const BackupModal: FC = (props) => {
                                     <Dropdown
                                         label={intl.get('user.organization')}
                                         options={(organizations ?? []).map(org => ({
-                                            key: `${org.id}`,
+                                            key: org.name,
                                             text: org.name,
                                         }))}
                                         required
-                                        selectedKey={`${selectedOrgId}`}
-                                        onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
+                                        selectedKey={selectedOrg}
+                                        onChange={(_, option) => option && setSelectedOrg(option.key as string)}
                                     />
                                     <Dropdown
                                         label={intl.get('user.workspace')}
                                         disabled={!Array.isArray(workspaces)}
                                         options={(workspaces ?? []).map(wsp => ({
-                                            key: `${wsp.id}`,
+                                            key: wsp.name,
                                             text: wsp.name,
                                         }))}
                                         required
-                                        selectedKey={`${selectedWspId}`}
-                                        onChange={(_, option) => option && setSelectedWspId(Number(option.key))}
+                                        selectedKey={selectedWsp}
+                                        onChange={(_, option) => option && setSelectedWsp(option.key as string)}
                                     />
                                     <TextField
                                         label={intl.get('storage.name', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.NOTEBOOK}`) })}
@@ -289,23 +300,23 @@ const BackupModal: FC = (props) => {
                                             <Dropdown
                                                 label={intl.get('user.organization')}
                                                 options={(organizations ?? []).map(org => ({
-                                                    key: `${org.id}`,
+                                                    key: org.name,
                                                     text: org.name,
                                                 }))}
                                                 required
-                                                selectedKey={`${selectedOrgId}`}
-                                                onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
+                                                selectedKey={selectedOrg}
+                                                onChange={(_, option) => option && setSelectedOrg(option.key as string)}
                                             />
                                             <Dropdown
                                                 label={intl.get('user.workspace')}
                                                 disabled={!Array.isArray(workspaces)}
                                                 options={(workspaces ?? []).map(wsp => ({
-                                                    key: `${wsp.id}`,
+                                                    key: wsp.name,
                                                     text: wsp.name,
                                                 }))}
                                                 required
-                                                selectedKey={`${selectedWspId}`}
-                                                onChange={(_, option) => option && setSelectedWspId(Number(option.key))}
+                                                selectedKey={selectedWsp}
+                                                onChange={(_, option) => option && setSelectedWsp(option.key as string)}
                                             />
                                             <TextField
                                                 label={intl.get('storage.data_source_name')}
