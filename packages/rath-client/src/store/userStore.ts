@@ -52,6 +52,7 @@ interface IUserInfo {
     email: string;
     eduEmail: string;
     phone: string;
+    avatarURL: string;
     organizations?: readonly IOrganization[] | undefined;
 }
 
@@ -207,6 +208,7 @@ export default class UserStore {
                         eduEmail: result.eduEmail,
                         email: result.email,
                         phone: result.phone,
+                        avatarURL: result.avatarURL,
                     };
                     this.getOrganizations();
                 });
@@ -359,15 +361,18 @@ export default class UserStore {
             if (ok) {
                 const etUrl = getMainServiceAddress('/api/ce/tracing/normal');
                 try {
-                    // FIXME: ET params
-                    await request.post<{
-                        eventType: 'datasetUsage';
-                        eventTime: number;
-                        dataset: IDatasetMeta;
-                    }, never>(etUrl, {
-                        eventTime: Date.now(),
-                        eventType: 'datasetUsage',
-                        dataset,
+                    await fetch(etUrl, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            eventTime: Date.now(),
+                            eventType: 'datasetUsage',
+                            eventLabel: 'rath',
+                            eventValue1: dataset.id,
+                        }),
                     });
                 } catch (error) {
                     console.warn('EventTrack error <report dataset use>', error);

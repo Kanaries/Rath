@@ -94,7 +94,7 @@ const Container = styled.div`
 const LoginInfo: FC = () => {
     const { commonStore, userStore } = useGlobalStore();
     const { navMode } = commonStore;
-    const { userName } = userStore;
+    const { userName, info } = userStore;
     const [loginHidden, setLoginHidden] = useState(true);
     const [tab, setTab] = useState<PreferencesType>(PreferencesType.Account);
 
@@ -129,6 +129,13 @@ const LoginInfo: FC = () => {
                     </Container>
                 </Dialog>
                 <div className="avatar-img">
+                    {info?.avatarURL && (
+                        <img
+                            src={info.avatarURL}
+                            alt=""
+                            style={{ width: 24, height: 24, borderRadius: '50%' }}
+                        />
+                    )}
                     {navMode === 'text' && (
                         <div className="user-name">
                             <p className="user">{userName || intl.get('login.clickLogin')}</p>
