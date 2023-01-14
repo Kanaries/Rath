@@ -1200,6 +1200,18 @@ export class DataSourceStore {
             const createDataSourceApiRes = await request.post<typeof params, ICreateDataSourceResult<Mode>>(
                 createDataSourceApiUrl, params
             );
+            if (params.datasourceType === DataSourceType.File && 'fileInfo' in createDataSourceApiRes) {
+                const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
+                    method: 'PUT',
+                    body: file,
+                });
+                if (!fileUploadRes.ok) {
+                    throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+                }
+                await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                    reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
+                );
+            }
             const dataSource = await userStore.fetchDataSource(payload.workspaceName, createDataSourceApiRes.id);
             if (!dataSource) {
                 throw new Error('Data source not existed');
@@ -1252,7 +1264,7 @@ export class DataSourceStore {
             );
             const dataset = await userStore.fetchDataset(payload.workspaceName, createDatasetApiRes.datasetId);
             if (!dataset) {
-                throw new Error('Data source not existed');
+                throw new Error('Dataset not existed');
             }
             if (isAutoSave) {
                 this.setAutoSavedCloudDataset(dataset);
@@ -1263,7 +1275,7 @@ export class DataSourceStore {
         } catch (error) {
             notify({
                 type: 'error',
-                title: '[saveDataSourceOnCloud]',
+                title: '[saveDatasetOnCloud]',
                 content: `${error}`,
             });
             return null;

@@ -346,7 +346,7 @@ export default class UserStore {
     }
 
     public async openDataset(dataset: IDatasetMeta): Promise<boolean> {
-        const { downloadUrl, datasourceId, id, workspace } = dataset;
+        const { downloadUrl, datasource, id, workspace } = dataset;
         try {
             const data = await fetch(downloadUrl, { method: 'GET' });
             if (!data.ok) {
@@ -355,15 +355,20 @@ export default class UserStore {
             if (!data.body) {
                 throw new Error('Request got empty body');
             }
-            const ok = await this.loadDataset(data.body, null, workspace.name, datasourceId, id);
+            const ok = await this.loadDataset(data.body, null, workspace.name, datasource.id, id);
             if (ok) {
                 const etUrl = getMainServiceAddress('/api/ce/tracing/normal');
                 try {
                     // FIXME: ET params
                     await request.post<{
+                        eventType: 'datasetUsage';
                         eventTime: number;
                         dataset: IDatasetMeta;
-                    }, never>(etUrl, { eventTime: Date.now(), dataset });
+                    }, never>(etUrl, {
+                        eventTime: Date.now(),
+                        eventType: 'datasetUsage',
+                        dataset,
+                    });
                 } catch (error) {
                     console.warn('EventTrack error <report dataset use>', error);
                 }

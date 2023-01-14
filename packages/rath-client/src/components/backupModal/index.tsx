@@ -9,7 +9,7 @@ import { downloadFileFromBlob, getKRFParseMap, IKRFComponents } from '../../util
 import { LoginPanel } from '../../pages/loginInfo/account';
 import { CloudItemType } from '../../pages/dataSource/selection/cloud/space';
 import { notify } from '../error';
-import { CloudAccessModifier } from '../../interfaces';
+import { CloudAccessModifier, DataSourceType } from '../../interfaces';
 import { writeDatasetFile, writeNotebookFile } from './utils';
 
 const Cont = styled.div`
@@ -139,7 +139,18 @@ const BackupModal: FC = (props) => {
             } else {
                 let dsId = dataSourceId;
                 if (dsId === undefined) {
-                    const dataSourceSaveRes = await dataSourceStore.saveDataSourceOnCloud<'online'>({
+                    const dataSourceSaveRes = sourceType === DataSourceType.File ? (
+                        await dataSourceStore.saveDataSourceOnCloud<'offline'>({
+                            name: modifiableDataSourceName || defaultDataSourceName,
+                            organizationName: selectedOrg!,
+                            workspaceName: selectedWsp!,
+                            datasourceType: sourceType,
+                            fileInfo: {
+                                fileName: file.name,
+                                fileSize: file.size,
+                            },
+                        }, file)
+                    ) : await dataSourceStore.saveDataSourceOnCloud<'online'>({
                         name: modifiableDataSourceName || defaultDataSourceName,
                         organizationName: selectedOrg!,
                         workspaceName: selectedWsp!,

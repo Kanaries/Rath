@@ -111,7 +111,7 @@ export const autoSaveDataset = async (): Promise<boolean> => {
         const [file, nRows, meta] = await writeDatasetFile(DATASET_AUTO_SAVE_NAME);
         await dataSourceStore.saveDatasetOnCloud({
             id: cloudAutoSaveDatasetMeta?.id,
-            datasourceId: cloudAutoSaveDatasetMeta?.datasourceId ?? cloudDataSourceMeta.id,
+            datasourceId: cloudAutoSaveDatasetMeta?.datasource.id ?? cloudDataSourceMeta.id,
             name: DATASET_AUTO_SAVE_NAME,
             workspaceName: cloudAutoSaveDatasetMeta?.workspace.name ?? currentWsp,
             type: cloudAutoSaveDatasetMeta?.type ?? CloudAccessModifier.PROTECTED,

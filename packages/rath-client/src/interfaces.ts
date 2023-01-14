@@ -292,7 +292,7 @@ export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
         linkInfo: Record<string, any>;
     } : {
         fileInfo: {
-            fileType: string;
+            fileType?: string;
             fileName: string;
             /** bytes */
             fileSize: number;
@@ -365,7 +365,6 @@ export type ICreateDatasetResult = {
 export type IDatasetMeta = {
     id: string;
     name: string;
-    datasourceId: string;
     type: CloudAccessModifier;
     size: number;
     totalCount: number;
