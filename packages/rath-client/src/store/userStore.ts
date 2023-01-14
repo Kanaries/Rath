@@ -346,7 +346,7 @@ export default class UserStore {
     }
 
     public async openDataset(dataset: IDatasetMeta): Promise<boolean> {
-        const { downloadUrl, datasourceId, id, workspaceName } = dataset;
+        const { downloadUrl, datasourceId, id, workspace } = dataset;
         try {
             const data = await fetch(downloadUrl, { method: 'GET' });
             if (!data.ok) {
@@ -355,7 +355,7 @@ export default class UserStore {
             if (!data.body) {
                 throw new Error('Request got empty body');
             }
-            const ok = await this.loadDataset(data.body, null, workspaceName, datasourceId, id);
+            const ok = await this.loadDataset(data.body, null, workspace.name, datasourceId, id);
             if (ok) {
                 const etUrl = getMainServiceAddress('/api/ce/tracing/normal');
                 try {
@@ -439,7 +439,7 @@ export default class UserStore {
             const dataSourceDetail = await request.get<{
                 workspaceName: string;
                 datasetId: string;
-            }, IDatasetMeta>(dataSourceApiUrl, { datasetId, workspaceName });
+            }, Omit<IDatasetMeta, 'workspaceName'>>(dataSourceApiUrl, { datasetId, workspaceName });
             return dataSourceDetail;
         } catch (error) {
             notify({

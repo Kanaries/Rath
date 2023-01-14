@@ -284,7 +284,7 @@ export enum DataSourceType {
 
 export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
     name: string;
-    organizationName: string;
+    // organizationName: string;
     workspaceName: string;
     datasourceType: DataSourceType;
 } & (
@@ -362,8 +362,22 @@ export type ICreateDatasetResult = {
     uploadUrl: string;
 };
 
-export type IDatasetMeta = ICreateDatasetPayload & {
+export type IDatasetMeta = {
     id: string;
+    name: string;
+    datasourceId: string;
+    type: CloudAccessModifier;
+    size: number;
+    totalCount: number;
+    meta: IDatasetFieldMeta[];
+    datasource: {
+        id: string;
+        name: string;
+    };
+    workspace: {
+        id: string;
+        name: string;
+    };
     createAt: number;
     downloadUrl: string;
 };

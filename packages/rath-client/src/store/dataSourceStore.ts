@@ -1181,23 +1181,24 @@ export class DataSourceStore {
 
     public async saveDataSourceOnCloud<
         Mode extends 'online' | 'offline',
-        Args extends Mode extends 'online' ? [payload: ICreateDataSourcePayload<'online'>] : [
-            payload: ICreateDataSourcePayload<'offline'>,
+        Args extends Mode extends 'online' ? [payload: ICreateDataSourcePayload<'online'> & { organizationName: string }] : [
+            payload: ICreateDataSourcePayload<'offline'> & { organizationName: string },
             file: File,
-        ] = Mode extends 'online' ? [payload: ICreateDataSourcePayload<'online'>] : [
-            payload: ICreateDataSourcePayload<'offline'>,
+        ] = Mode extends 'online' ? [payload: ICreateDataSourcePayload<'online'> & { organizationName: string }] : [
+            payload: ICreateDataSourcePayload<'offline'> & { organizationName: string },
             file: File,
         ],
         Res extends (
             Mode extends 'online' ? { id: string } : { id: string; downloadUrl: string }
         ) = Mode extends 'online' ? { id: string } : { id: string; downloadUrl: string },
     >(...[payload, file]: Args): Promise<Res | null> {
+        const { organizationName, ...params } = payload;
         const { userStore } = getGlobalStore();
         const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
         const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
         try {
-            const createDataSourceApiRes = await request.post<typeof payload, ICreateDataSourceResult<Mode>>(
-                createDataSourceApiUrl, payload
+            const createDataSourceApiRes = await request.post<typeof params, ICreateDataSourceResult<Mode>>(
+                createDataSourceApiUrl, params
             );
             const dataSource = await userStore.fetchDataSource(payload.workspaceName, createDataSourceApiRes.id);
             if (!dataSource) {

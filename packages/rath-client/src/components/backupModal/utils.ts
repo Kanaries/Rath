@@ -113,7 +113,7 @@ export const autoSaveDataset = async (): Promise<boolean> => {
             id: cloudAutoSaveDatasetMeta?.id,
             datasourceId: cloudAutoSaveDatasetMeta?.datasourceId ?? cloudDataSourceMeta.id,
             name: DATASET_AUTO_SAVE_NAME,
-            workspaceName: cloudAutoSaveDatasetMeta?.workspaceName ?? currentWsp,
+            workspaceName: cloudAutoSaveDatasetMeta?.workspace.name ?? currentWsp,
             type: cloudAutoSaveDatasetMeta?.type ?? CloudAccessModifier.PROTECTED,
             size: file.size,
             totalCount: nRows,
