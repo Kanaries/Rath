@@ -3,9 +3,9 @@ import requests, logging, json
 from . import session, common as c, interface as I
 from .interface import BaseModel, Literal, List, Optional, Union, Tuple
 
-url = 'https://causica.gateway.kanaries.cn:3433'
-url = 'https://causica2.gateway.kanaries.cn:3433'
-url = 'http://161.189.221.110:8081'
+url = "https://causica.gateway.kanaries.cn:3433"
+# url = 'https://causica2.gateway.kanaries.cn:3433'
+# url = 'http://161.189.221.110:8081'
 # url = 'http://52.82.70.212:8081'
 
 class DeciModelOptions(BaseModel):

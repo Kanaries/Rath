@@ -7,7 +7,7 @@ statsmodels
 graphviz
 pygam
 fastapi
-causal-learn
+# causal-learn
 dowhy
 requests
 mangum

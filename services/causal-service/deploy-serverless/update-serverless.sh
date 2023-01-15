@@ -11,8 +11,8 @@ cd $cur_dir
 docker build --platform linux/amd64 -t causal-server:serverless -f ./Dockerfile ../
 aws --profile $profile ecr get-login-password --region $region | docker login --username AWS --password-stdin $ecr
 docker tag causal-server:serverless $ecr/causal-service:serverless
-docker push $ecr/causal-service:serverless && \
-docker save causal-server:serverless | gzip | ssh -J StationViaTunnel T14-01 docker load
+docker push $ecr/causal-service:serverless # && \
+# docker save causal-server:serverless | gzip | ssh -J StationViaTunnel T14-01 docker load
 
 exitcode=$?
 cd $orig_dir
