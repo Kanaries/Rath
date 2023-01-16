@@ -6,20 +6,22 @@ import { workerService } from '../../services';
 // eslint-disable-next-line
 import CausalComputationWorker from './computation.worker.js?worker';
 
-type ICausalProps = {
-    task: 'ig';
-    dataSource: readonly IRow[];
-    fields: readonly IFieldMeta[];
-} | {
-    task: 'ig_cond';
-    dataSource: readonly IRow[];
-    fields: readonly IFieldMeta[];
-    matrix: readonly (readonly number[])[];
-}
+type ICausalProps =
+    | {
+          task: 'ig';
+          dataSource: readonly IRow[];
+          fields: readonly IFieldMeta[];
+      }
+    | {
+          task: 'ig_cond';
+          dataSource: readonly IRow[];
+          fields: readonly IFieldMeta[];
+          matrix: readonly (readonly number[])[];
+      };
 
 export async function causalService(props: ICausalProps): Promise<number[][]> {
     try {
-        const worker = new CausalComputationWorker();
+        const worker = new Worker(new URL('./computation.worker.js', import.meta.url));
         const result = await workerService<number[][], ICausalProps>(worker, props);
         worker.terminate();
         if (result.success) {

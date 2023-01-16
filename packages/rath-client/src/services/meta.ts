@@ -2,7 +2,7 @@ import { IRow } from 'visual-insights';
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import fieldMetaWorker from '../workers/fieldMeta.worker?worker';
+// import fieldMetaWorker from '../workers/fieldMeta.worker?worker';
 import { IFieldMeta, IRawField } from '../interfaces';
 import { workerService } from './base';
 
@@ -13,7 +13,7 @@ export interface ComputeFieldMetaServiceProps {
 export async function computeFieldMetaService(props: ComputeFieldMetaServiceProps): Promise<IFieldMeta[]> {
     let metas: IFieldMeta[] = [];
     try {
-        const worker = new fieldMetaWorker();
+        const worker = new Worker(new URL('../workers/fieldMeta.worker.js', import.meta.url));
         const result = await workerService<IFieldMeta[], ComputeFieldMetaServiceProps>(worker, props);
         if (result.success) {
             metas = result.data;

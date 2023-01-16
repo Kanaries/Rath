@@ -1,23 +1,22 @@
 import { Sampling } from 'visual-insights';
-import { FileReader as KFileReader } from '@kanaries/web-data-loader'
+import { FileReader as KFileReader } from '@kanaries/web-data-loader';
 import intl from 'react-intl-universal';
-import { useMemo } from "react";
+import { useMemo } from 'react';
 import * as xlsx from 'xlsx';
-import { STORAGE_FILE_SUFFIX } from "../../../constants";
-import { FileLoader } from "../../../utils";
-import { IMuteFieldBase, IRow } from "../../../interfaces";
-import { IRathStorage, RathStorageParse } from "../../../utils/storage";
-import { workerService } from "../../../services/index";
-
+import { STORAGE_FILE_SUFFIX } from '../../../constants';
+import { FileLoader } from '../../../utils';
+import { IMuteFieldBase, IRow } from '../../../interfaces';
+import { IRathStorage, RathStorageParse } from '../../../utils/storage';
+import { workerService } from '../../../services/index';
 
 /* eslint import/no-webpack-loader-syntax:0 */
 // @ts-ignore
 // eslint-disable-next-line
-import FileDataTransformWorker from './transFileData.worker?worker';
+// import FileDataTransformWorker from './transFileData.worker?worker';
 
 export enum SampleKey {
-  none = 'none',
-  reservoir = 'reservoir',
+    none = 'none',
+    reservoir = 'reservoir',
 }
 
 export const useSampleOptions = function () {
@@ -34,30 +33,33 @@ export const useSampleOptions = function () {
                 text: reservoirText,
             },
         ];
-    }, [noneText, reservoirText])
+    }, [noneText, reservoirText]);
     return options;
-}
+};
 
-export async function transformRawDataService (rawData: IRow[]): Promise<{
+export async function transformRawDataService(rawData: IRow[]): Promise<{
     fields: IMuteFieldBase[];
-    dataSource: IRow[]
+    dataSource: IRow[];
 }> {
-    const worker = new FileDataTransformWorker()
-    const res = await workerService<{
+    const worker = new Worker(new URL('./transFileData.worker', import.meta.url));
+    const res = await workerService<
+        {
             fields: IMuteFieldBase[];
-            dataSource: IRow[]
-        }, IRow[]>(worker, rawData);
+            dataSource: IRow[];
+        },
+        IRow[]
+    >(worker, rawData);
     if (res.success) {
         return res.data;
     } else {
-        throw new Error(res.message)
+        throw new Error(res.message);
     }
 }
 
 export const readRaw = (file: File, encoding?: string, limit?: number, rowLimit?: number, colLimit?: number): Promise<string | null> => {
     const fr = new FileReader();
     fr.readAsText(file, encoding);
-    return new Promise<string | null>(resolve => {
+    return new Promise<string | null>((resolve) => {
         fr.onload = () => {
             let text = fr.result as string | null;
             if (typeof text === 'string') {
@@ -65,7 +67,11 @@ export const readRaw = (file: File, encoding?: string, limit?: number, rowLimit?
                     text = text.slice(0, limit);
                 }
                 if (rowLimit || colLimit) {
-                    text = text.split('\n').slice(0, rowLimit).map(row => row.slice(0, colLimit)).join('\n');
+                    text = text
+                        .split('\n')
+                        .slice(0, rowLimit)
+                        .map((row) => row.slice(0, colLimit))
+                        .join('\n');
                 }
                 return resolve(text);
             } else {
@@ -86,25 +92,19 @@ interface LoadDataFileProps {
 }
 export async function loadDataFile(props: LoadDataFileProps): Promise<{
     fields: IMuteFieldBase[];
-    dataSource: IRow[]
+    dataSource: IRow[];
 }> {
-    const {
-        file,
-        sampleMethod,
-        sampleSize = 500,
-        encoding = 'utf-8',
-        onLoading,
-        separator,
-    } = props;
+    const { file, sampleMethod, sampleSize = 500, encoding = 'utf-8', onLoading, separator } = props;
     /**
      * tmpFields is fields cat by specific rules, the results is not correct sometimes, waitting for human's input
      */
-    let rawData: IRow[] = []
+    let rawData: IRow[] = [];
 
-    if (file.type.match(/^text\/.*/)) {     // csv-like text files
+    if (file.type.match(/^text\/.*/)) {
+        // csv-like text files
         if (separator && separator !== ',') {
-            const content = (await readRaw(file, encoding) ?? '');
-            const rows = content.split(/\r?\n/g).map(row => row.split(separator));
+            const content = (await readRaw(file, encoding)) ?? '';
+            const rows = content.split(/\r?\n/g).map((row) => row.split(separator));
             const fields = rows[0]?.map<IMuteFieldBase>((h, i) => ({
                 fid: `col_${i + 1}`,
                 name: h,
@@ -112,44 +112,44 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
                 analyticType: '?',
                 semanticType: '?',
             }));
-            const dataSource = rows.slice(1).map<IRow>(row => Object.fromEntries(fields.map((f, i) => [f.fid, row[i]])));
+            const dataSource = rows.slice(1).map<IRow>((row) => Object.fromEntries(fields.map((f, i) => [f.fid, row[i]])));
             return { fields, dataSource };
         }
         if (sampleMethod === SampleKey.reservoir) {
             rawData = (await KFileReader.csvReader({
-              file,
-              encoding,
-              config: {
-                type: 'reservoirSampling',
-                size: sampleSize,
-              },
-              onLoading
-            })) as IRow[]
+                file,
+                encoding,
+                config: {
+                    type: 'reservoirSampling',
+                    size: sampleSize,
+                },
+                onLoading,
+            })) as IRow[];
         } else {
             rawData = (await KFileReader.csvReader({
-              file,
-              encoding,
-              onLoading
-            })) as IRow[]
+                file,
+                encoding,
+                onLoading,
+            })) as IRow[];
         }
     } else if (file.type === 'application/json') {
-        rawData = await FileLoader.jsonLoader(file)
+        rawData = await FileLoader.jsonLoader(file);
         if (sampleMethod === SampleKey.reservoir) {
-            rawData = Sampling.reservoirSampling(rawData, sampleSize)
+            rawData = Sampling.reservoirSampling(rawData, sampleSize);
         }
     } else {
-        throw new Error(`unsupported file type=${file.type} `)
+        throw new Error(`unsupported file type=${file.type} `);
     }
     const dataset = await transformRawDataService(rawData);
-    return dataset
+    return dataset;
 }
 
 export const isExcelFile = (file: File): boolean => {
     return [
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',    // xlsx
-        'application/vnd.ms-excel.sheet.binary.macroEnabled.12',                // xlsb
-        'application/vnd.ms-excel',                                             // xls
-        'application/vnd.ms-excel.sheet.macroEnabled.12',                       // xlsm
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
+        'application/vnd.ms-excel.sheet.binary.macroEnabled.12', // xlsb
+        'application/vnd.ms-excel', // xls
+        'application/vnd.ms-excel.sheet.macroEnabled.12', // xlsm
     ].includes(file.type);
 };
 
@@ -159,23 +159,35 @@ export const parseExcelFile = async (file: File) => {
     return data;
 };
 
-export const loadExcelRaw = async (data: Awaited<ReturnType<typeof parseExcelFile>>, sheetIdx: number, limit?: number, rowLimit?: number, colLimit?: number): Promise<string> => {
+export const loadExcelRaw = async (
+    data: Awaited<ReturnType<typeof parseExcelFile>>,
+    sheetIdx: number,
+    limit?: number,
+    rowLimit?: number,
+    colLimit?: number
+): Promise<string> => {
     const sheet = data.SheetNames[sheetIdx];
     const worksheet = data.Sheets[sheet];
-    const csvData = xlsx.utils.sheet_to_csv(worksheet, { skipHidden: true });   // more options available here
+    const csvData = xlsx.utils.sheet_to_csv(worksheet, { skipHidden: true }); // more options available here
     let text = csvData;
     if (limit) {
         text = text.slice(0, limit);
     }
     if (rowLimit || colLimit) {
-        text = text.split('\n').slice(0, rowLimit).map(row => row.slice(0, colLimit)).join('\n');
+        text = text
+            .split('\n')
+            .slice(0, rowLimit)
+            .map((row) => row.slice(0, colLimit))
+            .join('\n');
     }
     return text;
 };
 
 export const loadExcelFile = async (
-    data: Awaited<ReturnType<typeof parseExcelFile>>, sheetIdx: number, encoding: string,
-    range?: [[number, number], [number, number]],
+    data: Awaited<ReturnType<typeof parseExcelFile>>,
+    sheetIdx: number,
+    encoding: string,
+    range?: [[number, number], [number, number]]
 ): Promise<{
     fields: IMuteFieldBase[];
     dataSource: IRow[];
@@ -189,7 +201,7 @@ export const loadExcelFile = async (
             e: { r: range[1][0], c: range[1][1] },
         });
     }
-    const csvData = xlsx.utils.sheet_to_csv(copy, { skipHidden: true });   // more options available here
+    const csvData = xlsx.utils.sheet_to_csv(copy, { skipHidden: true }); // more options available here
     const csvFile = new File([new Blob([csvData], { type: 'text/plain' })], 'file.csv');
     const rawData = (await KFileReader.csvReader({
         file: csvFile,
@@ -198,12 +210,12 @@ export const loadExcelFile = async (
     return await transformRawDataService(rawData);
 };
 
-export async function loadRathStorageFile (file: File): Promise<IRathStorage> {
+export async function loadRathStorageFile(file: File): Promise<IRathStorage> {
     // FIXME file type
     if (file.name.split('.').slice(-1)[0] === STORAGE_FILE_SUFFIX) {
         const rawContent = await FileLoader.textLoader(file);
         return RathStorageParse(rawContent);
     } else {
-        throw new Error(`file type not supported: ${file.name.split('.').slice(-1)[0]}`)
+        throw new Error(`file type not supported: ${file.name.split('.').slice(-1)[0]}`);
     }
 }
