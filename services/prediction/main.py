@@ -62,9 +62,7 @@ def runClassificationModel():
             if trainTestSplitIndices[i] == 0:
                 testset_indices.append(i)
         X, y, headers = makeTrainingData(data=data, fields=fields, features=features, target=targets[0])
-        # print(X.shape, y.shape, len(headers))
         X_train, X_test, y_train, y_test = controlSplitTrainTest(X, y, trainTestSplitIndices)
-        # print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
         score = 0
         diffs = []
         if mode == 'classification':
