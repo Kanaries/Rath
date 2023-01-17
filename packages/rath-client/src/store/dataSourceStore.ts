@@ -3,6 +3,7 @@ import { IReactionDisposer, makeAutoObservable, observable, reaction, runInActio
 import { combineLatest, from, Observable, Subscription } from "rxjs";
 import { getFreqRange } from "@kanaries/loa";
 import * as op from 'rxjs/operators'
+import { gzip } from 'pako';
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import {
@@ -1249,9 +1250,18 @@ export class DataSourceStore {
         const createDatasetApiUrl = getMainServiceAddress('/api/ce/dataset');
         const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
         try {
-            const createDatasetApiRes = await request.post<ICreateDatasetPayload, ICreateDatasetResult>(
-                createDatasetApiUrl, payload
-            );
+            const respond = await fetch(createDatasetApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Encoding': 'gzip',
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
+                body: gzip(JSON.stringify(payload)),
+            });
+            if (!respond.ok) {
+                throw new Error(respond.statusText);
+            }
+            const createDatasetApiRes = await respond.json() as ICreateDatasetResult;
             const fileUploadRes = await fetch(createDatasetApiRes.uploadUrl, {
                 method: 'PUT',
                 body: file,

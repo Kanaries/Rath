@@ -385,3 +385,21 @@ export type IDatasetData = {
     data: IBackUpData;
     meta: IBackUpDataMeta;
 };
+
+export interface ICreateDashboardPayload {
+    datasourceId: string;
+    workspaceName: string;
+    name: string;
+    publishTemplate: boolean;
+    description: string;
+    cover: {
+        name: string;
+        size: number;
+        type: string;
+    };
+    dashboard: {
+        name: string;
+        size: number;
+        type: string;
+    };
+}

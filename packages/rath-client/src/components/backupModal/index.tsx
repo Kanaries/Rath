@@ -38,7 +38,7 @@ const BackupModal: FC = (props) => {
     const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
     const mutFieldsLength = dataSourceStore.mutFields.length;
     const collectionLength = collectionStore.collectionList.length;
-    const [mode, setMode] = useState(CloudItemType.NOTEBOOK);
+    const [mode, setMode] = useState(CloudItemType.DATASET);
     
     const [dataSourceName, setDataSourceName] = useState<string | null>(null);
     const [modifiableDataSourceName, setModifiableDataSourceName] = useState('');
@@ -90,7 +90,7 @@ const BackupModal: FC = (props) => {
     const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
     const workspaces = organizations?.find(org => org.name === selectedOrg)?.workspaces;
     const [selectedWsp, setSelectedWsp] = useState<string | null>(null);
-    const [accessMode, setAccessMode] = useState(CloudAccessModifier.PUBLIC);
+    const [accessMode, setAccessMode] = useState(CloudAccessModifier.PROTECTED);
     const canBackup =  selectedWsp !== null && (mode === CloudItemType.NOTEBOOK ? (
         Object.values(backupItemKeys).some(Boolean)
     ) : (
