@@ -7,6 +7,7 @@ export const PredictAlgorithms = [
     { key: 'randomForest', text: '随机森林（Random Forest）' },
     { key: 'gradientBoosting', text: '梯度增强（Gradient Boosting）' },
     { key: 'adaBoost', text: '自适应增强（AdaBoost）' },
+    { key: 'XGBoost', text: 'XGBoost' }
 ] as const;
 
 export type PredictAlgorithm = typeof PredictAlgorithms[number]['key'];
@@ -47,8 +48,13 @@ export interface IPredictResult {
     result: PredictResultItem[];
 }
 
-// TODO: 模型预测服务：上生产环境后改称线上服务地址
-const PredictApiPath = 'http://127.0.0.1:5533/api/train_test';
+const PREDICT_API_KEY = 'prediction_service';
+function getPredictAPIPath (path = "/api/train_test") {
+    const baseURL = new URL(window.location.href);
+    const serviceURL = new URL(baseURL.searchParams.get(PREDICT_API_KEY) || localStorage.getItem(PREDICT_API_KEY) || "http://127.0.0.1:5533/api/train_test");
+    serviceURL.pathname = path;
+    return serviceURL.toString();
+}
 
 export const execPredict = async (props: IPredictProps): Promise<IPredictResult | null> => {
     try {
@@ -57,7 +63,7 @@ export const execPredict = async (props: IPredictProps): Promise<IPredictResult 
         //     0: 'T',
         //     1: '_',
         // }[flag])).join(''), props.trainTestSplitIndices.length)
-        const res = await fetch(PredictApiPath, {
+        const res = await fetch(getPredictAPIPath(), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
