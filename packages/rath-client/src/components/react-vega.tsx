@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { View } from 'vega';
 import intl from 'react-intl-universal';
 import embed, { vega } from 'vega-embed';
@@ -16,10 +16,51 @@ interface ReactVegaProps {
     config?: VegaThemeConfig;
 }
 
-const ReactVega: React.FC<ReactVegaProps> = (props) => {
+export interface IReactVegaHandler {
+    getSVGData: () => Promise<string | null>;
+    getCanvasData: () => Promise<string | null>;
+    downloadSVG: () => Promise<boolean>;
+    downloadPNG: () => Promise<boolean>;
+}
+
+const ReactVega = forwardRef<IReactVegaHandler, ReactVegaProps>(function ReactVega (props, ref) {
     const { spec, dataSource, signalHandler = {}, actions, config } = props;
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View>();
+    useImperativeHandle(ref, () => ({
+        async getSVGData() {
+            return viewRef.current?.toSVG() ?? null;
+        },
+        async getCanvasData() {
+            return viewRef.current?.toCanvas().then(canvas => canvas.toDataURL('image/png')) ?? null;
+        },
+        async downloadSVG() {
+            const data = (await viewRef.current?.toSVG()) ?? null;
+            if (data) {
+                const file = new File([data], 'image.svg');
+                const url = URL.createObjectURL(file);
+                const a = document.createElement('a');
+                a.download = file.name;
+                a.href = url;
+                a.click();
+                requestAnimationFrame(() => {
+                    URL.revokeObjectURL(url);
+                });
+            }
+            return false;
+        },
+        async downloadPNG() {
+            const data = (await viewRef.current?.toCanvas(2).then(canvas => canvas.toDataURL('image/png', 1))) ?? null;
+            if (data) {
+                const a = document.createElement('a');
+                a.download = 'image.png';
+                a.href = data.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+                a.click();
+                return true;
+            }
+            return false;
+        },
+    }));
     useEffect(() => {
         if (container.current) {
             const sspec = {
@@ -96,6 +137,6 @@ const ReactVega: React.FC<ReactVegaProps> = (props) => {
         }
     }, [dataSource]);
     return <div ref={container} />;
-};
+});
 
 export default ReactVega;

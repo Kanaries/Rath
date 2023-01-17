@@ -399,7 +399,8 @@
             "editInGW": "Customized Analysis",
             "editInEditor": "Edit in Editor",
             "associate": "associate views",
-            "constraints": "analysis constraints"
+            "constraints": "analysis constraints",
+            "download": "export chart"
         },
         "constraints": {
             "exclude": "exclude field",
