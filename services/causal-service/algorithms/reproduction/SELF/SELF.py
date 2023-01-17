@@ -10,7 +10,8 @@ from sklearn.linear_model import LinearRegression
 from scipy import stats
 import xgboost
 xgboost.set_config(verbosity=0)
-from rpy2.robjects import r
+from rpy2.robjects import r, pandas2ri
+pandas2ri.activate()
 import time
 
 from .utilities import get_parents, get_vicinity_G, compare_graph
@@ -79,8 +80,14 @@ def updateScore(data, graph, NodeScore, nodes, score_type="bic", bw="nrd0",
                 else:
                     # fit_ts = time.time_ns()
                     if use_py_package:
-                        model = xgboost.XGBRegressor(booster=booster, gamma=gamma, nrounds=nrounds)
-                        model.fit(x, y)
+                        # model = xgboost.XGBRegressor(booster=booster, gamma=gamma, nrounds=nrounds)
+                        # model.fit(x, y)
+                        d_train = xgboost.DMatrix(x, y)
+                        params = {
+                            'booster': booster,
+                            'gamma': gamma,
+                        }
+                        model = xgboost.train(params, d_train)
                     else:
                         model = r("xgboost")(data=x, label=y, verbose=0, nrounds=nrounds, gamma=gamma, booster=booster)
                     # print(f"xgb time: {(time.time_ns() - fit_ts) / 1e6}ms")
@@ -88,7 +95,7 @@ def updateScore(data, graph, NodeScore, nodes, score_type="bic", bw="nrd0",
                 N = y - model.predict(x)
             else:
                 if use_py_package:
-                    N = y - model.predict(x)
+                    N = y - model.predict(xgboost.DMatrix(x))
                 else:
                     N = y - r("stats::predict")(model, x)
             if is_cata:
@@ -106,7 +113,13 @@ def updateScore(data, graph, NodeScore, nodes, score_type="bic", bw="nrd0",
                     NodeScore[i] = np.sum(np.log(eta) * eta) - d / data.shape[0]
             else:
                 if booster == "gbtree":
-                    d = r("get_leaf_node")(model=model)
+                    if use_py_package:
+                        dump = model.get_dump()
+                        d = 0
+                        for item in dump:
+                            d += item.count('leaf')
+                    else:
+                        d = r("get_leaf_node")(model=model)
                     d = d + len(pa)
                 else:
                     d = len(pa) + 1  # gblinear
@@ -163,9 +176,6 @@ class FastHillClimb:
         )
         graph = copy.deepcopy(self.Graph)
         bestResult = copy.deepcopy(init_result)
-        # print(f"init_node_score: {init_result.nodeScore}")
-        # print("init_score: ", init_result.score)
-        # print("init_graph: ", init_result.graph)
         while True:
             t_s = time.time_ns()
             vicinities = get_vicinity_G(graph, self.bgKownledges)
@@ -184,9 +194,6 @@ class FastHillClimb:
                         nodeScore=nodeScore,
                         score=score
                     )
-            # print(f"updateScore time: {(time.time_ns() - t_s) / 1e6}ms")
-            # print("score: ", bestResult.score)
-            # print("graph: \n", bestResult.graph)
             if np.abs(bestResult.score - init_result.score) < self.min_increase:
                 break
             if (bestResult.graph == init_result.graph).all():
