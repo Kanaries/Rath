@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import { Resizable } from 're-resizable';
-import React, { useMemo } from 'react';
+import React, { RefObject, useMemo } from 'react';
 import { applyFilters, IPattern } from '@kanaries/loa';
-import ReactVega from '../../../components/react-vega';
+import ReactVega, { IReactVegaHandler } from '../../../components/react-vega';
 import { IResizeMode, IRow, IVegaSubset } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import ErrorBoundary from '../../../components/visErrorBoundary';
@@ -10,9 +10,10 @@ import ErrorBoundary from '../../../components/visErrorBoundary';
 interface MainCanvasProps {
     view: IPattern;
     spec: IVegaSubset;
+    handler?: RefObject<IReactVegaHandler>;
 }
 const MainCanvas: React.FC<MainCanvasProps> = (props) => {
-    const { view, spec } = props;
+    const { view, spec, handler } = props;
     const { semiAutoStore, commonStore, dataSourceStore } = useGlobalStore();
     const { mainVizSetting } = semiAutoStore;
     const { cleanedData: dataSource } = dataSourceStore;
@@ -42,14 +43,14 @@ const MainCanvas: React.FC<MainCanvasProps> = (props) => {
                 }}
             >
                 <ErrorBoundary>
-                    <ReactVega actions={debug} spec={spec} dataSource={viewData} config={commonStore.themeConfig} />
+                    <ReactVega ref={handler} actions={debug} spec={spec} dataSource={viewData} config={commonStore.themeConfig} />
                 </ErrorBoundary>
             </Resizable>
         );
     }
     return (
         <ErrorBoundary>
-            <ReactVega actions={debug} spec={spec} dataSource={viewData} config={commonStore.themeConfig} />
+            <ReactVega ref={handler} actions={debug} spec={spec} dataSource={viewData} config={commonStore.themeConfig} />
         </ErrorBoundary>
     );
 };

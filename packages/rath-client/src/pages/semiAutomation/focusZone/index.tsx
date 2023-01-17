@@ -11,12 +11,15 @@ import FilterCreationPill from '../../../components/fieldPill/filterCreationPill
 import Narrative from '../narrative';
 import EncodeCreationPill from '../../../components/fieldPill/encodeCreationPill';
 import EditorCore from '../../editor/core/index';
+import type { IReactVegaHandler } from '../../../components/react-vega';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
-
-const FocusZone: React.FC = (props) => {
+interface IFocusZoneProps {
+    handler: React.RefObject<IReactVegaHandler>;
+}
+const FocusZone: React.FC<IFocusZoneProps> = ({ handler }) => {
     const { semiAutoStore, commonStore, collectionStore, painterStore, editorStore } = useGlobalStore();
     const { mainVizSetting, mainView, showMiniFloatView, mainViewSpec, fieldMetas, neighborKeys, mainViewSpecSource } = semiAutoStore;
     const { muteSpec } = editorStore;
@@ -73,7 +76,7 @@ const FocusZone: React.FC = (props) => {
 
     return (
         <MainViewContainer>
-            {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
+            {mainView && showMiniFloatView && <MiniFloatCanvas handler={handler} pined={mainView} />}
             <div className="vis-container">
                 <div className="spec">
                     {mainViewSpecSource === 'custom' && (
@@ -90,7 +93,7 @@ const FocusZone: React.FC = (props) => {
                         />
                     )}
                 </div>
-                <div className="vis">{mainView && mainViewSpec && <MainCanvas view={mainView} spec={viewSpec} />}</div>
+                <div className="vis">{mainView && mainViewSpec && <MainCanvas handler={handler} view={mainView} spec={viewSpec} />}</div>
                 {mainVizSetting.nlg && (
                     <div style={{ overflow: 'auto' }}>
                         <Narrative />
@@ -217,6 +220,29 @@ const FocusZone: React.FC = (props) => {
                     text={intl.get('common.settings')}
                     onClick={() => {
                         semiAutoStore.setShowSettings(true);
+                    }}
+                />
+                <ActionButton
+                    style={{ marginTop: BUTTON_STYLE.marginTop }}
+                    styles={{ splitButtonMenuButton: BUTTON_STYLE }}
+                    iconProps={{ iconName: 'Download' }}
+                    ariaLabel={intl.get('megaAuto.commandBar.download')}
+                    title={intl.get('megaAuto.commandBar.download')}
+                    text={intl.get('megaAuto.commandBar.download')}
+                    onClick={() => {
+                        handler.current?.downloadPNG();
+                    }}
+                    split
+                    menuProps={{
+                        items: [
+                            {
+                                key: 'svg',
+                                text: 'SVG',
+                                onClick: () => {
+                                    handler.current?.downloadSVG();
+                                },
+                            },
+                        ],
                     }}
                 />
             </div>

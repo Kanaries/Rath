@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Divider } from '@material-ui/core';
 import styled from 'styled-components';
@@ -8,6 +8,7 @@ import { DefaultButton, PrimaryButton } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
 import EditorCore from '../editor/core';
+import type { IReactVegaHandler } from '../../components/react-vega';
 import VizPreference from './preference';
 import SaveModal from './save';
 import OperationBar from './vizOperation/operationBar';
@@ -85,6 +86,9 @@ const LTSPage: React.FC = () => {
         });
         commonStore.setAppKey(PIVOT_KEYS.megaAuto);
     }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode]);
+
+    const handler = useRef<IReactVegaHandler>(null);
+
     return (
         <div className="content-container">
             <VizPreference />
@@ -119,7 +123,7 @@ const LTSPage: React.FC = () => {
                 <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
                 <InsightContainer>
                     <div className="ope-container">
-                        <OperationBar />
+                        <OperationBar handler={handler} />
                     </div>
                     <div className="flex-container">
                         <div className="spec-container">
@@ -136,7 +140,7 @@ const LTSPage: React.FC = () => {
                                 />
                             )}
                         </div>
-                        <MainCanvas />
+                        <MainCanvas handler={handler} />
                         <div className="insight-info">{visualConfig.nlg && <Narrative />}</div>
                     </div>
                     <div>
