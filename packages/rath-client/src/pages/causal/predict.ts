@@ -7,6 +7,7 @@ export const PredictAlgorithms = [
     { key: 'randomForest', text: '随机森林（Random Forest）' },
     { key: 'gradientBoosting', text: '梯度增强（Gradient Boosting）' },
     { key: 'adaBoost', text: '自适应增强（AdaBoost）' },
+    { key: 'XGBoost', text: 'XGBoost' }
 ] as const;
 
 export type PredictAlgorithm = typeof PredictAlgorithms[number]['key'];
