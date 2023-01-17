@@ -1,5 +1,7 @@
 services:
-    rath:
-        build: .
-        ports:
-          - 2233:80
+  frontend:
+    build:
+      context: .
+      dockerfile: client.dockerfile
+    ports:
+      - 8080:80
