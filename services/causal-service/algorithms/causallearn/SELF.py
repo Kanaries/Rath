@@ -1,6 +1,9 @@
+import time
 from typing import Dict, List, Tuple, Optional, Union, Literal
 import logging
 import traceback
+
+import xgboost
 from pydantic import Field
 
 from algorithms.common import getOpts, ISELFBooster, ISELFScoreType, ICatEncodeType, IQuantEncodeType, UCPriorityItems, UCRuleItems, \
@@ -13,11 +16,19 @@ from causallearn.utils.PCUtils import SkeletonDiscovery
 from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 from causallearn.utils.PCUtils.BackgroundKnowledgeOrientUtils import orient_by_background_knowledge
 
+import rpy2
 import rpy2.robjects.packages as rpackages
 from rpy2.robjects import r
 from rpy2.robjects import pandas2ri
 pandas2ri.activate()
 rpackages.importr('SELF')
+rpackages.importr('xgboost')
+r('xgb.set.config')(verbosity=0)
+rpy2.robjects.r("warnings('off')")
+
+from algorithms.reproduction.SELF.SELF import FastHillClimb
+import numpy as np
+
 
 class SELFParams(OptionalParams, title="SELF"):
     """
@@ -42,7 +53,7 @@ class SELFParams(OptionalParams, title="SELF"):
         options=getOpts(ISELFScoreType)
     )
     booster: Optional[str] = Field(
-        default='gbtree', title="XGBoost-Boost",  # "Independence Test",
+        default='gblinear', title="XGBoost-Boost",  # "Independence Test",
         description="XGBoost中的booster参数，可选项为gbtree, gblinear, lm",
         options=getOpts(ISELFBooster),
     )
@@ -51,10 +62,18 @@ class SELFParams(OptionalParams, title="SELF"):
         description="XGBoost中的gamma参数，用于控制树的生长",
         gt=0.0, le=20
     )
-    nrounds: Optional[float] = Field(
+    nrounds: Optional[int] = Field(
         default=20, title="XGBoost-nrounds",  # "Alpha",
         description="XGBoost中的nrounds参数，最大迭代次数",
-        gt=0.0, le=30
+        gt=0, le=30
+    )
+    use_R: Optional[bool] = Field(
+        default=False, title="Use R language as lib",
+        description="调用R语言",
+    )
+    use_py_package: Optional[bool] = Field(
+        default=False, title="Use Python xgboost",
+        description="调用Python xgboost",
     )
 
 
@@ -75,6 +94,24 @@ class SELF(AlgoInterface):
                 self.bk.add_forbidden_by_node(node[f_ind[k.src]], node[f_ind[k.tar]])
         return self.bk
 
+    def constructBkGraph(self, bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], f_ind: Dict[str, int] = {}):
+        graph = np.zeros((len(f_ind), len(f_ind)))
+        rules = graph.copy()
+        for k in bgKnowledgesPag:
+            if k.src_type == 1 and k.tar_type == -1:
+                graph[f_ind[k.src], f_ind[k.tar]] = 1
+                rules[f_ind[k.src], f_ind[k.tar]] = 1
+                rules[f_ind[k.tar], f_ind[k.src]] = -1
+            elif k.src_type == -1 and k.tar_type == 1:
+                graph[f_ind[k.tar], f_ind[k.src]] = 1
+                rules[f_ind[k.tar], f_ind[k.src]] = 1
+                rules[f_ind[k.src], f_ind[k.tar]] = -1
+            elif k.src_type == 0:
+                rules[f_ind[k.src], f_ind[k.tar]] = -1
+            elif k.tar_type == 0:
+                rules[f_ind[k.tar], f_ind[k.src]] = -1
+        return graph, rules
+
     def calc(self, params: Optional[ParamType] = ParamType(), focusedFields: List[str] = [],
              bgKnowledgesPag: Optional[List[common.BgKnowledgePag]] = [], **kwargs):
         array = self.selectArray(focusedFields=focusedFields, params=params)
@@ -83,25 +120,42 @@ class SELF(AlgoInterface):
 
         params.__dict__['cache_path'] = None  # '/tmp/causal/pc.json'
 
-        # self.cg = pc(array, params.alpha, params.indep_test, params.stable, params.uc_rule, params.uc_priority, params.mvpc, cache_path=self.__class__.cache_path)
-        # self.cg = pc(array, **params.__dict__, background_knowledge=None, verbose=self.__class__.verbose)
-        # if bgKnowledgesPag and len(bgKnowledgesPag) > 0:
-        #     f_ind = {fid: i for i, fid in enumerate(focusedFields)}
-        #     bk = self.constructBgKnowledgePag(bgKnowledgesPag=bgKnowledgesPag, f_ind=f_ind)
-        #     self.cg = pc(array, **params.__dict__, background_knowledge=bk, verbose=self.__class__.verbose)
-        #
-        # l = self.cg.G.graph.tolist()
-        print(f'Param boost: {params.booster}')
-        fhc = r('fhc')
-        G = fhc(array, boost=params.booster, gamma=params.gamma, nrounds=params.nrounds, score_type=params.score_type).tolist()
+        print(f"array: {array[:5]}")
+        print(f"fields: {self.focusedFields}")
+        t_s = time.time_ns()
+        if bgKnowledgesPag and len(bgKnowledgesPag) > 0:
+            f_ind = {fid: i for i, fid in enumerate(focusedFields)}
+            print(f"f_ind: {f_ind}")
+            init_graph, rules = self.constructBkGraph(bgKnowledgesPag=bgKnowledgesPag, f_ind=f_ind)
+            if params.use_R:
+                fhc = r('fhc')
+                G = fhc(array, init_graph, boost=params.booster, gamma=params.gamma, nrounds=params.nrounds,
+                        score_type=params.score_type).tolist()
+            else:
+                fasthillclimb = FastHillClimb(array, init_graph, rules, score_type=params.score_type,
+                                              booster=params.booster, gamma=params.gamma, max_iter=params.nrounds,
+                                              use_py_package=params.use_py_package)
+                G = fasthillclimb.fit().tolist()
+        else:
+            if params.use_R:
+                fhc = r('fhc')
+                G = fhc(array, boost=params.booster, gamma=params.gamma, nrounds=params.nrounds,
+                        score_type=params.score_type).tolist()
+            else:
+                fasthillclimb = FastHillClimb(array, score_type=params.score_type,
+                                              booster=params.booster, gamma=params.gamma, max_iter=params.nrounds,
+                                              use_py_package=params.use_py_package)
+                G = fasthillclimb.fit().tolist()
+        print(f"SELF time: {(time.time_ns() - t_s) / 1e6}ms")
         l = G
         for i in range(len(l)):
             for j in range(len(l[i])):
                 if l[j][i] != 0:
                     if l[i][j] == 0:
                         l[i][j] = -l[j][i]
-                    else:
-                        l[i][j] = l[j][i] = 2  # circle
+                if l[i][j] == l[j][i] == 1:
+                    l[i][j] = l[j][i] = 2  # circle
+        print(np.array(l))
         return {
             'data': l,
             'matrix': l,
