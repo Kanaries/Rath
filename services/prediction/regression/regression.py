@@ -17,7 +17,7 @@ def regression (X_train, X_test, y_train, y_test, headers, algorithm):
         regr = tree.DecisionTreeRegressor()
     elif algorithm == 'randomForest':
         regr = ensemble.RandomForestRegressor(max_depth=3, random_state=50, oob_score=True)
-    elif algorithm == 'xgboost':
+    elif algorithm == 'XGBoost':
         regr = XGBRegressor(n_estimators=100, max_depth=3, learning_rate=0.1)
     else:
         regr = linear_model.ElasticNet(alpha=0.1, l1_ratio=0.7)
