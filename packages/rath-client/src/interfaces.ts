@@ -403,3 +403,79 @@ export interface ICreateDashboardPayload {
         type: string;
     };
 }
+
+export interface IDashboardFieldMeta {
+    fId: string;
+    analyticType: IAnalyticType;
+    semanticType: ISemanticType;
+    description: string;
+}
+
+export interface IDashboardTemplateInfo {
+    id: string;
+    name: string;
+    description: string;
+    meta: IDashboardFieldMeta[];
+    size: number;
+    type: number;
+    storageId: string;
+    downloadUrl: string;
+    cover: {
+        name: string;
+        size: number;
+        type: string;
+        storageId: string;
+        downloadUrl: string;
+    };
+    workspace: {
+        id: string;
+        name: string;
+        ownerName: string;
+    };
+    organization: {
+        id: string;
+        type: number;
+        name: string;
+        ownerName: string;
+    };
+}
+
+
+export interface IDashboardDocumentDetail {
+    id: string;
+    name: string;
+    type: number;
+    description: string;
+    dashboardTemplate: Omit<IDashboardTemplateInfo, 'workspace' | 'organization'>;
+    workspace: {
+        id: string;
+        name: string;
+        ownerName: string;
+    };
+    organization: {
+        id: string;
+        type: number;
+        name: string;
+        ownerName: string;
+    };
+    datasource: Pick<IDataSourceMeta, 'name' | 'id'>;
+}
+
+export type IDashboardDocumentInfo = (
+    Omit<IDashboardDocumentDetail, 'dashboardTemplate'>
+    & { dashboardTemplate: Omit<IDashboardDocumentDetail['dashboardTemplate'], 'meta'> }
+);
+
+export type ICreateDashboardConfig = {
+    dashboard: {
+        name: string;
+        description: string;
+    };
+    dashboardTemplate: {
+        name: string;
+        description: string;
+        fieldDescription: Record<string, string>;
+        publish: boolean;
+        cover?: File;
+    };
+};

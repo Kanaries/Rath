@@ -30,6 +30,7 @@ import {
     IDataSourceMeta,
     IDatasetMeta,
     DataSourceType,
+    IDashboardDocumentInfo,
 } from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
@@ -52,6 +53,7 @@ interface IDataMessage {
     data: IDatasetBase
     downLoadURL?: string;
     dataset?: IDatasetMeta;
+    dashboard?: IDashboardDocumentInfo[];
 }
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
@@ -242,7 +244,7 @@ export class DataSourceStore {
         let loadTaskReceived = false;
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
-            const { type, downLoadURL, dataset } = msg;
+            const { type, downLoadURL, dataset, dashboard } = msg;
             const { userStore } = getGlobalStore();
             switch (type) {
                 case 'download': {
@@ -254,12 +256,36 @@ export class DataSourceStore {
                     break;
                 }
                 case 'dataset': {
-                    if (ev.source && dataset && !loadTaskReceived) {
+                    if (ev.source && !loadTaskReceived) {
                         loadTaskReceived = true;
-                        console.warn('[Get Dataset From Other Pages]', msg);
-                        userStore.openDataset(dataset).then(ok => {
+                        console.warn('[Initialize From Other Pages]', msg);
+                        new Promise<{
+                            dataset?: boolean;
+                            dashboard?: boolean;
+                        }>(resolve => {
+                            if (dataset) {
+                                userStore.openDataset(dataset).then(ok => {
+                                    resolve({
+                                        dataset: ok,
+                                    });
+                                });
+                            } else {
+                                resolve({});
+                            }
+                        }).then(part => new Promise<typeof part>(resolve => {
+                            if (dashboard) {
+                                userStore.openDashboardTemplates(dashboard).then(ok => {
+                                    resolve({
+                                        ...part,
+                                        dashboard: ok,
+                                    });
+                                });
+                            } else {
+                                resolve(part);
+                            }
+                        })).then(state => {
                             // @ts-ignore
-                            ev.source!.postMessage({ type: "dataset", success: ok }, ev.origin);
+                            ev.source!.postMessage({ type: "dataset", result: state }, ev.origin);
                         });
                     }
                     break;

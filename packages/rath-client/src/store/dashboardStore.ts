@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction, toJS } from "mobx";
 import produce from "immer";
-import type { IFieldMeta, IFilter, IVegaSubset } from "../interfaces";
+import type { ICreateDashboardConfig, IFieldMeta, IFilter, IVegaSubset } from "../interfaces";
+import { getGlobalStore } from ".";
 
 
 export enum DashboardCardAppearance {
@@ -138,10 +139,10 @@ export default class DashboardStore {
         this.name = 'My Dashboard List';
         this.description = '';
         this.pages = [];
-        this.newPage();
     }
 
     public newPage() {
+        const { dataSourceStore } = getGlobalStore();
         const now = Date.now();
         this.pages.push({
             version: DashboardStore.rendererVersion,
@@ -152,8 +153,7 @@ export default class DashboardStore {
                 lastModifyTime: now,
             },
             data: {
-                source: 'context dataset', // TODO: [fix] get name from data source
-                // kyusho, 4 weeks ago   (October 31st, 2022 8:51 PM) 
+                source: dataSourceStore.datasetId ?? 'context dataset',
                 filters: [],
             },
             cards: [],
@@ -297,6 +297,26 @@ export default class DashboardStore {
                 }
             }
         }));
+    }
+
+    public loadPage(page: ReturnType<typeof this.save>['data'][number]) {
+        this.pages.push(produce(page as DashboardDocument, draft => {
+            for (const card of draft.cards) {
+                if (card.content.chart) {
+                    card.content.chart.highlighter = [];
+                    card.content.chart.size = { w: 1, h: 1 };
+                }
+            }
+        }));
+    }
+
+    public async saveDashboardOnCloud(workspaceName: string, pageIdx: number, config: ICreateDashboardConfig) {
+        const { userStore } = getGlobalStore();
+        const save = this.save().data;
+        const data = save[pageIdx];
+        const part = JSON.stringify(data);
+        const file = new File([new Blob([ part ], { type: 'text/plain' })], `${config.dashboard.name}.rath-dashboard`);
+        await userStore.uploadDashboard(workspaceName, file, config);
     }
 
     /**

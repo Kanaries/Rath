@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { TextWriter, ZipReader } from "@zip.js/zip.js";
-import { IAccessPageKeys, IDatasetData, IDatasetMeta, IDataSourceMeta } from '../interfaces';
+import { gzip } from 'pako';
+import type { IAccessPageKeys, ICreateDashboardConfig, IDashboardDocumentInfo, IDatasetData, IDatasetMeta, IDataSourceMeta } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
@@ -550,6 +551,122 @@ export default class UserStore {
                 type: 'error',
                 content: `${error}`,
             });
+        }
+    }
+
+    public async openDashboardTemplates(dashboards: IDashboardDocumentInfo[]): Promise<boolean> {
+        const { dashboardStore } = getGlobalStore();
+        const data: Parameters<(typeof dashboardStore)['loadAll']>[0] = {
+            name: 'Rath Dashboard List',
+            description: '',
+            data: [],
+        };
+        for await (const dashboard of dashboards) {
+            try {
+                const dashboardData = await fetch(dashboard.dashboardTemplate.downloadUrl, { method: 'GET' });
+                if (!dashboardData.ok) {
+                    throw new Error(dashboardData.statusText);
+                }
+                if (!dashboardData.body) {
+                    throw new Error('Request got empty body');
+                }
+                const res = await dashboardData.json();
+                data.data.push(res);
+            } catch (error) {
+                notify({
+                    type: 'error',
+                    title: '[fetchDashboardTemplate]',
+                    content: `${error}`,
+                });
+                return false;
+            } 
+        }
+        dashboardStore.loadAll(data);
+        return true;
+    }
+
+    public async uploadDashboard(workspaceName: string, file: File, config: ICreateDashboardConfig): Promise<boolean> {
+        const { dataSourceStore } = getGlobalStore();
+        const { cloudDataSourceMeta, fieldMetas } = dataSourceStore;
+        if (!cloudDataSourceMeta) {
+            notify({
+                type: 'error',
+                title: '[uploadDashboard]',
+                content: 'Data source is not uploaded',
+            });
+            return false;
+        }
+        const { id: datasourceId } = cloudDataSourceMeta;
+        const createDashboardApiUrl = getMainServiceAddress('/api/ce/dashboard');
+        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+        try {
+            const respond = await fetch(createDashboardApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Encoding': 'gzip',
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
+                body: gzip(JSON.stringify({
+                    datasourceId,
+                    workspaceName,
+                    name: config.dashboard.name,
+                    description: config.dashboard.description,
+                    dashboardTemplate: {
+                        name: config.dashboardTemplate.name,
+                        description: config.dashboardTemplate.description,
+                        meta: fieldMetas.map(f => ({
+                            fId: f.fid,
+                            description: config.dashboardTemplate.fieldDescription[f.fid] || f.name || '',
+                            analyticType: f.analyticType,
+                            semanticType: f.semanticType,
+                        })),
+                        size: file.size,
+                        type: config.dashboardTemplate.publish ? 1 : 2,
+                        cover: config.dashboardTemplate.cover ? {
+                            name: config.dashboardTemplate.cover.name,
+                            size: config.dashboardTemplate.cover.size,
+                            type: config.dashboardTemplate.cover.type,
+                        } : undefined,
+                    },
+                })),
+            });
+            if (!respond.ok) {
+                throw new Error(respond.statusText);
+            }
+            const res = await respond.json() as {
+                cover?: { uploadUrl: string; storage_id: string };
+                dashboardTemplate: { uploadUrl: string; storageId: string };
+            };
+            if (config.dashboardTemplate.cover && res.cover?.uploadUrl) {
+                const coverUploadRes = await fetch(res.cover.uploadUrl, {
+                    method: 'PUT',
+                    body: file,
+                });
+                if (!coverUploadRes.ok) {
+                    throw new Error(`Failed to upload cover: ${coverUploadRes.statusText}`);
+                }
+                await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                    reportUploadSuccessApiUrl, { storageId: res.cover.storage_id, status: 1 }
+                );
+            }
+            const templateUploadRes = await fetch(res.dashboardTemplate.uploadUrl, {
+                method: 'PUT',
+                body: file,
+            });
+            if (!templateUploadRes.ok) {
+                throw new Error(`Failed to upload file: ${templateUploadRes.statusText}`);
+            }
+            await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                reportUploadSuccessApiUrl, { storageId: res.dashboardTemplate.storageId, status: 1 }
+            );
+            return true;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[uploadDashboard]',
+                content: `${error}`,
+            });
+            return false;
         }
     }
 

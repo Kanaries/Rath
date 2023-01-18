@@ -52,7 +52,9 @@
             "searchViews": "Search Views",
             "searchFields": "Search fields / variables",
             "notFound": "No results found"
-        }
+        },
+        "list": "List",
+        "gallery": "Gallery"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -235,6 +237,8 @@
             "cloud": {
                 "notebook": "Notebook",
                 "dataset": "Dataset",
+                "dashboard": "Dashboard",
+                "dashboard_template": "Dashboard Template",
                 "total": "Total"
             },
             "demo": {
@@ -373,10 +377,13 @@
         "refresh": "Refresh",
         "name": "{mode} Name",
         "default_name": "Rath {mode} {date}",
+        "desc": "{mode} Description",
         "data_source_name": "Data Source Name",
+        "cover": "Cover",
         "size": "Size",
         "apply": "Upload",
         "public": "Public",
+        "publish_template": "Publish Template",
         "overwrite": "Overwrite",
         "auto_save": "Auto Save"
     },

@@ -51,7 +51,9 @@
             "searchViews": "搜索视图",
             "searchFields": "搜索字段/变量",
             "notFound": "未找到匹配结果"
-        }
+        },
+        "list": "列表",
+        "gallery": "预览"
     },
     "menu": {
         "dataSource": "数据源",
@@ -233,6 +235,8 @@
             "cloud": {
                 "notebook": "工作簿",
                 "dataset": "数据集",
+                "dashboard": "报表",
+                "dashboard_template": "报表模板",
                 "total": "所有"
             },
             "load": "加载数据",
@@ -369,13 +373,16 @@
         },
         "name": "{mode}名称",
         "default_name": "Rath {mode} {date}",
+        "desc": "{mode}描述",
         "data_source_name": "数据源名称",
+        "cover": "封面",
         "download": "加载",
         "createdAt": "创建时间",
         "refresh": "刷新",
         "size": "大小",
         "apply": "上传",
         "public": "公开",
+        "publish_template": "发布为公开模板",
         "overwrite": "覆盖当前备份",
         "auto_save": "自动备份"
     },
