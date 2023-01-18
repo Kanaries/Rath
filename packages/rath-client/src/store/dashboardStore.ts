@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction, toJS } from "mobx";
 import produce from "immer";
-import type { ICreateDashboardConfig, IFieldMeta, IFilter, IVegaSubset } from "../interfaces";
+import type { ICreateDashboardConfig, IDashboardDocumentInfo, IDashboardFieldMeta, IFieldMeta, IFilter, IVegaSubset } from "../interfaces";
 import { getGlobalStore } from ".";
 
 
@@ -86,6 +86,7 @@ export interface DashboardDocument {
         size: { w: number; h: number };
         filters: IFilter[];
     };
+    meta: (IDashboardFieldMeta & { mapTo: string | null })[];
 }
 
 export interface DashboardDocumentOperators {
@@ -164,6 +165,7 @@ export default class DashboardStore {
                 },
                 filters: [],
             },
+            meta: [],
         });
     }
 
@@ -299,7 +301,7 @@ export default class DashboardStore {
         }));
     }
 
-    public loadPage(page: ReturnType<typeof this.save>['data'][number]) {
+    public loadPage(page: ReturnType<typeof this.save>['data'][number], config: IDashboardDocumentInfo) {
         this.pages.push(produce(page as DashboardDocument, draft => {
             for (const card of draft.cards) {
                 if (card.content.chart) {
@@ -307,7 +309,50 @@ export default class DashboardStore {
                     card.content.chart.size = { w: 1, h: 1 };
                 }
             }
+            draft.meta = config.meta.map(f => ({
+                ...f,
+                mapTo: null,
+            }));
         }));
+    }
+
+    public mapField(pageIdx: number, id: string, mapTo: string | null): boolean {
+        const page = this.pages[pageIdx];
+        const field = page.meta.find(which => which.fId === id);
+        if (!field) {
+            return false;
+        }
+        const prev = field.mapTo ?? field.fId;
+        field.mapTo = mapTo;
+        for (const { content: { chart } } of page.cards) {
+            if (chart) {
+                chart.filters = chart.filters.reduce<typeof chart.filters>((list, filter) => {
+                    if (filter.fid === prev) {
+                        filter.fid = mapTo ?? '';
+                    }
+                    list.push(filter);
+                    return list;
+                }, []);
+                chart.highlighter = [];
+                chart.selectors = chart.selectors.reduce<typeof chart.selectors>((list, filter) => {
+                    if (filter.fid === prev) {
+                        if (mapTo) {
+                            filter.fid = mapTo;
+                            list.push(filter);
+                        }
+                    } else {
+                        list.push(filter);
+                    }
+                    return list;
+                }, []);
+                for (const channel of Object.values(chart.subset.encoding)) {
+                    if (channel.field === prev) {
+                        channel.field = mapTo ?? '';
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     public async saveDashboardOnCloud(workspaceName: string, pageIdx: number, config: ICreateDashboardConfig) {

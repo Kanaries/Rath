@@ -461,10 +461,7 @@ export interface IDashboardDocumentDetail {
     datasource: Pick<IDataSourceMeta, 'name' | 'id'>;
 }
 
-export type IDashboardDocumentInfo = (
-    Omit<IDashboardDocumentDetail, 'dashboardTemplate'>
-    & { dashboardTemplate: Omit<IDashboardDocumentDetail['dashboardTemplate'], 'meta'> }
-);
+export type IDashboardDocumentInfo = IDashboardDocumentDetail['dashboardTemplate'];
 
 export type ICreateDashboardConfig = {
     dashboard: {

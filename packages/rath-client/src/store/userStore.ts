@@ -556,22 +556,17 @@ export default class UserStore {
 
     public async openDashboardTemplates(dashboards: IDashboardDocumentInfo[]): Promise<boolean> {
         const { dashboardStore } = getGlobalStore();
-        const data: Parameters<(typeof dashboardStore)['loadAll']>[0] = {
-            name: 'Rath Dashboard List',
-            description: '',
-            data: [],
-        };
         for await (const dashboard of dashboards) {
             try {
-                const dashboardData = await fetch(dashboard.dashboardTemplate.downloadUrl, { method: 'GET' });
+                const dashboardData = await fetch(dashboard.downloadUrl, { method: 'GET' });
                 if (!dashboardData.ok) {
                     throw new Error(dashboardData.statusText);
                 }
                 if (!dashboardData.body) {
                     throw new Error('Request got empty body');
                 }
-                const res = await dashboardData.json();
-                data.data.push(res);
+                const res = await dashboardData.json() as Parameters<(typeof dashboardStore)['loadPage']>[0];
+                dashboardStore.loadPage(res, dashboard);
             } catch (error) {
                 notify({
                     type: 'error',
@@ -581,7 +576,6 @@ export default class UserStore {
                 return false;
             } 
         }
-        dashboardStore.loadAll(data);
         return true;
     }
 
