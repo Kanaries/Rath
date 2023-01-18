@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { FC, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
+import produce from 'immer';
 import { useGlobalStore } from '../../store';
 import { CloudItemType } from '../dataSource/selection/cloud/space';
 import { CloudAccessModifier } from '../../interfaces';
@@ -42,7 +43,7 @@ const CoverUploader = styled.input``;
 
 const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocumentInfo }> = ({ open, onDismiss, value }) => {
     const { dataSourceStore, dashboardStore, userStore } = useGlobalStore();
-    const { cloudDataSourceMeta, currentOrg, currentWsp } = dataSourceStore;
+    const { cloudDataSourceMeta, currentOrg, currentWsp, fieldMetas } = dataSourceStore;
     const { loggedIn } = userStore;
 
     const [name, setName] = useState(value.name);
@@ -60,11 +61,12 @@ const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocume
 
     const [templateCover, setTemplateCover] = useState<File | null>(null);
 
-    const [fieldDesc, setFieldDesc] = useState<[fid: string, desc: string][]>([]);
+    const [showFieldDesc, setShowFieldDesc] = useState(false);
+    const [fieldDesc, setFieldDesc] = useState<[fid: string, name: string, desc: string][]>([]);
 
     useEffect(() => {
-        setFieldDesc([]);
-    }, [cloudDataSourceMeta]);
+        setFieldDesc(fieldMetas.map(f => [f.fid, f.name ?? '', '']));
+    }, [cloudDataSourceMeta, fieldMetas]);
     
     const [busy, setBusy] = useState(false);
 
@@ -86,7 +88,7 @@ const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocume
                     name: templateName || defaultName,
                     description: templateDesc,
                     publish: accessMode === CloudAccessModifier.PUBLIC,
-                    fieldDescription: Object.fromEntries(fieldDesc),
+                    fieldDescription: Object.fromEntries(fieldDesc.map(([fid, , desc]) => [fid, desc])),
                     cover: templateCover === null ? undefined : templateCover,
                 },
             });
@@ -131,12 +133,12 @@ const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocume
                                 />
                                 <TextField
                                     label={intl.get('user.organization')}
-                                    value={currentOrg}
+                                    value={currentOrg ?? 'fdghs'}
                                     readOnly
                                 />
                                 <TextField
                                     label={intl.get('user.workspace')}
-                                    value={currentWsp}
+                                    value={currentWsp ?? 'dfhsjk'}
                                     readOnly
                                 />
                                 <TextField
@@ -176,6 +178,26 @@ const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocume
                                             onChange={(_, val) => setTemplateDesc(val ?? '')}
                                         />
                                     </>
+                                )}
+                                <Toggle
+                                    label={intl.get('storage.field_desc')}
+                                    checked={showFieldDesc}
+                                    onChange={(_, checked) => setShowFieldDesc(Boolean(checked))}
+                                />
+                                {showFieldDesc && (
+                                    <div style={{ border: '1px solid #8884', padding: '1em' }}>
+                                        {fieldDesc.map(([fid, name, val], i) => (
+                                            <TextField
+                                                key={fid}
+                                                label={fid}
+                                                placeholder={name}
+                                                value={val}
+                                                onChange={(_, next) => setFieldDesc(all => produce(all, draft => {
+                                                    draft[i][1] = next ?? '';
+                                                }))}
+                                            />
+                                        ))}
+                                    </div>
                                 )}
                             </Stack>
                         </div>

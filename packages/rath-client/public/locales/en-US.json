@@ -380,6 +380,7 @@
         "desc": "{mode} Description",
         "data_source_name": "Data Source Name",
         "cover": "Cover",
+        "field_desc": "Field Description",
         "size": "Size",
         "apply": "Upload",
         "public": "Public",
