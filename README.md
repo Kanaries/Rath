@@ -20,7 +20,7 @@
     <img src="https://img.shields.io/badge/Twitter-blue?style=flat-square&logo=twitter&logoColor=white" alt="Follow RATH on Twitter"/>
   </a>
   <a href="https://medium.com/@kanaries_data">
-    <img src="https://img.shields.io/badge/Medium-grey?style=flat-square&logo=medium&logoColor=white" alt="Follow RATH on LinkedIn"/>
+    <img src="https://img.shields.io/badge/Medium-grey?style=flat-square&logo=medium&logoColor=white" alt="Read about RATH on medium"/>
   </a>
   <a href="https://discord.gg/Z4ngFWXz2U">
     <img src="https://img.shields.io/badge/Discord-indigo?style=flat-square&logo=discord&logoColor=white" alt="Join RATH on Discord"/>
@@ -41,10 +41,6 @@
     <a href="https://github.com/Kanaries/Rath/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/kanaries/rath/auto-build.yml?branch=master&style=flat-square">
   </a>
-  </a>
-    <a href="https://github.com/Kanaries/graphic-walker">
-    <img src="https://img.shields.io/npm/v/@kanaries/graphic-walker/latest?label=%40kanaries%2Fgraphic-walker&style=flat-square" alt="RATH GitHub Forks">
-  </a>
 </div>
 
 ## Introduction
@@ -55,72 +51,31 @@
 
 ## Get started
 
-To get started with RATH, you can:
-- 🚀 [Try RATH now!](https://rath.kanaries.net)
+Get started with RATH now!
+- 🚀 [Online RATH / Demo](https://rath.kanaries.net)
 - 📖 [Read RATH Docs](https://docs.kanaries.net)
 - [Video introducing RATH's data painter](https://youtu.be/djqePNyhz7w)
 
 
-**RATH** is an ongoing project, actively being developed and maintained by a group of data scientists, developers and community enthusiasts. We are a group of people who are passionate about creating the next generation of data analytic tools.
-
-💪Join us, let's build it up!💪
-
-<a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/></a>
-<a href="https://discord.gg/Z4ngFWXz2U"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/discord.png" alt="Join our Discord community" width="200"/> </a>
-
-
-> Please consider sharing your experience or thoughts about [Kanaries RATH](https://kanaries.net) with the border Open Source community. It really does help!
-
-[![GitHub Repo stars](https://img.shields.io/badge/share%20on-reddit-red?style=flat-square&logo=reddit)](https://reddit.com/submit?url=https://github.com/Kanaries/Rath&title=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
-[![GitHub Repo stars](https://img.shields.io/badge/share%20on-hacker%20news-orange?style=flat-square&logo=ycombinator)](https://news.ycombinator.com/submitlink?u=https://github.com/Kanaries/Rath)
-[![GitHub Repo stars](https://img.shields.io/badge/share%20on-twitter-03A9F4?style=flat-square&logo=twitter)](https://twitter.com/share?url=https://github.com/Kanaries/Rath&text=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
-[![GitHub Repo stars](https://img.shields.io/badge/share%20on-facebook-1976D2?style=flat-square&logo=facebook)](https://www.facebook.com/sharer/sharer.php?u=https://github.com/Kanaries/Rath)
-[![GitHub Repo stars](https://img.shields.io/badge/share%20on-linkedin-3949AB?style=flat-square&logo=linkedin)](https://www.linkedin.com/shareArticle?url=https://github.com/Kanaries/Rath&title=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
-
-
 ## Table of contents
 
-| [Why use RATH?](#why-use-rath) | [Try RATH](#try-rath) | [Feature highlights](#feature-highlights) | [Walkthroughs](#walkthroughs) | [Developer Documentation](#developer-documentation) | [Project Status](#project-status) | [Community](#community) | [Contributions](#contributions) | [License (AGPL)](#license-agpl) |
+[Feature highlights](#features) | [Walkthroughs](#walkthroughs) | [Developer Documentation](#developer-documentation) | [Project Status](#project-status) | [Community](#community) | [Contributions](#contributions) 
 
-## Why use RATH?
+## Features
++ 🤖 [Mega-auto exploration](https://docs.kanaries.net/auto-explore): Augmented analytic engine for discovering patterns, insights, and causals. A fully-automated way to explore your data set and visualize your data with one click.
 
-- Effortlessly automate your Exploratory Data Analysis process.
-- Generate editable and insightful data visualizations. Freely modify your visualizations with Vega/Vega-lite.
-- Support a variety of database types.
-- Use predictive interaction to provide analysis suggestions based on your operation and status.
-- Paint your data to explore your datasets directly with Data Painter.
-- Causal discovery and explainer module to help you understand complex data patterns.
++ AutoVis: Auto-generated multi-dimensional data visualization based on the effectiveness score.
 
-## Try RATH
+- 👓 [Data Wrangler](https://docs.kanaries.net/data-source): Automated data wrangler for generating summary of the data and data transformation.
 
-You can either:
-- Run RATH in a browser. [RATH Cloud](https://rath.kanaries.net/)
-- Download the [desktop version](https://kanaries.net/#/products) for Windows/Mac.
-- Run your own RATH instance. Steps:
-
-```bash
-git clone https://github.com/Kanaries/Rath.git && cd Rath
-# Clone the Rath repository
-yarn install
-# Setup your Yarn workspace
-yarn workspace rath-client start
-# Boot up RATH
-```
-
-## Feature highlights
-- 👓 [Data profiling](https://docs.kanaries.net/data-source): overview your data source with one click. You can upload, sample, define dimensions and measures, perform data cleaning and more complicated computing on your data source. 
-
-- 🤖 [Mega-auto exploration](https://docs.kanaries.net/auto-explore): a fully-automated way to explore your data set and visualize your data with one click. Leave everything to RATH, simply pick the associate view that inspires you the most.
-
-- 🛠 [Semi-auto exploration](https://docs.kanaries.net/semi-auto-explore): The middle ground between a fully automated Data Exploration and manual exploration. RATH will work as your copilot, learn your interests and uses augmented analytics engine to generate relevant recommendations for you.
+- 🛠 [Semi-auto exploration](https://docs.kanaries.net/semi-auto-explore): Combines automated data exploration and manual exploration. RATH will work as your copilot in data science, learn your interests and uses augmented analytics engine to generate relevant recommendations for you.
 
 - 🎨 [Data painter](https://docs.kanaries.net/data-painter): An interactive, instinctive yet powerful tool for exploratory data analysis by directly coloring your data, with further analytical features. A video about data painter [here](https://youtu.be/djqePNyhz7w)
 
-- :bar_chart: Dashboard: build a beautiful interactive data dashboard.
+- :bar_chart: Dashboard: build a beautiful interactive data dashboard (including a automated dashboard designer which can provide suggestions to your dashboard).
 
 - :construction: Causal Analysis: Provide causal discovery and explanations for complex relation analysis.
 
-- 🎓 Wanna learn more about RATH? Visit our [Free online Courses](https://docs.kanaries.net/tutorials): Access learning materials, detailed instructions and skill tests for **FREE**!
 
 ## Walkthroughs
 
@@ -216,6 +171,18 @@ Our developer community is the backbone of the ongoing RATH project. We sincerel
 - [Join our Discord](https://discord.gg/Z4ngFWXz2U)
 
 Feel free to [contribute to the RATH project](contribution-guide), submit any issues on our GitHub page, or split your grand new ideas in our chats.
+
+<a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/></a>
+<a href="https://discord.gg/Z4ngFWXz2U"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/discord.png" alt="Join our Discord community" width="200"/> </a>
+
+
+> Please consider sharing your experience or thoughts about [Kanaries RATH](https://kanaries.net) with the border Open Source community. It really does help!
+
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-reddit-red?style=flat-square&logo=reddit)](https://reddit.com/submit?url=https://github.com/Kanaries/Rath&title=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-hacker%20news-orange?style=flat-square&logo=ycombinator)](https://news.ycombinator.com/submitlink?u=https://github.com/Kanaries/Rath)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-twitter-03A9F4?style=flat-square&logo=twitter)](https://twitter.com/share?url=https://github.com/Kanaries/Rath&text=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-facebook-1976D2?style=flat-square&logo=facebook)](https://www.facebook.com/sharer/sharer.php?u=https://github.com/Kanaries/Rath)
+[![GitHub Repo stars](https://img.shields.io/badge/share%20on-linkedin-3949AB?style=flat-square&logo=linkedin)](https://www.linkedin.com/shareArticle?url=https://github.com/Kanaries/Rath&title=OpenSource%20Augmented%20Analytic%20BI%20Solution:%20Automated%20Exploratory%20Data%20Analysis%20for%20Data%20Science)
 
 ## Contributions
 

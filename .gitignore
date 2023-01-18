@@ -53,3 +53,4 @@ run_flask_app.bat
 venv
 
 dataset-with-metas.json
+.Rproj.user

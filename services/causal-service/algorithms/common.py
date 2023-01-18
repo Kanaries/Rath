@@ -43,6 +43,16 @@ IDepTestItems = {
     'mv_fisherz': '允许空值的Fisher-Z变换' # ('missing-value fisher-z', 'Missing-value Fisher’s Z'),
     # 'mc_fisherz': ('missing correction fisher-z', "Fisher-Z's test with test-wise deletion and missingness correction")
 }
+ISELFBooster = {
+    'gbtree': '默认为gbtree，非线性回归方法',
+    'gblinear': '可选值gblinear，线性回归方法',
+    'lm': '可选值lm，线性回归方法',
+}
+ISELFScoreType = {
+    'bic': 'BIC',
+    'aic': 'AIC',
+    'log': 'LOG',
+}
 UCRuleItems = {
     0: "uc_superset",
     1: "maxP",
