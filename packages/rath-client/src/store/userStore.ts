@@ -581,7 +581,7 @@ export default class UserStore {
 
     public async uploadDashboard(workspaceName: string, file: File, config: ICreateDashboardConfig): Promise<boolean> {
         const { dataSourceStore } = getGlobalStore();
-        const { cloudDataSourceMeta, fieldMetas } = dataSourceStore;
+        const { cloudDataSourceMeta, cloudDatasetMeta, fieldMetas } = dataSourceStore;
         if (!cloudDataSourceMeta) {
             notify({
                 type: 'error',
@@ -602,6 +602,7 @@ export default class UserStore {
                 },
                 body: gzip(JSON.stringify({
                     datasourceId,
+                    datasetId: config.dashboard.bindDataset && cloudDatasetMeta ? cloudDatasetMeta.id : undefined,
                     workspaceName,
                     name: config.dashboard.name,
                     description: config.dashboard.description,

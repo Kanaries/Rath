@@ -376,6 +376,7 @@
         "desc": "{mode}描述",
         "data_source_name": "数据源名称",
         "cover": "封面",
+        "bind_dataset": "绑定到数据集",
         "field_desc": "字段描述",
         "download": "加载",
         "createdAt": "创建时间",

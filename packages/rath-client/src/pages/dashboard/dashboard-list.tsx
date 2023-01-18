@@ -148,13 +148,13 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
             {
                 key: 'action',
                 name: '',
-                minWidth: canBackup ? 128 : 96,
+                minWidth: canBackup ? 96 : 64,
                 onRender(item) {
                     const { operators } = dashboardStore.fromPage(item['index']);
                     return (
                         <ButtonGroup className="button-group" onClick={(e) => e.stopPropagation()}>
                             <IconButton iconProps={{ iconName: 'Copy' }} onClick={operators.copy} />
-                            <IconButton iconProps={{ iconName: 'Download' }} onClick={operators.download} />
+                            {/* <IconButton iconProps={{ iconName: 'Download' }} onClick={operators.download} /> */}
                             {canBackup && <IconButton iconProps={{ iconName: 'CloudUpload' }} onClick={() => setSelected(item)} />}
                             <IconButton iconProps={{ iconName: 'Delete', style: { color: '#f21044' } }} onClick={operators.remove} />
                         </ButtonGroup>

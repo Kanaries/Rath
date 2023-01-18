@@ -43,7 +43,7 @@ const CoverUploader = styled.input``;
 
 const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocumentInfo }> = ({ open, onDismiss, value }) => {
     const { dataSourceStore, dashboardStore, userStore } = useGlobalStore();
-    const { cloudDataSourceMeta, currentOrg, currentWsp, fieldMetas } = dataSourceStore;
+    const { cloudDataSourceMeta, cloudDatasetMeta, currentOrg, currentWsp, fieldMetas } = dataSourceStore;
     const { loggedIn } = userStore;
 
     const [name, setName] = useState(value.name);
@@ -72,6 +72,11 @@ const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocume
 
     const [accessMode, setAccessMode] = useState(CloudAccessModifier.PROTECTED);
     const canBackup = Boolean(cloudDataSourceMeta && currentOrg && currentWsp);
+
+    const [doBindDataset, setDoBindDataset] = useState(Boolean(cloudDatasetMeta));
+    useEffect(() => {
+        setDoBindDataset(Boolean(cloudDatasetMeta));
+    }, [cloudDatasetMeta]);
     
     const backup = async () => {
         if (!canBackup || !currentWsp) {
@@ -83,6 +88,7 @@ const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocume
                 dashboard: {
                     name: name || defaultName,
                     description: desc,
+                    bindDataset: doBindDataset,
                 },
                 dashboardTemplate: {
                     name: templateName || defaultName,
@@ -133,18 +139,24 @@ const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocume
                                 />
                                 <TextField
                                     label={intl.get('user.organization')}
-                                    value={currentOrg ?? 'fdghs'}
+                                    value={currentOrg}
                                     readOnly
                                 />
                                 <TextField
                                     label={intl.get('user.workspace')}
-                                    value={currentWsp ?? 'dfhsjk'}
+                                    value={currentWsp}
                                     readOnly
                                 />
                                 <TextField
                                     label={intl.get('storage.data_source_name')}
-                                    value={cloudDataSourceMeta?.name}
+                                    value={cloudDataSourceMeta.name}
                                     readOnly
+                                />
+                                <Toggle
+                                    label={intl.get('storage.bind_dataset')}
+                                    checked={doBindDataset}
+                                    disabled={!cloudDatasetMeta}
+                                    onChange={(_, checked) => setDoBindDataset(Boolean(checked))}
                                 />
                                 <TextField
                                     label={intl.get('storage.name', { mode: intl.get('dataSource.importData.cloud.dashboard') })}

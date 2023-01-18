@@ -467,6 +467,7 @@ export type ICreateDashboardConfig = {
     dashboard: {
         name: string;
         description: string;
+        bindDataset: boolean;
     };
     dashboardTemplate: {
         name: string;
