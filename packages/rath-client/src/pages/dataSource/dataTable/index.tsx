@@ -7,7 +7,7 @@ import intl from 'react-intl-universal';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useGlobalStore } from '../../../store';
 import type { IRow } from '../../../interfaces';
-import { extractSelection, intersectPattern, ITextPattern } from '../../../lib/textPattern/init';
+import { extractSelection, intersectPattern, ITextPattern } from '../../../lib/textPattern';
 import HeaderCell from './headerCell';
 import NestPanel from './nestPanel';
 import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './tpRegexEditor';
@@ -34,12 +34,17 @@ const CustomBaseTable = styled(BaseTable)`
     }
 `;
 
-const Tag = styled.div`
+
+
+const Tag = styled.div<{color?: string; bgColor?: string}>`
     display: inline-block;
-    padding: 2px 4px;
+    padding: 0px 8px;
     border-radius: 2px;
-    background-color: #f3f3f3;
+    background-color: ${props => props.bgColor || '#f3f3f3'};
+    color: ${props => props.color || '#000000'};
     font-size: 12px;
+    margin-right: 4px;
+    border-radius: 12px;
 `;
 
 const TextPatternCard = styled.div`
@@ -50,9 +55,15 @@ const TextPatternCard = styled.div`
     margin: 8px 0px;
     > .tp-content {
         margin: 1em 0em;
+        > pre {
+            display: inline-block;
+        }
     }
     .sl-text {
         background-color: ${SELECT_COLOR};
+    }
+    .ph-text, .pe-text {
+        background-color: #fed7aa;
     }
 `;
 const MiniButton = styled(DefaultButton)`
@@ -111,19 +122,45 @@ function initGroupedTextPatternList(): {
     return res;
 }
 
+type ITPPos = {
+    groupKey: IFieldTextPattern['selectionType'];
+    index: number
+}
+/**
+ * find the first exist text pattern (sorted by score)
+ */
 function findFirstExistTextPattern(
     groupedTextPatternList: {
         [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
-    }
-): {groupKey: IFieldTextPattern['selectionType']; index: number} {
-    const groupKeys = ['knowledge', 'generalize', 'specific'] as IFieldTextPattern['selectionType'][];
-    for (let groupKey of groupKeys) {
-        if (groupedTextPatternList[groupKey].length > 0) {
-            return {
-                groupKey,
-                index: 0,
-            };
+    },
+    enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = []
+): ITPPos {
+    const groupKeys = (['knowledge', 'generalize', 'specific'] as IFieldTextPattern['selectionType'][]).filter(k => !enhanceKeys.includes(k));
+    const createPatternsOfKeys = (keys: IFieldTextPattern['selectionType'][]) => {
+        const _patterns: { pattern: IFieldTextPattern; pos: ITPPos }[] = [];
+        for (let groupKey of keys) {
+            for (let i = 0; i < groupedTextPatternList[groupKey].length; i++) {
+                _patterns.push({
+                    pattern: groupedTextPatternList[groupKey][i],
+                    pos: {
+                        groupKey,
+                        index: i,
+                    },
+                });
+            }
         }
+        return _patterns;
+    }
+    const patterns = createPatternsOfKeys(groupKeys);
+    const enhancedPatterns = createPatternsOfKeys(enhanceKeys);
+    patterns.sort((a, b) => b.pattern.score - a.pattern.score);
+    enhancedPatterns.sort((a, b) => b.pattern.score - a.pattern.score);
+
+    if (enhancedPatterns.length > 0) {
+        return enhancedPatterns[0].pos;
+    }
+    if (patterns.length > 0) {
+        return patterns[0].pos;
     }
     return {
         groupKey: 'knowledge',
@@ -249,7 +286,8 @@ const DataTable: React.FC = (props) => {
                     // setTextPatternList(nextTPL);
                     const gtp = groupTextPattern(nextTPL);
                     setGroupedTextPatternList(gtp);
-                    setTpPos(findFirstExistTextPattern(gtp));
+                    const enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = nextTSL.length > 1 ? undefined : ['knowledge'];
+                    setTpPos(findFirstExistTextPattern(gtp, enhanceKeys));
                 });
             }
         },
@@ -409,10 +447,11 @@ const DataTable: React.FC = (props) => {
                         groupedTextPatternList[groupKey].slice(0, groupShownSize[groupKey]).map((tp, ti) => (
                             <TextPatternCard key={tp.pattern.source + ti}>
                                 <Tag>{intl.get(`dataSource.textPattern.${groupKey}`)}</Tag>
+                                {tpPos.index === ti && tpPos.groupKey === groupKey && <Tag color="#fff" bgColor="#14b8a6">{intl.get('dataSource.textPattern.currentPattern')}</Tag>}
                                 <div className="tp-content">
-                                    <span className="ph-text">{tp.ph.source}</span>
-                                    <span className="sl-text">{tp.selection.source}</span>
-                                    <span className="pe-text">{tp.pe.source}</span>
+                                    <pre className="ph-text">{tp.ph.source}</pre>
+                                    <pre className="sl-text">{tp.selection.source}</pre>
+                                    <pre className="pe-text">{tp.pe.source}</pre>
                                 </div>
                                 <Stack tokens={{ childrenGap: 4 }}>
                                     <MiniButton

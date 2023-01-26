@@ -151,7 +151,8 @@
         "textPattern": {
             "knowledge": "Knowledge",
             "generalize": "Generalize",
-            "specific": "Extract Match"
+            "specific": "Extract Match",
+            "currentPattern": "Current Pattern"
         },
         "statViewInfo": {
             "title": "Statistics View",

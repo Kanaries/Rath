@@ -34,7 +34,7 @@ import { updateDataStorageMeta } from "../utils/storage";
 import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
 import { IsolationForest } from "../lib/outlier/iforest";
 import { compressRows, uncompressRows } from "../utils/rows2csv";
-import { extractSelection, ITextPattern } from "../lib/textPattern/init";
+import { extractSelection, ITextPattern } from "../lib/textPattern";
 import { getGlobalStore } from ".";
 
 interface IDataMessage {

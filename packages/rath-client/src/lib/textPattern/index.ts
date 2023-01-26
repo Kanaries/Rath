@@ -1,20 +1,30 @@
-/**
- * @license AGPL Kanaries & ObservedObserver
- */
+// Copyright (C) 2023 observedobserver
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 /* eslint-disable import/first */
 // import 'buffer/'
 import { Buffer } from 'buffer';
 // @ts-ignore
 if (window.Buffer === undefined) window.Buffer = Buffer;
 import regexgen from 'regexgen';
-type ITextPatternType = 'knowledge' | 'generalize' | 'specific';
-interface IPatternNode {
-    pattern: RegExp;
-    name: string;
-    children: IPatternNode[];
-    type: ITextPatternType;
-    [key: string]: any;
-}
+import type { IPatternNode, ITextPattern, ITextSelection } from './interfaces';
+import { getPatternNodeScore, patternNodeCompare } from './rank';
+
+export type { IPatternNode, ITextPattern, ITextSelection };
+
 function initPatternTree(): IPatternNode {
     const root: IPatternNode = {
         pattern: /.+/,
@@ -112,20 +122,6 @@ function initPatternTree(): IPatternNode {
         ],
     };
     return root;
-}
-
-export interface ITextSelection {
-    str: string;
-    startIndex: number;
-    endIndex: number;
-}
-
-export interface ITextPattern {
-    ph: RegExp;
-    pe: RegExp;
-    selection: RegExp;
-    pattern: RegExp;
-    selectionType: ITextPatternType;
 }
 
 
@@ -285,7 +281,7 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
         uniques = commonParents
     }
     // const commonParents = findCommonParentsOfSepcificNodesInPatternTree(patternTree);
-    uniques.sort((a, b) => b.depth / b.specLabel - a.depth / a.specLabel);
+    uniques.sort(patternNodeCompare);
     if (textSelection.length === 1) {
         uniques = uniques.filter(u => u.type === 'knowledge').concat(uniques.filter(u => u.type !== 'knowledge'))
     }
@@ -311,7 +307,8 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
                     pe,
                     selection: uni.pattern,
                     pattern: new RegExp(`${ph.source}(?<selection>${uni.pattern.source})${pe.source}`),
-                    selectionType: uni.type
+                    selectionType: uni.type,
+                    score: getPatternNodeScore(uni)
                 }
                 const match = textSelection.every(text => {
                     const res = extractSelection(patt ,text.str)
@@ -335,7 +332,8 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
                     pe,
                     selection: sl,
                     pattern: new RegExp(`${ph.source}(?<selection>${sl.source})${pe.source}`),
-                    selectionType: 'generalize'
+                    selectionType: 'generalize',
+                    score: 1
                 };
                 const match = textSelection.every(text => {
                     const res = extractSelection(patt ,text.str)
@@ -352,7 +350,8 @@ export function intersectPattern(textSelection: ITextSelection[]): ITextPattern[
             pe: /.*/,
             selection: sl,
             pattern: new RegExp(`^.*(?<selection>${sl.source}).*$`),
-            selectionType: 'generalize'
+            selectionType: 'generalize',
+            score: 0
         })
     }
     return ans
@@ -380,7 +379,8 @@ export function textPatternInduction(textList: string[]) {
             pe,
             selection: uni.pattern,
             pattern: new RegExp(`${ph.source}(?<selection>${uni.pattern.source})${pe.source}`),
-            selectionType: uni.type
+            selectionType: uni.type,
+            score: getPatternNodeScore(uni)
         }
         return textList.every(text => {
             const res = extractSelection(patt ,text)
@@ -388,7 +388,7 @@ export function textPatternInduction(textList: string[]) {
             return res.matchPos[0] === 0 && res.matchPos[1] === text.length;
         })
     })
-    uniques.sort((a, b) => b.depth / b.specLabel - a.depth / a.specLabel);
+    uniques.sort(patternNodeCompare);
     return uniques
 }
 
