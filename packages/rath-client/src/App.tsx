@@ -18,6 +18,8 @@ import Painter from './pages/painter';
 import Collection from './pages/collection';
 import Dashboard from './pages/dashboard';
 import CausalPage from './pages/causal';
+import PreferencePage from './pages/preference';
+import { diffJSON, getItem, getPreferencesSchema, loadPreferences, savePreferences, toJSONValues } from './pages/preference/utils';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
 
@@ -25,6 +27,7 @@ import useHotKey from './hooks/use-hotkey';
 function App() {
     const { langStore, commonStore, userStore } = useGlobalStore();
     const { appKey, navMode } = commonStore;
+    const { userName } = userStore;
 
     useEffect(() => {
         initRathWorker(commonStore.computationEngine);
@@ -45,6 +48,31 @@ function App() {
     useHotKey({
         'Control+Shift+P': () => setShowPerformanceWindow(on => !on),
     });
+    
+    useEffect(() => {
+        const { loggedIn } = userStore;
+        const preferences = getPreferencesSchema();
+        loadPreferences().then(preferenceValues => {
+            if (preferenceValues) {
+                try {
+                    const prev = toJSONValues(preferences);
+                    const diff = diffJSON(JSON.parse(prev), preferenceValues);
+                    for (const [key, value] of Object.entries(diff)) {
+                        const item = getItem(preferences, key);
+                        // @ts-expect-error correct
+                        item?.onChange(value);
+                    }
+                } catch {
+                    // do nothing
+                }
+            } else {
+                savePreferences(preferences);
+            }
+        });
+        if (loggedIn && userName) {
+            // TODO: save online
+        }
+    }, [userName, userStore]);
 
     if (!langStore.loaded) {
         return (
@@ -74,6 +102,7 @@ function App() {
                     {appKey === PIVOT_KEYS.collection && <Collection />}
                     {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
                     {appKey === PIVOT_KEYS.causal && <CausalPage />}
+                    {appKey === PIVOT_KEYS.preference && <PreferencePage />}
                     <CrInfo />
                 </div>
             </div>

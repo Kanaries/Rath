@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { ActionButton, IDropdownOption, IconButton } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { SUPPORT_LANG } from '../locales';
+import { PIVOT_KEYS } from '../constants';
+import useHotKey from '../hooks/use-hotkey';
 import { useGlobalStore } from '../store';
 import DropdownSelect from './dropDownSelect';
 
@@ -20,6 +22,9 @@ const UserSettings: React.FC = () => {
     const target = useRef<HTMLDivElement>(null);
     const { langStore, commonStore } = useGlobalStore();
     const { navMode } = commonStore;
+    useHotKey({
+        'Meta+Shift+P': () => commonStore.setAppKey(PIVOT_KEYS.preference),
+    });
     return (
         <Container
             style={navMode === 'icon' ? { flexDirection: 'column' } : { flexDirection: 'row', alignItems: 'center' }}
@@ -43,8 +48,8 @@ const UserSettings: React.FC = () => {
                 <ActionButton
                     text={commonStore.navMode === 'text' ? intl.get('preference.title') : ''}
                     iconProps={{ iconName: 'PlayerSettings' }}
-                    disabled
-                ></ActionButton>
+                    onClick={() => commonStore.setAppKey(PIVOT_KEYS.preference)}
+                />
             </div>
             <div>
                 <IconButton

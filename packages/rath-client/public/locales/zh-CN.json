@@ -68,7 +68,9 @@
     },
     "preference": {
         "title": "个人偏好",
-        "config": "配置"
+        "config": "配置",
+        "ui": "表单",
+        "json": "JSON"
     },
     "support": {
         "title": "如何获取帮助/支持",

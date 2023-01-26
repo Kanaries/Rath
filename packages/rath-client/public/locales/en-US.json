@@ -70,7 +70,9 @@
     },
     "preference": {
         "title": "preference",
-        "config": "Configuration"
+        "config": "Configuration",
+        "ui": "UI",
+        "json": "JSON"
     },
     "support": {
         "title": "How to Get Support",
