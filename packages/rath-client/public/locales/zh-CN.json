@@ -455,6 +455,10 @@
                 "filters": "子集",
                 "neighbors": "邻近视图"
             }
+        },
+        "embed": {
+            "insight_discovery": "线索发现",
+            "insights": "线索"
         }
     },
     "desc": {

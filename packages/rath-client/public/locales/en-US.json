@@ -436,7 +436,7 @@
             "explainDiff": "explain diff",
             "pointInterests": "related subsets",
             "neighbors": "neighbor views",
-            "pin": "pin",
+            "pin": "related insights",
             "compare": "compare",
             "vizsys": {
                 "title": "visualization recommend system",
@@ -456,6 +456,10 @@
                 "filters": "Subsets",
                 "neighbors": "Neighbors"
             }
+        },
+        "embed": {
+            "insight_discovery": "Insight Discovery",
+            "insights": "Insights"
         }
     },
     "desc": {
