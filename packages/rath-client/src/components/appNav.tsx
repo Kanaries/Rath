@@ -140,10 +140,24 @@ const AppNav: React.FC<AppNavProps> = (props) => {
             links: [
                 ...getLinks([
                     PIVOT_KEYS.dataSource,
-                    PIVOT_KEYS.editor,
-                    PIVOT_KEYS.semiAuto,
-                    PIVOT_KEYS.megaAuto,
-                    PIVOT_KEYS.painter,
+                ]),
+                {
+                    url: '#eda',
+                    key: 'eda',
+                    name: navMode === 'text' ? intl.get('menu.eda') : '',
+                    isExpanded: true,
+                    forceAnchor: true,
+                    onClick(e: any) {
+                        e.preventDefault();
+                    },
+                    links: getLinks([
+                        PIVOT_KEYS.editor,
+                        PIVOT_KEYS.semiAuto,
+                        PIVOT_KEYS.megaAuto,
+                        PIVOT_KEYS.painter,
+                    ]),
+                },
+                ...getLinks([
                     PIVOT_KEYS.collection,
                     PIVOT_KEYS.dashboard,
                 ]),

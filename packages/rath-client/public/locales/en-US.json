@@ -56,6 +56,7 @@
     },
     "menu": {
         "dataSource": "DataSource",
+        "eda": "Exploratory Data Analysis",
         "editor": "Manual Exploration",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
