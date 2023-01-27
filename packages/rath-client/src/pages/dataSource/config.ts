@@ -47,7 +47,7 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 key: IDataSourceType.OLAP,
                 text: 'OLAP',
                 iconProps: { iconName: "TripleColumn" },
-                disabled: false,
+                disabled: true,
             },
             {
                 key: IDataSourceType.RESTFUL,

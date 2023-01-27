@@ -138,15 +138,6 @@ const LoginInfo: FC = () => {
                             {tab === PreferencesType.Setting && <Setup />}
                         </div>
                     </Container>
-                    {/* <Container>
-                        <Pivot className="content" selectedKey={tab} onLinkClick={item => item && setTab(item.props.itemKey as typeof tab)}>
-                            {preferencesList.map(pref => (
-                                <PivotItem key={pref.key} itemKey={pref.key} headerText={intl.get(`login.${pref.name}`)} itemIcon={pref.icon}>
-                                    {pref.element()}
-                                </PivotItem>
-                            ))}
-                        </Pivot>
-                    </Container> */}
                 </Dialog>
                 <div className="avatar-img">
                     {navMode === 'text' && (

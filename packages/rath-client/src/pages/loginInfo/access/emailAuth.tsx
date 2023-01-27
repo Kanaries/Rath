@@ -69,7 +69,7 @@ const EmailAuth: React.FC<EmailAuthProps> = (props) => {
                 >
                     {intl.get('login.loginAndRegister')}
                 </PrimaryButton>
-                {!originSupportEmail && <div className="text-red-500 text-xs t-2">{intl.get('access.unsupport')}</div>}
+                {!originSupportEmail && <div style={{ color: '#ef4444', fontSize: '12px' }}>{intl.get('access.unsupport')}</div>}
             </div>
         </EmailAuthDiv>
     );

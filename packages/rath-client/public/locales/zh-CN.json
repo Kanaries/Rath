@@ -229,7 +229,7 @@
                 "mysql": "MySQL",
                 "demo": "示例数据",
                 "database": "数据库",
-                "rath_notebook": "Notebook"
+                "rath_notebook": "工作簿"
             },
             "load": "加载数据",
             "demo": {
@@ -263,7 +263,7 @@
             "syncMode": "分位数同步"
         },
         "upload": {
-            "title": "连接你的数据集，根据需求调整以下配置",
+            "title": "连接你的数据集",
             "fileTypes": "支持 Excel 工作簿以及 JSON、CSV 等文本类型文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
             "show_more": "高级设置",
@@ -324,7 +324,7 @@
             "empty": "没有导出的列。",
             "apply": "扩展",
             "cancel": "取消",
-            "auto": "扩展建议",
+            "auto": "转换",
             "suggestion": {
                 "regex_selection": "模式发现&提取|将选中的字段作为模式，发现数据集中所有匹配的相似模式并提取出来。",
                 "dateTimeExpand": "将数据映射到不同时间单位。|时间序列可能在不同的单位尺度下展现出更强的周期性或相关性。",

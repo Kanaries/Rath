@@ -61,7 +61,7 @@ const LoginInfoList = (props: { infoList: PreferencesListType[] }) => {
                             setInfoListKey(item.key);
                         }}
                     >
-                        <Icon iconName={item.icon} className="mr-2" /> {intl.get(`login.${item.name}`)}
+                        <Icon iconName={item.icon} style={{ marginRight: '1em' }} /> {intl.get(`login.${item.name}`)}
                     </p>
                 ))}
             </div>

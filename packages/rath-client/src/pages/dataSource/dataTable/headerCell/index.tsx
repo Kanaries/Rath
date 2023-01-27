@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
-import { Callout, IconButton, PrimaryButton, TextField } from '@fluentui/react';
+import { IconButton } from '@fluentui/react';
 import { useId } from '@fluentui/react-hooks';
 import DistributionChart from '../../metaView/distChart';
 import DropdownSelect from '../../../../components/dropDownSelect';
@@ -14,6 +14,7 @@ import { PIVOT_KEYS } from '../../../../constants';
 import StatTable from './components/liteStatTable';
 import StatePlaceholder, { IColStateType } from './components/statePlaceholder';
 import { HEADER_CELL_STYLE_CONFIG, HeaderCellContainer } from './styles';
+import ColNameEditor from './components/colNameEditor';
 
 function getClassName(type: 'dimension' | 'measure', disable: boolean) {
     if (disable) return 'disable';
@@ -76,7 +77,6 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
     const { dataSourceStore, commonStore, semiAutoStore } = getGlobalStore();
     const { name, code, meta, disable, onChange, extSuggestions, isExt, colType } = props;
     const [showNameEditor, setShowNameEditor] = useState<boolean>(false);
-    const [headerName, setHeaderName] = useState<string>(name);
     const { focus, endFocus, startFocus, toggleFocus, setFocus } = useFocus();
     const optionsOfBIFieldType = useBIFieldTypeOptions();
     const buttonId = useId('edit-button');
@@ -94,9 +94,6 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
         };
     }, [focus, setFocus]);
 
-    useEffect(() => {
-        setHeaderName(name);
-    }, [name]);
     return (
         <HeaderCellContainer onMouseOver={startFocus} onMouseLeave={endFocus} onTouchStart={toggleFocus}>
             <StatePlaceholder
@@ -143,9 +140,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                                     )}
                                 </div>
                                 {extSuggestions.length > 0 && (
-                                    <LiveContainer
-                                        style={HEADER_CELL_STYLE_CONFIG.SUGGESTION_BUTTON}
-                                    >
+                                    <LiveContainer style={HEADER_CELL_STYLE_CONFIG.SUGGESTION_BUTTON}>
                                         <FieldExtSuggestions fid={code} suggestions={extSuggestions} />
                                         <div className="badge">{extSuggestions.length}</div>
                                     </LiveContainer>
@@ -159,36 +154,14 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                             </>
                         )}
                     </div>
-                    {showNameEditor && (
-                        <Callout
-                            target={`#${buttonId}`}
-                            onDismiss={() => {
-                                setShowNameEditor(false);
-                            }}
-                        >
-                            <div className="p-4">
-                                <h1 className="text-xl">{intl.get('dataSource.table.edit')}</h1>
-                                <div className="p-4">
-                                    <TextField
-                                        label={intl.get('dataSource.table.fieldName')}
-                                        value={headerName}
-                                        onChange={(e, val) => {
-                                            setHeaderName(`${val}`);
-                                        }}
-                                    />
-                                </div>
-                                <div className="p-4">
-                                    <PrimaryButton
-                                        text={intl.get('function.confirm')}
-                                        onClick={() => {
-                                            onChange && onChange(code, 'name', headerName);
-                                            setShowNameEditor(false);
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        </Callout>
-                    )}
+                    <ColNameEditor
+                        defaultName={name}
+                        setShowNameEditor={setShowNameEditor}
+                        showNameEditor={showNameEditor}
+                        onNameUpdate={(newName) => {
+                            onChange && onChange(code, 'name', newName);
+                        }}
+                    />
                 </div>
                 <div className="viz-container">
                     {meta && (
