@@ -38,12 +38,12 @@ function initPatternTree(): IPatternNode {
                 children: [
                     {
                         name: 'text',
-                        pattern: /(?!\d+$)(\w+|[\u4e00-\u9fa5]+)(\s+|[\u4e00-\u9fa5]+)*/,
+                        pattern: /(?!\d+)(\w+|[\u4e00-\u9fa5]+)(\s+|[\u4e00-\u9fa5]+)*/,
                         type: 'knowledge',
                         children: [
                             {
                                 name: 'word',
-                                pattern: /(?!\d+$)(\w+)(\s+|[\u4e00-\u9fa5]+)*/,
+                                pattern: /(?!\d+)(\w+)(\s+|[\u4e00-\u9fa5]+)*/,
                                 type: 'knowledge',
                                 children: [],
                             },
@@ -92,6 +92,30 @@ function initPatternTree(): IPatternNode {
                         pattern: /[\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A0-\u00BF\u2000-\u206F\u3000-\u303F\uFF00-\uFFEF]+/,
                         children: [],
                     },
+                    {
+                        name: 'email',
+                        type: 'knowledge',
+                        pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}/,
+                        children: [],
+                    },
+                    {
+                        name: 'phone',
+                        type: 'knowledge',
+                        pattern: /\(?[0-9]{3}\)?[-. ]?[0-9]{3}[-. ]?[0-9]{4}/,
+                        children: [],
+                    },
+                    {
+                        name: 'date',
+                        type: 'knowledge',
+                        pattern: /(0?[1-9]|[12][0-9]|3[01])[/-](0?[1-9]|1[012])[/-]\d{4}/,
+                        children: [],
+                    },
+                    {
+                        name: 'formatNumber',
+                        type: 'knowledge',
+                        pattern: /[+-]?(?:\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+(?:\.\d+)?)/,
+                        children: [],
+                    }
                 ],
             },
             {
