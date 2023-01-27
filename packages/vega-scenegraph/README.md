@@ -1,5 +1,7 @@
 # vega-scenegraph
 
+> This is a patch version of vega-scenegraph. It is caused by https://github.com/vega/vega/pull/3547, after the PR is merged and new version of vega is published. This patch version can be removed.
+
 [Vega](https://github.com/vega/vega) scenegraph and renderers.
 
 Renderers and event handlers for Vega's mark-based scenegraph. This package supports both pixel-based (canvas) and vector graphics (SVG) output. Renderers can either (re-)draw a complete scene or perform incremental re-rendering for a set of provided "dirty" items. A fast SVG string renderer is also provided to generate static SVG for export.

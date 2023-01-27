@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { IContextualMenuProps, IDropdownOption, IconButton } from '@fluentui/react';
+import { DirectionalHint, IContextualMenuProps, IDropdownOption, IconButton } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { SUPPORT_LANG } from '../locales';
 import { useGlobalStore } from '../store';
@@ -19,6 +19,7 @@ const UserSettings: React.FC = () => {
     const { langStore, commonStore } = useGlobalStore();
     const { navMode } = commonStore;
     const menuProps: IContextualMenuProps = {
+        directionalHint: DirectionalHint.topAutoEdge,
         items: langOptions.map((item) => ({
             key: `${item.key}`,
             text: item.text,
