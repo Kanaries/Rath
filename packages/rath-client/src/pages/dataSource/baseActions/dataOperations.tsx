@@ -1,4 +1,4 @@
-import { CommandBar } from '@fluentui/react';
+import { CommandBar, ICommandBarItemProps } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -47,16 +47,18 @@ const DataOperations: React.FC = () => {
     }, [dataSourceStore]);
 
     const cleanMethodListLang = useCleanMethodList();
-    const items = useMemo(() => {
+    const items = useMemo<ICommandBarItemProps[]>(() => {
         return [
             {
                 key: 'clean',
-                text: `${intl.get('dataSource.cleanMethod')}:${intl.get(`dataSource.methods.${cleanMethod}`)}`,
+                text: `${intl.get('dataSource.cleanMethod')}`,
                 iconProps: { iconName: 'Broom' },
                 subMenuProps: {
                     items: cleanMethodListLang.map((m) => ({
                         key: m.key + '',
                         text: m.text,
+                        canCheck: true,
+                        isChecked: m.key === cleanMethod,
                         onClick: () => {
                             dataSourceStore.setCleanMethod(m.key);
                         },
