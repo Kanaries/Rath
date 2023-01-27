@@ -23,6 +23,7 @@ import { useGlobalStore } from '../../store';
 import { deepcopy, getRange } from '../../utils';
 import { transVegaSubset2Schema } from '../../utils/transform';
 import { viewSampling } from '../../lib/stat/sampling';
+import { Card } from '../../components/card';
 import { batchMutInCatRange, batchMutInCircle, clearAggregation, debounceShouldNeverBeUsed, labelingData } from './utils';
 import EmbedAnalysis from './embedAnalysis';
 import { useViewData } from './viewDataHook';
@@ -358,7 +359,7 @@ const Painter: React.FC = (props) => {
     return (
         <Cont style={{ padding: '1em' }}>
             <div className="cursor rounded"></div>
-            <div className="card">
+            <Card>
                 <PainterContainer>
                     <div className="vis-segment" onTouchMove={(e) => {
                         e.stopPropagation();
@@ -471,7 +472,7 @@ const Painter: React.FC = (props) => {
                         itemIcon="BarChartVerticalEdit"
                     />
                 </Pivot>
-            </div>
+            </Card>
             {pivotKey === PIVOT_TAB_KEYS.SEARCH && <NeighborAutoLink
                 vizSpec={vizSpec}
                 dataSource={viewData}

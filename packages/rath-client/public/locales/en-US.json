@@ -264,7 +264,7 @@
             "syncMode": "sync mode"
         },
         "upload": {
-            "title": "Upload Your own dataset",
+            "title": "Connect your data",
             "fileTypes": "Excel workbooks and text-based files (e.g. JSON, CSV) are supported.",
             "uniqueIdIssue": "Add unique ids for fields",
             "show_more": "More Options",
@@ -582,8 +582,8 @@
         },
         "clickLogin": "Login",
         "haveSent": "Already Sent",
-        "signIn": "Sign In",
-        "signOut": "Sign Out",
+        "signIn": "Sign Up",
+        "signOut": "Logout",
         "preferences": "Preferences",
         "phoneCert": "Phone",
         "emailCert": "Email",

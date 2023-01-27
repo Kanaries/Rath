@@ -18,15 +18,17 @@ const NavContainer = styled.div`
     /* flex-direction: vertical; */
     display: flex;
     flex-direction: column;
+    border-right: 1px solid #e9ebf0;
     .nav-footer {
         /* position: absolute; */
         bottom: 0px;
-        /* padding-left: 1em; */
         flex-grow: 0;
         flex-shrink: 0;
         overflow: hidden;
+        > .padded {
+            padding: 1em;
+        }
     }
-    padding-left: 10px;
     .text-red {
         color: #e94726;
     }
@@ -58,7 +60,7 @@ const IconMap = {
     [PIVOT_KEYS.dashBoardDesigner]: 'SizeLegacy',
     [PIVOT_KEYS.collection]: 'Heart',
     [PIVOT_KEYS.dashboard]: 'CRMReport',
-    [PIVOT_KEYS.causal]: 'Relationship'
+    [PIVOT_KEYS.causal]: 'Relationship',
 } as {
     [key: string]: string;
 };
@@ -89,15 +91,11 @@ const AppNav: React.FC<AppNavProps> = (props) => {
     const getLinks = useCallback(
         (pivotKeys: string[]) => {
             return pivotKeys.map((p) => {
-                const hotkeyAccess = altKeyPressed ? Object.entries(HotKeyMap).find(
-                    ([, key]) => key === p
-                )?.[0] ?? null : null;
+                const hotkeyAccess = altKeyPressed ? Object.entries(HotKeyMap).find(([, key]) => key === p)?.[0] ?? null : null;
                 return {
                     url: `#${p}`,
                     key: p,
-                    name: `${navMode === 'text' ? intl.get(`menu.${p}`) : ''}${
-                        hotkeyAccess ? ` (${hotkeyAccess})` : ''
-                    }`,
+                    name: `${navMode === 'text' ? intl.get(`menu.${p}`) : ''}${hotkeyAccess ? ` (${hotkeyAccess})` : ''}`,
                     forceAnchor: true,
                     iconProps: { iconName: getIcon(p) },
                     // iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
@@ -130,9 +128,10 @@ const AppNav: React.FC<AppNavProps> = (props) => {
         };
     }, []);
 
-    const HotKeyActions = useMemo(() => Object.fromEntries(Object.entries(HotKeyMap).map(([k, appKey]) => [
-        `Alt+${k}`, () => commonStore.setAppKey(appKey)
-    ])), [commonStore]);
+    const HotKeyActions = useMemo(
+        () => Object.fromEntries(Object.entries(HotKeyMap).map(([k, appKey]) => [`Alt+${k}`, () => commonStore.setAppKey(appKey)])),
+        [commonStore]
+    );
 
     useHotKey(HotKeyActions);
 
@@ -193,7 +192,9 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                 <Nav selectedKey={appKey} groups={groups} />
             </div>
             <div className="nav-footer">
-                <UserSetting />
+                <div className="padded">
+                    <UserSetting />
+                </div>
                 <LoginInfo />
             </div>
         </NavContainer>

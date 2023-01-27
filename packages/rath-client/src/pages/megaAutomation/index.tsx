@@ -9,6 +9,7 @@ import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
 import EditorCore from '../editor/core';
 import type { IReactVegaHandler } from '../../components/react-vega';
+import { Card } from '../../components/card';
 import VizPreference from './preference';
 import SaveModal from './save';
 import OperationBar from './vizOperation/operationBar';
@@ -96,7 +97,7 @@ const LTSPage: React.FC = () => {
             <Constraints />
             <AssoPanel />
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
-            <div className="card">
+            <Card>
                 <DefaultButton
                     style={{ float: 'right' }}
                     iconProps={{ iconName: 'Settings' }}
@@ -147,7 +148,7 @@ const LTSPage: React.FC = () => {
                         <FieldContainer />
                     </div>
                 </InsightContainer>
-            </div>
+            </Card>
         </div>
     );
 };

@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import type { IReactVegaHandler } from '../../components/react-vega';
 import { throttle } from '../../utils';
+import { Card } from '../../components/card';
 import Settings from './settings';
 import FocusZone from './focusZone';
 import PredictZone from './predictZone';
@@ -43,9 +44,9 @@ const PatternPage: React.FC = () => {
     return (
         <div className="content-container">
             <Settings />
-            <div className="card" ref={focusZoneContainer}>
+            <Card ref={focusZoneContainer}>
                 <FocusZone handler={handler} />
-            </div>
+            </Card>
             <PredictZone />
         </div>
     );

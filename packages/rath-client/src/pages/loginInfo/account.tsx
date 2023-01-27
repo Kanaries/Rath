@@ -15,7 +15,6 @@ const AccountDiv = styled.div`
         display: flex;
         flex-direction: column;
         margin-bottom: 20px;
-        padding-left: 2em;
         .label {
             font-weight: 600;
             font-size: 14px;

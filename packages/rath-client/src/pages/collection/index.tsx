@@ -7,6 +7,7 @@ import { useBoolean } from '@fluentui/react-hooks';
 import { useGlobalStore } from '../../store';
 import { IInsightVizView } from '../../interfaces';
 import { searchFilterView } from '../../utils';
+import { Card } from '../../components/card';
 import { MainCardContainer } from './components';
 import CardView from './collectionView/cardView';
 import ListView from './collectionView/listView';
@@ -58,7 +59,7 @@ const Collection: React.FC = (props) => {
     };
     return (
         <div className="content-container">
-            <div className="card">
+            <Card>
                 <MainCardContainer>
                     <h1 className="seg-header">{intl.get('collection.title')}</h1>
                     <p className="seg-desc">{intl.get('collection.desc')}</p>
@@ -153,7 +154,7 @@ const Collection: React.FC = (props) => {
                         />
                     )}
                 </MainCardContainer>
-            </div>
+            </Card>
         </div>
     );
 };
