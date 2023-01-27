@@ -55,8 +55,12 @@ const TextPatternCard = styled.div`
     margin: 8px 0px;
     > .tp-content {
         margin: 1em 0em;
-        > pre {
+        > span {
+            border: 1px solid #f3f3f3;
             display: inline-block;
+            overflow-wrap: break-all;
+            word-break: break-all;
+            white-space: pre-wrap;
         }
     }
     .sl-text {
@@ -449,9 +453,9 @@ const DataTable: React.FC = (props) => {
                                 <Tag>{intl.get(`dataSource.textPattern.${groupKey}`)}</Tag>
                                 {tpPos.index === ti && tpPos.groupKey === groupKey && <Tag color="#fff" bgColor="#14b8a6">{intl.get('dataSource.textPattern.currentPattern')}</Tag>}
                                 <div className="tp-content">
-                                    <pre className="ph-text">{tp.ph.source}</pre>
-                                    <pre className="sl-text">{tp.selection.source}</pre>
-                                    <pre className="pe-text">{tp.pe.source}</pre>
+                                    <span className="ph-text">{tp.ph.source}</span>
+                                    <span className="sl-text">{tp.selection.source}</span>
+                                    <span className="pe-text">{tp.pe.source}</span>
                                 </div>
                                 <Stack tokens={{ childrenGap: 4 }}>
                                     <MiniButton
