@@ -1,176 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ArtColumn, BaseTable, Classes } from 'ali-react-table';
-import styled from 'styled-components';
+import { ArtColumn } from 'ali-react-table';
 import { observer } from 'mobx-react-lite';
-import { DefaultButton, IconButton, Label, MessageBar, MessageBarType, PrimaryButton, Stack } from '@fluentui/react';
+import { IconButton, Label, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useGlobalStore } from '../../../store';
 import type { IRow } from '../../../interfaces';
-import { extractSelection, intersectPattern, ITextPattern } from '../../../lib/textPattern';
+import { extractSelection, intersectPattern } from '../../../lib/textPattern';
 import HeaderCell from './headerCell';
-import NestPanel from './nestPanel';
-import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './tpRegexEditor';
-import { IColStateType } from './headerCell/statePlaceholder';
-
-const SELECT_COLOR = '#b7eb8f';
-
-const CustomBaseTable = styled(BaseTable)`
-    --header-bgcolor: #ffffff !important;
-    --bgcolor: rgba(0, 0, 0, 0);
-    --border-color: #f2f2f2;
-    --row-height: 38px;
-    .${Classes.tableHeaderCell} {
-        position: relative;
-    }
-    thead {
-        vertical-align: top;
-        th {
-            padding: 0px 0px 8px 0px;
-        }
-    }
-    td {
-        cursor: text;
-    }
-`;
-
-
-
-const Tag = styled.div<{color?: string; bgColor?: string}>`
-    display: inline-block;
-    padding: 0px 8px;
-    border-radius: 2px;
-    background-color: ${props => props.bgColor || '#f3f3f3'};
-    color: ${props => props.color || '#000000'};
-    font-size: 12px;
-    margin-right: 4px;
-    border-radius: 12px;
-`;
-
-const TextPatternCard = styled.div`
-    padding: 8px;
-    border: 1px solid #f3f3f3;
-    border-radius: 2px;
-    overflow: hidden;
-    margin: 8px 0px;
-    > .tp-content {
-        margin: 1em 0em;
-        > span {
-            border: 1px solid #f3f3f3;
-            display: inline-block;
-            overflow-wrap: break-all;
-            word-break: break-all;
-            white-space: pre-wrap;
-        }
-    }
-    .sl-text {
-        background-color: ${SELECT_COLOR};
-    }
-    .ph-text, .pe-text {
-        background-color: #fed7aa;
-    }
-`;
-const MiniButton = styled(DefaultButton)`
-    height: 26px;
-    font-size: 12px;
-`;
-
-const MiniPrimaryButton = styled(PrimaryButton)`
-    height: 26px;
-    font-size: 12px;
-`;
-
-const TableInnerStyle = {
-    height: 600,
-    overflow: 'auto',
-};
-
-function uniquePattern(textPatternList: ITextPattern[]): ITextPattern[] {
-    const keySet: Set<string> = new Set();
-    const ans: ITextPattern[] = [];
-    for (let tp of textPatternList) {
-        if (!keySet.has(tp.pattern.source)) {
-            ans.push(tp);
-            keySet.add(tp.pattern.source);
-        }
-    }
-    return ans;
-}
-
-function groupTextPattern(textPatternList: IFieldTextPattern[]): {
-    [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
-} {
-    const res: {
-        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
-    } = {
-        knowledge: [],
-        generalize: [],
-        specific: [],
-    };
-    for (let tp of textPatternList) {
-        res[tp.selectionType].push(tp);
-    }
-    return res;
-}
-
-function initGroupedTextPatternList(): {
-    [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
-} {
-    const res: {
-        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
-    } = {
-        knowledge: [],
-        generalize: [],
-        specific: [],
-    };
-    return res;
-}
-
-type ITPPos = {
-    groupKey: IFieldTextPattern['selectionType'];
-    index: number
-}
-/**
- * find the first exist text pattern (sorted by score)
- */
-function findFirstExistTextPattern(
-    groupedTextPatternList: {
-        [key in IFieldTextPattern['selectionType']]: IFieldTextPattern[];
-    },
-    enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = []
-): ITPPos {
-    const groupKeys = (['knowledge', 'generalize', 'specific'] as IFieldTextPattern['selectionType'][]).filter(k => !enhanceKeys.includes(k));
-    const createPatternsOfKeys = (keys: IFieldTextPattern['selectionType'][]) => {
-        const _patterns: { pattern: IFieldTextPattern; pos: ITPPos }[] = [];
-        for (let groupKey of keys) {
-            for (let i = 0; i < groupedTextPatternList[groupKey].length; i++) {
-                _patterns.push({
-                    pattern: groupedTextPatternList[groupKey][i],
-                    pos: {
-                        groupKey,
-                        index: i,
-                    },
-                });
-            }
-        }
-        return _patterns;
-    }
-    const patterns = createPatternsOfKeys(groupKeys);
-    const enhancedPatterns = createPatternsOfKeys(enhanceKeys);
-    patterns.sort((a, b) => b.pattern.score - a.pattern.score);
-    enhancedPatterns.sort((a, b) => b.pattern.score - a.pattern.score);
-
-    if (enhancedPatterns.length > 0) {
-        return enhancedPatterns[0].pos;
-    }
-    if (patterns.length > 0) {
-        return patterns[0].pos;
-    }
-    return {
-        groupKey: 'knowledge',
-        index: 0,
-    };
-}
+import NestPanel from './components/nestPanel';
+import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './components/tpRegexEditor';
+import { IColStateType } from './headerCell/components/statePlaceholder';
+import { CustomBaseTable, MiniButton, MiniPrimaryButton, DATA_TABLE_STYLE_CONFIG, Tag, TextPatternCard } from './styles';
+import { findFirstExistTextPattern, groupTextPattern, initGroupedTextPatternList, uniquePattern } from './utils';
 
 const ADD_BATCH_SIZE = 5;
 
@@ -380,7 +222,7 @@ const DataTable: React.FC = (props) => {
                             }}
                         >
                             {textBeforeSelection}
-                            <span style={{ backgroundColor: SELECT_COLOR }}>{matchedText}</span>
+                            <span style={{ backgroundColor: DATA_TABLE_STYLE_CONFIG.SELECT_COLOR }}>{matchedText}</span>
                             {textAfterSelection}
                         </span>
                     );
@@ -439,7 +281,7 @@ const DataTable: React.FC = (props) => {
                     <CustomBaseTable
                         useVirtual={true}
                         getRowProps={rowPropsCallback}
-                        style={TableInnerStyle}
+                        style={DATA_TABLE_STYLE_CONFIG.TABLE_INNER_STYLE}
                         dataSource={filteredData}
                         columns={columns}
                     />

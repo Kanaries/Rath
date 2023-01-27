@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { runInAction } from 'mobx';
 import { IAnalyticType, ISemanticType } from 'visual-insights';
@@ -12,67 +11,9 @@ import { LiveContainer } from '../../metaView/metaList';
 import FieldExtSuggestions from '../../../../components/fieldExtend/suggestions';
 import { getGlobalStore } from '../../../../store';
 import { PIVOT_KEYS } from '../../../../constants';
-import { RATH_THEME_CONFIG } from '../../../../theme';
-import StatTable from './liteStatTable';
-import StatePlaceholder, { IColStateType } from './statePlaceholder';
-
-const HeaderCellContainer = styled.div`
-    .others {
-        position: relative;
-        padding: 12px;
-    }
-    .bottom-bar {
-        position: absolute;
-        height: 4px;
-        left: 0px;
-        right: 0px;
-        top: 0px;
-    }
-    .info-container {
-        min-height: 50px;
-    }
-    .viz-container {
-        height: 100px;
-        overflow: hidden;
-    }
-    .dim {
-        background-color: ${RATH_THEME_CONFIG.dimensionColor};
-    }
-    .mea {
-        background-color: ${RATH_THEME_CONFIG.measureColor};
-    }
-    .disable {
-        background-color: ${RATH_THEME_CONFIG.disableColor};
-    }
-    .header-row {
-        display: flex;
-        flex-wrap: nowrap;
-        .header {
-            margin-top: 0px;
-            margin-bottom: 0px;
-            font-size: 18px;
-            font-weight: 500;
-            line-height: 36px;
-            flex-grow: 1;
-            max-width: 160px;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-        .edit-icon {
-            flex-shrink: 0;
-            flex-grow: 0;
-        }
-    }
-    .checkbox-container {
-        display: flex;
-        align-items: center;
-        margin-top: 2px;
-        label {
-            margin-right: 6px;
-        }
-    }
-`;
+import StatTable from './components/liteStatTable';
+import StatePlaceholder, { IColStateType } from './components/statePlaceholder';
+import { HEADER_CELL_STYLE_CONFIG, HeaderCellContainer } from './styles';
 
 function getClassName(type: 'dimension' | 'measure', disable: boolean) {
     if (disable) return 'disable';
@@ -95,7 +36,7 @@ interface IOption<T = string> {
     text: string;
 }
 
-const DataTypeOptions: IOption<ISemanticType>[] = [
+const SEMANTIC_TYPE_OPTIONS: IOption<ISemanticType>[] = [
     { key: 'nominal', text: 'nominal' },
     { key: 'ordinal', text: 'ordinal' },
     { key: 'quantitative', text: 'quantitative' },
@@ -203,11 +144,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                                 </div>
                                 {extSuggestions.length > 0 && (
                                     <LiveContainer
-                                        style={{
-                                            transform: 'scale(0.75)',
-                                            margin: '-4px -18px',
-                                            flexShrink: 0,
-                                        }}
+                                        style={HEADER_CELL_STYLE_CONFIG.SUGGESTION_BUTTON}
                                     >
                                         <FieldExtSuggestions fid={code} suggestions={extSuggestions} />
                                         <div className="badge">{extSuggestions.length}</div>
@@ -215,12 +152,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                                 )}
                                 {canDelete && (
                                     <IconButton
-                                        iconProps={{
-                                            iconName: 'Delete',
-                                            style: {
-                                                color: '#c50f1f',
-                                            },
-                                        }}
+                                        iconProps={HEADER_CELL_STYLE_CONFIG.DELETE_BUTTON}
                                         onClick={() => dataSourceStore.deleteExtField(code)}
                                     />
                                 )}
@@ -281,7 +213,7 @@ const HeaderCell: React.FC<HeaderCellProps> = (props) => {
                                 }
                             }}
                         >
-                            {DataTypeOptions.map((op) => (
+                            {SEMANTIC_TYPE_OPTIONS.map((op) => (
                                 <option key={op.key} value={op.key}>
                                     {intl.get(`common.semanticType.${op.key}`)}
                                 </option>

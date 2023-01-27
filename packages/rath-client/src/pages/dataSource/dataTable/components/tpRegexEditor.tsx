@@ -2,7 +2,7 @@ import { DefaultButton, PrimaryButton, Stack, TextField } from '@fluentui/react'
 import { unstable_batchedUpdates } from 'react-dom';
 import { FC, useCallback, useEffect, useState } from 'react';
 import intl from 'react-intl-universal';
-import { ITextPattern, ITextSelection } from '../../../lib/textPattern';
+import { ITextPattern, ITextSelection } from '../../../../lib/textPattern';
 
 export interface IFieldTextSelection extends ITextSelection {
     fid: string;
