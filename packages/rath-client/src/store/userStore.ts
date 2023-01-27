@@ -49,6 +49,7 @@ interface IUserInfo {
     email: string;
     eduEmail: string;
     phone: string;
+    avatarURL: string;
     organizations?: readonly IOrganization[] | undefined;
 }
 
@@ -194,6 +195,7 @@ export default class UserStore {
                         eduEmail: result.eduEmail,
                         email: result.email,
                         phone: result.phone,
+                        avatarURL: result.avatarURL,
                     };
                     this.getOrganizations();
                 });

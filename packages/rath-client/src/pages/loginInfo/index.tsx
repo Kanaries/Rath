@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import Account from './account';
 import Setup from './setup';
+import { LoginButton } from './components/loginButton';
 
 export enum PreferencesType {
     Account = 'account',
@@ -21,9 +22,9 @@ export interface PreferencesListType {
 }
 
 const LoginInfoDiv = styled.div`
-    height: 100%;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    /* flex-direction: column; */
     border-top-width: 1px;
     padding: 0.6em 0.8em 0.8em;
     > div {
@@ -41,15 +42,14 @@ const LoginInfoDiv = styled.div`
     .user::-webkit-scrollbar {
         display: none;
     }
-    .avatar-img {
-        display: flex;
-        align-items: center;
-    }
-    .user-name {
-        /* ml-2 */
-        margin-left: 0.5rem;
-        p {
-        }
+    .user-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 19px;
+        border: 3px solid #000;
+        margin: 0px 12px;
+        background-size: contain;
+        background-repeat: no-repeat;
     }
 `;
 
@@ -72,8 +72,8 @@ const Container = styled.div`
 const LoginInfo: FC = () => {
     const { commonStore, userStore } = useGlobalStore();
     const { navMode } = commonStore;
-    const { userName } = userStore;
-    const [loginHidden, setLoginHidden] = useState(true);
+    const { userName, info } = userStore;
+    const [showUserPanel, setShowUserPanel] = useState(false);
     const [tab, setTab] = useState<PreferencesType>(PreferencesType.Account);
 
     const settingMenuList = useMemo<INavLinkGroup[]>(() => {
@@ -111,42 +111,40 @@ const LoginInfo: FC = () => {
 
     return (
         <LoginInfoDiv>
-            <div
-                onClick={() => {
-                    setLoginHidden(false);
+            <Dialog
+                modalProps={{
+                    isBlocking: true,
                 }}
-                role="button"
-                aria-haspopup
+                hidden={!showUserPanel}
+                onDismiss={() => {
+                    setShowUserPanel(false);
+                }}
+                dialogContentProps={{ title: intl.get('login.preferences') }}
+                minWidth={550}
             >
-                <Dialog
-                    modalProps={{
-                        isBlocking: true,
-                    }}
-                    hidden={loginHidden}
-                    onDismiss={() => {
-                        setLoginHidden(true);
-                    }}
-                    dialogContentProps={{ title: intl.get('login.preferences') }}
-                    minWidth={550}
-                >
-                    <Container>
-                        <div className="nav-menu">
-                            <Nav selectedKey={tab} groups={settingMenuList} />
-                        </div>
-                        <div className="nav-content">
-                            {tab === PreferencesType.Account && <Account />}
-                            {tab === PreferencesType.Setting && <Setup />}
-                        </div>
-                    </Container>
-                </Dialog>
-                <div className="avatar-img">
-                    {navMode === 'text' && (
-                        <div className="user-name">
-                            <p className="user">{userName || intl.get('login.clickLogin')}</p>
-                        </div>
+                <Container>
+                    <div className="nav-menu">
+                        <Nav selectedKey={tab} groups={settingMenuList} />
+                    </div>
+                    <div className="nav-content">
+                        {tab === PreferencesType.Account && <Account />}
+                        {tab === PreferencesType.Setting && <Setup />}
+                    </div>
+                </Container>
+            </Dialog>
+            <div className="user-avatar" style={{ backgroundImage: `url(${info?.avatarURL || '/assets/cat3_1_question.jpeg'})`}}></div>
+            {navMode === 'text' && (
+                <div>
+                    {userName || (
+                        <LoginButton
+                            text={intl.get('login.clickLogin')}
+                            onClick={() => {
+                                setShowUserPanel(true);
+                            }}
+                        />
                     )}
                 </div>
-            </div>
+            )}
         </LoginInfoDiv>
     );
 };
