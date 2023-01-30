@@ -139,14 +139,14 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                     <PivotItem itemKey={IDataPreviewMode.meta} headerText={intl.get('dataSource.metaView')} itemIcon="ViewList" />
                     <PivotItem itemKey={IDataPreviewMode.stat} headerText={intl.get('dataSource.statView')} itemIcon="BarChartVerticalFilter" />
                 </Pivot>
-                <BorderCard>
+                {/* <BorderCard> */}
                     {rawDataMetaInfo.length > 0 && <DataOperations />}
                     <DataInfo />
                     {rawDataMetaInfo.length > 0 && <Advice />}
                     {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
                     {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
                     {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}
-                </BorderCard>
+                {/* </BorderCard> */}
             </Card>
         </div>
     );
