@@ -411,7 +411,12 @@
             "editInEditor": "在编辑器配置",
             "associate": "联想",
             "constraints": "分析约束",
-            "download": "导出图表"
+            "download": "导出图表",
+            "export": "导出",
+            "export_as": "导出为",
+            "export_size": "尺寸",
+            "lock_aspect": "锁定宽高比",
+            "err_msg_invalid_size": "大小不能超过 {min} ~ {max}"
         },
         "constraints": {
             "exclude": "排除字段",

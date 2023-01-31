@@ -39,6 +39,7 @@ export const RESULT_STORAGE_SPLITOR = '\n===RATH_STORAGE_SPLITOR===\n';
 
 export const STORAGE_FILE_SUFFIX = 'krs';
 
+/** @deprecated */
 export const EDITOR_URL = 'https://kanaries.cn/vega-editor/';
 
 export const STORAGE_INSTANCE = 'rath_storage_instance'

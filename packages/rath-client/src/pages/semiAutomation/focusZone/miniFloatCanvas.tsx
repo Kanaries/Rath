@@ -1,10 +1,10 @@
 import { observer } from 'mobx-react-lite';
 import { CommandBarButton, IconButton } from '@fluentui/react';
-import React, { RefObject, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { applyFilters, IPattern } from '@kanaries/loa';
-import ReactVega, { IReactVegaHandler } from '../../../components/react-vega';
+import ReactVega from '../../../components/react-vega';
 import type { IRow } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { adviceVisSize } from '../../collection/utils';
@@ -25,10 +25,9 @@ const FloatContainer = styled.div<{ hide: boolean }>`
 
 interface MiniFloatCanvasProps {
     pined: IPattern;
-    handler?: RefObject<IReactVegaHandler>;
 }
 const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = (props) => {
-    const { pined, handler } = props;
+    const { pined } = props;
     const { semiAutoStore, commonStore } = useGlobalStore();
     const { mainVizSetting, dataSource, fieldMetas } = semiAutoStore;
     const [hide, setHide] = useState<boolean>(false);
@@ -68,7 +67,7 @@ const MiniFloatCanvas: React.FC<MiniFloatCanvasProps> = (props) => {
                     />
                 )}
             </div>
-            {!hide && <ReactVega ref={handler} actions={debug} spec={spec} dataSource={mainViewData} config={commonStore.themeConfig} />}
+            {!hide && <ReactVega actions={debug} spec={spec} dataSource={mainViewData} config={commonStore.themeConfig} />}
         </FloatContainer>
     );
 };

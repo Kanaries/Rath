@@ -102,20 +102,8 @@ const OperationBar: React.FC<OperationBarProps> = ({ handler }) => {
             key: 'download',
             text: intl.get('megaAuto.commandBar.download'),
             iconProps: { iconName: 'Download' },
-            split: true,
-            subMenuProps: {
-                items: [
-                    {
-                        key: 'svg',
-                        text: 'SVG',
-                        onClick: () => {
-                            handler.current?.downloadSVG();
-                        },
-                    },
-                ],
-            },
             onClick: () => {
-                handler.current?.downloadPNG();
+                handler.current?.exportImage();
             },
         },
     ]
