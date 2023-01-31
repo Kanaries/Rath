@@ -416,6 +416,7 @@
             "export_as": "导出为",
             "export_size": "尺寸",
             "lock_aspect": "锁定宽高比",
+            "export_bg": "背景色",
             "err_msg_invalid_size": "大小不能超过 {min} ~ {max}"
         },
         "constraints": {

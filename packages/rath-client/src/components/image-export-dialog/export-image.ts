@@ -2,7 +2,6 @@ import type { View } from "vega";
 import embed, { EmbedOptions } from "vega-embed";
 
 
-// TODO: implement background
 export type ImageExportInfo = {
     fileName: string;
     width: number;
@@ -17,8 +16,7 @@ export type ImageExportInfo = {
     | {
         type: 'JPEG';
         dpi: number;
-        /** white if empty */
-        background: string | null;
+        background: string;
     }
     | {
         type: 'SVG';
@@ -53,6 +51,7 @@ const exportImage = async (spec: any, vegaOpts: EmbedOptions, options: ImageExpo
             type: 'fit',
             contains: 'padding',
         },
+        background: options.background || 'transparent',
     }, vegaOpts);
     const ok = await (async () => {
         switch (options.type) {
@@ -75,7 +74,11 @@ const exportImage = async (spec: any, vegaOpts: EmbedOptions, options: ImageExpo
             }
             case 'PNG':
             case 'JPEG': {
+                copy.view.width(options.width);
+                copy.view.height(options.height);
                 const canvas = await copy.view.toCanvas(ratio * scale);
+                canvas.style.width = `${options.width}px`;
+                canvas.style.height = `${options.height}px`;
                 const data = canvas.toDataURL(options.type === 'JPEG' ? 'image/jpeg' : 'image/png', 1.0);
                 if (data) {
                     const a = document.createElement('a');

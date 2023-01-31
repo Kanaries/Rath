@@ -1,5 +1,5 @@
 import { Dispatch, FC, RefObject, SetStateAction, useEffect, useState } from 'react';
-import { Checkbox, Dropdown, Icon, Label, Stack, TextField, TooltipHost } from '@fluentui/react';
+import { Checkbox, ColorPicker, Dropdown, HoverCard, HoverCardType, Icon, IconButton, Label, Stack, TextField, TooltipHost } from '@fluentui/react';
 import produce from 'immer';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
@@ -15,6 +15,52 @@ const Form = styled.div`
     overflow: hidden;
     row-gap: 1.5rem;
     column-gap: 1rem;
+`;
+
+const BackgroundField = styled.div`
+    width: 100%;
+    display: flex;
+    --height: 32px;
+    .preview {
+        flex-grow: 0;
+        flex-shrink: 0;
+        width: var(--height);
+        height: var(--height);
+        border: 1px solid #8888;
+        box-sizing: border-box;
+        position: relative;
+        cursor: pointer;
+        ::before {
+            display: block;
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAJUlEQVQYV2N89erVfwY0ICYmxoguxjgUFKI7GsTH5m4M3w1ChQC1/Ca8i2n1WgAAAABJRU5ErkJggg==");
+        }
+        ::after {
+            display: block;
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            background: var(--color);
+        }
+    }
+    output {
+        line-height: var(--height);
+        margin: 0 1em;
+        flex-grow: 1;
+        flex-shrink: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 `;
 
 export interface ImageExportDialogFormProps {
@@ -67,9 +113,8 @@ const ImageExportDialogForm: FC<ImageExportDialogFormProps> = ({ vegaViewRef, op
         if (!vegaView || !quickResizeKeyword || !lockAspect) {
             return;
         }
-        const { signals } = vegaView.getState();
-        const width = signals?.['width'] ?? (vegaView as any)['_width'];
-        const height = signals?.['height'] ?? (vegaView as any)['_height'];
+        const width = vegaView.width();
+        const height = vegaView.height();
         if (typeof width === 'number' && typeof height === 'number') {
             switch (quickResizeKeyword) {
                 case '1x': {
@@ -164,12 +209,13 @@ const ImageExportDialogForm: FC<ImageExportDialogFormProps> = ({ vegaViewRef, op
                                 });
                             }
                             case 'JPEG': {
+                                const bgColorHasAlpha = options.background?.startsWith('rgba') ?? false;
                                 return setOptions({
                                     fileName: `${fileNameWithoutExt}.jpg`,
                                     type: 'JPEG',
                                     width: options.width,
                                     height: options.height,
-                                    background: options.background,
+                                    background: bgColorHasAlpha ? '#fff' : options.background ?? '#fff',
                                     dpi: dpi ?? 150,
                                 });
                             }
@@ -309,6 +355,47 @@ const ImageExportDialogForm: FC<ImageExportDialogFormProps> = ({ vegaViewRef, op
                     onRenderTitle={() => dpiInput}
                     styles={{ title: { paddingLeft: 0 } }}
                 />
+            </Stack>
+            <Label>Background</Label>
+            <Stack horizontal>
+                <BackgroundField>
+                    <HoverCard
+                        type={HoverCardType.plain}
+                        cardOpenDelay={0}
+                        plainCardProps={{
+                            onRenderPlainCard() {
+                                return (
+                                    <ColorPicker
+                                        color={options.background ?? '#ff0000'}
+                                        onChange={(_, color) => setOptions(opt => produce(opt, draft => {
+                                            draft.background = color.str;
+                                        }))}
+                                        showPreview
+                                        alphaType={options.type === 'JPEG' ? 'none' : 'alpha'}
+                                    />
+                                );
+                            }
+                        }}
+                    >
+                        {/* @ts-expect-error */}
+                        <div className="preview" style={{ '--color': options.background ?? undefined }}/>
+                    </HoverCard>
+                    <output>{options.background}</output>
+                    {options.background && options.type !== 'JPEG' && (
+                        <IconButton
+                            iconProps={{
+                                iconName: 'ChromeClose',
+                                style: {
+                                    color: 'red',
+                                    transform: 'scale(0.7)',
+                                },
+                            }}
+                            onClick={() => setOptions(opt => produce(opt, draft => {
+                                draft.background = null;
+                            }))}
+                        />
+                    )}
+                </BackgroundField>
             </Stack>
         </Form>
     );
