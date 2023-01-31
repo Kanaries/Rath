@@ -6,7 +6,6 @@ import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
 import { Card } from '../../components/card';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
-import { BorderCard } from '../../components/borderCard';
 import BackupModal from '../../components/backupModal';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
@@ -139,14 +138,13 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                     <PivotItem itemKey={IDataPreviewMode.meta} headerText={intl.get('dataSource.metaView')} itemIcon="ViewList" />
                     <PivotItem itemKey={IDataPreviewMode.stat} headerText={intl.get('dataSource.statView')} itemIcon="BarChartVerticalFilter" />
                 </Pivot>
-                {/* <BorderCard> */}
-                    {rawDataMetaInfo.length > 0 && <DataOperations />}
-                    <DataInfo />
-                    {rawDataMetaInfo.length > 0 && <Advice />}
-                    {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
-                    {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
-                    {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}
-                {/* </BorderCard> */}
+                {rawDataMetaInfo.length > 0 && <DataOperations />}
+                <DataInfo />
+                {rawDataMetaInfo.length > 0 && <Advice />}
+                {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
+                {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
+                {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}
+
             </Card>
         </div>
     );

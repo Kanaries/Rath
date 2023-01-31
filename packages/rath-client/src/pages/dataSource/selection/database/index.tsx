@@ -7,7 +7,7 @@ import { logDataImport } from '../../../../loggers/dataImport';
 import prefetch from '../../../../utils/prefetch';
 import { notify } from '../../../../components/error';
 import { DataSourceTag } from '../../../../utils/storage';
-import { transformRawDataService } from '../../utils';
+import { rawData2DataWithBaseMetas } from '../../utils';
 import Progress from './progress';
 import datasetOptions from './config';
 import ConnectForm, { ConnectFormReadonly } from './connect-form';
@@ -186,7 +186,7 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
         submitPendingRef.current = true;
         try {
             const { rows, columns } = preview.value;
-            const data = await transformRawDataService(
+            const data = await rawData2DataWithBaseMetas(
                 rows.map(
                     row => Object.fromEntries(
                         row.map<[string, any]>((val, colIdx) => [columns?.[colIdx]?.key ?? `${colIdx}`, val])

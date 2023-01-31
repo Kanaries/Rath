@@ -51,15 +51,15 @@ const LogoBar = styled.div`
 `;
 
 const IconMap = {
-    [PIVOT_KEYS.megaAuto]: 'Robot',
-    [PIVOT_KEYS.semiAuto]: 'Manufacturing',
+    [PIVOT_KEYS.megaAuto]: 'UserEvent',
+    [PIVOT_KEYS.semiAuto]: 'D365TalentInsight',
     [PIVOT_KEYS.editor]: 'LineChart',
     [PIVOT_KEYS.support]: 'Telemarketer',
     [PIVOT_KEYS.dataSource]: 'DataManagementSettings',
     [PIVOT_KEYS.painter]: 'Brush',
     [PIVOT_KEYS.dashBoardDesigner]: 'SizeLegacy',
     [PIVOT_KEYS.collection]: 'Heart',
-    [PIVOT_KEYS.dashboard]: 'CRMReport',
+    [PIVOT_KEYS.dashboard]: 'Presentation',
     [PIVOT_KEYS.causal]: 'Relationship',
 } as {
     [key: string]: string;

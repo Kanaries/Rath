@@ -228,7 +228,7 @@
             "load": "Load Data",
             "type": {
                 "file": "File",
-                "restful": "RESTFUL",
+                "restful": "From URL",
                 "mysql": "MySQL",
                 "demo": "Demo",
                 "database": "Database",
@@ -239,7 +239,16 @@
             },
             "restful": {
                 "requestData": "Request Data",
-                "exampleDataStruct": "Example Data Structure"
+                "exampleDataStruct": "Example Data Structure",
+                "loadHistoryAPI": "Load History",
+                "detectedDataStruct": "Parse Rule(auto detect)",
+                "confirm": "Confirm",
+                "clear": "Clear",
+                "format": {
+                    "array": "Array",
+                    "array_with_meta": "Array with Meta",
+                    "others": "Others"
+                }
             }
         },
         "table": {

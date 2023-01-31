@@ -1,25 +1,26 @@
-import { CommandBar, ICommandBarItemProps } from '@fluentui/react';
+import { CommandBar, IButtonProps, ICommandBarItemProps } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../../store';
-import LaTiaoConsole from '../../../components/latiaoConsole';
 import { useCleanMethodList } from '../../../hooks';
 import { rows2csv } from '../../../utils/rows2csv';
 import { downloadFileWithContent } from '../../../utils/download';
+import LaTiaoModal from '../../../components/latiaoConsole/modal';
 
 const Cont = styled.div`
-    /* margin: 1em; */
-    /* border: 1px solid red; */
-    /* padding: 6px; */
-    display: flex;
-    align-items: center;
 `;
+
+const overflowProps: IButtonProps = {
+    ariaLabel: 'More commands',
+  };
+
+const overflowItems: ICommandBarItemProps[] = []
 
 const DataOperations: React.FC = () => {
     const { dataSourceStore, commonStore } = useGlobalStore();
-    const { mutFields, cleanMethod } = dataSourceStore;
+    const { mutFields, cleanMethod, showCustomizeComputationModal } = dataSourceStore;
     const exportDataset = useCallback(() => {
         const ds = dataSourceStore.exportDataAsDSService();
         const content = JSON.stringify(ds);
@@ -105,6 +106,15 @@ const DataOperations: React.FC = () => {
                 },
             },
             {
+                key: 'computation',
+                text: intl.get('dataSource.extend.manual'),
+                disabled: mutFields.length === 0,
+                iconProps: { iconName: 'Calculator' },
+                onClick: () => {
+                    dataSourceStore.togleShowCustomizeComputationModal(true);
+                }
+            },
+            {
                 key: 'enableAll',
                 text: intl.get('dataSource.operations.selectAll'),
                 iconProps: { iconName: 'CheckboxComposite' },
@@ -142,60 +152,21 @@ const DataOperations: React.FC = () => {
     ]);
     return (
         <Cont>
-            <LaTiaoConsole />
+            {
+                showCustomizeComputationModal && <LaTiaoModal close={() => {
+                    dataSourceStore.togleShowCustomizeComputationModal(false);
+                }} />
+            }
             <CommandBar
+                overflowButtonProps={overflowProps}
                 styles={{
                     root: {
                         padding: 0,
                     },
                 }}
+                overflowItems={overflowItems}
                 items={items}
             />
-            {/* <div className="item">
-                <Dropdown
-                    styles={{ root: { minWidth: '180px' } }}
-                    selectedKey={cleanMethod}
-                    // label={intl.get('dataSource.cleanMethod')}
-                    options={cleanMethodListLang}
-                    onChange={(e, option) => {
-                        option && dataSourceStore.setCleanMethod(option.key as CleanMethod);
-                    }}
-                    // onRenderLabel={makeRenderLabelHandler(intl.get('dataSource.tip'))}
-                />
-            </div> */}
-            {/* <div className="item">
-                <CommandButton
-                    text={intl.get('dataSource.downloadData.title')}
-                    disabled={mutFields.length === 0}
-                    onClick={exportData}
-                    iconProps={{ iconName: 'download' }}
-                    styles={{
-                        root: {
-                            height: '32px',
-                            marginLeft: '1.5em !important',
-                        },
-                    }}
-                />
-            </div> */}
-            {/* <div className="item">
-                <CommandButton
-                    disabled={mutFields.length === 0}
-                    text={intl.get('dataSource.fastSelection.title')}
-                    iconProps={{ iconName: 'filter' }}
-                    onClick={() => {
-                        dataSourceStore.setShowFastSelection(true);
-                    }}
-                />
-            </div> */}
-
-            {/* <Checkbox
-                checked={!allDisable}
-                indeterminate={!allDisable && !allAble}
-                label={intl.get('dataSource.operations.selectAll')}
-                onChange={(e, checked) => {
-                    dataSourceStore.setAllMutFieldsDisable(!checked);
-                }}
-            /> */}
         </Cont>
     );
 };

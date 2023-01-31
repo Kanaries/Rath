@@ -227,7 +227,7 @@
             "buttonName": "选择数据",
             "type": {
                 "file": "文件",
-                "restful": "RESTFUL",
+                "restful": "From URL",
                 "mysql": "MySQL",
                 "demo": "示例数据",
                 "database": "数据库",
@@ -238,8 +238,17 @@
                 "available": "可选数据集"
             },
             "restful": {
-                "requestData": "请求数据",
-                "exampleDataStruct": "示例数据结构"
+                "requestData": "获取数据",
+                "exampleDataStruct": "示例数据结构",
+                "loadHistoryAPI": "加载历史 API",
+                "detectedDataStruct": "解析结构(自动识别)",
+                "confirm": "确认使用",
+                "clear": "清除数据",
+                "format": {
+                    "array": "数组",
+                    "array_with_meta": "数组和元数据",
+                    "others": "其他"
+                }
             }
         },
         "table": {

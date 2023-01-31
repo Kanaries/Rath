@@ -9,7 +9,7 @@
     "singleQuote": true
   },
   "dependencies": {
-    "@antv/g6": "^4.7.10",
+    "@antv/g6": "^4.8.4",
     "@babel/parser": "^7.19.6",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",

@@ -8,7 +8,8 @@ import DataLoadingStatus from '../dataLoadingStatus';
 import type { DataSourceTag, IDBMeta } from '../../../utils/storage';
 import FileData from './file';
 import DemoData from './demo';
-import RestfulData from './restful';
+// import RestfulData from './restful';
+import JSONAPI from './jsonAPI';
 import OLAPData from './olap';
 import HistoryPanel from './history';
 import DatabaseData from './database/';
@@ -46,7 +47,8 @@ const Selection: React.FC<SelectionProps> = props => {
             <OLAPData onClose={onClose} onDataLoaded={onDataLoaded} />
         ),
         [IDataSourceType.RESTFUL]: (
-            <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+            <JSONAPI onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+            // <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
         ),
         [IDataSourceType.LOCAL]: (
             <HistoryPanel onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} />

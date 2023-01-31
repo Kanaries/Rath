@@ -137,10 +137,10 @@
     probe.gl "^3.1.1"
     reflect-metadata "^0.1.13"
 
-"@antv/g6-core@0.7.10":
-  version "0.7.10"
-  resolved "https://registry.npmmirror.com/@antv/g6-core/-/g6-core-0.7.10.tgz#9551a73779573cd88313a1c54d8e5800b21a9e7d"
-  integrity sha512-lpIajJPb0tIjRVk7205C2uXuR9+wuiNEgZcOxWF2rEwyTHe8FkeHhTX1b+vcHEkic+Ga6tA5nYNGr58Wm6nl9A==
+"@antv/g6-core@0.8.4":
+  version "0.8.4"
+  resolved "https://registry.npmmirror.com/@antv/g6-core/-/g6-core-0.8.4.tgz#0c2e5cf405cd5b7115129225044e1eb31a42b25c"
+  integrity sha512-7kLXpT0+KTIRHMxKbzRmX8z8DhC0F0d6H1FTyxDcbnO8qyJB9wbc0C+VDwe8S1UsAQsA6j/sB+L7SMhWYvSmVA==
   dependencies:
     "@antv/algorithm" "^0.1.8"
     "@antv/dom-util" "^2.0.1"
@@ -153,19 +153,19 @@
     ml-matrix "^6.5.0"
     tslib "^2.1.0"
 
-"@antv/g6-element@0.7.10":
-  version "0.7.10"
-  resolved "https://registry.npmmirror.com/@antv/g6-element/-/g6-element-0.7.10.tgz#1081785f7e8a5113088fe89d3d6e6c44852f1c4e"
-  integrity sha512-DcP8TJTqehpnYgxGi+8dFFwDenpqirTFmsmdpB9YoWRD2566j2bRuZ3GXScfbg37P7H26VbkFSM8kn/EuIXUvw==
+"@antv/g6-element@0.8.4":
+  version "0.8.4"
+  resolved "https://registry.npmmirror.com/@antv/g6-element/-/g6-element-0.8.4.tgz#8ae08fa5a1e44be8c1720e0ca826e644f5dbbe0d"
+  integrity sha512-xAhQn6amWcvZTjBMrmRY/GqMnzog9+7laMh65NcEFYQu1hMazRcD8LomsJ67Y6fxwuOazXu8YSGV7EBzg1orhA==
   dependencies:
     "@antv/g-base" "^0.5.1"
-    "@antv/g6-core" "0.7.10"
+    "@antv/g6-core" "0.8.4"
     "@antv/util" "~2.0.5"
 
-"@antv/g6-pc@0.7.10":
-  version "0.7.10"
-  resolved "https://registry.npmmirror.com/@antv/g6-pc/-/g6-pc-0.7.10.tgz#1dc5fc060f83df8de5ca66286aa86d2d82b380e9"
-  integrity sha512-mbUDZpN9OdDBMOEikLi/dU+NMDSLatpR0Gsm+vyTagWwJ1ps/EbSoCrU2J7FBYaBwCybWl2yQSnAsEC9NZUzVQ==
+"@antv/g6-pc@0.8.4":
+  version "0.8.4"
+  resolved "https://registry.npmmirror.com/@antv/g6-pc/-/g6-pc-0.8.4.tgz#821cbd3b58284662a54c933d168d46f6fa262ff7"
+  integrity sha512-PuYidjcCRZZQZe+gIkVl15Rgobs9fStSZ2KywMmOpofzd8pSjD7HS/vuEUHgDG0MeB9M6wzeTAX5/5xY6QKXzw==
   dependencies:
     "@ant-design/colors" "^4.0.5"
     "@antv/algorithm" "^0.1.8"
@@ -175,9 +175,9 @@
     "@antv/g-canvas" "^0.5.2"
     "@antv/g-math" "^0.1.1"
     "@antv/g-svg" "^0.5.1"
-    "@antv/g6-core" "0.7.10"
-    "@antv/g6-element" "0.7.10"
-    "@antv/g6-plugin" "0.7.10"
+    "@antv/g6-core" "0.8.4"
+    "@antv/g6-element" "0.8.4"
+    "@antv/g6-plugin" "0.8.4"
     "@antv/hierarchy" "^0.6.7"
     "@antv/layout" "^0.3.0"
     "@antv/matrix-util" "^3.1.0-beta.3"
@@ -189,29 +189,29 @@
     insert-css "^2.0.0"
     ml-matrix "^6.5.0"
 
-"@antv/g6-plugin@0.7.10":
-  version "0.7.10"
-  resolved "https://registry.npmmirror.com/@antv/g6-plugin/-/g6-plugin-0.7.10.tgz#1bd1821c0ab07a96b3f76e8daf59b8143da894f1"
-  integrity sha512-lFKql317hLcHxCIi113AoOTm4I/z0V8bMuDS+1utuZJVl2GE4AuX1Ly7Jf5my8dN4lwzTaPhbe6UoPfrUMLHOw==
+"@antv/g6-plugin@0.8.4":
+  version "0.8.4"
+  resolved "https://registry.npmmirror.com/@antv/g6-plugin/-/g6-plugin-0.8.4.tgz#6173e4653229944a79db4fae362f08f1f950c20e"
+  integrity sha512-yVHJYnTI59Kdaon7ooDbOv4pB7HcaiqB0D4lyXl0PJW+q+LX0yQv6gF9C1yocaq2fC7lLxBHbfCdQJkot66orQ==
   dependencies:
     "@antv/dom-util" "^2.0.2"
     "@antv/g-base" "^0.5.1"
     "@antv/g-canvas" "^0.5.2"
     "@antv/g-svg" "^0.5.2"
-    "@antv/g6-core" "0.7.10"
-    "@antv/g6-element" "0.7.10"
+    "@antv/g6-core" "0.8.4"
+    "@antv/g6-element" "0.8.4"
     "@antv/matrix-util" "^3.1.0-beta.3"
     "@antv/path-util" "^2.0.3"
     "@antv/scale" "^0.3.4"
     "@antv/util" "^2.0.9"
     insert-css "^2.0.0"
 
-"@antv/g6@^4.7.10":
-  version "4.7.10"
-  resolved "https://registry.npmmirror.com/@antv/g6/-/g6-4.7.10.tgz#ca2f0ec85e5b94e4234bee164513218103f6c2b9"
-  integrity sha512-AOEMtcbubd5PT6yGMJRAGIWRgJEfYoMpesXMwRrWyLAM/jzqrsXol8U7L0K74uOrIR+hUfc1XaSJF2aoBMQhQw==
+"@antv/g6@^4.8.4":
+  version "4.8.4"
+  resolved "https://registry.npmmirror.com/@antv/g6/-/g6-4.8.4.tgz#4d64d5cfdbe59c2f36f0953d4de8c12753fb92f6"
+  integrity sha512-mN/GwRlV92iB9cRFIWowhvyVUHB1trWlWD8E7L+EaPJE80gilMJIJ0PGVz7GEUcdb3YJWDtEsO1rQtKNvvDa3Q==
   dependencies:
-    "@antv/g6-pc" "0.7.10"
+    "@antv/g6-pc" "0.8.4"
 
 "@antv/graphlib@^1.0.0":
   version "1.2.0"
@@ -3366,7 +3366,7 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
-"@types/react-dom@^17.0.1", "@types/react-dom@^17.x":
+"@types/react-dom@^17.0.1":
   version "17.0.18"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-17.0.18.tgz#8f7af38f5d9b42f79162eea7492e5a1caff70dc2"
   integrity sha512-rLVtIfbwyur2iFKykP2w0pl/1unw26b5td16d5xMgp7/yjTHomkyxPYChFoCr/FtEX1lN9wY6lFj1qvKdS5kDw==
@@ -3397,7 +3397,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^17", "@types/react@^17.0.2", "@types/react@^17.x":
+"@types/react@*", "@types/react@^17", "@types/react@^17.0.2":
   version "17.0.53"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.53.tgz#10d4d5999b8af3d6bc6a9369d7eb953da82442ab"
   integrity sha512-1yIpQR2zdYu1Z/dc1OxC+MA6GR240u3gcnP4l6mvj/PJiVaqHsQPmWttsvHsfnhfPbU2FuGmo0wSITPygjBmsw==

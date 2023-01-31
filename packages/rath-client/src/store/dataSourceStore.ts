@@ -103,6 +103,7 @@ export class DataSourceStore {
     private subscriptions: Subscription[] = [];
     private reactions: IReactionDisposer[] = []
     public datasetId: string | null = null;
+    public showCustomizeComputationModal: boolean = false;
     constructor() {
         makeAutoObservable(this, {
             cookedDataSource: observable.ref,
@@ -130,6 +131,7 @@ export class DataSourceStore {
             versionCode: -1,
             length: 0,
         }
+        this.showCustomizeComputationModal = false;
         this.extData = new Map<string, ICol<any>>();
         this.mutFields = [];
         this.extFields = [];
@@ -341,6 +343,9 @@ export class DataSourceStore {
     }
     public setDatasetId (id: string) {
         this.datasetId = id;
+    }
+    public togleShowCustomizeComputationModal (show: boolean) {
+        this.showCustomizeComputationModal = show;
     }
     public addFilter () {
         const sampleField = this.fieldMetas.find(f => f.semanticType === 'quantitative');

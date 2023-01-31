@@ -1,5 +1,6 @@
 import {
     Checkbox,
+    CommandButton,
     DetailsList,
     IColumn,
     Label,
@@ -16,6 +17,7 @@ import { useGlobalStore } from '../../store';
 import FilterCreationPill from '../../components/fieldPill/filterCreationPill';
 import LaTiaoConsole from '../../components/latiaoConsole/index';
 import type { IFieldMeta } from '../../interfaces';
+import LaTiaoModal from '../../components/latiaoConsole/modal';
 import { FilterCell } from './filters';
 
 
@@ -62,7 +64,7 @@ const SelectedKey = 'selected';
 
 const DatasetPanel: FC = () => {
     const { dataSourceStore, causalStore } = useGlobalStore();
-    const { cleanedData } = dataSourceStore;
+    const { cleanedData, showCustomizeComputationModal } = dataSourceStore;
     const {
         fields, allFields, filteredDataSize, sampleRate, sampleSize, filters
     } = causalStore.dataset;
@@ -238,6 +240,18 @@ const DatasetPanel: FC = () => {
         <>
             <Stack style={{ marginBlock: '0.6em -0.6em', alignItems: 'center' }} horizontal>
                 <Label style={{ marginRight: '1em' }}>数据增强</Label>
+                <CommandButton
+                    text={intl.get('dataSource.extend.manual')}
+                    iconProps={{ iconName: 'AppIconDefaultAdd' }}
+                    onClick={() => {
+                        dataSourceStore.togleShowCustomizeComputationModal(true);
+                    }}
+                />
+                {showCustomizeComputationModal && (
+                    <LaTiaoModal close={() => {
+                        dataSourceStore.togleShowCustomizeComputationModal(false);
+                    }} />
+                )}
                 <LaTiaoConsole />
             </Stack>
             <Stack style={{ marginTop: '0.6em' }}>

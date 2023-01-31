@@ -38,7 +38,7 @@ export const useSampleOptions = function () {
     return options;
 }
 
-export async function transformRawDataService (rawData: IRow[]): Promise<{
+export async function rawData2DataWithBaseMetas (rawData: IRow[]): Promise<{
     fields: IMuteFieldBase[];
     dataSource: IRow[]
 }> {
@@ -140,7 +140,7 @@ export async function loadDataFile(props: LoadDataFileProps): Promise<{
     } else {
         throw new Error(`unsupported file type=${file.type} `)
     }
-    const dataset = await transformRawDataService(rawData);
+    const dataset = await rawData2DataWithBaseMetas(rawData);
     return dataset
 }
 
@@ -195,7 +195,7 @@ export const loadExcelFile = async (
         file: csvFile,
         encoding,
     })) as IRow[];
-    return await transformRawDataService(rawData);
+    return await rawData2DataWithBaseMetas(rawData);
 };
 
 export async function loadRathStorageFile (file: File): Promise<IRathStorage> {
