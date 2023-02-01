@@ -6,13 +6,14 @@ import intl from 'react-intl-universal';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useGlobalStore } from '../../../store';
 import type { IRow } from '../../../interfaces';
-import { extractSelection, intersectPattern } from '../../../lib/textPattern';
+import { ITextPattern, extractSelection, intersectPattern } from '../../../lib/textPattern';
 import HeaderCell from './headerCell';
 import NestPanel from './components/nestPanel';
 import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './components/tpRegexEditor';
 import { IColStateType } from './headerCell/components/statePlaceholder';
 import { CustomBaseTable, MiniButton, MiniPrimaryButton, DATA_TABLE_STYLE_CONFIG, Tag, TextPatternCard } from './styles';
 import { findFirstExistTextPattern, groupTextPattern, initGroupedTextPatternList, uniquePattern } from './utils';
+import regexgen from 'regexgen';
 
 const ADD_BATCH_SIZE = 5;
 
@@ -120,14 +121,55 @@ const DataTable: React.FC = (props) => {
             if (fullText && selectedText) {
                 const startIndex = startPos;
                 const endIndex = endPos;
-                unstable_batchedUpdates(() => {
-                    const nextTSL = textSelectList.concat({
-                        fid,
-                        str: fullText,
-                        startIndex: startIndex,
-                        endIndex: endIndex,
+                const nextTSL = textSelectList.concat({
+                    fid,
+                    str: fullText,
+                    startIndex: startIndex,
+                    endIndex: endIndex,
+                });
+                const nextTPL = tsList2tpList(nextTSL);
+                fetch('http://127.0.0.1:5533/api/text_pattern_extraction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        values: dataSourceStore.cleanedData.map((d) => `${d[fid]}`),
+                        selections: [
+                            ...textSelectList.map(t => t.str.slice(t.startIndex, t.endIndex)),
+                            fullText.slice(startIndex, endIndex)
+                        ].map((d) => `${d}`)
+                    }),
+
+                }).then(res => res.json())
+                .then((res) => {
+                    console.log(res);
+                    const extractions: {score: number, best_match: string}[] = res.data.extractions;
+                    const selection = regexgen(extractions.map(e => e.best_match))
+                    console.log(extractions.filter(e => e.best_match === 'at'))
+                    const wordSets: Set<string> = new Set(extractions.filter(e => e.score > 0.8).map(e => e.best_match));
+                    const wordsInRegExp = new RegExp(Array.from(wordSets).map(w => `(?<${w}>${w})`).join('|'));
+                    const textPatternsInNL: IFieldTextPattern[] = [
+                        {
+                            fid,
+                            ph: /.*/,
+                            pe: /.*/,
+                            selection: wordsInRegExp,
+                            selectionType: 'specific',
+                            score: 0.001,
+                            pattern: new RegExp(`^.*(?<selection>${wordsInRegExp.source}).*$`),
+                        }
+                    ]
+                    console.log(textPatternsInNL)
+                    unstable_batchedUpdates(() => {
+
+                        const gtp = groupTextPattern(nextTPL.concat(textPatternsInNL));
+                        setGroupedTextPatternList(gtp);
+                        const enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = nextTSL.length > 1 ? undefined : ['knowledge'];
+                        setTpPos(findFirstExistTextPattern(gtp, enhanceKeys));
                     });
-                    const nextTPL = tsList2tpList(nextTSL);
+                })
+                unstable_batchedUpdates(() => {
                     setTextSelectList(nextTSL);
                     // setTextPatternList(nextTPL);
                     const gtp = groupTextPattern(nextTPL);
@@ -137,7 +179,7 @@ const DataTable: React.FC = (props) => {
                 });
             }
         },
-        [textSelectList, tsList2tpList]
+        [textSelectList, tsList2tpList, dataSourceStore.cleanedData]
     );
     const clearTextSelect = () => {
         unstable_batchedUpdates(() => {
