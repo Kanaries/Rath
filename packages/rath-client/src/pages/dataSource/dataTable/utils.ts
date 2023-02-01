@@ -37,6 +37,7 @@ export function groupTextPattern(textPatternList: IFieldTextPattern[]): {
         knowledge: [],
         generalize: [],
         specific: [],
+        nlp: []
     };
     for (let tp of textPatternList) {
         res[tp.selectionType].push(tp);
@@ -53,6 +54,7 @@ export function initGroupedTextPatternList(): {
         knowledge: [],
         generalize: [],
         specific: [],
+        nlp: []
     };
     return res;
 }
@@ -70,7 +72,7 @@ export function findFirstExistTextPattern(
     },
     enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = []
 ): ITPPos {
-    const groupKeys = (['knowledge', 'generalize', 'specific'] as IFieldTextPattern['selectionType'][]).filter((k) => !enhanceKeys.includes(k));
+    const groupKeys = (['knowledge', 'generalize', 'specific', 'nlp'] as IFieldTextPattern['selectionType'][]).filter((k) => !enhanceKeys.includes(k));
     const createPatternsOfKeys = (keys: IFieldTextPattern['selectionType'][]) => {
         const _patterns: { pattern: IFieldTextPattern; pos: ITPPos }[] = [];
         for (let groupKey of keys) {

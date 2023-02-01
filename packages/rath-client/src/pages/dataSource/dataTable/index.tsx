@@ -6,7 +6,7 @@ import intl from 'react-intl-universal';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useGlobalStore } from '../../../store';
 import type { IRow } from '../../../interfaces';
-import { ITextPattern, extractSelection, intersectPattern } from '../../../lib/textPattern';
+import { extractSelection, intersectPattern } from '../../../lib/textPattern';
 import HeaderCell from './headerCell';
 import NestPanel from './components/nestPanel';
 import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './components/tpRegexEditor';
@@ -37,6 +37,7 @@ const DataTable: React.FC = (props) => {
         knowledge: 1,
         generalize: 1,
         specific: 1,
+        nlp: 1,
     });
 
     const tsList2tpList = useCallback((tsl: IFieldTextSelection[]) => {
@@ -135,40 +136,38 @@ const DataTable: React.FC = (props) => {
                     },
                     body: JSON.stringify({
                         values: dataSourceStore.cleanedData.map((d) => `${d[fid]}`),
-                        selections: [
-                            ...textSelectList.map(t => t.str.slice(t.startIndex, t.endIndex)),
-                            fullText.slice(startIndex, endIndex)
-                        ].map((d) => `${d}`)
+                        selections: [...textSelectList.map((t) => t.str.slice(t.startIndex, t.endIndex)), fullText.slice(startIndex, endIndex)].map(
+                            (d) => `${d}`
+                        ),
                     }),
-
-                }).then(res => res.json())
-                .then((res) => {
-                    console.log(res);
-                    const extractions: {score: number, best_match: string}[] = res.data.extractions;
-                    // const selection = regexgen(extractions.map(e => e.best_match))
-                    console.log(extractions.filter(e => e.best_match === 'at'))
-                    const wordSets: Set<string> = new Set(extractions.filter(e => e.score > 0.72).map(e => e.best_match));
-                    const wordsInRegExp = new RegExp(Array.from(wordSets).map(w => `${w}`).join('|'));
-                    const textPatternsInNL: IFieldTextPattern[] = [
-                        {
-                            fid,
-                            ph: /.*/,
-                            pe: /.*/,
-                            selection: wordsInRegExp,
-                            selectionType: 'specific',
-                            score: 0.001,
-                            pattern: new RegExp(`^.*(?<selection>${wordsInRegExp.source}).*$`),
-                        }
-                    ]
-                    console.log(textPatternsInNL)
-                    unstable_batchedUpdates(() => {
-
-                        const gtp = groupTextPattern(nextTPL.concat(textPatternsInNL));
-                        setGroupedTextPatternList(gtp);
-                        const enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = nextTSL.length > 1 ? undefined : ['knowledge'];
-                        setTpPos(findFirstExistTextPattern(gtp, enhanceKeys));
-                    });
                 })
+                    .then((res) => res.json())
+                    .then((res) => {
+                        const extractions: { score: number; best_match: string }[] = res.data.extractions;
+                        const wordSets: Set<string> = new Set(extractions.filter((e) => e.score > 0.72).map((e) => e.best_match));
+                        const wordsInRegExp = new RegExp(
+                            Array.from(wordSets)
+                                .map((w) => `${w}`)
+                                .join('|')
+                        );
+                        const textPatternsInNL: IFieldTextPattern[] = [
+                            {
+                                fid,
+                                ph: /.*/,
+                                pe: /.*/,
+                                selection: wordsInRegExp,
+                                selectionType: 'nlp',
+                                score: 0.001,
+                                pattern: new RegExp(`^.*(?<selection>${wordsInRegExp.source}).*$`),
+                            },
+                        ];
+                        unstable_batchedUpdates(() => {
+                            const gtp = groupTextPattern(nextTPL.concat(textPatternsInNL));
+                            setGroupedTextPatternList(gtp);
+                            const enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = nextTSL.length > 1 ? undefined : ['knowledge'];
+                            setTpPos(findFirstExistTextPattern(gtp, enhanceKeys));
+                        });
+                    });
                 unstable_batchedUpdates(() => {
                     setTextSelectList(nextTSL);
                     // setTextPatternList(nextTPL);
@@ -221,12 +220,12 @@ const DataTable: React.FC = (props) => {
         const fm = fields[i] && fields[i].fid === displayList[i].fid ? fields[i] : fields.find((m) => m.fid === f.fid);
         const suggestions = fields.find((_f) => _f.fid === f.fid)?.extSuggestions ?? [];
         let colType: IColStateType | undefined = undefined;
-        const previrewField = fields.find(f => f.stage === 'preview');
+        const previrewField = fields.find((f) => f.stage === 'preview');
         if (f.stage === 'preview') {
             colType = 'preview';
         } else if (previrewField) {
             if (previrewField.extInfo?.extFrom.includes(f.fid)) {
-                colType = 'source'
+                colType = 'source';
             }
         }
         const col: ArtColumn = {
@@ -299,7 +298,9 @@ const DataTable: React.FC = (props) => {
         [fields]
     );
 
-    const hasPattern = (Object.keys(groupedTextPatternList) as IFieldTextPattern['selectionType'][]).some((k: IFieldTextPattern['selectionType']) => groupedTextPatternList[k].length > 0);
+    const hasPattern = (Object.keys(groupedTextPatternList) as IFieldTextPattern['selectionType'][]).some(
+        (k: IFieldTextPattern['selectionType']) => groupedTextPatternList[k].length > 0
+    );
 
     return (
         <div style={{ position: 'relative' }}>
@@ -331,16 +332,31 @@ const DataTable: React.FC = (props) => {
                 <NestPanel show={hasPattern} onClose={() => {}}>
                     <IconButton style={{ float: 'right' }} iconProps={{ iconName: 'Cancel' }} onClick={clearTextSelect} />
                     <Label>{intl.get('common.suggestions')}</Label>
-                    {(['knowledge', 'generalize', 'specific'] as IFieldTextPattern['selectionType'][]).map((groupKey) =>
+                    {(['knowledge', 'generalize', 'specific', 'nlp'] as IFieldTextPattern['selectionType'][]).map((groupKey) =>
                         groupedTextPatternList[groupKey].slice(0, groupShownSize[groupKey]).map((tp, ti) => (
                             <TextPatternCard key={tp.pattern.source + ti}>
                                 <Tag>{intl.get(`dataSource.textPattern.${groupKey}`)}</Tag>
-                                {tpPos.index === ti && tpPos.groupKey === groupKey && <Tag color="#fff" bgColor="#14b8a6">{intl.get('dataSource.textPattern.currentPattern')}</Tag>}
-                                <div className="tp-content">
-                                    <span className="ph-text">{tp.ph.source}</span>
-                                    <span className="sl-text">{tp.selection.source}</span>
-                                    <span className="pe-text">{tp.pe.source}</span>
-                                </div>
+                                {tpPos.index === ti && tpPos.groupKey === groupKey && (
+                                    <Tag color="#fff" bgColor="#14b8a6">
+                                        {intl.get('dataSource.textPattern.currentPattern')}
+                                    </Tag>
+                                )}
+                                {tp.selectionType !== 'nlp' && (
+                                    <div className="tp-content">
+                                        <span className="ph-text">{tp.ph.source}</span>
+                                        <span className="sl-text">{tp.selection.source}</span>
+                                        <span className="pe-text">{tp.pe.source}</span>
+                                    </div>
+                                )}
+                                {
+                                    tp.selectionType === 'nlp' && <div style={{ margin: '12px 0px'}}>
+                                        {
+                                            tp.selection.source.split('|').map((s, i) => {
+                                                return <Tag color='#14532d' bgColor='#dcfce7' key={i}>{s}</Tag>;
+                                            })
+                                        }
+                                    </div>
+                                }
                                 <Stack tokens={{ childrenGap: 4 }}>
                                     <MiniButton
                                         text={intl.get(`common.${tpPos.index === ti && tpPos.groupKey === groupKey ? 'applied' : 'apply'}`)}
