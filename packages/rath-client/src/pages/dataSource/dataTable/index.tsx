@@ -13,7 +13,7 @@ import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './compone
 import { IColStateType } from './headerCell/components/statePlaceholder';
 import { CustomBaseTable, MiniButton, MiniPrimaryButton, DATA_TABLE_STYLE_CONFIG, Tag, TextPatternCard } from './styles';
 import { findFirstExistTextPattern, groupTextPattern, initGroupedTextPatternList, uniquePattern } from './utils';
-import regexgen from 'regexgen';
+// import regexgen from 'regexgen';
 
 const ADD_BATCH_SIZE = 5;
 
@@ -145,10 +145,10 @@ const DataTable: React.FC = (props) => {
                 .then((res) => {
                     console.log(res);
                     const extractions: {score: number, best_match: string}[] = res.data.extractions;
-                    const selection = regexgen(extractions.map(e => e.best_match))
+                    // const selection = regexgen(extractions.map(e => e.best_match))
                     console.log(extractions.filter(e => e.best_match === 'at'))
-                    const wordSets: Set<string> = new Set(extractions.filter(e => e.score > 0.8).map(e => e.best_match));
-                    const wordsInRegExp = new RegExp(Array.from(wordSets).map(w => `(?<${w}>${w})`).join('|'));
+                    const wordSets: Set<string> = new Set(extractions.filter(e => e.score > 0.72).map(e => e.best_match));
+                    const wordsInRegExp = new RegExp(Array.from(wordSets).map(w => `${w}`).join('|'));
                     const textPatternsInNL: IFieldTextPattern[] = [
                         {
                             fid,
