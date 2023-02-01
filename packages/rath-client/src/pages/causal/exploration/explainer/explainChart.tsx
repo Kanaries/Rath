@@ -4,7 +4,7 @@ import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import embed from 'vega-embed';
 import { Subject, throttleTime } from 'rxjs';
-import { EDITOR_URL } from '../../../../constants';
+// import { EDITOR_URL } from '../../../../constants';
 import type { IFieldMeta, IRow, IFilter } from '../../../../interfaces';
 import { getRange, getVegaTimeFormatRules } from '../../../../utils';
 import { SelectedFlag } from './RExplainer';
@@ -162,7 +162,7 @@ const ExplainChart: React.FC<ExplainChartProps> = ({
                     },
                 },
             }, {
-                editorUrl: EDITOR_URL,
+                // editorUrl: EDITOR_URL,
                 timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
                 actions: false,
             }).then((res) => {
