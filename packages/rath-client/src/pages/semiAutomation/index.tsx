@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
-import type { IReactVegaHandler } from '../../components/react-vega';
 import { throttle } from '../../utils';
 import { Card } from '../../components/card';
 import Settings from './settings';
@@ -39,13 +38,11 @@ const PatternPage: React.FC = () => {
         };
     }, [semiAutoStore]);
 
-    const handler = useRef<IReactVegaHandler>(null);
-
     return (
         <div className="content-container">
             <Settings />
             <Card ref={focusZoneContainer}>
-                <FocusZone handler={handler} />
+                <FocusZone />
             </Card>
             <PredictZone />
         </div>

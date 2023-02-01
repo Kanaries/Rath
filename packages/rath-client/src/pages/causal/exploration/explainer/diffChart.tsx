@@ -3,7 +3,7 @@ import type { View } from 'vega';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import embed from 'vega-embed';
-import { EDITOR_URL } from '../../../../constants';
+// import { EDITOR_URL } from '../../../../constants';
 import type { IFieldMeta, IRow } from '../../../../interfaces';
 import { getVegaTimeFormatRules } from '../../../../utils';
 
@@ -197,7 +197,7 @@ const DiffChart: React.FC<DiffChartProps> = ({ title, data, subspaces, mainField
                 },
                 resolve: { scale: { y: 'independent' } },
             }, {
-                editorUrl: EDITOR_URL,
+                // editorUrl: EDITOR_URL,
                 timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
                 actions: false,
             }).then((res) => {

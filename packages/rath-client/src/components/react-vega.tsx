@@ -1,10 +1,11 @@
-import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useRef, useEffect, forwardRef, useImperativeHandle, Fragment, useMemo } from 'react';
 import { View } from 'vega';
 import intl from 'react-intl-universal';
 import embed, { vega } from 'vega-embed';
-import { EDITOR_URL } from '../constants';
 import { getVegaTimeFormatRules } from '../utils';
 import { VegaThemeConfig } from '../queries/themes/config';
+import ImageExportDialog, { ImageExportDialogHandler } from './image-export-dialog';
+import type { ImageExportInfo } from './image-export-dialog/export-image';
 
 interface ReactVegaProps {
     dataSource: readonly any[];
@@ -19,14 +20,14 @@ interface ReactVegaProps {
 export interface IReactVegaHandler {
     getSVGData: () => Promise<string | null>;
     getCanvasData: () => Promise<string | null>;
-    downloadSVG: () => Promise<boolean>;
-    downloadPNG: () => Promise<boolean>;
+    exportImage: () => Promise<ImageExportInfo | null>;
 }
 
 const ReactVega = forwardRef<IReactVegaHandler, ReactVegaProps>(function ReactVega (props, ref) {
     const { spec, dataSource, signalHandler = {}, actions, config } = props;
     const container = useRef<HTMLDivElement>(null);
     const viewRef = useRef<View>();
+    const exportOptRef = useRef<ImageExportDialogHandler>(null);
     useImperativeHandle(ref, () => ({
         async getSVGData() {
             return viewRef.current?.toSVG() ?? null;
@@ -34,53 +35,56 @@ const ReactVega = forwardRef<IReactVegaHandler, ReactVegaProps>(function ReactVe
         async getCanvasData() {
             return viewRef.current?.toCanvas().then(canvas => canvas.toDataURL('image/png')) ?? null;
         },
-        async downloadSVG() {
-            const data = (await viewRef.current?.toSVG()) ?? null;
-            if (data) {
-                const file = new File([data], 'image.svg');
-                const url = URL.createObjectURL(file);
-                const a = document.createElement('a');
-                a.download = file.name;
-                a.href = url;
-                a.click();
-                requestAnimationFrame(() => {
-                    URL.revokeObjectURL(url);
-                });
-            }
-            return false;
-        },
-        async downloadPNG() {
-            const data = (await viewRef.current?.toCanvas(2).then(canvas => canvas.toDataURL('image/png', 1))) ?? null;
-            if (data) {
-                const a = document.createElement('a');
-                a.download = 'image.png';
-                a.href = data.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
-                a.click();
-                return true;
-            }
-            return false;
+        async exportImage() {
+            return exportOptRef.current?.open() ?? null;
         },
     }));
+    const dynamicVegaSpec = useMemo(() => {
+        const sspec = {
+            ...spec,
+            data: {
+                ...spec.data,
+            },
+        };
+        if (spec.data) {
+            sspec.data = {
+                ...spec.data,
+            };
+        }
+        sspec.data.values = dataSource;
+        for (const key of ['width', 'height', 'autosize']) {
+            if (key in sspec) {
+                delete sspec[key];
+            }
+        }
+        return sspec;
+    }, [spec, dataSource]);
+    const vegaSpec = useMemo(() => {
+        const sspec = {
+            ...spec,
+            data: {
+                ...spec.data,
+            },
+        };
+        if (spec.data) {
+            sspec.data = {
+                ...spec.data,
+            };
+        }
+        sspec.data.values = dataSource;
+        return sspec;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [spec]);
+    const vegaOpts = useMemo(() => {
+        return {
+            timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
+            actions,
+            config
+        };
+    }, [actions, config]);
     useEffect(() => {
         if (container.current) {
-            const sspec = {
-                ...spec,
-                data: {
-                    ...spec.data,
-                },
-            };
-            if (spec.data) {
-                sspec.data = {
-                    ...spec.data,
-                };
-            }
-            sspec.data.values = dataSource;
-            embed(container.current, sspec, {
-                editorUrl: EDITOR_URL,
-                timeFormatLocale: getVegaTimeFormatRules(intl.get('time_format.langKey')) as any,
-                actions,
-                config
-            }).then((res) => {
+            embed(container.current, vegaSpec, vegaOpts).then((res) => {
                 const view = res.view;
                 viewRef.current = view;
                 for (let key in signalHandler) {
@@ -98,7 +102,7 @@ const ReactVega = forwardRef<IReactVegaHandler, ReactVegaProps>(function ReactVe
             }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [spec, actions, config]);
+    }, [vegaSpec, vegaOpts]);
 
     useEffect(() => {
         if (viewRef.current && signalHandler) {
@@ -136,7 +140,12 @@ const ReactVega = forwardRef<IReactVegaHandler, ReactVegaProps>(function ReactVe
             viewRef.current.runAsync();
         }
     }, [dataSource]);
-    return <div ref={container} />;
+    return (
+        <Fragment>
+            <div ref={container} />
+            <ImageExportDialog vegaViewRef={viewRef} spec={dynamicVegaSpec} vegaOpts={vegaOpts} ref={exportOptRef} />
+        </Fragment>
+    );
 });
 
 export default ReactVega;

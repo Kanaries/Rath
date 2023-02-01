@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ActionButton, CommandButton, DefaultButton, IContextualMenuProps } from '@fluentui/react';
 import intl from 'react-intl-universal';
@@ -16,10 +16,8 @@ import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
-interface IFocusZoneProps {
-    handler: React.RefObject<IReactVegaHandler>;
-}
-const FocusZone: React.FC<IFocusZoneProps> = ({ handler }) => {
+
+const FocusZone: React.FC = () => {
     const { semiAutoStore, commonStore, collectionStore, painterStore, editorStore } = useGlobalStore();
     const { mainVizSetting, mainView, showMiniFloatView, mainViewSpec, fieldMetas, neighborKeys, mainViewSpecSource } = semiAutoStore;
     const { muteSpec } = editorStore;
@@ -74,9 +72,11 @@ const FocusZone: React.FC<IFocusZoneProps> = ({ handler }) => {
         };
     }, [editChart, editorStore, mainViewSpec, semiAutoStore]);
 
+    const handler = useRef<IReactVegaHandler>(null);
+
     return (
         <MainViewContainer>
-            {mainView && showMiniFloatView && <MiniFloatCanvas handler={handler} pined={mainView} />}
+            {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
             <div className="vis-container">
                 <div className="spec">
                     {mainViewSpecSource === 'custom' && (
@@ -224,25 +224,13 @@ const FocusZone: React.FC<IFocusZoneProps> = ({ handler }) => {
                 />
                 <ActionButton
                     style={{ marginTop: BUTTON_STYLE.marginTop }}
-                    styles={{ splitButtonMenuButton: BUTTON_STYLE }}
                     iconProps={{ iconName: 'Download' }}
                     ariaLabel={intl.get('megaAuto.commandBar.download')}
                     title={intl.get('megaAuto.commandBar.download')}
                     text={intl.get('megaAuto.commandBar.download')}
+                    disabled={mainView === null}
                     onClick={() => {
-                        handler.current?.downloadPNG();
-                    }}
-                    split
-                    menuProps={{
-                        items: [
-                            {
-                                key: 'svg',
-                                text: 'SVG',
-                                onClick: () => {
-                                    handler.current?.downloadSVG();
-                                },
-                            },
-                        ],
+                        handler.current?.exportImage();
                     }}
                 />
             </div>

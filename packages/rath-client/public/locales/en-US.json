@@ -411,7 +411,13 @@
             "editInEditor": "Edit in Editor",
             "associate": "associate views",
             "constraints": "analysis constraints",
-            "download": "export chart"
+            "download": "export chart",
+            "export": "Export",
+            "export_as": "Export As",
+            "export_size": "Size",
+            "lock_aspect": "Lock Aspect",
+            "export_bg": "Background Color",
+            "err_msg_invalid_size": "Size must be between {min} ~ {max}"
         },
         "constraints": {
             "exclude": "exclude field",
