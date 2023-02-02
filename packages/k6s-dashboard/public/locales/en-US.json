@@ -1,0 +1,648 @@
+{
+    "common": {
+        "dimension": "dimension",
+        "measure": "measure",
+        "name": "Name",
+        "home": "Home",
+        "settings": "Settings",
+        "history": "History",
+        "hide": "Hide",
+        "expand": "Expand",
+        "filter": "Filter",
+        "preview": "Preview",
+        "source": "Source",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "apply": "Apply",
+        "applied": "Applied",
+        "run": "Run",
+        "edit": "Edit",
+        "suggestions": "Suggestions",
+        "showMore": "Show More",
+        "semanticType": {
+            "nominal": "nominal",
+            "ordinal": "ordinal",
+            "temporal": "temporal",
+            "quantitative": "quantitative"
+        },
+        "analyticType": {
+            "dimension": "dimension",
+            "measure": "measure"
+        },
+        "vistheme": "Visualization Theme",
+        "addVar": "Add Variable",
+        "addFilter": "Add Filter",
+        "addEncode": "Add Computation",
+        "field": "Field",
+        "star": "Star",
+        "stat": {
+            "unique": "Unique",
+            "min": "Minimum",
+            "max": "Maximum",
+            "mean": "Mean",
+            "median": "Median",
+            "stdev": "Standard Deviation",
+            "count": "Count",
+            "sum": "Sum",
+            "qt_25": "25th Percentile",
+            "qt_75": "75th Percentile",
+            "qt_50": "Median"
+        },
+        "search": {
+            "searchViews": "Search Views",
+            "searchFields": "Search fields / variables",
+            "notFound": "No results found"
+        }
+    },
+    "menu": {
+        "dataSource": "DataSource",
+        "eda": "Exploratory Data Analysis",
+        "editor": "Manual Exploration",
+        "vizPipe": "interactive Pipeline",
+        "support": "Support",
+        "megaAuto": "Mega-auto Exploration",
+        "semiAuto": "Semi-auto Exploration",
+        "devCollection": "Insiders(α)",
+        "dashBoardDesigner": "Dashboard Designer",
+        "painter": "Data Painter",
+        "collection": "Collection",
+        "dashboard": "Dashboard",
+        "causal": "Causal"
+    },
+    "preference": {
+        "title": "preference",
+        "config": "Configuration"
+    },
+    "support": {
+        "title": "How to Get Support",
+        "link": "https://www.yuque.com/docs/share/65511730-af74-46eb-86fe-356c4f52402b?# 《Get Support》"
+    },
+    "config": {
+        "computationEngine": {
+            "title": "Computation Engine",
+            "desc": "Define where the analysis task run. If your dataset is small (< 100MB), web worker mode is recommended. Otherwise try clickhouse mode.",
+            "clickhouse": "ClickHouse",
+            "webworker": "Browser(Web Worker)",
+            "notCompatible": "Not compatible with datasource"
+        },
+        "analysisConfig": "Analysis Settings",
+        "cubeStorageManageMode": {
+            "title": "Cube Storage Manage Mode",
+            "desc": "How Cube store its cuboids."
+        }
+    },
+    "function": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "analysis": {
+            "start": "Start Analysis",
+            "checkResult": "Check Existed Results",
+            "pattern": "Semi-auto Exploration",
+            "manual": "Manual Exploration",
+            "causal": "Causal Analysis"
+        },
+        "importStorage": {
+            "title": "Import History Storage",
+            "desc": "Import a Rath storage file, which was exported from Rath, containing analysis history records in Rath.",
+            "type": {
+                "file": "File",
+                "indexdb": "Local Storage"
+            },
+            "storageColumns": {
+                "name": "Name",
+                "createTime": "Create Time",
+                "size": "Size",
+                "operation": "Operation"
+            }
+        },
+        "exportStorage": {
+            "title": "Export Rath Storage",
+            "type": {
+                "file": "File",
+                "indexdb": "Index DB"
+            }
+        },
+        "save": {
+            "title": "Save"
+        },
+        "upload": "Upload"
+    },
+    "dataSource": {
+        "extractInsight": "Insight Analysis",
+        "extractInsightOld": "Insight Analysis(Debug)",
+        "cleanMethod": "Clean Method",
+        "useField": "use field",
+        "viewMode": "View Mode",
+        "metaView": "Meta",
+        "dataView": "Table",
+        "statView": "Statistics",
+        "charset": "character encoding",
+        "separator": "Separator",
+        "databaseType": "Select Database",
+        "connectUri": "Connection URI",
+        "databaseName": "Database",
+        "schemaName": "Schema",
+        "tableName": "Table",
+        "editName": "Edit Name",
+        "preview": "Data Preview",
+        "query": "SQL Query",
+        "connectorConfig": "Connector Settings",
+        "connectorService": "Connector Service URL (Optional)",
+        "apply": "Apply&Test",
+        "textPattern": {
+            "knowledge": "Knowledge",
+            "generalize": "Generalize",
+            "specific": "Extract Match",
+            "currentPattern": "Current Pattern"
+        },
+        "statViewInfo": {
+            "title": "Statistics View",
+            "desc": "Statistics View is a quick way to get a sense of the data. It shows the distribution of each field in the dataset. You can click the field name to see the distribution of the field in detail.",
+            "explore": "Explore In Dataset",
+            "originStatTable": "Original Data Statistics",
+            "selectionStatTable": "Selection Data Statistics"
+        },
+        "sizeInfo": "{nCols} fields, {nRows} rows",
+        "demoDataset": {
+            "CARS": { "title": "Cars", "description": "Origin, product name and physical attributes of cars." },
+            "STUDENTS": { "title": "Students", "description": "" },
+            "BTC_GOLD": { "title": "BTC - Gold", "description": "" },
+            "CAR_SALES": { "title": "Car Sales", "description": "" },
+            "COLLAGE": { "title": "Collage", "description": "" },
+            "TITANIC": { "title": "Titanic", "description": "" },
+            "KEPLER": { "title": "Kepler", "description": "" },
+            "BIKE_SHARING_DC": { "title": "Bike Sharing", "description": "" }
+        },
+        "dbProgress": [
+            {
+                "label": "Connection",
+                "msgRunning": "Waiting to connect to host...",
+                "msgSucceeded": "Connection succeeded.",
+                "msgFailed": "Connection failed."
+            },
+            {
+                "label": "Focus",
+                "msgRunning": "Find a table to continue.",
+                "msgSucceeded": "Completed.",
+                "msgFailed": "Operation failed."
+            },
+            {
+                "label": "Preview",
+                "msgRunning": "Fetching data from the table.",
+                "msgSucceeded": "Preview generated.",
+                "msgFailed": "Operation failed."
+            },
+            {
+                "label": "Fetch",
+                "msgRunning": "Loading data by submitting the SQL statement.",
+                "msgSucceeded": "Succeeded to execute.",
+                "msgFailed": "Failed to execute."
+            }
+        ],
+        "btn": {
+            "connect": "Connect",
+            "reset": "Back and Reset",
+            "connectFailed": "Failed to connect",
+            "query": "Submit Query"
+        },
+        "advice": {
+            "lackData": "Lack of Data",
+            "lackDimension": "It seems you don't have dimensions in your dataset. (part of functions of mega-automation maybe influenced.)",
+            "lackMeasure": "It seems you don't have measures in your dataset. (part of functions of mega-automation maybe influenced.)",
+            "smallSample": "The sample size is not big enough, which may influence the reliability of recommendation.",
+            "forceAnalysis": "Force Analysis",
+            "upload_file_too_large": "This file is too large. Use a smaller subset or transform it into CSV file to apply sampling."
+        },
+        "meta": {
+            "uniqueValue": "Unique Value",
+            "analyticType": "analytic type",
+            "semanticType": "semantic Type",
+            "disable": {
+                "title": "Disable Column",
+                "on": "able",
+                "off": "disable"
+            }
+        },
+        "importData": {
+            "buttonName": "Import Data",
+            "load": "Load Data",
+            "type": {
+                "file": "File",
+                "restful": "From URL",
+                "mysql": "MySQL",
+                "demo": "Demo",
+                "database": "Database",
+                "rath_notebook": "Notebook"
+            },
+            "demo": {
+                "available": "Available Datasets"
+            },
+            "restful": {
+                "requestData": "Request Data",
+                "exampleDataStruct": "Example Data Structure",
+                "loadHistoryAPI": "Load History",
+                "detectedDataStruct": "Parse Rule(auto detect)",
+                "confirm": "Confirm",
+                "clear": "Clear",
+                "format": {
+                    "array": "Array",
+                    "array_with_meta": "Array with Meta",
+                    "others": "Others"
+                }
+            }
+        },
+        "table": {
+            "edit": "Edit Field Name",
+            "fieldName": "field name"
+        },
+        "sampling": {
+            "none": "none",
+            "reservoir": "fixed sample size"
+        },
+        "methods": {
+            "dropNull": "drop null records",
+            "useMode": "replace null with mode",
+            "simpleClean": "use zero or null",
+            "none": "none(use original data)"
+        },
+        "tip": "Remember to adjust the fields' types and cleaning strategy before analysis.",
+        "recordCount": "Number of records {count}",
+        "rowsInViews": "Origin: {originCols} columns × {origin} rows / Select: {selectCols} columns × {select} rows / Clean: {clean} rows",
+        "selection": {
+            "title": "Fast Selection Config",
+            "desc": "Filter based on quantiles to get the main part of your data.",
+            "syncMode": "sync mode"
+        },
+        "upload": {
+            "title": "Connect your data",
+            "fileTypes": "Excel workbooks and text-based files (e.g. JSON, CSV) are supported.",
+            "uniqueIdIssue": "Add unique ids for fields",
+            "show_more": "More Options",
+            "sampling": "Sampling",
+            "percentSize": "sample size(rows)",
+            "excel_range": "Range of cells",
+            "upload": "Upload",
+            "change": "Browse",
+            "lastOpen": "Last opened",
+            "firstOpen": "First created",
+            "history": "Open Recent",
+            "history_time": {
+                "1d": "Today",
+                "1w": "Last weak",
+                "1mo": "Last month",
+                "3mo": "Last 3 months",
+                "6mo": "Last half a year",
+                "1yr": "Last year"
+            },
+            "new": "New file",
+            "sheet": "Sheet",
+            "preview_parsed": "Preview",
+            "preview_full": "Full",
+            "preview_raw": "Raw",
+            "data_is_empty": "This dataset is empty",
+            "separator": {
+                "comma": "Comma",
+                "semicolon": "Semicolon",
+                "tab": "Tab",
+                "other": "Other..."
+            }
+        },
+        "exploreMode": {
+            "title": "Explore Mode",
+            "firstTime": "Meet the data first time",
+            "familiar": "Familiar with the data",
+            "comprehensive": "Comprehensive",
+            "manual": "Manual(with specific purpose)"
+        },
+        "fastSelection": {
+            "title": "Fast Selection"
+        },
+        "downloadData": {
+            "title": "export data",
+            "downloadCSV": "Download CSV",
+            "downloadJSON": "Download JSON",
+            "downloadJSONMeta": "Download JSON with Meta",
+            "downloadRATHDS": "Download RATH's Dataset"
+        },
+        "extend": {
+            "title": "Extend Information",
+            "manual": "Customized computation",
+            "editor": "Editor",
+            "autoExtend": "More fields can be generated from { count } existing fields to enhance analyze and exploration.",
+            "notDecided": "{ count } fields has not been decided.",
+            "findThem": "Find Next",
+            "checkThem": "Check",
+            "empty": "No column exported.",
+            "apply": "Apply",
+            "cancel": "Cancel",
+            "auto": "transforms",
+            "suggestion": {
+                "regex_selection": "Pattern discovery & extraction | Extract patterns from text fields and generate new fields matching extracted pattern.",
+                "dateTimeExpand": "Group date time by units of time.|Time series may be more regular or correlated as the time attribution is grouped into different scales such as years and months.",
+                "oneHot": "One-hot encoding for categorical fields.|One-hot encoding is a way to represent categorical variables as binary vectors. It allows the representation of categorical data to be more expressive.",
+                "wordTFIDF": "Extract words from text fields(score: tf-idf).|TF-IDF is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus.",
+                "wordTF": "Extract words from text fields(score: tf).| Use the term with top frequency in docs.",
+                "reGroupByFreq": "Re-Group By frequency.|Re-group the field by frequency, keep the top frequency value.",
+                "outlierIForest": "Re-Group By Outlier(Isolation Forest).|Re-group the field by outlier, create outlier group and non-outlier group. Using Isolation Forest as outlier detection algorithm."
+            }
+        },
+        "filter": {
+            "title": "Filter Config",
+            "active": "Filter",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "key": "Filter by",
+            "range": "value range",
+            "set": "value set",
+            "submit": "Submit",
+            "cancel": "Cancel"
+        },
+        "operations": {
+            "title": "Operations",
+            "selectAll": "Enable All Fields",
+            "disableAll": "Disable All Fields",
+            "backup": "Save to Cloud"
+        }
+    },
+    "storage": {
+        "upload": "Save to Cloud",
+        "upload_desc": "Backup your Rath notebook.",
+        "components": {
+            "data": "Raw Data ({size} rows)",
+            "meta": "Meta Data ({size} fields)",
+            "collection": "Collection ({size} items)",
+            "causal": "Causal Model",
+            "dashboard": "Dashboard ({size} documents)"
+        },
+        "download": "Load",
+        "createdAt": "Created At",
+        "refresh": "Refresh",
+        "name": "Notebook Name",
+        "default_name": "Rath Notebook {date}",
+        "size": "Size",
+        "apply": "Upload"
+    },
+    "meta": {
+        "title": "Meta Config",
+        "save": "Save",
+        "dimension": "dimension",
+        "measure": "measure"
+    },
+    "megaAuto": {
+        "autoAnalysis": "Auto Analysis",
+        "reRun": "Re-Run Task",
+        "computing": "computing",
+        "title": "Visual Insights",
+        "hintMain": "Here are some interesting patterns and insights found by RATH. If you are interested in some of them, try to use 'edit charts' to know more details about current view and use 'associate' to explore related insights",
+        "summary": "Summary",
+        "associate": "Associate",
+        "analysis": "Analysis",
+        "asso": {
+            "T1": "Associated Measures",
+            "T2": "Associated Dimensions",
+            "hint": "Associated Measures refers to keep the dimensions similar, find correlated measures. Associated Dimensions refers to keep the measures similar, find correlated dimensions."
+        },
+        "bring": "Customize Analysis",
+        "exitEditor": "Exit Editor",
+        "commandBar": {
+            "painting": "data painter",
+            "editing": "edit chart",
+            "editInGW": "Customized Analysis",
+            "editInEditor": "Edit in Editor",
+            "associate": "associate views",
+            "constraints": "analysis constraints",
+            "download": "export chart"
+        },
+        "constraints": {
+            "exclude": "exclude field",
+            "auto": "include if exists insights",
+            "include": "force include"
+        },
+        "commonVis": {
+            "text": "statistics"
+        },
+        "subinsights": "SubInsights",
+        "orderBy": {
+            "title": "Result Order By",
+            "default": "Default",
+            "field_num": "Field Number",
+            "cardinality": "Cardinality"
+        },
+        "operation": {
+            "debug": "debug",
+            "zoom": "interactive",
+            "resize": "resize mode",
+            "resizeMode": {
+                "resizable": "resizable",
+                "none": "none"
+            },
+            "excludeScaleZero": "exclude scale zero"
+        }
+    },
+    "semiAuto": {
+        "main": {
+            "mainView": "Main View",
+            "relatePatterns": "related patterns",
+            "relateFeatures": "related features",
+            "explainDiff": "explain diff",
+            "pointInterests": "related subsets",
+            "neighbors": "neighbor views",
+            "pin": "related insights",
+            "compare": "compare",
+            "vizsys": {
+                "title": "visualization recommend system",
+                "lite": "Lite mode(fast)",
+                "strict": "Strict mode"
+            },
+            "loadMore": "load more",
+            "associate": {
+                "patterns": "Associated Patterns",
+                "features": "Associated Features",
+                "filters": "Associated Subsets",
+                "neighbors": "Associated Neighbors"
+            },
+            "associateShorthand": {
+                "patterns": "Patterns",
+                "features": "Features",
+                "filters": "Subsets",
+                "neighbors": "Neighbors"
+            }
+        },
+        "embed": {
+            "insight_discovery": "Insight Discovery",
+            "insights": "Insights"
+        }
+    },
+    "desc": {
+        "dataViewInfo": "Pattern in {measures} by {dimensions} where {filters}."
+    },
+    "collection": {
+        "title": "Collection",
+        "desc": "This is a collection of your favorite views in all segments.",
+        "viewMode": {
+            "card": "Cards",
+            "list": "List"
+        }
+    },
+    "painter": {
+        "samplePercent": "Sample Percent(%)",
+        "brushSize": "Brush Size",
+        "useOriginalDist": "Use original distribution",
+        "clearPainting": "Clear Painting",
+        "syncData": "Sync Data",
+        "search": "Search",
+        "explore": "Explore",
+        "autoSearch": "Auto Search",
+        "last": "Last",
+        "next": "Next",
+        "addLabel": "Add Label",
+        "newField": "Paint Field",
+        "tools": {
+            "move": "Move",
+            "color": "Color",
+            "clean": "Erase",
+            "create": "Create"
+        }
+    },
+    "latiao": {
+        "maybe": {
+            "keyword": "keyword",
+            "operator": "operator",
+            "fid": "field"
+        },
+        "keyword": {
+            "out": "Append field to data."
+        },
+        "op": {
+            "$set": "Transforms a field to ordinals as a new column.",
+            "$vec": "Transforms a field to calculative numbers as a new column.",
+            "$text": "Transforms a field to strings as a new column.",
+            "$bool": "Transforms a field to 0 or 1 as a new column.",
+            "$id": "Generates an automatically incrementing id field, starting from 1.",
+            "$order": "Returns rank index of the data sorted on the target numeric field, starting from 1.",
+            "$dict": "Returns rank index of the data sorted on the target string field, starting from 1.",
+            "$isNaN": "Transforms numbers to string \"1\" if the number is NaN, otherwise string \"0\" as a new column.",
+            "$isZero": "Transforms numbers to string \"1\" if the number is zero, otherwise string \"0\" as a new column.",
+            "$toDate": "Transforms a field to a set of operative Date objects, which could be sliced on time units.",
+            "$isValidDate": "Transforms Date objects to string \"1\" if the Date object is valid, otherwise string \"0\" as a new column.",
+            "$normalize": "Normalizes a field as a new column.",
+            "$inset": "Scales a field to range -1 ~ +1 as a new column.",
+            "$bound": "Scales a field to range 0 ~ 1 as a new column.",
+            "$log": "Projects a field by x -> log(x) (the base is default to E) as a new column.",
+            "$log2": "Projects a field by x -> log[2](x) as a new column.",
+            "$log1p": "Projects a field by x -> log(x + 1) as a new column.",
+            "$log10": "Projects a field by x -> log[10](x) as a new column.",
+            "$map": "Maps each value to a new value of the same type as a new column.",
+            "$test": "Maps each value to a 0 (false) or 1 (true) as a new column.",
+            "$ReLU": "Projects a field by x -> max(0, x) as a new column.",
+            "$match": "Finds the matched parts of each text content using Regular Expression as a new column.",
+            "$replace": "Replaces the matched parts of each text content with a given string using Regular Expression as a new column.",
+            "$concat": "Merge two or more text contents of all the fields as a new column.",
+            "$sigmoid": "Projects a field by x -> (1 + e^-x)^-1 as a new column.",
+            "$boxClip": "Maps overflowing values (due to boxplot) to the domain as a new column.",
+            "$meanClip": "Maps overflowing values (due to the given domain) to the mean of all the other values as a new column.",
+            "$nearestClip": "Maps overflowing values (due to the given domain) to the domain as a new column.",
+            "$zeroFill": "Maps Infinite or NaN to 0 as a new column.",
+            "$meanFill": "Maps Infinite or NaN to the mean of all the other values as a new column.",
+            "$partition": "Separates each value by boolean expression into two new column."
+        }
+    },
+    "causal_direction": {
+        "_": "Type of Link",
+        "none": "irrelevant to",
+        "directed": "direct to",
+        "reversed": "directed from",
+        "weakDirected": "direct to (weak)",
+        "weakReversed": "directed from (weak)",
+        "undirected": "relative without direction with",
+        "weakUndirected": "relative without direction with (weak)",
+        "bidirected": "bidirected with"
+    },
+    "causal_direction_desc": {
+        "none": "A is irrelevant to B.",
+        "directed": "A influences B.",
+        "reversed": "A is influenced by B.",
+        "weakDirected": "In some cases, A influences B.",
+        "weakReversed": "In some cases, A is influenced by B.",
+        "undirected": "A is relevant to B, but the direction is not decided.",
+        "weakUndirected": "In different cases, A or B is relevant to the other one.",
+        "bidirected": "Both A and B influences each other."
+    },
+    "time_format": {
+        "langKey": "en-US",
+        "dateTime": "%x, %X",
+        "date": "%-m/%-d/%Y",
+        "time": "%-I:%M:%S %p",
+        "periods": ["AM", "PM"],
+        "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    },
+    "login": {
+        "configKeys": {
+            "basic": "Basic",
+            "design": "Design",
+            "analysis": "Data Analysis"
+        },
+        "design": {
+            "createCustomTheme": "Create Custom Theme",
+            "syncFromSelectedTheme": "Sync From Selected Theme",
+            "useCustomTheme": "Use Custom Theme"
+        },
+        "clickLogin": "Login",
+        "haveSent": "Already Sent",
+        "signIn": "Sign Up",
+        "signOut": "Logout",
+        "preferences": "Preferences",
+        "phoneCert": "Phone",
+        "emailCert": "Email",
+        "passwordLog": "Password",
+        "account": "Account",
+        "header": "Head Portrait",
+        "info": "Info",
+        "setting": "Setting",
+        "login": "Login",
+        "loginAndRegister": "login/Register",
+        "getCertCode": "Send Cert Code",
+        "upload": "Upload custom avatar",
+        "AvatarImage": "Avatar Image",
+        "phone": {
+            "phoneNo": "Phone NO.",
+            "certCode": "Cert Code"
+        },
+        "email": { 
+            "title": "Email",
+            "certCode": "Cert Code",
+            "errEmail": "not support email type"
+        },
+        "password": {
+            "userName": "Username",
+            "password": "Password"
+        }
+    },
+    "user": {
+        "organization": "Organization",
+        "workspace": "Workspace"
+    },
+    "messages": {
+        "email": {
+            "success": {
+                "title": "Email sent successfully",
+                "content": "Email has been sent to {email}  Please check your email to get the verification code."
+            },
+            "error": {
+                "title": "Email sent failed"
+            }
+        },
+        "phone": {
+            "success": {
+                "title": "SMS sent successfully",
+                "content": "SMS has been sent to {phone}  Please check your phone to get the verification code."
+            },
+            "error": {
+                "title": "SMS sent failed"
+            }
+        }
+    }
+}

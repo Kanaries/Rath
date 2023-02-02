@@ -1,0 +1,658 @@
+{
+    "common": {
+        "dimension": "维度",
+        "measure": "度量",
+        "name": "名称",
+        "home": "主页",
+        "settings": "设置",
+        "history": "历史记录",
+        "hide": "隐藏",
+        "expand": "展开",
+        "filter": "筛选",
+        "preview": "预览",
+        "source": "源",
+        "submit": "提交",
+        "cancel": "取消",
+        "apply": "应用",
+        "applied": "已应用",
+        "run": "执行",
+        "edit": "编辑",
+        "suggestions": "建议",
+        "showMore": "显示更多",
+        "semanticType": {
+            "nominal": "类别类型",
+            "ordinal": "有序类型",
+            "temporal": "时间类型",
+            "quantitative": "数值类型"
+        },
+        "analyticType": {
+            "dimension": "维度",
+            "measure": "度量"
+        },
+        "vistheme": "可视化主题",
+        "addVar": "添加变量",
+        "addFilter": "添加筛选项",
+        "addEncode": "添加计算",
+        "field": "字段",
+        "star": "收藏",
+        "stat": {
+            "unique": "唯一值",
+            "min": "最小值",
+            "max": "最大值",
+            "mean": "平均值",
+            "median": "中位数",
+            "stdev": "标准差",
+            "count": "计数",
+            "sum": "总和",
+            "qt_25": "25%分位数",
+            "qt_75": "75%分位数",
+            "qt_50": "中位数"
+        },
+        "search": {
+            "searchViews": "搜索视图",
+            "searchFields": "搜索字段/变量",
+            "notFound": "未找到匹配结果"
+        }
+    },
+    "menu": {
+        "dataSource": "数据源",
+        "editor": "自助分析",
+        "support": "帮助",
+        "eda": "数据探索分析",
+        "megaAuto": "全自动探索",
+        "semiAuto": "半自动探索",
+        "devCollection": "实验特性(α)",
+        "dashBoardDesigner": "智能报表",
+        "painter": "数据绘板",
+        "collection": "收藏夹",
+        "dashboard": "报表",
+        "causal": "因果分析"
+    },
+    "preference": {
+        "title": "个人偏好",
+        "config": "配置"
+    },
+    "support": {
+        "title": "如何获取帮助/支持",
+        "link": "https://www.yuque.com/docs/share/c1e4077d-c433-422b-9dc9-9486bf772f9c"
+    },
+    "config": {
+        "computationEngine": {
+            "title": "计算引擎",
+            "desc": "自定义你的计算任务会在哪里运行，如果你的数据集较小（通常是指100MB以内的csv），推荐使用webworker模式在本地进行计算。否则则建议尝试clickhouse模式。\n但需要连接你自己的clickhouse服务或使用kanaries提供的扩展服务。",
+            "clickhouse": "ClickHouse",
+            "webworker": "浏览器(Web Worker)",
+            "notCompatible": "与数据源暂不兼容"
+        },
+        "analysisConfig": "数据分析设置",
+        "cubeStorageManageMode": {
+            "title": "Cube存储管理模式",
+            "desc": "定义Cube计算中间结果的存储模式。通常建议使用mix模式，这样Rath会自动帮你进行精细的控制。对于数据量不大的数据集，你可以使用内存模式来获得更快的性能。 但对于一些极端情况，如数据量非常巨大，导致内存吃紧的情况，则可以选择硬盘模式保证程序的安全运行。"
+        }
+    },
+    "function": {
+        "confirm": "确认",
+        "cancel": "取消",
+        "analysis": {
+            "start": "开始分析",
+            "checkResult": "查看已有结果",
+            "pattern": "半自动化探索",
+            "manual": "自助分析",
+            "causal": "因果分析"
+        },
+        "importStorage": {
+            "title": "导入历史分析",
+            "desc": "导入一个Rath的分析结果文件，这个文件是曾经从Rath中导出分析记录文件。",
+            "type": {
+                "file": "文件",
+                "indexdb": "本地存储"
+            },
+            "storageColumns": {
+                "name": "名称",
+                "createTime": "创建时间",
+                "size": "大小",
+                "operation": "操作"
+            }
+        },
+        "exportStorage": {
+            "title": "导出分析文件",
+            "type": {
+                "file": "文件",
+                "indexdb": "Index DB"
+            }
+        },
+        "save": {
+            "title": "保存"
+        },
+        "upload": "上传文件"
+    },
+    "dataSource": {
+        "extractInsight": "开始分析",
+        "extractInsightOld": "开始分析(调试模式)",
+        "cleanMethod": "清洗方法",
+        "useField": "允许使用",
+        "viewMode": "视图模式",
+        "metaView": "元数据视图",
+        "dataView": "数据视图",
+        "statView": "统计视图",
+        "charset": "字符集编码",
+        "separator": "分隔符",
+        "databaseType": "选择数据库",
+        "connectUri": "连接 URI",
+        "databaseName": "数据库",
+        "schemaName": "Schema",
+        "tableName": "表",
+        "editName": "编辑名称",
+        "preview": "数据预览",
+        "query": "SQL 查询",
+        "connectorConfig": "连接器设置",
+        "connectorService": "连接器服务地址 (可选)",
+        "apply": "设置并测试",
+        "textPattern": {
+            "knowledge": "常识",
+            "generalize": "泛化",
+            "specific": "完全匹配",
+            "currentPattern": "当前文本模式"
+        },
+        "statViewInfo": {
+            "title": "统计视图",
+            "desc": "统计视图是对数据集的统计信息，包括数据集的大小、数据类型、缺失值、重复值等。",
+            "explore": "探索分析",
+            "originStatTable": "原始数据统计信息",
+            "selectionStatTable": "筛选部分统计信息"
+        },
+        "sizeInfo": "{nCols} 列 x {nRows} 行",
+        "demoDataset": {
+            "CARS": { "title": "汽车数据集", "description": "记录了汽车的型号、厂商、物理参数的数据。" },
+            "STUDENTS": { "title": "学生成绩数据集", "description": "分析学生的成绩和部分其他因素等关系。" },
+            "BTC_GOLD": { "title": "比特币-金价数据集", "description": "" },
+            "CAR_SALES": { "title": "汽车销售数据集", "description": "" },
+            "COLLAGE": { "title": "大学数据集", "description": "" },
+            "TITANIC": { "title": "泰坦尼克数据集", "description": "" },
+            "KEPLER": { "title": "开普勒数据集", "description": "" },
+            "BIKE_SHARING_DC": { "title": "共享单车数据集", "description": "" }
+        },
+        "dbProgress": [
+            {
+                "label": "建立连接",
+                "msgRunning": "正在等待连接主机......",
+                "msgSucceeded": "已连接到主机",
+                "msgFailed": "无法建立连接"
+            },
+            {
+                "label": "查找表项",
+                "msgRunning": "从数据库中选择一张表",
+                "msgSucceeded": "完成",
+                "msgFailed": "找不到表"
+            },
+            {
+                "label": "预览",
+                "msgRunning": "正在从表中获取预览",
+                "msgSucceeded": "预览已生成",
+                "msgFailed": "预览生成失败"
+            },
+            {
+                "label": "获取数据",
+                "msgRunning": "提交 SQL 查询以获取数据",
+                "msgSucceeded": "查询完成",
+                "msgFailed": "查询未正确执行"
+            }
+        ],
+        "btn": {
+            "connect": "建立连接",
+            "reset": "返回并重置",
+            "connectFailed": "建立连接失败",
+            "query": "提交查询"
+        },
+        "advice": {
+            "lackData": "缺少有效数据",
+            "lackDimension": "数据集中缺少维度。（全自动化分析模块部分能力会受到影响）",
+            "lackMeasure": "数据集中缺少度量，（全自动化分析模块会受到影响，可以尝试使用其他模块）",
+            "smallSample": "数据集中样本数量低于预期，可能会对推荐结果的一般性造成影响。（小样本问题）",
+            "forceAnalysis": "强制分析",
+            "upload_file_too_large": "文件体积过大。尝试使用更少的数据，或将文件转换为 CSV 格式以使用采样功能。"
+        },
+        "meta": {
+            "title": "元数据视图",
+            "uniqueValue": "唯一值数量",
+            "analyticType": "分析类型",
+            "semanticType": "数据类型",
+            "disable": {
+                "title": "是否使用该列",
+                "on": "使用",
+                "off": "禁用"
+            }
+        },
+        "importData": {
+            "buttonName": "选择数据",
+            "type": {
+                "file": "文件",
+                "restful": "From URL",
+                "mysql": "MySQL",
+                "demo": "示例数据",
+                "database": "数据库",
+                "rath_notebook": "工作簿"
+            },
+            "load": "加载数据",
+            "demo": {
+                "available": "可选数据集"
+            },
+            "restful": {
+                "requestData": "获取数据",
+                "exampleDataStruct": "示例数据结构",
+                "loadHistoryAPI": "加载历史 API",
+                "detectedDataStruct": "解析结构(自动识别)",
+                "confirm": "确认使用",
+                "clear": "清除数据",
+                "format": {
+                    "array": "数组",
+                    "array_with_meta": "数组和元数据",
+                    "others": "其他"
+                }
+            }
+        },
+        "table": {
+            "edit": "编辑字段名称",
+            "fieldName": "字段名称"
+        },
+        "sampling": {
+            "none": "不采样(使用原始数据)",
+            "reservoir": "固定样本大小(数据集较大时使用)"
+        },
+        "methods": {
+            "dropNull": "删除空值记录",
+            "useMode": "使用众数代替空",
+            "simpleClean": "替换为0或null",
+            "none": "无(使用原始数据)"
+        },
+        "tip": "记得在开始分析前先调整数据的清洗策略并配置字段的属性",
+        "recordCount": "记录数 {count}",
+        "rowsInViews": "原始数据: {originCols} 列 × {origin} 行 / 筛选后: {selectCols} 列 × {select} 行 / 清洗后: {clean} 行",
+        "selection": {
+            "title": "快速数据筛选",
+            "desc": "基于数据中的分位数进行快速筛选",
+            "syncMode": "分位数同步"
+        },
+        "upload": {
+            "title": "连接你的数据集",
+            "fileTypes": "支持 Excel 工作簿以及 JSON、CSV 等文本类型文件",
+            "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
+            "show_more": "高级设置",
+            "sampling": "数据采样",
+            "percentSize": "样本大小(行)",
+            "excel_range": "工作簿范围",
+            "upload": "上传文件",
+            "change": "重新选择",
+            "lastOpen": "上一次使用",
+            "firstOpen": "创建时间",
+            "history": "最近使用",
+            "history_time": {
+                "1d": "今天",
+                "1w": "过去一周",
+                "1mo": "过去一个月",
+                "3mo": "过去三个月",
+                "6mo": "过去半年",
+                "1yr": "一年内"
+            },
+            "new": "新的文件",
+            "sheet": "工作簿",
+            "preview_parsed": "预览",
+            "preview_full": "完整内容",
+            "preview_raw": "原始内容",
+            "data_is_empty": "数据集是空的。",
+            "separator": {
+                "comma": "逗号",
+                "semicolon": "分号",
+                "tab": "制表符",
+                "other": "自定义..."
+            }
+        },
+        "exploreMode": {
+            "title": "探索模式",
+            "firstTime": "第一次接触该数据集",
+            "familiar": "基本熟悉该数据集",
+            "comprehensive": "综合模式",
+            "manual": "手动（有明确分析目的）"
+        },
+        "fastSelection": {
+            "title": "快速筛选"
+        },
+        "downloadData": {
+            "title": "导出数据",
+            "downloadCSV": "导出CSV",
+            "downloadJSON": "导出JSON",
+            "downloadJSONMeta": "导出JSON(含元数据)",
+            "downloadRATHDS": "下载RATH格式数据集"
+        },
+        "extend": {
+            "title": "扩展信息",
+            "manual": "自定义计算",
+            "editor": "编辑器",
+            "autoExtend": "{ count } 个字段可以自动扩展生成新的字段以增强分析和探索。",
+            "notDecided": "{ count } 个自动扩展的字段待确认。",
+            "findThem": "下一个",
+            "checkThem": "筛选",
+            "empty": "没有导出的列。",
+            "apply": "扩展",
+            "cancel": "取消",
+            "auto": "转换",
+            "suggestion": {
+                "regex_selection": "模式发现&提取|将选中的字段作为模式，发现数据集中所有匹配的相似模式并提取出来。",
+                "dateTimeExpand": "将数据映射到不同时间单位。|时间序列可能在不同的单位尺度下展现出更强的周期性或相关性。",
+                "oneHot": "独热编码(one-hot encoding)|独热编码可以将类别型数据转换为多个数值型数据，方便进行相关性分析。",
+                "wordTFIDF": "按文档的词频与逆向文件频率提取类别(tf-idf)。|tf-idf是一种统计方法，用以评估一字词对于一个文件集或一个语料库中的其中一份文件的重要程度",
+                "wordTF": "按文档词频提取类别。|按照词汇在整个文档中的出现频率，选择出现频率最高的词汇作为新的类别字段",
+                "reGroupByFreq": "按照类别出现频率重新分组。|按照类别出现频率重新分组，可以将出现频率较低的类别合并为一个类别，方便进行相关性分析。",
+                "outlierIForest": "按异常检测(孤立森林)划分组。| 将偏离值预期的异常值单独分为一组，其余的分在一组当中。使用孤立森林评判异常情况。"
+            }
+        },
+        "filter": {
+            "title": "筛选规则",
+            "active": "启用筛选",
+            "enabled": "开启",
+            "disabled": "关闭",
+            "key": "筛选方式",
+            "range": "区间",
+            "set": "集合",
+            "submit": "应用",
+            "cancel": "取消"
+        },
+        "operations": {
+            "title": "快捷操作",
+            "selectAll": "选择所有字段",
+            "disableAll": "禁用所有字段",
+            "backup": "保存到云"
+        }
+    },
+    "storage": {
+        "upload": "保存到云",
+        "upload_desc": "备份你的 Rath 工作簿。",
+        "components": {
+            "data": "全量数据 ({size} 行)",
+            "meta": "元数据 ({size} 个字段)",
+            "collection": "收藏夹 ({size} 个项目)",
+            "causal": "因果模型",
+            "dashboard": "报表 ({size} 个文档)"
+        },
+        "name": "工作簿名称",
+        "default_name": "Rath 工作簿 {date}",
+        "download": "加载",
+        "createdAt": "创建时间",
+        "refresh": "刷新",
+        "size": "大小",
+        "apply": "上传"
+    },
+    "meta": {
+        "title": "字段元信息配置",
+        "save": "保存",
+        "dimension": "维度",
+        "measure": "度量"
+    },
+    "megaAuto": {
+        "autoAnalysis": "自动分析",
+        "reRun": "重新计算",
+        "computing": "计算中",
+        "title": "洞察推荐",
+        "hintMain": "洞察推荐板块展示了Rath自动化挖掘数据时发现的有趣的规律和洞察，如果你对其中的某些图表感兴趣，尝试使用'编辑图表'来进行更定制化的分析或使用'联想'来探索与当前图表相关的内容。",
+        "summary": "概览",
+        "associate": "联想",
+        "analysis": "分析",
+        "asso": {
+            "T1": "关联度量",
+            "T2": "关联维度",
+            "hint": "『关联度量』是指探索和当前图表中，度量/指标关联程度更高的图表，这可以帮你研究哪些指标的表现和当前关注的指标相近。『关联维度』是指探索和当前图表中，维度相关度更高的图表，这可以帮助你研究对于当前的度量下，相似维度对度量分布的划分差异。"
+        },
+        "bring": "自定义分析",
+        "exitEditor": "退出编辑",
+        "commandBar": {
+            "painting": "数据绘板",
+            "editing": "编辑图表",
+            "editInGW": "自助分析",
+            "editInEditor": "在编辑器配置",
+            "associate": "联想",
+            "constraints": "分析约束",
+            "download": "导出图表"
+        },
+        "constraints": {
+            "exclude": "排除字段",
+            "auto": "机器判断（有洞察则包含）",
+            "include": "强制包含"
+        },
+        "commonVis": {
+            "text": "汇总统计信息"
+        },
+        "subinsights": "获取子洞察",
+        "orderBy": {
+            "title": "结果排序规则",
+            "default": "默认",
+            "field_num": "字段数",
+            "cardinality": "字段总基数"
+        },
+        "operation": {
+            "debug": "开启调试",
+            "zoom": "允许交互",
+            "resize": "自定义尺寸",
+            "resizeMode": {
+                "resizable": "可控尺寸",
+                "none": "自适应"
+            },
+            "excludeScaleZero": "排除坐标0点"
+        }
+    },
+    "semiAuto": {
+        "main": {
+            "mainView": "主视图",
+            "relatePatterns": "关联规律",
+            "relateFeatures": "关联特征",
+            "explainDiff": "差异性分析",
+            "pointInterests": "拆分",
+            "neighbors": "相邻视图",
+            "pin": "深入分析",
+            "compare": "比对分析",
+            "vizsys": {
+                "title": "可视化推荐系统",
+                "lite": "轻量模式(近似算法、更快)",
+                "strict": "严格模式(效果更好)"
+            },
+            "loadMore": "加载更多",
+            "associate": {
+                "patterns": "联想规律",
+                "features": "联想维度",
+                "filters": "推荐子集",
+                "neighbors": "推荐相邻视图"
+            },
+            "associateShorthand": {
+                "patterns": "规律",
+                "features": "特征",
+                "filters": "子集",
+                "neighbors": "邻近视图"
+            }
+        },
+        "embed": {
+            "insight_discovery": "线索发现",
+            "insights": "线索"
+        }
+    },
+    "desc": {
+        "dataViewInfo": "在 {dimensions} 中 {measures} 的表现， 限制条件 {filters}."
+    },
+    "collection": {
+        "title": "收藏夹",
+        "desc": "这里会存放你在各个模块收藏的可视化视图。",
+        "viewMode": {
+            "card": "卡片",
+            "list": "列表"
+        }
+    },
+    "painter": {
+        "samplePercent": "样本采样(%)",
+        "brushSize": "笔刷尺寸",
+        "useOriginalDist": "使用原始分布",
+        "clearPainting": "清除画布",
+        "syncData": "同步数据",
+        "search": "搜索",
+        "explore": "探索",
+        "autoSearch": "自动搜索",
+        "last": "上一步",
+        "next": "下一步",
+        "addLabel": "添加标签",
+        "newField": "绘制字段",
+        "tools": {
+            "move": "移动",
+            "color": "上色",
+            "clean": "橡皮",
+            "create": "创建"
+        }
+    },
+    "latiao": {
+        "maybe": {
+            "keyword": "关键字",
+            "operator": "算子",
+            "fid": "字段"
+        },
+        "keyword": {
+            "out": "扩充这个字段。"
+        },
+        "op": {
+            "$set": "将一列转换至序数作为新的字段。",
+            "$vec": "将一列转换至可计算数值作为新的字段。",
+            "$text": "将一列转换至字符字面量作为新的字段。",
+            "$bool": "将一列转换至 0 或 1 作为新的字段。",
+            "$id": "生成一列从 1 起自增的 ID。",
+            "$order": "计算数据按目标字段数学排序后的位次，从 1 开始。",
+            "$dict": "计算数据按目标字段字典排序后的位次，从 1 开始。",
+            "$isNaN": "将一列中是 NaN 的数字记为字符 \"1\" ，其他记为字符 \"0\" 作为新的字段。",
+            "$isZero": "将一列中是 0 的数字记为字符 \"1\" ，其他记为字符 \"0\" 作为新的字段。",
+            "$toDate": "将一个字段识别为可沿时间单位切面的 Date 对象作为新的字段。",
+            "$isValidDate": "将一列中是有效 Date 对象的记为字符 \"1\" ，其他记为字符 \"0\" 作为新的字段。",
+            "$normalize": "标准化一个列作为新的字段。",
+            "$inset": "将一个列线性映射到 -1 ~ +1 区间作为新的字段。",
+            "$bound": "将一个列线性映射到 0 ~ 1 区间作为新的字段。",
+            "$log": "以对数（默认为自然对数）映射变换到一个新的字段。",
+            "$log2": "以 x -> log[2](x) 映射变换到一个新的字段。",
+            "$log1p": "以 x -> log(x + 1) 映射变换到一个新的字段。",
+            "$log10": "以 x -> log[10](x) 映射变换到一个新的字段。",
+            "$map": "构造一个同等类型的映射变换到一个新的字段。",
+            "$test": "构造一个二元映射变换到 0（非真）或 1（真）作为一个新的字段。",
+            "$ReLU": "以 x -> max(0, x) 映射变换到一个新的字段。",
+            "$match": "使用正则表达式提取出字段中的匹配部分作为新的字段。",
+            "$replace": "使用正则表达式替换字段中的匹配部分后作为新的字段。",
+            "$concat": "连接若干列文本作为新的字段。",
+            "$sigmoid": "以 x -> (1 + e^-x)^-1 映射变换到一个新的字段。",
+            "$boxClip": "基于箱线图统计，将异常值收束到正常分布范围的上下界作为新的字段。",
+            "$meanClip": "指定一个范围，将超出这个范围的值修正到范围内所有值的均值作为新的字段。",
+            "$nearestClip": "指定一个范围，将超出这个范围的值修正到对应的上下界作为新的字段。",
+            "$zeroFill": "将无穷或错误数值转换至 0 作为新的字段。",
+            "$meanFill": "将无穷或错误数值转换其他所有值的均值作为新的字段。",
+            "$partition": "构造一个二元映射将字段按规则拆解到两个新的字段。"
+        }
+    },
+    "causal_direction": {
+        "_": "连接类型",
+        "none": "无关",
+        "directed": "导向",
+        "reversed": "被导向",
+        "weakDirected": "导向（弱关系）",
+        "weakReversed": "被导向（弱关系）",
+        "undirected": "无向相关",
+        "weakUndirected": "无向相关（弱关系）",
+        "bidirected": "双向相关"
+    },
+    "causal_direction_desc": {
+        "none": "A 与 B 不相关。",
+        "directed": "A 对 B 有影响。",
+        "reversed": "A 被 B 影响。",
+        "weakDirected": "在部分子集合中，A 对 B 有影响。",
+        "weakReversed": "在部分子集合中，A 被 B 影响。",
+        "undirected": "A 与 B 相关，但影响方向不确定。",
+        "weakUndirected": "在不同的部分子集合中，A 与 B 有不同方向的影响关系。",
+        "bidirected": "A 与 B 相互作用。"
+    },
+    "RInsight": {
+        "explanation": {
+            "title": {
+                "unvisualizedDimension": "潜在因素"
+            },
+            "desc": {
+                "unvisualizedDimension": "视图中未展现的因素 field({ dimension }) 在选定区间有不同的分布模式，可能对 field.noEvents({ mainField }) 的分布有影响关系。评分：score({ responsibility })。"
+            }
+        }
+    },
+    "time_format": {
+        "langKey": "zh-CN",
+        "dateTime": "%x %A %X",
+        "date": "%Y年%-m月%-d日",
+        "time": "%H:%M:%S",
+        "periods": ["上午", "下午"],
+        "days": ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+        "shortDays": ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+        "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+        "shortMonths": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
+    },
+    "login": {
+        "configKeys": {
+            "basic": "基础信息",
+            "design": "样式/主题设计",
+            "analysis": "数据分析"
+        },
+        "design": {
+            "createCustomTheme": "创建自定义主题",
+            "syncFromSelectedTheme": "从已选主题同步配置",
+            "useCustomTheme": "使用自定义主题"
+        },
+        "clickLogin": "点击登录",
+        "haveSent": "已发送",
+        "signIn": "登录",
+        "signOut": "登出",
+        "preferences": "个人信息",
+        "phoneCert": "手机验证",
+        "emailCert": "邮箱验证",
+        "passwordLog": "密码登录",
+        "account": "账号",
+        "header": "头像",
+        "info": "信息",
+        "setting": "设置",
+        "login": "登录",
+        "loginAndRegister": "注册/登录",
+        "getCertCode": "获取验证码",
+        "upload": "上传自定义头像",
+        "AvatarImage": "头像",
+        "phone": {
+            "phoneNo": "手机号码",
+            "certCode": "验证码"
+        },
+        "email": { 
+            "title": "邮箱地址",
+            "certCode": "验证码",
+            "errEmail": "不支持此类邮箱"
+        },
+        "password": {
+            "userName": "用户名",
+            "password": "密码"
+        }
+    },
+    "user": {
+        "organization": "组织",
+        "workspace": "工作空间"
+    },
+    "messages": {
+        "email": {
+            "success": {
+                "title": "邮件发送成功",
+                "content": "邮箱已发送至{email}，请检查。"
+            },
+            "error": {
+                "title": "邮件发送发生错误"
+            }
+        },
+        "phone": {
+            "success": {
+                "title": "短信发送成功",
+                "content": "短信已发送至{phone}，请检查。"
+            },
+            "error": {
+                "title": "短信发送发生错误"
+            }
+        }
+    }
+}

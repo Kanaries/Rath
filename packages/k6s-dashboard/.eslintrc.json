@@ -1,0 +1,55 @@
+{
+  // Prevent eslint from looking for configuration files
+  // in all parent folders up to the root directory.
+  "root": true,
+  "plugins": [
+    "@typescript-eslint",
+    "react",
+    "eslint-plugin-no-memo-displayname",
+    "jsx-a11y",
+    "react-i18n",
+    "i18next",
+    "import"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:i18next/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "rules": {
+    "indent": ["error", 4, { "SwitchCase": 1 }],
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-unused-vars": "off",
+    "@typescript-eslint/ban-ts-comment": ["error", { "ts-expect-error": "allow-with-description" }],
+    "@typescript-eslint/no-explicit-any": ["error", { "ignoreRestArgs": true }],
+    "@typescript-eslint/no-this-alias": ["error", { "allowedNames": ["context"] }],
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-var-requires": "off",
+    "react/jsx-pascal-case": ["error", { "allowLeadingUnderscore": true }],
+    // Since TS is enabled,
+    // we don't and don't ever need to trust the react/prop-types rule.
+    "react/prop-types": "off",
+    "react/react-in-jsx-scope": "off",
+    "import/order": ["warn", {
+      "groups": ["builtin", "external", "internal", "parent", "index", "object", "type"],
+      "pathGroups": [
+        {
+          "pattern": "@/**",
+          "group": "parent",
+          "position": "before"
+        }
+      ]
+    }]
+  },
+  "parserOptions": {
+    // Use ES6
+    "ecmaVersion": 6
+  },
+  "env": {
+    "browser": true,
+    "commonjs": true
+  }
+}
