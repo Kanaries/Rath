@@ -1,10 +1,11 @@
 import { createContext, createElement, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo } from 'react';
 import { makeAutoObservable, observable } from 'mobx';
 import { ChatBubbleBottomCenterTextIcon, PresentationChartLineIcon, StopIcon, TableCellsIcon, VariableIcon, ViewColumnsIcon } from '@heroicons/react/24/outline';
-import LayoutBlock from '@components/dashboard-page/block/layout-block';
-import BlankBlock from '@components/dashboard-page/block/blank-block';
-import TextBlock from '@components/dashboard-page/block/text-block';
-import DataBlock from '@components/dashboard-page/block/data-block';
+import LayoutBlock from '@components/block/layout-block/block';
+import BlankBlock from '@components/block/blank-block/block';
+import TextBlock from '@components/block/text-block/block';
+import TextInspect from '@components/block/text-block/inspect';
+import DataBlock from '@components/block/data-block/block';
 import type { WorkspaceBlockConfig, DashboardBlocks, DashboardBlockMap, DashboardBlockType } from 'src/interfaces';
 
 
@@ -48,7 +49,7 @@ export class WorkspaceStore {
             }),
             text: subscribeBlock('text', TextBlock, {
                 getIcon: () => <ChatBubbleBottomCenterTextIcon />,
-                onInspect: () => <></>,
+                onInspect: TextInspect,
             }),
             data: subscribeBlock('data', DataBlock, {
                 getIcon: ({ mode }) => ({

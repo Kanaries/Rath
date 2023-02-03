@@ -4,7 +4,8 @@ import TileView from './tile-view';
 
 
 const Root = styled.div`
-    min-width: 20%;
+    width: 15%;
+    min-width: 180px;
     height: 100%;
     flex-grow: 0;
     flex-shrink: 0;

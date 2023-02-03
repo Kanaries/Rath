@@ -2,8 +2,8 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { FC, Fragment } from 'react';
 import { useBlockConfigs } from '@store/workspace';
+import BlockRoot from '../root';
 import type { DashboardLayoutBlock } from 'src/interfaces';
-import BlockRoot from './root';
 
 
 const Container = styled.div<{ direction: DashboardLayoutBlock['direction'] }>`

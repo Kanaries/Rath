@@ -15,6 +15,7 @@
     "mobx-react-lite": "^3.4.0",
     "nanoid": "^4.0.0",
     "react-beautiful-dnd": "^13.1.1",
+    "react-markdown": "^8.0.5",
     "react-quick-pinch-zoom": "^4.6.0",
     "vega": "^5.22.1",
     "vega-embed": "^6.21.0",

@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import embed, { vega, VisualizationSpec } from 'vega-embed';
 import { useDataSource } from '@store/index';
 import VisErrorBoundary from '@components/vis-error-boundary';
+import BlockRoot from '../root';
 import type { View } from 'vega';
 import type { DashboardDataBlock, IDashboardResultData, IDashboardTableData, IDashboardVegaData } from 'src/interfaces';
-import BlockRoot from './root';
 
 
 const VegaDataSourceId = '__context_dataset__';

@@ -18,7 +18,7 @@ const Item = styled.div`
 const ItemList = styled.div`
     display: flex;
     flex-direction: column;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     user-select: none;
 `;
 
@@ -122,7 +122,7 @@ const TileList = observer<{ items: DashboardBlock[]; level: number; id: string; 
                             return null;
                         }
 
-                        const isSelected = selections.some(which => which === item);
+                        const isSelected = selections.some(which => which.id === item.id);
 
                         if (item.type === 'layout') {
                             const isOpen = openKeys[item.id] ?? true;
@@ -141,9 +141,15 @@ const TileList = observer<{ items: DashboardBlock[]; level: number; id: string; 
                                                     style={{ ...provided.draggableProps.style, paddingLeft: `${level}em` }}
                                                     onClick={e => {
                                                         e.stopPropagation();
-                                                        setOpenKeys(opts => produce(opts, draft => {
-                                                            draft[item.id] = !draft[item.id];
-                                                        }));
+                                                        if (!e.metaKey) {
+                                                            setOpenKeys(opts => produce(opts, draft => {
+                                                                draft[item.id] = !draft[item.id];
+                                                            }));
+                                                            dashboard.clearSelections();
+                                                            dashboard.toggleSelect(item);
+                                                        } else {
+                                                            dashboard.toggleSelect(item, true);
+                                                        }
                                                     }}
                                                 >
                                                     <ItemSpin>
@@ -155,10 +161,6 @@ const TileList = observer<{ items: DashboardBlock[]; level: number; id: string; 
                                                     <span
                                                         role="button"
                                                         tabIndex={0}
-                                                        onClick={e => {
-                                                            e.stopPropagation();
-                                                            dashboard.toggleSelect(item, e.metaKey);
-                                                        }}
                                                         onKeyDown={e => e.key === 'Space' && (e.target as HTMLSpanElement).click()}
                                                     >
                                                         {config.getTileDisplayName?.(item) ?? `${item.direction} layout`}
@@ -224,6 +226,7 @@ const TileList = observer<{ items: DashboardBlock[]; level: number; id: string; 
 const Container = styled.div`
     flex-grow: 1;
     flex-shrink: 1;
+    padding-block: 0.75em 40vh;
     overflow: auto;
     background-color: #eee;
 `;

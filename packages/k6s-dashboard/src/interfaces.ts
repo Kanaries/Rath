@@ -1,4 +1,4 @@
-import type { CSSProperties, FC } from "react";
+import type { FC } from "react";
 import type { VisualizationSpec } from 'vega-embed';
 import type { Config as VegaLiteConfig } from 'vega-lite';
 import type { IDashboardTheme } from "./theme";
@@ -17,18 +17,6 @@ export type DashboardEvent<NE extends Event = Event> = {
 };
 
 export type DashboardEventHandler = (ev: DashboardEvent) => void;
-
-export type DashboardTextPart = {
-    text: string;
-    style?: CSSProperties;
-    link?: string;
-} | string;
-
-export type DashboardTextNode = {
-    /** @default "none" */
-    role?: "header" | "explanation" | "none";
-    value: DashboardTextPart[];
-};
 
 export type DashboardBlockConfig = {
     /** @default 1 */
@@ -50,8 +38,8 @@ export type DashboardLayoutBlock = IDashboardBlock<'layout', {
 }>;
 
 export type IDashboardResultData = {
-    title: DashboardTextPart;
-    description?: DashboardTextPart;
+    title: string;
+    description?: string;
     /** a function to get the result */
     target: string;
 };
@@ -78,7 +66,7 @@ export type DashboardDataBlock = IDashboardBlock<'data', (
 )>;
 
 export type DashboardTextBlock = IDashboardBlock<'text', {
-    contents: DashboardTextNode[];
+    content: string;
 }>;
 
 export type DashboardImageBlock = IDashboardBlock<'image', {

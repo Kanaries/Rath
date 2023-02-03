@@ -17,7 +17,7 @@ import {
 } from '@fluentui/react-components';
 import { DocumentTextIcon, PlusIcon, PresentationChartLineIcon, StopIcon, TableCellsIcon, TrashIcon, VariableIcon, ViewColumnsIcon } from '@heroicons/react/24/outline';
 import { useDashboardContext, useDashboardInfo } from '@store/index';
-import { DashboardDataBlock, DashboardLayoutBlock } from 'src/interfaces';
+import { DashboardBlock, DashboardDataBlock } from 'src/interfaces';
 
 
 const Root = styled.div`
@@ -38,9 +38,9 @@ const ToolPanel = observer(function ToolPanel () {
     const info = useDashboardInfo();
     const dashboard = useDashboardContext();
     const { selections, spec } = dashboard;
-    const container: DashboardLayoutBlock | null = selections.length === 0
+    const container: DashboardBlock | null = selections.length === 0
         ? spec.items
-        : (selections.length === 1 && selections[0]?.type === 'layout' ? selections[0] as DashboardLayoutBlock : null);
+        : (selections.length === 1 ? selections[0] : null);
     
     const removeSelected = useCallback(() => {
         const { selections: list } = dashboard;
@@ -76,7 +76,7 @@ const ToolPanel = observer(function ToolPanel () {
                             <MenuPopover>
                                 <MenuList>
                                     <MenuItem
-                                        onClick={() => dashboard.addBlock<DashboardDataBlock>(container, {
+                                        onClick={() => dashboard.addBlock<DashboardDataBlock>(container.id, {
                                             id: nanoid(6),
                                             type: 'data',
                                             mode: 'vega',
@@ -110,7 +110,7 @@ const ToolPanel = observer(function ToolPanel () {
                                         {'chart'}
                                     </MenuItem>
                                     <MenuItem
-                                        onClick={() => dashboard.addBlock(container, {
+                                        onClick={() => dashboard.addBlock(container.id, {
                                             id: nanoid(6),
                                             type: 'data',
                                             mode: 'result',
@@ -123,7 +123,7 @@ const ToolPanel = observer(function ToolPanel () {
                                         {'result'}
                                     </MenuItem>
                                     <MenuItem
-                                        onClick={() => dashboard.addBlock(container, {
+                                        onClick={() => dashboard.addBlock(container.id, {
                                             id: nanoid(6),
                                             type: 'data',
                                             mode: 'table',
@@ -136,7 +136,7 @@ const ToolPanel = observer(function ToolPanel () {
                                     </MenuItem>
                                     <MenuDivider />
                                     <MenuItem
-                                        onClick={() => dashboard.addBlock(container, {
+                                        onClick={() => dashboard.addBlock(container.id, {
                                             id: nanoid(6),
                                             type: 'layout',
                                             direction: 'vertical',
@@ -147,7 +147,7 @@ const ToolPanel = observer(function ToolPanel () {
                                         {'vertical layout'}
                                     </MenuItem>
                                     <MenuItem
-                                        onClick={() => dashboard.addBlock(container, {
+                                        onClick={() => dashboard.addBlock(container.id, {
                                             id: nanoid(6),
                                             type: 'layout',
                                             direction: 'horizontal',
@@ -158,35 +158,17 @@ const ToolPanel = observer(function ToolPanel () {
                                         {'horizontal layout'}
                                     </MenuItem>
                                     <MenuItem
-                                        onClick={() => dashboard.addBlock(container, { id: nanoid(6), type: 'blank' })}
+                                        onClick={() => dashboard.addBlock(container.id, { id: nanoid(6), type: 'blank' })}
                                         icon={<StopIcon />}
                                     >
                                         {'blank'}
                                     </MenuItem>
                                     <MenuDivider />
                                     <MenuItem
-                                        onClick={() => dashboard.addBlock(container, {
+                                        onClick={() => dashboard.addBlock(container.id, {
                                             id: nanoid(6),
                                             type: 'text',
-                                            contents: [
-                                                {
-                                                    role: 'header',
-                                                    value: ['I am header'],
-                                                },
-                                                {
-                                                    role: 'explanation',
-                                                    value: ['I am text'],
-                                                },
-                                                {
-                                                    value: [
-                                                        'Hello, ',
-                                                        {
-                                                            text: 'Google',
-                                                            link: 'https://google.com/',
-                                                        },
-                                                    ],
-                                                },
-                                            ],
+                                            content: '# I am header\n\nI am text\n\nHello, [Google](https://google.com/)',
                                         })}
                                         icon={<DocumentTextIcon />}
                                     >

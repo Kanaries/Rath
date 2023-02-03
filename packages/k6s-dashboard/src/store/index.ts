@@ -1,7 +1,7 @@
 import { createContext, createElement, CSSProperties, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo } from 'react';
 import { makeAutoObservable, observable } from 'mobx';
 import { IDashboardTheme, themeGold } from 'src/theme';
-import type { DashboardSpecification, DashboardInfo, IRow, DashboardBlock, Static, DashboardLayoutBlock, DashboardBlockConfig } from 'src/interfaces';
+import type { DashboardSpecification, DashboardInfo, IRow, DashboardBlock, DashboardLayoutBlock, DashboardBlockConfig } from 'src/interfaces';
 
 
 export class DashboardStore {
@@ -54,8 +54,25 @@ export class DashboardStore {
         return search(this.spec.items);
     }
 
-    public get selections(): Static<DashboardBlock[]> {
-        return this._selections as Static<DashboardBlock[]>;
+    public getBlockParent(id: string): DashboardLayoutBlock {
+        const search = (container: DashboardLayoutBlock): DashboardLayoutBlock | null => {
+            for (const child of container.children) {
+                if (child.id === id) {
+                    return container;
+                } else if (child.type === 'layout') {
+                    const which = search(child);
+                    if (which) {
+                        return child;
+                    }
+                }
+            }
+            return null;
+        };
+        return search(this.spec.items) ?? this.spec.items;
+    }
+
+    public get selections(): readonly DashboardBlock[] {
+        return this._selections;
     }
 
     public get theme(): CSSProperties {
@@ -94,11 +111,25 @@ export class DashboardStore {
         this._selections = [];
     }
 
-    public addBlock<T extends DashboardBlock>(parent: DashboardLayoutBlock, block: T): void {
-        parent.children.push(block);
-        if (block.type !== 'layout') {
-            this._selections = [block];
+    public addBlock<T extends DashboardBlock>(target: string, block: T): void {
+        const destination = this.getBlockById(target);
+        if (!destination) {
+            this.spec.items.children.push(block);
+            this.toggleSelect(block);
+            return;
         }
+        if (destination.type === 'layout') {
+            destination.children.push(block);
+        } else {
+            const parent = this.getBlockParent(target);
+            if (!parent) {
+                this.spec.items.children.push(block);
+                this.toggleSelect(block);
+                return;
+            }
+            parent.children.push(block);
+        }
+        this.toggleSelect(block);
     }
 
     public removeBlock(id: string): void {
@@ -125,6 +156,18 @@ export class DashboardStore {
             this.removeBlock(source.id);
         }
         to.children.splice(idx, 0, ...sources);
+    }
+
+    public updateBlock<T extends DashboardBlock, P extends Partial<T> = T>(id: string, updater: (prev: T) => P): void {
+        const item = this.getBlockById(id) as null | T;
+        if (item) {
+            const next = updater(item) as unknown as T;
+            for (const key of Object.keys(next) as (keyof T)[]) {
+                if (item[key] !== next[key]) {
+                    item[key] = next[key];
+                }
+            }
+        }
     }
 
 }
