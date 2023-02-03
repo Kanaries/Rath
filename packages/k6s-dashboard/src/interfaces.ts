@@ -37,6 +37,7 @@ export type DashboardBlockConfig = {
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type IDashboardBlock<Name extends string, Data extends Record<string, unknown> = {}> = {
+    id: string;
     type: Name;
     config?: Partial<DashboardBlockConfig>;
 } & Data;

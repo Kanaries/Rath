@@ -15,6 +15,7 @@ export class DashboardStore {
         this.data = [];
         this._selections = [];
         makeAutoObservable(this, {
+            spec: observable.shallow,
             // @ts-expect-error nonpublic fields
             data: observable.ref,
             _selections: observable.ref,
@@ -27,6 +28,26 @@ export class DashboardStore {
 
     public setData(data: readonly IRow[]): void {
         this.data = data;
+    }
+
+    public getBlockById(id: string): DashboardBlock | null {
+        const search = (container: DashboardLayoutBlock): DashboardBlock | null => {
+            if (container.id === id) {
+                return container;
+            }
+            for (const child of container.children) {
+                if (child.id === id) {
+                    return child;
+                } else if (child.type === 'layout') {
+                    const which = search(child);
+                    if (which) {
+                        return which;
+                    }
+                }
+            }
+            return null;
+        };
+        return search(this.spec.items);
     }
 
     public get selections(): Static<DashboardBlock[]> {
@@ -74,7 +95,34 @@ export class DashboardStore {
         if (block.type !== 'layout') {
             this._selections = [block];
         }
-        this.spec.items = {...this.spec.items};
+        this.spec.items = { ...this.spec.items };
+    }
+
+    public removeBlock(id: string): void {
+        const walk = (container: DashboardLayoutBlock): void => {
+            const next: DashboardBlock[] = [];
+            for (const child of container.children) {
+                if (child.id === id) {
+                    continue;
+                } else {
+                    next.push(child);
+                    if (child.type === 'layout') {
+                        walk(child);
+                    }
+                }
+            }
+            container.children = next;
+        };
+        walk(this.spec.items);
+        this.spec.items = { ...this.spec.items };
+    }
+
+    public moveBlocks(sources: DashboardBlock[], to: DashboardLayoutBlock, idx: number): void {
+        for (const source of sources) {
+            this.removeBlock(source.id);
+        }
+        to.children.splice(idx, 0, ...sources);
+        this.spec.items = { ...this.spec.items };
     }
 
 }

@@ -71,13 +71,13 @@ const TextBlock = observer<{ data: DashboardTextBlock }>(function TextBlock ({ d
                     const text = <>{value.map((val, j) => <TextPart key={j} data={val} />)}</>;
                     switch (role) {
                         case 'header': {
-                            return <header>{text}</header>;
+                            return <header key={i}>{text}</header>;
                         }
                         case 'explanation': {
-                            return <p>{text}</p>;
+                            return <p key={i}>{text}</p>;
                         }
                         case 'none': {
-                            return <span>{text}</span>;
+                            return <span key={i}>{text}</span>;
                         }
                         default: {
                             return null;

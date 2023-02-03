@@ -18,6 +18,7 @@ const App: FC = () => {
             themes: [themeGold],
         },
         items: {
+            id: 'root',
             type: 'layout',
             direction: 'vertical',
             children: [],
