@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, FC } from "react";
+import type { VisualizationSpec } from 'vega-embed';
+import type { Config as VegaLiteConfig } from 'vega-lite';
 import type { IDashboardTheme } from "./theme";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,7 +67,8 @@ export type IDashboardTableData = {
 
 export type IDashboardVegaData = {
     /** vega-lite schema */
-    specification: Record<string, unknown>;
+    specification: Omit<VisualizationSpec, 'data'>;
+    config?: VegaLiteConfig;
 };
 
 export type DashboardDataBlock = IDashboardBlock<'data', (
@@ -107,19 +110,27 @@ export type DashboardExtensionBlock = IDashboardBlock<'extension', {
     options?: Record<string, unknown>;
 }>;
 
-export type DashboardBlock = (
-    | DashboardLayoutBlock
-    | DashboardDataBlock
-    | DashboardTextBlock
-    | DashboardImageBlock
-    | DashboardWebContentBlock
-    | DashboardBlankBlock
-    | DashboardExportBlock
-    | DashboardEnqueteBlock
-    | DashboardExtensionBlock
-);
+export type DashboardBlocks = {
+    layout: DashboardLayoutBlock,
+    data: DashboardDataBlock,
+    text: DashboardTextBlock,
+    image: DashboardImageBlock,
+    web_content: DashboardWebContentBlock,
+    blank: DashboardBlankBlock,
+    exporter: DashboardExportBlock,
+    enquete: DashboardEnqueteBlock,
+    extension: DashboardExtensionBlock,
+};
 
-export type DashboardBlockType = DashboardBlock['type'];
+export type DashboardBlockType = keyof DashboardBlocks;
+
+export type DashboardBlockMap = {
+    [key in keyof DashboardBlocks]: DashboardBlocks[key] & {
+        type: key;
+    };
+};
+
+export type DashboardBlock = DashboardBlockMap[keyof DashboardBlockMap];
 
 export type DashboardSpecification = {
     version: number;
@@ -138,4 +149,13 @@ export type DashboardSpecification = {
 
 export type DashboardInfo = {
     title: string;
+};
+
+export type WorkspaceBlockConfig<Type extends DashboardBlockType, T extends DashboardBlock = DashboardBlockMap[Type]> = {
+    type: Type;
+    name: string;
+    getIcon?: (data: T) => JSX.Element;
+    getTileDisplayName?: (data: T) => JSX.Element;
+    onRender: FC<{ data: T }>;
+    onInspect: FC<{ data: T; onChange: (next: T) => void }>;
 };

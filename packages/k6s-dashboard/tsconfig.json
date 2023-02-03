@@ -28,6 +28,9 @@
       "@components/*": [
         "./src/components/*"
       ],
+      "@store": [
+        "./src/store/index"
+      ],
       "@store/*": [
         "./src/store/*"
       ],

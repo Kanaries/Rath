@@ -14,6 +14,7 @@ const Root = styled.div<{ isSelected: boolean; transparent: boolean }>`
     outline: none;
     border: 2px dashed;
     border-color: ${({ isSelected }) => isSelected ? 'var(--outline)' : 'transparent'};
+    overflow: hidden;
     > * {
         width: 100%;
         height: 100%;
@@ -34,7 +35,7 @@ const BlockRoot = observer<PropsWithChildren<{ data: DashboardBlock }>>(function
         if (isRoot) {
             dashboard.clearSelections();
         } else {
-            dashboard.toggleSelect(data, ev.shiftKey);
+            dashboard.toggleSelect(data, ev.metaKey);
         }
     }, [data, selections, isRoot]);
 

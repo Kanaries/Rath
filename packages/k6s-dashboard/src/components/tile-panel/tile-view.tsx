@@ -1,11 +1,12 @@
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import produce from 'immer';
-import { ChevronDownIcon, ChevronRightIcon, DocumentTextIcon, StopIcon, ViewColumnsIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { DragDropContext, OnDragStartResponder, OnDragEndResponder, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useDashboardContext } from '@store/index';
-import type { DashboardBlock } from 'src/interfaces';
+import { useBlockConfigs } from '@store/workspace';
+import type { DashboardBlock, WorkspaceBlockConfig } from 'src/interfaces';
 
 
 const Item = styled.div`
@@ -38,8 +39,11 @@ const ItemHeader = styled.div<{ isSelected: boolean; isDragging: boolean }>`
     }
     span {
         color: #666;
+        outline: none;
+        text-transform: capitalize;
     }
     small {
+        margin-left: 1em;
         font-size: 0.7rem;
         color: #aaa;
     }
@@ -64,7 +68,10 @@ const ItemIcon = styled.div`
     justify-content: center;
 `;
 
-const TileList = observer<{ items: DashboardBlock[]; level: number; id: string; open: boolean }>(function TileList ({ items, level, id, open }) {
+const TileList = observer<{ items: DashboardBlock[]; level: number; id: string; open: boolean; setOpen?: (value: boolean) => void }>(function TileList ({
+    items, level, id, open, setOpen
+}) {
+    const block = useBlockConfigs();
     const dashboard = useDashboardContext();
     const { selections } = dashboard;
 
@@ -78,6 +85,22 @@ const TileList = observer<{ items: DashboardBlock[]; level: number; id: string; 
             );
         });
     }, [items]);
+
+    const focused = useMemo(() => {
+        if (selections.some(d => items.some(item => item.id === d.id))) {
+            return true;
+        }
+        return false;
+    }, [selections, items]);
+
+    const setOpenRef = useRef(setOpen);
+    setOpenRef.current = setOpen;
+
+    useEffect(() => {
+        if (!open && focused) {
+            setOpenRef.current?.(true);
+        }
+    }, [focused, open]);
 
     if (!open) {
         return null;
@@ -94,6 +117,11 @@ const TileList = observer<{ items: DashboardBlock[]; level: number; id: string; 
                     onClick={e => e.stopPropagation()}
                 >
                     {items.map((item, i) => {
+                        const config = block[item.type] as undefined | WorkspaceBlockConfig<typeof item['type']>;
+                        if (!config) {
+                            return null;
+                        }
+
                         const isSelected = selections.some(which => which === item);
 
                         if (item.type === 'layout') {
@@ -122,28 +150,37 @@ const TileList = observer<{ items: DashboardBlock[]; level: number; id: string; 
                                                         {isOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
                                                     </ItemSpin>
                                                     <ItemIcon>
-                                                        <ViewColumnsIcon
-                                                            style={{
-                                                                transform: item.direction === 'horizontal' ? '' : 'rotate(90deg)',
-                                                            }}
-                                                        />
+                                                        {config.getIcon?.(item)}
                                                     </ItemIcon>
                                                     <span
                                                         role="button"
                                                         tabIndex={0}
                                                         onClick={e => {
                                                             e.stopPropagation();
-                                                            dashboard.toggleSelect(item, e.shiftKey);
+                                                            dashboard.toggleSelect(item, e.metaKey);
                                                         }}
                                                         onKeyDown={e => e.key === 'Space' && (e.target as HTMLSpanElement).click()}
                                                     >
-                                                        {`${item.direction} ${item.type} `}
+                                                        {config.getTileDisplayName?.(item) ?? `${item.direction} layout`}
                                                     </span>
                                                 </ItemHeader>
                                             )}
                                         </Draggable>
                                     )}
-                                    <TileList open={isOpen} id={item.id} level={level + 1} items={item.children} />
+                                    <TileList
+                                        open={isOpen}
+                                        setOpen={val => {
+                                            if (val) {
+                                                setOpen?.(true);
+                                            }
+                                            setOpenKeys(opts => produce(opts, draft => {
+                                                draft[item.id] = val;
+                                            }));
+                                        }}
+                                        id={item.id}
+                                        level={level + 1}
+                                        items={item.children}
+                                    />
                                 </Item>
                             );
                         }
@@ -166,14 +203,10 @@ const TileList = observer<{ items: DashboardBlock[]; level: number; id: string; 
                                         >
                                             <ItemSpin />
                                             <ItemIcon>
-                                                {({
-                                                    text: <DocumentTextIcon />,
-                                                    blank: <StopIcon />,
-                                                } as Partial<Record<DashboardBlock['type'], JSX.Element>>)[item.type]}
+                                                {config.getIcon?.(item)}
                                             </ItemIcon>
                                             <span>
-                                                {`${item.type} `}
-                                                <small>{`${item.id}`}</small>
+                                                {config.getTileDisplayName?.(item) ?? item.type}
                                             </span>
                                         </ItemHeader>
                                     )}

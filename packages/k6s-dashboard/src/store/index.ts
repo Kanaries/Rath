@@ -7,17 +7,17 @@ import type { DashboardSpecification, DashboardInfo, IRow, DashboardBlock, Stati
 export class DashboardStore {
 
     public readonly spec: DashboardSpecification;
-    protected data: readonly IRow[];
+    protected _data: readonly IRow[];
     protected _selections: readonly DashboardBlock[];
 
     public constructor(dashboard: DashboardSpecification) {
         this.spec = dashboard;
-        this.data = [];
+        this._data = [];
         this._selections = [];
         makeAutoObservable(this, {
-            spec: observable.shallow,
+            spec: observable.deep,
             // @ts-expect-error nonpublic fields
-            data: observable.ref,
+            _data: observable.ref,
             _selections: observable.ref,
         });
     }
@@ -27,7 +27,11 @@ export class DashboardStore {
     }
 
     public setData(data: readonly IRow[]): void {
-        this.data = data;
+        this._data = data;
+    }
+
+    public get data(): readonly IRow[] {
+        return this._data;
     }
 
     public getBlockById(id: string): DashboardBlock | null {
@@ -90,15 +94,15 @@ export class DashboardStore {
         this._selections = [];
     }
 
-    public addBlock(parent: DashboardLayoutBlock, block: DashboardBlock): void {
+    public addBlock<T extends DashboardBlock>(parent: DashboardLayoutBlock, block: T): void {
         parent.children.push(block);
         if (block.type !== 'layout') {
             this._selections = [block];
         }
-        this.spec.items = { ...this.spec.items };
     }
 
     public removeBlock(id: string): void {
+        this._selections = this._selections.filter(d => d.id !== id);
         const walk = (container: DashboardLayoutBlock): void => {
             const next: DashboardBlock[] = [];
             for (const child of container.children) {
@@ -114,7 +118,6 @@ export class DashboardStore {
             container.children = next;
         };
         walk(this.spec.items);
-        this.spec.items = { ...this.spec.items };
     }
 
     public moveBlocks(sources: DashboardBlock[], to: DashboardLayoutBlock, idx: number): void {
@@ -122,7 +125,6 @@ export class DashboardStore {
             this.removeBlock(source.id);
         }
         to.children.splice(idx, 0, ...sources);
-        this.spec.items = { ...this.spec.items };
     }
 
 }
@@ -169,4 +171,9 @@ export const useDashboardBlockTheme = (config: Partial<DashboardBlockConfig> | u
         }
         return dashboard.theme;
     }, [dashboard, rootTheme, blockTheme]);
+};
+
+export const useDataSource = (): readonly IRow[] => {
+    const dashboard = useContext(DashboardContext);
+    return dashboard.data;
 };

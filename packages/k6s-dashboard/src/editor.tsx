@@ -3,9 +3,10 @@ import styled from 'styled-components';
 import ToolPanel from '@components/tool-panel';
 import InspectPanel from '@components/inspect-panel';
 import TilePanel from '@components/tile-panel';
+import { useDashboardContextProvider } from '@store';
+import { useWorkspaceContextProvider } from '@store/workspace';
 import type { DashboardSpecification, DashboardEventHandler, IRow } from './interfaces';
 import K6sDashboard from './main';
-import { useDashboardContextProvider } from './store';
 
 
 const Root = styled.div`
@@ -34,23 +35,26 @@ export interface K6sDashboardEditorProps {
 }
 
 const K6sDashboardEditor = memo<K6sDashboardEditorProps>(function K6sDashboardEditor ({ data = [], dashboard }) {
-    const Provider = useDashboardContextProvider(dashboard);
+    const DashboardCtxProvider = useDashboardContextProvider(dashboard);
+    const WorkspaceCtxProvider = useWorkspaceContextProvider();
 
     const handler = useCallback<DashboardEventHandler>(ev => {
         // do sth
     }, []);
 
     return (
-        <Provider>
-            <Root>
-                <ToolPanel />
-                <Container>
-                    <TilePanel />
-                    <K6sDashboard dashboard={dashboard} data={data} handler={handler} />
-                    <InspectPanel />
-                </Container>
-            </Root>
-        </Provider>
+        <WorkspaceCtxProvider>
+            <DashboardCtxProvider>
+                <Root>
+                    <ToolPanel />
+                    <Container>
+                        <TilePanel />
+                        <K6sDashboard dashboard={dashboard} data={data} handler={handler} />
+                        <InspectPanel />
+                    </Container>
+                </Root>
+            </DashboardCtxProvider>
+        </WorkspaceCtxProvider>
     );
 });
 

@@ -2,8 +2,8 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { useDashboardContext } from '@store/index';
 import { useEffect } from 'react';
+import { useBlockConfigs } from '@store/workspace';
 import type { IRow } from 'src/interfaces';
-import LayoutBlock from './block/layout-block';
 
 
 const Root = styled.div`
@@ -15,8 +15,7 @@ const Root = styled.div`
     box-shadow: 0 0 1rem 0.4rem #888;
     transform-origin: 0 0;
     display: flex;
-    align-items: stretch;
-    justify-content: stretch;
+    overflow: hidden;
 `;
 
 export interface DashboardPageProps {
@@ -25,12 +24,15 @@ export interface DashboardPageProps {
 }
 
 const DashboardPage = observer<DashboardPageProps>(function DashboardPage ({ transform, data }) {
+    const block = useBlockConfigs();
     const dashboard = useDashboardContext();
     const { size, items } = dashboard.spec;
 
     useEffect(() => {
         dashboard.setData(data);
     }, [dashboard, data]);
+
+    const RootLayout = block.layout?.onRender;
     
     return (
         <Root
@@ -44,7 +46,7 @@ const DashboardPage = observer<DashboardPageProps>(function DashboardPage ({ tra
                 ...dashboard.theme
             }}
         >
-            <LayoutBlock data={items} />
+            {RootLayout && <RootLayout data={items} />}
         </Root>
     );
 });

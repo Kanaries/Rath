@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fluentui/react-components": "^9.13.0",
     "@heroicons/react": "^2.0.14",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -14,7 +15,10 @@
     "mobx-react-lite": "^3.4.0",
     "nanoid": "^4.0.0",
     "react-beautiful-dnd": "^13.1.1",
-    "react-quick-pinch-zoom": "^4.6.0"
+    "react-quick-pinch-zoom": "^4.6.0",
+    "vega": "^5.22.1",
+    "vega-embed": "^6.21.0",
+    "vega-lite": "^5.6.0"
   },
   "scripts": {
     "dev": "react-app-rewired start",
