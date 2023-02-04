@@ -153,6 +153,7 @@
             "knowledge": "Knowledge",
             "generalize": "Generalize",
             "specific": "Extract Match",
+            "nlp": "NLP(β)",
             "currentPattern": "Current Pattern"
         },
         "statViewInfo": {

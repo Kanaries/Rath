@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-export type ITextPatternType = 'knowledge' | 'generalize' | 'specific';
+export type ITextPatternType = 'knowledge' | 'generalize' | 'specific' | 'nlp';
 export interface IPatternNode {
     pattern: RegExp;
     name: string;

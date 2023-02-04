@@ -152,6 +152,7 @@
             "knowledge": "常识",
             "generalize": "泛化",
             "specific": "完全匹配",
+            "nlp": "NLP(β)",
             "currentPattern": "当前文本模式"
         },
         "statViewInfo": {
