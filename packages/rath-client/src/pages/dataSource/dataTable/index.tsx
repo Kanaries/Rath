@@ -15,6 +15,35 @@ import { CustomBaseTable, MiniButton, MiniPrimaryButton, DATA_TABLE_STYLE_CONFIG
 import { findFirstExistTextPattern, groupTextPattern, initGroupedTextPatternList, uniquePattern } from './utils';
 // import regexgen from 'regexgen';
 
+function provideSelectionRange (selectedRange: Range, currentNode: Node): { len: number, found: boolean } {
+    if (selectedRange.startContainer === currentNode) {
+        return {
+            len: selectedRange.startOffset,
+            found: true
+        }
+    }
+    if (currentNode.nodeType === Node.TEXT_NODE) {
+        return {
+            len: Number(currentNode.textContent?.length),
+            found: false
+        }
+    }
+    let len = 0;
+    let found = false;
+    for (let child of currentNode.childNodes) {
+        const r = provideSelectionRange(selectedRange, child);
+        len += r.len
+        if (r.found) {
+            found = true;
+            break;
+        }
+    }
+    return {
+        len,
+        found
+    }
+}
+
 const ADD_BATCH_SIZE = 5;
 
 const DataTable: React.FC = (props) => {
@@ -52,7 +81,6 @@ const DataTable: React.FC = (props) => {
             return [];
         }
     }, []);
-    // const [tpIndex, setTpIndex] = useState<number>(0);
     useEffect(() => {
         if (filteredDataMetaInfo.versionCode === -1) {
             setFilteredData([]);
@@ -98,30 +126,11 @@ const DataTable: React.FC = (props) => {
             const range = sl?.getRangeAt(0);
             if (!range) return;
             const selectedText = range.toString();
-            // Create a range representing the selected text
             const selectedRange = range.cloneRange();
-            // Create a range representing the full text of the element
-            const fullRange = document.createRange();
-            fullRange.selectNodeContents(td);
-            let startNode = td.firstChild;
-            let startPos = 0;
-            while (startNode) {
-                if (startNode === selectedRange.startContainer) break;
-                if (startNode.nodeType === Node.TEXT_NODE) {
-                    startPos += startNode.textContent?.length || 0;
-                }
-                if (startNode.nextSibling) {
-                    startNode = startNode.nextSibling;
-                } else {
-                    break;
-                }
-            }
-            // Compare the selected range to the full range
-            startPos += selectedRange.startOffset;
-            let endPos = startPos + selectedText.length;
-            if (fullText && selectedText) {
-                const startIndex = startPos;
-                const endIndex = endPos;
+            const search = provideSelectionRange(selectedRange, td);
+            if (search.found) {
+                const startIndex = search.len;
+                const endIndex = startIndex + selectedText.length;
                 const nextTSL = textSelectList.concat({
                     fid,
                     str: fullText,
@@ -129,45 +138,45 @@ const DataTable: React.FC = (props) => {
                     endIndex: endIndex,
                 });
                 const nextTPL = tsList2tpList(nextTSL);
-                fetch('http://127.0.0.1:5533/api/text_pattern_extraction', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        values: dataSourceStore.cleanedData.map((d) => `${d[fid]}`),
-                        selections: [...textSelectList.map((t) => t.str.slice(t.startIndex, t.endIndex)), fullText.slice(startIndex, endIndex)].map(
-                            (d) => `${d}`
-                        ),
-                    }),
-                })
-                    .then((res) => res.json())
-                    .then((res) => {
-                        const extractions: { score: number; best_match: string }[] = res.data.extractions;
-                        const wordSets: Set<string> = new Set(extractions.filter((e) => e.score > 0.72).map((e) => e.best_match));
-                        const wordsInRegExp = new RegExp(
-                            Array.from(wordSets)
-                                .map((w) => `${w}`)
-                                .join('|')
-                        );
-                        const textPatternsInNL: IFieldTextPattern[] = [
-                            {
-                                fid,
-                                ph: /.*/,
-                                pe: /.*/,
-                                selection: wordsInRegExp,
-                                selectionType: 'nlp',
-                                score: 0.001,
-                                pattern: new RegExp(`^.*(?<selection>${wordsInRegExp.source}).*$`),
-                            },
-                        ];
-                        unstable_batchedUpdates(() => {
-                            const gtp = groupTextPattern(nextTPL.concat(textPatternsInNL));
-                            setGroupedTextPatternList(gtp);
-                            const enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = nextTSL.length > 1 ? undefined : ['knowledge'];
-                            setTpPos(findFirstExistTextPattern(gtp, enhanceKeys));
-                        });
-                    });
+                // fetch('http://127.0.0.1:5533/api/text_pattern_extraction', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify({
+                //         values: dataSourceStore.cleanedData.map((d) => `${d[fid]}`),
+                //         selections: [...textSelectList.map((t) => t.str.slice(t.startIndex, t.endIndex)), fullText.slice(startIndex, endIndex)].map(
+                //             (d) => `${d}`
+                //         ),
+                //     }),
+                // })
+                //     .then((res) => res.json())
+                //     .then((res) => {
+                //         const extractions: { score: number; best_match: string }[] = res.data.extractions;
+                //         const wordSets: Set<string> = new Set(extractions.filter((e) => e.score > 0.72).map((e) => e.best_match));
+                //         const wordsInRegExp = new RegExp(
+                //             Array.from(wordSets)
+                //                 .map((w) => `${w}`)
+                //                 .join('|')
+                //         );
+                //         const textPatternsInNL: IFieldTextPattern[] = [
+                //             {
+                //                 fid,
+                //                 ph: /.*/,
+                //                 pe: /.*/,
+                //                 selection: wordsInRegExp,
+                //                 selectionType: 'nlp',
+                //                 score: 0.001,
+                //                 pattern: new RegExp(`^.*(?<selection>${wordsInRegExp.source}).*$`),
+                //             },
+                //         ];
+                //         unstable_batchedUpdates(() => {
+                //             const gtp = groupTextPattern(nextTPL.concat(textPatternsInNL));
+                //             setGroupedTextPatternList(gtp);
+                //             const enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = nextTSL.length > 1 ? undefined : ['knowledge'];
+                //             setTpPos(findFirstExistTextPattern(gtp, enhanceKeys));
+                //         });
+                //     });
                 unstable_batchedUpdates(() => {
                     setTextSelectList(nextTSL);
                     // setTextPatternList(nextTPL);
@@ -178,7 +187,8 @@ const DataTable: React.FC = (props) => {
                 });
             }
         },
-        [textSelectList, tsList2tpList, dataSourceStore.cleanedData]
+        // [textSelectList, tsList2tpList, dataSourceStore.cleanedData]
+        [textSelectList, tsList2tpList]
     );
     const clearTextSelect = () => {
         unstable_batchedUpdates(() => {
@@ -262,9 +272,9 @@ const DataTable: React.FC = (props) => {
                                 onTextSelect(f.fid, `${text}`, ele);
                             }}
                         >
-                            {textBeforeSelection}
+                            <span>{textBeforeSelection}</span>
                             <span style={{ backgroundColor: DATA_TABLE_STYLE_CONFIG.SELECT_COLOR }}>{matchedText}</span>
-                            {textAfterSelection}
+                            <span>{textAfterSelection}</span>
                         </span>
                     );
                     return ele;
