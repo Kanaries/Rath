@@ -125,17 +125,6 @@ async function specify (space: IInsightSpace) {
     return engine.specification(space)
 }
 
-function scanDetails (spaceIndex: number) {
-    const engine = EngineRef.current;
-    if (engine === null) throw new Error('Engine is not created.');
-    const space = engine.insightSpaces[spaceIndex];
-    if (space) {
-        return engine.scanDetail(space)
-    } else {
-        throw new Error(`insightSpaces(${spaceIndex}/${engine.insightSpaces.length}) not exist.`)
-    }
-}
-
 async function associate (props: { dimensions: string[]; measures: string[] }) {
     const engine = EngineRef.current;
     if (engine === null) throw new Error('Engine is not created.');
@@ -247,11 +236,6 @@ export async function router (e: { data: MessageProps }, onSuccess: (res?: any) 
             case 'associate': {
                 const res_asso = await associate(req.props);
                 onSuccess(res_asso)
-                break;
-            }
-            case 'detail': {
-                const res_details = scanDetails(req.props);
-                onSuccess(res_details)
                 break;
             }
             case 'download': {

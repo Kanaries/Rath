@@ -2,6 +2,7 @@ import { ActionButton, Panel, PanelType } from '@fluentui/react';
 import { IPattern } from '@kanaries/loa';
 import { runInAction } from 'mobx';
 import React, { useEffect } from 'react';
+import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../../store';
 import LiteFocusZone from './liteFocusZone';
 import LitePredictZone from './litePredictZone';
@@ -32,14 +33,14 @@ const SemiEmbed: React.FC<IProps> = (props) => {
                 iconProps={{
                     iconName: 'Lightbulb',
                 }}
-                text="线索发现"
+                text={intl.get('semiAuto.embed.insight_discovery')}
                 onClick={() => {
                     toggleShow && toggleShow(!show);
                 }}
             />
             <Panel
                 type={PanelType.medium}
-                headerText="线索"
+                headerText={intl.get('semiAuto.embed.insights')}
                 isOpen={show}
                 isBlocking={false}
                 onDismiss={() => {

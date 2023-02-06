@@ -1,19 +1,18 @@
 import { Slider } from '@fluentui/react';
 import React from 'react';
 
-
 interface RangeSelectionProps {
     range: [number, number];
     left: number;
     right: number;
     onValueChange: (range: [number, number]) => void;
 }
-const RangeSelection: React.FC<RangeSelectionProps> = props => {
+const RangeSelection: React.FC<RangeSelectionProps> = (props) => {
     const { range, left, right, onValueChange } = props;
 
-    return <div className="flex overflow-hidden items-center">
+    return (
         <Slider
-            label='range'
+            label="range"
             min={range[0]}
             max={range[1]}
             value={right}
@@ -41,7 +40,7 @@ const RangeSelection: React.FC<RangeSelectionProps> = props => {
                 },
             }}
         />
-    </div>
-}
+    );
+};
 
 export default RangeSelection;

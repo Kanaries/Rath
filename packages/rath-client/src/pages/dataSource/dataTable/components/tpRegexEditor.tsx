@@ -2,7 +2,7 @@ import { DefaultButton, PrimaryButton, Stack, TextField } from '@fluentui/react'
 import { unstable_batchedUpdates } from 'react-dom';
 import { FC, useCallback, useEffect, useState } from 'react';
 import intl from 'react-intl-universal';
-import { ITextPattern, ITextSelection } from '../../../lib/textPattern/init';
+import { ITextPattern, ITextSelection } from '../../../../lib/textPattern';
 
 export interface IFieldTextSelection extends ITextSelection {
     fid: string;
@@ -38,9 +38,10 @@ const TPRegexEditor: FC<TPRegexEditorProps> = (props) => {
             selection: new RegExp(sl),
             pattern: new RegExp(`${ph}(?<selection>${sl})${pe}`),
             selectionType: tp.selectionType,
+            score: tp.score,
         }
         onSubmit(ans);
-    }, [tp.fid, tp.selectionType, ph, pe, sl, onSubmit])
+    }, [tp.fid, tp.selectionType, tp.score, ph, pe, sl, onSubmit])
 
     return (
         <Stack>

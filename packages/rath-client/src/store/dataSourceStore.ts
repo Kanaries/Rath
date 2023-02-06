@@ -43,7 +43,7 @@ import { DataSourceTag, updateDataStorageMeta } from "../utils/storage";
 import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
 import { IsolationForest } from "../lib/outlier/iforest";
 import { compressRows, uncompressRows } from "../utils/rows2csv";
-import { extractSelection, ITextPattern } from "../lib/textPattern/init";
+import { extractSelection, ITextPattern } from "../lib/textPattern";
 import { getMainServiceAddress } from "../utils/user";
 import { request } from "../utils/request";
 import { getGlobalStore } from ".";
@@ -127,6 +127,7 @@ export class DataSourceStore {
     private subscriptions: Subscription[] = [];
     private reactions: IReactionDisposer[] = []
     public datasetId: string | null = null;
+    public showCustomizeComputationModal: boolean = false;
     public sourceType = DataSourceType.Unknown;
     constructor() {
         makeAutoObservable(this, {
@@ -159,6 +160,7 @@ export class DataSourceStore {
             versionCode: -1,
             length: 0,
         }
+        this.showCustomizeComputationModal = false;
         this.extData = new Map<string, ICol<any>>();
         this.mutFields = [];
         this.extFields = [];
@@ -419,6 +421,9 @@ export class DataSourceStore {
     }
     public setDatasetId (id: string) {
         this.datasetId = id;
+    }
+    public togleShowCustomizeComputationModal (show: boolean) {
+        this.showCustomizeComputationModal = show;
     }
     public addFilter () {
         const sampleField = this.fieldMetas.find(f => f.semanticType === 'quantitative');

@@ -5,9 +5,12 @@ import {  CommandBar, ICommandBarItemProps } from '@fluentui/react';
 import { toJS } from 'mobx';
 import { useGlobalStore } from '../../../store';
 import { IVisSpecType } from '../../../interfaces';
+import type { IReactVegaHandler } from '../../../components/react-vega';
 
-interface OperationBarProps {}
-const OperationBar: React.FC<OperationBarProps> = props => {
+interface OperationBarProps {
+    handler: React.RefObject<IReactVegaHandler>;
+}
+const OperationBar: React.FC<OperationBarProps> = ({ handler }) => {
     const { megaAutoStore, commonStore, collectionStore, painterStore, editorStore } = useGlobalStore();
     const { taskMode } = commonStore;
     const { mainViewSpec, mainViewPattern } = megaAutoStore;
@@ -94,7 +97,15 @@ const OperationBar: React.FC<OperationBarProps> = props => {
                 megaAutoStore.setShowContraints(true);
             },
             disabled: true
-        }
+        },
+        {
+            key: 'download',
+            text: intl.get('megaAuto.commandBar.download'),
+            iconProps: { iconName: 'Download' },
+            onClick: () => {
+                handler.current?.exportImage();
+            },
+        },
     ]
 
     return <div style={{ position: 'relative', zIndex: 99}}>

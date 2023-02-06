@@ -16,7 +16,7 @@ const AdviceContainer = styled.div`
 
 const Advice: React.FC = (props) => {
     const { dataSourceStore } = useGlobalStore();
-    const { measures, cleanedData, hasOriginalDimensionInData, groupMeanLimitCountsLog, dataPrepProgressTag } = dataSourceStore;
+    const { measures, cleanedData, hasOriginalDimensionInData, /*groupMeanLimitCountsLog,*/ dataPrepProgressTag } = dataSourceStore;
     const { startMode } = useActionModes();
 
     const onForceAnalysis = () => {
@@ -47,11 +47,11 @@ const Advice: React.FC = (props) => {
                     {intl.get('dataSource.advice.lackMeasure')}
                 </MessageBar>
             )}
-            {Math.log2(cleanedData.length) - groupMeanLimitCountsLog < Math.log2(8) && (
+            {/* {Math.log2(cleanedData.length) - groupMeanLimitCountsLog < Math.log2(8) && (
                 <MessageBar className="row" messageBarType={MessageBarType.warning}>
                     {intl.get('dataSource.advice.smallSample')}
                 </MessageBar>
-            )}
+            )} */}
         </AdviceContainer>
     );
 };

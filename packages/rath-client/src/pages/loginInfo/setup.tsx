@@ -14,7 +14,6 @@ const langOptions: IDropdownOption[] = SUPPORT_LANG.map((lang) => ({
 }));
 
 const SetUpDiv = styled.div`
-    padding: 0.5em 1em 1em 1em;
     hr {
         margin: 1em 0em;
     }

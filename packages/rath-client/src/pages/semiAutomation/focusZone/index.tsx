@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ActionButton, CommandButton, DefaultButton, IContextualMenuProps } from '@fluentui/react';
 import intl from 'react-intl-universal';
@@ -11,12 +11,13 @@ import FilterCreationPill from '../../../components/fieldPill/filterCreationPill
 import Narrative from '../narrative';
 import EncodeCreationPill from '../../../components/fieldPill/encodeCreationPill';
 import EditorCore from '../../editor/core/index';
+import type { IReactVegaHandler } from '../../../components/react-vega';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
-const FocusZone: React.FC = (props) => {
+const FocusZone: React.FC = () => {
     const { semiAutoStore, commonStore, collectionStore, painterStore, editorStore } = useGlobalStore();
     const { mainVizSetting, mainView, showMiniFloatView, mainViewSpec, fieldMetas, neighborKeys, mainViewSpecSource } = semiAutoStore;
     const { muteSpec } = editorStore;
@@ -71,6 +72,8 @@ const FocusZone: React.FC = (props) => {
         };
     }, [editChart, editorStore, mainViewSpec, semiAutoStore]);
 
+    const handler = useRef<IReactVegaHandler>(null);
+
     return (
         <MainViewContainer>
             {mainView && showMiniFloatView && <MiniFloatCanvas pined={mainView} />}
@@ -90,7 +93,7 @@ const FocusZone: React.FC = (props) => {
                         />
                     )}
                 </div>
-                <div className="vis">{mainView && mainViewSpec && <MainCanvas view={mainView} spec={viewSpec} />}</div>
+                <div className="vis">{mainView && mainViewSpec && <MainCanvas handler={handler} view={mainView} spec={viewSpec} />}</div>
                 {mainVizSetting.nlg && (
                     <div style={{ overflow: 'auto' }}>
                         <Narrative />
@@ -217,6 +220,17 @@ const FocusZone: React.FC = (props) => {
                     text={intl.get('common.settings')}
                     onClick={() => {
                         semiAutoStore.setShowSettings(true);
+                    }}
+                />
+                <ActionButton
+                    style={{ marginTop: BUTTON_STYLE.marginTop }}
+                    iconProps={{ iconName: 'Download' }}
+                    ariaLabel={intl.get('megaAuto.commandBar.download')}
+                    title={intl.get('megaAuto.commandBar.download')}
+                    text={intl.get('megaAuto.commandBar.download')}
+                    disabled={mainView === null}
+                    onClick={() => {
+                        handler.current?.exportImage();
                     }}
                 />
             </div>

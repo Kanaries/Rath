@@ -383,12 +383,6 @@ export class MegaAutomationStore {
     public setShowSaveModal (show: boolean) {
         this.showSaveModal = show;
     }
-    public async scanDetails (spaceIndex: number) {
-        const result = await this.ltsPipeLineStore.scanDetails(spaceIndex);
-        runInAction(() => {
-            this.details = result;
-        })
-    }
     public async getStorageContent (): Promise<string> {
         // TODO: 序列化相关工程问题
         // 1. 下载与上传的处理逻辑尽量放在同一文件处理（待议）

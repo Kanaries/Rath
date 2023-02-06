@@ -12,6 +12,7 @@
         "preview": "预览",
         "source": "源",
         "submit": "提交",
+        "cancel": "取消",
         "apply": "应用",
         "applied": "已应用",
         "run": "执行",
@@ -59,7 +60,8 @@
         "dataSource": "数据源",
         "editor": "自助分析",
         "support": "帮助",
-        "megaAuto": "全自动分析",
+        "eda": "数据探索分析",
+        "megaAuto": "全自动探索",
         "semiAuto": "半自动探索",
         "devCollection": "实验特性(α)",
         "dashBoardDesigner": "智能报表",
@@ -151,7 +153,9 @@
         "textPattern": {
             "knowledge": "常识",
             "generalize": "泛化",
-            "specific": "完全匹配"
+            "specific": "完全匹配",
+            "nlp": "NLP(β)",
+            "currentPattern": "当前文本模式"
         },
         "statViewInfo": {
             "title": "统计视图",
@@ -226,11 +230,12 @@
             "buttonName": "选择数据",
             "type": {
                 "file": "文件",
-                "restful": "RESTFUL",
+                "restful": "From URL",
                 "mysql": "MySQL",
                 "demo": "示例数据",
                 "database": "数据库",
-                "kanaries_cloud": "云"
+                "kanaries_cloud": "云",
+                "rath_notebook": "工作簿"
             },
             "cloud": {
                 "notebook": "工作簿",
@@ -244,8 +249,17 @@
                 "available": "可选数据集"
             },
             "restful": {
-                "requestData": "请求数据",
-                "exampleDataStruct": "示例数据结构"
+                "requestData": "获取数据",
+                "exampleDataStruct": "示例数据结构",
+                "loadHistoryAPI": "加载历史 API",
+                "detectedDataStruct": "解析结构(自动识别)",
+                "confirm": "确认使用",
+                "clear": "清除数据",
+                "format": {
+                    "array": "数组",
+                    "array_with_meta": "数组和元数据",
+                    "others": "其他"
+                }
             }
         },
         "table": {
@@ -271,7 +285,7 @@
             "syncMode": "分位数同步"
         },
         "upload": {
-            "title": "连接你的数据集，根据需求调整以下配置",
+            "title": "连接你的数据集",
             "fileTypes": "支持 Excel 工作簿以及 JSON、CSV 等文本类型文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
             "show_more": "高级设置",
@@ -332,7 +346,7 @@
             "empty": "没有导出的列。",
             "apply": "扩展",
             "cancel": "取消",
-            "auto": "扩展建议",
+            "auto": "转换",
             "suggestion": {
                 "regex_selection": "模式发现&提取|将选中的字段作为模式，发现数据集中所有匹配的相似模式并提取出来。",
                 "dateTimeExpand": "将数据映射到不同时间单位。|时间序列可能在不同的单位尺度下展现出更强的周期性或相关性。",
@@ -416,7 +430,14 @@
             "editInGW": "自助分析",
             "editInEditor": "在编辑器配置",
             "associate": "联想",
-            "constraints": "分析约束"
+            "constraints": "分析约束",
+            "download": "导出图表",
+            "export": "导出",
+            "export_as": "导出为",
+            "export_size": "尺寸",
+            "lock_aspect": "锁定宽高比",
+            "export_bg": "背景色",
+            "err_msg_invalid_size": "大小不能超过 {min} ~ {max}"
         },
         "constraints": {
             "exclude": "排除字段",
@@ -472,6 +493,10 @@
                 "filters": "子集",
                 "neighbors": "邻近视图"
             }
+        },
+        "embed": {
+            "insight_discovery": "线索发现",
+            "insights": "线索"
         }
     },
     "desc": {

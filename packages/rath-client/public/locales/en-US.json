@@ -58,6 +58,7 @@
     },
     "menu": {
         "dataSource": "DataSource",
+        "eda": "Exploratory Data Analysis",
         "editor": "Manual Exploration",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
@@ -134,9 +135,9 @@
         "cleanMethod": "Clean Method",
         "useField": "use field",
         "viewMode": "View Mode",
-        "metaView": "Meta View",
-        "dataView": "Table View",
-        "statView": "Statistics View",
+        "metaView": "Meta",
+        "dataView": "Table",
+        "statView": "Statistics",
         "charset": "character encoding",
         "separator": "Separator",
         "databaseType": "Select Database",
@@ -153,7 +154,9 @@
         "textPattern": {
             "knowledge": "Knowledge",
             "generalize": "Generalize",
-            "specific": "Extract Match"
+            "specific": "Extract Match",
+            "nlp": "NLP(β)",
+            "currentPattern": "Current Pattern"
         },
         "statViewInfo": {
             "title": "Statistics View",
@@ -228,7 +231,7 @@
             "load": "Load Data",
             "type": {
                 "file": "File",
-                "restful": "RESTFUL",
+                "restful": "From URL",
                 "mysql": "MySQL",
                 "demo": "Demo",
                 "database": "Database",
@@ -246,7 +249,16 @@
             },
             "restful": {
                 "requestData": "Request Data",
-                "exampleDataStruct": "Example Data Structure"
+                "exampleDataStruct": "Example Data Structure",
+                "loadHistoryAPI": "Load History",
+                "detectedDataStruct": "Parse Rule(auto detect)",
+                "confirm": "Confirm",
+                "clear": "Clear",
+                "format": {
+                    "array": "Array",
+                    "array_with_meta": "Array with Meta",
+                    "others": "Others"
+                }
             }
         },
         "table": {
@@ -272,7 +284,7 @@
             "syncMode": "sync mode"
         },
         "upload": {
-            "title": "Upload Your own dataset",
+            "title": "Connect your data",
             "fileTypes": "Excel workbooks and text-based files (e.g. JSON, CSV) are supported.",
             "uniqueIdIssue": "Add unique ids for fields",
             "show_more": "More Options",
@@ -417,7 +429,14 @@
             "editInGW": "Customized Analysis",
             "editInEditor": "Edit in Editor",
             "associate": "associate views",
-            "constraints": "analysis constraints"
+            "constraints": "analysis constraints",
+            "download": "export chart",
+            "export": "Export",
+            "export_as": "Export As",
+            "export_size": "Size",
+            "lock_aspect": "Lock Aspect",
+            "export_bg": "Background Color",
+            "err_msg_invalid_size": "Size must be between {min} ~ {max}"
         },
         "constraints": {
             "exclude": "exclude field",
@@ -453,7 +472,7 @@
             "explainDiff": "explain diff",
             "pointInterests": "related subsets",
             "neighbors": "neighbor views",
-            "pin": "pin",
+            "pin": "related insights",
             "compare": "compare",
             "vizsys": {
                 "title": "visualization recommend system",
@@ -473,6 +492,10 @@
                 "filters": "Subsets",
                 "neighbors": "Neighbors"
             }
+        },
+        "embed": {
+            "insight_discovery": "Insight Discovery",
+            "insights": "Insights"
         }
     },
     "desc": {
@@ -594,8 +617,8 @@
         },
         "clickLogin": "Login",
         "haveSent": "Already Sent",
-        "signIn": "Sign In",
-        "signOut": "Sign Out",
+        "signIn": "Sign Up",
+        "signOut": "Logout",
         "preferences": "Preferences",
         "phoneCert": "Phone",
         "emailCert": "Email",

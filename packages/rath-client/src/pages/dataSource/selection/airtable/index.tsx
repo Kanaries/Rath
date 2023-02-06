@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import intl from 'react-intl-universal'
 import { logDataImport } from '../../../../loggers/dataImport';
 import { IMuteFieldBase, IRow } from '../../../../interfaces';
-import { transformRawDataService } from '../../utils';
+import { rawData2DataWithBaseMetas } from '../../utils';
 import { DataSourceTag, IDBMeta } from '../../../../utils/storage';
 import { fetchAllRecordsFromAirTable } from './utils';
 
@@ -31,7 +31,7 @@ const AirTableSource: React.FC<AirTableSourceProps> = (props) => {
             tableName,
             viewName
         })
-            .then((data) => transformRawDataService(data))
+            .then((data) => rawData2DataWithBaseMetas(data))
             .then((ds) => {
                 const name = `airtable-${tableName}-${viewName}`;
                 onDataLoaded(ds.fields, ds.dataSource, name, DataSourceTag.AIR_TABLE);

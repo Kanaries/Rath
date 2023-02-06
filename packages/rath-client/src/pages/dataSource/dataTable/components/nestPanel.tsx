@@ -1,15 +1,11 @@
 import { DefaultButton, Stack } from '@fluentui/react';
 import { FC } from 'react';
 import styled from 'styled-components';
+import intl from 'react-intl-universal';
 
 const Cont = styled.div`
     background-color: #fff;
     min-width: 260px;
-    /* position: absolute; */
-    /* right: 0px; */
-    /* top: 0px; */
-    /* bottom: 0px; */
-    /* z-index: 50; */
     border: 1px solid #f0f0f0;
     flex-shrink: 0;
     flex-grow: 0;
@@ -48,20 +44,10 @@ const NestPanel: FC<NestPanelProps> = props => {
         </div>
         <div className="action-bar">
             <Stack tokens={{ childrenGap: 10 }}>
-                <DefaultButton text='cancel' onClick={onClose} />
+                <DefaultButton text={intl.get('common.cancel')} onClick={onClose} />
             </Stack>
         </div>
     </Cont>
 }
 
-// const StyledNestPanel = styled(NestPanel)`
-//     background-color: red;
-//     min-width: 200px;
-//     position: absolute;
-//     right: 0px;
-//     top: 0px;
-//     bottom: 0px;
-// `
-
-// export default StyledNestPanel;
 export default NestPanel

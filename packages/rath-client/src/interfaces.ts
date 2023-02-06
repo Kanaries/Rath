@@ -143,6 +143,7 @@ export interface ISyncEngine {
 export interface IDatasetBase {
     dataSource: IRow[];
     fields: IMuteFieldBase[];
+    error?: string;
 }
 
 export enum IDataPreviewMode {

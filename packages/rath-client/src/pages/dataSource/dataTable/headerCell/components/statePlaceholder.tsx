@@ -35,7 +35,7 @@ const Cont = styled.div<{ stateType?: IColStateType }>`
 `;
 
 interface StatePlaceholderProps {
-    stateType?: 'preview' | 'source';
+    stateType?: IColStateType;
     onAcceptExtField: () => void;
     onRejectExtField: () => void;
 }
