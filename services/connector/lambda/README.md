@@ -1,14 +1,13 @@
-# connector
-use sqlalchemy to connect database.
+# connector-lambda
+Deploy using lambda in aws. each folder is a separate database connection, in order to effectively separate its dependencies.
 
-You need to first add the four packages in requirements.txt to the deployed environment, Then refer to the website below to add the package that you need to connect to the database
+Install the dependencies of each database connector in the corresponding folder, When finished, all of them are packaged into a zip file and uploaded to aws lambda.
+```
+pip install --target .\{folder}\ {module} 
+```
+For details, see the following documents:
+https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/python-package.html
 
-Since this is a python program, it is recommended that you configure these packages in a virtual environment
-
-It uses a method similar to Superset, and you can refer to its reference documentation.
-https://superset.apache.org/docs/databases/installing-database-drivers/
-
-Currently supported databases are: clickhouse, mysql, doris, athena, drill, impala, redshift, sparksql, sqlserver
 
 ## The reference library is as follows:
     athena:           pyathena/pyathenajdbc
