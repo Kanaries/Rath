@@ -59,7 +59,7 @@ const ServerItem = styled.div`
         :nth-child(2) span {
             display: inline-block;
             font-size: 0.7rem;
-            min-width: 3em;
+            min-width: 2em;
             width: max-content;
             text-align: center;
             color: #666;
@@ -120,7 +120,7 @@ const renderServerItem = (
                     />
                 ) : status === 'rejected' ? (
                     <Icon
-                        iconName="ErrorBadge"
+                        iconName="StatusCircleErrorX"
                         style={{
                             color: 'red',
                         }}
@@ -136,7 +136,7 @@ const renderServerItem = (
             <div onClick={e => e.stopPropagation()}>
                 <IconButton
                     disabled={status === 'pending'}
-                    iconProps={{ iconName: 'Refresh' }}
+                    iconProps={{ iconName: 'SyncOccurence' }}
                     onClick={() => onRefresh(target)}
                 />
                 <IconButton
@@ -161,6 +161,13 @@ const AdvancedOptions = observer<{
     setServer: (target: string) => void;
     testConnector: (...indices: number[]) => void;
 }>(function AdvancedOptions ({ servers, server, setServer, appendServer, removeServer, testConnector }) {
+    useEffect(() => {
+        const unchecked = servers.map((s, i) => ({ s, i })).filter(({ s }) => s.status === 'unknown').map(({ i }) => i);
+        if (unchecked.length > 0) {
+            testConnector(...unchecked);
+        }
+    }, [servers, testConnector]);
+
     const [focused, setFocused] = useState(false);
 
     const [customServer, setCustomServer] = useState('');
@@ -192,7 +199,8 @@ const AdvancedOptions = observer<{
         }
     }, [servers, customServer, server]);
 
-    const status = servers.find(s => s.target === server)?.status;
+    const curServer = servers.find(s => s.target === server);
+    const status = curServer?.status;
 
     const renderItem = renderServerItem.bind({},
         target => {
@@ -251,16 +259,19 @@ const AdvancedOptions = observer<{
                         ) : status === 'pending' ? (
                             <Spinner size={SpinnerSize.small} />
                         ) : status === 'fulfilled' ? (
-                            <Icon
-                                iconName="StatusCircleCheckmark"
-                                style={{
-                                    borderRadius: '50%',
-                                    fontSize: '1.2rem',
-                                    color: 'green',
-                                    userSelect: 'none',
-                                    cursor: 'default',
-                                }}
-                            />
+                            <span style={{ display: 'flex', alignItems: 'center' }}>
+                                <Icon
+                                    iconName="StatusCircleCheckmark"
+                                    style={{
+                                        borderRadius: '50%',
+                                        fontSize: '1.2rem',
+                                        color: 'green',
+                                        userSelect: 'none',
+                                        cursor: 'default',
+                                    }}
+                                />
+                                {curServer.lag && <small>{`${curServer.lag}ms`}</small>}
+                            </span>
                         ) : (
                             <ErrorMessage>
                                 {intl.get('dataSource.connectorOffline')}
@@ -284,7 +295,7 @@ const AdvancedOptions = observer<{
             {focused && (
                 <>
                     <DefaultButton
-                        iconProps={{ iconName: 'Refresh' }}
+                        iconProps={{ iconName: 'SyncOccurence' }}
                         style={{ width: '32px', minWidth: 'unset', padding: '0', borderLeft: 'none' }}
                         onClick={e => {
                             e.stopPropagation();

@@ -21,7 +21,7 @@ export type DatabaseApiParams = {
     databaseName: string;
     tableName: string;
     schemaName: string;
-    tableHeadingCount: number;
+    tableHeadingCount: string;
     query: string;
 };
 
@@ -30,9 +30,9 @@ export type DatabaseRequestPayload<P extends Exclude<DatabaseApiOperator, 'ping'
     sourceType: DatabaseApiParams['sourceType'];
     func: P;
     db?: DatabaseApiParams['databaseName'] | null;
-    schema: DatabaseApiParams['schemaName'] | null;
+    schema?: DatabaseApiParams['schemaName'] | null;
     table?: DatabaseApiParams['tableName'] | null;
-    /** @default 500 */
+    /** @default "500" */
     rowsNum?: DatabaseApiParams['tableHeadingCount'] | null;
     query?: DatabaseApiParams['query'] | null;
 };
@@ -104,7 +104,7 @@ export const checkServerConnection = async (server: string): Promise<false | num
     }
 };
 
-export const fetchDatabaseList = async (server: string, payload: DatabaseRequestData['getDatabases']): Promise<string[]> => {
+export const fetchDatabaseList = async (server: string, payload: Omit<DatabaseRequestData['getDatabases'], 'func'>): Promise<string[]> => {
     try {
         return await combinedDatabaseService(server, 'getDatabases', payload);
     } catch (error) {
@@ -114,7 +114,7 @@ export const fetchDatabaseList = async (server: string, payload: DatabaseRequest
     }
 };
 
-export const fetchSchemaList = async (server: string, payload: DatabaseRequestData['getSchemas']): Promise<string[]> => {
+export const fetchSchemaList = async (server: string, payload: Omit<DatabaseRequestData['getSchemas'], 'func'>): Promise<string[]> => {
     try {
         return await combinedDatabaseService(server, 'getSchemas', payload);
     } catch (error) {
@@ -124,7 +124,7 @@ export const fetchSchemaList = async (server: string, payload: DatabaseRequestDa
     }
 };
 
-export const fetchTableList = async (server: string, payload: DatabaseRequestData['getTables']): Promise<TableInfo[]> => {
+export const fetchTableList = async (server: string, payload: Omit<DatabaseRequestData['getTables'], 'func'>): Promise<TableInfo[]> => {
     try {
         return await combinedDatabaseService(server, 'getTables', payload);
     } catch (error) {
@@ -134,7 +134,7 @@ export const fetchTableList = async (server: string, payload: DatabaseRequestDat
     }
 };
 
-export const fetchTableDetail = async (server: string, payload: DatabaseRequestData['getTableDetail']): Promise<DatabaseResponseData['getTableDetail']> => {
+export const fetchTableDetail = async (server: string, payload: Omit<DatabaseRequestData['getTableDetail'], 'func'>): Promise<DatabaseResponseData['getTableDetail']> => {
     try {
         return await combinedDatabaseService(server, 'getTableDetail', payload);
     } catch (error) {
@@ -147,7 +147,7 @@ export const fetchTableDetail = async (server: string, payload: DatabaseRequestD
     }
 };
 
-export const fetchQueryResult = async (server: string, payload: DatabaseRequestData['getResult']): Promise<DatabaseResponseData['getResult']> => {
+export const fetchQueryResult = async (server: string, payload: Omit<DatabaseRequestData['getResult'], 'func'>): Promise<DatabaseResponseData['getResult']> => {
     try {
         return await combinedDatabaseService(server, 'getResult', payload);
     } catch (error) {

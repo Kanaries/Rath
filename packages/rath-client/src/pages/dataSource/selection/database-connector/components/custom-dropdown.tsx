@@ -1,5 +1,5 @@
 import { Icon } from '@fluentui/react';
-import databaseOptions from './config';
+import databaseOptions from '../config';
 
 
 export const renderDropdownTitle: React.FC<typeof databaseOptions | undefined> = ([item]) => {
