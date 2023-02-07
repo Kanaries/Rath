@@ -25,10 +25,7 @@ const useAsyncState = <T>(
     initState: T | (() => T),
     option: AsyncStateOption<T> = {},
 ): [T, AsyncDispatch<T | Promise<T> | ((prevState: T) => T | Promise<T>)>, boolean] => {
-    const {
-        resetBeforeTask = true,
-        onReject = defaultRejectHandler,
-    } = option;
+    const optionRef = useRef(option);
     const initializerRef = useRef(initState);
     const [asyncState, setAsyncState] = useState<T>(initState);
     const [loading, setLoading] = useState(false);
@@ -45,7 +42,13 @@ const useAsyncState = <T>(
             }
             return new Promise<T>(() => void 0);
         }
-        const value = typeof next === 'function' ? (next as () => T | Promise<T>)() : next;
+        const {
+            resetBeforeTask = true,
+            onReject = defaultRejectHandler,
+        } = optionRef.current;
+
+        const value = typeof next === 'function' ? (next as (prevState: T) => T | Promise<T>)(lastSettledStateRef.current) : next;
+
         return new Promise<T>(resolve => {
             if (value instanceof Promise) {
                 if (resetBeforeTask) {
@@ -85,9 +88,10 @@ const useAsyncState = <T>(
                 resolve(value);
             }
         });
-    }, [resetBeforeTask, onReject]);
+    }, []);
 
     useEffect(() => {
+        unmountedRef.current = false;
         return () => {
             pendingRef.current = null;
             unmountedRef.current = true;

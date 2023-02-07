@@ -1,8 +1,8 @@
 import intl from 'react-intl-universal';
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
-import { Dropdown, IconButton, IDropdownOption, PrimaryButton, registerIcons, Spinner, SpinnerSize, Stack, TextField } from '@fluentui/react';
+import { Dropdown, IDropdownOption, PrimaryButton, registerIcons, Spinner, SpinnerSize, Stack, TextField } from '@fluentui/react';
 import type { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { DataSourceTag } from '../../../../utils/storage';
 import useAsyncState from '../../../../hooks/use-async-state';
@@ -14,7 +14,7 @@ import { checkServerConnection } from './api';
 import AdvancedOptions from './form/advanced-options';
 
 export const StackTokens = {
-    childrenGap: 20,
+    childrenGap: 10,
 };
 
 const iconPathPrefix = '/assets/icons/';
@@ -63,35 +63,39 @@ interface DatabaseDataProps {
 export const inputWidth = '180px';
 
 // FIXME: test server
-const defaultServer = 'https://za2piuk6wc.execute-api.us-east-1.amazonaws.com/connector'; //'https://gateway.kanaries.net/connector';
+export const defaultServers: readonly string[] = [
+    'https://za2piuk6wc.execute-api.us-east-1.amazonaws.com/connector',
+    'https://2qqrotf58e.execute-api.ap-northeast-1.amazonaws.com/connector',
+    'https://gateway.kanaries.net/connector',
+];
+
 
 const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLoadingAnimation }) => {
-    const [servers, setServers] = useLocalStorage('database_connector_server', [
-        defaultServer,
-        'https://2qqrotf58e.execute-api.ap-northeast-1.amazonaws.com/connector',
-        'https://gateway.kanaries.net/connector',
-    ]);
-    const [serverList, setServerList] = useAsyncState<{ target: string; status: 'pending' | 'fulfilled' | 'rejected'; lag: number }[]>(
-        () => servers.map(target => ({ target, status: 'pending', lag: 0 }))
+    const [servers, setServers] = useLocalStorage('database_connector_server', defaultServers);
+    const [serverList, setServerList] = useAsyncState<{ target: string; status: 'unknown' | 'pending' | 'fulfilled' | 'rejected'; lag: number }[]>(
+        () => servers.map(target => ({ target, status: 'unknown', lag: 0 })),
+        {
+            resetBeforeTask: false,
+        },
     );
 
-    const initialServersRef = useRef(servers);
+    // const initialServersRef = useRef(servers);
 
-    useEffect(() => {
-        const list = initialServersRef.current;
-        const state = list.map(target => checkServerConnection(target).then<typeof serverList[number]>(
-            status => ({
-                target,
-                status: status !== false ? 'fulfilled' : 'rejected',
-                lag: status !== false ? status : 0,
-            })
-        ));
-        setServerList(Promise.all(state));
-    }, [setServerList]);
+    // useEffect(() => {
+    //     const list = initialServersRef.current;
+    //     const state = list.map(target => checkServerConnection(target).then<typeof serverList[number]>(
+    //         status => ({
+    //             target,
+    //             status: status !== false ? 'fulfilled' : 'rejected',
+    //             lag: status !== false ? status : 0,
+    //         })
+    //     ));
+    //     setServerList(Promise.all(state));
+    // }, [setServerList]);
 
-    const [server, setServer] = useState(servers.at(0) ?? defaultServer);
+    const [server, setServer] = useState(servers.at(0) ?? defaultServers[0]);
 
-    const [showAdvanced, setShowAdvanced] = useState(false);
+    const serverStatusOk = serverList.find(s => s.target === server)?.status === 'fulfilled';
     
     const [sourceType, setSourceType] = useState<SupportedDatabaseType>('clickhouse');
 
@@ -111,74 +115,104 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
         setConnected(false);
     }, [connectUri, setConnected]);
 
-    const submit = async () => {
-        // if (!preview.value || submitPendingRef.current) {
-        //     return;
-        // }
-        // submitPendingRef.current = true;
-        // try {
-        //     const { rows, columns } = preview.value;
-        //     const data = await rawData2DataWithBaseMetas(
-        //         rows.map(
-        //             row => Object.fromEntries(
-        //                 row.map<[string, any]>((val, colIdx) => [columns?.[colIdx]?.key ?? `${colIdx}`, val])
-        //             )
-        //         )
-        //     );
-        //     const { dataSource, fields } = data;
-        //     const name = [database.value, schema.value].filter(
-        //         Boolean
-        //     ).join('.')
+    // const submit = async () => {
+    //     // if (!preview.value || submitPendingRef.current) {
+    //     //     return;
+    //     // }
+    //     // submitPendingRef.current = true;
+    //     // try {
+    //     //     const { rows, columns } = preview.value;
+    //     //     const data = await rawData2DataWithBaseMetas(
+    //     //         rows.map(
+    //     //             row => Object.fromEntries(
+    //     //                 row.map<[string, any]>((val, colIdx) => [columns?.[colIdx]?.key ?? `${colIdx}`, val])
+    //     //             )
+    //     //         )
+    //     //     );
+    //     //     const { dataSource, fields } = data;
+    //     //     const name = [database.value, schema.value].filter(
+    //     //         Boolean
+    //     //     ).join('.')
 
-        //     logDataImport({
-        //         dataType: `Database/${databaseType}`,
-        //         name,
-        //         fields,
-        //         dataSource: dataSource.slice(0, 10),
-        //         size: dataSource.length,
-        //     });
-        //     onDataLoaded(fields, dataSource, name, DataSourceTag.DATABASE);
+    //     //     logDataImport({
+    //     //         dataType: `Database/${databaseType}`,
+    //     //         name,
+    //     //         fields,
+    //     //         dataSource: dataSource.slice(0, 10),
+    //     //         size: dataSource.length,
+    //     //     });
+    //     //     onDataLoaded(fields, dataSource, name, DataSourceTag.DATABASE);
 
-        //     onClose();
-        // } catch (error) {
-        //     console.error(error);
-        // } finally {
-        //     submitPendingRef.current = false;
-        // }
-    };
+    //     //     onClose();
+    //     // } catch (error) {
+    //     //     console.error(error);
+    //     // } finally {
+    //     //     submitPendingRef.current = false;
+    //     // }
+    // };
 
     return (
-        <Stack tokens={StackTokens}>
-            {showAdvanced && (
-                <AdvancedOptions
-                    servers={serverList}
-                    removeServer={idx => {
-                        const next = produce(servers, draft => {
-                            draft.splice(idx, 1);
-                        });
-                        setServers(next);
-                        setServerList(next.map(target => ({
-                            target,
-                            status: serverList.find(which => which.target === target)?.status ?? 'pending',
-                            lag: 0,
-                        })));
-                    }}
-                    server={server}
-                    setServer={val => setServer(val)}
-                />
-            )}
-            <Stack horizontal style={{ alignItems: 'flex-end' }}>
-                <IconButton
-                    iconProps={{
-                        iconName: 'Settings',
-                    }}
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                />
+        <Stack tokens={StackTokens} style={{ paddingBlock: '1em' }}>
+            <AdvancedOptions
+                servers={serverList}
+                appendServer={target => {
+                    const next = produce(servers, draft => {
+                        draft.unshift(target);
+                    });
+                    setServers(next);
+                    setServerList(next.map(target => ({
+                        target,
+                        status: serverList.find(which => which.target === target)?.status ?? 'unknown',
+                        lag: 0,
+                    })));
+                }}
+                removeServer={idx => {
+                    const next = produce(servers, draft => {
+                        draft.splice(idx, 1);
+                    });
+                    setServers(next);
+                    setServerList(next.map(target => ({
+                        target,
+                        status: serverList.find(which => which.target === target)?.status ?? 'unknown',
+                        lag: 0,
+                    })));
+                }}
+                server={server}
+                setServer={val => setServer(val)}
+                testConnector={(...indices) => {
+                    setServerList(prev => produce(prev, draft => {
+                        for (const idx of indices) {
+                            draft[idx].status = 'pending';
+                        }
+                    }));
+                    setServerList(
+                        prev => Promise.all(
+                            indices.map(
+                                idx => serverList[idx].target
+                            ).map(
+                                target => checkServerConnection(target).then<typeof serverList[number]>(
+                                    status => ({
+                                        target,
+                                        status: status !== false ? 'fulfilled' : 'rejected',
+                                        lag: status !== false ? status : 0,
+                                    })
+                                )
+                            )
+                        ).then<typeof serverList>(data => {
+                            return prev.map(d => {
+                                const next = data.find(which => which.target === d.target);
+                                return next ?? d;
+                            });
+                        }),
+                    )
+                }}
+            />
+            <Stack>
                 <Dropdown
                     label={intl.get('dataSource.connectUri')}
                     title={intl.get('dataSource.databaseType')}
                     ariaLabel={intl.get('dataSource.databaseType')}
-                    disabled={isConnecting}
+                    disabled={!serverStatusOk || isConnecting}
                     required
                     styles={{
                         dropdown: {
@@ -214,7 +248,7 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
                     name={databaseConfig ? `connectUri:${databaseConfig.key}` : undefined}
                     title={intl.get('dataSource.connectUri')}
                     aria-required
-                    disabled={!databaseConfig || isConnecting || databaseConfig.key === 'demo'}
+                    disabled={!serverStatusOk || !databaseConfig || isConnecting || databaseConfig.key === 'demo'}
                     value={connectUri}
                     placeholder={databaseConfig?.rule}
                     onChange={(_, uri) => setConnectUri(uri ?? '')}
@@ -237,7 +271,7 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
                     }}
                 />
                 <PrimaryButton
-                    disabled={isConnecting || (databaseConfig?.key !== 'demo' && !connectUri) || connected}
+                    disabled={!serverStatusOk || isConnecting || (databaseConfig?.key !== 'demo' && !connectUri) || connected}
                     // onClick={() => handleConnectionTest()}
                 >
                     {isConnecting ? <Spinner size={SpinnerSize.small} /> : intl.get('dataSource.btn.connect')}

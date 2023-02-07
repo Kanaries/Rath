@@ -147,6 +147,8 @@
         "query": "SQL 查询",
         "connectorConfig": "连接器设置",
         "connectorService": "连接器服务地址 (可选)",
+        "connectorOffline": "连接器未成功连接，请重试或选择其他服务地址。",
+        "connectorEmpty": "未设置有效的连接器。",
         "apply": "设置并测试",
         "textPattern": {
             "knowledge": "常识",

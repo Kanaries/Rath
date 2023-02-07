@@ -12,7 +12,7 @@ import DemoData from './demo';
 import JSONAPI from './jsonAPI';
 import OLAPData from './olap';
 import HistoryPanel from './history';
-import DatabaseData from './database/';
+import DatabaseConnector from './database-connector';
 import AirTableSource from './airtable';
 import Notebook from './notebook';
 
@@ -54,7 +54,7 @@ const Selection: React.FC<SelectionProps> = props => {
             <HistoryPanel onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} />
         ),
         [IDataSourceType.DATABASE]: (
-            <DatabaseData onClose={onClose} onDataLoaded={onDataLoaded} setLoadingAnimation={setLoadingAnimation} />
+            <DatabaseConnector onClose={onClose} onDataLoaded={onDataLoaded} setLoadingAnimation={setLoadingAnimation} />
         ),
         [IDataSourceType.AIRTABLE]: (
             <AirTableSource onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
