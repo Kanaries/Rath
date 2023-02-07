@@ -1,0 +1,15 @@
+name: Push rath-client to mirror
+on:
+  push:
+    paths:
+    - 'packages/rath-client'
+  workflow_dispatch:
+jobs:
+  push-rath-client:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: |
+        git remote add client git@github.com:Kanaries/rath-client
+        git subtree push -P 'packages/rath-client' client $GITHUB_REF
+        
