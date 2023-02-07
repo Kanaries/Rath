@@ -9,8 +9,9 @@ import databaseOptions from '../config';
 import NestedList, { INestedListItem } from '../components/nested-list';
 import useAsyncState from '../../../../../hooks/use-async-state';
 import type { TableData } from '../index';
-import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchSchemaList, fetchTableDetail, fetchTableList } from '../api';
+import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchQueryResult, fetchSchemaList, fetchTableDetail, fetchTableList } from '../api';
 import TablePreview from './table-preview';
+import SQLEditor from './query-editor/sql-editor';
 
 
 const Container = styled.div<{ theme: Theme }>`
@@ -137,15 +138,17 @@ interface QueryOptionsProps {
     server: string;
     connectUri: string;
     sourceType: SupportedDatabaseType;
+    queryString: string;
+    setQueryString: (next: string) => void;
 }
 
-const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, disabled }) => {
+const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, disabled, queryString, setQueryString }) => {
     const theme = useTheme();
     const config = databaseOptions.find(opt => opt.key === sourceType);
 
     const [pages, setPages] = useState<{ id: string; path: INestedListItem[] }[]>([]);
-    const [preview, setPreview] = useState<{ [pathId: string]: TableData }>({});
-    const [pageIdx, setPageIdx] = useState(0);
+    const [preview, setPreview] = useState<{ [pathId: string | number]: TableData }>({});
+    const [pageIdx, setPageIdx] = useState(-1);
 
     const [menu, setMenu, busy] = useAsyncState<{
         title: string;
@@ -373,6 +376,26 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
         }
     }, [curPreview, page]);
 
+    const doPreview = (id: -1 | -2, query?: string) => {
+        fetchQueryResult(commonParamsRef.current.server, {
+            uri: commonParamsRef.current.connectUri,
+            sourceType: commonParamsRef.current.sourceType,
+            query: query ?? queryString,
+        }).then(res => {
+            setPreview(rec => produce(rec, draft => {
+                draft[id] = {
+                    // @ts-expect-error
+                    columns: 'columns' in res ? res : res.rows.at(0)?.map((_, i) => ({
+                        colIndex: i,
+                        key: `col_${i + 1}`,
+                        dataType: null,
+                    })) ?? [],
+                    rows: res.rows,
+                };
+            }));
+        });
+    };
+
     return (
         <Container theme={theme}>
             <header>
@@ -388,6 +411,14 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                 />
             </header>
             <PivotList>
+                <PivotHeader
+                    role="tab"
+                    tabIndex={0}
+                    aria-selected={pageIdx === -1}
+                    onClick={() => setPageIdx(-1)}
+                >
+                    <span>Query</span>
+                </PivotHeader>
                 {pages.map((page, i) => (
                     <PivotHeader
                         key={i}
@@ -411,11 +442,20 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                 onItemClick={handleItemClick}
             />
             <div>
-                {page ? curPreview ? (
-                    <TablePreview data={curPreview} />
-                ) : (
-                    <Spinner />
-                ) : null}
+                {config && (
+                    pageIdx === -1 ? (
+                        <SQLEditor
+                            setQuery={q => setQueryString(q)}
+                            preview={preview[-1] ?? null}
+                            doPreview={query => {
+                                setQueryString(query);
+                                doPreview(-1, query);
+                            }}
+                        />
+                    ) : page && (
+                        curPreview ? <TablePreview data={curPreview} /> : <Spinner />
+                    )
+                )}
             </div>
         </Container>
     );

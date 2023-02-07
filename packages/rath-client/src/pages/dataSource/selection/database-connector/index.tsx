@@ -163,6 +163,8 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
         );
     }, [setServerList]);
 
+    const [queryString, setQueryString] = useState('');
+
     return (
         <Stack tokens={StackTokens} style={{ paddingBlock: '1em' }}>
             <AdvancedOptions
@@ -195,6 +197,8 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
                 server={server}
                 connectUri={connectUri}
                 sourceType={sourceType}
+                queryString={queryString}
+                setQueryString={setQueryString}
             />
         </Stack>
     );

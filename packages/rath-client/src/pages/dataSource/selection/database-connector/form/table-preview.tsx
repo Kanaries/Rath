@@ -40,11 +40,11 @@ const Container = styled.div`
 `;
 
 const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }) {
-    const columns = ((data.columns ?? []).length === 0) ? data.rows[0]?.map((_, i) => ({
+    const columns = (((data.columns ?? []).length === 0) ? data.rows[0]?.map((_, i) => ({
         key: `col_${i + 1}`,
         colIndex: i,
         dataType: null,
-    })) : data.columns;
+    })) : data.columns) ?? [];
 
     return (
         // @ts-expect-error css variable
