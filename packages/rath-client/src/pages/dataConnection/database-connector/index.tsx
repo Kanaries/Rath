@@ -181,7 +181,7 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
     }, [setServerList]);
 
     return (
-        <Stack tokens={StackTokens} style={{ paddingBlock: '1em' }}>
+        <Stack tokens={StackTokens} style={{ paddingBlock: '1em', flexGrow: 1 }}>
             <AdvancedOptions
                 servers={serverList}
                 appendServer={target => {

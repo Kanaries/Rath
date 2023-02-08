@@ -1,5 +1,5 @@
 import intl from 'react-intl-universal';
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import {
     Icon,
@@ -177,17 +177,6 @@ const AdvancedOptions = observer<{
     }, [server]);
 
     const id = useId();
-    const [inputWidth, setInputWidth] = useState(400);
-
-    const springRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const el = springRef.current;
-        if (el) {
-            setInputWidth(el.getBoundingClientRect().width);
-            el.focus();
-        }
-    }, [id]);
 
     const items = useMemo<typeof servers>(() => {
         const letters = customServer.toLowerCase().replaceAll(/[^a-z0-9_.-]/g, '').split('');
@@ -233,9 +222,7 @@ const AdvancedOptions = observer<{
 
     return (
         <Stack horizontal verticalAlign="end" onClick={() => setFocused(false)} style={{ position: 'relative' }}>
-            <div aria-hidden ref={springRef} style={{ position: 'absolute', left: 0, top: 0, height: 0, width: '100%' }} />
             <TextField
-                id={id}
                 label={intl.get('dataSource.connectorService')}
                 value={customServer}
                 onClick={e => {
@@ -312,9 +299,11 @@ const AdvancedOptions = observer<{
                     />
                 </>
             )}
+            <div aria-hidden id={id} style={{ height: 0, width: '100%' }} />
             <ContextualMenu
                 target={`#${id}`}
-                styles={{ root: { width: `${inputWidth}px`, display: focused ? undefined : 'none' } }}
+                useTargetWidth
+                hidden={!focused}
                 items={items.map(s => ({ key: s.target, secondaryText: `${s.lag}`, text: s.status, checked: s.target === server }))}
                 onRenderContextualMenuItem={renderItem}
             />

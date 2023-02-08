@@ -6,11 +6,7 @@ import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchSc
 
 
 export const QueryContainer = styled.div<{ theme: Theme }>`
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: 0%;
-    min-height: 40vh;
-    max-height: 40vh;
+    height: 90vh;
     overflow: hidden;
     display: grid;
     grid-template-columns: 16em 1fr;
