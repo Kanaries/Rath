@@ -1,4 +1,4 @@
-import type { TableInfo } from "../../pages/dataSource/selection/database/api";
+import type { TableInfo } from "../../type";
 import { BOX_HEIGHT, BOX_WIDTH, STROKE_RADIUS } from "./config";
 import type { IDBEdge, IDBGraph } from "./localTypes";
 

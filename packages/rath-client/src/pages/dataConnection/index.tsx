@@ -30,7 +30,7 @@ import DemoData from './demo';
 import JSONAPI from './jsonAPI';
 import OLAPData from './olap';
 import HistoryPanel from './history';
-import DatabaseData from './database/';
+import DatabaseConnector from './database-connector';
 import AirTableSource from './airtable';
 import Notebook from './notebook';
 import SupportedSources from './supportedSources';
@@ -126,7 +126,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
         ),
         [IDataSourceType.LOCAL]: <HistoryPanel onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} onLoadingFailed={onLoadingFailed} />,
         [IDataSourceType.DATABASE]: (
-            <DatabaseData onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} setLoadingAnimation={toggleLoadingAnimation} />
+            <DatabaseConnector onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} setLoadingAnimation={toggleLoadingAnimation} />
         ),
         [IDataSourceType.AIRTABLE]: (
             <AirTableSource
