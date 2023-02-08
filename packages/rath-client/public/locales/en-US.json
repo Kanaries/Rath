@@ -19,6 +19,7 @@
         "edit": "Edit",
         "suggestions": "Suggestions",
         "showMore": "Show More",
+        "return": "Return",
         "semanticType": {
             "nominal": "nominal",
             "ordinal": "ordinal",
@@ -67,7 +68,8 @@
         "painter": "Data Painter",
         "collection": "Collection",
         "dashboard": "Dashboard",
-        "causal": "Causal"
+        "causal": "Causal",
+        "connection": "Data Connections"
     },
     "preference": {
         "title": "preference",
@@ -128,6 +130,9 @@
         "upload": "Upload"
     },
     "dataSource": {
+        "dataSourceConnection": {
+            "types": "Data Source Types"
+        },
         "extractInsight": "Insight Analysis",
         "extractInsightOld": "Insight Analysis(Debug)",
         "cleanMethod": "Clean Method",
@@ -159,6 +164,7 @@
             "knowledge": "Knowledge",
             "generalize": "Generalize",
             "specific": "Extract Match",
+            "nlp": "NLP(β)",
             "currentPattern": "Current Pattern"
         },
         "statViewInfo": {

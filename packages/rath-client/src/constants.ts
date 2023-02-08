@@ -4,6 +4,7 @@ export const RATH_INDEX_COLUMN_KEY = '__rath_index_col_key__';
 
 export const PIVOT_KEYS = {
     dataSource: 'dataSource',
+    connection: 'connection',
     editor: 'editor',
     support: 'support',
     megaAuto: 'megaAuto',

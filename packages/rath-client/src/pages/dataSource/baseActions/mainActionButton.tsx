@@ -88,7 +88,7 @@ const MainActionButton: React.FC = () => {
         <PrimaryButton
             split
             disabled={!satisfyAnalysisCondition}
-            iconProps={{ iconName: 'Financial' }}
+            iconProps={{ iconName: 'BarChart4' }}
             text={intl.get(`${startMode.key}`)}
             menuProps={analysisOptions}
             onClick={() => {

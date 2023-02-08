@@ -13,7 +13,7 @@ const Cont = styled.div`
     padding: 1rem;
     z-index: 100;
     margin-top: 1rem;
-    border: 1px solid #cfcfcf;
+    border: 1px solid #f6f6f6;
     position: relative;
     display: grid;
     grid-template-columns: repeat(6,minmax(0,1fr));

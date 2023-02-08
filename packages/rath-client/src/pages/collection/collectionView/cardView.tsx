@@ -17,8 +17,8 @@ const CollectContainer = styled.div`
         font-weight: 500;
     }
     .chart-container {
-        border: 1px solid rgb(218, 220, 224);
-        border-radius: 1em;
+        border: 1px solid rgb(238, 238, 238);
+        border-radius: 0.5em;
         padding: 1em;
         margin: 0.5em;
         cursor: pointer;
@@ -79,7 +79,7 @@ const CardView: React.FC<CardViewProps> = (props) => {
                             <VisErrorBoundary>
                                 <ReactVega
                                     dataSource={applyFilters(data, item.filters)}
-                                    spec={changeVisSize(item.spec, 200, 180)}
+                                    spec={changeVisSize(item.spec, 240, 180)}
                                     actions={false}
                                     config={themeConfig}
                                 />
