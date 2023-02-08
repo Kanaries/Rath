@@ -19,6 +19,7 @@
         "edit": "编辑",
         "suggestions": "建议",
         "showMore": "显示更多",
+        "return": "返回",
         "semanticType": {
             "nominal": "类别类型",
             "ordinal": "有序类型",
@@ -55,7 +56,7 @@
         }
     },
     "menu": {
-        "dataSource": "数据源",
+        "dataSource": "数据准备",
         "editor": "自助分析",
         "support": "帮助",
         "eda": "数据探索分析",
@@ -66,7 +67,8 @@
         "painter": "数据绘板",
         "collection": "收藏夹",
         "dashboard": "报表",
-        "causal": "因果分析"
+        "causal": "因果分析",
+        "connection": "数据源连接"
     },
     "preference": {
         "title": "个人偏好",
@@ -127,6 +129,9 @@
         "upload": "上传文件"
     },
     "dataSource": {
+        "dataSourceConnection": {
+            "types": "数据源类型"
+        },
         "extractInsight": "开始分析",
         "extractInsightOld": "开始分析(调试模式)",
         "cleanMethod": "清洗方法",
@@ -152,6 +157,7 @@
             "knowledge": "常识",
             "generalize": "泛化",
             "specific": "完全匹配",
+            "nlp": "NLP(β)",
             "currentPattern": "当前文本模式"
         },
         "statViewInfo": {
@@ -274,7 +280,7 @@
             "syncMode": "分位数同步"
         },
         "upload": {
-            "title": "连接你的数据集",
+            "title": "连接数据",
             "fileTypes": "支持 Excel 工作簿以及 JSON、CSV 等文本类型文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
             "show_more": "高级设置",

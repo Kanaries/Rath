@@ -10,5 +10,20 @@ https://superset.apache.org/docs/databases/installing-database-drivers/
 
 Currently supported databases are: clickhouse, mysql, doris, athena, drill, impala, redshift, sparksql, sqlserver
 
-The deployment mode of aws lambda is provided. Modify env.json in the lambda folder, package it into a zip file, and upload it to aws lambda. 
-(You need a database that you can connect with sqlalchemy, and a table with id, uri, and source_type.)
+## The reference library is as follows:
+    athena:           pyathena/pyathenajdbc
+    big query:        sqlalchemy-bigquery
+    clickhouse:       clickhouse-sqlalchemy
+    doris:            mysqlclient
+    drill:            sqlalchemy-drill
+    druid:            pydruid
+    impala:           impyla
+    kylin:            kylinpy
+    mysql:            mysqlclient
+    oracle:           cx_Oracle
+    postgres:         psycopg2
+    redshift:         sqlalchemy-redshift
+    snowflake:        snowflake-sqlalchemy
+    sparksql:         pyhive
+    sql server:       pymssql
+After the installation with pip, the corresponding database can be used.
