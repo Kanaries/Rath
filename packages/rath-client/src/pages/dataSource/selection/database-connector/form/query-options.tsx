@@ -1,137 +1,17 @@
 import intl from 'react-intl-universal';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import styled from 'styled-components';
 import produce from 'immer';
-import { Icon, IconButton, Spinner, Theme, useTheme } from '@fluentui/react';
+import { IconButton, Spinner, useTheme } from '@fluentui/react';
 import type { SupportedDatabaseType } from '../type';
 import databaseOptions from '../config';
 import NestedList, { INestedListItem } from '../components/nested-list';
 import useAsyncState from '../../../../../hooks/use-async-state';
 import type { TableData } from '../index';
-import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchQueryResult, fetchSchemaList, fetchTableDetail, fetchTableList } from '../api';
+import { DatabaseApiOperator, DatabaseRequestPayload, fetchQueryResult, fetchTableDetail } from '../api';
 import TablePreview from './table-preview';
 import SQLEditor from './query-editor/sql-editor';
-
-
-const Container = styled.div<{ theme: Theme }>`
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: 0%;
-    min-height: 40vh;
-    max-height: 40vh;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: 16em 1fr;
-    grid-template-rows: max-content 1fr;
-    border: 1px solid ${({ theme }) => theme.palette.neutralLight};
-    font-size: 0.8rem;
-    > *:nth-child(2n + 1) {
-        :not(header) {
-            padding-block: 0.6em;
-            padding-inline: 0.5em;
-        }
-        border-right: 1px solid ${({ theme }) => theme.palette.neutralLight};
-        > header, > div > div:first-child {
-            margin-inline: 1em;
-            margin-bottom: 0.2em;
-        }
-    }
-    > *:first-child {
-        padding-block: 0.6em;
-        padding-inline: 1.2em;
-        display: flex;
-        align-items: center;
-        user-select: none;
-        justify-content: space-between;
-        > span {
-            flex-grow: 1;
-            flex-shrink: 1;
-            margin-right: 1em;
-        }
-    }
-    > *:last-child {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: auto;
-    }
-`;
-
-const SyncButton = styled(IconButton)<{ busy: boolean }>`
-    width: 24px;
-    height: 24px;
-    background: none;
-    i {
-        font-size: 0.7rem;
-        animation: rotating 2.4s linear infinite;
-        ${({ busy }) => busy ? '' : 'animation: none;'}
-    }
-    @keyframes rotating {
-        from {
-            transform: rotate(0);
-        }
-        to {
-            transform: rotate(360deg);
-        }
-    }
-`;
-
-const PivotList = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    overflow: auto hidden;
-    background-color: #fcfcfc;
-    > * {
-        flex-grow: 0;
-        flex-shrink: 0;
-    }
-`;
-
-const PivotHeader = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    min-width: 6em;
-    padding-inline: 1em 0.6em;
-    background-color: #f8f8f8;
-    cursor: pointer;
-    outline: none;
-    position: relative;
-    :hover {
-        background-color: #f2f2f2;
-    }
-    &[aria-selected="true"] {
-        background-image: linear-gradient(to top, currentColor 2px, transparent 2px);
-    }
-    > span {
-        flex-grow: 1;
-    }
-    > button {
-        border-radius: 50%;
-        font-size: 100%;
-        opacity: 0;
-        transform: scale(50%);
-        margin-left: 0.6em;
-    }
-    :hover > button {
-        opacity: 1;
-    }
-`;
-
-const findNode = (root: INestedListItem[], path: INestedListItem[]): INestedListItem | null => {
-    if (path.length === 0) {
-        return null;
-    }
-    const [first] = path;
-    for (const item of root) {
-        if (item.key === first.key) {
-            return path.length === 1 ? item : Array.isArray(item.children) ? findNode(item.children, path.slice(1)) : null;
-        }
-    }
-    return null;
-};
+import { fetchListAsNodes, findNode, PivotHeader, PivotList, QueryContainer, SyncButton } from './utils';
 
 interface QueryOptionsProps {
     disabled: boolean;
@@ -155,9 +35,15 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
         items: INestedListItem[];
     }>({ title: '', items: [] });
 
+    const reset = useCallback(() => {
+        setMenu({ title: '', items: [] });
+        setPages([]);
+        setPreview({});
+    }, [setMenu]);
+
     const reload = useCallback(() => {
         if (!config || disabled) {
-            setMenu({ title: '', items: [] });
+            reset();
             return;
         }
 
@@ -167,97 +53,44 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
         );
 
         if (firstLevel) {
-            switch (typeof firstLevel === 'string' ? firstLevel : firstLevel.type) {
-                case 'database': {
-                    setMenu(
-                        fetchDatabaseList(server, { sourceType, uri: connectUri }).then<typeof menu>(
-                            list => ({
-                                title: 'database',
-                                items: list.map(database => ({
-                                    group: 'database',
-                                    key: database,
-                                    text: database,
-                                    children: hasNextLevel ? 'lazy' : undefined,
-                                    icon: <Icon iconName="Database" />,
-                                })),
-                            })
-                        )
-                    );
-                    return;
-                }
-                case 'schema': {
-                    setMenu(
-                        fetchSchemaList(server, { sourceType, uri: connectUri }).then<typeof menu>(
-                            list => ({
-                                title: 'schema',
-                                items: list.map(schema => ({
-                                    group: 'schema',
-                                    key: schema,
-                                    text: schema,
-                                    children: hasNextLevel ? 'lazy' : undefined,
-                                    icon: <Icon iconName="TableGroup" />,
-                                })),
-                            })
-                        )
-                    );
-                    return;
-                }
-                case 'table': {
-                    fetchTableList(server, { sourceType, uri: connectUri }).then<typeof menu>(
-                        list => ({
-                            title: 'table',
-                            items: list.map(table => ({
-                                group: 'table',
-                                key: table.name,
-                                text: table.name,
-                                children: table.meta.map(col => ({
-                                    group: 'column',
-                                    key: col.key,
-                                    text: col.key,
-                                    icon: (
-                                        <Icon
-                                            iconName={
-                                                col.dataType?.match(/^(Int|Double|Float).*$/) ? 'NumberField'
-                                                    : col.dataType?.match(/^(String|Char|VarChar).*$/i) ? 'TextField'
-                                                    : 'FieldEmpty'
-                                            }
-                                        />
-                                    ),
-                                })),
-                            })),
-                        })
-                    );
-                    return;
-                }
-                default: {
-                    break;
-                }
-            }
+            const levelType = typeof firstLevel === 'string' ? firstLevel : firstLevel.type;
+            setMenu(
+                fetchListAsNodes(
+                    levelType,
+                    server,
+                    { sourceType, uri: connectUri },
+                    hasNextLevel,
+                ).then(list => list ? ({ title: levelType, items: list }) : { title: '', items: [] })
+            );
         }
 
-        setMenu({ title: '', items: [] });
-    }, [disabled, server, sourceType, connectUri, config, setMenu]);
+        reset();
+    }, [disabled, server, sourceType, connectUri, config, setMenu, reset]);
     
     const empty = !config || disabled || !connectUri;
     
     useEffect(() => {
         if (empty) {
-            setMenu({ title: '', items: [] });
-            setPages([]);
-            setPreview({});
+            reset();
         }
-    }, [empty, setMenu]);
+    }, [empty, reset]);
 
     useEffect(() => {
-        setMenu({ title: '', items: [] });
-        setPages([]);
-        setPreview({});
-    }, [sourceType, connectUri, setMenu]);
+        reset();
+    }, [sourceType, connectUri, setMenu, reset]);
 
     const handleItemClick = (item: INestedListItem, path: INestedListItem[]): void => {
         const all = [...path, item];
         const reversedPath = all.slice().reverse();
-        if (config && item.children === 'lazy') {
+        if (config && (item.children === 'lazy' || item.children === 'failed')) {
+            if (item.children === 'failed') {
+                setMenu(menu => produce(menu, draft => {
+                    const target = findNode(draft.items, all);
+                    if (target) {
+                        target.children = 'lazy';
+                    }
+                }));
+            }
             const curLevelIdx = config.levels.findIndex(
                 lvl => typeof lvl === 'string' ? lvl : lvl.type
             );
@@ -281,60 +114,29 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                     }
                 }));
             };
-            switch (typeof nextLevel === 'string' ? nextLevel : nextLevel.type) {
-                case 'database': {
-                    fetchDatabaseList(server, commonParams).then(list => {
-                        submit(list.map(database => ({
-                            group: 'database',
-                            key: database,
-                            text: database,
-                            children: hasNextLevelThen ? 'lazy' : undefined,
-                            icon: <Icon iconName="Database" />,
-                        })));
-                    });
-                    break;
+            const reject = (err?: any) => {
+                if (err) {
+                    console.warn(err);
                 }
-                case 'schema': {
-                    fetchSchemaList(server, commonParams).then(list => {
-                        submit(list.map(schema => ({
-                            group: 'schema',
-                            key: schema,
-                            text: schema,
-                            children: hasNextLevelThen ? 'lazy' : undefined,
-                            icon: <Icon iconName="TableGroup" />,
-                        })));
-                    });
-                    break;
+                setMenu(menu => produce(menu, draft => {
+                    const target = findNode(draft.items, all);
+                    if (target) {
+                        target.children = 'failed';
+                    }
+                }));
+            };
+            fetchListAsNodes(
+                typeof nextLevel === 'string' ? nextLevel : nextLevel.type,
+                server,
+                commonParams,
+                hasNextLevelThen,
+            ).then(list => {
+                if (list) {
+                    submit(list);
+                } else {
+                    reject();
                 }
-                case 'table': {
-                    fetchTableList(server, commonParams).then(list => {
-                        submit(list.map(table => ({
-                            group: 'table',
-                            key: table.name,
-                            text: table.name,
-                            icon: <Icon iconName="Table" />,
-                            children: table.meta.map(col => ({
-                                group: 'column',
-                                key: col.key,
-                                text: col.key,
-                                icon: (
-                                    <Icon
-                                        iconName={
-                                            col.dataType?.match(/^(Int|Double|Float).*$/) ? 'NumberField'
-                                                : col.dataType?.match(/^(String|Char|VarChar).*$/i) ? 'TextField'
-                                                : 'FieldEmpty'
-                                        }
-                                    />
-                                ),
-                            })),
-                        })));
-                    });
-                    break;
-                }
-                default: {
-                    break;
-                }
-            }
+            }).catch(reject);
         } else if (item.group === 'table') {
             const pathId = all.map(p => p.key).join('.');
             const idx = pages.findIndex(page => page.id === pathId);
@@ -396,12 +198,31 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
         });
     };
 
+    const [w, setW] = useState<string | number>('fit-content');
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const { current: container } = containerRef;
+        const parent = container?.parentElement;
+        if (parent) {
+            const cb = (): void => {
+                const { width } = parent.getBoundingClientRect();
+                setW(width);
+            };
+            cb();
+            const ro = new ResizeObserver(cb);
+            ro.observe(parent);
+            return () => {
+                ro.disconnect();
+                setW('fit-content');
+            };
+        }
+    }, []);
+
     return (
-        <Container theme={theme}>
+        <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}>
             <header>
-                <span>
-                    {intl.get('dataSource.explorer')}
-                </span>
+                <span>{intl.get('dataSource.explorer')}</span>
                 <SyncButton
                     iconProps={{ iconName: 'SyncOccurence' }}
                     disabled={busy || !config || disabled}
@@ -415,7 +236,12 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                     role="tab"
                     tabIndex={0}
                     aria-selected={pageIdx === -1}
-                    onClick={() => setPageIdx(-1)}
+                    aria-disabled={disabled}
+                    onClick={() => {
+                        if (!disabled) {
+                            setPageIdx(-1);
+                        }
+                    }}
                 >
                     <span>Query</span>
                 </PivotHeader>
@@ -442,7 +268,7 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                 onItemClick={handleItemClick}
             />
             <div>
-                {config && (
+                {config && !disabled && (
                     pageIdx === -1 ? (
                         <SQLEditor
                             setQuery={q => setQueryString(q)}
@@ -452,12 +278,10 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                                 doPreview(-1, query);
                             }}
                         />
-                    ) : page && (
-                        curPreview ? <TablePreview data={curPreview} /> : <Spinner />
-                    )
+                    ) : page && (curPreview ? <TablePreview data={curPreview} /> : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Spinner /></div>)
                 )}
             </div>
-        </Container>
+        </QueryContainer>
     );
 };
 

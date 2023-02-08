@@ -71,13 +71,24 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
                             {i + 1}
                         </span>
                         {
-                            d.map((e, j) => (
-                                <div
-                                    key={j}
-                                    style={{ ...styles[data.columns?.[j]?.dataType ?? ''] }}
-                                >
-                                    {e}
-                                </div>
+                            columns.map((_, j) => (
+                                j in d ? (
+                                    <div
+                                        key={j}
+                                        style={{ ...styles[data.columns?.[j]?.dataType ?? ''] }}
+                                    >
+                                        {d[j]}
+                                    </div>
+                                ) : (
+                                    <span
+                                        style={{
+                                            color: 'rgb(133, 133, 133)',
+                                            fontStyle: 'italic',
+                                        }}
+                                    >
+                                        (empty)
+                                    </span>
+                                )
                             ))
                         }
                     </Fragment>

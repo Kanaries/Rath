@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
@@ -71,6 +72,13 @@ const ItemIcon = styled.div`
     justify-content: center;
     i {
         font-size: 1em;
+        &[role="button"] {
+            pointer-events: all;
+            cursor: pointer;
+            :hover {
+                background-color: #f3f3f3;
+            }
+        }
     }
     + span {
         margin-left: 0.5em;
@@ -87,24 +95,24 @@ export interface INestedListItem {
     group?: string;
     key: string;
     text: string;
-    children?: INestedListItem[] | 'lazy';
+    children?: INestedListItem[] | 'lazy' | 'failed';
     icon?: JSX.Element;
 }
 
 interface NestedListPartProps {
     path: INestedListItem[];
     level: number;
-    items: INestedListItem[] | 'lazy';
+    items: INestedListItem[] | 'lazy' | 'failed';
     open: boolean;
     setOpen: (open: boolean) => void;
     onItemClick: (item: INestedListItem, path: INestedListItem[]) => void;
 }
 
-const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ path, level, items, open, setOpen, onItemClick }) {
+const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ path, level, items, open, onItemClick }) {
     const [openKeys, setOpenKeys] = useState(new Set<string>());
 
     useEffect(() => {
-        if (items === 'lazy') {
+        if (items === 'lazy' || items === 'failed') {
             return;
         }
         setOpenKeys(prev => {
@@ -131,6 +139,29 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                         </ItemHeader>
                     </Item>
                 ))}
+            </Container>
+        );
+    } else if (items === 'failed') {
+        const parent = path.at(-1);
+        return (
+            // @ts-expect-error css variable
+            <Container open={open} style={{ '--level': level }}>
+                <Item virtual>
+                    <ItemHeader>
+                        <ItemChevron />
+                        {parent && (
+                            <ItemIcon>
+                                <Icon
+                                    iconName="Refresh"
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => onItemClick(parent, path.slice(0, -1))}
+                                />
+                            </ItemIcon>
+                        )}
+                        <i style={{ color: '#f66' }}>{`<${intl.get('dataSource.req_err')}>`}</i>
+                    </ItemHeader>
+                </Item>
             </Container>
         );
     }
@@ -171,6 +202,15 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                                 onClick={e => {
                                     e.stopPropagation();
                                     onItemClick(item, path);
+                                    if (item.children && !isOpen) {
+                                        setOpenKeys(keys => produce(keys, draft => {
+                                            if (isOpen) {
+                                                draft.delete(item.key);
+                                            } else {
+                                                draft.add(item.key);
+                                            }
+                                        }));
+                                    }
                                 }}
                             >
                                 {item.text}

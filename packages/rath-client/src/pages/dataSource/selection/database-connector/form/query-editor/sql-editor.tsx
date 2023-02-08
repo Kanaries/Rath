@@ -17,6 +17,8 @@ const Container = styled.div`
         flex-shrink: 1;
         flex-basis: 0%;
         overflow: auto;
+        margin: 0;
+        padding: 0;
     }
 `;
 
@@ -43,15 +45,13 @@ export interface SQLEditorProps {
 const SQLEditor: FC<SQLEditorProps> = ({ setQuery, preview, doPreview }) => {
     const [code, setCode] = useState<string>('');
 
-    const updateCode = useCallback<ChangeHandler>((newValue, e) => {
+    const updateCode = useCallback<ChangeHandler>(newValue => {
         setCode(newValue);
     }, []);
 
     return (
         <Container>
-            <div>
-                <TablePreview data={preview ?? { columns: [], rows: [] }} />
-            </div>
+            <TablePreview data={preview ?? { columns: [], rows: [] }} />
             <Editor>
                 <Stack horizontal style={{ marginBlock: '0.5em', paddingInline: '1em' }} horizontalAlign="end">
                     <PrimaryButton

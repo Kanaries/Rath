@@ -238,7 +238,10 @@ const AdvancedOptions = observer<{
                 id={id}
                 label={intl.get('dataSource.connectorService')}
                 value={customServer}
-                onClick={e => e.stopPropagation()}
+                onClick={e => {
+                    e.stopPropagation();
+                    setFocused(true);
+                }}
                 onKeyDown={e => {
                     if (e.key === 'Enter') {
                         e.preventDefault();

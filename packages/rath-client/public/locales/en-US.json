@@ -150,6 +150,7 @@
         "connectorService": "Connector Service URL (Optional)",
         "connectorOffline": "Connector is offline, please retry or select another service.",
         "connectorEmpty": "No valid connector is set.",
+        "req_err": "Request Failed",
         "explorer": "Explorer",
         "apply": "Apply&Test",
         "textPattern": {

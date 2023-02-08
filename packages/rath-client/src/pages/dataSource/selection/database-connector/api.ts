@@ -110,7 +110,7 @@ export const fetchDatabaseList = async (server: string, payload: Omit<DatabaseRe
     } catch (error) {
         const rathError = getRathError('FetchDatabaseListFailed', error);
         notify(rathError);
-        return [];
+        throw error;
     }
 };
 
@@ -120,7 +120,7 @@ export const fetchSchemaList = async (server: string, payload: Omit<DatabaseRequ
     } catch (error) {
         const rathError = getRathError('FetchSchemaListFailed', error);
         notify(rathError);
-        return [];
+        throw error;
     }
 };
 
@@ -130,7 +130,7 @@ export const fetchTableList = async (server: string, payload: Omit<DatabaseReque
     } catch (error) {
         const rathError = getRathError('FetchTableListFailed', error);
         notify(rathError);
-        return [];
+        throw error;
     }
 };
 
@@ -140,10 +140,7 @@ export const fetchTableDetail = async (server: string, payload: Omit<DatabaseReq
     } catch (error) {
         const rathError = getRathError('FetchTableListFailed', error);
         notify(rathError);
-        return {
-            columns: [],
-            rows: [],
-        };
+        throw error;
     }
 };
 
@@ -153,8 +150,6 @@ export const fetchQueryResult = async (server: string, payload: Omit<DatabaseReq
     } catch (error) {
         const rathError = getRathError('QueryExecutionError', error);
         notify(rathError);
-        return {
-            rows: [],
-        };
+        throw error;
     }
 };
