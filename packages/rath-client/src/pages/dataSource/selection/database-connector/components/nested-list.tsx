@@ -9,7 +9,7 @@ import { Icon, Shimmer } from '@fluentui/react';
 enableMapSet();
 
 const Root = styled.div`
-    overflow: hidden;
+    overflow: auto hidden;
     display: flex;
     flex-direction: column;
     > * {
@@ -82,6 +82,11 @@ const ItemIcon = styled.div`
     }
     + span {
         margin-left: 0.5em;
+        > small {
+            font-size: 90%;
+            margin-left: 0.5em;
+            opacity: 0.6;
+        }
     }
 `;
 
@@ -95,6 +100,7 @@ export interface INestedListItem {
     group?: string;
     key: string;
     text: string;
+    subtext?: string;
     children?: INestedListItem[] | 'lazy' | 'failed';
     icon?: JSX.Element;
 }
@@ -214,6 +220,11 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                                 }}
                             >
                                 {item.text}
+                                {item.subtext && (
+                                    <small>
+                                        {item.subtext}
+                                    </small>
+                                )}
                             </span>
                         </ItemHeader>
                         {item.children && (

@@ -151,6 +151,8 @@
         "connectorOffline": "Connector is offline, please retry or select another service.",
         "connectorEmpty": "No valid connector is set.",
         "req_err": "Request Failed",
+        "query_monaco": "Query",
+        "query_diagram": "Diagram",
         "explorer": "Explorer",
         "apply": "Apply&Test",
         "textPattern": {

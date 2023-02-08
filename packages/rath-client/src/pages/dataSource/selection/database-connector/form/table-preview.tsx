@@ -29,6 +29,8 @@ const Container = styled.div`
         }
         min-width: 2em;
         padding-inline: 0.8em;
+        line-height: 1.5em;
+        min-height: 1.5em;
     }
     > span:first-child, > label {
         position: sticky;
@@ -48,12 +50,12 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
 
     return (
         // @ts-expect-error css variable
-        <Container style={{ '--n-cols': columns.length, '--n-rows': data.rows.length }}>
+        <Container style={{ '--n-cols': columns.length || 1, '--n-rows': data.rows.length || 1 }}>
             {/* corner */}
             <span />
             {
-                columns.map(col => (
-                    <label key={col.colIndex}>
+                columns.map((col, i) => (
+                    <label key={i}>
                         {col.key}
                     </label>
                 ))
@@ -81,6 +83,7 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
                                     </div>
                                 ) : (
                                     <span
+                                        key={j}
                                         style={{
                                             color: 'rgb(133, 133, 133)',
                                             fontStyle: 'italic',
@@ -98,6 +101,7 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
                 data.rows.length === 0 && (
                     <span
                         style={{
+                            marginTop: '1.4em',
                             color: 'rgb(133, 133, 133)',
                             fontStyle: 'italic',
                         }}

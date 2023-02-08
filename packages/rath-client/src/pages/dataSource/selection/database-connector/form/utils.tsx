@@ -80,13 +80,14 @@ export const PivotList = styled.div`
     }
 `;
 
-export const PivotHeader = styled.div`
+export const PivotHeader = styled.div<{ primary?: boolean }>`
     display: flex;
     flex-direction: row;
     align-items: center;
     min-width: 6em;
     padding-inline: 1em 0.6em;
     background-color: #f8f8f8;
+    font-weight: ${({ primary }) => primary ? 600 : 400};
     cursor: pointer;
     outline: none;
     position: relative;
@@ -123,6 +124,20 @@ export const findNode = (root: INestedListItem[], path: INestedListItem[]): INes
     for (const item of root) {
         if (item.key === first.key) {
             return path.length === 1 ? item : Array.isArray(item.children) ? findNode(item.children, path.slice(1)) : null;
+        }
+    }
+    return null;
+};
+
+export const findNodeByPathId = (root: INestedListItem[], pathId: string): INestedListItem | null => {
+    const path = pathId.split('.');
+    if (path.length === 0) {
+        return null;
+    }
+    const [first] = path;
+    for (const item of root) {
+        if (item.key === first) {
+            return path.length === 1 ? item : Array.isArray(item.children) ? findNodeByPathId(item.children, path.slice(1).join('.')) : null;
         }
     }
     return null;
@@ -166,12 +181,13 @@ export const fetchListAsNodes = async (
                     children: table.meta.map(col => ({
                         group: 'column',
                         key: col.key,
+                        subtext: col.dataType ?? undefined,
                         text: col.key,
                         icon: (
                             <Icon
                                 iconName={
-                                    col.dataType?.match(/^(Int|Double|Float).*$/) ? 'NumberField'
-                                        : col.dataType?.match(/^(String|Char|VarChar).*$/i) ? 'TextField'
+                                    col.dataType?.match(/(Int|Double|Float|Decimal)/) ? 'NumberField'
+                                        : col.dataType?.match(/(String|Char|VarChar)/i) ? 'TextField'
                                         : 'FieldEmpty'
                                 }
                             />
@@ -187,3 +203,8 @@ export const fetchListAsNodes = async (
         return null;
     }
 };
+
+export enum EditorKey {
+    Monaco = -1,
+    Diagram = -2,
+}

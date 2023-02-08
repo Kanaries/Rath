@@ -88,7 +88,11 @@ const combinedDatabaseService = async <O extends DatabaseApiOperator>(
         }
     ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as WrappedResponse<DatabaseResponseData[O]>;
 
-    return res.success ? res.data : (() => { throw new Error (res.message) })();
+    if (res.success) {
+        return res.data;
+    } else {
+        throw new Error(res.message);
+    }
 };
 
 export const checkServerConnection = async (server: string): Promise<false | number> => {
@@ -148,7 +152,7 @@ export const fetchQueryResult = async (server: string, payload: Omit<DatabaseReq
     try {
         return await combinedDatabaseService(server, 'getResult', payload);
     } catch (error) {
-        const rathError = getRathError('QueryExecutionError', error);
+        const rathError = getRathError('QueryExecutionError', error, { sql: payload.query ?? '' });
         notify(rathError);
         throw error;
     }

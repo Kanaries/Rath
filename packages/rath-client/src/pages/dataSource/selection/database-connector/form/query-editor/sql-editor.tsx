@@ -1,5 +1,5 @@
 import { FC, useCallback, useState } from 'react';
-import { PrimaryButton, Stack } from '@fluentui/react';
+import { PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import styled from 'styled-components';
 import MonacoEditor, { ChangeHandler } from 'react-monaco-editor';
 import intl from 'react-intl-universal';
@@ -37,12 +37,13 @@ const Editor = styled.div`
 `;
 
 export interface SQLEditorProps {
+    busy: boolean;
     setQuery: (q: string) => void;
     preview: TableData | null;
     doPreview: (q: string) => void;
 }
 
-const SQLEditor: FC<SQLEditorProps> = ({ setQuery, preview, doPreview }) => {
+const SQLEditor: FC<SQLEditorProps> = ({ setQuery, preview, doPreview, busy }) => {
     const [code, setCode] = useState<string>('');
 
     const updateCode = useCallback<ChangeHandler>(newValue => {
@@ -51,17 +52,21 @@ const SQLEditor: FC<SQLEditorProps> = ({ setQuery, preview, doPreview }) => {
 
     return (
         <Container>
-            <TablePreview data={preview ?? { columns: [], rows: [] }} />
+            <div>
+                <TablePreview data={preview ?? { columns: [], rows: [] }} />
+            </div>
             <Editor>
                 <Stack horizontal style={{ marginBlock: '0.5em', paddingInline: '1em' }} horizontalAlign="end">
                     <PrimaryButton
+                        disabled={busy}
                         onClick={() => {
                             setQuery(code);
                             doPreview(code);
                         }}
-                        iconProps={{ iconName: "Play" }}
-                        text={intl.get('common.preview')}
-                    />
+                        iconProps={busy ? undefined : { iconName: "Play" }}
+                    >
+                        {busy ? <Spinner /> : intl.get('common.preview')}
+                    </PrimaryButton>
                 </Stack>
                 <MonacoEditor language="sql" theme="vs" value={code} onChange={updateCode} />
             </Editor>

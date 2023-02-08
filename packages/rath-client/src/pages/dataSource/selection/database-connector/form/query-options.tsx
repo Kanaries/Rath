@@ -3,7 +3,7 @@ import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
 import { IconButton, Spinner, useTheme } from '@fluentui/react';
-import type { SupportedDatabaseType } from '../type';
+import type { SupportedDatabaseType, TableColInfo, TableInfo } from '../type';
 import databaseOptions from '../config';
 import NestedList, { INestedListItem } from '../components/nested-list';
 import useAsyncState from '../../../../../hooks/use-async-state';
@@ -11,7 +11,8 @@ import type { TableData } from '../index';
 import { DatabaseApiOperator, DatabaseRequestPayload, fetchQueryResult, fetchTableDetail } from '../api';
 import TablePreview from './table-preview';
 import SQLEditor from './query-editor/sql-editor';
-import { fetchListAsNodes, findNode, PivotHeader, PivotList, QueryContainer, SyncButton } from './utils';
+import { EditorKey, fetchListAsNodes, findNode, findNodeByPathId, PivotHeader, PivotList, QueryContainer, SyncButton } from './utils';
+import DiagramEditor from './query-editor/diagram-editor';
 
 interface QueryOptionsProps {
     disabled: boolean;
@@ -27,8 +28,9 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
     const config = databaseOptions.find(opt => opt.key === sourceType);
 
     const [pages, setPages] = useState<{ id: string; path: INestedListItem[] }[]>([]);
-    const [preview, setPreview] = useState<{ [pathId: string | number]: TableData }>({});
-    const [pageIdx, setPageIdx] = useState(-1);
+    const [preview, setPreview] = useState<{ [pathId: string]: TableData | 'failed' }>({});
+    const [editorPreview, setEditorPreview, isEditorPreviewPending] = useAsyncState<TableData | null>(null);
+    const [pageIdx, setPageIdx] = useState<number | EditorKey>(EditorKey.Monaco);
 
     const [menu, setMenu, busy] = useAsyncState<{
         title: string;
@@ -174,27 +176,43 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                 setPreview(rec => produce(rec, draft => {
                     draft[page.id] = res;
                 }));
+            }).catch(() => {
+                setPreview(rec => produce(rec, draft => {
+                    draft[page.id] = 'failed';
+                }));
             });
         }
     }, [curPreview, page]);
 
-    const doPreview = (id: -1 | -2, query?: string) => {
+    const doPreview = (query?: string) => {
+        setEditorPreview(
+            fetchQueryResult(commonParamsRef.current.server, {
+                uri: commonParamsRef.current.connectUri,
+                sourceType: commonParamsRef.current.sourceType,
+                query: query ?? queryString,
+            }).then<TableData>(res => ({
+                columns: 'columns' in res ? (res as any).columns : res.rows.at(0)?.map((_, i) => ({
+                    colIndex: i,
+                    key: `col_${i + 1}`,
+                    dataType: null,
+                })) ?? [],
+                rows: res.rows,
+            })).catch(() => null)
+        );
         fetchQueryResult(commonParamsRef.current.server, {
             uri: commonParamsRef.current.connectUri,
             sourceType: commonParamsRef.current.sourceType,
             query: query ?? queryString,
         }).then(res => {
-            setPreview(rec => produce(rec, draft => {
-                draft[id] = {
-                    // @ts-expect-error
-                    columns: 'columns' in res ? res : res.rows.at(0)?.map((_, i) => ({
-                        colIndex: i,
-                        key: `col_${i + 1}`,
-                        dataType: null,
-                    })) ?? [],
-                    rows: res.rows,
-                };
-            }));
+            setEditorPreview({
+                // @ts-expect-error
+                columns: 'columns' in res ? res : res.rows.at(0)?.map((_, i) => ({
+                    colIndex: i,
+                    key: `col_${i + 1}`,
+                    dataType: null,
+                })) ?? [],
+                rows: res.rows,
+            });
         });
     };
 
@@ -219,6 +237,26 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
         }
     }, []);
 
+    const hasEnumerableTables = Boolean(
+        config?.levels.find(lvl => typeof lvl === 'string' ? lvl === 'table' : (lvl.type === 'table' && lvl.enumerable !== false))
+    );
+
+    const tables = Object.keys(preview).map<TableInfo>(pathId => {
+        const node = findNodeByPathId(menu.items, pathId);
+        const cols = node?.children;
+        if (node && cols && Array.isArray(cols)) {
+            return {
+                name: pathId,
+                meta: cols.map<TableColInfo>((col, i) => ({
+                    key: col.key,
+                    dataType: col.subtext ?? null,
+                    colIndex: i,
+                })),
+            };
+        }
+        return null!;
+    }).filter(Boolean);
+
     return (
         <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}>
             <header>
@@ -233,17 +271,32 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
             </header>
             <PivotList>
                 <PivotHeader
+                    primary
                     role="tab"
                     tabIndex={0}
-                    aria-selected={pageIdx === -1}
+                    aria-selected={pageIdx === EditorKey.Monaco}
                     aria-disabled={disabled}
                     onClick={() => {
                         if (!disabled) {
-                            setPageIdx(-1);
+                            setPageIdx(EditorKey.Monaco);
                         }
                     }}
                 >
-                    <span>Query</span>
+                    <span>{intl.get('dataSource.query_monaco')}</span>
+                </PivotHeader>
+                <PivotHeader
+                    primary
+                    role="tab"
+                    tabIndex={0}
+                    aria-selected={pageIdx === EditorKey.Diagram}
+                    aria-disabled={disabled}
+                    onClick={() => {
+                        if (!disabled) {
+                            setPageIdx(EditorKey.Diagram);
+                        }
+                    }}
+                >
+                    <span>{intl.get('dataSource.query_diagram')}</span>
                 </PivotHeader>
                 {pages.map((page, i) => (
                     <PivotHeader
@@ -269,16 +322,37 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
             />
             <div>
                 {config && !disabled && (
-                    pageIdx === -1 ? (
+                    pageIdx === EditorKey.Monaco ? (
                         <SQLEditor
+                            busy={isEditorPreviewPending}
                             setQuery={q => setQueryString(q)}
-                            preview={preview[-1] ?? null}
+                            preview={editorPreview}
                             doPreview={query => {
                                 setQueryString(query);
-                                doPreview(-1, query);
+                                doPreview(query);
                             }}
                         />
-                    ) : page && (curPreview ? <TablePreview data={curPreview} /> : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Spinner /></div>)
+                    ) : pageIdx === EditorKey.Diagram ? (
+                        <DiagramEditor
+                            disabled={!hasEnumerableTables}
+                            busy={isEditorPreviewPending}
+                            tables={tables}
+                            query={queryString}
+                            setQuery={q => setQueryString(q)}
+                            preview={editorPreview}
+                            doPreview={doPreview}
+                        />
+                    ) : page && (
+                        curPreview ? curPreview === 'failed' ? (
+                            <div style={{ padding: '0.5em', color: 'red' }}>
+                                {intl.get('dataSource.req_err')}
+                            </div>
+                        ) : <TablePreview data={curPreview} /> : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Spinner />
+                            </div>
+                        )
+                    )
                 )}
             </div>
         </QueryContainer>
