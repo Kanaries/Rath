@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { initializeIcons } from '@fluentui/font-icons-mdl2';
 import { ThemeProvider } from '@fluentui/react';
+import { inject } from '@vercel/analytics';
 import 'office-ui-fabric-core/dist/css/fabric.css';
 import './index.css';
 
@@ -16,6 +17,8 @@ import './index.css';
 // eslint-disable-next-line import/first
 import App from './App';
 import { mainTheme } from './theme';
+
+inject();
 
 // @ts-ignore
 // window.Buffer = Buffer.Buffer;
