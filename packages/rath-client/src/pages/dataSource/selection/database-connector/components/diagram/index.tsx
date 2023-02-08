@@ -1,4 +1,4 @@
-import { PrimaryButton } from '@fluentui/react';
+import { PrimaryButton, Spinner } from '@fluentui/react';
 import produce from 'immer';
 import { DragEvent, memo, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -52,11 +52,12 @@ export interface DbGraphProps {
     tables: TableInfo[];
     graph: IDBGraph;
     sql: string;
+    setQuery: (q: string) => void;
     setGraph: (graph: IDBGraph) => void;
     preview: () => void;
 }
 
-const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, preview, sql }) {
+const DbGraph = memo<DbGraphProps>(function DbGraph ({ busy, disabled, graph, setGraph, tables, preview, sql, setQuery }) {
     const [width, setWidth] = useState(400);
     const [height, setHeight] = useState(300);
     const container = useRef<HTMLDivElement>(null);
@@ -76,6 +77,10 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             return () => ro.disconnect();
         }
     }, []);
+
+    useEffect(() => {
+        setQuery('');
+    }, [setQuery])
 
     const dragEffectRef = useRef<null | 'append' | 'move'>(null);
     const dragOffsetRef = useRef<[number, number]>([0, 0]);
@@ -435,8 +440,12 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             <span>
                 {sql}
             </span>
-            <PrimaryButton onClick={preview}>
-                {intl.get('common.preview')}
+            <PrimaryButton
+                disabled={busy || disabled || tables.length === 0 || !sql}
+                onClick={preview}
+                iconProps={busy ? undefined : { iconName: "Play" }}
+            >
+                {busy ? <Spinner /> : intl.get('common.run')}
             </PrimaryButton>
         </Output>
     </>);

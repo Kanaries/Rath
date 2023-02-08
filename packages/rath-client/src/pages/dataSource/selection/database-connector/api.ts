@@ -56,10 +56,12 @@ export type DatabaseResponseData = {
     getSchemas: string[];
     getTables: TableInfo[];
     getTableDetail: {
-        columns: TableColInfo[];
+        meta: TableColInfo[];
+        columns: string[];
         rows: TableRowData[];
     };
     getResult: {
+        columns: string[];
         rows: TableRowData[];
     };
 };

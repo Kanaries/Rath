@@ -1,10 +1,14 @@
+import intl from 'react-intl-universal';
+import { PrimaryButton } from '@fluentui/react';
 import { FC, memo, CSSProperties, Fragment } from 'react';
 import styled from 'styled-components';
 import type { TableData } from '../index';
 
 
 interface TablePreviewProps {
+    name: string;
     data: TableData;
+    submit?: (name: string, value: TableData) => void;
 }
 
 const styles: Record<string, CSSProperties> & Record<string, any> = {
@@ -41,15 +45,27 @@ const Container = styled.div`
     }
 `;
 
-const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }) {
-    const columns = (((data.columns ?? []).length === 0) ? data.rows[0]?.map((_, i) => ({
-        key: `col_${i + 1}`,
-        colIndex: i,
-        dataType: null,
-    })) : data.columns) ?? [];
+const ButtonContainer = styled.div`
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin: 0.5em;
+    padding: 1em;
+    opacity: 0.1;
+    transition: opacity 100ms;
+    :hover {
+        opacity: 1;
+    }
+`;
 
-    return (
-        // @ts-expect-error css variable
+const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, data, submit }) {
+    const columns = data.columns.map(key => {
+        const col = data.meta.find(which => which.key === key)!;
+        return col!;
+    }).filter(Boolean);
+
+    return (<>
+        {/* @ts-expect-error css variable */}
         <Container style={{ '--n-cols': columns.length || 1, '--n-rows': data.rows.length || 1 }}>
             {/* corner */}
             <span />
@@ -77,7 +93,7 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
                                 j in d ? (
                                     <div
                                         key={j}
-                                        style={{ ...styles[data.columns?.[j]?.dataType ?? ''] }}
+                                        style={{ ...styles[columns?.[j]?.dataType ?? ''] }}
                                     >
                                         {d[j]}
                                     </div>
@@ -111,7 +127,15 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ data }
                 )
             }
         </Container>
-    );
+        {submit && (
+            <ButtonContainer>
+                <PrimaryButton
+                    text={intl.get('dataSource.btn.use_table')}
+                    onClick={() => submit(name, data)}
+                />
+            </ButtonContainer>
+        )}
+    </>);
 });
 
 

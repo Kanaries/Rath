@@ -179,33 +179,8 @@
             "KEPLER": { "title": "Kepler", "description": "" },
             "BIKE_SHARING_DC": { "title": "Bike Sharing", "description": "" }
         },
-        "dbProgress": [
-            {
-                "label": "Connection",
-                "msgRunning": "Waiting to connect to host...",
-                "msgSucceeded": "Connection succeeded.",
-                "msgFailed": "Connection failed."
-            },
-            {
-                "label": "Focus",
-                "msgRunning": "Find a table to continue.",
-                "msgSucceeded": "Completed.",
-                "msgFailed": "Operation failed."
-            },
-            {
-                "label": "Preview",
-                "msgRunning": "Fetching data from the table.",
-                "msgSucceeded": "Preview generated.",
-                "msgFailed": "Operation failed."
-            },
-            {
-                "label": "Fetch",
-                "msgRunning": "Loading data by submitting the SQL statement.",
-                "msgSucceeded": "Succeeded to execute.",
-                "msgFailed": "Failed to execute."
-            }
-        ],
         "btn": {
+            "use_table": "Load this table",
             "connect": "Connect",
             "reset": "Back and Reset",
             "connectFailed": "Failed to connect",

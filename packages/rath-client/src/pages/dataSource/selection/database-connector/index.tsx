@@ -1,11 +1,15 @@
 import { FC, useCallback, useState } from 'react';
+import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
-import { registerIcons, Stack } from '@fluentui/react';
+import { PrimaryButton, registerIcons, Spinner, Stack } from '@fluentui/react';
 import type { IMuteFieldBase, IRow } from '../../../../interfaces';
 import { DataSourceTag } from '../../../../utils/storage';
 import useAsyncState from '../../../../hooks/use-async-state';
 import useLocalStorage from '../../../../hooks/use-local-storage';
+import { notify } from '../../../../components/error';
+import { logDataImport } from '../../../../loggers/dataImport';
+import { rawData2DataWithBaseMetas } from '../../utils';
 import databaseOptions from './config';
 import type { SupportedDatabaseType } from './type';
 import { checkServerConnection } from './api';
@@ -50,7 +54,8 @@ type TableRowItem<TL extends TableLabels> = {
 };
 
 export interface TableData<TL extends TableLabels = TableLabels> {
-    columns: TL;
+    meta: TL;
+    columns: TL[number]['key'][];
     rows: TableRowItem<TL>[];
 }
 
@@ -87,41 +92,53 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
 
     const [connectUri, setConnectUri] = useState('');
 
-    // const submit = async () => {
-    //     // if (!preview.value || submitPendingRef.current) {
-    //     //     return;
-    //     // }
-    //     // submitPendingRef.current = true;
-    //     // try {
-    //     //     const { rows, columns } = preview.value;
-    //     //     const data = await rawData2DataWithBaseMetas(
-    //     //         rows.map(
-    //     //             row => Object.fromEntries(
-    //     //                 row.map<[string, any]>((val, colIdx) => [columns?.[colIdx]?.key ?? `${colIdx}`, val])
-    //     //             )
-    //     //         )
-    //     //     );
-    //     //     const { dataSource, fields } = data;
-    //     //     const name = [database.value, schema.value].filter(
-    //     //         Boolean
-    //     //     ).join('.')
+    const [queryString, setQueryString] = useState('');
+    const [editorPreview, setEditorPreview, isEditorPreviewPending] = useAsyncState<{
+        name: string;
+        value: TableData;
+    } | null>(null);
+    const [submitting, setSubmitting] = useState(false);
 
-    //     //     logDataImport({
-    //     //         dataType: `Database/${databaseType}`,
-    //     //         name,
-    //     //         fields,
-    //     //         dataSource: dataSource.slice(0, 10),
-    //     //         size: dataSource.length,
-    //     //     });
-    //     //     onDataLoaded(fields, dataSource, name, DataSourceTag.DATABASE);
+    const submit = async (
+        name: string = editorPreview?.name ?? '',
+        value: TableData | null = editorPreview?.value ?? null
+    ) => {
+        if (!value || submitting) {
+            return;
+        }
+        setSubmitting(true);
+        try {
+            const { rows, columns } = value;
+            const data = await rawData2DataWithBaseMetas(
+                rows.map(
+                    row => Object.fromEntries(
+                        row.map<[string, any]>((val, colIdx) => [columns?.[colIdx] ?? `${colIdx}`, val])
+                    )
+                )
+            );
+            const { dataSource, fields } = data;
 
-    //     //     onClose();
-    //     // } catch (error) {
-    //     //     console.error(error);
-    //     // } finally {
-    //     //     submitPendingRef.current = false;
-    //     // }
-    // };
+            logDataImport({
+                dataType: `Database/${sourceType}`,
+                name,
+                fields,
+                dataSource: dataSource.slice(0, 10),
+                size: dataSource.length,
+            });
+            onDataLoaded(fields, dataSource, name, DataSourceTag.DATABASE);
+
+            onClose();
+        } catch (error) {
+            notify({
+                title: 'Failed to load.',
+                type: 'error',
+                content: `${error}`,
+            });
+            console.error(error);
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     const updateServersList = (next: readonly string[]) => {
         setServers(next);
@@ -163,8 +180,6 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
         );
     }, [setServerList]);
 
-    const [queryString, setQueryString] = useState('');
-
     return (
         <Stack tokens={StackTokens} style={{ paddingBlock: '1em' }}>
             <AdvancedOptions
@@ -199,7 +214,21 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
                 sourceType={sourceType}
                 queryString={queryString}
                 setQueryString={setQueryString}
+                editorPreview={editorPreview}
+                setEditorPreview={setEditorPreview}
+                isEditorPreviewPending={isEditorPreviewPending}
+                submit={submit}
             />
+            {editorPreview && (
+                <div>
+                    <PrimaryButton
+                        onClick={() => submit()}
+                        disabled={submitting}
+                    >
+                        {submitting ? <Spinner /> : intl.get('common.apply')}
+                    </PrimaryButton>
+                </div>
+            )}
         </Stack>
     );
 };

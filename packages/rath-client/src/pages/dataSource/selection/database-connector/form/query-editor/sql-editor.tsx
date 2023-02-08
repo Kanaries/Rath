@@ -53,7 +53,7 @@ const SQLEditor: FC<SQLEditorProps> = ({ setQuery, preview, doPreview, busy }) =
     return (
         <Container>
             <div>
-                <TablePreview data={preview ?? { columns: [], rows: [] }} />
+                <TablePreview name="preview" data={preview ?? { meta: [], columns: [], rows: [] }} />
             </div>
             <Editor>
                 <Stack horizontal style={{ marginBlock: '0.5em', paddingInline: '1em' }} horizontalAlign="end">
@@ -65,7 +65,7 @@ const SQLEditor: FC<SQLEditorProps> = ({ setQuery, preview, doPreview, busy }) =
                         }}
                         iconProps={busy ? undefined : { iconName: "Play" }}
                     >
-                        {busy ? <Spinner /> : intl.get('common.preview')}
+                        {busy ? <Spinner /> : intl.get('common.run')}
                     </PrimaryButton>
                 </Stack>
                 <MonacoEditor language="sql" theme="vs" value={code} onChange={updateCode} />

@@ -59,7 +59,7 @@ const DiagramEditor = memo<DiagramEditorProps>(function DiagramEditor ({ disable
     return (
         <Container>
             <div>
-                <TablePreview data={preview ?? { columns: [], rows: [] }} />
+                <TablePreview name="preview" data={preview ?? { meta: [], columns: [], rows: [] }} />
             </div>
             <div>
                 {disabled || (
@@ -68,9 +68,10 @@ const DiagramEditor = memo<DiagramEditorProps>(function DiagramEditor ({ disable
                         disabled={disabled}
                         tables={tables}
                         graph={graph}
+                        setQuery={setQuery}
                         setGraph={setGraph}
                         sql={query}
-                        preview={doPreview}
+                        preview={() => doPreview()}
                     />
                 )}
             </div>

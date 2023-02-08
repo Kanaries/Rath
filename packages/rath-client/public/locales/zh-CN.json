@@ -178,33 +178,8 @@
             "KEPLER": { "title": "开普勒数据集", "description": "" },
             "BIKE_SHARING_DC": { "title": "共享单车数据集", "description": "" }
         },
-        "dbProgress": [
-            {
-                "label": "建立连接",
-                "msgRunning": "正在等待连接主机......",
-                "msgSucceeded": "已连接到主机",
-                "msgFailed": "无法建立连接"
-            },
-            {
-                "label": "查找表项",
-                "msgRunning": "从数据库中选择一张表",
-                "msgSucceeded": "完成",
-                "msgFailed": "找不到表"
-            },
-            {
-                "label": "预览",
-                "msgRunning": "正在从表中获取预览",
-                "msgSucceeded": "预览已生成",
-                "msgFailed": "预览生成失败"
-            },
-            {
-                "label": "获取数据",
-                "msgRunning": "提交 SQL 查询以获取数据",
-                "msgSucceeded": "查询完成",
-                "msgFailed": "查询未正确执行"
-            }
-        ],
         "btn": {
+            "use_table": "导入这张表",
             "connect": "建立连接",
             "reset": "返回并重置",
             "connectFailed": "建立连接失败",

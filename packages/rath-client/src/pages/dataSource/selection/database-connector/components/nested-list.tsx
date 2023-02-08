@@ -9,12 +9,10 @@ import { Icon, Shimmer } from '@fluentui/react';
 enableMapSet();
 
 const Root = styled.div`
-    overflow: auto hidden;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    > * {
-        width: 100%;
-    }
+    align-items: stretch;
     > *:last-child {
         flex-grow: 1;
         flex-shrink: 1;
@@ -35,6 +33,7 @@ const Item = styled.li<{ virtual?: boolean }>`
 `;
 
 const ItemHeader = styled.div<{ isRoot?: boolean }>`
+    width: 100%;
     padding-block: 2px;
     padding-inline: 1em;
     user-select: none;
@@ -82,6 +81,7 @@ const ItemIcon = styled.div`
     }
     + span {
         margin-left: 0.5em;
+        white-space: nowrap;
         > small {
             font-size: 90%;
             margin-left: 0.5em;

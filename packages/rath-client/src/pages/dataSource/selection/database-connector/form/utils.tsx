@@ -46,6 +46,7 @@ export const QueryContainer = styled.div<{ theme: Theme }>`
         align-items: stretch;
         justify-content: stretch;
         overflow: auto;
+        position: relative;
     }
 `;
 

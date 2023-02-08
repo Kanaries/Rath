@@ -6,7 +6,7 @@ import { IconButton, Spinner, useTheme } from '@fluentui/react';
 import type { SupportedDatabaseType, TableColInfo, TableInfo } from '../type';
 import databaseOptions from '../config';
 import NestedList, { INestedListItem } from '../components/nested-list';
-import useAsyncState from '../../../../../hooks/use-async-state';
+import useAsyncState, { AsyncDispatch } from '../../../../../hooks/use-async-state';
 import type { TableData } from '../index';
 import { DatabaseApiOperator, DatabaseRequestPayload, fetchQueryResult, fetchTableDetail } from '../api';
 import TablePreview from './table-preview';
@@ -21,15 +21,23 @@ interface QueryOptionsProps {
     sourceType: SupportedDatabaseType;
     queryString: string;
     setQueryString: (next: string) => void;
+    editorPreview: { name: string; value: TableData } | null;
+    setEditorPreview: AsyncDispatch<
+        | { name: string; value: TableData } | Promise<{ name: string; value: TableData } | null>
+        | ((prevState: { name: string; value: TableData } | null) => { name: string; value: TableData } | Promise<{ name: string; value: TableData } | null> | null) | null
+    >;
+    isEditorPreviewPending: boolean;
+    submit: (name: string, value: TableData) => void;
 }
 
-const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, disabled, queryString, setQueryString }) => {
+const QueryOptions: FC<QueryOptionsProps> = ({
+    server, sourceType, connectUri, disabled, queryString, setQueryString, editorPreview, setEditorPreview, isEditorPreviewPending, submit,
+}) => {
     const theme = useTheme();
     const config = databaseOptions.find(opt => opt.key === sourceType);
 
     const [pages, setPages] = useState<{ id: string; path: INestedListItem[] }[]>([]);
     const [preview, setPreview] = useState<{ [pathId: string]: TableData | 'failed' }>({});
-    const [editorPreview, setEditorPreview, isEditorPreviewPending] = useAsyncState<TableData | null>(null);
     const [pageIdx, setPageIdx] = useState<number | EditorKey>(EditorKey.Monaco);
 
     const [menu, setMenu, busy] = useAsyncState<{
@@ -41,7 +49,8 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
         setMenu({ title: '', items: [] });
         setPages([]);
         setPreview({});
-    }, [setMenu]);
+        setEditorPreview(null);
+    }, [setMenu, setEditorPreview]);
 
     const reload = useCallback(() => {
         if (!config || disabled) {
@@ -190,30 +199,19 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                 uri: commonParamsRef.current.connectUri,
                 sourceType: commonParamsRef.current.sourceType,
                 query: query ?? queryString,
-            }).then<TableData>(res => ({
-                columns: 'columns' in res ? (res as any).columns : res.rows.at(0)?.map((_, i) => ({
-                    colIndex: i,
-                    key: `col_${i + 1}`,
-                    dataType: null,
-                })) ?? [],
-                rows: res.rows,
+            }).then<{ name: string; value: TableData }>(res => ({
+                name: 'query result',
+                value: {
+                    meta: res.columns.map((col, i) => ({
+                        key: col,
+                        dataType: null,
+                        colIndex: i,
+                    })),
+                    columns: res.columns,
+                    rows: res.rows,
+                },
             })).catch(() => null)
         );
-        fetchQueryResult(commonParamsRef.current.server, {
-            uri: commonParamsRef.current.connectUri,
-            sourceType: commonParamsRef.current.sourceType,
-            query: query ?? queryString,
-        }).then(res => {
-            setEditorPreview({
-                // @ts-expect-error
-                columns: 'columns' in res ? res : res.rows.at(0)?.map((_, i) => ({
-                    colIndex: i,
-                    key: `col_${i + 1}`,
-                    dataType: null,
-                })) ?? [],
-                rows: res.rows,
-            });
-        });
     };
 
     const [w, setW] = useState<string | number>('fit-content');
@@ -326,7 +324,7 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                         <SQLEditor
                             busy={isEditorPreviewPending}
                             setQuery={q => setQueryString(q)}
-                            preview={editorPreview}
+                            preview={editorPreview?.value ?? null}
                             doPreview={query => {
                                 setQueryString(query);
                                 doPreview(query);
@@ -339,7 +337,7 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                             tables={tables}
                             query={queryString}
                             setQuery={q => setQueryString(q)}
-                            preview={editorPreview}
+                            preview={editorPreview?.value ?? null}
                             doPreview={doPreview}
                         />
                     ) : page && (
@@ -347,7 +345,7 @@ const QueryOptions: FC<QueryOptionsProps> = ({ server, sourceType, connectUri, d
                             <div style={{ padding: '0.5em', color: 'red' }}>
                                 {intl.get('dataSource.req_err')}
                             </div>
-                        ) : <TablePreview data={curPreview} /> : (
+                        ) : <TablePreview name={page.id} submit={submit} data={curPreview} /> : (
                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <Spinner />
                             </div>
