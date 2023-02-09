@@ -138,45 +138,45 @@ const DataTable: React.FC = (props) => {
                     endIndex: endIndex,
                 });
                 const nextTPL = tsList2tpList(nextTSL);
-                // fetch('http://127.0.0.1:5533/api/text_pattern_extraction', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify({
-                //         values: dataSourceStore.cleanedData.map((d) => `${d[fid]}`),
-                //         selections: [...textSelectList.map((t) => t.str.slice(t.startIndex, t.endIndex)), fullText.slice(startIndex, endIndex)].map(
-                //             (d) => `${d}`
-                //         ),
-                //     }),
-                // })
-                //     .then((res) => res.json())
-                //     .then((res) => {
-                //         const extractions: { score: number; best_match: string }[] = res.data.extractions;
-                //         const wordSets: Set<string> = new Set(extractions.filter((e) => e.score > 0.72).map((e) => e.best_match));
-                //         const wordsInRegExp = new RegExp(
-                //             Array.from(wordSets)
-                //                 .map((w) => `${w}`)
-                //                 .join('|')
-                //         );
-                //         const textPatternsInNL: IFieldTextPattern[] = [
-                //             {
-                //                 fid,
-                //                 ph: /.*/,
-                //                 pe: /.*/,
-                //                 selection: wordsInRegExp,
-                //                 selectionType: 'nlp',
-                //                 score: 0.001,
-                //                 pattern: new RegExp(`^.*(?<selection>${wordsInRegExp.source}).*$`),
-                //             },
-                //         ];
-                //         unstable_batchedUpdates(() => {
-                //             const gtp = groupTextPattern(nextTPL.concat(textPatternsInNL));
-                //             setGroupedTextPatternList(gtp);
-                //             const enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = nextTSL.length > 1 ? undefined : ['knowledge'];
-                //             setTpPos(findFirstExistTextPattern(gtp, enhanceKeys));
-                //         });
-                //     });
+                fetch('http://127.0.0.1:5533/api/text_pattern_extraction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        values: dataSourceStore.cleanedData.map((d) => `${d[fid]}`),
+                        selections: [...textSelectList.map((t) => t.str.slice(t.startIndex, t.endIndex)), fullText.slice(startIndex, endIndex)].map(
+                            (d) => `${d}`
+                        ),
+                    }),
+                })
+                    .then((res) => res.json())
+                    .then((res) => {
+                        const extractions: { score: number; best_match: string }[] = res.data.extractions;
+                        const wordSets: Set<string> = new Set(extractions.filter((e) => e.score > 0.5).map((e) => e.best_match));
+                        const wordsInRegExp = new RegExp(
+                            Array.from(wordSets)
+                                .map((w) => `${w}`)
+                                .join('|')
+                        );
+                        const textPatternsInNL: IFieldTextPattern[] = [
+                            {
+                                fid,
+                                ph: /.*/,
+                                pe: /.*/,
+                                selection: wordsInRegExp,
+                                selectionType: 'nlp',
+                                score: 0.001,
+                                pattern: new RegExp(`^.*(?<selection>${wordsInRegExp.source}).*$`),
+                            },
+                        ];
+                        unstable_batchedUpdates(() => {
+                            const gtp = groupTextPattern(nextTPL.concat(textPatternsInNL));
+                            setGroupedTextPatternList(gtp);
+                            const enhanceKeys: IFieldTextPattern['selectionType'][] | undefined = nextTSL.length > 1 ? undefined : ['knowledge'];
+                            setTpPos(findFirstExistTextPattern(gtp, enhanceKeys));
+                        });
+                    });
                 unstable_batchedUpdates(() => {
                     setTextSelectList(nextTSL);
                     // setTextPatternList(nextTPL);
