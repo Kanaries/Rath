@@ -13,7 +13,7 @@ export type DatabaseLevelConfig<T extends DatabaseLevelType = DatabaseLevelType>
 const databaseOptions: Array<
     & IDropdownOption
     & {
-        key: SupportedDatabaseType | 'demo';
+        key: SupportedDatabaseType;
         icon?: string;
         rule: string;
         levels: DatabaseLevelConfig[];
@@ -116,8 +116,15 @@ const databaseOptions: Array<
         text: 'Apache Drill',
         key: 'drill',
         rule: 'drill+sadrill://<username>:<password>@<host>:<port>/<storage_plugin>?use_ssl=True',
-        levels: ['schema', 'table'],
+        levels: ['database', 'table'],
         icon: 'apachedrill.png',
+    },
+    {
+        text: 'Apache Druid',
+        key: 'druid',
+        rule: 'druid://<User>:<password>@<Host>:<Port-default-9088>/druid/v2/sql',
+        levels: ['schema', 'table'],
+        icon: 'druid.png',
     },
     {
         text: 'snowflake',

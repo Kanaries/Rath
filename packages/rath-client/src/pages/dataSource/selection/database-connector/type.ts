@@ -12,6 +12,7 @@ export type SupportedDatabaseType = (
     | 'hive'
     | 'sqlserver'
     | 'drill'
+    | 'druid'
     | 'snowflake'
     | 'bigquery'
     | 'demo'
