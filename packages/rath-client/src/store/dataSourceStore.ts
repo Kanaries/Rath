@@ -246,7 +246,7 @@ export class DataSourceStore {
         let loadTaskReceived = false;
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
-            const { type, downLoadURL, dataset, dashboard } = msg;
+            const { type, downLoadURL, dataset/*, dashboard*/ } = msg;
             const { userStore } = getGlobalStore();
             switch (type) {
                 case 'download': {
@@ -275,16 +275,18 @@ export class DataSourceStore {
                                 resolve({});
                             }
                         }).then(part => new Promise<typeof part>(resolve => {
-                            if (dashboard) {
-                                userStore.openDashboardTemplates(dashboard).then(ok => {
-                                    resolve({
-                                        ...part,
-                                        dashboard: ok,
-                                    });
-                                });
-                            } else {
-                                resolve(part);
-                            }
+                            // TODO: release dashboard feature
+                            resolve(part);
+                            // if (dashboard) {
+                            //     userStore.openDashboardTemplates(dashboard).then(ok => {
+                            //         resolve({
+                            //             ...part,
+                            //             dashboard: ok,
+                            //         });
+                            //     });
+                            // } else {
+                            //     resolve(part);
+                            // }
                         })).then(state => {
                             // @ts-ignore
                             ev.source!.postMessage({ type: "dataset", result: state }, ev.origin);

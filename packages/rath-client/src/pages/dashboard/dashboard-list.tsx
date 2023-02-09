@@ -135,7 +135,8 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
         lastModifyTime: p.info.lastModifyTime,
     })), [pages]);
 
-    const canBackup = Boolean(loggedIn && cloudDataSourceMeta);
+    // TODO: release dashboard upload feature
+    const canBackup = Boolean(loggedIn && cloudDataSourceMeta) && false;
 
     const [selected, setSelected] = useState<FlatDocumentInfo | null>(null);
 
