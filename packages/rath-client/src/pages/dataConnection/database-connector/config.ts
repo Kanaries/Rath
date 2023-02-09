@@ -17,6 +17,7 @@ const databaseOptions: Array<
         icon?: string;
         rule: string;
         levels: DatabaseLevelConfig[];
+        credentials?: 'json' | undefined;
 }> = [
     {
         text: 'PostgreSQL',
@@ -128,9 +129,17 @@ const databaseOptions: Array<
     {
         text: 'Demo',
         key: 'demo',
-        rule: '(empty)',
-        levels: [],
+        rule: 'bigquery://kanaries-demo',
+        levels: ['database', 'table'],
         icon: '',
+    },
+    {
+        text: 'Google BigQuery',
+        key: 'bigquery',
+        rule: 'bigquery://{project_id}',
+        levels: ['database', 'table'],
+        credentials: 'json',
+        icon: 'bigquery.jpeg',
     },
 ];
 

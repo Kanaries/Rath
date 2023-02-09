@@ -221,7 +221,7 @@ const AdvancedOptions = observer<{
     };
 
     return (
-        <Stack horizontal verticalAlign="end" onClick={() => setFocused(false)} style={{ position: 'relative' }}>
+        <Stack horizontal verticalAlign="end" horizontalAlign="stretch" onClick={() => setFocused(false)} style={{ position: 'relative' }}>
             <TextField
                 label={intl.get('dataSource.connectorService')}
                 value={customServer}
@@ -235,38 +235,41 @@ const AdvancedOptions = observer<{
                         submitCustomServer();
                     }
                 }}
-                onFocus={() => setFocused(true)}
                 onChange={(_, val) => {
                     setCustomServer(val?.replaceAll(/\s+/g, '') ?? '');
                 }}
                 onRenderLabel={() => (
                     <Stack horizontal tokens={{ childrenGap: 20 }} verticalAlign="center">
-                        <Label>{intl.get('dataSource.connectorService')}</Label>
+                        <Label style={{ whiteSpace: 'nowrap' }}>{intl.get('dataSource.connectorService')}</Label>
                         {!status ? (
                             <ErrorMessage>
                                 {intl.get('dataSource.connectorEmpty')}
                             </ErrorMessage>
-                        ) : status === 'pending' ? (
-                            <Spinner size={SpinnerSize.small} />
-                        ) : status === 'fulfilled' ? (
-                            <span style={{ display: 'flex', alignItems: 'center' }}>
-                                <Icon
-                                    iconName="StatusCircleCheckmark"
-                                    style={{
-                                        borderRadius: '50%',
-                                        fontSize: '1.2rem',
-                                        color: 'green',
-                                        userSelect: 'none',
-                                        cursor: 'default',
-                                    }}
-                                />
-                                {curServer.lag && <small>{`${curServer.lag}ms`}</small>}
-                            </span>
-                        ) : (
-                            <ErrorMessage>
-                                {intl.get('dataSource.connectorOffline')}
-                            </ErrorMessage>
-                        )}
+                        ) : null}
+                        {{
+                            pending: <Spinner size={SpinnerSize.small} />,
+                            fulfilled: curServer && (
+                                <span style={{ display: 'flex', alignItems: 'center' }}>
+                                    <Icon
+                                        iconName="StatusCircleCheckmark"
+                                        style={{
+                                            borderRadius: '50%',
+                                            fontSize: '1.2rem',
+                                            color: 'green',
+                                            userSelect: 'none',
+                                            cursor: 'default',
+                                        }}
+                                    />
+                                    {curServer.lag && <small>{`${curServer.lag}ms`}</small>}
+                                </span>
+                            ),
+                            rejected: (
+                                <ErrorMessage>
+                                    {intl.get('dataSource.connectorOffline')}
+                                </ErrorMessage>
+                            ),
+                            unknown: '',
+                        }[status ?? 'unknown']}
                     </Stack>
                 )}
                 onRenderSuffix={() => {
@@ -280,7 +283,7 @@ const AdvancedOptions = observer<{
                     );
                 }}
                 autoComplete="off"
-                styles={{ root: { flexGrow: 1 }, suffix: { padding: 0 } }}
+                styles={{ root: { flex: 1 }, suffix: { padding: 0 } }}
             />
             {focused && (
                 <>
@@ -299,7 +302,7 @@ const AdvancedOptions = observer<{
                     />
                 </>
             )}
-            <div aria-hidden id={id} style={{ height: 0, width: '100%' }} />
+            <div aria-hidden id={id} style={{ position: 'absolute', height: 0, width: '100%' }} />
             <ContextualMenu
                 target={`#${id}`}
                 useTargetWidth

@@ -62,23 +62,20 @@ export interface TableData<TL extends TableLabels = TableLabels> {
 interface DatabaseDataProps {
     onClose: () => void;
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: string, tag: DataSourceTag) => void;
-    setLoadingAnimation: (on: boolean) => void;
 }
 
 export const inputWidth = '180px';
 
-// FIXME: test server
 export const defaultServers: readonly string[] = [
-    'https://za2piuk6wc.execute-api.us-east-1.amazonaws.com/connector',
-    'https://2qqrotf58e.execute-api.ap-northeast-1.amazonaws.com/connector',
     'https://gateway.kanaries.net/connector',
+    'https://kanaries.cn/connector',
 ];
 
 
-const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLoadingAnimation }) => {
-    const [servers, setServers] = useLocalStorage('database_connector_server', defaultServers);
+const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => {
+    const [servers, setServers] = useLocalStorage<string[]>('database_connector_server', []);
     const [serverList, setServerList] = useAsyncState<{ target: string; status: 'unknown' | 'pending' | 'fulfilled' | 'rejected'; lag: number }[]>(
-        () => servers.map(target => ({ target, status: 'unknown', lag: 0 })),
+        () => [...servers, ...defaultServers].map(target => ({ target, status: 'unknown', lag: 0 })),
         {
             resetBeforeTask: false,
         },
@@ -91,7 +88,7 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
     const [sourceType, setSourceType] = useState<SupportedDatabaseType>('clickhouse');
 
     const [connectUri, setConnectUri] = useState('');
-
+    const [credentials, setCredentials] = useState<Record<string, string>>({});
     const [queryString, setQueryString] = useState('');
     const [editorPreview, setEditorPreview, isEditorPreviewPending] = useAsyncState<{
         name: string;
@@ -206,9 +203,11 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
                 setSourceType={setSourceType}
                 connectUri={connectUri}
                 setConnectUri={setConnectUri}
+                credentials={credentials}
+                setCredentials={setCredentials}
             />
             <QueryOptions
-                disabled={curServer?.status !== 'fulfilled' || !connectUri}
+                disabled={curServer?.status !== 'fulfilled' || (sourceType !== 'demo' && !connectUri)}
                 server={server}
                 connectUri={connectUri}
                 sourceType={sourceType}
@@ -217,6 +216,7 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLo
                 editorPreview={editorPreview}
                 setEditorPreview={setEditorPreview}
                 isEditorPreviewPending={isEditorPreviewPending}
+                credentials={credentials}
                 submit={submit}
             />
             {editorPreview && (

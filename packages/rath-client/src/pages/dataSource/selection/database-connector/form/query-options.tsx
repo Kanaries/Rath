@@ -27,11 +27,12 @@ interface QueryOptionsProps {
         | ((prevState: { name: string; value: TableData } | null) => { name: string; value: TableData } | Promise<{ name: string; value: TableData } | null> | null) | null
     >;
     isEditorPreviewPending: boolean;
+    credentials: Record<string, string>;
     submit: (name: string, value: TableData) => void;
 }
 
 const QueryOptions: FC<QueryOptionsProps> = ({
-    server, sourceType, connectUri, disabled, queryString, setQueryString, editorPreview, setEditorPreview, isEditorPreviewPending, submit,
+    server, sourceType, connectUri, disabled, queryString, setQueryString, editorPreview, setEditorPreview, isEditorPreviewPending, credentials, submit,
 }) => {
     const theme = useTheme();
     const config = databaseOptions.find(opt => opt.key === sourceType);
@@ -69,14 +70,18 @@ const QueryOptions: FC<QueryOptionsProps> = ({
                 fetchListAsNodes(
                     levelType,
                     server,
-                    { sourceType, uri: connectUri },
+                    {
+                        sourceType,
+                        uri: connectUri,
+                        credentials: config.credentials === 'json' ? credentials : undefined,
+                    },
                     hasNextLevel,
                 ).then(list => list ? ({ title: levelType, items: list }) : { title: '', items: [] })
             );
         }
 
         reset();
-    }, [disabled, server, sourceType, connectUri, config, setMenu, reset]);
+    }, [config, disabled, reset, setMenu, server, sourceType, connectUri, credentials]);
     
     const empty = !config || disabled || !connectUri;
     
@@ -115,6 +120,7 @@ const QueryOptions: FC<QueryOptionsProps> = ({
                 db: reversedPath.find(d => d.group === 'database')?.key ?? null,
                 schema: reversedPath.find(d => d.group === 'schema')?.key ?? null,
                 table: reversedPath.find(d => d.group === 'table')?.key ?? null,
+                credentials: config.credentials === 'json' ? credentials : undefined,
             };
             const hasNextLevelThen = config.levels.length >= curLevelIdx + 2;
             const submit = (list: INestedListItem[]) => {
@@ -173,7 +179,7 @@ const QueryOptions: FC<QueryOptionsProps> = ({
     commonParamsRef.current = { connectUri, sourceType, server };
 
     useEffect(() => {
-        if (page && page.path.at(-1)?.group === 'table' && !curPreview) {
+        if (config && page && page.path.at(-1)?.group === 'table' && !curPreview) {
             fetchTableDetail(commonParamsRef.current.server, {
                 uri: commonParamsRef.current.connectUri,
                 sourceType: commonParamsRef.current.sourceType,
@@ -181,6 +187,7 @@ const QueryOptions: FC<QueryOptionsProps> = ({
                 schema: page.path.find(d => d.group === 'schema')?.key ?? null,
                 table: page.path.at(-1)?.key ?? null,
                 rowsNum: '100',
+                credentials: config.credentials === 'json' ? credentials : undefined,
             }).then(res => {
                 setPreview(rec => produce(rec, draft => {
                     draft[page.id] = res;
@@ -191,7 +198,7 @@ const QueryOptions: FC<QueryOptionsProps> = ({
                 }));
             });
         }
-    }, [curPreview, page]);
+    }, [curPreview, page, config, credentials]);
 
     const doPreview = (query?: string) => {
         setEditorPreview(

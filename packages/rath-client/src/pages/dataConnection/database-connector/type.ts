@@ -13,6 +13,8 @@ export type SupportedDatabaseType = (
     | 'sqlserver'
     | 'drill'
     | 'snowflake'
+    | 'bigquery'
+    | 'demo'
 );
 
 export type TableColInfo = {

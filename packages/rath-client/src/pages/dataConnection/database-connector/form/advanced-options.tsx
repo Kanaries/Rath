@@ -241,7 +241,7 @@ const AdvancedOptions = observer<{
                 onRenderLabel={() => (
                     <Stack horizontal tokens={{ childrenGap: 20 }} verticalAlign="center">
                         <Label style={{ whiteSpace: 'nowrap' }}>{intl.get('dataSource.connectorService')}</Label>
-                        {status ? (
+                        {!status ? (
                             <ErrorMessage>
                                 {intl.get('dataSource.connectorEmpty')}
                             </ErrorMessage>

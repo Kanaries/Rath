@@ -126,7 +126,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
         ),
         [IDataSourceType.LOCAL]: <HistoryPanel onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} onLoadingFailed={onLoadingFailed} />,
         [IDataSourceType.DATABASE]: (
-            <DatabaseConnector onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} setLoadingAnimation={toggleLoadingAnimation} />
+            <DatabaseConnector onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} />
         ),
         [IDataSourceType.AIRTABLE]: (
             <AirTableSource

@@ -23,6 +23,7 @@ export type DatabaseApiParams = {
     schemaName: string;
     tableHeadingCount: string;
     query: string;
+    credentials: Record<string, string>;
 };
 
 export type DatabaseRequestPayload<P extends Exclude<DatabaseApiOperator, 'ping'>> = {
@@ -35,6 +36,7 @@ export type DatabaseRequestPayload<P extends Exclude<DatabaseApiOperator, 'ping'
     /** @default "500" */
     rowsNum?: DatabaseApiParams['tableHeadingCount'] | null;
     query?: DatabaseApiParams['query'] | null;
+    credentials?: Record<string, string>;
 };
 
 type Rq<T, Keys extends keyof T> = T & Required<Pick<T, Keys>>;

@@ -54,7 +54,7 @@ const Selection: React.FC<SelectionProps> = props => {
             <HistoryPanel onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} />
         ),
         [IDataSourceType.DATABASE]: (
-            <DatabaseConnector onClose={onClose} onDataLoaded={onDataLoaded} setLoadingAnimation={setLoadingAnimation} />
+            <DatabaseConnector onClose={onClose} onDataLoaded={onDataLoaded} />
         ),
         [IDataSourceType.AIRTABLE]: (
             <AirTableSource onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
