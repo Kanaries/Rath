@@ -16,7 +16,7 @@ def lambda_handler(event, context):
     database = event.get('db', None)
     table = event.get('table', None)
     schema = event.get('schema', None)
-    rows_num = event.get('rowsNum', 500)
+    rows_num = event.get('rowsNum', 20)
     sql = event.get('query', None)
     payload = {
         'uri': uri,
@@ -34,8 +34,14 @@ def lambda_handler(event, context):
         InvocationType='RequestResponse',
         Payload=json.dumps(payload)
     )
-
-    return {
-        'success': True,
-        'data': json.load(response['Payload'])
-    }
+    res = json.load(response['Payload'])
+    if 'errorMessage' in res:
+        return {
+            'success': False,
+            'message': res['errorType']+'\n'+res['errorMessage']
+        }
+    else:
+        return {
+            'success': True,
+            'data': res
+        }

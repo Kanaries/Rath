@@ -34,15 +34,14 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                meta = basefunc.sqlserver_getmeta(uri=uri, database=database, schema=schema, table=item)
+                meta = basefunc.sqlserver_getmeta(engine=engine, database=database, schema=schema, table=item)
                 scores = {"name": item, "meta": meta}
                 table_list.append(scores)
         return table_list
 
     @staticmethod
-    def sqlserver_getmeta(uri, database, table, schema):
-        engine = create_engine(uri, echo=True)
-        metaRes = engine.execute('''
+    def sqlserver_getmeta(database, table, schema, engine=None):
+        meta_res = engine.execute('''
                 SELECT SC.name as table_name,
                        ST.name as table_column
                 FROM {0}.sys.sysobjects SO,
@@ -57,7 +56,7 @@ class basefunc:
             '''.format(database, database, database, table)).fetchall()
         meta = []
         i = 0
-        for colData in metaRes:
+        for colData in meta_res:
             scores = {"key": colData.table_name, "colIndex": i, "dataType": colData.table_column}
             meta.append(scores)
             i += 1
@@ -77,16 +76,30 @@ class basefunc:
         return data
 
     @staticmethod
-    def sqlserver_getresult(uri, sql):
+    def sqlserver_getdetail(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        res = engine.execute(sql).fetchall()
+        meta = basefunc.sqlserver_getmeta(database=database, schema=schema, table=table, engine=engine)
+        sql = f'select top {rows_num} * from {database}.{schema}.{table}'
+        res_list = basefunc.sqlserver_getresult(sql=sql, engine=engine)
+        return [meta, res_list[0], res_list[1]]
+
+    @staticmethod
+    def sqlserver_getresult(sql, uri=None, engine=None):
+        if engine is None:
+            engine = create_engine(uri, echo=True)
+        res = engine.execute(sql)
+        data_res = res.fetchall()
+        col_res = res.keys()
+        columns = []
+        for col_data in col_res:
+            columns.append(col_data)
         sql_result = []
-        for row in res:
+        for row in data_res:
             rows = []
             for item in row:
                 rows.append(item)
             sql_result.append(rows)
-        return sql_result
+        return [columns, sql_result]
 
 
 def lambda_handler(event, context):
@@ -109,18 +122,18 @@ def lambda_handler(event, context):
         table_list = dict_func['{0}_gettable'.format(source_type)].__func__(uri=uri, database=database, schema=schema)
         return table_list
     elif func == 'getTableDetail':
-        meta = dict_func['{0}_getmeta'.format(source_type)].__func__(uri=uri, database=database, table=table,
-                                                                     schema=schema)
-        data = dict_func['{0}_getdata'.format(source_type)].__func__(uri=uri, database=database, table=table,
-                                                                     schema=schema, rows_num=rows_num)
+        res_list = dict_func['{0}_getdetail'.format(source_type)].__func__(uri=uri, database=database, table=table,
+                                                                           schema=schema, rows_num=rows_num)
         return {
-            "columns": meta,
-            "rows": data
+            "meta": res_list[0],
+            "columns": res_list[1],
+            "rows": res_list[2]
         }
     elif func == 'getResult':
-        sql_result = dict_func['{0}_getresult'.format(source_type)].__func__(uri=uri, sql=sql)
+        res_list = dict_func['{0}_getresult'.format(source_type)].__func__(uri=uri, sql=sql)
         return {
-            "rows": sql_result
+            "columns": res_list[0],
+            "rows": res_list[1]
         }
     else:
         return 'The wrong func was entered'

@@ -20,18 +20,17 @@ class basefunc:
         table_list = []
         for row in res:
             for item in row:
-                meta = basefunc.doris_getmeta(uri=uri, database=database, schema=schema, table=item)
+                meta = basefunc.doris_getmeta(database=database, schema=schema, table=item)
                 scores = {"name": item, "meta": meta}
                 table_list.append(scores)
         return table_list
 
     @staticmethod
-    def doris_getmeta(uri, database, table, schema):
-        engine = create_engine(uri, echo=True)
-        metaRes = engine.execute('show full columns from ' + database + '.' + table).fetchall()
+    def doris_getmeta(uri, database, table, schema, engine=None):
+        meta_res = engine.execute('show full columns from ' + database + '.' + table).fetchall()
         meta = []
         i = 0
-        for colData in metaRes:
+        for colData in meta_res:
             scores = {"key": colData.name, "colIndex": i, "dataType": colData.type}
             meta.append(scores)
             i += 1
@@ -40,9 +39,9 @@ class basefunc:
     @staticmethod
     def doris_getdata(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
+        data_res = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
         data = []
-        for row in dataRes:
+        for row in data_res:
             rows = []
             for item in row:
                 rows.append(item)
@@ -50,17 +49,30 @@ class basefunc:
         return data
 
     @staticmethod
-    def doris_getresult(uri, sql):
+    def doris_getdetail(uri, database, table, schema, rows_num):
         engine = create_engine(uri, echo=True)
-        res = engine.execute(sql).fetchall()
+        meta = basefunc.doris_getmeta(database=database, schema=schema, table=table, engine=engine)
+        sql = f'select * from {database}.{table} limit {rows_num}'
+        res_list = basefunc.doris_getresult(sql=sql, engine=engine)
+        return [meta, res_list[0], res_list[1]]
+
+    @staticmethod
+    def doris_getresult(sql, uri=None, engine=None):
+        if engine is None:
+            engine = create_engine(uri, echo=True)
+        res = engine.execute(sql)
+        data_res = res.fetchall()
+        col_res = res.keys()
         sql_result = []
-        for row in res:
+        for row in data_res:
             rows = []
             for item in row:
                 rows.append(item)
             sql_result.append(rows)
-        return sql_result
-
+        columns = []
+        for col_data in col_res:
+            columns.append(col_data)
+        return [columns, sql_result]
 
 
 def lambda_handler(event, context):
@@ -83,18 +95,18 @@ def lambda_handler(event, context):
         table_list = dict_func['{0}_gettable'.format(source_type)].__func__(uri=uri, database=database, schema=schema)
         return table_list
     elif func == 'getTableDetail':
-        meta = dict_func['{0}_getmeta'.format(source_type)].__func__(uri=uri, database=database, table=table,
-                                                                     schema=schema)
-        data = dict_func['{0}_getdata'.format(source_type)].__func__(uri=uri, database=database, table=table,
-                                                                     schema=schema, rows_num=rows_num)
+        res_list = dict_func['{0}_getdetail'.format(source_type)].__func__(uri=uri, database=database, table=table,
+                                                                           schema=schema, rows_num=rows_num)
         return {
-            "columns": meta,
-            "rows": data
+            "meta": res_list[0],
+            "columns": res_list[1],
+            "rows": res_list[2]
         }
     elif func == 'getResult':
-        sql_result = dict_func['{0}_getresult'.format(source_type)].__func__(uri=uri, sql=sql)
+        res_list = dict_func['{0}_getresult'.format(source_type)].__func__(uri=uri, sql=sql)
         return {
-                "rows": sql_result
-            }
+            "columns": res_list[0],
+            "rows": res_list[1]
+        }
     else:
         return 'The wrong func was entered'
