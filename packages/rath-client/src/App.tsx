@@ -20,6 +20,7 @@ import Dashboard from './pages/dashboard';
 import CausalPage from './pages/causal';
 import PerformanceWindow from './components/performance-window';
 import useHotKey from './hooks/use-hotkey';
+import DataConnection from './pages/dataConnection';
 import AutoSaving from './components/backupModal/autoSaving';
 
 
@@ -75,6 +76,7 @@ function App() {
                     {appKey === PIVOT_KEYS.collection && <Collection />}
                     {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
                     {appKey === PIVOT_KEYS.causal && <CausalPage />}
+                    {appKey === PIVOT_KEYS.connection && <DataConnection />}
                     <CrInfo />
                 </div>
             </div>

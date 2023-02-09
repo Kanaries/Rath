@@ -61,6 +61,7 @@ const IconMap = {
     [PIVOT_KEYS.collection]: 'Heart',
     [PIVOT_KEYS.dashboard]: 'Presentation',
     [PIVOT_KEYS.causal]: 'Relationship',
+    [PIVOT_KEYS.connection]: 'Database'
 } as {
     [key: string]: string;
 };
@@ -139,6 +140,7 @@ const AppNav: React.FC<AppNavProps> = (props) => {
         {
             links: [
                 ...getLinks([
+                    PIVOT_KEYS.connection,
                     PIVOT_KEYS.dataSource,
                 ]),
                 {
