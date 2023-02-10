@@ -24,13 +24,13 @@ import DataLoadingStatus from '../dataSource/dataLoadingStatus';
 import { useGlobalStore } from '../../store';
 import { Card } from '../../components/card';
 import { PIVOT_KEYS } from '../../constants';
+import DatabaseConnector from '../dataSource/selection/database';
 import FileData from './file';
 import DemoData from './demo';
 // import RestfulData from './restful';
 import JSONAPI from './jsonAPI';
 import OLAPData from './olap';
 import HistoryPanel from './history';
-import DatabaseData from './database/';
 import AirTableSource from './airtable';
 import Notebook from './notebook';
 import SupportedSources from './supportedSources';
@@ -126,7 +126,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
         ),
         [IDataSourceType.LOCAL]: <HistoryPanel onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} onLoadingFailed={onLoadingFailed} />,
         [IDataSourceType.DATABASE]: (
-            <DatabaseData onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} setLoadingAnimation={toggleLoadingAnimation} />
+            <DatabaseConnector onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} />
         ),
         [IDataSourceType.AIRTABLE]: (
             <AirTableSource
@@ -152,7 +152,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
 
     return (
         <div className="content-container">
-            <Card style={{ minHeight: '96hv' }}>
+            <Card style={{ flexGrow: 1, flexShrink: 0, flexBasis: 'max-content', display: 'flex', flexDirection: 'column' }}>
                 <Breadcrumb
                     items={items}
                     maxDisplayedItems={10}
@@ -161,29 +161,31 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
                 />
                 { dataSourceType !== null && <hr style={{ marginTop: '1em' }} /> }
                 {dataSourceType !== null && (
-                    <DefaultButton
-                        style={{ margin: '1em 0em' }}
-                        text={intl.get('common.return')}
-                        onClick={() => {
-                            setDataSourceType(null);
-                        }}
-                    />
+                    <div>
+                        <DefaultButton
+                            style={{ margin: '1em 0em' }}
+                            text={intl.get('common.return')}
+                            onClick={() => {
+                                setDataSourceType(null);
+                            }}
+                        />
+                    </div>
                 )}
-                <div className="">
+                <div style={{ flexGrow: 1, flexShrink: 0, flexBasis: 'max-content', flexDirection: 'column' }}>
                     {loading && dataSourceType !== IDataSourceType.FILE && <ProgressIndicator description="loading" />}
                     {loading && dataSourceType === IDataSourceType.FILE && <DataLoadingStatus />}
                     {dataSourceType && formMap[dataSourceType]}
                 </div>
             </Card>
-            <div>
             {dataSourceType === null && (
-                        <SupportedSources
-                            onSelected={(k) => {
-                                setDataSourceType(k as IDataSourceType);
-                            }}
-                        />
-                    )}
-            </div>
+                <div style={{ flexGrow: 9999, flexShrink: 0, flexBasis: 'max-content' }}>
+                    <SupportedSources
+                        onSelected={(k) => {
+                            setDataSourceType(k as IDataSourceType);
+                        }}
+                    />
+                </div>
+            )}
         </div>
     );
 };

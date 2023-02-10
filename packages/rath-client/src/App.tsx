@@ -76,8 +76,8 @@ function App() {
                     {appKey === PIVOT_KEYS.dashboard && <Dashboard />}
                     {appKey === PIVOT_KEYS.causal && <CausalPage />}
                     {appKey === PIVOT_KEYS.connection && <DataConnection />}
-                    <CrInfo />
                 </div>
+                <CrInfo />
             </div>
             {showPerformanceWindow && <PerformanceWindow />}
         </div>

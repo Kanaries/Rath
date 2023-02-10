@@ -12,7 +12,7 @@ export type ErrorType = 'error' | 'info' | 'success';
 const TASK_TEST_MODE_COOKIE_KEY = 'task_test_mode';
 
 export class CommonStore {
-    public appKey: string = PIVOT_KEYS.dataSource;
+    public appKey: string = PIVOT_KEYS.connection;
     public computationEngine: string = COMPUTATION_ENGINE.webworker;
     public exploreMode: string = EXPLORE_MODE.comprehensive;
     public taskMode: ITaskTestMode = ITaskTestMode.local;

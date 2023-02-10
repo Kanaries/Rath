@@ -313,7 +313,7 @@ const DataTable: React.FC = (props) => {
     );
 
     return (
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {fieldsNotDecided.length > 0 && (
                 <MessageBar
                     messageBarType={MessageBarType.warning}
@@ -329,7 +329,7 @@ const DataTable: React.FC = (props) => {
                     <span>{intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}</span>
                 </MessageBar>
             )}
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', flexGrow: 1, flexShrink: 1, flexBasis: '0%', overflow: 'auto' }}>
                 {columns.length > 0 && (
                     <CustomBaseTable
                         useVirtual={true}
