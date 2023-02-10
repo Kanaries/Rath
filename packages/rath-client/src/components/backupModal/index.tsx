@@ -33,7 +33,7 @@ const BackupModal: FC = (props) => {
     const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore, userStore } = useGlobalStore();
     const { cloudDataSourceMeta, cloudDatasetMeta, datasetId, sourceType } = dataSourceStore;
     const { id: dataSourceId } = cloudDataSourceMeta ?? {};
-    const { id: cloudDatasetId } = cloudDatasetMeta ?? {};
+    const { id: cloudDatasetId, workspace } = cloudDatasetMeta ?? {};
     const { showBackupModal } = commonStore;
     const { info, loggedIn } = userStore;
     const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
@@ -171,9 +171,9 @@ const BackupModal: FC = (props) => {
                         id: cloudDatasetId,
                         datasourceId: dsId,
                         name: name || defaultName,
-                        workspaceName: selectedWsp!,
+                        workspaceName: cloudDatasetId ? workspace!.name : selectedWsp!,
                         type: accessMode,
-                        size: file.size,
+                        size: file.size,    
                         totalCount: nRows,
                         meta,
                     }, file);
