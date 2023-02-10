@@ -374,6 +374,10 @@ export type IDatasetMeta = {
         id: string;
         name: string;
     };
+    organization: {
+        id: string;
+        name: string;
+    };
     workspace: {
         id: string;
         name: string;

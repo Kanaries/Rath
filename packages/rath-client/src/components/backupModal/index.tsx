@@ -33,6 +33,7 @@ const BackupModal: FC = (props) => {
     const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore, userStore } = useGlobalStore();
     const { cloudDataSourceMeta, cloudDatasetMeta, datasetId, sourceType } = dataSourceStore;
     const { id: dataSourceId } = cloudDataSourceMeta ?? {};
+    const { id: cloudDatasetId } = cloudDatasetMeta ?? {};
     const { showBackupModal } = commonStore;
     const { info, loggedIn } = userStore;
     const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
@@ -91,7 +92,7 @@ const BackupModal: FC = (props) => {
     const workspaces = organizations?.find(org => org.name === selectedOrg)?.workspaces;
     const [selectedWsp, setSelectedWsp] = useState<string | null>(null);
     const [accessMode, setAccessMode] = useState(CloudAccessModifier.PROTECTED);
-    const canBackup =  selectedWsp !== null && (mode === CloudItemType.NOTEBOOK ? (
+    const canBackup = (datasetOverwrite || selectedWsp !== null) && (mode === CloudItemType.NOTEBOOK ? (
         Object.values(backupItemKeys).some(Boolean)
     ) : (
         (cloudDataSourceMeta && cloudDatasetMeta) || !datasetOverwrite || !cloudDatasetMeta
@@ -107,7 +108,7 @@ const BackupModal: FC = (props) => {
     }, [selectedOrg, userStore]);
     // const storageItems =
     const backup = async (download = false) => {
-        if (!download && (busy || !canBackup || selectedOrg === null || selectedWsp === null)) {
+        if (!download && (busy || !canBackup || (!datasetOverwrite && (selectedOrg === null || selectedWsp === null)))) {
             return false;
         }
         setBusy(true);
@@ -167,6 +168,7 @@ const BackupModal: FC = (props) => {
                 }
                 if (dsId) {
                     await dataSourceStore.saveDatasetOnCloud({
+                        id: cloudDatasetId,
                         datasourceId: dsId,
                         name: name || defaultName,
                         workspaceName: selectedWsp!,
@@ -281,7 +283,7 @@ const BackupModal: FC = (props) => {
                             <PivotItem itemKey={CloudItemType.DATASET} headerText={intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`)}>
                                 <p className='state-description'>{intl.get('storage.upload_desc', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`) })}</p>
                                 <Stack style={{ margin: '0.6em 0' }}>
-                                    {cloudDatasetMeta && (
+                                    {cloudDataSourceMeta && cloudDatasetMeta && (
                                         <Toggle
                                             label={intl.get('storage.overwrite')}
                                             checked={datasetOverwrite}

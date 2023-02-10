@@ -357,7 +357,7 @@ export default class UserStore {
             if (!data.body) {
                 throw new Error('Request got empty body');
             }
-            const ok = await this.loadDataset(data.body, null, workspace.name, datasource.id, id);
+            const ok = await this.loadDataset(data.body, dataset.organization.name, workspace.name, datasource.id, id);
             if (ok) {
                 const etUrl = getMainServiceAddress('/api/ce/tracing/normal');
                 try {
