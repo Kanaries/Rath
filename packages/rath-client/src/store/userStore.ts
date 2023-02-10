@@ -1,6 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { TextWriter, ZipReader } from "@zip.js/zip.js";
-import { gzip } from 'pako';
 import type { IAccessPageKeys, ICreateDashboardConfig, IDashboardDocumentInfo, IDatasetData, IDatasetMeta, IDataSourceMeta } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
@@ -597,10 +596,9 @@ export default class UserStore {
             const respond = await fetch(createDashboardApiUrl, {
                 method: 'POST',
                 headers: {
-                    'Content-Encoding': 'gzip',
                     'Content-Type': 'application/json; charset=utf-8',
                 },
-                body: gzip(JSON.stringify({
+                body: JSON.stringify({
                     datasourceId,
                     datasetId: config.dashboard.bindDataset && cloudDatasetMeta ? cloudDatasetMeta.id : undefined,
                     workspaceName,
@@ -623,7 +621,7 @@ export default class UserStore {
                             type: config.dashboardTemplate.cover.type,
                         } : undefined,
                     },
-                })),
+                }),
             });
             if (!respond.ok) {
                 throw new Error(respond.statusText);

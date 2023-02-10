@@ -3,7 +3,6 @@ import { IReactionDisposer, makeAutoObservable, observable, reaction, runInActio
 import { combineLatest, from, Observable, Subscription } from "rxjs";
 import { getFreqRange } from "@kanaries/loa";
 import * as op from 'rxjs/operators'
-import { gzip } from 'pako';
 import { notify } from "../components/error";
 import { RATH_INDEX_COLUMN_KEY } from "../constants";
 import {
@@ -1286,11 +1285,10 @@ export class DataSourceStore {
             const respond = await fetch(createDatasetApiUrl, {
                 method: 'POST',
                 headers: {
-                    'Content-Encoding': 'gzip',
                     'Content-Type': 'application/json; charset=utf-8',
                 },
                 credentials: 'include',
-                body: gzip(JSON.stringify(payload)),
+                body: JSON.stringify(payload),
             });
             if (!respond.ok) {
                 throw new Error(respond.statusText);
