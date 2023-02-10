@@ -1,22 +1,21 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { observer } from 'mobx-react-lite';
+import { FC, useCallback, useState } from 'react';
 import intl from 'react-intl-universal';
-import { IDropdownOption, Stack, registerIcons, PrimaryButton } from '@fluentui/react';
+import { observer } from 'mobx-react-lite';
+import produce from 'immer';
+import { PrimaryButton, registerIcons, Spinner, Stack } from '@fluentui/react';
 import type { IMuteFieldBase, IRow } from '../../../interfaces';
-import { logDataImport } from '../../../loggers/dataImport';
-import prefetch from '../../../utils/prefetch';
-import { notify } from '../../../components/error';
 import { DataSourceTag } from '../../../utils/storage';
+import useAsyncState from '../../../hooks/use-async-state';
+import useLocalStorage from '../../../hooks/use-local-storage';
+import { notify } from '../../../components/error';
+import { logDataImport } from '../../../loggers/dataImport';
 import { rawData2DataWithBaseMetas } from '../../dataSource/utils';
-import Progress from './progress';
-import datasetOptions from './config';
-import ConnectForm, { ConnectFormReadonly } from './connect-form';
-import DropdownOrInput from './dropdown-or-input';
-import useDatabaseReducer from './reducer';
-import { getSourceId, pingConnector } from './api';
-import CustomConfig from './customConfig';
-import QueryEditor from './query-editor';
-import TablePreview from './table-preview';
+import databaseOptions from './config';
+import type { SupportedDatabaseType } from './type';
+import { checkServerConnection } from './api';
+import AdvancedOptions from './form/advanced-options';
+import ConnectOptions from './form/connect-options';
+import QueryOptions from './form/query-options';
 
 export const StackTokens = {
     childrenGap: 20,
@@ -26,7 +25,7 @@ const iconPathPrefix = '/assets/icons/';
 
 registerIcons({
     icons: Object.fromEntries(
-        datasetOptions.map<[string, JSX.Element]>((opt) => [
+        databaseOptions.map<[string, JSX.Element]>(opt => [
             opt.key,
             opt.icon ? (
                 <img
@@ -39,9 +38,7 @@ registerIcons({
                         height: '100%',
                     }}
                 />
-            ) : (
-                <></>
-            ),
+            ) : (<></>)
         ])
     ),
 });
@@ -53,130 +50,73 @@ export type TableLabels = {
 }[];
 
 type TableRowItem<TL extends TableLabels> = {
-    [key in keyof TL]: any;
+    [key in keyof TL]: any
 };
 
 export interface TableData<TL extends TableLabels = TableLabels> {
-    columns: TL;
+    meta: TL;
+    columns: TL[number]['key'][];
     rows: TableRowItem<TL>[];
 }
 
 interface DatabaseDataProps {
     onClose: () => void;
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: string, tag: DataSourceTag) => void;
-    setLoadingAnimation: (on: boolean) => void;
 }
 
 export const inputWidth = '180px';
 
-const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLoadingAnimation }) => {
-    const { progress, actions } = useDatabaseReducer(setLoadingAnimation);
-    const [loading, setLoading] = useState<boolean>(false);
+export const defaultServers: readonly string[] = [
+    'https://gateway.kanaries.net/connector',
+    'https://kanaries.cn/connector',
+];
 
-    const { connectorReady, databaseType, connectUri, sourceId, database, schema, table, queryString, preview } = progress;
 
-    const ping = useCallback(async () => {
-        try {
-            setLoading(true);
-            const ok = await pingConnector();
-            if (ok) {
-                actions.setConnectorStatus(true);
-            }
-        } catch (error) {
-            actions.setConnectorStatus(false);
-            notify({
-                type: 'error',
-                title: 'ping connector error',
-                content: `${error}`,
-            });
-        } finally {
-            setLoading(false);
-        }
-    }, [actions]);
+const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => {
+    const [servers, setServers] = useLocalStorage<string[]>('database_connector_server', []);
+    const [serverList, setServerList] = useAsyncState<{ target: string; status: 'unknown' | 'pending' | 'fulfilled' | 'rejected'; lag: number }[]>(
+        () => [...servers, ...defaultServers].map(target => ({ target, status: 'unknown', lag: 0 })),
+        {
+            resetBeforeTask: false,
+        },
+    );
+    
+    const [server, setServer] = useState(servers.at(0) ?? defaultServers[0]);
 
-    useEffect(() => {
-        ping();
-    }, [ping]);
+    const curServer = serverList.find(s => s.target === server);
+    
+    const [sourceType, setSourceType] = useState<SupportedDatabaseType>('clickhouse');
 
-    // prefetch icons
-    useEffect(() => {
-        datasetOptions.forEach(({ icon }) => {
-            if (icon) {
-                prefetch(`${iconPathPrefix}${icon}`);
-            }
-        });
-    }, []);
+    const [connectUri, setConnectUri] = useState('');
+    const [credentials, setCredentials] = useState<Record<string, string>>({});
+    const [queryString, setQueryString] = useState('');
+    const [editorPreview, setEditorPreview, isEditorPreviewPending] = useAsyncState<{
+        name: string;
+        value: TableData;
+    } | null>(null);
+    const [submitting, setSubmitting] = useState(false);
 
-    const whichDatabase = datasetOptions.find((which) => which.key === databaseType)!;
-
-    const { hasDatabase = true, databaseEnumerable = true, requiredSchema = false, schemaEnumerable = true } = whichDatabase;
-
-    useEffect(() => {
-        setLoadingAnimation(false);
-
-        return () => setLoadingAnimation(false);
-    }, [setLoadingAnimation]);
-
-    const handleConnectionTest = useCallback(async () => {
-        if (connectUri && Number.isNaN(sourceId.value)) {
-            actions.setSourceId({
-                status: 'pending',
-                value: NaN,
-            });
-            setLoadingAnimation(true);
-            const sId = await getSourceId(databaseType, connectUri);
-            setLoadingAnimation(false);
-            if (sId === null) {
-                return;
-            }
-            actions.setSourceId({
-                status: 'resolved',
-                value: sId,
-            });
-        }
-    }, [databaseType, connectUri, sourceId, setLoadingAnimation, actions]);
-
-    const databaseSelector: IDropdownOption[] | null = useMemo(() => {
-        if (hasDatabase && databaseEnumerable) {
-            return database.options.map<IDropdownOption>((dbName) => ({
-                text: dbName,
-                key: dbName,
-            }));
-        }
-
-        return null;
-    }, [database.options, hasDatabase, databaseEnumerable]);
-
-    const schemaSelector: IDropdownOption[] | null = useMemo(() => {
-        if (requiredSchema && schemaEnumerable) {
-            return (
-                schema.options.map<IDropdownOption>((sName) => ({
-                    text: sName,
-                    key: sName,
-                })) ?? []
-            );
-        }
-
-        return null;
-    }, [schema.options, requiredSchema, schemaEnumerable]);
-
-    const submitPendingRef = useRef(false);
-
-    const submit = async () => {
-        if (!preview.value || submitPendingRef.current) {
+    const submit = async (
+        name: string = editorPreview?.name ?? '',
+        value: TableData | null = editorPreview?.value ?? null
+    ) => {
+        if (!value || submitting) {
             return;
         }
-        submitPendingRef.current = true;
+        setSubmitting(true);
         try {
-            const { rows, columns } = preview.value;
+            const { rows, columns } = value;
             const data = await rawData2DataWithBaseMetas(
-                rows.map((row) => Object.fromEntries(row.map<[string, any]>((val, colIdx) => [columns?.[colIdx]?.key ?? `${colIdx}`, val])))
+                rows.map(
+                    row => Object.fromEntries(
+                        row.map<[string, any]>((val, colIdx) => [columns?.[colIdx] ?? `${colIdx}`, val])
+                    )
+                )
             );
             const { dataSource, fields } = data;
-            const name = [database.value, schema.value].filter(Boolean).join('.');
 
             logDataImport({
-                dataType: `Database/${databaseType}`,
+                dataType: `Database/${sourceType}`,
                 name,
                 fields,
                 dataSource: dataSource.slice(0, 10),
@@ -186,85 +126,112 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
 
             onClose();
         } catch (error) {
+            notify({
+                title: 'Failed to load.',
+                type: 'error',
+                content: `${error}`,
+            });
             console.error(error);
         } finally {
-            submitPendingRef.current = false;
+            setSubmitting(false);
         }
     };
 
+    const updateServersList = (next: readonly string[]) => {
+        setServers(next);
+        setServerList(next.map(target => {
+            const prev = serverList.find(which => which.target === target);
+            return {
+                target,
+                status: prev?.status ?? 'unknown',
+                lag: prev?.lag ?? 0,
+            };
+        }));
+    };
+
+    const testConnector = useCallback((...indices: number[]): void => {
+        setServerList(prev => produce(prev, draft => {
+            for (const idx of indices) {
+                draft[idx].status = 'pending';
+            }
+        }));
+        setServerList(
+            prev => Promise.all(
+                indices.map(
+                    idx => prev[idx].target
+                ).map(
+                    target => checkServerConnection(target).then<typeof prev[number]>(
+                        status => ({
+                            target,
+                            status: status !== false ? 'fulfilled' : 'rejected',
+                            lag: status !== false ? status : 0,
+                        })
+                    )
+                )
+            ).then<typeof prev>(data => {
+                return prev.map(d => {
+                    const next = data.find(which => which.target === d.target);
+                    return next ?? d;
+                });
+            }),
+        );
+    }, [setServerList]);
+
     return (
-        <div>
-            <CustomConfig ping={ping} loading={loading} />
-            {connectorReady && (
-                <Stack>
-                    <Progress progress={progress} />
-                    {sourceId.status === 'empty' && (
-                        <ConnectForm
-                            sourceType={databaseType}
-                            setSourceType={actions.setDatabaseType}
-                            whichDatabase={whichDatabase}
-                            sourceId={sourceId}
-                            connectUri={connectUri}
-                            setConnectUri={actions.setConnectUri}
-                            handleConnectionTest={handleConnectionTest}
-                        />
-                    )}
-                    {sourceId.status === 'resolved' && (
-                        <>
-                            <ConnectFormReadonly connectUri={connectUri!} resetConnectUri={() => actions.setConnectorStatus(true)} />
-                            <Stack horizontal tokens={StackTokens} style={{ flexDirection: 'column' }}>
-                                {table.status === 'resolved' ? (
-                                    <>
-                                        <QueryEditor
-                                            tableEnumerable={whichDatabase.tableEnumerable ?? true}
-                                            tables={table.options}
-                                            query={queryString}
-                                            setQuery={actions.setQueryString}
-                                            preview={actions.genPreview}
-                                        />
-                                        {preview.value && (
-                                            <div>
-                                                <header
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'space-between',
-                                                    }}
-                                                >
-                                                    <span>{intl.get('common.preview')}</span>
-                                                    <PrimaryButton onClick={submit}>{intl.get('common.submit')}</PrimaryButton>
-                                                </header>
-                                                <TablePreview data={preview.value} />
-                                            </div>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
-                                        {database.status === 'resolved' && hasDatabase && (
-                                            <DropdownOrInput
-                                                name="dataSource.databaseName"
-                                                options={databaseSelector}
-                                                value={database.value}
-                                                setValue={actions.setDatabase}
-                                            />
-                                        )}
-                                        {schema.status === 'resolved' && requiredSchema && (
-                                            <DropdownOrInput
-                                                name="dataSource.schemaName"
-                                                options={schemaSelector}
-                                                value={schema.value}
-                                                setValue={actions.setSchema}
-                                            />
-                                        )}
-                                    </>
-                                )}
-                            </Stack>
-                        </>
-                    )}
-                </Stack>
+        <Stack tokens={StackTokens} style={{ paddingBlock: '1em', flexGrow: 1 }}>
+            <AdvancedOptions
+                servers={serverList}
+                appendServer={target => {
+                    const next = produce(servers, draft => {
+                        draft.unshift(target);
+                    });
+                    updateServersList(next);
+                }}
+                removeServer={idx => {
+                    const next = produce(servers, draft => {
+                        draft.splice(idx, 1);
+                    });
+                    updateServersList(next);
+                }}
+                server={server}
+                setServer={val => setServer(val)}
+                testConnector={testConnector}
+            />
+            <ConnectOptions
+                disabled={curServer?.status !== 'fulfilled'}
+                sourceType={sourceType}
+                setSourceType={setSourceType}
+                connectUri={connectUri}
+                setConnectUri={setConnectUri}
+                credentials={credentials}
+                setCredentials={setCredentials}
+            />
+            <QueryOptions
+                disabled={curServer?.status !== 'fulfilled' || (sourceType !== 'demo' && !connectUri)}
+                server={server}
+                connectUri={connectUri}
+                sourceType={sourceType}
+                queryString={queryString}
+                setQueryString={setQueryString}
+                editorPreview={editorPreview}
+                setEditorPreview={setEditorPreview}
+                isEditorPreviewPending={isEditorPreviewPending}
+                credentials={credentials}
+                submit={submit}
+            />
+            {editorPreview && (
+                <div>
+                    <PrimaryButton
+                        onClick={() => submit()}
+                        disabled={submitting}
+                    >
+                        {submitting ? <Spinner /> : intl.get('common.apply')}
+                    </PrimaryButton>
+                </div>
             )}
-        </div>
+        </Stack>
     );
 };
 
-export default observer(DatabaseData);
+
+export default observer(DatabaseConnector);

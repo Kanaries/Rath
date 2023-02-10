@@ -1,6 +1,11 @@
 .content-container{
   /* padding: 1em 9% 0px 9%; */
-  padding: 3px 1em;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: max-content;
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
 }
 .header-bar{
   position: relative;
@@ -106,7 +111,20 @@ h2, h3 {
 }
 
 .message-container {
-  padding: 1em 4em 0em 4em;
+  position: absolute;
+  z-index: 999;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1em 1em;
+}
+
+.message-container > * {
+  box-shadow: 0 4px 8px #32313044;
+}
+
+.message-container > *:not(:first-child) {
+  margin-top: 1em;
 }
 
 .main-app-container{
@@ -131,10 +149,13 @@ h2, h3 {
 }
 
 .main-app-container > .main-app-content{
-  flex-basis: 800px;
+  flex-basis: 100vh;
   flex-grow: 1;
   flex-shrink: 1;
+  display: flex;
+  flex-direction: column;
   overflow: auto;
+  position: relative;
 }
 
 .kanaries-copy-right-footer{

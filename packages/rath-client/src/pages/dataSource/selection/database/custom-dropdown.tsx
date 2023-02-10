@@ -1,8 +1,8 @@
 import { Icon } from '@fluentui/react';
-import datasetOptions from './config';
+import databaseOptions from './config';
 
 
-export const renderDropdownTitle: React.FC<typeof datasetOptions | undefined> = ([item]) => {
+export const renderDropdownTitle: React.FC<typeof databaseOptions | undefined> = ([item]) => {
     if (!item) {
         return null;
     }
@@ -39,7 +39,7 @@ export const renderDropdownTitle: React.FC<typeof datasetOptions | undefined> = 
     );
 };
 
-export const renderDropdownItem: React.FC<typeof datasetOptions[0] | undefined> = props => {
+export const renderDropdownItem: React.FC<typeof databaseOptions[0] | undefined> = props => {
     if (!props) {
         return null;
     }
