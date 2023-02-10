@@ -1293,8 +1293,14 @@ export class DataSourceStore {
             if (!respond.ok) {
                 throw new Error(respond.statusText);
             }
-            const createDatasetApiRes = await respond.json() as ICreateDatasetResult;
-            const fileUploadRes = await fetch(createDatasetApiRes.uploadUrl, {
+            const createDatasetApiRes = await respond.json() as (
+                | { success: false; message: string }
+                | { success: true; data: ICreateDatasetResult }
+            );
+            if (!createDatasetApiRes.success) {
+                throw new Error(createDatasetApiRes.message);
+            }
+            const fileUploadRes = await fetch(createDatasetApiRes.data.uploadUrl, {
                 method: 'PUT',
                 body: file,
             });
@@ -1302,9 +1308,9 @@ export class DataSourceStore {
                 throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
             }
             const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
-                reportUploadSuccessApiUrl, { storageId: createDatasetApiRes.storageId, status: 1 }
+                reportUploadSuccessApiUrl, { storageId: createDatasetApiRes.data.storageId, status: 1 }
             );
-            const dataset = await userStore.fetchDataset(payload.workspaceName, createDatasetApiRes.datasetId);
+            const dataset = await userStore.fetchDataset(payload.workspaceName, createDatasetApiRes.data.datasetId);
             if (!dataset) {
                 throw new Error('Dataset not existed');
             }
