@@ -1289,6 +1289,7 @@ export class DataSourceStore {
                     'Content-Encoding': 'gzip',
                     'Content-Type': 'application/json; charset=utf-8',
                 },
+                credentials: 'include',
                 body: gzip(JSON.stringify(payload)),
             });
             if (!respond.ok) {
