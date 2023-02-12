@@ -145,11 +145,7 @@ const LoginInfo: FC = () => {
                         size={PersonaSize.size32}
                     />
                 ) : null}
-                {!info && (
-                    <div className="user-avatar" style={{ backgroundImage: 'url(/assets/cat3_1_question.jpeg)'}}>
-                        <LoginButton text={intl.get('login.clickLogin')} />
-                    </div>
-                )}
+                {!info && navMode === 'text' && <LoginButton text={intl.get('login.clickLogin')} />}
             </div>
         </LoginInfoDiv>
     );
