@@ -1,6 +1,6 @@
 import intl from 'react-intl-universal';
 import { PrimaryButton } from '@fluentui/react';
-import { FC, memo, CSSProperties, Fragment } from 'react';
+import { FC, memo, CSSProperties, Fragment, useMemo } from 'react';
 import styled from 'styled-components';
 import type { TableData } from './index';
 
@@ -12,9 +12,13 @@ interface TablePreviewProps {
 }
 
 const styles: Record<string, CSSProperties> & Record<string, any> = {
-    Int64: {
+    numeric: {
         color: 'rgb(38, 139, 210)',
     },
+};
+
+const isNumeric = (dataType: string): boolean => {
+    return Boolean(dataType.match(/(Int|Float|Double|Decimal)/i));
 };
 
 const Container = styled.div`
@@ -87,46 +91,87 @@ const RowIndex = styled.span`
 `;
 
 const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, data, submit }) {
-    const columns = data.columns.map(key => {
-        const col = data.meta.find(which => which.key === key)!;
-        return col!;
-    }).filter(Boolean);
+    const columns = useMemo(() => {
+        return data.columns.map(key => {
+            const col = data.meta.find(which => which.key === key)!;
+            return col!;
+        }).filter(Boolean);
+    }, [data.columns, data.meta]);
+
+    const { headIndices, tailIndices, hasOthers } = useMemo(() => {
+        const indices = data.rows.map((_, i) => i + 1);
+        const headIndices = indices.splice(0, 100);
+        const tailIndices = indices.length ? indices.splice(-50) : [];
+    
+        const hasOthers = indices.length > 0;
+
+        return { headIndices, tailIndices, hasOthers };
+    }, [data.rows]);
 
     return (<>
         {/* @ts-expect-error css variable */}
-        <Container style={{ '--n-cols': columns.length || 1, '--n-rows': data.rows.length || 1 }}>
+        <Container style={{ '--n-cols': columns.length || 1, '--n-rows': headIndices.length + tailIndices.length }}>
             <Corner />
             {columns.map((col, i) => <TableHeader key={i}>{col.key}</TableHeader>)}
-            {
-                data.rows.map((d, i) => (
+            {data.rows.length === 0 && (
+                <TableEmptyMsg>
+                    {'(empty)'}
+                </TableEmptyMsg>
+            )}
+            {headIndices.map(i => {
+                const d = data.rows[i - 1];
+                return (
                     <Fragment key={i}>
-                        <RowIndex>{i + 1}</RowIndex>
-                        {
-                            columns.map((_, j) => (
-                                j in d ? (
-                                    <TableCell
-                                        key={j}
-                                        style={{ ...styles[columns?.[j]?.dataType ?? ''] }}
-                                    >
-                                        {d[j]}
-                                    </TableCell>
-                                ) : (
-                                    <TableCellEmpty key={j}>
-                                        {'(empty)'}
-                                    </TableCellEmpty>
-                                )
-                            ))
-                        }
+                        <RowIndex>{i}</RowIndex>
+                        {columns.map((_, j) => (
+                            j in d ? (
+                                <TableCell
+                                    key={j}
+                                    style={isNumeric(columns?.[j]?.dataType ?? '') ? styles['numeric'] : undefined}
+                                >
+                                    {d[j]}
+                                </TableCell>
+                            ) : (
+                                <TableCellEmpty key={j}>
+                                    {'(empty)'}
+                                </TableCellEmpty>
+                            )
+                        ))}
                     </Fragment>
-                ))
-            }
-            {
-                data.rows.length === 0 && (
-                    <TableEmptyMsg>
-                        {'(empty)'}
-                    </TableEmptyMsg>
-                )
-            }
+                );
+            })}
+            {hasOthers && (
+                <>
+                    <RowIndex>{'...'}</RowIndex>
+                    {columns.map((_, j) => (
+                        <TableCellEmpty key={j}>
+                            {'...'}
+                        </TableCellEmpty>
+                    ))}
+                </>
+            )}
+            {tailIndices.map(i => {
+                const d = data.rows[i - 1];
+                return (
+                    <Fragment key={i}>
+                        <RowIndex>{i}</RowIndex>
+                        {columns.map((_, j) => (
+                            j in d ? (
+                                <TableCell
+                                    key={j}
+                                    style={isNumeric(columns?.[j]?.dataType ?? '') ? styles['numeric'] : undefined}
+                                >
+                                    {d[j]}
+                                </TableCell>
+                            ) : (
+                                <TableCellEmpty key={j}>
+                                    {'(empty)'}
+                                </TableCellEmpty>
+                            )
+                        ))}
+                    </Fragment>
+                );
+            })}
         </Container>
         {submit && (
             <ButtonContainer>
