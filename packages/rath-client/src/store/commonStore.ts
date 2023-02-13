@@ -29,7 +29,7 @@ export interface IThemeInfo {
 }
 
 export type ThemeListResponse = {
-    data: IThemeInfo[];
+    list: IThemeInfo[];
     count: number;
     pageSize: number;
     pageIndex: number;
@@ -186,7 +186,7 @@ export class CommonStore {
                 personalUrl,
                 { workspaceName }
             );
-            list.push(...res.data);
+            list.push(...res.list);
         } catch (error) {
             notify({
                 title: '[/api/ce/theme/list]',
@@ -197,7 +197,7 @@ export class CommonStore {
         const collectionUrl = getMainServiceAddress('/api/ce/theme/favorites/list');
         try {
             const res = await request.get<{}, ThemeListResponse>(collectionUrl);
-            list.push(...res.data);
+            list.push(...res.list);
         } catch (error) {
             notify({
                 title: '[/api/ce/theme/favorites/list]',
