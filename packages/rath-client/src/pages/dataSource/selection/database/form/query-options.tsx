@@ -1,11 +1,12 @@
 import intl from 'react-intl-universal';
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
 import { IconButton, Spinner, useTheme } from '@fluentui/react';
 import type { SupportedDatabaseType, TableColInfo, TableInfo } from '../type';
 import databaseOptions from '../config';
-import NestedList, { INestedListItem } from '../components/nested-list';
+import NestedList from '../components/nested-list';
+import type { INestedListItem } from '../components/nested-list-item';
 import useAsyncState, { AsyncDispatch } from '../../../../../hooks/use-async-state';
 import type { TableData } from '../index';
 import { DatabaseApiOperator, DatabaseRequestPayload, fetchQueryResult, fetchTableDetail } from '../api';
@@ -13,7 +14,7 @@ import TablePreview from '../table-preview';
 import SQLEditor from '../query-editor/sql-editor';
 import DiagramEditor from '../query-editor/diagram-editor';
 import { EditorKey, fetchListAsNodes, findNodeByPathId, handleBrowserItemClick, MenuType, PageType } from './utils';
-import { PivotHeader, PivotList, QueryBrowserHeader, QueryContainer, QueryViewBody, SyncButton } from './components';
+import { MessageContainer, PivotHeader, PivotList, QueryBrowserHeader, QueryContainer, QueryViewBody, SpinnerContainer, SyncButton } from './components';
 
 interface QueryOptionsProps {
     disabled: boolean;
@@ -181,24 +182,26 @@ const QueryOptions: FC<QueryOptionsProps> = ({
     }, []);
 
     const hasEnumerableTables = Boolean(
-        config?.levels.find(lvl => typeof lvl === 'string' ? lvl === 'table' : (lvl.type === 'table' && lvl.enumerable !== false))
+        config?.levels.some(lvl => typeof lvl === 'string' ? lvl === 'table' : (lvl.type === 'table' && lvl.enumerable !== false))
     );
 
-    const tables = Object.keys(preview).map<TableInfo>(pathId => {
-        const node = findNodeByPathId(menu.items, pathId);
-        const cols = node?.children;
-        if (node && cols && Array.isArray(cols)) {
-            return {
-                name: pathId,
-                meta: cols.map<TableColInfo>((col, i) => ({
-                    key: col.key,
-                    dataType: col.subtext ?? null,
-                    colIndex: i,
-                })),
-            };
-        }
-        return null!;
-    }).filter(Boolean);
+    const tables = useMemo(() => {
+        return Object.keys(preview).map<TableInfo>(pathId => {
+            const node = findNodeByPathId(menu.items, pathId);
+            const cols = node?.children;
+            if (node && cols && Array.isArray(cols)) {
+                return {
+                    name: pathId,
+                    meta: cols.map<TableColInfo>((col, i) => ({
+                        key: col.key,
+                        dataType: col.subtext ?? null,
+                        colIndex: i,
+                    })),
+                };
+            }
+            return null!;
+        }).filter(Boolean);
+    }, [menu.items, preview]);
 
     return (
         <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}>
@@ -275,6 +278,7 @@ const QueryOptions: FC<QueryOptionsProps> = ({
                                     setQueryString(query);
                                     doPreview(query);
                                 }}
+                                items={menu.items}
                             />
                         )}
                         {pageIdx === EditorKey.Diagram && (
@@ -291,17 +295,17 @@ const QueryOptions: FC<QueryOptionsProps> = ({
                         {pageIdx >= 0 && page && (
                             <>
                                 {curPreview && curPreview === 'failed' && (
-                                    <div style={{ padding: '0.5em', color: 'red' }}>
+                                    <MessageContainer>
                                         {intl.get('dataSource.req_err')}
-                                    </div>
+                                    </MessageContainer>
                                 )}
                                 {curPreview && curPreview !== 'failed' && (
                                     <TablePreview name={page.id} submit={submit} data={curPreview} />
                                 )}
                                 {!curPreview && (
-                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <SpinnerContainer>
                                         <Spinner />
-                                    </div>
+                                    </SpinnerContainer>
                                 )}
                             </>
                         )}

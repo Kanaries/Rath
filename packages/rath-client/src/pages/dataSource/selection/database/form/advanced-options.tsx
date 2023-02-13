@@ -22,6 +22,39 @@ const ErrorMessage = styled.span`
     font-size: 0.6rem;
 `;
 
+const SuccessMessage = styled.span`
+    display: flex;
+    align-items: center;
+`;
+
+const SquaredDefaultButtonStyle = {
+    width: '32px',
+    minWidth: 'unset',
+    padding: '0',
+    borderLeft: 'none',
+};
+
+const AppendButtonStyle = {
+    width: '32px',
+    minWidth: 'unset',
+    padding: '0',
+};
+
+const FlexibleTextFieldStyle = {
+    root: {
+        flex: 1,
+    },
+    suffix: {
+        padding: 0
+    },
+};
+
+const FullWidthMenuTarget = styled.div`
+    position: absolute;
+    height: 0;
+    width: 100%;
+`;
+
 const AdvancedOptions = observer<{
     servers: {
         target: string;
@@ -93,6 +126,49 @@ const AdvancedOptions = observer<{
         setServer(customServer);
     };
 
+    const renderLabel = () => (
+        <Stack horizontal tokens={{ childrenGap: 20 }} verticalAlign="center">
+            <Label style={{ whiteSpace: 'nowrap' }}>{intl.get('dataSource.connectorService')}</Label>
+            {!status && (
+                <ErrorMessage>
+                    {intl.get('dataSource.connectorEmpty')}
+                </ErrorMessage>
+            )}
+            {status === 'pending' && <Spinner size={SpinnerSize.small} />}
+            {status === 'fulfilled' && curServer && (
+                <SuccessMessage>
+                    <Icon
+                        iconName="StatusCircleCheckmark"
+                        style={{
+                            borderRadius: '50%',
+                            fontSize: '1.2rem',
+                            color: 'green',
+                            userSelect: 'none',
+                            cursor: 'default',
+                        }}
+                    />
+                    {curServer.lag && <small>{`${curServer.lag}ms`}</small>}
+                </SuccessMessage>
+            )}
+            {status === 'rejected' && (
+                <ErrorMessage>
+                    {intl.get('dataSource.connectorOffline')}
+                </ErrorMessage>
+            )}
+        </Stack>
+    );
+
+    const renderSuffix = () => {
+        return (
+            <PrimaryButton
+                disabled={!isInputANewAddress}
+                iconProps={{ iconName: 'Add' }}
+                style={AppendButtonStyle}
+                onClick={submitCustomServer}
+            />
+        );
+    };
+
     return (
         <Stack horizontal verticalAlign="end" horizontalAlign="stretch" onClick={() => setFocused(false)} style={{ position: 'relative' }}>
             <TextField
@@ -103,6 +179,7 @@ const AdvancedOptions = observer<{
                     setFocused(true);
                 }}
                 onKeyDown={e => {
+                    e.stopPropagation();
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         submitCustomServer();
@@ -111,58 +188,16 @@ const AdvancedOptions = observer<{
                 onChange={(_, val) => {
                     setCustomServer(val?.replaceAll(/\s+/g, '') ?? '');
                 }}
-                onRenderLabel={() => (
-                    <Stack horizontal tokens={{ childrenGap: 20 }} verticalAlign="center">
-                        <Label style={{ whiteSpace: 'nowrap' }}>{intl.get('dataSource.connectorService')}</Label>
-                        {!status && (
-                            <ErrorMessage>
-                                {intl.get('dataSource.connectorEmpty')}
-                            </ErrorMessage>
-                        )}
-                        {status && {
-                            pending: <Spinner size={SpinnerSize.small} />,
-                            fulfilled: curServer && (
-                                <span style={{ display: 'flex', alignItems: 'center' }}>
-                                    <Icon
-                                        iconName="StatusCircleCheckmark"
-                                        style={{
-                                            borderRadius: '50%',
-                                            fontSize: '1.2rem',
-                                            color: 'green',
-                                            userSelect: 'none',
-                                            cursor: 'default',
-                                        }}
-                                    />
-                                    {curServer.lag && <small>{`${curServer.lag}ms`}</small>}
-                                </span>
-                            ),
-                            rejected: (
-                                <ErrorMessage>
-                                    {intl.get('dataSource.connectorOffline')}
-                                </ErrorMessage>
-                            ),
-                            unknown: '',
-                        }[status]}
-                    </Stack>
-                )}
-                onRenderSuffix={() => {
-                    return (
-                        <PrimaryButton
-                            disabled={!isInputANewAddress}
-                            iconProps={{ iconName: 'Add' }}
-                            style={{ width: '32px', minWidth: 'unset', padding: '0' }}
-                            onClick={submitCustomServer}
-                        />
-                    );
-                }}
+                onRenderLabel={renderLabel}
+                onRenderSuffix={renderSuffix}
                 autoComplete="off"
-                styles={{ root: { flex: 1 }, suffix: { padding: 0 } }}
+                styles={FlexibleTextFieldStyle}
             />
             {focused && (
                 <>
                     <DefaultButton
                         iconProps={{ iconName: 'SyncOccurence' }}
-                        style={{ width: '32px', minWidth: 'unset', padding: '0', borderLeft: 'none' }}
+                        style={SquaredDefaultButtonStyle}
                         onClick={e => {
                             e.stopPropagation();
                             testConnector(...servers.map((_, i) => i));
@@ -170,12 +205,12 @@ const AdvancedOptions = observer<{
                     />
                     <DefaultButton
                         iconProps={{ iconName: 'CheckMark' }}
-                        style={{ width: '32px', minWidth: 'unset', padding: '0', borderLeft: 'none' }}
+                        style={SquaredDefaultButtonStyle}
                         onClick={() => setFocused(false)}
                     />
                 </>
             )}
-            <div aria-hidden id={id} style={{ position: 'absolute', height: 0, width: '100%' }} />
+            <FullWidthMenuTarget aria-hidden id={id} />
             <ContextualMenu
                 target={`#${id}`}
                 useTargetWidth

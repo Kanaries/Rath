@@ -2,7 +2,7 @@ import { Icon } from '@fluentui/react';
 import produce from 'immer';
 import type { Dispatch } from 'react';
 import type { DatabaseLevelType } from '../config';
-import { INestedListItem } from '../components/nested-list';
+import { INestedListItem } from '../components/nested-list-item';
 import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchSchemaList, fetchTableList } from '../api';
 import databaseOptions from '../config';
 

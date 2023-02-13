@@ -106,3 +106,16 @@ export const PivotHeader = styled.div<{ primary?: boolean }>`
         margin-left: 0.6em;
     }
 `;
+
+export const MessageContainer = styled.div`
+    padding: 0.5em;
+    color: red;
+`;
+
+export const SpinnerContainer = styled.div`
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
