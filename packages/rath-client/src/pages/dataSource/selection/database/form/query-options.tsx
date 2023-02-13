@@ -137,6 +137,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
 
     useEffect(() => {
         if (config && page && page.path.at(-1)?.group === 'table' && !curPreview) {
+            // TODO: requires abstraction and props check
             fetchTableDetail(commonParamsRef.current.server, {
                 uri: commonParamsRef.current.connectUri,
                 sourceType: commonParamsRef.current.sourceType,
@@ -158,6 +159,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
     }, [curPreview, page, config, credentials]);
 
     const doPreview = (query?: string) => {
+        // TODO: requires abstraction and props check
         setEditorPreview(
             fetchQueryResult(commonParamsRef.current.server, {
                 uri: commonParamsRef.current.connectUri,
@@ -226,6 +228,10 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
             <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}></QueryContainer>
         );
     }
+
+    const previewFailed = curPreview === 'failed';
+    const previewData = curPreview && curPreview !== 'failed' && curPreview;
+    const previewPending = !curPreview;
 
     return (
         <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}>
@@ -318,15 +324,15 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
                         )}
                         {pageIdx >= 0 && page && (
                             <>
-                                {curPreview && curPreview === 'failed' && (
+                                {previewFailed && (
                                     <MessageContainer>
                                         {intl.get('dataSource.req_err')}
                                     </MessageContainer>
                                 )}
-                                {curPreview && curPreview !== 'failed' && (
-                                    <TablePreview name={page.id} submit={submit} data={curPreview} />
+                                {previewData && (
+                                    <TablePreview name={page.id} submit={submit} data={previewData} />
                                 )}
-                                {!curPreview && (
+                                {previewPending && (
                                     <SpinnerContainer>
                                         <Spinner />
                                     </SpinnerContainer>

@@ -1,9 +1,10 @@
 import intl from 'react-intl-universal';
-import { FC, ComponentPropsWithRef, useEffect, useMemo, useState, useRef } from 'react';
+import { FC, ComponentPropsWithRef, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import produce from 'immer';
-import { DefaultButton, Dropdown, IDropdownOption, Label, PrimaryButton, Stack, TextField } from '@fluentui/react';
+import { useId } from '@fluentui/react-hooks';
+import { ContextualMenu, DefaultButton, Dropdown, Icon, IContextualMenuItem, IDropdownOption, Label, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import databaseOptions from '../config';
 import type { SupportedDatabaseType } from '../type';
 import { renderDropdownItem, renderDropdownTitle } from '../custom-dropdown';
@@ -75,6 +76,38 @@ interface ConnectOptionsProps {
     markAsReady: () => void;
 }
 
+const MenuItem = styled.div`
+    position: relative;
+    i {
+        cursor: pointer;
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+`;
+
+const onRenderContextualMenuItem = (
+    item: IContextualMenuItem | undefined,
+    onDelete: (key: string) => void,
+    defaultRenderer: ((props?: IContextualMenuItem | undefined) => JSX.Element | null) | undefined,
+): JSX.Element => {
+    if (!item) {
+        return <></>;
+    }
+    return (
+        <MenuItem>
+            {defaultRenderer?.(item)}
+            <Icon
+                iconName="ChromeClose"
+                role="button"
+                tabIndex={0}
+                onClick={() => onDelete(item.key)}
+            />
+        </MenuItem>
+    );
+};
+
 const ConnectOptions: FC<ConnectOptionsProps> = ({
     disabled, sourceType, setSourceType, connectUri, setConnectUri, credentials, setCredentials, nextStepEnabled, markAsReady,
 }) => {
@@ -106,26 +139,27 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
         }
     };
 
-    const uriInputName = databaseConfig ? `connectUri:${databaseConfig.key}` : undefined;
+    const uriInputId = useId();
 
     const [storedUri, setStoredUri] = useLocalStorage<Partial<Record<string, string[]>>>(UriStorageKey, {});
 
-    const storedListRef = useRef<string[]>([]);
-    storedListRef.current = storedUri[sourceType] ?? [];
+    const storedList = storedUri[sourceType] ?? [];
 
-    const setConnectUriRef = useRef(setConnectUri);
-    setConnectUriRef.current = setConnectUri;
+    const [showAutoCompletion, setShowAutoCompletion] = useState(false);
 
     useEffect(() => {
-        if (!sourceType) {
-            return;
+        if (showAutoCompletion) {
+            document.getElementById(uriInputId)?.focus();
+            const clickOutsideToDismiss = () => {
+                setShowAutoCompletion(false);
+            };
+            document.body.addEventListener('click', clickOutsideToDismiss);
+            return () => {
+                document.body.removeEventListener('click', clickOutsideToDismiss);
+            };
         }
-        const [latestRecord] = storedListRef.current;
-        if (latestRecord) {
-            setConnectUriRef.current(latestRecord);
-        }
-    }, [sourceType, storedUri]);
-
+    }, [showAutoCompletion, uriInputId]);
+    
     const submit = () => {
         if (!sourceType || !connectUri) {
             return;
@@ -143,6 +177,21 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
     };
 
     const SubmitButton = nextStepEnabled ? DefaultButton : PrimaryButton;
+
+    const autoCompletionItems = storedList.map(content => ({
+        key: content,
+        text: content,
+        onClick: () => {
+            setConnectUri(content);
+            setShowAutoCompletion(false);
+        },
+    }));
+
+    const deleteStoreItem = (key: string) => {
+        setStoredUri(produce(storedUri, draft => {
+            draft[sourceType] = (draft[sourceType] ?? []).filter(data => data !== key);
+        }));
+    };
 
     return (
         <>
@@ -166,7 +215,7 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
                         }}
                     />
                     <ConnectUriField
-                        name={uriInputName}
+                        id={uriInputId}
                         title={intl.get('dataSource.connectUri')}
                         aria-required
                         disabled={disabled || !databaseConfig || databaseConfig.key === 'demo'}
@@ -174,6 +223,18 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
                         placeholder={databaseConfig?.rule}
                         onChange={(_, uri) => setConnectUri(uri ?? '')}
                         autoComplete="off"
+                        onClick={e => {
+                            e.stopPropagation();
+                            setShowAutoCompletion(true);
+                        }}
+                    />
+                    <ContextualMenu
+                        target={`#${uriInputId}`}
+                        useTargetWidth
+                        hidden={!showAutoCompletion}
+                        items={autoCompletionItems}
+                        onRenderContextualMenuItem={(item, defaultRenderer) => onRenderContextualMenuItem(item, deleteStoreItem, defaultRenderer)}
+                        shouldFocusOnMount={false}
                     />
                     <SubmitButton disabled={!connectUri} text={intl.get('common.submit')} onClick={submit} />
                 </Stack>

@@ -338,7 +338,7 @@ const DataTable: React.FC = (props) => {
                     <span>{intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}</span>
                 </MessageBar>
             )}
-            <div style={{ display: 'flex', flexGrow: 1, flexShrink: 1, flexBasis: '0%', overflow: 'auto' }}>
+            <div style={{ display: 'flex', overflow: 'auto' }}>
                 {columns.length > 0 && (
                     <CustomBaseTable
                         useVirtual={true}
