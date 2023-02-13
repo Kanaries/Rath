@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { IconButton, Label, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { unstable_batchedUpdates } from 'react-dom';
+import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
 import type { IRow } from '../../../interfaces';
 import { extractSelection, intersectPattern } from '../../../lib/textPattern';
@@ -14,6 +15,14 @@ import { IColStateType } from './headerCell/components/statePlaceholder';
 import { CustomBaseTable, MiniButton, MiniPrimaryButton, DATA_TABLE_STYLE_CONFIG, Tag, TextPatternCard } from './styles';
 import { findFirstExistTextPattern, groupTextPattern, initGroupedTextPatternList, uniquePattern } from './utils';
 // import regexgen from 'regexgen';
+
+export const DataViewContainer = styled.div`
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+`;
 
 function provideSelectionRange (selectedRange: Range, currentNode: Node): { len: number, found: boolean } {
     if (selectedRange.startContainer === currentNode) {
@@ -313,7 +322,7 @@ const DataTable: React.FC = (props) => {
     );
 
     return (
-        <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <DataViewContainer>
             {fieldsNotDecided.length > 0 && (
                 <MessageBar
                     messageBarType={MessageBarType.warning}
@@ -423,7 +432,7 @@ const DataTable: React.FC = (props) => {
                     )}
                 </NestPanel>
             </div>
-        </div>
+        </DataViewContainer>
     );
 };
 

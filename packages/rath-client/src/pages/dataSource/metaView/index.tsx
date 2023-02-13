@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 import intl from 'react-intl-universal';
 import { ActionButton, DefaultButton, MessageBar, MessageBarType } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
+import { DataViewContainer } from '../dataTable';
 import MetaList from './metaList';
 
 
@@ -66,7 +67,7 @@ const MetaView: React.FC = props => {
     }, [focusIdx]);
 
     // 这里加入一个快捷操作，只使用主体数据
-    return <div>
+    return <DataViewContainer>
         {fieldsCanExpand.length > 0 && (
             <div
                 style={{
@@ -148,7 +149,7 @@ const MetaView: React.FC = props => {
             </MessageBar>
         )}
         <MetaList onlyExt={onlyAutoExtent} metas={fields} focusIdx={fieldsCanExpand[focusIdx]?.index ?? -1} onChange={updateFieldInfo} />
-    </div>
+    </DataViewContainer>
 }
 
 export default observer(MetaView);

@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
+import { DataViewContainer } from '../dataTable';
 import MetaDetail from './metaDetail';
 import MetaList from './metaList';
 
@@ -19,10 +20,12 @@ const ProfilingVieiw: React.FC = (props) => {
     const [columnIndex, setColumnIndex] = useState<number>(0);
     if (fieldMetas.length === 0) return <div></div>;
     return (
-        <Cont>
-            <MetaList fieldMetas={fieldMetas} onColumnIndexChange={setColumnIndex} columnIndex={columnIndex} />
-            <MetaDetail field={fieldMetas[columnIndex]} />
-        </Cont>
+        <DataViewContainer>
+            <Cont>
+                <MetaList fieldMetas={fieldMetas} onColumnIndexChange={setColumnIndex} columnIndex={columnIndex} />
+                <MetaDetail field={fieldMetas[columnIndex]} />
+            </Cont>
+        </DataViewContainer>
     );
 };
 
