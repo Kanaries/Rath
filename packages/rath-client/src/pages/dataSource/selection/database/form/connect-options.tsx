@@ -1,11 +1,13 @@
 import intl from 'react-intl-universal';
-import { FC, ComponentPropsWithRef, useEffect, useMemo, useState } from 'react';
+import { FC, ComponentPropsWithRef, useEffect, useMemo, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
-import { DefaultButton, Dropdown, IDropdownOption, Label, Stack, TextField } from '@fluentui/react';
+import produce from 'immer';
+import { DefaultButton, Dropdown, IDropdownOption, Label, PrimaryButton, Stack, TextField } from '@fluentui/react';
 import databaseOptions from '../config';
 import type { SupportedDatabaseType } from '../type';
 import { renderDropdownItem, renderDropdownTitle } from '../custom-dropdown';
+import useLocalStorage from '../../../../../hooks/use-local-storage';
 
 
 const Form = styled.div`
@@ -58,6 +60,9 @@ const DatabaseDropdownStyles: ComponentPropsWithRef<typeof Dropdown>['styles'] =
     },
 };
 
+const UriStorageKey = '__connect_uri__';
+const MAX_STORE_SIZE = 10;
+
 interface ConnectOptionsProps {
     disabled: boolean;
     sourceType: SupportedDatabaseType;
@@ -66,10 +71,12 @@ interface ConnectOptionsProps {
     setConnectUri: (val: string) => void;
     credentials: Record<string, string>;
     setCredentials: (data: Record<string, string>) => void;
+    nextStepEnabled: boolean;
+    markAsReady: () => void;
 }
 
 const ConnectOptions: FC<ConnectOptionsProps> = ({
-    disabled, sourceType, setSourceType, connectUri, setConnectUri, credentials, setCredentials,
+    disabled, sourceType, setSourceType, connectUri, setConnectUri, credentials, setCredentials, nextStepEnabled, markAsReady,
 }) => {
     const databaseConfig = useMemo(() => {
         return databaseOptions.find(which => which.key === sourceType);
@@ -99,6 +106,44 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
         }
     };
 
+    const uriInputName = databaseConfig ? `connectUri:${databaseConfig.key}` : undefined;
+
+    const [storedUri, setStoredUri] = useLocalStorage<Partial<Record<string, string[]>>>(UriStorageKey, {});
+
+    const storedListRef = useRef<string[]>([]);
+    storedListRef.current = storedUri[sourceType] ?? [];
+
+    const setConnectUriRef = useRef(setConnectUri);
+    setConnectUriRef.current = setConnectUri;
+
+    useEffect(() => {
+        if (!sourceType) {
+            return;
+        }
+        const [latestRecord] = storedListRef.current;
+        if (latestRecord) {
+            setConnectUriRef.current(latestRecord);
+        }
+    }, [sourceType, storedUri]);
+
+    const submit = () => {
+        if (!sourceType || !connectUri) {
+            return;
+        }
+        markAsReady();
+        setStoredUri(produce(storedUri, draft => {
+            if (!(sourceType in draft)) {
+                draft[sourceType] = [];
+            }
+            if (!draft[sourceType]!.includes(connectUri)) {
+                draft[sourceType]!.unshift(connectUri);
+            }
+            draft[sourceType] = draft[sourceType]!.slice(0, MAX_STORE_SIZE);
+        }));
+    };
+
+    const SubmitButton = nextStepEnabled ? DefaultButton : PrimaryButton;
+
     return (
         <>
             <Form>
@@ -121,14 +166,16 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
                         }}
                     />
                     <ConnectUriField
-                        name={databaseConfig ? `connectUri:${databaseConfig.key}` : undefined}
+                        name={uriInputName}
                         title={intl.get('dataSource.connectUri')}
                         aria-required
                         disabled={disabled || !databaseConfig || databaseConfig.key === 'demo'}
                         value={connectUri}
                         placeholder={databaseConfig?.rule}
                         onChange={(_, uri) => setConnectUri(uri ?? '')}
+                        autoComplete="off"
                     />
+                    <SubmitButton disabled={!connectUri} text={intl.get('common.submit')} onClick={submit} />
                 </Stack>
             </Form>
             {databaseConfig?.credentials === 'json' && (

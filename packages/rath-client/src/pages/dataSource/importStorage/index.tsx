@@ -9,6 +9,7 @@ import { useGlobalStore } from '../../../store';
 import { loadRathStorageFile } from '../utils';
 import { STORAGE_FILE_SUFFIX } from '../../../constants';
 import { deleteStorageByIdInLocal, getStorageByIdInLocal, getStorageListInLocal, IDBMeta, IRathStorage, RathStorageParse } from '../../../utils/storage';
+import { notify } from '../../../components/error';
 
 const OperationStack = styled(Stack)`
     .ope-icon{
@@ -53,7 +54,11 @@ const ImportStorageSegment: React.FC = props => {
                 importStorage(sto);
                 commonStore.setShowStorageModal(false)
             }).catch(err => {
-                commonStore.showError('error', err);
+                notify({
+                    type: 'error',
+                    title: 'Error occurred',
+                    content: `${err}`,
+                });
                 commonStore.setShowStorageModal(false);
             })
         }
@@ -69,7 +74,11 @@ const ImportStorageSegment: React.FC = props => {
             importStorage(sto)
             commonStore.setShowStorageModal(false)
         }).catch(err => {
-            commonStore.showError('error', err);
+            notify({
+                type: 'error',
+                title: 'Error occurred',
+                content: `${err}`,
+            });
             commonStore.setShowStorageModal(false)
         })
     }, [importStorage, commonStore])
@@ -80,9 +89,13 @@ const ImportStorageSegment: React.FC = props => {
                 return ms.filter(m => m.id !== sid);
             })
         }).catch(err => {
-            commonStore.showError('error', err);
+            notify({
+                type: 'error',
+                title: 'Error occurred',
+                content: `${err}`,
+            });
         })
-    }, [commonStore])
+    }, [])
 
     const STORAGE_COLUMNS = useMemo<IColumn[]>(() => {
         return [

@@ -322,7 +322,7 @@ const DataTable: React.FC = (props) => {
     );
 
     return (
-        <DataViewContainer>
+        <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {fieldsNotDecided.length > 0 && (
                 <MessageBar
                     messageBarType={MessageBarType.warning}
@@ -432,7 +432,7 @@ const DataTable: React.FC = (props) => {
                     )}
                 </NestPanel>
             </div>
-        </DataViewContainer>
+        </div>
     );
 };
 

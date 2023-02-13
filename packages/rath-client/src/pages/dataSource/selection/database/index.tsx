@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react';
+import { FC, useCallback, useRef, useState } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
@@ -15,7 +15,7 @@ import type { SupportedDatabaseType } from './type';
 import { checkServerConnection } from './api';
 import AdvancedOptions from './form/advanced-options';
 import ConnectOptions from './form/connect-options';
-import QueryOptions from './form/query-options';
+import QueryOptions, { QueryOptionsHandlerRef } from './form/query-options';
 
 export const StackTokens = {
     childrenGap: 20,
@@ -177,6 +177,15 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
         );
     }, [setServerList]);
 
+    const queryOptionsHandlerRef = useRef<QueryOptionsHandlerRef>(null);
+
+    const [showQueryForm, setShowQueryForm] = useState(false);
+
+    const markAsReady = () => {
+        setShowQueryForm(true);
+        queryOptionsHandlerRef.current?.reload();
+    };
+
     return (
         <Stack tokens={StackTokens} style={{ paddingBlock: '1em', flexGrow: 1 }}>
             <AdvancedOptions
@@ -205,8 +214,11 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
                 setConnectUri={setConnectUri}
                 credentials={credentials}
                 setCredentials={setCredentials}
+                nextStepEnabled={showQueryForm}
+                markAsReady={markAsReady}
             />
             <QueryOptions
+                ready={showQueryForm}
                 disabled={curServer?.status !== 'fulfilled' || (sourceType !== 'demo' && !connectUri)}
                 server={server}
                 connectUri={connectUri}
@@ -218,6 +230,7 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
                 isEditorPreviewPending={isEditorPreviewPending}
                 credentials={credentials}
                 submit={submit}
+                ref={queryOptionsHandlerRef}
             />
             {editorPreview && (
                 <div>

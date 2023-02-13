@@ -124,18 +124,12 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, 
                     <Fragment key={i}>
                         <RowIndex>{i}</RowIndex>
                         {columns.map((_, j) => (
-                            j in d ? (
-                                <TableCell
-                                    key={j}
-                                    style={isNumeric(columns?.[j]?.dataType ?? '') ? styles['numeric'] : undefined}
-                                >
-                                    {d[j]}
-                                </TableCell>
-                            ) : (
-                                <TableCellEmpty key={j}>
-                                    {'(empty)'}
-                                </TableCellEmpty>
-                            )
+                            <TableCell
+                                key={j}
+                                style={isNumeric(columns?.[j]?.dataType ?? '') ? styles['numeric'] : undefined}
+                            >
+                                {d[j]}
+                            </TableCell>
                         ))}
                     </Fragment>
                 );
@@ -156,18 +150,12 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, 
                     <Fragment key={i}>
                         <RowIndex>{i}</RowIndex>
                         {columns.map((_, j) => (
-                            j in d ? (
-                                <TableCell
-                                    key={j}
-                                    style={isNumeric(columns?.[j]?.dataType ?? '') ? styles['numeric'] : undefined}
-                                >
-                                    {d[j]}
-                                </TableCell>
-                            ) : (
-                                <TableCellEmpty key={j}>
-                                    {'(empty)'}
-                                </TableCellEmpty>
-                            )
+                            <TableCell
+                                key={j}
+                                style={isNumeric(columns?.[j]?.dataType ?? '') ? styles['numeric'] : undefined}
+                            >
+                                {d[j]}
+                            </TableCell>
                         ))}
                     </Fragment>
                 );

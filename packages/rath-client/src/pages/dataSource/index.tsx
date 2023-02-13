@@ -7,6 +7,7 @@ import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '..
 import { Card } from '../../components/card';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
 import BackupModal from '../../components/backupModal';
+import { notify } from '../../components/error';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
 import Selection from './selection/index';
@@ -23,7 +24,7 @@ const MARGIN_LEFT = { marginLeft: '1em' };
 interface DataSourceBoardProps {}
 
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-    const { dataSourceStore, commonStore } = useGlobalStore();
+    const { dataSourceStore } = useGlobalStore();
 
     const { rawDataMetaInfo, loading, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } =
         dataSourceStore;
@@ -67,9 +68,13 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     const onSelectLoadingFailed = useCallback(
         (err: any) => {
             dataSourceStore.setLoading(false);
-            commonStore.showError('error', `[Data Loading Error]${err}`);
+            notify({
+                type: 'error',
+                title: '[Data Loading Error]',
+                content: `${err}`,
+            });
         },
-        [dataSourceStore, commonStore]
+        [dataSourceStore]
     );
 
     const toggleLoadingAnimation = useCallback(

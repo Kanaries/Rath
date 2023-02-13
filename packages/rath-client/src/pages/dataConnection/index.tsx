@@ -26,6 +26,7 @@ import { useGlobalStore } from '../../store';
 import { Card } from '../../components/card';
 import { PIVOT_KEYS } from '../../constants';
 import DatabaseConnector from '../dataSource/selection/database';
+import { notify } from '../../components/error';
 import FileData from './file';
 import DemoData from './demo';
 // import RestfulData from './restful';
@@ -91,9 +92,13 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
     const onLoadingFailed = useCallback(
         (err: any) => {
             dataSourceStore.setLoading(false);
-            commonStore.showError('error', `[Data Loading Error]${err}`);
+            notify({
+                type: 'error',
+                title: '[Data Loading Error]',
+                content: `${err}`,
+            });
         },
-        [dataSourceStore, commonStore]
+        [dataSourceStore]
     );
 
     const toggleLoadingAnimation = useCallback(

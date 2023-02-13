@@ -1,5 +1,5 @@
 import intl from 'react-intl-universal';
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
 import { IconButton, Spinner, useTheme } from '@fluentui/react';
@@ -17,6 +17,7 @@ import { EditorKey, fetchListAsNodes, findNodeByPathId, handleBrowserItemClick, 
 import { MessageContainer, PivotHeader, PivotList, QueryBrowserHeader, QueryContainer, QueryViewBody, SpinnerContainer, SyncButton } from './components';
 
 interface QueryOptionsProps {
+    ready: boolean;
     disabled: boolean;
     server: string;
     connectUri: string;
@@ -33,9 +34,13 @@ interface QueryOptionsProps {
     submit: (name: string, value: TableData) => void;
 }
 
-const QueryOptions: FC<QueryOptionsProps> = ({
-    server, sourceType, connectUri, disabled, queryString, setQueryString, editorPreview, setEditorPreview, isEditorPreviewPending, credentials, submit,
-}) => {
+export interface QueryOptionsHandlerRef {
+    reload: () => void;
+}
+
+const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(function QueryOptions ({
+    ready, server, sourceType, connectUri, disabled, queryString, setQueryString, editorPreview, setEditorPreview, isEditorPreviewPending, credentials, submit,
+}, handlerRef) {
     const theme = useTheme();
     const config = databaseOptions.find(opt => opt.key === sourceType);
 
@@ -81,6 +86,10 @@ const QueryOptions: FC<QueryOptionsProps> = ({
 
         reset();
     }, [config, disabled, reset, setMenu, server, sourceType, connectUri, credentials]);
+
+    useImperativeHandle(handlerRef, () => ({
+        reload,
+    }));
     
     const empty = !config || disabled || !connectUri;
     
@@ -89,6 +98,15 @@ const QueryOptions: FC<QueryOptionsProps> = ({
             reset();
         }
     }, [empty, reset]);
+
+    const reloadRef = useRef(reload);
+    reloadRef.current = reload;
+
+    useEffect(() => {
+        if (ready) {
+            reloadRef.current();
+        }
+    }, [ready]);
 
     useEffect(() => {
         reset();
@@ -203,6 +221,12 @@ const QueryOptions: FC<QueryOptionsProps> = ({
         }).filter(Boolean);
     }, [menu.items, preview]);
 
+    if (!ready) {
+        return (
+            <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}></QueryContainer>
+        );
+    }
+
     return (
         <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}>
             <QueryBrowserHeader>
@@ -314,7 +338,7 @@ const QueryOptions: FC<QueryOptionsProps> = ({
             </QueryViewBody>
         </QueryContainer>
     );
-};
+});
 
 
 export default observer(QueryOptions);
