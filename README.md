@@ -1,4 +1,4 @@
-![](https://docs-us.oss-us-west-1.aliyuncs.com/images/rath-banner.png)
+![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/rath-main-banner.png)
 
 <div id="header" align="center">
   <div id="badges">
@@ -77,12 +77,17 @@ Get started with RATH now!
 
 ### Import data from online databases or CSV/JSON files.
 
-[![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/datasource-readme.gif)](https://docs.kanaries.net/data-profiling#import-your-data)
+[![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/data-source-feature.png)](https://docs.kanaries.net/data-profiling#import-your-data)
 
 
 ### View statistics from your data source
 
 [![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/data-profiling-readme.gif)](https://docs.kanaries.net/data-profiling#data-profiling)
+
+### Data Preparation
+RATH support data preparation with black magic like predictive transformation operations. It will automatically generate suggestions of transformations and cleaning, etc.
+
+[![](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/text-pattern-general.gif)](https://docs.kanaries.net/data-profiling#data-profiling)
 
 ### One-click automated data analysis with visualizations
 
@@ -125,7 +130,7 @@ RATH's causal analysis feature include:
 - Interactive tools for deeper exploration
 - What-if analysis
 
-![Causal Analysis](https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/github-readme/causal-analysis.png)
+![Causal Analysis](https://docs-us.oss-us-west-1.aliyuncs.com/images/readme/causal-feature.png)
 
 For more about Causal Analysis features, refer to [RATH Docs](https://docs.kanaries.net/causal-analysis).
 
