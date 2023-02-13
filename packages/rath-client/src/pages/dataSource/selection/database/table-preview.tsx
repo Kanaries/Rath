@@ -27,22 +27,42 @@ const Container = styled.div`
     padding: 0 4px 50%;
     position: relative;
     overflow: auto;
-    > * {
-        :not(:first-child):not(label) {
-            background-color: #f8f8f8;
-        }
-        min-width: 2em;
-        padding-inline: 0.8em;
-        line-height: 1.5em;
-        min-height: 1.5em;
-    }
-    > span:first-child, > label {
-        position: sticky;
-        top: 0;
-        padding-top: 4px;
-        font-weight: 600;
-        background-color: #fff;
-    }
+`;
+
+const Corner = styled.span`
+    position: sticky;
+    top: 0;
+    padding-top: 4px;
+    font-weight: 600;
+    background-color: #fff;
+`;
+
+const TableHeader = styled.label`
+    position: sticky;
+    top: 0;
+    padding-top: 4px;
+    font-weight: 600;
+    background-color: #fff;
+    padding-inline: 0.8em;
+`;
+
+const TableCell = styled.div`
+    background-color: #f8f8f8;
+    min-width: 2em;
+    padding-inline: 0.8em;
+    line-height: 1.5em;
+    min-height: 1.5em;
+`;
+
+const TableCellEmpty = styled.span`
+    color: rgb(133, 133, 133);
+    font-style: italic;
+`;
+
+const TableEmptyMsg = styled.span`
+    margin-top: 1.4em;
+    color: rgb(133, 133, 133);
+    font-style: italic;
 `;
 
 const ButtonContainer = styled.div`
@@ -58,6 +78,14 @@ const ButtonContainer = styled.div`
     }
 `;
 
+const RowIndex = styled.span`
+    color: rgb(108, 113, 196);
+    letter-spacing: 0.5px;
+    background-color: #fff;
+    padding-inline: 0.8em;
+    text-align: end;
+`;
+
 const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, data, submit }) {
     const columns = data.columns.map(key => {
         const col = data.meta.find(which => which.key === key)!;
@@ -67,46 +95,25 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, 
     return (<>
         {/* @ts-expect-error css variable */}
         <Container style={{ '--n-cols': columns.length || 1, '--n-rows': data.rows.length || 1 }}>
-            {/* corner */}
-            <span />
-            {
-                columns.map((col, i) => (
-                    <label key={i}>
-                        {col.key}
-                    </label>
-                ))
-            }
+            <Corner />
+            {columns.map((col, i) => <TableHeader key={i}>{col.key}</TableHeader>)}
             {
                 data.rows.map((d, i) => (
                     <Fragment key={i}>
-                        <span
-                            style={{
-                                color: 'rgb(108, 113, 196)',
-                                letterSpacing: '0.5px',
-                                backgroundColor: '#fff',
-                            }}
-                        >
-                            {i + 1}
-                        </span>
+                        <RowIndex>{i + 1}</RowIndex>
                         {
                             columns.map((_, j) => (
                                 j in d ? (
-                                    <div
+                                    <TableCell
                                         key={j}
                                         style={{ ...styles[columns?.[j]?.dataType ?? ''] }}
                                     >
                                         {d[j]}
-                                    </div>
+                                    </TableCell>
                                 ) : (
-                                    <span
-                                        key={j}
-                                        style={{
-                                            color: 'rgb(133, 133, 133)',
-                                            fontStyle: 'italic',
-                                        }}
-                                    >
-                                        (empty)
-                                    </span>
+                                    <TableCellEmpty key={j}>
+                                        {'(empty)'}
+                                    </TableCellEmpty>
                                 )
                             ))
                         }
@@ -115,15 +122,9 @@ const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, 
             }
             {
                 data.rows.length === 0 && (
-                    <span
-                        style={{
-                            marginTop: '1.4em',
-                            color: 'rgb(133, 133, 133)',
-                            fontStyle: 'italic',
-                        }}
-                    >
-                        (empty)
-                    </span>
+                    <TableEmptyMsg>
+                        {'(empty)'}
+                    </TableEmptyMsg>
                 )
             }
         </Container>

@@ -1,121 +1,11 @@
-import styled from 'styled-components';
-import { Icon, IconButton, Theme } from '@fluentui/react';
+import { Icon } from '@fluentui/react';
+import produce from 'immer';
+import type { Dispatch } from 'react';
 import type { DatabaseLevelType } from '../config';
 import { INestedListItem } from '../components/nested-list';
 import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchSchemaList, fetchTableList } from '../api';
+import databaseOptions from '../config';
 
-
-export const QueryContainer = styled.div<{ theme: Theme }>`
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: 0%;
-    min-height: 40vh;
-    max-height: 40vh;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: 16em 1fr;
-    grid-template-rows: max-content 1fr;
-    border: 1px solid ${({ theme }) => theme.palette.neutralLight};
-    font-size: 0.8rem;
-    > *:nth-child(2n + 1) {
-        :not(header) {
-            padding-block: 0.6em;
-            padding-inline: 0.5em;
-        }
-        border-right: 1px solid ${({ theme }) => theme.palette.neutralLight};
-        > header, > div > div:first-child {
-            margin-inline: 1em;
-            margin-bottom: 0.2em;
-        }
-    }
-    > *:first-child {
-        padding-block: 0.6em;
-        padding-inline: 1.2em;
-        display: flex;
-        align-items: center;
-        user-select: none;
-        justify-content: space-between;
-        > span {
-            flex-grow: 1;
-            flex-shrink: 1;
-            margin-right: 1em;
-        }
-    }
-    > *:last-child {
-        display: flex;
-        align-items: stretch;
-        justify-content: stretch;
-        overflow: auto;
-        position: relative;
-    }
-`;
-
-export const SyncButton = styled(IconButton)<{ busy: boolean }>`
-    width: 24px;
-    height: 24px;
-    background: none;
-    i {
-        font-size: 0.7rem;
-        animation: rotating 2.4s linear infinite;
-        ${({ busy }) => busy ? '' : 'animation: none;'}
-    }
-    @keyframes rotating {
-        from {
-            transform: rotate(0);
-        }
-        to {
-            transform: rotate(360deg);
-        }
-    }
-`;
-
-export const PivotList = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    overflow: auto hidden;
-    background-color: #fcfcfc;
-    > * {
-        flex-grow: 0;
-        flex-shrink: 0;
-    }
-`;
-
-export const PivotHeader = styled.div<{ primary?: boolean }>`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    min-width: 6em;
-    padding-inline: 1em 0.6em;
-    background-color: #f8f8f8;
-    font-weight: ${({ primary }) => primary ? 600 : 400};
-    cursor: pointer;
-    outline: none;
-    position: relative;
-    :hover:not([aria-disabled="true"]) {
-        background-color: #f2f2f2;
-        > button {
-            opacity: 1;
-        }
-    }
-    &[aria-selected="true"]:not([aria-disabled="true"]) {
-        background-image: linear-gradient(to top, currentColor 2px, transparent 2px);
-    }
-    &[aria-disabled="true"] {
-        filter: contrast(0.5) brightness(1.5);
-        cursor: default;
-    }
-    > span {
-        flex-grow: 1;
-    }
-    > button {
-        border-radius: 50%;
-        font-size: 100%;
-        opacity: 0;
-        transform: scale(50%);
-        margin-left: 0.6em;
-    }
-`;
 
 export const findNode = (root: INestedListItem[], path: INestedListItem[]): INestedListItem | null => {
     if (path.length === 0) {
@@ -208,4 +98,92 @@ export const fetchListAsNodes = async (
 export enum EditorKey {
     Monaco = -1,
     Diagram = -2,
+}
+
+export interface MenuType {
+    title: string;
+    items: INestedListItem[];
+}
+
+export const handleBrowserItemClick = (
+    server: string,
+    config: (typeof databaseOptions)[number],
+    item: INestedListItem,
+    path: INestedListItem[],
+    commonParams: Omit<DatabaseRequestPayload<Exclude<DatabaseApiOperator, 'ping'>>, 'func'>,
+    setMenu: Dispatch<MenuType | ((prev: MenuType) => MenuType)>,
+    pages: PageType[],
+    setPages: Dispatch<PageType[] | ((prev: PageType[]) => PageType[])>,
+    setPageIdx: Dispatch<number>,
+): void => {
+    const all = [...path, item];
+    if (item.children === 'lazy' || item.children === 'failed') {
+        if (item.children === 'failed') {
+            setMenu(menu => produce(menu, draft => {
+                const target = findNode(draft.items, all);
+                if (target) {
+                    target.children = 'lazy';
+                }
+            }));
+        }
+        const curLevelIdx = config.levels.findIndex(
+            lvl => typeof lvl === 'string' ? lvl : lvl.type
+        );
+        const nextLevel = curLevelIdx === -1 ? undefined : config.levels[curLevelIdx + 1];
+        if (!nextLevel || (typeof nextLevel === 'object' && nextLevel.enumerable === false))  {
+            return;
+        }
+        const hasNextLevelThen = config.levels.length >= curLevelIdx + 2;
+        const submit = (list: INestedListItem[]) => {
+            setMenu(menu => produce(menu, draft => {
+                const target = findNode(draft.items, all);
+                if (target) {
+                    target.children = list;
+                }
+            }));
+        };
+        const reject = (err?: any) => {
+            if (err) {
+                console.warn(err);
+            }
+            setMenu(menu => produce(menu, draft => {
+                const target = findNode(draft.items, all);
+                if (target) {
+                    target.children = 'failed';
+                }
+            }));
+        };
+        fetchListAsNodes(
+            typeof nextLevel === 'string' ? nextLevel : nextLevel.type,
+            server,
+            commonParams,
+            hasNextLevelThen,
+        ).then(list => {
+            if (list) {
+                submit(list);
+            } else {
+                reject();
+            }
+        }).catch(reject);
+    } else if (item.group === 'table') {
+        const pathId = all.map(p => p.key).join('.');
+        const idx = pages.findIndex(page => page.id === pathId);
+        if (idx === -1) {
+            let size = pages.length + 1;
+            setPages(pages => produce(pages, draft => {
+                size = draft.push({
+                    path: all,
+                    id: pathId,
+                });
+            }));
+            setPageIdx(size - 1);
+        } else {
+            setPageIdx(idx);
+        }
+    }
+};
+
+export interface PageType {
+    id: string;
+    path: INestedListItem[];
 }

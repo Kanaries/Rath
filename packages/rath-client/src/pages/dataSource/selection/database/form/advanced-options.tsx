@@ -3,12 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import {
     Icon,
-    IconButton,
     TextField,
     Spinner,
     Stack,
     ContextualMenu,
-    IContextualMenuItem,
     SpinnerSize,
     PrimaryButton,
     DefaultButton,
@@ -16,138 +14,13 @@ import {
 } from "@fluentui/react";
 import { useId } from '@fluentui/react-hooks';
 import { observer } from "mobx-react-lite";
-import { defaultServers } from '..';
+import { renderServerItem } from '../components/server-dropdown-item';
 
 
 const ErrorMessage = styled.span`
     color: red;
     font-size: 0.6rem;
 `;
-
-const ServerItem = styled.div`
-    cursor: pointer;
-    outline: none;
-    user-select: none;
-    padding: 4px 8px;
-    :hover {
-        background-color: #eee;
-    }
-    &[aria-checked="true"] {
-        cursor: default;
-        background-color: #f3f3f3;
-    }
-    & * {
-        cursor: inherit;
-    }
-    display: flex;
-    flex-direction: row;
-    > * {
-        padding: 4px;
-        flex-grow: 1;
-        flex-shrink: 1;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        :first-child {
-            flex-grow: 0;
-            flex-shrink: 0;
-            align-items: center;
-            width: 2.4em;
-            font-size: 1.1rem;
-        }
-        :nth-child(2) span {
-            display: inline-block;
-            font-size: 0.7rem;
-            min-width: 2em;
-            width: max-content;
-            text-align: center;
-            color: #666;
-        }
-        :last-child {
-            flex-grow: 0;
-            flex-shrink: 0;
-            flex-direction: row;
-            cursor: unset;
-            button {
-                cursor: pointer;
-                &[aria-disabled="true"] {
-                    cursor: default;
-                }
-            }
-        }
-    }
-`;
-
-const renderServerItem = (
-    onClick: (target: string) => void,
-    onDelete: (target: string) => void,
-    onRefresh: (target: string) => void,
-    props: IContextualMenuItem | undefined,
-): JSX.Element => {
-    if (!props) {
-        return <></>;
-    }
-    const { checked, key: target, text: status, secondaryText } = props as {
-        checked: boolean;
-        key: string;
-        text: 'unknown' | 'pending' | 'fulfilled' | 'rejected';
-        secondaryText: string;
-    };
-    const lag = Number(secondaryText);
-
-    const isDefault = defaultServers.includes(target);
-    const canDelete = status !== 'pending' && !isDefault;
-
-    return (
-        <ServerItem
-            role="option"
-            tabIndex={0}
-            aria-checked={checked}
-            onClick={e => {
-                e.stopPropagation();
-                onClick(target);
-            }}
-        >
-            <div>
-                {status === 'fulfilled' ? (
-                    <Icon
-                        iconName="StatusCircleCheckmark"
-                        style={{
-                            borderRadius: '50%',
-                            color: 'green',
-                        }}
-                    />
-                ) : status === 'rejected' ? (
-                    <Icon
-                        iconName="StatusCircleErrorX"
-                        style={{
-                            color: 'red',
-                        }}
-                    />
-                ) : status === 'pending' && (
-                    <Spinner size={SpinnerSize.small} style={{ margin: '3px 0' }} />
-                )}
-            </div>
-            <div>
-                <label>{target}</label>
-                <span>{status === 'fulfilled' ? `${lag}ms` : '-'}</span>
-            </div>
-            <div onClick={e => e.stopPropagation()}>
-                <IconButton
-                    disabled={status === 'pending'}
-                    iconProps={{ iconName: 'SyncOccurence' }}
-                    onClick={() => onRefresh(target)}
-                />
-                <IconButton
-                    disabled={!canDelete}
-                    iconProps={{ iconName: 'Delete', style: { color: canDelete ? 'red' : undefined } }}
-                    onClick={() => onDelete(target)}
-                />
-            </div>
-        </ServerItem>
-    );
-};
 
 const AdvancedOptions = observer<{
     servers: {
@@ -241,12 +114,12 @@ const AdvancedOptions = observer<{
                 onRenderLabel={() => (
                     <Stack horizontal tokens={{ childrenGap: 20 }} verticalAlign="center">
                         <Label style={{ whiteSpace: 'nowrap' }}>{intl.get('dataSource.connectorService')}</Label>
-                        {!status ? (
+                        {!status && (
                             <ErrorMessage>
                                 {intl.get('dataSource.connectorEmpty')}
                             </ErrorMessage>
-                        ) : null}
-                        {{
+                        )}
+                        {status && {
                             pending: <Spinner size={SpinnerSize.small} />,
                             fulfilled: curServer && (
                                 <span style={{ display: 'flex', alignItems: 'center' }}>
@@ -269,7 +142,7 @@ const AdvancedOptions = observer<{
                                 </ErrorMessage>
                             ),
                             unknown: '',
-                        }[status ?? 'unknown']}
+                        }[status]}
                     </Stack>
                 )}
                 onRenderSuffix={() => {

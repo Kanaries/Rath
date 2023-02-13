@@ -12,7 +12,8 @@ import { DatabaseApiOperator, DatabaseRequestPayload, fetchQueryResult, fetchTab
 import TablePreview from '../table-preview';
 import SQLEditor from '../query-editor/sql-editor';
 import DiagramEditor from '../query-editor/diagram-editor';
-import { EditorKey, fetchListAsNodes, findNode, findNodeByPathId, PivotHeader, PivotList, QueryContainer, SyncButton } from './utils';
+import { EditorKey, fetchListAsNodes, findNodeByPathId, handleBrowserItemClick, MenuType, PageType } from './utils';
+import { PivotHeader, PivotList, QueryBrowserHeader, QueryContainer, QueryViewBody, SyncButton } from './components';
 
 interface QueryOptionsProps {
     disabled: boolean;
@@ -37,14 +38,11 @@ const QueryOptions: FC<QueryOptionsProps> = ({
     const theme = useTheme();
     const config = databaseOptions.find(opt => opt.key === sourceType);
 
-    const [pages, setPages] = useState<{ id: string; path: INestedListItem[] }[]>([]);
+    const [pages, setPages] = useState<PageType[]>([]);
     const [preview, setPreview] = useState<{ [pathId: string]: TableData | 'failed' }>({});
     const [pageIdx, setPageIdx] = useState<number | EditorKey>(EditorKey.Monaco);
 
-    const [menu, setMenu, busy] = useAsyncState<{
-        title: string;
-        items: INestedListItem[];
-    }>({ title: '', items: [] });
+    const [menu, setMenu, busy] = useAsyncState<MenuType>({ title: '', items: [] });
 
     const reset = useCallback(() => {
         setMenu({ title: '', items: [] });
@@ -96,80 +94,20 @@ const QueryOptions: FC<QueryOptionsProps> = ({
     }, [sourceType, connectUri, setMenu, reset]);
 
     const handleItemClick = (item: INestedListItem, path: INestedListItem[]): void => {
+        if (!config) {
+            return;
+        }
         const all = [...path, item];
         const reversedPath = all.slice().reverse();
-        if (config && (item.children === 'lazy' || item.children === 'failed')) {
-            if (item.children === 'failed') {
-                setMenu(menu => produce(menu, draft => {
-                    const target = findNode(draft.items, all);
-                    if (target) {
-                        target.children = 'lazy';
-                    }
-                }));
-            }
-            const curLevelIdx = config.levels.findIndex(
-                lvl => typeof lvl === 'string' ? lvl : lvl.type
-            );
-            const nextLevel = curLevelIdx === -1 ? undefined : config.levels[curLevelIdx + 1];
-            if (!nextLevel || (typeof nextLevel === 'object' && nextLevel.enumerable === false))  {
-                return;
-            }
-            const commonParams: Omit<DatabaseRequestPayload<Exclude<DatabaseApiOperator, 'ping'>>, 'func'> = {
-                uri: connectUri,
-                sourceType,
-                db: reversedPath.find(d => d.group === 'database')?.key ?? null,
-                schema: reversedPath.find(d => d.group === 'schema')?.key ?? null,
-                table: reversedPath.find(d => d.group === 'table')?.key ?? null,
-                credentials: config.credentials === 'json' ? credentials : undefined,
-            };
-            const hasNextLevelThen = config.levels.length >= curLevelIdx + 2;
-            const submit = (list: INestedListItem[]) => {
-                setMenu(menu => produce(menu, draft => {
-                    const target = findNode(draft.items, all);
-                    if (target) {
-                        target.children = list;
-                    }
-                }));
-            };
-            const reject = (err?: any) => {
-                if (err) {
-                    console.warn(err);
-                }
-                setMenu(menu => produce(menu, draft => {
-                    const target = findNode(draft.items, all);
-                    if (target) {
-                        target.children = 'failed';
-                    }
-                }));
-            };
-            fetchListAsNodes(
-                typeof nextLevel === 'string' ? nextLevel : nextLevel.type,
-                server,
-                commonParams,
-                hasNextLevelThen,
-            ).then(list => {
-                if (list) {
-                    submit(list);
-                } else {
-                    reject();
-                }
-            }).catch(reject);
-        } else if (item.group === 'table') {
-            const pathId = all.map(p => p.key).join('.');
-            const idx = pages.findIndex(page => page.id === pathId);
-            if (idx === -1) {
-                let size = pages.length + 1;
-                setPages(pages => produce(pages, draft => {
-                    size = draft.push({
-                        path: all,
-                        id: pathId,
-                    });
-                }));
-                setPageIdx(size - 1);
-            } else {
-                setPageIdx(idx);
-            }
-        }
+        const commonParams: Omit<DatabaseRequestPayload<Exclude<DatabaseApiOperator, 'ping'>>, 'func'> = {
+            uri: connectUri,
+            sourceType,
+            db: reversedPath.find(d => d.group === 'database')?.key ?? null,
+            schema: reversedPath.find(d => d.group === 'schema')?.key ?? null,
+            table: reversedPath.find(d => d.group === 'table')?.key ?? null,
+            credentials: config.credentials === 'json' ? credentials : undefined,
+        };
+        handleBrowserItemClick(server, config, item, path, commonParams, setMenu, pages, setPages, setPageIdx);
     };
 
     const page = pages[pageIdx];
@@ -264,8 +202,8 @@ const QueryOptions: FC<QueryOptionsProps> = ({
 
     return (
         <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}>
-            <header>
-                <span>{intl.get('dataSource.explorer')}</span>
+            <QueryBrowserHeader>
+                <span className="title">{intl.get('dataSource.explorer')}</span>
                 <SyncButton
                     iconProps={{ iconName: 'SyncOccurence' }}
                     disabled={busy || !config || disabled}
@@ -273,8 +211,8 @@ const QueryOptions: FC<QueryOptionsProps> = ({
                     onClick={reload}
                     style={{ animation: busy ? undefined : 'none' }}
                 />
-            </header>
-            <PivotList>
+            </QueryBrowserHeader>
+            <PivotList theme={theme}>
                 <PivotHeader
                     primary
                     role="tab"
@@ -325,41 +263,51 @@ const QueryOptions: FC<QueryOptionsProps> = ({
                 items={menu.items}
                 onItemClick={handleItemClick}
             />
-            <div>
+            <QueryViewBody theme={theme}>
                 {config && !disabled && (
-                    pageIdx === EditorKey.Monaco ? (
-                        <SQLEditor
-                            busy={isEditorPreviewPending}
-                            setQuery={q => setQueryString(q)}
-                            preview={editorPreview?.value ?? null}
-                            doPreview={query => {
-                                setQueryString(query);
-                                doPreview(query);
-                            }}
-                        />
-                    ) : pageIdx === EditorKey.Diagram ? (
-                        <DiagramEditor
-                            disabled={!hasEnumerableTables}
-                            busy={isEditorPreviewPending}
-                            tables={tables}
-                            query={queryString}
-                            setQuery={q => setQueryString(q)}
-                            preview={editorPreview?.value ?? null}
-                            doPreview={doPreview}
-                        />
-                    ) : page && (
-                        curPreview ? curPreview === 'failed' ? (
-                            <div style={{ padding: '0.5em', color: 'red' }}>
-                                {intl.get('dataSource.req_err')}
-                            </div>
-                        ) : <TablePreview name={page.id} submit={submit} data={curPreview} /> : (
-                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Spinner />
-                            </div>
-                        )
-                    )
+                    <>
+                        {pageIdx === EditorKey.Monaco && (
+                            <SQLEditor
+                                busy={isEditorPreviewPending}
+                                setQuery={q => setQueryString(q)}
+                                preview={editorPreview?.value ?? null}
+                                doPreview={query => {
+                                    setQueryString(query);
+                                    doPreview(query);
+                                }}
+                            />
+                        )}
+                        {pageIdx === EditorKey.Diagram && (
+                            <DiagramEditor
+                                disabled={!hasEnumerableTables}
+                                busy={isEditorPreviewPending}
+                                tables={tables}
+                                query={queryString}
+                                setQuery={q => setQueryString(q)}
+                                preview={editorPreview?.value ?? null}
+                                doPreview={doPreview}
+                            />
+                        )}
+                        {pageIdx >= 0 && page && (
+                            <>
+                                {curPreview && curPreview === 'failed' && (
+                                    <div style={{ padding: '0.5em', color: 'red' }}>
+                                        {intl.get('dataSource.req_err')}
+                                    </div>
+                                )}
+                                {curPreview && curPreview !== 'failed' && (
+                                    <TablePreview name={page.id} submit={submit} data={curPreview} />
+                                )}
+                                {!curPreview && (
+                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Spinner />
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </>
                 )}
-            </div>
+            </QueryViewBody>
         </QueryContainer>
     );
 };
