@@ -8,7 +8,7 @@ import { downloadFileFromBlob } from '../../../utils/download';
 import { CloudItemType } from '../../../pages/dataSource/selection/cloud/spaceList';
 import { notify } from '../../error';
 import useDefaultFilename from '../../../hooks/use-default-filename';
-import { CloudAccessModifier, DataSourceType } from '../../../interfaces';
+import { CloudAccessModifier } from '../../../interfaces';
 import { writeDatasetFile } from '../utils';
 import { IBackupFormHandler, IBackupFormProps, OrganizationDropdown, WorkspaceDropdown } from '.';
 
@@ -89,28 +89,16 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                             throw new Error('Workspace is not chosen');
                         }
                         // TODO: allow user to select these two modes
-                        const dataSourceSaveRes = await (() => {
-                            if (sourceType === DataSourceType.File) {
-                                return userStore.saveDataSourceOnCloudOfflineMode({
-                                    name: modifiableDataSourceName || defaultDataSourceName,
-                                    organizationName,
-                                    workspaceName,
-                                    datasourceType: sourceType,
-                                    fileInfo: {
-                                        fileName: file.name,
-                                        fileSize: file.size,
-                                    },
-                                }, file);
-                            } else {
-                                return userStore.saveDataSourceOnCloudOnlineMode({
-                                    name: modifiableDataSourceName || defaultDataSourceName,
-                                    organizationName,
-                                    workspaceName,
-                                    datasourceType: sourceType,
-                                    linkInfo: {},
-                                });
-                            }
-                        })();
+                        const dataSourceSaveRes = await userStore.saveDataSourceOnCloudOfflineMode({
+                            name: modifiableDataSourceName || defaultDataSourceName,
+                            organizationName,
+                            workspaceName,
+                            datasourceType: sourceType,
+                            fileInfo: {
+                                fileName: file.name,
+                                fileSize: file.size,
+                            },
+                        }, file);
                         if (!dataSourceSaveRes) {
                             throw new Error('Failed to upload data source');
                         }
@@ -122,14 +110,15 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                         dsId = userStore.cloudDataSourceMeta?.id;
                     }
                     if (dsId) {
-                        if (!workspaceName) {
+                        const wspName = cloudDatasetId ? workspace!.name : workspaceName;
+                        if (!wspName) {
                             throw new Error('Workspace is not chosen');
                         }
                         await userStore.saveDatasetOnCloud({
                             id: (canOverwrite && datasetOverwrite) ? cloudDatasetId : undefined,
                             datasourceId: dsId,
                             name: name || defaultName,
-                            workspaceName: cloudDatasetId ? workspace!.name : workspaceName,
+                            workspaceName: wspName,
                             type: accessMode,
                             size: file.size,    
                             totalCount: nRows,
