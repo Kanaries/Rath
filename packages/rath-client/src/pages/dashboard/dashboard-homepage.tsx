@@ -208,7 +208,7 @@ const DashboardHomepage: FC<DashboardHomepageProps> = ({ openDocument }) => {
                     style={{ margin: '1em 0' }}
                 >
                     {VIEW_MODES.map((mode) => (
-                        <PivotItem key={mode.key} itemKey={mode.key} headerText={intl.get(mode.key) || mode.key} itemIcon={mode.icon} />
+                        <PivotItem key={mode.key} itemKey={mode.key} headerText={intl.get(`common.${mode.key}`)} itemIcon={mode.icon} />
                     ))}
                 </Pivot>
                 <List openDocument={openDocument} pages={filteredPages} />

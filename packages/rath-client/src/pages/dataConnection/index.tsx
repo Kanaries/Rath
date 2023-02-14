@@ -32,8 +32,8 @@ import OLAPData from './olap';
 import HistoryPanel from './history';
 import DatabaseData from './database/';
 import AirTableSource from './airtable';
-import Notebook from './notebook';
 import SupportedSources from './supportedSources';
+import KanariesCloud from './cloud';
 
 interface DataConnectionProps {
     // show: boolean;
@@ -96,7 +96,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
     );
 
     const formMap: Record<IDataSourceType, JSX.Element> = {
-        [IDataSourceType.NOTEBOOK]: <Notebook setLoadingAnimation={toggleLoadingAnimation} />,
+        [IDataSourceType.CLOUD]: <KanariesCloud setLoadingAnimation={toggleLoadingAnimation} />,
         [IDataSourceType.FILE]: (
             <FileData
                 onDataLoading={onDataLoading}

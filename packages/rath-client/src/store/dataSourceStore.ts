@@ -21,7 +21,15 @@ import {
     IExtField,
     IteratorStorageMetaInfo,
     IBackUpDataMeta,
-    IBackUpData
+    IBackUpData,
+    ICreateDataSourcePayload,
+    ICreateDataSourceResult,
+    ICreateDatasetPayload,
+    ICreateDatasetResult,
+    IDataSourceMeta,
+    IDatasetMeta,
+    DataSourceType,
+    IDashboardDocumentInfo,
 } from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
@@ -30,17 +38,21 @@ import { findRathSafeColumnIndex, colFromIRow, readableWeekday } from "../utils"
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
 import { IteratorStorage } from "../utils/iteStorage";
-import { updateDataStorageMeta } from "../utils/storage";
+import { DataSourceTag, updateDataStorageMeta } from "../utils/storage";
 import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
 import { IsolationForest } from "../lib/outlier/iforest";
 import { compressRows, uncompressRows } from "../utils/rows2csv";
 import { extractSelection, ITextPattern } from "../lib/textPattern";
+import { getMainServiceAddress } from "../utils/user";
+import { request } from "../utils/request";
 import { getGlobalStore } from ".";
 
 interface IDataMessage {
-    type: 'init_data' | 'others' | 'download';
+    type: 'init_data' | 'dataset' | 'others' | 'download';
     data: IDatasetBase
     downLoadURL?: string;
+    dataset?: IDatasetMeta;
+    dashboard?: IDashboardDocumentInfo[];
 }
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
@@ -67,6 +79,17 @@ function fieldNotExtended (fid: string, mutFields: IMuteFieldBase[], extOpt: str
 }
 
 export class DataSourceStore {
+    /** Storage meta on cloud. */
+    public cloudDataSourceMeta: IDataSourceMeta | null = null;
+    /** Dataset storage meta on cloud. */
+    public cloudDatasetMeta: IDatasetMeta | null = null;
+    /** Auto-saved dataset storage meta on cloud. */
+    public cloudAutoSaveDatasetMeta: IDatasetMeta | null = null;
+    /** Organization name */
+    public currentOrg: string | null = null;
+    /** Workspace name */
+    public currentWsp: string | null = null;
+
     public rawDataMetaInfo: IteratorStorageMetaInfo = {
         versionCode: -1,
         length: 0,
@@ -104,8 +127,12 @@ export class DataSourceStore {
     private reactions: IReactionDisposer[] = []
     public datasetId: string | null = null;
     public showCustomizeComputationModal: boolean = false;
+    public sourceType = DataSourceType.Unknown;
     constructor() {
         makeAutoObservable(this, {
+            cloudDataSourceMeta: observable.ref,
+            cloudDatasetMeta: observable.ref,
+            cloudAutoSaveDatasetMeta: observable.ref,
             cookedDataSource: observable.ref,
             cookedMeasures: observable.ref,
             fieldsWithExtSug: observable.ref,
@@ -127,6 +154,7 @@ export class DataSourceStore {
         this.reactions = [];
     }
     public initStore () {
+        this.datasetId = null;
         this.rawDataMetaInfo = {
             versionCode: -1,
             length: 0,
@@ -214,19 +242,70 @@ export class DataSourceStore {
         })
         this.fieldMetasRef = fromStream(fieldMetas$, [])
         this.cleanedDataRef = fromStream(cleanedData$, []);
+        let loadTaskReceived = false;
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
-            const { type, downLoadURL } = msg;
+            const { type, downLoadURL, dataset/*, dashboard*/ } = msg;
             const { userStore } = getGlobalStore();
-            if (type === 'download' && downLoadURL) {
-                userStore.openNotebook(downLoadURL);
-            }
-            if (ev.source && msg.type === 'init_data') {
-                console.warn('[Get DataSource From Other Pages]', msg)
-                // @ts-ignore
-                ev.source.postMessage(true, ev.origin)
-                this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
-                this.setShowDataImportSelection(false);
+            switch (type) {
+                case 'download': {
+                    if (downLoadURL && !loadTaskReceived) {
+                        loadTaskReceived = true;
+                        console.warn('[Get Notebook From Other Pages]', msg);
+                        userStore.openNotebook(downLoadURL);
+                    }
+                    break;
+                }
+                case 'dataset': {
+                    if (ev.source && !loadTaskReceived) {
+                        loadTaskReceived = true;
+                        console.warn('[Initialize From Other Pages]', msg);
+                        new Promise<{
+                            dataset?: boolean;
+                            dashboard?: boolean;
+                        }>(resolve => {
+                            if (dataset) {
+                                userStore.openDataset(dataset).then(ok => {
+                                    resolve({
+                                        dataset: ok,
+                                    });
+                                });
+                            } else {
+                                resolve({});
+                            }
+                        }).then(part => new Promise<typeof part>(resolve => {
+                            // TODO: release dashboard feature
+                            resolve(part);
+                            // if (dashboard) {
+                            //     userStore.openDashboardTemplates(dashboard).then(ok => {
+                            //         resolve({
+                            //             ...part,
+                            //             dashboard: ok,
+                            //         });
+                            //     });
+                            // } else {
+                            //     resolve(part);
+                            // }
+                        })).then(state => {
+                            // @ts-ignore
+                            ev.source!.postMessage({ type: "dataset", result: state }, ev.origin);
+                        });
+                    }
+                    break;
+                }
+                case 'init_data': {
+                    if (ev.source) {
+                        console.warn('[Get DataSource From Other Pages]', msg)
+                        // @ts-ignore
+                        ev.source.postMessage(true, ev.origin)
+                        this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
+                        this.setShowDataImportSelection(false);
+                    }
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
         })
         this.subscriptions.push(rawDataMetaInfo$.subscribe(() => {
@@ -493,11 +572,19 @@ export class DataSourceStore {
         this.fieldMetasRef.current = state.fieldMetas
     } 
 
-    public async loadDataWithInferMetas (dataSource: IRow[], fields: IMuteFieldBase[]) {
+    public async loadDataWithInferMetas (dataSource: IRow[], fields: IMuteFieldBase[], tag?: DataSourceTag | undefined) {
         if (fields.length > 0 && dataSource.length > 0) {
             const metas = await inferMetaService({ dataSource, fields })
             await this.rawDataStorage.setAll(dataSource)
             runInAction(() => {
+                this.sourceType = tag ? {
+                    [DataSourceTag.AIR_TABLE]: DataSourceType.AirTable,
+                    [DataSourceTag.DATABASE]: DataSourceType.Database,
+                    [DataSourceTag.DEMO]: DataSourceType.Unknown,
+                    [DataSourceTag.FILE]: DataSourceType.File,
+                    [DataSourceTag.OLAP]: DataSourceType.Olap,
+                    [DataSourceTag.RESTFUL]: DataSourceType.Unknown,
+                }[tag] : DataSourceType.Unknown;
                 this.loading = false;
                 this.rawDataMetaInfo = this.rawDataStorage.metaInfo;
                 this.showDataImportSelection = false;
@@ -1101,6 +1188,8 @@ export class DataSourceStore {
         this.extData = new Map(extData);
         await rawDataStorage.setAll(uncompressRows(rawData, meta.mutFields.map(f => f.fid)));
         runInAction(() => {
+            this.sourceType = DataSourceType.Unknown;
+            this.datasetId = null;
             this.rawDataMetaInfo = rawDataStorage.metaInfo;
             this.mutFields = meta.mutFields;
             this.extFields = meta.extFields;
@@ -1113,12 +1202,160 @@ export class DataSourceStore {
     public async loadBackupMetaStore (data: IBackUpDataMeta) {
         const { mutFields, extFields, rawDataMetaInfo, filters, cleanMethod } = data;
         runInAction(() => {
+            this.sourceType = DataSourceType.Unknown;
+            this.datasetId = null;
             this.mutFields = mutFields;
             this.extFields = extFields;
             this.rawDataMetaInfo = rawDataMetaInfo;
             this.filters = filters;
             this.cleanMethod = cleanMethod as CleanMethod;
         });
+    }
+
+    public async saveDataSourceOnCloudOfflineMode(
+        payload: ICreateDataSourcePayload<'offline'> & { organizationName: string },
+        file: File,
+    ): Promise<{ id: string; downloadUrl: string } | null> {
+        const { organizationName, ...params } = payload;
+        const { userStore } = getGlobalStore();
+        const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+        try {
+            const createDataSourceApiRes = await request.post<typeof params, ICreateDataSourceResult<'offline'>>(
+                createDataSourceApiUrl, params
+            );
+            if (params.datasourceType === DataSourceType.File) {
+                const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
+                    method: 'PUT',
+                    body: file,
+                });
+                if (!fileUploadRes.ok) {
+                    throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+                }
+                await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                    reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
+                );
+            }
+            const dataSource = await userStore.fetchDataSource(payload.workspaceName, createDataSourceApiRes.id);
+            if (!dataSource) {
+                throw new Error('Data source not existed');
+            }
+            this.setCloudDataSource(dataSource, payload.organizationName, payload.workspaceName);
+            const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
+                method: 'PUT',
+                body: file,
+            });
+            if (!fileUploadRes.ok) {
+                throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+            }
+            const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
+            );
+            return {
+                id: createDataSourceApiRes.id,
+                downloadUrl: reportUploadSuccessApiRes.downloadUrl,
+            };
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[saveDataSourceOnCloud]',
+                content: `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public async saveDataSourceOnCloudOnlineMode(
+        payload: ICreateDataSourcePayload<'online'> & { organizationName: string },
+    ): Promise<{ id: string } | null> {
+        const { organizationName, ...params } = payload;
+        const { userStore } = getGlobalStore();
+        const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+        try {
+            const createDataSourceApiRes = await request.post<typeof params, ICreateDataSourceResult<'online'>>(
+                createDataSourceApiUrl, params
+            );
+            const dataSource = await userStore.fetchDataSource(payload.workspaceName, createDataSourceApiRes.id);
+            if (!dataSource) {
+                throw new Error('Data source not existed');
+            }
+            this.setCloudDataSource(dataSource, payload.organizationName, payload.workspaceName);
+            return { id: createDataSourceApiRes.id };
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[saveDataSourceOnCloud]',
+                content: `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public async saveDatasetOnCloud(payload: ICreateDatasetPayload, file: File, isAutoSave = false) {
+        const { userStore } = getGlobalStore();
+        const createDatasetApiUrl = getMainServiceAddress('/api/ce/dataset');
+        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+        try {
+            const respond = await fetch(createDatasetApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload),
+            });
+            if (!respond.ok) {
+                throw new Error(respond.statusText);
+            }
+            const createDatasetApiRes = await respond.json() as (
+                | { success: false; message: string }
+                | { success: true; data: ICreateDatasetResult }
+            );
+            if (!createDatasetApiRes.success) {
+                throw new Error(createDatasetApiRes.message);
+            }
+            const fileUploadRes = await fetch(createDatasetApiRes.data.uploadUrl, {
+                method: 'PUT',
+                body: file,
+            });
+            if (!fileUploadRes.ok) {
+                throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+            }
+            const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                reportUploadSuccessApiUrl, { storageId: createDatasetApiRes.data.storageId, status: 1 }
+            );
+            const dataset = await userStore.fetchDataset(payload.workspaceName, createDatasetApiRes.data.datasetId);
+            if (!dataset) {
+                throw new Error('Dataset not existed');
+            }
+            if (isAutoSave) {
+                this.setAutoSavedCloudDataset(dataset);
+            } else {
+                this.setCloudDataset(dataset);
+            }
+            return reportUploadSuccessApiRes;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[saveDatasetOnCloud]',
+                content: `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public setCloudDataSource(dataSource: IDataSourceMeta, organizationName: string, workspaceName: string) {
+        this.cloudDataSourceMeta = dataSource;
+        this.currentOrg = organizationName;
+        this.currentWsp = workspaceName;
+    }
+
+    public setCloudDataset(dataset: IDatasetMeta) {
+        this.cloudDatasetMeta = dataset;
+    }
+
+    public setAutoSavedCloudDataset(dataset: IDatasetMeta) {
+        this.cloudAutoSaveDatasetMeta = dataset;
     }
 
 }

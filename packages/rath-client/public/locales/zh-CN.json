@@ -53,7 +53,9 @@
             "searchViews": "搜索视图",
             "searchFields": "搜索字段/变量",
             "notFound": "未找到匹配结果"
-        }
+        },
+        "list": "列表",
+        "gallery": "预览"
     },
     "menu": {
         "dataSource": "数据准备",
@@ -237,7 +239,15 @@
                 "mysql": "MySQL",
                 "demo": "示例数据",
                 "database": "数据库",
+                "kanaries_cloud": "云",
                 "rath_notebook": "工作簿"
+            },
+            "cloud": {
+                "notebook": "工作簿",
+                "dataset": "数据集",
+                "dashboard": "报表",
+                "dashboard_template": "报表模板",
+                "total": "所有"
             },
             "load": "加载数据",
             "demo": {
@@ -372,7 +382,7 @@
     },
     "storage": {
         "upload": "保存到云",
-        "upload_desc": "备份你的 Rath 工作簿。",
+        "upload_desc": "备份你的{mode}。",
         "components": {
             "data": "全量数据 ({size} 行)",
             "meta": "元数据 ({size} 个字段)",
@@ -380,13 +390,22 @@
             "causal": "因果模型",
             "dashboard": "报表 ({size} 个文档)"
         },
-        "name": "工作簿名称",
-        "default_name": "Rath 工作簿 {date}",
+        "name": "{mode}名称",
+        "default_name": "Rath {mode} {date}",
+        "desc": "{mode}描述",
+        "data_source_name": "数据源名称",
+        "cover": "封面",
+        "bind_dataset": "绑定到数据集",
+        "field_desc": "字段描述",
         "download": "加载",
         "createdAt": "创建时间",
         "refresh": "刷新",
         "size": "大小",
-        "apply": "上传"
+        "apply": "上传",
+        "public": "公开",
+        "publish_template": "发布为公开模板",
+        "overwrite": "覆盖当前备份",
+        "auto_save": "自动备份"
     },
     "meta": {
         "title": "字段元信息配置",
