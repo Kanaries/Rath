@@ -8,7 +8,7 @@ import { downloadFileFromBlob } from '../../../utils/download';
 import { CloudItemType } from '../../../pages/dataSource/selection/cloud/spaceList';
 import { notify } from '../../error';
 import useDefaultFilename from '../../../hooks/use-default-filename';
-import { CloudAccessModifier } from '../../../interfaces';
+import { CloudAccessModifier, DataSourceType } from '../../../interfaces';
 import { writeDatasetFile } from '../utils';
 import { IBackupFormHandler, IBackupFormProps, OrganizationDropdown, WorkspaceDropdown } from '.';
 
@@ -17,7 +17,7 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
     const { setBusy, setCanBackup, organizationName, workspaceName } = props;
     
     const { commonStore, dataSourceStore, userStore } = useGlobalStore();
-    const { datasetId, sourceType } = dataSourceStore;
+    const { datasetId } = dataSourceStore;
     const { cloudDataSourceMeta, cloudDatasetMeta } = userStore;
     const { id: dataSourceId } = cloudDataSourceMeta ?? {};
     const { id: cloudDatasetId, workspace } = cloudDatasetMeta ?? {};
@@ -93,7 +93,7 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                             name: modifiableDataSourceName || defaultDataSourceName,
                             organizationName,
                             workspaceName,
-                            datasourceType: sourceType,
+                            datasourceType: DataSourceType.File,
                             fileInfo: {
                                 fileName: file.name,
                                 fileSize: file.size,
