@@ -17,7 +17,8 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
     const { setBusy, setCanBackup, organizationName, workspaceName } = props;
     
     const { commonStore, dataSourceStore, userStore } = useGlobalStore();
-    const { cloudDataSourceMeta, cloudDatasetMeta, datasetId, sourceType } = dataSourceStore;
+    const { datasetId, sourceType } = dataSourceStore;
+    const { cloudDataSourceMeta, cloudDatasetMeta } = userStore;
     const { id: dataSourceId } = cloudDataSourceMeta ?? {};
     const { id: cloudDatasetId, workspace } = cloudDatasetMeta ?? {};
     
@@ -90,7 +91,7 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                         // TODO: 这里需要支持用户自己选择, 后端也要更改
                         const dataSourceSaveRes = await (() => {
                             if (sourceType === DataSourceType.File) {
-                                return dataSourceStore.saveDataSourceOnCloudOfflineMode({
+                                return userStore.saveDataSourceOnCloudOfflineMode({
                                     name: modifiableDataSourceName || defaultDataSourceName,
                                     organizationName,
                                     workspaceName,
@@ -101,7 +102,7 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                                     },
                                 }, file);
                             } else {
-                                return dataSourceStore.saveDataSourceOnCloudOnlineMode({
+                                return userStore.saveDataSourceOnCloudOnlineMode({
                                     name: modifiableDataSourceName || defaultDataSourceName,
                                     organizationName,
                                     workspaceName,
@@ -117,14 +118,14 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                         if (!dataSource) {
                             throw new Error('Failed to get data source');
                         }
-                        dataSourceStore.setCloudDataSource(dataSource, organizationName, workspaceName);
-                        dsId = dataSourceStore.cloudDataSourceMeta?.id;
+                        userStore.setCloudDataSource(dataSource, organizationName, workspaceName);
+                        dsId = userStore.cloudDataSourceMeta?.id;
                     }
                     if (dsId) {
                         if (!workspaceName) {
                             throw new Error('Workspace is not chosen');
                         }
-                        await dataSourceStore.saveDatasetOnCloud({
+                        await userStore.saveDatasetOnCloud({
                             id: (canOverwrite && datasetOverwrite) ? cloudDatasetId : undefined,
                             datasourceId: dsId,
                             name: name || defaultName,

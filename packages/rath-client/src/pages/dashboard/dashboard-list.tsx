@@ -99,9 +99,8 @@ export interface DashboardListProps {
 }
 
 const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
-    const { dashboardStore, dataSourceStore, userStore } = useGlobalStore();
-    const { cloudDataSourceMeta } = dataSourceStore;
-    const { loggedIn } = userStore;
+    const { dashboardStore, userStore } = useGlobalStore();
+    const { loggedIn, cloudDataSourceMeta } = userStore;
 
     const [sortMode, setSortMode] = useState<{
         key: Exclude<keyof FlatDocumentInfo, 'description' | 'index'>;

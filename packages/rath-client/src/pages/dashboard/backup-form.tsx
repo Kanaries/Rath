@@ -19,8 +19,8 @@ export interface IBackupFormProps {
 
 const BackupForm: FC<IBackupFormProps> = ({ data, setData, submit }) => {
     const { dataSourceStore, userStore } = useGlobalStore();
-    const { cloudDataSourceMeta, cloudDatasetMeta, currentOrg, currentWsp, fieldMetas } = dataSourceStore;
-    const { loggedIn } = userStore;
+    const { fieldMetas } = dataSourceStore;
+    const { loggedIn, currentOrgName: curOrgName, currentWspName: curWspName, cloudDatasetMeta, cloudDataSourceMeta } = userStore;
 
     const defaultName = useDefaultFilename(intl.get('dataSource.importData.cloud.dashboard'));
 
@@ -63,7 +63,7 @@ const BackupForm: FC<IBackupFormProps> = ({ data, setData, submit }) => {
     
     const [busy, setBusy] = useState(false);
 
-    const canBackup = Boolean(cloudDataSourceMeta && currentOrg && currentWsp);
+    const canBackup = Boolean(cloudDataSourceMeta && curOrgName && curWspName);
 
     const setBindDatasetRef = useRef(setBindDataset);
     setBindDatasetRef.current = setBindDataset;
@@ -73,7 +73,7 @@ const BackupForm: FC<IBackupFormProps> = ({ data, setData, submit }) => {
     }, [cloudDatasetMeta]);
     
     const backup = async () => {
-        if (!canBackup || !currentWsp) {
+        if (!canBackup || !curWspName) {
             return false;
         }
         setBusy(true);
@@ -92,7 +92,7 @@ const BackupForm: FC<IBackupFormProps> = ({ data, setData, submit }) => {
         }
     };
 
-    if (!(loggedIn && cloudDataSourceMeta && currentOrg && currentWsp)) {
+    if (!(loggedIn && cloudDataSourceMeta && curOrgName && curWspName)) {
         return null;
     }
 
@@ -112,12 +112,12 @@ const BackupForm: FC<IBackupFormProps> = ({ data, setData, submit }) => {
                     />
                     <TextField
                         label={intl.get('user.organization')}
-                        value={currentOrg}
+                        value={curOrgName}
                         readOnly
                     />
                     <TextField
                         label={intl.get('user.workspace')}
-                        value={currentWsp}
+                        value={curWspName}
                         readOnly
                     />
                     <TextField

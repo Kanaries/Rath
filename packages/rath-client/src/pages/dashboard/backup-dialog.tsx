@@ -39,8 +39,8 @@ const Cont = styled.div`
 `;
 
 const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocumentInfo }> = ({ open, onDismiss, value }) => {
-    const { dataSourceStore, dashboardStore } = useGlobalStore();
-    const { cloudDatasetMeta, currentWsp } = dataSourceStore;
+    const { dashboardStore, userStore } = useGlobalStore();
+    const { cloudDatasetMeta, currentWspName: curWspName } = userStore;
 
     const defaultName = useMemo(() => {
         return intl.get('storage.default_name', {
@@ -64,10 +64,10 @@ const BackupDialog: FC<{ open: boolean; onDismiss: () => void; value: FlatDocume
     });
 
     const submit = async () => {
-        if (!currentWsp) {
+        if (!curWspName) {
             return;
         }
-        await dashboardStore.saveDashboardOnCloud(currentWsp, value.index, uploadConfig);
+        await dashboardStore.saveDashboardOnCloud(curWspName, value.index, uploadConfig);
     };
     
     return (

@@ -1,9 +1,8 @@
 import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import { KanariesDatasetFilenameCloud, KanariesDatasetPackCloudExtension } from "../../constants";
-import { CloudAccessModifier, IDatasetData, IDatasetFieldMeta } from "../../interfaces";
+import { IDatasetData, IDatasetFieldMeta } from "../../interfaces";
 import { getGlobalStore } from "../../store";
 import { IKRFComponents, IParseMapItem, KRF_VERSION } from "../../utils/download";
-import { notify } from "../error";
 
 
 export const writeNotebookFile = async (parseMapItems: IParseMapItem[], filename: string): Promise<File> => {
@@ -93,46 +92,4 @@ export const writeDatasetFile = async (filename: string): Promise<[File, number,
     const blob = await zipWriter.close();
     const fileName = `${filename}.${KanariesDatasetPackCloudExtension}`;
     return [new File([blob], fileName), data.data.rawData.length, allFields];
-};
-
-export const DATASET_AUTO_SAVE_NAME = 'auto save';
-
-export const autoSaveDataset = async (): Promise<boolean> => {
-    const { dataSourceStore, userStore } = getGlobalStore();
-    const { cloudDataSourceMeta, cloudAutoSaveDatasetMeta, currentWsp } = dataSourceStore;
-    const { saving, info } = userStore;
-
-    if (saving || !cloudDataSourceMeta || currentWsp === null || !info) {
-        return false;
-    }
-
-    try {
-        userStore.setSaving(true);
-        const [file, nRows, meta] = await writeDatasetFile(DATASET_AUTO_SAVE_NAME);
-        await dataSourceStore.saveDatasetOnCloud({
-            id: cloudAutoSaveDatasetMeta?.id,
-            datasourceId: cloudAutoSaveDatasetMeta?.datasource.id ?? cloudDataSourceMeta.id,
-            name: DATASET_AUTO_SAVE_NAME,
-            workspaceName: cloudAutoSaveDatasetMeta?.workspace.name ?? currentWsp,
-            type: cloudAutoSaveDatasetMeta?.type ?? CloudAccessModifier.PROTECTED,
-            size: file.size,
-            totalCount: nRows,
-            meta,
-        }, file, true);
-        userStore.setSaving(false);
-        notify({
-            type: 'success',
-            title: 'Dataset Auto Saved',
-            content: '',
-        });
-        return true;
-    } catch (error) {
-        userStore.setSaving(false);
-        notify({
-            type: 'warning',
-            title: 'Dataset Auto Save Failed',
-            content: '',
-        });
-        return false;
-    }
 };

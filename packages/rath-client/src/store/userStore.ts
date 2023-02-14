@@ -1,12 +1,11 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { TextWriter, ZipReader } from "@zip.js/zip.js";
-import type { IAccessPageKeys, ICreateDashboardConfig, IDashboardDocumentInfo, IDatasetData, IDatasetMeta, IDataSourceMeta } from '../interfaces';
+import { DataSourceType, IAccessPageKeys, ICreateDashboardConfig, ICreateDatasetPayload, ICreateDatasetResult, ICreateDataSourcePayload, ICreateDataSourceResult, IDashboardDocumentInfo, IDatasetData, IDatasetMeta, IDataSourceMeta } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
 import { KanariesDatasetFilenameCloud } from '../constants';
 import { IKRFComponents, IParseMapItem } from '../utils/download';
-// import { autoSaveDataset } from '../components/backupModal/utils';
 import { commitLoginService } from './fetch';
 import { getGlobalStore } from '.';
 
@@ -56,29 +55,35 @@ interface IUserInfo {
     organizations?: readonly IOrganization[] | undefined;
 }
 
-// const AUTO_SAVE_SPAN = 1_000 * 60 * 5;  // 5 mins
-
 export default class UserStore {
     public login!: ILoginForm;
     public signup!: ISignUpForm;
     public info: IUserInfo | null = null;
     public saving = false;
-    // protected autoSaveTimer: NodeJS.Timeout | null = null;
     public get loggedIn() {
         return this.info !== null;
     }
     public get userName() {
         return this.info?.userName ?? null;
     }
+
+    /** Storage meta on cloud. */
+    public cloudDataSourceMeta: IDataSourceMeta | null = null;
+    /** Dataset storage meta on cloud. */
+    public cloudDatasetMeta: IDatasetMeta | null = null;
+    /** Auto-saved dataset storage meta on cloud. */
+    public cloudAutoSaveDatasetMeta: IDatasetMeta | null = null;
+    /** Organization name */
+    public currentOrgName: string | null = null;
+    /** Workspace name */
+    public currentWspName: string | null = null;
+
     constructor() {
         this.init()
         makeAutoObservable(this, {
             // @ts-expect-error non-public fields
             autoSaveTimer: false,
         });
-        // this.autoSaveTimer = setInterval(() => {
-        //     autoSaveDataset();
-        // }, AUTO_SAVE_SPAN);
     }
     public init() {
         this.login = {
@@ -408,11 +413,11 @@ export default class UserStore {
             await dataSourceStore.loadBackupDataStore(dataset.data, dataset.meta);
             const dataSource = await this.fetchDataSource(workspaceName, dataSourceId);
             if (dataSource && organizationName) {
-                dataSourceStore.setCloudDataSource(dataSource, organizationName, workspaceName);
+                this.setCloudDataSource(dataSource, organizationName, workspaceName);
             }
             const cloudMeta = await this.fetchDataset(workspaceName, datasetId);
             if (cloudMeta) {
-                dataSourceStore.setCloudDataset(cloudMeta);
+                this.setCloudDataset(cloudMeta);
             }
             return true;
         } catch (error) {
@@ -580,8 +585,8 @@ export default class UserStore {
 
     public async uploadDashboard(workspaceName: string, file: File, config: ICreateDashboardConfig): Promise<boolean> {
         const { dataSourceStore } = getGlobalStore();
-        const { cloudDataSourceMeta, cloudDatasetMeta, fieldMetas } = dataSourceStore;
-        if (!cloudDataSourceMeta) {
+        const { fieldMetas } = dataSourceStore;
+        if (!this.cloudDataSourceMeta) {
             notify({
                 type: 'error',
                 title: '[uploadDashboard]',
@@ -589,7 +594,7 @@ export default class UserStore {
             });
             return false;
         }
-        const { id: datasourceId } = cloudDataSourceMeta;
+        const { id: datasourceId } = this.cloudDataSourceMeta;
         const createDashboardApiUrl = getMainServiceAddress('/api/ce/dashboard');
         const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
         try {
@@ -600,7 +605,7 @@ export default class UserStore {
                 },
                 body: JSON.stringify({
                     datasourceId,
-                    datasetId: config.dashboard.bindDataset && cloudDatasetMeta ? cloudDatasetMeta.id : undefined,
+                    datasetId: config.dashboard.bindDataset && this.cloudDatasetMeta ? this.cloudDatasetMeta.id : undefined,
                     workspaceName,
                     name: config.dashboard.name,
                     description: config.dashboard.description,
@@ -665,6 +670,146 @@ export default class UserStore {
 
     public setSaving(saving: boolean) {
         this.saving = saving;
+    }
+
+    public async saveDataSourceOnCloudOfflineMode(
+        payload: ICreateDataSourcePayload<'offline'> & { organizationName: string },
+        file: File,
+    ): Promise<{ id: string; downloadUrl: string } | null> {
+        const { organizationName, ...params } = payload;
+        const { userStore } = getGlobalStore();
+        const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+        try {
+            const createDataSourceApiRes = await request.post<typeof params, ICreateDataSourceResult<'offline'>>(
+                createDataSourceApiUrl, params
+            );
+            if (params.datasourceType === DataSourceType.File) {
+                const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
+                    method: 'PUT',
+                    body: file,
+                });
+                if (!fileUploadRes.ok) {
+                    throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+                }
+                await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                    reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
+                );
+            }
+            const dataSource = await userStore.fetchDataSource(payload.workspaceName, createDataSourceApiRes.id);
+            if (!dataSource) {
+                throw new Error('Data source not existed');
+            }
+            this.setCloudDataSource(dataSource, payload.organizationName, payload.workspaceName);
+            const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
+                method: 'PUT',
+                body: file,
+            });
+            if (!fileUploadRes.ok) {
+                throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+            }
+            const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
+            );
+            return {
+                id: createDataSourceApiRes.id,
+                downloadUrl: reportUploadSuccessApiRes.downloadUrl,
+            };
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[saveDataSourceOnCloud]',
+                content: `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public async saveDataSourceOnCloudOnlineMode(
+        payload: ICreateDataSourcePayload<'online'> & { organizationName: string },
+    ): Promise<{ id: string } | null> {
+        const { organizationName, ...params } = payload;
+        const { userStore } = getGlobalStore();
+        const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+        try {
+            const createDataSourceApiRes = await request.post<typeof params, ICreateDataSourceResult<'online'>>(
+                createDataSourceApiUrl, params
+            );
+            const dataSource = await userStore.fetchDataSource(payload.workspaceName, createDataSourceApiRes.id);
+            if (!dataSource) {
+                throw new Error('Data source not existed');
+            }
+            this.setCloudDataSource(dataSource, payload.organizationName, payload.workspaceName);
+            return { id: createDataSourceApiRes.id };
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[saveDataSourceOnCloud]',
+                content: `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public async saveDatasetOnCloud(payload: ICreateDatasetPayload, file: File) {
+        const { userStore } = getGlobalStore();
+        const createDatasetApiUrl = getMainServiceAddress('/api/ce/dataset');
+        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+        try {
+            const respond = await fetch(createDatasetApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload),
+            });
+            if (!respond.ok) {
+                throw new Error(respond.statusText);
+            }
+            const createDatasetApiRes = await respond.json() as (
+                | { success: false; message: string }
+                | { success: true; data: ICreateDatasetResult }
+            );
+            if (!createDatasetApiRes.success) {
+                throw new Error(createDatasetApiRes.message);
+            }
+            const fileUploadRes = await fetch(createDatasetApiRes.data.uploadUrl, {
+                method: 'PUT',
+                body: file,
+            });
+            if (!fileUploadRes.ok) {
+                throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+            }
+            const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                reportUploadSuccessApiUrl, { storageId: createDatasetApiRes.data.storageId, status: 1 }
+            );
+            const dataset = await userStore.fetchDataset(payload.workspaceName, createDatasetApiRes.data.datasetId);
+            if (!dataset) {
+                throw new Error('Dataset not existed');
+            }
+            this.setCloudDataset(dataset);
+            return reportUploadSuccessApiRes;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[saveDatasetOnCloud]',
+                content: `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public setCloudDataset(dataset: IDatasetMeta) {
+        this.cloudDatasetMeta = dataset;
+        this.currentOrgName = dataset.organization.name;
+        this.currentWspName = dataset.workspace.name;
+    }
+
+    public setCloudDataSource(dataSource: IDataSourceMeta, organizationName: string, workspaceName: string) {
+        this.cloudDataSourceMeta = dataSource;
+        this.currentOrgName = organizationName;
+        this.currentWspName = workspaceName;
     }
 
 }
