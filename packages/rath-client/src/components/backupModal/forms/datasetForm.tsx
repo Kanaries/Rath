@@ -88,7 +88,7 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                         if (!workspaceName) {
                             throw new Error('Workspace is not chosen');
                         }
-                        // TODO: 这里需要支持用户自己选择, 后端也要更改
+                        // TODO: allow user to select these two modes
                         const dataSourceSaveRes = await (() => {
                             if (sourceType === DataSourceType.File) {
                                 return userStore.saveDataSourceOnCloudOfflineMode({
