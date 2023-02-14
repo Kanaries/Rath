@@ -411,13 +411,13 @@ export default class UserStore {
             const writer = new TextWriter();
             const dataset = JSON.parse(await file.getData(writer)) as IDatasetData;
             await dataSourceStore.loadBackupDataStore(dataset.data, dataset.meta);
-            const dataSource = await this.fetchDataSource(workspaceName, dataSourceId);
+            const dataSource = await this.fetchDataSource(workspaceName, dataSourceId, true);
             if (dataSource && organizationName) {
                 this.setCloudDataSource(dataSource, organizationName, workspaceName);
-            }
-            const cloudMeta = await this.fetchDataset(workspaceName, datasetId);
-            if (cloudMeta) {
-                this.setCloudDataset(cloudMeta);
+                const cloudMeta = await this.fetchDataset(workspaceName, datasetId);
+                if (cloudMeta) {
+                    this.setCloudDataset(cloudMeta);
+                }
             }
             return true;
         } catch (error) {
@@ -430,7 +430,7 @@ export default class UserStore {
         }
     }
 
-    public async fetchDataSource(workspaceName: string, dataSourceId: string): Promise<IDataSourceMeta | null> {
+    public async fetchDataSource(workspaceName: string, dataSourceId: string, silent = false): Promise<IDataSourceMeta | null> {
         const dataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
         try {
             const dataSourceDetail = await request.get<{
@@ -439,11 +439,16 @@ export default class UserStore {
             }, IDataSourceMeta>(dataSourceApiUrl, { datasourceId: dataSourceId, workspaceName });
             return dataSourceDetail;
         } catch (error) {
-            notify({
+            const info = {
                 type: 'error',
                 title: '[fetchDataSource]',
                 content: `${error}`,
-            });
+            } as const;
+            if (silent) {
+                console.warn(info);
+            } else {
+                notify(info);
+            }
             return null;
         }
     }
