@@ -85,14 +85,23 @@ const BackupModal: FC = (props) => {
         }
     };
 
-    if (!loggedIn && process.env.NODE_ENV !== 'development') {
+    if (!loggedIn) {
         return (
-            <div className="login">
-                <div className="modal-header">
-                    <h3>{intl.get('login.login')}</h3>
-                </div>
-                <LoginPanel />
-            </div>
+            <Modal
+                isOpen={showBackupModal}
+                onDismiss={() => commonStore.setShowBackupModal(false)}
+                isBlocking={false}
+                containerClassName="modal-container"
+            >
+                <Cont>
+                    <div className="login">
+                        <div className="modal-header">
+                            <h3>{intl.get('login.login')}</h3>
+                        </div>
+                        <LoginPanel />
+                    </div>
+                </Cont>
+            </Modal>
         );
     }
 
