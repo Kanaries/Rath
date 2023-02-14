@@ -42,6 +42,10 @@ function App() {
         });
     }, [userStore]);
 
+    useEffect(() => {
+        return () => commonStore.destroy();
+    }, [commonStore]);
+
     const [showPerformanceWindow, setShowPerformanceWindow] = useState(false);
     useHotKey({
         'Control+Shift+P': () => setShowPerformanceWindow(on => !on),
