@@ -13,7 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { IFieldMeta } from '@kanaries/loa';
 import { ITextPattern } from '../../../lib/textPattern';
+import { IFieldMetaWithExtSuggestions } from '../../../interfaces';
 import { IFieldTextPattern } from './components/tpRegexEditor';
 
 export function uniquePattern(textPatternList: ITextPattern[]): ITextPattern[] {
@@ -103,4 +105,10 @@ export function findFirstExistTextPattern(
         groupKey: 'knowledge',
         index: 0,
     };
+}
+
+export function pickFieldMetaFromFieldMetaWithSuggestions(fms: IFieldMetaWithExtSuggestions | undefined): IFieldMeta | undefined {
+    if (typeof fms === 'undefined')return;
+    const { extSuggestions, ...fieldMeta } = fms;
+    return fieldMeta;
 }

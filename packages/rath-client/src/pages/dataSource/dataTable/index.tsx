@@ -5,14 +5,14 @@ import { IconButton, Label, MessageBar, MessageBarType, Stack } from '@fluentui/
 import intl from 'react-intl-universal';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useGlobalStore } from '../../../store';
-import type { IRow } from '../../../interfaces';
+import type { IFieldMeta, IRow } from '../../../interfaces';
 import { extractSelection, intersectPattern } from '../../../lib/textPattern';
 import HeaderCell from './headerCell';
 import NestPanel from './components/nestPanel';
 import TPRegexEditor, { IFieldTextPattern, IFieldTextSelection } from './components/tpRegexEditor';
 import { IColStateType } from './headerCell/components/statePlaceholder';
 import { CustomBaseTable, MiniButton, MiniPrimaryButton, DATA_TABLE_STYLE_CONFIG, Tag, TextPatternCard } from './styles';
-import { findFirstExistTextPattern, groupTextPattern, initGroupedTextPatternList, uniquePattern } from './utils';
+import { findFirstExistTextPattern, groupTextPattern, initGroupedTextPatternList, pickFieldMetaFromFieldMetaWithSuggestions, uniquePattern } from './utils';
 // import regexgen from 'regexgen';
 
 function provideSelectionRange (selectedRange: Range, currentNode: Node): { len: number, found: boolean } {
@@ -227,7 +227,7 @@ const DataTable: React.FC = (props) => {
     }, []);
 
     const columns: ArtColumn[] = displayList.map((f, i) => {
-        const fm = fields[i] && fields[i].fid === displayList[i].fid ? fields[i] : fields.find((m) => m.fid === f.fid);
+        const fm: IFieldMeta | undefined = pickFieldMetaFromFieldMetaWithSuggestions(fields[i] && fields[i].fid === displayList[i].fid ? fields[i] : fields.find((m) => m.fid === f.fid));
         const suggestions = fields.find((_f) => _f.fid === f.fid)?.extSuggestions ?? [];
         let colType: IColStateType | undefined = undefined;
         const previrewField = fields.find((f) => f.stage === 'preview');
