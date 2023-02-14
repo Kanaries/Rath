@@ -1,13 +1,13 @@
 import intl from 'react-intl-universal';
 import { Label, PrimaryButton, Spinner, Stack, TextField, Toggle } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import dayjs from 'dayjs';
 import produce from 'immer';
 import { useGlobalStore } from '../../store';
 import { ICreateDashboardConfig } from '../../interfaces';
 import { notify } from '../../components/error';
+import useDefaultFilename from '../../hooks/use-default-filename';
 
 const CoverUploader = styled.input``;
 
@@ -22,12 +22,7 @@ const BackupForm: FC<IBackupFormProps> = ({ data, setData, submit }) => {
     const { cloudDataSourceMeta, cloudDatasetMeta, currentOrg, currentWsp, fieldMetas } = dataSourceStore;
     const { loggedIn } = userStore;
 
-    const defaultName = useMemo(() => {
-        return intl.get('storage.default_name', {
-            date: dayjs().format('YYYY-MM-DD HHmm'),
-            mode: intl.get('dataSource.importData.cloud.dashboard'),
-        });
-    }, []);
+    const defaultName = useDefaultFilename(intl.get('dataSource.importData.cloud.dashboard'));
 
     const setName = (name: string) => setData(produce(data, draft => {
         draft.dashboard.name = name;

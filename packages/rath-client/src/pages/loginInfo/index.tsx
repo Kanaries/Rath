@@ -138,13 +138,13 @@ const LoginInfo: FC = () => {
                     setShowUserPanel(true);
                 }}
             >
-                {info ? (
+                {info && (
                     <Persona
                         text={navMode === 'text' ? info.userName : ''}
                         imageUrl={info.avatarURL}
                         size={PersonaSize.size32}
                     />
-                ) : null}
+                )}
                 {!info && navMode === 'text' && <LoginButton text={intl.get('login.clickLogin')} />}
             </div>
         </LoginInfoDiv>
