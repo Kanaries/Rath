@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { Pivot, PivotItem } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
@@ -92,8 +93,8 @@ const TabList: FC<{
                 }}
                 style={{ marginTop: '0.5em' }}
             >
-                <PivotItem itemKey="config" headerText="模型设置" />
-                <PivotItem itemKey="result" headerText="预测结果" />
+                <PivotItem itemKey="config" headerText={intl.get('causal.analyze.model_config')} />
+                <PivotItem itemKey="result" headerText={intl.get('causal.analyze.predict_result')} />
             </Pivot>
             <div className="content">
                 {{

@@ -24,13 +24,13 @@ export enum ExplorationKey {
     PREDICT = 'predict',
 }
 
-export const ExplorationOptions = [
-    // { key: ExplorationKey.CAUSAL_BLAME, text: '归因分析' },
-    { key: ExplorationKey.AUTO_VIS, text: '变量概览' },
-    { key: ExplorationKey.CROSS_FILTER, text: '因果验证' },
-    { key: ExplorationKey.CAUSAL_INSIGHT, text: '可解释探索' },
-    { key: ExplorationKey.GRAPHIC_WALKER, text: '可视化自助分析' },
-    { key: ExplorationKey.PREDICT, text: '模型预测' },
+export const ExplorationKeys = [
+    // ExplorationKey.CAUSAL_BLAME,
+    ExplorationKey.AUTO_VIS,
+    ExplorationKey.CROSS_FILTER,
+    ExplorationKey.CAUSAL_INSIGHT,
+    ExplorationKey.GRAPHIC_WALKER,
+    ExplorationKey.PREDICT,
 ] as const;
 
 class CausalViewStore {

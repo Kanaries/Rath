@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Graph } from '@antv/g6';
@@ -151,7 +152,7 @@ const FDGraph: React.FC<{
                     onClick={handleForceLayout}
                     iconProps={{ iconName: 'Play' }}
                 >
-                    重新布局
+                    {intl.get('causal.actions.relayout')}
                 </DefaultButton>
             </div>
         </Container>

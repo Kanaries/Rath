@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import { Graph } from "@antv/g6";
@@ -199,16 +200,16 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
             {mode === 'edit' && (
                 <div className="tools">
                     <ActionButton onClick={() => causalStore.model.clearAssertions()}>
-                        清空所有
+                        {intl.get('causal.analyze.clear_all')}
                     </ActionButton>
                     <Dropdown
-                        label="连接类型"
+                        label={intl.get('causal.analyze.link_mode')}
                         selectedKey={createEdgeMode}
                         options={[
-                            { key: EdgeAssert.TO_EFFECT, text: '单向一定影响' },
-                            { key: EdgeAssert.TO_NOT_EFFECT, text: '单向一定不影响' },
-                            { key: EdgeAssert.TO_BE_RELEVANT, text: '至少在一个方向存在影响' },
-                            { key: EdgeAssert.TO_BE_NOT_RELEVANT, text: '在任意方向一定不影响' },
+                            { key: EdgeAssert.TO_EFFECT, text: intl.get('causal.analyze.def_to_effect') },
+                            { key: EdgeAssert.TO_NOT_EFFECT, text: intl.get('causal.analyze.def_to_not_effect') },
+                            { key: EdgeAssert.TO_BE_RELEVANT, text: intl.get('causal.analyze.def_to_be_relevant') },
+                            { key: EdgeAssert.TO_BE_NOT_RELEVANT, text: intl.get('causal.analyze.def_to_be_not_relevant') },
                         ]}
                         onChange={(_e, option) => {
                             if (!option) {
@@ -239,11 +240,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                         }}
                     />
                     <Dropdown
-                        label="单击连接行为"
+                        label={intl.get('causal.analyze.click_link_mode')}
                         selectedKey={clickEdgeMode}
                         options={[
-                            { key: 'forbid', text: '禁用此连接' },
-                            { key: 'delete', text: '删除约束' },
+                            { key: 'forbid', text: intl.get('causal.analyze.forbid_link') },
+                            { key: 'delete', text: intl.get('causal.analyze.delete_link') },
                         ]}
                         onChange={(_e, option) => {
                             if (!option) {
@@ -274,11 +275,11 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                         }}
                     />
                     <Dropdown
-                        label="双击节点行为"
+                        label={intl.get('causal.analyze.dbl_click_node_mode')}
                         selectedKey={dblClickNodeMode}
                         options={[
-                            { key: NodeAssert.FORBID_AS_CAUSE, text: '一定不作为输出' },
-                            { key: NodeAssert.FORBID_AS_EFFECT, text: '一定不作为输入' },
+                            { key: NodeAssert.FORBID_AS_CAUSE, text: intl.get('causal.analyze.def_forbid_as_cause') },
+                            { key: NodeAssert.FORBID_AS_EFFECT, text: intl.get('causal.analyze.def_forbid_as_effect') },
                         ]}
                         onChange={(_e, option) => {
                             if (!option) {

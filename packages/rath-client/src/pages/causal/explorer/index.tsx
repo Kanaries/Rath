@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { DefaultButton, Icon, Slider, Stack, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
@@ -133,7 +134,7 @@ const Explorer: FC<ExplorerProps> = ({
                     iconProps={{ iconName: 'Play' }}
                     onClick={forceLayout}
                 >
-                    重新布局
+                    {intl.get('causal.actions.relayout')}
                 </DefaultButton>
             </Stack>
             <MainView>
@@ -158,7 +159,7 @@ const Explorer: FC<ExplorerProps> = ({
             <Floating position="absolute" direction="start" onRenderAside={() => (<Icon iconName="Waffle" />)}>
                 <Tools>
                     <Toggle
-                        label="画布缩放"
+                        label={intl.get('causal.actions.zoom_canvas')}
                         checked={allowZoom}
                         onChange={(_, checked) => setAllowZoom(Boolean(checked))}
                         onText="On"
@@ -167,8 +168,7 @@ const Explorer: FC<ExplorerProps> = ({
                     />
                     {allowEdit && (
                         <Toggle
-                            // label="Modify Constraints"
-                            label="编辑因果关系"
+                            label={intl.get('causal.actions.modify_constraints')}
                             checked={mode === 'edit'}
                             onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
                             onText="On"
@@ -177,8 +177,7 @@ const Explorer: FC<ExplorerProps> = ({
                         />
                     )}
                     <Slider
-                        // label="Display Limit"
-                        label="边显示上限"
+                        label={intl.get('causal.actions.display_limit')}
                         min={1}
                         max={Math.max((causality ?? []).length, limit, 10)}
                         value={limit}
@@ -187,7 +186,7 @@ const Explorer: FC<ExplorerProps> = ({
                     {/* TODO: 现在没有有意义的权重，暂时隐藏 */}
                     {false && (
                         <Slider
-                            label="按权重筛选"
+                            label={intl.get('causal.actions.filter_by_weights')}
                             min={0}
                             max={1}
                             step={0.01}

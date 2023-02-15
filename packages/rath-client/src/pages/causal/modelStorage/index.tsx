@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { ChoiceGroup, DefaultButton, Label, Modal, PrimaryButton, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, Fragment, useState } from 'react';
@@ -17,7 +18,7 @@ const ModelStorage: FC = () => {
     return (
         <Fragment>
             <DefaultButton
-                text="保存因果模型"
+                text={intl.get('causal.actions.save_model')}
                 iconProps={{ iconName: 'Save' }}
                 onClick={() => {
                     causalStore.save().then(ok => {
@@ -38,7 +39,7 @@ const ModelStorage: FC = () => {
                 }}
             />
             <DefaultButton
-                text="导入因果模型"
+                text={intl.get('causal.actions.load_model')}
                 iconProps={{ iconName: 'CloudDownload' }}
                 onClick={() => {
                     setShowModels(true);
@@ -53,9 +54,9 @@ const ModelStorage: FC = () => {
             >
                 <ModalInnerContainer>
                     <Stack tokens={{ childrenGap: 10 }}>
-                        <Label>我的模型</Label>
+                        <Label>{intl.get('causal.analyze.my_models')}</Label>
                         <ChoiceGroup
-                            label="模型列表"
+                            label={intl.get('causal.analyze.model_list')}
                             value={selectedModelKey}
                             options={saveKeys.map((key) => {
                                 return {
@@ -69,7 +70,7 @@ const ModelStorage: FC = () => {
                         />
                         <PrimaryButton
                             disabled={selectedModelKey === undefined}
-                            text="使用"
+                            text={intl.get('common.apply')}
                             onClick={() => {
                                 if (selectedModelKey) {
                                     causalStore.checkout(selectedModelKey);
