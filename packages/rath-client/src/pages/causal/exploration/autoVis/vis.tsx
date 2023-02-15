@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { FC, useMemo } from "react";
 import { IPattern } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
@@ -52,7 +53,7 @@ const Vis: FC = () => {
     return viewContext && viewSpec && (
         <div>
             <header>
-                可视化分析
+                {intl.get('causal.analyze.vis')}
             </header>
             <ErrorBoundary>
                 <ReactVega actions={false} spec={viewSpec} dataSource={visSample} config={commonStore.themeConfig} />

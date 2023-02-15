@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { ActionButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -39,20 +40,11 @@ enum BatchUpdateMode {
     FULLY_REPLACE = 'fully replace',
 }
 
-const dropdownOptions: { key: BatchUpdateMode; text: string }[] = [
-    {
-        key: BatchUpdateMode.OVERWRITE_ONLY,
-        text: '更新并替换',//BatchUpdateMode.OVERWRITE_ONLY,
-    },
-    {
-        key: BatchUpdateMode.FILL_ONLY,
-        text: '补充不替换',//BatchUpdateMode.FILL_ONLY,
-    },
-    {
-        key: BatchUpdateMode.FULLY_REPLACE,
-        text: '全部覆盖',//BatchUpdateMode.FULLY_REPLACE,
-    },
-];
+const batchUpdateModes = [
+    BatchUpdateMode.OVERWRITE_ONLY,
+    BatchUpdateMode.FILL_ONLY,
+    BatchUpdateMode.FULLY_REPLACE,
+] as const;
 
 const FDBatch: FC = () => {
     const { causalStore } = useGlobalStore();
@@ -62,6 +54,13 @@ const FDBatch: FC = () => {
     const [preview, setPreview] = useState<readonly IFunctionalDep[] | null>(null);
     const isPending = displayPreview && preview === null;
     const [mode, setMode] = useState(BatchUpdateMode.OVERWRITE_ONLY);
+
+    const dropdownOptions = useMemo<{ key: BatchUpdateMode; text: string }[]>(() => {
+        return batchUpdateModes.map(key => ({
+            key,
+            text: intl.get(`causal.analyze.${key}`),
+        }));
+    }, []);
 
     const updatePreview = useMemo<(fdArr: IFunctionalDep[] | ((prev: readonly IFunctionalDep[] | null) => readonly IFunctionalDep[])) => void>(() => {
         if (displayPreview) {
@@ -158,19 +157,19 @@ const FDBatch: FC = () => {
 
     return (
         <>
-            <h3>快捷操作</h3>
+            <h3>{intl.get('causal.actions.one_click')}</h3>
             <Stack tokens={{ childrenGap: 10 }} horizontal>
                 <ActionButton iconProps={{ iconName: 'Delete' }} onClick={handleClear}>
-                    全部删除
+                    {intl.get('causal.analyze.clear_all')}
                 </ActionButton>
                 <ActionButton iconProps={{ iconName: 'EngineeringGroup' || 'BranchSearch' }} onClick={generateFDFromExtInfo}>
-                    使用扩展字段计算图
+                    {intl.get('causal.actions.use_ext_diagram')}
                 </ActionButton>
                 {/* <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
-                    导入影响关系
+                    {intl.get('causal.actions.import_effect')}
                 </ActionButton> */}
                 <ActionButton iconProps={{ iconName: 'HintText' }} onClick={generateFDFromAutoDetection}>
-                    自动识别
+                    {intl.get('causal.actions.auto_detect')}
                 </ActionButton>
             </Stack>
             {displayPreview && (
@@ -181,7 +180,7 @@ const FDBatch: FC = () => {
                                 <Spinner label="computing" />
                             ) : (
                                 <FDEditor
-                                    title="预览"
+                                    title={intl.get('causal.actions.preview')}
                                     functionalDependencies={submittable}
                                     setFunctionalDependencies={updatePreview}
                                 />
@@ -189,7 +188,7 @@ const FDBatch: FC = () => {
                         </div>
                         <Stack tokens={{ childrenGap: 20 }} horizontal style={{ justifyContent: 'center' }}>
                             <DefaultButton
-                                text={dropdownOptions.find(opt => opt.key === mode)?.text ?? '确定'}
+                                text={dropdownOptions.find(opt => opt.key === mode)?.text ?? intl.get('common.apply')}
                                 onClick={handleSubmit}
                                 primary
                                 split
@@ -203,7 +202,7 @@ const FDBatch: FC = () => {
                                 }}
                             />
                             <DefaultButton
-                                text="取消"
+                                text={intl.get('common.cancel')}
                                 onClick={handleCancel}
                             />
                         </Stack>

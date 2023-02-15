@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { DetailsList, IColumn, SelectionMode, Stack } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useMemo, useRef } from "react";
@@ -141,7 +142,7 @@ const CausalBlame: FC = () => {
     return selectedField ? (
         <Stack tokens={{ childrenGap: 20 }}>
             <Section ref={metaViewContainerRef}>
-                <header>单变量分析</header>
+                <header>{intl.get('causal.analyze.single_dim')}</header>
                 <FullDistViz
                     dataSource={selectedField.distribution}
                     x="memberName"
@@ -155,7 +156,7 @@ const CausalBlame: FC = () => {
                 />
             </Section>
             <Section>
-                <header>关联因素</header>
+                <header>{intl.get('causal.analyze.corr_atoms')}</header>
                 <DetailsList
                     items={neighbors}
                     columns={columns}

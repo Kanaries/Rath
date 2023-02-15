@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { DefaultButton, Icon, IconButton } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { Fragment, useEffect, useMemo, useState } from "react";
@@ -86,23 +87,11 @@ export type CausalStepOption = {
     help: string;
 };
 
-export const CausalSteps: readonly CausalStepOption[] = [
-    {
-        key: CausalStep.DATASET_CONFIG,
-        title: '数据集配置',
-        help: '从数据中有针对性地选出合适的数据子集以及分析目标关注的因素集合。',
-    },
-    {
-        key: CausalStep.FD_CONFIG,
-        title: '编辑函数依赖',
-        help: '基于特定领域或背景知识定义绝对的函数依赖，帮助算法回避不合理的探索空间，更好进行决策。',
-    },
-    {
-        key: CausalStep.CAUSAL_MODEL,
-        title: '因果模型',
-        help: '选择算法进行因果发现，完善因果图。在已确认的因果图上结合可视化探索进行结论验证和进一步分析。（需要运行因果发现完成因果模型）',
-    },
-];
+const allCausalSteps = [
+    CausalStep.DATASET_CONFIG,
+    CausalStep.FD_CONFIG,
+    CausalStep.CAUSAL_MODEL,
+] as const;
 
 export const CausalStepPager = observer(function CausalStepPager () {
     const [stepKey, setStepKey] = useState<CausalStep>(CausalStep.DATASET_CONFIG);
@@ -112,8 +101,16 @@ export const CausalStepPager = observer(function CausalStepPager () {
         setShowHelp(stepKey);
     }, [stepKey]);
 
-    const curStep = useMemo(() => CausalSteps.find(s => s.key === stepKey)!, [stepKey]);
-    const hintStep = useMemo(() => CausalSteps.find(s => s.key === showHelp)!, [showHelp]);
+    const CausalSteps = useMemo(() => {
+        return allCausalSteps.map<CausalStepOption>(step => ({
+            key: step,
+            title: intl.get(`causal.analyze.${step}.title`),
+            help: intl.get(`causal.analyze.${step}.help`),
+        }));
+    }, []);
+
+    const curStep = useMemo(() => CausalSteps.find(s => s.key === stepKey)!, [CausalSteps, stepKey]);
+    const hintStep = useMemo(() => CausalSteps.find(s => s.key === showHelp)!, [CausalSteps, showHelp]);
 
     const [skipFDEdit, setSkipFDEdit] = useState(true);
 
@@ -155,7 +152,7 @@ export const CausalStepPager = observer(function CausalStepPager () {
         <Container>
             <StepHeader>
                 <DefaultButton disabled={!goPreviousStep} onClick={goPreviousStep} iconProps={{ iconName: 'Previous' }}>
-                    上一步
+                    {intl.get('causal.actions.prev_step')}
                 </DefaultButton>
                 <StepList>
                     {CausalSteps.map((step, i, arr) => {
@@ -194,7 +191,7 @@ export const CausalStepPager = observer(function CausalStepPager () {
                     })}
                 </StepList>
                 <DefaultButton primary disabled={!goNextStep} onClick={goNextStep} iconProps={{ iconName: 'Next' }}>
-                    继续
+                    {intl.get('causal.actions.continue')}
                 </DefaultButton>
             </StepHeader>
             <StepHint isCurrentStep={hintStep.key === stepKey}>

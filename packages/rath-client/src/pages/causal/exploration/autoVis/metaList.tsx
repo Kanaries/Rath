@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { DetailsList, IColumn, SelectionMode } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useMemo } from "react";
@@ -23,15 +24,15 @@ const MetaList: FC = () => {
             isResizable: false,
             onRender(key: typeof metaKeys[number]) {
                 return {
-                    dist: '分布',
-                    unique: '唯一值数量',
-                    mean: '均值',
-                    min: '最小值',
-                    qt_25: '25% 分位数',
-                    qt_50: '50% 分位数',
-                    qt_75: '75% 分位数',
-                    max: '最大值',
-                    stdev: '标准差',
+                    dist: intl.get('causal.dataset.dist'),
+                    unique: intl.get('causal.dataset.distinct_count'),
+                    mean: intl.get('common.stat.mean'),
+                    min: intl.get('common.stat.min'),
+                    qt_25: intl.get('common.stat.qt_25'),
+                    qt_50: intl.get('common.stat.qt_50'),
+                    qt_75: intl.get('common.stat.qt_75'),
+                    max: intl.get('common.stat.mean'),
+                    stdev: intl.get('common.stat.stdev'),
                 }[key];
             },
         }).concat(selectedFieldGroup?.map<IColumn>(f => ({
@@ -76,7 +77,7 @@ const MetaList: FC = () => {
     return selectedFieldGroup?.length ? (
         <div>
             <header>
-                统计信息
+                {intl.get('causal.dataset.stat')}
             </header>
             <DetailsList
                 items={metaKeys.slice(0)}

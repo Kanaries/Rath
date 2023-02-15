@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { DefaultButton, Icon, Spinner } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
@@ -31,8 +32,8 @@ const Container = styled.div`
 `;
 
 const ModeOptions = [
-    { key: 'classification', text: '分类' },
-    { key: 'regression', text: '回归' },
+    { key: 'classification', text: 'Classification' },
+    { key: 'regression', text: 'Regression' },
 ] as const;
 
 const TRAIN_RATE = 0.2;
@@ -158,7 +159,7 @@ const PredictPanel = forwardRef<{
                     },
                 }}
             >
-                {`${ModeOptions.find(m => m.key === mode)?.text}预测`}
+                {`${ModeOptions.find(m => m.key === mode)?.text}${intl.get('causal.analyze.prediction')}`}
             </DefaultButton>
             <TabList algo={algo} setAlgo={setAlgo} tab={tab} setTab={setTab} running={running} predictInput={predictInput} setPredictInput={setPredictInput} />
         </Container>

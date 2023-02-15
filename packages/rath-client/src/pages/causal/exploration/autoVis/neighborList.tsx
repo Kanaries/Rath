@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { DetailsList, IColumn, SelectionMode } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useMemo } from "react";
@@ -43,7 +44,7 @@ const NeighborList: FC = () => {
         return [
             {
                 key: 'cause',
-                name: '因',
+                name: intl.get('causal.analyze.cause'),
                 minWidth: 100,
                 maxWidth: 100,
                 isResizable: false,
@@ -53,7 +54,7 @@ const NeighborList: FC = () => {
             },
             {
                 key: 'corr',
-                name: '相关系数',
+                name: intl.get('causal.analyze.corr'),
                 minWidth: 120,
                 maxWidth: 120,
                 isResizable: false,
@@ -73,7 +74,7 @@ const NeighborList: FC = () => {
             },
             {
                 key: 'effect',
-                name: '果',
+                name: intl.get('causal.analyze.effect'),
                 minWidth: 100,
                 maxWidth: 100,
                 isResizable: false,
@@ -87,7 +88,7 @@ const NeighborList: FC = () => {
     return selectedFieldGroup?.length ? (
         <div>
             <header>
-                关联因素
+                {intl.get('causal.analyze.corr_atoms')}
             </header>
             <DetailsList
                 items={neighbors}
