@@ -394,6 +394,7 @@
         "default_name": "Rath {mode} {date}",
         "desc": "{mode}描述",
         "data_source_name": "数据源名称",
+        "upload_data_source": "绑定数据源",
         "cover": "封面",
         "bind_dataset": "绑定到数据集",
         "field_desc": "字段描述",

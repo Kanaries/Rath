@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { observer } from "mobx-react-lite";
 import { ActionButton, TooltipHost, TooltipOverflowMode } from '@fluentui/react';
 import { useGlobalStore } from '../../../store';
+import WorkspaceRole from '../../loginInfo/workspaceRole';
 import CloudSpaceList, { CloudItemType } from './spaceList';
 
 
@@ -54,8 +55,12 @@ const KanariesCloudSpace = observer<{ setLoadingAnimation: (on: boolean) => void
 
     const [typeFilter, setTypeFilter] = useState<CloudItemType | 'total'>('total');
 
-    if (!organization) {
-        return null;
+    if (!organization || !workspace) {
+        return (
+            <Container>
+                <WorkspaceRole />
+            </Container>
+        );
     }
 
     const reloadList = () => {

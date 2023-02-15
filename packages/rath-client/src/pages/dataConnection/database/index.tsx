@@ -2,12 +2,13 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { IDropdownOption, Stack, registerIcons, PrimaryButton } from '@fluentui/react';
-import type { IMuteFieldBase, IRow } from '../../../interfaces';
+import { DataSourceType, IMuteFieldBase, IRow } from '../../../interfaces';
 import { logDataImport } from '../../../loggers/dataImport';
 import prefetch from '../../../utils/prefetch';
 import { notify } from '../../../components/error';
 import { DataSourceTag } from '../../../utils/storage';
 import { rawData2DataWithBaseMetas } from '../../dataSource/utils';
+import { useGlobalStore } from '../../../store';
 import Progress from './progress';
 import datasetOptions from './config';
 import ConnectForm, { ConnectFormReadonly } from './connect-form';
@@ -72,6 +73,7 @@ export const inputWidth = '180px';
 const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLoadingAnimation }) => {
     const { progress, actions } = useDatabaseReducer(setLoadingAnimation);
     const [loading, setLoading] = useState<boolean>(false);
+    const { userStore } = useGlobalStore();
 
     const { connectorReady, databaseType, connectUri, sourceId, database, schema, table, queryString, preview } = progress;
 
@@ -181,6 +183,18 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 fields,
                 dataSource: dataSource.slice(0, 10),
                 size: dataSource.length,
+            });
+            userStore.saveDataSourceOnCloudOnlineMode({
+                name,
+                datasourceType: DataSourceType.Database,
+                linkInfo: {
+                    databaseType,
+                    connectUri,
+                    database,
+                    schema,
+                    table,
+                    queryString,
+                },
             });
             onDataLoaded(fields, dataSource, name, DataSourceTag.DATABASE);
 

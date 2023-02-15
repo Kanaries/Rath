@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { TextWriter, ZipReader } from "@zip.js/zip.js";
 import { DataSourceType, IAccessPageKeys, ICreateDashboardConfig, ICreateDatasetPayload, ICreateDatasetResult, ICreateDataSourcePayload, ICreateDataSourceResult, IDashboardDocumentInfo, IDatasetData, IDatasetMeta, IDataSourceMeta } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
@@ -71,12 +71,13 @@ export default class UserStore {
     public cloudDataSourceMeta: IDataSourceMeta | null = null;
     /** Dataset storage meta on cloud. */
     public cloudDatasetMeta: IDatasetMeta | null = null;
-    /** Auto-saved dataset storage meta on cloud. */
-    public cloudAutoSaveDatasetMeta: IDatasetMeta | null = null;
     /** Organization name */
     public currentOrgName: string | null = null;
     /** Workspace name */
     public currentWspName: string | null = null;
+
+    public uploadDataSource: (() => void) | null = null;
+    public uploadingDataSource = false;
 
     public get organization(): IOrganization | null {
         return this.info?.organizations?.find(org => org.name === this.currentOrgName) ?? null;
@@ -88,8 +89,11 @@ export default class UserStore {
     constructor() {
         this.init()
         makeAutoObservable(this, {
+            uploadDataSource: observable.ref,
             // @ts-expect-error non-public fields
             autoSaveTimer: false,
+            waitList: false,
+            disposers: false,
         });
     }
     public init() {
@@ -685,18 +689,42 @@ export default class UserStore {
     }
 
     public async saveDataSourceOnCloudOfflineMode(
-        payload: ICreateDataSourcePayload<'offline'> & { organizationName: string },
+        params: ICreateDataSourcePayload<'offline'>,
         file: File,
     ): Promise<{ id: string; downloadUrl: string } | null> {
-        const { organizationName, ...params } = payload;
-        const { userStore } = getGlobalStore();
-        const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
-        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
-        try {
-            const createDataSourceApiRes = await request.post<typeof params, ICreateDataSourceResult<'offline'>>(
-                createDataSourceApiUrl, params
-            );
-            if (params.datasourceType === DataSourceType.File) {
+        const send = async () => {
+            if (!this.workspace || !this.organization || this.uploadingDataSource) {
+                return null;
+            }
+            runInAction(() => {
+                this.uploadingDataSource = true;
+            });
+            const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+            const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+            try {
+                const createDataSourceApiRes = await request.post<typeof params & { workspaceName: string }, ICreateDataSourceResult<'offline'>>(
+                    createDataSourceApiUrl, {
+                        ...params,
+                        workspaceName: this.workspace.name,
+                    }
+                );
+                if (params.datasourceType === DataSourceType.File) {
+                    const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
+                        method: 'PUT',
+                        body: file,
+                    });
+                    if (!fileUploadRes.ok) {
+                        throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+                    }
+                    await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                        reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
+                    );
+                }
+                const dataSource = await this.fetchDataSource(this.workspace.name, createDataSourceApiRes.id);
+                if (!dataSource) {
+                    throw new Error('Data source not existed');
+                }
+                this.setCloudDataSource(dataSource, this.organization.name, this.workspace.name);
                 const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
                     method: 'PUT',
                     body: file,
@@ -704,63 +732,95 @@ export default class UserStore {
                 if (!fileUploadRes.ok) {
                     throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
                 }
-                await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
                     reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
                 );
+                runInAction(() => {
+                    this.uploadingDataSource = false;
+                });
+                return {
+                    id: createDataSourceApiRes.id,
+                    downloadUrl: reportUploadSuccessApiRes.downloadUrl,
+                };
+            } catch (error) {
+                notify({
+                    type: 'error',
+                    title: '[saveDataSourceOnCloud]',
+                    content: `${error}`,
+                });
+                runInAction(() => {
+                    this.uploadingDataSource = false;
+                });
+                return null;
             }
-            const dataSource = await userStore.fetchDataSource(payload.workspaceName, createDataSourceApiRes.id);
-            if (!dataSource) {
-                throw new Error('Data source not existed');
-            }
-            this.setCloudDataSource(dataSource, payload.organizationName, payload.workspaceName);
-            const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
-                method: 'PUT',
-                body: file,
-            });
-            if (!fileUploadRes.ok) {
-                throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
-            }
-            const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
-                reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
-            );
-            return {
-                id: createDataSourceApiRes.id,
-                downloadUrl: reportUploadSuccessApiRes.downloadUrl,
-            };
-        } catch (error) {
-            notify({
-                type: 'error',
-                title: '[saveDataSourceOnCloud]',
-                content: `${error}`,
-            });
-            return null;
+        };
+        if (this.organization && this.workspace && !this.uploadingDataSource) {
+            return send();
         }
+        this.uploadDataSource = () => {
+            if (this.organization && this.workspace && !this.uploadingDataSource) {
+                send().then(res => {
+                    if (res) {
+                        this.uploadDataSource = null;
+                    }
+                });
+            }
+        };
+        return null;
     }
 
     public async saveDataSourceOnCloudOnlineMode(
-        payload: ICreateDataSourcePayload<'online'> & { organizationName: string },
+        params: ICreateDataSourcePayload<'online'>,
     ): Promise<{ id: string } | null> {
-        const { organizationName, ...params } = payload;
-        const { userStore } = getGlobalStore();
-        const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
-        try {
-            const createDataSourceApiRes = await request.post<typeof params, ICreateDataSourceResult<'online'>>(
-                createDataSourceApiUrl, params
-            );
-            const dataSource = await userStore.fetchDataSource(payload.workspaceName, createDataSourceApiRes.id);
-            if (!dataSource) {
-                throw new Error('Data source not existed');
+        const send = async () => {
+            if (!this.workspace || !this.organization || this.uploadingDataSource) {
+                return null;
             }
-            this.setCloudDataSource(dataSource, payload.organizationName, payload.workspaceName);
-            return { id: createDataSourceApiRes.id };
-        } catch (error) {
-            notify({
-                type: 'error',
-                title: '[saveDataSourceOnCloud]',
-                content: `${error}`,
+            runInAction(() => {
+                this.uploadingDataSource = true;
             });
-            return null;
+            const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+            try {
+                const createDataSourceApiRes = await request.post<typeof params & { workspaceName: string }, ICreateDataSourceResult<'online'>>(
+                    createDataSourceApiUrl, {
+                        ...params,
+                        workspaceName: this.workspace.name,
+                    }
+                );
+                const dataSource = await this.fetchDataSource(this.workspace.name, createDataSourceApiRes.id);
+                if (!dataSource) {
+                    throw new Error('Data source not existed');
+                }
+                this.setCloudDataSource(dataSource, this.organization.name, this.workspace.name);
+                runInAction(() => {
+                    this.uploadingDataSource = false;
+                });
+                return { id: createDataSourceApiRes.id };
+            } catch (error) {
+                notify({
+                    type: 'error',
+                    title: '[saveDataSourceOnCloud]',
+                    content: `${error}`,
+                });
+                runInAction(() => {
+                    this.uploadingDataSource = false;
+                });
+                return null;
+            }
+        };
+        if (this.organization && this.workspace && !this.uploadingDataSource) {
+            return send();
         }
+        this.uploadDataSource = () => {
+            if (this.organization && this.workspace && !this.uploadingDataSource) {
+                send().then(res => {
+                    if (res) {
+                        this.uploadDataSource = null;
+                    }
+                });
+            }
+        };
+        return null;
     }
 
     public async saveDatasetOnCloud(payload: ICreateDatasetPayload, file: File) {
@@ -818,10 +878,14 @@ export default class UserStore {
         this.currentWspName = dataset.workspace.name;
     }
 
-    public setCloudDataSource(dataSource: IDataSourceMeta, organizationName: string, workspaceName: string) {
+    public setCloudDataSource(dataSource: IDataSourceMeta, organizationName?: string, workspaceName?: string) {
         this.cloudDataSourceMeta = dataSource;
-        this.currentOrgName = organizationName;
-        this.currentWspName = workspaceName;
+        if (organizationName) {
+            this.currentOrgName = organizationName;
+        }
+        if (workspaceName) {
+            this.currentWspName = workspaceName;
+        }
     }
 
     public setOrgName(orgName: string | null): boolean {

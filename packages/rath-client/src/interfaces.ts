@@ -285,8 +285,6 @@ export enum DataSourceType {
 
 export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
     name: string;
-    // organizationName: string;
-    workspaceName: string;
     datasourceType: DataSourceType;
 } & (
     Mode extends 'online' ? {

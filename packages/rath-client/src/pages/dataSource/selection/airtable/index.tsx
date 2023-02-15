@@ -2,9 +2,10 @@ import { DefaultButton, PrimaryButton, Stack, TextField } from '@fluentui/react'
 import React, { useCallback, useState } from 'react';
 import intl from 'react-intl-universal'
 import { logDataImport } from '../../../../loggers/dataImport';
-import { IMuteFieldBase, IRow } from '../../../../interfaces';
+import { DataSourceType, IMuteFieldBase, IRow } from '../../../../interfaces';
 import { rawData2DataWithBaseMetas } from '../../utils';
 import { DataSourceTag, IDBMeta } from '../../../../utils/storage';
+import { useGlobalStore } from '../../../../store';
 import { fetchAllRecordsFromAirTable } from './utils';
 
 
@@ -15,6 +16,7 @@ interface AirTableSourceProps {
     onDataLoaded: (fields: IMuteFieldBase[], dataSource: IRow[], name: string, tag: DataSourceTag, withHistory?: IDBMeta | undefined) => void;
 }
 const AirTableSource: React.FC<AirTableSourceProps> = (props) => {
+    const { userStore } = useGlobalStore();
     const { onClose, onDataLoaded, onLoadingFailed, onStartLoading } = props;
     const [endPoint, setEndPoint] = useState<string>('');
     const [apiKey, setAPIKey] = useState<string>('');
@@ -24,13 +26,14 @@ const AirTableSource: React.FC<AirTableSourceProps> = (props) => {
 
     const fetchData = useCallback(() => {
         onStartLoading();
-        fetchAllRecordsFromAirTable({
+        const linkInfo = {
             endPoint,
             apiKey,
             tableID,
             tableName,
             viewName
-        })
+        };
+        fetchAllRecordsFromAirTable(linkInfo)
             .then((data) => rawData2DataWithBaseMetas(data))
             .then((ds) => {
                 const name = `airtable-${tableName}-${viewName}`;
@@ -41,10 +44,15 @@ const AirTableSource: React.FC<AirTableSourceProps> = (props) => {
                     dataSource: ds.dataSource.slice(0, 10),
                     size: ds.dataSource.length
                 });
+                userStore.saveDataSourceOnCloudOnlineMode({
+                    name,
+                    datasourceType: DataSourceType.AirTable,
+                    linkInfo,
+                });
                 onClose();
             })
             .catch(onLoadingFailed);
-    }, [onDataLoaded, onClose, onLoadingFailed, onStartLoading, endPoint, apiKey, tableID, tableName, viewName]);
+    }, [onDataLoaded, onClose, onLoadingFailed, onStartLoading, endPoint, apiKey, tableID, tableName, viewName, userStore]);
     return (
         <div>
             <Stack tokens={{ childrenGap: '4px' }} style={{ maxWidth: '300px' }}>

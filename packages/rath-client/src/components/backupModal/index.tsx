@@ -31,7 +31,7 @@ const Cont = styled.div`
 const BackupModal: FC = (props) => {
     const { commonStore, userStore } = useGlobalStore();
     const { showBackupModal } = commonStore;
-    const { loggedIn } = userStore;
+    const { loggedIn, uploadDataSource, cloudDataSourceMeta } = userStore;
     const [mode, setMode] = useState(CloudItemType.DATASET);
     
     const [busy, setBusy] = useState(false);
@@ -94,6 +94,8 @@ const BackupModal: FC = (props) => {
         setCanBackup: setCanBackup,
     };
 
+    const allowToUploadDataset = Boolean(uploadDataSource || cloudDataSourceMeta);
+
     return (
         <Modal
             isOpen={showBackupModal}
@@ -106,9 +108,11 @@ const BackupModal: FC = (props) => {
                     <h3>{intl.get('storage.upload')}</h3>
                 </div>
                 <Pivot selectedKey={mode} onLinkClick={item => item?.props.itemKey && setMode(item.props.itemKey as CloudItemType)} styles={{ root: { marginBlock: '1em' } }}>
-                    <PivotItem itemKey={CloudItemType.DATASET} headerText={intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`)}>
-                        <DatasetForm ref={datasetFormRef} {...commonProps} />
-                    </PivotItem>
+                    {allowToUploadDataset && (
+                        <PivotItem itemKey={CloudItemType.DATASET} headerText={intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`)}>
+                            <DatasetForm ref={datasetFormRef} {...commonProps} />
+                        </PivotItem>
+                    )}
                     <PivotItem itemKey={CloudItemType.NOTEBOOK} headerText={intl.get(`dataSource.importData.cloud.${CloudItemType.NOTEBOOK}`)}>
                         <NotebookForm ref={notebookFormRef} {...commonProps} />
                     </PivotItem>

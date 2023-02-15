@@ -1,5 +1,5 @@
 import intl from 'react-intl-universal';
-import { Stack, TextField, Toggle } from '@fluentui/react';
+import { PrimaryButton, Spinner, SpinnerSize, Stack, TextField, Toggle } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
@@ -9,7 +9,7 @@ import { CloudItemType } from '../../../pages/dataSource/selection/cloud/spaceLi
 import { notify } from '../../error';
 import useDefaultFilename from '../../../hooks/use-default-filename';
 import WorkspaceRole from '../../../pages/loginInfo/workspaceRole';
-import { CloudAccessModifier, DataSourceType } from '../../../interfaces';
+import { CloudAccessModifier } from '../../../interfaces';
 import { writeDatasetFile } from '../utils';
 import type { IBackupFormHandler, IBackupFormProps } from '.';
 
@@ -19,21 +19,11 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
     
     const { commonStore, dataSourceStore, userStore } = useGlobalStore();
     const { datasetId } = dataSourceStore;
-    const { cloudDataSourceMeta, cloudDatasetMeta, currentOrgName, currentWspName } = userStore;
+    const { cloudDataSourceMeta, cloudDatasetMeta, currentOrgName, currentWspName, uploadDataSource, uploadingDataSource } = userStore;
     const { id: dataSourceId } = cloudDataSourceMeta ?? {};
     const { id: cloudDatasetId, workspace } = cloudDatasetMeta ?? {};
     
-    const [dataSourceName, setDataSourceName] = useState<string | null>(null);
-    const [modifiableDataSourceName, setModifiableDataSourceName] = useState('');
-    const defaultDataSourceName = `${datasetId || 'unnamed'}`;
-    useEffect(() => {
-        if (cloudDataSourceMeta === null) {
-            setDataSourceName(null);
-        } else {
-            setDataSourceName(cloudDataSourceMeta.name);
-        }
-    }, [cloudDataSourceMeta, userStore]);
-    const dsName = dataSourceName || modifiableDataSourceName || datasetId;
+    const dsName = cloudDataSourceMeta?.name || datasetId;
 
     const [name, setName] = useState('');
     const emptyDefaultName = useDefaultFilename(intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`));
@@ -51,8 +41,11 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
     const [accessMode, setAccessMode] = useState(CloudAccessModifier.PROTECTED);
 
     const canBackup = useMemo(() => {
+        if (!cloudDataSourceMeta) {
+            return false;
+        }
         if (canOverwrite && datasetOverwrite) {
-            if (!cloudDataSourceMeta || !cloudDatasetMeta) {
+            if (!cloudDatasetMeta) {
                 return false;
             }
         } else {
@@ -89,21 +82,10 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                         if (!currentWspName) {
                             throw new Error('Workspace is not chosen');
                         }
-                        // TODO: allow user to select these two modes
-                        const dataSourceSaveRes = await userStore.saveDataSourceOnCloudOfflineMode({
-                            name: modifiableDataSourceName || defaultDataSourceName,
-                            organizationName: currentOrgName,
-                            workspaceName: currentWspName,
-                            datasourceType: DataSourceType.File,
-                            fileInfo: {
-                                fileName: file.name,
-                                fileSize: file.size,
-                            },
-                        }, file);
-                        if (!dataSourceSaveRes) {
-                            throw new Error('Failed to upload data source');
+                        if (!cloudDataSourceMeta) {
+                            throw new Error('Data source is not successfully uploaded.')
                         }
-                        const dataSource = await userStore.fetchDataSource(currentWspName, dataSourceSaveRes.id);
+                        const dataSource = await userStore.fetchDataSource(currentWspName, cloudDataSourceMeta.id);
                         if (!dataSource) {
                             throw new Error('Failed to get data source');
                         }
@@ -176,15 +158,27 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                 )}
                 {(!canOverwrite || !datasetOverwrite) && (
                     <>
-                        <WorkspaceRole />
-                        <TextField
-                            label={intl.get('storage.data_source_name')}
-                            value={dataSourceName ?? modifiableDataSourceName}
-                            readOnly={dataSourceName !== null}
-                            placeholder={defaultDataSourceName}
-                            onChange={(_, val) => setModifiableDataSourceName(val ?? '')}
-                            required
-                        />
+                        {!currentWspName && <WorkspaceRole />}
+                        {cloudDataSourceMeta && (
+                            <TextField
+                                label={intl.get('storage.data_source_name')}
+                                value={cloudDataSourceMeta.name}
+                                required
+                                readOnly
+                            />
+                        )}
+                        {!cloudDataSourceMeta && (
+                            <div>
+                                <PrimaryButton
+                                    disabled={!uploadDataSource || !currentWspName || uploadingDataSource}
+                                    onClick={() => uploadDataSource?.()}
+                                    style={{ marginTop: '1em' }}
+                                >
+                                    {uploadingDataSource && <Spinner size={SpinnerSize.small} />}
+                                    {uploadingDataSource || intl.get('storage.upload_data_source')}
+                                </PrimaryButton>
+                            </div>
+                        )}
                         <TextField
                             label={intl.get('storage.name', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`) })}
                             value={name}

@@ -13,11 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DefaultButton, Dropdown, IDropdownOption, PrimaryButton, ProgressIndicator, Stack, TextField } from '@fluentui/react';
 import ConnectionStatus from '../../components/connectionStatus';
-import { IMuteFieldBase, IRow } from '../../interfaces';
+import { DataSourceType, IMuteFieldBase, IRow } from '../../interfaces';
 import { useGlobalStore } from '../../store';
 import { logDataImport } from '../../loggers/dataImport';
 import { notify } from '../../components/error';
@@ -38,7 +38,7 @@ interface OLAPDataProps {
 
 const OLAPData: React.FC<OLAPDataProps> = (props) => {
     const { onDataLoaded, onClose } = props;
-    const { clickHouseStore } = useGlobalStore();
+    const { clickHouseStore, userStore } = useGlobalStore();
 
     const { databases, viewNames, currentDB, currentView, loadingDBs, loadingViews, connectStatus, config, proxyConfig } = clickHouseStore;
     const { protocol, user, password, host, port } = config;
@@ -54,6 +54,9 @@ const OLAPData: React.FC<OLAPDataProps> = (props) => {
         text: v,
     }));
 
+    const linkInfoRef = useRef({ config, proxyConfig });
+    linkInfoRef.current = { config, proxyConfig };
+
     const loadData = useCallback(() => {
         clickHouseStore
             .loadSampleData()
@@ -63,6 +66,11 @@ const OLAPData: React.FC<OLAPDataProps> = (props) => {
                     fields: fieldMetas,
                     dataSource: data.slice(0, 10),
                     size: data.length,
+                });
+                userStore.saveDataSourceOnCloudOnlineMode({
+                    name: '',
+                    datasourceType: DataSourceType.Restful,
+                    linkInfo: linkInfoRef.current,
                 });
                 onDataLoaded(fieldMetas, data, undefined, DataSourceTag.OLAP);
                 onClose();
@@ -74,7 +82,7 @@ const OLAPData: React.FC<OLAPDataProps> = (props) => {
                     content: `${err}\n Fail to load sample data from clickhouse.`,
                 });
             });
-    }, [clickHouseStore, onDataLoaded, onClose]);
+    }, [clickHouseStore, onDataLoaded, onClose, userStore]);
 
     useEffect(() => {
         clickHouseStore

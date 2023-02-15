@@ -396,6 +396,7 @@
         "default_name": "Rath {mode} {date}",
         "desc": "{mode} Description",
         "data_source_name": "Data Source Name",
+        "upload_data_source": "Bind Data Source",
         "cover": "Cover",
         "bind_dataset": "Bind with Dataset",
         "field_desc": "Field Description",

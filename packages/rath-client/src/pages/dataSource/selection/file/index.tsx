@@ -6,8 +6,9 @@ import * as xlsx from 'xlsx';
 import intl from "react-intl-universal";
 import { isExcelFile, loadDataFile, loadExcelFile, loadExcelRaw, parseExcelFile, readRaw, SampleKey } from "../../utils";
 import { dataBackup, logDataImport } from "../../../../loggers/dataImport";
-import type { IMuteFieldBase, IRow } from "../../../../interfaces";
+import { DataSourceType, IMuteFieldBase, IRow } from "../../../../interfaces";
 import { DataSourceTag, IDBMeta } from "../../../../utils/storage";
+import { useGlobalStore } from "../../../../store";
 import HistoryList from "../history/history-list";
 import FileUpload from "./file-upload";
 import FileHelper, { Charset } from "./file-helper";
@@ -62,6 +63,7 @@ const FileData: FC<FileDataProps> = (props) => {
     const [charset, setCharset] = useState<Charset>('utf-8');
     const [separator, setSeparator] = useState(',');
     const [appliedSeparator, setAppliedSeparator] = useState(separator);
+    const { userStore } = useGlobalStore();
 
     useEffect(() => {
         setPreviewOfRaw(null);
@@ -209,6 +211,15 @@ const FileData: FC<FileDataProps> = (props) => {
             return;
         }
         const { fields, dataSource } = previewOfFile;
+        userStore.saveDataSourceOnCloudOfflineMode({
+            name: preview.name,
+            datasourceType: DataSourceType.File,
+            fileInfo: {
+                fileName: preview.name,
+                fileSize: preview.size,
+                fileType: preview.type,
+            },
+        }, preview);
         logDataImport({
             dataType: 'File',
             fields,
@@ -218,7 +229,7 @@ const FileData: FC<FileDataProps> = (props) => {
         dataBackup(preview);
         onDataLoaded(fields, dataSource, preview.name, DataSourceTag.FILE);
         onClose();
-    }, [onClose, onDataLoaded, preview, previewOfFile]);
+    }, [onClose, onDataLoaded, preview, previewOfFile, userStore]);
 
     const [showMoreConfig, setShowMoreConfig] = useState(false);
 

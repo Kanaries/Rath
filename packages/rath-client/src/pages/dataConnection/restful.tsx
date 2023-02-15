@@ -19,9 +19,10 @@ import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import MonacoEditor from 'react-monaco-editor';
 import { DEMO_DATA_REQUEST_TIMEOUT } from '../../constants';
-import { IDatasetBase, IMuteFieldBase, IRow } from '../../interfaces';
+import { DataSourceType, IDatasetBase, IMuteFieldBase, IRow } from '../../interfaces';
 import { logDataImport } from '../../loggers/dataImport';
 import { DataSourceTag } from '../../utils/storage';
+import { useGlobalStore } from '../../store';
 
 function requestAPIData(api: string): Promise<IDatasetBase> {
     return new Promise<IDatasetBase>((resolve, reject) => {
@@ -68,6 +69,7 @@ interface RestFulProps {
 const RestFul: React.FC<RestFulProps> = (props) => {
     const { onClose, onStartLoading, onLoadingFailed, onDataLoaded } = props;
     const [api, setAPI] = useState<string>('');
+    const { userStore } = useGlobalStore();
 
     const loadData = useCallback(() => {
         onStartLoading();
@@ -75,6 +77,11 @@ const RestFul: React.FC<RestFulProps> = (props) => {
             .then((data) => {
                 const { dataSource, fields } = data;
                 onDataLoaded(fields, dataSource, undefined, DataSourceTag.RESTFUL);
+                userStore.saveDataSourceOnCloudOnlineMode({
+                    name: api,
+                    datasourceType: DataSourceType.Restful,
+                    linkInfo: { api },
+                });
                 logDataImport({
                     dataType: 'Restful API',
                     name: api,
@@ -87,7 +94,7 @@ const RestFul: React.FC<RestFulProps> = (props) => {
                 onLoadingFailed(err);
             });
         onClose();
-    }, [api, onDataLoaded, onClose, onStartLoading, onLoadingFailed]);
+    }, [api, onDataLoaded, onClose, onStartLoading, onLoadingFailed, userStore]);
     return (
         <Cont>
             <Stack className="inner-stack">
