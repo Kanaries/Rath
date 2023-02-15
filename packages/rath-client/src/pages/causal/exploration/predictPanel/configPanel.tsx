@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { Checkbox, DetailsList, Dropdown, IColumn, Label, SelectionMode } from "@fluentui/react";
 import produce from "immer";
 import { observer } from "mobx-react-lite";
@@ -47,7 +48,7 @@ const ConfigPanel: FC<{
         return [
             {
                 key: 'selectedAsFeature',
-                name: `特征 (${predictInput.features.length} / ${fields.length})`,
+                name: `${intl.get('causal.analyze.feature')} (${predictInput.features.length} / ${fields.length})`,
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     const checked = predictInput.features.some(f => f.fid === field.fid);
@@ -76,7 +77,7 @@ const ConfigPanel: FC<{
             },
             {
                 key: 'selectedAsTarget',
-                name: `目标 (${predictInput.targets.length} / ${fields.length})`,
+                name: `${intl.get('causal.analyze.target')} (${predictInput.targets.length} / ${fields.length})`,
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     const checked = predictInput.targets.some(f => f.fid === field.fid);
@@ -105,7 +106,7 @@ const ConfigPanel: FC<{
             },
             {
                 key: 'name',
-                name: '因素',
+                name: intl.get('causal.analyze.name'),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
@@ -122,7 +123,7 @@ const ConfigPanel: FC<{
     return (
         <>
             <Dropdown
-                label="模型选择"
+                label={intl.get('causal.analyze.model')}
                 options={PredictAlgorithms.map(algo => ({ key: algo.key, text: algo.text }))}
                 selectedKey={algo}
                 onChange={(_, option) => {
@@ -133,7 +134,7 @@ const ConfigPanel: FC<{
                 }}
                 style={{ width: 'max-content' }}
             />
-            <Label style={{ marginTop: '1em' }}>分析空间</Label>
+            <Label style={{ marginTop: '1em' }}>{intl.get('causal.analyze.analyze_space')}</Label>
             <TableContainer>
                 <DetailsList
                     items={fields.slice(0)}

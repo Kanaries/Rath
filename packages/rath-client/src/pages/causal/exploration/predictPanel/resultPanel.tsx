@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { Checkbox, DefaultButton, DetailsList, IColumn, Icon, SelectionMode } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
@@ -47,7 +48,7 @@ const ResultPanel: FC = () => {
         return [
             {
                 key: 'selected',
-                name: '对比',
+                name: intl.get('causal.analyze.diff_title'),
                 onRender: (item) => {
                     const record = item as typeof sortedResults[number];
                     const selected = (comparison ?? [] as string[]).includes(record.id);
@@ -80,7 +81,7 @@ const ResultPanel: FC = () => {
             },
             {
                 key: 'index',
-                name: '运行次数',
+                name: intl.get('causal.analyze.run_idx'),
                 minWidth: 70,
                 maxWidth: 70,
                 isResizable: false,
@@ -90,7 +91,7 @@ const ResultPanel: FC = () => {
             },
             {
                 key: 'algo',
-                name: '预测模型',
+                name: intl.get('causal.analyze.model'),
                 minWidth: 70,
                 onRender(item) {
                     const record = item as typeof sortedResults[number];
@@ -99,7 +100,7 @@ const ResultPanel: FC = () => {
             },
             {
                 key: 'accuracy',
-                name: '准确率',
+                name: intl.get('causal.analyze.accuracy'),
                 minWidth: 150,
                 onRender(item, index) {
                     if (!item || index === undefined) {
@@ -183,7 +184,7 @@ const ResultPanel: FC = () => {
                 onClick={() => viewContext?.clearPredictResults()}
                 style={{ width: 'max-content' }}
             >
-                清空记录
+                {intl.get('causal.analyze.clear_records')}
             </DefaultButton>
             <TableContainer>
                 <DetailsList

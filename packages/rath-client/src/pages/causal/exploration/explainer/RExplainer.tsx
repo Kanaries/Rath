@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { DefaultButton, Dropdown, Stack, Toggle } from '@fluentui/react';
@@ -184,10 +185,10 @@ const RExplainer: FC = () => {
         <Container>
             {mainField && (
                 <>
-                    <header>{'探索目标' || 'Main Field'}</header>
+                    <header>{intl.get('causal.analyze.main_field')}</header>
                     <Stack tokens={{ childrenGap: 20 }} horizontal style={{ alignItems: 'flex-end' }}>
                         <Dropdown
-                            label="运行环境"//"Service"
+                            label={intl.get('causal.analyze.service')}
                             selectedKey={serviceMode}
                             options={[
                                 { key: 'worker', text: 'worker' },
@@ -201,12 +202,12 @@ const RExplainer: FC = () => {
                             style={{ width: '7em' }}
                         />
                         <Dropdown
-                            label="对照选择"//"Diff Mode"
+                            label={intl.get('causal.analyze.diff_mode')}
                             selectedKey={diffMode}
                             options={[
-                                { key: 'other', text: '数据补集' || 'Other' },
-                                { key: 'full', text: '数据全集' || 'Full' },
-                                { key: 'two-group', text: '自选两个集合' || 'Two Groups' },
+                                { key: 'other', text: intl.get('causal.analyze.other') },
+                                { key: 'full', text: intl.get('causal.analyze.full') },
+                                { key: 'two-group', text: intl.get('causal.analyze.diff_two') },
                             ]}
                             onChange={(_, option) => {
                                 if (option?.key) {
@@ -218,9 +219,9 @@ const RExplainer: FC = () => {
                     </Stack>
                     <Stack tokens={{ childrenGap: 20 }} horizontal style={{ alignItems: 'flex-end' }}>
                         <Dropdown
-                            label="基准因素"//"Index Key"
+                            label={intl.get('causal.analyze.index_key')}
                             selectedKey={indexKey?.fid ?? ''}
-                            options={[{ key: '', text: '无' || 'null' }].concat(fieldMetas.map(f => ({
+                            options={[{ key: '', text: intl.get('causal.analyze.not_chosen') }].concat(fieldMetas.map(f => ({
                                 key: f.fid,
                                 text: f.name ?? f.fid,
                             })))}
@@ -231,13 +232,13 @@ const RExplainer: FC = () => {
                             style={{ width: '12em' }}
                         />
                         <Dropdown
-                            label="聚合类型"//"Aggregation Type"
+                            label={intl.get('causal.analyze.aggregation_type')}
                             selectedKey={aggr}
                             options={[
-                                { key: '', text: '无（明细）' || 'None' },
-                                { key: 'sum', text: '总和' || 'SUM' },
-                                { key: 'mean', text: '均值' || 'MEAN' },
-                                { key: 'count', text: '计数' || 'COUNT' },
+                                { key: '', text: 'None' },
+                                { key: 'sum', text: 'SUM' },
+                                { key: 'mean', text: 'MEAN' },
+                                { key: 'count', text: 'COUNT' },
                             ]}
                             onChange={(_, option) => {
                                 setAggr((option?.key as typeof aggr) ?? null);
@@ -266,7 +267,7 @@ const RExplainer: FC = () => {
                     {subspaces && (
                         <>
                             <ChartItem
-                                title="对照组"//"Foreground Group"
+                                title={intl.get('causal.analyze.foreground_group')}
                                 data={visSample}
                                 indexKey={indexKey}
                                 mainField={mainField}
@@ -276,7 +277,7 @@ const RExplainer: FC = () => {
                                 normalize={false}
                             />
                             <ChartItem
-                                title="实验组"//"Background Group"
+                                title={intl.get('causal.analyze.background_group')}
                                 data={visSample}
                                 indexKey={indexKey}
                                 mainField={mainField}
@@ -292,7 +293,7 @@ const RExplainer: FC = () => {
                         disabled={!subspaces}
                         onClick={applySelection}
                     >
-                        {'发现' || 'Insight'}
+                        {intl.get('causal.analyze.insight')}
                     </DefaultButton>
                     {subspaces && (
                         <RInsightView
