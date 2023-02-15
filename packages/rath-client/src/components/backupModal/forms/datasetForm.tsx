@@ -142,17 +142,17 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                         <TextField
                             label={intl.get('storage.data_source_name')}
                             value={cloudDataSourceMeta.name}
-                            readOnly
+                            disabled
                         />
                         <TextField
                             label={intl.get('storage.name', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`) })}
                             value={cloudDatasetMeta.name}
-                            readOnly
+                            disabled
                         />
                         <Toggle
                             label={intl.get('storage.public')}
                             checked={cloudDatasetMeta.type === CloudAccessModifier.PUBLIC}
-                            onChange={() => void 0} // readOnly
+                            disabled
                         />
                     </>
                 )}
@@ -163,8 +163,7 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                             <TextField
                                 label={intl.get('storage.data_source_name')}
                                 value={cloudDataSourceMeta.name}
-                                required
-                                readOnly
+                                disabled
                             />
                         )}
                         {!cloudDataSourceMeta && (

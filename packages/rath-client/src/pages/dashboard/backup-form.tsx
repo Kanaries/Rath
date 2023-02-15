@@ -113,7 +113,7 @@ const BackupForm: FC<IBackupFormProps> = ({ data, setData, submit }) => {
                     <TextField
                         label={intl.get('storage.data_source_name')}
                         value={cloudDataSourceMeta.name}
-                        readOnly
+                        disabled
                     />
                     <Toggle
                         label={intl.get('storage.bind_dataset')}

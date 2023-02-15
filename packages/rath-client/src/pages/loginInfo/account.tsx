@@ -55,8 +55,8 @@ function Account() {
                 <div>
                     <Stack tokens={{ childrenGap: 12 }}>
                         <WorkspaceRole />
-                        <TextField label="Phone" value={info?.phone} readOnly disabled />
-                        <TextField label="Email" value={info?.email} readOnly disabled />
+                        <TextField label="Phone" value={info?.phone} disabled />
+                        <TextField label="Email" value={info?.email} disabled />
                         <div>
                             <DefaultButton
                                 onClick={() => {
