@@ -1,7 +1,7 @@
 import intl from 'react-intl-universal';
 import { Modal, Pivot, PivotItem, PrimaryButton, Spinner, SpinnerSize } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import { LoginPanel } from '../../pages/loginInfo/account';
@@ -31,26 +31,10 @@ const Cont = styled.div`
 const BackupModal: FC = (props) => {
     const { commonStore, userStore } = useGlobalStore();
     const { showBackupModal } = commonStore;
-    const { info, loggedIn } = userStore;
+    const { loggedIn } = userStore;
     const [mode, setMode] = useState(CloudItemType.DATASET);
     
     const [busy, setBusy] = useState(false);
-
-    const organizations = useMemo(() => info?.organizations ?? [], [info?.organizations]);
-    const [selectedOrgName, setSelectedOrgName] = useState<string | null>(null);
-    const workspaces = organizations?.find(org => org.name === selectedOrgName)?.workspaces ?? [];
-    const [selectedWspName, setSelectedWspName] = useState<string | null>(null);
-
-    useEffect(() => {
-        setSelectedOrgName(null);
-    }, [organizations]);
-
-    useEffect(() => {
-        setSelectedWspName(null);
-        if (selectedOrgName !== null) {
-            userStore.getWorkspaces(selectedOrgName);
-        }
-    }, [selectedOrgName, userStore]);
 
     const [canBackup, setCanBackup] = useState(false);
 
@@ -108,12 +92,6 @@ const BackupModal: FC = (props) => {
     const commonProps = {
         setBusy: setBusy,
         setCanBackup: setCanBackup,
-        organizations: organizations,
-        organizationName: selectedOrgName,
-        setOrganizationName: setSelectedOrgName,
-        workspaces: workspaces,
-        workspaceName: selectedWspName,
-        setWorkspaceName: setSelectedWspName,
     };
 
     return (

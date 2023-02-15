@@ -8,17 +8,18 @@ import { downloadFileFromBlob } from '../../../utils/download';
 import { CloudItemType } from '../../../pages/dataSource/selection/cloud/spaceList';
 import { notify } from '../../error';
 import useDefaultFilename from '../../../hooks/use-default-filename';
+import WorkspaceRole from '../../../pages/loginInfo/workspaceRole';
 import { CloudAccessModifier, DataSourceType } from '../../../interfaces';
 import { writeDatasetFile } from '../utils';
-import { IBackupFormHandler, IBackupFormProps, OrganizationDropdown, WorkspaceDropdown } from '.';
+import type { IBackupFormHandler, IBackupFormProps } from '.';
 
 
 const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(function DatasetBackupForm (props, ref) {
-    const { setBusy, setCanBackup, organizationName, workspaceName } = props;
+    const { setBusy, setCanBackup } = props;
     
     const { commonStore, dataSourceStore, userStore } = useGlobalStore();
     const { datasetId } = dataSourceStore;
-    const { cloudDataSourceMeta, cloudDatasetMeta } = userStore;
+    const { cloudDataSourceMeta, cloudDatasetMeta, currentOrgName, currentWspName } = userStore;
     const { id: dataSourceId } = cloudDataSourceMeta ?? {};
     const { id: cloudDatasetId, workspace } = cloudDatasetMeta ?? {};
     
@@ -55,12 +56,12 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                 return false;
             }
         } else {
-            if (workspaceName === null) {
+            if (currentWspName === null) {
                 return false;
             }
         }
         return true;
-    }, [cloudDataSourceMeta, cloudDatasetMeta, canOverwrite, datasetOverwrite, workspaceName]);
+    }, [cloudDataSourceMeta, cloudDatasetMeta, canOverwrite, datasetOverwrite, currentWspName]);
 
     const setCanBackupRef = useRef(setCanBackup);
     setCanBackupRef.current = setCanBackup;
@@ -82,17 +83,17 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                 } else {
                     let dsId = dataSourceId;
                     if (dsId === undefined) {
-                        if (!organizationName) {
+                        if (!currentOrgName) {
                             throw new Error('Organization is not chosen');
                         }
-                        if (!workspaceName) {
+                        if (!currentWspName) {
                             throw new Error('Workspace is not chosen');
                         }
                         // TODO: allow user to select these two modes
                         const dataSourceSaveRes = await userStore.saveDataSourceOnCloudOfflineMode({
                             name: modifiableDataSourceName || defaultDataSourceName,
-                            organizationName,
-                            workspaceName,
+                            organizationName: currentOrgName,
+                            workspaceName: currentWspName,
                             datasourceType: DataSourceType.File,
                             fileInfo: {
                                 fileName: file.name,
@@ -102,15 +103,15 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                         if (!dataSourceSaveRes) {
                             throw new Error('Failed to upload data source');
                         }
-                        const dataSource = await userStore.fetchDataSource(workspaceName, dataSourceSaveRes.id);
+                        const dataSource = await userStore.fetchDataSource(currentWspName, dataSourceSaveRes.id);
                         if (!dataSource) {
                             throw new Error('Failed to get data source');
                         }
-                        userStore.setCloudDataSource(dataSource, organizationName, workspaceName);
+                        userStore.setCloudDataSource(dataSource, currentOrgName, currentWspName);
                         dsId = userStore.cloudDataSourceMeta?.id;
                     }
                     if (dsId) {
-                        const wspName = cloudDatasetId ? workspace!.name : workspaceName;
+                        const wspName = cloudDatasetId ? workspace!.name : currentWspName;
                         if (!wspName) {
                             throw new Error('Workspace is not chosen');
                         }
@@ -175,8 +176,7 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                 )}
                 {(!canOverwrite || !datasetOverwrite) && (
                     <>
-                        <OrganizationDropdown {...props} />
-                        <WorkspaceDropdown {...props} />
+                        <WorkspaceRole />
                         <TextField
                             label={intl.get('storage.data_source_name')}
                             value={dataSourceName ?? modifiableDataSourceName}

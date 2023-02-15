@@ -111,16 +111,6 @@ const BackupForm: FC<IBackupFormProps> = ({ data, setData, submit }) => {
                         }}
                     />
                     <TextField
-                        label={intl.get('user.organization')}
-                        value={curOrgName}
-                        readOnly
-                    />
-                    <TextField
-                        label={intl.get('user.workspace')}
-                        value={curWspName}
-                        readOnly
-                    />
-                    <TextField
                         label={intl.get('storage.data_source_name')}
                         value={cloudDataSourceMeta.name}
                         readOnly

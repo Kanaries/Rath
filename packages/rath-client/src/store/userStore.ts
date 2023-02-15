@@ -78,6 +78,13 @@ export default class UserStore {
     /** Workspace name */
     public currentWspName: string | null = null;
 
+    public get organization(): IOrganization | null {
+        return this.info?.organizations?.find(org => org.name === this.currentOrgName) ?? null;
+    }
+    public get workspace(): IWorkspace | null {
+        return this.organization?.workspaces?.find(wsp => wsp.name === this.currentWspName) ?? null;
+    }
+
     constructor() {
         this.init()
         makeAutoObservable(this, {
@@ -318,7 +325,7 @@ export default class UserStore {
         }
     }
 
-    public async uploadNotebook(workspaceId: string, file: File) {
+    public async uploadNotebook(workspaceName: string, file: File) {
         const url = getMainServiceAddress('/api/ce/notebook');
         try {
             const { uploadUrl, id } = (await (await fetch(url, {
@@ -330,7 +337,7 @@ export default class UserStore {
                 body: JSON.stringify({
                     name: file.name,
                     type: 0,    // TODO: customize type of upload workspace
-                    workspaceId,
+                    workspaceName,
                     fileType: file.type,
                     introduction: '',
                     size: file.size,
@@ -815,6 +822,24 @@ export default class UserStore {
         this.cloudDataSourceMeta = dataSource;
         this.currentOrgName = organizationName;
         this.currentWspName = workspaceName;
+    }
+
+    public setOrgName(orgName: string | null): boolean {
+        const org = this.info?.organizations?.find(which => which.name === orgName);
+        if (!org) {
+            this.currentOrgName = null;
+            return false;
+        }
+        this.currentOrgName = orgName;
+        const wsp = org.workspaces?.find(which => which.name === this.currentWspName);
+        if (!wsp) {
+            this.currentWspName = null;
+        }
+        return true;
+    }
+
+    public setWspName(wspName: string | null) {
+        this.currentWspName = wspName;
     }
 
 }

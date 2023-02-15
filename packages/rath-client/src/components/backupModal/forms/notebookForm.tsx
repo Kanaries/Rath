@@ -7,13 +7,15 @@ import { downloadFileFromBlob, getKRFParseMap, IKRFComponents } from '../../../u
 import { CloudItemType } from '../../../pages/dataSource/selection/cloud/spaceList';
 import { notify } from '../../error';
 import useDefaultFilename from '../../../hooks/use-default-filename';
+import WorkspaceRole from '../../../pages/loginInfo/workspaceRole';
 import { writeNotebookFile } from '../utils';
-import { IBackupFormHandler, IBackupFormProps, OrganizationDropdown, WorkspaceDropdown } from '.';
+import type { IBackupFormHandler, IBackupFormProps } from '.';
 
 
 const NotebookBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(function NotebookBackupForm (props, ref) {
-    const { setBusy, setCanBackup, workspaces, workspaceName } = props;
+    const { setBusy, setCanBackup } = props;
     const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore, userStore } = useGlobalStore();
+    const { currentWspName } = userStore;
     const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
     const mutFieldsLength = dataSourceStore.mutFields.length;
     const collectionLength = collectionStore.collectionList.length;
@@ -43,7 +45,7 @@ const NotebookBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(func
         })
     }, [rawDataLength, mutFieldsLength, collectionLength]);
     
-    const canBackup = workspaceName !== null && Object.values(backupItemKeys).some(Boolean);
+    const canBackup = currentWspName !== null && Object.values(backupItemKeys).some(Boolean);
 
     const setCanBackupRef = useRef(setCanBackup);
     setCanBackupRef.current = setCanBackup;
@@ -64,11 +66,7 @@ const NotebookBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(func
                 if (download) {
                     downloadFileFromBlob(file, file.name);
                 } else {
-                    const wsp = workspaces?.find(which => which.name === workspaceName);
-                    if (!wsp) {
-                        throw new Error('Workspace not found');
-                    }
-                    const ok = await userStore.uploadNotebook(wsp.id, file);
+                    const ok = await userStore.uploadNotebook(currentWspName, file);
                     if (ok) {
                         commonStore.setShowBackupModal(false);
                     }
@@ -118,6 +116,7 @@ const NotebookBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(func
     return (
         <>
             <p className='state-description'>{intl.get('storage.upload_desc', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.NOTEBOOK}`) })}</p>
+            <WorkspaceRole />
             <Stack tokens={{ childrenGap: 10 }} style={{ marginTop: '1em' }}>
                 {items.map((item) => (
                     <Stack.Item key={item.key}>
@@ -136,8 +135,6 @@ const NotebookBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(func
                 ))}
             </Stack>
             <Stack style={{ margin: '0.6em 0' }}>
-                <OrganizationDropdown {...props} />
-                <WorkspaceDropdown {...props} />
                 <TextField
                     label={intl.get('storage.name', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.NOTEBOOK}`) })}
                     value={name}
