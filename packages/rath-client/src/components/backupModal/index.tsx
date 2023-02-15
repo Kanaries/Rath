@@ -1,13 +1,15 @@
 import intl from 'react-intl-universal';
-import { Checkbox, Dropdown, Modal, PrimaryButton, Spinner, Stack, TextField } from '@fluentui/react';
+import { Modal, Pivot, PivotItem, PrimaryButton, Spinner, SpinnerSize } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import { FC, useEffect, useMemo, useState } from 'react';
-import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
+import { FC, useRef, useState } from 'react';
 import styled from 'styled-components';
-import dayjs from 'dayjs';
 import { useGlobalStore } from '../../store';
-import { downloadFileFromBlob, getKRFParseMap, IKRFComponents, KRF_VERSION } from '../../utils/download';
 import { LoginPanel } from '../../pages/loginInfo/account';
+import { notify } from '../error';
+import { CloudItemType } from '../../pages/dataSource/selection/cloud/spaceList';
+import NotebookForm from './forms/notebookForm';
+import type { IBackupFormHandler } from './forms';
+import DatasetForm from './forms/datasetForm';
 
 const Cont = styled.div`
     padding: 1em;
@@ -24,142 +26,76 @@ const Cont = styled.div`
     .login {
         padding: 0.6em 1em 1em;
     }
-`
+`;
 
 const BackupModal: FC = (props) => {
-    const { commonStore, dataSourceStore, collectionStore, causalStore, dashboardStore, userStore } = useGlobalStore();
+    const { commonStore, userStore } = useGlobalStore();
     const { showBackupModal } = commonStore;
-    const { info, loggedIn } = userStore;
-    const rawDataLength = dataSourceStore.rawDataMetaInfo.length;
-    const mutFieldsLength = dataSourceStore.mutFields.length;
-    const collectionLength = collectionStore.collectionList.length;
-    const defaultName = useMemo(() => intl.get('storage.default_name', { date: dayjs().format('YYYY-MM-DDTHH_mm') }), []);
-    const [name, setName] = useState('');
+    const { loggedIn, uploadDataSource, cloudDataSourceMeta } = userStore;
+    const [mode, setMode] = useState(CloudItemType.DATASET);
+    
     const [busy, setBusy] = useState(false);
-    const [backupItemKeys, setBackupItemKeys] = useState<{
-        [key in IKRFComponents]: boolean;
-    }>({
-        [IKRFComponents.data]: rawDataLength > 0,
-        [IKRFComponents.meta]: mutFieldsLength > 0,
-        [IKRFComponents.collection]: collectionLength > 0,
-        [IKRFComponents.causal]: false,
-        [IKRFComponents.dashboard]: false,
-        [IKRFComponents.mega]: false,
-    });
-    useEffect(() => {
-        setBackupItemKeys({
-            data: rawDataLength > 0,
-            meta: mutFieldsLength > 0,
-            collection: collectionLength > 0,
-            causal: false,
-            dashboard: false,
-            mega: false
-        })
-    }, [rawDataLength, mutFieldsLength, collectionLength]);
-    const organizations = info?.organizations;
-    const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null);
-    const workspaces = organizations?.find(org => org.id === selectedOrgId)?.workspaces;
-    const [selectedWspId, setSelectedWspId] = useState<number | null>(null);
-    const canBackup = selectedWspId !== null && Object.values(backupItemKeys).some(Boolean);
-    useEffect(() => {
-        setSelectedOrgId(null);
-    }, [organizations]);
-    useEffect(() => {
-        setSelectedWspId(null);
-        if (selectedOrgId !== null) {
-            userStore.getWorkspaces(selectedOrgId);
-        }
-    }, [selectedOrgId, userStore]);
-    // const storageItems =
-    const backup = async (download = false) => {
-        if (!download && (busy || !canBackup || selectedWspId === null)) {
+
+    const [canBackup, setCanBackup] = useState(false);
+
+    const notebookFormRef = useRef<IBackupFormHandler>(null);
+    const datasetFormRef = useRef<IBackupFormHandler>(null);
+
+    const submit = async (download = false) => {
+        if (!canBackup) {
             return false;
         }
-        setBusy(true);
-        const parseMapItems = getKRFParseMap(backupItemKeys);
-        const zipFileWriter = new BlobWriter();
-        const zipWriter = new ZipWriter(zipFileWriter);
-        const pm = new TextReader(JSON.stringify({
-            items: parseMapItems,
-            version: KRF_VERSION
-        }));
-        zipWriter.add("parse_map.json", pm);
-        for await (const item of parseMapItems) {
-            switch (item.key) {
-                case IKRFComponents.data: {
-                    const data = await dataSourceStore.backupDataStore()
-                    const content = new TextReader(JSON.stringify(data));
-                    await zipWriter.add(item.name, content);
-                    break;
-                }
-                case IKRFComponents.meta: {
-                    const data = await dataSourceStore.backupMetaStore()
-                    const content = new TextReader(JSON.stringify(data));
-                    await zipWriter.add(item.name, content);
-                    break;
-                }
-                case IKRFComponents.collection: {
-                    const data = await collectionStore.backupCollectionStore()
-                    const content = new TextReader(JSON.stringify(data));
-                    await zipWriter.add(item.name, content);
-                    break;
-                }
-                case IKRFComponents.causal: {
-                    const save = await causalStore.save();
-                    if (save) {
-                        const content = new TextReader(JSON.stringify(save));
-                        await zipWriter.add(item.name, content);
-                    }
-                    break;
-                }
-                case IKRFComponents.dashboard: {
-                    const save = dashboardStore.save();
-                    const content = new TextReader(JSON.stringify(save));
-                    await zipWriter.add(item.name, content);
-                    break;
-                }
-                default: {
-                    break;
-                }
+        if (mode === CloudItemType.NOTEBOOK) {
+            const ok = await notebookFormRef.current?.submit(download);
+            if (ok) {
+                notify({
+                    type: 'success',
+                    title: 'Saved Successfully',
+                    content: '',
+                });
             }
+            return ok;
         }
-        const blob = await zipWriter.close();
-        const fileName = `${name || defaultName}.krf`;
-        const file = new File([blob], fileName);
-        if (download) {
-            downloadFileFromBlob(blob, fileName);
-        } else {
-            await userStore.uploadNotebook(selectedWspId!, file);
+        if (mode === CloudItemType.DATASET) {
+            const ok = await datasetFormRef.current?.submit(download);
+            if (ok) {
+                notify({
+                    type: 'success',
+                    title: 'Saved Successfully',
+                    content: '',
+                });
+            }
+            return ok;
         }
-        setBusy(false);
     };
-    const items: {
-        key: IKRFComponents;
-        text: string;
-        disabled?: boolean;
-    }[] = [
-        {
-            key: IKRFComponents.data,
-            text: intl.get('storage.components.data', { size: rawDataLength }),
-        },
-        {
-            key: IKRFComponents.meta,
-            text: intl.get('storage.components.meta', { size: mutFieldsLength }),
-        },
-        {
-            key: IKRFComponents.collection,
-            text: intl.get('storage.components.collection', { size: collectionLength }),
-        },
-        {
-            key: IKRFComponents.causal,
-            text: intl.get('storage.components.causal'),
-            disabled: !causalStore.model.causality,
-        },
-        {
-            key: IKRFComponents.dashboard,
-            text: intl.get('storage.components.dashboard', { size: dashboardStore.pages.length }),
-        },
-    ];
+
+    if (!loggedIn) {
+        return (
+            <Modal
+                isOpen={showBackupModal}
+                onDismiss={() => commonStore.setShowBackupModal(false)}
+                isBlocking={false}
+                containerClassName="modal-container"
+            >
+                <Cont>
+                    <div className="login">
+                        <div className="modal-header">
+                            <h3>{intl.get('login.login')}</h3>
+                        </div>
+                        <LoginPanel />
+                    </div>
+                </Cont>
+            </Modal>
+        );
+    }
+
+    const commonProps = {
+        setBusy: setBusy,
+        setCanBackup: setCanBackup,
+    };
+
+    const allowToUploadDataset = Boolean(uploadDataSource || cloudDataSourceMeta);
+
     return (
         <Modal
             isOpen={showBackupModal}
@@ -168,78 +104,30 @@ const BackupModal: FC = (props) => {
             containerClassName="modal-container"
         >
             <Cont>
-                {loggedIn || process.env.NODE_ENV === 'development' ? (
-                    <>
-                        <div className="modal-header">
-                            <h3>{intl.get('storage.upload')}</h3>
-                            <p className='state-description'>{intl.get('storage.upload_desc')}</p>
-                        </div>
-                        <Stack tokens={{ childrenGap: 10 }}>
-                            {items.map((item) => (
-                                <Stack.Item key={item.key}>
-                                    <Checkbox
-                                        label={item.text}
-                                        disabled={item.disabled}
-                                        checked={backupItemKeys[item.key as keyof typeof backupItemKeys]}
-                                        onChange={(e, checked) => {
-                                            setBackupItemKeys({
-                                                ...backupItemKeys,
-                                                [item.key]: checked,
-                                            });
-                                        }}
-                                    />
-                                </Stack.Item>
-                            ))}
-                        </Stack>
-                        <Stack style={{ margin: '0.6em 0' }}>
-                            <TextField
-                                label={intl.get('storage.name')}
-                                value={name}
-                                placeholder={defaultName}
-                                onChange={(_, val) => setName(val ?? '')}
-                            />
-                            <Dropdown
-                                label={intl.get('user.organization')}
-                                options={(organizations ?? []).map(org => ({
-                                    key: `${org.id}`,
-                                    text: org.name,
-                                }))}
-                                required
-                                selectedKey={`${selectedOrgId}`}
-                                onChange={(_, option) => option && setSelectedOrgId(Number(option.key))}
-                            />
-                            <Dropdown
-                                label={intl.get('user.workspace')}
-                                disabled={!Array.isArray(workspaces)}
-                                options={(workspaces ?? []).map(wsp => ({
-                                    key: `${wsp.id}`,
-                                    text: wsp.name,
-                                }))}
-                                required
-                                selectedKey={`${selectedWspId}`}
-                                onChange={(_, option) => option && setSelectedWspId(Number(option.key))}
-                            />
-                        </Stack>
-                        <div className="modal-footer">
-                            <PrimaryButton disabled={!canBackup || busy} onClick={() => backup()}>
-                                {busy && <Spinner style={{ transform: 'scale(0.8)', transformOrigin: '0 50%' }} />}
-                                {intl.get('storage.apply')}
-                            </PrimaryButton>
-                            {process.env.NODE_ENV === 'development' && (
-                                <button onClick={() => backup(true)}>
-                                    Download File (dev)
-                                </button>
-                            )}
-                        </div>
-                    </>
-                ) : (
-                    <div className="login">
-                        <div className="modal-header">
-                            <h3>{intl.get('login.login')}</h3>
-                        </div>
-                        <LoginPanel />
-                    </div>
-                )}
+                <div className="modal-header">
+                    <h3>{intl.get('storage.upload')}</h3>
+                </div>
+                <Pivot selectedKey={mode} onLinkClick={item => item?.props.itemKey && setMode(item.props.itemKey as CloudItemType)} styles={{ root: { marginBlock: '1em' } }}>
+                    {allowToUploadDataset && (
+                        <PivotItem itemKey={CloudItemType.DATASET} headerText={intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`)}>
+                            <DatasetForm ref={datasetFormRef} {...commonProps} />
+                        </PivotItem>
+                    )}
+                    <PivotItem itemKey={CloudItemType.NOTEBOOK} headerText={intl.get(`dataSource.importData.cloud.${CloudItemType.NOTEBOOK}`)}>
+                        <NotebookForm ref={notebookFormRef} {...commonProps} />
+                    </PivotItem>
+                </Pivot>
+                <div className="modal-footer">
+                    <PrimaryButton disabled={!canBackup || busy} onClick={() => submit()}>
+                        {busy && <Spinner size={SpinnerSize.small} />}
+                        {intl.get('storage.apply')}
+                    </PrimaryButton>
+                    {process.env.NODE_ENV === 'development' && (
+                        <button onClick={() => submit(true)}>
+                            Download File (dev)
+                        </button>
+                    )}
+                </div>
             </Cont>
         </Modal>
     );

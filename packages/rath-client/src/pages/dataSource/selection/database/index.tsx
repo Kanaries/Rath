@@ -2,11 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { IDropdownOption, Stack, registerIcons, PrimaryButton } from '@fluentui/react';
-import type { IMuteFieldBase, IRow } from '../../../../interfaces';
+import { DataSourceType, IMuteFieldBase, IRow } from '../../../../interfaces';
 import { logDataImport } from '../../../../loggers/dataImport';
 import prefetch from '../../../../utils/prefetch';
 import { notify } from '../../../../components/error';
 import { DataSourceTag } from '../../../../utils/storage';
+import { useGlobalStore } from '../../../../store';
 import { rawData2DataWithBaseMetas } from '../../utils';
 import Progress from './progress';
 import datasetOptions from './config';
@@ -70,6 +71,7 @@ export const inputWidth = '180px';
 const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setLoadingAnimation }) => {
     const { progress, actions } = useDatabaseReducer(setLoadingAnimation);
     const [loading, setLoading] = useState<boolean>(false);
+    const { userStore } = useGlobalStore();
 
     const {
         connectorReady,
@@ -198,6 +200,18 @@ const DatabaseData: React.FC<DatabaseDataProps> = ({ onClose, onDataLoaded, setL
                 Boolean
             ).join('.')
 
+            userStore.saveDataSourceOnCloudOnlineMode({
+                name,
+                datasourceType: DataSourceType.Database,
+                linkInfo: {
+                    databaseType,
+                    connectUri,
+                    database,
+                    schema,
+                    table,
+                    queryString,
+                },
+            });
             logDataImport({
                 dataType: `Database/${databaseType}`,
                 name,

@@ -1,9 +1,10 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { TextWriter, ZipReader } from "@zip.js/zip.js";
-import { IAccessPageKeys } from '../interfaces';
+import { DataSourceType, IAccessPageKeys, ICreateDashboardConfig, ICreateDatasetPayload, ICreateDatasetResult, ICreateDataSourcePayload, ICreateDataSourceResult, IDashboardDocumentInfo, IDatasetData, IDatasetMeta, IDataSourceMeta } from '../interfaces';
 import { getMainServiceAddress } from '../utils/user';
 import { notify } from '../components/error';
 import { request } from '../utils/request';
+import { KanariesDatasetFilenameCloud } from '../constants';
 import { IKRFComponents, IParseMapItem } from '../utils/download';
 import { commitLoginService } from './fetch';
 import { getGlobalStore } from '.';
@@ -15,7 +16,7 @@ export interface ILoginForm {
 }
 
 export interface INotebook {
-    readonly id: number;
+    readonly id: string;
     readonly name: string;
     readonly size: number;
     readonly createAt: number;
@@ -23,14 +24,15 @@ export interface INotebook {
 }
 
 export interface IWorkspace {
-    readonly id: number;
+    readonly id: string;
     readonly name: string;
+    datasets?: readonly IDatasetMeta[] | null | undefined;
     notebooks?: readonly INotebook[] | null | undefined;
 }
 
 export interface IOrganization {
     readonly name: string;
-    readonly id: number;
+    readonly id: string;
     workspaces?: readonly IWorkspace[] | null | undefined;
 }
 
@@ -57,15 +59,42 @@ export default class UserStore {
     public login!: ILoginForm;
     public signup!: ISignUpForm;
     public info: IUserInfo | null = null;
+    public saving = false;
     public get loggedIn() {
         return this.info !== null;
     }
     public get userName() {
         return this.info?.userName ?? null;
     }
+
+    /** Storage meta on cloud. */
+    public cloudDataSourceMeta: IDataSourceMeta | null = null;
+    /** Dataset storage meta on cloud. */
+    public cloudDatasetMeta: IDatasetMeta | null = null;
+    /** Organization name */
+    public currentOrgName: string | null = null;
+    /** Workspace name */
+    public currentWspName: string | null = null;
+
+    public uploadDataSource: (() => void) | null = null;
+    public uploadingDataSource = false;
+
+    public get organization(): IOrganization | null {
+        return this.info?.organizations?.find(org => org.name === this.currentOrgName) ?? null;
+    }
+    public get workspace(): IWorkspace | null {
+        return this.organization?.workspaces?.find(wsp => wsp.name === this.currentWspName) ?? null;
+    }
+
     constructor() {
         this.init()
-        makeAutoObservable(this);
+        makeAutoObservable(this, {
+            uploadDataSource: observable.ref,
+            // @ts-expect-error non-public fields
+            autoSaveTimer: false,
+            waitList: false,
+            disposers: false,
+        });
     }
     public init() {
         this.login = {
@@ -212,7 +241,7 @@ export default class UserStore {
     protected async getOrganizations() {
         const url = getMainServiceAddress('/api/ce/organization/list');
         try {
-            const result = await request.get<{}, { organization: readonly IOrganization[] }>(url);
+            const result = await request.get<{}, { organization: readonly Omit<IOrganization, 'workspaces'>[] }>(url);
             runInAction(() => {
                 this.info!.organizations = result.organization;
             });
@@ -225,15 +254,15 @@ export default class UserStore {
         }
     }
 
-    public async getWorkspaces(organizationId: number) {
-        const which = this.info?.organizations?.find(org => org.id === organizationId);
+    public async getWorkspaces(organizationName: string) {
+        const which = this.info?.organizations?.find(org => org.name === organizationName);
         if (!which || which.workspaces !== undefined) {
             return null;
         }
         const url = getMainServiceAddress('/api/ce/organization/workspace/list');
         try {
-            const result = await request.get<{ organizationId: number }, { workspaceList: Exclude<IWorkspace, 'notebooks'>[] }>(url, {
-                organizationId,
+            const result = await request.get<{ organizationName: string }, { workspaceList: Omit<IWorkspace, 'notebooks' | 'datasets'>[] }>(url, {
+                organizationName,
             });
             runInAction(() => {
                 which.workspaces = result.workspaceList;
@@ -249,26 +278,50 @@ export default class UserStore {
         }
     }
 
-    public async getNotebooks(organizationId: number, workspaceId: number, forceUpdate = false) {
-        const which = this.info?.organizations?.find(org => org.id === organizationId)?.workspaces?.find(wsp => wsp.id === workspaceId);
+    public async getNotebooksAndDatasets(organizationName: string, workspaceName: string, forceUpdate = false) {
+        const which = this.info?.organizations?.find(org => org.name === organizationName)?.workspaces?.find(wsp => wsp.name === workspaceName);
         if (!which) {
             return null;
         }
         if (!forceUpdate && which.notebooks !== undefined) {
             return null;
         }
-        const url = getMainServiceAddress('/api/ce/notebook/list');
+        const listNotebookApiUrl = getMainServiceAddress('/api/ce/notebook/list');
+        const listDatasetApiUrl = getMainServiceAddress('/api/ce/dataset/list');
         try {
-            const result = await request.get<{ organizationId: number }, { notebookList: INotebook[] }>(url, {
-                organizationId,
-            });
+            const result = await Promise.allSettled([
+                request.get<{ workspaceName: string }, { notebookList: INotebook[] }>(listNotebookApiUrl, {
+                    workspaceName,
+                }),
+                request.get<{ workspaceName: string }, { datasetList: IDatasetMeta[] }>(listDatasetApiUrl, {
+                    workspaceName,
+                })
+            ]).then(([notebookRes, datasetRes]) => ({
+                notebooks: notebookRes.status === 'fulfilled' ? notebookRes.value.notebookList : [],
+                datasets: datasetRes.status === 'fulfilled' ? datasetRes.value.datasetList : [],
+                errInfo: [
+                    notebookRes.status === 'rejected' ? notebookRes.reason : null,
+                    datasetRes.status === 'rejected' ? datasetRes.reason : null,
+                ].filter(reason => reason !== null),
+            }));
+            for (const errInfo of result.errInfo) {
+                notify({
+                    title: '[getNotebooksAndDatasets]',
+                    type: 'error',
+                    content: `${errInfo}`,
+                });
+            }
+            if (result.errInfo.length > 0) {
+                return null;
+            }
             runInAction(() => {
-                which.notebooks = result.notebookList;
+                which.notebooks = result.notebooks;
+                which.datasets = result.datasets;
             });
-            return result.notebookList;
+            return result;
         } catch (error) {
             notify({
-                title: '[/api/ce/notebook/list]',
+                title: '[getNotebooksAndDatasets]',
                 type: 'error',
                 content: `${error}`,
             });
@@ -276,7 +329,7 @@ export default class UserStore {
         }
     }
 
-    public async uploadNotebook(workspaceId: number, file: File) {
+    public async uploadNotebook(workspaceName: string, file: File) {
         const url = getMainServiceAddress('/api/ce/notebook');
         try {
             const { uploadUrl, id } = (await (await fetch(url, {
@@ -288,7 +341,7 @@ export default class UserStore {
                 body: JSON.stringify({
                     name: file.name,
                     type: 0,    // TODO: customize type of upload workspace
-                    workspaceId,
+                    workspaceName,
                     fileType: file.type,
                     introduction: '',
                     size: file.size,
@@ -298,13 +351,134 @@ export default class UserStore {
                 method: 'PUT',
                 body: file,
             });
-            await request.post<{ id: number }, {}>(getMainServiceAddress('/api/ce/notebook/callback'), { id });
+            await request.post<{ id: string }, {}>(getMainServiceAddress('/api/ce/notebook/callback'), { id });
+            return true;
         } catch (error) {
             notify({
                 title: '[/api/ce/notebook]',
                 type: 'error',
                 content: `${error}`,
             });
+            return false;
+        }
+    }
+
+    public async openDataset(dataset: IDatasetMeta): Promise<boolean> {
+        const { downloadUrl, datasource, id, workspace } = dataset;
+        try {
+            const data = await fetch(downloadUrl, { method: 'GET' });
+            if (!data.ok) {
+                throw new Error(data.statusText);
+            }
+            if (!data.body) {
+                throw new Error('Request got empty body');
+            }
+            const ok = await this.loadDataset(data.body, dataset.organization.name, workspace.name, datasource.id, id);
+            if (ok) {
+                const etUrl = getMainServiceAddress('/api/ce/tracing/normal');
+                try {
+                    await fetch(etUrl, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            eventTime: Date.now(),
+                            eventType: 'datasetUsage',
+                            eventLabel: 'rath',
+                            eventValue1: dataset.id,
+                        }),
+                    });
+                } catch (error) {
+                    console.warn('EventTrack error <report dataset use>', error);
+                }
+            }
+            return ok;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[openDataset]',
+                content: `${error}`,
+            });
+            return false;
+        }
+    }
+
+    public async loadDataset(
+        body: ReadableStream<Uint8Array> | File,
+        organizationName: string | null,
+        workspaceName: string,
+        dataSourceId: string,
+        datasetId: string
+    ): Promise<boolean> {
+        const { dataSourceStore } = getGlobalStore();
+        try {
+            const zipReader = new ZipReader(body instanceof File ? body.stream() : body);
+            const file = (await zipReader.getEntries()).find(entry => entry.filename === KanariesDatasetFilenameCloud);
+            if (!file) {
+                throw new Error('Dataset file not found');
+            }
+            const writer = new TextWriter();
+            const dataset = JSON.parse(await file.getData(writer)) as IDatasetData;
+            await dataSourceStore.loadBackupDataStore(dataset.data, dataset.meta);
+            const dataSource = await this.fetchDataSource(workspaceName, dataSourceId, true);
+            if (dataSource && organizationName) {
+                this.setCloudDataSource(dataSource, organizationName, workspaceName);
+                const cloudMeta = await this.fetchDataset(workspaceName, datasetId);
+                if (cloudMeta) {
+                    this.setCloudDataset(cloudMeta);
+                }
+            }
+            return true;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[loadDataset]',
+                content: `${error}`,
+            });
+            return false;
+        }
+    }
+
+    public async fetchDataSource(workspaceName: string, dataSourceId: string, silent = false): Promise<IDataSourceMeta | null> {
+        const dataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+        try {
+            const dataSourceDetail = await request.get<{
+                workspaceName: string;
+                datasourceId: string;
+            }, IDataSourceMeta>(dataSourceApiUrl, { datasourceId: dataSourceId, workspaceName });
+            return dataSourceDetail;
+        } catch (error) {
+            const info = {
+                type: 'error',
+                title: '[fetchDataSource]',
+                content: `${error}`,
+            } as const;
+            if (silent) {
+                console.warn(info);
+            } else {
+                notify(info);
+            }
+            return null;
+        }
+    }
+
+    public async fetchDataset(workspaceName: string, datasetId: string): Promise<IDatasetMeta | null> {
+        const dataSourceApiUrl = getMainServiceAddress('/api/ce/dataset');
+        try {
+            const dataSourceDetail = await request.get<{
+                workspaceName: string;
+                datasetId: string;
+            }, Omit<IDatasetMeta, 'workspaceName'>>(dataSourceApiUrl, { datasetId, workspaceName });
+            return dataSourceDetail;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[fetchDataset]',
+                content: `${error}`,
+            });
+            return null;
         }
     }
 
@@ -398,6 +572,338 @@ export default class UserStore {
                 content: `${error}`,
             });
         }
+    }
+
+    public async openDashboardTemplates(dashboards: IDashboardDocumentInfo[]): Promise<boolean> {
+        const { dashboardStore } = getGlobalStore();
+        for await (const dashboard of dashboards) {
+            try {
+                const dashboardData = await fetch(dashboard.downloadUrl, { method: 'GET' });
+                if (!dashboardData.ok) {
+                    throw new Error(dashboardData.statusText);
+                }
+                if (!dashboardData.body) {
+                    throw new Error('Request got empty body');
+                }
+                const res = await dashboardData.json() as Parameters<(typeof dashboardStore)['loadPage']>[0];
+                dashboardStore.loadPage(res, dashboard);
+            } catch (error) {
+                notify({
+                    type: 'error',
+                    title: '[fetchDashboardTemplate]',
+                    content: `${error}`,
+                });
+                return false;
+            } 
+        }
+        return true;
+    }
+
+    public async uploadDashboard(workspaceName: string, file: File, config: ICreateDashboardConfig): Promise<boolean> {
+        const { dataSourceStore } = getGlobalStore();
+        const { fieldMetas } = dataSourceStore;
+        if (!this.cloudDataSourceMeta) {
+            notify({
+                type: 'error',
+                title: '[uploadDashboard]',
+                content: 'Data source is not uploaded',
+            });
+            return false;
+        }
+        const { id: datasourceId } = this.cloudDataSourceMeta;
+        const createDashboardApiUrl = getMainServiceAddress('/api/ce/dashboard');
+        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+        try {
+            const respond = await fetch(createDashboardApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
+                body: JSON.stringify({
+                    datasourceId,
+                    datasetId: config.dashboard.bindDataset && this.cloudDatasetMeta ? this.cloudDatasetMeta.id : undefined,
+                    workspaceName,
+                    name: config.dashboard.name,
+                    description: config.dashboard.description,
+                    dashboardTemplate: {
+                        name: config.dashboardTemplate.name,
+                        description: config.dashboardTemplate.description,
+                        meta: fieldMetas.map(f => ({
+                            fId: f.fid,
+                            description: config.dashboardTemplate.fieldDescription[f.fid] || f.name || '',
+                            analyticType: f.analyticType,
+                            semanticType: f.semanticType,
+                        })),
+                        size: file.size,
+                        type: config.dashboardTemplate.publish ? 1 : 2,
+                        cover: config.dashboardTemplate.cover ? {
+                            name: config.dashboardTemplate.cover.name,
+                            size: config.dashboardTemplate.cover.size,
+                            type: config.dashboardTemplate.cover.type,
+                        } : undefined,
+                    },
+                }),
+            });
+            if (!respond.ok) {
+                throw new Error(respond.statusText);
+            }
+            const res = await respond.json() as {
+                cover?: { uploadUrl: string; storage_id: string };
+                dashboardTemplate: { uploadUrl: string; storageId: string };
+            };
+            if (config.dashboardTemplate.cover && res.cover?.uploadUrl) {
+                const coverUploadRes = await fetch(res.cover.uploadUrl, {
+                    method: 'PUT',
+                    body: file,
+                });
+                if (!coverUploadRes.ok) {
+                    throw new Error(`Failed to upload cover: ${coverUploadRes.statusText}`);
+                }
+                await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                    reportUploadSuccessApiUrl, { storageId: res.cover.storage_id, status: 1 }
+                );
+            }
+            const templateUploadRes = await fetch(res.dashboardTemplate.uploadUrl, {
+                method: 'PUT',
+                body: file,
+            });
+            if (!templateUploadRes.ok) {
+                throw new Error(`Failed to upload file: ${templateUploadRes.statusText}`);
+            }
+            await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                reportUploadSuccessApiUrl, { storageId: res.dashboardTemplate.storageId, status: 1 }
+            );
+            return true;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[uploadDashboard]',
+                content: `${error}`,
+            });
+            return false;
+        }
+    }
+
+    public setSaving(saving: boolean) {
+        this.saving = saving;
+    }
+
+    public async saveDataSourceOnCloudOfflineMode(
+        params: ICreateDataSourcePayload<'offline'>,
+        file: File,
+    ): Promise<{ id: string; downloadUrl: string } | null> {
+        const send = async () => {
+            if (!this.workspace || !this.organization || this.uploadingDataSource) {
+                return null;
+            }
+            runInAction(() => {
+                this.uploadingDataSource = true;
+            });
+            const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+            const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+            try {
+                const createDataSourceApiRes = await request.post<typeof params & { workspaceName: string }, ICreateDataSourceResult<'offline'>>(
+                    createDataSourceApiUrl, {
+                        ...params,
+                        workspaceName: this.workspace.name,
+                    }
+                );
+                if (params.datasourceType === DataSourceType.File) {
+                    const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
+                        method: 'PUT',
+                        body: file,
+                    });
+                    if (!fileUploadRes.ok) {
+                        throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+                    }
+                    await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                        reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
+                    );
+                }
+                const dataSource = await this.fetchDataSource(this.workspace.name, createDataSourceApiRes.id);
+                if (!dataSource) {
+                    throw new Error('Data source not existed');
+                }
+                this.setCloudDataSource(dataSource, this.organization.name, this.workspace.name);
+                const fileUploadRes = await fetch(createDataSourceApiRes.fileInfo.uploadUrl, {
+                    method: 'PUT',
+                    body: file,
+                });
+                if (!fileUploadRes.ok) {
+                    throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+                }
+                const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                    reportUploadSuccessApiUrl, { storageId: createDataSourceApiRes.fileInfo.storageId, status: 1 }
+                );
+                runInAction(() => {
+                    this.uploadingDataSource = false;
+                });
+                return {
+                    id: createDataSourceApiRes.id,
+                    downloadUrl: reportUploadSuccessApiRes.downloadUrl,
+                };
+            } catch (error) {
+                notify({
+                    type: 'error',
+                    title: '[saveDataSourceOnCloud]',
+                    content: `${error}`,
+                });
+                runInAction(() => {
+                    this.uploadingDataSource = false;
+                });
+                return null;
+            }
+        };
+        if (this.organization && this.workspace && !this.uploadingDataSource) {
+            return send();
+        }
+        this.uploadDataSource = () => {
+            if (this.organization && this.workspace && !this.uploadingDataSource) {
+                send().then(res => {
+                    if (res) {
+                        this.uploadDataSource = null;
+                    }
+                });
+            }
+        };
+        return null;
+    }
+
+    public async saveDataSourceOnCloudOnlineMode(
+        params: ICreateDataSourcePayload<'online'>,
+    ): Promise<{ id: string } | null> {
+        const send = async () => {
+            if (!this.workspace || !this.organization || this.uploadingDataSource) {
+                return null;
+            }
+            runInAction(() => {
+                this.uploadingDataSource = true;
+            });
+            const createDataSourceApiUrl = getMainServiceAddress('/api/ce/datasource');
+            try {
+                const createDataSourceApiRes = await request.post<typeof params & { workspaceName: string }, ICreateDataSourceResult<'online'>>(
+                    createDataSourceApiUrl, {
+                        ...params,
+                        workspaceName: this.workspace.name,
+                    }
+                );
+                const dataSource = await this.fetchDataSource(this.workspace.name, createDataSourceApiRes.id);
+                if (!dataSource) {
+                    throw new Error('Data source not existed');
+                }
+                this.setCloudDataSource(dataSource, this.organization.name, this.workspace.name);
+                runInAction(() => {
+                    this.uploadingDataSource = false;
+                });
+                return { id: createDataSourceApiRes.id };
+            } catch (error) {
+                notify({
+                    type: 'error',
+                    title: '[saveDataSourceOnCloud]',
+                    content: `${error}`,
+                });
+                runInAction(() => {
+                    this.uploadingDataSource = false;
+                });
+                return null;
+            }
+        };
+        if (this.organization && this.workspace && !this.uploadingDataSource) {
+            return send();
+        }
+        this.uploadDataSource = () => {
+            if (this.organization && this.workspace && !this.uploadingDataSource) {
+                send().then(res => {
+                    if (res) {
+                        this.uploadDataSource = null;
+                    }
+                });
+            }
+        };
+        return null;
+    }
+
+    public async saveDatasetOnCloud(payload: ICreateDatasetPayload, file: File) {
+        const { userStore } = getGlobalStore();
+        const createDatasetApiUrl = getMainServiceAddress('/api/ce/dataset');
+        const reportUploadSuccessApiUrl = getMainServiceAddress('/api/ce/upload/callback');
+        try {
+            const respond = await fetch(createDatasetApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload),
+            });
+            if (!respond.ok) {
+                throw new Error(respond.statusText);
+            }
+            const createDatasetApiRes = await respond.json() as (
+                | { success: false; message: string }
+                | { success: true; data: ICreateDatasetResult }
+            );
+            if (!createDatasetApiRes.success) {
+                throw new Error(createDatasetApiRes.message);
+            }
+            const fileUploadRes = await fetch(createDatasetApiRes.data.uploadUrl, {
+                method: 'PUT',
+                body: file,
+            });
+            if (!fileUploadRes.ok) {
+                throw new Error(`Failed to upload file: ${fileUploadRes.statusText}`);
+            }
+            const reportUploadSuccessApiRes = await request.get<{ storageId: string; status: 1 }, { downloadUrl: string }>(
+                reportUploadSuccessApiUrl, { storageId: createDatasetApiRes.data.storageId, status: 1 }
+            );
+            const dataset = await userStore.fetchDataset(payload.workspaceName, createDatasetApiRes.data.datasetId);
+            if (!dataset) {
+                throw new Error('Dataset not existed');
+            }
+            this.setCloudDataset(dataset);
+            return reportUploadSuccessApiRes;
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: '[saveDatasetOnCloud]',
+                content: `${error}`,
+            });
+            return null;
+        }
+    }
+
+    public setCloudDataset(dataset: IDatasetMeta) {
+        this.cloudDatasetMeta = dataset;
+        this.currentOrgName = dataset.organization.name;
+        this.currentWspName = dataset.workspace.name;
+    }
+
+    public setCloudDataSource(dataSource: IDataSourceMeta, organizationName?: string, workspaceName?: string) {
+        this.cloudDataSourceMeta = dataSource;
+        if (organizationName) {
+            this.currentOrgName = organizationName;
+        }
+        if (workspaceName) {
+            this.currentWspName = workspaceName;
+        }
+    }
+
+    public setOrgName(orgName: string | null): boolean {
+        const org = this.info?.organizations?.find(which => which.name === orgName);
+        if (!org) {
+            this.currentOrgName = null;
+            return false;
+        }
+        this.currentOrgName = orgName;
+        const wsp = org.workspaces?.find(which => which.name === this.currentWspName);
+        if (!wsp) {
+            this.currentWspName = null;
+        }
+        return true;
+    }
+
+    public setWspName(wspName: string | null) {
+        this.currentWspName = wspName;
     }
 
 }

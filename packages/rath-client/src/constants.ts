@@ -71,3 +71,6 @@ export const RathEnv: RATH_ENV = (
         : globalThis.window === undefined || globalThis.window?.location.host.match(/^(.*\.)?kanaries\.(net|cn)$/) ? RATH_ENV.ONLINE
         : globalThis.window?.location.host.match(/^.*kanaries\.vercel\.app$/) ? RATH_ENV.IPE : RATH_ENV.LPE
 );
+
+export const KanariesDatasetFilenameCloud = 'data.kanaries-data';
+export const KanariesDatasetPackCloudExtension = 'kanaries-pack';

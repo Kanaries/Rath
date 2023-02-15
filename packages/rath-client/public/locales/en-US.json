@@ -53,7 +53,9 @@
             "searchViews": "Search Views",
             "searchFields": "Search fields / variables",
             "notFound": "No results found"
-        }
+        },
+        "list": "List",
+        "gallery": "Gallery"
     },
     "menu": {
         "dataSource": "DataSource",
@@ -238,7 +240,14 @@
                 "mysql": "MySQL",
                 "demo": "Demo",
                 "database": "Database",
-                "rath_notebook": "Notebook"
+                "kanaries_cloud": "Cloud"
+            },
+            "cloud": {
+                "notebook": "Notebook",
+                "dataset": "Dataset",
+                "dashboard": "Dashboard",
+                "dashboard_template": "Dashboard Template",
+                "total": "Total"
             },
             "demo": {
                 "available": "Available Datasets"
@@ -294,7 +303,7 @@
             "history": "Open Recent",
             "history_time": {
                 "1d": "Today",
-                "1w": "Last weak",
+                "1w": "Last week",
                 "1mo": "Last month",
                 "3mo": "Last 3 months",
                 "6mo": "Last half a year",
@@ -372,7 +381,7 @@
     },
     "storage": {
         "upload": "Save to Cloud",
-        "upload_desc": "Backup your Rath notebook.",
+        "upload_desc": "Backup your {mode}.",
         "components": {
             "data": "Raw Data ({size} rows)",
             "meta": "Meta Data ({size} fields)",
@@ -383,10 +392,20 @@
         "download": "Load",
         "createdAt": "Created At",
         "refresh": "Refresh",
-        "name": "Notebook Name",
-        "default_name": "Rath Notebook {date}",
+        "name": "{mode} Name",
+        "default_name": "Rath {mode} {date}",
+        "desc": "{mode} Description",
+        "data_source_name": "Data Source Name",
+        "upload_data_source": "Bind Data Source",
+        "cover": "Cover",
+        "bind_dataset": "Bind with Dataset",
+        "field_desc": "Field Description",
         "size": "Size",
-        "apply": "Upload"
+        "apply": "Upload",
+        "public": "Public",
+        "publish_template": "Publish Template",
+        "overwrite": "Overwrite",
+        "auto_save": "Auto Save"
     },
     "meta": {
         "title": "Meta Config",

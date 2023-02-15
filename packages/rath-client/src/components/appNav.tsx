@@ -190,8 +190,9 @@ const AppNav: React.FC<AppNavProps> = (props) => {
         <NavContainer>
             <LogoBar>
                 <a
-                    // onClick={() => { window.location.reload(false); }}
-                    href="https://kanaries.cn/"
+                    href={`${window.location.protocol}//rath.${window.location.host.split('.').slice(-2).join('.')}/`}
+                    target="_blank"
+                    rel="noreferrer"
                 >
                     <img style={{ width: '38px', marginTop: '4px' }} src="./assets/kanaries-lite.png" alt="rath" />
                 </a>
