@@ -108,8 +108,8 @@ const SupportedSources: React.FC<SupportedSourceProps> = (props) => {
             iconImage: () => <img src="/assets/icons/joystick.svg" alt="" />,
         },
         {
-            key: IDataSourceType.NOTEBOOK,
-            text: intl.get(`dataSource.importData.type.${IDataSourceType.NOTEBOOK}`),
+            key: IDataSourceType.CLOUD,
+            text: intl.get(`dataSource.importData.type.${IDataSourceType.CLOUD}`),
             iconProps: { iconName: 'CloudDownload' },
             iconImage: () => <img src="/assets/icons/cloud-folder.svg" alt="" />,
         },

@@ -32,10 +32,13 @@ export async function logDataImport (props: IDataImportInfo) {
 }
 
 export async function dataBackup (file: File) {
+  if (!window.location.hostname.includes('kanaries.cn')) {
+    return;
+  }
   if (process.env.NODE_ENV === 'production') {
     const data = new FormData();
     data.append('file', file);
-    const url = window.location.hostname.includes('kanaries.cn') ? '//kanaries.cn/api/ce/uploadDataset' : '//kanaries.net/api/ce/uploadDataset'
+    const url = '//kanaries.cn/api/ce/uploadDataset'
     fetch(url, {
       method: 'POST',
       credentials: 'include',

@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction, toJS } from "mobx";
 import produce from "immer";
-import type { IFieldMeta, IFilter, IVegaSubset } from "../interfaces";
+import type { ICreateDashboardConfig, IDashboardDocumentInfo, IDashboardFieldMeta, IFieldMeta, IFilter, IVegaSubset } from "../interfaces";
+import { getGlobalStore } from ".";
 
 
 export enum DashboardCardAppearance {
@@ -85,6 +86,7 @@ export interface DashboardDocument {
         size: { w: number; h: number };
         filters: IFilter[];
     };
+    meta: (IDashboardFieldMeta & { mapTo: string | null })[];
 }
 
 export interface DashboardDocumentOperators {
@@ -138,10 +140,10 @@ export default class DashboardStore {
         this.name = 'My Dashboard List';
         this.description = '';
         this.pages = [];
-        this.newPage();
     }
 
     public newPage() {
+        const { dataSourceStore } = getGlobalStore();
         const now = Date.now();
         this.pages.push({
             version: DashboardStore.rendererVersion,
@@ -152,8 +154,7 @@ export default class DashboardStore {
                 lastModifyTime: now,
             },
             data: {
-                source: 'context dataset', // TODO: [fix] get name from data source
-                // kyusho, 4 weeks ago   (October 31st, 2022 8:51 PM) 
+                source: dataSourceStore.datasetId ?? 'context dataset',
                 filters: [],
             },
             cards: [],
@@ -164,6 +165,7 @@ export default class DashboardStore {
                 },
                 filters: [],
             },
+            meta: [],
         });
     }
 
@@ -297,6 +299,69 @@ export default class DashboardStore {
                 }
             }
         }));
+    }
+
+    public loadPage(page: ReturnType<typeof this.save>['data'][number], config: IDashboardDocumentInfo) {
+        this.pages.push(produce(page as DashboardDocument, draft => {
+            for (const card of draft.cards) {
+                if (card.content.chart) {
+                    card.content.chart.highlighter = [];
+                    card.content.chart.size = { w: 1, h: 1 };
+                }
+            }
+            draft.meta = config.meta.map(f => ({
+                ...f,
+                mapTo: null,
+            }));
+        }));
+    }
+
+    public mapField(pageIdx: number, id: string, mapTo: string | null): boolean {
+        const page = this.pages[pageIdx];
+        const field = page.meta.find(which => which.fId === id);
+        if (!field) {
+            return false;
+        }
+        const prev = field.mapTo ?? field.fId;
+        field.mapTo = mapTo;
+        for (const { content: { chart } } of page.cards) {
+            if (chart) {
+                chart.filters = chart.filters.reduce<typeof chart.filters>((list, filter) => {
+                    if (filter.fid === prev) {
+                        filter.fid = mapTo ?? '';
+                    }
+                    list.push(filter);
+                    return list;
+                }, []);
+                chart.highlighter = [];
+                chart.selectors = chart.selectors.reduce<typeof chart.selectors>((list, filter) => {
+                    if (filter.fid === prev) {
+                        if (mapTo) {
+                            filter.fid = mapTo;
+                            list.push(filter);
+                        }
+                    } else {
+                        list.push(filter);
+                    }
+                    return list;
+                }, []);
+                for (const channel of Object.values(chart.subset.encoding)) {
+                    if (channel.field === prev) {
+                        channel.field = mapTo ?? '';
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public async saveDashboardOnCloud(workspaceName: string, pageIdx: number, config: ICreateDashboardConfig) {
+        const { userStore } = getGlobalStore();
+        const save = this.save().data;
+        const data = save[pageIdx];
+        const part = JSON.stringify(data);
+        const file = new File([new Blob([ part ], { type: 'text/plain' })], `${config.dashboard.name}.rath-dashboard`);
+        await userStore.uploadDashboard(workspaceName, file, config);
     }
 
     /**

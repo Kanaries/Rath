@@ -1,12 +1,14 @@
 import { DetailsList, DetailsRow, IColumn, IconButton, IDetailsRowProps, Layer, SelectionMode } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { FC, useCallback, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import type { DashboardDocument } from '../../store/dashboardStore';
 import DocumentPreview from './document-preview';
 import { EditableCell } from './dashboard-homepage';
+import BackupDialog from './backup-dialog';
+
 
 const TableContainer = styled.div`
     flex-grow: 1;
@@ -18,7 +20,6 @@ const TableContainer = styled.div`
 `;
 
 const CustomRow = styled.div`
-    cursor: pointer;
     .button-group {
         opacity: 0;
     }
@@ -63,18 +64,15 @@ const PreviewPopup = styled.div`
 
 const Row = observer(function Row({
     content,
-    handleClick,
     handleMouseOn,
     handleMouseOut,
 }: {
     content: IDetailsRowProps;
-    handleClick: () => void;
     handleMouseOn: (x: number, y: number) => void;
     handleMouseOut: () => void;
 }) {
     return (
         <CustomRow
-            onClick={handleClick}
             onMouseEnter={(e) => {
                 const { y } = (e.target as HTMLDivElement).getBoundingClientRect();
                 handleMouseOn(e.clientX, y);
@@ -101,7 +99,8 @@ export interface DashboardListProps {
 }
 
 const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
-    const { dashboardStore } = useGlobalStore();
+    const { dashboardStore, userStore } = useGlobalStore();
+    const { loggedIn, cloudDataSourceMeta } = userStore;
 
     const [sortMode, setSortMode] = useState<{
         key: Exclude<keyof FlatDocumentInfo, 'description' | 'index'>;
@@ -116,8 +115,46 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
         position: [number, number];
     } | null>(null);
 
+    const items = useMemo(() => pages.map<FlatDocumentInfo>((p, i) => ({
+        index: i,
+        name: p.info.name,
+        source: p.data.source,
+        description: p.info.description,
+        createTime: p.info.createTime,
+        lastModifyTime: p.info.lastModifyTime,
+    })), [pages]);
+
+    // TODO: release dashboard upload feature
+    const canBackup = Boolean(loggedIn && cloudDataSourceMeta) && false;
+
+    const [selected, setSelected] = useState<FlatDocumentInfo | null>(null);
+
+    useEffect(() => {
+        setSelected(null);
+    }, [items]);
+
+    const openDocumentRef = useRef(openDocument);
+    openDocumentRef.current = openDocument;
+
     const columns = useMemo<(IColumn & { key: keyof FlatDocumentInfo | 'action'; fieldName?: keyof FlatDocumentInfo })[]>(() => {
         return [
+            {
+                key: 'action',
+                name: '',
+                minWidth: canBackup ? 96 : 64,
+                onRender(item) {
+                    const { operators } = dashboardStore.fromPage(item['index']);
+                    return (
+                        <ButtonGroup className="button-group" onClick={(e) => e.stopPropagation()}>
+                            <IconButton iconProps={{ iconName: 'BarChartVerticalEdit' }} onClick={() => openDocumentRef.current((item as FlatDocumentInfo).index)} />
+                            <IconButton iconProps={{ iconName: 'Copy' }} onClick={operators.copy} />
+                            {/* <IconButton iconProps={{ iconName: 'Download' }} onClick={operators.download} /> */}
+                            {canBackup && <IconButton iconProps={{ iconName: 'CloudUpload' }} onClick={() => setSelected(item)} />}
+                            <IconButton iconProps={{ iconName: 'Delete', style: { color: '#f21044' } }} onClick={operators.remove} />
+                        </ButtonGroup>
+                    );
+                },
+            },
             {
                 key: 'source',
                 name: 'source' || intl.get(''),
@@ -175,32 +212,8 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                     return new Date(item['lastModifyTime']).toLocaleString();
                 },
             },
-            {
-                key: 'action',
-                name: '',
-                minWidth: 96,
-                onRender(item) {
-                    const { operators } = dashboardStore.fromPage(item['index']);
-                    return (
-                        <ButtonGroup className="button-group" onClick={(e) => e.stopPropagation()}>
-                            <IconButton iconProps={{ iconName: 'Copy' }} onClick={operators.copy} />
-                            <IconButton iconProps={{ iconName: 'Download' }} onClick={operators.download} />
-                            <IconButton iconProps={{ iconName: 'Delete', style: { color: '#f21044' } }} onClick={operators.remove} />
-                        </ButtonGroup>
-                    );
-                },
-            },
         ];
-    }, [sortMode, dashboardStore]);
-
-    const items = pages.map<FlatDocumentInfo>((p, i) => ({
-        index: i,
-        name: p.info.name,
-        source: p.data.source,
-        description: p.info.description,
-        createTime: p.info.createTime,
-        lastModifyTime: p.info.lastModifyTime,
-    }));
+    }, [sortMode, dashboardStore, canBackup]);
 
     const sortedItems = useMemo<typeof items>(() => {
         const flag = sortMode.direction === 'descending' ? -1 : 1;
@@ -252,21 +265,23 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                     columns={columns}
                     onColumnHeaderClick={(_, col) => col && toggleSort(col.key as typeof sortMode.key)}
                     selectionMode={SelectionMode.none}
-                    onRenderRow={(props) =>
-                        props ? (
-                            <Row
-                                content={props}
-                                handleClick={() => openDocument((props.item as FlatDocumentInfo).index)}
-                                handleMouseOn={(x, y) =>
-                                    setPreviewSource({
-                                        source: (props.item as FlatDocumentInfo).index,
-                                        position: [x, y],
-                                    })
-                                }
-                                handleMouseOut={() => setPreviewSource(null)}
-                            />
-                        ) : null
-                    }
+                    onRenderRow={props => {
+                        if (props) {
+                            return (
+                                <Row
+                                    content={props}
+                                    handleMouseOn={(x, y) =>
+                                        setPreviewSource({
+                                            source: (props.item as FlatDocumentInfo).index,
+                                            position: [x, y],
+                                        })
+                                    }
+                                    handleMouseOut={() => setPreviewSource(null)}
+                                />
+                            );
+                        }
+                        return null;
+                    }}
                 />
             </TableContainer>
             <Layer>
@@ -276,6 +291,13 @@ const DashboardList: FC<DashboardListProps> = ({ openDocument, pages }) => {
                     </PreviewPopup>
                 )}
             </Layer>
+            {selected && (
+                <BackupDialog
+                    open={Boolean(selected)}
+                    onDismiss={() => setSelected(null)}
+                    value={selected}
+                />
+            )}
         </>
     );
 };

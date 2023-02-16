@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { Dropdown, Pivot, PivotItem, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, useState } from 'react';
@@ -31,27 +32,27 @@ export enum VIEW_TYPE {
 export enum MATRIX_TYPE {
     mutualInfo = 'mutual_info',
     conditionalMutualInfo = 'conditional_mutual_info',
-    causal = 'causal',
+    causal = 'causal_discover',
 }
 
 const MATRIX_PIVOT_LIST = [
-    { itemKey: MATRIX_TYPE.mutualInfo, text: '关联信息' || 'Mutual Info', taskLabel: '计算' || 'Compute' },
+    { itemKey: MATRIX_TYPE.mutualInfo, text: MATRIX_TYPE.mutualInfo, taskLabel: 'compute' },
     {
         itemKey: MATRIX_TYPE.conditionalMutualInfo,
-        text: '条件关联信息' || 'Conditional Mutual Info',
-        taskLabel: '计算' || 'Compute',
+        text: MATRIX_TYPE.conditionalMutualInfo,
+        taskLabel: 'compute',
     },
-    { itemKey: MATRIX_TYPE.causal, text: '因果发现' || 'Causal Discovery', taskLabel: '因果发现' || 'Causal Discover', iconName: 'Relationship' },
+    { itemKey: MATRIX_TYPE.causal, text: MATRIX_TYPE.causal, taskLabel: MATRIX_TYPE.causal, iconName: 'Relationship' },
 ];
 
 const VIEW_LABELS = [
-    { key: 'matrix', text: '矩阵' },
-    { key: 'diagram', text: '图（PAG）' },
+    { key: 'matrix', text: 'matrix' },
+    { key: 'diagram', text: 'diagram' },
 ];
 
 const MARK_LABELS = [
-    { key: 'circle', text: '圆形' || 'Circle' },
-    { key: 'square', text: '矩形' },
+    { key: 'circle', text: 'circle' },
+    { key: 'square', text: 'square' },
 ];
 
 function showMatrix(causalFields: readonly IFieldMeta[], mat: readonly (readonly number[])[], computing: boolean): boolean {
@@ -73,6 +74,16 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
     const { mutualMatrix, condMutualMatrix, causalityRaw } = causalStore.model;
     const { busy } = causalStore.operator;
 
+    const viewOptions = VIEW_LABELS.map(opt => ({
+        key: opt.key,
+        text: intl.get(`causal.analyze.${opt.text}`),
+    }));
+
+    const markOptions = MARK_LABELS.map(opt => ({
+        key: opt.key,
+        text: intl.get(`causal.analyze.${opt.text}`),
+    }));
+
     return (
         <Cont>
             <Pivot
@@ -86,12 +97,14 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                 }}
             >
                 {MATRIX_PIVOT_LIST.map((item) => {
-                    return <PivotItem key={item.itemKey} headerText={item.text} itemKey={item.itemKey} itemIcon={item.iconName} />;
+                    return <PivotItem key={item.itemKey} headerText={intl.get(`causal.analyze.${item.text}`)} itemKey={item.itemKey} itemIcon={item.iconName} />;
                 })}
             </Pivot>
             <Stack style={{ marginBottom: '1em' }} tokens={{ childrenGap: 10 }}>
                 <PrimaryButton
-                    text={MATRIX_PIVOT_LIST.find((item) => item.itemKey === selectedKey)?.taskLabel}
+                    text={intl.get(`causal.actions.${
+                        MATRIX_PIVOT_LIST.find((item) => item.itemKey === selectedKey)?.taskLabel
+                    }`)}
                     onRenderText={(props, defaultRenderer) => {
                         return (
                             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} >
@@ -112,8 +125,8 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                 />
                 {selectedKey === MATRIX_TYPE.causal && (
                     <Dropdown
-                        options={VIEW_LABELS}
-                        label="视图"
+                        options={viewOptions}
+                        label={intl.get('causal.analyze.view')}
                         selectedKey={viewType}
                         onChange={(e, op) => {
                             op && setViewType(op.key as VIEW_TYPE);
@@ -134,8 +147,8 @@ const MatrixPanel: FC<MatrixPanelProps> = (props) => {
                 )}
                 {viewType === VIEW_TYPE.matrix && (
                     <Dropdown
-                        options={MARK_LABELS}
-                        label="标记"
+                        options={markOptions}
+                        label={intl.get('causal.analyze.mark')}
                         selectedKey={markType}
                         onChange={(e, op) => {
                             op && setMarkType(op.key as 'circle' | 'square');

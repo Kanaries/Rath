@@ -21,7 +21,10 @@ import {
     IExtField,
     IteratorStorageMetaInfo,
     IBackUpDataMeta,
-    IBackUpData
+    IBackUpData,
+    IDatasetMeta,
+    DataSourceType,
+    IDashboardDocumentInfo,
 } from "../interfaces";
 import { cleanDataService, filterDataService,  inferMetaService, computeFieldMetaService } from "../services/index";
 import { expandDateTimeService } from "../dev/services";
@@ -30,7 +33,7 @@ import { findRathSafeColumnIndex, colFromIRow, readableWeekday } from "../utils"
 import { fromStream, StreamListener, toStream } from "../utils/mobx-utils";
 import { getQuantiles } from "../lib/stat";
 import { IteratorStorage } from "../utils/iteStorage";
-import { updateDataStorageMeta } from "../utils/storage";
+import { DataSourceTag, updateDataStorageMeta } from "../utils/storage";
 import { termFrequency, termFrequency_inverseDocumentFrequency } from "../lib/nlp/tf-idf";
 import { IsolationForest } from "../lib/outlier/iforest";
 import { compressRows, uncompressRows } from "../utils/rows2csv";
@@ -38,9 +41,11 @@ import { extractSelection, ITextPattern } from "../lib/textPattern";
 import { getGlobalStore } from ".";
 
 interface IDataMessage {
-    type: 'init_data' | 'others' | 'download';
+    type: 'init_data' | 'dataset' | 'others' | 'download';
     data: IDatasetBase
     downLoadURL?: string;
+    dataset?: IDatasetMeta;
+    dashboard?: IDashboardDocumentInfo[];
 }
 
 // 关于dataSource里的单变量分析和pipeline整合的考虑：
@@ -104,6 +109,7 @@ export class DataSourceStore {
     private reactions: IReactionDisposer[] = []
     public datasetId: string | null = null;
     public showCustomizeComputationModal: boolean = false;
+    public sourceType = DataSourceType.Unknown;
     constructor() {
         makeAutoObservable(this, {
             cookedDataSource: observable.ref,
@@ -127,6 +133,7 @@ export class DataSourceStore {
         this.reactions = [];
     }
     public initStore () {
+        this.datasetId = null;
         this.rawDataMetaInfo = {
             versionCode: -1,
             length: 0,
@@ -214,19 +221,70 @@ export class DataSourceStore {
         })
         this.fieldMetasRef = fromStream(fieldMetas$, [])
         this.cleanedDataRef = fromStream(cleanedData$, []);
+        let loadTaskReceived = false;
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
-            const { type, downLoadURL } = msg;
+            const { type, downLoadURL, dataset/*, dashboard*/ } = msg;
             const { userStore } = getGlobalStore();
-            if (type === 'download' && downLoadURL) {
-                userStore.openNotebook(downLoadURL);
-            }
-            if (ev.source && msg.type === 'init_data') {
-                console.warn('[Get DataSource From Other Pages]', msg)
-                // @ts-ignore
-                ev.source.postMessage(true, ev.origin)
-                this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
-                this.setShowDataImportSelection(false);
+            switch (type) {
+                case 'download': {
+                    if (downLoadURL && !loadTaskReceived) {
+                        loadTaskReceived = true;
+                        console.warn('[Get Notebook From Other Pages]', msg);
+                        userStore.openNotebook(downLoadURL);
+                    }
+                    break;
+                }
+                case 'dataset': {
+                    if (ev.source && !loadTaskReceived) {
+                        loadTaskReceived = true;
+                        console.warn('[Initialize From Other Pages]', msg);
+                        new Promise<{
+                            dataset?: boolean;
+                            dashboard?: boolean;
+                        }>(resolve => {
+                            if (dataset) {
+                                userStore.openDataset(dataset).then(ok => {
+                                    resolve({
+                                        dataset: ok,
+                                    });
+                                });
+                            } else {
+                                resolve({});
+                            }
+                        }).then(part => new Promise<typeof part>(resolve => {
+                            // TODO: release dashboard feature
+                            resolve(part);
+                            // if (dashboard) {
+                            //     userStore.openDashboardTemplates(dashboard).then(ok => {
+                            //         resolve({
+                            //             ...part,
+                            //             dashboard: ok,
+                            //         });
+                            //     });
+                            // } else {
+                            //     resolve(part);
+                            // }
+                        })).then(state => {
+                            // @ts-ignore
+                            ev.source!.postMessage({ type: "dataset", result: state }, ev.origin);
+                        });
+                    }
+                    break;
+                }
+                case 'init_data': {
+                    if (ev.source) {
+                        console.warn('[Get DataSource From Other Pages]', msg)
+                        // @ts-ignore
+                        ev.source.postMessage(true, ev.origin)
+                        this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
+                        this.setShowDataImportSelection(false);
+                    }
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
         })
         this.subscriptions.push(rawDataMetaInfo$.subscribe(() => {
@@ -493,11 +551,19 @@ export class DataSourceStore {
         this.fieldMetasRef.current = state.fieldMetas
     } 
 
-    public async loadDataWithInferMetas (dataSource: IRow[], fields: IMuteFieldBase[]) {
+    public async loadDataWithInferMetas (dataSource: IRow[], fields: IMuteFieldBase[], tag?: DataSourceTag | undefined) {
         if (fields.length > 0 && dataSource.length > 0) {
             const metas = await inferMetaService({ dataSource, fields })
             await this.rawDataStorage.setAll(dataSource)
             runInAction(() => {
+                this.sourceType = tag ? {
+                    [DataSourceTag.AIR_TABLE]: DataSourceType.AirTable,
+                    [DataSourceTag.DATABASE]: DataSourceType.Database,
+                    [DataSourceTag.DEMO]: DataSourceType.Unknown,
+                    [DataSourceTag.FILE]: DataSourceType.File,
+                    [DataSourceTag.OLAP]: DataSourceType.Olap,
+                    [DataSourceTag.RESTFUL]: DataSourceType.Unknown,
+                }[tag] : DataSourceType.Unknown;
                 this.loading = false;
                 this.rawDataMetaInfo = this.rawDataStorage.metaInfo;
                 this.showDataImportSelection = false;
@@ -1101,6 +1167,8 @@ export class DataSourceStore {
         this.extData = new Map(extData);
         await rawDataStorage.setAll(uncompressRows(rawData, meta.mutFields.map(f => f.fid)));
         runInAction(() => {
+            this.sourceType = DataSourceType.Unknown;
+            this.datasetId = null;
             this.rawDataMetaInfo = rawDataStorage.metaInfo;
             this.mutFields = meta.mutFields;
             this.extFields = meta.extFields;
@@ -1113,6 +1181,8 @@ export class DataSourceStore {
     public async loadBackupMetaStore (data: IBackUpDataMeta) {
         const { mutFields, extFields, rawDataMetaInfo, filters, cleanMethod } = data;
         runInAction(() => {
+            this.sourceType = DataSourceType.Unknown;
+            this.datasetId = null;
             this.mutFields = mutFields;
             this.extFields = extFields;
             this.rawDataMetaInfo = rawDataMetaInfo;

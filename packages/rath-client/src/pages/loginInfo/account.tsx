@@ -1,4 +1,3 @@
-import React from 'react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
 import { DefaultButton, Pivot, PivotItem, Stack, TextField } from '@fluentui/react';
@@ -7,6 +6,7 @@ import { IAccessMethod } from '../../interfaces';
 import PhoneAuth from './access/phoneAuth';
 import EmailAuth from './access/emailAuth';
 import PasswordLogin from './access/passwordLogin';
+import WorkspaceRole from './workspaceRole';
 
 const PIVOT_LIST = [
     {
@@ -54,8 +54,9 @@ function Account() {
             {userIsOnline && (
                 <div>
                     <Stack tokens={{ childrenGap: 12 }}>
-                        <TextField label="Phone" value={info?.phone} disabled={true} />
-                        <TextField label="Email" value={info?.email} disabled={true} />
+                        <WorkspaceRole />
+                        <TextField label="Phone" value={info?.phone} disabled />
+                        <TextField label="Email" value={info?.email} disabled />
                         <div>
                             <DefaultButton
                                 onClick={() => {

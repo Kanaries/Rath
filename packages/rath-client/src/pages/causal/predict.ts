@@ -3,10 +3,10 @@ import type { IRow, IFieldMeta } from "../../interfaces";
 
 
 export const PredictAlgorithms = [
-    { key: 'decisionTree', text: '决策树（Decision Tree）' },
-    { key: 'randomForest', text: '随机森林（Random Forest）' },
-    { key: 'gradientBoosting', text: '梯度增强（Gradient Boosting）' },
-    { key: 'adaBoost', text: '自适应增强（AdaBoost）' },
+    { key: 'decisionTree', text: 'Decision Tree' },
+    { key: 'randomForest', text: 'Random Forest' },
+    { key: 'gradientBoosting', text: 'Gradient Boosting' },
+    { key: 'adaBoost', text: 'AdaBoost' },
     { key: 'XGBoost', text: 'XGBoost' }
 ] as const;
 

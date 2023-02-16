@@ -232,7 +232,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
 
     return (
         <>
-            <header style={{ margin: '1em 0' }}>{'线索洞察' || 'Why Query'}</header>
+            <header style={{ margin: '1em 0' }}>{intl.get('causal.analyze.why_query')}</header>
             {/* TODO: 这里面手风琴 + TOC 的设计个人比较满意，有时间可以优化下样式然后作为组件抽出去 */}
             <ExploreQueue>
                 <div className="tool">
@@ -295,7 +295,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
             </ExploreQueue>
             <Container>
                 {list.length === 0 ? (
-                    <p>没有更多的线索</p>
+                    <p>{intl.get('causal.analyze.no_more_hints')}</p>
                 ) : (
                     <TabList role="tablist">
                         {list.map((res, i) => {
@@ -320,14 +320,14 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                     {i === cursor && (
                                         <div role="tabpanel" id={getTabId(i)}>
                                             <Toggle
-                                                label="标准化堆叠"//"Normalize Stack"
+                                                label={intl.get('causal.analyze.normalize_stack')}
                                                 inlineLabel
                                                 checked={normalize}
                                                 onChange={(_, checked) => setNormalize(Boolean(checked))}
                                             />
                                             <br />
                                             <ExplainChart
-                                                title="全局分布"
+                                                title={intl.get('causal.analyze.global_dist')}
                                                 data={data}
                                                 mainField={tar}
                                                 mainFieldAggregation={null}
@@ -336,7 +336,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                                 normalize={normalize}
                                             />
                                             <DiffChart
-                                                title="对比分布"
+                                                title={intl.get('causal.analyze.diff_dist')}
                                                 data={data}
                                                 subspaces={indices}
                                                 mainField={tar}

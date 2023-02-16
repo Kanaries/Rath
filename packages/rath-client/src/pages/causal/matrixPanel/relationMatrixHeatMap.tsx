@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { ActionButton } from '@fluentui/react';
 import type { DeepReadonly } from '@kanaries/graphic-walker/dist/interfaces';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -54,7 +55,7 @@ const ExportGraphButton: React.FC<Props> = ({ data, fields }) => {
     }, [value.name]);
     return (
         <ActionButton iconProps={{ iconName: 'Download' }} onClick={handleExport}>
-            导出为图
+            {intl.get('causal.actions.export_diagram')}
         </ActionButton>
     );
 };

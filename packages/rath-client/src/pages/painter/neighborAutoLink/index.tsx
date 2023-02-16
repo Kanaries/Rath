@@ -65,13 +65,15 @@ const NeighborAutoLink: React.FC<NALProps> = (props) => {
                 if (true) {
                     const Y = data.map((r) => r[field.fid]);
                     const score = purennMic(X, Y);
-                    ans.push({
-                        field,
-                        score,
-                    });
+                    if (!isNaN(score)) {
+                        ans.push({
+                            field,
+                            score,
+                        });
+                    }
                 }
             }
-            ans.sort((a, b) => b.score - a.score);
+            ans.sort((a, b) => Number(b.score) - Number(a.score));
             setNearFields(ans.map((a) => a.field));
             painterStore.setPainting(false);
         },

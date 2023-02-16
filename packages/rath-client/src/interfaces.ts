@@ -268,3 +268,215 @@ export interface IRawFeatures {
 }
 
 export type ISpecSourceType = 'default' | 'custom';
+
+export enum CloudAccessModifier {
+    PUBLIC = 1,
+    PROTECTED = 2,
+}
+
+export enum DataSourceType {
+    File = 1,
+    Database = 2,
+    Olap = 3,
+    AirTable = 4,
+    Restful = 5,
+    Unknown = 6,
+}
+
+export type ICreateDataSourcePayload<Mode extends 'online' | 'offline'> = {
+    name: string;
+    datasourceType: DataSourceType;
+} & (
+    Mode extends 'online' ? {
+        linkInfo: Record<string, any>;
+    } : {
+        fileInfo: {
+            fileType?: string;
+            fileName: string;
+            /** bytes */
+            fileSize: number;
+        };
+    }
+);
+
+export type ICreateDataSourceResult<Mode extends 'online' | 'offline'> = {
+    id: string;
+    name: string;
+    type: CloudAccessModifier;
+} & (
+    Mode extends 'online' ? {
+        linkInfo: Record<string, any>;
+    } : {
+        fileInfo: {
+            storageId: string;
+            fileType: string;
+            fileName: string;
+            /** bytes */
+            fileSize: number;
+            uploadUrl: string;
+        };
+    }
+);
+
+export interface IDatasetFieldMeta {
+    name: string;
+    fid: string;
+    semanticType: ISemanticType;
+    analyticType: IAnalyticType;
+    geoRole: IGeoRole;
+    features: IFieldMeta['features'];
+}
+
+export interface IDataSourceMeta {
+    id: string;
+    name: string;
+    type: DataSourceType;
+    fileInfo?: {
+        storageId: number;
+        fileType: string;
+        fileName: string;
+        /** bytes */
+        fileSize: number;
+        download_url: string;
+    };
+    createAt: number;
+}
+
+export type ICreateDatasetPayload = {
+    /** declared -> overwrite; undeclared -> create; */
+    id?: string;
+    datasourceId: string;
+    name: string;
+    workspaceName: string;
+    type: CloudAccessModifier;
+    /** bytes */
+    size: number;
+    totalCount: number;
+    meta: IDatasetFieldMeta[];
+};
+
+export type ICreateDatasetResult = {
+    datasetId: string;
+    storageId: string;
+    uploadUrl: string;
+};
+
+export type IDatasetMeta = {
+    id: string;
+    name: string;
+    type: CloudAccessModifier;
+    size: number;
+    totalCount: number;
+    meta: IDatasetFieldMeta[];
+    datasource: {
+        id: string;
+        name: string;
+    };
+    organization: {
+        id: string;
+        name: string;
+    };
+    workspace: {
+        id: string;
+        name: string;
+    };
+    createAt: number;
+    downloadUrl: string;
+};
+
+export type IDatasetData = {
+    data: IBackUpData;
+    meta: IBackUpDataMeta;
+};
+
+export interface ICreateDashboardPayload {
+    datasourceId: string;
+    workspaceName: string;
+    name: string;
+    publishTemplate: boolean;
+    description: string;
+    cover: {
+        name: string;
+        size: number;
+        type: string;
+    };
+    dashboard: {
+        name: string;
+        size: number;
+        type: string;
+    };
+}
+
+export interface IDashboardFieldMeta {
+    fId: string;
+    analyticType: IAnalyticType;
+    semanticType: ISemanticType;
+    description: string;
+}
+
+export interface IDashboardTemplateInfo {
+    id: string;
+    name: string;
+    description: string;
+    meta: IDashboardFieldMeta[];
+    size: number;
+    type: number;
+    storageId: string;
+    downloadUrl: string;
+    cover: {
+        name: string;
+        size: number;
+        type: string;
+        storageId: string;
+        downloadUrl: string;
+    };
+    workspace: {
+        id: string;
+        name: string;
+        ownerName: string;
+    };
+    organization: {
+        id: string;
+        type: number;
+        name: string;
+        ownerName: string;
+    };
+}
+
+
+export interface IDashboardDocumentDetail {
+    id: string;
+    name: string;
+    type: number;
+    description: string;
+    dashboardTemplate: Omit<IDashboardTemplateInfo, 'workspace' | 'organization'>;
+    workspace: {
+        id: string;
+        name: string;
+        ownerName: string;
+    };
+    organization: {
+        id: string;
+        type: number;
+        name: string;
+        ownerName: string;
+    };
+    datasource: Pick<IDataSourceMeta, 'name' | 'id'>;
+}
+
+export type IDashboardDocumentInfo = IDashboardDocumentDetail['dashboardTemplate'];
+
+export type ICreateDashboardConfig = {
+    dashboard: {
+        name: string;
+        description: string;
+        bindDataset: boolean;
+    };
+    dashboardTemplate: {
+        name: string;
+        description: string;
+        fieldDescription: Record<string, string>;
+        publish: boolean;
+        cover?: File;
+    };
+};

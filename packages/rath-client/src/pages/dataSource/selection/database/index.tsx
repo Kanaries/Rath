@@ -3,11 +3,12 @@ import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
 import { PrimaryButton, registerIcons, Spinner, Stack } from '@fluentui/react';
-import type { IMuteFieldBase, IRow } from '../../../../interfaces';
+import { DataSourceType, IMuteFieldBase, IRow } from '../../../../interfaces';
 import { DataSourceTag } from '../../../../utils/storage';
 import useAsyncState from '../../../../hooks/use-async-state';
 import useLocalStorage from '../../../../hooks/use-local-storage';
 import { notify } from '../../../../components/error';
+import { useGlobalStore } from '../../../../store';
 import { logDataImport } from '../../../../loggers/dataImport';
 import { rawData2DataWithBaseMetas } from '../../utils';
 import databaseOptions from './config';
@@ -71,7 +72,6 @@ export const defaultServers: readonly string[] = [
     'https://kanaries.cn/connector',
 ];
 
-
 const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => {
     const [servers, setServers] = useLocalStorage<string[]>('database_connector_server', []);
     const [serverList, setServerList] = useAsyncState<{ target: string; status: 'unknown' | 'pending' | 'fulfilled' | 'rejected'; lag: number }[]>(
@@ -80,6 +80,7 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
             resetBeforeTask: false,
         },
     );
+    const { userStore } = useGlobalStore();
     
     const [server, setServer] = useState(servers.at(0) ?? defaultServers[0]);
 
@@ -115,6 +116,16 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
             );
             const { dataSource, fields } = data;
 
+            userStore.saveDataSourceOnCloudOnlineMode({
+                name,
+                datasourceType: DataSourceType.Database,
+                linkInfo: {
+                    sourceType,
+                    connectUri,
+                    queryString,
+                    credentials,
+                },
+            });
             logDataImport({
                 dataType: `Database/${sourceType}`,
                 name,
