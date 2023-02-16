@@ -311,6 +311,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
                         {pageIdx === EditorKey.Monaco && (
                             <SQLEditor
                                 busy={isEditorPreviewPending}
+                                query={queryString}
                                 setQuery={q => setQueryString(q)}
                                 preview={editorPreview?.value ?? null}
                                 doPreview={query => {

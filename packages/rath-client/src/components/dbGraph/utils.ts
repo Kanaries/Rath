@@ -8,14 +8,16 @@ export const toSQL = (graph: IDBGraph, tables: TableInfo[]): string => {
         return '';
     }
 
+    let idx = 0;
+
     return graph.edges.reduce<string>((sql, link) => {
         const tableFrom = tables[link.from.table];
         const tableTo = tables[link.to.table];
 
-        return `${sql} ${link.joinOpt} ${tableTo.name} ON ${
-            tableFrom.name
-        }.${tableFrom.meta[link.from.colIdx].key} = ${tableTo.name}.${tableTo.meta[link.to.colIdx].key}`;
-    }, `SELECT * FROM ${tables[graph.edges[0].from.table].name}`);
+        return `${sql} ${link.joinOpt} ${tableTo.name} AS t_${idx++} ON t_${
+            idx - 2
+        }.${tableFrom.meta[link.from.colIdx].key} = t_${idx - 1}.${tableTo.meta[link.to.colIdx].key}`;
+    }, `SELECT * FROM ${tables[graph.edges[0].from.table].name} AS t_${idx++}`);
 };
 
 export const hasCircle = (edges: Readonly<IDBEdge[]>, from: number, to: number): boolean => {

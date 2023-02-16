@@ -53,14 +53,16 @@ const fireUpdate = (key: string, virtual: boolean): void => {
     batchUpdate();
 };
 
-const setStorageItem = <S>(key: string, value: S, virtual: boolean): void => {
+const setStorageItem = <S>(key: string, value: S, virtual: boolean, noFire = false): void => {
     if (virtual) {
         virtualStorage[key] = value;
     } else {
         localStorage.setItem(key, JSON.stringify(value));
     }
 
-    fireUpdate(key, virtual);
+    if (!noFire) {
+        fireUpdate(key, virtual);
+    }
 };
 
 const subscribe = (key: string, cb: () => void, virtual: boolean): void => {
@@ -120,7 +122,7 @@ const useLocalStorage = <S, RS extends S extends object ? Readonly<S> : S = S ex
 
     const { current: defaultState } = useRef(((): RS => {
         if (!hasStorageItem(keyRef.current, virtualRef.current) || forceAssignRef.current) {
-            setStorageItem(keyRef.current, initValue, virtualRef.current);
+            setStorageItem(keyRef.current, initValue, virtualRef.current, true);
         }
         return getStorageItem(keyRef.current, virtualRef.current) as RS;
     })());

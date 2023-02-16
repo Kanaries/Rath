@@ -75,7 +75,7 @@ interface ConnectOptionsProps {
     credentials: Record<string, string>;
     setCredentials: (data: Record<string, string>) => void;
     nextStepEnabled: boolean;
-    markAsReady: () => void;
+    markAsReady: (forceReload: boolean) => void;
 }
 
 const MenuItem = styled.div`
@@ -183,7 +183,7 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
 
     useEffect(() => {
         if (sourceType === 'demo') {
-            markAsReadyRef.current();
+            markAsReadyRef.current(false);
         }
     }, [sourceType, markAsReady]);
     
@@ -194,7 +194,7 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
         if (sourceType !== 'demo' && !connectUri) {
             return;
         }
-        markAsReady();
+        markAsReady(true);
         setStoredUri(produce(storedUri, draft => {
             if (!(sourceType in draft)) {
                 draft[sourceType] = [];

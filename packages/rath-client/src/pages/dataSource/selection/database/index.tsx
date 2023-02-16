@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import produce from 'immer';
@@ -72,6 +72,8 @@ export const defaultServers: readonly string[] = [
     'https://kanaries.cn/connector',
 ];
 
+const MAX_SERVER_COUNT = 5;
+
 const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => {
     const [servers, setServers] = useLocalStorage<string[]>('database_connector_server', []);
     const [serverList, setServerList] = useAsyncState<{ target: string; status: 'unknown' | 'pending' | 'fulfilled' | 'rejected'; lag: number }[]>(
@@ -80,6 +82,11 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
             resetBeforeTask: false,
         },
     );
+    useEffect(() => {
+        if (servers.length > MAX_SERVER_COUNT) {
+            setServers(servers.slice(0, MAX_SERVER_COUNT));
+        }
+    }, [servers, setServers]);
     const { userStore } = useGlobalStore();
     
     const [server, setServer] = useState(servers.at(0) ?? defaultServers[0]);
@@ -149,9 +156,9 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
     };
 
     const updateServersList = (next: readonly string[]) => {
-        setServers(next);
-        setServerList(next.map(target => {
-            const prev = serverList.find(which => which.target === target);
+        setServers(next.filter(s => !defaultServers.includes(s)));
+        setServerList(list => next.map(target => {
+            const prev = list.find(which => which.target === target);
             return {
                 target,
                 status: prev?.status ?? 'unknown',
@@ -192,8 +199,11 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
 
     const [showQueryForm, setShowQueryForm] = useState(false);
 
-    const markAsReady = () => {
+    const markAsReady = (forceReload: boolean) => {
         if (showQueryForm) {
+            if (forceReload) {
+                queryOptionsHandlerRef.current?.reload();
+            }
             return;
         }
         setShowQueryForm(true);
@@ -205,13 +215,13 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
             <AdvancedOptions
                 servers={serverList}
                 appendServer={target => {
-                    const next = produce([...servers, ...defaultServers], draft => {
+                    const next = produce(serverList.map(s => s.target), draft => {
                         draft.unshift(target);
                     });
                     updateServersList(next);
                 }}
                 removeServer={idx => {
-                    const next = produce([...servers, ...defaultServers], draft => {
+                    const next = produce(serverList.map(s => s.target), draft => {
                         draft.splice(idx, 1);
                     });
                     updateServersList(next);

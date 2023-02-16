@@ -44,23 +44,31 @@ interface DiagramEditorProps {
     children?: any;
 }
 
+const emptyPreview = { meta: [], columns: [], rows: [] };
+
 const DiagramEditor = memo<DiagramEditorProps>(function DiagramEditor ({ disabled, query, busy, tables, setQuery, preview, doPreview, children }) {
+    const [tempQuery, setTempQuery] = useState('');
+
     const [graph, setGraph] = useState<IDBGraph>({
         nodes: [],
         edges: [],
     });
 
     useEffect(() => {
+        setTempQuery('');
         if (!disabled) {
             const sql = toSQL(graph, tables);
-            setQuery(sql);
+            setTempQuery(sql);
+            if (sql) {
+                setQuery(sql);
+            }
         }
     }, [graph, setQuery, tables, disabled]);
 
     return (
         <Container>
             <div>
-                <TablePreview name="preview" data={preview ?? { meta: [], columns: [], rows: [] }} />
+                <TablePreview name="preview" data={preview ?? emptyPreview} />
             </div>
             <div>
                 <div>
@@ -72,9 +80,9 @@ const DiagramEditor = memo<DiagramEditorProps>(function DiagramEditor ({ disable
                         disabled={disabled}
                         tables={tables}
                         graph={graph}
-                        setQuery={setQuery}
+                        setQuery={setTempQuery}
                         setGraph={setGraph}
-                        sql={query}
+                        sql={tempQuery}
                         preview={() => doPreview()}
                     />
                 )}
