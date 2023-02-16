@@ -104,6 +104,10 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
     } | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
+    useEffect(() => {
+        setQueryString('');
+    }, [connectUri, sourceType]);
+
     const submit = async (
         name: string = editorPreview?.name ?? '',
         value: TableData | null = editorPreview?.value ?? null

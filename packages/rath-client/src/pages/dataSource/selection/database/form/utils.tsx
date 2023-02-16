@@ -132,10 +132,10 @@ export const handleBrowserItemClick = (
             }
         }));
         const curLevelIdx = config.levels.findIndex(
-            lvl => typeof lvl === 'string' ? lvl : lvl.type
+            lvl => lvl.type === item.group,
         );
         const nextLevel = curLevelIdx === -1 ? undefined : config.levels[curLevelIdx + 1];
-        if (!nextLevel || (typeof nextLevel === 'object' && nextLevel.enumerable === false))  {
+        if (!nextLevel || nextLevel.enumerable === false)  {
             return;
         }
         const hasNextLevelThen = config.levels.length >= curLevelIdx + 2;
@@ -163,7 +163,7 @@ export const handleBrowserItemClick = (
             }));
         };
         fetchListAsNodes(
-            typeof nextLevel === 'string' ? nextLevel : nextLevel.type,
+            nextLevel.type,
             server,
             commonParams,
             hasNextLevelThen,

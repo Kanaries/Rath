@@ -1,5 +1,5 @@
 import intl from 'react-intl-universal';
-import { FC, ComponentPropsWithRef, useEffect, useMemo, useState, useRef } from 'react';
+import { FC, ComponentPropsWithRef, useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import produce from 'immer';
@@ -139,9 +139,13 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
 
     const [credentialsRaw, setCredentialsRaw] = useState('');
 
-    useEffect(() => {
+    const reset = useCallback(() => {
         setCredentialsRaw(JSON.stringify(credentials, undefined, 4));
     }, [credentials]);
+
+    useEffect(() => {
+        reset();
+    }, [reset]);
 
     const submitCredentials = (): boolean => {
         try {
@@ -150,9 +154,11 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
                 setCredentials(obj);
                 return true;
             } else {
+                reset();
                 return false;
             }
         } catch {
+            reset();
             return false;
         }
     };
@@ -269,23 +275,20 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
                 </Stack>
             </Form>
             {databaseConfig?.credentials === 'json' && (
-                <Stack horizontal verticalAlign="end">
-                    <FlexingTextField
-                        multiline
-                        autoComplete="false"
-                        title="Credentials"
-                        label="Credentials"
-                        required
-                        aria-required
-                        value={credentialsRaw}
-                        placeholder="{}"
-                        onChange={(_, content) => setCredentialsRaw(content ?? '')}
-                    />
-                    <DefaultButton
-                        text={intl.get('common.apply')}
-                        onClick={() => submitCredentials()}
-                    />
-                </Stack>
+                <FlexingTextField
+                    multiline
+                    autoComplete="false"
+                    title="Credentials (JSON)"
+                    label="Credentials"
+                    required
+                    aria-required
+                    value={credentialsRaw}
+                    placeholder="{}"
+                    onChange={(_, content) => setCredentialsRaw(content ?? '')}
+                    onBlur={() => {
+                        submitCredentials();
+                    }}
+                />
             )}
         </>
     );

@@ -73,7 +73,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
         );
 
         if (firstLevel) {
-            const levelType = typeof firstLevel === 'string' ? firstLevel : firstLevel.type;
+            const levelType = firstLevel.type;
             setMenu(
                 fetchListAsNodes(
                     levelType,

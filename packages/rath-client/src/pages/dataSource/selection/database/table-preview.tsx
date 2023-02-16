@@ -93,7 +93,7 @@ const RowIndex = styled.span`
 const TablePreview: FC<TablePreviewProps> = memo(function TablePreview ({ name, data, submit }) {
     const columns = useMemo(() => {
         return data.columns.map(key => {
-            const col = data.meta.find(which => which.key === key)!;
+            const col = data.meta.find(which => which.key.toUpperCase() === key.toUpperCase())!;
             return col!;
         }).filter(Boolean);
     }, [data.columns, data.meta]);
