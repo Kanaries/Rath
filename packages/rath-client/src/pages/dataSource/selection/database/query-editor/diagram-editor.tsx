@@ -41,9 +41,10 @@ interface DiagramEditorProps {
     setQuery: (q: string) => void;
     preview: TableData<TableLabels> | null;
     doPreview: () => void;
+    children?: any;
 }
 
-const DiagramEditor = memo<DiagramEditorProps>(function DiagramEditor ({ disabled, query, busy, tables, setQuery, preview, doPreview }) {
+const DiagramEditor = memo<DiagramEditorProps>(function DiagramEditor ({ disabled, query, busy, tables, setQuery, preview, doPreview, children }) {
     const [graph, setGraph] = useState<IDBGraph>({
         nodes: [],
         edges: [],
@@ -62,6 +63,9 @@ const DiagramEditor = memo<DiagramEditorProps>(function DiagramEditor ({ disable
                 <TablePreview name="preview" data={preview ?? { meta: [], columns: [], rows: [] }} />
             </div>
             <div>
+                <div>
+                    {children}
+                </div>
                 {disabled || (
                     <Diagram
                         busy={busy}

@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { PrimaryButton, Spinner, Stack } from '@fluentui/react';
+import { DefaultButton, PrimaryButton, Spinner, Stack } from '@fluentui/react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import MonacoEditor, { ChangeHandler, EditorWillMount } from 'react-monaco-editor';
@@ -51,7 +51,7 @@ const createSuggestion = (label: string, kind: languages.CompletionItemKind, ran
 };
 
 const keywordsAsSuggestions = [
-    'SELECT', 'AS', 'DISTINCT', 'FROM', 'WHERE', 'AND', 'OR', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'JOIN', 'ON',
+    'SELECT', 'AS', 'DISTINCT', 'FROM', 'WHERE', 'AND', 'OR', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'JOIN', 'ON', 'LIMIT',
 ];
 
 const flatAll = (items: INestedListItem[], path: string[] = []): { label: string; kind: languages.CompletionItemKind }[] => {
@@ -84,7 +84,7 @@ export interface SQLEditorProps {
     items: INestedListItem[];
 }
 
-const SQLEditor: FC<SQLEditorProps> = ({ setQuery, preview, doPreview, busy, items }) => {
+const SQLEditor: FC<SQLEditorProps> = ({ setQuery, preview, doPreview, busy, items, children }) => {
     const [code, setCode] = useState<string>('');
 
     const updateCode = useCallback<ChangeHandler>(newValue => {
@@ -120,14 +120,17 @@ const SQLEditor: FC<SQLEditorProps> = ({ setQuery, preview, doPreview, busy, ite
         }
     }, [items]);
 
+    const RunButton = children ? DefaultButton : PrimaryButton;
+
     return (
         <Container>
             <div>
                 <TablePreview name="preview" data={preview ?? { meta: [], columns: [], rows: [] }} />
             </div>
             <Editor>
-                <Stack horizontal style={{ marginBlock: '0.5em', paddingInline: '1em' }} horizontalAlign="end">
-                    <PrimaryButton
+                <Stack horizontal style={{ marginBlock: '0.5em', paddingInline: '1em' }} horizontalAlign="end" tokens={{ childrenGap: 10 }}>
+                    {children}
+                    <RunButton
                         disabled={busy}
                         onClick={() => {
                             setQuery(code);
@@ -136,7 +139,7 @@ const SQLEditor: FC<SQLEditorProps> = ({ setQuery, preview, doPreview, busy, ite
                         iconProps={busy ? undefined : { iconName: "Play" }}
                     >
                         {busy ? <Spinner /> : intl.get('common.run')}
-                    </PrimaryButton>
+                    </RunButton>
                 </Stack>
                 <MonacoEditor language="sql" theme="vs" value={code} onChange={updateCode} editorWillMount={editorWillMount} />
             </Editor>

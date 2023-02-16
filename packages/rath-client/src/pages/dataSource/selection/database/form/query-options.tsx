@@ -32,6 +32,7 @@ interface QueryOptionsProps {
     isEditorPreviewPending: boolean;
     credentials: Record<string, string>;
     submit: (name: string, value: TableData) => void;
+    children?: any;
 }
 
 export interface QueryOptionsHandlerRef {
@@ -39,7 +40,7 @@ export interface QueryOptionsHandlerRef {
 }
 
 const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(function QueryOptions ({
-    ready, server, sourceType, connectUri, disabled, queryString, setQueryString, editorPreview, setEditorPreview, isEditorPreviewPending, credentials, submit,
+    ready, server, sourceType, connectUri, disabled, queryString, setQueryString, editorPreview, setEditorPreview, isEditorPreviewPending, credentials, submit, children,
 }, handlerRef) {
     const theme = useTheme();
     const config = databaseOptions.find(opt => opt.key === sourceType);
@@ -91,7 +92,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
         reload,
     }));
     
-    const empty = !config || disabled || !connectUri;
+    const empty = !config || disabled || (sourceType !== 'demo' && !connectUri);
     
     useEffect(() => {
         if (empty) {
@@ -165,6 +166,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
                 uri: commonParamsRef.current.connectUri,
                 sourceType: commonParamsRef.current.sourceType,
                 query: query ?? queryString,
+                credentials: config?.credentials === 'json' ? credentials : undefined,
             }).then<{ name: string; value: TableData }>(res => ({
                 name: 'query result',
                 value: {
@@ -309,7 +311,9 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
                                     doPreview(query);
                                 }}
                                 items={menu.items}
-                            />
+                            >
+                                {children}
+                            </SQLEditor>
                         )}
                         {pageIdx === EditorKey.Diagram && (
                             <DiagramEditor
@@ -320,7 +324,9 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
                                 setQuery={q => setQueryString(q)}
                                 preview={editorPreview?.value ?? null}
                                 doPreview={doPreview}
-                            />
+                            >
+                                {children}
+                            </DiagramEditor>
                         )}
                         {pageIdx >= 0 && page && (
                             <>

@@ -1,5 +1,5 @@
 import intl from 'react-intl-universal';
-import { FC, ComponentPropsWithRef, useEffect, useMemo, useState } from 'react';
+import { FC, ComponentPropsWithRef, useEffect, useMemo, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import produce from 'immer';
@@ -161,9 +161,21 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
             };
         }
     }, [showAutoCompletion, uriInputId]);
+
+    const markAsReadyRef = useRef(markAsReady);
+    markAsReadyRef.current = markAsReady;
+
+    useEffect(() => {
+        if (sourceType === 'demo') {
+            markAsReadyRef.current();
+        }
+    }, [sourceType, markAsReady]);
     
     const submit = () => {
-        if (!sourceType || !connectUri) {
+        if (!sourceType) {
+            return;
+        }
+        if (sourceType !== 'demo' && !connectUri) {
             return;
         }
         markAsReady();

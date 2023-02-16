@@ -193,6 +193,9 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
     const [showQueryForm, setShowQueryForm] = useState(false);
 
     const markAsReady = () => {
+        if (showQueryForm) {
+            return;
+        }
         setShowQueryForm(true);
         queryOptionsHandlerRef.current?.reload();
     };
@@ -228,16 +231,6 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
                 nextStepEnabled={showQueryForm}
                 markAsReady={markAsReady}
             />
-            {editorPreview && (
-                <Stack horizontal horizontalAlign="end">
-                    <PrimaryButton
-                        onClick={() => submit()}
-                        disabled={submitting}
-                    >
-                        {submitting ? <Spinner /> : intl.get('common.apply')}
-                    </PrimaryButton>
-                </Stack>
-            )}
             <QueryOptions
                 ready={showQueryForm}
                 disabled={curServer?.status !== 'fulfilled' || (sourceType !== 'demo' && !connectUri)}
@@ -252,7 +245,18 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
                 credentials={credentials}
                 submit={submit}
                 ref={queryOptionsHandlerRef}
-            />
+            >
+                {editorPreview && (
+                    <Stack horizontal horizontalAlign="end">
+                        <PrimaryButton
+                            onClick={() => submit()}
+                            disabled={submitting}
+                        >
+                            {submitting ? <Spinner /> : intl.get('common.apply')}
+                        </PrimaryButton>
+                    </Stack>
+                )}
+            </QueryOptions>
         </Stack>
     );
 };
