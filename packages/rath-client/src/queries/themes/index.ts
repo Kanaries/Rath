@@ -19,25 +19,12 @@ export enum THEME_KEYS {
     latimes = 'latimes'
 }
 
-export function visThemeParser (themeKey?: string): VegaThemeConfig | undefined {
-    if (typeof themeKey === 'undefined') return;
-    switch (themeKey) {
-        case THEME_KEYS.googlecharts:
-            return VIS_GOOGLE_THEME;
-        case THEME_KEYS.powerbi:
-            return VIS_POWERBI_THEME;
-        case THEME_KEYS.ggplot2:
-            return VIS_GGPLOT2_THEME;
-        case THEME_KEYS.vox:
-            return VIS_VOX_THEME;
-        case THEME_KEYS.excel:
-            return VIS_EXCEL_THEME;
-        case THEME_KEYS.fivethreeeight:
-            return VIS_538_THEME;
-        case THEME_KEYS.latimes:
-            return VIS_LATIMES_THEME;
-        case THEME_KEYS.default:
-        default:
-            return;
-    }
-}
+export const prebuiltThemes: Readonly<Record<string, VegaThemeConfig>> = {
+    [THEME_KEYS.googlecharts]: VIS_GOOGLE_THEME,
+    [THEME_KEYS.powerbi]: VIS_POWERBI_THEME,
+    [THEME_KEYS.ggplot2]: VIS_GGPLOT2_THEME,
+    [THEME_KEYS.vox]: VIS_VOX_THEME,
+    [THEME_KEYS.excel]: VIS_EXCEL_THEME,
+    [THEME_KEYS.fivethreeeight]: VIS_538_THEME,
+    [THEME_KEYS.latimes]: VIS_LATIMES_THEME,
+};

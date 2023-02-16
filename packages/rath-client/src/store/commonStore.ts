@@ -2,14 +2,44 @@ import { makeAutoObservable, observable, runInAction } from 'mobx';
 import { Specification } from 'visual-insights';
 import { COMPUTATION_ENGINE, EXPLORE_MODE, PIVOT_KEYS } from '../constants';
 import { ITaskTestMode, IVegaSubset } from '../interfaces';
-import { THEME_KEYS, visThemeParser } from '../queries/themes';
+import { THEME_KEYS, prebuiltThemes } from '../queries/themes';
 import { VegaThemeConfig } from '../queries/themes/config';
 import { destroyRathWorker, initRathWorker, rathEngineService } from '../services/index';
 import { transVegaSubset2Schema } from '../utils/transform';
 import { deepcopy } from '../utils';
+import { getMainServiceAddress } from '../utils/user';
+import { request } from '../utils/request';
+import { notify } from '../components/error';
 
 export type ErrorType = 'error' | 'info' | 'success';
 const TASK_TEST_MODE_COOKIE_KEY = 'task_test_mode';
+
+export interface IThemeInfo {
+    id: string;
+    name: string;
+    config: Record<string, any>;
+    cover: {
+        storageId: string;
+        downloadUrl: string;
+    };
+    isFavorite: boolean;
+    favoritesTotal: boolean;
+    owner: string;
+}
+
+export type ThemeListResponse = {
+    list: IThemeInfo[];
+    count: number;
+    pageSize: number;
+    pageIndex: number;
+};
+
+interface IWorkspaceSimpleInfo {
+    name: string;
+    organization: {
+        name: string;
+    };
+}
 
 export class CommonStore {
     public appKey: string = PIVOT_KEYS.dataSource;
@@ -25,6 +55,7 @@ export class CommonStore {
     public vizSpec: IVegaSubset | null = null;
     public vizTheme: string = 'default';
     public customThemeConfig: VegaThemeConfig | undefined = undefined;
+    public themes: Record<string, VegaThemeConfig | undefined> = { ...prebuiltThemes };
     public useCustomTheme: boolean = false;
     constructor() {
         const taskMode = localStorage.getItem(TASK_TEST_MODE_COOKIE_KEY) || ITaskTestMode.local;
@@ -33,13 +64,17 @@ export class CommonStore {
         makeAutoObservable(this, {
             graphicWalkerSpec: observable.ref,
             vizSpec: observable.ref,
-            customThemeConfig: observable.ref
+            customThemeConfig: observable.ref,
+            themes: observable.shallow,
         });
     }
     public get themeConfig (): VegaThemeConfig | undefined {
+        return this.getTheme(this.vizTheme);
+    }
+    public getTheme(themeKey: string): VegaThemeConfig | undefined {
         if (this.useCustomTheme) return this.customThemeConfig;
-        if (this.vizTheme === THEME_KEYS.default) return undefined;
-        return visThemeParser(this.vizTheme)
+        if (themeKey === THEME_KEYS.default) return undefined;
+        return this.themes[themeKey];
     }
     public setAppKey(key: string) {
         this.appKey = key;
@@ -55,7 +90,7 @@ export class CommonStore {
     }
     public resetCustomThemeConfigByThemeKey (themeKey: string) {
         if (themeKey === THEME_KEYS.default) this.customThemeConfig = undefined;
-        this.customThemeConfig = deepcopy(visThemeParser(this.vizTheme));
+        this.customThemeConfig = deepcopy(this.getTheme(themeKey));
     }
     public showError(type: ErrorType, content: string) {
         this.messages.push({
@@ -107,5 +142,53 @@ export class CommonStore {
     }
     public async setExploreMode(mode: string) {
         this.exploreMode = mode;
+    }
+    public async getCloudThemes(userName: string): Promise<IThemeInfo[]> {
+        const workspaceUrl = getMainServiceAddress("/api/ce/simpleInfo/workspace");
+        let workspaceName: string;
+        try {
+            const result = await request.get<{ userName: string }, IWorkspaceSimpleInfo>(workspaceUrl, { userName });
+            workspaceName = result.name;
+        } catch (error) {
+            notify({
+                title: '[/api/ce/simpleInfo/workspace]',
+                type: 'error',
+                content: `${error}`,
+            });
+            return [];
+        }
+        const list: IThemeInfo[] = [];
+        const personalUrl = getMainServiceAddress('/api/ce/theme/list');
+        try {
+            const res = await request.get<{ workspaceName: string }, ThemeListResponse>(
+                personalUrl,
+                { workspaceName }
+            );
+            list.push(...res.list);
+        } catch (error) {
+            notify({
+                title: '[/api/ce/theme/list]',
+                type: 'error',
+                content: `${error}`,
+            });
+        }
+        const collectionUrl = getMainServiceAddress('/api/ce/theme/favorites/list');
+        try {
+            const res = await request.get<{}, ThemeListResponse>(collectionUrl);
+            list.push(...res.list);
+        } catch (error) {
+            notify({
+                title: '[/api/ce/theme/favorites/list]',
+                type: 'error',
+                content: `${error}`,
+            });
+        }
+        runInAction(() => {
+            for (const theme of list) {
+                // TODO: async config fetch
+                this.themes[theme.name] = theme.config;
+            }
+        });
+        return list;
     }
 }
