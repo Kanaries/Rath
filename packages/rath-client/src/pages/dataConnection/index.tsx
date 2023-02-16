@@ -17,6 +17,7 @@ import React, { useCallback, useState } from 'react';
 import { Breadcrumb, DefaultButton, IBreadcrumbItem, ProgressIndicator } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
+import styled from 'styled-components';
 import { IDataSourceType } from '../../global';
 import { IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
@@ -24,13 +25,14 @@ import DataLoadingStatus from '../dataSource/dataLoadingStatus';
 import { useGlobalStore } from '../../store';
 import { Card } from '../../components/card';
 import { PIVOT_KEYS } from '../../constants';
+import DatabaseConnector from '../dataSource/selection/database';
+import { notify } from '../../components/error';
 import FileData from './file';
 import DemoData from './demo';
 // import RestfulData from './restful';
 import JSONAPI from './jsonAPI';
 import OLAPData from './olap';
 import HistoryPanel from './history';
-import DatabaseData from './database/';
 import AirTableSource from './airtable';
 import SupportedSources from './supportedSources';
 import KanariesCloud from './cloud';
@@ -45,6 +47,10 @@ interface DataConnectionProps {
     // onDataLoading: (p: number) => void;
     // toggleLoadingAnimation: (on: boolean) => void;
 }
+
+const Content = styled.div<{ open: boolean }>`
+    min-height: ${({ open }) => open ? '60vh' : 'unset'};
+`;
 
 const DataConnection: React.FC<DataConnectionProps> = (props) => {
     const { dataSourceStore, commonStore } = useGlobalStore();
@@ -76,9 +82,13 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
     const onLoadingFailed = useCallback(
         (err: any) => {
             dataSourceStore.setLoading(false);
-            commonStore.showError('error', `[Data Loading Error]${err}`);
+            notify({
+                type: 'error',
+                title: '[Data Loading Error]',
+                content: `${err}`,
+            });
         },
-        [dataSourceStore, commonStore]
+        [dataSourceStore]
     );
 
     const toggleLoadingAnimation = useCallback(
@@ -126,7 +136,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
         ),
         [IDataSourceType.LOCAL]: <HistoryPanel onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} onLoadingFailed={onLoadingFailed} />,
         [IDataSourceType.DATABASE]: (
-            <DatabaseData onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} setLoadingAnimation={toggleLoadingAnimation} />
+            <DatabaseConnector onClose={onSelectPannelClose} onDataLoaded={onSelectDataLoaded} />
         ),
         [IDataSourceType.AIRTABLE]: (
             <AirTableSource
@@ -152,7 +162,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
 
     return (
         <div className="content-container">
-            <Card style={{ minHeight: '96hv' }}>
+            <Card fitContainer={Boolean(dataSourceType)}>
                 <Breadcrumb
                     items={items}
                     maxDisplayedItems={10}
@@ -169,11 +179,11 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
                         }}
                     />
                 )}
-                <div className="">
+                <Content open={Boolean(dataSourceType)}>
                     {loading && dataSourceType !== IDataSourceType.FILE && <ProgressIndicator description="loading" />}
                     {loading && dataSourceType === IDataSourceType.FILE && <DataLoadingStatus />}
                     {dataSourceType && formMap[dataSourceType]}
-                </div>
+                </Content>
             </Card>
             <div>
             {dataSourceType === null && (

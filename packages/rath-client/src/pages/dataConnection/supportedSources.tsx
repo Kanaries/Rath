@@ -42,6 +42,7 @@ const OptionCard = styled.div`
         width: 5rem;
         display: flex;
         justify-content: center;
+        transition: transform 80ms;
         > img {
             /* width: 64px; */
             /* width: 10rem; */
@@ -58,6 +59,20 @@ const OptionCard = styled.div`
         text-align: center;
         /* display: flex; */
         /* align-items: center; */
+    }
+    filter: saturate(0.9);
+    transition: filter 80ms, background-color 80ms;
+    :not([aria-disabled="true"]):hover {
+        background-color: transparent;
+        filter: saturate(1.2);
+        > .op-logo {
+            transform: scale(1.1);
+        }
+    }
+    cursor: pointer;
+    &[aria-disabled="true"] {
+        filter: opacity(0.6);
+        cursor: not-allowed;
     }
 `;
 
@@ -131,12 +146,14 @@ const SupportedSources: React.FC<SupportedSourceProps> = (props) => {
                 {options.map((op) => (
                     <OptionCard
                         key={op.key}
+                        role="button"
+                        aria-disabled={op.disabled}
+                        tabIndex={0}
                         onClick={() => {
                             if (!op.disabled) {
                                 onSelected(op.key);
                             }
                         }}
-                        style={{ cursor: op.disabled ? 'not-allowed' : 'pointer' }}
                     >
                         <div className="op-logo">
                             {op.iconImage && op.iconImage()}

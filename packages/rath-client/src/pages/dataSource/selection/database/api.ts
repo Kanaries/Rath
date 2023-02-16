@@ -1,256 +1,172 @@
-import { notify } from '../../../../components/error';
-import { getRathError } from '../../../../rath-error';
-import { SupportedDatabaseType } from './type';
-import type { TableData, TableLabels } from '.';
+import { notify } from "../../../../components/error";
+import { getRathError } from "../../../../rath-error";
+import databaseOptions from "./config";
+import type { SupportedDatabaseType, TableColInfo, TableInfo, TableRowData } from "./type";
 
 
-const apiPathPrefix = '/api';
+const apiPath = '/api/get_connection';
 
-const DB_CONNECTOR_SERVICE_KEY = 'db_api'
+export type DatabaseApiOperator = (
+    | 'ping'
+    | 'getDatabases'
+    | 'getSchemas'
+    | 'getTables'
+    | 'getTableDetail'
+    | 'getResult'
+);
 
-export function getConnectorServiceInfo () {
-    return localStorage.getItem(DB_CONNECTOR_SERVICE_KEY) || 'https://gateway.kanaries.net/connector';
-}
+export type DatabaseApiParams = {
+    connectUri: string;
+    sourceType: SupportedDatabaseType;
+    operator: DatabaseApiOperator;
+    databaseName: string;
+    tableName: string;
+    schemaName: string;
+    tableHeadingCount: string;
+    query: string;
+    credentials: Record<string, string>;
+};
 
-export function setConnectorServiceInfo (info: string) {
-    localStorage.setItem(DB_CONNECTOR_SERVICE_KEY, info)
-}
+export type DatabaseRequestPayload<P extends Exclude<DatabaseApiOperator, 'ping'>> = {
+    uri: DatabaseApiParams['connectUri'];
+    sourceType: DatabaseApiParams['sourceType'];
+    func: P;
+    db?: DatabaseApiParams['databaseName'] | null;
+    schema?: DatabaseApiParams['schemaName'] | null;
+    table?: DatabaseApiParams['tableName'] | null;
+    /** @default "500" */
+    rowsNum?: DatabaseApiParams['tableHeadingCount'] | null;
+    query?: DatabaseApiParams['query'] | null;
+    credentials?: Record<string, string>;
+};
 
-function getAPIPathPrefix (apiPrefix: string | undefined = '') {
-    const servicePrefix = getConnectorServiceInfo();
-    return `${servicePrefix}${apiPrefix}`
-}
+type Rq<T, Keys extends keyof T> = T & Required<Pick<T, Keys>>;
 
-type TableDataResult<TL extends TableLabels> = {
+export type DatabaseRequestData = {
+    ping: {
+        func: 'ping';
+    };
+    getDatabases: DatabaseRequestPayload<'getDatabases'>;
+    getSchemas: DatabaseRequestPayload<'getSchemas'>;
+    getTables: DatabaseRequestPayload<'getTables'>;
+    getTableDetail: Rq<DatabaseRequestPayload<'getTableDetail'>, 'table'>;
+    getResult: Rq<DatabaseRequestPayload<'getResult'>, 'query'>;
+};
+
+export type DatabaseResponseData = {
+    ping: undefined;
+    getDatabases: string[];
+    getSchemas: string[];
+    getTables: TableInfo[];
+    getTableDetail: {
+        meta: TableColInfo[];
+        columns: string[];
+        rows: TableRowData[];
+    };
+    getResult: {
+        columns: string[];
+        rows: TableRowData[];
+    };
+};
+
+type WrappedResponse<T> = {
     success: true;
-    data: TableData<TL>;
+    data: T;
 } | {
     success: false;
     message: string;
 };
 
-interface TestConnectionResult {
-    success: boolean;
-    // 先直接返回，未来需要放到 token 里
-    data: number;
-}
-
-type ListDatabasesResult = {
-    success: true;
-    data: string[];
-} | {
-    success: false;
-    message: string;
-};
-
-export type TableInfo = {
-    name: string;
-    meta: {
-        key: string;
-        colIndex: number;
-        dataType: string | null;
-    }[];
-};
-
-type TableList = TableInfo[];
-
-type ListTableResult = {
-    success: true;
-    data: TableList;
-} | {
-    success: false;
-    message: string;
-};
-
-export const pingConnector = async (): Promise<boolean> => {
-    try {
-        const res = await fetch(
-            `${getAPIPathPrefix()}/ping`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-            }
-        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TestConnectionResult;
-
-        if (!res.success) {
-            throw new Error('Operation failed.');
+const combinedDatabaseService = async <O extends DatabaseApiOperator>(
+    server: string, operator: O, payload: Omit<DatabaseRequestData[O], 'func'>
+): Promise<DatabaseResponseData[O]> => {
+    const res = await fetch(
+        `${server}${apiPath}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...payload,
+                func: operator,
+            }),
         }
+    ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as WrappedResponse<DatabaseResponseData[O]>;
 
-        return true;
+    if (res.success) {
+        return res.data;
+    } else {
+        throw new Error(res.message);
+    }
+};
+
+export const checkServerConnection = async (server: string): Promise<false | number> => {
+    try {
+        const beginTime = Date.now();
+        await combinedDatabaseService(server, 'ping', {});
+        const endTime = Date.now();
+        return endTime - beginTime;
     } catch (error) {
         const rathError = getRathError('ConnectorError', error);
-
-        notify(rathError);
-
+        console.warn(rathError);
         return false;
     }
 };
 
-export const getSourceId = async (
-    sourceType: SupportedDatabaseType,
-    uri: string,
-): Promise<number | null> => {
+export const fetchDatabaseList = async (server: string, payload: Omit<DatabaseRequestData['getDatabases'], 'func'>): Promise<string[]> => {
     try {
-        const res = await fetch(
-            `${getAPIPathPrefix(apiPathPrefix)}/upsert`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    sourceType,
-                    uri,
-                }),
-            }
-        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TestConnectionResult;
-
-        if (!res.success) {
-            throw new Error('Operation failed.');
-        }
-
-        return res.data;
-    } catch (error) {
-        const rathError = getRathError('SourceIdError', error);
-
-        notify(rathError);
-
-        return null;
-    }
-};
-
-export const listDatabases = async (sourceId: number): Promise<string[] | null> => {
-    try {
-        const res = await fetch(
-            `${getAPIPathPrefix(apiPathPrefix)}/database_list`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    sourceId,
-                }),
-            }
-        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListDatabasesResult;
-
-        return res.success ? res.data : (() => { throw new Error(res.message) })();
+        return await combinedDatabaseService(server, 'getDatabases', payload);
     } catch (error) {
         const rathError = getRathError('FetchDatabaseListFailed', error);
-
         notify(rathError);
-        
-        return null;
+        throw error;
     }
 };
 
-export const listSchemas = async (sourceId: number, db: string | null): Promise<string[] | null> => {
+export const fetchSchemaList = async (server: string, payload: Omit<DatabaseRequestData['getSchemas'], 'func'>): Promise<string[]> => {
     try {
-        const res = await fetch(
-            `${getAPIPathPrefix(apiPathPrefix)}/schema_list`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    sourceId,
-                    db,
-                }),
-            }
-        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListDatabasesResult;
-
-        return res.success ? res.data : (() => { throw new Error(res.message) })();
+        return await combinedDatabaseService(server, 'getSchemas', payload);
     } catch (error) {
         const rathError = getRathError('FetchSchemaListFailed', error);
-
         notify(rathError);
-        
-        return null;
+        throw error;
     }
 };
 
-export const listTables = async (sourceId: number, db: string | null, schema: string | null): Promise<TableList | null> => {
+export const fetchTableList = async (server: string, payload: Omit<DatabaseRequestData['getTables'], 'func'>): Promise<TableInfo[]> => {
     try {
-        const res = await fetch(
-            `${getAPIPathPrefix(apiPathPrefix)}/table_list`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    sourceId,
-                    db,
-                    schema,
-                }),
-            }
-        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as ListTableResult;
-
-        return res.success ? res.data : (() => { throw new Error(res.message) })();
+        return await combinedDatabaseService(server, 'getTables', payload);
     } catch (error) {
         const rathError = getRathError('FetchTableListFailed', error);
-
         notify(rathError);
-
-        return null;
+        throw error;
     }
 };
 
-export const fetchTablePreview = async (sourceId: number, db: string | null, schema: string | null, table: string | null, silent: boolean = false): Promise<TableData<TableLabels> | null> => {
+export const fetchTableDetail = async (server: string, payload: Omit<DatabaseRequestData['getTableDetail'], 'func'>): Promise<DatabaseResponseData['getTableDetail']> => {
     try {
-        const res = await fetch(
-            `${getAPIPathPrefix(apiPathPrefix)}/table_detail`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    sourceId,
-                    db,
-                    schema,
-                    table,
-                }),
-            }
-        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TableDataResult<TableLabels>;
-
-        return res.success ? res.data : (() => { throw new Error (res.message) })();
+        return await combinedDatabaseService(server, 'getTableDetail', payload);
     } catch (error) {
-        if (!silent) {
-            const rathError = getRathError('FetchTablePreviewFailed', error);
-
-            notify(rathError);
-        }
-
-        return null;
-    }
-};
-
-export const requestSQL = async (sourceId: number, queryString: string) => {
-    try {
-        const res = await fetch(
-            `${getAPIPathPrefix(apiPathPrefix)}/execute`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    sourceId,
-                    query: queryString,
-                }),
-            }
-        ).then(res => res.ok ? res.json() : (() => { throw new Error() })()) as TableDataResult<TableLabels>;
-
-        const data = res.success ? res.data : (() => { throw new Error(res.message) })();
-        
-        if (!data) {
-            return null;
-        }
-
-        return data;
-    } catch (error) {
-        const rathError = getRathError('QueryExecutionError', error, { sql: queryString });
-
+        const rathError = getRathError('FetchTableListFailed', error);
         notify(rathError);
-
-        return null;
+        throw error;
     }
 };
 
+export const fetchQueryResult = async (server: string, payload: Omit<DatabaseRequestData['getResult'], 'func'>): Promise<DatabaseResponseData['getResult']> => {
+    try {
+        const config = databaseOptions.find(opt => opt.key === payload.sourceType);
+        if (!config) {
+            throw new Error(`Database ${payload.sourceType} is not supported.`);
+        }
+        const requiresCredentials = Boolean(config.credentials);
+        if (requiresCredentials && !payload.credentials) {
+            throw new Error(`Credentials is required but not given.`);
+        }
+        return await combinedDatabaseService(server, 'getResult', payload);
+    } catch (error) {
+        const rathError = getRathError('QueryExecutionError', error, { sql: payload.query ?? '' });
+        notify(rathError);
+        throw error;
+    }
+};

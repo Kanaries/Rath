@@ -8,7 +8,6 @@ import DataSourceBoard from './pages/dataSource/index';
 import PatternPage from './pages/semiAutomation/index';
 import SupportPage from './pages/support/index';
 import LTSPage from './pages/megaAutomation';
-import MessageSegment from './components/messageSegment';
 import AppNav from './components/appNav';
 import { destroyRathWorker, initRathWorker } from './services/index';
 import { PIVOT_KEYS } from './constants';
@@ -62,9 +61,6 @@ function App() {
                     <AppNav />
                 </div>
                 <div className="main-app-content">
-                    <div className="message-container">
-                        <MessageSegment />
-                    </div>
                     {appKey === PIVOT_KEYS.dataSource && <DataSourceBoard />}
                     {appKey === PIVOT_KEYS.editor && <VisualInterface />}
                     {appKey === PIVOT_KEYS.support && <SupportPage />}

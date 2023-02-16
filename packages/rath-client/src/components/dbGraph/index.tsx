@@ -1,76 +1,86 @@
-import { PrimaryButton } from '@fluentui/react';
+import { PrimaryButton, Spinner } from '@fluentui/react';
 import produce from 'immer';
 import { DragEvent, memo, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
-import type { TableInfo } from '../../pages/dataSource/selection/database/api';
+import type { TableInfo } from '../../pages/dataSource/selection/database/type';
 import Link from './link';
 import { IDBGraph } from './localTypes';
 import DBNode from './node';
 import { encodePath, hasCircle } from './utils';
-import { BOX_HEIGHT, BOX_WIDTH, GRAPH_HEIGHT, BOX_PADDING } from './config';
+import { BOX_HEIGHT, BOX_WIDTH, BOX_PADDING } from './config';
 import { DBBox, DiagramContainer, ListContainer } from './components';
 
 const Container = styled.div`
+    width: 100%;
+    height: 100%;
     display: flex;
-    flexDirection: row;
-    height: ${GRAPH_HEIGHT}px;
+    flex-direction: row;
     overflow: hidden;
-    border: 1px solid #cfcfcf;
-    borderTop: none;
-`
+    > * {
+        flex-grow: 1;
+        flex-shrink: 1;
+        flex-basis: 0%;
+        margin: 0;
+        padding: 0;
+    }
+    border-bottom: 1px solid #eee;
+`;
 
 const Output = styled.div`
-    flex-grow: 1;
-    flex-shrink: 1;
+    flex-grow: 0;
+    flex-shrink: 0;
     overflow: hidden;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border: 1px solid #cfcfcf;
-    border-top: none;
-    margin-bottom: 1em;
+    padding: 0.5em 0.5em 0.8em;
 
     > span {
         flex-grow: 1;
         flex-shrink: 1;
         padding: 0 1em;
         overflow: hidden;
-        // textOverflow: 'ellipsis',
         max-width: 30vw;
     }
 `
 
 export interface DbGraphProps {
+    busy?: boolean;
+    disabled?: boolean;
     tables: TableInfo[];
     graph: IDBGraph;
     sql: string;
+    setQuery?: (q: string) => void;
     setGraph: (graph: IDBGraph) => void;
     preview: () => void;
 }
 
-const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, preview, sql }) {
-    const [width, setWidth] = useState(600);
+const DbGraph = memo<DbGraphProps>(function DbGraph ({ busy = false, disabled = false, graph, setGraph, tables, preview, sql, setQuery }) {
+    const [width, setWidth] = useState(400);
+    const [height, setHeight] = useState(300);
     const container = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const c = container.current;
-
         if (c) {
-            setWidth(c.getBoundingClientRect().width);
-
             const cb = () => {
-                setWidth(c.getBoundingClientRect().width);
+                const { width, height } = c.getBoundingClientRect();
+                setWidth(width);
+                setHeight(height);
             };
-
             const ro = new ResizeObserver(cb);
-
             ro.observe(c);
+            cb();
 
             return () => ro.disconnect();
         }
     }, []);
+
+    useEffect(() => {
+        setQuery?.('');
+    }, [setQuery])
 
     const dragEffectRef = useRef<null | 'append' | 'move'>(null);
     const dragOffsetRef = useRef<[number, number]>([0, 0]);
@@ -89,7 +99,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             ];
 
             const x = Math.round(Math.max(Math.min(tx, width - BOX_PADDING - BOX_WIDTH - 1), BOX_PADDING));
-            const y = Math.round(Math.max(Math.min(ty, GRAPH_HEIGHT - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
+            const y = Math.round(Math.max(Math.min(ty, height - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
 
             switch (dragEffectRef.current) {
                 case 'append': {
@@ -124,7 +134,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
         dragEffectRef.current = null;
         dragSourceRef.current = null;
         dragNodeRef.current = null;
-    }, [width, graph, setGraph]);
+    }, [width, height, graph, setGraph]);
 
     const deleteNode = useCallback((index: number) => {
         if (index < graph.nodes.length) {
@@ -192,7 +202,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             ];
 
             const x = Math.round(Math.max(Math.min(tx, width - BOX_PADDING - BOX_WIDTH - 1), BOX_PADDING));
-            const y = Math.round(Math.max(Math.min(ty, GRAPH_HEIGHT - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
+            const y = Math.round(Math.max(Math.min(ty, height - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
 
             setLinkPreview({
                 from: linkPreview.from,
@@ -204,7 +214,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
 
             return;
         }
-    }, [linkPreview, width]);
+    }, [linkPreview, width, height]);
 
     const handleMouseUp = () => {
         if (container.current && linkPreview) {
@@ -247,7 +257,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             ];
 
             const x = Math.round(Math.max(Math.min(tx, width - BOX_PADDING - BOX_WIDTH - 1), BOX_PADDING));
-            const y = Math.round(Math.max(Math.min(ty, GRAPH_HEIGHT - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
+            const y = Math.round(Math.max(Math.min(ty, height - BOX_PADDING - BOX_HEIGHT - 1), BOX_PADDING));
 
             setLinkPreview({
                 from: linkPreview.from,
@@ -259,7 +269,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
 
             return;
         }
-    }, [linkPreview, width]);
+    }, [linkPreview, width, height]);
 
     return (<>
         <Container>
@@ -301,7 +311,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             </ListContainer>
             <DiagramContainer
                 ref={container}
-                style={{ height: `${GRAPH_HEIGHT}px`, position: 'relative' }}
+                style={{ height: `${height}px`, position: 'relative' }}
                 onDrop={handleDrop}
                 onDragOver={e => {
                     e.stopPropagation();
@@ -312,7 +322,7 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             >
                 <svg
                     width={`${width}px`}
-                    height={`${GRAPH_HEIGHT}px`}
+                    height={`${height}px`}
                     style={{ backgroundColor: '#cecece20' }}
                     fill="none"
                     stroke="currentColor"
@@ -430,8 +440,12 @@ const DbGraph = memo<DbGraphProps>(function DbGraph ({ graph, setGraph, tables, 
             <span>
                 {sql}
             </span>
-            <PrimaryButton onClick={preview}>
-                {intl.get('common.preview')}
+            <PrimaryButton
+                disabled={busy || disabled || tables.length === 0 || !sql}
+                onClick={preview}
+                iconProps={busy ? undefined : { iconName: "Play" }}
+            >
+                {busy ? <Spinner /> : intl.get('common.run')}
             </PrimaryButton>
         </Output>
     </>);

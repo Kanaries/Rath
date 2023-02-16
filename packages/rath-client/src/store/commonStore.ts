@@ -12,11 +12,10 @@ export type ErrorType = 'error' | 'info' | 'success';
 const TASK_TEST_MODE_COOKIE_KEY = 'task_test_mode';
 
 export class CommonStore {
-    public appKey: string = PIVOT_KEYS.dataSource;
+    public appKey: string = PIVOT_KEYS.connection;
     public computationEngine: string = COMPUTATION_ENGINE.webworker;
     public exploreMode: string = EXPLORE_MODE.comprehensive;
     public taskMode: ITaskTestMode = ITaskTestMode.local;
-    public messages: Array<{ type: ErrorType; content: string }> = []; //[{type:'error', content: 'This is a test.'}];
     public showStorageModal: boolean = false;
     public showBackupModal: boolean = false;
     public showAnalysisConfig: boolean = false;
@@ -57,12 +56,6 @@ export class CommonStore {
         if (themeKey === THEME_KEYS.default) this.customThemeConfig = undefined;
         this.customThemeConfig = deepcopy(visThemeParser(this.vizTheme));
     }
-    public showError(type: ErrorType, content: string) {
-        this.messages.push({
-            type,
-            content,
-        });
-    }
     public visualAnalysisInGraphicWalker(spec: IVegaSubset) {
         this.graphicWalkerSpec = transVegaSubset2Schema(spec);
         this.appKey = PIVOT_KEYS.editor;
@@ -80,9 +73,6 @@ export class CommonStore {
     }
     public setShowAnalysisConfig(show: boolean) {
         this.showAnalysisConfig = show;
-    }
-    public removeError(errIndex: number) {
-        this.messages.splice(errIndex, 1);
     }
     public setShowStorageModal(show: boolean) {
         this.showStorageModal = show;

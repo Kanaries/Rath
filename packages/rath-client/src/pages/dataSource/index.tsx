@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import intl from 'react-intl-universal';
 import { PrimaryButton, Stack, DefaultButton, Pivot, PivotItem, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
@@ -7,6 +7,7 @@ import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '..
 import { Card } from '../../components/card';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
 import BackupModal from '../../components/backupModal';
+import { notify } from '../../components/error';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
 import Selection from './selection/index';
@@ -23,17 +24,10 @@ const MARGIN_LEFT = { marginLeft: '1em' };
 interface DataSourceBoardProps {}
 
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-    const { dataSourceStore, commonStore } = useGlobalStore();
+    const { dataSourceStore } = useGlobalStore();
 
     const { rawDataMetaInfo, loading, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } =
         dataSourceStore;
-    useEffect(() => {
-        // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
-        if (rawDataMetaInfo.length === 0) {
-            dataSourceStore.setShowDataImportSelection(true);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dataSourceStore]);
 
     const dataImportButton = useCallback(
         (text: string, dataSourceIsEmpty: boolean) => {
@@ -74,9 +68,13 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     const onSelectLoadingFailed = useCallback(
         (err: any) => {
             dataSourceStore.setLoading(false);
-            commonStore.showError('error', `[Data Loading Error]${err}`);
+            notify({
+                type: 'error',
+                title: '[Data Loading Error]',
+                content: `${err}`,
+            });
         },
-        [dataSourceStore, commonStore]
+        [dataSourceStore]
     );
 
     const toggleLoadingAnimation = useCallback(
@@ -94,7 +92,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     );
     return (
         <div className="content-container" style={{ position: 'relative' }}>
-            <Card>
+            <Card fitContainer>
                 <ImportStorage />
                 <FastSelection />
                 <BackupModal />

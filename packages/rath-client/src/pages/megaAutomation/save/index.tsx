@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import { useGlobalStore } from '../../../store';
 import { setStorageByIdInLocal } from '../../../utils/storage';
+import { notify } from '../../../components/error';
 
 const Container = styled.div`
     padding: 1em;
@@ -18,7 +19,7 @@ const Container = styled.div`
 `;
 
 const SaveModal: React.FC = (props) => {
-    const { megaAutoStore, commonStore } = useGlobalStore();
+    const { megaAutoStore } = useGlobalStore();
     const [name, setName] = useState<string>('');
     const { showSaveModal } = megaAutoStore;
 
@@ -29,10 +30,14 @@ const SaveModal: React.FC = (props) => {
                 setStorageByIdInLocal(`[Rath_Storage]${dayjs().unix()}`, name === '' ? `[Rath_Storage]${dayjs().unix()}` : name, content)
             )
             .catch((err) => {
-                commonStore.showError('error', err);
+                notify({
+                    type: 'error',
+                    title: 'Error occurred',
+                    content: `${err}`,
+                });
             });
         megaAutoStore.setShowSaveModal(false);
-    }, [megaAutoStore, commonStore, name]);
+    }, [megaAutoStore, name]);
 
     const closeModal = useCallback(() => {
         megaAutoStore.setShowSaveModal(false);
