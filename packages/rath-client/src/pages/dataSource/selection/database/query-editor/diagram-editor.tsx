@@ -46,13 +46,20 @@ interface DiagramEditorProps {
 
 const emptyPreview = { meta: [], columns: [], rows: [] };
 
-const DiagramEditor = memo<DiagramEditorProps>(function DiagramEditor ({ disabled, query, busy, tables, setQuery, preview, doPreview, children }) {
+const DiagramEditor = memo<DiagramEditorProps>(function DiagramEditor ({ disabled, busy, tables, setQuery, preview, doPreview, children }) {
     const [tempQuery, setTempQuery] = useState('');
 
     const [graph, setGraph] = useState<IDBGraph>({
         nodes: [],
         edges: [],
     });
+
+    useEffect(() => {
+        setGraph({
+            nodes: [],
+            edges: [],
+        });
+    }, [tables]);
 
     useEffect(() => {
         setTempQuery('');
