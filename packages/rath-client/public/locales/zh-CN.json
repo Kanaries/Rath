@@ -187,7 +187,7 @@
             "BIKE_SHARING_DC": { "title": "共享单车数据集", "description": "" }
         },
         "btn": {
-            "use_table": "导入这张表",
+            "use_table": "导入这些数据 (最大 100 行)",
             "connect": "建立连接",
             "reset": "返回并重置",
             "connectFailed": "建立连接失败",

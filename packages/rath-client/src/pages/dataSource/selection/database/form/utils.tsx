@@ -3,8 +3,9 @@ import produce from 'immer';
 import type { Dispatch } from 'react';
 import type { DatabaseLevelType } from '../config';
 import { INestedListItem } from '../components/nested-list-item';
-import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchSchemaList, fetchTableList } from '../api';
+import { DatabaseApiOperator, DatabaseRequestPayload, fetchDatabaseList, fetchSchemaList, fetchTableDetail, fetchTableList } from '../api';
 import databaseOptions from '../config';
+import { SupportedDatabaseType } from '../type';
 
 
 export const findNode = (root: INestedListItem[], path: INestedListItem[]): INestedListItem | null => {
@@ -48,7 +49,7 @@ export const fetchListAsNodes = async (
                     group: 'database',
                     key: database,
                     text: database,
-                    children: hasNextLevelThen ? 'lazy' : undefined,
+                    isUnloaded: hasNextLevelThen,
                     icon: <Icon iconName="Database" />,
                 }));
             }
@@ -58,7 +59,7 @@ export const fetchListAsNodes = async (
                     group: 'schema',
                     key: schema,
                     text: schema,
-                    children: hasNextLevelThen ? 'lazy' : undefined,
+                    isUnloaded: hasNextLevelThen,
                     icon: <Icon iconName="TableGroup" />,
                 }));
             }
@@ -69,11 +70,13 @@ export const fetchListAsNodes = async (
                     key: table.name,
                     text: table.name,
                     icon: <Icon iconName="Table" />,
+                    isUnloaded: false,
                     children: table.meta.map(col => ({
                         group: 'column',
                         key: col.key,
                         subtext: col.dataType ?? undefined,
                         text: col.key,
+                        isUnloaded: false,
                         icon: (
                             <Icon
                                 iconName={
@@ -103,6 +106,8 @@ export enum EditorKey {
 export interface MenuType {
     title: string;
     items: INestedListItem[];
+    isUnloaded: boolean;
+    isFailed?: boolean;
 }
 
 export const handleBrowserItemClick = (
@@ -117,15 +122,15 @@ export const handleBrowserItemClick = (
     setPageIdx: Dispatch<number>,
 ): void => {
     const all = [...path, item];
-    if (item.children === 'lazy' || item.children === 'failed') {
-        if (item.children === 'failed') {
-            setMenu(menu => produce(menu, draft => {
-                const target = findNode(draft.items, all);
-                if (target) {
-                    target.children = 'lazy';
-                }
-            }));
-        }
+    if (item.isUnloaded || item.isFailed) {
+        setMenu(menu => produce(menu, draft => {
+            const target = findNode(draft.items, all);
+            if (target) {
+                target.isUnloaded = true;
+                target.isFailed = undefined;
+                target.children = undefined;
+            }
+        }));
         const curLevelIdx = config.levels.findIndex(
             lvl => typeof lvl === 'string' ? lvl : lvl.type
         );
@@ -138,6 +143,8 @@ export const handleBrowserItemClick = (
             setMenu(menu => produce(menu, draft => {
                 const target = findNode(draft.items, all);
                 if (target) {
+                    target.isUnloaded = false;
+                    target.isFailed = false;
                     target.children = list;
                 }
             }));
@@ -149,7 +156,9 @@ export const handleBrowserItemClick = (
             setMenu(menu => produce(menu, draft => {
                 const target = findNode(draft.items, all);
                 if (target) {
-                    target.children = 'failed';
+                    target.isUnloaded = false;
+                    target.isFailed = true;
+                    target.children = undefined;
                 }
             }));
         };
@@ -187,3 +196,38 @@ export interface PageType {
     id: string;
     path: INestedListItem[];
 }
+
+export const fetchTablePreviewData = async (
+    config: (typeof databaseOptions)[number],
+    page: PageType,
+    params: {
+        connectUri: string;
+        credentials: Record<string, string>;
+        sourceType: SupportedDatabaseType;
+        server: string;
+    },
+): ReturnType<typeof fetchTableDetail> => {
+    const payload: Parameters<typeof fetchTableDetail>[1] = {
+        uri: params.connectUri,
+        sourceType: params.sourceType,
+        table: page.path.at(-1)?.key ?? null,
+        rowsNum: '100',
+        credentials: config.credentials === 'json' ? params.credentials : undefined,
+    };
+    if (config.levels.some(lvl => lvl.type === 'database')) {
+        payload.db = page.path.find(d => d.group === 'database')?.key ?? null;
+        if (!payload.db) {
+            throw new Error('Database name is required but not given');
+        }
+    }
+    if (config.levels.some(lvl => lvl.type === 'schema')) {
+        payload.schema = page.path.find(d => d.group === 'schema')?.key ?? null;
+        if (!payload.db) {
+            throw new Error('Schema name is required but not given');
+        }
+    }
+    if (config.credentials === 'json') {
+        payload.credentials = params.credentials;
+    }
+    return fetchTableDetail(params.server, payload);
+};

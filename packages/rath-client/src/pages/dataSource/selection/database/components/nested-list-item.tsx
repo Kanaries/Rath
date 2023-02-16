@@ -89,24 +89,28 @@ export interface INestedListItem {
     key: string;
     text: string;
     subtext?: string;
-    children?: INestedListItem[] | 'lazy' | 'failed';
+    isUnloaded: boolean;
+    isFailed?: boolean;
+    children?: INestedListItem[];
     icon?: JSX.Element;
 }
 
 export interface NestedListPartProps {
     path: INestedListItem[];
     level: number;
-    items: INestedListItem[] | 'lazy' | 'failed';
+    isUnloaded: boolean;
+    isFailed?: boolean;
+    items: INestedListItem[];
     open: boolean;
-    setOpen: (open: boolean) => void;
-    onItemClick: (item: INestedListItem, path: INestedListItem[]) => void;
+    setOpen?: (open: boolean) => void;
+    onItemClick?: (item: INestedListItem, path: INestedListItem[]) => void;
 }
 
-const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ path, level, items, open, onItemClick }) {
+const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ path, level, items, isFailed = false, isUnloaded, open, onItemClick }) {
     const [openKeys, setOpenKeys] = useState(new Set<string>());
 
     useEffect(() => {
-        if (items === 'lazy' || items === 'failed') {
+        if (isUnloaded || isFailed) {
             return;
         }
         setOpenKeys(prev => {
@@ -119,9 +123,9 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
             }
             return next;
         });
-    }, [items]);
+    }, [items, isUnloaded, isFailed]);
 
-    if (items === 'lazy') {
+    if (isUnloaded) {
         return (
             // @ts-expect-error css variable
             <Container open={open} style={{ '--level': level }}>
@@ -135,7 +139,7 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                 ))}
             </Container>
         );
-    } else if (items === 'failed') {
+    } else if (isFailed) {
         const parent = path.at(-1);
         return (
             // @ts-expect-error css variable
@@ -149,7 +153,7 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                                     iconName="Refresh"
                                     role="button"
                                     tabIndex={0}
-                                    onClick={() => onItemClick(parent, path.slice(0, -1))}
+                                    onClick={() => onItemClick?.(parent, path.slice(0, -1))}
                                 />
                             </ItemIcon>
                         )}
@@ -164,13 +168,14 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
         // @ts-expect-error css variable
         <Container open={open} style={{ '--level': level }}>
             {items.map(item => {
+                const mayHasChildren = item.children || item.isUnloaded || item.isFailed;
                 const isOpen = openKeys.has(item.key);
 
                 return (
                     <Item key={item.key}>
                         <ItemHeader
                             onClick={() => {
-                                onItemClick(item, path);
+                                onItemClick?.(item, path);
                                 if (item.children) {
                                     setOpenKeys(keys => produce(keys, draft => {
                                         if (isOpen) {
@@ -183,7 +188,7 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                             }}
                         >
                             <ItemChevron>
-                                {item.children && (
+                                {mayHasChildren && (
                                     <ChevronIcon open={isOpen} />
                                 )}
                             </ItemChevron>
@@ -195,8 +200,8 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                             <ItemText
                                 onClick={e => {
                                     e.stopPropagation();
-                                    onItemClick(item, path);
-                                    if (item.children && !isOpen) {
+                                    onItemClick?.(item, path);
+                                    if (mayHasChildren && !isOpen) {
                                         setOpenKeys(keys => produce(keys, draft => {
                                             if (isOpen) {
                                                 draft.delete(item.key);
@@ -215,11 +220,13 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                                 )}
                             </ItemText>
                         </ItemHeader>
-                        {item.children && (
+                        {mayHasChildren && (
                             <NestedListPart
                                 path={[...path, item]}
                                 level={level + 1}
-                                items={item.children}
+                                isUnloaded={item.isUnloaded}
+                                isFailed={item.isFailed}
+                                items={item.children ?? []}
                                 open={isOpen}
                                 setOpen={isOpen => {
                                     setOpenKeys(keys => produce(keys, draft => {

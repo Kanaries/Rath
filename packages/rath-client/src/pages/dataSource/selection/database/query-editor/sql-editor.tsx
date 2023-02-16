@@ -54,10 +54,12 @@ const keywordsAsSuggestions = [
     'SELECT', 'AS', 'DISTINCT', 'FROM', 'WHERE', 'AND', 'OR', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'JOIN', 'ON', 'LIMIT',
 ];
 
+const validGroupLabels: readonly (string | undefined)[] = ['database', 'schema', 'table'];
+
 const flatAll = (items: INestedListItem[], path: string[] = []): { label: string; kind: languages.CompletionItemKind }[] => {
     const result: { label: string; kind: languages.CompletionItemKind }[] = [];
     for (const item of items) {
-        if (!['database', 'schema', 'table'].includes(item.group ?? '')) {
+        if (!validGroupLabels.includes(item.group)) {
             result.push({
                 label: item.text,
                 kind: languages.CompletionItemKind.Field,

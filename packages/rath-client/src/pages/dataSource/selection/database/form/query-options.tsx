@@ -8,12 +8,13 @@ import databaseOptions from '../config';
 import NestedList from '../components/nested-list';
 import type { INestedListItem } from '../components/nested-list-item';
 import useAsyncState, { AsyncDispatch } from '../../../../../hooks/use-async-state';
+import { notify } from '../../../../../components/error';
 import type { TableData } from '../index';
-import { DatabaseApiOperator, DatabaseRequestPayload, fetchQueryResult, fetchTableDetail } from '../api';
+import { DatabaseApiOperator, DatabaseRequestPayload, fetchQueryResult } from '../api';
 import TablePreview from '../table-preview';
 import SQLEditor from '../query-editor/sql-editor';
 import DiagramEditor from '../query-editor/diagram-editor';
-import { EditorKey, fetchListAsNodes, findNodeByPathId, handleBrowserItemClick, MenuType, PageType } from './utils';
+import { EditorKey, fetchListAsNodes, fetchTablePreviewData, findNodeByPathId, handleBrowserItemClick, MenuType, PageType } from './utils';
 import { MessageContainer, PivotHeader, PivotList, QueryBrowserHeader, QueryContainer, QueryViewBody, SpinnerContainer, SyncButton } from './components';
 
 interface QueryOptionsProps {
@@ -39,6 +40,8 @@ export interface QueryOptionsHandlerRef {
     reload: () => void;
 }
 
+const emptyMenu: MenuType = { title: '', items: [], isUnloaded: false };
+
 const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(function QueryOptions ({
     ready, server, sourceType, connectUri, disabled, queryString, setQueryString, editorPreview, setEditorPreview, isEditorPreviewPending, credentials, submit, children,
 }, handlerRef) {
@@ -49,10 +52,10 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
     const [preview, setPreview] = useState<{ [pathId: string]: TableData | 'failed' }>({});
     const [pageIdx, setPageIdx] = useState<number | EditorKey>(EditorKey.Monaco);
 
-    const [menu, setMenu, busy] = useAsyncState<MenuType>({ title: '', items: [] });
+    const [menu, setMenu, busy] = useAsyncState<MenuType>(emptyMenu);
 
     const reset = useCallback(() => {
-        setMenu({ title: '', items: [] });
+        setMenu(emptyMenu);
         setPages([]);
         setPreview({});
         setEditorPreview(null);
@@ -66,7 +69,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
 
         const [firstLevel] = config.levels;
         const hasNextLevel = config.levels.length >= 2 && (
-            typeof config.levels[1] === 'string' || config.levels[1].enumerable !== false
+            config.levels[1].enumerable !== false
         );
 
         if (firstLevel) {
@@ -81,7 +84,12 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
                         credentials: config.credentials === 'json' ? credentials : undefined,
                     },
                     hasNextLevel,
-                ).then(list => list ? ({ title: levelType, items: list }) : { title: '', items: [] })
+                ).then<typeof menu>(list => {
+                    if (list) {
+                        return { title: levelType, items: list, isUnloaded: false };
+                    }
+                    return emptyMenu;
+                })
             );
         }
 
@@ -138,20 +146,16 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
 
     useEffect(() => {
         if (config && page && page.path.at(-1)?.group === 'table' && !curPreview) {
-            // TODO: requires abstraction and props check
-            fetchTableDetail(commonParamsRef.current.server, {
-                uri: commonParamsRef.current.connectUri,
-                sourceType: commonParamsRef.current.sourceType,
-                db: page.path.find(d => d.group === 'database')?.key ?? null,
-                schema: page.path.find(d => d.group === 'schema')?.key ?? null,
-                table: page.path.at(-1)?.key ?? null,
-                rowsNum: '100',
-                credentials: config.credentials === 'json' ? credentials : undefined,
-            }).then(res => {
+            fetchTablePreviewData(config, page, { ...commonParamsRef.current, credentials }).then(res => {
                 setPreview(rec => produce(rec, draft => {
                     draft[page.id] = res;
                 }));
-            }).catch(() => {
+            }).catch(reason => {
+                notify({
+                    type: 'error',
+                    title: 'Failed to fetch table preview',
+                    content: `${reason}`,
+                });
                 setPreview(rec => produce(rec, draft => {
                     draft[page.id] = 'failed';
                 }));
@@ -204,7 +208,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
     }, []);
 
     const hasEnumerableTables = Boolean(
-        config?.levels.some(lvl => typeof lvl === 'string' ? lvl === 'table' : (lvl.type === 'table' && lvl.enumerable !== false))
+        config?.levels.some(lvl => lvl.type === 'table' && lvl.enumerable !== false)
     );
 
     const tables = useMemo(() => {
@@ -234,6 +238,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
     const previewFailed = curPreview === 'failed';
     const previewData = curPreview && curPreview !== 'failed' && curPreview;
     const previewPending = !curPreview;
+    const isOpenedPage = Boolean(pageIdx >= 0 && page);
 
     return (
         <QueryContainer theme={theme} ref={containerRef} style={{ width: w }}>
@@ -296,6 +301,8 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
                 loading={busy}
                 title={menu.title}
                 items={menu.items}
+                isUnloaded={menu.isUnloaded}
+                isFailed={menu.isFailed}
                 onItemClick={handleItemClick}
             />
             <QueryViewBody theme={theme}>
@@ -328,7 +335,7 @@ const QueryOptions = forwardRef<QueryOptionsHandlerRef, QueryOptionsProps>(funct
                                 {children}
                             </DiagramEditor>
                         )}
-                        {pageIdx >= 0 && page && (
+                        {isOpenedPage && (
                             <>
                                 {previewFailed && (
                                     <MessageContainer>

@@ -1,5 +1,6 @@
 import { notify } from "../../../../components/error";
 import { getRathError } from "../../../../rath-error";
+import databaseOptions from "./config";
 import type { SupportedDatabaseType, TableColInfo, TableInfo, TableRowData } from "./type";
 
 
@@ -154,6 +155,26 @@ export const fetchTableDetail = async (server: string, payload: Omit<DatabaseReq
 
 export const fetchQueryResult = async (server: string, payload: Omit<DatabaseRequestData['getResult'], 'func'>): Promise<DatabaseResponseData['getResult']> => {
     try {
+        const config = databaseOptions.find(opt => opt.key === payload.sourceType);
+        if (!config) {
+            throw new Error(`Database ${payload.sourceType} is not supported.`);
+        }
+        const requiresDatabase = config.levels.some(lvl => lvl.type === 'database');
+        if (requiresDatabase && !payload.db) {
+            throw new Error(`Database is required but not given.`);
+        }
+        const requiresSchema = config.levels.some(lvl => lvl.type === 'schema');
+        if (requiresSchema && !payload.schema) {
+            throw new Error(`Schema is required but not given.`);
+        }
+        const requiresTable = config.levels.some(lvl => lvl.type === 'table');
+        if (requiresTable && !payload.table) {
+            throw new Error(`Table is required but not given.`);
+        }
+        const requiresCredentials = Boolean(config.credentials);
+        if (requiresCredentials && !payload.credentials) {
+            throw new Error(`Credentials is required but not given.`);
+        }
         return await combinedDatabaseService(server, 'getResult', payload);
     } catch (error) {
         const rathError = getRathError('QueryExecutionError', error, { sql: payload.query ?? '' });

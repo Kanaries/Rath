@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { Shimmer } from '@fluentui/react';
@@ -70,11 +70,11 @@ const ItemChevron = styled.div`
 export type INestedListProps = {
     title: string;
     loading: boolean;
-} & Pick<NestedListPartProps, 'items'> & Partial<Pick<NestedListPartProps, 'onItemClick'>>;
+} & Pick<NestedListPartProps, 'items' | 'isFailed' | 'isUnloaded'> & Partial<Pick<NestedListPartProps, 'onItemClick'>>;
 
 const ShimmerItems = (
     <>
-        {new Array<0>(8).fill(0).map((_, i) => (
+        {new Array(8).fill(0).map((_, i) => (
             <Item virtual key={i}>
                 <ItemHeader>
                     <ItemChevron />
@@ -85,7 +85,9 @@ const ShimmerItems = (
     </>
 );
 
-const NestedList: FC<INestedListProps> = ({ loading, title, items, onItemClick }) => {
+const NestedList: FC<INestedListProps> = ({ loading, title, items, isFailed, isUnloaded, onItemClick }) => {
+    const emptyPath = useMemo(() => [], []);
+
     return (
         <Root>
             {loading && (
@@ -100,12 +102,13 @@ const NestedList: FC<INestedListProps> = ({ loading, title, items, onItemClick }
                 </ItemHeader>
             )}
             <NestedListPart
-                path={[]}
+                path={emptyPath}
                 level={1}
                 items={items}
+                isUnloaded={isUnloaded}
+                isFailed={isFailed}
                 open
-                setOpen={() => {}}
-                onItemClick={onItemClick ?? (() => {})}
+                onItemClick={onItemClick}
             />
         </Root>
     );

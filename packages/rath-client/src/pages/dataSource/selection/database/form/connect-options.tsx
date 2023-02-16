@@ -80,12 +80,26 @@ interface ConnectOptionsProps {
 
 const MenuItem = styled.div`
     position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
     i {
+        flex-grow: 0;
+        flex-shrink: 0;
         cursor: pointer;
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
+        padding-inline: 8px;
+    }
+`;
+
+const TextDisplay = styled.span`
+    display: inline-block;
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    span {
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 `;
 
@@ -99,7 +113,9 @@ const onRenderContextualMenuItem = (
     }
     return (
         <MenuItem>
-            {defaultRenderer?.(item)}
+            <TextDisplay>
+                {defaultRenderer?.(item)}
+            </TextDisplay>
             <Icon
                 iconName="ChromeClose"
                 role="button"
@@ -249,7 +265,7 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
                         onRenderContextualMenuItem={(item, defaultRenderer) => onRenderContextualMenuItem(item, deleteStoreItem, defaultRenderer)}
                         shouldFocusOnMount={false}
                     />
-                    <SubmitButton disabled={!connectUri} text={intl.get('common.submit')} onClick={submit} />
+                    <SubmitButton disabled={sourceType !== 'demo' && !connectUri} text={intl.get('common.submit')} onClick={submit} />
                 </Stack>
             </Form>
             {databaseConfig?.credentials === 'json' && (

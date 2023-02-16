@@ -188,7 +188,7 @@
             "BIKE_SHARING_DC": { "title": "Bike Sharing", "description": "" }
         },
         "btn": {
-            "use_table": "Load this table",
+            "use_table": "Load this table (up to 100 rows)",
             "connect": "Connect",
             "reset": "Back and Reset",
             "connectFailed": "Failed to connect",
