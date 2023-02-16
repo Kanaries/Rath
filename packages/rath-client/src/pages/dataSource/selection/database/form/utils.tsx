@@ -222,7 +222,7 @@ export const fetchTablePreviewData = async (
     }
     if (config.levels.some(lvl => lvl.type === 'schema')) {
         payload.schema = page.path.find(d => d.group === 'schema')?.key ?? null;
-        if (!payload.db) {
+        if (!payload.schema) {
             throw new Error('Schema name is required but not given');
         }
     }
