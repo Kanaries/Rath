@@ -192,7 +192,8 @@
             "connect": "Connect",
             "reset": "Back and Reset",
             "connectFailed": "Failed to connect",
-            "query": "Submit Query"
+            "query": "Submit Query",
+            "new_connector": "Press Enter or click on the Plus button to add and use a new connector"
         },
         "advice": {
             "lackData": "Lack of Data",

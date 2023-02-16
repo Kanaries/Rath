@@ -205,13 +205,13 @@ const DatabaseConnector: FC<DatabaseDataProps> = ({ onClose, onDataLoaded }) => 
             <AdvancedOptions
                 servers={serverList}
                 appendServer={target => {
-                    const next = produce(servers, draft => {
+                    const next = produce([...servers, ...defaultServers], draft => {
                         draft.unshift(target);
                     });
                     updateServersList(next);
                 }}
                 removeServer={idx => {
-                    const next = produce(servers, draft => {
+                    const next = produce([...servers, ...defaultServers], draft => {
                         draft.splice(idx, 1);
                     });
                     updateServersList(next);

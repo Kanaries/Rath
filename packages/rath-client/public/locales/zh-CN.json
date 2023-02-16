@@ -191,7 +191,8 @@
             "connect": "建立连接",
             "reset": "返回并重置",
             "connectFailed": "建立连接失败",
-            "query": "提交查询"
+            "query": "提交查询",
+            "new_connector": "按下回车或点击加号按钮以添加新的连接器"
         },
         "advice": {
             "lackData": "缺少有效数据",

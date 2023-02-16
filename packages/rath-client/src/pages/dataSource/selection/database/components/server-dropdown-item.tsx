@@ -48,6 +48,12 @@ const LagText = styled.span`
     color: #666;
 `;
 
+const TipsText = styled.div`
+    user-select: none;
+    font-style: italic;
+    padding: 1em;
+`;
+
 const ActionGroup = styled.div`
     flex-grow: 0;
     flex-shrink: 0;
@@ -73,9 +79,16 @@ export const renderServerItem = (
     const { checked, key: target, text: status, secondaryText } = props as {
         checked: boolean;
         key: string;
-        text: 'unknown' | 'pending' | 'fulfilled' | 'rejected';
+        text: 'unknown' | 'pending' | 'fulfilled' | 'rejected' | 'new';
         secondaryText: string;
     };
+    if (status === 'new') {
+        return (
+            <TipsText>
+                {secondaryText}
+            </TipsText>
+        );
+    }
     const lag = Number(secondaryText);
 
     const isDefault = defaultServers.includes(target);

@@ -176,7 +176,7 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                         <ItemHeader
                             onClick={() => {
                                 onItemClick?.(item, path);
-                                if (item.children) {
+                                if (mayHasChildren) {
                                     setOpenKeys(keys => produce(keys, draft => {
                                         if (isOpen) {
                                             draft.delete(item.key);
@@ -194,7 +194,7 @@ const NestedListPart = observer<NestedListPartProps>(function NestedListPart ({ 
                             </ItemChevron>
                             <ItemIcon>
                                 {item.icon ?? (
-                                    <Icon iconName={item.children ? 'ProductList' : 'Document'} />
+                                    <Icon iconName={mayHasChildren ? 'ProductList' : 'Document'} />
                                 )}
                             </ItemIcon>
                             <ItemText

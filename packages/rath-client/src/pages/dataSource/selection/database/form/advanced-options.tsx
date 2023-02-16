@@ -11,6 +11,7 @@ import {
     PrimaryButton,
     DefaultButton,
     Label,
+    IContextualMenuItem,
 } from "@fluentui/react";
 import { useId } from '@fluentui/react-hooks';
 import { observer } from "mobx-react-lite";
@@ -169,6 +170,22 @@ const AdvancedOptions = observer<{
         );
     };
 
+    const options = useMemo<IContextualMenuItem[]>(() => {
+        if (items.length > 0) {
+            return items.map(s => ({
+                key: s.target,
+                secondaryText: `${s.lag}`,
+                text: s.status,
+                checked: s.target === server,
+            }));
+        }
+        return [{
+            key: 'new',
+            text: 'new',
+            secondaryText: intl.get('dataSource.btn.new_connector'),
+        }];
+    }, [items, server])
+
     return (
         <Stack horizontal verticalAlign="end" horizontalAlign="stretch" onClick={() => setFocused(false)} style={{ position: 'relative' }}>
             <TextField
@@ -215,7 +232,7 @@ const AdvancedOptions = observer<{
                 target={`#${id}`}
                 useTargetWidth
                 hidden={!focused}
-                items={items.map(s => ({ key: s.target, secondaryText: `${s.lag}`, text: s.status, checked: s.target === server }))}
+                items={options}
                 onRenderContextualMenuItem={renderItem}
             />
         </Stack>

@@ -159,18 +159,6 @@ export const fetchQueryResult = async (server: string, payload: Omit<DatabaseReq
         if (!config) {
             throw new Error(`Database ${payload.sourceType} is not supported.`);
         }
-        const requiresDatabase = config.levels.some(lvl => lvl.type === 'database');
-        if (requiresDatabase && !payload.db) {
-            throw new Error(`Database is required but not given.`);
-        }
-        const requiresSchema = config.levels.some(lvl => lvl.type === 'schema');
-        if (requiresSchema && !payload.schema) {
-            throw new Error(`Schema is required but not given.`);
-        }
-        const requiresTable = config.levels.some(lvl => lvl.type === 'table');
-        if (requiresTable && !payload.table) {
-            throw new Error(`Table is required but not given.`);
-        }
         const requiresCredentials = Boolean(config.credentials);
         if (requiresCredentials && !payload.credentials) {
             throw new Error(`Credentials is required but not given.`);
