@@ -121,7 +121,7 @@ Assisted with AI, RATH can help you with your data analysis. Just provide RATH w
 
 ### 🌅 Causal Analysis (Alpha stage)
 
-Causal analysis could be defined as the way to identify and examine the causal relationship between variables, which can help explore the data, create better prediction models and make business decission.
+Causal analysis could be defined as the way to identify and examine the causal relationship between variables, which can help explore the data, create better prediction models and make business decision.
 
 RATH's causal analysis feature include:
 - Causal Discovery
