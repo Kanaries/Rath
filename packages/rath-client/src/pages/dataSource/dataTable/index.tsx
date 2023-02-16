@@ -4,7 +4,6 @@ import { observer } from 'mobx-react-lite';
 import { IconButton, Label, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import intl from 'react-intl-universal';
 import { unstable_batchedUpdates } from 'react-dom';
-import styled from 'styled-components';
 import { useGlobalStore } from '../../../store';
 import type { IFieldMeta, IRow } from '../../../interfaces';
 import { extractSelection, intersectPattern } from '../../../lib/textPattern';
@@ -15,14 +14,6 @@ import { IColStateType } from './headerCell/components/statePlaceholder';
 import { CustomBaseTable, MiniButton, MiniPrimaryButton, DATA_TABLE_STYLE_CONFIG, Tag, TextPatternCard } from './styles';
 import { findFirstExistTextPattern, groupTextPattern, initGroupedTextPatternList, pickFieldMetaFromFieldMetaWithSuggestions, uniquePattern } from './utils';
 // import regexgen from 'regexgen';
-
-export const DataViewContainer = styled.div`
-    position: relative;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-`;
 
 function provideSelectionRange (selectedRange: Range, currentNode: Node): { len: number, found: boolean } {
     if (selectedRange.startContainer === currentNode) {
@@ -322,7 +313,7 @@ const DataTable: React.FC = (props) => {
     );
 
     return (
-        <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ position: 'relative' }}>
             {fieldsNotDecided.length > 0 && (
                 <MessageBar
                     messageBarType={MessageBarType.warning}
@@ -338,7 +329,7 @@ const DataTable: React.FC = (props) => {
                     <span>{intl.get('dataSource.extend.notDecided', { count: fieldsNotDecided.length })}</span>
                 </MessageBar>
             )}
-            <div style={{ display: 'flex', overflow: 'auto' }}>
+            <div style={{ display: 'flex' }}>
                 {columns.length > 0 && (
                     <CustomBaseTable
                         useVirtual={true}

@@ -17,7 +17,6 @@ import React, { useCallback, useState } from 'react';
 import { Breadcrumb, DefaultButton, IBreadcrumbItem, ProgressIndicator } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
-import styled from 'styled-components';
 import { IDataSourceType } from '../../global';
 import { IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
@@ -47,20 +46,6 @@ interface DataConnectionProps {
     // onDataLoading: (p: number) => void;
     // toggleLoadingAnimation: (on: boolean) => void;
 }
-
-const FormContainer = styled.div`
-    flex-grow: 1;
-    flex-shrink: 0;
-    flex-basis: max-content;
-    display: flex;
-    flex-direction: column;
-`;
-
-const FirstClassMenu = styled.div`
-    flex-grow: 9999;
-    flex-shrink: 0;
-    flex-basis: max-content;
-`;
 
 const DataConnection: React.FC<DataConnectionProps> = (props) => {
     const { dataSourceStore, commonStore } = useGlobalStore();
@@ -181,31 +166,29 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
                 />
                 { dataSourceType !== null && <hr style={{ marginTop: '1em' }} /> }
                 {dataSourceType !== null && (
-                    <div>
-                        <DefaultButton
-                            style={{ margin: '1em 0em' }}
-                            text={intl.get('common.return')}
-                            onClick={() => {
-                                setDataSourceType(null);
-                            }}
-                        />
-                    </div>
+                    <DefaultButton
+                        style={{ margin: '1em 0em' }}
+                        text={intl.get('common.return')}
+                        onClick={() => {
+                            setDataSourceType(null);
+                        }}
+                    />
                 )}
-                <FormContainer>
+                <div className="">
                     {loading && dataSourceType !== IDataSourceType.FILE && <ProgressIndicator description="loading" />}
                     {loading && dataSourceType === IDataSourceType.FILE && <DataLoadingStatus />}
                     {dataSourceType && formMap[dataSourceType]}
-                </FormContainer>
+                </div>
             </Card>
+            <div>
             {dataSourceType === null && (
-                <FirstClassMenu>
-                    <SupportedSources
-                        onSelected={(k) => {
-                            setDataSourceType(k as IDataSourceType);
-                        }}
-                    />
-                </FirstClassMenu>
-            )}
+                        <SupportedSources
+                            onSelected={(k) => {
+                                setDataSourceType(k as IDataSourceType);
+                            }}
+                        />
+                    )}
+            </div>
         </div>
     );
 };
