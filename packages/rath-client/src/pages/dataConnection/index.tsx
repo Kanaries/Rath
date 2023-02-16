@@ -17,6 +17,7 @@ import React, { useCallback, useState } from 'react';
 import { Breadcrumb, DefaultButton, IBreadcrumbItem, ProgressIndicator } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
+import styled from 'styled-components';
 import { IDataSourceType } from '../../global';
 import { IMuteFieldBase, IRow } from '../../interfaces';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
@@ -46,6 +47,10 @@ interface DataConnectionProps {
     // onDataLoading: (p: number) => void;
     // toggleLoadingAnimation: (on: boolean) => void;
 }
+
+const Content = styled.div<{ open: boolean }>`
+    min-height: ${({ open }) => open ? '60vh' : 'unset'};
+`;
 
 const DataConnection: React.FC<DataConnectionProps> = (props) => {
     const { dataSourceStore, commonStore } = useGlobalStore();
@@ -157,7 +162,7 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
 
     return (
         <div className="content-container">
-            <Card style={{ flexGrow: 1, flexShrink: 0, flexBasis: 'max-content', display: 'flex', flexDirection: 'column' }}>
+            <Card fitContainer={Boolean(dataSourceType)}>
                 <Breadcrumb
                     items={items}
                     maxDisplayedItems={10}
@@ -174,11 +179,11 @@ const DataConnection: React.FC<DataConnectionProps> = (props) => {
                         }}
                     />
                 )}
-                <div className="">
+                <Content open={Boolean(dataSourceType)}>
                     {loading && dataSourceType !== IDataSourceType.FILE && <ProgressIndicator description="loading" />}
                     {loading && dataSourceType === IDataSourceType.FILE && <DataLoadingStatus />}
                     {dataSourceType && formMap[dataSourceType]}
-                </div>
+                </Content>
             </Card>
             <div>
             {dataSourceType === null && (

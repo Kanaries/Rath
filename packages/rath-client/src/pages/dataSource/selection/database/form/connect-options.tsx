@@ -11,6 +11,8 @@ import { renderDropdownItem, renderDropdownTitle } from '../custom-dropdown';
 import useLocalStorage from '../../../../../hooks/use-local-storage';
 
 
+const InputGroupStackToken = { childrenGap: 10 };
+
 const Form = styled.div`
     display: grid;
     grid-template-columns: max-content 1fr;
@@ -197,12 +199,11 @@ const ConnectOptions: FC<ConnectOptionsProps> = ({
         <>
             <Form>
                 <Label disabled={disabled} required>{intl.get('dataSource.connectUri')}</Label>
-                <Stack horizontal>
+                <Stack horizontal tokens={InputGroupStackToken}>
                     <Dropdown
                         title={intl.get('dataSource.databaseType')}
                         ariaLabel={intl.get('dataSource.databaseType')}
                         disabled={disabled}
-                        required
                         styles={DatabaseDropdownStyles}
                         options={databaseOptions}
                         selectedKey={sourceType}

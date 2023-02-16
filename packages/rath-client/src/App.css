@@ -1,6 +1,11 @@
 .content-container{
   /* padding: 1em 9% 0px 9%; */
-  padding: 3px 1em;
+  padding: 1em;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .header-bar{
   position: relative;

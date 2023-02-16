@@ -91,8 +91,8 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
         [dataSourceStore]
     );
     return (
-        <div className="content-container" style={{ position: 'relative', height: '100vh', maxHeight: '100vh', overflow: 'hidden' }}>
-            <Card style={{ flexGrow: 1, flexShrink: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="content-container" style={{ position: 'relative' }}>
+            <Card fitContainer>
                 <ImportStorage />
                 <FastSelection />
                 <BackupModal />

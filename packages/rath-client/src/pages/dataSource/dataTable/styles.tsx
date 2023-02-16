@@ -20,6 +20,7 @@ import styled from "styled-components";
 export const DATA_TABLE_STYLE_CONFIG = {
     SELECT_COLOR: '#b7eb8f',
     TABLE_INNER_STYLE: {
+        height: 600,
         overflow: 'auto',
     }
 } as const;
