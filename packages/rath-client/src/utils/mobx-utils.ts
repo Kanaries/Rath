@@ -6,11 +6,9 @@ export function toStream<T>(
     fireImmediately: boolean = false
 ): Observable<T> {
     const computedValue = computed(expression)
-    return new Observable<T>((subscriber) => {
-        observe<T>(computedValue, (props) => {
-            subscriber.next(props.newValue as any)
-        }, fireImmediately)
-    })
+    return new Observable<T>((subscriber) => observe<T>(computedValue, (props) => {
+        subscriber.next(props.newValue as any)
+    }, fireImmediately))
 }
 export class StreamListener<T> {
     public current: T
