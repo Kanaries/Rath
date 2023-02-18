@@ -157,6 +157,10 @@ If you want to add support for more database types or data engines, feel free to
 
 ## Developer Documentation
 
+This project is an alpha software. We are working on improving its code and documentation.
+
+If you are using RATH for your project(s), please let us know what are you using it for by emailing us at  [support@kanaries.org](support@kanaries.org). Feedbacks are also welcomed. If you find a bug or have a feature request, please create an issue.
+
 We encourage you to check out our [RATH Docs](https://docs.kanaries.net) for references and guidance. RATH Docs are scripted and maintained by technical writers and editors who collectively follow a standardized [style guide](https://docs.kanaries.net/documentation-style-guide) to produce clear and consistent documentation.
 
 ## Project Status
