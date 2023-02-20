@@ -17,7 +17,7 @@
   <a href="https://discord.gg/Z4ngFWXz2U">
     <img src="https://img.shields.io/badge/Discord-indigo?style=flat-square&logo=discord&logoColor=white" alt="Join RATH on Discord"/>
   </a>
-  <a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg">
+  <a href="https://join.slack.com/t/kanaries-community/shared_invite/zt-1pcosgbua-E_GBPawQOI79C41dPDyyvw">
     <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join RATH on Slack"/>
   </a> 
   </div>
@@ -121,7 +121,7 @@ Assisted with AI, RATH can help you with your data analysis. Just provide RATH w
 
 ### 🌅 Causal Analysis (Alpha stage)
 
-Causal analysis could be defined as the way to identify and examine the causal relationship between variables, which can help explore the data, create better prediction models and make business decission.
+Causal analysis could be defined as the way to identify and examine the causal relationship between variables, which can help explore the data, create better prediction models and make business decision.
 
 RATH's causal analysis feature include:
 - Causal Discovery
@@ -157,6 +157,10 @@ If you want to add support for more database types or data engines, feel free to
 
 ## Developer Documentation
 
+This project is an alpha software. We are working on improving its code and documentation.
+
+If you are using RATH for your project(s), please let us know what are you using it for by emailing us at  [support@kanaries.org](support@kanaries.org). Feedbacks are also welcomed. If you find a bug or have a feature request, please create an issue.
+
 We encourage you to check out our [RATH Docs](https://docs.kanaries.net) for references and guidance. RATH Docs are scripted and maintained by technical writers and editors who collectively follow a standardized [style guide](https://docs.kanaries.net/documentation-style-guide) to produce clear and consistent documentation.
 
 ## Project Status
@@ -168,12 +172,12 @@ We encourage you to check out our [RATH Docs](https://docs.kanaries.net) for ref
 [Kanaries community](https://docs.kanaries.net/community) is a place to have open discussions on features, voice your ideas, or get help with general questions. Get onboard with us through the following channels:
 
 Our developer community is the backbone of the ongoing RATH project. We sincerely welcome you to [join our community](join), participate in the conversation and stay connected with us for the latest updates.
-- [Join our Slack](https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg)
+- [Join our Slack](https://join.slack.com/t/kanaries-community/shared_invite/zt-1pcosgbua-E_GBPawQOI79C41dPDyyvw)
 - [Join our Discord](https://discord.gg/Z4ngFWXz2U)
 
 Feel free to [contribute to the RATH project](contribution-guide), submit any issues on our GitHub page, or split your grand new ideas in our chats.
 
-<a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/></a>
+<a href="https://join.slack.com/t/kanaries-community/shared_invite/zt-1pcosgbua-E_GBPawQOI79C41dPDyyvw"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/></a>
 <a href="https://discord.gg/Z4ngFWXz2U"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/discord.png" alt="Join our Discord community" width="200"/> </a>
 
 

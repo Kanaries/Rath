@@ -25,7 +25,7 @@
   <a href="https://discord.gg/Z4ngFWXz2U">
     <img src="https://img.shields.io/badge/Discord-indigo?style=flat-square&logo=discord&logoColor=white" alt="Join RATH on Discord"/>
   </a>
-  <a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg">
+  <a href="https://join.slack.com/t/kanaries-community/shared_invite/zt-1pcosgbua-E_GBPawQOI79C41dPDyyvw">
     <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join RATH on Slack"/>
   </a> 
   </div>
@@ -67,7 +67,7 @@
 
 💪私たちと共に、未来を作りましょう！💪
 
-<a href="https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/></a>
+<a href="https://join.slack.com/t/kanaries-community/shared_invite/zt-1pcosgbua-E_GBPawQOI79C41dPDyyvw"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/slack.png" alt="Join our Slack community" width="200"/></a>
 <a href="https://discord.gg/Z4ngFWXz2U"><img src="https://kanaries-docs.oss-cn-hangzhou.aliyuncs.com/img/discord.png" alt="Join our Discord community" width="200"/> </a>
 
 
@@ -197,7 +197,7 @@ RATH は、多くのデータソースをサポートします。RATH に接続�
 [Kanaries コミュニティ](https://docs.kanaries.net/community) は RATH の機能について交流できるオープンな場所です。あなたのアイディアで共に討論したり、質問や支援請求を答えたりすることができます。ぜひ以下のチャンネルを通して Kanaries コミュニティと共に進みましょう。
 
 私たちの開発者コミュニティは、日々進捗している RATH プロジェクトのメンテナンスを担当しています。あなたが[コミュニティに参加](join)して、交流を深めて、最新情報を交換することを歓迎します。
-- [Join our Slack](https://join.slack.com/t/kanaries/shared_invite/zt-1k60sgaxu-aGcuS7CwGeJUccE61iGopg)
+- [Join our Slack](https://join.slack.com/t/kanaries-community/shared_invite/zt-1pcosgbua-E_GBPawQOI79C41dPDyyvw)
 - [Join our Discord](https://discord.gg/Z4ngFWXz2U)
 
 RATH プロジェクトにコントリビュートすることは[自由](contribution-guide)。GitHub ページで Issue を提出することとチャットで新しいアイディアを送信することもぜひ遠慮せずに。
