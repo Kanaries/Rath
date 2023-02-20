@@ -70,8 +70,8 @@ export class CommonStore {
     public get themeConfig (): VegaThemeConfig | undefined {
         return this.getTheme(this.vizTheme);
     }
-    public getTheme(themeKey: string, useCustomTheme = this.useCustomTheme): VegaThemeConfig | undefined {
-        if (useCustomTheme) return this.customThemeConfig;
+    public getTheme(themeKey: string): VegaThemeConfig | undefined {
+        if (this.useCustomTheme) return this.customThemeConfig;
         if (themeKey === THEME_KEYS.default) return undefined;
         return this.themes[themeKey];
     }
@@ -88,8 +88,11 @@ export class CommonStore {
         this.customThemeConfig = config;
     }
     public resetCustomThemeConfigByThemeKey (themeKey: string) {
-        if (themeKey === THEME_KEYS.default) this.customThemeConfig = undefined;
-        this.customThemeConfig = deepcopy(this.getTheme(themeKey, false));
+        if (themeKey === THEME_KEYS.default || !this.themes[themeKey]) {
+            this.customThemeConfig = undefined;
+            return;
+        }
+        this.customThemeConfig = deepcopy(this.themes[themeKey]);
     }
     public visualAnalysisInGraphicWalker(spec: IVegaSubset) {
         this.graphicWalkerSpec = transVegaSubset2Schema(spec);
