@@ -114,6 +114,8 @@ const LoginInfo: FC = () => {
             <Dialog
                 modalProps={{
                     isBlocking: true,
+                    // to make an error message closable
+                    isClickableOutsideFocusTrap: true,
                 }}
                 hidden={!showUserPanel}
                 onDismiss={() => {
