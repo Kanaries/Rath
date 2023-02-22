@@ -48,6 +48,12 @@ const LogoBar = styled.div`
         margin-left: 12px;
         font-size: 1.6em;
     }
+    a {
+        display: flex;
+    }
+    img {
+        height: auto;
+    }
 `;
 
 const IconMap = {
