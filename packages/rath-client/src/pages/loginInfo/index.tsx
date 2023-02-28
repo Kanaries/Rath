@@ -143,8 +143,7 @@ const LoginInfo: FC = () => {
                 {info && (
                     <Persona
                         text={navMode === 'text' ? info.userName : ''}
-                        // FIXME: avatar display
-                        // imageUrl={info.avatarURL}
+                        imageUrl={info.avatarURL}
                         size={PersonaSize.size32}
                     />
                 )}
