@@ -173,6 +173,7 @@ export default class UserStore {
         }
     }
 
+    /** @deprecated this method won't work because Rath cannot change the cookie set by Kanaries Home */
     public async commitLogout() {
         try {
             const url = getMainServiceAddress('/api/logout');
