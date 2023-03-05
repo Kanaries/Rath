@@ -72,7 +72,7 @@ RATH是开源项目，离不开开源贡献者和关注者的支持。当你遇�
 - 无需代码知识，在浏览器中直接使用 [RATH Cloud](https://rath.kanaries.cn/)
 - 下载 [桌面版RATH](https://kanaries.cn/#/products)
 
-这是一个alphaa版本，我们会持续更新和改进RATH，欢迎你的反馈和建议。如果你想现在在内部项目中集成RATH，可以联系我们[support@kanaries.org](support@kanaries.org)，并告诉我们你的使用场景和计划。如果你遇到一些问题，欢迎提出在issues中告诉我们。
+这是一个alpha版本，我们会持续更新和改进RATH，欢迎你的反馈和建议。如果你想现在在内部项目中集成RATH，可以联系我们[support@kanaries.org](support@kanaries.org)，并告诉我们你的使用场景和计划。如果你遇到一些问题，欢迎提出在issues中告诉我们。
 
 
 ## 功能特点
