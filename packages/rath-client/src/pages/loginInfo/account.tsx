@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import intl from 'react-intl-universal';
+import { useMemo } from 'react';
 import { DefaultButton, Pivot, PivotItem, Stack, TextField } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
 import { IAccessMethod } from '../../interfaces';
@@ -47,6 +48,12 @@ function Account() {
     const { userStore } = useGlobalStore();
     const { info } = userStore;
     const userIsOnline = info !== null && info.userName && info.userName !== '';
+    const accountUrl = useMemo(() => {
+        const url = new URL(window.location.origin);
+        url.host = url.host.split('.').slice(-2).join('.');
+        url.pathname = '/me';
+        return url;
+    }, []);
 
     return (
         <div>
@@ -60,10 +67,11 @@ function Account() {
                         <div>
                             <DefaultButton
                                 onClick={() => {
-                                    userStore.commitLogout();
+                                    window.open(accountUrl, '_blank');
+                                    // userStore.commitLogout();
                                 }}
                             >
-                                {intl.get('login.signOut')}
+                                {intl.get('login.my_account')}
                             </DefaultButton>
                         </div>
                     </Stack>
