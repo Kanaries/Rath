@@ -4,10 +4,8 @@ import {
     ChoiceGroup,
     IChoiceGroupOption,
     IconButton,
-    PrimaryButton,
     Separator,
     Stack,
-    TextField,
     Toggle,
 } from '@fluentui/react';
 import styled from 'styled-components';
@@ -21,10 +19,14 @@ import FieldExtSuggestions from '../../../components/fieldExtend/suggestions';
 import { getGlobalStore } from '../../../store';
 import { PIVOT_KEYS } from '../../../constants';
 import { RATH_THEME_CONFIG } from '../../../theme';
+import ColNameEditor from '../dataTable/headerCell/components/colNameEditor';
 import DistributionChart from './distChart';
 
 const MetaContainer = styled.div`
     overflow: auto;
+    /* Make sure the box-shadow won't be hidden */
+    margin-inline: -6px;
+    padding-inline: 6px;
 `;
 const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
     overflow: hidden;
@@ -72,6 +74,17 @@ const MetaItemContainer = styled.div<{ focus: boolean; isPreview: boolean }>`
         font-size: 12px;
         font-weight: 400;
         color: rgb(89, 89, 89);
+    }
+    .comment {
+        font-size: 12px;
+        font-weight: 400;
+        color: rgb(68, 68, 68);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.5em;
+        height: 1.5em;
+        margin-block: 0.4em;
     }
     padding: 1em;
     padding-top: ${({ isPreview }) => (isPreview ? '2.2em' : '1em')};
@@ -182,6 +195,7 @@ interface MetaItemProps {
     focus: boolean;
     colKey: string;
     colName: string;
+    colComment: string;
     semanticType: ISemanticType;
     analyticType: IAnalyticType;
     extSuggestions: FieldExtSuggestion[];
@@ -196,6 +210,7 @@ const MetaItem: React.FC<MetaItemProps> = (props) => {
     const {
         colKey,
         colName,
+        colComment,
         semanticType,
         analyticType,
         dist,
@@ -208,10 +223,6 @@ const MetaItem: React.FC<MetaItemProps> = (props) => {
     } = props;
     const { dataSourceStore, semiAutoStore, commonStore } = getGlobalStore();
     const [editing, setEditing] = React.useState(false);
-    const [editingName, setEditingName] = React.useState(colName);
-    useEffect(() => {
-        setEditingName(colName);
-    }, [colName]);
 
     const ANALYTIC_TYPE_CHOICES_LANG: IChoiceGroupOption[] = ANALYTIC_TYPE_CHOICES.map((ch) => ({
         ...ch,
@@ -297,38 +308,32 @@ const MetaItem: React.FC<MetaItemProps> = (props) => {
                 </Stack>
             </div>
             <div className="col-name-container">
-                {!editing && (
-                    <React.Fragment>
-                        <h1>{colName}</h1>
-                        <IconButton
-                            title={intl.get('dataSource.editName')}
-                            iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
-                            onClick={() => {
-                                setEditing(true);
-                            }}
-                        />
-                    </React.Fragment>
-                )}
-                {editing && (
-                    <React.Fragment>
-                        <TextField
-                            value={editingName}
-                            onChange={(e, val) => {
-                                setEditingName(val || '');
-                            }}
-                        />
-                        <PrimaryButton
-                            style={{ marginLeft: '3px' }}
-                            text={intl.get('function.confirm')}
-                            onClick={() => {
-                                onChange && onChange(colKey, 'name', editingName);
-                                setEditing(false);
-                            }}
-                        />
-                    </React.Fragment>
-                )}
+                <h1>{colName}</h1>
+                <IconButton
+                    title={intl.get('dataSource.editName')}
+                    iconProps={{ iconName: 'edit', style: { fontSize: '12px' } }}
+                    onClick={() => {
+                        setEditing(true);
+                    }}
+                />
+                <ColNameEditor
+                    defaultName={colName}
+                    setShowNameEditor={setEditing}
+                    showNameEditor={editing}
+                    onNameUpdate={(newName) => {
+                        onChange && onChange(colKey, 'name', newName);
+                    }}
+                    defaultComment={colComment}
+                    onCommentUpdate={(newComment) => {
+                        onChange && onChange(colKey, 'comment', newComment);
+                    }}
+                />
             </div>
             <div className="fid">Column ID: {colKey}</div>
+            {colComment.match(/[^\s]/) && (
+                // contains any non-empty character
+                <p className="comment">{colComment}</p>
+            )}
             <Separator />
             <div className="flex-container">
                 <DistributionChart
@@ -407,6 +412,7 @@ const MetaList: React.FC<MetaListProps> = (props) => {
                         key={m.fid}
                         colKey={m.fid}
                         colName={`${m.name}`}
+                        colComment={m.comment ?? ''}
                         semanticType={m.semanticType}
                         analyticType={m.analyticType}
                         dist={m.distribution}

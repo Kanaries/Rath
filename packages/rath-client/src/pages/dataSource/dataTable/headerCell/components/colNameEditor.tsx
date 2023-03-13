@@ -27,19 +27,33 @@ const Container = styled.div`
     }
 `;
 
+const FormStyle = {
+    marginBlock: '1em',
+};
+const FormTokens = { childrenGap: 12 };
+const BtnGroupStyle = {
+    marginTop: '2em',
+};
+
 interface ColNameEditorProps {
     showNameEditor: boolean;
     setShowNameEditor: React.Dispatch<React.SetStateAction<boolean>>;
     defaultName: string;
     onNameUpdate: (newName: string) => void;
+    defaultComment: string;
+    onCommentUpdate: (newComment: string) => void;
 }
 const ColNameEditor: React.FC<ColNameEditorProps> = (props) => {
-    const { showNameEditor, setShowNameEditor, defaultName, onNameUpdate } = props;
+    const { showNameEditor, setShowNameEditor, defaultName, onNameUpdate, defaultComment, onCommentUpdate } = props;
     const nameEditorTitleId = useId('name-editor-title');
     const [headerName, setHeaderName] = useState<string>(defaultName);
     useEffect(() => {
         setHeaderName(defaultName);
     }, [defaultName]);
+    const [comment, setComment] = useState(defaultComment);
+    useEffect(() => {
+        setComment(defaultComment);
+    }, [defaultComment]);
     return (
         <Modal
             titleAriaId={nameEditorTitleId}
@@ -50,7 +64,7 @@ const ColNameEditor: React.FC<ColNameEditorProps> = (props) => {
         >
             <Container>
                 <h1 id={nameEditorTitleId}>{intl.get('dataSource.table.edit')}</h1>
-                <Stack tokens={{ childrenGap: 12 }}>
+                <Stack style={FormStyle} tokens={FormTokens}>
                     <TextField
                         label={intl.get('dataSource.table.fieldName')}
                         aria-label={intl.get('dataSource.table.fieldName')}
@@ -60,11 +74,21 @@ const ColNameEditor: React.FC<ColNameEditorProps> = (props) => {
                             setHeaderName(`${val}`);
                         }}
                     />
-                    <Stack tokens={{ childrenGap: 12 }} horizontal>
+                    <TextField
+                        label={intl.get('storage.desc', { mode: intl.get('common.field') })}
+                        aria-label={intl.get('storage.desc', { mode: intl.get('common.field') })}
+                        value={comment}
+                        placeholder={defaultComment}
+                        onChange={(e, val) => {
+                            setComment(val ?? '');
+                        }}
+                    />
+                    <Stack style={BtnGroupStyle} tokens={FormTokens} horizontal>
                         <PrimaryButton
                             text={intl.get('function.confirm')}
                             onClick={() => {
                                 onNameUpdate && onNameUpdate(headerName);
+                                onCommentUpdate && onCommentUpdate(comment);
                                 setShowNameEditor(false);
                             }}
                         />
@@ -74,6 +98,7 @@ const ColNameEditor: React.FC<ColNameEditorProps> = (props) => {
                                 unstable_batchedUpdates(() => {
                                     setShowNameEditor(false);
                                     setHeaderName(defaultName);
+                                    setComment(defaultComment);
                                 });
                             }}
                         />

@@ -32,6 +32,17 @@ const DetailContainer = styled.div`
         color: #666;
         font-size: 12px;
     }
+    .comment {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 12px;
+        color: #666666aa;
+        line-height: 1.5em;
+        height: 1.5em;
+        padding-inline: 0.1em;
+        margin-bottom: 0.6em;
+    }
     position: relative;
     .bottom-bar {
         position: absolute;
@@ -135,6 +146,10 @@ const MetaDetail: React.FC<MetaDetailProps> = (props) => {
             <div className={`${field.analyticType} bottom-bar`}></div>
             <h1 className="detail-header">{field.name}</h1>
             <p className="detail-content">Column ID: {field.fid}</p>
+            {field.comment?.match(/[^\s]/) && (
+                // contains any non-empty character
+                <p className="comment">{field.comment}</p>
+            )}
             <FullDistViz
                 dataSource={field.distribution}
                 x="memberName"
