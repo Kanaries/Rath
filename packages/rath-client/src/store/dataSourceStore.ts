@@ -4,7 +4,7 @@ import { combineLatest, from, Observable, Subscription } from "rxjs";
 import { getFreqRange } from "@kanaries/loa";
 import * as op from 'rxjs/operators'
 import { notify } from "../components/error";
-import { RATH_INDEX_COLUMN_KEY } from "../constants";
+import { RATH_INDEX_COLUMN_KEY, PIVOT_KEYS } from "../constants";
 import {
     IDataPreviewMode,
     IDatasetBase,
@@ -159,6 +159,7 @@ export class DataSourceStore {
         this.filteredDataStorage = new IteratorStorage({ itemKey: 'filteredData' });
         const fields$ = from(toStream(() => this.fieldsAndPreview, false));
         const fieldsNames$ = from(toStream(() => this.fieldNames, true));
+        const fieldsComments$ = from(toStream(() => this.fieldComments, true));
         const rawDataMetaInfo$ = from(toStream(() => this.rawDataMetaInfo, false));
         const extData$ = from(toStream(() => this.extData, true));
         const filters$ = from(toStream(() => this.filters, true))
@@ -200,8 +201,8 @@ export class DataSourceStore {
             op.share()
         )
         // 弱约束关系：fieldNames必须保证和metas是对应的顺序，这一对应可能会被fieldSummary的服务破坏。
-        const fieldMetas$ = combineLatest([originFieldMetas$, fieldsNames$]).pipe(
-            op.map(([originFieldMetas, fieldNames]) => {
+        const fieldMetas$ = combineLatest([originFieldMetas$, fieldsNames$, fieldsComments$]).pipe(
+            op.map(([originFieldMetas, fieldNames, fieldComments]) => {
                 return originFieldMetas.map((m, index) => {
                     const ext = this.extFields.find(f => f.fid === m.fid);
 
@@ -209,7 +210,8 @@ export class DataSourceStore {
                         ...m,
                         extInfo: ext?.extInfo,
                         stage: ext?.stage,
-                        name: ext?.name ?? fieldNames[index]
+                        name: ext?.name ?? fieldNames[index],
+                        comment: ext?.comment ?? fieldComments[index],
                     }
                 })
             }),
@@ -225,13 +227,17 @@ export class DataSourceStore {
         window.addEventListener('message', (ev) => {
             const msg = ev.data as IDataMessage;
             const { type, downLoadURL, dataset/*, dashboard*/ } = msg;
-            const { userStore } = getGlobalStore();
+            const { userStore, commonStore } = getGlobalStore();
             switch (type) {
                 case 'download': {
                     if (downLoadURL && !loadTaskReceived) {
                         loadTaskReceived = true;
                         console.warn('[Get Notebook From Other Pages]', msg);
-                        userStore.openNotebook(downLoadURL);
+                        userStore.openNotebook(downLoadURL).then(() => {
+                            if (commonStore.appKey === PIVOT_KEYS.connection) {
+                                commonStore.setAppKey(PIVOT_KEYS.dataSource);
+                            }
+                        });
                     }
                     break;
                 }
@@ -268,6 +274,9 @@ export class DataSourceStore {
                         })).then(state => {
                             // @ts-ignore
                             ev.source!.postMessage({ type: "dataset", result: state }, ev.origin);
+                            if (commonStore.appKey === PIVOT_KEYS.connection) {
+                                commonStore.setAppKey(PIVOT_KEYS.dataSource);
+                            }
                         });
                     }
                     break;
@@ -279,6 +288,9 @@ export class DataSourceStore {
                         ev.source.postMessage(true, ev.origin)
                         this.loadDataWithInferMetas(msg.data.dataSource, msg.data.fields)
                         this.setShowDataImportSelection(false);
+                        if (commonStore.appKey === PIVOT_KEYS.connection) {
+                            commonStore.setAppKey(PIVOT_KEYS.dataSource);
+                        }
                     }
                     break;
                 }
@@ -367,6 +379,9 @@ export class DataSourceStore {
     }
     public get fieldNames (): string[] {
         return this.fields.map(f => `${f.name}`)
+    }
+    public get fieldComments (): string[] {
+        return this.fields.map(f => f.comment ?? '');
     }
     public get fieldSemanticTypes () {
         return this.fields.map(f => f.semanticType);

@@ -21,7 +21,7 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
     const { datasetId } = dataSourceStore;
     const { cloudDataSourceMeta, cloudDatasetMeta, currentOrgName, currentWspName, uploadDataSource, uploadingDataSource } = userStore;
     const { id: dataSourceId } = cloudDataSourceMeta ?? {};
-    const { id: cloudDatasetId, workspace } = cloudDatasetMeta ?? {};
+    const { id: cloudDatasetId, workspace, comment } = cloudDatasetMeta ?? {};
     
     const dsName = cloudDataSourceMeta?.name || datasetId;
 
@@ -62,6 +62,12 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
     useEffect(() => {
         setCanBackupRef.current(canBackup);
     }, [canBackup]);
+
+    const [datasetComment, setDatasetComment] = useState('');
+
+    useEffect(() => {
+        setDatasetComment(comment ?? '');
+    }, [comment]);
 
     useImperativeHandle(ref, () => ({
         async submit(download) {
@@ -105,6 +111,7 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                             type: accessMode,
                             size: file.size,    
                             totalCount: nRows,
+                            comment: datasetComment,
                             meta,
                         }, file);
                         commonStore.setShowBackupModal(false);
@@ -182,8 +189,15 @@ const DatasetBackupForm = forwardRef<IBackupFormHandler, IBackupFormProps>(funct
                             label={intl.get('storage.name', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`) })}
                             value={name}
                             placeholder={defaultName}
+                            autoComplete="off"
                             onChange={(_, val) => setName(val ?? '')}
                             required
+                        />
+                        <TextField
+                            label={intl.get('storage.desc', { mode: intl.get(`dataSource.importData.cloud.${CloudItemType.DATASET}`) })}
+                            value={datasetComment}
+                            autoComplete="off"
+                            onChange={(_, val) => setDatasetComment(val ?? '')}
                         />
                         <Toggle
                             label={intl.get('storage.public')}

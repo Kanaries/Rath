@@ -73,6 +73,7 @@ export const writeDatasetFile = async (filename: string): Promise<[File, number,
         return {
             ...f,
             name: f.name ?? f.fid,
+            comment: f.comment ?? "",
             features: meta?.features ?? {
                 entropy: 0,
                 maxEntropy: 0,
