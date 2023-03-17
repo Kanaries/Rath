@@ -50,12 +50,15 @@ export const charsetOptions = [
 export type Charset = typeof charsetOptions[number]['key'];
 
 const Container = styled.div`
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 1em;
+    row-gap: 1em;
     padding-top: 1em;
     & label {
         font-weight: 400;
         margin-right: 1em;
+        text-transform: capitalize;
     }
     & [role='radiogroup'] {
         display: flex;
@@ -76,18 +79,25 @@ const Container = styled.div`
         display: flex;
         flex-direction: row;
         align-items: center;
-        & * {
+        /* & * {
             min-width: unset;
             width: max-content;
             height: max-content;
             min-height: unset;
-        }
+        } */
         > * {
-            margin: 0 0.5em;
+            flex-grow: 0;
+            flex-shrink: 0;
+            width: max-content;
+            white-space: nowrap;
+            margin-left: 0.5em;
+            :first-child {
+                margin-left: 0;
+            }
         }
-        & input {
+        /* & input {
             width: 3em;
-        }
+        } */
     }
 `;
 
@@ -167,39 +177,38 @@ const FileHelper: FC<IFileHelperProps> = ({
     return (
         <Container>
             {showMoreConfig && (
-                <Dropdown
-                    label={intl.get('dataSource.charset')}
-                    style={{ maxWidth: '120px' }}
-                    options={charsetOptions.slice()}
-                    selectedKey={charset}
-                    onChange={(_, item) => {
-                        item && setCharset(item.key as Charset);
-                    }}
-                    styles={{
-                        root: { display: 'flex', flexDirection: 'row', marginRight: '2em' },
-                        label: { marginRight: '1em', fontWeight: 400 },
-                        dropdown: { width: '8em' },
-                    }}
-                />
+                <>
+                    <Label>{intl.get('dataSource.charset')}</Label>
+                    <Dropdown
+                        style={{ maxWidth: '120px' }}
+                        options={charsetOptions.slice()}
+                        selectedKey={charset}
+                        onChange={(_, item) => {
+                            item && setCharset(item.key as Charset);
+                        }}
+                    />
+                </>
             )}
-            {!preview || preview.type.match(/^text\/.*/) ? (
+            {(!preview || preview.type.match(/^text\/.*/)) && (
                 <>
                     {showMoreConfig && (
-                        <ChoiceGroup
-                            label={intl.get('dataSource.separator')}
-                            options={separatorOptions}
-                            selectedKey={selectedSeparatorKey}
-                            onChange={(_, option) => {
-                                if (option) {
-                                    setSeparator(option.key);
-                                }
-                            }}
-                        />
+                        <>
+                            <Label>{intl.get('dataSource.separator')}</Label>
+                            <ChoiceGroup
+                                options={separatorOptions}
+                                selectedKey={selectedSeparatorKey}
+                                onChange={(_, option) => {
+                                    if (option) {
+                                        setSeparator(option.key);
+                                    }
+                                }}
+                            />
+                        </>
                     )}
                     {(!preview || preview.type === 'text/csv') && separator === ',' && (
                         <>
+                            <Label>{intl.get('dataSource.upload.sampling')}</Label>
                             <ChoiceGroup
-                                label={intl.get('dataSource.upload.sampling')}
                                 options={sampleOptions}
                                 selectedKey={sampleMethod}
                                 onChange={(_, option) => {
@@ -209,106 +218,108 @@ const FileHelper: FC<IFileHelperProps> = ({
                                 }}
                             />
                             {sampleMethod === SampleKey.reservoir && (
-                                <SpinButton
-                                    label={intl.get('dataSource.upload.percentSize')}
-                                    min={0}
-                                    step={1}
-                                    value={sampleSize.toString()}
-                                    onValidate={(value) => {
-                                        setSampleSize(Number(value));
-                                    }}
-                                    onIncrement={() => {
-                                        setSampleSize((v) => v + 1);
-                                    }}
-                                    onDecrement={() => {
-                                        setSampleSize((v) => Math.max(v - 1, 0));
-                                    }}
-                                />
+                                <>
+                                    <Label>{intl.get('dataSource.upload.percentSize')}</Label>
+                                    <SpinButton
+                                        min={0}
+                                        step={1}
+                                        value={sampleSize.toString()}
+                                        onValidate={(value) => {
+                                            setSampleSize(Number(value));
+                                        }}
+                                        onIncrement={() => {
+                                            setSampleSize((v) => v + 1);
+                                        }}
+                                        onDecrement={() => {
+                                            setSampleSize((v) => Math.max(v - 1, 0));
+                                        }}
+                                    />
+                                </>
                             )}
                         </>
                     )}
                 </>
-            ) : null}
-            {sheetNames && (
-                <Dropdown
-                    label={intl.get('dataSource.upload.sheet')}
-                    options={sheetNames.map((name, i) => ({ key: `${i}`, text: name }))}
-                    selectedKey={`${selectedSheetIdx}`}
-                    onChange={(_, option) => option?.key && setSelectedSheetIdx(Number(option.key))}
-                    styles={{
-                        root: { padding: '1em 0', display: 'flex', flexDirection: 'row', marginRight: '2em' },
-                        label: { marginRight: '1em', fontWeight: 400 },
-                        dropdown: { width: '10em' },
-                    }}
-                />
             )}
-            {isExcel && showMoreConfig && (
-                <div className="spin-group">
+            {sheetNames && (
+                <>
+                    <Label>{intl.get('dataSource.upload.sheet')}</Label>
+                    <Dropdown
+                        style={{ maxWidth: '20em' }}
+                        options={sheetNames.map((name, i) => ({ key: `${i}`, text: name }))}
+                        selectedKey={`${selectedSheetIdx}`}
+                        onChange={(_, option) => option?.key && setSelectedSheetIdx(Number(option.key))}
+                    />
+                </>
+            )}
+            {isExcel && (
+                <>
                     <Label>{intl.get('dataSource.upload.excel_range')}</Label>
-                    <SpinButton
-                        value={String(excelRange[0][0])}
-                        min={excelRef[0][0]}
-                        max={Math.min(excelRef[1][0], excelRange[1][0])}
-                        step={1}
-                        onChange={(_, str) =>
-                            str &&
-                            setExcelRange(
-                                produce(excelRange, (draft) => {
-                                    draft[0][0] = Number(str);
-                                })
-                            )
-                        }
-                        styles={{ spinButtonWrapper: { display: 'flex', alignItems: 'center' } }}
-                    />
-                    ,
-                    <SpinButton
-                        value={String(excelRange[0][1])}
-                        min={excelRef[0][1]}
-                        max={Math.min(excelRef[1][1], excelRange[1][1])}
-                        step={1}
-                        onChange={(_, str) =>
-                            str &&
-                            setExcelRange(
-                                produce(excelRange, (draft) => {
-                                    draft[0][1] = Number(str);
-                                })
-                            )
-                        }
-                        styles={{ spinButtonWrapper: { display: 'flex', alignItems: 'center' } }}
-                    />
-                    {'-'}
-                    <SpinButton
-                        value={String(excelRange[1][0])}
-                        min={Math.max(excelRef[0][0], excelRange[0][0])}
-                        max={excelRef[1][0]}
-                        step={1}
-                        onChange={(_, str) =>
-                            str &&
-                            setExcelRange(
-                                produce(excelRange, (draft) => {
-                                    draft[1][0] = Number(str);
-                                })
-                            )
-                        }
-                        styles={{ spinButtonWrapper: { display: 'flex', alignItems: 'center' } }}
-                    />
-                    ,
-                    <SpinButton
-                        value={String(excelRange[1][1])}
-                        min={Math.max(excelRef[0][1], excelRange[0][1])}
-                        max={excelRef[1][1]}
-                        step={1}
-                        onChange={(_, str) =>
-                            str &&
-                            setExcelRange(
-                                produce(excelRange, (draft) => {
-                                    draft[1][1] = Number(str);
-                                })
-                            )
-                        }
-                        styles={{ spinButtonWrapper: { display: 'flex', alignItems: 'center' } }}
-                    />
-                </div>
+                    <div className="spin-group">
+                        <SpinButton
+                            value={String(excelRange[0][0])}
+                            min={excelRef[0][0]}
+                            max={Math.min(excelRef[1][0], excelRange[1][0])}
+                            step={1}
+                            style={{ maxWidth: '4em' }}
+                            onChange={(_, str) =>
+                                str &&
+                                setExcelRange(
+                                    produce(excelRange, (draft) => {
+                                        draft[0][0] = Number(str);
+                                    })
+                                )
+                            }
+                        />
+                        <span>,</span>
+                        <SpinButton
+                            value={String(excelRange[0][1])}
+                            min={excelRef[0][1]}
+                            max={Math.min(excelRef[1][1], excelRange[1][1])}
+                            step={1}
+                            style={{ maxWidth: '4em' }}
+                            onChange={(_, str) =>
+                                str &&
+                                setExcelRange(
+                                    produce(excelRange, (draft) => {
+                                        draft[0][1] = Number(str);
+                                    })
+                                )
+                            }
+                        />
+                        <span>{'-'}</span>
+                        <SpinButton
+                            value={String(excelRange[1][0])}
+                            min={Math.max(excelRef[0][0], excelRange[0][0])}
+                            max={excelRef[1][0]}
+                            step={1}
+                            style={{ maxWidth: '4em' }}
+                            onChange={(_, str) =>
+                                str &&
+                                setExcelRange(
+                                    produce(excelRange, (draft) => {
+                                        draft[1][0] = Number(str);
+                                    })
+                                )
+                            }
+                        />
+                        <span>,</span>
+                        <SpinButton
+                            value={String(excelRange[1][1])}
+                            min={Math.max(excelRef[0][1], excelRange[0][1])}
+                            max={excelRef[1][1]}
+                            step={1}
+                            style={{ maxWidth: '4em' }}
+                            onChange={(_, str) =>
+                                str &&
+                                setExcelRange(
+                                    produce(excelRange, (draft) => {
+                                        draft[1][1] = Number(str);
+                                    })
+                                )
+                            }
+                        />
+                    </div>
+                </>
             )}
         </Container>
     );
