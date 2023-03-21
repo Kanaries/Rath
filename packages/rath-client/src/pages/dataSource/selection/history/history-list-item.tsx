@@ -169,7 +169,7 @@ export interface IHistoryListItemProps {
 const HistoryListItem: FC<IHistoryListItemProps> = ({
     file, rowIndex, colIndex, handleClick, handleClearClick, handleRefresh,
 }) => {
-    const ext = file.name.endsWith(RathDemoVirtualExt) ? RathDemoVirtualExt : /(?<=\.)[^.]+$/.exec(file.name)?.[0];
+    const ext = file.name.endsWith(RathDemoVirtualExt) ? RathDemoVirtualExt : /\.([^./]+)$/.exec(file.name)?.[1];
     const isRathDemo = ext === RathDemoVirtualExt;
     const name = isRathDemo ? file.name.replace(new RegExp(`\\.${RathDemoVirtualExt.replaceAll(/\./g, '\\.')}$`), '') : file.name;
 

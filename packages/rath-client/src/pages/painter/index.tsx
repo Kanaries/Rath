@@ -31,6 +31,7 @@ import { COLOR_CELLS, LABEL_FIELD_KEY, LABEL_INDEX, PAINTER_MODE_LIST } from './
 import NeighborAutoLink from './neighborAutoLink';
 import EmptyError from './emptyError';
 import Operations from './operations';
+import CanvasContainer from './canvasContainer';
 
 const Cont = styled.div`
     /* cursor: none !important; */
@@ -80,10 +81,6 @@ const Painter: React.FC = (props) => {
 
     const painting = painterMode !== PAINTER_MODE.MOVE;
 
-    const clearPainting = useCallback(() => {
-        setViewData(labelingData(painterViewData, initValue));
-    }, [painterViewData, initValue, setViewData]);
-
     const fieldsInView = useMemo<IFieldMeta[]>(() => {
         const res: IFieldMeta[] = [];
         if (vizSpec) {
@@ -96,6 +93,17 @@ const Painter: React.FC = (props) => {
         }
         return res;
     }, [fieldMetas, vizSpec]);
+
+    const spRef = useRef(samplePercent);
+    spRef.current = samplePercent;
+    const fieldsRef = useRef(fieldsInView);
+    fieldsRef.current = fieldsInView;
+
+    const clearPainting = useCallback(() => {
+        const size = Math.min(painterViewData.length, Math.round(painterViewData.length * spRef.current));
+        const sampleData = viewSampling(labelingData(painterViewData, initValue), fieldsRef.current, size);
+        setViewData(sampleData);
+    }, [painterViewData, initValue, setViewData]);
 
     useEffect(() => {
         const size = Math.min(painterViewData.length, Math.round(painterViewData.length * samplePercent));
@@ -142,6 +150,7 @@ const Painter: React.FC = (props) => {
         }
         return null;
     }, [vizSpec, mutFeatValues, noViz, painterMode]);
+    const [realPainterSize, setRealPainterSize] = useState(0);
     useEffect(() => {
         if (painterSpec !== null && container.current) {
 
@@ -156,6 +165,7 @@ const Painter: React.FC = (props) => {
                         .remove(() => true)
                         .insert(viewData)
                 );
+                setRealPainterSize((res.view as unknown as { _width: number })._width * painterSize);
                 if (!(painterSpec.encoding.x && painterSpec.encoding.y)) return;
                 const xField = painterSpec.encoding.x.field;
                 const yField = painterSpec.encoding.y.field;
@@ -179,7 +189,7 @@ const Painter: React.FC = (props) => {
                                 point: [item.datum[xField], item.datum[yField]],
                                 a: xRange[1] - xRange[0],
                                 b: yRange[1] - yRange[0],
-                                r: painterSize,
+                                r: painterSize / 2,
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
                                 value: mutFeatValues[mutFeatIndex],
@@ -229,7 +239,7 @@ const Painter: React.FC = (props) => {
                                 mutData: viewData,
                                 fields: [xField, yField],
                                 point: [item.datum[xField], item.datum[yField]],
-                                r: painterSize,
+                                r: painterSize / 2,
                                 key: LABEL_FIELD_KEY,
                                 range: yRange[1] - yRange[0],
                                 indexKey: LABEL_INDEX,
@@ -277,7 +287,7 @@ const Painter: React.FC = (props) => {
                                 mutData: viewData,
                                 fields: [yField, xField],
                                 point: [item.datum[yField], item.datum[xField]],
-                                r: painterSize,
+                                r: painterSize / 2,
                                 range: xRange[1] - xRange[0],
                                 key: LABEL_FIELD_KEY,
                                 indexKey: LABEL_INDEX,
@@ -353,6 +363,26 @@ const Painter: React.FC = (props) => {
         return {};
     }, [painterSpec]);
 
+    const [showCursorPreview, setShowCursorPreview] = useState(false);
+    
+    const currentColor = COLOR_CELLS.find(f => f.id === mutFeatValues[mutFeatIndex])?.color;
+    const painterColor = currentColor && painterMode === PAINTER_MODE.COLOR ? currentColor : '#8888';
+
+    useEffect(() => {
+        setRealPainterSize(0);
+    }, [painterSize]);
+
+    useEffect(() => {
+        setShowCursorPreview(true);
+        const timer = setTimeout(() => {
+            setShowCursorPreview(false);
+        }, 1_000);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [realPainterSize, painterColor]);
+
     if (noViz) {
         return <EmptyError />;
     }
@@ -365,7 +395,14 @@ const Painter: React.FC = (props) => {
                         e.stopPropagation();
                         e.preventDefault();
                     }}>
-                        <div ref={container}></div>
+                        <CanvasContainer
+                            showTrack={painterMode === PAINTER_MODE.COLOR || painterMode === PAINTER_MODE.ERASE}
+                            color={painterColor}
+                            size={realPainterSize}
+                            preview={showCursorPreview}
+                        >
+                            <div ref={container}></div>
+                        </CanvasContainer>
                         <Operations />
                     </div>
                     <div className="operation-segment">
@@ -385,6 +422,7 @@ const Painter: React.FC = (props) => {
                             {painterMode === PAINTER_MODE.COLOR && (
                                 <Stack.Item>
                                     <SwatchColorPicker
+                        styles={{ root: { margin: '0.5em 1.2em' } }}
                                         selectedId={mutFeatValues[mutFeatIndex]}
                                         columnCount={5}
                                         cellShape={'circle'}
