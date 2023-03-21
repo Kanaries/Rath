@@ -1,8 +1,5 @@
 *, :before, :after {
     box-sizing: border-box;
-    border-width: 0;
-    border-style: solid;
-    border-color: #e5e7eb;
 }
 
 html {
@@ -87,12 +84,6 @@ button, select {
     text-transform: none;
 }
 
-button, [type=button], [type=reset], [type=submit] {
-    -webkit-appearance: button;
-    background-color: transparent;
-    background-image: none;
-}
-
 :-moz-focusring {
     outline: auto;
 }
@@ -150,16 +141,11 @@ textarea {
     resize: vertical;
 }
 
-input::placeholder, textarea::placeholder {
-    opacity: 1;
-    color: #9ca3af;
-}
-
 button, [role=button] {
     cursor: pointer;
 }
 
-:disabled {
+:disabled, [aria-disable="true"] {
     cursor: default;
 }
 
@@ -175,40 +161,6 @@ img, video {
 
 [hidden] {
     display: none;
-}
-
-.container {
-    width: 100%;
-}
-
-@media (min-width: 640px) {
-    .container {
-        max-width:640px;
-    }
-}
-
-@media (min-width: 768px) {
-    .container {
-        max-width: 768px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .container {
-        max-width: 1024px;
-    }
-}
-
-@media (min-width: 1280px) {
-    .container {
-        max-width: 1280px;
-    }
-}
-
-@media (min-width: 1536px) {
-    .container {
-        max-width: 1536px;
-    }
 }
 
 .sr-only {
