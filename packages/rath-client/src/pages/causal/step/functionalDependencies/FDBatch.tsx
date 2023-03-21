@@ -9,6 +9,7 @@ import { getI18n } from '../../locales';
 import { getGeneratedFDFromAutoDetection } from './utils';
 import FDEditor from './FDEditor';
 
+// nothing
 
 const Mask = styled.div`
     position: fixed;
