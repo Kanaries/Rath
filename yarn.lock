@@ -1962,6 +1962,13 @@
   resolved "https://registry.yarnpkg.com/@formatjs/intl-utils/-/intl-utils-2.3.0.tgz#2dc8c57044de0340eb53a7ba602e59abf80dc799"
   integrity sha512-KWk80UPIzPmUg+P0rKh6TqspRw0G6eux1PuJr+zz47ftMaZ9QDwbGzHZbtzWkl5hgayM/qrKRutllRC7D/vVXQ==
 
+"@headlessui/react@^1.7.12":
+  version "1.7.13"
+  resolved "https://registry.npmmirror.com/@headlessui/react/-/react-1.7.13.tgz#fd150b394954e9f1d86ed2340cffd1217d6e7628"
+  integrity sha512-9n+EQKRtD9266xIHXdY5MfiXPDfYwl7zBM7KOx2Ae3Gdgxy8QML1FkCMjq6AsOf0l6N9uvI4HcFtuFlenaldKg==
+  dependencies:
+    client-only "^0.0.1"
+
 "@heroicons/react@^2.0.8":
   version "2.0.11"
   resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-2.0.11.tgz#2c6cf4c66d81142ec87c102502407d8c353558bb"
@@ -2510,11 +2517,12 @@
   dependencies:
     localforage "^1.10.0"
 
-"@kanaries/graphic-walker@0.2.11":
-  version "0.2.11"
-  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.2.11.tgz#7305e7e4ef000f1f15d4fc33532656eb3070daca"
-  integrity sha512-YvSiTl712BCOZmQ9oRDEIJ8KsXlRI2WbH87gQsZIKLEgVw5umV8LiVLmMk2tZdq0PDetVGcmcBTjtpS0B+g0xw==
+"@kanaries/graphic-walker@^0.2.15":
+  version "0.2.15"
+  resolved "https://registry.npmmirror.com/@kanaries/graphic-walker/-/graphic-walker-0.2.15.tgz#a8d39716f51c6a768a23b2329492192447d4a740"
+  integrity sha512-ocmoFHsDJZmkW+dk3xg250ZdyFNUr5JpZsrKAKYrARL5ucxbsfoonl5OJgePF4xKfKbDjllrK68pBPyKezszPQ==
   dependencies:
+    "@headlessui/react" "^1.7.12"
     "@heroicons/react" "^2.0.8"
     "@kanaries/react-beautiful-dnd" "0.0.1"
     "@kanaries/web-data-loader" "0.1.5"
@@ -4704,6 +4712,11 @@ clean-css@^5.2.2:
   integrity sha512-lCr8OHhiWCTw4v8POJovCoh4T7I9U11yVsPjMWWnnMmp9ZowCxyad1Pathle/9HjaDp+fdQKjO9fQydE6RHTZg==
   dependencies:
     source-map "~0.6.0"
+
+client-only@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.npmmirror.com/client-only/-/client-only-0.0.1.tgz#38bba5d403c41ab150bff64a95c85013cf73bca1"
+  integrity sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==
 
 cliui@^4.0.0:
   version "4.1.0"
