@@ -18,15 +18,17 @@ const NavContainer = styled.div`
     /* flex-direction: vertical; */
     display: flex;
     flex-direction: column;
+    border-right: 1px solid #e9ebf0;
     .nav-footer {
         /* position: absolute; */
         bottom: 0px;
-        /* padding-left: 1em; */
         flex-grow: 0;
         flex-shrink: 0;
         overflow: hidden;
+        > .padded {
+            padding: 1em;
+        }
     }
-    padding-left: 10px;
     .text-red {
         color: #e94726;
     }
@@ -49,16 +51,17 @@ const LogoBar = styled.div`
 `;
 
 const IconMap = {
-    [PIVOT_KEYS.megaAuto]: 'Robot',
-    [PIVOT_KEYS.semiAuto]: 'Manufacturing',
+    [PIVOT_KEYS.megaAuto]: 'UserEvent',
+    [PIVOT_KEYS.semiAuto]: 'D365TalentInsight',
     [PIVOT_KEYS.editor]: 'LineChart',
     [PIVOT_KEYS.support]: 'Telemarketer',
     [PIVOT_KEYS.dataSource]: 'DataManagementSettings',
     [PIVOT_KEYS.painter]: 'Brush',
     [PIVOT_KEYS.dashBoardDesigner]: 'SizeLegacy',
     [PIVOT_KEYS.collection]: 'Heart',
-    [PIVOT_KEYS.dashboard]: 'CRMReport',
-    [PIVOT_KEYS.causal]: 'Relationship'
+    [PIVOT_KEYS.dashboard]: 'Presentation',
+    [PIVOT_KEYS.causal]: 'Relationship',
+    [PIVOT_KEYS.connection]: 'Database'
 } as {
     [key: string]: string;
 };
@@ -89,15 +92,11 @@ const AppNav: React.FC<AppNavProps> = (props) => {
     const getLinks = useCallback(
         (pivotKeys: string[]) => {
             return pivotKeys.map((p) => {
-                const hotkeyAccess = altKeyPressed ? Object.entries(HotKeyMap).find(
-                    ([, key]) => key === p
-                )?.[0] ?? null : null;
+                const hotkeyAccess = altKeyPressed ? Object.entries(HotKeyMap).find(([, key]) => key === p)?.[0] ?? null : null;
                 return {
                     url: `#${p}`,
                     key: p,
-                    name: `${navMode === 'text' ? intl.get(`menu.${p}`) : ''}${
-                        hotkeyAccess ? ` (${hotkeyAccess})` : ''
-                    }`,
+                    name: `${navMode === 'text' ? intl.get(`menu.${p}`) : ''}${hotkeyAccess ? ` (${hotkeyAccess})` : ''}`,
                     forceAnchor: true,
                     iconProps: { iconName: getIcon(p) },
                     // iconProps: navMode === 'icon' ? {iconName: getIcon(p) } : undefined,
@@ -130,9 +129,10 @@ const AppNav: React.FC<AppNavProps> = (props) => {
         };
     }, []);
 
-    const HotKeyActions = useMemo(() => Object.fromEntries(Object.entries(HotKeyMap).map(([k, appKey]) => [
-        `Alt+${k}`, () => commonStore.setAppKey(appKey)
-    ])), [commonStore]);
+    const HotKeyActions = useMemo(
+        () => Object.fromEntries(Object.entries(HotKeyMap).map(([k, appKey]) => [`Alt+${k}`, () => commonStore.setAppKey(appKey)])),
+        [commonStore]
+    );
 
     useHotKey(HotKeyActions);
 
@@ -140,11 +140,26 @@ const AppNav: React.FC<AppNavProps> = (props) => {
         {
             links: [
                 ...getLinks([
+                    PIVOT_KEYS.connection,
                     PIVOT_KEYS.dataSource,
-                    PIVOT_KEYS.editor,
-                    PIVOT_KEYS.semiAuto,
-                    PIVOT_KEYS.megaAuto,
-                    PIVOT_KEYS.painter,
+                ]),
+                {
+                    url: '#eda',
+                    key: 'eda',
+                    name: navMode === 'text' ? intl.get('menu.eda') : '',
+                    isExpanded: true,
+                    forceAnchor: true,
+                    onClick(e: any) {
+                        e.preventDefault();
+                    },
+                    links: getLinks([
+                        PIVOT_KEYS.editor,
+                        PIVOT_KEYS.semiAuto,
+                        PIVOT_KEYS.megaAuto,
+                        PIVOT_KEYS.painter,
+                    ]),
+                },
+                ...getLinks([
                     PIVOT_KEYS.collection,
                     PIVOT_KEYS.dashboard,
                 ]),
@@ -175,8 +190,9 @@ const AppNav: React.FC<AppNavProps> = (props) => {
         <NavContainer>
             <LogoBar>
                 <a
-                    // onClick={() => { window.location.reload(false); }}
-                    href="https://kanaries.cn/"
+                    href={`${window.location.protocol}//rath.${window.location.host.split('.').slice(-2).join('.')}/`}
+                    target="_blank"
+                    rel="noreferrer"
                 >
                     <img style={{ width: '38px', marginTop: '4px' }} src="./assets/kanaries-lite.png" alt="rath" />
                 </a>
@@ -193,7 +209,9 @@ const AppNav: React.FC<AppNavProps> = (props) => {
                 <Nav selectedKey={appKey} groups={groups} />
             </div>
             <div className="nav-footer">
-                <UserSetting />
+                <div className="padded">
+                    <UserSetting />
+                </div>
                 <LoginInfo />
             </div>
         </NavContainer>

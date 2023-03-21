@@ -55,10 +55,10 @@ export const mainTheme = createTheme({
         white: '#ffffff',
     },
     semanticColors: {
-        buttonBorder: '#eaeaea',
+        buttonBorder: '#e6e6e6',
         buttonText: '#888',
-        inputBorder: '#eaeaea',
-        inputIcon: '#eaeaea',
+        inputBorder: '#e6e6e6',
+        inputIcon: '#e6e6e6',
         focusBorder: 'red',
         smallInputBorder: '#666'
     },

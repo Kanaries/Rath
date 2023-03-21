@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { ActionButton, DefaultButton, Spinner, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -40,21 +41,28 @@ enum BatchUpdateMode {
     FULLY_REPLACE = 'fully_replace',
 }
 
-const dropdownOptions: readonly BatchUpdateMode[] = [
+const batchUpdateModes = [
     BatchUpdateMode.OVERWRITE_ONLY,
     BatchUpdateMode.FILL_ONLY,
     BatchUpdateMode.FULLY_REPLACE,
-];
+] as const;
 
 const FDBatch: FC = () => {
     const { causalStore } = useGlobalStore();
     const { sample } = causalStore.dataset;
     const { functionalDependencies } = causalStore.model;
-    const { serverActive } = causalStore.operator;
+    // const { serverActive } = causalStore.operator;
     const [displayPreview, setDisplayPreview] = useState(false);
     const [preview, setPreview] = useState<readonly IFunctionalDep[] | null>(null);
     const isPending = displayPreview && preview === null;
     const [mode, setMode] = useState(BatchUpdateMode.OVERWRITE_ONLY);
+
+    const dropdownOptions = useMemo<{ key: BatchUpdateMode; text: string }[]>(() => {
+        return batchUpdateModes.map(key => ({
+            key,
+            text: intl.get(`causal.analyze.${key}`),
+        }));
+    }, []);
 
     const updatePreview = useMemo<(fdArr: IFunctionalDep[] | ((prev: readonly IFunctionalDep[] | null) => readonly IFunctionalDep[])) => void>(() => {
         if (displayPreview) {
@@ -151,19 +159,19 @@ const FDBatch: FC = () => {
 
     return (
         <>
-            <h3>{getI18n('fd_config.batch.title')}</h3>
+            <h3>{intl.get('causal.actions.one_click')}</h3>
             <Stack tokens={{ childrenGap: 10 }} horizontal>
                 <ActionButton iconProps={{ iconName: 'Delete' }} onClick={handleClear}>
-                    {getI18n('fd_config.batch.delete_all')}
+                    {intl.get('causal.analyze.clear_all')}
                 </ActionButton>
-                <ActionButton iconProps={{ iconName: 'EngineeringGroup' }} onClick={generateFDFromExtInfo}>
-                    {getI18n('fd_config.batch.from_ext')}
+                <ActionButton iconProps={{ iconName: 'EngineeringGroup' || 'BranchSearch' }} onClick={generateFDFromExtInfo}>
+                    {intl.get('causal.actions.use_ext_diagram')}
                 </ActionButton>
                 {/* <ActionButton iconProps={{ iconName: 'ConfigurationSolid' }} disabled>
-                    导入影响关系
+                    {intl.get('causal.actions.import_effect')}
                 </ActionButton> */}
-                <ActionButton iconProps={{ iconName: 'HintText' }} disabled={!serverActive} onClick={generateFDFromAutoDetection}>
-                    {getI18n('fd_config.batch.from_detection')}
+                <ActionButton iconProps={{ iconName: 'HintText' }} onClick={generateFDFromAutoDetection}>
+                    {intl.get('causal.actions.auto_detect')}
                 </ActionButton>
             </Stack>
             {displayPreview && (
@@ -174,7 +182,7 @@ const FDBatch: FC = () => {
                                 <Spinner label={getI18n('computing')} />
                             ) : (
                                 <FDEditor
-                                    title={getI18n('fd_config.batch.preview')}
+                                    title={intl.get('causal.actions.preview')}
                                     functionalDependencies={submittable}
                                     setFunctionalDependencies={updatePreview}
                                 />
@@ -182,12 +190,12 @@ const FDBatch: FC = () => {
                         </div>
                         <Stack tokens={{ childrenGap: 20 }} horizontal style={{ justifyContent: 'center' }}>
                             <DefaultButton
-                                text={getI18n(`fd_config.batch_mode.${mode}`)}
+                                text={dropdownOptions.find(opt => opt.key === mode)?.text ?? intl.get('common.apply')}
                                 onClick={handleSubmit}
                                 primary
                                 split
                                 menuProps={{
-                                    items: dropdownOptions.map(key => ({ key, text: getI18n(`fd_config.batch_mode.${key}`) })),
+                                    items: dropdownOptions,
                                     onItemClick: (_e, item) => {
                                         if (item) {
                                             setMode(item.key as BatchUpdateMode);
@@ -196,7 +204,7 @@ const FDBatch: FC = () => {
                                 }}
                             />
                             <DefaultButton
-                                text={getI18n('fd_config.batch.cancel')}
+                                text={intl.get('common.cancel')}
                                 onClick={handleCancel}
                             />
                         </Stack>

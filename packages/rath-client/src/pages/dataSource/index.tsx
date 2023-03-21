@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import intl from 'react-intl-universal';
-import { PrimaryButton, Stack, DefaultButton, Spinner } from '@fluentui/react';
+import { PrimaryButton, Stack, DefaultButton, Pivot, PivotItem, Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { useGlobalStore } from '../../store';
 import { IDataPrepProgressTag, IDataPreviewMode, IMuteFieldBase, IRow } from '../../interfaces';
 import { Card } from '../../components/card';
 import { DataSourceTag, IDBMeta, setDataStorage } from '../../utils/storage';
-import { BorderCard } from '../../components/borderCard';
 import BackupModal from '../../components/backupModal';
+import { notify } from '../../components/error';
 import DataTable from './dataTable/index';
 import MetaView from './metaView/index';
 import Selection from './selection/index';
@@ -24,17 +24,10 @@ const MARGIN_LEFT = { marginLeft: '1em' };
 interface DataSourceBoardProps {}
 
 const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
-    const { dataSourceStore, commonStore } = useGlobalStore();
+    const { dataSourceStore } = useGlobalStore();
 
     const { rawDataMetaInfo, loading, showDataImportSelection, dataPreviewMode, dataPrepProgressTag } =
         dataSourceStore;
-    useEffect(() => {
-        // 注意！不要对useEffect加依赖rawData，因为这里是初始加载的判断。
-        if (rawDataMetaInfo.length === 0) {
-            dataSourceStore.setShowDataImportSelection(true);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dataSourceStore]);
 
     const dataImportButton = useCallback(
         (text: string, dataSourceIsEmpty: boolean) => {
@@ -59,7 +52,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
 
     const onSelectDataLoaded = useCallback(
         (fields: IMuteFieldBase[], dataSource: IRow[], name?: string, tag?: DataSourceTag | undefined, withHistory?: IDBMeta | undefined) => {
-            dataSourceStore.loadDataWithInferMetas(dataSource, fields);
+            dataSourceStore.loadDataWithInferMetas(dataSource, fields, tag);
             if (name && tag !== undefined) {
                 dataSourceStore.setDatasetId(name);
                 setDataStorage(name, fields, dataSource, tag, withHistory);
@@ -75,9 +68,13 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     const onSelectLoadingFailed = useCallback(
         (err: any) => {
             dataSourceStore.setLoading(false);
-            commonStore.showError('error', `[Data Loading Error]${err}`);
+            notify({
+                type: 'error',
+                title: '[Data Loading Error]',
+                content: `${err}`,
+            });
         },
-        [dataSourceStore, commonStore]
+        [dataSourceStore]
     );
 
     const toggleLoadingAnimation = useCallback(
@@ -95,7 +92,7 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
     );
     return (
         <div className="content-container" style={{ position: 'relative' }}>
-            <Card backgroundColor="#fff">
+            <Card fitContainer>
                 <ImportStorage />
                 <FastSelection />
                 <BackupModal />
@@ -127,15 +124,25 @@ const DataSourceBoard: React.FC<DataSourceBoardProps> = (props) => {
                         setLoadingAnimation={toggleLoadingAnimation}
                     />
                 </Stack>
-                {/* <hr style={{ margin: '0.6em 0em', border: 'none' }} /> */}
-                <BorderCard>
-                    {rawDataMetaInfo.length > 0 && <DataOperations />}
-                    <DataInfo />
-                    {rawDataMetaInfo.length > 0 && <Advice />}
-                    {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
-                    {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
-                    {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}
-                </BorderCard>
+                <hr style={{ margin: '1em 0em 0em 0em' }} />
+                <Pivot
+                    style={{ marginBottom: '6px' }}
+                    selectedKey={dataPreviewMode}
+                    onLinkClick={(item) => {
+                        item && dataSourceStore.setDataPreviewMode(item.props.itemKey as IDataPreviewMode);
+                    }}
+                >
+                    <PivotItem itemKey={IDataPreviewMode.data} headerText={intl.get('dataSource.dataView')} itemIcon="Table" />
+                    <PivotItem itemKey={IDataPreviewMode.meta} headerText={intl.get('dataSource.metaView')} itemIcon="ViewList" />
+                    <PivotItem itemKey={IDataPreviewMode.stat} headerText={intl.get('dataSource.statView')} itemIcon="BarChartVerticalFilter" />
+                </Pivot>
+                {rawDataMetaInfo.length > 0 && <DataOperations />}
+                <DataInfo />
+                {rawDataMetaInfo.length > 0 && <Advice />}
+                {dataPreviewMode === IDataPreviewMode.data && <DataTable />}
+                {dataPreviewMode === IDataPreviewMode.meta && <MetaView />}
+                {dataPreviewMode === IDataPreviewMode.stat && <ProfilingView />}
+
             </Card>
         </div>
     );

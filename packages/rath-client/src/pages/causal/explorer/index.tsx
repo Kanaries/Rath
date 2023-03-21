@@ -1,4 +1,5 @@
-import { DefaultButton, Dropdown, Icon, SpinButton, Stack, Toggle } from "@fluentui/react";
+import intl from 'react-intl-universal';
+import { DefaultButton, Dropdown, Icon, /*Slider, */SpinButton, Stack, Toggle } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -144,7 +145,7 @@ const Explorer: FC<ExplorerProps> = ({
                         iconProps={{ iconName: 'Play' }}
                         onClick={forceLayout}
                     >
-                        {getI18n('chart.re_layout')}
+                        {intl.get('causal.actions.relayout')}
                     </DefaultButton>
                 </Stack>
             )}
@@ -169,7 +170,7 @@ const Explorer: FC<ExplorerProps> = ({
             <Floating position="absolute" direction="start" onRenderAside={() => (<Icon iconName="Waffle" />)}>
                 <Tools>
                     <Toggle
-                        label={getI18n('chart.tools.resize')}
+                        label={intl.get('causal.actions.zoom_canvas')}
                         checked={allowZoom}
                         onChange={(_, checked) => setAllowZoom(Boolean(checked))}
                         onText="On"
@@ -178,7 +179,7 @@ const Explorer: FC<ExplorerProps> = ({
                     />
                     {allowEdit && (
                         <Toggle
-                            label={getI18n('chart.tools.write')}
+                            label={intl.get('causal.actions.modify_constraints')}
                             checked={mode === 'edit'}
                             onChange={(_, checked) => setMode(checked ? 'edit' : 'explore')}
                             onText="On"
@@ -206,6 +207,25 @@ const Explorer: FC<ExplorerProps> = ({
                             />
                         </>
                     )}
+                    {/* <Slider
+                        label={intl.get('causal.actions.display_limit')}
+                        min={1}
+                        max={Math.max((causality ?? []).length, limit, 10)}
+                        value={limit}
+                        onChange={value => setLimit(value)}
+                    /> */}
+                    {/* TODO: 现在没有有意义的权重，暂时隐藏 */}
+                    {/* {false && (
+                        <Slider
+                            label={intl.get('causal.actions.filter_by_weights')}
+                            min={0}
+                            max={1}
+                            step={0.01}
+                            value={cutThreshold}
+                            showValue
+                            onChange={d => setCutThreshold(d)}
+                        />
+                    )} */}
                 </Tools>
             </Floating>
         </Container>

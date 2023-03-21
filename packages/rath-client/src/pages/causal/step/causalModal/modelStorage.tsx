@@ -1,10 +1,10 @@
+import intl from 'react-intl-universal';
 import { ChoiceGroup, DefaultButton, Label, Modal, PrimaryButton, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { FC, Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { notify } from '../../../../components/error';
 import { useGlobalStore } from '../../../../store';
-import { getI18n } from '../../locales';
 
 const ModalInnerContainer = styled.div`
     padding: 1em;
@@ -18,7 +18,7 @@ const ModelStorage: FC = () => {
     return (
         <Fragment>
             <DefaultButton
-                text={getI18n('storage.save')}
+                text={intl.get('causal.actions.save_model')}
                 iconProps={{ iconName: 'Save' }}
                 onClick={() => {
                     causalStore.save().then(ok => {
@@ -39,7 +39,7 @@ const ModelStorage: FC = () => {
                 }}
             />
             <DefaultButton
-                text={getI18n('storage.load')}
+                text={intl.get('causal.actions.load_model')}
                 iconProps={{ iconName: 'CloudDownload' }}
                 onClick={() => {
                     setShowModels(true);
@@ -54,9 +54,9 @@ const ModelStorage: FC = () => {
             >
                 <ModalInnerContainer>
                     <Stack tokens={{ childrenGap: 10 }}>
-                        <Label>{getI18n('storage.title')}</Label>
+                        <Label>{intl.get('causal.analyze.my_models')}</Label>
                         <ChoiceGroup
-                            label={getI18n('storage.list')}
+                            label={intl.get('causal.analyze.model_list')}
                             value={selectedModelKey}
                             options={saveKeys.map((key) => {
                                 return {
@@ -70,7 +70,7 @@ const ModelStorage: FC = () => {
                         />
                         <PrimaryButton
                             disabled={selectedModelKey === undefined}
-                            text={getI18n('storage.apply')}
+                            text={intl.get('common.apply')}
                             onClick={() => {
                                 if (selectedModelKey) {
                                     causalStore.checkout(selectedModelKey);

@@ -166,31 +166,6 @@ export class RathEngine extends VIEngine {
         }
         return this;
     }
-    public async scanDetail(viewSpace: ViewSpace) {
-        const context = this;
-        // @ts-ignore TODO: [fix] FIX this in visual insights
-        // Hao Chen, 14 months ago   (September 28th, 2021 11:18 PM) 
-        const { cube, fieldDictonary } = context;
-        const { dimensions, measures } = viewSpace;
-        const insightSpaces: IInsightSpace[] = []
-        if (cube) {
-            const cuboid = await cube.getCuboid(viewSpace.dimensions);
-            const aggData = await cuboid.getAggregatedRows(measures, measures.map(() => 'sum'));
-            const taskPool: Promise<void>[] = [];
-            this.workerCollection.each((iWorker, name) => {
-                const task = async () => {
-                    const result = await iWorker(aggData, dimensions, measures, fieldDictonary, context);
-                    if (result) {
-                        result.type = name;
-                        insightSpaces.push(result)
-                    }
-                }
-                taskPool.push(task());
-            })
-            await Promise.all(taskPool);
-        }
-        return insightSpaces
-    }
     public async searchPointInterests(viewSpace: ViewSpace) {
         // const globalMeasures = this.measures;
         let ansSet: any[] = []

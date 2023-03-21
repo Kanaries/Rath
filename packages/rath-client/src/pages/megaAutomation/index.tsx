@@ -1,11 +1,15 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
+import { Divider } from '@material-ui/core';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
+import { runInAction } from 'mobx';
 import { DefaultButton, PrimaryButton } from '@fluentui/react';
 import { useGlobalStore } from '../../store';
 import { PIVOT_KEYS } from '../../constants';
 import EditorCore from '../editor/core';
+import type { IReactVegaHandler } from '../../components/react-vega';
+import { Card } from '../../components/card';
 import VizPreference from './preference';
 import SaveModal from './save';
 import OperationBar from './vizOperation/operationBar';
@@ -25,6 +29,8 @@ const MainHeader = styled.div`
 const InsightContainer = styled.div`
     .ope-container {
         margin: 1em 0em;
+        padding-bottom: 1em;
+        border-bottom: 1px solid #f5f5f5;
     }
     .flex-container {
         display: flex;
@@ -58,7 +64,7 @@ const InsightContainer = styled.div`
 const LTSPage: React.FC = () => {
     const { ltsPipeLineStore, megaAutoStore, commonStore } = useGlobalStore();
 
-    const { visualConfig, mainViewSpecSource, mainViewSpec, mainViewPattern } = megaAutoStore;
+    const { visualConfig, mainViewSpecSource } = megaAutoStore;
     const { taskMode } = commonStore;
 
     // const [subinsightsData, setSubinsightsData] = useState<any[]>([]);
@@ -81,14 +87,28 @@ const LTSPage: React.FC = () => {
         });
         commonStore.setAppKey(PIVOT_KEYS.megaAuto);
     }, [ltsPipeLineStore, megaAutoStore, commonStore, taskMode]);
-    const viewExists = !(mainViewPattern === null || mainViewSpec === null);
+
+    const handler = useRef<IReactVegaHandler>(null);
+
     return (
         <div className="content-container">
+            <VizPreference />
             <SaveModal />
             <Constraints />
             <AssoPanel />
             {/* <SubinsightSegment data={subinsightsData} show={showSubinsights} onClose={() => { megaAutoStore.setShowSubinsights(false) }} /> */}
-            <div className="card">
+            <Card>
+                <DefaultButton
+                    style={{ float: 'right' }}
+                    iconProps={{ iconName: 'Settings' }}
+                    text={intl.get('preference.config')}
+                    ariaLabel={intl.get('preference.config')}
+                    onClick={() => {
+                        runInAction(() => {
+                            megaAutoStore.showPreferencePannel = true;
+                        });
+                    }}
+                />
                 <PrimaryButton
                     style={{ float: 'right', marginRight: '1em' }}
                     iconProps={{ iconName: 'Rerun' }}
@@ -98,17 +118,14 @@ const LTSPage: React.FC = () => {
                 />
                 <ComputationProgress />
                 <MainHeader>{intl.get('megaAuto.title')}</MainHeader>
-                <div className="ope-container">
-                    <VizPreference />
-                </div>
                 <p className="state-description">{intl.get('megaAuto.hintMain')}</p>
+                <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
                 <VizPagination />
+                <Divider style={{ marginBottom: '1em', marginTop: '1em' }} />
                 <InsightContainer>
-                    {viewExists && (
-                        <div className="ope-container">
-                            <OperationBar />
-                        </div>
-                    )}
+                    <div className="ope-container">
+                        <OperationBar handler={handler} />
+                    </div>
                     <div className="flex-container">
                         <div className="spec-container">
                             {mainViewSpecSource === 'custom' && (
@@ -124,14 +141,14 @@ const LTSPage: React.FC = () => {
                                 />
                             )}
                         </div>
-                        <MainCanvas />
+                        <MainCanvas handler={handler} />
                         <div className="insight-info">{visualConfig.nlg && <Narrative />}</div>
                     </div>
                     <div>
                         <FieldContainer />
                     </div>
                 </InsightContainer>
-            </div>
+            </Card>
         </div>
     );
 };

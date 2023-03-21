@@ -12,12 +12,14 @@
         "preview": "预览",
         "source": "源",
         "submit": "提交",
+        "cancel": "取消",
         "apply": "应用",
         "applied": "已应用",
         "run": "执行",
         "edit": "编辑",
         "suggestions": "建议",
         "showMore": "显示更多",
+        "return": "返回",
         "semanticType": {
             "nominal": "类别类型",
             "ordinal": "有序类型",
@@ -53,20 +55,24 @@
             "notFound": "未找到匹配结果"
         },
         "advanced_options": "高级选项",
-        "advanced_options_switch": "高级选项"
+        "advanced_options_switch": "高级选项",
+        "list": "列表",
+        "gallery": "预览"
     },
     "menu": {
-        "dataSource": "数据源",
+        "dataSource": "数据准备",
         "editor": "自助分析",
         "support": "帮助",
-        "megaAuto": "全自动分析",
+        "eda": "数据探索分析",
+        "megaAuto": "全自动探索",
         "semiAuto": "半自动探索",
         "devCollection": "实验特性(α)",
         "dashBoardDesigner": "智能报表",
         "painter": "数据绘板",
         "collection": "收藏夹",
         "dashboard": "报表",
-        "causal": "因果分析"
+        "causal": "因果分析",
+        "connection": "数据源连接"
     },
     "preference": {
         "title": "个人偏好",
@@ -127,6 +133,9 @@
         "upload": "上传文件"
     },
     "dataSource": {
+        "dataSourceConnection": {
+            "types": "数据源类型"
+        },
         "extractInsight": "开始分析",
         "extractInsightOld": "开始分析(调试模式)",
         "cleanMethod": "清洗方法",
@@ -147,11 +156,19 @@
         "query": "SQL 查询",
         "connectorConfig": "连接器设置",
         "connectorService": "连接器服务地址 (可选)",
+        "connectorOffline": "连接器未成功连接，请重试或选择其他服务地址。",
+        "connectorEmpty": "未设置有效的连接器。",
+        "req_err": "获取失败",
+        "query_monaco": "查询",
+        "query_diagram": "表连接",
+        "explorer": "浏览",
         "apply": "设置并测试",
         "textPattern": {
             "knowledge": "常识",
             "generalize": "泛化",
-            "specific": "完全匹配"
+            "specific": "完全匹配",
+            "nlp": "NLP(β)",
+            "currentPattern": "当前文本模式"
         },
         "statViewInfo": {
             "title": "统计视图",
@@ -171,37 +188,13 @@
             "KEPLER": { "title": "开普勒数据集", "description": "" },
             "BIKE_SHARING_DC": { "title": "共享单车数据集", "description": "" }
         },
-        "dbProgress": [
-            {
-                "label": "建立连接",
-                "msgRunning": "正在等待连接主机......",
-                "msgSucceeded": "已连接到主机",
-                "msgFailed": "无法建立连接"
-            },
-            {
-                "label": "查找表项",
-                "msgRunning": "从数据库中选择一张表",
-                "msgSucceeded": "完成",
-                "msgFailed": "找不到表"
-            },
-            {
-                "label": "预览",
-                "msgRunning": "正在从表中获取预览",
-                "msgSucceeded": "预览已生成",
-                "msgFailed": "预览生成失败"
-            },
-            {
-                "label": "获取数据",
-                "msgRunning": "提交 SQL 查询以获取数据",
-                "msgSucceeded": "查询完成",
-                "msgFailed": "查询未正确执行"
-            }
-        ],
         "btn": {
+            "use_table": "导入这些数据 (最大 100 行)",
             "connect": "建立连接",
             "reset": "返回并重置",
             "connectFailed": "建立连接失败",
-            "query": "提交查询"
+            "query": "提交查询",
+            "new_connector": "按下回车或点击加号按钮以添加新的连接器"
         },
         "advice": {
             "lackData": "缺少有效数据",
@@ -226,19 +219,36 @@
             "buttonName": "选择数据",
             "type": {
                 "file": "文件",
-                "restful": "RESTFUL",
+                "restful": "From URL",
                 "mysql": "MySQL",
                 "demo": "示例数据",
                 "database": "数据库",
-                "rath_notebook": "Notebook"
+                "kanaries_cloud": "云",
+                "rath_notebook": "工作簿"
+            },
+            "cloud": {
+                "notebook": "工作簿",
+                "dataset": "数据集",
+                "dashboard": "报表",
+                "dashboard_template": "报表模板",
+                "total": "所有"
             },
             "load": "加载数据",
             "demo": {
                 "available": "可选数据集"
             },
             "restful": {
-                "requestData": "请求数据",
-                "exampleDataStruct": "示例数据结构"
+                "requestData": "获取数据",
+                "exampleDataStruct": "示例数据结构",
+                "loadHistoryAPI": "加载历史 API",
+                "detectedDataStruct": "解析结构(自动识别)",
+                "confirm": "确认使用",
+                "clear": "清除数据",
+                "format": {
+                    "array": "数组",
+                    "array_with_meta": "数组和元数据",
+                    "others": "其他"
+                }
             }
         },
         "table": {
@@ -264,7 +274,7 @@
             "syncMode": "分位数同步"
         },
         "upload": {
-            "title": "连接你的数据集，根据需求调整以下配置",
+            "title": "连接数据",
             "fileTypes": "支持 Excel 工作簿以及 JSON、CSV 等文本类型文件",
             "uniqueIdIssue": "添加唯一标识(字段是中文字符推荐使用)",
             "show_more": "高级设置",
@@ -326,7 +336,7 @@
             "empty": "没有导出的列。",
             "apply": "扩展",
             "cancel": "取消",
-            "auto": "扩展建议",
+            "auto": "转换",
             "suggestion": {
                 "regex_selection": "模式发现&提取|将选中的字段作为模式，发现数据集中所有匹配的相似模式并提取出来。",
                 "dateTimeExpand": "将数据映射到不同时间单位。|时间序列可能在不同的单位尺度下展现出更强的周期性或相关性。",
@@ -357,7 +367,7 @@
     },
     "storage": {
         "upload": "保存到云",
-        "upload_desc": "备份你的 Rath 工作簿。",
+        "upload_desc": "备份你的{mode}。",
         "components": {
             "data": "全量数据 ({size} 行)",
             "meta": "元数据 ({size} 个字段)",
@@ -365,13 +375,23 @@
             "causal": "因果模型",
             "dashboard": "报表 ({size} 个文档)"
         },
-        "name": "工作簿名称",
-        "default_name": "Rath 工作簿 {date}",
+        "name": "{mode}名称",
+        "default_name": "Rath {mode} {date}",
+        "desc": "{mode}描述",
+        "data_source_name": "数据源名称",
+        "upload_data_source": "绑定数据源",
+        "cover": "封面",
+        "bind_dataset": "绑定到数据集",
+        "field_desc": "字段描述",
         "download": "加载",
         "createdAt": "创建时间",
         "refresh": "刷新",
         "size": "大小",
-        "apply": "上传"
+        "apply": "上传",
+        "public": "公开",
+        "publish_template": "发布为公开模板",
+        "overwrite": "覆盖当前备份",
+        "auto_save": "自动备份"
     },
     "meta": {
         "title": "字段元信息配置",
@@ -401,7 +421,14 @@
             "editInGW": "自助分析",
             "editInEditor": "在编辑器配置",
             "associate": "联想",
-            "constraints": "分析约束"
+            "constraints": "分析约束",
+            "download": "导出图表",
+            "export": "导出",
+            "export_as": "导出为",
+            "export_size": "尺寸",
+            "lock_aspect": "锁定宽高比",
+            "export_bg": "背景色",
+            "err_msg_invalid_size": "大小不能超过 {min} ~ {max}"
         },
         "constraints": {
             "exclude": "排除字段",
@@ -458,7 +485,11 @@
                 "neighbors": "邻近视图"
             }
         },
-        "insight": "线索"
+        "insight": "线索",
+        "embed": {
+            "insight_discovery": "线索发现",
+            "insights": "线索"
+        }
     },
     "desc": {
         "dataViewInfo": "在 {dimensions} 中 {measures} 的表现， 限制条件 {filters}."
@@ -560,6 +591,7 @@
         "haveSent": "已发送",
         "signIn": "登录",
         "signOut": "登出",
+        "my_account": "我的账号",
         "preferences": "个人信息",
         "phoneCert": "手机验证",
         "emailCert": "邮箱验证",
@@ -611,7 +643,123 @@
             }
         }
     },
-    "access": {
-        "unsupport": "当前地区不支持此类注册/登录方式。"
+    "causal": {
+        "dataset": {
+            "extend": "数据增强",
+            "field": "因素",
+            "extInfo": "扩展来源",
+            "distinct_count": "唯一值数量",
+            "no_filter": "(无筛选项)",
+            "origin_size": "原始大小: {size} 行，",
+            "filtered_size": "筛选后子集大小: ${size} 行",
+            "sample_rate": "采样率",
+            "sample_size": "样本量: {size} 行",
+            "choose_fields": "需要分析的字段",
+            "dist": "分布",
+            "stat": "统计信息"
+        },
+        "actions": {
+            "clear_fields": "清除全部选择字段",
+            "causal_discover": "因果发现",
+            "relayout": "重新布局",
+            "zoom_canvas": "画布缩放",
+            "modify_constraints": "编辑因果关系",
+            "display_limit": "边显示上限",
+            "filter_by_weights": "按权重筛选",
+            "one_click": "快捷操作",
+            "use_ext_diagram": "使用扩展字段计算图",
+            "import_effect": "导入影响关系",
+            "auto_detect": "自动识别",
+            "preview": "预览",
+            "edit_view": "编辑视图",
+            "compute": "计算",
+            "export_diagram": "导出图结构",
+            "save_model": "保存因果模型",
+            "load_model": "导入因果模型",
+            "prev_step": "上一步",
+            "continue": "继续"
+        },
+        "analyze": {
+            "cause": "因",
+            "corr": "相关系数",
+            "effect": "果",
+            "corr_atoms": "关联因素",
+            "vis": "可视化分析",
+            "single_dim": "单变量分析",
+            "main_field": "探索目标",
+            "service": "运行环境",
+            "diff_mode": "对照选择",
+            "other": "数据补集",
+            "full": "数据全集",
+            "diff_two": "自选两个集合",
+            "index_key": "基准因素",
+            "not_chosen": "无",
+            "aggregation_type": "聚合类型",
+            "foreground_group": "对照组",
+            "background_group": "实验组",
+            "insight": "发现",
+            "why_query": "线索洞察",
+            "no_more_hints": "没有更多的线索",
+            "normalize_stack": "标准化堆叠",
+            "global_dist": "全局分布",
+            "diff_dist": "对比分布",
+            "feature": "特征",
+            "target": "目标",
+            "name": "因素",
+            "model": "模型",
+            "analyze_space": "分析空间",
+            "prediction": "预测",
+            "diff_title": "对比",
+            "run_idx": "运行次数",
+            "accuracy": "准确率",
+            "clear_records": "清空记录",
+            "model_config": "模型设置",
+            "predict_result": "预测结果",
+            "clear_all": "清除所有",
+            "link_mode": "连接类型",
+            "def_to_effect": "单向一定影响",
+            "def_to_not_effect": "单向一定不影响",
+            "def_to_be_relevant": "至少在一个方向存在影响",
+            "def_to_be_not_relevant": "在任意方向一定不影响",
+            "click_link_mode": "单击连接行为",
+            "forbid_link": "禁用此连接",
+            "delete_link": "删除约束",
+            "dbl_click_node_mode": "双击节点行为",
+            "def_forbid_as_cause": "一定不作为输出",
+            "def_forbid_as_effect": "一定不作为输入",
+            "overwrite-only": "更新并替换",
+            "fill-only": "补充不替换",
+            "fully replace": "完全覆盖",
+            "mutual_info": "关联信息",
+            "conditional_mutual_info": "条件关联信息",
+            "causal_discover": "因果发现",
+            "matrix": "矩阵",
+            "diagram": "图",
+            "circle": "圆形",
+            "square": "矩形",
+            "view": "视图",
+            "mark": "标记",
+            "my_models": "我的模型",
+            "model_list": "模型列表",
+            "dataset_config": {
+                "title": "数据集配置",
+                "help": "从数据中有针对性地选出合适的数据子集以及分析目标关注的因素集合。"
+            },
+            "fd_config": {
+                "title": "编辑函数依赖",
+                "help": "基于特定领域或背景知识定义绝对的函数依赖，帮助算法回避不合理的探索空间，更好进行决策。"
+            },
+            "causal_model": {
+                "title": "因果模型",
+                "help": "选择算法进行因果发现，完善因果图。在已确认的因果图上结合可视化探索进行结论验证和进一步分析。（需要运行因果发现完成因果模型）"
+            }
+        },
+        "exploration": {
+            "AutoVis": "变量概览",
+            "CrossFilter": "因果验证",
+            "CausalInsight": "可解释探索",
+            "GraphicWalker": "可视化自助分析",
+            "predict": "模型预测"
+        }
     }
 }

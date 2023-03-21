@@ -1,15 +1,16 @@
+import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import { useCausalViewProvider } from '../../store/causalStore/viewStore';
+import { Card } from '../../components/card';
 import type { IFunctionalDep } from './config';
-import { getI18n } from './locales';
 import NoConnection from './noConnection';
 import { CausalStepPager } from './step';
 
 
-const Main = styled.div`
+const Main = styled(Card)`
     height: calc(100vh - 70px);
     display: flex;
     flex-direction: column;
@@ -45,10 +46,8 @@ const CausalPage: FC = () => {
     return (
         <div className="content-container">
             <ViewContextProvider>
-                <Main className="card">
-                    <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>
-                        {getI18n('title')}
-                    </h1>
+                <Main>
+                    <h1 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '10px' }}>{intl.get('menu.causal')}</h1>
                     <hr className="card-line" />
                     {serverActive || <NoConnection />}
                     <CausalStepPager />

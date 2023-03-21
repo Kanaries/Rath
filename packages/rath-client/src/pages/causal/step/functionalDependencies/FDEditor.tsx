@@ -1,7 +1,8 @@
+import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import type { FC } from 'react';
 import type { IFunctionalDep } from '../../config';
-import { getI18n } from '../../locales';
+// import { getI18n } from '../../locales';
 import FDGraph from './FDGraph';
 
 
@@ -9,7 +10,7 @@ const FDEditor: FC<{
     title?: string;
     functionalDependencies: readonly IFunctionalDep[];
     setFunctionalDependencies: (fdArr: IFunctionalDep[] | ((prev: readonly IFunctionalDep[] | null) => readonly IFunctionalDep[])) => void;
-}> = ({ functionalDependencies, setFunctionalDependencies, title = getI18n('fd_config.edit') }) => {
+}> = ({ functionalDependencies, setFunctionalDependencies, title = intl.get('causal.actions.edit_view') }) => {
     return (
         <>
             <h3>{title}</h3>

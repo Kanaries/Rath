@@ -8,12 +8,13 @@ import DataLoadingStatus from '../dataLoadingStatus';
 import type { DataSourceTag, IDBMeta } from '../../../utils/storage';
 import FileData from './file';
 import DemoData from './demo';
-import RestfulData from './restful';
+// import RestfulData from './restful';
+import JSONAPI from './jsonAPI';
 import OLAPData from './olap';
 import HistoryPanel from './history';
-import DatabaseData from './database/';
+import DatabaseConnector from './database';
 import AirTableSource from './airtable';
-import Notebook from './notebook';
+import KanariesCloud from './cloud';
 
 interface SelectionProps {
     show: boolean;
@@ -33,8 +34,8 @@ const Selection: React.FC<SelectionProps> = props => {
     const dsTypeOptions = useDataSourceTypeOptions();
 
     const formMap: Record<IDataSourceType, JSX.Element> = {
-        [IDataSourceType.NOTEBOOK]: (
-            <Notebook setLoadingAnimation={setLoadingAnimation} />
+        [IDataSourceType.CLOUD]: (
+            <KanariesCloud setLoadingAnimation={setLoadingAnimation} />
         ),
         [IDataSourceType.FILE]: (
             <FileData onDataLoading={onDataLoading} onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} toggleLoadingAnimation={setLoadingAnimation} />
@@ -46,13 +47,14 @@ const Selection: React.FC<SelectionProps> = props => {
             <OLAPData onClose={onClose} onDataLoaded={onDataLoaded} />
         ),
         [IDataSourceType.RESTFUL]: (
-            <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+            <JSONAPI onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
+            // <RestfulData onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />
         ),
         [IDataSourceType.LOCAL]: (
             <HistoryPanel onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} />
         ),
         [IDataSourceType.DATABASE]: (
-            <DatabaseData onClose={onClose} onDataLoaded={onDataLoaded} setLoadingAnimation={setLoadingAnimation} />
+            <DatabaseConnector onClose={onClose} onDataLoaded={onDataLoaded} />
         ),
         [IDataSourceType.AIRTABLE]: (
             <AirTableSource onClose={onClose} onDataLoaded={onDataLoaded} onLoadingFailed={onLoadingFailed} onStartLoading={onStartLoading} />

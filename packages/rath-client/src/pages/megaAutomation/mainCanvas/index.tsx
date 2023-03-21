@@ -1,14 +1,14 @@
 import { Spinner } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
-import React from 'react';
-import ReactVega from '../../../components/react-vega';
+import type { FC, Ref } from 'react';
+import ReactVega, { IReactVegaHandler } from '../../../components/react-vega';
 import VisErrorBoundary from '../../../components/visErrorBoundary';
 import { IResizeMode } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { LoadingLayer } from '../../semiAutomation/components';
 import ResizeContainer from './resizeContainer';
 
-const MainCanvas: React.FC = () => {
+const MainCanvas: FC<{ handler?: Ref<IReactVegaHandler> }> = ({ handler }) => {
     const { megaAutoStore, ltsPipeLineStore, commonStore, editorStore } = useGlobalStore();
     const { mainViewSpec, dataSource, visualConfig, mainViewSpecSource } = megaAutoStore;
     const { muteSpec } = editorStore;
@@ -26,7 +26,7 @@ const MainCanvas: React.FC = () => {
                     enableResize={visualConfig.resize === IResizeMode.control && !(mainViewSpec.encoding.column || mainViewSpec.encoding.row)}
                 >
                     <VisErrorBoundary>
-                        <ReactVega dataSource={dataSource} spec={spec} actions={visualConfig.debug} config={commonStore.themeConfig} />
+                        <ReactVega ref={handler} dataSource={dataSource} spec={spec} actions={visualConfig.debug} config={commonStore.themeConfig} />
                     </VisErrorBoundary>
                 </ResizeContainer>
             )}

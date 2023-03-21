@@ -138,29 +138,6 @@ export class LTSPipeLine {
     public async getSampleData(maxSampleSize: number = 500) {
         this.samplingDataSource = Sampling.reservoirSampling(this.dataSource, maxSampleSize);
     }
-    public async scanDetails (spaceIndex: number): Promise<IInsightSpace[]> {
-        const space = this.insightSpaces[spaceIndex];
-        if (space) {
-            this.computing = true;
-            try {
-                const res = await rathEngineService({
-                    task: 'detail',
-                    props: spaceIndex
-                })
-                runInAction(() => {
-                    this.computing = false;
-                })
-                return res;
-            } catch (error) {
-                console.error(error)
-                runInAction(() => {
-                    this.computing = false;
-                })
-                throw error;
-            }
-        }
-        return []
-    }
     /**
      * currently provide view in insightSpaces only.
      * in future providing any view close to it (data or design)

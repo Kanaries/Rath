@@ -83,9 +83,15 @@ class TestCore extends NextVICore {
                     score2: totalScore,
                 });
             }
-            // TODO: [feat] 考虑字段的semantic 与 analyticType 都可以作为近邻的相似度评分
-            // jojocys, last week   (November 19th, 2022 4:38 PM) 
             fieldsWithScore.sort((a, b) => {
+                let aHasSameSemanticOfCard = card.neighbors.map(nei => fields.find(f => f.fid === nei)).filter(f => Boolean(f)).every(nei => nei?.semanticType === a.field.semanticType)
+                let bHasSameSemanticOfCard = card.neighbors.map(nei => fields.find(f => f.fid === nei)).filter(f => Boolean(f)).every(nei => nei?.semanticType === b.field.semanticType)
+                if (aHasSameSemanticOfCard && !bHasSameSemanticOfCard) return -1;
+                if (!aHasSameSemanticOfCard && bHasSameSemanticOfCard) return 1;
+                let aHasSameAnalyticOfCard = card.neighbors.map(nei => fields.find(f => f.fid === nei)).filter(f => Boolean(f)).every(nei => nei?.analyticType === a.field.analyticType)
+                let bHasSameAnalyticOfCard = card.neighbors.map(nei => fields.find(f => f.fid === nei)).filter(f => Boolean(f)).every(nei => nei?.analyticType === b.field.analyticType)
+                if (aHasSameAnalyticOfCard && !bHasSameAnalyticOfCard) return -1;
+                if (!aHasSameAnalyticOfCard && bHasSameAnalyticOfCard) return 1;
                 if (b.score1 > a.score1) return 1;
                 if (b.score1 < a.score1) return -1;
                 if (b.score2 > a.score2) return 1;

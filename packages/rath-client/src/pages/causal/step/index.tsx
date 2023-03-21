@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { DefaultButton, Icon, IconButton } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { Fragment, useEffect, useMemo, useState } from "react";
@@ -87,11 +88,11 @@ export type CausalStepOption = {
     help: string;
 };
 
-export const CausalSteps: readonly CausalStep[] = [
+const allCausalSteps = [
     CausalStep.DATASET_CONFIG,
     CausalStep.FD_CONFIG,
     CausalStep.CAUSAL_MODEL,
-];
+] as const;
 
 export const CausalStepPager = observer(function CausalStepPager () {
     const [stepKey, setStepKey] = useState<CausalStep>(CausalStep.DATASET_CONFIG);
@@ -100,6 +101,17 @@ export const CausalStepPager = observer(function CausalStepPager () {
     useEffect(() => {
         setShowHelp(stepKey);
     }, [stepKey]);
+
+    const CausalSteps = useMemo(() => {
+        return allCausalSteps.map<CausalStepOption>(step => ({
+            key: step,
+            title: intl.get(`causal.analyze.${step}.title`),
+            help: intl.get(`causal.analyze.${step}.help`),
+        }));
+    }, []);
+
+    // const curStep = useMemo(() => CausalSteps.find(s => s.key === stepKey)!, [CausalSteps, stepKey]);
+    // const hintStep = useMemo(() => CausalSteps.find(s => s.key === showHelp)!, [CausalSteps, showHelp]);
 
     const [skipFDEdit, setSkipFDEdit] = useState(true);
 
@@ -141,26 +153,26 @@ export const CausalStepPager = observer(function CausalStepPager () {
         <Container>
             <StepHeader>
                 <DefaultButton disabled={!goPreviousStep} onClick={goPreviousStep} iconProps={{ iconName: 'Previous' }}>
-                    {getI18n('step_control.prev')}
+                    {intl.get('causal.actions.prev_step')}
                 </DefaultButton>
                 <StepList>
                     {CausalSteps.map((step, i, arr) => {
-                        const active = step === stepKey;
-                        const completed = arr.slice(i + 1).some(opt => opt === stepKey);
+                        const active = step.key === stepKey;
+                        const completed = arr.slice(i + 1).some(opt => opt.key === stepKey);
                         return (
-                            <Fragment key={step}>
+                            <Fragment key={step.key}>
                                 {i !== 0 && (
                                     <span>{'>'}</span>
                                 )}
                                 <StepItem
                                     active={active}
                                     completed={completed}
-                                    onClick={() => active || setStepKey(step)}
-                                    onMouseOver={() => active || setShowHelp(step)}
+                                    onClick={() => active || setStepKey(step.key)}
+                                    onMouseOver={() => active || setShowHelp(step.key)}
                                     onMouseOut={() => setShowHelp(stepKey)}
                                 >
-                                    <span>{getI18n(`step.${step}.title`)}</span>
-                                    {step === CausalStep.FD_CONFIG && (
+                                    <span>{getI18n(`step.${step.key}.title`)}</span>
+                                    {step.key === CausalStep.FD_CONFIG && (
                                         <Badge>
                                             <IconButton
                                                 title={getI18n('step_control.bypass')}
@@ -180,7 +192,7 @@ export const CausalStepPager = observer(function CausalStepPager () {
                     })}
                 </StepList>
                 <DefaultButton primary disabled={!goNextStep} onClick={goNextStep} iconProps={{ iconName: 'Next' }}>
-                    {getI18n('step_control.next')}
+                    {intl.get('causal.actions.continue')}
                 </DefaultButton>
             </StepHeader>
             <StepHint isCurrentStep={showHelp === stepKey}>

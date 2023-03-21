@@ -10,13 +10,19 @@ const Cont = styled.div`
     box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d;
     min-width: 360px;
     background-color: #ffffff;
-    /* z-50 mt-4 bg-white p-4 border-solid border-1 border-grey-50 grid grid-cols-6 relative */
-    z-index: 50;
-    padding: 1em 1em 1.2em;
-    border: 1px solid #88888844;
-    display: grid;
-    grid-template-columns: repeat(6, calc(100% / 6));
+    padding: 1rem;
+    z-index: 100;
+    margin-top: 1rem;
+    border: 1px solid #f6f6f6;
     position: relative;
+    display: grid;
+    grid-template-columns: repeat(6,minmax(0,1fr));
+    >.span-5-content{
+        grid-column: span 5 / span 5;
+        >p{
+            font-size: 12px;
+        }
+    }
     @keyframes cont-show{
         from {
             transform: translateX(100%);
@@ -44,19 +50,15 @@ const Cont = styled.div`
     .text-blue-500{
         color: #3B82F6;
     }
+    .text-gray-600{
+        color: #4b5563;
+    }
     .text-2xl{
         font-size: 1.5em;
     }
     .allow-break-line{
         white-space: pre-line;
         font-size: 12px;
-    }
-    .col-span-5 {
-        grid-column: 2 / 6;
-    }
-    h1 {
-        font-size: 1rem;
-        margin-block: 0 0.8em;
     }
 `
 
@@ -77,9 +79,9 @@ const MessageCard: React.FC<MessageProps> = props => {
                 {type === 'success' && <Icon iconName="Completed" className="text-green-500 text-2xl" />}
                 {type === 'info' && <Icon iconName="Info" className="text-blue-500 text-2xl" />}
             </div>
-        <div className="col-span-5">
-            <h1 className="text-base">{title}</h1>
-            <div className="text-sm mt-1 text-gray-600 allow-break-line">{content}</div>
+        <div className="span-5-content">
+            <h1>{title}</h1>
+            <p className="allow-break-line text-gray-600">{content}</p>
         </div>
     </Cont>
 }

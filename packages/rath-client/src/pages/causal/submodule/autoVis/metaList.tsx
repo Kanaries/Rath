@@ -1,9 +1,10 @@
+import intl from 'react-intl-universal';
 import { DetailsList, IColumn, SelectionMode } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useMemo } from "react";
 import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
 import DistributionChart from "../../../dataSource/metaView/distChart";
-import { getI18n } from "../../locales";
+// import { getI18n } from "../../locales";
 
 
 const metaKeys = ['dist', 'unique', 'mean', 'min', 'qt_25', 'qt_50', 'qt_75', 'max', 'stdev'] as const;
@@ -24,15 +25,15 @@ const MetaList: FC = () => {
             isResizable: false,
             onRender(key: typeof metaKeys[number]) {
                 return {
-                    dist: getI18n('submodule.AutoVis.meta.dist'),
-                    unique: getI18n('submodule.AutoVis.meta.unique'),
-                    mean: getI18n('submodule.AutoVis.meta.mean'),
-                    min: getI18n('submodule.AutoVis.meta.min'),
-                    qt_25: getI18n('submodule.AutoVis.meta.qt_25'),
-                    qt_50: getI18n('submodule.AutoVis.meta.qt_50'),
-                    qt_75: getI18n('submodule.AutoVis.meta.qt_75'),
-                    max: getI18n('submodule.AutoVis.meta.max'),
-                    stdev: getI18n('submodule.AutoVis.meta.stdev'),
+                    dist: intl.get('causal.dataset.dist'),
+                    unique: intl.get('causal.dataset.distinct_count'),
+                    mean: intl.get('common.stat.mean'),
+                    min: intl.get('common.stat.min'),
+                    qt_25: intl.get('common.stat.qt_25'),
+                    qt_50: intl.get('common.stat.qt_50'),
+                    qt_75: intl.get('common.stat.qt_75'),
+                    max: intl.get('common.stat.mean'),
+                    stdev: intl.get('common.stat.stdev'),
                 }[key];
             },
         }).concat(selectedFieldGroup?.map<IColumn>(f => ({
@@ -77,7 +78,7 @@ const MetaList: FC = () => {
     return selectedFieldGroup?.length ? (
         <div>
             <header>
-                {getI18n('submodule.AutoVis.meta_info')}
+                {intl.get('causal.dataset.stat')}
             </header>
             <DetailsList
                 items={metaKeys.slice(0)}

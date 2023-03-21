@@ -1,4 +1,5 @@
 import { Spinner, SpinnerSize } from '@fluentui/react';
+import { Card } from '@material-ui/core';
 import React, { useState } from 'react';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
@@ -12,7 +13,7 @@ const SupportPage: React.FC = props => {
     const [loading, setLoading] = useState<boolean>(true);
     return (
         <div className="content-container">
-            <div className="card">
+            <Card>
                 {
                     loading && <Spinner label='loading' size={SpinnerSize.large} />
                 }
@@ -25,7 +26,7 @@ const SupportPage: React.FC = props => {
                     src={intl.get('support.link')}
                     frameBorder="0"
                 />
-            </div>
+            </Card>
         </div>
     );
 }

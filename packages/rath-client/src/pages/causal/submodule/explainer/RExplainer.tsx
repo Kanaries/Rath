@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { DefaultButton, Dropdown, Stack, Toggle } from '@fluentui/react';
@@ -40,7 +41,7 @@ const RExplainer: FC = () => {
     }, [mainField, aggr]);
 
     const [irResult, setIrResult] = useState<IRInsightExplainResult>({ causalEffects: [] });
-    const [serviceMode] = useState<'worker' | 'server'>('server');
+    const [serviceMode, setServiceMode] = useState<'worker' | 'server'>('server');
 
     const pendingRef = useRef<Promise<IRInsightExplainResult>>();
 
@@ -198,10 +199,10 @@ const RExplainer: FC = () => {
         <Container>
             {mainField && (
                 <>
-                    <header>{getI18n('submodule.CausalInsight.header')}</header>
+                    <header>{intl.get('causal.analyze.main_field')}</header>
                     <Stack tokens={{ childrenGap: 20 }} horizontal style={{ alignItems: 'flex-end' }}>
-                        {/* <Dropdown
-                            label={getI18n('submodule.CausalInsight.engine')}
+                        <Dropdown
+                            label={intl.get('causal.analyze.service')}
                             selectedKey={serviceMode}
                             options={[
                                 { key: 'worker', text: 'worker' },
@@ -213,13 +214,15 @@ const RExplainer: FC = () => {
                                 }
                             }}
                             style={{ width: '7em' }}
-                        /> */}
+                        />
                         <Dropdown
-                            label={getI18n('submodule.CausalInsight.diff_mode')}
+                            label={intl.get('causal.analyze.diff_mode')}
                             selectedKey={diffMode}
-                            options={(['other', 'full', 'two-group'] as typeof diffMode[]).map((key) => ({
-                                key, text: getI18n(`submodule.CausalInsight.diff.${key}`)
-                            }))}
+                            options={[
+                                { key: 'other', text: intl.get('causal.analyze.other') },
+                                { key: 'full', text: intl.get('causal.analyze.full') },
+                                { key: 'two-group', text: intl.get('causal.analyze.diff_two') },
+                            ]}
                             onChange={(_, option) => {
                                 if (option?.key) {
                                     setDiffMode(option.key as typeof diffMode);
@@ -230,9 +233,9 @@ const RExplainer: FC = () => {
                     </Stack>
                     <Stack tokens={{ childrenGap: 20 }} horizontal style={{ alignItems: 'flex-end' }}>
                         <Dropdown
-                            label={getI18n('submodule.CausalInsight.index_key')}
+                            label={intl.get('causal.analyze.index_key')}
                             selectedKey={indexKey?.fid ?? ''}
-                            options={[{ key: '', text: getI18n('submodule.CausalInsight.empty') }].concat(allFields.map(f => ({
+                            options={[{ key: '', text: intl.get('causal.analyze.not_chosen') }].concat(allFields.map(f => ({
                                 key: f.fid,
                                 text: f.name ?? f.fid,
                             })))}
@@ -282,7 +285,7 @@ const RExplainer: FC = () => {
                     {subspaces && (
                         <>
                             <ChartItem
-                                title={getI18n('submodule.CausalInsight.two_group.foreground')}
+                                title={intl.get('causal.analyze.foreground_group')}
                                 data={visSample}
                                 indexKey={indexKey}
                                 mainField={mainField}
@@ -292,7 +295,7 @@ const RExplainer: FC = () => {
                                 normalize={false}
                             />
                             <ChartItem
-                                title={getI18n('submodule.CausalInsight.two_group.background')}
+                                title={intl.get('causal.analyze.background_group')}
                                 data={visSample}
                                 indexKey={indexKey}
                                 mainField={mainField}
@@ -308,7 +311,7 @@ const RExplainer: FC = () => {
                         disabled={!subspaces}
                         onClick={applySelection}
                     >
-                        {getI18n('submodule.CausalInsight.run')}
+                        {intl.get('causal.analyze.insight')}
                     </DefaultButton>
                     {subspaces && (
                         <RInsightView

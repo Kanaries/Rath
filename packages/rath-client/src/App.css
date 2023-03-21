@@ -1,6 +1,11 @@
 .content-container{
   /* padding: 1em 9% 0px 9%; */
-  padding: 3px 1em;
+  padding: 1em;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .header-bar{
   position: relative;
@@ -44,14 +49,14 @@ h2, h3 {
   background-color: #fff;
   padding: 1em;
   border-radius: 2px;
-  box-shadow: 0 1.6px 7.6px 0 rgba(0, 0, 0, 0.1), 0 0.3px 1.9px 0 rgba(0, 0, 0, 0.08);
+  /* box-shadow: 0 1.6px 7.6px 0 rgba(0, 0, 0, 0.1), 0 0.3px 1.9px 0 rgba(0, 0, 0, 0.08); */
   margin-bottom: 1em;
 }
 .card{
   background-color: #fff;
   padding: 1em;
   border-radius: 2px;
-  box-shadow: 0 1.6px 7.6px 0 rgba(0, 0, 0, 0.1), 0 0.3px 1.9px 0 rgba(0, 0, 0, 0.08);
+  /* box-shadow: 0 1.6px 7.6px 0 rgba(0, 0, 0, 0.1), 0 0.3px 1.9px 0 rgba(0, 0, 0, 0.08); */
   margin-bottom: 1em;
   animation-duration: 0.5s;
   animation-name: showCard;
@@ -103,10 +108,6 @@ h2, h3 {
 .header-toolbar{
   float: right;
   padding: 0.5rem;
-}
-
-.message-container {
-  padding: 1em 4em 0em 4em;
 }
 
 .main-app-container{

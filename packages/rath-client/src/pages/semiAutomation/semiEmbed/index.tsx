@@ -33,14 +33,14 @@ const SemiEmbed: React.FC<IProps> = (props) => {
                 iconProps={{
                     iconName: 'Lightbulb',
                 }}
-                text={intl.get('megaAuto.commandBar.associate')}
+                text={intl.get('semiAuto.embed.insight_discovery')}
                 onClick={() => {
                     toggleShow && toggleShow(!show);
                 }}
             />
             <Panel
                 type={PanelType.medium}
-                headerText={intl.get('semiAuto.insight')}
+                headerText={intl.get('semiAuto.embed.insights')}
                 isOpen={show}
                 isBlocking={false}
                 onDismiss={() => {

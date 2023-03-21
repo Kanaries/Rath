@@ -87,18 +87,6 @@ const LaTiaoModal = observer<LaTiaoModalProps>(({ close }) => {
         }
     }, [code]);
 
-    useEffect(() => {
-        const cb = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                close();
-            }
-        };
-        document.addEventListener('keydown', cb);
-        return () => {
-            document.removeEventListener('keydown', cb);
-        };
-    }, [close]);
-
     const [inputMaybe, setInputMaybe] = useState<InputMaybe[]>([]);
 
     const resultRef = useRef<Static<IRow[]>>();

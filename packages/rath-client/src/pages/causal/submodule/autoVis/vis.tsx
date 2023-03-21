@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { FC, useMemo } from "react";
 import type { IPattern } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
@@ -7,7 +8,7 @@ import { labDistVis } from "../../../../queries/labdistVis";
 import ErrorBoundary from "../../../../components/visErrorBoundary";
 import ReactVega from "../../../../components/react-vega";
 import { useGlobalStore } from "../../../../store";
-import { getI18n } from "../../locales";
+// import { getI18n } from "../../locales";
 
 
 const Vis: FC = () => {
@@ -54,7 +55,7 @@ const Vis: FC = () => {
     return viewContext && viewSpec && (
         <div>
             <header>
-                {getI18n('submodule.AutoVis.chart')}
+                {intl.get('causal.analyze.vis')}
             </header>
             <ErrorBoundary>
                 <ReactVega actions={false} spec={viewSpec} dataSource={visSample} config={commonStore.themeConfig} />

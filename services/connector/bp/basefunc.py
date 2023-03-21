@@ -799,6 +799,142 @@ class basefunc:
             sql_result.append(rows)
         return sql_result
 
+    # snowflake
+    @staticmethod
+    def snowflake_getdb(uri, schema):
+        engine = create_engine(uri, echo=True)
+        res = engine.execute('SHOW DATABASES').fetchall()
+        db_list = []
+        for row in res:
+            db_list.append(row.name)
+        return db_list
+
+    @staticmethod
+    def snowflake_getschema(uri, db):
+        engine = create_engine(uri, echo=True)
+        res = engine.execute('show schemas in database {0}'.format(db)).fetchall()
+        schema_list = []
+        for row in res:
+            schema_list.append(row.name)
+        return schema_list
+
+    @staticmethod
+    def snowflake_gettable(uri, database, schema):
+        engine = create_engine(uri, echo=True)
+        res = engine.execute('show tables in schema {0}.{1}'.format(database, schema)).fetchall()
+        print('show tables in schema {0}.{1}'.format(database, schema))
+        table_list = []
+        for row in res:
+            meta = basefunc.snowflake_getmeta(uri=uri, database=database, schema=schema, table=row.name)
+            scores = {"name": row.name, "meta": meta}
+            table_list.append(scores)
+        return table_list
+
+    @staticmethod
+    def snowflake_getmeta(uri, database, table, schema):
+        engine = create_engine(uri, echo=True)
+        metaRes = engine.execute('desc table {0}.{1}.{2}'.format(database, schema, table)).fetchall()
+        meta = []
+        i = 0
+        for colData in metaRes:
+            scores = {"key": colData.name, "colIndex": i, "dataType": colData.type}
+            meta.append(scores)
+            i += 1
+        return meta
+
+    @staticmethod
+    def snowflake_getdata(uri, database, table, schema, rows_num):
+        engine = create_engine(uri, echo=True)
+        dataRes = engine.execute(
+            'select * from {0}.{1}.{2} limit {3}'.format(database, schema, table, rows_num)).fetchall()
+        data = []
+        for row in dataRes:
+            rows = []
+            for item in row:
+                rows.append(item)
+            data.append(rows)
+        return data
+
+    @staticmethod
+    def snowflake_getresult(uri, sql):
+        engine = create_engine(uri, echo=True)
+        res = engine.execute(sql).fetchall()
+        sql_result = []
+        for row in res:
+            rows = []
+            for item in row:
+                rows.append(item)
+            sql_result.append(rows)
+        return sql_result
+
+    # bigquery
+    @staticmethod
+    def bigquery_getdb(uri, schema, credentials):
+        project_id = uri.split(r'//')[1]
+        engine = create_engine(uri, credentials_base64=credentials, echo=True)
+        res = engine.execute(
+            'SELECT schema_name FROM {0}.INFORMATION_SCHEMA.SCHEMATA'.format(project_id)).fetchall()
+        db_list = []
+        for row in res:
+            for item in row:
+                db_list.append(item)
+        return db_list
+
+    @staticmethod
+    def bigquery_gettable(uri, database, schema, credentials):
+        engine = create_engine(uri, credentials_base64=credentials, echo=True)
+        res = engine.execute('SELECT table_name FROM {0}.INFORMATION_SCHEMA.TABLES'.format(database)).fetchall()
+        table_list = []
+        for row in res:
+            for item in row:
+                meta = basefunc.bigquery_getmeta(uri=uri, database=database, schema=schema, table=item,
+                                                 credentials=credentials)
+                scores = {"name": item, "meta": meta}
+                table_list.append(scores)
+        return table_list
+
+    @staticmethod
+    def bigquery_getmeta(uri, database, table, schema, credentials):
+        engine = create_engine(uri, credentials_base64=credentials, echo=True)
+        metaRes = engine.execute('''
+        SELECT
+          * 
+        FROM
+          {0}.INFORMATION_SCHEMA.COLUMNS
+        WHERE
+          table_name = "{1}"'''.format(database, table)).fetchall()
+        meta = []
+        i = 0
+        for colData in metaRes:
+            scores = {"key": colData.column_name, "colIndex": i, "dataType": colData.data_type}
+            meta.append(scores)
+            i += 1
+        return meta
+
+    @staticmethod
+    def bigquery_getdata(uri, database, table, schema, rows_num, credentials):
+        engine = create_engine(uri, credentials_base64=credentials, echo=True)
+        dataRes = engine.execute('select * from ' + database + '.' + table + ' limit ' + rows_num).fetchall()
+        data = []
+        for row in dataRes:
+            rows = []
+            for item in row:
+                rows.append(item)
+            data.append(rows)
+        return data
+
+    @staticmethod
+    def bigquery_getresult(uri, sql, credentials):
+        engine = create_engine(uri, credentials_base64=credentials, echo=True)
+        res = engine.execute(sql).fetchall()
+        sql_result = []
+        for row in res:
+            rows = []
+            for item in row:
+                rows.append(item)
+            sql_result.append(rows)
+        return sql_result
+
     # # x
     # @staticmethod
     # def x_getdb(uri, schema):

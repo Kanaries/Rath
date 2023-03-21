@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { Checkbox, DetailsList, Dropdown, IColumn, Label, SelectionMode } from "@fluentui/react";
 import produce from "immer";
 import { observer } from "mobx-react-lite";
@@ -5,7 +6,7 @@ import { FC, useMemo } from "react";
 import styled from "styled-components";
 import type { IFieldMeta } from "../../../../interfaces";
 import { useGlobalStore } from "../../../../store";
-import { getI18n } from "../../locales";
+// import { getI18n } from "../../locales";
 import { PredictAlgorithm, PredictAlgorithms } from "../../predict";
 
 
@@ -48,7 +49,7 @@ const ConfigPanel: FC<{
         return [
             {
                 key: 'selectedAsFeature',
-                name: `${getI18n('submodule.predict.feature')} (${predictInput.features.length} / ${fields.length})`,
+                name: `${intl.get('causal.analyze.feature')} (${predictInput.features.length} / ${fields.length})`,
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     const checked = predictInput.features.some(f => f.fid === field.fid);
@@ -77,7 +78,7 @@ const ConfigPanel: FC<{
             },
             {
                 key: 'selectedAsTarget',
-                name: `${getI18n('submodule.predict.target')} (${predictInput.targets.length} / ${fields.length})`,
+                name: `${intl.get('causal.analyze.target')} (${predictInput.targets.length} / ${fields.length})`,
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     const checked = predictInput.targets.some(f => f.fid === field.fid);
@@ -106,7 +107,7 @@ const ConfigPanel: FC<{
             },
             {
                 key: 'name',
-                name: getI18n('submodule.predict.field'),
+                name: intl.get('causal.analyze.name'),
                 onRender: (item) => {
                     const field = item as IFieldMeta;
                     return (
@@ -123,7 +124,7 @@ const ConfigPanel: FC<{
     return (
         <>
             <Dropdown
-                label={getI18n('submodule.predict.select_model')}
+                label={intl.get('causal.analyze.model')}
                 options={PredictAlgorithms.map(algo => ({ key: algo.key, text: algo.text }))}
                 selectedKey={algo}
                 onChange={(_, option) => {
@@ -134,7 +135,7 @@ const ConfigPanel: FC<{
                 }}
                 style={{ width: 'max-content' }}
             />
-            <Label style={{ marginTop: '1em' }}>{getI18n('submodule.predict.scope')}</Label>
+            <Label style={{ marginTop: '1em' }}>{intl.get('causal.analyze.analyze_space')}</Label>
             <TableContainer>
                 <DetailsList
                     items={fields.slice(0)}

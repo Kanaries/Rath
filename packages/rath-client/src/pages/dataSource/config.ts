@@ -28,8 +28,8 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 iconProps: { iconName: "FileTemplate" },
             },
             {
-                key: IDataSourceType.NOTEBOOK,
-                text: intl.get(`dataSource.importData.type.${IDataSourceType.NOTEBOOK}`),
+                key: IDataSourceType.CLOUD,
+                text: intl.get(`dataSource.importData.type.${IDataSourceType.CLOUD}`),
                 iconProps: { iconName: "CloudDownload" },
             },
             {
@@ -44,16 +44,16 @@ export const useDataSourceTypeOptions = function (): Array<{ key: IDataSourceTyp
                 disabled: false
             },
             {
-                key: IDataSourceType.OLAP,
-                text: 'OLAP',
-                iconProps: { iconName: "TripleColumn" },
-                disabled: false,
-            },
-            {
                 key: IDataSourceType.RESTFUL,
                 text: restfulText,
                 iconProps: { iconName: "Cloud" },
             },
+            {
+                key: IDataSourceType.OLAP,
+                text: 'OLAP',
+                iconProps: { iconName: "TripleColumn" },
+                disabled: true,
+            }
         ];
     }, [fileText, restfulText, demoText, dbText, historyText]);
     return options;

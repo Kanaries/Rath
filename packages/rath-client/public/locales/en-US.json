@@ -19,6 +19,7 @@
         "edit": "Edit",
         "suggestions": "Suggestions",
         "showMore": "Show More",
+        "return": "Return",
         "semanticType": {
             "nominal": "nominal",
             "ordinal": "ordinal",
@@ -54,10 +55,13 @@
             "notFound": "No results found"
         },
         "advanced_options": "Advanced Options",
-        "advanced_options_switch": "Advanced Options"
+        "advanced_options_switch": "Advanced Options",
+        "list": "List",
+        "gallery": "Gallery"
     },
     "menu": {
         "dataSource": "DataSource",
+        "eda": "Exploratory Data Analysis",
         "editor": "Manual Exploration",
         "vizPipe": "interactive Pipeline",
         "support": "Support",
@@ -68,7 +72,8 @@
         "painter": "Data Painter",
         "collection": "Collection",
         "dashboard": "Dashboard",
-        "causal": "Causal"
+        "causal": "Causal",
+        "connection": "Data Connections"
     },
     "preference": {
         "title": "preference",
@@ -129,14 +134,17 @@
         "upload": "Upload"
     },
     "dataSource": {
+        "dataSourceConnection": {
+            "types": "Data Source Types"
+        },
         "extractInsight": "Insight Analysis",
         "extractInsightOld": "Insight Analysis(Debug)",
         "cleanMethod": "Clean Method",
         "useField": "use field",
         "viewMode": "View Mode",
-        "metaView": "Meta View",
-        "dataView": "Table View",
-        "statView": "Statistics View",
+        "metaView": "Meta",
+        "dataView": "Table",
+        "statView": "Statistics",
         "charset": "character encoding",
         "separator": "Separator",
         "databaseType": "Select Database",
@@ -149,11 +157,19 @@
         "query": "SQL Query",
         "connectorConfig": "Connector Settings",
         "connectorService": "Connector Service URL (Optional)",
+        "connectorOffline": "Connector is offline, please retry or select another service.",
+        "connectorEmpty": "No valid connector is set.",
+        "req_err": "Request Failed",
+        "query_monaco": "Query",
+        "query_diagram": "Diagram",
+        "explorer": "Explorer",
         "apply": "Apply&Test",
         "textPattern": {
             "knowledge": "Knowledge",
             "generalize": "Generalize",
-            "specific": "Extract Match"
+            "specific": "Extract Match",
+            "nlp": "Semantics",
+            "currentPattern": "Current Pattern"
         },
         "statViewInfo": {
             "title": "Statistics View",
@@ -173,37 +189,13 @@
             "KEPLER": { "title": "Kepler", "description": "" },
             "BIKE_SHARING_DC": { "title": "Bike Sharing", "description": "" }
         },
-        "dbProgress": [
-            {
-                "label": "Connection",
-                "msgRunning": "Waiting to connect to host...",
-                "msgSucceeded": "Connection succeeded.",
-                "msgFailed": "Connection failed."
-            },
-            {
-                "label": "Focus",
-                "msgRunning": "Find a table to continue.",
-                "msgSucceeded": "Completed.",
-                "msgFailed": "Operation failed."
-            },
-            {
-                "label": "Preview",
-                "msgRunning": "Fetching data from the table.",
-                "msgSucceeded": "Preview generated.",
-                "msgFailed": "Operation failed."
-            },
-            {
-                "label": "Fetch",
-                "msgRunning": "Loading data by submitting the SQL statement.",
-                "msgSucceeded": "Succeeded to execute.",
-                "msgFailed": "Failed to execute."
-            }
-        ],
         "btn": {
+            "use_table": "Load this table (up to 100 rows)",
             "connect": "Connect",
             "reset": "Back and Reset",
             "connectFailed": "Failed to connect",
-            "query": "Submit Query"
+            "query": "Submit Query",
+            "new_connector": "Press Enter or click on the Plus button to add and use a new connector"
         },
         "advice": {
             "lackData": "Lack of Data",
@@ -228,18 +220,34 @@
             "load": "Load Data",
             "type": {
                 "file": "File",
-                "restful": "RESTFUL",
+                "restful": "From URL",
                 "mysql": "MySQL",
                 "demo": "Demo",
                 "database": "Database",
-                "rath_notebook": "Notebook"
+                "kanaries_cloud": "Cloud"
+            },
+            "cloud": {
+                "notebook": "Notebook",
+                "dataset": "Dataset",
+                "dashboard": "Dashboard",
+                "dashboard_template": "Dashboard Template",
+                "total": "Total"
             },
             "demo": {
                 "available": "Available Datasets"
             },
             "restful": {
                 "requestData": "Request Data",
-                "exampleDataStruct": "Example Data Structure"
+                "exampleDataStruct": "Example Data Structure",
+                "loadHistoryAPI": "Load History",
+                "detectedDataStruct": "Parse Rule(auto detect)",
+                "confirm": "Confirm",
+                "clear": "Clear",
+                "format": {
+                    "array": "Array",
+                    "array_with_meta": "Array with Meta",
+                    "others": "Others"
+                }
             }
         },
         "table": {
@@ -265,7 +273,7 @@
             "syncMode": "sync mode"
         },
         "upload": {
-            "title": "Upload Your own dataset",
+            "title": "Connect your data",
             "fileTypes": "Excel workbooks and text-based files (e.g. JSON, CSV) are supported.",
             "uniqueIdIssue": "Add unique ids for fields",
             "show_more": "More Options",
@@ -279,7 +287,7 @@
             "history": "Open Recent",
             "history_time": {
                 "1d": "Today",
-                "1w": "Last weak",
+                "1w": "Last week",
                 "1mo": "Last month",
                 "3mo": "Last 3 months",
                 "6mo": "Last half a year",
@@ -358,7 +366,7 @@
     },
     "storage": {
         "upload": "Save to Cloud",
-        "upload_desc": "Backup your Rath notebook.",
+        "upload_desc": "Backup your {mode}.",
         "components": {
             "data": "Raw Data ({size} rows)",
             "meta": "Meta Data ({size} fields)",
@@ -369,10 +377,20 @@
         "download": "Load",
         "createdAt": "Created At",
         "refresh": "Refresh",
-        "name": "Notebook Name",
-        "default_name": "Rath Notebook {date}",
+        "name": "{mode} Name",
+        "default_name": "Rath {mode} {date}",
+        "desc": "{mode} Description",
+        "data_source_name": "Data Source Name",
+        "upload_data_source": "Bind Data Source",
+        "cover": "Cover",
+        "bind_dataset": "Bind with Dataset",
+        "field_desc": "Field Description",
         "size": "Size",
-        "apply": "Upload"
+        "apply": "Upload",
+        "public": "Public",
+        "publish_template": "Publish Template",
+        "overwrite": "Overwrite",
+        "auto_save": "Auto Save"
     },
     "meta": {
         "title": "Meta Config",
@@ -402,7 +420,14 @@
             "editInGW": "Customized Analysis",
             "editInEditor": "Edit in Editor",
             "associate": "associate views",
-            "constraints": "analysis constraints"
+            "constraints": "analysis constraints",
+            "download": "export chart",
+            "export": "Export",
+            "export_as": "Export As",
+            "export_size": "Size",
+            "lock_aspect": "Lock Aspect",
+            "export_bg": "Background Color",
+            "err_msg_invalid_size": "Size must be between {min} ~ {max}"
         },
         "constraints": {
             "exclude": "exclude field",
@@ -438,7 +463,7 @@
             "explainDiff": "explain diff",
             "pointInterests": "related subsets",
             "neighbors": "neighbor views",
-            "pin": "pin",
+            "pin": "related insights",
             "compare": "compare",
             "vizsys": {
                 "title": "visualization recommend system",
@@ -459,7 +484,11 @@
                 "neighbors": "Neighbors"
             }
         },
-        "insight": "Insight"
+        "insight": "Insight",
+        "embed": {
+            "insight_discovery": "Insight Discovery",
+            "insights": "Insights"
+        }
     },
     "desc": {
         "dataViewInfo": "Pattern in {measures} by {dimensions} where {filters}."
@@ -559,8 +588,9 @@
         },
         "clickLogin": "Login",
         "haveSent": "Already Sent",
-        "signIn": "Sign In",
-        "signOut": "Sign Out",
+        "signIn": "Sign Up",
+        "signOut": "Logout",
+        "my_account": "My Account",
         "preferences": "Preferences",
         "phoneCert": "Phone",
         "emailCert": "Email",
@@ -612,7 +642,123 @@
             }
         }
     },
-    "access": {
-        "unsupport": "Not support in your location."
+    "causal": {
+        "dataset": {
+            "extend": "Extending",
+            "field": "Field",
+            "extInfo": "Extended from",
+            "distinct_count": "distinct count",
+            "no_filter": "(no filters)",
+            "origin_size": "Original size: {size} rows, ",
+            "filtered_size": "subset size: ${size} rows",
+            "sample_rate": "sampling rate",
+            "sample_size": "sample size: {size} rows",
+            "choose_fields": "Selected fields to analyze",
+            "dist": "Distribution",
+            "stat": "Statistics"
+        },
+        "actions": {
+            "clear_fields": "Clear All Fields",
+            "causal_discover": "Causal Discover",
+            "relayout": "Relayout",
+            "zoom_canvas": "Zoom Canvas",
+            "modify_constraints": "Modify Constraints",
+            "display_limit": "Links Display Limit",
+            "filter_by_weights": "Filter by Weights",
+            "one_click": "One Click",
+            "use_ext_diagram": "Generate from extending information of fields",
+            "import_effect": "Load constraints",
+            "auto_detect": "Auto detect",
+            "preview": "Preview",
+            "edit_view": "Edit View",
+            "compute": "Compute",
+            "export_diagram": "Export as Diagram",
+            "save_model": "Save Causal Model",
+            "load_model": "Load Causal Model",
+            "prev_step": "Previous Step",
+            "continue": "Next"
+        },
+        "analyze": {
+            "cause": "Cause",
+            "corr": "Correlation",
+            "effect": "Effect",
+            "corr_atoms": "Relevant Fields",
+            "vis": "Visualization",
+            "single_dim": "Single Field Analysis",
+            "main_field": "Main Field",
+            "service": "Service Environment",
+            "diff_mode": "Diff Mode",
+            "other": "Others",
+            "full": "Full",
+            "diff_two": "Two Groups",
+            "index_key": "Index Key",
+            "not_chosen": "None",
+            "aggregation_type": "Aggregation Type",
+            "foreground_group": "Foreground Group",
+            "background_group": "Background Group",
+            "insight": "Insight",
+            "why_query": "Why Query",
+            "no_more_hints": "No more hints.",
+            "normalize_stack": "Normalize Stack",
+            "global_dist": "Global Distribution",
+            "diff_dist": "Diff Distribution",
+            "feature": "Features",
+            "target": "Targets",
+            "name": "Name",
+            "model": "Model",
+            "analyze_space": "Analyze Space",
+            "prediction": "Prediction",
+            "diff_title": "Diff",
+            "run_idx": "ID",
+            "accuracy": "Accuracy",
+            "clear_records": "Clear Records",
+            "model_config": "Model Configuration",
+            "predict_result": "Predict Results",
+            "clear_all": "Clear All",
+            "link_mode": "Create a link to",
+            "def_to_effect": "Effect",
+            "def_to_not_effect": "Not Effect",
+            "def_to_be_relevant": "Be Relevant",
+            "def_to_be_not_relevant": "Be Not Relevant",
+            "click_link_mode": "Click on a link to",
+            "forbid_link": "Forbid",
+            "delete_link": "Delete",
+            "dbl_click_node_mode": "Double click on a node to",
+            "def_forbid_as_cause": "Forbid It to Be A Cause",
+            "def_forbid_as_effect": "Forbid It to Be An Effect",
+            "overwrite-only": "Overwrite Only",
+            "fill-only": "Fill Only",
+            "fully replace": "Fully Replace",
+            "mutual_info": "Mutual Info",
+            "conditional_mutual_info": "Conditional Mutual Info",
+            "causal_discover": "Causal Discover",
+            "matrix": "Matrix",
+            "diagram": "Diagram",
+            "circle": "Circle",
+            "square": "Square",
+            "view": "View Type",
+            "mark": "Mark Type",
+            "my_models": "My Models",
+            "model_list": "Model List",
+            "dataset_config": {
+                "title": "Configure Dataset",
+                "help": "Select data subset and fields from the full set to analyze."
+            },
+            "fd_config": {
+                "title": "Define Functional Dependencies",
+                "help": "Set functional dependencies based on background knowledge."
+            },
+            "causal_model": {
+                "title": "Causal Model",
+                "help": "Use algorithm to apply Causal Discovery, modify the causal diagram, and begin a further exploration on the result."
+            }
+        },
+        "exploration": {
+            "AutoVis": "AutoVis",
+            "CrossFilter": "CrossFilter",
+            "CausalInsight": "CausalInsight",
+            "GraphicWalker": "GraphicWalker",
+            "predict": "predict"
+        }
     }
 }

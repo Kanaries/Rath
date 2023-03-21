@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import type { Graph } from '@antv/g6';
@@ -9,7 +10,7 @@ import { useRenderData, useGraphOptions } from '../../explorer/graph-utils';
 import { useReactiveGraph } from '../../explorer/graph-helper';
 import { transformFuncDepsToPag } from '../../../../store/causalStore/pag';
 import type { IFunctionalDep } from '../../config';
-import { getI18n } from '../../locales';
+// import { getI18n } from '../../locales';
 
 
 const Container = styled.div`
@@ -161,7 +162,7 @@ const FDGraph: FC<{
                     onClick={handleForceLayout}
                     iconProps={{ iconName: 'Play' }}
                 >
-                    {getI18n('chart.re_layout')}
+                    {intl.get('causal.actions.relayout')}
                 </DefaultButton>
             </div>
         </Container>

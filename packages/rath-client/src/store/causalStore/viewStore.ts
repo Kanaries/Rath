@@ -29,11 +29,9 @@ export enum ExplorationKey {
     PREDICT = 'predict',
 }
 
-export const ExplorationOptions: readonly ExplorationKey[] = [
-    // { key: ExplorationKey.CAUSAL_BLAME, text: '归因分析' },
+export const ExplorationKeys = [
+    // ExplorationKey.CAUSAL_BLAME,
     ExplorationKey.AUTO_VIS,
-    ExplorationKey.WHAT_IF,
-    ExplorationKey.HYPOTHESIS_TEST,
     ExplorationKey.CROSS_FILTER,
     ExplorationKey.CAUSAL_INSIGHT,
     ExplorationKey.GRAPHIC_WALKER,

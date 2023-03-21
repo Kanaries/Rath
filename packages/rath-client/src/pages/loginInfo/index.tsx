@@ -1,18 +1,18 @@
-import { FC, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import intl from 'react-intl-universal';
 import { observer } from 'mobx-react-lite';
-import { ActionButton, Dialog, Pivot, PivotItem } from '@fluentui/react';
+import { Dialog, INavLinkGroup, Nav, Persona, PersonaSize } from '@fluentui/react';
 import styled from 'styled-components';
 import { useGlobalStore } from '../../store';
 import Account from './account';
 import Setup from './setup';
-
+import { LoginButton } from './components/loginButton';
 
 export enum PreferencesType {
     Account = 'account',
     Info = 'info',
     Setting = 'setting',
-    Header = 'header'
+    Header = 'header',
 }
 export interface PreferencesListType {
     key: PreferencesType;
@@ -21,17 +21,10 @@ export interface PreferencesListType {
     element: () => JSX.Element;
 }
 
-const preferencesList: PreferencesListType[] = [
-    { key: PreferencesType.Account, name: PreferencesType.Account, icon: 'Home', element: () => <Account /> },
-    // { key: PreferencesType.Info, name: PreferencesType.Info, icon: 'Info', element: () => <Info /> },
-    // { key: PreferencesType.Header, name: PreferencesType.Header, icon: 'Contact', element: () => <Header /> },
-    { key: PreferencesType.Setting, name: PreferencesType.Setting, icon: 'Settings', element: () => <Setup /> },
-];
-
 const LoginInfoDiv = styled.div`
-    height: 100%;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    /* flex-direction: column; */
     border-top-width: 1px;
     padding: 0.6em 0.8em 0.8em;
     > div {
@@ -49,80 +42,112 @@ const LoginInfoDiv = styled.div`
     .user::-webkit-scrollbar {
         display: none;
     }
+    .user-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 19px;
+        border: 3px solid #000;
+        margin: 0px 12px;
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
 `;
 
 const Container = styled.div`
-    & .content {
-        display: flex;
-        flex-direction: row;
-        > [role=tablist] {
-            flex-grow: 0;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #8888;
-            > [role=tab] {
-                margin: 0px 4px 8px 0;
-                ::before {
-                    right: 0px;
-                    width: 2px;
-                    height: unset;
-                    top: 2px;
-                    bottom: 2px;
-                    left: unset;
-                    transition: unset;
-                }
-            }
-        }
-        > [role=tabpanel] {
-            flex-grow: 1;
-            flex-shrink: 1;
-        }
+    display: flex;
+    > .nav-menu {
+        flex-grow: 0;
+        border: 1px solid #e9ebf0;
+    }
+    > .nav-content {
+        padding: 1em;
+        flex-grow: 1;
+        flex-shrink: 1;
+        border-top: 1px solid #e9ebf0;
+        border-right: 1px solid #e9ebf0;
+        border-bottom: 1px solid #e9ebf0;
     }
 `;
 
 const LoginInfo: FC = () => {
     const { commonStore, userStore } = useGlobalStore();
     const { navMode } = commonStore;
-    const { userName } = userStore;
-    const [loginHidden, setLoginHidden] = useState(true);
+    const { info } = userStore;
+    const [showUserPanel, setShowUserPanel] = useState(false);
     const [tab, setTab] = useState<PreferencesType>(PreferencesType.Account);
+
+    const settingMenuList = useMemo<INavLinkGroup[]>(() => {
+        return [
+            {
+                links: [
+                    {
+                        url: `#preference/${PreferencesType.Account}`,
+                        key: PreferencesType.Account,
+                        name: PreferencesType.Account,
+                        icon: 'Home',
+                        forceAnchor: true,
+                        iconProps: { iconName: 'Home' },
+                        onClick(e: any) {
+                            e.preventDefault();
+                            setTab(PreferencesType.Account);
+                        },
+                    },
+                    {
+                        url: `#preference/${PreferencesType.Setting}`,
+                        key: PreferencesType.Setting,
+                        name: PreferencesType.Setting,
+                        icon: 'Settings',
+                        forceAnchor: true,
+                        iconProps: { iconName: 'Settings' },
+                        onClick(e: any) {
+                            e.preventDefault();
+                            setTab(PreferencesType.Setting);
+                        },
+                    },
+                ],
+            },
+        ];
+    }, []);
 
     return (
         <LoginInfoDiv>
-            <div
-                onClick={() => {
-                    setLoginHidden(false);
+            <Dialog
+                modalProps={{
+                    isBlocking: true,
+                    // to make an error message closable
+                    isClickableOutsideFocusTrap: true,
                 }}
-                role="button"
-                aria-haspopup
+                hidden={!showUserPanel}
+                onDismiss={() => {
+                    setShowUserPanel(false);
+                }}
+                dialogContentProps={{ title: intl.get('login.preferences') }}
+                minWidth={550}
             >
-                <Dialog
-                    modalProps={{
-                        isBlocking: true,
-                    }}
-                    hidden={loginHidden}
-                    onDismiss={() => {
-                        setLoginHidden(true);
-                    }}
-                    dialogContentProps={{ title: intl.get('login.preferences') }}
-                    minWidth={550}
-                >
-                    <Container>
-                        <Pivot className="content" selectedKey={tab} onLinkClick={item => item && setTab(item.props.itemKey as typeof tab)}>
-                            {preferencesList.map(pref => (
-                                <PivotItem key={pref.key} itemKey={pref.key} headerText={intl.get(`login.${pref.name}`)} itemIcon={pref.icon}>
-                                    {pref.element()}
-                                </PivotItem>
-                            ))}
-                        </Pivot>
-                    </Container>
-                </Dialog>
-                <ActionButton
-                    styles={{ root: { display: 'flex', alignItems: 'center' } }}
-                    text={navMode === 'icon' ? undefined : (userName ?? intl.get('login.clickLogin'))}
-                    iconProps={{ iconName: 'Contact' }}
-                />
+                <Container>
+                    <div className="nav-menu">
+                        <Nav selectedKey={tab} groups={settingMenuList} />
+                    </div>
+                    <div className="nav-content">
+                        {tab === PreferencesType.Account && <Account />}
+                        {tab === PreferencesType.Setting && <Setup />}
+                    </div>
+                </Container>
+            </Dialog>
+            <div
+                className="user"
+                onClick={() => {
+                    setShowUserPanel(true);
+                }}
+            >
+                {info && (
+                    <Persona
+                        text={navMode === 'text' ? info.userName : ''}
+                        imageUrl={info.avatarURL}
+                        size={PersonaSize.size32}
+                    />
+                )}
+                {!info && navMode === 'text' && <LoginButton text={intl.get('login.clickLogin')} />}
             </div>
         </LoginInfoDiv>
     );

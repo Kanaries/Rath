@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import type { IFieldMeta } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { getI18n } from '../locales';
-import { MATRIX_TYPE } from '../step/causalModal';
 import DirectionMatrix from './directionMatrix';
 import RelationMatrixHeatMap from './relationMatrixHeatMap';
 
@@ -28,6 +27,12 @@ const Cont = styled.div`
 export enum MATRIX_MARK_TYPE {
     circle = 'circle',
     square = 'square',
+}
+
+export enum MATRIX_TYPE {
+    mutualInfo = 'mutual_info',
+    conditionalMutualInfo = 'conditional_mutual_info',
+    causal = 'causal_discover',
 }
 
 const MARK_LABELS: readonly MATRIX_MARK_TYPE[] = [MATRIX_MARK_TYPE.circle, MATRIX_MARK_TYPE.square];

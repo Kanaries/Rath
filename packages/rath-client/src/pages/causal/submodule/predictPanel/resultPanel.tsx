@@ -1,10 +1,11 @@
+import intl from 'react-intl-universal';
 import { Checkbox, DefaultButton, DetailsList, IColumn, Icon, SelectionMode } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { useGlobalStore } from "../../../../store";
 import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
-import { getI18n } from "../../locales";
+// import { getI18n } from "../../locales";
 import { PredictAlgorithms } from "../../predict";
 
 
@@ -48,7 +49,7 @@ const ResultPanel: FC = () => {
         return [
             {
                 key: 'selected',
-                name: getI18n('submodule.predict.comparison'),
+                name: intl.get('causal.analyze.diff_title'),
                 onRender: (item) => {
                     const record = item as typeof sortedResults[number];
                     const selected = (comparison ?? [] as string[]).includes(record.id);
@@ -81,7 +82,7 @@ const ResultPanel: FC = () => {
             },
             {
                 key: 'index',
-                name: getI18n('submodule.predict.index'),
+                name: intl.get('causal.analyze.run_idx'),
                 minWidth: 70,
                 maxWidth: 70,
                 isResizable: false,
@@ -91,7 +92,7 @@ const ResultPanel: FC = () => {
             },
             {
                 key: 'algo',
-                name: getI18n('submodule.predict.algo'),
+                name: intl.get('causal.analyze.model'),
                 minWidth: 70,
                 onRender(item) {
                     const record = item as typeof sortedResults[number];
@@ -100,7 +101,7 @@ const ResultPanel: FC = () => {
             },
             {
                 key: 'accuracy',
-                name: getI18n('submodule.predict.accuracy'),
+                name: intl.get('causal.analyze.accuracy'),
                 minWidth: 150,
                 onRender(item, index) {
                     if (!item || index === undefined) {
@@ -184,7 +185,7 @@ const ResultPanel: FC = () => {
                 onClick={() => viewContext?.clearPredictResults()}
                 style={{ width: 'max-content' }}
             >
-                {getI18n('submodule.predict.clear')}
+                {intl.get('causal.analyze.clear_records')}
             </DefaultButton>
             <TableContainer>
                 <DetailsList

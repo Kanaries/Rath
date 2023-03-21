@@ -46,9 +46,10 @@ module.exports = function override(config, env) {
             ],
         }
     );
-    config.stats = {
-        children: true,
-    };
+    // allow config.stats when you want to see the details log in console of webpack
+    // config.stats = {
+    //     children: true,
+    // };
     if (config.resolve) {
         let fallback = {};
         if (config.resolve.fallback) {

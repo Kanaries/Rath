@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { ActionButton, Pivot, PivotItem, Stack } from '@fluentui/react';
 import { observer } from 'mobx-react-lite';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
@@ -10,7 +11,7 @@ import { useGlobalStore } from '../../../store';
 import SemiEmbed from '../../semiAutomation/semiEmbed';
 import { PAG_NODE } from '../config';
 import { getI18n } from '../locales';
-import { ExplorationKey, ExplorationOptions, useCausalViewContext } from '../../../store/causalStore/viewStore';
+import { ExplorationKey, ExplorationKeys, useCausalViewContext } from '../../../store/causalStore/viewStore';
 import CrossFilter from './crossFilter';
 import PredictPanel from './predictPanel';
 import RExplainer from './explainer/RExplainer';
@@ -136,6 +137,13 @@ const Submodule = forwardRef<{
         viewContext?.toggleNodeSelected(fid);
     }, [viewContext]);
 
+    const ExplorationOptions = useMemo(() => {
+        return ExplorationKeys.map(key => ({
+            key,
+            text: intl.get(`causal.exploration.${key}`),
+        }));
+    }, []);
+
     return viewContext && (
         <Container>
             <Pivot
@@ -146,7 +154,7 @@ const Submodule = forwardRef<{
                 }}
                 overflowBehavior="menu"
             >
-                {ExplorationOptions.map(key => (
+                {ExplorationOptions.map(({ key }) => (
                     <PivotItem key={key} itemKey={key} headerText={getI18n(`submodule.${key}.title`)} />
                 ))}
             </Pivot>
@@ -164,7 +172,7 @@ const Submodule = forwardRef<{
                 {[ExplorationKey.AUTO_VIS, ExplorationKey.CROSS_FILTER, ExplorationKey.CAUSAL_INSIGHT].includes(viewContext.explorationKey) && (
                     <ActionButton
                         iconProps={{ iconName: 'Delete' }}
-                        text={getI18n('extra.clear_focused')}
+                        text={intl.get('causal.actions.clear_fields')}
                         disabled={selectedFieldGroup.length === 0}
                         onClick={clearFieldGroup}
                     />

@@ -37,6 +37,14 @@ export function applySizeConfig2DistViz(spec: any, cnf: IDistVizSizeConfig): any
                 spec.height = (yFieldType === 'quantitative' || yFieldType === 'temporal') ? height : { step: stepSize };
             }
         }
+        if (spec.mark === 'circle' || spec.mark.type === 'circle' || spec.mark === 'point' || spec.mark.type === 'point') {
+            if (spec.encoding.size) {
+                if (!spec.encoding.size.scale) {
+                    spec.encoding.size.scale = {}
+                }
+                spec.encoding.size.scale = { range: [10, Math.min(width ?? 200, height ?? 200)] }
+            }
+        }
     }
     return spec;
 }

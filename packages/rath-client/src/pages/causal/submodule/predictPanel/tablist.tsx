@@ -1,10 +1,11 @@
+import intl from 'react-intl-universal';
 import { Pivot, PivotItem } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import type { IFieldMeta } from "../../../../interfaces";
 import { useGlobalStore } from "../../../../store";
 import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
-import { getI18n } from "../../locales";
+// import { getI18n } from "../../locales";
 import { PredictAlgorithm } from "../../predict";
 import ConfigPanel from "./configPanel";
 import ResultPanel from "./resultPanel";
@@ -93,8 +94,8 @@ const TabList: FC<{
                 }}
                 style={{ marginTop: '0.5em' }}
             >
-                <PivotItem itemKey="config" headerText={getI18n('submodule.predict.config')} />
-                <PivotItem itemKey="result" headerText={getI18n('submodule.predict.result')} />
+                <PivotItem itemKey="config" headerText={intl.get('causal.analyze.model_config')} />
+                <PivotItem itemKey="result" headerText={intl.get('causal.analyze.predict_result')} />
             </Pivot>
             <div className="content">
                 {{

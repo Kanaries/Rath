@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import { ReactElement } from 'react';
 
-const MESSAGE_SHOW_TINE = 3000;
+const MESSAGE_SHOW_TINE = 30000;
 
 export interface IErrorInfo {
     title: string;

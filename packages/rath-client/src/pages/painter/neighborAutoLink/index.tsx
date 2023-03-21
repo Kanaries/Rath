@@ -9,7 +9,7 @@ import { IFieldMeta, IRow, IVegaSubset } from '../../../interfaces';
 import { useGlobalStore } from '../../../store';
 import { deepcopy } from '../../../utils';
 import { LABEL_FIELD_KEY } from '../constants';
-
+import { Card } from '../../../components/card';
 
 const LoadingLayer = styled.div`
     position: absolute;
@@ -21,10 +21,10 @@ const LoadingLayer = styled.div`
     bottom: 0px;
     display: flex;
     justify-content: center;
-    .cont{
+    .cont {
         margin-top: 1em;
     }
-`
+`;
 
 interface NALProps {
     vizSpec: IVegaSubset;
@@ -34,7 +34,7 @@ interface NALProps {
 const NeighborAutoLink: React.FC<NALProps> = (props) => {
     const { vizSpec, dataSource, fieldMetas } = props;
     const { painterStore, commonStore } = useGlobalStore();
-    const { painting, autoLink } = painterStore
+    const { painting, autoLink } = painterStore;
     const [nearFields, setNearFields] = useState<IFieldMeta[]>([]);
     const [nearIndex, setNearIndex] = useState<number>(0);
     const nearSpec = useMemo<IVegaSubset | null>(() => {
@@ -65,13 +65,15 @@ const NeighborAutoLink: React.FC<NALProps> = (props) => {
                 if (true) {
                     const Y = data.map((r) => r[field.fid]);
                     const score = purennMic(X, Y);
-                    ans.push({
-                        field,
-                        score,
-                    });
+                    if (!isNaN(score)) {
+                        ans.push({
+                            field,
+                            score,
+                        });
+                    }
                 }
             }
-            ans.sort((a, b) => b.score - a.score);
+            ans.sort((a, b) => Number(b.score) - Number(a.score));
             setNearFields(ans.map((a) => a.field));
             painterStore.setPainting(false);
         },
@@ -79,49 +81,56 @@ const NeighborAutoLink: React.FC<NALProps> = (props) => {
     );
 
     useEffect(() => {
-        getNearFields(dataSource)
-    }, [dataSource, painterStore.linkTrigger, getNearFields])
+        getNearFields(dataSource);
+    }, [dataSource, painterStore.linkTrigger, getNearFields]);
     return (
-        <div style={{ position: 'relative', marginTop: '1em' }}>
-                {
-                    painting && <LoadingLayer>
-                        <div className='cont'>
-                            <Label>Search for relative patterns</Label>
-                            <Spinner label="Linking..." size={SpinnerSize.large} />
-                        </div>
-                    </LoadingLayer>
-                }
-                <div>
-                <Toggle label={intl.get('painter.autoSearch')} inlineLabel checked={autoLink} onChange={(e, checked) => {
-                        painterStore.setAutoLinkMode(Boolean(checked))
-                    }} />
-                </div>
-                <Stack horizontal tokens={{ childrenGap: 10, padding: '0em 0em 2em 0em' }}>
-                    <PrimaryButton
-                            text={intl.get('painter.search')}
-                            iconProps={{ iconName: 'Search' }}
-                            onClick={() => {
-                                getNearFields(dataSource);
-                            }}
-                        />
-                    <DefaultButton
-                        text={intl.get('painter.last')}
-                        iconProps={{ iconName: 'Back' }}
-                        onClick={() => {
-                            setNearIndex((v) => (v - 1 + nearFields.length) % nearFields.length);
-                        }}
-                    />
-                    <DefaultButton
-                        text={intl.get('painter.next')}
-                        iconProps={{ iconName: 'Forward' }}
-                        onClick={() => {
-                            setNearIndex((v) => (v + 1) % nearFields.length);
-                        }}
-                    />
-                    <span className="state-description">{nearIndex + 1} of {nearFields.length}</span>
-                </Stack>
-                {nearSpec && <ReactVega spec={nearSpec} dataSource={dataSource} config={commonStore.themeConfig} />}
+        <Card style={{ position: 'relative' }}>
+            {painting && (
+                <LoadingLayer>
+                    <div className="cont">
+                        <Label>Search for relative patterns</Label>
+                        <Spinner label="Linking..." size={SpinnerSize.large} />
+                    </div>
+                </LoadingLayer>
+            )}
+            <div>
+                <Toggle
+                    label={intl.get('painter.autoSearch')}
+                    inlineLabel
+                    checked={autoLink}
+                    onChange={(e, checked) => {
+                        painterStore.setAutoLinkMode(Boolean(checked));
+                    }}
+                />
             </div>
+            <Stack horizontal tokens={{ childrenGap: 10, padding: '0em 0em 2em 0em' }}>
+                <PrimaryButton
+                    text={intl.get('painter.search')}
+                    iconProps={{ iconName: 'Search' }}
+                    onClick={() => {
+                        getNearFields(dataSource);
+                    }}
+                />
+                <DefaultButton
+                    text={intl.get('painter.last')}
+                    iconProps={{ iconName: 'Back' }}
+                    onClick={() => {
+                        setNearIndex((v) => (v - 1 + nearFields.length) % nearFields.length);
+                    }}
+                />
+                <DefaultButton
+                    text={intl.get('painter.next')}
+                    iconProps={{ iconName: 'Forward' }}
+                    onClick={() => {
+                        setNearIndex((v) => (v + 1) % nearFields.length);
+                    }}
+                />
+                <span className="state-description">
+                    {nearIndex + 1} of {nearFields.length}
+                </span>
+            </Stack>
+            {nearSpec && <ReactVega spec={nearSpec} dataSource={dataSource} config={commonStore.themeConfig} />}
+        </Card>
     );
 };
 

@@ -1,4 +1,4 @@
-import type { TableInfo } from "../../pages/dataSource/selection/database/api";
+import type { TableInfo } from "../../pages/dataSource/selection/database/type";
 import { BOX_HEIGHT, BOX_WIDTH, STROKE_RADIUS } from "./config";
 import type { IDBEdge, IDBGraph } from "./localTypes";
 
@@ -8,14 +8,22 @@ export const toSQL = (graph: IDBGraph, tables: TableInfo[]): string => {
         return '';
     }
 
-    return graph.edges.reduce<string>((sql, link) => {
-        const tableFrom = tables[link.from.table];
-        const tableTo = tables[link.to.table];
+    let idx = 0;
 
-        return `${sql} ${link.joinOpt} ${tableTo.name} ON ${
-            tableFrom.name
-        }.${tableFrom.meta[link.from.colIdx].key} = ${tableTo.name}.${tableTo.meta[link.to.colIdx].key}`;
-    }, `SELECT * FROM ${tables[graph.edges[0].from.table].name}`);
+    try {
+        return graph.edges.reduce<string>((sql, link) => {
+            const tableFrom = tables[link.from.table];
+            const tableTo = tables[link.to.table];
+    
+            return `${sql} ${link.joinOpt} ${tableTo.name} AS t_${idx++} ON t_${
+                idx - 2
+            }.${tableFrom.meta[link.from.colIdx].key} = t_${idx - 1}.${tableTo.meta[link.to.colIdx].key}`;
+        }, `SELECT * FROM ${tables[graph.edges[0].from.table].name} AS t_${idx++}`);
+    } catch (error) {
+        console.warn(error);
+        return '';
+    }
+
 };
 
 export const hasCircle = (edges: Readonly<IDBEdge[]>, from: number, to: number): boolean => {

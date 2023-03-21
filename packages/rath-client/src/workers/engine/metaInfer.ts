@@ -53,7 +53,7 @@ export function inferMeta (props: { dataSource: IRow[]; fields: IMuteFieldBase[]
     const finalFieldMetas: IRawField[] = [];
     for (let field of fields) {
         let semanticType: ISemanticType = field.semanticType === '?' ? inferSemanticType(dataSource, field.fid) : field.semanticType;
-        let geoRole = field.geoRole === '?' ? inferGeoRole(dataSource, field.fid, semanticType, field.name || '') : field.geoRole;
+        let geoRole = (field.geoRole === '?' || field.geoRole === undefined) ? inferGeoRole(dataSource, field.fid, semanticType, field.name || '') : field.geoRole;
         let analyticType: IAnalyticType = 'dimension';
         if (geoRole === 'none') {
             analyticType = field.analyticType === '?' ? inferAnalyticTypeFromSemanticType(semanticType) : field.analyticType;

@@ -17,6 +17,7 @@ const CollectContainer = styled.div`
     .chart-container {
         border: 1px solid rgb(218, 220, 224);
         border-radius: 1em;
+        cursor: pointer;
         padding: 1em;
         margin: 1em;
         display: flex;
@@ -60,14 +61,13 @@ const ListView: React.FC<ListViewProps> = (props) => {
             <CollectContainer>
                 {views.slice(pageIndex * VIEW_NUM_IN_PAGE, (pageIndex + 1) * VIEW_NUM_IN_PAGE).map((item, i) => (
                     <div
-                        className="chart-container cursor-pointer"
+                        className="chart-container"
                         key={item.viewId}
                         onClick={() => {
                             onConfig(item);
                         }}
                     >
                         <div className="c-vis">
-                            <div className="flex justify-center text-lg font-bold mb-2">{item.title}</div>
                             <VisErrorBoundary>
                                 <ReactVega
                                     dataSource={applyFilters(data, item.filters)}
@@ -78,7 +78,6 @@ const ListView: React.FC<ListViewProps> = (props) => {
                             </VisErrorBoundary>
                         </div>
                         <div className="c-desc">
-                            <div className="w-full text-gray-700 text-sm">{item.desc}</div>
                             <ViewInfo metas={metas} fields={item.fields} filters={item.filters} />
                         </div>
                     </div>

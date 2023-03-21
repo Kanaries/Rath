@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { DefaultButton, Icon, Spinner } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
@@ -31,7 +32,10 @@ const Container = styled.div`
     }
 `;
 
-const ModeOptions: readonly IPredictProps['mode'][] = ['classification', 'regression'] as const;
+const ModeOptions = [
+    { key: 'classification', text: 'Classification' },
+    { key: 'regression', text: 'Regression' },
+] as const;
 
 const TRAIN_RATE = 0.2;
 
@@ -149,7 +153,7 @@ const PredictPanel = forwardRef<{
                 split
                 menuProps={{
                     items: ModeOptions.map(opt => ({
-                        key: opt, text: getI18n(`submodule.predict.mission.${opt}`)
+                        key: opt.key, text: getI18n(`submodule.predict.mission.${opt.key}`)
                     })),
                     onItemClick: (_e, item) => {
                         if (item) {
@@ -158,7 +162,7 @@ const PredictPanel = forwardRef<{
                     },
                 }}
             >
-                {getI18n(`submodule.predict.mission.${mode}`)}
+                {`${ModeOptions.find(m => m.key === mode)?.text}${intl.get('causal.analyze.prediction')}`}
             </DefaultButton>
             <TabList algo={algo} setAlgo={setAlgo} tab={tab} setTab={setTab} running={running} predictInput={predictInput} setPredictInput={setPredictInput} />
         </Container>

@@ -1,10 +1,11 @@
+import intl from 'react-intl-universal';
 import { DetailsList, IColumn, SelectionMode } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, useMemo } from "react";
 import { useGlobalStore } from "../../../../store";
 import { useCausalViewContext } from "../../../../store/causalStore/viewStore";
 import { PAG_NODE } from "../../config";
-import { getI18n } from "../../locales";
+// import { getI18n } from "../../locales";
 
 
 const NeighborList: FC = () => {
@@ -44,7 +45,7 @@ const NeighborList: FC = () => {
         return [
             {
                 key: 'cause',
-                name: getI18n('submodule.AutoVis.rel.cause'),
+                name: intl.get('causal.analyze.cause'),
                 minWidth: 100,
                 maxWidth: 100,
                 isResizable: false,
@@ -54,7 +55,7 @@ const NeighborList: FC = () => {
             },
             {
                 key: 'corr',
-                name: getI18n('submodule.AutoVis.rel.value'),
+                name: intl.get('causal.analyze.corr'),
                 minWidth: 120,
                 maxWidth: 120,
                 isResizable: false,
@@ -74,7 +75,7 @@ const NeighborList: FC = () => {
             },
             {
                 key: 'effect',
-                name: getI18n('submodule.AutoVis.rel.effect'),
+                name: intl.get('causal.analyze.effect'),
                 minWidth: 100,
                 maxWidth: 100,
                 isResizable: false,
@@ -88,7 +89,7 @@ const NeighborList: FC = () => {
     return selectedFieldGroup?.length ? (
         <div>
             <header>
-                {getI18n('submodule.AutoVis.relation')}
+                {intl.get('causal.analyze.corr_atoms')}
             </header>
             <DetailsList
                 items={neighbors}

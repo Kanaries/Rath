@@ -1,3 +1,4 @@
+import intl from 'react-intl-universal';
 import { ActionButton, Icon, Toggle, TooltipHost } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import { FC, Fragment, useCallback, useEffect, useRef, useState } from "react";
@@ -231,8 +232,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
 
     return (
         <>
-            <header style={{ margin: '1em 0' }}>{getI18n('submodule.CausalInsight.why_query')}</header>
-            {/* TODO: 这里面手风琴 + TOC 的设计个人比较满意，有时间可以优化下样式然后作为组件抽出去 */}
+            <header style={{ margin: '1em 0' }}>{intl.get('causal.analyze.why_query')}</header>
             <ExploreQueue>
                 <div className="tool">
                     <TooltipHost
@@ -294,7 +294,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
             </ExploreQueue>
             <Container>
                 {list.length === 0 ? (
-                    <p>{getI18n('submodule.CausalInsight.insight.no_more')}</p>
+                    <p>{intl.get('causal.analyze.no_more_hints')}</p>
                 ) : (
                     <TabList role="tablist">
                         {list.map((res, i) => {
@@ -319,14 +319,14 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                     {i === cursor && (
                                         <div role="tabpanel" id={getTabId(i)}>
                                             <Toggle
-                                                label={getI18n('submodule.CausalInsight.normalize')}
+                                                label={intl.get('causal.analyze.normalize_stack')}
                                                 inlineLabel
                                                 checked={normalize}
                                                 onChange={(_, checked) => setNormalize(Boolean(checked))}
                                             />
                                             <br />
                                             <ExplainChart
-                                                title={getI18n('submodule.CausalInsight.distribution')}
+                                                title={intl.get('causal.analyze.global_dist')}
                                                 data={data}
                                                 mainField={tar}
                                                 mainFieldAggregation={null}
@@ -335,7 +335,7 @@ const RInsightView: FC<IRInsightViewProps> = ({
                                                 normalize={normalize}
                                             />
                                             <DiffChart
-                                                title={getI18n('submodule.CausalInsight.comparison')}
+                                                title={intl.get('causal.analyze.diff_dist')}
                                                 data={data}
                                                 subspaces={indices}
                                                 mainField={tar}

@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 export const BorderCard = styled.div`
-    /* background-color: #fefefe; */
-    margin: 8px 0;
-    padding: 8px 0;
+    border: 1px solid #efefef;
+    margin: 8px;
+    padding: 8px;
 `

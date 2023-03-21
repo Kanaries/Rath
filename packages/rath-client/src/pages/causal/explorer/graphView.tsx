@@ -1,4 +1,5 @@
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import intl from 'react-intl-universal';
+import { forwardRef, useCallback, useEffect, /*useMemo, */useRef, useState } from "react";
 import styled, { StyledComponentProps } from "styled-components";
 import type { Graph } from "@antv/g6";
 import { observer } from "mobx-react-lite";
@@ -176,19 +177,19 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
             <div className="container" ref={containerRef} />
             {mode === 'edit' && (
                 <div className="tools">
-                    {/* <ActionButton onClick={() => causalStore.model.synchronizeAssertionsWithResult()}>
-                        编辑因果图覆盖
-                    </ActionButton> */}
-                    <ActionButton iconProps={{ iconName: 'Delete' }} onClick={() => causalStore.model.clearAssertions()}>
-                        {getI18n('chart.tools.edit.clear')}
+                    <ActionButton onClick={() => causalStore.model.clearAssertions()}>
+                        {intl.get('causal.analyze.clear_all')}
                     </ActionButton>
                     <Label style={{ marginBlock: '0.1em', fontSize: '90%' }} >{getI18n('chart.tools.edit.settings')}</Label>
                     <Dropdown
-                        label={getI18n('chart.assertion.edge')}
+                        label={intl.get('causal.analyze.link_mode')}
                         selectedKey={createEdgeMode}
                         options={[
-                            EdgeAssert.TO_EFFECT, EdgeAssert.TO_NOT_EFFECT, EdgeAssert.TO_BE_RELEVANT, EdgeAssert.TO_BE_NOT_RELEVANT
-                        ].map((key => ({ key, text: getI18n(`chart.assertion.${key}`) })))}
+                            { key: EdgeAssert.TO_EFFECT, text: intl.get('causal.analyze.def_to_effect') },
+                            { key: EdgeAssert.TO_NOT_EFFECT, text: intl.get('causal.analyze.def_to_not_effect') },
+                            { key: EdgeAssert.TO_BE_RELEVANT, text: intl.get('causal.analyze.def_to_be_relevant') },
+                            { key: EdgeAssert.TO_BE_NOT_RELEVANT, text: intl.get('causal.analyze.def_to_be_not_relevant') },
+                        ]}
                         onChange={(_e, option) => {
                             if (!option) {
                                 return;
@@ -218,11 +219,12 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                         }}
                     />
                     <Dropdown
-                        label={getI18n('chart.assertion.click_edge')}
+                        label={intl.get('causal.analyze.click_link_mode')}
                         selectedKey={clickEdgeMode}
-                        options={(['forbid', 'delete'] as typeof clickEdgeMode[]).map((key) => ({
-                            key, text: getI18n(`chart.assertion.${key}`),
-                        }))}
+                        options={[
+                            { key: 'forbid', text: intl.get('causal.analyze.forbid_link') },
+                            { key: 'delete', text: intl.get('causal.analyze.delete_link') },
+                        ]}
                         onChange={(_e, option) => {
                             if (!option) {
                                 return;
@@ -252,11 +254,12 @@ const GraphView = forwardRef<HTMLDivElement, GraphViewProps>(({
                         }}
                     />
                     <Dropdown
-                        label={getI18n('chart.assertion.node')}
+                        label={intl.get('causal.analyze.dbl_click_node_mode')}
                         selectedKey={dblClickNodeMode}
-                        options={[NodeAssert.FORBID_AS_CAUSE, NodeAssert.FORBID_AS_EFFECT].map((key) => ({
-                            key, text: getI18n(`chart.assertion.${key}`)
-                        }))}
+                        options={[
+                            { key: NodeAssert.FORBID_AS_CAUSE, text: intl.get('causal.analyze.def_forbid_as_cause') },
+                            { key: NodeAssert.FORBID_AS_EFFECT, text: intl.get('causal.analyze.def_forbid_as_effect') },
+                        ]}
                         onChange={(_e, option) => {
                             if (!option) {
                                 return;

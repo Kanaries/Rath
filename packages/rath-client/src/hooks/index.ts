@@ -5,6 +5,7 @@ import { CleanMethod } from '../interfaces';
 import { notify } from '../components/error';
 import { getMainServiceAddress } from '../utils/user';
 import { request } from '../utils/request';
+import { isLegalEmail } from '../utils/format';
 
 /**
  * @param S type of the composed state
@@ -56,21 +57,18 @@ export const useCleanMethodList = function (): typeof cleanMethodList {
 };
 
 async function sendCertMail(email: string) {
-    const url = getMainServiceAddress('/api/sendMailCert');
-    // TODO: [feat] email format check
-    const res = await request.post<{ email: string }, string>(url, { email });
-    if (res) {
-        // console.log("mail sent success");
+    const legal = isLegalEmail(email)
+    if (!legal) {
+        throw new Error('illegal email format');
     }
+    const url = getMainServiceAddress('/api/sendMailCert');
+    const res = await request.post<{ email: string }, string>(url, { email });
     return res;
 }
 
 async function sendCertPhone(phone: string) {
     const url = getMainServiceAddress('/api/sendPhoneCert');
     const res = await request.post<{ phone: string }, string>(url, { phone });
-    if (res) {
-        // console.log("message sent success");
-    }
     return res;
 }
 
