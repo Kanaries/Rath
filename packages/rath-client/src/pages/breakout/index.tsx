@@ -32,7 +32,8 @@ const BreakoutPage = observer<IBreakoutPageProps>(function BreakoutPage ({
     defaultMainField, defaultMainFieldFilters, defaultComparisonFilters
 }) {
     const { dataSourceStore } = useGlobalStore();
-    const BreakoutContext = useBreakoutContext(dataSourceStore);
+    const { cleanedData, fieldMetas } = dataSourceStore;
+    const BreakoutContext = useBreakoutContext(cleanedData, fieldMetas);
 
     useEffect(() => {
         if (defaultMainField !== undefined) {

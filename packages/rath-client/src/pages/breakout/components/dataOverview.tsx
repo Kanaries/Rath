@@ -149,9 +149,8 @@ const OverviewCard = observer(function OverviewCard ({ stats, compareBase, title
 
 const DataOverview = observer(function DataOverview () {
     const context = useBreakoutStore();
-    const { dataSourceStore, mainField, mainFieldFilters, comparisonFilters, globalStats, diffStats, selectionStats } = context;
-    const { fieldMetas } = dataSourceStore;
-    const targetField = mainField ? resolveCompareTarget(mainField, fieldMetas) : null;
+    const { fields, mainField, mainFieldFilters, comparisonFilters, globalStats, diffStats, selectionStats } = context;
+    const targetField = mainField ? resolveCompareTarget(mainField, fields) : null;
 
     const compareStats = comparisonFilters.length > 0 ? diffStats : globalStats;
 

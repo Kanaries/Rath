@@ -271,9 +271,8 @@ const DivisionDetailList = memo<IDivisionDetailListProps>(function DivisionDetai
 
 const DivisionList = observer(function DivisionList () {
     const context = useBreakoutStore();
-    const { generalAnalyses, comparisonAnalyses, mainField, comparisonFilters, dataSourceStore } = context;
-    const { fieldMetas } = dataSourceStore;
-    const targetField = mainField ? resolveCompareTarget(mainField, fieldMetas) : null;
+    const { generalAnalyses, comparisonAnalyses, mainField, comparisonFilters, fields } = context;
+    const targetField = mainField ? resolveCompareTarget(mainField, fields) : null;
 
     return (
         <div>

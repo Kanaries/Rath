@@ -91,10 +91,9 @@ const mayBePeriod = (field: IFieldMeta): PeriodFlag | null => {
 
 const ControlPanel = observer(function ControlPanel () {
     const context = useBreakoutStore();
-    const { dataSourceStore, mainField, mainFieldFilters, comparisonFilters } = context;
-    const { fieldMetas } = dataSourceStore;
+    const { fields, mainField, mainFieldFilters, comparisonFilters } = context;
 
-    const compareTargetItem = mainField ? resolveCompareTarget(mainField, fieldMetas) : undefined;
+    const compareTargetItem = mainField ? resolveCompareTarget(mainField, fields) : undefined;
     const targetSelectorRef = useRef<IConfigButtonRef>(null);
     const onSelectTarget = (field: IFieldMeta, aggregator: Aggregator) => {
         context.setMainField({
@@ -103,7 +102,7 @@ const ControlPanel = observer(function ControlPanel () {
         });
     };
 
-    const validMeasures = fieldMetas.filter(f => f.analyticType === 'measure' && f.semanticType !== 'temporal');
+    const validMeasures = fields.filter(f => f.analyticType === 'measure' && f.semanticType !== 'temporal');
 
     const [targetSelectorPeriods, otherFilters] = useMemo<[{ flag: PeriodFlag; filter: IFilter }[], IUniqueFilter[]]>(() => {
         if (mainFieldFilters.length === 0) {
@@ -112,7 +111,7 @@ const ControlPanel = observer(function ControlPanel () {
         const filters = flatFilterRules(mainFieldFilters);
         const temporalFilters: { flag: PeriodFlag; filter: IUniqueFilter }[] = [];
         for (const f of filters) {
-            const field = fieldMetas.find(which => which.fid === f.fid);
+            const field = fields.find(which => which.fid === f.fid);
             if (!field) {
                 continue;
             }
@@ -123,7 +122,7 @@ const ControlPanel = observer(function ControlPanel () {
         }
         const otherFilters = filters.filter(f => !temporalFilters.some(t => t.filter.id === f.id));
         return [temporalFilters, otherFilters];
-    }, [mainFieldFilters, fieldMetas]);
+    }, [mainFieldFilters, fields]);
 
     const suggestions = useMemo<{ title: string; rule: IFilter[] }[]>(() => {
         if (targetSelectorPeriods.length === 0) {
@@ -299,7 +298,7 @@ const ControlPanel = observer(function ControlPanel () {
                         {validMeasures.map(f => {
                             const options = (f.semanticType === 'nominal' || f.semanticType === 'ordinal' ? CategoricalMetricAggregationTypes : NumericalMetricAggregationTypes).map(aggregator => {
                                 const item: BreakoutMainField = { fid: f.fid, aggregator };
-                                const target = resolveCompareTarget(item, fieldMetas)!;
+                                const target = resolveCompareTarget(item, fields)!;
                                 return {
                                     key: target.key,
                                     text: aggregator,
@@ -327,7 +326,7 @@ const ControlPanel = observer(function ControlPanel () {
                 <ConfigButton button={{ iconProps: { iconName: 'Filter' }, disabled: !mainField, styles: { root: { padding: '0', minWidth: '32px', borderLeft: 'none' } } }}>
                     {mainField && (
                         <MetricFilter
-                            fields={fieldMetas}
+                            fields={fields}
                             filters={mainFieldFilters}
                             onChange={metric => {
                                 context.setMainFieldFilters(metric);
@@ -352,7 +351,7 @@ const ControlPanel = observer(function ControlPanel () {
                         </Stack>
                     )}
                     <MetricFilter
-                        fields={fieldMetas}
+                        fields={fields}
                         filters={comparisonFilters}
                         onChange={metric => {
                             context.setComparisonFilters(metric);
