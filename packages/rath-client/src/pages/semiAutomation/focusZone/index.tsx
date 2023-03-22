@@ -14,6 +14,7 @@ import EditorCore from '../../editor/core/index';
 import type { IReactVegaHandler } from '../../../components/react-vega';
 import MainCanvas from './mainCanvas';
 import MiniFloatCanvas from './miniFloatCanvas';
+import NLQ from './nlq';
 
 const BUTTON_STYLE = { marginRight: '1em', marginTop: '1em' };
 
@@ -101,6 +102,7 @@ const FocusZone: React.FC = () => {
                 )}
             </div>
             <hr style={{ marginTop: '1em' }} />
+            <NLQ />
             <div className="fields-container">
                 {mainView &&
                     mainView.fields.map((f: IFieldMeta) => (
