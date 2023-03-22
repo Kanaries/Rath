@@ -213,6 +213,7 @@ const Exploration = forwardRef<{
                             spec={initialSpec}
                             i18nLang={langStore.lang}
                             keepAlive={false}
+                            dark="light"
                         />
                     ),
                     [ExplorationKey.PREDICT]: (

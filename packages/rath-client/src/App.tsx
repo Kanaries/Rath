@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Spinner, SpinnerSize } from '@fluentui/react';
+import './normalize.css';
 import './App.css';
 import { useGlobalStore, StoreWrapper } from './store/index';
 import VisualInterface from './pages/manualControl';
