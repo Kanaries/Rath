@@ -1,5 +1,13 @@
 export const coerceNumber = (raw: any, defaultValue = NaN) => {
-    return typeof raw === 'number' ? raw : defaultValue;
+    if (typeof raw === 'number') {
+        return raw;
+    } else if (typeof raw === 'string') {
+        const numeric = Number(raw);
+        if (`${numeric}` === raw) {
+            return numeric;
+        }
+    }
+    return defaultValue;
 };
 
 export const formatNumber = (num: unknown, fractionDigits = 4): string => {

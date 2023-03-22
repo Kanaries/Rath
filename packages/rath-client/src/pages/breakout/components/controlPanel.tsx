@@ -1,12 +1,14 @@
-import { useRef } from "react";
-import { Dropdown, Stack } from "@fluentui/react";
+import { useMemo, useRef } from "react";
+import { ActionButton, Dropdown, Stack } from "@fluentui/react";
 import { observer } from "mobx-react-lite";
 import produce from "immer";
-import type { IFieldMeta } from "@kanaries/loa";
+import type { IFieldMeta, IFilter } from "@kanaries/loa";
+import { nanoid } from "nanoid";
 import styled from "styled-components";
-import { CategoricalMetricAggregationTypes, CompareTarget, MetricAggregationType, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
+import { CategoricalMetricAggregationTypes, CompareTarget, FilterRule, MetricAggregationType, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
+import { coerceNumber } from "../utils/format";
 import ConfigButton, { IConfigButtonRef } from "./configButton";
-import MetricFilter from "./metricFilter";
+import MetricFilter, { flatFilterRules } from "./metricFilter";
 
 
 const StackTokens = {
@@ -55,9 +57,42 @@ export const resolveCompareTarget = (target: CompareTarget, fields: IFieldMeta[]
     return null;
 };
 
+export enum PeriodFlag {
+    Weekday = 'Week',
+    Day = 'Day',
+    Month = 'Month',
+    Season = 'Season',
+    Year = 'Year',
+}
+
+const mayBePeriod = (field: IFieldMeta): PeriodFlag | null => {
+    if (field.semanticType === 'nominal') {
+        if (field.distribution.length <= 7 && field.name?.match(/week/i)) {
+            return PeriodFlag.Weekday;
+        }
+    } else if (field.semanticType === 'ordinal' || field.semanticType === 'temporal') {
+        if (field.distribution.length <= 7 && field.name?.match(/week/i)) {
+            return PeriodFlag.Weekday;
+        }
+        if (field.distribution.length <= 31 && field.name?.match(/day/i)) {
+            return PeriodFlag.Day;
+        }
+        if (field.distribution.length <= 12 && field.name?.match(/month/i)) {
+            return PeriodFlag.Month;
+        }
+        if (field.distribution.length <= 4 && field.name?.match(/season/i)) {
+            return PeriodFlag.Season;
+        }
+        if (field.name?.match(/year/i)) {
+            return PeriodFlag.Year;
+        }
+    }
+    return null;
+};
+
 const ControlPanel = observer(function ControlPanel () {
     const context = useBreakoutStore();
-    const { dataSourceStore, compareTarget } = context;
+    const { dataSourceStore, compareTarget, compareBase } = context;
     const { fieldMetas } = dataSourceStore;
 
     const compareTargetItem = compareTarget ? resolveCompareTarget(compareTarget, fieldMetas) : undefined;
@@ -71,6 +106,208 @@ const ControlPanel = observer(function ControlPanel () {
     };
 
     const validMeasures = fieldMetas.filter(f => f.analyticType === 'measure' && f.semanticType !== 'temporal');
+
+    const targetSelectorPeriods = useMemo<{ flag: PeriodFlag; filter: IFilter }[]>(() => {
+        if (!compareTarget?.metric) {
+            return [];
+        }
+        const filters = flatFilterRules(compareTarget.metric);
+        const temporalFilters: { flag: PeriodFlag; filter: IFilter }[] = [];
+        for (const f of filters) {
+            const field = fieldMetas.find(which => which.fid === f.fid);
+            if (!field) {
+                continue;
+            }
+            const flag = mayBePeriod(field);
+            if (flag) {
+                temporalFilters.push({ flag, filter: f });
+            }
+        }
+        return temporalFilters;
+    }, [compareTarget, fieldMetas]);
+
+    const suggestions = useMemo<{ title: string; rule: FilterRule }[]>(() => {
+        if (targetSelectorPeriods.length === 0) {
+            return [];
+        }
+
+        const list: { title: string; rule: FilterRule }[] = [];
+        
+        const minFlag = [
+            PeriodFlag.Weekday,
+            PeriodFlag.Day,
+            PeriodFlag.Month,
+            PeriodFlag.Season,
+            PeriodFlag.Year,
+        ].find(flag => targetSelectorPeriods.some(f => f.flag === flag));
+
+        const minPeriodFilters = targetSelectorPeriods.filter(f => f.flag === minFlag);
+
+        if (!minFlag || minPeriodFilters.length !== 1) {
+            return [];
+        }
+
+        const minPeriodFilter = minPeriodFilters[0].filter;
+        const prevLevels = {
+            [PeriodFlag.Weekday]: [],
+            [PeriodFlag.Day]: [PeriodFlag.Weekday, PeriodFlag.Month],
+            [PeriodFlag.Month]: [PeriodFlag.Season, PeriodFlag.Year],
+            [PeriodFlag.Season]: [PeriodFlag.Year],
+            [PeriodFlag.Year]: [],
+        }[minFlag] as PeriodFlag[];
+
+        if (minPeriodFilter.type !== 'set') {
+            return [];
+        }
+
+        const currentValue = coerceNumber((minPeriodFilter.values as [number | string])[0]);
+        let prevPeriod: typeof targetSelectorPeriods[number] | null = null;
+        for (const flag of prevLevels) {
+            const filters = targetSelectorPeriods.filter(f => f.flag === flag);
+            if (filters.length === 1 && filters[0].filter.type === 'set') {
+                prevPeriod = filters[0];
+                break;
+            }
+        }
+
+        const prevValue = ((): number | null => {
+            if (!prevPeriod || prevPeriod.filter.type !== 'set') {
+                return null;
+            }
+            const cur = coerceNumber((prevPeriod.filter.values as [number | string])[0]);
+            switch (prevPeriod.flag) {
+                case PeriodFlag.Season: {
+                    return (cur + 3) % 4;
+                }
+                case PeriodFlag.Year: {
+                    return cur - 1;
+                }
+                default: {
+                    return null;
+                }
+            }
+        })();
+
+        if (prevPeriod && prevValue !== null) {
+            switch (minFlag) {
+                case PeriodFlag.Month: {
+                    list.push({
+                        title: `Same Month Last ${prevPeriod.flag}`,
+                        rule: {
+                            when: {
+                                type: 'set',
+                                id: nanoid(),
+                                fid: minPeriodFilter.fid,
+                                values: [currentValue],
+                            },
+                            and: {
+                                when: {
+                                    id: nanoid(),
+                                    type: 'set',
+                                    fid: prevPeriod.filter.fid,
+                                    values: [prevValue],
+                                },
+                            },
+                        },
+                    });
+                    break;
+                }
+                case PeriodFlag.Season: {
+                    list.push({
+                        title: `Same Season Last ${prevPeriod.flag}`,
+                        rule: {
+                            when: {
+                                type: 'set',
+                                id: nanoid(),
+                                fid: minPeriodFilter.fid,
+                                values: [currentValue - 1],
+                            },
+                            and: {
+                                when: {
+                                    id: nanoid(),
+                                    type: 'set',
+                                    fid: prevPeriod.filter.fid,
+                                    values: [prevValue],
+                                },
+                            },
+                        },
+                    });
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+
+        switch (minFlag) {
+            case PeriodFlag.Weekday: {
+                list.push({
+                    title: 'Last Week',
+                    rule: {
+                        when: {
+                            type: 'set',
+                            id: nanoid(),
+                            fid: minPeriodFilter.fid,
+                            values: [(currentValue + 6) % 7],
+                        },
+                        and: prevPeriod ? {
+                            when: {
+                                ...prevPeriod.filter,
+                                id: nanoid(),
+                            },
+                        } : undefined,
+                    },
+                });
+                break;
+            }
+            case PeriodFlag.Month: {
+                list.push({
+                    title: 'Last Month',
+                    rule: {
+                        when: {
+                            type: 'set',
+                            id: nanoid(),
+                            fid: minPeriodFilter.fid,
+                            values: [(currentValue + 11) % 12],
+                        },
+                        and: prevPeriod ? {
+                            when: {
+                                ...prevPeriod.filter,
+                                id: nanoid(),
+                            },
+                        } : undefined,
+                    },
+                });
+                break;
+            }
+            case PeriodFlag.Year: {
+                list.push({
+                    title: 'Last Year',
+                    rule: {
+                        when: {
+                            type: 'set',
+                            id: nanoid(),
+                            fid: minPeriodFilter.fid,
+                            values: [currentValue - 1],
+                        },
+                        and: prevPeriod ? {
+                            when: {
+                                ...prevPeriod.filter,
+                                id: nanoid(),
+                            },
+                        } : undefined,
+                    },
+                });
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
+        return list;
+    }, [targetSelectorPeriods]);
 
     return (
         <Stack horizontal tokens={StackTokens}>
@@ -124,6 +361,30 @@ const ControlPanel = observer(function ControlPanel () {
                     )}
                 </ConfigButton>
             </Stack>
+            {Boolean(compareTarget?.metric) && (
+                <ConfigButton button={{ text: 'Compare' }}>
+                    {suggestions.length > 0 && (
+                        <Stack>
+                            {suggestions.map((sug, i) => (
+                                <ActionButton
+                                    key={i}
+                                    text={sug.title}
+                                    onClick={() => {
+                                        context.setCompareBase(sug.rule);
+                                    }}
+                                />
+                            ))}
+                        </Stack>
+                    )}
+                    <MetricFilter
+                        fields={fieldMetas}
+                        value={compareBase}
+                        onChange={metric => {
+                            context.setCompareBase(metric);
+                        }}
+                    />
+                </ConfigButton>
+            )}
         </Stack>
     );
 });

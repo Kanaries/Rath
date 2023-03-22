@@ -1,13 +1,10 @@
 import { Stack } from "@fluentui/react";
-import { applyFilters } from "@kanaries/loa";
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
 import styled from "styled-components";
 import { CategoricalMetricAggregationTypes, MetricAggregationType, NumericalMetricAggregationTypes, useBreakoutStore } from "../store";
 import { formatNumber, formatRate } from "../utils/format";
-import { statDivision, type FieldStats } from "../utils/stats";
+import { type FieldStats } from "../utils/stats";
 import { resolveCompareTarget } from "./controlPanel";
-import { flatFilterRules } from "./metricFilter";
 
 
 const OverviewCardContainer = styled.div`
@@ -152,39 +149,14 @@ const OverviewCard = observer(function OverviewCard ({ stats, compareBase, title
 
 const DataOverview = observer(function DataOverview () {
     const context = useBreakoutStore();
-    const { dataSourceStore, compareTarget/*, compareBase*/ } = context;
-    const { cleanedData: data, fieldMetas } = dataSourceStore;
+    const { dataSourceStore, compareTarget, compareBase, globalStats: targetGlobalStats, diffStats, selectionStats: targetSelectionStats } = context;
+    const { fieldMetas } = dataSourceStore;
     const targetField = compareTarget ? resolveCompareTarget(compareTarget, fieldMetas) : null;
-    const targetGlobalStats = useMemo<FieldStats | null>(() => {
-        if (!targetField) {
-            return null;
-        }
-        return {
-            definition: compareTarget!,
-            field: targetField.field,
-            stats: statDivision(data, data, fieldMetas, targetField.field.fid),
-        };
-    }, [compareTarget, data, fieldMetas, targetField]);
 
-    const filters = useMemo(() => {
-        return flatFilterRules(compareTarget?.metric ?? null);
-    }, [compareTarget?.metric]);
-    const filtered = useMemo(() => {
-        return applyFilters(data, filters);
-    }, [data, filters]);
-    const targetSelectionStats = useMemo<FieldStats | null>(() => {
-        if (targetField && compareTarget?.metric) {
-            return {
-                definition: compareTarget,
-                field: targetField.field,
-                stats: statDivision(data, filtered, fieldMetas, compareTarget.fid),
-            };
-        }
-        return null;
-    }, [targetField, compareTarget, data, fieldMetas, filtered]);
+    const compareStats = compareBase ? diffStats : targetGlobalStats;
 
     const showGlobalStats = targetGlobalStats?.definition.metric === null;
-    const showSelectionStats = targetGlobalStats && Boolean(targetSelectionStats);
+    const showSelectionStats = compareStats && Boolean(targetSelectionStats);
 
     return (
         <Stack horizontal tokens={StackTokens}>
@@ -193,8 +165,8 @@ const DataOverview = observer(function DataOverview () {
             )}
             {showSelectionStats && (
                 <>
-                    <OverviewCard stats={targetGlobalStats} title={targetField!.text} />
-                    <OverviewCard stats={targetSelectionStats!} compareBase={targetGlobalStats} title={"Selection"} />
+                    <OverviewCard stats={compareStats} title={targetField!.text} />
+                    <OverviewCard stats={targetSelectionStats!} compareBase={compareStats} title={"Selection"} />
                 </>
             )}
         </Stack>
